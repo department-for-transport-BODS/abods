@@ -1,0 +1,6 @@
+kpmg-code/category: "sandbox"
+kpmg-code/cmdb:
+  kpmg-uk/inventory:
+    url: https://inventory.customappsteam.co.uk/service/502
+kpmg-code/metadata_version: v1.2
+kpmg-code/service_name: "DfT - BODS (Bus Open Data Service)"
