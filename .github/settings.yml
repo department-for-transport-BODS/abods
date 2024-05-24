@@ -7,7 +7,7 @@ repository:
   name: abods-sandbox
 
   # A short description of the repository that will show up on GitHub
-  description: Repository is managed by user - PCridKPMG
+  description: DfT - Analytical BODS Backend API infrastructure and pipelines
 
   # A URL with more information about the repository
   homepage: <URL of your App or Wiki Space>

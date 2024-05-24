@@ -1,0 +1,290 @@
+name: build application
+run-name: build application @ ${{ github.ref_name == 'main' && 'prod' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'uat' && 'uat' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+
+on:
+  workflow_dispatch:
+    branches:
+    - main
+    inputs:
+      change:
+        type: choice
+        description: type of change - one of ['patch', 'minor', 'major']
+        required: true
+        default: 'patch'
+        options: 
+        - patch
+        - minor
+        - major
+  push:
+    branches:
+    - main
+    - sandbox
+    - dev
+    - test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && 'prod' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'uat' && 'uat' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  RC_ENV: ${{ github.ref_name == 'main' && 'prod' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'uat' && 'uat' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  RC_TYP: ${{ (github.event_name == 'workflow_dispatch' && github.ref_name == 'main') && github.event.inputs.change || 'patch' }}
+  RC_DST_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.increment.outputs.version }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: validate job parameters
+        run: |
+          echo """ \
+            Executing build and release job using parameters:
+              (Release Type) - $RC_TYP
+              (Environment Variables) - $RC_ENVs
+          """
+
+      - name: increment the ${{ env.RC_TYP }} version
+        id: increment
+        run: |
+          if [[ ${GITHUB_REF##*/} != 'main' ]]; then
+            echo "[INFO] Running on a feature branch, skipping version increment"
+            echo "version=${GITHUB_REF//\//-}" >> "$GITHUB_OUTPUT"
+          else
+            # install yq for parsing yaml files
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
+              sudo chmod 755 /usr/bin/yq
+
+            npm install semver
+            current_version=$(yq e '.version' VERSION)
+            new_version=$(node -p "const semver = require('semver'); semver.inc('${current_version#v}', '$RC_TYP', false)")
+            echo "[INFO] New application version v${new_version}"
+            
+            # outputs
+            echo "version=v${new_version}" >> "$GITHUB_OUTPUT"
+          fi
+
+  # database:
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ github.ref_name == 'main' && 'prod' ||
+  #     github.ref_name == 'test' && 'test' ||
+  #     github.ref_name == 'uat' && 'uat' ||
+  #     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  #   needs: validation
+
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: configure aws credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ env.AWS_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+  #         role-session-name: ${{ env.RC_ENV }}-database-build
+  #         role-duration-seconds: 3600
+  #         role-skip-session-tagging: true
+
+  #     - name: push database migrations
+  #       env:
+  #         RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
+  #         VERSION: ${{ needs.validation.outputs.version }}
+  #       run: |
+  #         [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/sql" || rc_path="releases/$VERSION/sql"
+
+  #         aws s3 cp sql s3://$RC_DST/$rc_path/ --recursive --exclude 'local/*'
+
+  backend:
+    runs-on: ubuntu-latest
+    environment: ${{ (github.head_ref || github.ref_name) == 'main' && 'prod' ||
+      (github.head_ref || github.ref_name) == 'test' && 'test' ||
+      (github.head_ref || github.ref_name) == 'uat' && 'uat' ||
+      (github.head_ref || github.ref_name) == 'dev' && 'dev' || 'sandbox' }}
+    needs: validation
+    defaults:
+      run:
+        working-directory: abods-api
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: setup sam
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ env.RC_ENV }}-backend-app-build
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: package and push backend code
+        env: 
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.version }}
+        run: |
+          [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/backend" || rc_path="releases/$VERSION/backend"
+
+          sam build && \
+            sam package \
+              --s3-bucket $RC_DST \
+              --s3-prefix $rc_path \
+              --output-template-file packaged.yaml
+
+          aws s3 cp packaged.yaml s3://$RC_DST/$rc_path/
+          aws s3 cp samconfig.yaml s3://$RC_DST/$rc_path/
+
+          echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully uploaded"
+
+  frontend:
+    runs-on: ubuntu-latest
+    environment: ${{ (github.head_ref || github.ref_name) == 'main' && 'prod' ||
+      (github.head_ref || github.ref_name) == 'test' && 'test' ||
+      (github.head_ref || github.ref_name) == 'uat' && 'uat' ||
+      (github.head_ref || github.ref_name) == 'dev' && 'dev' || 'sandbox' }}
+    needs: validation
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.FRONTEND_REPO }}
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ env.RC_ENV }}-frontend-app-build
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: package and push frontend code
+        env:
+          CI: ""
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.version }}
+        run: |
+          [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/frontend" || rc_path="releases/$VERSION/frontend"
+
+          # determine environment variables for build
+          domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
+            | jq -r '.Parameter.Value'`
+          api_url="${domain_name}/api/graphql"
+          
+          jq '.apiUrl = "${api_url}" | .analyticsId = "1234"' src/config.json > tmp.json && \
+            mv tmp.json src/config.json
+
+          npm install
+          npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
+            ng build
+
+          echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
+          aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENV^^}"
+
+  commit-and-tag:
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'main') }}
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+      # - database
+      - backend
+      - frontend
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: commit and push changes
+        run: |
+          # install yq for parsing yaml files
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
+            sudo chmod 755 /usr/bin/yq
+
+          new_version=${{ needs.validation.outputs.version }}
+          yq e -i '.version = "'"$new_version"'"' VERSION
+          echo "[INFO] Updated application version to ${new_version}"
+
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git config --global url.https://${{ github.token }}@github.com/.insteadOf https://github.com/
+
+
+          git add VERSION
+          git commit -m "[AUTO] GitHub actions push for version $new_version"
+          git push --force
+
+          git tag $new_version
+          git push --tags --force
+
+  trigger-deploy-dev:
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(github.ref, 'main') }}
+    runs-on: ubuntu-latest
+    needs: 
+      - validation
+      # - database
+      - backend
+      - frontend
+      - commit-and-tag
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: trigger remote
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          repository: ${{ github.repository }}
+          event-type: automated-deploy
+          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.version }}" }'
