@@ -1,0 +1,15 @@
+{
+  "buildNumber": "1234",
+  "featureFlags": {
+    "consolidateHistogram": true,
+    "corridorStatsTimezoneEnabled": false,
+    "freshdeskEnabled": false,
+    "lineDirectionFiltering": false,
+    "ssoEnabled": false,
+    "stopIndexFiltering": true,
+    "taggingIncludeBankHolidays": false,
+    "vehicleReplayFromTimestream": false
+  },
+  "timezone": "UTC",
+  "version": "1.0.0"
+}

@@ -1,0 +1,125 @@
+[
+  {
+    "delayFrequency": [
+      {
+        "bucket": 5,
+        "frequency": 120
+      }
+    ],
+    "journeyScheduledStartTimes": [
+      {
+        "days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        "fromDate": "2024-01-01",
+        "startTimes": ["07:30:00", "08:00:00", "08:30:00"],
+        "toDate": "2024-12-31"
+      }
+    ],
+    "operatorPerformance": {
+      "actualDepartures": 400,
+      "averageDelay": 2.5,
+      "early": 50,
+      "late": 100,
+      "name": "City Transport",
+      "nocCode": "CT123",
+      "onTime": 250,
+      "operatorId": "op123",
+      "scheduledDepartures": 450
+    },
+    "punctualityDayOfWeek": [
+      {
+        "dayOfWeek": 1,
+        "early": 30,
+        "late": 20,
+        "onTime": 400
+      }
+    ],
+    "punctualityOverview": {
+      "actualWaitTime": 5.5,
+      "excessWaitTime": 0.5,
+      "scheduledWaitTime": 5.0
+    },
+    "punctualityTimeOfDay": [
+      {
+        "early": 20,
+        "late": 30,
+        "onTime": 350,
+        "timeOfDay": "09:00:00"
+      }
+    ],
+    "punctualityTimeSeries": [
+      {
+        "early": 25,
+        "late": 25,
+        "onTime": 350,
+        "ts": "2024-04-10T10:00:00Z"
+      }
+    ],
+    "servicePerformance": [
+      {
+        "actualDepartures": 100,
+        "averageDelay": 1.2,
+        "early": 20,
+        "late": 10,
+        "lineId": "line1",
+        "lineInfo": {
+          "serviceId": "service123",
+          "serviceName": "Morning Route",
+          "serviceNumber": "MR1"
+        },
+        "onTime": 70,
+        "operatorInfo": {
+          "nocCode": "NOC123",
+          "operatorId": "op123",
+          "operatorName": "City Lines"
+        },
+        "scheduledDepartures": 90
+      }
+    ],
+    "servicePunctuality": [
+      {
+        "early": 15,
+        "late": 5,
+        "lineId": "line2",
+        "lineInfo": {
+          "serviceId": "service456",
+          "serviceName": "Evening Route",
+          "serviceNumber": "ER2"
+        },
+        "nocCode": "NOC456",
+        "onTime": 80,
+        "operatorId": "op456",
+        "rank": 1.0
+      }
+    ],
+    "stopPerformance": [
+      {
+        "actualDepartures": 95,
+        "averageDelay": 0.8,
+        "early": 15,
+        "late": 5,
+        "lineId": "line3",
+        "onTime": 75,
+        "scheduledDepartures": 85,
+        "stopId": "stop123",
+        "stopIndex": 1,
+        "stopInfo": {
+          "sourceId": "ext789",
+          "stopId": "stop123",
+          "stopLocality": {
+            "localityAreaId": "area123",
+            "localityAreaName": "Metro District",
+            "localityId": "local123",
+            "localityName": "Central Square"
+          },
+          "stopLocation": {
+            "latitude": 52.5200,
+            "longitude": 13.4050
+          },
+          "stopName": "Central Bus Station"
+        },
+        "timingPoint": true
+      }
+    ]
+  }
+  
+]

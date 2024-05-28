@@ -1,0 +1,10 @@
+[
+  {
+    "id": "org1",
+    "name": "Acme Corp"
+  },
+  {
+    "id": "org2",
+    "name": "Beta Ltd"
+  }
+]

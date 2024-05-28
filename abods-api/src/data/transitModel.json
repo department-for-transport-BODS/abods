@@ -1,0 +1,32 @@
+[
+  {
+    "operatorId": "op1",
+    "lines": {
+      "items": [
+        {
+          "lineId": "line1",
+          "lineName": "Metro Express",
+          "lineNumber": "M1"
+        }
+      ],
+      "pageInfo": {
+        "totalCount": 1
+      }
+    }
+  },
+  {
+    "operatorId": "op2",
+    "lines": {
+      "items": [
+        {
+          "lineId": "line2",
+          "lineName": "City Circle",
+          "lineNumber": "C2"
+        }
+      ],
+      "pageInfo": {
+        "totalCount": 1
+      }
+    }
+  }
+]

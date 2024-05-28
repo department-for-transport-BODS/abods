@@ -1,0 +1,18 @@
+[
+    {
+      "id": "4",
+      "name": "Administrator",
+      "scope": "organisation"
+    },
+    {
+      "id": "5",
+      "name": "Administrator",
+      "scope": "system"
+    },
+    {
+      "id": "6",
+      "name": "Staff",
+      "scope": "organisation"
+    }
+  ]
+  
