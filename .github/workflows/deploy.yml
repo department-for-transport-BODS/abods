@@ -85,7 +85,7 @@ jobs:
                 (Release Version)       - ${RC_VER//\//-}
                 (Target Environment)    - $RC_ENV
             """
-            echo "version=${RC_VER}" >> "$GITHUB_OUTPUT"
+            echo "version=${RC_VER//\//-}" >> "$GITHUB_OUTPUT"
           else
             echo [INFO] Deploying from main branch. Using latest tagged version
             latest_version=$(get_latest_version $RC_SRC 'releases')
