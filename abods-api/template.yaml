@@ -1,0 +1,310 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  This SAM template deploys resources associated with the frontend application for the ABODS (Analyse Bus Open Data) service
+
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    # Layers:
+    #   - !Ref RuntimeDependenciesLayer
+    Runtime: nodejs16.x
+    MemorySize: 256
+    Timeout: 60
+
+Parameters:
+  Environment:
+    Type: String
+    Description: The environment into which the stack is being deployed
+  ProjectName:
+    Description: The name of the project
+    Default: 'abods'
+    Type: String
+  RdsDbHostAddr:
+    Type: String
+    Default: ''
+  RdsDbPort:
+    Type: Number
+    Default: 5432
+  VpcId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
+    Default: ''
+  VpcSubnets:
+    Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
+    Default: ''
+
+Conditions:
+  IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
+  IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
+
+Resources:
+  ##############################################
+  #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
+  ##############################################
+  GraphQlApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub  ${ProjectName}-${Environment}-graphql-function-api
+      StageName: !Ref Environment
+      EndpointConfiguration: 
+        Type: REGIONAL
+      TracingEnabled: true
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: execute-api:/*
+              Condition:
+                StringEquals:
+                  aws:UserAgent: 'Amazon CloudFront'
+
+  GraphQlFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      FunctionName: !Sub  ${Environment}-${ProjectName}-graphql-function
+      Role: !GetAtt GraphQlFunctionExecutionRole.Arn
+      CodeUri: .
+      Handler: dist/index.default
+      Events:
+        ApiEvents:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref GraphQlApi
+      VpcConfig:
+        SubnetIds: !Ref VpcSubnets
+        SecurityGroupIds:
+          - !GetAtt GraphQlFunctionSecurityGroup.GroupId
+          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
+      Environment:
+        Variables:
+          PROJECT_ENV: !Ref Environment
+          PROJECT_NAME: !Ref ProjectName
+          CORS_ORIGIN: !If
+            - IsNotLocal
+            - !Sub
+              - 'https://${CloudFrontDomainName}'
+              - CloudFrontDomainName: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+            - 'http://localhost:4200'
+          DB_HOST: !If
+            - IsNotLocal
+            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
+            - !Ref RdsDbHostAddr
+          DB_PORT: !Ref RdsDbPort
+          DB_NAME: !If
+            - IsNotLocal
+            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
+            - !Ref ProjectName
+          DB_USER: !Sub '${ProjectName}_proxy_rw'
+      LoggingConfig:
+        LogGroup: !Ref GraphQlFunctionLogGroup
+
+  GraphQlFunctionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-graphql-function Lambda'
+      GroupName: !Sub '${ProjectName}-${Environment}-graphql-function'
+      SecurityGroupEgress: 
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-graphql-function'
+
+  GraphQlFunctionLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Condition: IsNotLocal
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-graphql-function'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      RetentionInDays: 30
+
+  GraphQlFunctionExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Condition: IsNotLocal
+    Properties:
+      RoleName: !Sub '${ProjectName}-${Environment}-graphql-function-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
+
+  GraphQlFunctionLoggingPolicy:
+    Type: 'AWS::IAM::Policy'
+    Condition: IsNotLocal
+    Properties:
+      PolicyName: !Sub '${ProjectName}-${Environment}-graphql-function-logging-policy'
+      Roles:
+        - !Ref GraphQlFunctionExecutionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !GetAtt GraphQlFunctionLogGroup.Arn
+
+  #########################################
+  #### GENERAL CONFIGURATION RESOURCES ####
+  #########################################
+  # RuntimeDependenciesLayer:
+  #   Type: AWS::Serverless::LayerVersion
+  #   Metadata:
+  #     BuildMethod: makefile
+  #   Properties:
+  #     LayerName: !Sub '${ProjectName}-${Environment}-runtime-dependencies-layer'
+  #     ContentUri: .
+  #     CompatibleRuntimes:
+  #       - nodejs16.x
+  #     RetentionPolicy: Retain
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Condition: IsNotLocal
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-deployment-frontend'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: IsNotLocal
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Principal:
+              Service: 'cloudfront.amazonaws.com'
+            Action: 's3:GetObject'
+            Resource: !Sub
+              - 'arn:aws:s3:::${Bucket}/*'
+              - Bucket: !Ref FrontendBucket
+            Condition:
+              StringEquals:
+                aws:SourceArn: !Sub
+                  - 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+                  - Distribution: !Ref CloudFrontDistribution
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Condition: IsNotLocal
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${ProjectName}-${Environment}-cdn'
+        Aliases:
+          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+        ViewerCertificate:
+          AcmCertificateArn: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/acm/certificate/arn}}'
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Origins:
+          - Id: frontendBucket
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+          - Id: backendApi
+            DomainName: !Sub '${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com'
+            OriginPath: !Sub '/${Environment}'
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: frontendBucket
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
+        CacheBehaviors:
+          - TargetOriginId: backendApi
+            PathPattern: '/api/*'
+            DefaultTTL: 0
+            MinTTL: 0
+            MaxTTL: 0
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: 
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # Managed-CachingDisabled
+            OriginRequestPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/originrequestpolicy/id}}' # CustomCookiesPolicy
+            ResponseHeadersPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/responseheaderspolicy/id}}' # CustomHeadersPolicy
+        Logging:
+          Bucket: !Sub '${ProjectName}-shared-cdn-logging-${AWS::AccountId}.s3.amazonaws.com' 
+          Prefix: !Ref Environment
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ErrorCachingMinTTL: 10
+            ResponseCode: 200
+            ResponsePagePath: '/index.html'
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${ProjectName}-${Environment}-cdn-oac
+        Description: !Sub 'CloudFront access control used for access to ${ProjectName}-${Environment}-deployment-frontend S3 bucket'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontRoute53RecordSetGroup:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/id}}'
+      RecordSets: 
+        - Name: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt CloudFrontDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+        - Name: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt CloudFrontDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+
+Outputs:
+  ApiGatewayUrl:
+    Description: 'API Gateway endpoint URL for FastAPI'
+    Value: !Sub 'https://${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+  CloudFrontDistributionId:
+    Description: 'CloudFront Distribution ID'
+    Value: !Ref CloudFrontDistribution
+  CloudFrontDistributionUrl:
+    Description: 'CloudFront Distribution Domain Name URL'
+    Value: !Sub
+      - 'https://${CloudFrontDomainName}'
+      - CloudFrontDomainName: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+  FrontendBucketName:
+    Description: 'Name of Frontend S3 Bucket'
+    Value: !Sub 's3://${FrontendBucket}'
