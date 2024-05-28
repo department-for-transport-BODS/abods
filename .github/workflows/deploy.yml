@@ -81,7 +81,7 @@ jobs:
             echo "$latest_version"
           }
 
-          if [[ ${GITHUB_REF##*/} != 'main' ]]; then
+          if [[ ${RC_VER} != 'null' ]]; then
             echo """ \
               Executing deploy job using parameters:
                 (Release Version)       - ${RC_VER//\//-}
