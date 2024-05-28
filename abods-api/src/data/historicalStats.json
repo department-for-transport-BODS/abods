@@ -1,0 +1,26 @@
+[
+  {
+    "availability": 99.5,
+    "compliance": 95.0,
+    "updateFrequency": 5,
+    "vehicleStats": [
+      {
+        "actual": 150,
+        "expected": 160,
+        "timestamp": "2024-04-09T12:00:00Z"
+      }
+    ]
+  },
+  {
+    "availability": 98.0,
+    "compliance": 90.0,
+    "updateFrequency": 10,
+    "vehicleStats": [
+      {
+        "actual": 100,
+        "expected": 110,
+        "timestamp": "2024-04-08T12:00:00Z"
+      }
+    ]
+  }
+]

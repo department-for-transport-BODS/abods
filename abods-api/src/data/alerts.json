@@ -1,0 +1,44 @@
+[
+  {
+  "alertId": "alert123",
+  "alertType": "FeedFailure",
+  "createdBy": {
+    "email": "jane.smith@example.com",
+    "firstName": "Jane",
+    "id": "2",
+    "lastName": "Smith",
+    "organisation": {
+      "id": "org2",
+      "name": "Beta Ltd"
+    },
+    "roles": [
+      {
+        "id": "role3",
+        "name": "Manager",
+        "scope": "Organisation"
+      }
+    ],
+    "username": "janesmith"
+  },
+  "eventHysterisis": 10,
+  "eventThreshold": 5,
+  "sendTo": {
+    "email": "john.doe@example.com",
+    "firstName": "John",
+    "id": "1",
+    "lastName": "Doe",
+    "organisation": {
+      "id": "org1",
+      "name": "Acme Corp"
+    },
+    "roles": [
+      {
+        "id": "role1",
+        "name": "Administrator",
+        "scope": "System"
+      }
+    ],
+    "username": "johndoe"
+  }
+}
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "serviceId": "service123",
+    "serviceInfo": {
+      "serviceId": "service123",
+      "serviceName": "Morning Route",
+      "serviceNumber": "MR1"
+    }
+  }
+]

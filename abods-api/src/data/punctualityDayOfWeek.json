@@ -1,0 +1,15 @@
+[
+  {
+    "dayOfWeek": 1,
+    "early": 30,
+    "late": 20,
+    "onTime": 400
+  },
+  {
+    "dayOfWeek": 2,
+    "early": 25,
+    "late": 25,
+    "onTime": 350
+  }
+]
+

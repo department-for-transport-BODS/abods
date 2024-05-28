@@ -1,0 +1,22 @@
+[
+  {
+    "journeyStatus": "Completed",
+    "minuteBeginning": 30,
+    "operatorInfo": {
+      "nocCode": "B456",
+      "operatorId": "op2",
+      "operatorName": "Operator B"
+    },
+    "secondsTracked": 1800,
+    "serviceInfo": {
+      "serviceId": "service2",
+      "serviceName": "City Circle",
+      "serviceNumber": "C2"
+    },
+    "servicePatternId": "sp2",
+    "startTime": "2024-04-09T09:00:00Z",
+    "ts": "2024-04-09T10:30:00Z",
+    "vehicleJourneyId": "vj2"
+  }
+  
+]

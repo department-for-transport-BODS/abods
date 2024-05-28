@@ -1,0 +1,13 @@
+[
+  {
+    "avgTransitTime": 40.5,
+    "dow": 3,
+    "maxTransitTime": 58,
+    "minTransitTime": 32,
+    "percentile25": 34.0,
+    "percentile5": 33.0,
+    "percentile75": 48.0,
+    "percentile95": 57.0
+  }
+  
+]
