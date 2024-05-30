@@ -17,7 +17,7 @@ export const getUsers = async (sessionUser: any, db: Context) => {
     const bodsUsers = await db.prisma.bods_user.findMany({
       where:{
         userOrganisations:{
-          every:{
+          some:{
             organisation_id:{
               in: orgIds
             }
@@ -28,7 +28,7 @@ export const getUsers = async (sessionUser: any, db: Context) => {
         userOrganisations: true
       },
     });
-   
+
     const userResponse = bodsUsers.map((thisUser): UserType => {
 
       return{ 
