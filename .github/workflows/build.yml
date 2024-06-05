@@ -155,18 +155,11 @@ jobs:
       run:
         working-directory: frontend
 
-    permissions:
-      id-token: write
-      contents: read
+    # permissions:
+    #   id-token: write
+    #   contents: read
 
     steps:
-      - name: prerequisites
-        run: |
-          sudo apt-get update -y \
-            && sudo apt-get install -y git-lfs
-          
-          sleep 10
-
       - name: checkout
         uses: actions/checkout@v4
 
