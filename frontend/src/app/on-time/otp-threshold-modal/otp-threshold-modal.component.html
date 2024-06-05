@@ -1,0 +1,33 @@
+<app-modal modalTitle="Compare on-time performance thresholds" [identifier]="identifier">
+  <gds-error-summary [errors]="errors"></gds-error-summary>
+  <p class="govuk-body">Use an alternative definition of on-time to compare performance data with other platforms.</p>
+  <app-otp-threshold-form (compare)="onCompare($event)"></app-otp-threshold-form>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header"></th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">Default</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">Comparison</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr *ngFor="let item of tableData | keyvalue: orderBy" class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ item.value.name }}</th>
+        <td class="govuk-table__cell govuk-table__cell--numeric">
+          {{ (item.value.defaultValue | noInfinity | percent: '1.0-2') || 'Unavailable' }}
+        </td>
+        <td class="govuk-table__cell govuk-table__cell--numeric">
+          <span *ngIf="!loading; else skeleton" class="govuk-!-font-weight-bold">{{
+            (item.value.comparisonValue | noInfinity | percent: '1.0-2') || '-'
+          }}</span>
+          <ng-template #skeleton
+            ><app-skeleton appearance="body" width="80px" spaceBelow="0" [style.float]="'right'"></app-skeleton
+          ></ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="flex-row-reverse">
+    <gds-button text="Close" appearance="secondary" spaceBelow="0" type="button" (click)="closeModal()"></gds-button>
+  </div>
+</app-modal>

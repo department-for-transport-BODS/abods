@@ -1,0 +1,66 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.gds-multiselect-checkbox {
+  width: 100%;
+  &__show-all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: govuk-colour('light-grey');
+    padding: govuk-spacing(2);
+    @include govuk-font($size: 19, $line-height: 1.25);
+    margin-bottom: govuk-spacing(1);
+  }
+}
+
+.ng-select.gds-select.gds-multiselect-checkbox {
+  .ng-select-container {
+    .ng-value-container {
+      .ng-input {
+        padding-left: 0;
+      }
+      .ng-value {
+        .ng-value-label {
+          padding-left: govuk-spacing(1);
+        }
+      }
+    }
+  }
+  &.ng-select-opened {
+    > .ng-select-container {
+      z-index: $z-menu + 1;
+    }
+  }
+  .ng-dropdown-panel {
+    border-top: 0;
+    z-index: $z-menu + 2;
+    .ng-option {
+      padding: 0 0 0 govuk-spacing(2);
+    }
+
+    .ng-option-marked,
+    .ng-option-selected.ng-option-marked {
+      background-color: inherit;
+      .ng-option-label,
+      .ng-option-label .text-secondary {
+        color: inherit !important;
+      }
+    }
+
+    .ng-option-marked {
+      .govuk-checkboxes--small
+        .govuk-checkboxes__item
+        .govuk-checkboxes__input:not(:disabled)
+        + .govuk-checkboxes__label:before {
+        box-shadow: 0 0 0 10px govuk-colour('mid-grey');
+      }
+    }
+  }
+  .govuk-checkboxes--small .govuk-checkboxes__label:before {
+    top: 10px;
+  }
+  .govuk-checkboxes--small .govuk-checkboxes__label:after {
+    top: 17px;
+  }
+}

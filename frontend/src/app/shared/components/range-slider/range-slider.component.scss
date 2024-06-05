@@ -1,0 +1,54 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.range-slider {
+  .ng2-nouislider {
+    margin-top: govuk-spacing(2);
+    margin-bottom: govuk-spacing(4);
+  }
+  .noUi-horizontal {
+    height: govuk-spacing(4);
+
+    .noUi-handle {
+      cursor: pointer;
+      border-radius: 0;
+      border: 2px solid govuk-colour('black');
+      box-shadow: none;
+      height: 40px;
+      width: 15px;
+      top: -13px;
+
+      &:before,
+      &:after {
+        content: none;
+      }
+
+      &:focus {
+        box-shadow: 0 0 0 1.5px $govuk-input-border-colour, 0 0 0 4px $govuk-focus-colour;
+        outline: none;
+      }
+
+      &.noUi-handle-lower {
+        right: -12px;
+      }
+      &.noUi-handle-upper {
+        right: -1px;
+      }
+    }
+  }
+  .noUi-target {
+    border: 2px solid govuk-colour('black');
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: none;
+  }
+
+  .noUi-connects {
+    border-radius: 0;
+  }
+
+  .noUi-connect {
+    background: govuk-colour('black');
+    border: 3px solid govuk-colour('white');
+  }
+}

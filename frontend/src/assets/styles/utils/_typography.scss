@@ -1,0 +1,7 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+// used in the top-bar to recreate govuk menu button styling
+.text-secondary {
+  color: $govuk-secondary-text-colour !important;
+}

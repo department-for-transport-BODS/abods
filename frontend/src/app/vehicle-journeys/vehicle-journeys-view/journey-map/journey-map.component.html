@@ -1,0 +1,143 @@
+<div *ngIf="loading" class="vehicle-journey__map-loading">
+  <app-spinner></app-spinner>
+</div>
+<mgl-map
+  [style]="mapboxStyle"
+  [fitBounds]="bounds"
+  [fitBoundsOptions]="{ padding: 50, linear: true, maxZoom: 16 }"
+  [cursorStyle]="cursorStyle"
+  (mapLoad)="map = $event"
+  (moveStart)="moveCounter = moveCounter + 1"
+  class="vehicle-journey__map"
+>
+  <mgl-control position="top-left">
+    <app-dropdown identifier="map-display-menu" triggerLabel="Display options" [width]="200">
+      <p class="govuk-body govuk-!-margin-bottom-2"><strong>Map view</strong></p>
+      <app-map-view-toggle (mapboxStyle)="mapboxStyle = $event"></app-map-view-toggle>
+    </app-dropdown>
+  </mgl-control>
+  <ng-container *ngIf="view && !loading">
+    <mgl-control position="bottom-left">
+      <app-map-recentre-button *ngIf="moveCounter > 1" (recentre)="recentre()"></app-map-recentre-button>
+    </mgl-control>
+    <mgl-geojson-source id="journey-line" promoteId="id" [data]="line"></mgl-geojson-source>
+    <mgl-geojson-source id="journey-stops" promoteId="id" [data]="stops"></mgl-geojson-source>
+    <mgl-geojson-source id="journey-pings" promoteId="id" [data]="pings"></mgl-geojson-source>
+    <mgl-geojson-source id="journey-timing-points" promoteId="id" [data]="timingPoints"></mgl-geojson-source>
+    <mgl-layer
+      id="journey-line-layer"
+      type="line"
+      [paint]="{
+        'line-color': ['case', isEarly, earlyColor, isOnTime, onTimeColor, isLate, lateColor, noDataColor],
+        'line-width': 3,
+        'line-opacity': ['interpolate', ['exponential', 0.5], ['zoom'], 12, 1, 14, 0.5]
+      }"
+      [layout]="{
+        'line-cap': 'round',
+        'line-join': 'round'
+      }"
+      source="journey-line"
+    ></mgl-layer>
+    <mgl-layer
+      id="journey-line-chevrons"
+      type="symbol"
+      [paint]="{
+        'icon-opacity': ['interpolate', ['exponential', 0.5], ['zoom'], 12, 1, 14, 0.5]
+      }"
+      [layout]="{
+        'icon-image': [
+          'case',
+          isEarly,
+          'map-chevron-early',
+          isOnTime,
+          'map-chevron-on-time',
+          isLate,
+          'map-chevron-late',
+          'map-chevron-no-data'
+        ],
+        'symbol-placement': 'line',
+        'symbol-spacing': 500
+      }"
+      [minzoom]="12"
+      source="journey-line"
+    ></mgl-layer>
+    <mgl-layer
+      id="journey-ping-layer"
+      type="circle"
+      [paint]="{
+        'circle-color': '#505a5f',
+        'circle-radius': 3.5,
+        'circle-stroke-width': 0
+      }"
+      [minzoom]="14"
+      source="journey-pings"
+      (layerMouseMove)="onPingMouseEnter($event.features?.[0]?.properties)"
+      (layerMouseLeave)="onPingMouseLeave()"
+    ></mgl-layer>
+    <mgl-layer
+      id="journey-stop-layer"
+      type="circle"
+      [paint]="{
+        'circle-color': '#ffffff',
+        'circle-radius': ['interpolate', ['exponential', 0.8], ['zoom'], 11, 2, 14, 6],
+        'circle-stroke-width': ['interpolate', ['exponential', 0.5], ['zoom'], 11, 1, 14, 3],
+        'circle-stroke-color': ['case', isEarly, earlyColor, isOnTime, onTimeColor, isLate, lateColor, noDataColor]
+      }"
+      source="journey-stops"
+      (layerMouseMove)="onStopMouseEnter($event.features?.[0]?.properties)"
+      (layerMouseLeave)="onStopMouseLeave()"
+    ></mgl-layer>
+    <mgl-layer
+      id="journey-timing-point-layer"
+      type="symbol"
+      [layout]="{
+        'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 11, 0.8, 14, 1],
+        'icon-image': [
+          'case',
+          isEarly,
+          'timing-early',
+          isOnTime,
+          'timing-on-time',
+          isLate,
+          'timing-late',
+          'timing-no-data'
+        ],
+        'symbol-placement': 'point'
+      }"
+      source="journey-timing-points"
+      (layerMouseMove)="onStopMouseEnter($event.features?.[0]?.properties)"
+      (layerMouseLeave)="onStopMouseLeave()"
+    ></mgl-layer>
+    <mgl-popup
+      *ngIf="tooltipStop"
+      [lngLat]="tooltipStop"
+      [closeButton]="false"
+      [closeOnClick]="false"
+      maxWidth="200"
+      [offset]="10"
+      className="gds-popup"
+    >
+      <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+        {{ tooltipStop.stopName }}
+      </div>
+    </mgl-popup>
+    <mgl-popup
+      *ngIf="tooltipPing"
+      [lngLat]="tooltipPing"
+      [closeButton]="false"
+      [closeOnClick]="false"
+      maxWidth="200"
+      [offset]="5"
+      className="gds-popup"
+    >
+      <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+        Received at: {{ tooltipPing.formattedTime }}
+      </div>
+    </mgl-popup>
+  </ng-container>
+  <mgl-control mglNavigation></mgl-control>
+</mgl-map>
+
+<div class="govuk-!-margin-top-4">
+  <app-otp-legend></app-otp-legend>
+</div>

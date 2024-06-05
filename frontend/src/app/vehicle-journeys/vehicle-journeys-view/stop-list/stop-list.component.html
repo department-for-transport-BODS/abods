@@ -1,0 +1,25 @@
+<div class="stop-list-item stop-list-header">
+  <div></div>
+  <div></div>
+  <div class="stop-list-item__heading"><span>Scheduled</span></div>
+  <div class="stop-list-item__heading"><span>Actual</span></div>
+</div>
+<ng-container *ngIf="!loading; else skeleton">
+  <app-stop-item
+    *ngFor="let stop of stopList; let first = first;"
+    [firstItem]="first"
+    [stop]="stop"
+    (stopSelected)="stopSelected.emit($event)"
+    (stopHovered)="stopHovered.emit($event)"
+  ></app-stop-item>
+  <div *ngIf="!loading && !isStopList" class="no-stops"><span>No stops available</span></div>
+</ng-container>
+
+<ng-template #skeleton>
+  <div *ngFor="let _ of [].constructor(20)" class="stop-list-item">
+    <app-skeleton appearance="body-s" width="25px"></app-skeleton>
+    <app-skeleton appearance="body-s" width="2fr"></app-skeleton>
+    <app-skeleton appearance="body-s" width="1fr"></app-skeleton>
+    <app-skeleton appearance="body-s" width="1fr"></app-skeleton>
+  </div>
+</ng-template>

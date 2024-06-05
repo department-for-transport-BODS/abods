@@ -1,0 +1,24 @@
+<app-box>
+  <!-- <h2 class="govuk-heading-m">Live Vehicles status</h2> -->
+  <h2 class="govuk-heading-m">Vehicle count</h2>
+  <div class="vehicles-status__stats">
+    <app-stat
+      label="Current"
+      [statValue]="actual"
+      id="vehicle-status-current"
+      class="vehicles-status__current-stat"
+      tooltip="Current number of vehicles running that we can match to the schedules that have been provided"
+    ></app-stat>
+    <app-stat
+      label="Expected"
+      [statValue]="expected"
+      id="vehicle-status-expected"
+      class="vehicles-status__expected-stat"
+      tooltip="The number of vehicles that should be running now according to the timetables provided"
+    ></app-stat>
+  </div>
+
+  <div class="vehicles-status__footer">
+    <app-link [route]="liveStatusRoute" [arrows]="true" [underline]="false" weight="bold">Live status</app-link>
+  </div>
+</app-box>

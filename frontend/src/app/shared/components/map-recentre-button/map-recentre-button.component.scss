@@ -1,0 +1,24 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.map-recentre-button {
+  padding: govuk-spacing(1) govuk-spacing(2);
+  gap: govuk-spacing(1);
+  background: govuk-colour('white');
+  color: govuk-colour('blue');
+  @include govuk-font(19);
+  border-style: none;
+  border-radius: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &:not(:disabled):hover {
+    background: govuk-colour('light-grey');
+  }
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

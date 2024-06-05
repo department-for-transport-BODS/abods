@@ -1,0 +1,20 @@
+<div
+  class="govuk-notification-banner"
+  [ngClass]="{ 'govuk-notification-banner--success': success }"
+  data-module="govuk-notification-banner"
+  [attr.role]="success ? 'alert' : null"
+  [attr.labelled-by]="identifier + '-title'"
+  [attr.id]="identifier"
+>
+  <div *ngIf="title" class="govuk-notification-banner__header">
+    <h2 class="govuk-notification-banner__title" [attr.id]="identifier + '-title'">
+      {{ title }}
+    </h2>
+    <button *ngIf="dismissable" (click)="dismiss($event)" class="unbuttoned">
+      <svg-icon class="govuk-notification-banner__icon" src="assets/icons/cross.svg" [applyClass]="true"></svg-icon>
+    </button>
+  </div>
+  <div class="govuk-notification-banner__content">
+    <ng-content></ng-content>
+  </div>
+</div>

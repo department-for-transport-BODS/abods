@@ -1,0 +1,131 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+@include bp($to-tablet) {
+  .nav {
+    padding-left: $window-padding-small-screen;
+    &--open {
+      left: $window-padding-small-screen * -1;
+    }
+  }
+}
+
+@include bp($tablet-only) {
+  .nav {
+    padding-left: $window-padding-large-screen;
+    &--open {
+      left: $window-padding-large-screen * -1;
+    }
+  }
+}
+
+@include bp($to-desktop) {
+  .nav {
+    display: none;
+    position: absolute;
+    &--open {
+      display: flex;
+    }
+  }
+}
+
+@include bp($desktop) {
+  .nav {
+    display: flex;
+    position: relative;
+  }
+}
+
+.nav {
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  border-right: 1px solid $govuk-border-colour;
+  width: 200px;
+  box-sizing: content-box;
+  padding-right: govuk-spacing(4);
+  margin-right: govuk-spacing(6);
+  background-color: govuk-colour('white');
+  z-index: $z-menu;
+
+  &__block {
+    position: sticky;
+    top: 0;
+    padding-top: govuk-spacing(7);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  &__item {
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  &__link {
+    display: block;
+    color: $govuk-link-colour;
+    text-decoration: none;
+    padding-top: govuk-spacing(1);
+    padding-bottom: govuk-spacing(1);
+    padding-left: 13px;
+
+    &--current {
+      font-weight: $govuk-font-weight-bold;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: $govuk-link-colour;
+      }
+    }
+
+    &:hover:not(:focus) {
+      text-decoration: underline;
+    }
+
+    &:focus {
+      outline: 0;
+      color: govuk-colour('black');
+      background-color: govuk-colour('yellow');
+      box-shadow: 0 4px govuk-colour('black');
+    }
+  }
+
+  &__menu-bottom {
+    position: sticky;
+    bottom: 0;
+    &__action-item {
+      display: inline-flex;
+      width: 100%;
+      @include govuk-font(19);
+      padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
+      align-items: center;
+      svg-icon {
+        display: inline-flex;
+        color: govuk-colour('blue');
+        width: 20px;
+        height: 20px;
+        margin-right: govuk-spacing(2);
+      }
+      &:focus {
+        svg-icon {
+          color: govuk-colour('black');
+        }
+      }
+    }
+  }
+}
+
+.nav--open {
+  .nav__menu-bottom {
+    // Fixes DRA-951 issue with repositioning of the 'My account' menu item in Firefox when the nav panes are open.
+    // Issue is caused by 'position:fixed' that's added to the body to disable scrolling when the nav panes are open.
+    // We add position: fixed, rather than overflow:hidden as we'd like the scrollbars to remain (but disabled)
+    // otherwise content moves on the page as we open/close the mobile nav or filters pane.
+    position: fixed;
+  }
+}

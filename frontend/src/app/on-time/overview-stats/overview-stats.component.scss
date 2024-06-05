@@ -1,0 +1,59 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.on-time-overview {
+  &__stats {
+    margin-top: govuk-spacing(2);
+    margin-bottom: govuk-spacing(7);
+    margin-left: -(govuk-spacing(3));
+    margin-right: -(govuk-spacing(3));
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__stat {
+    border-top: 1px solid $govuk-border-colour;
+    padding-top: govuk-spacing(3);
+    flex-basis: calc(100% - #{govuk-spacing(6)});
+    margin-left: govuk-spacing(3);
+    margin-right: govuk-spacing(3);
+  }
+}
+
+@include bp($phablet) {
+  .on-time-overview {
+    &__stat {
+      flex-basis: calc(50% - #{govuk-spacing(6)});
+    }
+  }
+}
+
+@include bp($desktop) {
+  .on-time-overview {
+    &__stats:not(&__stats--nested) {
+      flex-wrap: nowrap;
+      .on-time-overview__stat {
+        flex-basis: calc(25% - #{govuk-spacing(6)});
+      }
+    }
+  }
+}
+
+.helpdesk-link {
+  display: inline-flex;
+  align-items: center;
+  text-align: left;
+  @include govuk-font(19);
+  svg-icon {
+    display: inline-flex;
+    color: govuk-colour('blue');
+    width: 20px;
+    height: 20px;
+    margin-right: govuk-spacing(1);
+  }
+  &:focus {
+    svg-icon {
+      color: govuk-colour('black');
+    }
+  }
+}

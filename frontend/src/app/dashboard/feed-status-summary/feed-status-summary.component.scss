@@ -1,0 +1,44 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.feed-status-summary {
+  width: 100%;
+  margin-bottom: govuk-spacing(2);
+  tr {
+    vertical-align: top;
+  }
+  th,
+  td {
+    padding: 0 0 govuk-spacing(3) govuk-spacing(2);
+  }
+  th {
+    @include govuk-font(16);
+    color: $govuk-secondary-text-colour;
+  }
+  td {
+    @include govuk-font(19);
+  }
+  &__heading {
+    text-align: right;
+    @include govuk-typography-weight-regular();
+  }
+  td.feed-status-summary__status {
+    padding-left: 0;
+    padding-top: 2px;
+  }
+  &__count {
+    text-align: right;
+  }
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    @include govuk-font(19);
+    margin-top: govuk-spacing(4);
+  }
+  &__operator {
+    &--muted {
+      color: $govuk-secondary-text-colour;
+      @include govuk-font(16);
+    }
+  }
+}

@@ -1,0 +1,92 @@
+<div class="date-range-controls">
+  <form (submit)="apply()">
+    <div class="date-range-controls__date-range">
+      <section class="date-range-controls__dates">
+        <app-stack childMin="322px">
+          <gds-text-input
+            inputId="dateRangeStart"
+            [type]="start?.isValid || startFocused ? 'date' : 'text'"
+            [placeholder]="start?.isValid || startFocused ? '' : placeholder"
+            label="Starting"
+            [(ngModel)]="starting"
+            [ngModelOptions]="{ standalone: true }"
+            [max]="today | dateTimeToIsoDate"
+            [noCal]="true"
+            [autofocus]="true"
+            (focussed)="startFocused = true"
+            (blurred)="startFocused = false"
+          ></gds-text-input>
+          <gds-text-input
+            inputId="dateRangeEnd"
+            [type]="end?.isValid || endFocused ? 'date' : 'text'"
+            [placeholder]="end?.isValid || endFocused ? '' : placeholder"
+            type="date"
+            label="Ending"
+            [(ngModel)]="ending"
+            [ngModelOptions]="{ standalone: true }"
+            [max]="today | dateTimeToIsoDate"
+            [noCal]="true"
+            (focussed)="endFocused = true"
+            (blurred)="endFocused = false"
+          ></gds-text-input>
+        </app-stack>
+      </section>
+      <div class="date-range-controls__calendar-wrapper">
+        <app-stack childMin="322px">
+          <section class="date-range-controls__calendar">
+            <div class="date-range-controls__calendar-header">
+              <button
+                (click)="prevMonth($event)"
+                tabindex="-1"
+                class="date-range-controls__month-step date-range-controls__month-step--prev unbuttoned"
+                [ngClass]="{ 'date-range-controls__month-step--disabled': prevMonthDisabled }"
+              >
+                <svg-icon class="date-range-controls__chevron-left" src="../assets/icons/caret-left.svg"></svg-icon>
+              </button>
+              <span
+                class="date-range-controls__month-name"
+                [ngClass]="{
+                  'date-range-controls__month-name--this-month': monthLeft.contains(today)
+                }"
+                >{{ monthLeft.start | dateTimeToFormat: 'MMM yyyy' }}</span
+              >
+            </div>
+            <app-calendar
+              [month]="monthLeft"
+              (dateChange)="selectDay($event)"
+              [selected]="rangeInclusive"
+            ></app-calendar>
+          </section>
+          <section class="date-range-controls__calendar">
+            <div class="date-range-controls__calendar-header">
+              <span
+                class="date-range-controls__month-name"
+                [ngClass]="{
+                  'date-range-controls__month-name--this-month': monthRight.contains(today)
+                }"
+                >{{ monthRight.start | dateTimeToFormat: 'MMM yyyy' }}</span
+              >
+              <button
+                (click)="nextMonth($event)"
+                tabindex="-1"
+                class="date-range-controls__month-step date-range-controls__month-step--next unbuttoned"
+                [ngClass]="{ 'date-range-controls__month-step--disabled': nextMonthDisabled }"
+              >
+                <svg-icon class="date-range-controls__chevron-right" src="../assets/icons/caret-right.svg"></svg-icon>
+              </button>
+            </div>
+            <app-calendar
+              [month]="monthRight"
+              (dateChange)="selectDay($event)"
+              [selected]="rangeInclusive"
+            ></app-calendar>
+          </section>
+        </app-stack>
+      </div>
+      <section class="date-range-controls__buttons">
+        <gds-button appearance="secondary" (click)="cancel()" text="Cancel" spaceBelow="0"></gds-button>
+        <gds-button [disabled]="invalidDates" type="submit" text="Apply" spaceBelow="0"></gds-button>
+      </section>
+    </div>
+  </form>
+</div>

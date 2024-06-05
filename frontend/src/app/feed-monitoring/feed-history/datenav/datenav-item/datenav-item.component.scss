@@ -1,0 +1,63 @@
+@use "sass:math";
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+:host {
+  display: block;
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.datenav {
+  &__item {
+    height: 32px;
+    background-color: #f3f2f1;
+    transition: transform 0.1s ease-in-out;
+    width: 100%;
+    z-index: $z-content;
+    &--heat-1 {
+      background-color: raas-colour('heat', 1);
+    }
+    &--heat-2 {
+      background-color: raas-colour('heat', 2);
+    }
+    &--heat-3 {
+      background-color: raas-colour('heat', 3);
+    }
+    &--heat-4 {
+      background-color: raas-colour('heat', 4);
+    }
+    &--heat-5 {
+      background-color: raas-colour('heat', 5);
+    }
+    &--heat-6 {
+      background-color: raas-colour('heat', 6);
+    }
+
+    &--active {
+      transform: scale(1.05, 1.4);
+      z-index: $z-content + 1;
+      border-radius: 1px;
+      position: relative; // required to make active item appear above inactive ones.
+      box-shadow: 0 0 0 1.5px $govuk-input-border-colour, 0 0 0 4px $govuk-focus-colour;
+    }
+    &:hover {
+      z-index: $z-content + 1;
+    }
+    &:focus:not(.datenav-item--active) {
+      outline: none;
+      box-shadow: 0 0 0 3px $govuk-focus-colour;
+    }
+  }
+  &__month-label {
+    color: $govuk-secondary-text-colour;
+    font-size: 13px;
+    font-size: rem(13);
+    line-height: math.div(20, 13);
+    transform: translateX(-50%);
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+  }
+}

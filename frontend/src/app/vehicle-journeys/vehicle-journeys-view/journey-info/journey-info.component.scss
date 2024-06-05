@@ -1,0 +1,9 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.journey-info {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  row-gap: govuk-spacing(2);
+  column-gap: govuk-spacing(2);
+}

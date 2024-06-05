@@ -1,0 +1,14 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.journey-search-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(6) govuk-spacing(4);
+  margin-bottom: govuk-spacing(7);
+  &__time {
+    text-rendering: optimizeLegibility;
+    font-feature-settings: normal;
+    font-variant-numeric: tabular-nums;
+  }
+}

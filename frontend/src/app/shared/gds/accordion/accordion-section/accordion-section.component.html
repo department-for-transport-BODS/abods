@@ -1,0 +1,40 @@
+<div class="govuk-accordion__section" [ngClass]="{ 'govuk-accordion__section--expanded': expanded }" [id]="id">
+  <div class="govuk-accordion__section-header">
+    <h2 class="govuk-accordion__section-heading">
+      <button
+        type="button"
+        [id]="id + '-show-section'"
+        [attr.aria-controls]="id + '-content'"
+        class="govuk-accordion__section-button"
+        [attr.aria-expanded]="expanded"
+        [attr.aria-label]="heading + ' , ' + summary + ' , Show this section'"
+        (click)="toggleExpandSection()"
+      >
+        <span class="govuk-accordion__section-heading-text" [id]="id + '-heading'">
+          <span class="govuk-accordion__section-heading-text-focus">
+            {{ heading }}
+          </span>
+        </span>
+        <span class="govuk-visually-hidden govuk-accordion__section-heading-divider">, </span>
+        <span class="govuk-accordion__section-summary govuk-body" [id]="id + '-summary'">
+          <span class="govuk-accordion__section-summary-focus">{{ summary }}</span>
+        </span>
+        <span class="govuk-visually-hidden govuk-accordion__section-heading-divider">, </span>
+        <span class="govuk-accordion__section-toggle">
+          <span class="govuk-accordion__section-toggle-focus">
+            <span
+              class="govuk-accordion-nav__chevron"
+              [ngClass]="{
+                'govuk-accordion-nav__chevron--down': !expanded
+              }"
+            ></span>
+            <span class="govuk-accordion__section-toggle-text">{{ expanded ? 'Hide' : 'Show' }}</span>
+          </span>
+        </span>
+      </button>
+    </h2>
+  </div>
+  <div [id]="id + '-content'" class="govuk-accordion__section-content" [hidden]="!expanded ? 'hidden' : null">
+    <ng-content></ng-content>
+  </div>
+</div>

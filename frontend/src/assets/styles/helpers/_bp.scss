@@ -1,0 +1,15 @@
+@function _convert-query($media) {
+  @if type-of($media) == number {
+    @return 'only screen and (min-width: #{$media})';
+  } @else if type-of($media) == string {
+    @return '#{$media}';
+  }
+}
+
+@mixin bp($query) {
+  $media: map-get($query, 'media');
+  $_query: _convert-query($media);
+  @media #{$_query} {
+    @content;
+  }
+}

@@ -1,0 +1,83 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+$spinner-dasharray: 100;
+$spinner-duration: 2s;
+
+.spinner {
+  display: flex;
+  flex-direction: column;
+  &__icon {
+    width: 50px;
+    height: 50px;
+  }
+  &__background {
+    stroke: $govuk-border-colour;
+  }
+  &__message {
+    margin-top: govuk-spacing(2);
+    color: $govuk-secondary-text-colour;
+  }
+  &__dot1,
+  &__dot2,
+  &__dot3 {
+    animation: bounce-dots 1.8s infinite ease-in-out both;
+    color: govuk-colour('blue');
+  }
+
+  &__dot1 {
+    animation-delay: -0.48s;
+    transform-origin: 16% 50%;
+  }
+  &__dot2 {
+    animation-delay: -0.24s;
+    transform-origin: 50% 50%;
+  }
+  &__dot3 {
+    transform-origin: 83% 50%;
+  }
+  &--small {
+    .spinner__icon {
+      width: 35px;
+      height: 35px;
+    }
+  }
+  &--x-small {
+    .spinner__icon {
+      width: 35px;
+      height: 35px;
+      margin: -7.5px 0;
+    }
+  }
+  &--vcentre {
+    position: absolute;
+    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.amcharts-chart-spinner-dot1 .amcharts-Circle {
+  animation: bounce-dots 1.8s infinite ease-in-out both;
+  animation-delay: -0.48s;
+}
+.amcharts-chart-spinner-dot2 .amcharts-Circle {
+  animation: bounce-dots 1.8s infinite ease-in-out both;
+  animation-delay: -0.24s;
+}
+.amcharts-chart-spinner-dot3 .amcharts-Circle {
+  animation: bounce-dots 1.8s infinite ease-in-out both;
+}
+
+@keyframes bounce-dots {
+  0%,
+  50%,
+  100% {
+    transform: scale(0);
+  }
+
+  20% {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,10 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+$day-width: 46px;
+$date-range-padding: govuk-spacing(4);
+$border-width: 2px;
+$calendar-width: ($day-width * 7);
+$grid-gap: govuk-spacing(6);
+$light-grey-alpha: rgba(24, 24, 24, 0.06);
+$light-grey-alpha-darken: rgba(0, 0, 0, 0.06);
