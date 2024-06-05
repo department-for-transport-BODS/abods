@@ -40,6 +40,8 @@
     "jest-mock-extended": "^3.0.7",
     "node-postgres": "^0.6.2",
     "pg": "^8.11.5",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.1.0",
     "redis": "^4.6.13",
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.20"
@@ -51,6 +53,7 @@
     "concurrently": "^8.2.2",
     "copyfiles": "^2.4.1",
     "jest": "^29.7.0",
+    "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.5.0",
     "serverless-plugin-typescript": "^2.1.5",
     "ts-jest": "^29.1.2",
