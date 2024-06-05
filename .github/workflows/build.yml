@@ -157,9 +157,14 @@ jobs:
 
     permissions:
       id-token: write
-      contents: write
+      contents: read
 
     steps:
+      - name: prerequisites
+        run: |
+          sudo apt-get update -y \
+            && apt-get install -y git-lfs
+
       - name: checkout
         uses: actions/checkout@v4
 
