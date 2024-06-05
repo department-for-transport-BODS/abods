@@ -22,8 +22,8 @@
         "PATH": "/Users/kalva1/.nvm/versions/node/v20.14.0/bin/node:$PATH"
       },
       "runtimeArgs": ["--lazy"],
-      //"runtimeExecutable": "node"
-      "runtimeExecutable": "/Users/kalva1/.nvm/versions/node/v20.14.0/bin/node"
+      // update below to match your machines node runtime
+      "runtimeExecutable": "node"
     }
   ]
 }
