@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
 import { createContext } from './context.js';
+import logger from './logger.js';
 
 const db = await createContext()
 
@@ -17,6 +18,7 @@ const server = new ApolloServer({
   resolvers
 });
 
+logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env["CORS_ORIGIN"];
 const app = express();
