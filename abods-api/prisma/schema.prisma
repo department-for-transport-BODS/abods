@@ -19,6 +19,8 @@ view bods_user {
   is_superuser Boolean
   is_active    Boolean
   userOrganisations bods_userorganisation[]
+  account_type Int
+  admin_org    Int
   created_by_alerts Alert[]            @relation("created_by_user")
   send_to_alerts    Alert[]            @relation("send_to_user")
 }
@@ -139,15 +141,6 @@ model ExpectedOperators {
   noc                  String
   organization_id      Int
   operator_name        String
-  expected_services    ExpectedServices[]
-}
-
-model ExpectedServices {
-  expected_service_id  Int               @id @default(1)
-  service_name         String
-  expected_operator_id Int
-  expected_operator    ExpectedOperators @relation(fields: [expected_operator_id], references: [expected_operator_id])
-  // expected_journeys    ExpectedJourneys[]
 }
 
 // model ExpectedJourneys {

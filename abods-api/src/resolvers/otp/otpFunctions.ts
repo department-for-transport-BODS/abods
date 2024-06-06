@@ -1,7 +1,7 @@
 import { Db } from "typeorm";
 import { Context } from "../../context";
 import { OperatorPerformanceType, OperatorType } from "../../types";
-import { ExpectedOperators, ExpectedServices } from "@prisma/client";
+import { ExpectedOperators } from "@prisma/client";
 
 // Summary: Fetch all operators for user
 export const getOperators = async (SessionUser: any, db: Context) => {
@@ -71,21 +71,16 @@ export const getServiceInfo = async (serviceId, sessionUser: any, db: Context) =
     if(!sessionUser){
       throw ("Not authorized")
     }
-    const service : ExpectedServices | null = await db.prisma.expectedServices.findUnique({
-      where:{
-        expected_service_id: serviceId
-        // AND operator id is in users operatorid array
-      }
-    })
+    const service : null = null
 
     if(!service){
       throw("No service found")
     }
 
     return {
-      serviceId: service.expected_service_id,
-      serviceNumber: service.service_name,
-      serviceName: service.service_name
+      serviceId: null,
+      serviceNumber: null,
+      serviceName: null
     };
 
   } catch (error) {
@@ -106,10 +101,6 @@ export const getOperator = async (operatorId, sessionUser: any, db: Context) => 
     const operator : ExpectedOperators | null = await db.prisma.expectedOperators.findUnique({
       where:{
         expected_operator_id: operatorId
-      },
-      include:
-      {
-        expected_services: true
       }
     })
 
