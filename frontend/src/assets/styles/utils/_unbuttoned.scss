@@ -1,0 +1,13 @@
+.unbuttoned {
+  // undoes the default <button> styling
+  border: 0 none;
+  background: transparent;
+  display: block;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+  font-family: $font-family-default;
+  color: inherit;
+}

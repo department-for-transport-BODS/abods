@@ -1,0 +1,49 @@
+[
+  {
+    "lineId": "line1",
+    "lineName": "Metro Express",
+    "lineNumber": "M1",
+    "servicePatterns": [
+      {
+        "direction": "Northbound",
+        "direction_id": 1,
+        "name": "Northbound Service",
+        "servicePatternId": "sp1",
+        "serviceLinks": [
+          {
+            "distance": 1200,
+            "fromStop": "stop1",
+            "linkRoute": "Main Street",
+            "routeValidity": "2024",
+            "toStop": "stop2"
+          }
+        ],
+        "stops": ["stop1", "stop2"]
+      }
+    ]
+  },
+  {
+    "lineId": "line2",
+    "lineName": "City Circle",
+    "lineNumber": "C2",
+    "servicePatterns": [
+      {
+        "direction": "Circular",
+        "direction_id": 2,
+        "name": "Circular City Line",
+        "servicePatternId": "sp2",
+        "serviceLinks": [
+          {
+            "distance": 800,
+            "fromStop": "stop2",
+            "linkRoute": "Circular Road",
+            "routeValidity": "2024",
+            "toStop": "stop1"
+          }
+        ],
+        "stops": ["stop2", "stop1"]
+      }
+    ]
+  }
+  
+]

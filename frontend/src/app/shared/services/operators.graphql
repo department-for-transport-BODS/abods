@@ -1,0 +1,26 @@
+query operatorList {
+  operators {
+    items {
+      name
+      nocCode
+      operatorId
+      adminAreas {
+        adminAreaId
+      }
+    }
+  }
+}
+
+query operatorLines($operatorId: String!) {
+  operator(operatorId: $operatorId) {
+    transitModel {
+      lines {
+        items {
+          id: lineId
+          name: lineName
+          number: lineNumber
+        }
+      }
+    }
+  }
+}

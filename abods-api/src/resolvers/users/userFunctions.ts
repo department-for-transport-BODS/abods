@@ -1,0 +1,522 @@
+import { getOrganisation, getRoles, mapRoleToRoleType } from '../shared/sharedFunctions.js';
+import { Context } from '../../context.js'
+import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum } from '../../types.js';
+import { v4 as uuidv4 } from 'uuid';
+import argon2 from 'argon2';
+
+// Summary: fetch all users
+export const getUsers = async (sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser){
+      throw ("Not authorized")
+    }
+
+    const orgIds = sessionUser.userOrganisations.map(o=>o.organisation_id);
+    const organisationsForUser = await getOrganisationsForUser(sessionUser.userOrganisations, sessionUser, db);
+
+    const bodsUsers = await db.prisma.bods_user.findMany({
+      where:{
+        userOrganisations:{
+          some:{
+            organisation_id:{
+              in: orgIds
+            }
+          }
+        }
+      },
+      include:{
+        userOrganisations: true
+      },
+    });
+
+    const userResponse = bodsUsers.map((thisUser): UserType => {
+
+      return{ 
+        id: String(thisUser.id),
+        username: thisUser.username,
+        email: thisUser.email,
+        firstName: thisUser.first_name,
+        lastName: thisUser.last_name,
+        organisation: organisationsForUser ? {
+          id: String(organisationsForUser[0].id),
+          name: organisationsForUser[0].name
+        } : null,
+        roles: [{
+          "id": "1",
+          "name": "Staff",
+          "scope": ScopeEnum.Organisation
+        }]
+      };
+    });
+
+    return userResponse;
+  } catch (error) {
+    console.error(error)
+    return null;
+  }
+}
+// Summary: fetch a single user by id
+export const getUser = async (id: string, sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser){
+      throw ("Not authorized")
+    }
+
+    const bodsUser = await db.prisma.bods_user.findUnique(
+      { 
+        where:
+        { 
+          id: sessionUser.id
+        },
+        include: {
+          userOrganisations: true
+        } 
+      })
+
+    if(!bodsUser)
+    {
+      throw("No user found")
+    }
+
+    const organisationsForUser = await getOrganisationsForUser(bodsUser.userOrganisations, sessionUser, db);
+
+    return {
+      id: bodsUser.id,
+      username: bodsUser.username,
+      email: bodsUser.email,
+      firstName: bodsUser.first_name,
+      lastName: bodsUser.last_name,
+      organisation: organisationsForUser ? organisationsForUser[0] : null,
+      roles: [{
+        "id": "1",
+        "name": "Staff",
+        "scope": "organisation"
+      },
+      {
+        "id": "2",
+        "name": "Administrator",
+        "scope": "organisation"
+      },
+    ]
+    }
+  
+  } catch (error) {
+    console.error(error)
+    return null;
+  }
+}
+
+// Summary: fetch a single user by username
+export const getUserByUsername = async (username: string, sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser)
+      {
+        throw ("Not Authorized")
+      }
+
+    if (!username) {
+      throw('Invalid username')
+    }
+
+    if(username != sessionUser.username){
+      throw('Invalid username')
+    }
+
+    const bodsUser = await db.prisma.bods_user.findUnique(
+      { 
+        where:
+        { 
+          username: username 
+        },
+        include: {
+          userOrganisations: true
+        } 
+      })
+
+    if(!bodsUser)
+    {
+      throw("No user found")
+    }
+
+    const organisationsForUser = await getOrganisationsForUser(bodsUser.userOrganisations, sessionUser, db);
+
+    return {
+      id: bodsUser.id,
+      username: bodsUser.username,
+      email: bodsUser.email,
+      firstName: bodsUser.first_name,
+      lastName: bodsUser.last_name,
+      organisation: organisationsForUser ? organisationsForUser[0] : null,
+      roles: [{
+        "id": "1",
+        "name": "Staff",
+        "scope": "organisation"
+      },
+      {
+        "id": "2",
+        "name": "Administrator",
+        "scope": "organisation"
+      },
+    ]
+    }
+  
+  } catch (error) {
+    console.error(error)
+    return null;
+  }
+}
+
+const getOrganisationsForUser = async (userOrganisations, user: any, db: Context) => {
+
+  const orgIds = userOrganisations.map(o=>o.organisation_id);
+
+  const orgs = await db.prisma.bods_organisation.findMany({
+    where:
+    {
+      id: {
+        in : orgIds
+      }
+    }
+  })
+
+  if(!orgs){
+    return null;
+  }
+
+  return orgs;
+}
+
+// Summary: fetch all user alerts
+export const getUserAlerts = async (sessionUser: any, db: Context) => {
+  try {
+    
+    if(!sessionUser)
+    {
+      throw ("Not Authorized")
+    }
+
+    // fetch alerts ONLY if user is creator or recipient
+    const alerts = await db.prisma.alert.findMany({
+      where:{
+        OR: [
+          {
+          created_by: {
+            equals: sessionUser.id
+          },
+          },
+          {
+            send_to: {
+              equals: sessionUser.id
+            },
+          }
+        ]
+      },
+      include: {
+        created_by_user: true,
+        send_to_user: true
+      }
+    })
+
+    if(!alerts)
+    {
+      throw new Error("Alerts not found");
+    }
+
+    const userAlerts = alerts.map((alert): AlertType => {
+      return {
+        alertId: alert.id,
+        alertType: alert.alert?.trim() as AlertTypeEnum,
+        eventHysterisis: alert.event_hysterisis,
+        eventThreshold: alert.event_threshold,
+        createdBy: alert.created_by_user ? {
+          id: String(alert.created_by_user.id),
+          username: alert.created_by_user.username,
+          email: alert.created_by_user.email,
+          firstName: alert.created_by_user.first_name,
+          lastName: alert.created_by_user.last_name,
+          roles: new Array<RoleType>
+        } : null,
+        sendTo: alert.send_to_user ? {
+          id: String(alert.send_to_user.id),
+          username: alert.send_to_user.username,
+          email: alert.send_to_user.email,
+          firstName: alert.send_to_user.first_name,
+          lastName: alert.send_to_user.last_name,
+          roles: new Array<RoleType>
+        } : null,
+      }
+    })
+
+    return userAlerts;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Summary: log the user in
+export const loginUser = async (username:string, password:string, db: Context, res: any) => {
+
+  try {
+    if (!username || !password) {
+      throw('Invalid username or password')
+    }
+
+    const bodsUser = await db.prisma.bods_user.findUnique(
+      { 
+        where:{ email: username },
+        include:{
+          userOrganisations: true
+        }
+      }
+    )
+
+    if(!bodsUser)
+    {
+      throw("Invalid username or password")
+    }
+
+    const strippedPassword = bodsUser.password.replace("argon2$", "$")
+    if (await argon2.verify(strippedPassword, password)) {
+      const sessionId = uuidv4();
+      const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
+      const session = await db.prisma.tokens.findUnique({
+        where:{
+          user_id: bodsUser.id
+        }
+      })
+      if(!session)
+      {
+        await db.prisma.tokens.create({
+          data:{
+            user_id: bodsUser.id,
+            token: sessionId
+          }
+        })
+      }
+      else{
+        await db.prisma.tokens.update({
+          where:{
+            user_id: bodsUser.id
+          },
+          data: {
+            token: sessionId
+          }
+        })
+      }
+      
+      res.setHeader('Set-Cookie', `sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`)
+      return {
+        success: true,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000)
+      }
+    } else {
+      throw("Invalid username or password")
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      success: false
+    }
+  }
+}
+
+export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
+  try {
+    if(!sessionUser)
+    {
+      throw ("Not Authorized")
+    }
+
+    await db.prisma.tokens.update({
+      where: {
+        user_id: sessionUser.id
+      },
+      data: {
+        token: ''
+      }
+    })
+    
+    return true;
+  
+  } catch (error) {
+    console.error(error)
+    return false;
+  }
+}
+
+export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
+  try {
+
+    if(!sessionUser)
+    {
+      throw ("Not Authorized")
+    }
+
+    if(!alertId){
+      throw new Error("Alert id required");
+    }
+
+    // fetch alert by id and ONLY if user is creator or recipient
+    const alert = await db.prisma.alert.findUnique({
+      where: {
+        id: alertId,
+        AND: {
+          OR: [
+            {
+              created_by: {
+              equals: sessionUser.id
+            },
+            },
+            {
+              send_to: {
+                equals: sessionUser.id
+              },
+            }
+          ]
+        }
+      },
+      include: {
+        created_by_user: true,
+        send_to_user: true
+      }
+    })
+
+    if(!alert)
+    {
+      throw new Error("Alert not found");
+    }
+
+    return {
+      alertId: alert.id,
+      alertType: alert.alert?.trim() as AlertTypeEnum,
+      eventHysterisis: alert.event_hysterisis,
+      eventThreshold: alert.event_threshold,
+      createdBy: alert.created_by_user ? {
+        id: alert.created_by_user.id,
+        username: alert.created_by_user.username,
+        email: alert.created_by_user.email,
+        firstName: alert.created_by_user.first_name,
+        lastName: alert.created_by_user.last_name
+      } : null,
+      sendTo: alert.send_to_user ? {
+        id: alert.send_to_user.id,
+        username: alert.send_to_user.username,
+        email: alert.send_to_user.email,
+        firstName: alert.send_to_user.first_name,
+        lastName: alert.send_to_user.last_name
+      } : null,
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
+export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser)
+      {
+        throw ("Not Authorized")
+      }
+
+    const {alertType, eventHysterisis, eventThreshold, sendTo } = payload;
+
+    // TODO: check if sendto user id is in one of the same organisations as created_by user
+    await db.prisma.alert.create({
+      data:{
+        alert: alertType,
+        event_hysterisis: eventHysterisis,
+        event_threshold: eventThreshold,
+        send_to: Number(sendTo.id),
+        created_by: sessionUser.id
+      }
+    })
+
+    return {
+      error: null, 
+      success: true
+    }
+  } catch (error) {
+    return {
+      error: error.message,
+      success: false
+    }
+  }
+}
+
+export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser)
+      {
+        throw ("Not Authorized")
+      }
+
+    const {alertType, eventHysterisis, eventThreshold, sendTo } = payload;
+
+    if(!alertId){
+      throw new Error("AlertId is required");
+    }
+
+    // only an alert created by or the recipient of can update
+    var alert = await getUserAlert(alertId, sessionUser, db);
+
+    if(!alert)
+    {
+      throw new Error("Alert not found");
+    }
+
+    await db.prisma.alert.update({
+      where:{
+        id: alert.alertId
+      },
+      data:{
+        alert: alertType,
+        event_hysterisis: eventHysterisis,
+        event_threshold: eventThreshold,
+        send_to: sendTo ? Number(sendTo.id) : null
+      }
+    })
+
+    return {
+      error: null, 
+      success: true
+    }
+  } catch (error) {
+    return {
+      error: error.message,
+      success: false
+    }
+  }
+}
+
+export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) => {
+  try {
+    if(!sessionUser)
+    {
+      throw ("Not Authorized")
+    }
+
+    if(!alertId){
+      throw new Error("AlertId is required");
+    }
+
+    // only an alert created by or the recipient of can delete
+    var alert = await getUserAlert(alertId, sessionUser, db);
+
+    if(alert){
+      await db.prisma.alert.delete({where: {id:alertId}})
+    }
+    else{
+      throw ("Not Authorized")
+    }
+    
+    return {
+      error: null, 
+      success: true
+    }
+  } catch (error) {
+    return {
+      error: error.message,
+      success: false
+    }
+  }
+}

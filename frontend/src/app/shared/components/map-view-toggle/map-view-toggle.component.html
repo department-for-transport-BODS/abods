@@ -1,0 +1,14 @@
+<app-segmented-toggle [(ngModel)]="mapboxStyleOption" (ngModelChange)="onStyleChange()">
+  <app-segmented-toggle-item
+    name="default-style"
+    identifier="default-style"
+    value="default"
+    label="Default"
+  ></app-segmented-toggle-item>
+  <app-segmented-toggle-item
+    name="satellite-style"
+    identifier="satellite-style"
+    value="satellite"
+    label="Satellite"
+  ></app-segmented-toggle-item>
+</app-segmented-toggle>

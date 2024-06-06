@@ -1,0 +1,29 @@
+[
+  {
+    "direction": "Northbound",
+    "direction_id": 1,
+    "name": "Northbound Service",
+    "servicePatternId": "sp1",
+    "serviceLinks": [
+      "link1"
+    ],
+    "stops": ["stop1", "stop2"]
+  },
+  {
+    "direction": "Circular",
+    "direction_id": 2,
+    "name": "Circular City Line",
+    "servicePatternId": "sp2",
+    "serviceLinks": [
+      {
+        "distance": 800,
+        "fromStop": "stop2",
+        "linkRoute": "Circular Road",
+        "routeValidity": "2024",
+        "toStop": "stop1"
+      }
+    ],
+    "stops": ["stop2", "stop1"]
+  }
+]
+

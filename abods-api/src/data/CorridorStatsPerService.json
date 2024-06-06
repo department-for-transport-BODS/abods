@@ -1,0 +1,12 @@
+[
+  {
+    "lineName": "Downtown Express",
+    "noc": "NOC123",
+    "operatorName": "City Transport",
+    "recordedTransits": 120,
+    "scheduledTransits": 130,
+    "servicePatternName": "Main Route",
+    "totalJourneyTime": 7200
+  }
+  
+]

@@ -1,0 +1,22 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+//because our radio item is nested within the component element <gds-radio-item> we break the margin that should be on items when NOT small radios or the last child - this reapplies it.
+.govuk-radios:not(.govuk-radios--small) {
+  :host:not(:last-child) {
+    .govuk-radios__item {
+      margin-bottom: govuk-spacing(2);
+    }
+  }
+}
+
+.govuk-radios--inline {
+  :host {
+    float: left;
+  }
+  :host:last-child {
+    .govuk-radios__item {
+      margin-right: 0; //removes space to right for the last item which is useful if aligned right as on the /on-time services list percentage/count filter
+    }
+  }
+}

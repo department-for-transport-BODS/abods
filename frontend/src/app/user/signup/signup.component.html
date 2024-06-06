@@ -1,0 +1,114 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-browser-title title="Sign up" [renderTitle]="false"></app-browser-title>
+    <div *ngIf="invitationFetched" id="signup-container">
+      <ng-container *ngIf="signUpSuccess; else showForm">
+        <div id="signup-success" class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds-from-desktop">
+            <gds-panel title="Sign up successful"></gds-panel>
+            <p class="govuk-body">
+              You can now <a class="govuk-link" [routerLink]="['/login']">sign in</a>. Your username is
+              <span class="govuk-!-font-weight-bold">{{ invitation?.email }}</span
+              >.
+            </p>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #showForm>
+        <ng-container *ngIf="invitation && !invitation.accepted; else notFound">
+          <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+            <div class="govuk-grid-row">
+              <div class="govuk-grid-column-two-thirds-from-desktop">
+                <gds-error-summary [errors]="errors" id="signup-error"></gds-error-summary>
+              </div>
+            </div>
+            <gds-fieldset legend="Create an account">
+              <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds-from-desktop">
+                  <p class="govuk-body">
+                    Enter your name and a password to secure your new account. Your username will be
+                    <span class="govuk-!-font-weight-bold">{{ invitation.email }}</span
+                    >.
+                  </p>
+                  <app-stack childMin="200px">
+                    <gds-text-input
+                      inputId="signup-first-name"
+                      formControlName="firstName"
+                      type="text"
+                      label="First name"
+                      [error]="getError('firstName')"
+                      [required]="true"
+                      width="20"
+                      autocomplete="given-name"
+                    ></gds-text-input>
+                    <gds-text-input
+                      inputId="signup-last-name"
+                      formControlName="lastName"
+                      type="text"
+                      label="Last name"
+                      [error]="getError('lastName')"
+                      [required]="true"
+                      width="20"
+                      autocomplete="family-name"
+                    ></gds-text-input>
+                  </app-stack>
+                  <gds-password-input
+                    inputId="signup-password"
+                    formControlName="password"
+                    type="password"
+                    label="Enter a password"
+                    [error]="getError('password')"
+                    width="20"
+                    [required]="true"
+                    autocomplete="new-password"
+                  ></gds-password-input>
+                  <gds-password-input
+                    inputId="signup-confirm-password"
+                    formControlName="confirmPassword"
+                    type="password"
+                    label="Confirm your password"
+                    [error]="getError('confirmPassword')"
+                    width="20"
+                    [required]="true"
+                    autocomplete="new-password"
+                  ></gds-password-input>
+                  <div [style.max-width]="'41ex'">
+                    <gds-button text="Save and continue" type="submit"></gds-button>
+                  </div>
+                </div>
+                <div class="govuk-grid-column-one-third-from-desktop" id="password-policy">
+                  <p class="govuk-body">Your password must:</p>
+                  <ul class="govuk-list govuk-list--bullet">
+                    <li *ngFor="let policy of passwordPolicy">{{ policy }}</li>
+                  </ul>
+                </div>
+              </div>
+            </gds-fieldset>
+          </form>
+        </ng-container>
+        <ng-template #notFound>
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds-from-desktop">
+              <h1 class="govuk-heading-l">Create an account</h1>
+              <p id="invitation-notfound" class="govuk-body">
+                This invitation has already been accepted or has expired.
+              </p>
+              <p class="govuk-body">
+                Please request a new invitation by asking your organisation admin to resend the invitation from the user
+                management section, or by
+                <a class="govuk-link" href="https://www.bus-data.dft.gov.uk/contact/">contacting us</a>.
+              </p>
+              <p class="govuk-body">
+                Once a new invitation is sent please accept the invite within 72 hours of receiving it.
+              </p>
+              <p class="govuk-body">
+                If you have already accepted the invitation then you can
+                <a class="govuk-link" [routerLink]="['/login']">sign in</a>.
+              </p>
+            </div>
+          </div>
+        </ng-template>
+      </ng-template>
+    </div>
+  </ng-container>
+</app-page>

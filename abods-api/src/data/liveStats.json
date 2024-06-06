@@ -1,0 +1,32 @@
+[
+  {
+    "currentVehicles": 120,
+    "expectedVehicles": 130,
+    "feedAlerts": 2,
+    "feedErrors": 1,
+    "last20Minutes": [
+      {
+        "actual": 120,
+        "expected": 130,
+        "timestamp": "2024-04-09T11:40:00Z"
+      }
+    ],
+    "last24Hours": [
+      {
+        "actual": 100,
+        "expected": 110,
+        "timestamp": "2024-04-08T12:00:00Z"
+      }
+    ],
+    "updateFrequency": 5
+  },
+  {
+    "currentVehicles": 80,
+    "expectedVehicles": 90,
+    "feedAlerts": 3,
+    "feedErrors": 2,
+    "last20Minutes": [],
+    "last24Hours": [],
+    "updateFrequency": 10
+  }
+]

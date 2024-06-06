@@ -1,0 +1,22 @@
+[
+  {
+    "sourceId": "ext123",
+    "stopId": "stop1",
+    "stopLocality": "local1",
+    "stopLocation": {
+      "latitude": 52.520008,
+      "longitude": 13.404954
+    },
+    "stopName": "Central Station"
+  },
+  {
+    "sourceId": "ext456",
+    "stopId": "stop2",
+    "stopLocality": "local2",
+    "stopLocation": {
+      "latitude": 48.856614,
+      "longitude": 2.352222
+    },
+    "stopName": "Market Square"
+  }
+]

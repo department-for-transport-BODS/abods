@@ -1,0 +1,29 @@
+@use "sass:math";
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+:host {
+  margin-bottom: govuk-spacing(4);
+  display: block;
+}
+.stat {
+  &__label {
+    color: $govuk-secondary-text-colour;
+    @include govuk-font(19);
+  }
+
+  &__value {
+    padding-top: govuk-spacing(1);
+    display: block;
+    font-size: rem(32);
+    line-height: math.div(35, 32);
+    font-weight: $govuk-font-weight-bold;
+    &--tooltip {
+      border-bottom: 4px dotted;
+    }
+  }
+  &__spinner {
+    min-height: rem(35);
+    position: relative;
+  }
+}

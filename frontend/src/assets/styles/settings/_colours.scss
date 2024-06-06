@@ -1,0 +1,81 @@
+@import 'govuk-frontend/govuk/helpers/_colour.scss';
+
+// -----------------------------------------------------------------------------
+// Colors
+// -----------------------------------------------------------------------------
+// CUSTOM COLOURS - list any non GDS system colours here
+
+$raas-colours: (
+  heat: (
+    1: #ffd8ca,
+    2: #fbbaa4,
+    3: #f49c7f,
+    4: #ec7d5d,
+    5: #e15c3c,
+    6: #d4351c,
+  ),
+  on-time: (
+    base: govuk-colour('purple'),
+  ),
+  late: (
+    base: #e5c700,
+  ),
+  early: (
+    base: govuk-colour('pink'),
+  ),
+);
+
+// GDS COLOURS
+// Government colour variables and a colour palette exist in the GDS system https://design-system.service.gov.uk/styles/colour/
+// They are listed below for convenience. The imports below expose the govuk-
+
+// MAIN COLOURS
+
+// Text
+// $govuk-text-colour	#0b0c0c
+// $govuk-secondary-text-colour	#505a5f
+
+// Links
+// $govuk-link-colour	#1d70b8
+// $govuk-link-hover-colour	#003078
+// $govuk-link-visited-colour	#4c2c92
+// $govuk-link-active-colour	#0b0c0c
+
+// Border
+// $govuk-border-colour	#b1b4b6
+// $govuk-input-border-colour	#0b0c0c
+
+// Focus state
+// $govuk-focus-colour	#ffdd00	Only use this colour to indicate which element is focused on. For example, when a user tabs to an element with their keyboard.
+// $govuk-focus-text-colour	#0b0c0c
+
+// Error state
+// $govuk-error-colour	#d4351c	Use for error messages
+
+// Brand colour
+// $govuk-brand-colour	#1d70b8
+
+// COLOUR PALETTE
+//To reference colours from the palette directly you should use the govuk-colour function. For example, color: govuk-colour("blue").
+//If you need to use tints of this palette, use either 25% or 50%. You will need to include /src/assets/styles/helpers/helpers to access these functions.
+
+// govuk-colour("red")	#d4351c
+// govuk-colour("yellow")	#ffdd00
+// govuk-colour("green")	#00703c
+// govuk-colour("blue")	#1d70b8
+// govuk-colour("dark-blue")	#003078
+// govuk-colour("light-blue")	#5694ca
+// govuk-colour("purple")	#4c2c92
+// govuk-colour("black")	#0b0c0c
+// govuk-colour("dark-grey")	#505a5f
+// govuk-colour("mid-grey")	#b1b4b6
+// govuk-colour("light-grey")	#f3f2f1
+// govuk-colour("white")	#ffffff
+// govuk-colour("light-purple")	#6f72af
+// govuk-colour("bright-purple")	#912b88
+// govuk-colour("pink")	#d53880
+// govuk-colour("light-pink")	#f499be
+// govuk-colour("orange")	#f47738
+// govuk-colour("brown")	#b58840
+// govuk-colour("light-green")	#85994b
+// govuk-colour("turquoise")	#28a197

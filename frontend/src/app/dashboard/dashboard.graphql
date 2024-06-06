@@ -1,0 +1,71 @@
+fragment OperatorDashboard on OperatorType {
+  name
+  nocCode
+  operatorId
+  feedMonitoring {
+    feedStatus
+    liveStats {
+      feedErrors
+      feedAlerts
+    }
+  }
+}
+
+fragment OperatorDashboardVehicleCounts on OperatorType {
+  nocCode
+  operatorId
+  feedMonitoring {
+    liveStats {
+      currentVehicles
+      expectedVehicles
+    }
+  }
+}
+
+query dashboardOperatorList {
+  operators {
+    items {
+      ...OperatorDashboard
+    }
+  }
+}
+
+query dashboardOperatorVehicleCountsList {
+  operators {
+    items {
+      ...OperatorDashboardVehicleCounts
+    }
+  }
+}
+
+query dashboardPerformanceStats($params: PerformanceInputType!) {
+  onTimePerformance {
+    punctualityOverview(inputs: $params) {
+      onTime
+      late
+      early
+    }
+  }
+}
+
+query dashboardServiceRanking($params: ServicePerformanceInputType!, $trendFrom: DateTime!, $trendTo: DateTime!) {
+  onTimePerformance {
+    servicePunctuality(inputs: $params) {
+      nocCode
+      lineId
+      lineInfo {
+        serviceId
+        serviceName
+        serviceNumber
+      }
+      onTime
+      early
+      late
+      trend(fromTimestamp: $trendFrom, toTimestamp: $trendTo) {
+        onTime
+        early
+        late
+      }
+    }
+  }
+}

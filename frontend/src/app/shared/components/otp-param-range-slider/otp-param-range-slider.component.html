@@ -1,0 +1,22 @@
+<div class="otp-param-range-slider">
+  <div class="otp-param-range-slider__legend">
+    <div class="otp-param-range-slider__legend__label">Early</div>
+    <div class="otp-param-range-slider__legend__label-centre">
+      <div>Scheduled departure</div>
+      <div class="otp-param-range-slider__legend__label-centre__value">0:00</div>
+    </div>
+    <div class="otp-param-range-slider__legend__label">Late</div>
+  </div>
+  <div class="otp-param-range-slider__marks">
+    <div class="otp-param-range-slider__mark-centre"></div>
+  </div>
+  <app-range-slider
+    [max]="20"
+    [min]="-20"
+    [connect]="[true, true, true]"
+    [(lower)]="sliderEarly"
+    [(upper)]="sliderLate"
+    [lowerEndLimit]="-1"
+    [upperStartLimit]="1"
+  ></app-range-slider>
+</div>

@@ -1,0 +1,8 @@
+<app-page>
+  <ng-container ngProjectAs="content"
+    ><app-page-header heading="Not authorised" spaceAbove="2"></app-page-header>
+    <p class="govuk-body">
+      You are not authorised to access this page. Go <a [routerLink]="['/dashboard']">to the dashboard?</a>
+    </p>
+  </ng-container>
+</app-page>

@@ -1,0 +1,57 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.journey-search {
+  &__controls {
+    display: grid;
+    grid-template-columns: 165px minmax(150px, 1fr) minmax(150px, 1fr);
+    grid-column-gap: 30px;
+  }
+  &__start-time {
+    margin-bottom: 0;
+  }
+  &__submit {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  &__disabled {
+    opacity: 0.5;
+  }
+  &__error-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: govuk-spacing(2);
+    color: $govuk-error-colour;
+  }
+}
+
+.journey-search-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  &__date {
+    padding-left: govuk-spacing(3);
+    padding-right: govuk-spacing(3);
+    @include govuk-font(19);
+  }
+}
+
+@include bp($to-tablet) {
+  .journey-search {
+    &__controls {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// The piercing selector has been deprecated for years but Angular STILL hasn't
+// implemented support for anything to replace it - likely CSS shadow parts
+// @see https://drafts.csswg.org/css-shadow-parts
+
+:host ::ng-deep .ng-select.gds-select.journey-search__operators .ng-dropdown-panel {
+  min-width: 400px;
+}
+
+:host ::ng-deep .ng-select.gds-select.journey-search__services .ng-dropdown-panel {
+  min-width: 500px;
+}

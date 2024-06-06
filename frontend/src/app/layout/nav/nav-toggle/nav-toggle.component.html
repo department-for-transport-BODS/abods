@@ -1,0 +1,10 @@
+<button
+  [ngClass]="toggleClasses"
+  class="button-link"
+  aria-controls="nav"
+  [attr.aria-expanded]="navService.isOpen"
+  (click)="navService.toggleMenu()"
+  id="nav-toggle"
+>
+  Menu
+</button>

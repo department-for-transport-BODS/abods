@@ -66,10 +66,14 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
-      FunctionName: !Sub  ${Environment}-${ProjectName}-graphql-function
+      FunctionName: !Sub  ${ProjectName}-${Environment}-graphql-function
       Role: !GetAtt GraphQlFunctionExecutionRole.Arn
       CodeUri: .
       Handler: dist/index.default
+      KmsKeyArn: !If 
+        - IsNotLocal
+        - !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/lambda/arn}}'
+        - !Ref 'AWS::NoValue'
       Events:
         ApiEvents:
           Type: Api

@@ -1,0 +1,122 @@
+<app-page *ngIf="!(notFound && !chartsErrored); else operatorNotFound"
+  ><ng-container ngProjectAs="back-link" *ngIf="allOperators && allOperators.length > 1">
+    <gds-back-link label="All operators"></gds-back-link>
+  </ng-container>
+  <ng-container ngProjectAs="content">
+    <app-page-header caption="Feed monitoring" heading="Live status" spaceBelow="2"></app-page-header>
+
+    <app-operator-selector
+      [allOperators]="allOperators"
+      [operator]="operator"
+      (operatorChange)="changeOperator($event)"
+    >
+    </app-operator-selector>
+
+    <div class="live-status__info">
+      <div class="live-status__meta">
+        <div class="live-status__date">{{ lastCheck | dateTimeToFormat: 'dd MMMM yyyy' }}</div>
+      </div>
+      <a [routerLink]="['feed-history']" class="govuk-link live-status__feed-history">View feed history</a>
+    </div>
+
+    <div class="live-status__stats">
+      <app-stat
+        label="Feed status"
+        class="live-status__stat"
+        [statValue]="operator?.feedMonitoring?.feedStatus"
+        [statLoaded]="!operatorLoading"
+        id="live-stat-status"
+      >
+        <ng-template #statTemplate let-value="value">
+          <app-status [active]="value"></app-status>
+        </ng-template>
+      </app-stat>
+      <app-stat
+        label="Current vehicles"
+        class="live-status__stat live-status__current-vehicles"
+        [statValue]="operator?.feedMonitoring?.liveStats?.currentVehicles"
+        [statLoaded]="!operatorLoading"
+        tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS"
+        id="live-stat-current"
+      ></app-stat>
+      <app-stat
+        label="Expected vehicles"
+        class="live-status__stat live-status__expected-vehicles"
+        [statValue]="operator?.feedMonitoring?.liveStats?.expectedVehicles"
+        [statLoaded]="!operatorLoading"
+        tooltip="The number of vehicles that should be running now according to the timetables uploaded to BODS"
+        id="live-stat-expected"
+      ></app-stat>
+      <app-stat
+        label="Update frequency"
+        class="live-status__stat live-status__update-frequency"
+        [statValue]="operator?.feedMonitoring?.liveStats?.updateFrequency || 0"
+        [statFormatter]="formatUpdateFrequency"
+        [statLoaded]="!operatorLoading"
+        tooltip="Average update frequency is calculated over the last 24 hour period"
+        id="live-stat-frequency"
+      ></app-stat>
+    </div>
+
+    <div *ngIf="showBodsLink" class="govuk-inset-text">
+      If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are
+      up to date <a target="_blank" rel="noopener" class="govuk-link" [href]="bodsLink">here</a>.
+    </div>
+
+    <app-box *ngIf="!chartsLoading && !chartsErrored">
+      <div class="live-status__charts">
+        <app-live-vehicle-stats
+          class="live-status__24-hour"
+          chartId="vehicle-stats-hours"
+          [granularity]="hour"
+          [nocCode]="nocCode"
+          [dataSource]="operator?.feedMonitoring?.liveStats?.last24Hours"
+          [interval]="intervalLast24Hours"
+          label="Last 24 hours"
+        ></app-live-vehicle-stats>
+        <app-live-vehicle-stats
+          class="live-status__20-min"
+          chartId="vehicle-stats-minutes"
+          [granularity]="minute"
+          [nocCode]="nocCode"
+          [dataSource]="operator?.feedMonitoring?.liveStats?.last20Minutes"
+          [interval]="intervalLast20Minutes"
+          label="Last 20 minutes"
+        ></app-live-vehicle-stats>
+      </div>
+    </app-box>
+    <app-box *ngIf="chartsLoading && !chartsErrored" minHeight="335px">
+      <app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner>
+    </app-box>
+    <app-box *ngIf="chartsErrored" minHeight="335px">
+      <div class="live-status__charts--error">
+        <svg-icon
+          class="live-status__charts--error__icon"
+          src="assets/icons/exclamation-in-circle.svg"
+          [applyClass]="true"
+        ></svg-icon>
+
+        <span class="live-status__charts--error__message"
+          >There was an error loading the operator data, please try again.</span
+        >
+      </div>
+    </app-box>
+    <app-alert-list *ngIf="operatorId" [operatorId]="operatorId" title="Recent alerts" [mode]="alertMode.LiveStatus">
+    </app-alert-list>
+  </ng-container>
+</app-page>
+
+<ng-template #operatorNotFound>
+  <app-page>
+    <ng-container ngProjectAs="back-link">
+      <gds-back-link [route]="['/feed-monitoring']" label="Feed monitoring"></gds-back-link>
+    </ng-container>
+    <ng-container ngProjectAs="content">
+      <app-page-header caption="Feed monitoring" heading="Not found"></app-page-header>
+      <p class="govuk-body">
+        Operator not found, or you do not have permission to view. Go back to
+        <a [routerLink]="['/feed-monitoring']">Feed monitoring</a>?
+      </p>
+    </ng-container>
+  </app-page>
+</ng-template>

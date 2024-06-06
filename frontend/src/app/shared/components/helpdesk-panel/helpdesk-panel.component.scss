@@ -1,0 +1,53 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.helpdesk-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: calc($z-modal - 1);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  visibility: hidden;
+  transition: background-color 0.15s;
+  &--open {
+    visibility: visible;
+  }
+}
+
+.helpdesk-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  height: 100%;
+  border: none;
+  padding: govuk-spacing(4);
+  background: govuk-colour('white');
+  z-index: $z-modal;
+  transform: translateX(100%);
+  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: scroll;
+  &--open {
+    width: 100%;
+    visibility: visible;
+    transform: translateX(0%);
+  }
+  &__heading {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__close-button {
+    height: govuk-spacing(7);
+  }
+}
+
+@include bp($tablet) {
+  .helpdesk-panel {
+    padding: govuk-spacing(6);
+    width: 750px;
+  }
+}

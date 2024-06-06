@@ -1,0 +1,8 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.otp-threshold-modal-button {
+  @include govuk-font(19);
+  padding-left: 0;
+  text-align: right;
+}

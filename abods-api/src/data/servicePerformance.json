@@ -1,0 +1,22 @@
+[
+  {
+    "actualDepartures": 100,
+    "averageDelay": 1.2,
+    "early": 20,
+    "late": 10,
+    "lineId": "line1",
+    "lineInfo": {
+      "serviceId": "service123",
+      "serviceName": "Morning Route",
+      "serviceNumber": "MR1"
+    },
+    "onTime": 70,
+    "operatorInfo": {
+      "nocCode": "NOC123",
+      "operatorId": "op123",
+      "operatorName": "City Lines"
+    },
+    "scheduledDepartures": 90
+  }
+]
+

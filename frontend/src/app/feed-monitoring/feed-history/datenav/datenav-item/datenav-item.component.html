@@ -1,0 +1,12 @@
+<button
+  #navButton
+  ngxTippy
+  [tippyName]="date?.toFormat('d MMM')"
+  [tippyProps]="tippyProps"
+  (click)="selectDate.emit(date)"
+  [ngClass]="dateNavItemClasses"
+  [disabled]="disabled"
+>
+  <span class="govuk-visually-hidden">{{ date?.toFormat('d MMMM') }}</span>
+</button>
+<span *ngIf="firstOfTheMonth" class="datenav__month-label">{{ date?.toFormat('MMM') }}</span>

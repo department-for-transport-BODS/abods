@@ -1,0 +1,33 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.date-range {
+  display: grid;
+  grid-gap: govuk-spacing(6);
+  grid-template-columns: 267px 193px;
+  &__input-wrapper {
+    position: relative;
+  }
+  &__input {
+    caret-color: transparent;
+    //cursor: pointer;
+  }
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: govuk-spacing(1);
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: 2px;
+    padding-right: 3px;
+    z-index: 1;
+  }
+  &__icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "delay": 120,
+  "feedStatus": "Active",
+  "isTimingPoint": true,
+  "journeyStatus": "Started",
+  "lat": 52.520008,
+  "lon": 13.404954,
+  "operatorInfo": {
+    "nocCode": "A123",
+    "operatorId": "op1",
+    "operatorName": "Operator A"
+  },
+  "previousStopInfo": {
+    "sourceId": "ext123",
+    "stopId": "stop1",
+    "stopLocality": "local1",
+    "stopLocation": {
+      "latitude": 52.520008,
+      "longitude": 13.404954
+    },
+    "stopName": "Central Station"
+  },
+  "scheduledDeparture": "2024-04-10T08:00:00Z",
+  "serviceInfo": {
+    "serviceId": "service1",
+    "serviceName": "Metro Express",
+    "serviceNumber": "M1"
+  },
+  "servicePatternId": "sp1",
+  "startTime": "2024-04-10T07:45:00Z",
+  "ts": "2024-04-10T07:46:00Z",
+  "vehicleId": "vehicle1",
+  "vehicleJourneyId": "vj1"
+}

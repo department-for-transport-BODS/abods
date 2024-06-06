@@ -1,0 +1,52 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-page-header heading="Notifications" caption="My organisation" spaceAbove="2"></app-page-header>
+    <h2 class="govuk-heading-m">Feed notifications</h2>
+    <p class="govuk-body">
+      Notify organisation members when a feed is unavailable or when it contains incomplete or faulty data.
+    </p>
+    <app-box *ngIf="alertsLoaded && alerts.length === 0" padding="8">
+      <div class="alerts alerts--empty">
+        <p class="govuk-body text-secondary">You don’t currently have any feed notifications</p>
+        <gds-button (click)="createAlert()" spaceBelow="0" text="Create a notification"></gds-button>
+      </div>
+    </app-box>
+    <app-box *ngFor="let alert of alerts" padding="3" spaceBelow="1" class="govuk-body user-alert">
+      <div class="alerts__item">
+        <div class="govuk-!-margin-right-4">
+          <span *ngIf="alert.alertType === 'vehicle disparity'">
+            If more than <span class="govuk-!-font-weight-bold">{{ alert.alertThreshold }}</span> are missing from the
+            feed send a notification to
+          </span>
+          <span *ngIf="alert.alertType === 'feed failure'">
+            <span class="govuk-!-font-weight-bold">{{ alert.alertThreshold }}</span> after a feed failure send a
+            notification to
+          </span>
+          <span class="govuk-!-font-weight-bold">{{ alert.sendToName }}</span>
+        </div>
+        <a
+          *ngIf="alert.alertId && (authUserIsAdmin || alert.sendToId === authenticatedUser?.id)"
+          [routerLink]="[]"
+          (click)="editAlert(alert.alertId)"
+          class="govuk-link alerts__edit-link"
+          >Edit</a
+        >
+      </div>
+    </app-box>
+    <app-box *ngIf="!alertsLoaded" padding="3">
+      <div class="alerts alerts--empty">
+        <app-spinner size="small"></app-spinner>
+      </div>
+    </app-box>
+    <gds-button
+      *ngIf="alertsLoaded && alerts.length > 0"
+      spaceAbove="4"
+      text="Add another notification"
+      (click)="createAlert()"
+    ></gds-button>
+    <!-- create alert modal-->
+    <app-modal [modalTitle]="(modalEditing ? 'Update' : 'Create') + ' feed notification'" identifier="editAlertModal">
+      <app-edit-alert (openEdit)="openEditModal($event)" (closeEdit)="closeEditModal()"></app-edit-alert>
+    </app-modal>
+  </ng-container>
+</app-page>
