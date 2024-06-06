@@ -1,0 +1,10 @@
+<ng-template #itemContent>
+  <ng-content></ng-content>
+</ng-template>
+
+<a [routerLink]="route" *ngIf="route" [ngClass]="actionListActionClasses"
+  ><ng-container *ngTemplateOutlet="itemContent"></ng-container
+></a>
+<button (click)="onClick.emit($event)" [disabled]="disabled" *ngIf="!route" [ngClass]="actionListActionClasses">
+  <ng-container *ngTemplateOutlet="itemContent"></ng-container>
+</button>

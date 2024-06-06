@@ -1,0 +1,81 @@
+query servicePatterns($servicePatternIds: [String!]) {
+  servicePatternsInfo(servicePatternIds: $servicePatternIds) {
+    stops {
+      stopId
+      stopName
+      lon
+      lat
+    }
+  }
+}
+
+query vehicleJourney($journeyId: String!, $startTime: DateTime!) {
+  vehicleReplay {
+    getJourney(journeyId: $journeyId, startTime: $startTime) {
+      ts
+      lat
+      lon
+      vehicleId
+      vehicleJourneyId
+      servicePatternId
+      delay
+      startTime
+      scheduledDeparture
+      isTimingPoint
+      operatorInfo {
+        operatorId
+        operatorName
+        nocCode
+      }
+      serviceInfo {
+        serviceId
+        serviceName
+        serviceNumber
+      }
+      previousStopInfo {
+        stopId
+        stopName
+      }
+      feedStatus
+      journeyStatus
+    }
+  }
+}
+
+query journeys($fromTimestamp: DateTime!, $toTimestamp: DateTime!, $lineId: String!, $filterOnStartTime: Boolean!) {
+  vehicleReplay {
+    findJourneys(
+      inputs: {
+        fromTimestamp: $fromTimestamp
+        toTimestamp: $toTimestamp
+        filters: { lineIds: [$lineId], filterOnStartTime: $filterOnStartTime }
+      }
+    ) {
+      vehicleJourneyId
+      startTime
+      serviceInfo {
+        serviceName
+        serviceNumber
+      }
+    }
+  }
+}
+
+query vehicleJourneyTimingPattern($vehicleJourneyId: String!) {
+  vehicleJourney(vehicleJourneyId: $vehicleJourneyId) {
+    vehicleJourneyId
+    servicePatternId
+    timingPatternId
+    operatorId
+  }
+}
+
+query timingPatternDetail($timingPatternId: String!) {
+  timingPatternDetail(timingPatternId: $timingPatternId) {
+    stopIndex
+    timingPoint
+    arrivalTimeOffset
+    departureTimeOffset
+    timingPatternId
+  }
+}

@@ -1,0 +1,23 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+:host {
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+  top: govuk-spacing(8);
+}
+
+mgl-map {
+  height: 360px;
+  width: 100%;
+  border: solid 1px $govuk-border-colour;
+  @include bp($phablet) {
+    height: 480px;
+    // stops map gettting extremely narrow
+    min-width: 340px;
+  }
+  @include bp($lg-desktop) {
+    height: 666px;
+  }
+}

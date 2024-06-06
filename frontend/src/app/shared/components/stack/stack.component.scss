@@ -1,0 +1,11 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.stack {
+  display: grid;
+  @for $i from 0 through 9 {
+    &--gap-#{$i} {
+      @include _govuk-responsive-spacing($i, $property: 'grid-column-gap', $direction: 'all');
+    }
+  }
+}

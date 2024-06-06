@@ -1,0 +1,20 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.corridor-stop-list {
+  &__stop {
+    &--matching {
+      box-shadow: inset 0px -2px 0px $govuk-border-colour;
+      padding-top: govuk-spacing(3);
+      padding-left: govuk-spacing(1);
+    }
+  }
+  &__stop-details {
+    &--no-graphic {
+      padding-left: 0;
+      &:before {
+        content: none;
+      }
+    }
+  }
+}

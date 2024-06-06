@@ -20,10 +20,11 @@ on:
         - major
   push:
     branches:
-    - main
     - sandbox
     - dev
     - test
+    - uat
+    - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
@@ -43,7 +44,7 @@ env:
 
 jobs:
   validation:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
       github.ref_name == 'uat' && 'uat' ||
@@ -95,38 +96,8 @@ jobs:
             echo "VERSION=v${new_version}" >> "$GITHUB_OUTPUT"
           fi
 
-  # database:
-  #   runs-on: ubuntu-latest
-  #   needs: validation
-
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: configure aws credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-region: ${{ env.AWS_REGION }}
-  #         role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-  #         role-session-name: ${{ env.RC_ENV }}-database-build
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
-
-  #     - name: push database migrations
-  #       env:
-  #         RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
-  #         VERSION: ${{ needs.validation.outputs.VERSION }}
-  #       run: |
-  #         [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/sql" || rc_path="releases/$VERSION/sql"
-
-  #         aws s3 cp sql s3://$RC_DST/$rc_path/ --recursive --exclude 'local/*'
-
   backend:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs: validation
     defaults:
       run:
@@ -178,10 +149,12 @@ jobs:
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully uploaded"
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-prod
     needs: 
       - validation
-      - backend
+    defaults:
+      run:
+        working-directory: frontend
 
     permissions:
       id-token: write
@@ -190,13 +163,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          repository: ${{ vars.FRONTEND_REPO }}
 
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: frontend/.nvmrc
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -233,10 +204,9 @@ jobs:
 
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs:
       - validation
-      # - database
       - backend
       - frontend
 
@@ -271,10 +241,9 @@ jobs:
 
   trigger-deploy-dev:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs: 
       - validation
-      # - database
       - backend
       - frontend
       - commit-and-tag

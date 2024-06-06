@@ -1,0 +1,40 @@
+<div class="date-range">
+  <div (appMouseupOutside)="closeControls()">
+    <div class="date-range__input-wrapper">
+      <gds-text-input
+        inputId="dateRange"
+        class="date-range__input"
+        type="text"
+        label="Date range"
+        [hideLabel]="true"
+        [ngModel]="fromToStr"
+        (focussed)="openControls()"
+        (keydowned)="preventKeystroke($event)"
+        spaceBelow="0"
+      ></gds-text-input>
+      <button (click)="toggleControls($event)" class="date-range__button unbuttoned">
+        <svg-icon class="date-range__icon" src="assets/icons/calendar.svg" [applyClass]="true"></svg-icon>
+        <div class="govuk-visually-hidden">Open date range picker</div>
+      </button>
+    </div>
+    <app-date-range-controls
+      *ngIf="open"
+      [(fromTo)]="fromTo"
+      (fromToChange)="pickDateRange($event)"
+      (closeControls)="closeControls()"
+    ></app-date-range-controls>
+  </div>
+  <gds-select
+    (selected)="selectPresetDateRange($event)"
+    [value]="value.preset"
+    label="Preset"
+    [hideLabel]="true"
+    inputId="date-range-preset"
+  >
+    <option value="last7">Last 7 days</option>
+    <option value="last28">Last 28 days</option>
+    <option value="lastMonth">Last month</option>
+    <option value="monthToDate">Month to date</option>
+    <option *ngIf="value.preset === 'custom'" value="custom">Custom</option>
+  </gds-select>
+</div>

@@ -1,0 +1,13 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.feed-monitoring {
+  &__active-grid,
+  &__inactive-grid {
+    margin-bottom: govuk-spacing(8);
+  }
+
+  &__loading {
+    min-height: 300px;
+  }
+}

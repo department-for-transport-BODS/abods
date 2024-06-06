@@ -1,0 +1,8 @@
+<div
+  class="panel"
+  [appTrapFocus]="(isOpen | async) ?? false"
+  [ngClass]="{ 'panel--open': this.isOpen | async }"
+  id="panel"
+>
+  <ng-template appDynamicPanelComponentHost></ng-template>
+</div>

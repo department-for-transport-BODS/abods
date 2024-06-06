@@ -1,0 +1,130 @@
+fragment User on UserType {
+  id
+  email
+  username
+  firstName
+  lastName
+  organisation {
+    id
+    name
+  }
+  roles {
+    ...Role
+  }
+}
+
+fragment Role on RoleType {
+  id
+  name
+  scope
+}
+
+fragment Alert on AlertType {
+  alertId
+  alertType
+  createdBy {
+    firstName
+    lastName
+    username
+  }
+  sendTo {
+    id
+    firstName
+    lastName
+    username
+  }
+  eventHysterisis
+  eventThreshold
+}
+
+query listUsers {
+  users {
+    ...User
+  }
+}
+
+query listRoles {
+  roles {
+    ...Role
+  }
+}
+
+query listUserAlerts {
+  userAlerts {
+    ...Alert
+  }
+}
+
+query fetchUserAlert($alertId: String!) {
+  userAlert(alertId: $alertId) {
+    ...Alert
+  }
+}
+
+mutation editUser($username: String!, $firstName: String!, $lastName: String!, $role: String!) {
+  updateUser(username: $username, payload: { firstName: $firstName, lastName: $lastName, role: { id: $role } }) {
+    error
+    user {
+      ...User
+    }
+  }
+}
+
+mutation removeUser($username: String!) {
+  deleteUser(username: $username) {
+    success
+    error
+  }
+}
+
+mutation inviteUser($email: String!, $organisationId: String!, $roleId: String!) {
+  inviteUser(payload: { email: $email, organisation: { id: $organisationId }, role: { id: $roleId } }) {
+    invitation {
+      email
+      accepted
+    }
+    error
+  }
+}
+
+mutation updateUserAlert(
+  $alertId: String!
+  $alertType: AlertTypeEnum
+  $sendToId: String!
+  $eventHysterisis: Int
+  $eventThreshold: Int
+) {
+  updateUserAlert(
+    alertId: $alertId
+    payload: {
+      alertType: $alertType
+      sendTo: { id: $sendToId }
+      eventHysterisis: $eventHysterisis
+      eventThreshold: $eventThreshold
+    }
+  ) {
+    success
+    error
+  }
+}
+
+mutation createUserAlert($alertType: AlertTypeEnum, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
+  addUserAlert(
+    payload: {
+      alertType: $alertType
+      sendTo: { id: $sendToId }
+      eventHysterisis: $eventHysterisis
+      eventThreshold: $eventThreshold
+    }
+  ) {
+    success
+    error
+  }
+}
+
+mutation deleteUserAlert($alertId: String!) {
+  deleteUserAlert(alertId: $alertId) {
+    success
+    error
+  }
+}

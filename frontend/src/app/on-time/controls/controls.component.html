@@ -1,0 +1,44 @@
+<div class="on-time__filter-row">
+  <div>
+    <div class="on-time__date-picker">
+      <app-date-range [formControl]="dateRange"></app-date-range>
+    </div>
+  </div>
+  <div class="on-time__filters">
+    <div>
+      <button
+        class="on-time__more-filters button-link govuk-link"
+        [attr.aria-expanded]="panelService.isOpen$ ? panelService.isOpen$ : 'false'"
+        aria-controls="panel"
+        id="panel-toggle"
+        (click)="onMoreFiltersClick()"
+      >
+        <svg-icon class="on-time__filter-icon" src="assets/icons/refine.svg" [applyClass]="true"></svg-icon
+        ><span>Refine results</span>
+      </button>
+    </div>
+    <div class="on-time__timing-toggle">
+      <app-segmented-toggle legend="Show performance using data from" [(ngModel)]="timingPointsOption">
+        <app-segmented-toggle-item
+          name="stops-filter"
+          identifier="all-stops"
+          value="all-stops"
+          label="All stops"
+        ></app-segmented-toggle-item>
+        <app-segmented-toggle-item
+          name="stops-filter"
+          identifier="timing-points"
+          value="timing-points"
+          label="Timing points"
+        ></app-segmented-toggle-item>
+      </app-segmented-toggle>
+    </div>
+  </div>
+</div>
+<div class="on-time__filter-chips">
+  <app-filter-chips
+    [filters]="filtersSubject.value"
+    (filterChange)="updateFilters($event)"
+    [showAdminAreas]="showAdminAreas"
+  ></app-filter-chips>
+</div>

@@ -1,0 +1,10 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+:host {
+  display: block;
+}
+.box {
+  background: govuk-colour('light-grey');
+  @include govuk-responsive-padding(5);
+  position: relative;
+}

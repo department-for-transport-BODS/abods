@@ -1,0 +1,9 @@
+button:focus {
+  outline: 0;
+}
+
+button {
+  cursor: pointer;
+  font-family: $font-family-default;
+  font-size: 100%;
+}

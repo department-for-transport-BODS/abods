@@ -1,0 +1,15 @@
+<app-modal #deleteModal modalTitle="Delete corridor?" identifier="deleteCorridor">
+  <p class="govuk-body" id="delete-modal-body">
+    Are you sure you want to delete the corridor <strong>{{ corridor?.name }}</strong
+    >? This operation cannot be undone.
+  </p>
+  <div class="flex-row justify-content-between">
+    <gds-button text="Cancel" spaceBelow="0" appearance="secondary" (click)="deleteModal.close()"></gds-button>
+    <gds-button
+      text="Delete corridor"
+      spaceBelow="0"
+      (click)="deleteCorridor.emit(corridor)"
+      appearance="warning"
+    ></gds-button>
+  </div>
+</app-modal>

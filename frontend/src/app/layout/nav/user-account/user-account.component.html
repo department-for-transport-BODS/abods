@@ -1,0 +1,28 @@
+<div class="user-account">
+
+  <app-invite-user-modal [identifier]="'inviteUserFromNav'"></app-invite-user-modal>
+  <app-popover
+    position="right-end"
+    identifier="user-account-menu"
+    triggerLabel="My account"
+    triggerIcon="user"
+    triggerType="link"
+  >
+    <ul app-actionlist>
+      <li app-actionlist-action [disabled]="true" route="my-account">My account</li>
+      <li app-actionlist-section title="My organisation">
+        <ul class="govuk-list govuk-!-margin-bottom-0">
+          <!-- <li app-actionlist-action [disabled]="true" route="organisation-settings">Organisation settings</li> -->
+          <li
+            app-actionlist-action
+            [route]="['/organisation', 'alerts']"
+            (click)="tippyService.hide('user-account-menu')"
+          >
+            Notifications
+          </li>
+        </ul>
+      </li>
+      <li app-actionlist-action (onClick)="logout($event)">Logout</li>
+    </ul>
+  </app-popover>
+</div>

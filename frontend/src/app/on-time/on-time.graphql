@@ -1,0 +1,131 @@
+query onTimeDelayFrequency($params: PerformanceInputType!) {
+  onTimePerformance {
+    delayFrequency(inputs: $params) {
+      bucket
+      frequency
+    }
+  }
+}
+
+query onTimeTimeSeries($params: PerformanceInputType!) {
+  onTimePerformance {
+    punctualityTimeSeries(inputs: $params) {
+      ts
+      onTime
+      early
+      late
+    }
+  }
+}
+
+query onTimeStats($params: PerformanceInputType!) {
+  onTimePerformance {
+    punctualityOverview(inputs: $params) {
+      early
+      late
+      onTime
+      scheduled
+      completed
+      averageDeviation
+    }
+  }
+}
+
+query onTimePunctualityTimeOfDay($params: PerformanceInputType!) {
+  onTimePerformance {
+    punctualityTimeOfDay(inputs: $params) {
+      timeOfDay
+      onTime
+      early
+      late
+    }
+  }
+}
+
+query onTimePunctualityDayOfWeek($params: PerformanceInputType!) {
+  onTimePerformance {
+    punctualityDayOfWeek(inputs: $params) {
+      dayOfWeek
+      onTime
+      early
+      late
+    }
+  }
+}
+
+query onTimeServicePerformanceList($params: PerformanceInputType!) {
+  onTimePerformance {
+    servicePerformance(inputs: $params) {
+      lineId
+      lineInfo {
+        serviceId
+        serviceName
+        serviceNumber
+      }
+      early
+      onTime
+      late
+      averageDelay
+      scheduledDepartures
+      actualDepartures
+    }
+  }
+}
+
+query onTimeStopPerformanceList($params: PerformanceInputType!) {
+  onTimePerformance {
+    stopPerformance(inputs: $params) {
+      lineId
+      stopId
+      stopInfo {
+        stopId
+        sourceId
+        stopName
+        stopLocation {
+          latitude
+          longitude
+        }
+        stopLocality {
+          localityId
+          localityName
+          localityAreaId
+          localityAreaName
+        }
+      }
+      early
+      onTime
+      late
+      averageDelay
+      scheduledDepartures
+      actualDepartures
+      timingPoint
+    }
+  }
+}
+
+query onTimeOperatorPerformanceList($params: PerformanceInputType!) {
+  onTimePerformance {
+    operatorPerformance(inputs: $params) {
+      pageInfo {
+        totalCount
+        next
+      }
+      items {
+        nocCode
+        operatorId
+        name
+        early
+        onTime
+        late
+      }
+    }
+  }
+}
+
+query serviceInfo($lineId: String!) {
+  serviceInfo(serviceId: $lineId) {
+    serviceId
+    serviceNumber
+    serviceName
+  }
+}

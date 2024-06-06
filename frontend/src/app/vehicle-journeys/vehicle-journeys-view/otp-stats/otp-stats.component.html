@@ -1,0 +1,34 @@
+<div class="vehicle-journeys__otp-stats">
+  <app-stat
+    class="vehicle-journeys__otp-stat"
+    label="On-time"
+    [statValue]="(onTime / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    tooltip="{{ onTime }} of {{
+      completed
+    }} recorded stop departures were between 1 minute early and 5 minutes 59 seconds late."
+  ></app-stat>
+  <app-stat
+    class="vehicle-journeys__otp-stat"
+    label="Late"
+    [statValue]="(late / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    tooltip="{{ late }} of {{ completed }} recorded stop departures were more than 5 minutes 59 seconds late."
+  ></app-stat>
+  <app-stat
+    class="vehicle-journeys__otp-stat"
+    label="Early"
+    [statValue]="(early / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    tooltip="{{ early }} of {{ completed }} recorded stop departures were more than 1 minute early."
+  ></app-stat>
+  <app-stat
+    class="vehicle-journeys__otp-stat"
+    label="Incomplete data"
+    [statValue]="(noData / total | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    tooltip="{{ noData }} of {{
+      total
+    }} stop departures have limited or missing real-time data so we are unable to calculate an accurate on-time performance figure."
+  ></app-stat>
+</div>
