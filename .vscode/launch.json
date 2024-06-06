@@ -27,6 +27,25 @@
       // update below to match your machines node runtime
       //   "runtimeExecutable": "node"
       "runtimeExecutable": "/Users/kalva1/.nvm/versions/node/v20.14.0/bin/node"
+    },
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Unit tests",
+      "address": "localhost",
+      "port": 9333,
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/frontend",
+      "pathMapping": {
+        "/_karma_webpack_": "${workspaceFolder}/frontend"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch chrome",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/frontend"
     }
   ]
 }
