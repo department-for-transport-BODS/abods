@@ -1,0 +1,27 @@
+<div class="stat">
+  <span class="stat__label">{{ label }}</span>
+  <div class="stat__value" *ngIf="statLoaded; else spinner">
+    <ng-container
+      *ngIf="statTemplate; else basicStat"
+      [ngTemplateOutlet]="statTemplate"
+      [ngTemplateOutletContext]="{ value: statValue }"
+    ></ng-container>
+  </div>
+</div>
+
+<ng-template #basicStat>
+  <span *ngIf="!tooltip" class="stat__value">{{
+    statFormatter ? format() : statValue
+  }}</span>
+  <app-tooltip *ngIf="tooltip" [message]="tooltip">
+    <span class="stat__value stat__value--tooltip">{{
+      statFormatter ? format() : statValue
+    }}</span>
+  </app-tooltip>
+</ng-template>
+
+<ng-template #spinner>
+  <div class="stat__spinner">
+    <app-spinner size="small"></app-spinner>
+  </div>
+</ng-template>

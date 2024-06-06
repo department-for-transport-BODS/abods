@@ -1,0 +1,148 @@
+query corridorsStopSearch($inputs: AddFirstStopInputType) {
+  corridor {
+    addFirstStop(inputs: $inputs) {
+      stopId
+      stopName
+      lat
+      lon
+      localityName
+      adminAreaId
+    }
+  }
+}
+
+query corridorsSubsequentStops($stopList: [String]!) {
+  corridor {
+    addSubsequentStops(stopList: $stopList) {
+      stopId
+      stopName
+      lon
+      lat
+      localityName
+      adminAreaId
+    }
+  }
+}
+
+query corridorsList {
+  corridor {
+    corridorList {
+      id
+      name
+      stops {
+        stopId
+      }
+    }
+  }
+}
+
+query getCorridor($corridorId: Int!) {
+  corridor {
+    getCorridor(corridorId: $corridorId) {
+      id
+      name
+      stops {
+        stopId
+        sourceId
+        stopName
+        stopLocation {
+          latitude
+          longitude
+        }
+        stopLocality {
+          localityId
+          localityName
+          localityAreaId
+          localityAreaName
+        }
+      }
+    }
+  }
+}
+
+query corridorStats($params: CorridorStatsInputType!) {
+  corridor {
+    stats(inputs: $params) {
+      summaryStats {
+        totalTransits
+        numberOfServices
+        averageJourneyTime
+        scheduledTransits
+      }
+
+      journeyTimeStats {
+        ts
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+
+      journeyTimeTimeOfDayStats {
+        hour
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+
+      journeyTimeDayOfWeekStats {
+        dow
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+
+      journeyTimePerServiceStats {
+        lineName
+        servicePatternName
+        noc
+        operatorName
+        totalJourneyTime
+        recordedTransits
+        scheduledTransits
+      }
+
+      journeyTimeHistogram {
+        ts
+        hist {
+          bin
+          freq
+        }
+      }
+
+      serviceLinks {
+        fromStop
+        toStop
+        distance
+        routeValidity
+        linkRoute
+      }
+    }
+  }
+}
+
+mutation createCorridor($name: String!, $stopIds: [String]!) {
+  createCorridor(payload: { name: $name, stopIds: $stopIds }) {
+    success
+    error
+  }
+}
+
+mutation deleteCorridor($corridorId: Int!) {
+  deleteCorridor(corridorId: $corridorId) {
+    success
+    error
+  }
+}
+
+mutation updateCorridor($inputs: CorridorUpdateInputType!) {
+  updateCorridor(inputs: $inputs) {
+    error
+    success
+  }
+}

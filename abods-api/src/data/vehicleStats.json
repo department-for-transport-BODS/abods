@@ -1,0 +1,17 @@
+[
+  {
+    "actual": 150,
+    "expected": 160,
+    "timestamp": "2024-04-09T12:00:00Z"
+  },
+  {
+    "actual": 100,
+    "expected": 110,
+    "timestamp": "2024-04-08T12:00:00Z"
+  },
+  {
+    "actual": 120,
+    "expected": 130,
+    "timestamp": "2024-04-09T11:40:00Z"
+  }
+]

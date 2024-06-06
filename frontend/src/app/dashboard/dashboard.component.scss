@@ -1,0 +1,66 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.dashboard {
+  &__controls {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    app-segmented-toggle {
+      margin-bottom: govuk-spacing(3);
+    }
+  }
+  &__layout {
+    display: flex;
+    flex-direction: column;
+  }
+  &__vehicles-status {
+    margin-bottom: govuk-spacing(6);
+  }
+  &__feed-status-link {
+    @include govuk-font(19);
+    text-align: right;
+  }
+}
+
+@include bp($tablet) {
+  .dashboard {
+    &__feeds {
+      display: flex;
+    }
+
+    &__vehicles-status,
+    &__feed-alerts {
+      flex-basis: 50%;
+    }
+
+    &__vehicles-status {
+      margin-right: govuk-spacing(6);
+      margin-bottom: 0;
+    }
+  }
+}
+
+@include bp($xlg-desktop) {
+  .dashboard {
+    &__layout {
+      flex-direction: row;
+    }
+    &__performance {
+      flex: 1;
+      margin-right: govuk-spacing(6);
+    }
+    &__feeds {
+      flex-direction: column;
+      flex-basis: 383px;
+    }
+    &__vehicles-status {
+      margin-bottom: govuk-spacing(6);
+    }
+    &__vehicles-status,
+    &__feed-alerts {
+      flex-basis: auto;
+      margin-right: 0;
+    }
+  }
+}

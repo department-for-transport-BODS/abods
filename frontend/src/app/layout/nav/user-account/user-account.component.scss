@@ -1,0 +1,32 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.user-account {
+  margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
+
+  &__invite-button {
+    display: inline-flex;
+    width: 100%;
+    padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
+    align-items: center;
+    span {
+      margin-left: govuk-spacing(2);
+    }
+    div {
+      width: 20px;
+      height: 20px;
+    }
+    svg-icon {
+      display: inline-flex;
+      color: govuk-colour('blue');
+      width: 15px;
+      height: 15px;
+    }
+    &:focus {
+      svg-icon {
+        color: govuk-colour('black');
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+@import 'src/app/shared/components/date-range/date-control-variables.scss';
+
+.date {
+  position: relative;
+  &__controls {
+    z-index: $z-popover;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: -2px;
+    width: calc($calendar-width + ($date-range-padding * 2) + ($border-width * 2));
+    background: govuk-colour('white');
+    border: 2px solid govuk-colour('black');
+    box-sizing: border-box;
+    padding: govuk-spacing(4);
+  }
+  &__calendar-header {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: govuk-spacing(1);
+  }
+
+  &__month-name {
+    @include govuk-font(19);
+    &--this-month {
+      font-weight: $govuk-font-weight-bold;
+    }
+  }
+  &__month-step {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: block;
+    width: 24px;
+    height: 24px;
+    color: govuk-colour('blue');
+    &--disabled {
+      pointer-events: none;
+      color: govuk-colour('mid-grey');
+    }
+    &--next {
+      right: 0;
+    }
+    &--prev {
+      left: 0;
+    }
+
+    &__chevron-left,
+    &__chevron-right {
+      display: block;
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+:host {
+  &::ng-deep {
+    .text-input__icon-wrapper--suffix {
+      cursor: pointer;
+    }
+  }
+}

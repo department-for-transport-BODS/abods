@@ -1,0 +1,30 @@
+<app-modal modalTitle="Invite a user" [identifier]="identifier">
+  <!-- <form [formGroup]="inviteForm" (ngSubmit)="onSubmitInvite()">
+    <gds-error-summary [errors]="errors"></gds-error-summary>
+    <gds-text-input
+      inputId="email"
+      formControlName="email"
+      label="Email address"
+      [error]="getError('email')"
+      [required]="true"
+      lowercase
+    >
+    </gds-text-input>
+    <gds-radios
+      legend="Access level"
+      size="small"
+      layout="inline"
+      [error]="getError('roleId')"
+      identifier="new-user-role"
+    >
+      <gds-radio-item
+        *ngFor="let role of roles"
+        [inputId]="'invite-role-' + role.id"
+        formControlName="roleId"
+        [value]="role.id"
+        [label]="role.name"
+      ></gds-radio-item>
+    </gds-radios>
+    <gds-button text="Invite user" spaceBelow="0" type="submit"></gds-button>
+  </form> -->
+</app-modal>

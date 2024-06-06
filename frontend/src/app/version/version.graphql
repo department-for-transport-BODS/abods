@@ -1,0 +1,6 @@
+query getVersion {
+  apiInfo {
+    version
+    buildNumber
+  }
+}

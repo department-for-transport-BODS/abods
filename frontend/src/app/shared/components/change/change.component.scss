@@ -1,0 +1,37 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.change {
+  @include govuk-font(19);
+  display: inline-flex;
+  align-items: center;
+  &:after {
+    content: '';
+    margin-left: govuk-spacing(1);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+  }
+  &--increase {
+    color: govuk-colour('green');
+    .change__value {
+      background-color: #dfeae5;
+    }
+    &:after {
+      border-bottom: 11px solid govuk-colour('dark-grey');
+    }
+  }
+  &--decrease {
+    color: govuk-colour('red');
+    .change__value {
+      background-color: #f9dfdf;
+    }
+    &:after {
+      border-top: 11px solid govuk-colour('dark-grey');
+    }
+  }
+  &--small {
+    @include govuk-font(16);
+  }
+}

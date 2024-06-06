@@ -1,0 +1,28 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.performance {
+  &__no-data,
+  &__chart {
+    min-height: rem(300);
+    margin-bottom: govuk-spacing(6);
+  }
+  &__no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__chart {
+    max-width: rem(800);
+  }
+  &__link {
+    @include govuk-font(19);
+    margin-bottom: 0;
+  }
+  &__footer {
+    margin-top: govuk-spacing(6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

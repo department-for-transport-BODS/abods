@@ -1,0 +1,49 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.router-link-cell {
+  white-space: normal;
+  word-break: break-word;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  a {
+    text-decoration: none;
+  }
+
+  pointer-events: all;
+  user-select: text;
+
+  .ag-row-hover .ag-column-hover & {
+    a {
+      text-decoration: underline;
+    }
+  }
+  &--bold {
+    font-weight: bold;
+  }
+
+  &--no-wrap {
+    white-space: nowrap;
+  }
+
+  &--overflow-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--overflow-clip {
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
+  &--flex-row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &--flex-row-reverse {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+}

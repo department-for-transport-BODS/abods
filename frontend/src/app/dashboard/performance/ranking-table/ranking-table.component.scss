@@ -1,0 +1,38 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.ranking-table {
+  &__data {
+    border-collapse: collapse;
+    width: 100%;
+    @include govuk-font(19);
+    padding: 0;
+
+    td {
+      padding: 0 govuk-spacing(4) govuk-spacing(2) 0;
+      vertical-align: top;
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+
+  &__link {
+    text-decoration: none;
+  }
+  &__trend {
+    text-align: right;
+  }
+
+  &__no-data,
+  &__loading {
+    min-height: 108px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__loading {
+    position: relative;
+  }
+}

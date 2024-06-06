@@ -1,0 +1,14 @@
+[
+  {
+    "actualDepartures": 400,
+    "averageDelay": 2.5,
+    "early": 50,
+    "late": 100,
+    "name": "City Transport",
+    "nocCode": "CT123",
+    "onTime": 250,
+    "operatorId": "op123",
+    "scheduledDepartures": 450
+  }
+]
+

@@ -1,0 +1,82 @@
+<div *ngIf="showTotal" class="govuk-body-l govuk-!-margin-bottom-2">
+  <ng-container *ngIf="!loading; else skeleton"
+    ><span class="govuk-!-font-weight-bold">{{ completed | number }}</span> departures recorded</ng-container
+  >
+  <ng-template #skeleton><app-skeleton appearance="body-l" width="320px"></app-skeleton></ng-template>
+</div>
+
+<div class="flex-row justify-content-between">
+  <button class="helpdesk-link govuk-link button-link" (click)="openHelpdesk()" type="button">
+    <svg-icon src="assets/icons/question-in-circle.svg"></svg-icon>
+    How are these numbers calculated?
+  </button>
+  <app-otp-threshold-modal-link
+    *ngIf="!loading; else spinner"
+    [modalData]="{ defaultValues: overview, params: params$ | async }"
+  ></app-otp-threshold-modal-link>
+  <ng-template #spinner>
+    <app-spinner size="small"></app-spinner>
+  </ng-template>
+</div>
+
+<div class="on-time-overview__stats" [class.on-time-overview__stats--nested]="nested">
+  <app-stat
+    label="On-time"
+    class="on-time-overview__stat on-time-overview__on-time"
+    [statValue]="(onTime / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    id="on-time-overview-stat-on-time"
+    [tooltip]="overview && overview.completed ? onTimeTooltip : noRealtimeDataTooltip"
+  ></app-stat>
+  <ng-template #onTimeTooltip>
+    {{ onTime | number }} of {{ completed | number }} recorded stop departures were between 1 minute early and 5 minutes
+    59 seconds late.
+  </ng-template>
+  <app-stat
+    label="Late"
+    class="on-time-overview__stat on-time-overview__late"
+    [statValue]="(late / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    [tooltip]="overview && overview.completed ? lateTooltip : noRealtimeDataTooltip"
+    id="on-time-overview-stat-late"
+  ></app-stat>
+  <ng-template #lateTooltip>
+    {{ late | number }} of {{ completed | number }} recorded stop departures were more than 5 minutes 59 seconds late.
+  </ng-template>
+  <app-stat
+    label="Early"
+    class="on-time-overview__stat on-time-overview__early"
+    [statValue]="(early / completed | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    [tooltip]="overview && overview.completed ? earlyTooltip : noRealtimeDataTooltip"
+    id="on-time-overview-stat-early"
+  ></app-stat>
+  <ng-template #earlyTooltip>
+    {{ early | number }} of {{ completed | number }} recorded stop departures were more than 1 minute early.
+  </ng-template>
+  <app-stat
+    *ngIf="frequent && headwayOverview"
+    label="Excess wait time"
+    class="on-time-overview__stat"
+    [statValue]="excess | durationFromMilliseconds | formatDuration: 'm:ss'"
+    [statLoaded]="!loading"
+    tooltip="The average additional time that passengers had to wait due to irregular spacing of buses or those which failed to run."
+  ></app-stat>
+  <app-stat
+    *ngIf="showNoData"
+    label="Incomplete data"
+    class="on-time-overview__stat on-time-overview__no-data"
+    [statValue]="(noData / scheduled | noInfinity | percent: '1.0-2') || 'Unavailable'"
+    [statLoaded]="!loading"
+    [tooltip]="overview && overview.scheduled ? noDataTooltip : noTimetableDataTooltip"
+    id="on-time-overview-stat-no-data"
+  ></app-stat>
+  <ng-template #noDataTooltip>
+    {{ noData | number }} of {{ scheduled | number }} stop departures have limited or missing real-time data so we are
+    unable to calculate an accurate on-time performance figure.
+  </ng-template>
+  <ng-template #noTimetableDataTooltip>
+    No scheduled stop departures found for the selected date range and filters.
+  </ng-template>
+  <ng-template #noRealtimeDataTooltip> No real-time data available.</ng-template>
+</div>

@@ -20,10 +20,11 @@ on:
         - major
   push:
     branches:
-    - main
     - sandbox
     - dev
     - test
+    - uat
+    - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
@@ -43,9 +44,14 @@ env:
 
 jobs:
   validation:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
+    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+      github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'uat' && 'uat' ||
+      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
-      version: ${{ steps.increment.outputs.version }}
+      AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
+      VERSION: ${{ steps.increment.outputs.VERSION }}
 
     steps:
       - name: checkout
@@ -64,12 +70,17 @@ jobs:
               (Parameter Environment) - $RC_ENV
           """
 
+      - name: set environment specific vars
+        id: set-vars
+        run: |
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+
       - name: increment the ${{ env.RC_TYP }} version
         id: increment
         run: |          
           if [[ ${GITHUB_REF_NAME} != 'main' ]]; then
             echo "[INFO] Running on a feature branch, skipping version increment"
-            echo "version=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
           else
             # install yq for parsing yaml files
             sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
@@ -81,49 +92,11 @@ jobs:
             echo "[INFO] New application version v${new_version}"
             
             # outputs
-            echo "version=v${new_version}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=v${new_version}" >> "$GITHUB_OUTPUT"
           fi
 
-  # database:
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-  #     github.ref_name == 'test' && 'test' ||
-  #     github.ref_name == 'uat' && 'uat' ||
-  #     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
-  #   needs: validation
-
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: configure aws credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-region: ${{ env.AWS_REGION }}
-  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-  #         role-session-name: ${{ env.RC_ENV }}-database-build
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
-
-  #     - name: push database migrations
-  #       env:
-  #         RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-  #         VERSION: ${{ needs.validation.outputs.version }}
-  #       run: |
-  #         [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/sql" || rc_path="releases/$VERSION/sql"
-
-  #         aws s3 cp sql s3://$RC_DST/$rc_path/ --recursive --exclude 'local/*'
-
   backend:
-    runs-on: ubuntu-latest
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    runs-on: pcoe-runner-linux-small-prod
     needs: validation
     defaults:
       run:
@@ -151,15 +124,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-backend-app-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
       - name: package and push backend code
         env: 
-          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/backend" || rc_path="releases/$VERSION/backend"
 
@@ -175,14 +148,12 @@ jobs:
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully uploaded"
 
   frontend:
-    runs-on: ubuntu-latest
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    runs-on: pcoe-runner-linux-prod
     needs: 
       - validation
-      - backend
+    defaults:
+      run:
+        working-directory: frontend
 
     permissions:
       id-token: write
@@ -191,19 +162,17 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          repository: ${{ vars.FRONTEND_REPO }}
 
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: frontend/.nvmrc
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-frontend-app-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
@@ -211,8 +180,8 @@ jobs:
       - name: package and push frontend code
         env:
           CI: ""
-          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/frontend" || rc_path="releases/$VERSION/frontend"
 
@@ -226,7 +195,7 @@ jobs:
 
           npm install
           npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
-            ng build
+            ng build -c production
 
           echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
@@ -234,10 +203,9 @@ jobs:
 
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs:
       - validation
-      # - database
       - backend
       - frontend
 
@@ -254,7 +222,7 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
             sudo chmod 755 /usr/bin/yq
 
-          new_version=${{ needs.validation.outputs.version }}
+          new_version=${{ needs.validation.outputs.VERSION }}
           yq e -i '.version = "'"$new_version"'"' VERSION
           echo "[INFO] Updated application version to ${new_version}"
 
@@ -272,10 +240,9 @@ jobs:
 
   trigger-deploy-dev:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs: 
       - validation
-      # - database
       - backend
       - frontend
       - commit-and-tag
@@ -289,4 +256,4 @@ jobs:
         with:
           repository: ${{ github.repository }}
           event-type: automated-deploy
-          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.version }}" }'
+          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.VERSION }}" }'

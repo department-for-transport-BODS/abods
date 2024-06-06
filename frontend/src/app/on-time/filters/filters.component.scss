@@ -1,0 +1,63 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.filters {
+  &__heading {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__close-button {
+    height: govuk-spacing(7);
+  }
+  &__scrollbox {
+    overflow-y: auto;
+    height: calc(100vh - 180px);
+    visibility: hidden;
+    &::-webkit-scrollbar {
+      background-color: govuk-colour('white');
+      width: 20px;
+    }
+    &::-webkit-scrollbar-thumb {
+      border: 6px solid rgba(0, 0, 0, 0);
+      background-clip: padding-box;
+      border-radius: 999em;
+      background-color: govuk-colour('mid-grey');
+    }
+    &:hover {
+      visibility: visible;
+    }
+    &:focus {
+      visibility: visible;
+    }
+  }
+  &__scrollbox-content {
+    visibility: visible;
+  }
+  &__2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: govuk-spacing(6);
+    .govuk-select {
+      width: 100%;
+    }
+  }
+  &__label-heading {
+    margin-bottom: govuk-spacing(2);
+  }
+  &__reset {
+    @include govuk-font(19);
+    margin-bottom: govuk-spacing(4);
+    margin-left: govuk-spacing(1) * -1;
+  }
+  &__button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: govuk-spacing(2);
+    > * {
+      &:first-child {
+        margin-right: govuk-spacing(2);
+      }
+    }
+  }
+}

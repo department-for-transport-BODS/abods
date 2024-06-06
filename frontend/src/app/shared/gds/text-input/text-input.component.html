@@ -1,0 +1,65 @@
+<div [ngClass]="containerClasses">
+  <h1 *ngIf="isLabelHeader; else normalLabel" class="govuk-label-wrapper">
+    <label class="govuk-label govuk-label--l" [for]="inputId">
+      {{ label }}
+    </label>
+  </h1>
+  <ng-template #normalLabel>
+    <label
+      class="govuk-label"
+      [ngClass]="{ 'text-input__label--required': required, 'govuk-visually-hidden': hideLabel }"
+      [for]="inputId"
+    >
+      {{ label }}
+    </label>
+  </ng-template>
+  <div *ngIf="hint" id="{{ inputId }}-hint" class="govuk-hint">
+    {{ hint }}
+  </div>
+  <span *ngIf="error" id="{{ inputId }}-error" class="govuk-error-message">
+    <span class="govuk-visually-hidden">Error:</span> {{ error }}
+  </span>
+  <div class="govuk-input__wrapper text-input__wrapper" [style.display]="type === 'search' ? 'inline' : 'flex'">
+    <div *ngIf="prefix" class="govuk-input__prefix" aria-hidden="true">{{ prefix }}</div>
+    <div *ngIf="type === 'search'" class="text-input__icon-wrapper text-input__icon-wrapper--preffix">
+      <svg-icon src="assets/icons/search.svg" class="text-input__preffix-icon" [applyClass]="true"></svg-icon>
+    </div>
+    <input
+      #textInput
+      [ngClass]="inputClasses"
+      [id]="inputId"
+      spellcheck="spellcheck"
+      [name]="inputId"
+      [type]="type"
+      attr.aria-describedby="{{ inputId }}-hint {{ inputId }}-error"
+      [formControl]="control"
+      (blur)="onTouch($event); blurred.emit($event)"
+      (focus)="focussed.emit($event)"
+      (keydown)="keydowned.emit($event)"
+      (click)="preventCalendarPopupFF($event)"
+      (keydown.enter)="preventCalendarPopupFF($event)"
+      (keydown.space)="preventCalendarPopupFF($event)"
+      [readonly]="readonly"
+      [attr.inputmode]="inputMode ? inputMode : null"
+      [attr.pattern]="pattern ? pattern : null"
+      [max]="max"
+      [min]="min"
+      [step]="step"
+      [attr.placeholder]="placeholder"
+      [autofocus]="autofocus"
+      [attr.required]="required ? 'true' : null"
+      [attr.autocomplete]="autocomplete ? autocomplete : null"
+    />
+    <div *ngIf="suffix" class="govuk-input__suffix" aria-hidden="true">{{ suffix }}</div>
+    <div *ngIf="noCal" class="text-input__icon-wrapper text-input__icon-wrapper--suffix" (click)="calClick.emit()">
+      <svg-icon src="assets/icons/calendar.svg" class="text-input__suffix-icon" [applyClass]="true"></svg-icon>
+    </div>
+    <div
+      *ngIf="type === 'search' && value"
+      class="text-input__icon-wrapper text-input__icon-wrapper--suffix cursor-pointer"
+      (click)="clearInput()"
+    >
+      <svg-icon class="text-input__suffix-icon" [applyClass]="true" src="assets/icons/cross.svg"></svg-icon>
+    </div>
+  </div>
+</div>

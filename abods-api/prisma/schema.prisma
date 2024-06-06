@@ -1,0 +1,189 @@
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+view bods_user {
+  id           Int     @id @default(1)
+  username     String @unique
+  email        String @unique
+  first_name   String?
+  last_name    String?
+  password     String
+  is_superuser Boolean
+  is_active    Boolean
+  userOrganisations bods_userorganisation[]
+  created_by_alerts Alert[]            @relation("created_by_user")
+  send_to_alerts    Alert[]            @relation("send_to_user")
+}
+
+view bods_userorganisation {
+  user            bods_user         @relation(fields: [user_id], references: [id])
+  user_id Int
+  organisation    bods_organisation @relation(fields: [organisation_id], references: [id])
+  organisation_id Int
+
+  @@id([user_id, organisation_id])
+}
+
+view bods_organisation {
+  id Int @id @default(1)
+  name String
+  is_abods_global_viewer Boolean
+  userOrganisations bods_userorganisation[]
+  operatorOrganisations bods_organisationoperator[]
+}
+
+view all_operators {
+  operatorid Int? 
+  operatorref String @id
+  name String
+  operatorOrganisations bods_organisationoperator[]
+}
+
+view bods_organisationoperator {
+  organisation    bods_organisation @relation(fields: [organisation_id], references: [id])
+  organisation_id Int
+  operatorref String
+  operator    all_operators @relation(fields: [operatorref], references: [operatorref])
+
+  @@id([organisation_id, operatorref])
+}
+
+model Alert {
+  id               String  @id @default(uuid())
+  alert            String? //type
+  event_hysterisis Int?
+  event_threshold  Int?
+  created_by_user  bods_user?   @relation(fields: [created_by], references: [id], name: "created_by_user")
+  created_by       Int?
+  send_to_user     bods_user?   @relation(fields: [send_to], references: [id], name: "send_to_user")
+  send_to          Int?
+}
+
+model Role {
+  id          Int          @id @default(1)
+  name        String
+  scope       String
+}
+
+model ApiInfo {
+  id              String       @id @default("1")
+  build_number    String
+  version         String
+  timezone        String
+  feature_flag    FeatureFlag? @relation(fields: [feature_flag_id], references: [id])
+  feature_flag_id String?      @unique
+}
+
+model FeatureFlag {
+  id                              String   @id @default("1")
+  consolidate_histogram           Boolean  @default(false)
+  corridor_stats_timezone_enabled Boolean  @default(false)
+  freshdesk_enabled               Boolean  @default(false)
+  line_direction_filtering        Boolean  @default(false)
+  sso_enabled                     Boolean  @default(false)
+  stop_index_filtering            Boolean  @default(false)
+  tagging_include_bank_holidays   Boolean  @default(false)
+  vehicle_replay_from_timestream  Boolean  @default(false)
+  apiinfo                         ApiInfo?
+}
+
+model Tokens {
+  user_id Int    @unique
+  token   String
+}
+
+model BODS_OTP {
+  bods_journey_id               Int      @id @default(1)
+  operator_noc                  String
+  service_code                  String
+  line_name                     String
+  xml_file_name                 String
+  journey_code                  String
+  date                          DateTime
+  day_of_week                   String
+  common_name                   String
+  atco_code                     String
+  stop_type                     String
+  stop_index                    String
+  departure_time                DateTime
+  actual_departure_time         DateTime
+  is_timing_point               Boolean
+  group_id                      Int
+  transmodel_vehicle_journey_id String
+  time_difference               String
+  sirivm_position_id            Int
+  expected_headway              String
+  actual_headway                String
+  headway_time_difference       String
+  journey_id                    Int
+  operator_name                 String
+  state                         String
+}
+
+model OperatorAdminArea {
+  operator_admin_area_id Int    @id @default(1)
+  operator_noc           String
+  admin_area_id          Int
+}
+
+model ExpectedOperators {
+  expected_operator_id Int                @id @default(1)
+  noc                  String
+  organization_id      Int
+  operator_name        String
+  expected_services    ExpectedServices[]
+}
+
+model ExpectedServices {
+  expected_service_id  Int               @id @default(1)
+  service_name         String
+  expected_operator_id Int
+  expected_operator    ExpectedOperators @relation(fields: [expected_operator_id], references: [expected_operator_id])
+  // expected_journeys    ExpectedJourneys[]
+}
+
+// model ExpectedJourneys {
+//   expected_journey_id Int              @id @default(1)
+//   date_of_journey     DateTime
+//   day_of_week         String
+//   direction_ref       String
+//   expected_service_id Int
+//   expected_service    ExpectedServices @relation(fields: [expected_service_id], references: [expected_service_id])
+//   otps                OTP[]
+// }
+
+// model OTP {
+//   otp_id              Int              @id @default(1)
+//   stop_index          String
+//   stop_name           String
+//   latitude            String
+//   longitude           String
+//   expected            String
+//   actual              String
+//   time_difference     String
+//   state               String
+//   is_timing_point     Boolean
+//   expected_headway    String
+//   actual_headway      String
+//   headway_time_diff   String
+//   locality_id         String
+//   expected_journey_id Int
+//   expected_journey    ExpectedJourneys @relation(fields: [expected_journey_id], references: [expected_journey_id])
+//   journey_position_id Int
+//   stop_id             Int
+//   stop                Stops            @relation(fields: [stop_id], references: [stop_id])
+// }
+
+// model Stops {
+//   stop_id   Int    @id @default(1)
+//   stop_code String
+//   otps      OTP[]
+// }

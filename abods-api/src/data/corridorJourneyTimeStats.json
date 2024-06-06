@@ -1,0 +1,12 @@
+[
+  {
+    "avgTransitTime": 45.5,
+    "maxTransitTime": 60,
+    "minTransitTime": 30,
+    "percentile25": 35.0,
+    "percentile5": 31.0,
+    "percentile75": 55.0,
+    "percentile95": 59.0,
+    "ts": "2024-04-10T12:00:00Z"
+  }
+]

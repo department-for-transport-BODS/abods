@@ -1,0 +1,14 @@
+<div class="segmented-toggle-item">
+  <input
+    class="govuk-visually-hidden segmented-toggle-item__input"
+    type="radio"
+    id="{{ identifier }}"
+    name="{{ name }}"
+    value="{{ value }}"
+    [checked]="selected"
+    (change)="onChanged($event)"
+    (click)="$event.stopPropagation()"
+    (blur)="touch()"
+  />
+  <label class="segmented-toggle-item__label" for="{{ identifier }}">{{ label }}</label>
+</div>

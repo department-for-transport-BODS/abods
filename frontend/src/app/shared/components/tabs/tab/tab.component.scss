@@ -1,0 +1,8 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.tab {
+  &__content {
+    margin-top: govuk-spacing(6);
+  }
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "distance": 1200,
+    "fromStop": "stop1",
+    "linkRoute": "Main Street",
+    "routeValidity": "2024",
+    "toStop": "stop2"
+  },
+  {
+    "distance": 800,
+    "fromStop": "stop2",
+    "linkRoute": "Circular Road",
+    "routeValidity": "2024",
+    "toStop": "stop1"
+  }
+]

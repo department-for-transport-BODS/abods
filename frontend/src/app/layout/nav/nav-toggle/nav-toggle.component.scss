@@ -1,0 +1,31 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+:host {
+  flex-shrink: 0;
+  @include bp($desktop) {
+    display: none;
+  }
+}
+.nav-toggle {
+  &:hover:not(:focus) {
+    text-decoration: none;
+  }
+  &::after {
+    content: '';
+    margin-left: govuk-spacing(1);
+    @include govuk-shape-arrow(down, 10px, 8px, inline-block);
+    border-top-color: currentColor;
+  }
+  &--active {
+    &::after {
+      @include govuk-shape-arrow(up, 10px, 8px, inline-block);
+      border-bottom-color: currentColor;
+    }
+  }
+  &--light {
+    color: govuk-colour('white');
+    &:focus {
+      color: govuk-colour('black');
+    }
+  }
+}

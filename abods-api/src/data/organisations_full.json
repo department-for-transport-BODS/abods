@@ -1,0 +1,136 @@
+[
+    {
+      "id": "org1",
+      "name": "Acme Corp",
+      "operators": [
+        {
+          "name": "Operator A",
+          "nocCode": "A123",
+          "operatorId": "op1",
+          "adminAreas": [
+            {
+              "adminAreaId": "area1",
+              "adminAreaName": "Area1Name"
+            }
+          ],
+          "feedMonitoring": {
+            "feedStatus": true,
+            "historicalStats": {
+              "availability": 99.5,
+              "compliance": 95.0,
+              "updateFrequency": 5,
+              "vehicleStats": [
+                {
+                  "actual": 150,
+                  "expected": 160,
+                  "timestamp": "2024-04-09T12:00:00Z"
+                }
+              ]
+            },
+            "liveStats": {
+              "currentVehicles": 120,
+              "expectedVehicles": 130,
+              "feedAlerts": 2,
+              "feedErrors": 1,
+              "last20Minutes": [
+                {
+                  "actual": 120,
+                  "expected": 130,
+                  "timestamp": "2024-04-09T11:40:00Z"
+                }
+              ],
+              "last24Hours": [
+                {
+                  "actual": 100,
+                  "expected": 110,
+                  "timestamp": "2024-04-08T12:00:00Z"
+                }
+              ],
+              "updateFrequency": 5
+            },
+            "vehicleStats": [
+              {
+                "actual": 150,
+                "expected": 160,
+                "timestamp": "2024-04-09T12:00:00Z"
+              }
+            ]
+          },
+          "transitModel": {
+            "lines": {
+              "items": [
+                {
+                  "lineId": "line1",
+                  "lineName": "Metro Express",
+                  "lineNumber": "M1"
+                }
+              ],
+              "pageInfo": {
+                "next": null,
+                "totalCount": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "org2",
+      "name": "Beta Ltd",
+      "operators": [
+        {
+          "name": "Operator B",
+          "nocCode": "B456",
+          "operatorId": "op2",
+          "adminAreas": [
+            {
+              "adminAreaId": "area2",
+              "adminAreaName": "Area2Name"
+            }
+          ],
+          "feedMonitoring": {
+            "feedStatus": false,
+            "unavailableSince": "2024-04-08T10:00:00Z",
+            "historicalStats": {
+              "availability": 98.0,
+              "compliance": 90.0,
+              "updateFrequency": 10,
+              "vehicleStats": [
+                {
+                  "actual": 100,
+                  "expected": 110,
+                  "timestamp": "2024-04-08T12:00:00Z"
+                }
+              ]
+            },
+            "liveStats": {
+              "currentVehicles": 80,
+              "expectedVehicles": 90,
+              "feedAlerts": 3,
+              "feedErrors": 2,
+              "last20Minutes": [],
+              "last24Hours": [],
+              "updateFrequency": 10
+            },
+            "vehicleStats": []
+          },
+          "transitModel": {
+            "lines": {
+              "items": [
+                {
+                  "lineId": "line2",
+                  "lineName": "City Circle",
+                  "lineNumber": "C2"
+                }
+              ],
+              "pageInfo": {
+                "next": null,
+                "totalCount": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+  

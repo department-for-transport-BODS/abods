@@ -1,0 +1,34 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.link {
+  &--with-arrows {
+    &::after {
+      margin-left: govuk-spacing(1);
+      content: '\00BB';
+    }
+  }
+  &--no-underline {
+    // we push the standard link text-decoration behaviours into the __text element below
+    // so that decorator arrows don't have the underline
+    text-decoration: none;
+    display: inline-flex;
+    &:focus,
+    &:hover,
+    &:active {
+      text-decoration: none;
+    }
+
+    &:hover {
+      .link__text {
+        text-decoration: underline;
+      }
+    }
+
+    &:focus {
+      .link__text {
+        text-decoration: none;
+      }
+    }
+  }
+}

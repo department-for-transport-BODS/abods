@@ -1,0 +1,15 @@
+[
+  {
+    "bucket": 0,
+    "frequency": 150
+  },
+  {
+    "bucket": 5,
+    "frequency": 120
+  },
+  {
+    "bucket": 10,
+    "frequency": 100
+  }
+]
+

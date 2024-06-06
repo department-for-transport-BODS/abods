@@ -1,0 +1,12 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.page-header {
+  &__title {
+    margin-bottom: 0;
+  }
+}
+
+.govuk-body {
+  max-width: none;
+}

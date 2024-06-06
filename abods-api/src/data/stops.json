@@ -1,0 +1,24 @@
+[
+  {
+    "adminAreaId": "1",
+    "adminAreaName": "Area1Name",
+    "lat": 52.520008,
+    "localityId": "101",
+    "localityName": "Downtown",
+    "lon": 13.404954,
+    "sourceId": "ext123",
+    "stopId": "stop1",
+    "stopName": "Central Station"
+  },
+  {
+    "adminAreaId": "2",
+    "adminAreaName": "Area2Name",
+    "lat": 48.856614,
+    "localityId": "202",
+    "localityName": "Uptown",
+    "lon": 2.352222,
+    "sourceId": "ext456",
+    "stopId": "stop2",
+    "stopName": "Market Square"
+  }
+]

@@ -1,0 +1,33 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.tabs {
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  &__list-item {
+    @include govuk-font(19);
+    color: $govuk-link-colour;
+    cursor: pointer;
+    &--selected {
+      font-weight: $govuk-font-weight-bold;
+      border-bottom: $govuk-link-colour 4px solid;
+    }
+    &:not(:last-child) {
+      margin-right: govuk-spacing(7);
+    }
+    &:focus {
+      outline: none;
+    }
+    &:focus-visible {
+      outline: 3px solid transparent;
+      color: $govuk-focus-text-colour;
+      background-color: $govuk-focus-colour;
+      border-bottom: 4px solid $govuk-focus-text-colour;
+      text-decoration: none;
+    }
+  }
+}
