@@ -30,6 +30,7 @@ async function initialisePrismaClient(): Promise<PrismaClient> {
   if (!prisma) {
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
+      log: ['info'], 
       datasources: {
         db: {
           url: databaseUrl,

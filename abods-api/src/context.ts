@@ -11,7 +11,14 @@ export type MockContext = {
 }
 
 export const createContext = async (): Promise<Context> => {
-  const prisma = await initialisePrismaClient();
+  let prisma: PrismaClient;
+
+  if(!global.prisma){
+    global.prisma = await initialisePrismaClient();
+  }
+  
+  prisma = global.prisma;
+
   return { prisma };
 }
 

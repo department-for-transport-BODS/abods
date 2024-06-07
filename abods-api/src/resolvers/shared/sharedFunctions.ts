@@ -15,7 +15,7 @@ const adminAreas = [
 
 export const getOrganisation = async (id, sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 
@@ -78,7 +78,7 @@ export const getApiInfo = async (db: Context) => {
 // Summary: fetch roles
 export const getRoles = async (sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 

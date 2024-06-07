@@ -1,23 +1,62 @@
 import { getOrganisation, getRoles, mapRoleToRoleType } from '../shared/sharedFunctions.js';
 import { Context } from '../../context.js'
-import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum } from '../../types.js';
+import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, SessionUser, OperatorType } from '../../types.js';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
+import { all_operators } from '@prisma/client';
+
+export const getSession = async (sessionId, db: Context) : Promise<SessionUser> =>  {
+  let sessionUser: SessionUser = {
+    user: null,
+    userOrganisationIDs: null
+  }
+
+  // temporary session token storage
+  const sessionRecord = await db.prisma.tokens.findFirst({
+    where: {
+      token: sessionId
+    }
+  })
+  
+  if(sessionRecord) {
+    // fetch user from bods
+    const bodsUser = await db.prisma.bods_user.findUnique(
+      { 
+        where:{ id: sessionRecord.user_id },
+        include:{
+          userOrganisations: true
+        }
+      }
+    )
+
+    if(bodsUser)
+    {
+      sessionUser.user = bodsUser;
+      sessionUser.userOrganisationIDs = bodsUser.userOrganisations.map(o=>o.organisation_id);
+    }
+  }
+
+  return sessionUser;
+}
+
+
 
 // Summary: fetch all users
-export const getUsers = async (sessionUser: any, db: Context) => {
+export const getUsers = async (sessionUser: SessionUser, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 
-    const orgIds = sessionUser.userOrganisations.map(o=>o.organisation_id);
-    const organisationsForUser = await getOrganisationsForUser(sessionUser.userOrganisations, sessionUser, db);
+    if(!sessionUser.userOrganisationIDs){
+      throw ("User not in any organisations")
+    }
 
+    const orgIds = sessionUser.userOrganisationIDs;
     const bodsUsers = await db.prisma.bods_user.findMany({
       where:{
         userOrganisations:{
-          some:{
+          every:{
             organisation_id:{
               in: orgIds
             }
@@ -28,7 +67,7 @@ export const getUsers = async (sessionUser: any, db: Context) => {
         userOrganisations: true
       },
     });
-
+   
     const userResponse = bodsUsers.map((thisUser): UserType => {
 
       return{ 
@@ -37,9 +76,9 @@ export const getUsers = async (sessionUser: any, db: Context) => {
         email: thisUser.email,
         firstName: thisUser.first_name,
         lastName: thisUser.last_name,
-        organisation: organisationsForUser ? {
-          id: String(organisationsForUser[0].id),
-          name: organisationsForUser[0].name
+        organisation: sessionUser.userOrganisationIDs ? {
+          id: String(sessionUser.userOrganisationIDs[0]),
+          name: String(sessionUser.userOrganisationIDs[0])
         } : null,
         roles: [{
           "id": "1",
@@ -56,37 +95,18 @@ export const getUsers = async (sessionUser: any, db: Context) => {
   }
 }
 // Summary: fetch a single user by id
-export const getUser = async (id: string, sessionUser: any, db: Context) => {
+export const getUser = async (id: string, sessionUser: SessionUser, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 
-    const bodsUser = await db.prisma.bods_user.findUnique(
-      { 
-        where:
-        { 
-          id: sessionUser.id
-        },
-        include: {
-          userOrganisations: true
-        } 
-      })
-
-    if(!bodsUser)
-    {
-      throw("No user found")
-    }
-
-    const organisationsForUser = await getOrganisationsForUser(bodsUser.userOrganisations, sessionUser, db);
-
     return {
-      id: bodsUser.id,
-      username: bodsUser.username,
-      email: bodsUser.email,
-      firstName: bodsUser.first_name,
-      lastName: bodsUser.last_name,
-      organisation: organisationsForUser ? organisationsForUser[0] : null,
+      id: sessionUser.user.id,
+      username: sessionUser.user.username,
+      email: sessionUser.user.email,
+      firstName: sessionUser.user.first_name,
+      lastName: sessionUser.user.last_name,
       roles: [{
         "id": "1",
         "name": "Staff",
@@ -104,93 +124,13 @@ export const getUser = async (id: string, sessionUser: any, db: Context) => {
     console.error(error)
     return null;
   }
-}
-
-// Summary: fetch a single user by username
-export const getUserByUsername = async (username: string, sessionUser: any, db: Context) => {
-  try {
-    if(!sessionUser)
-      {
-        throw ("Not Authorized")
-      }
-
-    if (!username) {
-      throw('Invalid username')
-    }
-
-    if(username != sessionUser.username){
-      throw('Invalid username')
-    }
-
-    const bodsUser = await db.prisma.bods_user.findUnique(
-      { 
-        where:
-        { 
-          username: username 
-        },
-        include: {
-          userOrganisations: true
-        } 
-      })
-
-    if(!bodsUser)
-    {
-      throw("No user found")
-    }
-
-    const organisationsForUser = await getOrganisationsForUser(bodsUser.userOrganisations, sessionUser, db);
-
-    return {
-      id: bodsUser.id,
-      username: bodsUser.username,
-      email: bodsUser.email,
-      firstName: bodsUser.first_name,
-      lastName: bodsUser.last_name,
-      organisation: organisationsForUser ? organisationsForUser[0] : null,
-      roles: [{
-        "id": "1",
-        "name": "Staff",
-        "scope": "organisation"
-      },
-      {
-        "id": "2",
-        "name": "Administrator",
-        "scope": "organisation"
-      },
-    ]
-    }
-  
-  } catch (error) {
-    console.error(error)
-    return null;
-  }
-}
-
-const getOrganisationsForUser = async (userOrganisations, user: any, db: Context) => {
-
-  const orgIds = userOrganisations.map(o=>o.organisation_id);
-
-  const orgs = await db.prisma.bods_organisation.findMany({
-    where:
-    {
-      id: {
-        in : orgIds
-      }
-    }
-  })
-
-  if(!orgs){
-    return null;
-  }
-
-  return orgs;
 }
 
 // Summary: fetch all user alerts
 export const getUserAlerts = async (sessionUser: any, db: Context) => {
   try {
     
-    if(!sessionUser)
+    if(!sessionUser.user)
     {
       throw ("Not Authorized")
     }
@@ -284,6 +224,8 @@ export const loginUser = async (username:string, password:string, db: Context, r
           user_id: bodsUser.id
         }
       })
+
+
       if(!session)
       {
         await db.prisma.tokens.create({
@@ -322,17 +264,14 @@ export const loginUser = async (username:string, password:string, db: Context, r
 
 export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
   try {
-    if(!sessionUser)
+    if(!sessionUser.user)
     {
       throw ("Not Authorized")
     }
 
-    await db.prisma.tokens.update({
+    await db.prisma.tokens.delete({
       where: {
-        user_id: sessionUser.id
-      },
-      data: {
-        token: ''
+        user_id: sessionUser.user.id
       }
     })
     
@@ -347,7 +286,7 @@ export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
 export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
   try {
 
-    if(!sessionUser)
+    if(!sessionUser.user)
     {
       throw ("Not Authorized")
     }
@@ -413,7 +352,7 @@ export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
 
 export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser)
+    if(!sessionUser.user)
       {
         throw ("Not Authorized")
       }
@@ -445,7 +384,7 @@ export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
 
 export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser)
+    if(!sessionUser.user)
       {
         throw ("Not Authorized")
       }
@@ -490,7 +429,7 @@ export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Co
 
 export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser)
+    if(!sessionUser.user)
     {
       throw ("Not Authorized")
     }
