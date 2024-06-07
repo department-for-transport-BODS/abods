@@ -38,7 +38,7 @@ app.use(
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
           const cookies = parseCookie(cookieHeader)
-          const sessionid = cookies["sessionCookie"];
+          const sessionid = cookies["sessionid"];
 
           if(sessionid) {
             const session = await getSession(sessionid, db);
