@@ -74,7 +74,7 @@ const getOperators = async (sessionUser: SessionUser, db: Context, adminAreaIds?
           throw("No operators found")
         }
 
-        const userOperators = operators.map((operator): OperatorType => {return mapOperatorToOperatorType(operator) as OperatorType})
+        const userOperators = operators.map((operator): OperatorType => {return mapOperatorToOperatorType(operator, operator.noc_adminareas) as OperatorType})
         return userOperators;
     
   } catch (error) {
@@ -83,20 +83,18 @@ const getOperators = async (sessionUser: SessionUser, db: Context, adminAreaIds?
   }
 } 
 
-const mapOperatorToOperatorType = (operator: all_operators): OperatorType => {
-  const adminAreas = operator.noc_adminareas.map(adminArea => {
+const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
+  const adminAreaIds = adminAreas.map(adminArea => {
     return {
       adminAreaId: adminArea.adminarea_id
     }
   })
-
-
-
+  
   return {
     operatorId: operator.operatorref,
     nocCode: operator.operatorref,
     name: operator.name,
-    adminAreas: adminAreas
+    adminAreas: adminAreaIds
   }
 }
 
