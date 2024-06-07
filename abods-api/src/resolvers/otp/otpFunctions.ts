@@ -1498,7 +1498,7 @@ export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, d
         return{
           adminAreaId: String(adminArea.naptan_admin_area_id),
           adminAreaName:adminArea.name, 
-          shape: "{ \"type\": \"Polygon\", \"coordinates\": [ [ [ 51.647644, -0.0106669292 ], [ 51.6469994, -0.0103048719 ], [ 51.625267, 0.0315818489 ], [ 51.6072121, 0.0671125129 ], [ 51.6048164, 0.0729247406 ], [ 51.5115929, 0.590538561 ], [ 51.5126762, 0.600920141 ], [ 51.5421524, 0.804930627 ], [ 51.5461006, 0.812833011 ], [ 51.6021919, 0.921918273 ], [ 51.8340263, 1.25312865 ], [ 51.8504448, 1.27476156 ], [ 51.8519745, 1.27658665 ], [ 51.8606491, 1.28580248 ], [ 51.944603, 1.28840399 ], [ 51.9480591, 1.28647375 ], [ 51.9483414, 1.28597057 ], [ 51.9484444, 1.2855413 ], [ 52.0699081, 0.6770432 ], [ 52.0728111, 0.645781815 ], [ 52.0829659, 0.198333591 ], [ 52.0403748, 0.109538488 ], [ 52.0395546, 0.108595841 ], [ 52.037014, 0.106493138 ], [ 51.7391586, -0.00934430212 ], [ 51.647644, -0.0106669292 ] ] ] }"
+          shape: ""
         }
       })
 
@@ -1527,11 +1527,10 @@ function getDayOfWeekNumbers(dayOfWeekFlags: any){
 }
 
 const getFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
-  const {fromTimestamp, toTimestamp, filters, paging, sortBy, state, departureNullCheck} = inputs;
+  let {fromTimestamp, toTimestamp, filters, paging, sortBy, state, departureNullCheck} = inputs;
   const {timingPointsOnly, adminAreaIds, operatorIds, startTime, endTime, maxDelay, minDelay, lineIds, dayOfWeekFlags} = filters;
 
   //console.log(new Date().toLocaleString() + " getFiltersForOTPQuery: inputs = " + JSON.stringify(inputs))
-
 
   let dayOfWeekNumbers:Number[] = []
   if(dayOfWeekFlags){
@@ -1551,6 +1550,17 @@ const getFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   }
   else{
     tempNocList = userOperatorNocList;
+  }
+
+  // date cap to today for performance WILL REMOVE
+
+  // hard cap data to 1 day if operators is higher than 10 TEMPORARY
+  if(tempNocList.length > 10){
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T00:00:00.000+01:00`
+    const tommorrowString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate() + 1).padStart(2, '0')}T00:00:00.000+01:00`
+    fromTimestamp = todayString;
+    toTimestamp = tommorrowString;
   }
 
   let start = new Date();
