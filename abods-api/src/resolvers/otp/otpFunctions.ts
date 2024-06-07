@@ -1,7 +1,7 @@
 import { Db } from "typeorm";
 import { Context } from "../../context";
 import { OperatorPerformanceType, OperatorType, ServicePunctualityType, SessionUser, StopPerformanceType, StopType } from "../../types";
-import { ExpectedOperators, ExpectedServices, all_operators } from "@prisma/client";
+import { ExpectedOperators, all_operators } from "@prisma/client";
 
 export const getOperatorList = async (sessionUser: SessionUser, db: Context) => {
   try {
@@ -114,16 +114,6 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
     }
 
     const userOperatorIds = operators.map(o=>o.nocCode)
-
-    // const service : ExpectedServices | null = await db.prisma.expectedServices.findUnique({
-    //   where:{
-    //     expected_service_id: serviceId,
-    //     // NOC or id?????
-    //     // expected_operator_id:{
-    //     //   in: userOperatorIds
-    //     // }
-    //   }
-    // })
 
     const service = await db.prisma.timetable.findFirst({
       where:{
