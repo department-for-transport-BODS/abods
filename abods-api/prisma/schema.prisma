@@ -19,8 +19,8 @@ view bods_user {
   is_superuser Boolean
   is_active    Boolean
   userOrganisations bods_userorganisation[]
-  account_type Int
-  admin_org    Int
+  account_type Int?
+  admin_org    Int?
   created_by_alerts Alert[]            @relation("created_by_user")
   send_to_alerts    Alert[]            @relation("send_to_user")
 }
