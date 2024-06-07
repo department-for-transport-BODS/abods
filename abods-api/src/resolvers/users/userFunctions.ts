@@ -33,44 +33,6 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
     {
       sessionUser.user = bodsUser;
       sessionUser.userOrganisationIDs = bodsUser.userOrganisations.map(o=>o.organisation_id);
-      
-      // // get users' organisations
-      // const orgIds = bodsUser.userOrganisations.map(o=>o.organisation_id);
-      // const orgs = await db.prisma.bods_organisation.findMany({
-      //   where:
-      //   {
-      //     id: {
-      //       in : orgIds
-      //     }
-      //   }
-      // })
-
-      // if(orgs)
-      // {
-      //   sessionUser.userOrganisations = orgs;
-      // }
-
-      // // get user's operators
-      // const operators = await db.prisma.all_operators.findMany({
-      //   where: {
-      //     //operatorref:'ACYM'
-      //     operatorOrganisations:{
-      //       some:{
-      //         organisation_id: {
-      //           in: orgIds
-      //         }
-      //       }
-      //     }
-      //   },
-      //   include:{
-      //     operatorOrganisations: true
-      //   }
-      //   })
-
-      //   if(operators){
-      //     const userOperators = operators.map((operator): OperatorType => {return mapOperatorToOperatorType(operator) as OperatorType})
-      //     sessionUser.userOperators = userOperators;
-      //   }
     }
   }
 
