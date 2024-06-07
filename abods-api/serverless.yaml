@@ -2,7 +2,7 @@ service: apollo-lambda
 provider:
   name: aws
   runtime: nodejs16.x
-  timeout: 30
+  timeout: 899
   httpApi:
     cors:
       allowCredentials: true

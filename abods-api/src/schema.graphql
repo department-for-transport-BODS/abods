@@ -9,7 +9,7 @@ type Query {
     roles: [RoleType]
     userAlerts: [AlertType]
     userAlert(alertId: String!): AlertType
-    operator(operatorId: String!): OperatorType
+    operator(operatorId: String!, lineId: String!): OperatorType
     operators: OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
@@ -31,7 +31,7 @@ type HeadwayMetricsType {
   headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
   headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
-  headwayTimeSeries(lineId: String!): [HeadwayTimeSeriesType]
+  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
 }
 
 input HeadwayInputType {
@@ -174,6 +174,7 @@ type AdminAreasType {
 }
 
 type OperatorsPage {
+    pageInfo: PageInfo
     items: [OperatorType]
 }
 
@@ -476,7 +477,7 @@ input PerformanceFiltersInputType {
   addNonTagged: Boolean
   adminAreaIds: [String]
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   excludedDates: [Date]
   excludeItoLineId: String
   granularity: Granularity
@@ -488,7 +489,7 @@ input PerformanceFiltersInputType {
   onTimeMaxMinutes: Int
   onTimeMinMinutes: Int
   operatorIds: [String]
-  startTime: Time
+  startTime: String
   startTimes: [Time]
   stopsSegment: StopsSegment
   tagIds: [Int]

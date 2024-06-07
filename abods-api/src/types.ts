@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import { ApolloServer } from '@apollo/server';
 import { Context } from './context.js';
-import { bods_user } from '@prisma/client';
+import { bods_organisation, bods_user } from '@prisma/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 
@@ -21,10 +21,15 @@ export type Scalars = {
 export interface RequestContext {
   req: any;
   res: any;
-  sessionUser: bods_user | null;
+  sessionUser: SessionUser;
   db: Context;
   lambdaEvent: any;
   lambdaContext: any;
+}
+
+export interface SessionUser {
+  user: bods_user | null;
+  userOrganisationIDs: number[] | null;
 }
 
 export type AddFirstStopInputType = {
@@ -1527,6 +1532,8 @@ export type ServicePunctualityType = IPunctualityType & {
    * for comparison with current period.
    */
   trend?: Maybe<ServicePunctualityType>;
+  scheduledDepartures: Scalars['Int'];
+  actualDepartures: Scalars['Int'];
 };
 
 
@@ -1568,7 +1575,7 @@ export enum SortOrderEnum {
 export type StopInfoType = {
   __typename?: 'StopInfoType';
   sourceId: Scalars['String'];
-  stopId: Scalars['String'];
+  stopId: Scalars['Int'];
   stopLocality: LocalityType;
   stopLocation: GpsPointType;
   stopName: Scalars['String'];
@@ -1584,7 +1591,7 @@ export type StopPerformanceType = IPunctualityType & {
   lineId?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   scheduledDepartures: Scalars['Int'];
-  stopId: Scalars['String'];
+  stopId: Scalars['Int'];
   stopIndex?: Maybe<Scalars['Int']>;
   stopInfo: StopInfoType;
   timingPoint: Scalars['Boolean'];
