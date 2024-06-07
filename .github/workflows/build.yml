@@ -190,11 +190,8 @@ jobs:
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
           api_url="https://${domain_name}/api/graphql"
-          mapboxToken="pk.eyJ1Ijoia2plbmtzIiwiYSI6ImNseDFsNG53aTBjdngya3M5aWw1YWd6djAifQ.J8pxnGpSNahS8eUpxrtyQw"
-          mapboxStyle="mapbox://styles/mapbox/streets-v11"
-          mapboxSatelliteStyle="mapbox://styles/mapbox/streets-v11"
           
-          jq --arg api_url "$api_url" '.apiUrl = $api_url | .analyticsId = "1234"' | .mapboxToken = $mapboxToken | .mapboxStyle = $mapboxStyle | .mapboxSatelliteStyle = $mapboxSatelliteStyle src/config.json > tmp.json && \
+          jq --arg api_url "$api_url" '.apiUrl = $api_url | .analyticsId = "1234"' src/config.json > tmp.json && \
             mv tmp.json src/config.json
 
           npm install
