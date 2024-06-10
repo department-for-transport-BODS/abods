@@ -1,4 +1,14 @@
 <div class="user-account">
+  <a href="https://publish.bus-data.dft.gov.uk/account/manage/invite/" target="_blank">
+    <button
+    class="user-account__invite-button button-link"
+  >
+    <div>
+      <svg-icon src="assets/icons/plus.svg"> </svg-icon>
+    </div>
+    <span>Invite a new user</span>
+  </button>
+  </a>
 
   <app-invite-user-modal [identifier]="'inviteUserFromNav'"></app-invite-user-modal>
   <app-popover
