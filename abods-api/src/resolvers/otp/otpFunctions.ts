@@ -1,7 +1,8 @@
 import { Db } from "typeorm";
 import { Context } from "../../context";
-import { OperatorPerformanceType, OperatorType, ServicePunctualityType, SessionUser, StopPerformanceType, StopType } from "../../types";
-import { ExpectedOperators, all_operators } from "@prisma/client";
+import { LineType, Maybe, OperatorLinesQuery, OperatorPerformanceType, OperatorType, ServicePunctualityType, SessionUser, StopPerformanceType, StopType, TransitModelType, UniqueJourneyType, VehicleReplayInputType } from "../../types";
+import { GraphQLResolveInfo } from "graphql";
+
 
 export const getOperatorList = async (sessionUser: SessionUser, db: Context) => {
   try {
@@ -135,19 +136,59 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
   }
 }
 
-export const getOperator = async (operatorId, lineId,  sessionUser: SessionUser, db: Context) => {
+const getOperatorLines = async (operatorRef: string, db: Context) => {
+
+  const operator = await db.prisma.expectedOperators.findMany({
+    where:{
+      noc: operatorRef
+    },
+    include: {
+      expected_services: true
+    }
+  })
+
+  const services:  LineType[] = [];
+  operator.map((op) => {
+    op.expected_services.map((service) => services.push({
+      lineId: service.expected_service_id.toString(),
+      lineName: service.service_name,
+      lineNumber:  service.service_name,
+      onTimePerformance: [],
+      servicePatterns: []
+    }))
+  })
+
+  const transitModel: OperatorType = {
+    nocCode: operatorRef,
+    transitModel: {
+      lines: {
+        items: services 
+      }
+    } 
+  }
+
+  return  transitModel
+}
+
+export const getOperator = async (operatorRef: string, lineId: string,  sessionUser: SessionUser, db: Context, info: GraphQLResolveInfo) => {
 
   try {
     if(!sessionUser.user){
       throw ("Not authorized")
     }
 
+    const operationName: string = info.operation.name?.value ?? ""
+
+    if(operationName === 'operatorLines') {
+      return getOperatorLines(operatorRef, db)
+    }
+    
     // TODO: is operator id in users' operator id array
-    console.log("getOperator op: {0} line: {1}", operatorId, lineId)
+    console.log("getOperator op: {0} line: {1}", operatorRef, lineId)
 
     const operator = await db.prisma.all_operators.findUnique({
       where:{
-        operatorref: operatorId
+        operatorref: operatorRef
       }
     })
 
@@ -155,26 +196,30 @@ export const getOperator = async (operatorId, lineId,  sessionUser: SessionUser,
       throw("No operator found")
     }
 
-  const operators = await getOperators(sessionUser, db);
-      
-  if(!operators){
-    throw("No user operators")
-  }
+    const operators = await getOperators(sessionUser, db);
+        
+    if(!operators){
+      throw("No user operators")
+    }
   
     const userOperatorIds = operators.map(o=>o.nocCode)
 
-    const operator_noc_to_filter = operatorId;
+    const operator_noc_to_filter = operatorRef;
 
     if(userOperatorIds.includes(operator_noc_to_filter))
     {
 
       // fetch all otp rows for this operator and service
-      const lineIds = [lineId];
-      const operatorIds = [operatorId]
+      let lineIds: string[] = [];
+      if(lineId) {
+        lineIds.push(lineId)
+      }
+      const operatorIds = [operatorRef]
 
       const date7DaysAgo = new Date();
       date7DaysAgo.setDate(date7DaysAgo.getDate() - 7)
       const dateTs = `${date7DaysAgo.getFullYear()}-${String(date7DaysAgo.getMonth() + 1).padStart(2, '0')}-${String(date7DaysAgo.getDate() + 1).padStart(2, '0')}T00:00:00.000+01:00`
+
 
       const otpRecords = await db.prisma.timetable.findMany({
         where: {
@@ -188,7 +233,7 @@ export const getOperator = async (operatorId, lineId,  sessionUser: SessionUser,
             },
   
             // only get services in lineIds arr
-            ...(lineIds ? {service_code: {
+            ...(lineIds && lineIds.length > 0 ? {service_code: {
               in: lineIds
             }} : {}),
         }}
@@ -1636,3 +1681,17 @@ const getFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   return queryArgs;    
 }
 
+
+export const findJourneys = (inputs: VehicleReplayInputType, sessionUser: any, db: Context): [UniqueJourneyType] => {
+  return  [
+    {
+        vehicleJourneyId: "VJ923c019c47e1c96648deffd8690ea2cbcb433e3f",
+        startTime: new Date().toISOString(),
+        serviceInfo: {
+            serviceName: "Ancaster - Welbourn",
+            serviceNumber: "WM06",
+            serviceId: "test"
+        },
+    }
+  ]
+}

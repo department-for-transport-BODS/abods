@@ -162,17 +162,25 @@ model ExpectedOperators {
   noc                  String
   organization_id      Int
   operator_name        String
+  expected_services    ExpectedServices[] 
 }
 
-// model ExpectedJourneys {
-//   expected_journey_id Int              @id @default(1)
-//   date_of_journey     DateTime
-//   day_of_week         String
-//   direction_ref       String
-//   expected_service_id Int
-//   expected_service    ExpectedServices @relation(fields: [expected_service_id], references: [expected_service_id])
-//   otps                OTP[]
-// }
+model ExpectedServices {
+  expected_service_id   Int                 @id @default(1)
+  service_name          String
+  expected_operator_id  Int
+  expected_operator     ExpectedOperators @relation(fields: [expected_operator_id], references: [expected_operator_id])
+  expected_journeys     ExpectedJourneys[]
+}
+
+model ExpectedJourneys {
+  expected_journey_id Int              @id @default(1)
+  date_of_journey     DateTime
+  day_of_week         String
+  direction_ref       String
+  expected_service_id Int
+  expected_service    ExpectedServices @relation(fields: [expected_service_id], references: [expected_service_id])
+}
 
 // model Stops {
 //   stop_id   Int    @id @default(1)
