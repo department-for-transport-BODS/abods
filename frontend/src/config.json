@@ -6,8 +6,8 @@
   "mapboxSatelliteStyle": "",
   "vehicleJourneys": {
     "validDateRange": {
-      "offsetISO": "",
-      "durationISO": ""
+      "offsetISO": "PT0H",
+      "durationISO": "P6M"
     }
   },
   "otp": {
