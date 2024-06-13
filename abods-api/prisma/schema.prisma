@@ -103,6 +103,29 @@ model Tokens {
   token   String
 }
 
+model otp_stats_operator_noc {
+  id            Int      @id @default(1)
+  operator_noc            String?
+  date_of_journey         DateTime?
+  on_time_count             Int
+  early_count             Int
+  late_count             Int
+  completed             Int
+  scheduled             Int
+}
+
+model otp_stats_service_code {
+  id            Int      @id @default(1)
+  operator_noc            String?
+  service_code           String?
+  date_of_journey         DateTime?
+  on_time_count             Int
+  early_count             Int
+  late_count             Int
+  completed             Int
+  scheduled             Int
+}
+
 model Timetable {
   timetable_id            Int      @id @default(1)
   operator_noc            String?

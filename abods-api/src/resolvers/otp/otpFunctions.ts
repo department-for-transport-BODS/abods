@@ -270,6 +270,8 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
       throw ("Not authorized")
     }
 
+    var startTimer = performance.now()
+
     const {fromTimestamp, toTimestamp, filters, paging, sortBy, state, departureNullCheck} = inputs;
     const {timingPointsOnly, adminAreaIds, operatorIds, startTime, endTime, maxDelay, minDelay, lineIds, dayOfWeekFlags} = filters;
 
@@ -286,37 +288,42 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
 
     const userOperatorIds = operators.map(o=>o.nocCode)
 
-
-    inputs.state = 'OnTime';
-    const otpOnTimeCount = await db.prisma.timetable.count({
-      where: getFiltersForOTPQuery(inputs, userOperatorIds)
+    // fetch all rows from otp_stats_operator_noc with filters.
+    const otp_stats = await db.prisma.otp_stats_operator_noc.findMany({
+      where: {
+        operator_noc:{
+          in: userOperatorIds
+        },
+        AND:{
+          date_of_journey:{
+            gte: fromTimestamp,
+            lte: toTimestamp
+          },
+        }
+      }
     })
 
-    inputs.state = 'Early';
-    const otpEarlyCount = await db.prisma.timetable.count({
-      where: getFiltersForOTPQuery(inputs, userOperatorIds)
-    })
+    let totalOntime = 0, totalEarly = 0, totalLate = 0, totalscheduled = 0, totalCompleted = 0;
 
-    inputs.state = 'Late';
-    const otpLateCount = await db.prisma.timetable.count({
-      where: getFiltersForOTPQuery(inputs, userOperatorIds)
-    })
+    otp_stats.forEach(opt_stat => {
+      totalOntime += opt_stat.on_time_count;
+      totalEarly += opt_stat.early_count;
+      totalLate += opt_stat.late_count;
+      totalscheduled += opt_stat.scheduled;
+      totalCompleted += opt_stat.completed;
+    });
 
-    inputs.state = null;
-    inputs.departureNullCheck = true;
-    const completedCount = await db.prisma.timetable.count({
-      where: getFiltersForOTPQuery(inputs, userOperatorIds)
-    })
+    var endTimer = performance.now()
 
-    let scheduled = otpEarlyCount + otpOnTimeCount + otpLateCount;
+    console.log(`Call to getPunctualityOverview took ${endTimer - startTimer} milliseconds`)
 
     return ({
       __typename: "PunctualityTotalsType",
-      early: otpEarlyCount,
-      late: otpLateCount,
-      onTime: otpOnTimeCount,
-      scheduled: scheduled,
-      completed: completedCount,
+      early: totalEarly,
+      late: totalLate,
+      onTime: totalOntime,
+      scheduled: totalscheduled,
+      completed: totalCompleted,
       averageDeviation: 0
     });
 
@@ -334,6 +341,8 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
       throw ("Not authorized")
     }
 
+    var startTimer = performance.now()
+
   let opPerformances : OperatorPerformanceType[] = [];
 
   const {fromTimestamp, toTimestamp, filters, paging, sortBy, state, departureNullCheck} = inputs;
@@ -350,79 +359,45 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
 
   const userOperatorIds = operators.map(o=>o.nocCode)
 
-  inputs.state = 'Early';
-  const otpEarlyRecords = await db.prisma.timetable.groupBy({
-    by:['operator_noc'],
-    where: getFiltersForOTPQuery(inputs, userOperatorIds),
-    _count: {
-      timetable_id: true,
-    },
+  // fetch all rows from otp_stats_operator_noc with filters.
+  const otp_stats = await db.prisma.otp_stats_operator_noc.findMany({
+    where: {
+      operator_noc:{
+        in: userOperatorIds
+      },
+      AND:{
+        date_of_journey:{
+          gte: fromTimestamp,
+          lte: toTimestamp
+        },
+      }
+    }
   })
 
-  inputs.state = 'Late';
-  const otpLateRecords = await db.prisma.timetable.groupBy({
-    by:['operator_noc'],
-    where: getFiltersForOTPQuery(inputs, userOperatorIds),
-    _count: {
-      timetable_id: true,
-    },
-  })
 
-  inputs.state = 'OnTime';
-  const otpOnTimeRecords = await db.prisma.timetable.groupBy({
-    by:['operator_noc'],
-    where: getFiltersForOTPQuery(inputs, userOperatorIds),
-    _count: {
-      timetable_id: true,
-    },
-  })
-
-  inputs.state = null;
-  inputs.departureNullCheck = true;
-  const completedRecords = await db.prisma.timetable.groupBy({
-    by:['operator_noc'],
-    where: getFiltersForOTPQuery(inputs, userOperatorIds),
-    _count: {
-      timetable_id: true,
-    },
-  })
 
   for (let i = 0; i < operators.length; i++) {
-        const otpEarlyRecord = otpEarlyRecords.filter(o => o.operator_noc == operators[i].nocCode);
-        const otpLateRecord = otpLateRecords.filter(o => o.operator_noc == operators[i].nocCode);
-        const otpOnTimeRecord = otpOnTimeRecords.filter(o => o.operator_noc == operators[i].nocCode);
-        const otpCompletedRecord = completedRecords.filter(o => o.operator_noc == operators[i].nocCode);
+    const operatorOtpStats = otp_stats.filter(o=>o.operator_noc == operators[i].nocCode)
+    let totalOntime = 0, totalEarly = 0, totalLate = 0, totalscheduled = 0, totalCompleted = 0;
 
-        let earlyCount, lateCount, onTimeCount, completed, scheduled = 0;
-        
-        if(otpEarlyRecord && otpEarlyRecord.length > 0){
-          earlyCount = otpEarlyRecord[0]._count.timetable_id;
-        }
-
-        if(otpLateRecord && otpLateRecord.length > 0){
-          lateCount = otpLateRecord[0]._count.timetable_id;
-        }
-
-        if(otpOnTimeRecord && otpOnTimeRecord.length > 0){
-          onTimeCount = otpOnTimeRecord[0]._count.timetable_id;
-        }
-
-        if(otpCompletedRecord && otpCompletedRecord.length > 0){
-          completed = otpCompletedRecord;
-        }
-
-        scheduled = earlyCount + lateCount + onTimeCount;
+    operatorOtpStats.forEach(opt_stat => {
+      totalOntime += opt_stat.on_time_count;
+      totalEarly += opt_stat.early_count;
+      totalLate += opt_stat.late_count;
+      totalscheduled += opt_stat.scheduled;
+      totalCompleted += opt_stat.completed;
+    });
     
         let opPerformance: OperatorPerformanceType = {
           nocCode: operators[i].nocCode,
           operatorId: operators[i].nocCode,
           name: operators[i].name,
-          early: earlyCount,
-          late: lateCount,
-          onTime: onTimeCount,
+          early: totalEarly,
+          late: totalLate,
+          onTime: totalOntime,
           averageDelay: 0, // TODO
-          scheduledDepartures: scheduled,
-          actualDepartures: completed
+          scheduledDepartures: totalscheduled,
+          actualDepartures: totalCompleted
         }
         opPerformances.push(opPerformance)
     }
@@ -434,6 +409,10 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
       totalCount: opPerformances.length
     }
   }
+
+  var endTimer = performance.now()
+  console.log(`Call to getOperatorPerformance took ${endTimer - startTimer} milliseconds`)
+
   return (ret)
 
   } catch (error) {
@@ -1555,13 +1534,13 @@ const getFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   // date cap to today for performance WILL REMOVE
 
   // hard cap data to 1 day if operators is higher than 10 TEMPORARY
-  if(tempNocList.length > 10){
-    const today = new Date();
-    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T00:00:00.000+01:00`
-    const tommorrowString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate() + 1).padStart(2, '0')}T00:00:00.000+01:00`
-    fromTimestamp = todayString;
-    toTimestamp = tommorrowString;
-  }
+  // if(tempNocList.length > 10){
+  //   const today = new Date();
+  //   const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T00:00:00.000+01:00`
+  //   const tommorrowString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate() + 1).padStart(2, '0')}T00:00:00.000+01:00`
+  //   fromTimestamp = todayString;
+  //   toTimestamp = tommorrowString;
+  // }
 
   let start = new Date();
   let end = new Date();
