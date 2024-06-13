@@ -1482,9 +1482,9 @@ export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, d
 
     if(adminAreaRecords){
       const adminareaIds = adminAreaRecords.map(a=>a.adminarea_id);
-      const adminAreas = await db.prisma.bods_naptanadminarea.findMany({
+      const adminAreas = await db.prisma.naptan_adminarea_with_shape.findMany({
         where: {
-          naptan_admin_area_id:{
+          id:{
             in: adminareaIds
           }
         }
@@ -1496,9 +1496,9 @@ export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, d
 
       const ret = adminAreas.map(adminArea => {
         return{
-          adminAreaId: String(adminArea.naptan_admin_area_id),
+          adminAreaId: String(adminArea.id),
           adminAreaName:adminArea.name, 
-          shape: ""
+          shape: adminArea.st_asgeojson
         }
       })
 
