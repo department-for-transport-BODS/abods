@@ -1,6 +1,5 @@
-import { Db } from "typeorm";
 import { Context } from "../../context";
-import { LineType, Maybe, OperatorLinesQuery, OperatorPerformanceType, OperatorType, ServicePunctualityType, SessionUser, StopPerformanceType, StopType, TransitModelType, UniqueJourneyType, VehicleReplayInputType } from "../../types";
+import { LineType, OperatorPerformanceType, OperatorType, ServicePunctualityType, SessionUser, StopPerformanceType, StopType } from "../../types";
 import { GraphQLResolveInfo } from "graphql";
 
 
@@ -1679,19 +1678,4 @@ const getFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   }
 
   return queryArgs;    
-}
-
-
-export const findJourneys = (inputs: VehicleReplayInputType, sessionUser: any, db: Context): [UniqueJourneyType] => {
-  return  [
-    {
-        vehicleJourneyId: "VJ923c019c47e1c96648deffd8690ea2cbcb433e3f",
-        startTime: new Date().toISOString(),
-        serviceInfo: {
-            serviceName: "Ancaster - Welbourn",
-            serviceNumber: "WM06",
-            serviceId: "test"
-        },
-    }
-  ]
 }

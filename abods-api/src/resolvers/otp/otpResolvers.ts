@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils'
-import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance, findJourneys } from './otpFunctions.js';
-import { Exact, JourneysQueryVariables, RequestContext } from '../../types.js';
+import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
+import { RequestContext } from '../../types.js';
 import { GraphQLResolveInfo } from 'graphql';
 
 const otpResolvers: IResolvers = {
@@ -11,7 +11,6 @@ const otpResolvers: IResolvers = {
         headwayMetrics: async () => { return {}; }, // stub -> sub-resolvers do the work 
         serviceInfo: async (_, { serviceId }, {sessionUser, db }: RequestContext) => getServiceInfo(serviceId, sessionUser, db),
         adminAreas: async (_: any, {adminAreaIds}: {adminAreaIds: string[]}, {sessionUser, db }: RequestContext) => getAdminAreas(adminAreaIds, sessionUser, db),
-        vehicleReplay:  async () => { return {}; }
     },
     OnTimePerformanceType: {
         delayFrequency: async (_, { inputs }, {sessionUser, db }: RequestContext) => getDelayFrequency(inputs, sessionUser, db),
@@ -32,9 +31,6 @@ const otpResolvers: IResolvers = {
         headwayOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayOverview(inputs, sessionUser, db),      
         headwayTimeOfDay: async (_, { lineId }, {sessionUser, db }: RequestContext) => getHeadwayTimeOfDay(lineId, sessionUser, db),
         headwayTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayTimeSeries(inputs, sessionUser, db)
-    },
-    VehicleReplayNamespace: {
-        findJourneys: async(_, { inputs } , {sessionUser, db }: RequestContext ) => findJourneys(inputs, sessionUser, db)
     }
 }
 
