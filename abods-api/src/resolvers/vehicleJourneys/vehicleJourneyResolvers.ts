@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils'
 import { RequestContext } from '../../types';
-import { findJourneys } from './vehicleJourneyFunctions';
+import { findJourneys } from './vehicleJourneyFunctions.js';
 
 const vehicleJourneyResovlers: IResolvers = {
     Query: {
