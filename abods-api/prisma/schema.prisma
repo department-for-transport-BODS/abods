@@ -134,10 +134,11 @@ model Timetable {
   stop_id                 Int?
 }
 
-view bods_naptanadminarea{
-  naptan_admin_area_id Int @id @default(1)
+view naptan_adminarea_with_shape{
+  id Int @id @default(1)
   name String
   atco_code String
+  st_asgeojson String
   noc_adminareas noc_adminarea[]
 }
 
@@ -145,7 +146,7 @@ view noc_adminarea {
   national_operator_code String
   adminarea_id Int
 
-  admin_area    bods_naptanadminarea @relation(fields: [adminarea_id], references: [naptan_admin_area_id])
+  admin_area    naptan_adminarea_with_shape @relation(fields: [adminarea_id], references: [id])
   operator      all_operators     @relation(fields: [national_operator_code], references: [operatorref])
 
   @@id([national_operator_code, adminarea_id])
