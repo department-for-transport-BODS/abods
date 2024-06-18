@@ -1532,12 +1532,15 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
                     })
                   })
                 })
-              }:{})
+              }:{}),
+              ...(lineIds ? {service_code: {
+                in: lineIds
+              }} : {}),
             }
     
             // get a sum per day
-            const results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
-              by:['service_code'],
+            const results = await db.prisma.aa_otp_stats_summary_stops.groupBy({
+              by:['stop_id', 'common_name', 'service_code', 'locality_id', 'stop_longitude', 'stop_latitude', 'timing_point'],
               where:prisma_filters,
               _sum:{
                 early_count:true,
@@ -1548,116 +1551,34 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
               }
             })
 
-            // const otpRecords = await db.prisma.timetable.findMany({
-            //   where: getFiltersForOTPQuery(inputs, operatorIds),
-            //   select:{
-            //     timetable_id: true,
-            //     service_code: true,
-            //     line_name: true,
-            //     stop_id: true,
-            //     common_name: true,
-            //     stop_longitude: true,
-            //     stop_latitude: true,
-            //     locality_id: true,
-            //     is_timing_point: true,
-            //     otp_state: true,
-            //     actual_departure_time: true,
-            //     expected_departure_time: true,
-            //     time_difference: true
-            //   }
-            // })
-
-            // console.log("getStopPerformance found otprecords for line: " + JSON.stringify(lineIds) + " " + otpRecords.length)
-
-            // for (let i = 0; i < otpRecords.length; i++) {
-            //   const otpRecord = otpRecords[i];
-              
-            //   // get the index of this service in stop performances
-            //   const index = stopPerformances.findIndex(s=>s.stopId == otpRecord.stop_id)
-            //   if(index !== -1)
-            //     {
-            //       // this service is in the stopPerformances arr, update it
-            //       if(otpRecord.otp_state)
-            //         {
-            //           switch (otpRecord.otp_state) {
-            //             case 'OnTime':
-            //               stopPerformances[index].onTime += 1;
-            //               break;
-            //             case 'Late':
-            //               stopPerformances[index].late += 1;
-            //               break;
-            //             case 'Early':
-            //               stopPerformances[index].early += 1;
-            //               break;
-            //             default:
-            //               break;
-            //           }
-            //         }
-
-            //       stopPerformances[index].scheduledDepartures += 1;
-
-            //       if(otpRecord.actual_departure_time)
-            //       {
-            //         stopPerformances[index].actualDepartures += 1;
-            //       }
-            //     }
-            //     else{
-            //       // create a new entry in stopperformances
-            //       let early: number = 0, late: number = 0, ontime: number = 0, actualDepartures: number = 0
-
-            //       if(otpRecord.actual_departure_time)
-            //         {
-            //           actualDepartures = 1;
-            //         }
-
-            //         if(otpRecord.otp_state)
-            //         {
-            //           switch (otpRecord.otp_state) {
-            //             case 'OnTime':
-            //               ontime += 1;
-            //               break;
-            //             case 'Late':
-            //               late += 1;
-            //               break;
-            //             case 'Early':
-            //               early += 1;
-            //               break;
-            //             default:
-            //               break;
-            //           }
-            //         }
-
-                  
-
-            //       stopPerformances.push({
-            //         lineId: otpRecord.service_code,
-            //         stopId: otpRecord.stop_id? otpRecord.stop_id : 0,
-            //         stopInfo: {
-            //           stopId: otpRecord.stop_id? otpRecord.stop_id : 0,
-            //           stopName: otpRecord.common_name? otpRecord.common_name : "",
-            //           stopLocality: {
-            //             localityId: otpRecord.locality_id? otpRecord.locality_id : "",
-            //             localityName: "",
-            //             localityAreaId: "",
-            //             localityAreaName: ""
-            //           },
-            //           sourceId: "",
-            //           stopLocation: {
-            //             longitude: otpRecord.stop_longitude ? Number(otpRecord.stop_longitude):0 ,
-            //             latitude: otpRecord.stop_latitude ? Number(otpRecord.stop_latitude): 0
-            //           }
-            //         },
-            //         early: early,
-            //         late: late,
-            //         onTime: ontime,
-            //         actualDepartures: actualDepartures,
-            //         scheduledDepartures: 1,
-            //         averageDelay: 0,
-            //         timingPoint: otpRecord.is_timing_point? otpRecord.is_timing_point : false
-            //       })
-            //     }
-
-            // }
+            results.forEach(res => {
+                stopPerformances.push({
+                lineId: res.service_code,
+                stopId: res.stop_id? res.stop_id : 0,
+                stopInfo: {
+                  stopId: res.stop_id? res.stop_id : 0,
+                  stopName: res.common_name? res.common_name : "",
+                  stopLocality: {
+                    localityId: res.locality_id? res.locality_id : "",
+                    localityName: "",
+                    localityAreaId: "",
+                    localityAreaName: ""
+                  },
+                  sourceId: "",
+                  stopLocation: {
+                    longitude: res.stop_longitude ? Number(res.stop_longitude):0 ,
+                    latitude: res.stop_latitude ? Number(res.stop_latitude): 0
+                  }
+                },
+                early: res._sum.early_count ? res._sum.early_count : 0,
+                late: res._sum.late_count ? res._sum.late_count : 0,
+                onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
+                actualDepartures: res._sum.completed ? res._sum.completed: 0,
+                scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
+                averageDelay: 0,
+                timingPoint: res.timing_point? res.timing_point : false
+              })
+            });
           }
         }
 
@@ -1787,7 +1708,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
       
               // get a sum per day
               const results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
-                by:['service_code'],
+                by:['service_code'], // TODO: get data guys to add line name to table + add as group field + return
                 where:prisma_filters,
                 _sum:{
                   early_count:true,

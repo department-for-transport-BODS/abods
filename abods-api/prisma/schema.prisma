@@ -158,6 +158,39 @@ model aa_otp_stats_summary_soc {
   avg_time_difference Int
 }
 
+model aa_otp_stats_summary_stops {
+  id    Int   @id @default(1)
+	operator_noc String
+  service_code String
+  stop_id Int
+  stop_latitude           Decimal?
+  stop_longitude          Decimal?
+  locality_id             String?
+  common_name             String?
+	date_of_journey DateTime
+	day_of_week Int
+	expected_departure_hour DateTime? @db.Time(6)
+	timing_point Boolean
+	on_time_count Int
+	early_count Int
+	late_count Int
+	completed Int
+	scheduled Int
+	maximum_early_10 Int
+	maximum_early_20 Int
+	maximum_early_30 Int
+	maximum_early_40 Int
+	maximum_early_50 Int
+	maximum_early_60 Int
+	maximum_late_10 Int
+	maximum_late_20 Int
+	maximum_late_30 Int
+	maximum_late_40 Int
+	maximum_late_50 Int
+	maximum_late_60 Int
+  avg_time_difference Int
+}
+
 model otp_stats_operator_noc {
   id            Int      @id @default(1)
   operator_noc            String?
