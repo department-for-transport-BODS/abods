@@ -16,11 +16,11 @@ async function getDatabaseUrl(): Promise<string> {
 
   if ((process.env.PROJECT_ENV || 'local') === 'local') {
     const password = process.env.DB_PASSWORD;
-    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&gssencmode=disable`;
+    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable`;
   } else {
     const token = await generateRdsIamToken(region, hostname, port, username);
     const encodedToken = encodeURIComponent(token);
-    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public`;
+    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50`;
   }
 }
 
