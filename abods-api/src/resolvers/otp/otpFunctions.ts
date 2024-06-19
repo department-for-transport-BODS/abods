@@ -27,9 +27,9 @@ interface TimeCount {
   late: number;
 }
 
-interface delayFrequencyRecord {
-  bucket: number,
-  frequency: number
+interface distribution {
+  noOfStops: number,
+  performanceInMins: number
 }
 
 const dayOfWeek: DayCount[] = Array.from({length: 7}, (_, i) => ({
@@ -846,7 +846,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
     const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
     const {timingPointsOnly, adminAreaIds, startTime, endTime, maxDelay, minDelay, dayOfWeekFlags, operatorIds, granularity, lineIds} = filters;
 
-    let delaysBuckets: delayFrequencyRecord[] = [];
+    let performanceStopDistribution: distribution[] = [];
 
     // fetch all otp records group by time difference
     if(operatorIds.length == 1)
@@ -962,7 +962,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
               where:prisma_filters,
               select: {
                 avg_time_difference:true,
-                scheduled: true
+                completed: true
               }
             })
           }else{
@@ -970,31 +970,40 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
               where:prisma_filters,
               select: {
                 avg_time_difference:true,
-                scheduled: true
+                completed: true
               }
             })
           }
       
           if(results){
             results.forEach(res => {
-              if(res.avg_time_difference > 0 && res.scheduled > 0)
+              if(res.avg_time_difference)
                 {
+                  // get a rounded average time difference for the record
                   const avgDiff = Math.round(res.avg_time_difference);
-                  const index = delaysBuckets.findIndex(d=>d.bucket == avgDiff)
-                  if(index !== -1)
+
+                  if(res.completed > 0)
                     {
-                      const freq = delaysBuckets.find(d=>d.bucket == avgDiff)
-                      delaysBuckets.splice(index, 1);
-                      delaysBuckets.push({
-                        bucket: avgDiff,
-                        frequency: freq?.frequency ? freq?.frequency + res.scheduled : res.scheduled
-                      })
-                    }
-                  else  {
-                      delaysBuckets.push({
-                        bucket: avgDiff,
-                        frequency: res.scheduled
-                      })
+                       // is thie performance in minutes (time difference) value already in the array?
+                      const index = performanceStopDistribution.findIndex(d=>d.performanceInMins == avgDiff)
+                      if(index !== -1)
+                        {
+                          // it is in the array, add the completed stops to this noOfStops
+                          const element = performanceStopDistribution.find(d=>d.performanceInMins == avgDiff)
+                          performanceStopDistribution.splice(index, 1);
+                          performanceStopDistribution.push({
+                            performanceInMins: avgDiff,
+                            noOfStops: element?.noOfStops ? element?.noOfStops + res.completed : res.completed
+                          })
+                        }
+                      else  {
+    
+                        // add a new entry for this new time difference
+                        performanceStopDistribution.push({
+                            performanceInMins: avgDiff,
+                            noOfStops: res.completed
+                          })
+                        }
                     }
                 }
             })
@@ -1002,7 +1011,16 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
         }
       }
 
-    return delaysBuckets;
+    const unsortedArray = performanceStopDistribution.map(ele => {
+      return {
+        bucket: ele.performanceInMins,
+        frequency: ele.noOfStops
+      }
+    })
+
+    const sortedArray = unsortedArray.sort((a, b) => a.bucket - b.bucket)
+
+    return sortedArray;
   } catch (error) {
     console.log(error)
     return null;
@@ -1540,7 +1558,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
     
             // get a sum per day
             const results = await db.prisma.aa_otp_stats_summary_stops.groupBy({
-              by:['stop_id', 'common_name', 'service_code', 'locality_id', 'stop_longitude', 'stop_latitude', 'timing_point'],
+              by:['stop_id', 'common_name', 'timing_point'],
               where:prisma_filters,
               _sum:{
                 early_count:true,
@@ -1548,26 +1566,33 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
                 on_time_count: true,
                 scheduled: true,
                 completed:true
+              },
+              _avg:{
+                avg_time_difference:true
               }
             })
 
             results.forEach(res => {
+
+              // avg delay
+              const timeInSeconds = res._avg.avg_time_difference ? res._avg.avg_time_difference * 60 : 0;
+
                 stopPerformances.push({
-                lineId: res.service_code,
+                lineId: lineIds[0],
                 stopId: res.stop_id? res.stop_id : 0,
                 stopInfo: {
                   stopId: res.stop_id? res.stop_id : 0,
                   stopName: res.common_name? res.common_name : "",
                   stopLocality: {
-                    localityId: res.locality_id? res.locality_id : "",
+                    localityId: "",
                     localityName: "",
                     localityAreaId: "",
                     localityAreaName: ""
                   },
                   sourceId: "",
                   stopLocation: {
-                    longitude: res.stop_longitude ? Number(res.stop_longitude):0 ,
-                    latitude: res.stop_latitude ? Number(res.stop_latitude): 0
+                    longitude: 0 ,
+                    latitude: 0
                   }
                 },
                 early: res._sum.early_count ? res._sum.early_count : 0,
@@ -1575,7 +1600,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
                 onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
                 actualDepartures: res._sum.completed ? res._sum.completed: 0,
                 scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
-                averageDelay: 0,
+                averageDelay: timeInSeconds,
                 timingPoint: res.timing_point? res.timing_point : false
               })
             });
@@ -1705,7 +1730,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
                   })
                 }:{})
               }
-      
+
               // get a sum per day
               const results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
                 by:['service_code'], // TODO: get data guys to add line name to table + add as group field + return
@@ -1716,10 +1741,15 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
                   on_time_count: true,
                   scheduled: true,
                   completed:true
+                },
+                _avg:{
+                  avg_time_difference:true
                 }
               })
 
               results.forEach(res => {
+
+                const avgDelay = res._avg.avg_time_difference ? res._avg.avg_time_difference * 60 : 0;
                 servicePunctualities.push({
                   lineId: res.service_code,
                   early: res._sum.early_count ? res._sum.early_count : 0,
@@ -1727,6 +1757,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
                   onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
                   scheduledDepartures: res._sum.scheduled ?  res._sum.scheduled : 0,
                   actualDepartures: res._sum.completed ? res._sum.completed : 0,
+                  averageDelay: avgDelay,
                   lineInfo: 
                   {
                     serviceId: res.service_code,
