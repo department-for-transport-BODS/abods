@@ -1527,6 +1527,7 @@ export type ServicePunctualityType = IPunctualityType & {
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
   rank: Scalars['Float'];
+  averageDelay: Scalars['Float'];
   /**
    * Get the performance numbers for a previous period
    * for comparison with current period.
