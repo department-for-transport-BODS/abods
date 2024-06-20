@@ -123,7 +123,7 @@ model Timetable {
   expected_departure_time DateTime? @db.Time(6)
   actual_departure_time   DateTime? @db.Time(6)
   is_timing_point         Boolean?
-  group_id                String?
+  group_id                String
   previous_group_id       String?
   otp_state               String?
   expected_headway        Int?
@@ -132,6 +132,8 @@ model Timetable {
   siri_vm_position_id     Int?
   time_difference         Int?
   stop_id                 Int?
+  journey_pattern         Int?
+  expected_journeys       ExpectedJourneys @relation(fields: [group_id], references: [group_id])
 }
 
 view naptan_adminarea_with_shape{
@@ -167,24 +169,23 @@ model ExpectedOperators {
 }
 
 model ExpectedServices {
-  expected_service_id   Int                 @id @default(1)
+  line_name             String
+  noc_and_line          String
   service_name          String
+  date_of_journey       DateTime
   expected_operator_id  Int
   expected_operator     ExpectedOperators @relation(fields: [expected_operator_id], references: [expected_operator_id])
   expected_journeys     ExpectedJourneys[]
+  @@id([noc_and_line, date_of_journey])
 }
 
 model ExpectedJourneys {
-  expected_journey_id Int              @id @default(1)
-  date_of_journey     DateTime
-  day_of_week         String
-  direction_ref       String
-  expected_service_id Int
-  expected_service    ExpectedServices @relation(fields: [expected_service_id], references: [expected_service_id])
+  group_id                    String            @unique
+  journey_pattern_description String
+  date_of_journey             DateTime
+  day_of_week                 String
+  noc_and_line                String
+  expected_journey_start      DateTime?         @db.Time(6)
+  expected_service            ExpectedServices  @relation(fields: [noc_and_line, date_of_journey], references: [noc_and_line, date_of_journey])
+  timetable                   Timetable[]
 }
-
-// model Stops {
-//   stop_id   Int    @id @default(1)
-//   stop_code String
-//   otps      OTP[]
-// }

@@ -149,9 +149,9 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
   const services:  LineType[] = [];
   operator.map((op) => {
     op.expected_services.map((service) => services.push({
-      lineId: service.expected_service_id.toString(),
+      lineId: service.noc_and_line,
       lineName: service.service_name,
-      lineNumber:  service.service_name,
+      lineNumber:  service.line_name,
       onTimePerformance: [],
       servicePatterns: []
     }))
