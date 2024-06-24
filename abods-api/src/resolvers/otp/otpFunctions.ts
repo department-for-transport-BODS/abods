@@ -320,7 +320,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
     let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if(lineIds){
-      results = await db.prisma.aa_otp_stats_summary_soc.aggregate({
+      results = await db.prisma.aa_timetable_summary_soc.aggregate({
         where: prismaFilters,
         _sum:{
           early_count:true,
@@ -482,7 +482,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+            results = await db.prisma.aa_timetable_summary_soc.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -588,7 +588,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.findMany({
+            results = await db.prisma.aa_timetable_summary_soc.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -698,8 +698,8 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
-              by:['expected_departure_hour'],
+            results = await db.prisma.aa_timetable_summary_soc.groupBy({
+              by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -787,7 +787,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
         // get a sum per day
         let results;
         if(lineIds){
-          results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+          results = await db.prisma.aa_timetable_summary_soc.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -913,8 +913,8 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
           if(userOperatorIds.includes(operator_noc_to_filter))
           {
             // get a sum per day
-            const results = await db.prisma.aa_otp_stats_summary_stops.groupBy({
-              by:['stop_id', 'common_name', 'timing_point'],
+            const results = await db.prisma.aa_timetable_summary_stops.groupBy({
+              by:['stop_id', 'common_name', 'is_timing_point'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -957,7 +957,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
                 actualDepartures: res._sum.completed ? res._sum.completed: 0,
                 scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
                 averageDelay: timeInSeconds,
-                timingPoint: res.timing_point? res.timing_point : false
+                timingPoint: res.is_timing_point? res.is_timing_point : false
               })
             });
           }
@@ -1002,7 +1002,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
             if(userOperatorIds.includes(operator_noc_to_filter))
             {
               // get a sum per day
-              const results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+              const results = await db.prisma.aa_timetable_summary_soc.groupBy({
                 by:['service_code'], // TODO: get data guys to add line name to table + add as group field + return
                 where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
                 _sum:{
