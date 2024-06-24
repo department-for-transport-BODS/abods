@@ -317,10 +317,11 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
     const userOperatorIds = operators.map(o=>o.nocCode)
 
     let results;
+    let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if(lineIds){
       results = await db.prisma.aa_otp_stats_summary_soc.aggregate({
-        where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+        where: prismaFilters,
         _sum:{
           early_count:true,
           late_count: true,
@@ -331,8 +332,8 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
       })
     }
     else{
-      results = await db.prisma.aa_otp_stats_summary.aggregate({
-        where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      results = await db.prisma.aa_timetable_summary_noc.aggregate({
+        where: prismaFilters,
         _sum:{
           early_count:true,
           late_count: true,
@@ -394,7 +395,7 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
 
   const userOperatorIds = operators.map(o=>o.nocCode)
 
-  const results = await db.prisma.aa_otp_stats_summary.groupBy({
+  const results = await db.prisma.aa_timetable_summary_noc.groupBy({
     by:['operator_noc'],
     where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
     _sum:{
@@ -492,7 +493,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_otp_stats_summary.groupBy({
+            results = await db.prisma.aa_timetable_summary_noc.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -595,7 +596,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
               }
             })
           }else{
-            results = await db.prisma.aa_otp_stats_summary.findMany({
+            results = await db.prisma.aa_timetable_summary_noc.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -708,8 +709,8 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_otp_stats_summary.groupBy({
-              by:['expected_departure_hour'],
+            results = await db.prisma.aa_timetable_summary_noc.groupBy({
+              by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -796,7 +797,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
             }
           })
         }else{
-          results = await db.prisma.aa_otp_stats_summary.groupBy({
+          results = await db.prisma.aa_timetable_summary_noc.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -1267,74 +1268,44 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       end.setMinutes(minutes)
     }
 
+    // date_of_journey - add an hour to from timestamp
+    let fromMlSeconds = new Date(fromTimestamp).getTime();
+    var addMlSeconds = 60 * 60 * 1000;
+    var dateOfJourneyFromDateTime = new Date(fromMlSeconds + addMlSeconds);
+    var dateOfJourneyToDateTime = new Date(toTimestamp);
+
+    // maxDelay == max late
+    // minDelay = max early
+
     // change maxDelay and maxEarly
     // where maxearly <= X
     // where maxlate <= X
 
+    let maxLateNumber = 0, maxEarlyNumber = 0;
+    if(maxDelay){
+      maxLateNumber = maxDelay
+    }
+
+    if(minDelay){
+      maxEarlyNumber = Math.abs(minDelay)
+    }
+
     return {
       operator_noc:{ in: nocListToFilter },
-      date_of_journey:{ gte: fromTimestamp, lte: toTimestamp },
-      ...(timingPointsOnly ? {timing_point: timingPointsOnly} : {}),
+      date_of_journey:{ gte: dateOfJourneyFromDateTime, lte: dateOfJourneyToDateTime },
+      ...(timingPointsOnly ? {is_timing_point: timingPointsOnly} : {}),
       ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers as number[] }} : {}),
       ...((startTime && endTime) ? { expected_departure_hour: { gte: start, lte: end }} : {
         ...(startTime ? { expected_departure_hour: { gte: start }} : {
           ...(endTime ? {expected_departure_hour: { lte: end }} : {})
         }),
       }),
-      ...(minDelay ? {
-        ...(minDelay == '-10' ? {
-          maximum_early_10: { gt: 0}
-        }: {
-          ...(minDelay == '-20' ? {
-            maximum_early_20: { gt: 0}
-          }: {
-            ...(minDelay == '-30' ? {
-              maximum_early_30: { gt: 0}
-            }: {
-              ...(minDelay == '-40' ? {
-                maximum_early_40: { gt: 0}
-              }: {
-                ...(minDelay == '-50' ? {
-                  maximum_early_50: { gt: 0}
-                }: {
-                  ...(minDelay == '-60' ? {
-                    maximum_early_60: { gt: 0}
-                  }: {
-                    
-                  })
-                })
-              })
-            })
-          })
-        })
-      }:{}),
-      ...(maxDelay ? {
-        ...(maxDelay == '10' ? {
-          maximum_late_10: { gt: 0}
-        }: {
-          ...(maxDelay == '20' ? {
-            maximum_late_20: { gt: 0}
-          }: {
-            ...(maxDelay == '30' ? {
-              maximum_late_30: { gt: 0}
-            }: {
-              ...(maxDelay == '40' ? {
-                maximum_late_40: { gt: 0}
-              }: {
-                ...(maxDelay == '50' ? {
-                  maximum_late_50: { gt: 0}
-                }: {
-                  ...(maxDelay == '60' ? {
-                    maximum_late_60: { gt: 0}
-                  }: {
-                    
-                  })
-                })
-              })
-            })
-          })
-        })
-      }:{}),
+      // ...(maxEarlyNumber > 0 ? {
+      //     max_early: { lte: maxEarlyNumber}
+      //   }: {}),
+      // ...(maxLateNumber > 0 ? {
+      //     max_late: { lte: maxLateNumber}
+      //   }: {}),
       ...(lineIds ? {service_code: {
         in: lineIds
       }} : {}),
