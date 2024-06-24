@@ -72,9 +72,7 @@ export const getApiInfo = async (db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 // Summary: fetch roles
@@ -99,9 +97,7 @@ export const getRoles = async (sessionUser: any, db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const mapRoleToRoleType = (role: Role): RoleType | undefined => {

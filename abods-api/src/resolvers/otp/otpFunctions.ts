@@ -60,9 +60,7 @@ export const getOperatorList = async (sessionUser: SessionUser, db: Context) => 
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 } 
 
 const getOperators = async (sessionUser: SessionUser, db: Context, adminAreaIds?: string[]) => {
@@ -169,9 +167,7 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getOperator = async (operatorId, lineId,  sessionUser: SessionUser, db: Context) => {
@@ -294,9 +290,7 @@ export const getOperator = async (operatorId, lineId,  sessionUser: SessionUser,
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -371,9 +365,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -456,9 +448,7 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -535,9 +525,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getJourneyScheduledStartTimes = async (sessionUser:SessionUser, db: Context) => {
@@ -663,9 +651,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -750,9 +736,7 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -849,9 +833,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 
@@ -984,9 +966,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getServicePerformance = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -1064,9 +1044,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
   } catch (error) {
     logger.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 // -> OPERATOR PAGE
@@ -1240,9 +1218,7 @@ export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, d
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 // helpers
@@ -1290,6 +1266,10 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       end.setHours(hours)
       end.setMinutes(minutes)
     }
+
+    // change maxDelay and maxEarly
+    // where maxearly <= X
+    // where maxlate <= X
 
     return {
       operator_noc:{ in: nocListToFilter },

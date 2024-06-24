@@ -90,9 +90,7 @@ export const getUsers = async (sessionUser: SessionUser, db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
   
 }
 // Summary: fetch a single user by id
@@ -124,9 +122,7 @@ export const getUser = async (id: string, sessionUser: SessionUser, db: Context)
   } catch (error) {
     console.error(error)
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 // Summary: fetch all user alerts
@@ -193,9 +189,7 @@ export const getUserAlerts = async (sessionUser: any, db: Context) => {
     return userAlerts;
   } catch (error) {
     return null;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 // Summary: log the user in
@@ -264,9 +258,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
     return {
       success: false
     }
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
@@ -287,9 +279,7 @@ export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
   } catch (error) {
     console.error(error)
     return false;
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
@@ -388,9 +378,7 @@ export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
       error: error.message,
       success: false
     }
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Context) => {
@@ -435,9 +423,7 @@ export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Co
       error: error.message,
       success: false
     }
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
 
 export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) => {
@@ -470,7 +456,5 @@ export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) =>
       error: error.message,
       success: false
     }
-  } finally{
-    db.prisma.$disconnect();
-  }
+  } 
 }
