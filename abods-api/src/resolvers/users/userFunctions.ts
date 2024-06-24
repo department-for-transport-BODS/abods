@@ -1,9 +1,7 @@
-import { getOrganisation, getRoles, mapRoleToRoleType } from '../shared/sharedFunctions.js';
 import { Context } from '../../context.js'
 import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, SessionUser, OperatorType } from '../../types.js';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
-import { all_operators } from '@prisma/client';
 
 export const getSession = async (sessionId, db: Context) : Promise<SessionUser> =>  {
   let sessionUser: SessionUser = {
@@ -92,7 +90,8 @@ export const getUsers = async (sessionUser: SessionUser, db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
+  
 }
 // Summary: fetch a single user by id
 export const getUser = async (id: string, sessionUser: SessionUser, db: Context) => {
@@ -123,7 +122,7 @@ export const getUser = async (id: string, sessionUser: SessionUser, db: Context)
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
 }
 
 // Summary: fetch all user alerts
@@ -190,7 +189,7 @@ export const getUserAlerts = async (sessionUser: any, db: Context) => {
     return userAlerts;
   } catch (error) {
     return null;
-  }
+  } 
 }
 
 // Summary: log the user in
@@ -259,7 +258,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
     return {
       success: false
     }
-  }
+  } 
 }
 
 export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
@@ -280,7 +279,7 @@ export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
   } catch (error) {
     console.error(error)
     return false;
-  }
+  } 
 }
 
 export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
@@ -379,7 +378,7 @@ export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
       error: error.message,
       success: false
     }
-  }
+  } 
 }
 
 export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Context) => {
@@ -424,7 +423,7 @@ export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Co
       error: error.message,
       success: false
     }
-  }
+  } 
 }
 
 export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) => {
@@ -457,5 +456,5 @@ export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) =>
       error: error.message,
       success: false
     }
-  }
+  } 
 }
