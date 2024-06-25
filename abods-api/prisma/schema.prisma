@@ -103,63 +103,44 @@ model Tokens {
   token   String
 }
 
-model aa_otp_stats_summary {
-  id    Int   @id @default(1)
+model aa_timetable_summary_noc {
+  timetable_id    Int   @id @default(1)
 	operator_noc String
 	date_of_journey DateTime
 	day_of_week Int
-	expected_departure_hour DateTime? @db.Time(6)
-	timing_point Boolean
+	departure_hour DateTime? @db.Time(6)
+	is_timing_point Boolean
 	on_time_count Int
 	early_count Int
 	late_count Int
 	completed Int
 	scheduled Int
-	maximum_early_10 Int
-	maximum_early_20 Int
-	maximum_early_30 Int
-	maximum_early_40 Int
-	maximum_early_50 Int
-	maximum_early_60 Int
-	maximum_late_10 Int
-	maximum_late_20 Int
-	maximum_late_30 Int
-	maximum_late_40 Int
-	maximum_late_50 Int
-	maximum_late_60 Int
+	max_late Int
+	max_early Int
   avg_time_difference Int
 }
 
-model aa_otp_stats_summary_soc {
-  id    Int   @id @default(1)
+model aa_timetable_summary_soc {
+  timetable_id    Int   @id @default(1)
+  common_name String
 	operator_noc String
   service_code String
 	date_of_journey DateTime
 	day_of_week Int
-	expected_departure_hour DateTime? @db.Time(6)
-	timing_point Boolean
+	departure_hour DateTime? @db.Time(6)
+	is_timing_point Boolean
 	on_time_count Int
 	early_count Int
 	late_count Int
 	completed Int
 	scheduled Int
-	maximum_early_10 Int
-	maximum_early_20 Int
-	maximum_early_30 Int
-	maximum_early_40 Int
-	maximum_early_50 Int
-	maximum_early_60 Int
-	maximum_late_10 Int
-	maximum_late_20 Int
-	maximum_late_30 Int
-	maximum_late_40 Int
-	maximum_late_50 Int
-	maximum_late_60 Int
+	max_late Int
+	max_early Int
   avg_time_difference Int
 }
 
-model aa_otp_stats_summary_stops {
-  id    Int   @id @default(1)
+model aa_timetable_summary_stops {
+  timetable_id    Int   @id @default(1)
 	operator_noc String
   service_code String
   stop_id Int
@@ -169,49 +150,16 @@ model aa_otp_stats_summary_stops {
   common_name             String?
 	date_of_journey DateTime
 	day_of_week Int
-	expected_departure_hour DateTime? @db.Time(6)
-	timing_point Boolean
+	departure_hour DateTime? @db.Time(6)
+	is_timing_point Boolean
 	on_time_count Int
 	early_count Int
 	late_count Int
 	completed Int
 	scheduled Int
-	maximum_early_10 Int
-	maximum_early_20 Int
-	maximum_early_30 Int
-	maximum_early_40 Int
-	maximum_early_50 Int
-	maximum_early_60 Int
-	maximum_late_10 Int
-	maximum_late_20 Int
-	maximum_late_30 Int
-	maximum_late_40 Int
-	maximum_late_50 Int
-	maximum_late_60 Int
+	max_late Int
+	max_early Int
   avg_time_difference Int
-}
-
-model otp_stats_operator_noc {
-  id            Int      @id @default(1)
-  operator_noc            String?
-  date_of_journey         DateTime?
-  on_time_count             Int
-  early_count             Int
-  late_count             Int
-  completed             Int
-  scheduled             Int
-}
-
-model otp_stats_service_code {
-  id            Int      @id @default(1)
-  operator_noc            String?
-  service_code           String?
-  date_of_journey         DateTime?
-  on_time_count             Int
-  early_count             Int
-  late_count             Int
-  completed             Int
-  scheduled             Int
 }
 
 model Timetable {

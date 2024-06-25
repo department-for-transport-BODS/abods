@@ -41,8 +41,6 @@ const dayOfWeek: DayCount[] = Array.from({length: 7}, (_, i) => ({
   onTime: 0
 }))
 
-
-
 export const getOperatorList = async (sessionUser: SessionUser, db: Context) => {
   try {
     if(!sessionUser.user){
@@ -63,7 +61,7 @@ export const getOperatorList = async (sessionUser: SessionUser, db: Context) => 
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 } 
 
 const getOperators = async (sessionUser: SessionUser, db: Context, adminAreaIds?: string[]) => {
@@ -170,7 +168,7 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
 }
 
 const getOperatorLines = async (operatorRef: string, db: Context) => {
@@ -337,13 +335,7 @@ export const getOperator = async (operatorRef: string, lineId: string,  sessionU
   } catch (error) {
     console.error(error)
     return null;
-  }
-
-  // for a service for an operator, get me all stops and their name/long/latutude
-  // servicePattern name
-
-
-
+  } 
 }
 
 export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -370,10 +362,11 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
     const userOperatorIds = operators.map(o=>o.nocCode)
 
     let results;
+    let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if(lineIds){
-      results = await db.prisma.aa_otp_stats_summary_soc.aggregate({
-        where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      results = await db.prisma.aa_timetable_summary_soc.aggregate({
+        where: prismaFilters,
         _sum:{
           early_count:true,
           late_count: true,
@@ -384,8 +377,8 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
       })
     }
     else{
-      results = await db.prisma.aa_otp_stats_summary.aggregate({
-        where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      results = await db.prisma.aa_timetable_summary_noc.aggregate({
+        where: prismaFilters,
         _sum:{
           early_count:true,
           late_count: true,
@@ -401,7 +394,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
       var endTimer = performance.now()
   
       logger.debug(`Call to getPunctualityOverview took ${endTimer - startTimer} milliseconds`)
-  
+
       return ({
         __typename: "PunctualityTotalsType",
         early: results._sum.early_count,
@@ -418,7 +411,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -447,7 +440,7 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
 
   const userOperatorIds = operators.map(o=>o.nocCode)
 
-  const results = await db.prisma.aa_otp_stats_summary.groupBy({
+  const results = await db.prisma.aa_timetable_summary_noc.groupBy({
     by:['operator_noc'],
     where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
     _sum:{
@@ -501,7 +494,7 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -534,7 +527,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+            results = await db.prisma.aa_timetable_summary_soc.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -545,7 +538,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_otp_stats_summary.groupBy({
+            results = await db.prisma.aa_timetable_summary_noc.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -559,11 +552,15 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
           if(results)
           {
             for (let i = 0; i < dayOfWeek.length; i++) {
+              
               const day = dayOfWeek[i];
-              const dayRecord = results.filter(d=>d.day_of_week == i);
-              day.early += dayRecord[0]._sum.early_count? dayRecord[0]._sum.early_count : 0;
-              day.onTime += dayRecord[0]._sum.on_time_count? dayRecord[0]._sum.on_time_count : 0;
-              day.late += dayRecord[0]._sum.late_count? dayRecord[0]._sum.late_count : 0;
+              const dayRecord = results.find(d=>d.day_of_week == i);
+              if(dayRecord && dayRecord._sum)
+              {
+                day.early += dayRecord._sum.early_count? dayRecord._sum.early_count : 0;
+                day.onTime += dayRecord._sum.on_time_count? dayRecord._sum.on_time_count : 0;
+                day.late += dayRecord._sum.late_count? dayRecord._sum.late_count : 0;
+              }
             }
           }
         }
@@ -574,7 +571,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getJourneyScheduledStartTimes = async (sessionUser:SessionUser, db: Context) => {
@@ -636,7 +633,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.findMany({
+            results = await db.prisma.aa_timetable_summary_soc.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -644,7 +641,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
               }
             })
           }else{
-            results = await db.prisma.aa_otp_stats_summary.findMany({
+            results = await db.prisma.aa_timetable_summary_noc.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -700,7 +697,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -746,8 +743,8 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
-              by:['expected_departure_hour'],
+            results = await db.prisma.aa_timetable_summary_soc.groupBy({
+              by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -757,8 +754,8 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_otp_stats_summary.groupBy({
-              by:['expected_departure_hour'],
+            results = await db.prisma.aa_timetable_summary_noc.groupBy({
+              by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -781,12 +778,11 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
       }
     }
 
-
   return hoursOfDay;
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -836,7 +832,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
         // get a sum per day
         let results;
         if(lineIds){
-          results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+          results = await db.prisma.aa_timetable_summary_soc.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -846,7 +842,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
             }
           })
         }else{
-          results = await db.prisma.aa_otp_stats_summary.groupBy({
+          results = await db.prisma.aa_timetable_summary_noc.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -883,7 +879,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 
@@ -962,8 +958,8 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
           if(userOperatorIds.includes(operator_noc_to_filter))
           {
             // get a sum per day
-            const results = await db.prisma.aa_otp_stats_summary_stops.groupBy({
-              by:['stop_id', 'common_name', 'timing_point'],
+            const results = await db.prisma.aa_timetable_summary_stops.groupBy({
+              by:['stop_id', 'common_name', 'is_timing_point'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
                 early_count:true,
@@ -1007,7 +1003,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
                 actualDepartures: res._sum.completed ? res._sum.completed: 0,
                 scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
                 averageDelay: timeInSeconds,
-                timingPoint: res.timing_point? res.timing_point : false
+                timingPoint: res.is_timing_point? res.is_timing_point : false
               })
             });
           }
@@ -1017,7 +1013,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 export const getServicePerformance = async (inputs, sessionUser:SessionUser, db: Context) => {
@@ -1052,7 +1048,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
             if(userOperatorIds.includes(operator_noc_to_filter))
             {
               // get a sum per day
-              const results = await db.prisma.aa_otp_stats_summary_soc.groupBy({
+              const results = await db.prisma.aa_timetable_summary_soc.groupBy({
                 by:['service_code'], // TODO: get data guys to add line name to table + add as group field + return
                 where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
                 _sum:{
@@ -1095,7 +1091,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
   } catch (error) {
     logger.error(error)
     return null;
-  }
+  } 
 }
 
 // -> OPERATOR PAGE
@@ -1269,7 +1265,7 @@ export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, d
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
 }
 
 // helpers
@@ -1289,6 +1285,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
   const {timingPointsOnly, adminAreaIds, operatorIds, startTime, endTime, maxDelay, minDelay, lineIds, dayOfWeekFlags} = filters;
 
+  // filter list of users' nocs to either operator nocs from filter OR full list
   let nocListToFilter: string[] = [];
     if(operatorIds && operatorIds.length>0)
     {
@@ -1303,6 +1300,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags)
     }
 
+    // parse startime and endtime minutes/hours
     let start = new Date();
     let end = new Date();
 
@@ -1318,70 +1316,32 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       end.setMinutes(minutes)
     }
 
+    // date_of_journey - add an hour to from timestamp to prevent single day condition issues
+    let fromMlSeconds = new Date(fromTimestamp).getTime();
+    var addMlSeconds = 60 * 60 * 1000;
+    var dateOfJourneyFromDateTime = new Date(fromMlSeconds + addMlSeconds);
+    var dateOfJourneyToDateTime = new Date(toTimestamp);
+
+    // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
+    const maxLateNumber = maxDelay ? maxDelay : 0;
+    const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
+
     return {
       operator_noc:{ in: nocListToFilter },
-      date_of_journey:{ gte: fromTimestamp, lte: toTimestamp },
-      ...(timingPointsOnly ? {timing_point: timingPointsOnly} : {}),
+      date_of_journey:{ gte: dateOfJourneyFromDateTime, lte: dateOfJourneyToDateTime },
+      ...(timingPointsOnly ? {is_timing_point: timingPointsOnly} : {}),
       ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers as number[] }} : {}),
       ...((startTime && endTime) ? { expected_departure_hour: { gte: start, lte: end }} : {
         ...(startTime ? { expected_departure_hour: { gte: start }} : {
           ...(endTime ? {expected_departure_hour: { lte: end }} : {})
         }),
       }),
-      ...(minDelay ? {
-        ...(minDelay == '-10' ? {
-          maximum_early_10: { gt: 0}
-        }: {
-          ...(minDelay == '-20' ? {
-            maximum_early_20: { gt: 0}
-          }: {
-            ...(minDelay == '-30' ? {
-              maximum_early_30: { gt: 0}
-            }: {
-              ...(minDelay == '-40' ? {
-                maximum_early_40: { gt: 0}
-              }: {
-                ...(minDelay == '-50' ? {
-                  maximum_early_50: { gt: 0}
-                }: {
-                  ...(minDelay == '-60' ? {
-                    maximum_early_60: { gt: 0}
-                  }: {
-                    
-                  })
-                })
-              })
-            })
-          })
-        })
-      }:{}),
-      ...(maxDelay ? {
-        ...(maxDelay == '10' ? {
-          maximum_late_10: { gt: 0}
-        }: {
-          ...(maxDelay == '20' ? {
-            maximum_late_20: { gt: 0}
-          }: {
-            ...(maxDelay == '30' ? {
-              maximum_late_30: { gt: 0}
-            }: {
-              ...(maxDelay == '40' ? {
-                maximum_late_40: { gt: 0}
-              }: {
-                ...(maxDelay == '50' ? {
-                  maximum_late_50: { gt: 0}
-                }: {
-                  ...(maxDelay == '60' ? {
-                    maximum_late_60: { gt: 0}
-                  }: {
-                    
-                  })
-                })
-              })
-            })
-          })
-        })
-      }:{}),
+      ...(maxEarlyNumber > 0 ? {
+          max_early: { lte: maxEarlyNumber}
+        }: {}),
+      ...(maxLateNumber > 0 ? {
+          max_late: { lte: maxLateNumber}
+        }: {}),
       ...(lineIds ? {service_code: {
         in: lineIds
       }} : {}),
