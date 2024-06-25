@@ -1239,6 +1239,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
   const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
   const {timingPointsOnly, adminAreaIds, operatorIds, startTime, endTime, maxDelay, minDelay, lineIds, dayOfWeekFlags} = filters;
 
+  // filter list of users' nocs to either operator nocs from filter OR full list
   let nocListToFilter: string[] = [];
     if(operatorIds && operatorIds.length>0)
     {
@@ -1253,6 +1254,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags)
     }
 
+    // parse startime and endtime minutes/hours
     let start = new Date();
     let end = new Date();
 
@@ -1268,27 +1270,17 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       end.setMinutes(minutes)
     }
 
-    // date_of_journey - add an hour to from timestamp
+    // date_of_journey - add an hour to from timestamp to prevent single day condition issues
     let fromMlSeconds = new Date(fromTimestamp).getTime();
     var addMlSeconds = 60 * 60 * 1000;
     var dateOfJourneyFromDateTime = new Date(fromMlSeconds + addMlSeconds);
     var dateOfJourneyToDateTime = new Date(toTimestamp);
 
-    // maxDelay == max late
-    // minDelay = max early
+    // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
+    const maxLateNumber = maxDelay ? maxDelay : 0;
+    const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
-    // change maxDelay and maxEarly
-    // where maxearly <= X
-    // where maxlate <= X
-
-    let maxLateNumber = 0, maxEarlyNumber = 0;
-    if(maxDelay){
-      maxLateNumber = maxDelay
-    }
-
-    if(minDelay){
-      maxEarlyNumber = Math.abs(minDelay)
-    }
+    logger.info("maxdelay: " + maxDelay + " mindelay: " + minDelay + " maxlateNumber: " + maxLateNumber + " maxearlyNumber: " + maxEarlyNumber)
 
     return {
       operator_noc:{ in: nocListToFilter },
@@ -1300,12 +1292,12 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
           ...(endTime ? {expected_departure_hour: { lte: end }} : {})
         }),
       }),
-      // ...(maxEarlyNumber > 0 ? {
-      //     max_early: { lte: maxEarlyNumber}
-      //   }: {}),
-      // ...(maxLateNumber > 0 ? {
-      //     max_late: { lte: maxLateNumber}
-      //   }: {}),
+      ...(maxEarlyNumber > 0 ? {
+          max_early: { lte: maxEarlyNumber}
+        }: {}),
+      ...(maxLateNumber > 0 ? {
+          max_late: { lte: maxLateNumber}
+        }: {}),
       ...(lineIds ? {service_code: {
         in: lineIds
       }} : {}),
