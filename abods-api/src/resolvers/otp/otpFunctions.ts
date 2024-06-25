@@ -1280,8 +1280,6 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
     const maxLateNumber = maxDelay ? maxDelay : 0;
     const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
-    logger.info("maxdelay: " + maxDelay + " mindelay: " + minDelay + " maxlateNumber: " + maxLateNumber + " maxearlyNumber: " + maxEarlyNumber)
-
     return {
       operator_noc:{ in: nocListToFilter },
       date_of_journey:{ gte: dateOfJourneyFromDateTime, lte: dateOfJourneyToDateTime },
