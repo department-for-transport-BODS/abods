@@ -1527,6 +1527,7 @@ export type ServicePunctualityType = IPunctualityType & {
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
   rank: Scalars['Float'];
+  averageDelay: Scalars['Float'];
   /**
    * Get the performance numbers for a previous period
    * for comparison with current period.
@@ -1575,7 +1576,7 @@ export enum SortOrderEnum {
 export type StopInfoType = {
   __typename?: 'StopInfoType';
   sourceId: Scalars['String'];
-  stopId: Scalars['Int'];
+  stopId: Scalars['String'];
   stopLocality: LocalityType;
   stopLocation: GpsPointType;
   stopName: Scalars['String'];

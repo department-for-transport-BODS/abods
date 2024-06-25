@@ -16,6 +16,32 @@ type Query {
     headwayMetrics: HeadwayMetricsType
     serviceInfo(serviceId: String!): ServiceInfoType
     vehicleReplay: VehicleReplayNamespace
+    servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
+    vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
+    timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
+}
+
+type VehicleJourneyType {
+  mode: String
+  operatorId: String
+  servicePatternId: String
+  timingPatternId: String
+  vehicleJourneyId: String
+}
+
+type TimingPatternDetailType {
+  arrivalTimeOffset: Int
+  createdAt: DateTime
+  deletedAt: DateTime
+  departureTimeOffset: Int
+  noPickup: Boolean
+  noSetdown: Boolean
+  requestStop: Boolean
+  stopIndex: Int
+  timingPatternId: String
+  timingPoint: Boolean
+  updatedAt: DateTime
+  version: String
 }
 
 input VehicleReplayFilterInputType {
@@ -32,6 +58,41 @@ input VehicleReplayInputType {
 
 type VehicleReplayNamespace {
   findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
+  getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
+}
+
+type GpsFeedType {
+  delay: Int!
+  feedStatus: GpsFeedStatus
+  isTimingPoint: Boolean
+  journeyStatus: GpsFeedJourneyStatus!
+  lat: Float
+  lon: Float
+  operatorInfo: OperatorInfoType
+  previousStopInfo: StopInfoType
+  scheduledDeparture: DateTime
+  serviceInfo: ServiceInfoType
+  servicePatternId: String
+  startTime: DateTime
+  ts: DateTime
+  vehicleId: String
+  vehicleJourneyId: String
+}
+
+enum GpsFeedStatus {
+  Active
+  Stale
+}
+
+enum GpsFeedJourneyStatus {
+  Completed
+  Started 
+  Unknown 
+}
+
+input GpsFeedNamespaceGetJourneyArgs {
+  journeyId: String
+  startTime: DateTime
 }
 
 type UniqueJourneyType {
