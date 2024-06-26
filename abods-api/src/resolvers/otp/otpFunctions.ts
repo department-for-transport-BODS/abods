@@ -149,9 +149,9 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
 
     const userOperatorIds = operators.map(o=>o.nocCode)
 
-    const service = await db.prisma.timetable.findFirst({
+    const service = await db.prisma.expected_services.findFirst({
       where:{
-        service_code: serviceId
+        noc_and_line: serviceId
       }
     })
 
@@ -159,11 +159,16 @@ export const getServiceInfo = async (serviceId, sessionUser: SessionUser, db: Co
       throw("No service found")
     }
 
-    return {
-      serviceId: service.service_code,
-      serviceNumber: service.line_name,
-      serviceName: service.line_name
-    };
+    if(userOperatorIds.includes(service.operator_noc)){
+      return {
+        serviceId: serviceId,
+        serviceNumber: service.line_name,
+        serviceName: service.service_name
+      };
+    }
+    else throw("User does not have access to service")
+
+
 
   } catch (error) {
     console.error(error)
@@ -365,7 +370,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
     let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if(lineIds){
-      results = await db.prisma.aa_timetable_summary_soc.aggregate({
+      results = await db.prisma.timetable_summary_service.aggregate({
         where: prismaFilters,
         _sum:{
           early_count:true,
@@ -377,7 +382,7 @@ export const getPunctualityOverview = async (inputs, sessionUser:SessionUser, db
       })
     }
     else{
-      results = await db.prisma.aa_timetable_summary_noc.aggregate({
+      results = await db.prisma.timetable_summary_operator.aggregate({
         where: prismaFilters,
         _sum:{
           early_count:true,
@@ -440,7 +445,7 @@ export const getOperatorPerformance = async (inputs, sessionUser:SessionUser, db
 
   const userOperatorIds = operators.map(o=>o.nocCode)
 
-  const results = await db.prisma.aa_timetable_summary_noc.groupBy({
+  const results = await db.prisma.timetable_summary_operator.groupBy({
     by:['operator_noc'],
     where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
     _sum:{
@@ -527,7 +532,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_timetable_summary_soc.groupBy({
+            results = await db.prisma.timetable_summary_service.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -538,7 +543,7 @@ export const getPunctualityDayOfWeek = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_timetable_summary_noc.groupBy({
+            results = await db.prisma.timetable_summary_operator.groupBy({
               by:['day_of_week'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -633,7 +638,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_timetable_summary_soc.findMany({
+            results = await db.prisma.timetable_summary_service.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -641,7 +646,7 @@ export const getDelayFrequency = async (inputs, sessionUser:SessionUser, db: Con
               }
             })
           }else{
-            results = await db.prisma.aa_timetable_summary_noc.findMany({
+            results = await db.prisma.timetable_summary_operator.findMany({
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               select: {
                 avg_time_difference:true,
@@ -743,7 +748,7 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
           let results;
 
           if(lineIds){
-            results = await db.prisma.aa_timetable_summary_soc.groupBy({
+            results = await db.prisma.timetable_summary_service.groupBy({
               by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -754,7 +759,7 @@ export const getPunctualityTimeOfDay = async (inputs, sessionUser:SessionUser, d
             })
           }
           else{
-            results = await db.prisma.aa_timetable_summary_noc.groupBy({
+            results = await db.prisma.timetable_summary_operator.groupBy({
               by:['departure_hour'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -832,7 +837,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
         // get a sum per day
         let results;
         if(lineIds){
-          results = await db.prisma.aa_timetable_summary_soc.groupBy({
+          results = await db.prisma.timetable_summary_service.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -842,7 +847,7 @@ export const getPunctualityTimeSeries = async (inputs, sessionUser:SessionUser, 
             }
           })
         }else{
-          results = await db.prisma.aa_timetable_summary_noc.groupBy({
+          results = await db.prisma.timetable_summary_operator.groupBy({
             by:['date_of_journey'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum:{
@@ -958,7 +963,7 @@ export const getStopPerformance = async (inputs, sessionUser:SessionUser, db: Co
           if(userOperatorIds.includes(operator_noc_to_filter))
           {
             // get a sum per day
-            const results = await db.prisma.aa_timetable_summary_stops.groupBy({
+            const results = await db.prisma.timetable_summary_stops.groupBy({
               by:['stop_id', 'common_name', 'is_timing_point'],
               where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
               _sum:{
@@ -1048,8 +1053,8 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
             if(userOperatorIds.includes(operator_noc_to_filter))
             {
               // get a sum per day
-              const results = await db.prisma.aa_timetable_summary_soc.groupBy({
-                by:['service_code'], // TODO: get data guys to add line name to table + add as group field + return
+              const results = await db.prisma.timetable_summary_service.groupBy({
+                by:['noc_and_line', 'line_name', 'service_name'], 
                 where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
                 _sum:{
                   early_count:true,
@@ -1067,7 +1072,7 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
 
                 const avgDelay = res._avg.avg_time_difference ? res._avg.avg_time_difference * 60 : 0;
                 servicePunctualities.push({
-                  lineId: res.service_code,
+                  lineId: res.noc_and_line,
                   early: res._sum.early_count ? res._sum.early_count : 0,
                   late: res._sum.late_count ? res._sum.late_count : 0,
                   onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
@@ -1076,9 +1081,9 @@ export const getServicePerformance = async (inputs, sessionUser:SessionUser, db:
                   averageDelay: avgDelay,
                   lineInfo: 
                   {
-                    serviceId: res.service_code,
-                    serviceNumber: res.service_code,
-                    serviceName: res.service_code
+                    serviceId: res.noc_and_line,
+                    serviceNumber: res.line_name,
+                    serviceName: res.service_name
                   },
                   rank: 1
                 });
@@ -1342,7 +1347,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList:string[]) => {
       ...(maxLateNumber > 0 ? {
           max_late: { lte: maxLateNumber}
         }: {}),
-      ...(lineIds ? {service_code: {
+      ...(lineIds ? {noc_and_line: {
         in: lineIds
       }} : {}),
     }
