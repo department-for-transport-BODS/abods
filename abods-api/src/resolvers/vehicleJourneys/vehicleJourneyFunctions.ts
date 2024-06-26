@@ -19,14 +19,13 @@ export const findJourneys = async (
   sessionUser: any,
   db: Context
 ): Promise<UniqueJourneyType[]> => {
-  if(!sessionUser.user){
-    throw("Not Authorized")
+  if (!sessionUser.user) {
+    throw "Not Authorized";
   }
   const lineIds = inputs.filters?.lineIds;
 
   let journeysData: UniqueJourneyType[] = [];
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
-    
     const currentTime = getDate();
     const journeys = await db.prisma.expected_journeys.findMany({
       where: {
@@ -38,37 +37,39 @@ export const findJourneys = async (
       include: {
         expected_service: {
           select: {
-            line_name: true
-          }
-        }
-      }
-    });
-    
-
-    journeysData = journeys.filter((journey) => {
-      const parsedTime = parseTimetz(journey.expected_journey_start?.toLocaleTimeString() ?? "")
-      return parsedTime.isBefore(currentTime, 'second');
-    }).map((journey) => {
-      
-      const departureTime = getUTCDate(journey.expected_journey_start);
-      const journeyDate = getDate(journey.date_of_journey);
-      const startTime = getDate(
-        `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-          "HH:mm:ss"
-        )}`
-      );
-
-      const journeyDescription: string = journey.journey_pattern_description;
-      return {
-        vehicleJourneyId: journey.group_id,
-        startTime: startTime.toISOString(),
-        serviceInfo: {
-          serviceName: journeyDescription,
-          serviceNumber: journey.expected_service.line_name,
-          serviceId: journey.group_id,
+            line_name: true,
+          },
         },
-      };
+      },
     });
+
+    journeysData = journeys
+      .filter((journey) => {
+        const parsedTime = parseTimetz(
+          journey.expected_journey_start?.toLocaleTimeString() ?? ""
+        );
+        return parsedTime.isBefore(currentTime, "second");
+      })
+      .map((journey) => {
+        const departureTime = getUTCDate(journey.expected_journey_start);
+        const journeyDate = getDate(journey.date_of_journey);
+        const startTime = getDate(
+          `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+            "HH:mm:ss"
+          )}`
+        );
+
+        const journeyDescription: string = journey.journey_pattern_description;
+        return {
+          vehicleJourneyId: journey.group_id,
+          startTime: startTime.toISOString(),
+          serviceInfo: {
+            serviceName: journeyDescription,
+            serviceNumber: journey.expected_service.line_name,
+            serviceId: journey.group_id,
+          },
+        };
+      });
   }
 
   return journeysData;
@@ -80,12 +81,12 @@ export const getJourney = async (
   sessionUser: any,
   db: Context
 ): Promise<Array<Maybe<GpsFeedType>>> => {
-  if(!sessionUser.user){
-    throw("Not Authorized")
+  if (!sessionUser.user) {
+    throw "Not Authorized";
   }
   let journeyData: Array<Maybe<GpsFeedType>> = [];
 
-  const testDate = new Date(startTime.toISOString().substring(0, 10))
+  const testDate = new Date(startTime.toISOString().substring(0, 10));
 
   const journeys = await db.prisma.timetable.findMany({
     where: {
@@ -153,12 +154,14 @@ export const getJourney = async (
         journeyStatus: GpsFeedJourneyStatus.Completed,
         operatorInfo: {
           operatorId:
-            journey.expected_journeys.expected_service.expected_operator.operator_noc,
+            journey.expected_journeys.expected_service.expected_operator
+              .operator_noc,
           operatorName:
             journey.expected_journeys.expected_service.expected_operator
               .operator_name,
           nocCode:
-            journey.expected_journeys.expected_service.expected_operator.operator_noc,
+            journey.expected_journeys.expected_service.expected_operator
+              .operator_noc,
         },
         serviceInfo: {
           serviceId: journey.expected_journeys.expected_service.noc_and_line,
@@ -191,8 +194,8 @@ export const servicePatternsInfo = async (
   sessionUser: any,
   db: Context
 ): Promise<Array<Maybe<ServicePatternType>>> => {
-  if(!sessionUser.user){
-    throw("Not Authorized")
+  if (!sessionUser.user) {
+    throw "Not Authorized";
   }
 
   let servicePatterns: Array<Maybe<ServicePatternType>> = [];
@@ -254,8 +257,8 @@ export const vehicleJourney = async (
   sessionUser: any,
   db: Context
 ): Promise<Maybe<VehicleJourneyType>[]> => {
-  if(!sessionUser.user){
-    throw("Not Authorized")
+  if (!sessionUser.user) {
+    throw "Not Authorized";
   }
 
   const journey = await db.prisma.expected_journeys.findUnique({
@@ -275,7 +278,8 @@ export const vehicleJourney = async (
   return [
     {
       mode: "",
-      operatorId: journey?.expected_service.expected_operator.operator_noc ?? "",
+      operatorId:
+        journey?.expected_service.expected_operator.operator_noc ?? "",
       servicePatternId: journey?.vehicle_journey_id.toString() ?? "",
       timingPatternId: journey?.vehicle_journey_id.toString() ?? "",
       vehicleJourneyId: vehicleJourneyId,
@@ -288,15 +292,18 @@ export const timingPatternDetail = async (
   sessionUser: any,
   db: Context
 ): Promise<Maybe<TimingPatternDetailType>[]> => {
-
+  if (!sessionUser.user) {
+    throw "Not Authorized";
+  }
+  
   const journey = await db.prisma.transmodel_vehiclejourney.findMany({
     where: {
-      id: Number(timingPatternId)
+      id: Number(timingPatternId),
     },
     include: {
-      stops: true
-    }
-  })
+      stops: true,
+    },
+  });
 
   return journey[0].stops.map((stop) => ({
     stopIndex: stop.sequence_number,
@@ -309,6 +316,6 @@ export const timingPatternDetail = async (
     timingPatternId: timingPatternId,
     timingPoint: stop.is_timing_point,
     updatedAt: getDate(),
-    version: "1"
-  }))
-}
+    version: "1",
+  }));
+};
