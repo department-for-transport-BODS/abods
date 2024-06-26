@@ -1,10 +1,8 @@
-import dayjs from "dayjs";
 import { Context } from "../../context";
 import { getDate, getUTCDate, parseTimetz } from "../../lib/dayjs.js";
 import {
   UniqueJourneyType,
   VehicleReplayInputType,
-  GpsFeedNamespaceGetJourneyArgs,
   Maybe,
   GpsFeedType,
   ServicePatternType,
