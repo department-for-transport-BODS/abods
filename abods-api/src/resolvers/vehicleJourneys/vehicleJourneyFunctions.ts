@@ -11,6 +11,7 @@ import {
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
 } from "../../types.js";
+import logger from '../../logger.js'
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
@@ -56,11 +57,22 @@ export const findJourneys = async (
             "HH:mm:ss"
           )}`
         );
+        logger.info(`expected_journey_start------- ${journey.expected_journey_start}`)
+        logger.info(`departureTime locale------- ${journey.expected_journey_start.toLocaleString('en-GB', { timeZone: 'Europe/London'})}`)
+        logger.info(`departureTime -------${journey.expected_journey_start.toLocaleString()}`)
+        logger.info(`format-------${departureTime.format("HH:mm:ss")}`)
+        logger.info(`london-------${departureTime.tz("Europe/London").format("HH:mm:ss")}`)
+        logger.info(`UTC-------${departureTime.tz("UTC").format("HH:mm:ss")}`)
+        logger.info(`startTime locale-------${startTime.toISOString()}`)
+        logger.info(`startTime -------${startTime.tz("Europe/London").toISOString()}`)
+        logger.info(`locale-------${startTime.utc()}`)
+        logger.info(`iso-------${startTime.utc().toISOString()}`)
+        logger.info(`iso2------- ${journey.expected_journey_start.toISOString()}`)
 
         const journeyDescription: string = journey.journey_pattern_description;
         return {
           vehicleJourneyId: journey.group_id,
-          startTime: startTime.toISOString(),
+          startTime: startTime.tz("Europe/London").toISOString(),
           serviceInfo: {
             serviceName: journeyDescription,
             serviceNumber: journey.expected_service.line_name,
@@ -84,12 +96,12 @@ export const getJourney = async (
   }
   let journeyData: Array<Maybe<GpsFeedType>> = [];
 
-  const testDate = new Date(startTime.toISOString().substring(0, 10));
+  const journeyDate = new Date(startTime.toISOString().substring(0, 10));
 
   const journeys = await db.prisma.timetable.findMany({
     where: {
       group_id: journeyId,
-      date_of_journey: testDate,
+      date_of_journey: journeyDate,
     },
     include: {
       expected_journeys: {
