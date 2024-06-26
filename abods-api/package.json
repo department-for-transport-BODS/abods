@@ -32,6 +32,8 @@
     "connect-redis": "^7.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.11",
+    "dayjs-plugin-utc": "^0.1.2",
     "express-session": "^1.18.0",
     "graphql": "^16.8.1",
     "graphql-scalars": "^1.23.0",

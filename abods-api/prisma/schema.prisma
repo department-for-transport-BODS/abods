@@ -103,14 +103,6 @@ model Tokens {
   token   String
 }
 
-model expected_services {
-  date_of_journey DateTime
-  operator_noc String
-  line_name String
-  noc_and_line String @id
-  service_name String
-}
-
 model timetable_summary_operator {
   timetable_id    Int   @id @default(1)
 	operator_noc String
@@ -180,19 +172,19 @@ model Timetable {
   line_name               String?
   xml_file_name           String?
   journey_code            String?
-  date_of_journey         DateTime?
+  date_of_journey         DateTime
   day_of_week             Int
   common_name             String?
   atco_code               String?
   stop_type               String?
-  stop_index              Int?
+  stop_index              Int
   stop_latitude           Decimal?
   stop_longitude          Decimal?
   locality_id             String?
   expected_departure_time DateTime? @db.Time(6)
   actual_departure_time   DateTime? @db.Time(6)
   is_timing_point         Boolean?
-  group_id                String?
+  group_id                String
   previous_group_id       String?
   otp_state               String?
   expected_headway        Int?
@@ -201,6 +193,9 @@ model Timetable {
   siri_vm_position_id     Int?
   time_difference         Int?
   stop_id                 Int?
+  servicepattern_id       Int
+  vehiclejourney_id       Int
+  expected_journeys       expected_journeys @relation(fields: [group_id], references: [group_id])
 }
 
 view naptan_adminarea_with_shape{
@@ -227,25 +222,63 @@ model OperatorAdminArea {
   admin_area_id          Int
 }
 
-model ExpectedOperators {
-  expected_operator_id Int                @id @default(1)
-  noc                  String
-  organization_id      Int
+model expected_operators {
+  date_of_journey      DateTime 
+  operator_noc         String
   operator_name        String
+  expected_services    expected_services[]
+  @@id([operator_noc, date_of_journey]) 
 }
 
-// model ExpectedJourneys {
-//   expected_journey_id Int              @id @default(1)
-//   date_of_journey     DateTime
-//   day_of_week         String
-//   direction_ref       String
-//   expected_service_id Int
-//   expected_service    ExpectedServices @relation(fields: [expected_service_id], references: [expected_service_id])
-//   otps                OTP[]
-// }
+model expected_services {
+  line_name             String
+  noc_and_line          String
+  service_name          String
+  date_of_journey       DateTime
+  operator_noc          String
+  expected_operator     expected_operators @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
+  expected_journeys     expected_journeys[]       
+  @@id([noc_and_line, date_of_journey])
+}
 
-// model Stops {
-//   stop_id   Int    @id @default(1)
-//   stop_code String
-//   otps      OTP[]
-// }
+model expected_journeys {
+  group_id                    String            @unique
+  operator_noc                String
+  line_name                   String
+  journey_pattern_description String
+  journey_code                String
+  date_of_journey             DateTime
+  day_of_week                 Int
+  noc_and_line                String
+  stop_count                  Int
+  vehicle_journey_id          Int               
+  expected_journey_start      DateTime           @db.Timetz
+  expected_service            expected_services  @relation(fields: [noc_and_line, date_of_journey], references: [noc_and_line, date_of_journey])
+  timetable                   Timetable[]
+  vehicle_journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
+  @@id([noc_and_line, journey_code, date_of_journey])
+}
+
+model transmodel_vehiclejourney {
+  id            Int      @id @default(1)
+  stops         transmodel_servicepatternstop[]
+  expected_journeys expected_journeys[]
+}
+
+model transmodel_servicepatternstop {
+  id                  Int      @id @default(1)
+  sequence_number     Int
+  naptan_stop_id      Int
+  is_timing_point     Boolean
+  vehicle_journey_id  Int
+  atco_code           String
+  common_name         String
+  journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
+  naptan_stop         naptan_stop_id  @relation(fields: [naptan_stop_id], references: [id])
+}
+
+model naptan_stop_id {
+  id                  Int      @id @default(1)
+  location            String
+  sp_stops            transmodel_servicepatternstop[]
+}

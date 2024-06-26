@@ -1576,7 +1576,7 @@ export enum SortOrderEnum {
 export type StopInfoType = {
   __typename?: 'StopInfoType';
   sourceId: Scalars['String'];
-  stopId: Scalars['Int'];
+  stopId: Scalars['String'];
   stopLocality: LocalityType;
   stopLocation: GpsPointType;
   stopName: Scalars['String'];

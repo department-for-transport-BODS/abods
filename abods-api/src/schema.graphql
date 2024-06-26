@@ -9,12 +9,102 @@ type Query {
     roles: [RoleType]
     userAlerts: [AlertType]
     userAlert(alertId: String!): AlertType
-    operator(operatorId: String!, lineId: String!): OperatorType
+    operator(operatorId: String!, lineId: String): OperatorType
     operators: OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType
     serviceInfo(serviceId: String!): ServiceInfoType
+    vehicleReplay: VehicleReplayNamespace
+    servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
+    vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
+    timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
+}
+
+type VehicleJourneyType {
+  mode: String
+  operatorId: String
+  servicePatternId: String
+  timingPatternId: String
+  vehicleJourneyId: String
+}
+
+type TimingPatternDetailType {
+  arrivalTimeOffset: Int
+  createdAt: DateTime
+  deletedAt: DateTime
+  departureTimeOffset: Int
+  noPickup: Boolean
+  noSetdown: Boolean
+  requestStop: Boolean
+  stopIndex: Int
+  timingPatternId: String
+  timingPoint: Boolean
+  updatedAt: DateTime
+  version: String
+}
+
+input VehicleReplayFilterInputType {
+  filterOnStartTime: Boolean
+  lineIds: [String]
+  stopIds: [String]
+}
+
+input VehicleReplayInputType {
+  filters: VehicleReplayFilterInputType
+  fromTimestamp: DateTime!
+  toTimestamp: DateTime!
+}
+
+type VehicleReplayNamespace {
+  findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
+  getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
+}
+
+type GpsFeedType {
+  delay: Int!
+  feedStatus: GpsFeedStatus
+  isTimingPoint: Boolean
+  journeyStatus: GpsFeedJourneyStatus!
+  lat: Float
+  lon: Float
+  operatorInfo: OperatorInfoType
+  previousStopInfo: StopInfoType
+  scheduledDeparture: DateTime
+  serviceInfo: ServiceInfoType
+  servicePatternId: String
+  startTime: DateTime
+  ts: DateTime
+  vehicleId: String
+  vehicleJourneyId: String
+}
+
+enum GpsFeedStatus {
+  Active
+  Stale
+}
+
+enum GpsFeedJourneyStatus {
+  Completed
+  Started 
+  Unknown 
+}
+
+input GpsFeedNamespaceGetJourneyArgs {
+  journeyId: String
+  startTime: DateTime
+}
+
+type UniqueJourneyType {
+  serviceInfo: ServiceInfoType
+  startTime: DateTime
+  vehicleJourneyId: String
+}
+
+type ServiceInfoType {
+  serviceId: String
+  serviceName: String
+  serviceNumber: String
 }
 
 type Mutation {
@@ -141,6 +231,7 @@ type PaginatedLineType {
 type LineType {
   lineId: String
   lineName: String
+  lineNumber: String
   servicePatterns: [ServicePatternType]
 }
 
