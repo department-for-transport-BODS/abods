@@ -103,7 +103,15 @@ model Tokens {
   token   String
 }
 
-model aa_timetable_summary_noc {
+model expected_services {
+  date_of_journey DateTime
+  operator_noc String
+  line_name String
+  noc_and_line String @id
+  service_name String
+}
+
+model timetable_summary_operator {
   timetable_id    Int   @id @default(1)
 	operator_noc String
 	date_of_journey DateTime
@@ -120,11 +128,12 @@ model aa_timetable_summary_noc {
   avg_time_difference Int
 }
 
-model aa_timetable_summary_soc {
+model timetable_summary_service {
   timetable_id    Int   @id @default(1)
-  common_name String
+  line_name String
+  noc_and_line String
+  service_name String
 	operator_noc String
-  service_code String
 	date_of_journey DateTime
 	day_of_week Int
 	departure_hour DateTime? @db.Time(6)
@@ -139,10 +148,11 @@ model aa_timetable_summary_soc {
   avg_time_difference Int
 }
 
-model aa_timetable_summary_stops {
+model timetable_summary_stops {
   timetable_id    Int   @id @default(1)
 	operator_noc String
   service_code String
+  noc_and_line String
   stop_id Int
   stop_latitude           Decimal?
   stop_longitude          Decimal?
