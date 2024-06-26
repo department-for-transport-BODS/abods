@@ -103,14 +103,6 @@ model Tokens {
   token   String
 }
 
-model expected_services {
-  date_of_journey DateTime
-  operator_noc String
-  line_name String
-  noc_and_line String @id
-  service_name String
-}
-
 model timetable_summary_operator {
   timetable_id    Int   @id @default(1)
 	operator_noc String
