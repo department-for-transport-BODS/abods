@@ -61,7 +61,9 @@ export const findJourneys = async (
         const startTimeUTC = dayjs.utc(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
              "HH:mm:ss"
            )}Z`)
-        const startTime = dayjs.tz(startTimeUTC.format('YYYY-MM-DDTHH:mm:ss'), 'Europe/London');
+        const startTime = dayjs.tz(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+            "HH:mm:ss"
+          )}`, 'Europe/London');
         logger.info(`expected_journey_start------- ${journey.expected_journey_start}`)
         logger.info(`departureTime locale------- ${journey.expected_journey_start.toLocaleString('en-GB', { timeZone: 'Europe/London'})}`)
         logger.info(`db utc------- ${journey.expected_journey_start.toUTCString()}`)
