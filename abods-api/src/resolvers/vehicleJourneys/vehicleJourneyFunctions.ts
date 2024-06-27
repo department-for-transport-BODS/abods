@@ -12,6 +12,7 @@ import {
   GpsFeedJourneyStatus,
 } from "../../types.js";
 import logger from '../../logger.js'
+import dayjs from "dayjs";
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
@@ -52,11 +53,15 @@ export const findJourneys = async (
       .map((journey) => {
         const departureTime = getUTCDate(journey.expected_journey_start);
         const journeyDate = getDate(journey.date_of_journey);
-        const startTime = getDate(
-          `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-            "HH:mm:ss"
-          )}`
-        );
+        // const startTime = dayjs.tz(getDate(
+        //   `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+        //     "HH:mm:ss"
+        //   )}`
+        // ),'Europe/London');
+        const startTimeUTC = dayjs.utc(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+             "HH:mm:ss"
+           )}Z`)
+        const startTime = dayjs.tz(startTimeUTC.format('YYYY-MM-DDTHH:mm:ss'), 'Europe/London');
         logger.info(`expected_journey_start------- ${journey.expected_journey_start}`)
         logger.info(`departureTime locale------- ${journey.expected_journey_start.toLocaleString('en-GB', { timeZone: 'Europe/London'})}`)
         logger.info(`db utc------- ${journey.expected_journey_start.toUTCString()}`)
