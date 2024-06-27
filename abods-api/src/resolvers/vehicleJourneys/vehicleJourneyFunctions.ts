@@ -1,5 +1,10 @@
 import { Context } from "../../context";
-import { getDate, getDateLocale, getUTCDate, parseTimetz } from "../../lib/dayjs.js";
+import {
+  getDate,
+  getDateLocale,
+  getUTCDate,
+  parseTimetz,
+} from "../../lib/dayjs.js";
 import {
   UniqueJourneyType,
   VehicleReplayInputType,
@@ -25,7 +30,7 @@ export const findJourneys = async (
   let journeysData: UniqueJourneyType[] = [];
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
     const currentTime = getDate();
-    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, "hour")
+    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, "hour");
     let journeys = await db.prisma.expected_journeys.findMany({
       where: {
         noc_and_line: lineIds[0],
@@ -40,38 +45,37 @@ export const findJourneys = async (
       },
     });
 
-    if(toTimestamp.isSame(currentTime, 'day')){
+    if (toTimestamp.isSame(currentTime, "day")) {
       journeys = journeys.filter((journey) => {
-        
         const parsedTime = parseTimetz(
           journey.expected_journey_start?.toLocaleTimeString() ?? ""
         );
-        
+
         return parsedTime.isBefore(currentTime, "second");
-      })
+      });
     }
 
-    journeysData = journeys
-      .map((journey) => {
-        const departureTime = getUTCDate(journey.expected_journey_start);
-        const journeyDate = getDate(journey.date_of_journey);
-        
-        const startTime = getDateLocale(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-            "HH:mm:ss"
-          )}`);
-        
+    journeysData = journeys.map((journey) => {
+      const departureTime = getUTCDate(journey.expected_journey_start);
+      const journeyDate = getDate(journey.date_of_journey);
 
-        const journeyDescription: string = journey.journey_pattern_description;
-        return {
-          vehicleJourneyId: journey.group_id,
-          startTime: startTime.toISOString(),
-          serviceInfo: {
-            serviceName: journeyDescription,
-            serviceNumber: journey.expected_service.line_name,
-            serviceId: journey.group_id,
-          },
-        };
-      });
+      const startTime = getDateLocale(
+        `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+          "HH:mm:ss"
+        )}`
+      );
+
+      const journeyDescription: string = journey.journey_pattern_description;
+      return {
+        vehicleJourneyId: journey.group_id,
+        startTime: startTime.toISOString(),
+        serviceInfo: {
+          serviceName: journeyDescription,
+          serviceNumber: journey.expected_service.line_name,
+          serviceId: journey.group_id,
+        },
+      };
+    });
   }
 
   return journeysData;
@@ -226,14 +230,14 @@ export const servicePatternsInfo = async (
         // if (matches) {
         //   const longitude = parseFloat(matches[1]);
         //   const latitude = parseFloat(matches[2]);
-          return {
-            stopId: stop.atco_code,
-            stopName: stop.txc_common_name ?? "",
-            // lon: longitude,
-            // lat: latitude,
-            lon: 0,
-            lat: 0,
-          };
+        return {
+          stopId: stop.atco_code,
+          stopName: stop.txc_common_name ?? "",
+          // lon: longitude,
+          // lat: latitude,
+          lon: 0,
+          lat: 0,
+        };
         // } else {
         //   throw new Error(
         //     `Invalid geometry format: ${stop.naptan_stop.location}`
@@ -298,8 +302,8 @@ export const timingPatternDetail = async (
   if (!sessionUser.user) {
     throw "Not Authorized";
   }
-  
-  const journey = await db.prisma.transmodel_vehiclejourney.findMany({
+
+  const journey = await db.prisma.transmodel_vehiclejourney.findUnique({
     where: {
       id: Number(timingPatternId),
     },
@@ -308,17 +312,23 @@ export const timingPatternDetail = async (
     },
   });
 
-  return journey[0].stops.map((stop) => ({
-    stopIndex: stop.sequence_number,
-    arrivalTimeOffset: 0,
-    departureTimeOffset: 0,
-    createdAt: getDate(),
-    noPickup: false,
-    noSetdown: false,
-    requestStop: false,
-    timingPatternId: timingPatternId,
-    timingPoint: stop.is_timing_point,
-    updatedAt: getDate(),
-    version: "1",
-  }));
+  const journeyDepartureTime = getDate(journey?.start_time);
+
+  return (
+    journey?.stops.map((stop) => ({
+      stopIndex: stop.sequence_number,
+      arrivalTimeOffset: 0,
+      departureTimeOffset: journey?.start_time
+        ? getDate(stop.departure_time).diff(journeyDepartureTime, "minute")
+        : 0,
+      createdAt: getDate(),
+      noPickup: false,
+      noSetdown: false,
+      requestStop: false,
+      timingPatternId: timingPatternId,
+      timingPoint: stop.is_timing_point,
+      updatedAt: getDate(),
+      version: "1",
+    })) ?? []
+  );
 };

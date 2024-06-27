@@ -261,6 +261,7 @@ model expected_journeys {
 
 model transmodel_vehiclejourney {
   id            Int      @id @default(1)
+  start_time    DateTime @db.Time(6)
   stops         transmodel_servicepatternstop[]
   expected_journeys expected_journeys[]
 }
@@ -272,6 +273,7 @@ model transmodel_servicepatternstop {
   is_timing_point     Boolean
   vehicle_journey_id  Int
   atco_code           String
+  departure_time      DateTime @db.Time(6)
   txc_common_name     String?
   journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
   naptan_stop         naptan_stoppoint  @relation(fields: [naptan_stop_id], references: [id])
