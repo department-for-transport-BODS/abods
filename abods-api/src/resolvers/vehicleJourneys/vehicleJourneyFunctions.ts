@@ -53,38 +53,16 @@ export const findJourneys = async (
       .map((journey) => {
         const departureTime = getUTCDate(journey.expected_journey_start);
         const journeyDate = getDate(journey.date_of_journey);
-        // const startTime = dayjs.tz(getDate(
-        //   `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-        //     "HH:mm:ss"
-        //   )}`
-        // ),'Europe/London');
-        const startTimeUTC = dayjs.utc(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-             "HH:mm:ss"
-           )}Z`)
+        
         const startTime = dayjs.tz(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
             "HH:mm:ss"
           )}`, 'Europe/London');
-        logger.info(`expected_journey_start------- ${journey.expected_journey_start}`)
-        logger.info(`departureTime locale------- ${journey.expected_journey_start.toLocaleString('en-GB', { timeZone: 'Europe/London'})}`)
-        logger.info(`db utc------- ${journey.expected_journey_start.toUTCString()}`)
-        logger.info(`db string------- ${journey.expected_journey_start.toString()}`)
-        logger.info(`db locale -------${journey.expected_journey_start.toLocaleString()}`)
-        logger.info(`format-------${departureTime.format("HH:mm:ss")}`)
-        logger.info(`london-------${departureTime.tz("Europe/London").format("HH:mm:ss")}`)
-        logger.info(`UTC-------${departureTime.tz("UTC").format("HH:mm:ss")}`)
-        logger.info(`startTime-------${startTime}`)
-        logger.info(`startTime locale-------${startTime.toISOString()}`)
-        logger.info(`startTime London-------${startTime.tz("Europe/London").utc().toISOString()}`)
-        logger.info(`startTime UTC-------${startTime.utc().toISOString()}`)
-        logger.info(`locale-------${startTime.utc()}`)
-        logger.info(`iso-------${startTime.utc().toISOString()}`)
-        logger.info(`iso2------- ${journey.expected_journey_start.toISOString()}`)
+        
 
         const journeyDescription: string = journey.journey_pattern_description;
         return {
           vehicleJourneyId: journey.group_id,
-          startTime: startTime.tz("Europe/London").toDate(),
-          //startTime: startTime.toISOString(),
+          startTime: startTime.toISOString(),
           serviceInfo: {
             serviceName: journeyDescription,
             serviceNumber: journey.expected_service.line_name,
