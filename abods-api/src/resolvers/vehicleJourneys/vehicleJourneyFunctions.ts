@@ -197,7 +197,6 @@ export const servicePatternsInfo = async (
   if (!sessionUser.user) {
     throw "Not Authorized";
   }
-  console.log("before------")
   let servicePatterns: Array<Maybe<ServicePatternType>> = [];
   if (vehicleJourneyId && vehicleJourneyId.length > 0) {
     const vehicleJourney = await db.prisma.transmodel_vehiclejourney.findUnique(
@@ -217,14 +216,11 @@ export const servicePatternsInfo = async (
       }
     );
 
-    console.log("vehicleJourney------",vehicleJourney)
     const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
       (stop) => {
-        console.log("matches-----",stop.naptan_stop)
         // const matches = stop.naptan_stop.location.match(
         //   /POINT\(([^ ]+) ([^ ]+)\)/
         // );
-        // console.log("matches-----",matches)
         // if (matches) {
         //   const longitude = parseFloat(matches[1]);
         //   const latitude = parseFloat(matches[2]);
