@@ -1,5 +1,5 @@
 import { Context } from "../../context";
-import { getDate, getUTCDate, parseTimetz } from "../../lib/dayjs.js";
+import { getDate, getDateLocale, getUTCDate, parseTimetz } from "../../lib/dayjs.js";
 import {
   UniqueJourneyType,
   VehicleReplayInputType,
@@ -11,8 +11,6 @@ import {
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
 } from "../../types.js";
-import logger from '../../logger.js'
-import dayjs from "dayjs";
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
@@ -27,12 +25,11 @@ export const findJourneys = async (
   let journeysData: UniqueJourneyType[] = [];
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
     const currentTime = getDate();
-    const journeys = await db.prisma.expected_journeys.findMany({
+    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, "hour")
+    let journeys = await db.prisma.expected_journeys.findMany({
       where: {
         noc_and_line: lineIds[0],
-        date_of_journey: getDate(inputs.toTimestamp)
-          .subtract(4, "hour")
-          .toDate(),
+        date_of_journey: toTimestamp.toDate(),
       },
       include: {
         expected_service: {
@@ -43,20 +40,25 @@ export const findJourneys = async (
       },
     });
 
-    journeysData = journeys
-      .filter((journey) => {
+    if(toTimestamp.isSame(currentTime, 'day')){
+      journeys = journeys.filter((journey) => {
+        
         const parsedTime = parseTimetz(
           journey.expected_journey_start?.toLocaleTimeString() ?? ""
         );
+        
         return parsedTime.isBefore(currentTime, "second");
       })
+    }
+
+    journeysData = journeys
       .map((journey) => {
         const departureTime = getUTCDate(journey.expected_journey_start);
         const journeyDate = getDate(journey.date_of_journey);
         
-        const startTime = dayjs.tz(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+        const startTime = getDateLocale(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
             "HH:mm:ss"
-          )}`, 'Europe/London');
+          )}`);
         
 
         const journeyDescription: string = journey.journey_pattern_description;

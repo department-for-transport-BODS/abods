@@ -5,7 +5,6 @@ import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-//dayjs.extend(advancedFormat);
 dayjs.locale('en');
 
 export const getDate = (date?: string | Date | null, format?: string): Dayjs => {
@@ -29,4 +28,7 @@ export const parseTimetz = (timetzString: string): Dayjs => {
   
     return dayjs().set('hour', hours).set('minute', minutes).set('second', seconds);
 }
-  
+
+export const getDateLocale = (utcString: string): Dayjs => {
+    return dayjs.tz(utcString, 'Europe/London')
+}
