@@ -72,7 +72,8 @@ export const findJourneys = async (
         const journeyDescription: string = journey.journey_pattern_description;
         return {
           vehicleJourneyId: journey.group_id,
-          startTime: startTime.tz("Europe/London").toISOString(),
+          startTime: startTime.tz("Europe/London").toDate(),
+          //startTime: startTime.toISOString(),
           serviceInfo: {
             serviceName: journeyDescription,
             serviceNumber: journey.expected_service.line_name,
@@ -154,7 +155,7 @@ export const getJourney = async (
         ts: stopTime.toISOString(),
         vehicleId: journey.group_id,
         vehicleJourneyId: journey.group_id,
-        servicePatternId: journey.servicepattern_id.toString(),
+        servicePatternId: journey.vehiclejourney_id.toString(),
         isTimingPoint: journey.is_timing_point,
         delay: journey.time_difference ?? 0,
         startTime: startTime.toISOString(),
@@ -200,59 +201,64 @@ export const getJourney = async (
 };
 
 export const servicePatternsInfo = async (
-  servicePatternIds: string[],
+  vehicleJourneyId: string[],
   sessionUser: any,
   db: Context
 ): Promise<Array<Maybe<ServicePatternType>>> => {
   if (!sessionUser.user) {
     throw "Not Authorized";
   }
-
+  console.log("before------")
   let servicePatterns: Array<Maybe<ServicePatternType>> = [];
-  if (servicePatternIds && servicePatternIds.length > 0) {
+  if (vehicleJourneyId && vehicleJourneyId.length > 0) {
     const vehicleJourney = await db.prisma.transmodel_vehiclejourney.findUnique(
       {
         where: {
-          id: Number(servicePatternIds[0]),
+          id: Number(vehicleJourneyId[0]),
         },
         include: {
           stops: {
             select: {
               naptan_stop: true,
               atco_code: true,
-              common_name: true,
+              txc_common_name: true,
             },
           },
         },
       }
     );
 
+    console.log("vehicleJourney------",vehicleJourney)
     const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
       (stop) => {
-        const matches = stop.naptan_stop.location.match(
-          /POINT\(([^ ]+) ([^ ]+)\)/
-        );
-        if (matches) {
-          const longitude = parseFloat(matches[1]);
-          const latitude = parseFloat(matches[2]);
+        console.log("matches-----",stop.naptan_stop)
+        // const matches = stop.naptan_stop.location.match(
+        //   /POINT\(([^ ]+) ([^ ]+)\)/
+        // );
+        // console.log("matches-----",matches)
+        // if (matches) {
+        //   const longitude = parseFloat(matches[1]);
+        //   const latitude = parseFloat(matches[2]);
           return {
             stopId: stop.atco_code,
-            stopName: stop.common_name,
-            lon: longitude,
-            lat: latitude,
+            stopName: stop.txc_common_name ?? "",
+            // lon: longitude,
+            // lat: latitude,
+            lon: 0,
+            lat: 0,
           };
-        } else {
-          throw new Error(
-            `Invalid geometry format: ${stop.naptan_stop.location}`
-          );
-        }
+        // } else {
+        //   throw new Error(
+        //     `Invalid geometry format: ${stop.naptan_stop.location}`
+        //   );
+        // }
       }
     );
 
     servicePatterns = [
       {
         stops: stops ?? [],
-        servicePatternId: servicePatternIds[0],
+        servicePatternId: vehicleJourneyId[0],
         serviceLinks: [],
         name: "",
       },
