@@ -11,6 +11,8 @@ import {
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
 } from "../../types.js";
+import logger from '../../logger.js'
+import dayjs from "dayjs";
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
@@ -51,11 +53,11 @@ export const findJourneys = async (
       .map((journey) => {
         const departureTime = getUTCDate(journey.expected_journey_start);
         const journeyDate = getDate(journey.date_of_journey);
-        const startTime = getDate(
-          `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
+        
+        const startTime = dayjs.tz(`${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
             "HH:mm:ss"
-          )}`
-        );
+          )}`, 'Europe/London');
+        
 
         const journeyDescription: string = journey.journey_pattern_description;
         return {
@@ -84,12 +86,12 @@ export const getJourney = async (
   }
   let journeyData: Array<Maybe<GpsFeedType>> = [];
 
-  const testDate = new Date(startTime.toISOString().substring(0, 10));
+  const journeyDate = new Date(startTime.toISOString().substring(0, 10));
 
   const journeys = await db.prisma.timetable.findMany({
     where: {
       group_id: journeyId,
-      date_of_journey: testDate,
+      date_of_journey: journeyDate,
     },
     include: {
       expected_journeys: {
@@ -142,7 +144,7 @@ export const getJourney = async (
         ts: stopTime.toISOString(),
         vehicleId: journey.group_id,
         vehicleJourneyId: journey.group_id,
-        servicePatternId: journey.servicepattern_id.toString(),
+        servicePatternId: journey.vehiclejourney_id.toString(),
         isTimingPoint: journey.is_timing_point,
         delay: journey.time_difference ?? 0,
         startTime: startTime.toISOString(),
@@ -188,27 +190,26 @@ export const getJourney = async (
 };
 
 export const servicePatternsInfo = async (
-  servicePatternIds: string[],
+  vehicleJourneyId: string[],
   sessionUser: any,
   db: Context
 ): Promise<Array<Maybe<ServicePatternType>>> => {
   if (!sessionUser.user) {
     throw "Not Authorized";
   }
-
   let servicePatterns: Array<Maybe<ServicePatternType>> = [];
-  if (servicePatternIds && servicePatternIds.length > 0) {
+  if (vehicleJourneyId && vehicleJourneyId.length > 0) {
     const vehicleJourney = await db.prisma.transmodel_vehiclejourney.findUnique(
       {
         where: {
-          id: Number(servicePatternIds[0]),
+          id: Number(vehicleJourneyId[0]),
         },
         include: {
           stops: {
             select: {
               naptan_stop: true,
               atco_code: true,
-              common_name: true,
+              txc_common_name: true,
             },
           },
         },
@@ -217,30 +218,32 @@ export const servicePatternsInfo = async (
 
     const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
       (stop) => {
-        const matches = stop.naptan_stop.location.match(
-          /POINT\(([^ ]+) ([^ ]+)\)/
-        );
-        if (matches) {
-          const longitude = parseFloat(matches[1]);
-          const latitude = parseFloat(matches[2]);
+        // const matches = stop.naptan_stop.location.match(
+        //   /POINT\(([^ ]+) ([^ ]+)\)/
+        // );
+        // if (matches) {
+        //   const longitude = parseFloat(matches[1]);
+        //   const latitude = parseFloat(matches[2]);
           return {
             stopId: stop.atco_code,
-            stopName: stop.common_name,
-            lon: longitude,
-            lat: latitude,
+            stopName: stop.txc_common_name ?? "",
+            // lon: longitude,
+            // lat: latitude,
+            lon: 0,
+            lat: 0,
           };
-        } else {
-          throw new Error(
-            `Invalid geometry format: ${stop.naptan_stop.location}`
-          );
-        }
+        // } else {
+        //   throw new Error(
+        //     `Invalid geometry format: ${stop.naptan_stop.location}`
+        //   );
+        // }
       }
     );
 
     servicePatterns = [
       {
         stops: stops ?? [],
-        servicePatternId: servicePatternIds[0],
+        servicePatternId: vehicleJourneyId[0],
         serviceLinks: [],
         name: "",
       },

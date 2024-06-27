@@ -5,7 +5,8 @@ import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.extend(advancedFormat);
+//dayjs.extend(advancedFormat);
+dayjs.locale('en');
 
 export const getDate = (date?: string | Date | null, format?: string): Dayjs => {
     if(format){
