@@ -276,11 +276,13 @@ model transmodel_servicepatternstop {
   departure_time      DateTime @db.Time(6)
   txc_common_name     String?
   journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
-  naptan_stop         naptan_stoppoint  @relation(fields: [naptan_stop_id], references: [id])
+  naptan_stop         naptan_stoppoint_latlong  @relation(fields: [naptan_stop_id], references: [id])
 }
 
-model naptan_stoppoint {
+view naptan_stoppoint_latlong {
   id                  Int      @id @default(1)
-  location            Unsupported("geometry(point, 4326)")
+  common_name         String
+  latitude            Decimal
+  longitude           Decimal
   sp_stops            transmodel_servicepatternstop[]
 }

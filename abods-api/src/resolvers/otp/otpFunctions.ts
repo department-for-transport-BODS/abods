@@ -203,21 +203,31 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
       operator_noc: operatorRef,
     },
     include: {
-      expected_services: true,
+      expected_services: {
+        select: {
+          noc_and_line: true,
+          service_name: true,
+          line_name: true,
+        },
+      },
     },
   });
 
   const services: LineType[] = [];
+  const distinctServices = new Set();
   operator.map((op) => {
-    op.expected_services.map((service) =>
-      services.push({
-        lineId: service.noc_and_line,
-        lineName: service.service_name,
-        lineNumber: service.line_name,
-        onTimePerformance: [],
-        servicePatterns: [],
-      })
-    );
+    op.expected_services.map((service) => {
+      if (!distinctServices.has(service.noc_and_line)) {
+        distinctServices.add(service.noc_and_line);
+        services.push({
+          lineId: service.noc_and_line,
+          lineName: service.service_name,
+          lineNumber: service.line_name,
+          onTimePerformance: [],
+          servicePatterns: [],
+        });
+      }
+    });
   });
 
   const transitModel: OperatorType = {
@@ -945,7 +955,8 @@ export const getPunctualityTimeSeries = async (
       lineIds,
     } = filters;
 
-    if (granularity == "day" && operatorIds.length == 1) {
+    if (operatorIds.length == 1) {
+      //if (granularity == "day" && operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
       const operators = await getOperators(sessionUser, db);
 
