@@ -245,7 +245,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
         })
       }
       
-      res.setHeader('Set-Cookie', `abods_sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`)
+      res.setHeader('Set-Cookie', `${process.env.PROJECT_ENV ?? ''}_abods_sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`)
       return {
         success: true,
         expiresAt: new Date(Date.now() + 60 * 60 * 1000)

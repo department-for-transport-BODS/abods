@@ -38,7 +38,7 @@ app.use(
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
           const cookies = parseCookie(cookieHeader)
-          const sessionid = cookies["abods_sessionid"];
+          const sessionid = cookies[`${process.env.PROJECT_ENV ?? ''}_abods_sessionid`];
 
           if(sessionid) {
             const session = await getSession(sessionid, db);
