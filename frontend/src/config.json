@@ -22,12 +22,12 @@
   "freshdesk": {
     "apiUrl": "",
     "folders": {
-      "dashboard": "",
-      "feedMonitoring": "",
-      "otp": "",
-      "vehicleJourneys": "",
-      "corridors": "",
-      "organisation": ""
+		  "dashboard": "43000590095",
+		  "feedMonitoring": "43000590096",
+		  "otp": "43000590097",
+		  "vehicleJourneys": "43000590098",
+		  "corridors": "43000590099",
+		  "organisation": "43000590100"
     }
   }
 }

@@ -1,0 +1,27 @@
+[
+  {
+    "id": 43000700922,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-28T08:53:13Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590100,
+    "title": "Users and Permissions",
+    "updated_at": "2023-06-02T14:10:04Z",
+    "description": "<p dir=\"ltr\">If you are an organisation admin you can invite new users within your organisation to use ABOD.</p><p dir=\"ltr\">Simply navigate to 'Invite New User' at the bottom left of your screen and enter their email.</p><p dir=\"ltr\">If you would like to invite someone outside of your organisation please email our customer success team at support@itoworld.com.</p>",
+    "description_text": " If you are an organisation admin you can invite new users within your organisation to use ABOD.  Simply navigate to 'Invite New User' at the bottom left of your screen and enter their email.  If you would like to invite someone outside of your organisation please email our customer success team at support@itoworld.com. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 1,
+    "suggested": 0,
+    "feedback_count": 0
+  }
+]
