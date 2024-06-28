@@ -189,16 +189,18 @@ jobs:
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
-          api_url="https://${domain_name}/api/graphql"
+          freshdesk_api_url="https://${domain_name}/freshdesk/"
+          graphql_api_url="https://${domain_name}/api/graphql"
           mapbox_token="pk.eyJ1Ijoia2plbmtzIiwiYSI6ImNseDFsNG53aTBjdngya3M5aWw1YWd6djAifQ.J8pxnGpSNahS8eUpxrtyQw"
           mapbox_style="mapbox://styles/mapbox/streets-v11"
           mapbox_satellite_style="mapbox://styles/mapbox/streets-v11"
           
-          jq --arg api_url "$api_url" \
+          jq --arg freshdesk_api_url "$freshdesk_api_url" \
+             --arg graphql_api_url "$graphql_api_url" \
              --arg mapbox_token "$mapbox_token" \
              --arg mapbox_style "$mapbox_style" \
              --arg mapbox_satellite_style "$mapbox_satellite_style" \
-             '.apiUrl = $api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style' src/config.json > tmp.json && \
+             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
             mv tmp.json src/config.json
 
           npm install
@@ -207,6 +209,7 @@ jobs:
 
           echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
+          aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENV^^}"
 
   commit-and-tag:

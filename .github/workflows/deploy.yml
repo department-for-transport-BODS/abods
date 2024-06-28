@@ -240,7 +240,7 @@ jobs:
       
       - name: clear frontend for ${{ env.RC_ENV }}
         run: |
-          aws s3 rm ${{ steps.get-values.outputs.frontend-bucket-name }} --recursive
+          aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}
           echo "[INFO] S3 Bucket for application component (FRONTEND) successfully cleared for ${RC_ENV^^}"
 
       - name: invalidate cloudfront cache for ${{ env.RC_ENV }}
@@ -263,5 +263,6 @@ jobs:
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          aws s3 cp dist/ ${{ steps.get-values.outputs.frontend-bucket-name }} --recursive
+          aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
+          aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"
