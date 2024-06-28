@@ -213,7 +213,13 @@ export const servicePatternsInfo = async (
         include: {
           stops: {
             select: {
-              naptan_stop: true,
+              naptan_stop: {
+                select: {
+                  common_name: true,
+                  latitude: true,
+                  longitude: true
+                }
+              },
               atco_code: true,
               txc_common_name: true,
             },
@@ -224,25 +230,12 @@ export const servicePatternsInfo = async (
 
     const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
       (stop) => {
-        // const matches = stop.naptan_stop.location.match(
-        //   /POINT\(([^ ]+) ([^ ]+)\)/
-        // );
-        // if (matches) {
-        //   const longitude = parseFloat(matches[1]);
-        //   const latitude = parseFloat(matches[2]);
         return {
           stopId: stop.atco_code,
-          stopName: stop.txc_common_name ?? "",
-          // lon: longitude,
-          // lat: latitude,
-          lon: 0,
-          lat: 0,
+          stopName: stop.naptan_stop.common_name ?? stop.txc_common_name ,
+          lon: Number(stop.naptan_stop.longitude),
+          lat: Number(stop.naptan_stop.latitude),
         };
-        // } else {
-        //   throw new Error(
-        //     `Invalid geometry format: ${stop.naptan_stop.location}`
-        //   );
-        // }
       }
     );
 
