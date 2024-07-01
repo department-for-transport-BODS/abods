@@ -121,43 +121,49 @@ export const getJourney = async (
     },
   });
 
+  const journeyCount = journeys.length;
   journeyData = journeys
-    .sort((a, b) => (a.stop_index > b.stop_index ? 1 : -1))
     .map((journey, index) => {
       const journeyDepartureTime = getDate(
         journey.expected_journeys.expected_journey_start
       );
       const stopDepartureTime = getDate(journey.expected_departure_time);
       const journeyDate = getDate(journey.date_of_journey);
-      const scheduledDepartureTime = getDate(journey.actual_departure_time);
-      const startTime = getDate(
+      const actualDepartureTime = getDate(journey.actual_departure_time);
+      const startTime = getDateLocale(
         `${journeyDate.format("YYYY-MM-DD")}T${journeyDepartureTime.format(
           "HH:mm:ss"
         )}`
       );
-      const stopTime = getDate(
+      const timestamp = getDateLocale(
+        `${journeyDate.format("YYYY-MM-DD")}T${actualDepartureTime.format(
+          "HH:mm:ss"
+        )}`
+      );
+      const stopScheduledTime = getDateLocale(
         `${journeyDate.format("YYYY-MM-DD")}T${stopDepartureTime.format(
           "HH:mm:ss"
         )}`
       );
-      const stopScheduledTime = getDate(
-        `${journeyDate.format("YYYY-MM-DD")}T${scheduledDepartureTime.format(
-          "HH:mm:ss"
-        )}`
-      );
-      const previousIndex = index == 0 ? 0 : index - 1;
+      const previousIndex = index === 0 ? 0 : index - 1;
       return {
-        ts: stopTime.toISOString(),
+        ts: timestamp.toISOString(),
         vehicleId: journey.group_id,
         vehicleJourneyId: journey.group_id,
         servicePatternId: journey.vehiclejourney_id.toString(),
         isTimingPoint: journey.is_timing_point,
-        delay: journey.time_difference ?? 0,
+        delay: journey.time_difference
+          ? Math.floor(journey.time_difference / 60)
+          : 0,
         startTime: startTime.toISOString(),
         scheduledDeparture: stopScheduledTime.toISOString(),
         lat: Number(journey.stop_latitude),
         lon: Number(journey.stop_longitude),
-        journeyStatus: GpsFeedJourneyStatus.Completed,
+        journeyStatus: journey.actual_departure_time
+          ? index + 1 === journeyCount
+            ? GpsFeedJourneyStatus.Completed
+            : GpsFeedJourneyStatus.Started
+          : GpsFeedJourneyStatus.Unknown,
         operatorInfo: {
           operatorId:
             journey.expected_journeys.expected_service.expected_operator
@@ -217,11 +223,11 @@ export const servicePatternsInfo = async (
                 select: {
                   common_name: true,
                   latitude: true,
-                  longitude: true
-                }
+                  longitude: true,
+                },
               },
               atco_code: true,
-              txc_common_name: true,
+              txc_common_name: true
             },
           },
         },
@@ -232,7 +238,7 @@ export const servicePatternsInfo = async (
       (stop) => {
         return {
           stopId: stop.atco_code,
-          stopName: stop.naptan_stop.common_name ?? stop.txc_common_name ,
+          stopName: stop.naptan_stop.common_name ?? stop.txc_common_name,
           lon: Number(stop.naptan_stop.longitude),
           lat: Number(stop.naptan_stop.latitude),
         };
@@ -308,8 +314,8 @@ export const timingPatternDetail = async (
   const journeyDepartureTime = getDate(journey?.start_time);
 
   return (
-    journey?.stops.map((stop) => ({
-      stopIndex: stop.sequence_number,
+    journey?.stops.map((stop, index) => ({
+      stopIndex: index,
       arrivalTimeOffset: 0,
       departureTimeOffset: journey?.start_time
         ? getDate(stop.departure_time).diff(journeyDepartureTime, "minute")
