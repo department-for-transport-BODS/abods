@@ -5,7 +5,7 @@ import {
   getUTCDate,
   parseTimetz,
 } from "../../lib/dayjs.js";
-import logger from "../../logger";
+import logger from "../../logger.js";
 import {
   UniqueJourneyType,
   VehicleReplayInputType,
