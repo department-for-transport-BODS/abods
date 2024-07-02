@@ -46,23 +46,14 @@ export const findJourneys = async (
       },
     });
 
-    logger.info(`currentTime------${currentTime}`)
-    logger.info(`toTimestamp------${toTimestamp}`)
     if (toTimestamp.isSame(currentTime, "day")) {
-      logger.info('same day------')
       journeys = journeys.filter((journey) => {
         const parsedTime = parseTimetz(
           journey.expected_journey_start?.toTimeString() ?? ""
         );
-        logger.info(`expected_journey_start------${journey.expected_journey_start?.toTimeString()}`)
-        logger.info(`expected_journey_start local------${journey.expected_journey_start?.toLocaleTimeString()}`)
-        logger.info(`parsedTime------${parsedTime}`)
-        logger.info(`condition------${parsedTime.isBefore(currentTime, "second")}`)
         return parsedTime.isBefore(currentTime, "second");
       });
     }
-
-    logger.info(`journeys------${JSON.stringify(journeys)}`)
 
     journeysData = journeys.map((journey) => {
       const departureTime = getUTCDate(journey.expected_journey_start);
