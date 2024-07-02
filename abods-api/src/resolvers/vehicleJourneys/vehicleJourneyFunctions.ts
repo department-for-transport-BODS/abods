@@ -54,13 +54,13 @@ export const findJourneys = async (
         const parsedTime = parseTimetz(
           journey.expected_journey_start?.toLocaleTimeString() ?? ""
         );
-        
+        logger.info(`expected_journey_start------${parsedTime}`)
         logger.info(`condition------${parsedTime.isBefore(currentTime, "second")}`)
         return parsedTime.isBefore(currentTime, "second");
       });
     }
 
-    logger.info(`journeys------${journeys}`)
+    logger.info(`journeys------${JSON.stringify(journeys)}`)
 
     journeysData = journeys.map((journey) => {
       const departureTime = getUTCDate(journey.expected_journey_start);
