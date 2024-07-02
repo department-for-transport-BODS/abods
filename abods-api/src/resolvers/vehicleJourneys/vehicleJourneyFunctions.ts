@@ -52,9 +52,11 @@ export const findJourneys = async (
       logger.info('same day------')
       journeys = journeys.filter((journey) => {
         const parsedTime = parseTimetz(
-          journey.expected_journey_start?.toLocaleTimeString() ?? ""
+          journey.expected_journey_start?.toTimeString() ?? ""
         );
-        logger.info(`expected_journey_start------${parsedTime}`)
+        logger.info(`expected_journey_start------${journey.expected_journey_start?.toTimeString()}`)
+        logger.info(`expected_journey_start local------${journey.expected_journey_start?.toLocaleTimeString()}`)
+        logger.info(`parsedTime------${parsedTime}`)
         logger.info(`condition------${parsedTime.isBefore(currentTime, "second")}`)
         return parsedTime.isBefore(currentTime, "second");
       });
