@@ -148,7 +148,7 @@ model timetable_summary_stops {
   stop_id Int
   stop_latitude           Decimal?
   stop_longitude          Decimal?
-  locality_id             String?
+  locality_id             String
   common_name             String?
 	date_of_journey DateTime
 	day_of_week Int
@@ -162,6 +162,7 @@ model timetable_summary_stops {
 	max_late Int
 	max_early Int
   avg_time_difference Int
+  locality                naptan_locality @relation(fields: [locality_id], references: [gazetteer_id])
 }
 
 model Timetable {
@@ -285,4 +286,18 @@ view naptan_stoppoint_latlong {
   latitude            Decimal
   longitude           Decimal
   sp_stops            transmodel_servicepatternstop[]
+}
+
+model naptan_locality {
+  gazetteer_id            String      @unique
+  name                    String
+  admin_area_id           Int
+  admin_area              naptan_adminarea @relation(fields: [admin_area_id], references: [id])
+  timetable_summary_stops timetable_summary_stops[]
+}
+
+model naptan_adminarea {
+  id                  Int      @id @default(1)
+  name                String
+  locality            naptan_locality[]
 }

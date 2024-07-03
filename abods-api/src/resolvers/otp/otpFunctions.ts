@@ -1119,7 +1119,7 @@ export const getStopPerformance = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const results = await db.prisma.timetable_summary_stops.groupBy({
-          by: ["stop_id", "common_name", "is_timing_point"],
+          by: ["locality_id","stop_id", "common_name", "is_timing_point"],
           where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
           _sum: {
             early_count: true,
@@ -1133,12 +1133,32 @@ export const getStopPerformance = async (
           },
         });
 
+        const localityIds: string[] = results.map((res) => res.locality_id)
+
+        const localities = await db.prisma.naptan_locality.findMany({
+          where: {
+            gazetteer_id: {
+              in: localityIds
+            }
+          },
+          select: {
+            gazetteer_id: true,
+            name: true,
+            admin_area: {
+              select: {
+                name: true,
+              }
+            }
+          }
+        })
+
         results.forEach((res) => {
           // avg delay
           const timeInSeconds = res._avg.avg_time_difference
             ? res._avg.avg_time_difference * 60
             : 0;
 
+          const locality = localities.find((dbLocality) => dbLocality.gazetteer_id === res.locality_id)
           stopPerformances.push({
             lineId: lineIds[0],
             stopId: res.stop_id ? res.stop_id : 0,
@@ -1148,9 +1168,9 @@ export const getStopPerformance = async (
               stopName: res.common_name ? res.common_name : "",
               stopLocality: {
                 localityId: "",
-                localityName: "",
+                localityName: locality?.name ?? "",
                 localityAreaId: "",
-                localityAreaName: "",
+                localityAreaName: locality?.admin_area.name ?? "",
               },
               sourceId: "",
               stopLocation: {
