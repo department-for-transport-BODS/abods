@@ -191,9 +191,9 @@ jobs:
             | jq -r '.Parameter.Value'`
           freshdesk_api_url="https://${domain_name}/freshdesk/"
           graphql_api_url="https://${domain_name}/api/graphql"
-          mapbox_token="pk.eyJ1Ijoia2plbmtzIiwiYSI6ImNseDFsNG53aTBjdngya3M5aWw1YWd6djAifQ.J8pxnGpSNahS8eUpxrtyQw"
-          mapbox_style="mapbox://styles/mapbox/streets-v11"
-          mapbox_satellite_style="mapbox://styles/mapbox/streets-v11"
+          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
+          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
+          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
           
           jq --arg freshdesk_api_url "$freshdesk_api_url" \
              --arg graphql_api_url "$graphql_api_url" \
