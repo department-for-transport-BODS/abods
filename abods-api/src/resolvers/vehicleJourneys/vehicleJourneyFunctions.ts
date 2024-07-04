@@ -1,10 +1,11 @@
-import { Context } from "../../context";
+import { Context } from '../../context';
 import {
   getDate,
   getDateLocale,
   getUTCDate,
   parseTimetz,
-} from "../../lib/dayjs.js";
+} from '../../lib/dayjs.js';
+import logger from '../../logger.js';
 import {
   UniqueJourneyType,
   VehicleReplayInputType,
@@ -15,22 +16,22 @@ import {
   VehicleJourneyType,
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
-} from "../../types.js";
+} from '../../types.js';
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
   sessionUser: any,
-  db: Context
+  db: Context,
 ): Promise<UniqueJourneyType[]> => {
   if (!sessionUser.user) {
-    throw "Not Authorized";
+    throw 'Not Authorized';
   }
   const lineIds = inputs.filters?.lineIds;
 
   let journeysData: UniqueJourneyType[] = [];
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
     const currentTime = getDate();
-    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, "hour");
+    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, 'hour');
     let journeys = await db.prisma.expected_journeys.findMany({
       where: {
         noc_and_line: lineIds[0],
@@ -45,13 +46,12 @@ export const findJourneys = async (
       },
     });
 
-    if (toTimestamp.isSame(currentTime, "day")) {
+    if (toTimestamp.isSame(currentTime, 'day')) {
       journeys = journeys.filter((journey) => {
         const parsedTime = parseTimetz(
-          journey.expected_journey_start?.toLocaleTimeString() ?? ""
+          journey.expected_journey_start?.toTimeString() ?? '',
         );
-
-        return parsedTime.isBefore(currentTime, "second");
+        return parsedTime.isBefore(currentTime, 'second');
       });
     }
 
@@ -60,9 +60,9 @@ export const findJourneys = async (
       const journeyDate = getDate(journey.date_of_journey);
 
       const startTime = getDateLocale(
-        `${journeyDate.format("YYYY-MM-DD")}T${departureTime.format(
-          "HH:mm:ss"
-        )}`
+        `${journeyDate.format('YYYY-MM-DD')}T${departureTime.format(
+          'HH:mm:ss',
+        )}`,
       );
 
       const journeyDescription: string = journey.journey_pattern_description;
@@ -85,10 +85,10 @@ export const getJourney = async (
   journeyId: string,
   startTime: Date,
   sessionUser: any,
-  db: Context
+  db: Context,
 ): Promise<Array<Maybe<GpsFeedType>>> => {
   if (!sessionUser.user) {
-    throw "Not Authorized";
+    throw 'Not Authorized';
   }
   let journeyData: Array<Maybe<GpsFeedType>> = [];
 
@@ -121,43 +121,50 @@ export const getJourney = async (
     },
   });
 
+  const journeyCount = journeys.length;
   journeyData = journeys
-    .sort((a, b) => (a.stop_index > b.stop_index ? 1 : -1))
+    .filter((journey) => journey.actual_departure_time)
     .map((journey, index) => {
       const journeyDepartureTime = getDate(
-        journey.expected_journeys.expected_journey_start
+        journey.expected_journeys.expected_journey_start,
       );
       const stopDepartureTime = getDate(journey.expected_departure_time);
       const journeyDate = getDate(journey.date_of_journey);
-      const scheduledDepartureTime = getDate(journey.actual_departure_time);
-      const startTime = getDate(
-        `${journeyDate.format("YYYY-MM-DD")}T${journeyDepartureTime.format(
-          "HH:mm:ss"
-        )}`
+      const actualDepartureTime = getDate(journey.actual_departure_time);
+      const startTime = getDateLocale(
+        `${journeyDate.format('YYYY-MM-DD')}T${journeyDepartureTime.format(
+          'HH:mm:ss',
+        )}`,
       );
-      const stopTime = getDate(
-        `${journeyDate.format("YYYY-MM-DD")}T${stopDepartureTime.format(
-          "HH:mm:ss"
-        )}`
+      const timestamp = getDateLocale(
+        `${journeyDate.format('YYYY-MM-DD')}T${actualDepartureTime.format(
+          'HH:mm:ss',
+        )}`,
       );
-      const stopScheduledTime = getDate(
-        `${journeyDate.format("YYYY-MM-DD")}T${scheduledDepartureTime.format(
-          "HH:mm:ss"
-        )}`
+      const stopScheduledTime = getDateLocale(
+        `${journeyDate.format('YYYY-MM-DD')}T${stopDepartureTime.format(
+          'HH:mm:ss',
+        )}`,
       );
-      const previousIndex = index == 0 ? 0 : index - 1;
+      const previousIndex = index === 0 ? 0 : index - 1;
       return {
-        ts: stopTime.toISOString(),
+        ts: timestamp.toISOString(),
         vehicleId: journey.group_id,
         vehicleJourneyId: journey.group_id,
         servicePatternId: journey.vehiclejourney_id.toString(),
         isTimingPoint: journey.is_timing_point,
-        delay: journey.time_difference ?? 0,
+        delay: journey.time_difference
+          ? Math.floor(journey.time_difference / 60)
+          : 0,
         startTime: startTime.toISOString(),
         scheduledDeparture: stopScheduledTime.toISOString(),
         lat: Number(journey.stop_latitude),
         lon: Number(journey.stop_longitude),
-        journeyStatus: GpsFeedJourneyStatus.Completed,
+        journeyStatus: journey.actual_departure_time
+          ? index + 1 === journeyCount
+            ? GpsFeedJourneyStatus.Completed
+            : GpsFeedJourneyStatus.Started
+          : GpsFeedJourneyStatus.Unknown,
         operatorInfo: {
           operatorId:
             journey.expected_journeys.expected_service.expected_operator
@@ -175,14 +182,14 @@ export const getJourney = async (
           serviceName: journey.expected_journeys.expected_service.service_name,
         },
         previousStopInfo: {
-          stopId: journeys[previousIndex].atco_code?.toString() ?? "",
-          stopName: journeys[previousIndex].common_name ?? "",
-          sourceId: "test",
+          stopId: journeys[previousIndex].atco_code?.toString() ?? '',
+          stopName: journeys[previousIndex].common_name ?? '',
+          sourceId: 'test',
           stopLocality: {
-            localityAreaId: "",
-            localityAreaName: "",
-            localityId: "",
-            localityName: "",
+            localityAreaId: '',
+            localityAreaName: '',
+            localityId: '',
+            localityName: '',
           },
           stopLocation: {
             latitude: Number(journey.stop_latitude),
@@ -198,10 +205,10 @@ export const getJourney = async (
 export const servicePatternsInfo = async (
   vehicleJourneyId: string[],
   sessionUser: any,
-  db: Context
+  db: Context,
 ): Promise<Array<Maybe<ServicePatternType>>> => {
   if (!sessionUser.user) {
-    throw "Not Authorized";
+    throw 'Not Authorized';
   }
   let servicePatterns: Array<Maybe<ServicePatternType>> = [];
   if (vehicleJourneyId && vehicleJourneyId.length > 0) {
@@ -217,26 +224,26 @@ export const servicePatternsInfo = async (
                 select: {
                   common_name: true,
                   latitude: true,
-                  longitude: true
-                }
+                  longitude: true,
+                },
               },
               atco_code: true,
               txc_common_name: true,
             },
           },
         },
-      }
+      },
     );
 
     const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
       (stop) => {
         return {
           stopId: stop.atco_code,
-          stopName: stop.naptan_stop.common_name ?? stop.txc_common_name ,
+          stopName: stop.naptan_stop.common_name ?? stop.txc_common_name,
           lon: Number(stop.naptan_stop.longitude),
           lat: Number(stop.naptan_stop.latitude),
         };
-      }
+      },
     );
 
     servicePatterns = [
@@ -244,7 +251,7 @@ export const servicePatternsInfo = async (
         stops: stops ?? [],
         servicePatternId: vehicleJourneyId[0],
         serviceLinks: [],
-        name: "",
+        name: '',
       },
     ];
   }
@@ -255,10 +262,10 @@ export const servicePatternsInfo = async (
 export const vehicleJourney = async (
   vehicleJourneyId: string,
   sessionUser: any,
-  db: Context
+  db: Context,
 ): Promise<Maybe<VehicleJourneyType>[]> => {
   if (!sessionUser.user) {
-    throw "Not Authorized";
+    throw 'Not Authorized';
   }
 
   const journey = await db.prisma.expected_journeys.findUnique({
@@ -277,11 +284,11 @@ export const vehicleJourney = async (
 
   return [
     {
-      mode: "",
+      mode: '',
       operatorId:
-        journey?.expected_service.expected_operator.operator_noc ?? "",
-      servicePatternId: journey?.vehicle_journey_id.toString() ?? "",
-      timingPatternId: journey?.vehicle_journey_id.toString() ?? "",
+        journey?.expected_service.expected_operator.operator_noc ?? '',
+      servicePatternId: journey?.vehicle_journey_id.toString() ?? '',
+      timingPatternId: journey?.vehicle_journey_id.toString() ?? '',
       vehicleJourneyId: vehicleJourneyId,
     },
   ];
@@ -290,10 +297,10 @@ export const vehicleJourney = async (
 export const timingPatternDetail = async (
   timingPatternId: string,
   sessionUser: any,
-  db: Context
+  db: Context,
 ): Promise<Maybe<TimingPatternDetailType>[]> => {
   if (!sessionUser.user) {
-    throw "Not Authorized";
+    throw 'Not Authorized';
   }
 
   const journey = await db.prisma.transmodel_vehiclejourney.findUnique({
@@ -308,11 +315,11 @@ export const timingPatternDetail = async (
   const journeyDepartureTime = getDate(journey?.start_time);
 
   return (
-    journey?.stops.map((stop) => ({
-      stopIndex: stop.sequence_number,
+    journey?.stops.map((stop, index) => ({
+      stopIndex: index,
       arrivalTimeOffset: 0,
       departureTimeOffset: journey?.start_time
-        ? getDate(stop.departure_time).diff(journeyDepartureTime, "minute")
+        ? getDate(stop.departure_time).diff(journeyDepartureTime, 'minute')
         : 0,
       createdAt: getDate(),
       noPickup: false,
@@ -321,7 +328,7 @@ export const timingPatternDetail = async (
       timingPatternId: timingPatternId,
       timingPoint: stop.is_timing_point,
       updatedAt: getDate(),
-      version: "1",
+      version: '1',
     })) ?? []
   );
 };

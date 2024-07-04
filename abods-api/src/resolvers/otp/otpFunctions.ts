@@ -4,6 +4,8 @@ import {
   LineType,
   OperatorPerformanceType,
   OperatorType,
+  PunctualityTimeOfDayType,
+  PunctualityTimeSeriesType,
   ServicePunctualityType,
   SessionUser,
   StopPerformanceType,
@@ -11,6 +13,8 @@ import {
 } from "../../types";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
+import { getDate, getDateLocale, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
+import dayjs from "dayjs";
 
 function divideAndRound(number: number): number {
   const result = number / 60;
@@ -837,12 +841,7 @@ export const getPunctualityTimeOfDay = async (
     }
     // of the 10:30 slot, how many were ontime/early/late example
 
-    const hoursOfDay: TimeCount[] = Array.from({ length: 24 }, (_, i) => ({
-      timeOfDay: `${i.toString().padStart(2, "0")}:00`,
-      early: 0,
-      late: 0,
-      onTime: 0,
-    }));
+    const hoursOfDay: PunctualityTimeOfDayType[] = []
 
     logger.debug("getPunctualityTimeOfDay");
 
@@ -890,7 +889,7 @@ export const getPunctualityTimeOfDay = async (
               late_count: true,
               on_time_count: true,
             },
-          });
+          }) ?? [];
         } else {
           results = await db.prisma.timetable_summary_operator.groupBy({
             by: ["departure_hour"],
@@ -900,25 +899,18 @@ export const getPunctualityTimeOfDay = async (
               late_count: true,
               on_time_count: true,
             },
-          });
+          }) ?? [];
         }
 
-        if (results) {
-          results.forEach((res) => {
-            if (res.expected_departure_hour) {
-              const hour = roundToNearestHour(res.expected_departure_hour);
-              hoursOfDay[hour].early += res._sum.early_count
-                ? res._sum.early_count
-                : 0;
-              hoursOfDay[hour].onTime += res._sum.on_time_count
-                ? res._sum.on_time_count
-                : 0;
-              hoursOfDay[hour].late += res._sum.late_count
-                ? res._sum.late_count
-                : 0;
-            }
-          });
-        }
+        results.forEach((res) => {
+          hoursOfDay.push({
+            timeOfDay: getStrUTCHour(res.departure_hour),
+            early: res._sum.early_count,
+            onTime: res._sum.on_time_count,
+            late: res._sum.late_count
+          })
+        });
+     
       }
     }
 
@@ -959,7 +951,7 @@ export const getPunctualityTimeSeries = async (
       //if (granularity == "day" && operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
       const operators = await getOperators(sessionUser, db);
-
+      const isDayGranularity = granularity === 'day'
       if (!operators) {
         throw "No user operators";
       }
@@ -973,65 +965,61 @@ export const getPunctualityTimeSeries = async (
         const end = new Date(toTimestamp);
         const days = getDaysInRange(start, end);
 
-        const summary = days.map((date) => ({
-          ts: date.toISOString(),
-          early: 0,
-          late: 0,
-          onTime: 0,
-        }));
+        
+        let summary: PunctualityTimeSeriesType[] = []
 
-        const dateToSummary: DayCount[] = [];
-        summary.forEach((daySummary) => {
-          const dateKey = daySummary.ts.split("T")[0];
-          dateToSummary[dateKey] = daySummary;
-        });
-
-        // get a sum per day
         let results;
+        const queryFields = {
+          _sum: {
+            early_count: true,
+            late_count: true,
+            on_time_count: true,
+          }
+        }
+        
         if (lineIds) {
           results = await db.prisma.timetable_summary_service.groupBy({
-            by: ["date_of_journey"],
+            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
               early_count: true,
               late_count: true,
               on_time_count: true,
             },
-          });
+          }) ?? [];
         } else {
           results = await db.prisma.timetable_summary_operator.groupBy({
-            by: ["date_of_journey"],
+            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
               early_count: true,
               late_count: true,
               on_time_count: true,
             },
-          });
+          }) ?? [];
         }
 
-        if (results) {
-          results.forEach((result) => {
-            if (result._sum) {
-              const dateOfJourney = result.date_of_journey
-                .toISOString()
-                .split("T")[0];
-              if (dateOfJourney in dateToSummary) {
-                const daySymmary = dateToSummary[dateOfJourney];
+        results.forEach((result) => {
+          if (result._sum) {
+            const journeyDate = getDate(result.date_of_journey)
+            const departureHour = isDayGranularity ? undefined: getDate(result.departure_hour)
 
-                if (daySymmary) {
-                  daySymmary.early = result._sum.early_count
-                    ? result._sum.early_count
-                    : 0;
-                  daySymmary.onTime = result._sum.on_time_count;
-                  daySymmary.late = result._sum.late_count;
-                }
-              }
-            }
-          });
-        }
+            summary.push({
+              ts: isDayGranularity ? result.date_of_journey : getDateUTC(journeyDate, departureHour).toISOString(),
+              early: result._sum.early_count,
+              late: result._sum.late_count,
+              onTime: result._sum.on_time_count
+            })
+          }
+        });
 
-        return summary;
+        summary = summary.sort((a,b) => {
+          const firstTS = getDate(a.ts)
+          const secondTS = getDate(b.ts)
+          return firstTS.isAfter(secondTS) ? 1 : -1
+        });
+
+        return summary
       }
     }
 
@@ -1131,7 +1119,7 @@ export const getStopPerformance = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const results = await db.prisma.timetable_summary_stops.groupBy({
-          by: ["stop_id", "common_name", "is_timing_point"],
+          by: ["locality_id","stop_id", "common_name", "is_timing_point"],
           where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
           _sum: {
             early_count: true,
@@ -1145,12 +1133,32 @@ export const getStopPerformance = async (
           },
         });
 
+        const localityIds: string[] = results.map((res) => res.locality_id)
+
+        const localities = await db.prisma.naptan_locality.findMany({
+          where: {
+            gazetteer_id: {
+              in: localityIds
+            }
+          },
+          select: {
+            gazetteer_id: true,
+            name: true,
+            admin_area: {
+              select: {
+                name: true,
+              }
+            }
+          }
+        })
+
         results.forEach((res) => {
           // avg delay
           const timeInSeconds = res._avg.avg_time_difference
             ? res._avg.avg_time_difference * 60
             : 0;
 
+          const locality = localities.find((dbLocality) => dbLocality.gazetteer_id === res.locality_id)
           stopPerformances.push({
             lineId: lineIds[0],
             stopId: res.stop_id ? res.stop_id : 0,
@@ -1160,9 +1168,9 @@ export const getStopPerformance = async (
               stopName: res.common_name ? res.common_name : "",
               stopLocality: {
                 localityId: "",
-                localityName: "",
+                localityName: locality?.name ?? "",
                 localityAreaId: "",
-                localityAreaName: "",
+                localityAreaName: locality?.admin_area.name ?? "",
               },
               sourceId: "",
               stopLocation: {
