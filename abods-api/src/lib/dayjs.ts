@@ -48,6 +48,14 @@ export const getDateUTC = (
   return dayjs.utc(utcString);
 };
 
+export const dbGmtToUtc = (
+  journeyDate: Dayjs,
+  hour: Dayjs | undefined,
+): Dayjs => {
+  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(hour)}`
+  return getDateLocale(utcString);
+};
+
 export const getStrUTCHour = (hour: Dayjs | undefined): string => {
     return hour ? dayjs.utc(hour).format('HH:mm:ss') : "00:00:00"
 }

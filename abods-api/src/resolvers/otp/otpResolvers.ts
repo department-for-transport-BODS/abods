@@ -1,12 +1,12 @@
 import { IResolvers } from '@graphql-tools/utils'
-import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
+import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
 import { RequestContext } from '../../types.js';
 import { GraphQLResolveInfo } from 'graphql';
 
 const otpResolvers: IResolvers = {
     Query: {
         operators: async (_: any, __: any, {sessionUser, db }: RequestContext) => getOperatorList(sessionUser, db),
-        operator: async (_: any, {operatorId, lineId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getOperator(operatorId, lineId, sessionUser, db, info),
+        operator: async (_: any, {operatorId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getOperator(operatorId, sessionUser, db, info),
         onTimePerformance: async () => { return {}; }, // stub -> sub-resolvers do the work
         headwayMetrics: async () => { return {}; }, // stub -> sub-resolvers do the work 
         serviceInfo: async (_, { serviceId }, {sessionUser, db }: RequestContext) => getServiceInfo(serviceId, sessionUser, db),
@@ -31,6 +31,12 @@ const otpResolvers: IResolvers = {
         headwayOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayOverview(inputs, sessionUser, db),      
         headwayTimeOfDay: async (_, { lineId }, {sessionUser, db }: RequestContext) => getHeadwayTimeOfDay(lineId, sessionUser, db),
         headwayTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayTimeSeries(inputs, sessionUser, db)
+    },
+    OperatorType:{
+        transitModel: async () => { return {}; },
+    },
+    TransitModelType: {
+        lines: async (_: any, {lineId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(lineId, sessionUser, db, info),
     }
 }
 

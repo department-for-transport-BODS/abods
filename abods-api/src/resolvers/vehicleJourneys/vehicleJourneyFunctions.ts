@@ -1,5 +1,6 @@
 import { Context } from '../../context';
 import {
+  dbGmtToUtc,
   getDate,
   getDateLocale,
   getUTCDate,
@@ -81,25 +82,21 @@ export const findJourneys = async (
   return journeysData;
 };
 
-export const getJourney = async (
-  journeyId: string,
-  startTime: Date,
-  sessionUser: any,
-  db: Context,
-): Promise<Array<Maybe<GpsFeedType>>> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
-  let journeyData: Array<Maybe<GpsFeedType>> = [];
-
-  const journeyDate = new Date(startTime.toISOString().substring(0, 10));
-
-  const journeys = await db.prisma.timetable.findMany({
-    where: {
-      group_id: journeyId,
-      date_of_journey: journeyDate,
-    },
-    include: {
+export const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
+  latitude: true,
+  longitude: true,
+  vehicle_ref: true,
+  recorded_at_time: true,
+  Timetable: {
+    select: {
+      date_of_journey: true,
+      common_name: true,
+      atco_code: true,
+      stop_index: true,
+      expected_departure_time: true,
+      is_timing_point: true,
+      vehiclejourney_id: true,
+      time_difference: true,
       expected_journeys: {
         select: {
           expected_journey_start: true,
@@ -119,86 +116,120 @@ export const getJourney = async (
         },
       },
     },
+    where: {
+      group_id: journeyId,
+      date_of_journey: journeyDate,
+    }
+  }
+})
+
+export const getJourney = async (
+  journeyId: string,
+  startTime: Date,
+  sessionUser: any,
+  db: Context,
+): Promise<Array<Maybe<GpsFeedType>>> => {
+  if (!sessionUser.user) {
+    throw 'Not Authorized';
+  }
+  let journeyData: Array<Maybe<GpsFeedType>> = [];
+
+  const journeyDate = new Date(startTime.toISOString().substring(0, 10));
+
+  const journeys = await db.prisma.siriVMPositions.findMany({
+    where: {
+      date_of_journey: journeyDate,
+      group_id: journeyId,
+    },
+    select: {
+      ...getJourneyInputs(journeyId, journeyDate)
+    }
   });
 
+  let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
+  let previousStop = matchedStop;
   const journeyCount = journeys.length;
-  journeyData = journeys
-    .filter((journey) => journey.actual_departure_time)
-    .map((journey, index) => {
-      const journeyDepartureTime = getDate(
-        journey.expected_journeys.expected_journey_start,
-      );
-      const stopDepartureTime = getDate(journey.expected_departure_time);
-      const journeyDate = getDate(journey.date_of_journey);
-      const actualDepartureTime = getDate(journey.actual_departure_time);
-      const startTime = getDateLocale(
-        `${journeyDate.format('YYYY-MM-DD')}T${journeyDepartureTime.format(
-          'HH:mm:ss',
-        )}`,
-      );
-      const timestamp = getDateLocale(
-        `${journeyDate.format('YYYY-MM-DD')}T${actualDepartureTime.format(
-          'HH:mm:ss',
-        )}`,
-      );
-      const stopScheduledTime = getDateLocale(
-        `${journeyDate.format('YYYY-MM-DD')}T${stopDepartureTime.format(
-          'HH:mm:ss',
-        )}`,
-      );
-      const previousIndex = index === 0 ? 0 : index - 1;
-      return {
-        ts: timestamp.toISOString(),
-        vehicleId: journey.group_id,
-        vehicleJourneyId: journey.group_id,
-        servicePatternId: journey.vehiclejourney_id.toString(),
-        isTimingPoint: journey.is_timing_point,
-        delay: journey.time_difference
-          ? Math.floor(journey.time_difference / 60)
-          : 0,
-        startTime: startTime.toISOString(),
-        scheduledDeparture: stopScheduledTime.toISOString(),
-        lat: Number(journey.stop_latitude),
-        lon: Number(journey.stop_longitude),
-        journeyStatus: journey.actual_departure_time
-          ? index + 1 === journeyCount
-            ? GpsFeedJourneyStatus.Completed
-            : GpsFeedJourneyStatus.Started
-          : GpsFeedJourneyStatus.Unknown,
-        operatorInfo: {
-          operatorId:
-            journey.expected_journeys.expected_service.expected_operator
-              .operator_noc,
-          operatorName:
-            journey.expected_journeys.expected_service.expected_operator
-              .operator_name,
-          nocCode:
-            journey.expected_journeys.expected_service.expected_operator
-              .operator_noc,
-        },
-        serviceInfo: {
-          serviceId: journey.expected_journeys.expected_service.noc_and_line,
-          serviceNumber: journey.expected_journeys.expected_service.line_name,
-          serviceName: journey.expected_journeys.expected_service.service_name,
-        },
-        previousStopInfo: {
-          stopId: journeys[previousIndex].atco_code?.toString() ?? '',
-          stopName: journeys[previousIndex].common_name ?? '',
-          sourceId: 'test',
-          stopLocality: {
-            localityAreaId: '',
-            localityAreaName: '',
-            localityId: '',
-            localityName: '',
-          },
-          stopLocation: {
-            latitude: Number(journey.stop_latitude),
-            longitude: Number(journey.stop_longitude),
-          },
-        },
-      };
-    });
+  journeyData = journeys.map((journey, index) => {
+    previousStop = matchedStop;
+    if (journey.Timetable?.stop_index) {
+      matchedStop = journey;
+    }
 
+    const journeyDepartureTime = getDate(
+      matchedStop?.Timetable?.expected_journeys.expected_journey_start,
+    );
+    const stopDepartureTime = getDate(
+      matchedStop?.Timetable?.expected_departure_time,
+    );
+    const journeyDate = getDate(matchedStop?.Timetable?.date_of_journey);
+    const actualDepartureTime = getDate(journey.recorded_at_time);
+    const startTime = dbGmtToUtc(journeyDate, journeyDepartureTime);
+
+    const timestamp = getDateLocale(
+      `${journeyDate.format('YYYY-MM-DD')}T${actualDepartureTime.format(
+        'HH:mm:ss',
+      )}`,
+    );
+    const stopScheduledTime = dbGmtToUtc(journeyDate, stopDepartureTime);
+
+    const previousIndex = index === 0 ? 0 : index - 1;
+    return {
+      ts: timestamp.toISOString(),
+      vehicleId: journey.vehicle_ref,
+      vehicleJourneyId: journeyId,
+      servicePatternId: matchedStop?.Timetable?.vehiclejourney_id.toString(),
+      isTimingPoint: journey.Timetable?.is_timing_point,
+      delay: matchedStop?.Timetable?.time_difference ?? 0,
+      startTime: startTime.toISOString(),
+      scheduledDeparture: stopScheduledTime.toISOString(),
+      lat: Number(journey.latitude),
+      lon: Number(journey.longitude),
+      journeyStatus: matchedStop?.Timetable?.expected_departure_time
+        ? index + 1 === journeyCount
+          ? GpsFeedJourneyStatus.Completed
+          : GpsFeedJourneyStatus.Started
+        : GpsFeedJourneyStatus.Unknown,
+      operatorInfo: {
+        operatorId:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .expected_operator.operator_noc ?? '',
+        operatorName:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .expected_operator.operator_name ?? '',
+        nocCode:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .expected_operator.operator_noc ?? '',
+      },
+      serviceInfo: {
+        serviceId:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .noc_and_line ?? '',
+        serviceNumber:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .line_name ?? '',
+        serviceName:
+          matchedStop?.Timetable?.expected_journeys.expected_service
+            .service_name ?? '',
+      },
+      previousStopInfo: {
+        stopId: matchedStop?.Timetable?.atco_code?.toString() ?? '',
+        stopName: matchedStop?.Timetable?.common_name ?? '',
+        sourceId: '',
+        stopLocality: {
+          localityAreaId: '',
+          localityAreaName: '',
+          localityId: '',
+          localityName: '',
+        },
+        stopLocation: {
+          latitude: Number(journeys[previousIndex].latitude),
+          longitude: Number(journeys[previousIndex].longitude),
+        },
+      },
+    };
+  });
+
+  journeyData;
   return journeyData;
 };
 
