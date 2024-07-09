@@ -25,15 +25,11 @@ export const getUTCDate = (date?: string | Date): Dayjs => {
   return dayjs.utc(date);
 };
 
-export const parseTimetz = (timetzString: string): Dayjs => {
-  const [timePart] = timetzString.split('+');
-  const [time, timezone] = timePart.split(' ');
-  const [hours, minutes, seconds] = time.split(':').map(Number);
-
+export const parseTimetz = (timetz: Dayjs): Dayjs => {
   return dayjs()
-    .set('hour', hours)
-    .set('minute', minutes)
-    .set('second', seconds);
+    .set('hour', timetz.hour())
+    .set('minute', timetz.minute())
+    .set('second', timetz.second());
 };
 
 export const getDateLocale = (utcString: string): Dayjs => {
