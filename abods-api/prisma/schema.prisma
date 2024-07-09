@@ -165,6 +165,22 @@ model timetable_summary_stops {
   locality                naptan_locality @relation(fields: [locality_id], references: [gazetteer_id])
 }
 
+model SiriVMPositions{
+  siri_vm_positions_id     Int      @id @default(1)
+  operator_ref            String
+  line_name               String
+  journey_ref             String
+  date_of_journey         DateTime
+  latitude                Decimal
+  longitude               Decimal
+  vehicle_ref             String
+  recorded_at_time        DateTime
+  group_id                String
+  Timetable               Timetable? 
+  @@unique([group_id, recorded_at_time])
+}
+
+
 model Timetable {
   timetable_id            Int      @id @default(1)
   operator_noc            String?
@@ -191,12 +207,14 @@ model Timetable {
   expected_headway        Int?
   actual_headway          Int?
   headway_time_difference Int?
-  siri_vm_position_id     Int?
   time_difference         Int?
   stop_id                 Int?
   servicepattern_id       Int
   vehiclejourney_id       Int
+  recorded_at_time_utc        DateTime
   expected_journeys       expected_journeys @relation(fields: [group_id], references: [group_id])
+  SiriVMPositions         SiriVMPositions? @relation(fields: [group_id, recorded_at_time_utc], references: [group_id, recorded_at_time])
+  @@unique([group_id, recorded_at_time_utc])
 }
 
 view naptan_adminarea_with_shape{
@@ -285,7 +303,9 @@ view naptan_stoppoint_latlong {
   common_name         String
   latitude            Decimal
   longitude           Decimal
+  locality_id         String
   sp_stops            transmodel_servicepatternstop[]
+  locality            naptan_locality @relation(fields: [locality_id], references: [gazetteer_id])
 }
 
 model naptan_locality {
@@ -294,6 +314,7 @@ model naptan_locality {
   admin_area_id           Int
   admin_area              naptan_adminarea @relation(fields: [admin_area_id], references: [id])
   timetable_summary_stops timetable_summary_stops[]
+  stops                   naptan_stoppoint_latlong[]
 }
 
 model naptan_adminarea {

@@ -4,6 +4,7 @@ import {
   LineType,
   OperatorPerformanceType,
   OperatorType,
+  PaginatedLineType,
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   ServicePunctualityType,
@@ -234,21 +235,43 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
     });
   });
 
-  const transitModel: OperatorType = {
-    nocCode: operatorRef,
-    transitModel: {
-      lines: {
-        items: services,
-      },
-    },
+  const lines: PaginatedLineType = {
+    items: services,
   };
 
-  return transitModel;
+  return lines;
 };
+
+export const getLines = async (
+  lineIds: string[],
+  sessionUser: SessionUser,
+  db: Context,
+  info: GraphQLResolveInfo
+) => {
+  const { operatorId } = info.variableValues as { operatorId: string };
+  const operationName: string = info.operation.name?.value ?? "";
+
+  if (operationName === "operatorLines") {
+    return getOperatorLines(operatorId, db);
+  }
+  const operators = await getOperators(sessionUser, db);
+
+  if (!operators) {
+    throw "No user operators";
+  }
+
+  const userOperatorIds = operators.map((o) => o.nocCode);
+
+
+  if (userOperatorIds.includes(operatorId)) {
+    // to be added for service maps next
+  }
+  console.log("operator ref", operatorId)
+}
+
 
 export const getOperator = async (
   operatorRef: string,
-  lineId: string,
   sessionUser: SessionUser,
   db: Context,
   info: GraphQLResolveInfo
@@ -258,14 +281,8 @@ export const getOperator = async (
       throw "Not authorized";
     }
 
-    const operationName: string = info.operation.name?.value ?? "";
-
-    if (operationName === "operatorLines") {
-      return getOperatorLines(operatorRef, db);
-    }
-
     // TODO: is operator id in users' operator id array
-    logger.debug("getOperator op: {0} line: {1}", operatorRef, lineId);
+    logger.debug("getOperator op: {0} ", operatorRef);
 
     const operator = await db.prisma.all_operators.findUnique({
       where: {
@@ -277,121 +294,13 @@ export const getOperator = async (
       throw "No operator found";
     }
 
-    const operators = await getOperators(sessionUser, db);
+    let operatorPayload: OperatorType = {
+      operatorId: operator.operatorref,
+      name: operator.name,
+      nocCode: operator.operatorref,
+    };
 
-    if (!operators) {
-      throw "No user operators";
-    }
-
-    const userOperatorIds = operators.map((o) => o.nocCode);
-
-    const operator_noc_to_filter = operatorRef;
-
-    if (userOperatorIds.includes(operator_noc_to_filter)) {
-      // fetch all otp rows for this operator and service
-      let lineIds: string[] = [];
-      if (lineId) {
-        lineIds.push(lineId);
-      }
-      const operatorIds = [operatorRef];
-
-      const date7DaysAgo = new Date();
-      date7DaysAgo.setDate(date7DaysAgo.getDate() - 7);
-      const dateTs = `${date7DaysAgo.getFullYear()}-${String(
-        date7DaysAgo.getMonth() + 1
-      ).padStart(2, "0")}-${String(date7DaysAgo.getDate() + 1).padStart(
-        2,
-        "0"
-      )}T00:00:00.000+01:00`;
-
-      const otpRecords = await db.prisma.timetable.findMany({
-        where: {
-          operator_noc: {
-            in: operatorIds,
-          },
-          AND: {
-            // any in last 7 days
-            date_of_journey: {
-              gte: dateTs,
-            },
-
-            // only get services in lineIds arr
-            ...(lineIds && lineIds.length > 0
-              ? {
-                  service_code: {
-                    in: lineIds,
-                  },
-                }
-              : {}),
-          },
-        },
-      });
-
-      logger.debug(
-        "getOperator found otprecords for line: " +
-          JSON.stringify(lineIds) +
-          " " +
-          otpRecords.length
-      );
-
-      let stops: StopType[] = [];
-      let lineName = "";
-
-      // add all unique stops to the list
-      for (let i = 0; i < otpRecords.length; i++) {
-        const otpRecord = otpRecords[i];
-
-        if (otpRecord.line_name && lineName != "") {
-          lineName = otpRecord.line_name;
-        }
-
-        if (otpRecord.stop_id) {
-          const index = stops.findIndex(
-            (d) => d.stopId == String(otpRecord.stop_id)
-          );
-          if (index == -1) {
-            stops.push({
-              stopId: String(otpRecord.stop_id),
-              stopName: otpRecord.common_name ? otpRecord.common_name : "", // naptan
-              lon: otpRecord.stop_longitude
-                ? Number(otpRecord.stop_longitude)
-                : 0, // naptan
-              lat: otpRecord.stop_latitude
-                ? Number(otpRecord.stop_latitude)
-                : 0, // naptan
-            });
-          }
-        }
-      }
-
-      let operatorPayload: OperatorType = {
-        operatorId: operator.operatorref,
-        name: operator.name,
-        nocCode: operator.operatorref,
-        transitModel: {
-          lines: {
-            items: [
-              {
-                lineId: lineId,
-                lineName: lineName,
-                lineNumber: lineName,
-                onTimePerformance: [],
-                servicePatterns: [
-                  {
-                    servicePatternId: "SP1",
-                    name: "Pattern 1",
-                    stops: stops,
-                    serviceLinks: [],
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      };
-
-      return operatorPayload;
-    } else return null;
+    return operatorPayload;
   } catch (error) {
     console.error(error);
     return null;
@@ -1119,7 +1028,7 @@ export const getStopPerformance = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const results = await db.prisma.timetable_summary_stops.groupBy({
-          by: ["locality_id","stop_id", "common_name", "is_timing_point"],
+          by: ["stop_id", "common_name", "is_timing_point"],
           where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
           _sum: {
             early_count: true,
@@ -1133,20 +1042,27 @@ export const getStopPerformance = async (
           },
         });
 
-        const localityIds: string[] = results.map((res) => res.locality_id)
+        const stopIds: number[] = results.map((res) => res.stop_id)
 
-        const localities = await db.prisma.naptan_locality.findMany({
+        const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
           where: {
-            gazetteer_id: {
-              in: localityIds
+            id: {
+              in: stopIds
             }
           },
           select: {
-            gazetteer_id: true,
-            name: true,
-            admin_area: {
+            id: true,
+            longitude: true,
+            latitude: true,
+            locality:{
               select: {
+                gazetteer_id: true,
                 name: true,
+                admin_area: {
+                  select: {
+                    name: true,
+                  }
+                }
               }
             }
           }
@@ -1158,7 +1074,7 @@ export const getStopPerformance = async (
             ? res._avg.avg_time_difference * 60
             : 0;
 
-          const locality = localities.find((dbLocality) => dbLocality.gazetteer_id === res.locality_id)
+          const stop = stops.find((dbStop) => dbStop.id === res.stop_id)
           stopPerformances.push({
             lineId: lineIds[0],
             stopId: res.stop_id ? res.stop_id : 0,
@@ -1168,14 +1084,14 @@ export const getStopPerformance = async (
               stopName: res.common_name ? res.common_name : "",
               stopLocality: {
                 localityId: "",
-                localityName: locality?.name ?? "",
+                localityName: stop?.locality?.name ?? "",
                 localityAreaId: "",
-                localityAreaName: locality?.admin_area.name ?? "",
+                localityAreaName: stop?.locality?.admin_area.name ?? "",
               },
               sourceId: "",
               stopLocation: {
-                longitude: 0,
-                latitude: 0,
+                longitude: Number(stop?.longitude) ?? 0,
+                latitude: Number(stop?.latitude) ?? 0,
               },
             },
             early: res._sum.early_count ? res._sum.early_count : 0,

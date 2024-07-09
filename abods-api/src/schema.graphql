@@ -9,7 +9,7 @@ type Query {
     roles: [RoleType]
     userAlerts: [AlertType]
     userAlert(alertId: String!): AlertType
-    operator(operatorId: String!, lineId: String): OperatorType
+    operator(operatorId: String!): OperatorType
     operators: OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
