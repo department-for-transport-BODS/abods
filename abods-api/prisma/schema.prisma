@@ -322,3 +322,28 @@ model naptan_adminarea {
   name                String
   locality            naptan_locality[]
 }
+
+model performance_statistics {
+  operator_noc            String
+  line_name               String
+  noc_and_line            String
+  service_name            String
+  is_timing_point         Boolean
+  date_period_start       DateTime
+  date_period_end         DateTime
+  period_type             String
+  on_time_count           Int
+  early_count             Int
+  late_count              Int
+  total_count             Int
+  on_time_percentage      Decimal
+  trend_period_start      DateTime?
+  trend_period_end        DateTime?
+  trend_on_time_count     Int?
+  trend_early_count       Int?
+  trend_late_count        Int?
+  trend_total_count       Int?
+  trend_percentage        Decimal?
+
+  @@unique([operator_noc, noc_and_line, date_period_start, period_type, service_name])
+}

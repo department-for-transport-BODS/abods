@@ -406,7 +406,7 @@ type OnTimePerformanceType {
   punctualityTimeOfDay(inputs: PerformanceInputType!): [PunctualityTimeOfDayType]
   punctualityTimeSeries(inputs: PerformanceInputType!): [PunctualityTimeSeriesType]
   servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType]
-  servicePunctuality: [ServicePunctualityType]
+  servicePunctuality(inputs: ServicePerformanceInputType!): [ServicePunctualityType]
   stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType]
 }
 
@@ -500,15 +500,22 @@ type OperatorInfoType {
   operatorName: String
 }
 
+type IPunctualityType {
+  early: Int
+  late: Int
+  onTime: Int
+}
+
 type ServicePunctualityType {
   early: Int
   late: Int
   lineId: String
+  lineInfo: ServiceInfoType
   nocCode: String
   onTime: Int
   operatorId: String
   rank: Float
-  trend: ServicePunctualityType
+  trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
 }
 
 type StopPerformanceType {
@@ -625,4 +632,21 @@ enum PunctualitySortEnum {
 enum SortOrderEnum {
   ASC
   DESC
+}
+
+enum RankingOrder {
+  ascending
+  descending
+}
+
+input ServicePerformanceFiltersInputType {
+  timingPointsOnly: Boolean
+}
+
+input ServicePerformanceInputType {
+  filters: ServicePerformanceFiltersInputType
+  fromTimestamp: DateTime
+  toTimestamp: DateTime
+  limit: Int
+  order: RankingOrder
 }
