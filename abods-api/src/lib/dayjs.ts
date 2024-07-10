@@ -59,3 +59,20 @@ export const dbGmtToUtc = (
 export const getStrUTCHour = (hour: Dayjs | undefined): string => {
     return hour ? dayjs.utc(hour).format('HH:mm:ss') : "00:00:00"
 }
+
+export const getBSTDate = (date: Date | Dayjs, format: string): string => {
+  return dayjs(date).tz('Europe/London').format(format);
+};
+
+export const getStrDateRange = (startDate: Date, endDate: Date): string[] => {
+  const strDates: string[] = []
+
+  let fromDate = getDate(startDate)
+  const toDate = getDate(endDate)
+
+  while(fromDate.isBefore(toDate)){
+    strDates.push(getBSTDate(fromDate, "YYYY-MM-DD"))
+    fromDate = fromDate.add(1, 'day')
+  }
+  return strDates
+}

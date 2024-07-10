@@ -322,3 +322,16 @@ model naptan_adminarea {
   name                String
   locality            naptan_locality[]
 }
+
+model timetable_threshold_summary {
+  operator_noc        String
+	line_name           String
+	noc_and_line        String
+	service_name        String
+	date_of_journey     DateTime
+	is_timing_point     Boolean
+	time_diff_minutes   Float
+	otp_count           Int
+
+  @@unique([noc_and_line, service_name, date_of_journey, is_timing_point, time_diff_minutes, otp_count])
+}

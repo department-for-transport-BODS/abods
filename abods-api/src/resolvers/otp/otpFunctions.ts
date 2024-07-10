@@ -15,8 +15,8 @@ import {
 } from "../../types";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getDate, getDateLocale, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
-import dayjs from "dayjs";
+import { getDate, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
+import { compareThresholds } from "../../lib/otp.js"
 
 function divideAndRound(number: number): number {
   const result = number / 60;
@@ -81,7 +81,7 @@ export const getOperatorList = async (
   }
 };
 
-const getOperators = async (
+export const getOperators = async (
   sessionUser: SessionUser,
   db: Context,
   adminAreaIds?: string[]
@@ -308,16 +308,6 @@ export const getOperator = async (
   }
 };
 
-const compareThresholds = (inputs: PerformanceInputType) => {
-  const { fromTimestamp, toTimestamp, filters } = inputs;
-
-  const {
-    onTimeMaxMinutes,
-    onTimeMinMinutes
-  } = filters
-
-  const 
-}
 
 export const getPunctualityOverview = async (
   inputs,
@@ -348,6 +338,10 @@ export const getPunctualityOverview = async (
     } = filters;
 
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
+
+    if( onTimeMinMinutes || onTimeMaxMinutes ) {
+      return compareThresholds(inputs, sessionUser, db)
+    }
 
     // get an array of user's org's operator nocs.
     const operators = await getOperators(sessionUser, db, adminAreaIds);
