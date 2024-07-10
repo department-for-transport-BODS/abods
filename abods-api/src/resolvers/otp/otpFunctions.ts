@@ -5,6 +5,7 @@ import {
   OperatorPerformanceType,
   OperatorType,
   PaginatedLineType,
+  PerformanceInputType,
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   ServicePunctualityType,
@@ -307,6 +308,17 @@ export const getOperator = async (
   }
 };
 
+const compareThresholds = (inputs: PerformanceInputType) => {
+  const { fromTimestamp, toTimestamp, filters } = inputs;
+
+  const {
+    onTimeMaxMinutes,
+    onTimeMinMinutes
+  } = filters
+
+  const 
+}
+
 export const getPunctualityOverview = async (
   inputs,
   sessionUser: SessionUser,
@@ -331,6 +343,8 @@ export const getPunctualityOverview = async (
       minDelay,
       lineIds,
       dayOfWeekFlags,
+      onTimeMaxMinutes,
+      onTimeMinMinutes,
     } = filters;
 
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
