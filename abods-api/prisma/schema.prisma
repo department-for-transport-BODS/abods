@@ -304,6 +304,7 @@ view naptan_stoppoint_latlong {
   latitude            Decimal
   longitude           Decimal
   locality_id         String
+  atco_code           String
   sp_stops            transmodel_servicepatternstop[]
   locality            naptan_locality @relation(fields: [locality_id], references: [gazetteer_id])
 }
