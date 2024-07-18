@@ -303,6 +303,7 @@ view naptan_stoppoint_latlong {
   latitude            Decimal
   longitude           Decimal
   locality_id         String
+  atco_code           String
   sp_stops            transmodel_servicepatternstop[]
   locality            naptan_locality @relation(fields: [locality_id], references: [gazetteer_id])
 }
@@ -372,4 +373,29 @@ model timetable_summary_service_admin {
 	max_early Int
   avg_time_difference Int
   admin_areas                 Int[]
+}
+
+model performance_statistics {
+  operator_noc            String
+  line_name               String
+  noc_and_line            String
+  service_name            String
+  is_timing_point         Boolean
+  date_period_start       DateTime
+  date_period_end         DateTime
+  period_type             String
+  on_time_count           Int
+  early_count             Int
+  late_count              Int
+  total_count             Int
+  on_time_percentage      Decimal
+  trend_period_start      DateTime?
+  trend_period_end        DateTime?
+  trend_on_time_count     Int?
+  trend_early_count       Int?
+  trend_late_count        Int?
+  trend_total_count       Int?
+  trend_percentage        Decimal?
+
+  @@unique([operator_noc, noc_and_line, date_period_start, period_type, service_name])
 }

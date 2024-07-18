@@ -1,4 +1,3 @@
-import { equal } from "assert";
 import { Context } from "../../context";
 import {
   LineType,
@@ -7,14 +6,17 @@ import {
   PaginatedLineType,
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
+  RankingOrder,
+  ServicePerformanceInputType,
   ServicePunctualityType,
   SessionUser,
   StopPerformanceType,
-} from "../../types";
+} from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getDate, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
+import { getBSTDate, getDate, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
 import { compareThresholds } from "../../lib/otp.js"
+import { Prisma } from "@prisma/client";
 
 interface DayCount {
   dayOfWeek: number;
@@ -950,37 +952,74 @@ function getDaysInRange(startDate: Date, endDate: Date): Date[] {
 }
 
 export const getServicePunctuality = async (
+  inputs: ServicePerformanceInputType,
   sessionUser: SessionUser,
   db: Context
-) => {
+): Promise<ServicePunctualityType[]> => {
   try {
     if (!sessionUser.user) {
       throw "Not authorized";
     }
-    return [
-      {
-        early: 50,
-        late: 5,
-        lineId: "line201",
-        nocCode: "NC101",
-        onTime: 145,
-        operatorId: "operator101",
-        rank: 1.0,
-        trend: {
-          early: 55,
-          late: 3,
-          onTime: 142,
-          lineId: "line201",
-          nocCode: "NC101",
-          operatorId: "operator101",
-          rank: 2.0,
-          trend: null,
-        },
+
+    const {
+      filters,
+      fromTimestamp,
+      order,
+      toTimestamp
+    } = inputs
+
+    const timingPointsOnly = filters?.timingPointsOnly
+
+
+    const operators = await getOperators(sessionUser, db);
+
+    const operatorNocs = operators?.map((op) => op.nocCode) ?? []
+
+    const where: Prisma.performance_statisticsWhereInput = {
+      operator_noc: {
+        in: operatorNocs
       },
-    ];
+      date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
+    }
+
+    if(timingPointsOnly) {
+      where.is_timing_point = timingPointsOnly
+    }
+
+    const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
+    const performanceMetrics = await db.prisma.performance_statistics.findMany({
+      where,
+      take: 3,
+      distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
+      orderBy: [{
+        on_time_percentage: orderFilter
+      },{
+        trend_percentage: orderFilter
+      }]
+    })
+
+
+    return performanceMetrics.map((stats) =>({
+      nocCode: stats.operator_noc,
+      lineId: stats.noc_and_line,
+      lineInfo: {
+        serviceId: stats.noc_and_line,
+        serviceName: stats.service_name,
+        serviceNumber: stats.line_name
+      },
+      onTime: stats.on_time_count,
+      early: stats.early_count,
+      late: stats.late_count,
+      trend: {
+        onTime: stats.trend_on_time_count ?? 0,
+        late: stats.trend_late_count ?? 0,
+        early: stats.trend_early_count ?? 0
+      }
+    }))
+
   } catch (error) {
     logger.error(error);
-    return null;
+    return [];
   }
 };
 
@@ -1053,6 +1092,7 @@ export const getStopPerformance = async (
             id: true,
             longitude: true,
             latitude: true,
+            atco_code: true,
             locality:{
               select: {
                 gazetteer_id: true,
@@ -1076,10 +1116,10 @@ export const getStopPerformance = async (
           const stop = stops.find((dbStop) => dbStop.id === res.stop_id)
           stopPerformances.push({
             lineId: lineIds[0],
-            stopId: res.stop_id ? res.stop_id : 0,
+            stopId: `ST${stop?.atco_code}`,
             stopInfo: {
               //stopId: res.stop_id? res.stop_id : 0,
-              stopId: res.stop_id.toString(),
+              stopId: `ST${stop?.atco_code}`,
               stopName: res.common_name ? res.common_name : "",
               stopLocality: {
                 localityId: "",
@@ -1087,7 +1127,7 @@ export const getStopPerformance = async (
                 localityAreaId: "",
                 localityAreaName: stop?.locality?.admin_area.name ?? "",
               },
-              sourceId: "",
+              sourceId: stop?.atco_code ?? "",
               stopLocation: {
                 longitude: Number(stop?.longitude) ?? 0,
                 latitude: Number(stop?.latitude) ?? 0,

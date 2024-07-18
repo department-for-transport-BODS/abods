@@ -1521,20 +1521,20 @@ export type ServicePunctualityType = IPunctualityType & {
   __typename?: 'ServicePunctualityType';
   early: Scalars['Int'];
   late: Scalars['Int'];
-  lineId: Scalars['String'];
-  lineInfo: ServiceInfoType;
+  lineId?: Scalars['String'];
+  lineInfo?: ServiceInfoType;
   nocCode?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
-  rank: Scalars['Float'];
-  averageDelay: Scalars['Float'];
+  rank?: Scalars['Float'];
+  averageDelay?: Scalars['Float'];
   /**
    * Get the performance numbers for a previous period
    * for comparison with current period.
    */
   trend?: Maybe<ServicePunctualityType>;
-  scheduledDepartures: Scalars['Int'];
-  actualDepartures: Scalars['Int'];
+  scheduledDepartures?: Scalars['Int'];
+  actualDepartures?: Scalars['Int'];
 };
 
 

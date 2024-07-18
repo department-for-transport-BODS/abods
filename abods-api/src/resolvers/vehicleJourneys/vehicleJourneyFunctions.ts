@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import { Context } from '../../context';
 import {
   dbGmtToUtc,
@@ -48,6 +49,7 @@ export const findJourneys = async (
       },
     });
 
+    let inputDate: Dayjs;
     if (toTimestamp.isSame(currentTime, 'day')) {
       journeys = journeys.filter((journey) => {
         
