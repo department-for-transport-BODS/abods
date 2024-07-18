@@ -1091,6 +1091,7 @@ export const getStopPerformance = async (
             id: true,
             longitude: true,
             latitude: true,
+            atco_code: true,
             locality:{
               select: {
                 gazetteer_id: true,
@@ -1114,10 +1115,10 @@ export const getStopPerformance = async (
           const stop = stops.find((dbStop) => dbStop.id === res.stop_id)
           stopPerformances.push({
             lineId: lineIds[0],
-            stopId: res.stop_id ? res.stop_id : 0,
+            stopId: `ST${stop?.atco_code}`,
             stopInfo: {
               //stopId: res.stop_id? res.stop_id : 0,
-              stopId: res.stop_id.toString(),
+              stopId: `ST${stop?.atco_code}`,
               stopName: res.common_name ? res.common_name : "",
               stopLocality: {
                 localityId: "",
@@ -1125,7 +1126,7 @@ export const getStopPerformance = async (
                 localityAreaId: "",
                 localityAreaName: stop?.locality?.admin_area.name ?? "",
               },
-              sourceId: "",
+              sourceId: stop?.atco_code ?? "",
               stopLocation: {
                 longitude: Number(stop?.longitude) ?? 0,
                 latitude: Number(stop?.latitude) ?? 0,
