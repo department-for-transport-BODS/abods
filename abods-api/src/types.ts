@@ -1592,7 +1592,7 @@ export type StopPerformanceType = IPunctualityType & {
   lineId?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   scheduledDepartures: Scalars['Int'];
-  stopId: Scalars['Int'];
+  stopId: Scalars['Int'] | Scalars['String'];
   stopIndex?: Maybe<Scalars['Int']>;
   stopInfo: StopInfoType;
   timingPoint: Scalars['Boolean'];
@@ -1657,7 +1657,8 @@ export type TransitModelTypeLinesArgs = {
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
   serviceInfo: ServiceInfoType;
-  startTime: Scalars['DateTime'];
+  //startTime: Scalars['DateTime'];
+  startTime: Scalars['String'];
   vehicleJourneyId: Scalars['String'];
 };
 

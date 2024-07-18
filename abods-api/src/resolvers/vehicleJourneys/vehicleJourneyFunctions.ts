@@ -3,7 +3,8 @@ import {
   dbGmtToUtc,
   getDate,
   getDateLocale,
-  getUTCDate,
+  getFormattedDate,
+  overwriteDate,
   parseTimetz,
 } from '../../lib/dayjs.js';
 import logger from '../../logger.js';
@@ -35,7 +36,7 @@ export const findJourneys = async (
     const toTimestamp = getDate(inputs.toTimestamp).subtract(4, 'hour');
     let journeys = await db.prisma.expected_journeys.findMany({
       where: {
-        noc_and_line: lineIds[0],
+        noc_and_line_and_servicecode: lineIds[0],
         date_of_journey: toTimestamp.toDate(),
       },
       include: {
@@ -49,27 +50,24 @@ export const findJourneys = async (
 
     if (toTimestamp.isSame(currentTime, 'day')) {
       journeys = journeys.filter((journey) => {
-        const parsedTime = parseTimetz(
-          journey.expected_journey_start?.toTimeString() ?? '',
-        );
+        
+        const parsedTime = getDate(journey.expected_journey_start);
         return parsedTime.isBefore(currentTime, 'second');
       });
     }
 
     journeysData = journeys.map((journey) => {
-      const departureTime = getUTCDate(journey.expected_journey_start);
-      const journeyDate = getDate(journey.date_of_journey);
-
-      const startTime = getDateLocale(
-        `${journeyDate.format('YYYY-MM-DD')}T${departureTime.format(
-          'HH:mm:ss',
-        )}`,
+      
+      const formattedDate = getFormattedDate(
+        journey.expected_journey_start
       );
+
+      const jsDate = getDate(journey.expected_journey_start)
 
       const journeyDescription: string = journey.journey_pattern_description;
       return {
         vehicleJourneyId: journey.group_id,
-        startTime: startTime.toISOString(),
+        startTime: formattedDate.toString(),
         serviceInfo: {
           serviceName: journeyDescription,
           serviceNumber: journey.expected_service.line_name,
@@ -102,7 +100,7 @@ export const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
           expected_journey_start: true,
           expected_service: {
             select: {
-              noc_and_line: true,
+              noc_and_line_and_servicecode: true,
               service_name: true,
               line_name: true,
               expected_operator: {
@@ -119,9 +117,9 @@ export const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
     where: {
       group_id: journeyId,
       date_of_journey: journeyDate,
-    }
-  }
-})
+    },
+  },
+});
 
 export const getJourney = async (
   journeyId: string,
@@ -142,46 +140,38 @@ export const getJourney = async (
       group_id: journeyId,
     },
     select: {
-      ...getJourneyInputs(journeyId, journeyDate)
-    }
+      ...getJourneyInputs(journeyId, journeyDate),
+    },
   });
 
   let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
-  let previousStop = matchedStop;
   const journeyCount = journeys.length;
+
   journeyData = journeys.map((journey, index) => {
-    previousStop = matchedStop;
     if (journey.Timetable?.stop_index) {
       matchedStop = journey;
     }
 
-    const journeyDepartureTime = getDate(
-      matchedStop?.Timetable?.expected_journeys.expected_journey_start,
+    const startTime = getFormattedDate(
+      matchedStop?.Timetable?.expected_journeys.expected_journey_start
     );
-    const stopDepartureTime = getDate(
-      matchedStop?.Timetable?.expected_departure_time,
-    );
-    const journeyDate = getDate(matchedStop?.Timetable?.date_of_journey);
-    const actualDepartureTime = getDate(journey.recorded_at_time);
-    const startTime = dbGmtToUtc(journeyDate, journeyDepartureTime);
 
-    const timestamp = getDateLocale(
-      `${journeyDate.format('YYYY-MM-DD')}T${actualDepartureTime.format(
-        'HH:mm:ss',
-      )}`,
+    const timestamp = getFormattedDate(journey.recorded_at_time);
+
+    const stopScheduledTime = getFormattedDate(
+      matchedStop?.Timetable?.expected_departure_time
     );
-    const stopScheduledTime = dbGmtToUtc(journeyDate, stopDepartureTime);
 
     const previousIndex = index === 0 ? 0 : index - 1;
     return {
-      ts: timestamp.toISOString(),
+      ts: timestamp.toString(),
       vehicleId: journey.vehicle_ref,
       vehicleJourneyId: journeyId,
       servicePatternId: matchedStop?.Timetable?.vehiclejourney_id.toString(),
       isTimingPoint: journey.Timetable?.is_timing_point,
       delay: matchedStop?.Timetable?.time_difference ?? 0,
-      startTime: startTime.toISOString(),
-      scheduledDeparture: stopScheduledTime.toISOString(),
+      startTime: startTime.toString(),
+      scheduledDeparture: stopScheduledTime.toString(),
       lat: Number(journey.latitude),
       lon: Number(journey.longitude),
       journeyStatus: matchedStop?.Timetable?.expected_departure_time
@@ -203,7 +193,7 @@ export const getJourney = async (
       serviceInfo: {
         serviceId:
           matchedStop?.Timetable?.expected_journeys.expected_service
-            .noc_and_line ?? '',
+            .noc_and_line_and_servicecode ?? '',
         serviceNumber:
           matchedStop?.Timetable?.expected_journeys.expected_service
             .line_name ?? '',
@@ -229,7 +219,6 @@ export const getJourney = async (
     };
   });
 
-  journeyData;
   return journeyData;
 };
 

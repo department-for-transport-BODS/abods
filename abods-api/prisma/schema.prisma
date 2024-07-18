@@ -123,7 +123,7 @@ model timetable_summary_operator {
 model timetable_summary_service {
   timetable_id    Int   @id @default(1)
   line_name String
-  noc_and_line String
+  noc_and_line_and_servicecode String
   service_name String
 	operator_noc String
 	date_of_journey DateTime
@@ -144,7 +144,7 @@ model timetable_summary_stops {
   timetable_id    Int   @id @default(1)
 	operator_noc String
   service_code String
-  noc_and_line String
+  noc_and_line_and_servicecode String
   stop_id Int
   stop_latitude           Decimal?
   stop_longitude          Decimal?
@@ -198,8 +198,8 @@ model Timetable {
   stop_latitude           Decimal?
   stop_longitude          Decimal?
   locality_id             String?
-  expected_departure_time DateTime? @db.Time(6)
-  actual_departure_time   DateTime? @db.Time(6)
+  expected_departure_time DateTime?         @db.Timestamptz()
+  actual_departure_time   DateTime?         @db.Timestamptz()
   is_timing_point         Boolean?
   group_id                String
   previous_group_id       String?
@@ -211,10 +211,9 @@ model Timetable {
   stop_id                 Int?
   servicepattern_id       Int
   vehiclejourney_id       Int
-  recorded_at_time_utc        DateTime
   expected_journeys       expected_journeys @relation(fields: [group_id], references: [group_id])
-  SiriVMPositions         SiriVMPositions? @relation(fields: [group_id, recorded_at_time_utc], references: [group_id, recorded_at_time])
-  @@unique([group_id, recorded_at_time_utc])
+  SiriVMPositions         SiriVMPositions? @relation(fields: [group_id, actual_departure_time], references: [group_id, recorded_at_time])
+  @@unique([group_id, actual_departure_time])
 }
 
 view naptan_adminarea_with_shape{
@@ -251,13 +250,13 @@ model expected_operators {
 
 model expected_services {
   line_name             String
-  noc_and_line          String
+  noc_and_line_and_servicecode          String
   service_name          String
   date_of_journey       DateTime
   operator_noc          String
   expected_operator     expected_operators @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys     expected_journeys[]       
-  @@id([noc_and_line, date_of_journey])
+  @@id([noc_and_line_and_servicecode, date_of_journey])
 }
 
 model expected_journeys {
@@ -268,14 +267,14 @@ model expected_journeys {
   journey_code                String
   date_of_journey             DateTime
   day_of_week                 Int
-  noc_and_line                String
+  noc_and_line_and_servicecode                  String
   stop_count                  Int
   vehicle_journey_id          Int               
-  expected_journey_start      DateTime           @db.Timetz
-  expected_service            expected_services  @relation(fields: [noc_and_line, date_of_journey], references: [noc_and_line, date_of_journey])
+  expected_journey_start      DateTime          @db.Timetz()      
+  expected_service            expected_services  @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
   timetable                   Timetable[]
   vehicle_journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
-  @@id([noc_and_line, journey_code, date_of_journey])
+  @@id([noc_and_line_and_servicecode, journey_code, date_of_journey])
 }
 
 model transmodel_vehiclejourney {
@@ -324,14 +323,53 @@ model naptan_adminarea {
 }
 
 model timetable_threshold_summary {
-  operator_noc        String
-	line_name           String
-	noc_and_line        String
-	service_name        String
-	date_of_journey     DateTime
-	is_timing_point     Boolean
-	time_diff_minutes   Float
-	otp_count           Int
+  threshold_id                        Int      @id @default(1)
+  operator_noc                        String
+	line_name                           String
+	noc_and_line_and_servicecode        String
+	service_name                        String
+	date_of_journey                     DateTime
+	is_timing_point                     Boolean
+	time_diff_minutes                   Float
+	otp_count                           Int
+  admin_area_id                       Int
+}
 
-  @@unique([noc_and_line, service_name, date_of_journey, is_timing_point, time_diff_minutes, otp_count])
+model timetable_summary_operator_admin {
+  timetable_id                  Int   @id @default(1)
+	operator_noc                  String
+	date_of_journey               DateTime
+	day_of_week                   Int
+	departure_hour                DateTime? @db.Time(6)
+	is_timing_point               Boolean
+	on_time_count                 Int
+	early_count                   Int
+	late_count                    Int
+	completed                     Int
+	scheduled                     Int
+	max_late                      Int
+	max_early                     Int
+  avg_time_difference           Int
+  admin_areas                   Int[]
+}
+
+model timetable_summary_service_admin {
+  timetable_id    Int   @id @default(1)
+  line_name String
+  noc_and_line_and_servicecode String
+  service_name String
+	operator_noc String
+	date_of_journey DateTime
+	day_of_week Int
+	departure_hour DateTime? @db.Time(6)
+	is_timing_point Boolean
+	on_time_count Int
+	early_count Int
+	late_count Int
+	completed Int
+	scheduled Int
+	max_late Int
+	max_early Int
+  avg_time_difference Int
+  admin_areas                 Int[]
 }

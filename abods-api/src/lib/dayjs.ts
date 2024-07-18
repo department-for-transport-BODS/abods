@@ -44,7 +44,9 @@ export const getDateUTC = (
   journeyDate: Dayjs,
   hour: Dayjs | undefined,
 ): Dayjs => {
-  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(hour)}Z`
+  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(
+    hour,
+  )}Z`;
   return dayjs.utc(utcString);
 };
 
@@ -52,27 +54,47 @@ export const dbGmtToUtc = (
   journeyDate: Dayjs,
   hour: Dayjs | undefined,
 ): Dayjs => {
-  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(hour)}`
+  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(
+    hour,
+  )}`;
   return getDateLocale(utcString);
 };
 
 export const getStrUTCHour = (hour: Dayjs | undefined): string => {
-    return hour ? dayjs.utc(hour).format('HH:mm:ss') : "00:00:00"
-}
+  return hour ? dayjs.utc(hour).format('HH:mm:ss') : '00:00:00';
+};
 
 export const getBSTDate = (date: Date | Dayjs, format: string): string => {
   return dayjs(date).tz('Europe/London').format(format);
 };
 
 export const getStrDateRange = (startDate: Date, endDate: Date): string[] => {
-  const strDates: string[] = []
+  const strDates: string[] = [];
 
-  let fromDate = getDate(startDate)
-  const toDate = getDate(endDate)
+  let fromDate = getDate(startDate);
+  const toDate = getDate(endDate);
 
-  while(fromDate.isBefore(toDate)){
-    strDates.push(getBSTDate(fromDate, "YYYY-MM-DD"))
-    fromDate = fromDate.add(1, 'day')
+  while (fromDate.isBefore(toDate)) {
+    strDates.push(getBSTDate(fromDate, 'YYYY-MM-DD'));
+    fromDate = fromDate.add(1, 'day');
   }
-  return strDates
-}
+  return strDates;
+};
+
+export const overwriteDate = (
+  inputDate: Dayjs,
+  overwriteDate: Dayjs,
+): Dayjs => {
+  return inputDate
+    .set('year', overwriteDate.year())
+    .set('month', overwriteDate.month())
+    .set('day', overwriteDate.date());
+};
+
+export const getFormattedDate = (
+  inputDate: Date | null | undefined
+): string => {
+  return getDate(inputDate)
+    .tz('Europe/London')
+    .format('YYYY-MM-DDTHH:mm:ssZ');
+};

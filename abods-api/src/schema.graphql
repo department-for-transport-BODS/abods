@@ -70,7 +70,7 @@ type GpsFeedType {
   lon: Float
   operatorInfo: OperatorInfoType
   previousStopInfo: StopInfoType
-  scheduledDeparture: DateTime
+  scheduledDeparture: String
   serviceInfo: ServiceInfoType
   servicePatternId: String
   startTime: DateTime
@@ -97,7 +97,7 @@ input GpsFeedNamespaceGetJourneyArgs {
 
 type UniqueJourneyType {
   serviceInfo: ServiceInfoType
-  startTime: DateTime
+  startTime: String
   vehicleJourneyId: String
 }
 
@@ -275,6 +275,40 @@ type OperatorType {
     operatorId: String
     adminAreas: [AdminAreaInfoType]
     transitModel: TransitModelType
+    feedMonitoring: FeedMonitoringType
+}
+
+type FeedMonitoringType {
+  availability: Float
+  feedStatus: Boolean
+  historicalStats: HistoricalStatsType
+  lastOutage: DateTime
+  liveStats: LiveStatsType
+  unavailableSince: DateTime
+  vehicleStats: [VehicleStatsType]
+}
+
+type HistoricalStatsType {
+  availability: Float
+  compliance: Float
+  updateFrequency: Int
+  vehicleStats: [VehicleStatsType]
+}
+
+type VehicleStatsType {
+  actual: Int
+  expected: Int
+  timestamp: DateTime
+}
+
+type LiveStatsType {
+  currentVehicles: Int
+  expectedVehicles: Int
+  feedAlerts: Int
+  feedErrors: Int
+  last20Minutes: [VehicleStatsType]
+  last24Hours: [VehicleStatsType]
+  updateFrequency: Int
 }
 
 type AdminAreaInfoType {
