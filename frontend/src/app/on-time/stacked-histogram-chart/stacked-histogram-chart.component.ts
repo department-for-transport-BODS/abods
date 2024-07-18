@@ -166,7 +166,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     }
 
     const noDataPattern = new am4core.LinePattern();
-    noDataPattern.strokeWidth = 0;
+    noDataPattern.strokeWidth = 1;
     noDataPattern.rotation = 135;
     noDataPattern.stroke = this.chart.colors.getIndex(1);
     noDataPattern.fill = this.chart.colors.getIndex(1);
