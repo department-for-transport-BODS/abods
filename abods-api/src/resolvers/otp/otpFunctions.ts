@@ -998,12 +998,11 @@ export const getServicePunctuality = async (
       }]
     })
 
-
     return performanceMetrics.map((stats) =>({
       nocCode: stats.operator_noc,
-      lineId: stats.noc_and_line,
+      lineId: stats.noc_and_line_and_servicecode,
       lineInfo: {
-        serviceId: stats.noc_and_line,
+        serviceId: stats.noc_and_line_and_servicecode,
         serviceName: stats.service_name,
         serviceNumber: stats.line_name
       },
@@ -1559,7 +1558,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
       : {}),
     ...(lineIds
       ? {
-          noc_and_line: {
+          noc_and_line_and_servicecode: {
             in: lineIds,
           },
         }
