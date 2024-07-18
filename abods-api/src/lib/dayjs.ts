@@ -36,6 +36,10 @@ export const getDateLocale = (utcString: string): Dayjs => {
   return dayjs.tz(utcString, 'Europe/London');
 };
 
+export const getBSTDate = (date: Date, format: string): string => {
+  return dayjs(date).tz('Europe/London').format(format);
+};
+
 export const getDateUTC = (
   journeyDate: Dayjs,
   hour: Dayjs | undefined,

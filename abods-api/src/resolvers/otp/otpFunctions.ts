@@ -1,4 +1,3 @@
-import { equal } from "assert";
 import { Context } from "../../context";
 import {
   LineType,
@@ -7,15 +6,16 @@ import {
   PaginatedLineType,
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
+  RankingOrder,
+  ServicePerformanceInputType,
   ServicePunctualityType,
   SessionUser,
   StopPerformanceType,
-  StopType,
-} from "../../types";
+} from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getDate, getDateLocale, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
-import dayjs from "dayjs";
+import { getDate, getDateUTC, getBSTDate, getStrUTCHour } from "../../lib/dayjs.js";
+import { Prisma } from "@prisma/client";
 
 function divideAndRound(number: number): number {
   const result = number / 60;
@@ -951,37 +951,74 @@ function getDaysInRange(startDate: Date, endDate: Date): Date[] {
 }
 
 export const getServicePunctuality = async (
+  inputs: ServicePerformanceInputType,
   sessionUser: SessionUser,
   db: Context
-) => {
+): Promise<ServicePunctualityType[]> => {
   try {
     if (!sessionUser.user) {
       throw "Not authorized";
     }
-    return [
-      {
-        early: 50,
-        late: 5,
-        lineId: "line201",
-        nocCode: "NC101",
-        onTime: 145,
-        operatorId: "operator101",
-        rank: 1.0,
-        trend: {
-          early: 55,
-          late: 3,
-          onTime: 142,
-          lineId: "line201",
-          nocCode: "NC101",
-          operatorId: "operator101",
-          rank: 2.0,
-          trend: null,
-        },
+
+    const {
+      filters,
+      fromTimestamp,
+      order,
+      toTimestamp
+    } = inputs
+
+    const timingPointsOnly = filters?.timingPointsOnly
+
+
+    const operators = await getOperators(sessionUser, db);
+
+    const operatorNocs = operators?.map((op) => op.nocCode) ?? []
+
+    const where: Prisma.performance_statisticsWhereInput = {
+      operator_noc: {
+        in: operatorNocs
       },
-    ];
+      date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
+    }
+
+    if(timingPointsOnly) {
+      where.is_timing_point = timingPointsOnly
+    }
+
+    const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
+    const performanceMetrics = await db.prisma.performance_statistics.findMany({
+      where,
+      take: 3,
+      distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
+      orderBy: [{
+        on_time_percentage: orderFilter
+      },{
+        trend_percentage: orderFilter
+      }]
+    })
+
+
+    return performanceMetrics.map((stats) =>({
+      nocCode: stats.operator_noc,
+      lineId: stats.noc_and_line,
+      lineInfo: {
+        serviceId: stats.noc_and_line,
+        serviceName: stats.service_name,
+        serviceNumber: stats.line_name
+      },
+      onTime: stats.on_time_count,
+      early: stats.early_count,
+      late: stats.late_count,
+      trend: {
+        onTime: stats.trend_on_time_count ?? 0,
+        late: stats.trend_late_count ?? 0,
+        early: stats.trend_early_count ?? 0
+      }
+    }))
+
   } catch (error) {
     logger.error(error);
-    return null;
+    return [];
   }
 };
 

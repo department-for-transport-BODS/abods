@@ -20,7 +20,7 @@ const otpResolvers: IResolvers = {
         punctualityOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityOverview(inputs, sessionUser, db),
         punctualityTimeOfDay: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityTimeOfDay(inputs, sessionUser, db),
         punctualityTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityTimeSeries(inputs, sessionUser, db),
-        servicePunctuality: async (_, { inputs }, {sessionUser, db }: RequestContext) => getServicePunctuality(sessionUser, db),
+        servicePunctuality: async (_, { inputs }, {sessionUser, db }: RequestContext) => getServicePunctuality(inputs, sessionUser, db),
         stopPerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getStopPerformance(inputs, sessionUser, db),
         servicePerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getServicePerformance(inputs, sessionUser, db)
     },
