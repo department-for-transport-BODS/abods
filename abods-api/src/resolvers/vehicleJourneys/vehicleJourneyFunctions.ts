@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import { Context } from '../../context';
 import {
   dbGmtToUtc,
@@ -47,11 +48,11 @@ export const findJourneys = async (
       },
     });
 
+    let inputDate: Dayjs;
     if (toTimestamp.isSame(currentTime, 'day')) {
       journeys = journeys.filter((journey) => {
-        const parsedTime = parseTimetz(
-          journey.expected_journey_start?.toTimeString() ?? '',
-        );
+        inputDate = getUTCDate(journey.expected_journey_start)
+        const parsedTime = parseTimetz(inputDate);
         return parsedTime.isBefore(currentTime, 'second');
       });
     }
@@ -143,14 +144,13 @@ export const getJourney = async (
     },
     select: {
       ...getJourneyInputs(journeyId, journeyDate)
-    }
+    },
   });
 
   let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
-  let previousStop = matchedStop;
+
   const journeyCount = journeys.length;
   journeyData = journeys.map((journey, index) => {
-    previousStop = matchedStop;
     if (journey.Timetable?.stop_index) {
       matchedStop = journey;
     }
@@ -229,7 +229,6 @@ export const getJourney = async (
     };
   });
 
-  journeyData;
   return journeyData;
 };
 
