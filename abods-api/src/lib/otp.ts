@@ -98,13 +98,13 @@ export const compareThresholds = async (
     where.is_timing_point = timingPointsOnly;
   }
 
-  if (lineIds) {
+  if (lineIds && lineIds.length > 0) {
     where.noc_and_line_and_servicecode = {
       in: lineIds?.filter(isDefined),
     };
   }
 
-  if (adminIds) {
+  if (adminIds && adminIds.length > 0) {
     where.admin_areas = {
       hasEvery: adminIds.map(Number),
     };
@@ -168,6 +168,7 @@ export const compareThresholds = async (
     where.day_of_week = { in: dayOfWeekNumbers } 
   }
 
+  console.log("where-----", where)
   if (onTimeMinMinutes && onTimeMaxMinutes) {
     const earlyTimeDifference = [
       ...timeDifference,

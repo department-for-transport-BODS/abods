@@ -14,10 +14,11 @@ import {
 } from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getBSTDate, getDate, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
+import { getBSTDate, getDate, getDateUTC, getStrHour, getStrUTCHour } from "../../lib/dayjs.js";
 import { compareThresholds } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../../lib/utils.js";
+import dayjs from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
@@ -813,6 +814,7 @@ export const getPunctualityTimeOfDay = async (
         }
 
         results.forEach((res) => {
+          const hour = dayjs(res.departure_hour)
           hoursOfDay.push({
             timeOfDay: getStrUTCHour(res.departure_hour),
             early: res._sum.early_count,
@@ -1496,14 +1498,18 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
 
   if (startTime) {
     const [hours, minutes, seconds] = startTime.split(":").map(Number);
-    start.setHours(hours);
-    start.setMinutes(minutes);
+    start.setUTCHours(hours);
+    start.setUTCMinutes(minutes);
+    start.setUTCSeconds(0)
+    start.setUTCMilliseconds(0)
   }
 
   if (endTime) {
     const [hours, minutes, seconds] = endTime.split(":").map(Number);
-    end.setHours(hours);
-    end.setMinutes(minutes);
+    end.setUTCHours(hours);
+    end.setUTCMinutes(minutes);
+    end.setUTCSeconds(0)
+    end.setUTCMilliseconds(0)
   }
 
   // date_of_journey - add an hour to from timestamp to prevent single day condition issues
