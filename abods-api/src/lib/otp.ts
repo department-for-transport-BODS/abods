@@ -168,7 +168,6 @@ export const compareThresholds = async (
     where.day_of_week = { in: dayOfWeekNumbers } 
   }
 
-  console.log("where-----", where)
   if (onTimeMinMinutes && onTimeMaxMinutes) {
     const earlyTimeDifference = [
       ...timeDifference,
