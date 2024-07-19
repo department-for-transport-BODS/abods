@@ -17,6 +17,7 @@ import { GraphQLResolveInfo } from "graphql";
 import { getBSTDate, getDate, getDateUTC, getStrUTCHour } from "../../lib/dayjs.js";
 import { compareThresholds } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
+import { getDayOfWeekNumbers } from "../../lib/utils.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -1064,9 +1065,10 @@ export const getStopPerformance = async (
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
         const results = await db.prisma.timetable_summary_stops.groupBy({
           by: ["stop_id", "common_name", "is_timing_point"],
-          where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+          where: where,
           _sum: {
             early_count: true,
             late_count: true,
@@ -1458,19 +1460,6 @@ export const getAdminAreas = async (
     return null;
   }
 };
-
-// helpers
-function getDayOfWeekNumbers(dayOfWeekFlags: any) {
-  let dayOfWeekNumbers: Number[] = [];
-  if (dayOfWeekFlags.monday == true) dayOfWeekNumbers.push(1);
-  if (dayOfWeekFlags.tuesday == true) dayOfWeekNumbers.push(2);
-  if (dayOfWeekFlags.wednesday == true) dayOfWeekNumbers.push(3);
-  if (dayOfWeekFlags.thursday == true) dayOfWeekNumbers.push(4);
-  if (dayOfWeekFlags.friday == true) dayOfWeekNumbers.push(5);
-  if (dayOfWeekFlags.saturday == true) dayOfWeekNumbers.push(6);
-  if (dayOfWeekFlags.sunday == true) dayOfWeekNumbers.push(0);
-  return dayOfWeekNumbers;
-}
 
 const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;

@@ -6,7 +6,7 @@ import {
   SessionUser,
 } from '../types';
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
-import { isDefined } from './utils.js';
+import { getDayOfWeekNumbers, isDefined } from './utils.js';
 
 const getThresholds = async (
   db: Context,
@@ -60,6 +60,11 @@ export const compareThresholds = async (
     onTimeMinMinutes,
     adminAreaIds,
     operatorIds,
+    dayOfWeekFlags,
+    startTime,
+    endTime,
+    maxDelay,
+    minDelay,
     lineIds,
   } = filters ?? {};
 
@@ -100,32 +105,108 @@ export const compareThresholds = async (
   }
 
   if (adminIds) {
-    where.admin_area_id = {
-      in: adminIds.map(Number),
+    where.admin_areas = {
+      hasEvery: adminIds.map(Number),
     };
   }
 
+  // parse startime and endtime minutes/hours
+  let start = new Date();
+  let end = new Date();
+
+  const departure_hour: {
+    gte?: Date;
+    lte?: Date;
+  } = {};
+
+  if (startTime) {
+    const [hours, minutes, seconds] = startTime.split(':').map(Number);
+    start.setHours(hours);
+    start.setMinutes(minutes);
+    departure_hour.gte = start;
+  }
+
+  if (endTime) {
+    const [hours, minutes, seconds] = endTime.split(':').map(Number);
+    end.setHours(hours);
+    end.setMinutes(minutes);
+    departure_hour.lte = end;
+  }
+
+  if (departure_hour.gte || departure_hour.lte) {
+    where.departure_hour = departure_hour;
+  }
+
+  const timeDifference: {
+    time_diff_minutes: {
+      lt?: number;
+      gt?: number;
+      lte?: number;
+      gte?: number;
+    };
+  }[] = [];
+
+  if (minDelay) {
+    timeDifference.push({
+      time_diff_minutes: {
+        gte: minDelay,
+      },
+    });
+  }
+
+  if (maxDelay) {
+    timeDifference.push({
+      time_diff_minutes: {
+        lte: maxDelay,
+      },
+    });
+  }
+
+  let dayOfWeekNumbers: number[] = [];
+  if (dayOfWeekFlags) {
+    dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
+    where.day_of_week = { in: dayOfWeekNumbers } 
+  }
+
   if (onTimeMinMinutes && onTimeMaxMinutes) {
+    const earlyTimeDifference = [
+      ...timeDifference,
+      {
+        time_diff_minutes: {
+          lt: onTimeMinMinutes,
+        },
+      },
+    ];
     const whereEarly: Prisma.timetable_threshold_summaryWhereInput = {
       ...where,
-      time_diff_minutes: {
-        lt: onTimeMinMinutes,
-      },
+      AND: earlyTimeDifference,
     };
 
+    const lateTimeDifference = [
+      ...timeDifference,
+      {
+        time_diff_minutes: {
+          gt: onTimeMaxMinutes,
+        },
+      },
+    ];
     const whereLate: Prisma.timetable_threshold_summaryWhereInput = {
       ...where,
-      time_diff_minutes: {
-        gt: onTimeMaxMinutes,
-      },
+      AND: lateTimeDifference,
     };
 
+    const ontimeDifference = [
+      ...timeDifference,
+      {
+        time_diff_minutes: {
+          gte: onTimeMinMinutes,
+          lte: onTimeMaxMinutes,
+        },
+      },
+    ];
     const whereOntime: Prisma.timetable_threshold_summaryWhereInput = {
       ...where,
-      time_diff_minutes: {
-        gte: onTimeMinMinutes,
-        lte: onTimeMaxMinutes,
-      },
+      AND: ontimeDifference,
     };
 
     const results = await aggThresholds(db, whereEarly, whereLate, whereOntime);

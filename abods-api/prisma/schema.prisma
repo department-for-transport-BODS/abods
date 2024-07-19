@@ -333,7 +333,9 @@ model timetable_threshold_summary {
 	is_timing_point                     Boolean
 	time_diff_minutes                   Float
 	otp_count                           Int
-  admin_area_id                       Int
+  admin_areas                         Int[]
+  departure_hour                      DateTime? @db.Time(6)
+  day_of_week                         Int
 }
 
 model timetable_summary_operator_admin {
