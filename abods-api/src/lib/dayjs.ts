@@ -56,6 +56,10 @@ export const dbGmtToUtc = (
   return getDateLocale(utcString);
 };
 
+export const getStrHour = (hour: Dayjs | undefined): string => {
+  return hour ? dayjs(hour).format('HH:mm:ss') : '00:00:00';
+};
+
 export const getStrUTCHour = (hour: Dayjs | undefined): string => {
   return hour ? dayjs.utc(hour).format('HH:mm:ss') : '00:00:00';
 };
