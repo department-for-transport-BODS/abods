@@ -11,8 +11,8 @@
     }
   },
   "otp": {
-    "early": "",
-    "late": ""
+    "early": "1",
+    "late": "6"
   },
   "defaultCookiePolicy": {
     "analyticsEnabled": false,
