@@ -1440,9 +1440,9 @@ export const getHeadwayOverview = async (
     })
 
     return {
-      actualWaitTime: Number(results._sum.actual_headway),
-      scheduledWaitTime: Number(results._sum.expected_headway),
-      excessWaitTime: Number(results._sum.excess_wait_time)
+      actualWaitTime: (results._sum.actual_headway ?? 0) / 60,
+      scheduledWaitTime: (results._sum.expected_headway ?? 0) / 60,
+      excessWaitTime: (results._sum.excess_wait_time ?? 0) / 60
     };
   } catch (error) {
     logger.error(error);
@@ -1516,10 +1516,10 @@ export const getHeadwayTimeSeries = async (
     })
 
     return results.map(result => ({
-      ts: result.departure_hour? getDateWithTimestamp(result.date_of_journey, result.departure_hour).toISOString(): result.date_of_journey,
-      actualWaitTime: result._sum.actual_headway ?? 0/ 60,
-      scheduledWaitTime: result._sum.expected_headway ?? 0 / 60,
-      excessWaitTime: result._sum.excess_wait_time ?? 0 / 60
+      ts: result.departure_hour? getDateWithTimestamp(result.date_of_journey, result.departure_hour): result.date_of_journey,
+      actualWaitTime: (result._sum.actual_headway ?? 0) / 60,
+      scheduledWaitTime: (result._sum.expected_headway ?? 0) / 60,
+      excessWaitTime: (result._sum.excess_wait_time ?? 0) / 60
     }))
   } catch (error) {
     logger.error(error);

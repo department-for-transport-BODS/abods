@@ -97,7 +97,7 @@ export const getFormattedDate = (
   return getDate(inputDate).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
 };
 
-export const getDateWithTimestamp = (date: Date, time: Date): Dayjs => {
+export const getDateWithTimestamp = (date: Date, time: Date): string => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const day = date.getDate();
@@ -109,7 +109,7 @@ export const getDateWithTimestamp = (date: Date, time: Date): Dayjs => {
 
   const combinedDate = dayjs(
     new Date(year, month, day, hours, minutes, seconds, milliseconds),
-  ).tz('Europe/London');
+  );
 
-  return combinedDate;
+  return combinedDate.tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
 };
