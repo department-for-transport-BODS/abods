@@ -164,6 +164,7 @@ export const getJourney = async (
     );
 
     const previousIndex = index === 0 ? 0 : index - 1;
+    const delay = matchedStop?.Timetable?.time_difference ?? 0
     return {
       ts: timestamp.toString(),
       vehicleId: journey.vehicle_ref,
@@ -171,9 +172,9 @@ export const getJourney = async (
       servicePatternId: matchedStop?.Timetable?.vehiclejourney_id.toString(),
       isTimingPoint: journey.Timetable?.is_timing_point,
       delay:
-        lastStopIndex === matchedStop?.Timetable?.stop_index
+        lastStopIndex === matchedStop?.Timetable?.stop_index && delay < 0
           ? 0
-          : matchedStop?.Timetable?.time_difference ?? 0,
+          : delay,
       startTime: startTime.toString(),
       scheduledDeparture: stopScheduledTime.toString(),
       lat: Number(journey.latitude),
