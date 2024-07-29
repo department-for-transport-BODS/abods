@@ -1,13 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { Context } from '../../context';
-import {
-  dbGmtToUtc,
-  getDate,
-  getDateLocale,
-  getFormattedDate,
-  overwriteDate,
-  parseTimetz,
-} from '../../lib/dayjs.js';
+import { getDate, getFormattedDate } from '../../lib/dayjs.js';
 import logger from '../../logger.js';
 import {
   UniqueJourneyType,
@@ -52,19 +45,15 @@ export const findJourneys = async (
     let inputDate: Dayjs;
     if (toTimestamp.isSame(currentTime, 'day')) {
       journeys = journeys.filter((journey) => {
-        
         const parsedTime = getDate(journey.expected_journey_start);
         return parsedTime.isBefore(currentTime, 'second');
       });
     }
 
     journeysData = journeys.map((journey) => {
-      
-      const formattedDate = getFormattedDate(
-        journey.expected_journey_start
-      );
+      const formattedDate = getFormattedDate(journey.expected_journey_start);
 
-      const jsDate = getDate(journey.expected_journey_start)
+      const jsDate = getDate(journey.expected_journey_start);
 
       const journeyDescription: string = journey.journey_pattern_description;
       return {
@@ -146,6 +135,16 @@ export const getJourney = async (
     },
   });
 
+  const lastStopIndex = journeys.reduce((maxIndex, journey) => {
+    if (
+      journey.Timetable?.stop_index &&
+      journey.Timetable?.stop_index > maxIndex
+    ) {
+      maxIndex = journey.Timetable?.stop_index;
+    }
+    return maxIndex;
+  }, 0);
+
   let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
   const journeyCount = journeys.length;
 
@@ -155,23 +154,27 @@ export const getJourney = async (
     }
 
     const startTime = getFormattedDate(
-      matchedStop?.Timetable?.expected_journeys.expected_journey_start
+      matchedStop?.Timetable?.expected_journeys.expected_journey_start,
     );
 
     const timestamp = getFormattedDate(journey.recorded_at_time);
 
     const stopScheduledTime = getFormattedDate(
-      matchedStop?.Timetable?.expected_departure_time
+      matchedStop?.Timetable?.expected_departure_time,
     );
 
     const previousIndex = index === 0 ? 0 : index - 1;
+    const delay = matchedStop?.Timetable?.time_difference ?? 0
     return {
       ts: timestamp.toString(),
       vehicleId: journey.vehicle_ref,
       vehicleJourneyId: journeyId,
       servicePatternId: matchedStop?.Timetable?.vehiclejourney_id.toString(),
       isTimingPoint: journey.Timetable?.is_timing_point,
-      delay: matchedStop?.Timetable?.time_difference ?? 0,
+      delay:
+        lastStopIndex === matchedStop?.Timetable?.stop_index && delay < 0
+          ? 0
+          : delay,
       startTime: startTime.toString(),
       scheduledDeparture: stopScheduledTime.toString(),
       lat: Number(journey.latitude),
