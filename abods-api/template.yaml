@@ -330,3 +330,4 @@ Outputs:
   FrontendBucketName:
     Description: 'Name of Frontend S3 Bucket'
     Value: !Sub 's3://${FrontendBucket}'
+    
