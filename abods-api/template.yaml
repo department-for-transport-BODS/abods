@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform: AWS::Serverless-2016-10-31
+Transform:
+  - AWS::Serverless-2016-10-31
+  - Name: DatadogServerless
+     Parameters:
+       stackName: !Ref 'AWS::StackName'
+       nodeLayerVersion: 113
+       extensionLayerVersion: 62
+       site: 'datadoghq.eu'
+       apiKeySecretArn: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/datadog/apikey/arn}}'
 Description: >
   This SAM template deploys resources associated with the frontend application for the ABODS (Analyse Bus Open Data) service
   - Name: DatadogServerless
