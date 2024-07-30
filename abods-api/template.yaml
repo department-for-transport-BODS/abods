@@ -10,7 +10,6 @@ Transform:
        apiKeySecretArn: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/datadog/apikey/arn}}'
 Description: >
   This SAM template deploys resources associated with the frontend application for the ABODS (Analyse Bus Open Data) service
-  
 Globals:
   Function:
     Architectures:
