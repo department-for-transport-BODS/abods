@@ -92,9 +92,24 @@ export const overwriteDate = (
 };
 
 export const getFormattedDate = (
-  inputDate: Date | null | undefined
+  inputDate: Date | null | undefined,
 ): string => {
-  return getDate(inputDate)
-    .tz('Europe/London')
-    .format('YYYY-MM-DDTHH:mm:ssZ');
+  return getDate(inputDate).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
+};
+
+export const getDateWithTimestamp = (date: Date, time: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+
+  const hours = time.getHours();
+  const minutes = time.getMinutes();
+  const seconds = time.getSeconds();
+  const milliseconds = time.getMilliseconds();
+
+  const combinedDate = dayjs(
+    new Date(year, month, day, hours, minutes, seconds, milliseconds),
+  );
+
+  return combinedDate.tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
 };
