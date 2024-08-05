@@ -594,7 +594,13 @@ export const getPunctualityDayOfWeek = async (
       }
     }
 
-    return dayOfWeek;
+    return dayOfWeek.filter((week) => {
+      if(week.early === 0 && week.late === 0 && week.onTime ===0)
+        return false
+
+      return true
+    });
+    
   } catch (error) {
     logger.error(error);
     return null;
