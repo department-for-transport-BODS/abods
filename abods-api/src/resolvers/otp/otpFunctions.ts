@@ -513,11 +513,11 @@ export const getOperatorPerformance = async (
 export const getPunctualityDayOfWeek = async (
   inputs,
   sessionUser: SessionUser,
-  db: Context
+  db: Context,
 ) => {
   try {
     if (!sessionUser.user) {
-      throw "Not authorized";
+      throw 'Not authorized';
     }
 
     const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
@@ -537,12 +537,12 @@ export const getPunctualityDayOfWeek = async (
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
       logger.debug(
-        "getPunctualityDayOfWeek id: " + JSON.stringify(operatorIds)
+        'getPunctualityDayOfWeek id: ' + JSON.stringify(operatorIds),
       );
       const operators = await getOperators(sessionUser, db);
 
       if (!operators) {
-        throw "No user operators";
+        throw 'No user operators';
       }
 
       const userOperatorIds = operators.map((o) => o.nocCode);
@@ -554,7 +554,7 @@ export const getPunctualityDayOfWeek = async (
 
         if (lineIds) {
           results = await db.prisma.timetable_summary_service_headway.groupBy({
-            by: ["day_of_week"],
+            by: ['day_of_week'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
               early_count: true,
@@ -564,7 +564,7 @@ export const getPunctualityDayOfWeek = async (
           });
         } else {
           results = await db.prisma.timetable_summary_operator_admin.groupBy({
-            by: ["day_of_week"],
+            by: ['day_of_week'],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
               early_count: true,
@@ -595,12 +595,11 @@ export const getPunctualityDayOfWeek = async (
     }
 
     return dayOfWeek.filter((week) => {
-      if(week.early === 0 && week.late === 0 && week.onTime ===0)
-        return false
+      if (week.early === 0 && week.late === 0 && week.onTime === 0)
+        return false;
 
-      return true
+      return true;
     });
-    
   } catch (error) {
     logger.error(error);
     return null;
