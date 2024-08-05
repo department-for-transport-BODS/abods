@@ -624,6 +624,37 @@ export const getJourneyScheduledStartTimes = async (
   }
 };
 
+export const getStopsDistribution = async(
+  inputs,
+  userOperatorIds: string[],
+  db: Context
+) => {
+
+  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+
+  const results = await db.prisma.timetable_threshold_summary.groupBy({
+    by: ["time_diff_minutes"],
+    where: where,
+    _sum: {
+      otp_count: true
+    }
+  })
+
+  const filteredResults = results.filter(result => result.time_diff_minutes)
+
+  filteredResults.sort((a,b) => {
+    if(a.time_diff_minutes && b.time_diff_minutes)
+      return a.time_diff_minutes - b.time_diff_minutes
+
+    return 0
+  })
+
+  return filteredResults.map((result) => ({
+    bucket: Number(result.time_diff_minutes),
+    frequency: result._sum.otp_count
+  }))
+}
+
 export const getDelayFrequency = async (
   inputs,
   sessionUser: SessionUser,
@@ -672,13 +703,7 @@ export const getDelayFrequency = async (
         let results;
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headway.findMany({
-            where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-            select: {
-              avg_time_difference: true,
-              completed: true,
-            },
-          });
+          return getStopsDistribution(inputs, userOperatorIds, db)
         } else {
           results = await db.prisma.timetable_summary_operator_admin.findMany({
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),

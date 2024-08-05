@@ -248,7 +248,7 @@ model expected_operators {
   @@id([operator_noc, date_of_journey]) 
 }
 
-model expected_services {
+view expected_services {
   line_name             String
   noc_and_line_and_servicecode          String
   service_name          String
@@ -332,7 +332,7 @@ model timetable_threshold_summary {
 	service_name                        String
 	date_of_journey                     DateTime
 	is_timing_point                     Boolean
-	time_diff_minutes                   Float
+	time_diff_minutes                   Float?
 	otp_count                           Int
   admin_areas                         Int[]
   departure_hour                      DateTime? @db.Time(6)
