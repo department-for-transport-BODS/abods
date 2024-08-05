@@ -624,36 +624,56 @@ export const getJourneyScheduledStartTimes = async (
   }
 };
 
-export const getStopsDistribution = async(
+export const getStopsDistribution = async (
   inputs,
   userOperatorIds: string[],
-  db: Context
+  db: Context,
 ) => {
+  const { filters } = inputs;
+  const { maxDelay, minDelay } = filters;
 
-  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+  const where: Prisma.timetable_threshold_summaryWhereInput =
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+  if (maxDelay && minDelay) {
+    where.time_diff_minutes = {
+      lte: maxDelay,
+      gte: minDelay,
+    };
+  } else if (maxDelay) {
+    where.time_diff_minutes = {
+      lte: maxDelay,
+    };
+  } else if (minDelay) {
+    where.time_diff_minutes = {
+      gte: minDelay,
+    };
+  }
 
   const results = await db.prisma.timetable_threshold_summary.groupBy({
-    by: ["time_diff_minutes"],
+    by: ['time_diff_minutes'],
     where: where,
     _sum: {
-      otp_count: true
-    }
-  })
+      otp_count: true,
+    },
+  });
 
-  const filteredResults = results.filter(result => result.time_diff_minutes)
+  const filteredResults = results.filter(
+    (result) => result.time_diff_minutes || result.time_diff_minutes === 0,
+  );
 
-  filteredResults.sort((a,b) => {
-    if(a.time_diff_minutes && b.time_diff_minutes)
-      return a.time_diff_minutes - b.time_diff_minutes
+  filteredResults.sort((a, b) => {
+    if (a.time_diff_minutes && b.time_diff_minutes)
+      return a.time_diff_minutes - b.time_diff_minutes;
 
-    return 0
-  })
+    return 0;
+  });
 
   return filteredResults.map((result) => ({
     bucket: Number(result.time_diff_minutes),
-    frequency: result._sum.otp_count
-  }))
-}
+    frequency: result._sum.otp_count,
+  }));
+};
 
 export const getDelayFrequency = async (
   inputs,
@@ -1671,6 +1691,8 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   const maxLateNumber = maxDelay ? maxDelay : 0;
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
+  const isServiceGranularity = lineIds && lineIds.length > 0
+
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
@@ -1690,12 +1712,12 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
                 ...(endTime ? { departure_hour: { lte: end } } : {}),
               }),
         }),
-    ...(maxEarlyNumber > 0
+    ...(maxEarlyNumber > 0 && !isServiceGranularity
       ? {
           max_early: { lte: maxEarlyNumber },
         }
       : {}),
-    ...(maxLateNumber > 0
+    ...(maxLateNumber > 0 && !isServiceGranularity
       ? {
           max_late: { lte: maxLateNumber },
         }
