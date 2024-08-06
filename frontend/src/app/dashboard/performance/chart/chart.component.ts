@@ -26,7 +26,7 @@ export class PerformanceChartComponent extends BaseChart implements AfterViewIni
 
   private legendHints: { [key in PerformanceCategories]: string } = {
     [PerformanceCategories.OnTime]: '',
-    [PerformanceCategories.Late]: '(> 5:59 minutes)',
+    [PerformanceCategories.Late]: '(> 5 minutes)',
     [PerformanceCategories.Early]: '(> 1 minute)',
   };
 

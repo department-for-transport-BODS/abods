@@ -52,7 +52,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     },
     [PerformanceCategories.Late]: {
       name: 'Late',
-      hint: '(> 5:59 minutes)',
+      hint: '(> 5 minutes)',
       fill: this.chartService.colorMap.ochre,
     },
     [PerformanceCategories.Early]: {

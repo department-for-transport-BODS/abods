@@ -210,7 +210,7 @@ type HeadwayTimeOfDayType {
 }
 
 type HeadwayTimeSeriesType {
-  ts: DateTime
+  ts: String
   actualWaitTime: Float
   excessWaitTime: Float
   scheduledWaitTime: Float
@@ -507,7 +507,7 @@ type PunctualityTimeSeriesType {
   early: Int
   late: Int
   onTime: Int
-  ts: DateTime
+  ts: String
 }
 
 type ServicePerformanceType {

@@ -112,6 +112,106 @@ export const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
   },
 });
 
+export const getTimetableJourney = async (
+  journeyId: string,
+  journeyDate: Date,
+  db: Context,
+): Promise<Array<Maybe<GpsFeedType>>> => {
+  const journeys = await db.prisma.timetable.findMany({
+    where: {
+      date_of_journey: journeyDate,
+      group_id: journeyId,
+    },
+    select: {
+      date_of_journey: true,
+      common_name: true,
+      atco_code: true,
+      stop_index: true,
+      expected_departure_time: true,
+      is_timing_point: true,
+      vehiclejourney_id: true,
+      time_difference: true,
+      stop_latitude: true,
+      stop_longitude: true,
+      expected_journeys: {
+        select: {
+          expected_journey_start: true,
+          expected_service: {
+            select: {
+              noc_and_line_and_servicecode: true,
+              service_name: true,
+              line_name: true,
+              expected_operator: {
+                select: {
+                  operator_noc: true,
+                  operator_name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return journeys.map((journey) => {
+    const startTime = getFormattedDate(
+      journey.expected_journeys?.expected_journey_start,
+    );
+
+    const stopScheduledTime = getFormattedDate(journey.expected_departure_time);
+
+    return {
+      ts: startTime.toString(),
+      vehicleId: 'N/A',
+      vehicleJourneyId: journeyId,
+      servicePatternId: journey.vehiclejourney_id.toString(),
+      isTimingPoint: journey.is_timing_point,
+      delay: 0,
+      startTime: startTime.toString(),
+      scheduledDeparture: stopScheduledTime.toString(),
+      lat: Number(journey.stop_latitude),
+      lon: Number(journey.stop_longitude),
+      journeyStatus: GpsFeedJourneyStatus.Unknown,
+      operatorInfo: {
+        operatorId:
+          journey.expected_journeys.expected_service.expected_operator
+            .operator_noc ?? '',
+        operatorName:
+          journey.expected_journeys.expected_service.expected_operator
+            .operator_name ?? '',
+        nocCode:
+          journey.expected_journeys.expected_service.expected_operator
+            .operator_noc ?? '',
+      },
+      serviceInfo: {
+        serviceId:
+          journey.expected_journeys.expected_service
+            .noc_and_line_and_servicecode ?? '',
+        serviceNumber:
+          journey.expected_journeys.expected_service.line_name ?? '',
+        serviceName:
+          journey.expected_journeys.expected_service.service_name ?? '',
+      },
+      previousStopInfo: {
+        stopId: journey.atco_code?.toString() ?? '',
+        stopName: journey.common_name ?? '',
+        sourceId: '',
+        stopLocality: {
+          localityAreaId: '',
+          localityAreaName: '',
+          localityId: '',
+          localityName: '',
+        },
+        stopLocation: {
+          latitude: Number(journey.stop_latitude),
+          longitude: Number(journey.stop_longitude),
+        },
+      },
+    };
+  });
+};
+
 export const getJourney = async (
   journeyId: string,
   startTime: Date,
@@ -134,6 +234,10 @@ export const getJourney = async (
       ...getJourneyInputs(journeyId, journeyDate),
     },
   });
+
+  if (!journeys || journeys.length === 0) {
+    return getTimetableJourney(journeyId, journeyDate, db);
+  }
 
   const lastStopIndex = journeys.reduce((maxIndex, journey) => {
     if (
@@ -164,7 +268,7 @@ export const getJourney = async (
     );
 
     const previousIndex = index === 0 ? 0 : index - 1;
-    const delay = matchedStop?.Timetable?.time_difference ?? 0
+    const delay = matchedStop?.Timetable?.time_difference ?? 0;
     return {
       ts: timestamp.toString(),
       vehicleId: journey.vehicle_ref,
