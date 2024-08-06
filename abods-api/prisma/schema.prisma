@@ -314,7 +314,7 @@ model naptan_locality {
   admin_area_id           Int
   admin_area              naptan_adminarea @relation(fields: [admin_area_id], references: [id])
   timetable_summary_stops timetable_summary_stops[]
-  timetable_summary_stops_headway timetable_summary_stops_headway[]
+  timetable_summary_stops_headway timetable_summary_stops_headwaytz[]
   stops                   naptan_stoppoint_latlong[]
 }
 
@@ -382,14 +382,14 @@ model performance_statistics {
   @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type, service_name])
 }
 
-model timetable_summary_service_headway {
+model timetable_summary_service_headwaytz {
   timetable_id    Int   @id @default(1)
   line_name String
   noc_and_line_and_servicecode String
 	operator_noc String
 	date_of_journey DateTime
 	day_of_week Int
-	departure_hour DateTime? @db.Time(6)
+	departure_hour DateTime? @db.Timestamptz()
 	is_timing_point Boolean
 	on_time_count Int
 	early_count Int
@@ -403,7 +403,7 @@ model timetable_summary_service_headway {
   headway_valid         Boolean
 }
 
-model timetable_summary_stops_headway {
+model timetable_summary_stops_headwaytz {
   timetable_id    Int   @id @default(1)
 	operator_noc String
   service_code String
@@ -415,7 +415,7 @@ model timetable_summary_stops_headway {
   common_name             String?
 	date_of_journey DateTime
 	day_of_week Int
-	departure_hour DateTime? @db.Time(6)
+	departure_hour DateTime? @db.Timestamptz()
 	is_timing_point Boolean
 	on_time_count Int
 	early_count Int

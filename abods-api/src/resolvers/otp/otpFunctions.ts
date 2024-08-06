@@ -347,7 +347,7 @@ export const getPunctualityOverview = async (
     let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if (lineIds) {
-      results = await db.prisma.timetable_summary_service_headway.aggregate({
+      results = await db.prisma.timetable_summary_service_headwaytz.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -553,7 +553,7 @@ export const getPunctualityDayOfWeek = async (
         let results;
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headway.groupBy({
+          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
             by: ["day_of_week"],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
@@ -672,7 +672,7 @@ export const getDelayFrequency = async (
         let results;
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headway.findMany({
+          results = await db.prisma.timetable_summary_service_headwaytz.findMany({
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             select: {
               avg_time_difference: true,
@@ -792,7 +792,7 @@ export const getPunctualityTimeOfDay = async (
 
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headway.groupBy({
+          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
             by: ["departure_hour"],
             where: where,
             _sum: {
@@ -891,8 +891,8 @@ export const getPunctualityTimeSeries = async (
         
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headway.groupBy({
-            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
+          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
+            by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
             where: where,
             _sum: {
               early_count: true,
@@ -902,7 +902,7 @@ export const getPunctualityTimeSeries = async (
           }) ?? [];
         } else {
           results = await db.prisma.timetable_summary_operator_admin.groupBy({
-            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
+            by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
             where: where,
             _sum: {
               early_count: true,
@@ -914,11 +914,8 @@ export const getPunctualityTimeSeries = async (
 
         results.forEach((result) => {
           if (result._sum) {
-            const journeyDate = getDate(result.date_of_journey)
-            const departureHour = isDayGranularity ? undefined: getDate(result.departure_hour)
-
             summary.push({
-              ts: isDayGranularity ? result.date_of_journey : getDateUTC(journeyDate, departureHour).toISOString(),
+              ts: isDayGranularity ? result.date_of_journey : result.departure_hour,
               early: result._sum.early_count,
               late: result._sum.late_count,
               onTime: result._sum.on_time_count
@@ -1068,7 +1065,7 @@ export const getStopPerformance = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
-        const results = await db.prisma.timetable_summary_stops_headway.groupBy({
+        const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy({
           by: ["stop_id", "common_name", "is_timing_point"],
           where: where,
           _sum: {
@@ -1199,7 +1196,7 @@ export const getServicePerformance = async (
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
-        const results = await db.prisma.timetable_summary_service_headway.groupBy({
+        const results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
           by: ["noc_and_line_and_servicecode", "line_name"],
           where: where,
           _sum: {
@@ -1279,7 +1276,7 @@ export const getFrequentServices = async (
     const userOperatorIds = operators.map((o) => o.nocCode);
 
     if(userOperatorIds.includes(operatorId)){
-      const results = await db.prisma.timetable_summary_service_headway.findMany({
+      const results = await db.prisma.timetable_summary_service_headwaytz.findMany({
         where: {
           operator_noc: operatorId,
           date_of_journey: {
@@ -1328,8 +1325,8 @@ export const getFrequentServiceInfo = async (
     const {filters, fromTimestamp, toTimestamp} = inputs
     const {lineIds, operatorIds } = filters
 
-    const results = await db.prisma.timetable_summary_stops_headway.groupBy({
-      by: ["date_of_journey", "departure_hour"],
+    const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy({
+      by: ["departure_hour"],
       where: {
         operator_noc: {
           in: operatorIds
@@ -1419,7 +1416,7 @@ export const getHeadwayOverview = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
     
-    const results = await db.prisma.timetable_summary_stops_headway.aggregate({
+    const results = await db.prisma.timetable_summary_stops_headwaytz.aggregate({
       where: {
         operator_noc: {
           in: operatorIds
@@ -1494,8 +1491,8 @@ export const getHeadwayTimeSeries = async (
 
     const isDayGranularity = granularity === 'day'
 
-    const results = await db.prisma.timetable_summary_stops_headway.groupBy({
-      by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
+    const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy({
+      by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
       where: {
         operator_noc: {
           in: operatorIds
@@ -1516,7 +1513,7 @@ export const getHeadwayTimeSeries = async (
     })
 
     return results.map(result => ({
-      ts: result.departure_hour? getDateWithTimestamp(result.date_of_journey, result.departure_hour): result.date_of_journey,
+      ts: result.departure_hour? result.departure_hour: result.date_of_journey,
       actualWaitTime: (result._sum.actual_headway ?? 0) / 60,
       scheduledWaitTime: (result._sum.expected_headway ?? 0) / 60,
       excessWaitTime: (result._sum.excess_wait_time ?? 0) / 60
