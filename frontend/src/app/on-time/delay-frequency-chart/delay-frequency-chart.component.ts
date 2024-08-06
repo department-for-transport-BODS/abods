@@ -45,7 +45,7 @@ export class DelayFrequencyChartComponent extends BaseChart implements AfterView
     },
     [PerformanceCategories.Late]: {
       name: 'Late',
-      hint: '(> 5:59 minutes)',
+      hint: '(> 5 minutes)',
       fill: this.chartService.colorMap.ochre,
     },
     [PerformanceCategories.Early]: {
