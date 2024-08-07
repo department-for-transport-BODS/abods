@@ -162,7 +162,7 @@ export const getTimetableJourney = async (
     const stopScheduledTime = getFormattedDate(journey.expected_departure_time);
 
     return {
-      ts: startTime.toString(),
+      ts: '',
       vehicleId: 'N/A',
       vehicleJourneyId: journeyId,
       servicePatternId: journey.vehiclejourney_id.toString(),
@@ -194,8 +194,8 @@ export const getTimetableJourney = async (
           journey.expected_journeys.expected_service.service_name ?? '',
       },
       previousStopInfo: {
-        stopId: journey.atco_code?.toString() ?? '',
-        stopName: journey.common_name ?? '',
+        stopId: '',
+        stopName: '',
         sourceId: '',
         stopLocality: {
           localityAreaId: '',
