@@ -221,3 +221,27 @@ export const compareThresholds = async (
 
   return null;
 };
+
+export const getOperatorsFromOrgId = async (orgId: number[], db: Context) => {
+
+  return db.prisma.bods_organisationoperator.findMany({
+    where: {
+      AND: [
+        {
+          organisation_id: {
+            in: orgId,
+          },
+        },
+        {
+          operatorref: {
+            not: undefined,
+          },
+        }
+      ],
+    },
+    select: {
+      operatorref: true,
+    },
+    distinct: ['operatorref'],
+  });
+}

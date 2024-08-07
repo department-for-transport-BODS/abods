@@ -48,6 +48,7 @@ view all_operators {
   name                  String
   operatorOrganisations bods_organisationoperator[]
   noc_adminareas noc_adminarea[]
+  service_details service_details[]
 }
 
 view bods_organisationoperator {
@@ -57,6 +58,15 @@ view bods_organisationoperator {
   operator        all_operators     @relation(fields: [operatorref], references: [operatorref])
 
   @@id([organisation_id, operatorref])
+}
+
+model service_details {
+  noc_and_line_and_servicecode String     @unique
+  operator_noc                 String 
+  line_name                    String
+  service_name                 String
+
+  operator  all_operators     @relation(fields: [operator_noc], references: [operatorref])
 }
 
 model Alert {
@@ -339,12 +349,12 @@ model timetable_threshold_summary {
   day_of_week                         Int
 }
 
-model timetable_summary_operator_admin {
+model timetable_summary_operator_admintz {
   timetable_id                  Int   @id @default(1)
 	operator_noc                  String
 	date_of_journey               DateTime
 	day_of_week                   Int
-	departure_hour                DateTime? @db.Time(6)
+	departure_hour                DateTime? @db.Timestamptz()
 	is_timing_point               Boolean
 	on_time_count                 Int
 	early_count                   Int
