@@ -392,7 +392,7 @@ model performance_statistics {
   @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type, service_name])
 }
 
-model timetable_summary_service_headwaytz {
+model timetable_summary_service_tz {
   timetable_id    Int   @id @default(1)
   line_name String
   noc_and_line_and_servicecode String
@@ -400,6 +400,7 @@ model timetable_summary_service_headwaytz {
 	date_of_journey DateTime
 	day_of_week Int
 	departure_hour DateTime? @db.Timestamptz()
+  departure_hour_only DateTime? @db.Timetz()
 	is_timing_point Boolean
 	on_time_count Int
 	early_count Int

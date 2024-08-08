@@ -14,7 +14,7 @@ import {
 } from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getBSTDate, getDate, getDateUTC, getFormattedDate, getStrUTCHour } from "../../lib/dayjs.js";
+import { getBSTDate, getDate, getDateUTC, getFormattedDate, getStrHour, getStrUTCHour } from "../../lib/dayjs.js";
 import { compareThresholds, getOperatorsFromOrgId } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers } from "../../lib/utils.js";
@@ -57,8 +57,8 @@ export const getOperatorList = async (
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = await getOperators(sessionUser, db);
-    //const userOperators = await getOperatorsDropDown(sessionUser, db)
+    //const userOperators = await getOperators(sessionUser, db);
+    const userOperators = await getOperatorsDropDown(sessionUser, db)
 
     if (!userOperators) {
       throw "No operators for user";
@@ -393,7 +393,7 @@ export const getPunctualityOverview = async (
     let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
     if (lineIds) {
-      results = await db.prisma.timetable_summary_service_headwaytz.aggregate({
+      results = await db.prisma.timetable_summary_service_tz.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -599,7 +599,7 @@ export const getPunctualityDayOfWeek = async (
         let results;
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
             by: ["day_of_week"],
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             _sum: {
@@ -889,7 +889,7 @@ export const getPunctualityTimeOfDay = async (
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
             by: ["departure_hour"],
             where: where,
             _sum: {
@@ -912,7 +912,7 @@ export const getPunctualityTimeOfDay = async (
 
         results.forEach((res) => {
           hoursOfDay.push({
-            timeOfDay: getStrUTCHour(res.departure_hour),
+            timeOfDay: getStrHour(res.departure_hour),
             early: res._sum.early_count,
             onTime: res._sum.on_time_count,
             late: res._sum.late_count
@@ -987,7 +987,7 @@ export const getPunctualityTimeSeries = async (
         
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
             by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
             where: where,
             _sum: {
@@ -1294,7 +1294,7 @@ export const getServicePerformance = async (
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
-        const results = await db.prisma.timetable_summary_service_headwaytz.groupBy({
+        const results = await db.prisma.timetable_summary_service_tz.groupBy({
           by: ["noc_and_line_and_servicecode", "line_name"],
           where: where,
           _sum: {
@@ -1374,7 +1374,7 @@ export const getFrequentServices = async (
     const userOperatorIds = operators.map((o) => o.nocCode);
 
     if(userOperatorIds.includes(operatorId)){
-      const results = await db.prisma.timetable_summary_service_headwaytz.findMany({
+      const results = await db.prisma.timetable_summary_service_tz.findMany({
         where: {
           operator_noc: operatorId,
           date_of_journey: {
@@ -1728,23 +1728,23 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   // date_of_journey - add an hour to from timestamp to prevent single day condition issues
   let fromMlSeconds = new Date(fromTimestamp).getTime();
   var addMlSeconds = 60 * 60 * 1000;
-  var dateOfJourneyFromDateTime = new Date(fromMlSeconds + addMlSeconds);
-  var dateOfJourneyToDateTime = new Date(toTimestamp);
+  var dateOfJourneyFromDateTime = getDate(new Date(fromMlSeconds + addMlSeconds)).tz('Europe/London');
+  var dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz('Europe/London');
 
   if (startTime) {
     const [hours, minutes, seconds] = startTime.split(':').map(Number);
-    dateOfJourneyFromDateTime.setUTCHours(hours);
-    dateOfJourneyFromDateTime.setUTCMinutes(minutes);
-    dateOfJourneyFromDateTime.setUTCSeconds(0);
-    dateOfJourneyFromDateTime.setUTCMilliseconds(0);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('hour', hours);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('minute',minutes);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('second', 0);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('millisecond', 0);
   }
 
   if (endTime) {
     const [hours, minutes, seconds] = endTime.split(':').map(Number);
-    dateOfJourneyToDateTime.setUTCHours(hours);
-    dateOfJourneyToDateTime.setUTCMinutes(minutes);
-    dateOfJourneyToDateTime.setUTCSeconds(0);
-    dateOfJourneyToDateTime.setUTCMilliseconds(0);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('hour', hours);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('minute', minutes);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('second', 0);
+    dateOfJourneyToDateTime =  dateOfJourneyToDateTime.set('millisecond', 0);
   }
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
@@ -1752,12 +1752,12 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
-
+  
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
-      gte: dateOfJourneyFromDateTime,
-      lte: dateOfJourneyToDateTime,
+      gte: dateOfJourneyFromDateTime.toDate(),
+      lte: dateOfJourneyToDateTime.toDate(),
     },
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(dayOfWeekFlags
@@ -1765,17 +1765,17 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
       : {}),
     ...(startTime && endTime
       ? {
-          departure_hour: {
-            gte: dateOfJourneyFromDateTime,
-            lte: dateOfJourneyToDateTime,
+          departure_hour_only: {
+            gte: dateOfJourneyFromDateTime.toDate(),
+            lte: dateOfJourneyToDateTime.toDate(),
           },
         }
       : {
           ...(startTime
-            ? { departure_hour: { gte: dateOfJourneyFromDateTime } }
+            ? { departure_hour_only: { gte: dateOfJourneyFromDateTime.toDate() } }
             : {
                 ...(endTime
-                  ? { departure_hour: { lte: dateOfJourneyToDateTime } }
+                  ? { departure_hour_only: { lte: dateOfJourneyToDateTime.toDate() } }
                   : {}),
               }),
         }),
