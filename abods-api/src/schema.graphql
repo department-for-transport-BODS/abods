@@ -144,12 +144,12 @@ input HeadwaySortType {
 
 input HeadwayFiltersInputType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   granularity: Granularity
   lineIds: [String]
   nocCodes: [String]
   operatorIds: [String]
-  startTime: Time
+  startTime: String
 }
 
 input DayOfWeekFlagsInputType {
@@ -170,14 +170,12 @@ input FrequentServiceInfoInputType {
 
 input FrequentServiceInfoFilterType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   lineId: String
   noc: String
   operatorId: String
-  startTime: Time
+  startTime: String
 }
-
-
 
 type FrequentServiceType {
   serviceId: String
@@ -675,6 +673,7 @@ enum RankingOrder {
 
 input ServicePerformanceFiltersInputType {
   timingPointsOnly: Boolean
+  operatorIds: [String]
 }
 
 input ServicePerformanceInputType {

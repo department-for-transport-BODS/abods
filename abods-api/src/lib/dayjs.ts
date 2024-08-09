@@ -93,8 +93,11 @@ export const overwriteDate = (
 
 export const getFormattedDate = (
   inputDate: Date | null | undefined,
+  format?: string
 ): string => {
-  return getDate(inputDate).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
+  return format
+    ? getDate(inputDate).tz('Europe/London').format(format)
+    : getDate(inputDate).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
 };
 
 export const getDateWithTimestamp = (date: Date, time: Date): string => {

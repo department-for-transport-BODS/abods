@@ -1,5 +1,6 @@
 import { Context } from "../../context";
 import {
+  HeadwayTimeSeriesType,
   LineType,
   OperatorPerformanceType,
   OperatorType,
@@ -14,10 +15,10 @@ import {
 } from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getBSTDate, getDate, getDateUTC, getFormattedDate, getStrHour, getStrUTCHour } from "../../lib/dayjs.js";
+import { getBSTDate, getDate, getFormattedDate, getStrHour } from "../../lib/dayjs.js";
 import { compareThresholds, getOperatorsFromOrgId } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
-import { checkSubArray, getDayOfWeekNumbers } from "../../lib/utils.js";
+import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
 import dayjs from "dayjs";
 
 interface DayCount {
@@ -39,12 +40,7 @@ interface distribution {
   performanceInMins: number;
 }
 
-const dayOfWeek: DayCount[] = Array.from({ length: 7 }, (_, i) => ({
-  dayOfWeek: i + 1,
-  early: 0,
-  late: 0,
-  onTime: 0,
-}));
+
 
 export const getOperatorList = async (
   sessionUser: SessionUser,
@@ -57,7 +53,6 @@ export const getOperatorList = async (
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    //const userOperators = await getOperators(sessionUser, db);
     const userOperators = await getOperatorsDropDown(sessionUser, db)
 
     if (!userOperators) {
@@ -110,11 +105,15 @@ export const getOperatorsDropDown = async (
     distinct: ["operator_noc"]
   });
 
-  return userOperators.map((op) => ({
-    name: op.operator.name,
-    nocCode: op.operator_noc,
-    operatorId: op.operator_noc
-  }))
+  return userOperators
+    .map((op) => ({
+      name: op.operator.name,
+      nocCode: op.operator_noc,
+      operatorId: op.operator_noc,
+    }))
+    .sort((a, b) =>
+      (a.name ?? '').localeCompare(b.name ?? '', undefined, { numeric: true }),
+    );
 
 }
 
@@ -404,7 +403,7 @@ export const getPunctualityOverview = async (
         },
       });
     } else {
-      results = await db.prisma.timetable_summary_operator_admintz.aggregate({
+      results = await db.prisma.timetable_summary_operator_tz.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -485,7 +484,7 @@ export const getOperatorPerformance = async (
 
     const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
 
-    const results = await db.prisma.timetable_summary_operator_admintz.groupBy({
+    const results = await db.prisma.timetable_summary_operator_tz.groupBy({
       by: ["operator_noc"],
       where:  where,
       _sum: {
@@ -598,10 +597,11 @@ export const getPunctualityDayOfWeek = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         let results;
 
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
         if (lineIds) {
           results = await db.prisma.timetable_summary_service_tz.groupBy({
             by: ["day_of_week"],
-            where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+            where: where,
             _sum: {
               early_count: true,
               late_count: true,
@@ -609,9 +609,9 @@ export const getPunctualityDayOfWeek = async (
             },
           });
         } else {
-          results = await db.prisma.timetable_summary_operator_admintz.groupBy({
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
             by: ['day_of_week'],
-            where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+            where: where,
             _sum: {
               early_count: true,
               late_count: true,
@@ -620,6 +620,14 @@ export const getPunctualityDayOfWeek = async (
           });
         }
 
+        const dayOfWeek: DayCount[] = Array.from({ length: 7 }, (_, i) => ({
+          dayOfWeek: i + 1,
+          early: 0,
+          late: 0,
+          onTime: 0,
+        }));
+        
+        
         if (results) {
           for (let i = 0; i < dayOfWeek.length; i++) {
             const day = dayOfWeek[i];
@@ -637,15 +645,17 @@ export const getPunctualityDayOfWeek = async (
             }
           }
         }
+
+        return dayOfWeek.filter((week) => {
+          if (week.early === 0 && week.late === 0 && week.onTime === 0)
+            return false;
+    
+          return true;
+        });
       }
     }
 
-    return dayOfWeek.filter((week) => {
-      if (week.early === 0 && week.late === 0 && week.onTime === 0)
-        return false;
-
-      return true;
-    });
+    return []
   } catch (error) {
     logger.error(error);
     return null;
@@ -684,7 +694,7 @@ export const getStopsDistribution = async (
   const { maxDelay, minDelay } = filters;
 
   const where: Prisma.timetable_threshold_summaryWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
 
   if (maxDelay && minDelay) {
     where.time_diff_minutes = {
@@ -776,7 +786,7 @@ export const getDelayFrequency = async (
         if (lineIds) {
           return getStopsDistribution(inputs, userOperatorIds, db)
         } else {
-          results = await db.prisma.timetable_summary_operator_admintz.findMany({
+          results = await db.prisma.timetable_summary_operator_tz.findMany({
             where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
             select: {
               avg_time_difference: true,
@@ -890,7 +900,7 @@ export const getPunctualityTimeOfDay = async (
 
         if (lineIds) {
           results = await db.prisma.timetable_summary_service_tz.groupBy({
-            by: ["departure_hour"],
+            by: ["departure_hour_only"],
             where: where,
             _sum: {
               early_count: true,
@@ -899,8 +909,8 @@ export const getPunctualityTimeOfDay = async (
             },
           }) ?? [];
         } else {
-          results = await db.prisma.timetable_summary_operator_admintz.groupBy({
-            by: ["departure_hour"],
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
+            by: ["departure_hour_only"],
             where: where,
             _sum: {
               early_count: true,
@@ -912,7 +922,7 @@ export const getPunctualityTimeOfDay = async (
 
         results.forEach((res) => {
           hoursOfDay.push({
-            timeOfDay: getStrHour(res.departure_hour),
+            timeOfDay: getStrHour(res.departure_hour_only),
             early: res._sum.early_count,
             onTime: res._sum.on_time_count,
             late: res._sum.late_count
@@ -997,7 +1007,7 @@ export const getPunctualityTimeSeries = async (
             },
           }) ?? [];
         } else {
-          results = await db.prisma.timetable_summary_operator_admintz.groupBy({
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
             by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
             where: where,
             _sum: {
@@ -1012,8 +1022,8 @@ export const getPunctualityTimeSeries = async (
           if (result._sum) {
             summary.push({
               ts: isDayGranularity
-                ? result.date_of_journey.toISOString()
-                : result.departure_hour.toISOString(),
+                ? getFormattedDate(result.date_of_journey)
+                : getFormattedDate(result.departure_hour),
               early: result._sum.early_count,
               late: result._sum.late_count,
               onTime: result._sum.on_time_count,
@@ -1067,53 +1077,61 @@ export const getServicePunctuality = async (
     } = inputs
 
     const timingPointsOnly = filters?.timingPointsOnly
-
+    const operatorIds = filters?.operatorIds?.filter(isDefined)
 
     const operators = await getOperators(sessionUser, db);
 
     const operatorNocs = operators?.map((op) => op.nocCode) ?? []
 
-    const where: Prisma.performance_statisticsWhereInput = {
-      operator_noc: {
-        in: operatorNocs
-      },
-      date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
-    }
+    let displayData = true
+    if (operatorIds) {
+      displayData = checkSubArray(operatorNocs, operatorIds)
+    } 
 
-    if(timingPointsOnly) {
-      where.is_timing_point = timingPointsOnly
-    }
-
-    const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
-    const performanceMetrics = await db.prisma.performance_statistics.findMany({
-      where,
-      take: 3,
-      distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
-      orderBy: [{
-        on_time_percentage: orderFilter
-      },{
-        trend_percentage: orderFilter
-      }]
-    })
-
-    return performanceMetrics.map((stats) =>({
-      nocCode: stats.operator_noc,
-      lineId: stats.noc_and_line_and_servicecode,
-      lineInfo: {
-        serviceId: stats.noc_and_line_and_servicecode,
-        serviceName: stats.service_name,
-        serviceNumber: stats.line_name
-      },
-      onTime: stats.on_time_count,
-      early: stats.early_count,
-      late: stats.late_count,
-      trend: {
-        onTime: stats.trend_on_time_count ?? 0,
-        late: stats.trend_late_count ?? 0,
-        early: stats.trend_early_count ?? 0
+    if(displayData) {
+      const where: Prisma.performance_statisticsWhereInput = {
+        operator_noc: {
+          in: operatorIds ? operatorIds : operatorNocs
+        },
+        date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
       }
-    }))
-
+  
+      if(timingPointsOnly) {
+        where.is_timing_point = timingPointsOnly
+      }
+  
+      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
+      const performanceMetrics = await db.prisma.performance_statistics.findMany({
+        where,
+        take: 3,
+        distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
+        orderBy: [{
+          on_time_percentage: orderFilter
+        },{
+          trend_percentage: orderFilter
+        }]
+      })
+  
+      return performanceMetrics.map((stats) =>({
+        nocCode: stats.operator_noc,
+        lineId: stats.noc_and_line_and_servicecode,
+        lineInfo: {
+          serviceId: stats.noc_and_line_and_servicecode,
+          serviceName: stats.service_name,
+          serviceNumber: stats.line_name
+        },
+        onTime: stats.on_time_count,
+        early: stats.early_count,
+        late: stats.late_count,
+        trend: {
+          onTime: stats.trend_on_time_count ?? 0,
+          late: stats.trend_late_count ?? 0,
+          early: stats.trend_early_count ?? 0
+        }
+      }))
+    }
+    
+    return []
   } catch (error) {
     logger.error(error);
     return [];
@@ -1131,18 +1149,10 @@ export const getStopPerformance = async (
     }
     // for this operator & for this service, get all stops and their OTP stats
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { filters } = inputs;
     const {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
       lineIds,
-      granularity,
     } = filters;
 
     let stopPerformances: StopPerformanceType[] = [];
@@ -1163,7 +1173,7 @@ export const getStopPerformance = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
-        const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy({
+        const results = await db.prisma.timetable_summary_stops_tz.groupBy({
           by: ["stop_id", "common_name", "is_timing_point"],
           where: where,
           _sum: {
@@ -1420,46 +1430,35 @@ export const getFrequentServiceInfo = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    const { filters, fromTimestamp, toTimestamp } = inputs;
-    const { lineIds, operatorId } = filters;
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
-    if (checkSubArray(userOperatorIds, operatorId)) {
-      const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy(
-        {
-          by: ['departure_hour'],
-          where: {
-            operator_noc:  operatorId,
-            noc_and_line_and_servicecode: {
-              in: lineIds,
-            },
-            date_of_journey: {
-              gt: new Date(fromTimestamp),
-              lte: new Date(toTimestamp),
-            },
-          },
-          _sum: {
-            scheduled: true,
-            actual_headway: true,
-          },
+    const results = await db.prisma.timetable_summary_stops_tz.groupBy(
+      {
+        by: ['departure_hour'],
+        where: where,
+        _sum: {
+          scheduled: true,
+          actual_headway: true,
         },
-      );
+      },
+    );
 
-      let totalHours = 0;
-      let actualHours = 0;
+    let totalHours = 0;
+    let actualHours = 0;
 
-      results.map((result) => {
-        if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
+    results.map((result) => {
+      if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
 
-        if (result._sum.actual_headway && result._sum.actual_headway > 0)
-          actualHours += 1;
-      });
+      if (result._sum.actual_headway && result._sum.actual_headway > 0)
+        actualHours += 1;
+    });
 
-      return {
-        numHours: actualHours,
-        totalHours: totalHours,
-      };
-    }
-    return {};
+    return {
+      numHours: actualHours,
+      totalHours: totalHours,
+    };
+    
   } catch (error) {
     logger.error(error);
     return null;
@@ -1505,9 +1504,6 @@ export const getHeadwayOverview = async (
       throw 'Not authorized';
     }
 
-    const { filters, fromTimestamp, toTimestamp } = inputs;
-    const { lineIds, operatorIds } = filters;
-
     const operators = await getOperators(sessionUser, db);
 
     if (!operators) {
@@ -1516,37 +1512,50 @@ export const getHeadwayOverview = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    if (checkSubArray(userOperatorIds, operatorIds)) {
-      const results = await db.prisma.timetable_summary_stops_headwaytz.aggregate(
-        {
-          where: {
-            operator_noc: {
-              in: operatorIds,
-            },
-            noc_and_line_and_servicecode: {
-              in: lineIds,
-            },
-            date_of_journey: {
-              gt: new Date(fromTimestamp),
-              lte: new Date(toTimestamp),
-            },
-          },
-          _sum: {
-            actual_headway: true,
-            expected_headway: true,
-            excess_wait_time: true,
-          },
-        },
-      );
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
-      return {
-        actualWaitTime: (results._sum.actual_headway ?? 0) / 60,
-        scheduledWaitTime: (results._sum.expected_headway ?? 0) / 60,
-        excessWaitTime: (results._sum.excess_wait_time ?? 0) / 60,
-      };
+    where.headway_stops_count = {
+      gt: 0
     }
 
-    return {};
+    const results = await db.prisma.timetable_summary_stops_tz.findMany(
+      {
+        where: where,
+        select: {
+          headway_stops_count: true,
+          actual_headway: true,
+          expected_headway: true,
+          excess_wait_time: true,
+        },
+      },
+    );
+
+    let headway = {
+      actualWaitTime: 0,
+      scheduledWaitTime: 0,
+      excessWaitTime: 0,
+      headwayCount: 0
+    }
+
+    headway = results.reduce((acc, currentHeadway) => {
+      acc.actualWaitTime +=
+        currentHeadway.actual_headway * currentHeadway.headway_stops_count;
+      acc.scheduledWaitTime +=
+        currentHeadway.expected_headway * currentHeadway.headway_stops_count;
+      acc.excessWaitTime +=
+        currentHeadway.excess_wait_time * currentHeadway.headway_stops_count;
+      acc.headwayCount += currentHeadway.headway_stops_count
+
+      return acc
+    }, headway);
+
+    return {
+      actualWaitTime: headway.actualWaitTime / (headway.headwayCount * 60),
+      scheduledWaitTime: headway.scheduledWaitTime / (headway.headwayCount * 60),
+      excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
+    }
+  
   } catch (error) {
     logger.error(error);
     return null;
@@ -1592,40 +1601,87 @@ export const getHeadwayTimeSeries = async (
       throw 'Not authorized';
     }
 
-    const { filters, fromTimestamp, toTimestamp } = inputs;
-    const { lineIds, operatorIds, granularity } = filters;
+    const { filters } = inputs;
+    const { granularity } = filters;
 
     const isDayGranularity = granularity === 'day'
 
-    const results = await db.prisma.timetable_summary_stops_headwaytz.groupBy({
-      by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
-      where: {
-        operator_noc: {
-          in: operatorIds
-        },
-        noc_and_line_and_servicecode: {
-          in: lineIds
-        },
-        date_of_journey: {
-          gt: new Date(fromTimestamp),
-          lte: new Date(toTimestamp)
-        },
-      },
-      _sum: {
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw 'No user operators';
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+    where.headway_stops_count = {
+      gt: 0
+    }
+
+    const results = await db.prisma.timetable_summary_stops_tz.findMany({
+      where: where,
+      select: {
+        date_of_journey: true,
+        departure_hour: true,
+        headway_stops_count: true,
         actual_headway: true,
         expected_headway: true,
-        excess_wait_time: true
+        excess_wait_time: true,
+      },
+    })
+
+    let headwayMap: {
+      [key: string]: {
+        actual_headway: number,
+        expected_headway: number,
+        excess_wait_time: number,
+        headway_stops_count: number
+      }
+    } = {}
+    results.map(result => {
+
+      if (result.departure_hour){
+        const formatterdeparture = isDayGranularity
+          ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
+          : getFormattedDate(result.departure_hour);
+        const headwayData = headwayMap[formatterdeparture]
+
+        if(headwayData){
+          headwayData.actual_headway = headwayData.actual_headway + result.actual_headway * result.headway_stops_count
+          headwayData.expected_headway = headwayData.expected_headway + result.expected_headway * result.headway_stops_count
+          headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time * result.headway_stops_count
+          headwayData.headway_stops_count =+ result.headway_stops_count
+        } else {
+          headwayMap[formatterdeparture] = {
+            actual_headway: result.actual_headway * result.headway_stops_count,
+            expected_headway: result.expected_headway * result.headway_stops_count,
+            excess_wait_time: result.excess_wait_time * result.headway_stops_count,
+            headway_stops_count: result.headway_stops_count
+          }
+        }
       }
     })
 
-    return results.map(result => ({
-        ts: result.departure_hour
-          ? getFormattedDate(result.departure_hour)
-          : result.date_of_journey,
-        actualWaitTime: (result._sum.actual_headway ?? 0) / 60,
-        scheduledWaitTime: (result._sum.expected_headway ?? 0) / 60,
-        excessWaitTime: (result._sum.excess_wait_time ?? 0) / 60,
-    }))
+    const returnHeadways: HeadwayTimeSeriesType[]  = []
+
+    for (const [departure_hour, headway] of Object.entries(headwayMap)){
+      returnHeadways.push({
+        ts: departure_hour,
+        actualWaitTime: headway.actual_headway / (headway.headway_stops_count * 60),
+        scheduledWaitTime: headway.expected_headway / (headway.headway_stops_count * 60),
+        excessWaitTime: headway.excess_wait_time / (headway.headway_stops_count * 60)
+      })
+    }
+
+    return returnHeadways.sort((a,b) => {
+      if(getDate(a.ts).isBefore(getDate(b.ts)))
+        return -1
+      return 1
+    })
+     
   } catch (error) {
     logger.error(error);
     return null;
@@ -1692,7 +1748,11 @@ export const getAdminAreas = async (
   }
 };
 
-const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
+const getPrismaFiltersForOTPQuery = (
+  inputs,
+  userOperatorNocList: string[],
+  isThreshold?: boolean,
+) => {
   const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
   const {
     timingPointsOnly,
@@ -1728,13 +1788,20 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   // date_of_journey - add an hour to from timestamp to prevent single day condition issues
   let fromMlSeconds = new Date(fromTimestamp).getTime();
   var addMlSeconds = 60 * 60 * 1000;
-  var dateOfJourneyFromDateTime = getDate(new Date(fromMlSeconds + addMlSeconds)).tz('Europe/London');
-  var dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz('Europe/London');
+  var dateOfJourneyFromDateTime = getDate(
+    new Date(fromMlSeconds + addMlSeconds),
+  ).tz('Europe/London');
+  var dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
+    'Europe/London',
+  );
 
   if (startTime) {
     const [hours, minutes, seconds] = startTime.split(':').map(Number);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('hour', hours);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('minute',minutes);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
+      'minute',
+      minutes,
+    );
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('second', 0);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('millisecond', 0);
   }
@@ -1744,7 +1811,7 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('hour', hours);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('minute', minutes);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('second', 0);
-    dateOfJourneyToDateTime =  dateOfJourneyToDateTime.set('millisecond', 0);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('millisecond', 0);
   }
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
@@ -1752,30 +1819,53 @@ const getPrismaFiltersForOTPQuery = (inputs, userOperatorNocList: string[]) => {
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
-  
+
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
       gte: dateOfJourneyFromDateTime.toDate(),
-      lte: dateOfJourneyToDateTime.toDate(),
+      lte: new Date(toTimestamp),
     },
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(dayOfWeekFlags
       ? { day_of_week: { in: dayOfWeekNumbers as number[] } }
       : {}),
     ...(startTime && endTime
-      ? {
-          departure_hour_only: {
-            gte: dateOfJourneyFromDateTime.toDate(),
-            lte: dateOfJourneyToDateTime.toDate(),
-          },
-        }
+      ? isThreshold
+        ? {
+            departure_hour: {
+              gte: dateOfJourneyFromDateTime.toDate(),
+              lte: dateOfJourneyToDateTime.toDate(),
+            },
+          }
+        : {
+            departure_hour_only: {
+              gte: dateOfJourneyFromDateTime.toDate(),
+              lte: dateOfJourneyToDateTime.toDate(),
+            },
+          }
       : {
           ...(startTime
-            ? { departure_hour_only: { gte: dateOfJourneyFromDateTime.toDate() } }
+            ? isThreshold
+              ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
+              : {
+                  departure_hour_only: {
+                    gte: dateOfJourneyFromDateTime.toDate(),
+                  },
+                }
             : {
                 ...(endTime
-                  ? { departure_hour_only: { lte: dateOfJourneyToDateTime.toDate() } }
+                  ? isThreshold
+                    ? {
+                        departure_hour: {
+                          lte: dateOfJourneyToDateTime.toDate(),
+                        },
+                      }
+                    : {
+                        departure_hour_only: {
+                          lte: dateOfJourneyToDateTime.toDate(),
+                        },
+                      }
                   : {}),
               }),
         }),
