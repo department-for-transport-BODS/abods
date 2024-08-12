@@ -73,8 +73,8 @@ type GpsFeedType {
   scheduledDeparture: String
   serviceInfo: ServiceInfoType
   servicePatternId: String
-  startTime: DateTime
-  ts: DateTime
+  startTime: String
+  ts: String
   vehicleId: String
   vehicleJourneyId: String
 }
