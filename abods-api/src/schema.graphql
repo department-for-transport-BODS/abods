@@ -73,8 +73,8 @@ type GpsFeedType {
   scheduledDeparture: String
   serviceInfo: ServiceInfoType
   servicePatternId: String
-  startTime: DateTime
-  ts: DateTime
+  startTime: String
+  ts: String
   vehicleId: String
   vehicleJourneyId: String
 }
@@ -144,12 +144,12 @@ input HeadwaySortType {
 
 input HeadwayFiltersInputType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   granularity: Granularity
   lineIds: [String]
   nocCodes: [String]
   operatorIds: [String]
-  startTime: Time
+  startTime: String
 }
 
 input DayOfWeekFlagsInputType {
@@ -170,14 +170,12 @@ input FrequentServiceInfoInputType {
 
 input FrequentServiceInfoFilterType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   lineId: String
   noc: String
   operatorId: String
-  startTime: Time
+  startTime: String
 }
-
-
 
 type FrequentServiceType {
   serviceId: String
@@ -210,7 +208,7 @@ type HeadwayTimeOfDayType {
 }
 
 type HeadwayTimeSeriesType {
-  ts: DateTime
+  ts: String
   actualWaitTime: Float
   excessWaitTime: Float
   scheduledWaitTime: Float
@@ -507,7 +505,7 @@ type PunctualityTimeSeriesType {
   early: Int
   late: Int
   onTime: Int
-  ts: DateTime
+  ts: String
 }
 
 type ServicePerformanceType {
@@ -675,6 +673,7 @@ enum RankingOrder {
 
 input ServicePerformanceFiltersInputType {
   timingPointsOnly: Boolean
+  operatorIds: [String]
 }
 
 input ServicePerformanceInputType {

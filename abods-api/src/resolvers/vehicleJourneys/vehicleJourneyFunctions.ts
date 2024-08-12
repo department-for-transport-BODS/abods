@@ -235,7 +235,9 @@ export const getJourney = async (
     },
   });
 
-  if (!journeys || journeys.length === 0) {
+  let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
+  
+  if (!matchedStop ) {
     return getTimetableJourney(journeyId, journeyDate, db);
   }
 
@@ -249,7 +251,7 @@ export const getJourney = async (
     return maxIndex;
   }, 0);
 
-  let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
+  
   const journeyCount = journeys.length;
 
   journeyData = journeys.map((journey, index) => {
