@@ -1795,7 +1795,7 @@ const getPrismaFiltersForOTPQuery = (
     'Europe/London',
   );
 
-  if (startTime) {
+  if (startTime && startTime !== '00:00') {
     const [hours, minutes, seconds] = startTime.split(':').map(Number);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('hour', hours);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
