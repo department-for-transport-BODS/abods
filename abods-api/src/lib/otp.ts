@@ -245,3 +245,33 @@ export const getOperatorsFromOrgId = async (orgId: number[], db: Context) => {
     distinct: ['operatorref'],
   });
 }
+
+export const getOperatorsFroServiceDetails = async (
+  orgOperators: { operatorref: string }[],
+  db: Context,
+) => {
+  return db.prisma.service_details.findMany({
+    where: {
+      operator_noc: {
+        in: orgOperators.map((operator) => operator.operatorref),
+      },
+    },
+    select: {
+      operator_noc: true,
+      operator: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    distinct: ['operator_noc'],
+  });
+};
+
+export const getNocAdminAreas = async (db: Context) => {
+  return db.prisma.noc_adminarea.findMany({
+    include: {
+      admin_area: true
+    }
+  })
+}
