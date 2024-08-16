@@ -1653,7 +1653,7 @@ export const getHeadwayTimeSeries = async (
           headwayData.actual_headway = headwayData.actual_headway + result.actual_headway * result.headway_stops_count
           headwayData.expected_headway = headwayData.expected_headway + result.expected_headway * result.headway_stops_count
           headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time * result.headway_stops_count
-          headwayData.headway_stops_count =+ result.headway_stops_count
+          headwayData.headway_stops_count += result.headway_stops_count
         } else {
           headwayMap[formatterdeparture] = {
             actual_headway: result.actual_headway * result.headway_stops_count,
@@ -1758,6 +1758,7 @@ const getPrismaFiltersForOTPQuery = (
     timingPointsOnly,
     adminAreaIds,
     operatorIds,
+    operatorId,
     startTime,
     endTime,
     maxDelay,
@@ -1772,6 +1773,8 @@ const getPrismaFiltersForOTPQuery = (
     nocListToFilter = userOperatorNocList.filter((o) =>
       operatorIds.includes(o),
     );
+  } else if(operatorId && userOperatorNocList.includes(operatorId)){
+    nocListToFilter = [operatorId]
   } else {
     nocListToFilter = userOperatorNocList;
   }
