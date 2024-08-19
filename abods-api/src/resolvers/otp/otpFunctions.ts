@@ -16,7 +16,7 @@ import {
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
 import { getBSTDate, getDate, getFormattedDate, getStrHour } from "../../lib/dayjs.js";
-import { compareThresholds, getOperatorsFromOrgId } from "../../lib/otp.js"
+import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
 import dayjs from "dayjs";
@@ -82,34 +82,27 @@ export const getOperatorsDropDown = async (
 
   let orgOperators: { operatorref: string }[] = [];
   
-  orgOperators = await getOperatorsFromOrgId(sessionUser.userOrganisationIDs, db)
-  
-  let userOperators: { operator: { name: string }; operator_noc: string }[] =
-    [];
+  orgOperators = await getOperatorsFromOrgId(
+    sessionUser.userOrganisationIDs,
+    db,
+  );
 
-  
-  userOperators = await db.prisma.service_details.findMany({
-    where: {
-      operator_noc: {
-        in: orgOperators.map((operator) => operator.operatorref),
-      },
-    },
-    select: {
-      operator_noc: true,
-      operator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    distinct: ["operator_noc"]
-  });
+  const [userOperators, adminAreas] = await Promise.all([
+    getOperatorsFroServiceDetails(orgOperators, db),
+    getNocAdminAreas(db),
+  ]);
 
   return userOperators
     .map((op) => ({
       name: op.operator.name,
       nocCode: op.operator_noc,
       operatorId: op.operator_noc,
+      adminAreas: adminAreas
+        .filter((area) => area.national_operator_code === op.operator_noc)
+        .map((area) => ({
+          adminAreaId: area.adminarea_id.toString(),
+          adminAreaName: area.admin_area.name,
+        })),
     }))
     .sort((a, b) =>
       (a.name ?? '').localeCompare(b.name ?? '', undefined, { numeric: true }),
