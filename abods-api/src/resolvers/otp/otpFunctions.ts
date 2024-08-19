@@ -1757,6 +1757,7 @@ const getPrismaFiltersForOTPQuery = (
     maxDelay,
     minDelay,
     lineIds,
+    lineId,
     dayOfWeekFlags,
   } = filters;
 
@@ -1880,6 +1881,11 @@ const getPrismaFiltersForOTPQuery = (
           noc_and_line_and_servicecode: {
             in: lineIds,
           },
+        }
+      : {}),
+    ...(lineId
+      ? {
+          noc_and_line_and_servicecode: lineId,
         }
       : {}),
     ...(adminAreaIds && adminAreaIds.length > 0
