@@ -28,8 +28,8 @@ on:
     - 'uat'
     paths:
     - 'VERSION'
-    - 'abods-api/*'
-    - 'frontend/*'
+    - 'abods-api/**'
+    - 'frontend/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
@@ -54,10 +54,7 @@ jobs:
     runs-on: pcoe-runner-linux-small-prod
     environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
-<<<<<<< HEAD
       github.ref_name == 'cavl' && 'cavl' ||
-=======
->>>>>>> test
       github.ref_name == 'uat' && 'uat' ||
       github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
