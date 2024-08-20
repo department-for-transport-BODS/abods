@@ -15,16 +15,20 @@ on:
         required: true
         default: 'patch'
         options: 
-        - patch
-        - minor
-        - major
+        - 'patch'
+        - 'minor'
+        - 'major'
   push:
     branches:
-    - sandbox
-    - dev
-    - test
-    - uat
-    - main
+    - 'main'
+    - 'sandbox'
+    - 'dev'
+    - 'test'
+    - 'uat'
+    paths:
+    - 'VERSION'
+    - 'abods-api/*'
+    - 'frontend/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||

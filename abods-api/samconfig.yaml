@@ -81,17 +81,29 @@ uat:
         VpcId='/abods/uat/vpc/id'
         VpcSubnets='/abods/uat/vpc/subnets/private'
 
-# prod:
-#   sync:
-#     parameters:
-#       watch: false
-#   deploy:
-#     parameters:
-#       stack_name: 'abods-prod-app-stack'
-#       s3_prefix: prod
-#       capabilities: 'CAPABILITY_NAMED_IAM'
-#       parameter_overrides:
-#         ProjectName='abods'
-#         Environment='prod'
-#         VpcId='/abods/prod/vpc/id'
-#         VpcSubnets='/abods/prod/vpc/subnets/private'
+cavl:
+  deploy:
+    parameters:
+      stack_name: 'abods-itm-cavl-app-stack'
+      s3_prefix: uat
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='uat'
+        VpcId='/abods/cavl/vpc/id'
+        VpcSubnets='/abods/cavl/vpc/subnets/private'
+
+prod:
+  sync:
+    parameters:
+      watch: false
+  deploy:
+    parameters:
+      stack_name: 'abods-prod-app-stack'
+      s3_prefix: prod
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='prod'
+        VpcId='/abods/prod/vpc/id'
+        VpcSubnets='/abods/prod/vpc/subnets/private'
