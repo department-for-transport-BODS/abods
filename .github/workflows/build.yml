@@ -28,8 +28,8 @@ on:
     - 'uat'
     paths:
     - 'VERSION'
-    - 'abods-api/*'
-    - 'frontend/*'
+    - 'abods-api/**'
+    - 'frontend/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
