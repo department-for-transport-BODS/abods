@@ -15,6 +15,96 @@ type Query {
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType
     serviceInfo(serviceId: String!): ServiceInfoType
+    vehicleReplay: VehicleReplayNamespace
+    servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
+    vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
+    timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
+}
+
+type VehicleJourneyType {
+  mode: String
+  operatorId: String
+  servicePatternId: String
+  timingPatternId: String
+  vehicleJourneyId: String
+}
+
+type TimingPatternDetailType {
+  arrivalTimeOffset: Int
+  createdAt: DateTime
+  deletedAt: DateTime
+  departureTimeOffset: Int
+  noPickup: Boolean
+  noSetdown: Boolean
+  requestStop: Boolean
+  stopIndex: Int
+  timingPatternId: String
+  timingPoint: Boolean
+  updatedAt: DateTime
+  version: String
+}
+
+input VehicleReplayFilterInputType {
+  filterOnStartTime: Boolean
+  lineIds: [String]
+  stopIds: [String]
+}
+
+input VehicleReplayInputType {
+  filters: VehicleReplayFilterInputType
+  fromTimestamp: DateTime!
+  toTimestamp: DateTime!
+}
+
+type VehicleReplayNamespace {
+  findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
+  getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
+}
+
+type GpsFeedType {
+  delay: Int!
+  feedStatus: GpsFeedStatus
+  isTimingPoint: Boolean
+  journeyStatus: GpsFeedJourneyStatus!
+  lat: Float
+  lon: Float
+  operatorInfo: OperatorInfoType
+  previousStopInfo: StopInfoType
+  scheduledDeparture: String
+  serviceInfo: ServiceInfoType
+  servicePatternId: String
+  startTime: String
+  ts: String
+  vehicleId: String
+  vehicleJourneyId: String
+}
+
+enum GpsFeedStatus {
+  Active
+  Stale
+}
+
+enum GpsFeedJourneyStatus {
+  Completed
+  Started 
+  Unknown 
+}
+
+input GpsFeedNamespaceGetJourneyArgs {
+  journeyId: String
+  startTime: DateTime
+}
+
+type UniqueJourneyType {
+  serviceInfo: ServiceInfoType
+  startTime: String
+  vehicleJourneyId: String
+}
+
+type ServiceInfoType {
+  serviceId: String
+  serviceName: String
+  serviceNumber: String
 }
 
 type Mutation {
@@ -31,7 +121,7 @@ type HeadwayMetricsType {
   headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
   headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
-  headwayTimeSeries(lineId: String!): [HeadwayTimeSeriesType]
+  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
 }
 
 input HeadwayInputType {
@@ -54,12 +144,12 @@ input HeadwaySortType {
 
 input HeadwayFiltersInputType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   granularity: Granularity
   lineIds: [String]
   nocCodes: [String]
   operatorIds: [String]
-  startTime: Time
+  startTime: String
 }
 
 input DayOfWeekFlagsInputType {
@@ -80,14 +170,12 @@ input FrequentServiceInfoInputType {
 
 input FrequentServiceInfoFilterType {
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   lineId: String
   noc: String
   operatorId: String
-  startTime: Time
+  startTime: String
 }
-
-
 
 type FrequentServiceType {
   serviceId: String
@@ -120,7 +208,7 @@ type HeadwayTimeOfDayType {
 }
 
 type HeadwayTimeSeriesType {
-  ts: DateTime
+  ts: String
   actualWaitTime: Float
   excessWaitTime: Float
   scheduledWaitTime: Float
@@ -141,6 +229,7 @@ type PaginatedLineType {
 type LineType {
   lineId: String
   lineName: String
+  lineNumber: String
   servicePatterns: [ServicePatternType]
 }
 
@@ -174,6 +263,7 @@ type AdminAreasType {
 }
 
 type OperatorsPage {
+    pageInfo: PageInfo
     items: [OperatorType]
 }
 
@@ -183,6 +273,40 @@ type OperatorType {
     operatorId: String
     adminAreas: [AdminAreaInfoType]
     transitModel: TransitModelType
+    feedMonitoring: FeedMonitoringType
+}
+
+type FeedMonitoringType {
+  availability: Float
+  feedStatus: Boolean
+  historicalStats: HistoricalStatsType
+  lastOutage: DateTime
+  liveStats: LiveStatsType
+  unavailableSince: DateTime
+  vehicleStats: [VehicleStatsType]
+}
+
+type HistoricalStatsType {
+  availability: Float
+  compliance: Float
+  updateFrequency: Int
+  vehicleStats: [VehicleStatsType]
+}
+
+type VehicleStatsType {
+  actual: Int
+  expected: Int
+  timestamp: DateTime
+}
+
+type LiveStatsType {
+  currentVehicles: Int
+  expectedVehicles: Int
+  feedAlerts: Int
+  feedErrors: Int
+  last20Minutes: [VehicleStatsType]
+  last24Hours: [VehicleStatsType]
+  updateFrequency: Int
 }
 
 type AdminAreaInfoType {
@@ -314,7 +438,7 @@ type OnTimePerformanceType {
   punctualityTimeOfDay(inputs: PerformanceInputType!): [PunctualityTimeOfDayType]
   punctualityTimeSeries(inputs: PerformanceInputType!): [PunctualityTimeSeriesType]
   servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType]
-  servicePunctuality: [ServicePunctualityType]
+  servicePunctuality(inputs: ServicePerformanceInputType!): [ServicePunctualityType]
   stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType]
 }
 
@@ -381,7 +505,7 @@ type PunctualityTimeSeriesType {
   early: Int
   late: Int
   onTime: Int
-  ts: DateTime
+  ts: String
 }
 
 type ServicePerformanceType {
@@ -408,15 +532,22 @@ type OperatorInfoType {
   operatorName: String
 }
 
+type IPunctualityType {
+  early: Int
+  late: Int
+  onTime: Int
+}
+
 type ServicePunctualityType {
   early: Int
   late: Int
   lineId: String
+  lineInfo: ServiceInfoType
   nocCode: String
   onTime: Int
   operatorId: String
   rank: Float
-  trend: ServicePunctualityType
+  trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
 }
 
 type StopPerformanceType {
@@ -476,7 +607,7 @@ input PerformanceFiltersInputType {
   addNonTagged: Boolean
   adminAreaIds: [String]
   dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: Time
+  endTime: String
   excludedDates: [Date]
   excludeItoLineId: String
   granularity: Granularity
@@ -488,7 +619,7 @@ input PerformanceFiltersInputType {
   onTimeMaxMinutes: Int
   onTimeMinMinutes: Int
   operatorIds: [String]
-  startTime: Time
+  startTime: String
   startTimes: [Time]
   stopsSegment: StopsSegment
   tagIds: [Int]
@@ -533,4 +664,22 @@ enum PunctualitySortEnum {
 enum SortOrderEnum {
   ASC
   DESC
+}
+
+enum RankingOrder {
+  ascending
+  descending
+}
+
+input ServicePerformanceFiltersInputType {
+  timingPointsOnly: Boolean
+  operatorIds: [String]
+}
+
+input ServicePerformanceInputType {
+  filters: ServicePerformanceFiltersInputType
+  fromTimestamp: DateTime
+  toTimestamp: DateTime
+  limit: Int
+  order: RankingOrder
 }

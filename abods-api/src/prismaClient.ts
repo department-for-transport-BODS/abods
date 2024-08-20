@@ -16,11 +16,11 @@ async function getDatabaseUrl(): Promise<string> {
 
   if ((process.env.PROJECT_ENV || 'local') === 'local') {
     const password = process.env.DB_PASSWORD;
-    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&gssencmode=disable`;
+    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true`;
   } else {
     const token = await generateRdsIamToken(region, hostname, port, username);
     const encodedToken = encodeURIComponent(token);
-    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public`;
+    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&sslmode=prefer&ssl=true`;
   }
 }
 
@@ -30,6 +30,7 @@ async function initialisePrismaClient(): Promise<PrismaClient> {
   if (!prisma) {
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
+      log: ['info'], 
       datasources: {
         db: {
           url: databaseUrl,

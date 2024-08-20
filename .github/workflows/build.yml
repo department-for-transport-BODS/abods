@@ -1,6 +1,7 @@
 name: build application
 run-name: build application from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 
@@ -15,20 +16,25 @@ on:
         required: true
         default: 'patch'
         options: 
-        - patch
-        - minor
-        - major
+        - 'patch'
+        - 'minor'
+        - 'major'
   push:
     branches:
-    - sandbox
-    - dev
-    - test
-    - uat
-    - main
+    - 'main'
+    - 'sandbox'
+    - 'dev'
+    - 'test'
+    - 'uat'
+    paths:
+    - 'VERSION'
+    - 'abods-api/*'
+    - 'frontend/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
@@ -37,6 +43,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   RC_ENV: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   RC_TYP: ${{ (github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v'))) && github.event.inputs.change || 'patch' }}
@@ -47,6 +54,10 @@ jobs:
     runs-on: pcoe-runner-linux-small-prod
     environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
+<<<<<<< HEAD
+      github.ref_name == 'cavl' && 'cavl' ||
+=======
+>>>>>>> test
       github.ref_name == 'uat' && 'uat' ||
       github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
@@ -54,6 +65,7 @@ jobs:
       VERSION: ${{ steps.increment.outputs.VERSION }}
 
     steps:
+
       - name: checkout
         uses: actions/checkout@v4
 
@@ -188,9 +200,18 @@ jobs:
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
-          api_url="https://${domain_name}/api/graphql"
+          freshdesk_api_url="https://${domain_name}/freshdesk/"
+          graphql_api_url="https://${domain_name}/api/graphql"
+          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
+          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
+          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
           
-          jq --arg api_url "$api_url" '.apiUrl = $api_url | .analyticsId = "1234"' src/config.json > tmp.json && \
+          jq --arg freshdesk_api_url "$freshdesk_api_url" \
+             --arg graphql_api_url "$graphql_api_url" \
+             --arg mapbox_token "$mapbox_token" \
+             --arg mapbox_style "$mapbox_style" \
+             --arg mapbox_satellite_style "$mapbox_satellite_style" \
+             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
             mv tmp.json src/config.json
 
           npm install
@@ -199,6 +220,7 @@ jobs:
 
           echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
+          aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENV^^}"
 
   commit-and-tag:

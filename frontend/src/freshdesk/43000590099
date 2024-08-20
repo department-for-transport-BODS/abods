@@ -1,0 +1,102 @@
+[
+  {
+    "id": 43000700840,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:11Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Corridors",
+    "updated_at": "2023-06-02T14:07:37Z",
+    "description": "<p dir=\"ltr\">Corridors allows you to create your own route, along which you can analyse bus speed and journebroken down by service pattern.</p>",
+    "description_text": " Corridors allows you to create your own route, along which you can analyse bus speed and journebroken down by service pattern. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 4,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700841,
+    "type": 1,
+    "status": 1,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:29Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Length of Time",
+    "updated_at": "2023-05-02T14:45:30Z",
+    "description": "<p>We can't display corridor data for less than 24 hours previous.</p>",
+    "description_text": " We can't display corridor data for less than 24 hours previous. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700842,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:46Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Speed",
+    "updated_at": "2023-06-02T14:07:52Z",
+    "description": "<p>We calculate speed metrics based on the shape data we receive and GPS pings. If we don’t receive shape data we calculate distance based on a straight line between two stops.</p>",
+    "description_text": " We calculate speed metrics based on the shape data we receive and GPS pings. If we don’t receive shape data we calculate distance based on a straight line between two stops. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700867,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T13:41:23Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Missing Transits",
+    "updated_at": "2023-06-02T14:07:58Z",
+    "description": "<p dir=\"ltr\">These are journeys that we have in the schedules provided but that we could not match against the real time data we received.&nbsp;</p>",
+    "description_text": " These are journeys that we have in the schedules provided but that we could not match against the real time data we received.  ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  }
+]

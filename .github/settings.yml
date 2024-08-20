@@ -19,7 +19,7 @@ repository:
   private: internal
   
   # Updates the default branch for this repository.
-  default_branch: main
+  default_branch: sandbox
 
 # See https://docs.github.com/en/rest/reference/teams#add-or-update-team-repository-permissions for available options
 collaborators:

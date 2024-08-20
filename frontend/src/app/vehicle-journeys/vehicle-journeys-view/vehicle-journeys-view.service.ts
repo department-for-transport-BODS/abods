@@ -124,7 +124,12 @@ export class VehicleJourneysViewService {
       .pipe(
         map(({ data }) => {
           // Sort GPS pings by timestamp
-          return sortBy(nonNullishArray(data?.vehicleReplay?.getJourney), (ping: ApolloGpsFeedType) => ping.ts);
+          const noLocationData = data?.vehicleReplay?.getJourney.some((journey) => !journey?.ts);
+          return noLocationData
+            ? nonNullishArray(data?.vehicleReplay?.getJourney)
+            : sortBy(nonNullishArray(data?.vehicleReplay?.getJourney), (ping: ApolloGpsFeedType) =>
+                ping.ts ? ping.ts : ping.scheduledDeparture
+              );
         })
       );
   }

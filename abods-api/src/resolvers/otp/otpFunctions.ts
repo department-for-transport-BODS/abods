@@ -1,753 +1,1899 @@
-import { Db } from "typeorm";
 import { Context } from "../../context";
-import { OperatorPerformanceType, OperatorType } from "../../types";
-import { ExpectedOperators, ExpectedServices } from "@prisma/client";
+import {
+  HeadwayTimeSeriesType,
+  LineType,
+  OperatorPerformanceType,
+  OperatorType,
+  PaginatedLineType,
+  PunctualityTimeOfDayType,
+  PunctualityTimeSeriesType,
+  RankingOrder,
+  ServicePerformanceInputType,
+  ServicePunctualityType,
+  SessionUser,
+  StopPerformanceType,
+} from "../../types.js";
+import logger from "../../logger.js";
+import { GraphQLResolveInfo } from "graphql";
+import { getBSTDate, getDate, getFormattedDate, getStrHour } from "../../lib/dayjs.js";
+import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
+import { Prisma } from "@prisma/client";
+import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
+import dayjs from "dayjs";
 
-// Summary: Fetch all operators for user
-export const getOperators = async (SessionUser: any, db: Context) => {
-  try {
-    if(!SessionUser){
-      throw("Not Authorized")
-    }
-
-    const userOrganisationIds : number[] = SessionUser.userOrganisations.map(userOrganisation => userOrganisation.organisation_id)
-
-    const operators = await db.prisma.expectedOperators.findMany({
-      where:{
-        organization_id: {
-          in: userOrganisationIds
-        }
-      }
-    })
-
-    if(!operators)
-    {
-      throw("No operators found")
-    }
-
-    return operators.map((operator): OperatorType => {return mapOperatorToOperatorType(operator) as OperatorType})
-    
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-} 
-
-const mapOperatorToOperatorType = (operator: ExpectedOperators): OperatorType => {
-  return {
-    operatorId: String(operator.expected_operator_id),
-    nocCode: operator.noc,
-    name: operator.operator_name,
-    adminAreas: []
-  }
+interface DayCount {
+  dayOfWeek: number;
+  early: number;
+  onTime: number;
+  late: number;
 }
 
-export const getAdminAreas = async (adminAreaIds : String[], sessionUser: any, db: Context) => {
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    // needs admin area view??
-    const adminAreas = null; //await db.prisma.operatorAdminArea.findMany()
-
-    if(!adminAreas){
-      throw("No admin areas found")
-    }
-
-    return adminAreas; //.filter(a=>adminAreaIds.includes(a.adminAreaId))
-
-  } catch (error) {
-    console.error(error)
-    return null;
-  }
+interface TimeCount {
+  timeOfDay: string;
+  early: number;
+  onTime: number;
+  late: number;
 }
 
-const getOperatorIdsForUser = async (userOrgs) => {
-  // TODO: fetch an array of operator ids that user can touch...
+interface distribution {
+  noOfStops: number;
+  performanceInMins: number;
 }
 
-export const getServiceInfo = async (serviceId, sessionUser: any, db: Context) => {
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    const service : ExpectedServices | null = await db.prisma.expectedServices.findUnique({
-      where:{
-        expected_service_id: serviceId
-        // AND operator id is in users operatorid array
-      }
-    })
 
-    if(!service){
-      throw("No service found")
+
+export const getOperatorList = async (
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not Authorized";
+    }
+
+    logger.debug(new Date().toLocaleString() + " getOperatorList");
+
+    const userOperators = await getOperatorsDropDown(sessionUser, db)
+
+    if (!userOperators) {
+      throw "No operators for user";
     }
 
     return {
-      serviceId: service.expected_service_id,
-      serviceNumber: service.service_name,
-      serviceName: service.service_name
+      items: userOperators,
     };
-
   } catch (error) {
-    console.error(error)
+    logger.error(error);
     return null;
   }
+};
+
+export const getOperatorsDropDown = async (
+  sessionUser: SessionUser,
+  db: Context,
+): Promise<OperatorType[]> => {
+  if (!sessionUser.user) {
+    throw "Not Authorized";
+  }
+
+  if (!sessionUser.userOrganisationIDs) {
+    throw "User not in any organisations";
+  }
+
+  let orgOperators: { operatorref: string }[] = [];
+  
+  orgOperators = await getOperatorsFromOrgId(
+    sessionUser.userOrganisationIDs,
+    db,
+  );
+
+  const [userOperators, adminAreas] = await Promise.all([
+    getOperatorsFroServiceDetails(orgOperators, db),
+    getNocAdminAreas(db),
+  ]);
+
+  return userOperators
+    .map((op) => ({
+      name: op.operator.name,
+      nocCode: op.operator_noc,
+      operatorId: op.operator_noc,
+      adminAreas: adminAreas
+        .filter((area) => area.national_operator_code === op.operator_noc)
+        .map((area) => ({
+          adminAreaId: area.adminarea_id.toString(),
+          adminAreaName: area.admin_area.name,
+        })),
+    }))
+    .sort((a, b) =>
+      (a.name ?? '').localeCompare(b.name ?? '', undefined, { numeric: true }),
+    );
+
 }
 
-export const getOperator = async (operatorId, sessionUser: any, db: Context) => {
-
+export const getOperators = async (
+  sessionUser: SessionUser,
+  db: Context,
+  adminAreaIds?: string[]
+) => {
   try {
-    if(!sessionUser){
-      throw ("Not authorized")
+    if (!sessionUser.user) {
+      throw "Not Authorized";
+    }
+
+    if (!sessionUser.userOrganisationIDs) {
+      throw "User not in any organisations";
+    }
+
+    let adminAreaNumberIds: number[] = [];
+
+    if (adminAreaIds && adminAreaIds.length > 0) {
+      adminAreaNumberIds = adminAreaIds.map((str) => parseInt(str, 10));
+    }
+
+    const operators = await db.prisma.all_operators.findMany({
+      where: {
+        ...(adminAreaNumberIds.length > 0
+          ? {
+              noc_adminareas: {
+                some: {
+                  adminarea_id: {
+                    in: adminAreaNumberIds,
+                  },
+                },
+              },
+            }
+          : {}),
+        operatorOrganisations: {
+          some: {
+            organisation_id: {
+              in: sessionUser.userOrganisationIDs,
+            },
+          },
+        },
+      },
+      include: {
+        noc_adminareas: true,
+      },
+    });
+
+    if (!operators) {
+      throw "No operators found";
+    }
+
+    const userOperators = operators.map((operator): OperatorType => {
+      return mapOperatorToOperatorType(
+        operator,
+        operator.noc_adminareas
+      ) as OperatorType;
+    });
+    return userOperators.sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true })
+    );
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
+  const adminAreaIds = adminAreas.map((adminArea) => {
+    return {
+      adminAreaId: adminArea.adminarea_id,
+    };
+  });
+
+  return {
+    operatorId: operator.operatorref,
+    nocCode: operator.operatorref,
+    name: operator.name,
+    adminAreas: adminAreaIds,
+  };
+};
+
+export const getServiceInfo = async (
+  serviceId,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    // get user's operator ids
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw "No user operators";
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const service = await db.prisma.expected_services.findFirst({
+      where: {
+        noc_and_line_and_servicecode: serviceId,
+      },
+    });
+
+    if (!service) {
+      throw "No service found";
+    }
+
+    if (userOperatorIds.includes(service.operator_noc)) {
+      return {
+        serviceId: serviceId,
+        serviceNumber: service.line_name,
+        serviceName: service.service_name,
+      };
+    } else throw "User does not have access to service";
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const getOperatorLines = async (operatorRef: string, db: Context) => {
+  const operator = await db.prisma.expected_operators.findMany({
+    where: {
+      operator_noc: operatorRef,
+    },
+    include: {
+      expected_services: {
+        select: {
+          noc_and_line_and_servicecode: true,
+          service_name: true,
+          line_name: true,
+        },
+      },
+    },
+  });
+
+  const services: LineType[] = [];
+  const distinctServices = new Set();
+  operator.map((op) => {
+    op.expected_services.map((service) => {
+      if (!distinctServices.has(service.noc_and_line_and_servicecode)) {
+        distinctServices.add(service.noc_and_line_and_servicecode);
+        services.push({
+          lineId: service.noc_and_line_and_servicecode,
+          lineName: service.service_name,
+          lineNumber: service.line_name,
+          onTimePerformance: [],
+          servicePatterns: [],
+        });
+      }
+    });
+  });
+
+  const lines: PaginatedLineType = {
+    items: services,
+  };
+
+  return lines;
+};
+
+export const getLines = async (
+  lineIds: string[],
+  sessionUser: SessionUser,
+  db: Context,
+  info: GraphQLResolveInfo
+) => {
+  const { operatorId } = info.variableValues as { operatorId: string };
+  const operationName: string = info.operation.name?.value ?? "";
+
+  if (operationName === "operatorLines") {
+    return getOperatorLines(operatorId, db);
+  }
+  const operators = await getOperators(sessionUser, db);
+
+  if (!operators) {
+    throw "No user operators";
+  }
+
+  const userOperatorIds = operators.map((o) => o.nocCode);
+
+
+  if (userOperatorIds.includes(operatorId)) {
+    // to be added for service maps next
+  }
+  console.log("operator ref", operatorId)
+}
+
+
+export const getOperator = async (
+  operatorRef: string,
+  sessionUser: SessionUser,
+  db: Context,
+  info: GraphQLResolveInfo
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
     }
 
     // TODO: is operator id in users' operator id array
+    logger.debug("getOperator op: {0} ", operatorRef);
 
-    const operator : ExpectedOperators | null = await db.prisma.expectedOperators.findUnique({
-      where:{
-        expected_operator_id: operatorId
+    const operator = await db.prisma.all_operators.findUnique({
+      where: {
+        operatorref: operatorRef,
       },
-      include:
-      {
-        expected_services: true
-      }
-    })
+    });
 
-    if(!operator){
-      throw("No operator found")
+    if (!operator) {
+      throw "No operator found";
     }
 
-    return {
-      operatorId: operator.expected_operator_id,
-      transitModel: null,
+    let operatorPayload: OperatorType = {
+      operatorId: operator.operatorref,
+      name: operator.name,
+      nocCode: operator.operatorref,
     };
 
+    return operatorPayload;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return null;
   }
-
-  // for a service for an operator, get me all stops and their name/long/latutude
-  // servicePattern name
+};
 
 
-  // return {
-  //   __typename: "OperatorType",
-  //   operatorId: operatorId,
-  //   transitModel: {
-  //     __typename: "TransitModelType",
-  //     lines: ({ filterBy }) => ({
-  //       __typename: "PaginatedLineType",
-  //       items: filterBy.lineIds.map(lineId => ({
-  //         __typename: "LineType",
-  //         lineId: lineId,
-  //         lineName: "Line " + lineId,
-  //         servicePatterns: [
-  //           {
-  //             __typename: "ServicePatternType",
-  //             servicePatternId: "SP1",
-  //             name: "Pattern 1",
-  //             stops: [
-  //               {
-  //                 __typename: "StopType",
-  //                 stopId: "S1",
-  //                 stopName: "Stop 1", // naptan
-  //                 lon: -122.406417, // naptan
-  //                 lat: 37.785834 // naptan
-  //               },
-  //               {
-  //                 __typename: "StopType",
-  //                 stopId: "S2",
-  //                 stopName: "Stop 2",
-  //                 lon: -122.406417,
-  //                 lat: 37.785834
-  //               }
-  //             ],
-  //             serviceLinks: [
-  //               {
-  //                 __typename: "ServiceLinkType",
-  //                 fromStop: "S1",
-  //                 toStop: "S2",
-  //                 distance: 100,
-  //                 routeValidity: "Valid",
-  //                 linkRoute: "Main Route"
-  //               }
-  //             ]
-  //           }
-  //         ]
-  //       }))
-  //     })
-  //   }
-  // }
-}
-
-export const getDelayFrequency = async (inputs, sessionUser:any, db: Context) => {
+export const getPunctualityOverview = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
   try {
-
-    if(!sessionUser){
-      throw ("Not authorized")
+    if (!sessionUser.user) {
+      throw "Not authorized";
     }
+
+    // start - performance timer
+    var startTimer = performance.now();
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      operatorIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      lineIds,
+      dayOfWeekFlags,
+      onTimeMaxMinutes,
+      onTimeMinMinutes,
+    } = filters;
+
+    logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
+
+    if( onTimeMinMinutes || onTimeMaxMinutes ) {
+      return compareThresholds(inputs, sessionUser, db)
+    }
+
+    // get an array of user's org's operator nocs.
+    const operators = await getOperators(sessionUser, db, adminAreaIds);
+
+    if (!operators) {
+      throw "No user operators";
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    let results;
+    let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+    if (lineIds) {
+      results = await db.prisma.timetable_summary_service_tz.aggregate({
+        where: prismaFilters,
+        _sum: {
+          early_count: true,
+          late_count: true,
+          on_time_count: true,
+          completed: true,
+          scheduled: true,
+        },
+      });
+    } else {
+      results = await db.prisma.timetable_summary_operator_tz.aggregate({
+        where: prismaFilters,
+        _sum: {
+          early_count: true,
+          late_count: true,
+          on_time_count: true,
+          completed: true,
+          scheduled: true,
+        },
+      });
+    }
+
+    if (results) {
+      //end - performance timer
+      var endTimer = performance.now();
+
+      logger.debug(
+        `Call to getPunctualityOverview took ${
+          endTimer - startTimer
+        } milliseconds`
+      );
+
+      return {
+        __typename: "PunctualityTotalsType",
+        early: results._sum.early_count,
+        late: results._sum.late_count,
+        onTime: results._sum.on_time_count,
+        scheduled: results._sum.scheduled,
+        completed: results._sum.completed,
+        averageDeviation: 0,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getOperatorPerformance = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    // start - performance timer
+    var startTimer = performance.now();
+
+    let opPerformances: OperatorPerformanceType[] = [];
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      operatorIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      lineIds,
+      dayOfWeekFlags,
+    } = filters;
+
+    logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
+
+    // get an array of user's org's operator nocs.
+    const operators = await getOperators(sessionUser, db, adminAreaIds);
+
+    if (!operators) {
+      throw "No user operators";
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+
+    const results = await db.prisma.timetable_summary_operator_tz.groupBy({
+      by: ["operator_noc"],
+      where:  where,
+      _sum: {
+        early_count: true,
+        late_count: true,
+        on_time_count: true,
+        completed: true,
+        scheduled: true,
+      },
+    });
+
+    for (let i = 0; i < operators.length; i++) {
+      const operatorOtpStats = results.find(
+        (o) => o.operator_noc == operators[i].nocCode
+      );
+      if (operatorOtpStats && operatorOtpStats._sum) {
+        let totalOntime = operatorOtpStats._sum.on_time_count
+            ? operatorOtpStats._sum.on_time_count
+            : 0,
+          totalEarly = operatorOtpStats._sum.early_count
+            ? operatorOtpStats._sum.early_count
+            : 0,
+          totalLate = operatorOtpStats._sum.late_count
+            ? operatorOtpStats._sum.late_count
+            : 0,
+          totalscheduled = operatorOtpStats._sum.scheduled
+            ? operatorOtpStats._sum.scheduled
+            : 0,
+          totalCompleted = operatorOtpStats._sum.completed
+            ? operatorOtpStats._sum.completed
+            : 0;
+
+        let opPerformance: OperatorPerformanceType = {
+          nocCode: operators[i].nocCode,
+          operatorId: operators[i].nocCode,
+          name: operators[i].name,
+          early: totalEarly,
+          late: totalLate,
+          onTime: totalOntime,
+          averageDelay: 0, // TODO
+          scheduledDepartures: totalscheduled,
+          actualDepartures: totalCompleted,
+        };
+        opPerformances.push(opPerformance);
+      }
+    }
+
+    var ret = {
+      items: opPerformances,
+      pageInfo: {
+        next: opPerformances.length,
+        totalCount: opPerformances.length,
+      },
+    };
+
+    //end - performance timer
+    var endTimer = performance.now();
+    logger.debug(
+      `Call to getOperatorPerformance took ${
+        endTimer - startTimer
+      } milliseconds`
+    );
+
+    return ret;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getPunctualityDayOfWeek = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      dayOfWeekFlags,
+      operatorIds,
+      granularity,
+      lineIds,
+    } = filters;
+
+    // fetch all otp records group by time difference
+    if (operatorIds.length == 1) {
+      logger.debug(
+        'getPunctualityDayOfWeek id: ' + JSON.stringify(operatorIds),
+      );
+      const operators = await getOperators(sessionUser, db);
+
+      if (!operators) {
+        throw 'No user operators';
+      }
+
+      const userOperatorIds = operators.map((o) => o.nocCode);
+
+      const operator_noc_to_filter = operatorIds[0];
+
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        let results;
+
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+        if (lineIds) {
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
+            by: ["day_of_week"],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          });
+        } else {
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
+            by: ['day_of_week'],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          });
+        }
+
+        const dayOfWeek: DayCount[] = Array.from({ length: 7 }, (_, i) => ({
+          dayOfWeek: i + 1,
+          early: 0,
+          late: 0,
+          onTime: 0,
+        }));
+        
+        
+        if (results) {
+          for (let i = 0; i < dayOfWeek.length; i++) {
+            const day = dayOfWeek[i];
+            const dayRecord = results.find((d) => d.day_of_week == i);
+            if (dayRecord && dayRecord._sum) {
+              day.early += dayRecord._sum.early_count
+                ? dayRecord._sum.early_count
+                : 0;
+              day.onTime += dayRecord._sum.on_time_count
+                ? dayRecord._sum.on_time_count
+                : 0;
+              day.late += dayRecord._sum.late_count
+                ? dayRecord._sum.late_count
+                : 0;
+            }
+          }
+        }
+
+        return dayOfWeek.filter((week) => {
+          if (week.early === 0 && week.late === 0 && week.onTime === 0)
+            return false;
+    
+          return true;
+        });
+      }
+    }
+
+    return []
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getJourneyScheduledStartTimes = async (
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    return [
+      {
+        days: ["Mon", "Wed", "Fri"],
+        fromDate: "2024-01-01",
+        startTimes: ["08:00", "10:00", "12:00"],
+        toDate: "2024-01-31",
+      },
+    ];
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getStopsDistribution = async (
+  inputs,
+  userOperatorIds: string[],
+  db: Context,
+) => {
+  const { filters } = inputs;
+  const { maxDelay, minDelay } = filters;
+
+  const where: Prisma.timetable_threshold_summaryWhereInput =
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
+
+  if (maxDelay && minDelay) {
+    where.time_diff_minutes = {
+      lte: maxDelay,
+      gte: minDelay,
+    };
+  } else if (maxDelay) {
+    where.time_diff_minutes = {
+      lte: maxDelay,
+    };
+  } else if (minDelay) {
+    where.time_diff_minutes = {
+      gte: minDelay,
+    };
+  }
+
+  const results = await db.prisma.timetable_threshold_summary.groupBy({
+    by: ['time_diff_minutes'],
+    where: where,
+    _sum: {
+      otp_count: true,
+    },
+  });
+
+  const filteredResults = results.filter(
+    (result) => result.time_diff_minutes || result.time_diff_minutes === 0,
+  );
+
+  filteredResults.sort((a, b) => {
+    if (a.time_diff_minutes && b.time_diff_minutes)
+      return a.time_diff_minutes - b.time_diff_minutes;
+
+    return 0;
+  });
+
+  return filteredResults.map((result) => ({
+    bucket: Number(result.time_diff_minutes),
+    frequency: result._sum.otp_count,
+  }));
+};
+
+export const getDelayFrequency = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    logger.debug("getDelayFrequency");
 
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    return [
-      { bucket: 1, frequency: 5 },
-      { bucket: 2, frequency: 15 }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      dayOfWeekFlags,
+      operatorIds,
+      granularity,
+      lineIds,
+    } = filters;
 
-export const getJourneyScheduledStartTimes = async (sessionUser:any, db: Context) => {
+    let performanceStopDistribution: distribution[] = [];
 
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
+    // fetch all otp records group by time difference
+    if (operatorIds.length == 1) {
+      logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
+      const operators = await getOperators(sessionUser, db);
 
-    return [
-      {
-        days: ['Mon', 'Wed', 'Fri'],
-        fromDate: '2024-01-01',
-        startTimes: ['08:00', '10:00', '12:00'],
-        toDate: '2024-01-31'
+      if (!operators) {
+        throw "No user operators";
       }
-    ];
 
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
+      const userOperatorIds = operators.map((o) => o.nocCode);
 
-export const getOperatorPerformance = async (inputs, sessionUser:any, db: Context) => {
+      const operator_noc_to_filter = operatorIds[0];
 
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-      // OTP table -> operator
-  // completed: Int
-  // early: Int
-  // late: Int
-  // onTime: Int
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        let results;
 
-  // get inputs
-  const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
+        if (lineIds) {
+          return getStopsDistribution(inputs, userOperatorIds, db)
+        } else {
+          results = await db.prisma.timetable_summary_operator_tz.findMany({
+            where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+            select: {
+              avg_time_difference: true,
+              completed: true,
+            },
+          });
+        }
 
-  let opPerformances : OperatorPerformanceType[] = [];
+        if (results) {
+          results.forEach((res) => {
+            if (res.avg_time_difference) {
+              // get a rounded average time difference for the record
+              const avgDiff = Math.round(res.avg_time_difference);
 
-  // get an array of user's org's operator nocs.
-  const userOperators = await getOperators(sessionUser, db);
-
-  if(!userOperators){
-    throw("No operators for user")
-  }
-
-  const operatorNocs = userOperators.map(op => op.nocCode)
-
-  // fetch all OTP entries where operator is in user's org's operator list, and within the timestamp date range.
-  const otp_entries = await db.prisma.bODS_OTP.findMany({
-    where:
-    {
-      operator_noc:{
-        in: operatorNocs
-      },
-      AND:{
-        date:{
-          gte: fromTimestamp,
-          lte: toTimestamp
+              if (res.completed > 0) {
+                // is thie performance in minutes (time difference) value already in the array?
+                const index = performanceStopDistribution.findIndex(
+                  (d) => d.performanceInMins == avgDiff
+                );
+                if (index !== -1) {
+                  // it is in the array, add the completed stops to this noOfStops
+                  const element = performanceStopDistribution.find(
+                    (d) => d.performanceInMins == avgDiff
+                  );
+                  performanceStopDistribution.splice(index, 1);
+                  performanceStopDistribution.push({
+                    performanceInMins: avgDiff,
+                    noOfStops: element?.noOfStops
+                      ? element?.noOfStops + res.completed
+                      : res.completed,
+                  });
+                } else {
+                  // add a new entry for this new time difference
+                  performanceStopDistribution.push({
+                    performanceInMins: avgDiff,
+                    noOfStops: res.completed,
+                  });
+                }
+              }
+            }
+          });
         }
       }
     }
-  })
 
-  if(!otp_entries)
-  {
-      throw("No OTP entries")
-  }
+    const unsortedArray = performanceStopDistribution.map((ele) => ({
+      bucket: ele.performanceInMins,
+      frequency: ele.noOfStops,
+    }));
 
-  userOperators.forEach(operator => {
-    const operator_otp_entries = otp_entries.filter(o=>o.operator_noc == operator.nocCode)
-    const earlies = operator_otp_entries.filter(o => o.state == "early");
-    const lates = operator_otp_entries.filter(o => o.state == "late");
-    const onTimes = operator_otp_entries.filter(o => o.state == "ontime");
-    const completed = operator_otp_entries.filter(o => o.actual_departure_time != null);
+    const sortedArray = unsortedArray.sort((a, b) => a.bucket - b.bucket);
 
-    let opPerformance: OperatorPerformanceType = {
-      nocCode: operator.nocCode,
-      operatorId: operator.operatorId,
-      name: operator.name,
-      early: earlies.length,
-      late: lates.length,
-      onTime: onTimes.length,
-      averageDelay: 0, // TODO
-      scheduledDepartures: operator_otp_entries.length,
-      actualDepartures: completed.length
-    }
-
-    opPerformances.push(opPerformance)
-  });
-
-  return ({
-    items: opPerformances,
-    pageInfo: {
-      next: 1,
-      totalCount: opPerformances.length
-    }
-  })
-
-//   return ({
-//     items: [
-//         {
-//           __typename: 'OperatorPerformanceType',
-//           nocCode: 'A123',
-//           operatorId: 'op1',
-//           name: 'StageCoach',
-//           early: 120,
-//           onTime: 300,
-//           late: 80
-//         },
-//         {
-//           __typename: 'OperatorPerformanceType',
-//           nocCode: 'B456',
-//           operatorId: 'op2',
-//           name: 'Arriva',
-//           early: 150,
-//           onTime: 320,
-//           late: 50
-//         }
-//       ]
-// ,
-//   pageInfo: {
-//     next: 2,
-//     totalCount: 10
-//   }
-// });
+    return sortedArray;
   } catch (error) {
-    console.log(error)
+    logger.error(error);
     return null;
   }
+};
+
+export const getPunctualityTimeOfDay = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+    // of the 10:30 slot, how many were ontime/early/late example
+
+    const hoursOfDay: PunctualityTimeOfDayType[] = []
+
+    logger.debug("getPunctualityTimeOfDay");
+
+    // bucket is the number difference in the OTP table
+    // freq is the count of that difference
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      dayOfWeekFlags,
+      operatorIds,
+      granularity,
+      lineIds,
+    } = filters;
+
+    // fetch all otp records group by time difference
+    if (operatorIds.length == 1) {
+      logger.debug(
+        "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds)
+      );
+      const operators = await getOperators(sessionUser, db);
+
+      if (!operators) {
+        throw "No user operators";
+      }
+
+      const userOperatorIds = operators.map((o) => o.nocCode);
+
+      const operator_noc_to_filter = operatorIds[0];
+
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        let results;
+
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+
+        if (lineIds) {
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
+            by: ["departure_hour_only"],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          }) ?? [];
+        } else {
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
+            by: ["departure_hour_only"],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          }) ?? [];
+        }
+
+        results.forEach((res) => {
+          hoursOfDay.push({
+            timeOfDay: getStrHour(res.departure_hour_only),
+            early: res._sum.early_count,
+            onTime: res._sum.on_time_count,
+            late: res._sum.late_count
+          })
+        });
+     
+      }
+    }
+
+    return hoursOfDay;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getPunctualityTimeSeries = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      dayOfWeekFlags,
+      operatorIds,
+      granularity,
+      lineIds,
+    } = filters;
+
+    if (operatorIds.length == 1) {
+      //if (granularity == "day" && operatorIds.length == 1) {
+      // get an array of user's org's operator nocs.
+      const operators = await getOperators(sessionUser, db);
+      const isDayGranularity = granularity === 'day'
+      if (!operators) {
+        throw "No user operators";
+      }
+
+      const userOperatorIds = operators.map((o) => o.nocCode);
+
+      const operator_noc_to_filter = operatorIds[0];
+
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        const start = new Date(fromTimestamp);
+        const end = new Date(toTimestamp);
+        const days = getDaysInRange(start, end);
+
+        
+        let summary: PunctualityTimeSeriesType[] = []
+
+        let results;
+        const queryFields = {
+          _sum: {
+            early_count: true,
+            late_count: true,
+            on_time_count: true,
+          }
+        }
+        
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+        if (lineIds) {
+          results = await db.prisma.timetable_summary_service_tz.groupBy({
+            by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          }) ?? [];
+        } else {
+          results = await db.prisma.timetable_summary_operator_tz.groupBy({
+            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
+            where: where,
+            _sum: {
+              early_count: true,
+              late_count: true,
+              on_time_count: true,
+            },
+          }) ?? [];
+        }
+
+        results.forEach((result) => {
+          if (result._sum) {
+            summary.push({
+              ts: isDayGranularity
+                ? getFormattedDate(result.date_of_journey)
+                : getFormattedDate(result.departure_hour),
+              early: result._sum.early_count,
+              late: result._sum.late_count,
+              onTime: result._sum.on_time_count,
+            });
+          }
+        });
+
+        summary = summary.sort((a,b) => {
+          const firstTS = getDate(a.ts)
+          const secondTS = getDate(b.ts)
+          return firstTS.isAfter(secondTS) ? 1 : -1
+        });
+
+        return summary
+      }
+    }
+
+    return null;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+function getDaysInRange(startDate: Date, endDate: Date): Date[] {
+  const dates: Date[] = [];
+  let currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    dates.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
 }
 
-export const getPunctualityDayOfWeek = async (inputs, sessionUser:any, db: Context) => {
-
+export const getServicePunctuality = async (
+  inputs: ServicePerformanceInputType,
+  sessionUser: SessionUser,
+  db: Context
+): Promise<ServicePunctualityType[]> => {
   try {
-    if(!sessionUser){
-      throw ("Not authorized")
+    if (!sessionUser.user) {
+      throw "Not authorized";
     }
 
-    // get inputs
-    const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
+    const {
+      filters,
+      fromTimestamp,
+      order,
+      toTimestamp
+    } = inputs
 
-    // get an array of user's org's operator nocs.
-    const userOperators = await getOperators(sessionUser, db);
+    const timingPointsOnly = filters?.timingPointsOnly
+    const operatorIds = filters?.operatorIds?.filter(isDefined)
 
-    if(!userOperators){
-      throw("No operators for user")
-    }
+    const operators = await getOperators(sessionUser, db);
 
-    const operatorNocs : string[] = userOperators.map(op => op.nocCode)
+    const operatorNocs = operators?.map((op) => op.nocCode) ?? []
 
-    // fetch all OTP entries where operator is in user's org's operator list, and within the timestamp date range.
-    const otp_entries = await db.prisma.bODS_OTP.findMany({
-      where:
-      {
-        operator_noc:{
-          in: operatorNocs
+    let displayData = true
+    if (operatorIds) {
+      displayData = checkSubArray(operatorNocs, operatorIds)
+    } 
+
+    if(displayData) {
+      const where: Prisma.performance_statisticsWhereInput = {
+        operator_noc: {
+          in: operatorIds ? operatorIds : operatorNocs
         },
-        AND:{
-          date:{
-            gte: fromTimestamp,
-            lte: toTimestamp
+        date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
+      }
+  
+      if(timingPointsOnly) {
+        where.is_timing_point = timingPointsOnly
+      }
+  
+      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
+      const performanceMetrics = await db.prisma.performance_statistics.findMany({
+        where,
+        take: 3,
+        distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
+        orderBy: [{
+          on_time_percentage: orderFilter
+        },{
+          trend_percentage: orderFilter
+        }]
+      })
+  
+      return performanceMetrics.map((stats) =>({
+        nocCode: stats.operator_noc,
+        lineId: stats.noc_and_line_and_servicecode,
+        lineInfo: {
+          serviceId: stats.noc_and_line_and_servicecode,
+          serviceName: stats.service_name,
+          serviceNumber: stats.line_name
+        },
+        onTime: stats.on_time_count,
+        early: stats.early_count,
+        late: stats.late_count,
+        trend: {
+          onTime: stats.trend_on_time_count ?? 0,
+          late: stats.trend_late_count ?? 0,
+          early: stats.trend_early_count ?? 0
+        }
+      }))
+    }
+    
+    return []
+  } catch (error) {
+    logger.error(error);
+    return [];
+  }
+};
+
+export const getStopPerformance = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+    // for this operator & for this service, get all stops and their OTP stats
+
+    const { filters } = inputs;
+    const {
+      operatorIds,
+      lineIds,
+    } = filters;
+
+    let stopPerformances: StopPerformanceType[] = [];
+
+    // fetch all otp records group by time difference
+    if (operatorIds.length == 1) {
+      logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
+      const operators = await getOperators(sessionUser, db);
+
+      if (!operators) {
+        throw "No user operators";
+      }
+
+      const userOperatorIds = operators.map((o) => o.nocCode);
+
+      const operator_noc_to_filter = operatorIds[0];
+
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        // get a sum per day
+        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+        const results = await db.prisma.timetable_summary_stops_tz.groupBy({
+          by: ["stop_id", "common_name", "is_timing_point"],
+          where: where,
+          _sum: {
+            early_count: true,
+            late_count: true,
+            on_time_count: true,
+            scheduled: true,
+            completed: true,
+          },
+          _avg: {
+            avg_time_difference: true,
+          },
+        });
+
+        const stopIds: number[] = results.map((res) => res.stop_id)
+
+        const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+          where: {
+            id: {
+              in: stopIds
+            }
+          },
+          select: {
+            id: true,
+            longitude: true,
+            latitude: true,
+            atco_code: true,
+            locality:{
+              select: {
+                gazetteer_id: true,
+                name: true,
+                admin_area: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        results.forEach((res) => {
+          // avg delay
+          const timeInSeconds = res._avg.avg_time_difference
+            ? res._avg.avg_time_difference * 60
+            : 0;
+
+          const stop = stops.find((dbStop) => dbStop.id === res.stop_id)
+          stopPerformances.push({
+            lineId: lineIds[0],
+            stopId: `ST${stop?.atco_code}`,
+            stopInfo: {
+              //stopId: res.stop_id? res.stop_id : 0,
+              stopId: `ST${stop?.atco_code}`,
+              stopName: res.common_name ? res.common_name : "",
+              stopLocality: {
+                localityId: "",
+                localityName: stop?.locality?.name ?? "",
+                localityAreaId: "",
+                localityAreaName: stop?.locality?.admin_area.name ?? "",
+              },
+              sourceId: stop?.atco_code ?? "",
+              stopLocation: {
+                longitude: Number(stop?.longitude) ?? 0,
+                latitude: Number(stop?.latitude) ?? 0,
+              },
+            },
+            early: res._sum.early_count ? res._sum.early_count : 0,
+            late: res._sum.late_count ? res._sum.late_count : 0,
+            onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
+            actualDepartures: res._sum.completed ? res._sum.completed : 0,
+            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
+            averageDelay: timeInSeconds,
+            timingPoint: res.is_timing_point ? res.is_timing_point : false,
+          });
+        });
+      }
+    }
+
+    return stopPerformances;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getServicePerformance = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    let servicePunctualities: ServicePunctualityType[] = [];
+
+    // get all services for this operator
+    // get all journies for this service
+    // get all OTP stops for this journey
+
+    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const {
+      timingPointsOnly,
+      adminAreaIds,
+      startTime,
+      endTime,
+      maxDelay,
+      minDelay,
+      dayOfWeekFlags,
+      operatorIds,
+      granularity,
+    } = filters;
+
+    if (operatorIds.length == 1) {
+      // get an array of user's org's operator nocs.
+      const operators = await getOperators(sessionUser, db);
+
+      if (!operators) {
+        throw "No user operators";
+      }
+
+      const userOperatorIds = operators.map((o) => o.nocCode);
+
+      const operator_noc_to_filter = operatorIds[0];
+      const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+
+      if (userOperatorIds.includes(operator_noc_to_filter)) {
+        // get a sum per day
+        const results = await db.prisma.timetable_summary_service_tz.groupBy({
+          by: ["noc_and_line_and_servicecode", "line_name"],
+          where: where,
+          _sum: {
+            early_count: true,
+            late_count: true,
+            on_time_count: true,
+            scheduled: true,
+            completed: true,
+          },
+          _avg: {
+            avg_time_difference: true,
+          },
+        });
+
+        const noc_and_lines = results.map(result => result.noc_and_line_and_servicecode)
+
+        const services = await db.prisma.expected_services.findMany({
+          where: {
+            noc_and_line_and_servicecode: {
+              in: noc_and_lines
+            }
+          }
+        })
+
+        results.forEach((res) => {
+          const avgDelay = res._avg.avg_time_difference
+            ? res._avg.avg_time_difference * 60
+            : 0;
+
+          const service = services.find(serv => serv.noc_and_line_and_servicecode === res.noc_and_line_and_servicecode)
+          
+          servicePunctualities.push({
+            lineId: res.noc_and_line_and_servicecode,
+            early: res._sum.early_count ? res._sum.early_count : 0,
+            late: res._sum.late_count ? res._sum.late_count : 0,
+            onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
+            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
+            actualDepartures: res._sum.completed ? res._sum.completed : 0,
+            averageDelay: avgDelay,
+            lineInfo: {
+              serviceId: res.noc_and_line_and_servicecode,
+              serviceNumber: res.line_name,
+              serviceName: service?.service_name ?? "",
+            },
+            rank: 1,
+          });
+        });
+      }
+    }
+
+    return servicePunctualities;
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+// -> OPERATOR PAGE
+export const getFrequentServices = async (
+  operatorId,
+  fromTimestamp,
+  toTimestamp,
+  sessionUser: SessionUser,
+  db: Context
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw "Not authorized";
+    }
+
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw "No user operators";
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    if(userOperatorIds.includes(operatorId)){
+      const results = await db.prisma.timetable_summary_service_tz.findMany({
+        where: {
+          operator_noc: operatorId,
+          date_of_journey: {
+            gt: new Date(fromTimestamp),
+            lte: new Date(toTimestamp)
+          },
+          headway_valid: true
+        },
+        select: {
+          noc_and_line_and_servicecode: true
+        },
+        distinct:['noc_and_line_and_servicecode']
+      })
+      
+      return results.map(result => ({
+        serviceId: result.noc_and_line_and_servicecode
+      }));
+    }
+
+    return []
+    
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getFrequentServiceInfo = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw 'No user operators';
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+    const results = await db.prisma.timetable_summary_stops_tz.groupBy(
+      {
+        by: ['departure_hour'],
+        where: where,
+        _sum: {
+          scheduled: true,
+          actual_headway: true,
+        },
+      },
+    );
+
+    let totalHours = 0;
+    let actualHours = 0;
+
+    results.map((result) => {
+      if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
+
+      if (result._sum.actual_headway && result._sum.actual_headway > 0)
+        actualHours += 1;
+    });
+
+    return {
+      numHours: actualHours,
+      totalHours: totalHours,
+    };
+    
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getHeadwayDayOfWeek = async (
+  lineId,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+    return [
+      {
+        dayOfWeek: 1,
+        actualWaitTime: 5.0,
+        excessWaitTime: 0.5,
+        scheduledWaitTime: 4.5,
+      },
+      {
+        dayOfWeek: 2,
+        actualWaitTime: 6.0,
+        excessWaitTime: 0.6,
+        scheduledWaitTime: 5.4,
+      },
+    ];
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getHeadwayOverview = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw 'No user operators';
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+    where.headway_stops_count = {
+      gt: 0
+    }
+
+    const results = await db.prisma.timetable_summary_stops_tz.findMany(
+      {
+        where: where,
+        select: {
+          headway_stops_count: true,
+          actual_headway: true,
+          expected_headway: true,
+          excess_wait_time: true,
+        },
+      },
+    );
+
+    let headway = {
+      actualWaitTime: 0,
+      scheduledWaitTime: 0,
+      excessWaitTime: 0,
+      headwayCount: 0
+    }
+
+    headway = results.reduce((acc, currentHeadway) => {
+      acc.actualWaitTime +=
+        currentHeadway.actual_headway * currentHeadway.headway_stops_count;
+      acc.scheduledWaitTime +=
+        currentHeadway.expected_headway * currentHeadway.headway_stops_count;
+      acc.excessWaitTime +=
+        currentHeadway.excess_wait_time * currentHeadway.headway_stops_count;
+      acc.headwayCount += currentHeadway.headway_stops_count
+
+      return acc
+    }, headway);
+
+    return {
+      actualWaitTime: headway.actualWaitTime / (headway.headwayCount * 60),
+      scheduledWaitTime: headway.scheduledWaitTime / (headway.headwayCount * 60),
+      excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
+    }
+  
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getHeadwayTimeOfDay = async (
+  lineId,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+    return [
+      {
+        timeOfDay: '08:00',
+        actualWaitTime: 4.0,
+        excessWaitTime: 0.4,
+        scheduledWaitTime: 3.6,
+      },
+      {
+        timeOfDay: '09:00',
+        actualWaitTime: 3.8,
+        excessWaitTime: 0.2,
+        scheduledWaitTime: 3.6,
+      },
+    ];
+  } catch (error) {
+    logger.error(error);
+    return null;
+  }
+};
+
+export const getHeadwayTimeSeries = async (
+  inputs,
+  sessionUser: SessionUser,
+  db: Context,
+) => {
+  try {
+    if (!sessionUser.user) {
+      throw 'Not authorized';
+    }
+
+    const { filters } = inputs;
+    const { granularity } = filters;
+
+    const isDayGranularity = granularity === 'day'
+
+    const operators = await getOperators(sessionUser, db);
+
+    if (!operators) {
+      throw 'No user operators';
+    }
+
+    const userOperatorIds = operators.map((o) => o.nocCode);
+
+    const where: Prisma.timetable_summary_stops_tzWhereInput =
+      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+    where.headway_stops_count = {
+      gt: 0
+    }
+
+    const results = await db.prisma.timetable_summary_stops_tz.findMany({
+      where: where,
+      select: {
+        date_of_journey: true,
+        departure_hour: true,
+        headway_stops_count: true,
+        actual_headway: true,
+        expected_headway: true,
+        excess_wait_time: true,
+      },
+    })
+
+    let headwayMap: {
+      [key: string]: {
+        actual_headway: number,
+        expected_headway: number,
+        excess_wait_time: number,
+        headway_stops_count: number
+      }
+    } = {}
+    results.map(result => {
+
+      if (result.departure_hour){
+        const formatterdeparture = isDayGranularity
+          ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
+          : getFormattedDate(result.departure_hour);
+        const headwayData = headwayMap[formatterdeparture]
+
+        if(headwayData){
+          headwayData.actual_headway = headwayData.actual_headway + result.actual_headway * result.headway_stops_count
+          headwayData.expected_headway = headwayData.expected_headway + result.expected_headway * result.headway_stops_count
+          headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time * result.headway_stops_count
+          headwayData.headway_stops_count += result.headway_stops_count
+        } else {
+          headwayMap[formatterdeparture] = {
+            actual_headway: result.actual_headway * result.headway_stops_count,
+            expected_headway: result.expected_headway * result.headway_stops_count,
+            excess_wait_time: result.excess_wait_time * result.headway_stops_count,
+            headway_stops_count: result.headway_stops_count
           }
         }
       }
     })
 
-    if(!otp_entries)
-    {
-        throw("No OTP entries")
-    }
+    const returnHeadways: HeadwayTimeSeriesType[]  = []
 
-    let punctualityDaysOfWeek;
-    for (let index = 1; index < 8; index++) {
-      const day_otp_entries = otp_entries.filter(o=>Number(o.day_of_week)==index)
-      const earlies = day_otp_entries.filter(o => o.state == "early");
-      const lates = day_otp_entries.filter(o => o.state == "late");
-      const onTimes = day_otp_entries.filter(o => o.state == "ontime");
-
-      punctualityDaysOfWeek.push({
-        dayOfWeek: index, 
-        onTime: onTimes.length, 
-        early: earlies.length, 
-        late: lates.length
+    for (const [departure_hour, headway] of Object.entries(headwayMap)){
+      returnHeadways.push({
+        ts: departure_hour,
+        actualWaitTime: headway.actual_headway / (headway.headway_stops_count * 60),
+        scheduledWaitTime: headway.expected_headway / (headway.headway_stops_count * 60),
+        excessWaitTime: headway.excess_wait_time / (headway.headway_stops_count * 60)
       })
     }
 
-    return punctualityDaysOfWeek;
-
-    // return [
-    //   { dayOfWeek: 1, onTime: 130, early: 4, late: 8 },
-    //   { dayOfWeek: 2, onTime: 140, early: 5, late: 7 }
-    // ];
-
+    return returnHeadways.sort((a,b) => {
+      if(getDate(a.ts).isBefore(getDate(b.ts)))
+        return -1
+      return 1
+    })
+     
   } catch (error) {
-    console.log(error)
+    logger.error(error);
     return null;
   }
-}
+};
 
-export const getPunctualityOverview = async (inputs, sessionUser:any, db: Context) => {
+export const getAdminAreas = async (
+  adminAreaIds: String[],
+  sessionUser: any,
+  db: Context
+) => {
   try {
-    if(!sessionUser){
-      throw ("Not authorized")
+    if (!sessionUser.user) {
+      throw "Not authorized";
     }
 
-    // get inputs
-    const {fromTimestamp, toTimestamp, filters, paging, sortBy} = inputs;
-    const {timingPointsOnly} = filters;
+    const operators = await getOperators(sessionUser, db);
 
-    // get an array of user's org's operator nocs.
-    const userOperators = await getOperators(sessionUser, db);
-
-    if(!userOperators){
-      throw("No operators for user")
+    if (!operators) {
+      throw "No operators";
     }
+    const userOperatorIds = operators.map((o) => o.nocCode);
 
-    const operatorNocs : string[] = userOperators.map(op => op.nocCode)
-
-    // fetch all OTP entries where operator is in user's org's operator list, and within the timestamp date range.
-    const otp_entries = await db.prisma.bODS_OTP.findMany({
-      where:
-      {
-        operator_noc:{
-          in: operatorNocs
+    const adminAreaRecords = await db.prisma.noc_adminarea.findMany({
+      where: {
+        national_operator_code: {
+          in: userOperatorIds,
         },
-        AND:{
-          date:{
-            gte: fromTimestamp,
-            lte: toTimestamp
-          },
-          // filters:  All stops/ Timing points (if all stops then dont send filter) == isTimingPoint = true
-          ...(timingPointsOnly ? {is_timing_point: timingPointsOnly} : {})
-        }
-      }
-    })
-
-    if(!otp_entries)
-    {
-        throw("No OTP entries")
-    }
-
-  // filters: areas: adminAreaIds: ["id1", "id2"]
-  // filters: onTimeMaxMinutes: int, onTimeMinMinutes: int
-  // filters: dayOfWeekFlags -> only show for certain days of week
-
-    const earlies = otp_entries.filter(o => o.state == "early");
-    const lates = otp_entries.filter(o => o.state == "late");
-    const onTimes = otp_entries.filter(o => o.state == "ontime");
-    const completed = otp_entries.filter(o => o.actual_departure_time != null);
-    const avgDeviation = 0;
-
-    return ({
-      __typename: "PunctualityTotalsType",
-      early: earlies.length,
-      late: lates.length,
-      onTime: onTimes.length,
-      scheduled: otp_entries.length,
-      completed: completed.length,
-      averageDeviation: avgDeviation
+      },
+      select: {
+        adminarea_id: true,
+      },
     });
 
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getPunctualityTimeOfDay = async (inputs, sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-      // of the 10:30 slot, how many were ontime/early/late example
-  return [
-    { timeOfDay: "08:00", onTime: 120, early: 5, late: 10 },
-    { timeOfDay: "09:00", onTime: 110, early: 6, late: 9 }
-  ];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getPunctualityTimeSeries = async (inputs, sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-        // get data
-    // filter data
-    // sort data
-
-    // count where state is X (ontime/early/late) -> filter on journey -> stop -> expected operator AND this is per day
-
-  return [
-    { early: 20, late: 15, onTime: 165, ts: '2024-04-10T12:00:00Z' },
-    { early: 25, late: 10, onTime: 165, ts: '2024-04-11T12:00:00Z' }];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getServicePunctuality = async (sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return [
-      {
-        early: 50,
-        late: 5,
-        lineId: "line201",
-        nocCode: "NC101",
-        onTime: 145,
-        operatorId: "operator101",
-        rank: 1.0,
-        trend: {
-          early: 55,
-          late: 3,
-          onTime: 142,
-          lineId: "line201",
-          nocCode: "NC101",
-          operatorId: "operator101",
-          rank: 2.0,
-          trend: null
-        }
-      }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getStopPerformance = async (inputs, sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-      // for this operator & for this service, get all stops and their OTP stats 
-
-  return [
-    {
-      lineId: "L100",
-      stopId: "S100",
-      early: 50,
-      onTime: 250,
-      late: 20,
-      averageDelay: 1.5,
-      scheduledDepartures: 320,
-      actualDepartures: 310,
-      timingPoint: true,
-      stopIndex: 1,
-      stopInfo: { // naptan data
-        stopId: "S100",
-        sourceId: "Source1", // naptan data
-        stopName: "Central Station", // naptan data
-        stopLocation: {
-          latitude: 34.0522, // naptan data
-          longitude: -118.2437 // naptan data
+    if (adminAreaRecords) {
+      const adminareaIds = adminAreaRecords.map((a) => a.adminarea_id);
+      const adminAreas = await db.prisma.naptan_adminarea_with_shape.findMany({
+        where: {
+          id: {
+            in: adminareaIds,
+          },
         },
-        stopLocality: {
-          localityId: "Loc100", // naptan data
-          localityName: "Downtown", // naptan data
-          localityAreaId: "Area100", // naptan data
-          localityAreaName: "Central Area" // naptan data
-        }
+      });
+
+      if (!adminAreas) {
+        throw "No admin areas found";
       }
+
+      const ret = adminAreas.map((adminArea) => {
+        return {
+          adminAreaId: String(adminArea.id),
+          adminAreaName: adminArea.name,
+          shape: adminArea.st_asgeojson,
+        };
+      });
+
+      return ret;
     }
-  ];
+
+    return null;
   } catch (error) {
-    console.log(error)
+    console.error(error);
     return null;
   }
-}
+};
 
-export const getServicePerformance = async (inputs, sessionUser:any, db: Context) => {
+const getPrismaFiltersForOTPQuery = (
+  inputs,
+  userOperatorNocList: string[],
+  isThreshold?: boolean,
+) => {
+  const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+  const {
+    timingPointsOnly,
+    adminAreaIds,
+    operatorIds,
+    operatorId,
+    startTime,
+    endTime,
+    maxDelay,
+    minDelay,
+    lineIds,
+    lineId,
+    dayOfWeekFlags,
+  } = filters;
 
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-     // "servicePerformance": [
-  //   {
-  //       "lineId": "L100",
-  //       "lineInfo": {
-  //           "serviceId": "123",
-  //           "serviceName": "Downtown Rapid",
-  //           "serviceNumber": "100",
-  //           "__typename": "ServiceInfoType"
-  //       },
-  //       "early": 50,
-  //       "onTime": 250,
-  //       "late": 20,
-  //       "averageDelay": 1.5,
-  //       "scheduledDepartures": 320,
-  //       "actualDepartures": 310,
-  //       "__typename": "ServicePerformanceType"
-  //   }
-  // ]
-
-    // get all services for this operator
-      // get all journies for this service
-        // get all OTP stops for this journey
-
-  return [
-    {
-      lineId: "L100",
-      early: 50,
-      onTime: 250,
-      late: 20,
-      averageDelay: 1.5,
-      scheduledDepartures: 320,
-      actualDepartures: 310,
-      lineInfo: {
-        serviceId: "123",
-        serviceNumber: "100",
-        serviceName: "Downtown Rapid"
-      },
-      operatorInfo: {
-        operatorName: "StageCoach",
-        nocCode: "A123",
-        operatorId: "op1",
-      }
-    }
-  ];
-  } catch (error) {
-    console.log(error)
-    return null;
+  // filter list of users' nocs to either operator nocs from filter OR full list
+  let nocListToFilter: string[] = [];
+  if (operatorIds && operatorIds.length > 0) {
+    nocListToFilter = userOperatorNocList.filter((o) =>
+      operatorIds.includes(o),
+    );
+  } else if(operatorId && userOperatorNocList.includes(operatorId)){
+    nocListToFilter = [operatorId]
+  } else {
+    nocListToFilter = userOperatorNocList;
   }
-}
 
-export const getFrequentServices = async ( operatorId, fromTimestamp, toTimestamp, sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return [
-      {
-        serviceId: "Service123",
-        serviceInfo: {
-          serviceId: "Service123",
-          serviceName: "Downtown Express",
-          serviceNumber: "EXP123"
-        }
-      },
-      {
-        serviceId: "Service456",
-        serviceInfo: {
-          serviceId: "Service456",
-          serviceName: "Uptown Loop",
-          serviceNumber: "LOOP456"
-        }
-      }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
+  let dayOfWeekNumbers: Number[] = [];
+  if (dayOfWeekFlags) {
+    dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
-}
 
-export const getFrequentServiceInfo = async (inputs, sessionUser:any, db: Context) => {
+  // parse startime and endtime minutes/hours
+  let start = new Date();
+  let end = new Date();
 
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return {
-      numHours: 150,
-      totalHours: 200
-    };
-  } catch (error) {
-    console.log(error)
-    return null;
+  // date_of_journey - add an hour to from timestamp to prevent single day condition issues
+  let fromMlSeconds = new Date(fromTimestamp).getTime();
+  var addMlSeconds = 60 * 60 * 1000;
+  var dateOfJourneyFromDateTime = getDate(
+    new Date(fromMlSeconds + addMlSeconds),
+  ).tz('Europe/London');
+  var dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
+    'Europe/London',
+  );
+
+  if (startTime && startTime !== '00:00') {
+    const [hours, minutes, seconds] = startTime.split(':').map(Number);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('hour', hours);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
+      'minute',
+      minutes,
+    );
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('second', 0);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set('millisecond', 0);
   }
-}
 
-export const getHeadwayDayOfWeek = async (lineId, sessionUser:any, db: Context) => {
-
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return [
-      { dayOfWeek: 1, actualWaitTime: 5.0, excessWaitTime: 0.5, scheduledWaitTime: 4.5 },
-      { dayOfWeek: 2, actualWaitTime: 6.0, excessWaitTime: 0.6, scheduledWaitTime: 5.4 }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
+  if (endTime) {
+    const [hours, minutes, seconds] = endTime.split(':').map(Number);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('hour', hours);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('minute', minutes);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('second', 0);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set('millisecond', 0);
   }
-}
 
-export const getHeadwayOverview = async (inputs, sessionUser:any, db: Context) => {
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-      // filtered on service id and operator id
+  // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
+  const maxLateNumber = maxDelay ? maxDelay : 0;
+  const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
-  // per service - headway
+  const isServiceGranularity = lineIds && lineIds.length > 0;
 
   return {
-    actualWaitTime: 5.5,
-    scheduledWaitTime: 3.2,
-    excessWaitTime: 2.3
+    operator_noc: { in: nocListToFilter },
+    date_of_journey: {
+      gte: dateOfJourneyFromDateTime.toDate(),
+      lte: new Date(toTimestamp),
+    },
+    ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
+    ...(dayOfWeekFlags
+      ? { day_of_week: { in: dayOfWeekNumbers as number[] } }
+      : {}),
+    ...(startTime && endTime
+      ? isThreshold
+        ? {
+            departure_hour: {
+              gte: dateOfJourneyFromDateTime.toDate(),
+              lte: dateOfJourneyToDateTime.toDate(),
+            },
+          }
+        : {
+            departure_hour_only: {
+              gte: dateOfJourneyFromDateTime.toDate(),
+              lte: dateOfJourneyToDateTime.toDate(),
+            },
+          }
+      : {
+          ...(startTime
+            ? isThreshold
+              ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
+              : {
+                  departure_hour_only: {
+                    gte: dateOfJourneyFromDateTime.toDate(),
+                  },
+                }
+            : {
+                ...(endTime
+                  ? isThreshold
+                    ? {
+                        departure_hour: {
+                          lte: dateOfJourneyToDateTime.toDate(),
+                        },
+                      }
+                    : {
+                        departure_hour_only: {
+                          lte: dateOfJourneyToDateTime.toDate(),
+                        },
+                      }
+                  : {}),
+              }),
+        }),
+    ...(maxEarlyNumber > 0 && !isServiceGranularity
+      ? {
+          max_early: { lte: maxEarlyNumber },
+        }
+      : {}),
+    ...(maxLateNumber > 0 && !isServiceGranularity
+      ? {
+          max_late: { lte: maxLateNumber },
+        }
+      : {}),
+    ...(lineIds
+      ? {
+          noc_and_line_and_servicecode: {
+            in: lineIds,
+          },
+        }
+      : {}),
+    ...(lineId
+      ? {
+          noc_and_line_and_servicecode: lineId,
+        }
+      : {}),
+    ...(adminAreaIds && adminAreaIds.length > 0
+      ? {
+          admin_areas: {
+            hasEvery: adminAreaIds.map(Number),
+          },
+        }
+      : {}),
   };
-
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getHeadwayTimeOfDay = async (lineId, sessionUser:any, db: Context) => {
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return [
-      { timeOfDay: "08:00", actualWaitTime: 4.0, excessWaitTime: 0.4, scheduledWaitTime: 3.6 },
-      { timeOfDay: "09:00", actualWaitTime: 3.8, excessWaitTime: 0.2, scheduledWaitTime: 3.6 }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
-
-export const getHeadwayTimeSeries = async (lineId, sessionUser:any, db: Context) => {
-  try {
-    if(!sessionUser){
-      throw ("Not authorized")
-    }
-    return [
-      { ts: "2024-04-10T12:00:00Z", actualWaitTime: 5.2, excessWaitTime: 0.5, scheduledWaitTime: 4.7 },
-      { ts: "2024-04-11T12:00:00Z", actualWaitTime: 5.1, excessWaitTime: 0.4, scheduledWaitTime: 4.7 }
-    ];
-  } catch (error) {
-    console.log(error)
-    return null;
-  }
-}
+};

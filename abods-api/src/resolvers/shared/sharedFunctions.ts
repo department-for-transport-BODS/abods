@@ -15,7 +15,7 @@ const adminAreas = [
 
 export const getOrganisation = async (id, sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 
@@ -72,13 +72,13 @@ export const getApiInfo = async (db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
 }
 
 // Summary: fetch roles
 export const getRoles = async (sessionUser: any, db: Context) => {
   try {
-    if(!sessionUser){
+    if(!sessionUser.user){
       throw ("Not authorized")
     }
 
@@ -97,7 +97,7 @@ export const getRoles = async (sessionUser: any, db: Context) => {
   } catch (error) {
     console.error(error)
     return null;
-  }
+  } 
 }
 
 export const mapRoleToRoleType = (role: Role): RoleType | undefined => {

@@ -1,5 +1,5 @@
 <app-tabs>
-  <!-- <app-tab (opened)="changeOrder(RankingOrder.Descending)" tabTitle="Top 3"></app-tab>
+  <app-tab (opened)="changeOrder(RankingOrder.Descending)" tabTitle="Top 3"></app-tab>
   <app-tab (opened)="changeOrder(RankingOrder.Ascending)" tabTitle="Bottom 3"></app-tab>
   <ng-container *ngIf="loaded; else spinner">
     <table *ngIf="rows.length > 0; else noData" class="ranking-table__data">
@@ -40,5 +40,5 @@
   </ng-container>
   <ng-template #spinner>
     <div class="ranking-table__loading"><app-spinner [vCentre]="true" size="small"></app-spinner></div>
-  </ng-template> -->
+  </ng-template>
 </app-tabs>
