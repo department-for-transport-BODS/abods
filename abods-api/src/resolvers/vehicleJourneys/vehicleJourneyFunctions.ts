@@ -154,62 +154,66 @@ export const getTimetableJourney = async (
     },
   });
 
-  return journeys.map((journey) => {
-    const startTime = getFormattedDate(
-      journey.expected_journeys?.expected_journey_start,
-    );
+  return journeys
+    .sort((a, b) => a.stop_index - b.stop_index)
+    .map((journey) => {
+      const startTime = getFormattedDate(
+        journey.expected_journeys?.expected_journey_start,
+      );
 
-    const stopScheduledTime = getFormattedDate(journey.expected_departure_time);
+      const stopScheduledTime = getFormattedDate(
+        journey.expected_departure_time,
+      );
 
-    return {
-      ts: '',
-      vehicleId: 'N/A',
-      vehicleJourneyId: journeyId,
-      servicePatternId: journey.vehiclejourney_id.toString(),
-      isTimingPoint: journey.is_timing_point,
-      delay: 0,
-      startTime: startTime.toString(),
-      scheduledDeparture: stopScheduledTime.toString(),
-      lat: Number(journey.stop_latitude),
-      lon: Number(journey.stop_longitude),
-      journeyStatus: GpsFeedJourneyStatus.Unknown,
-      operatorInfo: {
-        operatorId:
-          journey.expected_journeys.expected_service.expected_operator
-            .operator_noc ?? '',
-        operatorName:
-          journey.expected_journeys.expected_service.expected_operator
-            .operator_name ?? '',
-        nocCode:
-          journey.expected_journeys.expected_service.expected_operator
-            .operator_noc ?? '',
-      },
-      serviceInfo: {
-        serviceId:
-          journey.expected_journeys.expected_service
-            .noc_and_line_and_servicecode ?? '',
-        serviceNumber:
-          journey.expected_journeys.expected_service.line_name ?? '',
-        serviceName:
-          journey.expected_journeys.expected_service.service_name ?? '',
-      },
-      previousStopInfo: {
-        stopId: '',
-        stopName: '',
-        sourceId: '',
-        stopLocality: {
-          localityAreaId: '',
-          localityAreaName: '',
-          localityId: '',
-          localityName: '',
+      return {
+        ts: '',
+        vehicleId: 'N/A',
+        vehicleJourneyId: journeyId,
+        servicePatternId: journey.vehiclejourney_id.toString(),
+        isTimingPoint: journey.is_timing_point,
+        delay: 0,
+        startTime: startTime.toString(),
+        scheduledDeparture: stopScheduledTime.toString(),
+        lat: Number(journey.stop_latitude),
+        lon: Number(journey.stop_longitude),
+        journeyStatus: GpsFeedJourneyStatus.Unknown,
+        operatorInfo: {
+          operatorId:
+            journey.expected_journeys.expected_service.expected_operator
+              .operator_noc ?? '',
+          operatorName:
+            journey.expected_journeys.expected_service.expected_operator
+              .operator_name ?? '',
+          nocCode:
+            journey.expected_journeys.expected_service.expected_operator
+              .operator_noc ?? '',
         },
-        stopLocation: {
-          latitude: Number(journey.stop_latitude),
-          longitude: Number(journey.stop_longitude),
+        serviceInfo: {
+          serviceId:
+            journey.expected_journeys.expected_service
+              .noc_and_line_and_servicecode ?? '',
+          serviceNumber:
+            journey.expected_journeys.expected_service.line_name ?? '',
+          serviceName:
+            journey.expected_journeys.expected_service.service_name ?? '',
         },
-      },
-    };
-  });
+        previousStopInfo: {
+          stopId: '',
+          stopName: '',
+          sourceId: '',
+          stopLocality: {
+            localityAreaId: '',
+            localityAreaName: '',
+            localityId: '',
+            localityName: '',
+          },
+          stopLocation: {
+            latitude: Number(journey.stop_latitude),
+            longitude: Number(journey.stop_longitude),
+          },
+        },
+      };
+    });
 };
 
 export const getJourney = async (
