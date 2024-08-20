@@ -1,0 +1,33 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.header {
+  border-bottom: 10px solid $govuk-brand-colour;
+  &__logo {
+    width: auto;
+  }
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    @include govuk-clearfix();
+    &:after {
+      display: none;
+    }
+  }
+  &__help-icon {
+    color: govuk-colour('white');
+    width: 24px;
+  }
+  &__help-link {
+    @include bp($to-desktop) {
+      display: none;
+    }
+    @include govuk-font(19);
+    margin-bottom: 10px;
+    &:focus {
+      .header__help-icon {
+        color: govuk-colour('black');
+      }
+    }
+  }
+}

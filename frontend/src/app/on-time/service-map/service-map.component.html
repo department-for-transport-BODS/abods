@@ -1,0 +1,175 @@
+<div *ngIf="isLoading && !errored" class="map__loading">
+  <app-spinner></app-spinner>
+</div>
+<mgl-map
+  [style]="mapboxStyle"
+  [fitBounds]="bounds"
+  [fitBoundsOptions]="{ padding: 50, duration: 0 }"
+  (mapLoad)="map = $event"
+  [appAutoResizeMap]="map"
+>
+  <mgl-geojson-source
+    *ngIf="servicePatterns"
+    id="patterns"
+    [data]="servicePatterns"
+    [generateId]="true"
+  ></mgl-geojson-source>
+  <mgl-geojson-source *ngIf="stops" id="stops" [data]="stops"></mgl-geojson-source>
+  <mgl-layer
+    *ngIf="servicePatterns"
+    id="service-pattern"
+    type="line"
+    [paint]="{
+      'line-color': '#5694ca',
+      'line-width': 3,
+      'line-dasharray': ['case', ['boolean', ['get', 'dashedLine'], true], ['literal', [0.8, 1.6]], ['literal', [1]]]
+    }"
+    [layout]="{
+      'line-cap': 'round',
+      'line-join': 'round'
+    }"
+    source="patterns"
+    before="road-label"
+  >
+  </mgl-layer>
+  <mgl-layer
+    *ngIf="servicePatterns"
+    id="direction"
+    type="symbol"
+    [layout]="{
+      'icon-image': 'map-chevron',
+      'symbol-placement': 'line',
+      'symbol-spacing': 150
+    }"
+    source="patterns"
+  ></mgl-layer>
+  <mgl-layer
+    *ngIf="stops"
+    id="stop-names"
+    type="symbol"
+    [minzoom]="14"
+    [filter]="['has', 'stopName']"
+    [layout]="{
+      'text-field': '{stopName}',
+      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+      'text-size': 12,
+      'text-offset': [0, 1.2],
+      'text-allow-overlap': true,
+      'text-anchor': 'top'
+    }"
+    [paint]="{ 'text-color': '#747b7b', 'text-halo-color': '#ffffff', 'text-halo-width': 1, 'text-halo-blur': 1 }"
+    source="stops"
+  ></mgl-layer>
+  <ng-container *ngIf="timingPointsOnly && !isLoading">
+    <mgl-layer
+      *ngIf="stops"
+      id="stop-markers-no-data"
+      type="circle"
+      [filter]="isNoData"
+      [paint]="{
+        'circle-radius': ['interpolate', ['exponential', 0.8], ['zoom'], 11, 2, 14, 6],
+        'circle-color': '#b1b4b6',
+        'circle-stroke-width': ['interpolate', ['exponential', 0.5], ['zoom'], 11, ['case', isNoData, 1, 2], 14, 3],
+        'circle-stroke-color': '#ffffff'
+      }"
+      source="stops"
+      (layerMouseMove)="setHoveredStop($event)"
+      (layerMouseLeave)="clearHoveredStop()"
+    ></mgl-layer>
+  </ng-container>
+  <ng-container *ngIf="!timingPointsOnly && !isLoading">
+    <mgl-layer
+      *ngIf="stops"
+      id="stop-markers-no-data"
+      type="circle"
+      [filter]="isNoData"
+      [paint]="{
+        'circle-radius': ['interpolate', ['exponential', 0.8], ['zoom'], 11, 4, 14, 8],
+        'circle-color': '#b1b4b6',
+        'circle-stroke-width': ['interpolate', ['exponential', 0.5], ['zoom'], 11, 2, 14, 3],
+        'circle-stroke-color': '#ffffff'
+      }"
+      source="stops"
+      (layerMouseMove)="setHoveredStop($event)"
+      (layerMouseLeave)="clearHoveredStop()"
+    ></mgl-layer>
+    <mgl-layer
+      *ngIf="stops"
+      id="stop-markers"
+      type="circle"
+      [filter]="['all', ['has', 'onTime'], ['!', ['get', 'timingPoint']]]"
+      [paint]="{
+        'circle-radius': ['interpolate', ['exponential', 0.8], ['zoom'], 11, 4, 14, 8],
+        'circle-color': [
+          'case',
+          ['>', onTimePercentage, 80],
+          '#28a197',
+          ['all', ['>=', onTimePercentage, 60], ['<=', onTimePercentage, 80]],
+          '#ffdd00',
+          ['<', onTimePercentage, 60],
+          '#d4351c',
+          '#b1b4b6'
+        ],
+        'circle-stroke-width': ['interpolate', ['exponential', 0.5], ['zoom'], 11, 2, 14, 3],
+        'circle-stroke-color': '#ffffff'
+      }"
+      source="stops"
+      (layerMouseMove)="setHoveredStop($event)"
+      (layerMouseLeave)="clearHoveredStop()"
+    ></mgl-layer>
+  </ng-container>
+  <mgl-layer
+    *ngIf="stops && !isLoading"
+    id="timing-points"
+    type="symbol"
+    [filter]="['get', 'timingPoint']"
+    [layout]="{
+      'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 11, 0.8, 14, 1],
+      'icon-image': [
+        'case',
+        ['>', onTimePercentage, 80],
+        'otp-timing-map-turquoise',
+        ['all', ['>=', onTimePercentage, 60], ['<=', onTimePercentage, 80]],
+        'otp-timing-map-yellow',
+        ['<', onTimePercentage, 60],
+        'otp-timing-map-red',
+        'timing-no-data-map'
+      ],
+      'symbol-placement': 'point',
+      'icon-allow-overlap': true
+    }"
+    source="stops"
+    (layerMouseMove)="setHoveredStop($event)"
+    (layerMouseLeave)="clearHoveredStop()"
+  ></mgl-layer>
+  <mgl-control position="top-left">
+    <div class="map__legend map__legend">
+      <span class="map__dot map__dot--high"></span>
+      <span>> 80% on-time</span>
+      <span class="map__dot map__dot--med"></span>
+      <span>60 - 80% on-time</span>
+      <span class="map__dot map__dot--low"></span>
+      <span>< 60% on-time</span>
+      <span class="map__dot map__dot--no-data"></span>
+      <span>No data</span>
+    </div>
+  </mgl-control>
+  <mgl-popup
+    *ngIf="popupInfo"
+    [lngLat]="popupInfo.position"
+    [closeButton]="false"
+    [closeOnClick]="false"
+    className="gds-popup"
+  >
+    <div>
+      <div>
+        <strong>{{ stopInfo?.stop?.stopName }}</strong>
+      </div>
+      <div>{{ stopInfo?.stop?.stopLocality }}</div>
+      <div>
+        <span>{{ stopInfo?.stop?.naptan }}</span>
+      </div>
+    </div>
+  </mgl-popup>
+  <mgl-control mglNavigation></mgl-control>
+</mgl-map>

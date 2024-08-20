@@ -1,0 +1,26 @@
+@import 'src/assets/styles/settings/settings.scss';
+@import 'src/assets/styles/helpers/helpers.scss';
+:host {
+  margin-bottom: 0 !important;
+}
+.actionlist-action {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 10px;
+  @include govuk-font(19);
+  color: inherit;
+  text-decoration: none;
+  &:hover:not(.actionlist-action--disabled) {
+    background-color: govuk-colour('light-grey');
+  }
+  &:focus-visible:not(.actionlist-action--disabled) {
+    outline: 0;
+    background-color: govuk-colour('yellow');
+    box-shadow: 0 -2px govuk-colour('yellow');
+  }
+  &--disabled {
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}

@@ -1,0 +1,133 @@
+<form (submit)="apply()">
+  <div class="filters__heading">
+    <h2 class="govuk-heading-l">Refine results</h2>
+    <button type="button" class="filters__close-button button-link govuk-link" (click)="cancel()">Close</button>
+  </div>
+  <div class="filters__scrollbox">
+    <div class="filters__scrollbox-content">
+      <gds-checkboxes
+        size="small"
+        layout="horizontal"
+        legend="Day of the week"
+        legendSize="s"
+        [error]="getError('dayOfWeekFlags')"
+        spaceBelow="8"
+      >
+        <gds-checkboxes-item
+          inputId="monday"
+          name="days"
+          label="Mon"
+          value="Monday"
+          [checked]="dayOfWeekFlags.monday"
+          (checkedChange)="toggleDayOfTheWeek('monday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="tuesday"
+          name="days"
+          label="Tue"
+          value="Tuesday"
+          [checked]="dayOfWeekFlags.tuesday"
+          (checkedChange)="toggleDayOfTheWeek('tuesday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="wednesday"
+          name="days"
+          label="Wed"
+          value="Wednesday"
+          [checked]="dayOfWeekFlags.wednesday"
+          (checkedChange)="toggleDayOfTheWeek('wednesday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="thursday"
+          name="days"
+          label="Thur"
+          value="Thursday"
+          [checked]="dayOfWeekFlags.thursday"
+          (checkedChange)="toggleDayOfTheWeek('thursday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="friday"
+          name="days"
+          label="Fri"
+          value="Friday"
+          [checked]="dayOfWeekFlags.friday"
+          (checkedChange)="toggleDayOfTheWeek('friday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="saturday"
+          name="days"
+          label="Sat"
+          value="Saturday"
+          [checked]="dayOfWeekFlags.saturday"
+          (checkedChange)="toggleDayOfTheWeek('saturday')"
+        ></gds-checkboxes-item>
+        <gds-checkboxes-item
+          inputId="sunday"
+          name="days"
+          label="Sun"
+          value="Sunday"
+          [checked]="dayOfWeekFlags.sunday"
+          (checkedChange)="toggleDayOfTheWeek('sunday')"
+        ></gds-checkboxes-item>
+      </gds-checkboxes>
+      <app-time-range-slider
+        labelMin="Start time"
+        labelMax="End time"
+        legend="Time range"
+        legendSize="s"
+        [(startTime)]="startTime"
+        [(endTime)]="endTime"
+        [error]="getErrors('startTime', 'endTime', 'startEndTime')"
+      ></app-time-range-slider>
+      <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Performance</legend>
+        <div class="filters__2-col">
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="maxEarly">Maximum early</label>
+            <select class="govuk-select" id="maxEarly" name="maxEarly" [(ngModel)]="minDelayStr">
+              <option value="none" selected>No limit</option>
+              <option value="-10">10 minutes</option>
+              <option value="-20">20 minutes</option>
+              <option value="-30">30 minutes</option>
+              <option value="-40">40 minutes</option>
+              <option value="-50">50 minutes</option>
+              <option value="-60">60 minutes</option>
+            </select>
+          </div>
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="maxLate">Maximum late</label>
+            <select class="govuk-select" id="maxLate" name="maxLate" [(ngModel)]="maxDelayStr">
+              <option value="none" selected>No limit</option>
+              <option value="10">10 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="40">40 minutes</option>
+              <option value="50">50 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset *ngIf="showAdminAreas" class="govuk-fieldset">
+        <div class="govuk-form-group">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Area</legend>
+          <gds-multiselect-checkbox
+            [options]="adminAreas$ | async"
+            [(selected)]="adminAreaIds"
+            showAllLabel="Area"
+            [showAll]="true"
+            placeholderText="All areas"
+            ariaLabel="Admin area"
+          ></gds-multiselect-checkbox>
+        </div>
+      </fieldset>
+      <div class="filters__reset">
+        <button type="button" class="button-link" (click)="resetToDefault()">Reset to defaults</button>
+      </div>
+    </div>
+  </div>
+  <div class="filters__button-group">
+    <gds-button text="Cancel" appearance="secondary" type="button" (click)="cancel()"></gds-button>
+    <gds-button text="Apply" type="submit"></gds-button>
+  </div>
+</form>

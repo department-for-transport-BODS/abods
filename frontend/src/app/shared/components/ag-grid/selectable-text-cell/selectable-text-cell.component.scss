@@ -1,0 +1,27 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.selectable-text-cell {
+  white-space: normal;
+  word-break: break-word;
+
+  pointer-events: all;
+  user-select: text;
+
+  &--bold {
+    font-weight: bold;
+  }
+  &--no-wrap {
+    white-space: nowrap;
+  }
+
+  &--overflow-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--overflow-clip {
+    overflow: hidden;
+    text-overflow: clip;
+  }
+}

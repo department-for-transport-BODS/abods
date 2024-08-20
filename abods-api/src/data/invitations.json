@@ -1,0 +1,16 @@
+[
+  {
+    "accepted": false,
+    "email": "new.user@example.com",
+    "organisation": {
+      "id": "org2",
+      "name": "Beta Ltd"
+    },
+    "role": {
+      "id": "role2",
+      "name": "User",
+      "scope": "Organisation"
+    }
+  }
+  
+]

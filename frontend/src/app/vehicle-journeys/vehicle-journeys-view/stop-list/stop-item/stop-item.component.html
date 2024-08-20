@@ -1,0 +1,58 @@
+<div
+  class="stop-list-item"
+  [ngClass]="{
+    'stop-list-item--timing-point': stop?.isTimingPoint,
+    'stop-list-item--timing-point--first': stop?.isTimingPoint && firstItem
+  }"
+>
+  <div class="stop-list-item__value-container">
+    <span
+      *ngIf="!stop?.isHidden"
+      [ngxTippy]="stop?.isTimingPoint ? 'Timing point' : null"
+      [tippyProps]="{ theme: 'gds-tooltip' }"
+    >
+      <svg-icon
+        class="stop-list-item__icon"
+        [ngClass]="{
+          'stop-list-item__icon--on-time': stop?.onTimePerformance === 'OnTime',
+          'stop-list-item__icon--early': stop?.onTimePerformance === 'Early',
+          'stop-list-item__icon--late': stop?.onTimePerformance === 'Late',
+          'stop-list-item__icon--no-data': stop?.onTimePerformance === 'NoData',
+          'stop-list-item__icon--stop': !stop?.isTimingPoint
+        }"
+        [applyClass]="true"
+        [src]="stop?.isTimingPoint ? 'assets/icons/timing.svg' : 'assets/icons/stop.svg'"
+        aria-hidden="true"
+      ></svg-icon>
+      <span class="govuk-visually-hidden">Timing point</span>
+    </span>
+  </div>
+  <div class="stop-list-item__value-container">
+    <button
+      role="button"
+      class="stop-list-item__name unbuttoned"
+      (click)="stopSelected.emit(stop)"
+      (mouseenter)="stopHovered.emit({ stop: stop, event: 'enter' })"
+      (mouseleave)="stopHovered.emit({ stop: stop, event: 'leave' })"
+    >
+      <span>{{ stop?.stopName ? stop?.stopName : '-' }}</span>
+    </button>
+  </div>
+  <div class="stop-list-item__value-container stop-list-item__value-container__align-right">
+    <span *ngIf="!stop?.isHidden" class="stop-list-item__scheduled">{{
+      stop?.scheduledDeparture ? (stop?.scheduledDeparture | dateTimeToFormat: 'HH:mm') : '-'
+    }}</span>
+  </div>
+  <div class="stop-list-item__value-container stop-list-item__value-container__align-right">
+    <span *ngIf="!stop?.isHidden" class="stop-list-item__actual">
+      <div
+        *ngIf="stop?.actualDeparture; else noActual"
+        [ngxTippy]="'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss':'+')"
+        [tippyProps]="{ theme: 'gds-tooltip' }"
+      >
+        <span>{{ stop?.actualDeparture | dateTimeToFormat: 'HH:mm' }}</span>
+      </div>
+      <ng-template #noActual>-</ng-template>
+    </span>
+  </div>
+</div>

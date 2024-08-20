@@ -1,0 +1,90 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.on-time {
+  &__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  &__date-picker {
+    margin-right: govuk-spacing(2);
+    margin-bottom: govuk-spacing(2) * -1;
+  }
+  &__timing-toggle {
+    margin-bottom: govuk-spacing(4);
+  }
+  &__more-filters {
+    margin-bottom: govuk-spacing(4);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    @include govuk-font(19);
+  }
+  &__filter-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: govuk-spacing(1);
+    color: currentColor;
+  }
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(2, min-content);
+    grid-column-gap: govuk-spacing(6);
+  }
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 440px;
+  }
+  &__filter-chips {
+    margin-bottom: govuk-spacing(6);
+  }
+  &__otp-chart,
+  &__ewt-chart,
+  &__tod-chart,
+  &__dist-chart,
+  &__dow-chart {
+    display: flex;
+    flex-grow: 1;
+  }
+  &__ewt-chart {
+    max-height: 385px; // So the height of the ewt doesn't jump about too much as the data loads
+  }
+
+  &__tod-chart,
+  &__dist-chart,
+  &__dow-chart {
+    width: 100%;
+  }
+  &__chart-footer {
+    display: flex;
+    flex-direction: column;
+    margin-top: govuk-spacing(4);
+    margin-bottom: -1 * govuk-spacing(1); //this moves 'Show' control to overlap the padded border
+  }
+  &__service-info {
+    margin-right: govuk-spacing(6);
+  }
+  &__mode-select {
+    display: flex;
+    align-items: center;
+    position: relative;
+    align-self: flex-end;
+  }
+  &__mode-label {
+    margin-right: govuk-spacing(3);
+  }
+}
+
+@media screen and (min-width: 890px) and (max-width: 1024px), (min-width: 1185px) {
+  .on-time {
+    &__chart-footer {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+    &__otp-chart-wrapper + &__chart-footer {
+      margin-top: -35px; //moves 'Show' control to be inline with the chart legend
+    }
+  }
+}

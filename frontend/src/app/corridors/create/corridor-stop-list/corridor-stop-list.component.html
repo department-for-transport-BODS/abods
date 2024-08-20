@@ -1,0 +1,17 @@
+<div
+  class="corridor-stop-list__stop corridor-stop-list__stop--added"
+  [ngClass]="{ 'corridor-stop-list__stop--connected': !isLast }"
+  *ngFor="let stop of corridorStops?.features; let isLast = last; let i = index"
+  (mouseover)="mouseOver.emit(stop)"
+  (mouseleave)="mouseLeave.emit(stop)"
+>
+  <div class="corridor-stop-list__stop-details">
+    <div class="corridor-stop-list__stop-label">{{ stop.properties.stopName }}</div>
+    <div class="corridor-stop-list__naptan">{{ stop.properties.naptan }}</div>
+  </div>
+  <div *ngIf="isLast && !loading && (isEdit ? i > 0 : true)">
+    <button type="button" class="corridor-stop-list__remove button-link" (click)="removeLastStop.emit(stop)">
+      Remove
+    </button>
+  </div>
+</div>

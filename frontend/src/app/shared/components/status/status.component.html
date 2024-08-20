@@ -1,0 +1,5 @@
+<div [ngClass]="statusClasses">
+  <svg-icon class="status__icon" [applyClass]="true" [src]="svgSrc" aria-hidden="true"></svg-icon>
+  <span *ngIf="label" class="status__label">{{ status }}</span>
+  <span *ngIf="!label" class="govuk-visually-hidden">{{ status }}</span>
+</div>

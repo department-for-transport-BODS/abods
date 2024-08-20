@@ -1,0 +1,11 @@
+[
+  {
+    "feedStatus": true,
+    "operatorId": "op1"
+  },
+  {
+    "feedStatus": false,
+    "operatorId": "op2",
+    "unavailableSince": "2024-04-08T10:00:00Z"
+  }
+]

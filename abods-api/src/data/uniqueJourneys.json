@@ -1,0 +1,12 @@
+[
+  {
+    "serviceInfo": {
+      "serviceId": "service123",
+      "serviceName": "Morning Route",
+      "serviceNumber": "MR1"
+    },
+    "startTime": "2024-04-10T07:30:00Z",
+    "vehicleJourneyId": "vj123"
+  }
+  
+]

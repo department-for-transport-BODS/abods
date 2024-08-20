@@ -1,0 +1,42 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-page-header
+      heading="All services"
+      caption="On-time performance"
+      spaceAbove="2"
+      spaceBelow="6"
+    ></app-page-header>
+    <app-controls (params)="params$.next($event)" #controls [showAdminAreas]="false"></app-controls>
+    <div class="all-operators__summary-header">
+      <h2 class="govuk-heading-l">Summary</h2>
+      <div class="all-operators__admin-areas">
+        <gds-multiselect-checkbox
+          [options]="adminAreas | async"
+          [ngModel]="controls.filters.adminAreaIds"
+          (selectedChange)="controls.changeAdminAreaIds($event)"
+          [showAll]="true"
+          showAllLabel="Area"
+          placeholderText="All areas"
+          ariaLabel="Admin area"
+        ></gds-multiselect-checkbox>
+      </div>
+    </div>
+    <div class="all-operators__summary">
+      <app-overview-stats
+        class="all-operators__summary-column"
+        [showTotal]="true"
+        [overview]="overview"
+        [loading]="overviewLoading"
+        [nested]="true"
+        [params$]="params$.asObservable()"
+      ></app-overview-stats>
+      <app-admin-area-map
+        class="all-operators__summary-column"
+        [adminAreaIds]="nonNullishArray(controls.filters.adminAreaIds)"
+        (boundaryClick)="controls.changeAdminAreaIds([$event.id])"
+      ></app-admin-area-map>
+    </div>
+    <h2 class="govuk-heading-m">Operators</h2>
+    <app-operators-grid [params]="params$ | async"></app-operators-grid>
+  </ng-container>
+</app-page>

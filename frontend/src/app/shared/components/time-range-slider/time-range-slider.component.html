@@ -1,0 +1,41 @@
+<div class="govuk-form-group" [ngClass]="formGroupClasses">
+  <fieldset class="govuk-fieldset">
+    <legend *ngIf="legend" class="govuk-fieldset__legend" [ngClass]="legendClasses">
+      {{ legend }}
+    </legend>
+    <span *ngIf="error" class="govuk-error-message">
+      <span class="govuk-visually-hidden">Error:</span> {{ error }}
+    </span>
+    <div id="time-range-slider" class="range-slider">
+      <app-range-slider
+        [max]="24"
+        [min]="0"
+        name="time-range-raw"
+        [(lower)]="sliderStartHour"
+        [(upper)]="sliderEndHour"
+      ></app-range-slider>
+    </div>
+    <div class="time-range-slider__textboxes">
+      <gds-text-input
+        inputId="rangeSliderMin"
+        name="rangeSliderMax"
+        type="number"
+        label="{{ labelMin }}"
+        [(ngModel)]="inputStartHour"
+        min="0"
+        max="23"
+        suffix=":00"
+      ></gds-text-input>
+      <gds-text-input
+        inputId="rangeSliderMax"
+        name="rangeSliderMax"
+        type="number"
+        label="{{ labelMax }}"
+        [(ngModel)]="inputEndHour"
+        min="0"
+        max="23"
+        suffix=":59"
+      ></gds-text-input>
+    </div>
+  </fieldset>
+</div>

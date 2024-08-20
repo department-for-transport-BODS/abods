@@ -1,0 +1,21 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.alert-list {
+  @include govuk-grid-column('full');
+  margin-top: govuk-spacing(8);
+  &__items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__no-items {
+    @include govuk-font(19);
+  }
+}
+@include bp($lg-desktop) {
+  .alert-list {
+    @include govuk-grid-column('two-thirds');
+  }
+}

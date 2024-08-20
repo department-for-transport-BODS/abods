@@ -1,0 +1,14 @@
+<div class="range-slider">
+  <nouislider
+    #nouislider
+    name="range-slider"
+    [config]="{ margin: 1, connect: true, step: 1 }"
+    [min]="min"
+    [max]="max"
+    [ngModel]="value"
+    (change)="onSliderChange($event)"
+    [connect]="connect"
+    (start)="startSlide()"
+    (end)="endSlide()"
+  ></nouislider>
+</div>

@@ -1,0 +1,38 @@
+[
+  {
+    "journeyTimeDayOfWeekStats": [
+      {"dow": 3}
+    ],
+    "journeyTimeHistogram": [
+      {"ts": "2024-04-10T12:00:00Z"}
+    ],
+    "journeyTimePerServiceStats": [
+      {"lineName": "Downtown Express"}
+    ],
+    "journeyTimeStats": [
+      {"ts": "2024-04-10T12:00:00Z"}
+    ],
+    "journeyTimeTimeOfDayStats": [
+      {"hour": 14}
+    ],
+    "serviceLinks": [
+      {
+        "distance": 1200,
+        "fromStop": "stop1",
+        "linkRoute": "Main Street",
+        "routeValidity": "2024",
+        "toStop": "stop2"
+      }
+    ],
+    "summaryStats": {
+      "averageJourneyTime": 45,
+      "numberOfServices": 5,
+      "operatorName": "City Transport",
+      "percentile95": 59.0,
+      "scheduledJourneyTime": 50,
+      "scheduledTransits": 130,
+      "totalTransits": 120
+    }
+  }
+  
+]

@@ -1,0 +1,13 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+.checkboxes {
+  display: grid;
+
+  &--horizontal {
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  }
+
+  &--2-column {
+    grid-template-columns: 1fr 1fr;
+  }
+}

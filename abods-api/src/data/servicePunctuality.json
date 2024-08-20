@@ -1,0 +1,16 @@
+[
+  {
+    "early": 15,
+    "late": 5,
+    "lineId": "line2",
+    "lineInfo": {
+      "serviceId": "service456",
+      "serviceName": "Evening Route",
+      "serviceNumber": "ER2"
+    },
+    "nocCode": "NOC456",
+    "onTime": 80,
+    "operatorId": "op456",
+    "rank": 1.0
+  }
+]

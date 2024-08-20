@@ -1,0 +1,25 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.vehicles-status {
+  &__stats {
+    display: flex;
+    margin-right: -(govuk-spacing(3));
+    margin-left: -(govuk-spacing(3));
+  }
+
+  &__current-stat,
+  &__expected-stat {
+    flex-basis: calc(50% - #{govuk-spacing(6)});
+    margin-left: govuk-spacing(3);
+    margin-right: govuk-spacing(3);
+    margin-bottom: 0;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    @include govuk-font(19);
+    margin-top: govuk-spacing(4);
+  }
+}

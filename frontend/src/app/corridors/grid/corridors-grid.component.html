@@ -1,0 +1,37 @@
+<div class="corridors-grid">
+  <ng-container>
+    <div class="corridors-grid__controls">
+      <gds-text-input
+        class="corridors-grid__controls--filter"
+        label="Search for a corridor"
+        name="filter"
+        inputId="corridors-grid-filter"
+        width="20"
+        type="search"
+        [(ngModel)]="gridFilter"
+      ></gds-text-input>
+      <button gdsButton routerLink="create" spaceAbove="4">Create new corridor</button>
+    </div>
+    <ag-grid-angular
+      class="ag-theme-compact ag-theme-wrapped-header"
+      [rowData]="data"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      domLayout="autoHeight"
+      [quickFilterText]="gridFilter"
+      (filterChanged)="onFilterChanged()"
+      [suppressLoadingOverlay]="true"
+      [suppressNoRowsOverlay]="true"
+      (componentStateChanged)="onGridChanged($event)"
+    >
+    </ag-grid-angular>
+  </ng-container>
+  <app-spinner *ngIf="loading" [vCentre]="true" message="Loading..." size="default"></app-spinner>
+  <div class="corridors-grid--message" *ngIf="noMatches" role="alert">
+    <span class="corridors-grid__message">No corridors matched the search query.</span>
+  </div>
+  <div class="corridors-grid--message" *ngIf="errored" role="alert">
+    <svg-icon class="corridors-grid__icon" src="assets/icons/exclamation-in-circle.svg" [applyClass]="true"></svg-icon>
+    <span class="corridors-grid__message">There was an error loading operator data, please try again.</span>
+  </div>
+</div>

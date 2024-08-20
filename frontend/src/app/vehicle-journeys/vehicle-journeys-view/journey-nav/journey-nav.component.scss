@@ -1,0 +1,29 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.journey-nav {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: govuk-spacing(9);
+  margin-bottom: govuk-spacing(3);
+  @include govuk-font(19);
+
+  &__link {
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+    display: flex;
+    align-items: center;
+    color: $govuk-link-colour;
+    &--disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    margin-left: govuk-spacing(2);
+  }
+  &__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 25px;
+    height: 25px;
+  }
+}

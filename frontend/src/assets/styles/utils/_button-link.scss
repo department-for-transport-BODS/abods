@@ -1,0 +1,37 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+// used in the top-bar to recreate govuk menu button styling
+.button-link {
+  font-family: $font-family-default;
+  line-height: inherit;
+  color: $govuk-link-colour;
+  background-color: transparent;
+  margin: 0;
+  padding: govuk-spacing(1);
+  border: 0;
+  position: relative;
+  box-sizing: border-box;
+  &:focus {
+    outline: 0;
+    color: govuk-colour('black');
+    background-color: govuk-colour('yellow');
+    box-shadow: 0 4px govuk-colour('black');
+  }
+  &:hover:not(:focus) {
+    text-decoration: underline;
+  }
+  &--disabled {
+    color: $govuk-secondary-text-colour;
+    text-decoration: none;
+    &:hover:not(:focus) {
+      color: $govuk-secondary-text-colour;
+      text-decoration: none;
+      cursor: auto;
+    }
+    &:focus {
+      color: $govuk-secondary-text-colour;
+      text-decoration: none;
+    }
+  }
+}

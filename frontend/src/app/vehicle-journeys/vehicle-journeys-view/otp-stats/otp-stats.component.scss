@@ -1,0 +1,54 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.vehicle-journeys {
+  &__otp-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: govuk-spacing(8);
+  }
+  &__otp-stat {
+    border-top: 1px solid $govuk-border-colour;
+    padding-top: govuk-spacing(3);
+    flex-basis: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: govuk-spacing(6);
+  }
+}
+
+@include bp($to-tablet) {
+  .vehicle-journeys {
+    &__otp-stats {
+      margin-top: 0px;
+    }
+  }
+}
+
+@include bp($phablet) {
+  .vehicle-journeys {
+    &__otp-stat {
+      flex-basis: calc(50% - #{govuk-spacing(6)});
+    }
+  }
+}
+
+@include bp($desktop) {
+  .vehicle-journeys {
+    &__otp-stats {
+      flex-wrap: nowrap;
+    }
+    &__otp-stat {
+      flex-basis: calc(25% - #{govuk-spacing(6)});
+      margin-left: govuk-spacing(3);
+      margin-right: govuk-spacing(3);
+      &:nth-child(1) {
+        margin-left: 0;
+      }
+      &:nth-last-child(1) {
+        margin-right: 0;
+      }
+    }
+  }
+}

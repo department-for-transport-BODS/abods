@@ -1,0 +1,33 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+:host {
+  // restores the standard margins that are lost through the angular wrapper
+  margin-bottom: govuk-spacing(2);
+  &:last-child,
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+.checkboxes-item {
+  :host-context(.checkboxes--horizontal) & {
+    padding-left: 0;
+    padding-top: 40px;
+    float: none;
+    .checkboxes-item__label {
+      padding: 0;
+      float: none;
+      width: 100%;
+      text-align: center;
+    }
+    .checkboxes-item__label::before,
+    .checkboxes-item__label::after {
+      left: 50%;
+      transform: translate(-50%);
+    }
+    .checkboxes-item__label::after {
+      transform: rotate(-45deg) translate(-50%);
+      top: 11px;
+      margin-left: -2px;
+    }
+  }
+}

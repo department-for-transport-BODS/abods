@@ -1,0 +1,12 @@
+<app-page>
+  <ng-container ngProjectAs="back-link">
+    <gds-back-link [route]="['/on-time']" label="On-time performance"></gds-back-link>
+  </ng-container>
+  <ng-container ngProjectAs="content">
+    <app-page-header caption="On-time performance" heading="Not found"></app-page-header>
+    <p class="govuk-body">
+      Operator not found, or you do not have permission to view. Go back to
+      <a [routerLink]="['/on-time']">On-time performance</a>?
+    </p>
+  </ng-container>
+</app-page>

@@ -1,0 +1,47 @@
+<div class="datenav" *ngIf="stats; else skeleton">
+  <div class="datenav__header">
+    <h2 class="datenav__current-date govuk-heading-m govuk-!-margin-0">{{ date?.toFormat('d MMMM yyyy') }}</h2>
+    <nav class="datenav__controls">
+      <button
+        class="datenav__button unbuttoned"
+        [attr.aria-disabled]="first"
+        [disabled]="first"
+        (click)="dateSelected.emit(date?.minus({ day: 1 }))"
+      >
+        <svg-icon class="datenav__icon" src="assets/icons/caret-left.svg" [applyClass]="true"></svg-icon
+        ><span class="datenav__label">Previous</span>
+      </button>
+      <button
+        class="datenav__button unbuttoned"
+        aria-label="Show next date"
+        [attr.aria-disabled]="last"
+        [disabled]="last"
+        (click)="dateSelected.emit(date?.plus({ day: 1 }))"
+      >
+        <span class="datenav__label">Next</span>
+        <svg-icon class="datenav__icon" src="assets/icons/caret-right.svg" [applyClass]="true"></svg-icon>
+      </button>
+    </nav>
+  </div>
+
+  <div class="datenav__day-blocks datenav__day-blocks--with-labels">
+    <ng-container *ngFor="let item of stats">
+      <app-datenav-item
+        [heat]="item.heat"
+        [date]="item.date"
+        (selectDate)="dateSelected.emit($event)"
+        [active]="date?.equals(item.date) || false"
+      >
+      </app-datenav-item>
+    </ng-container>
+  </div>
+</div>
+
+<ng-template #skeleton>
+  <div class="datenav__header">
+    <app-skeleton appearance="heading-m" width="200px" spaceBelow="0"></app-skeleton>
+  </div>
+  <div class="datenav__day-blocks">
+    <app-skeleton height="32px" width="100%"></app-skeleton>
+  </div>
+</ng-template>

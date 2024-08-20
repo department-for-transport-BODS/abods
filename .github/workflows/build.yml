@@ -1,6 +1,7 @@
 name: build application
 run-name: build application from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 
@@ -15,19 +16,25 @@ on:
         required: true
         default: 'patch'
         options: 
-        - patch
-        - minor
-        - major
+        - 'patch'
+        - 'minor'
+        - 'major'
   push:
     branches:
-    - main
-    - sandbox
-    - dev
-    - test
+    - 'main'
+    - 'sandbox'
+    - 'dev'
+    - 'test'
+    - 'uat'
+    paths:
+    - 'VERSION'
+    - 'abods-api/*'
+    - 'frontend/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
@@ -36,6 +43,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   RC_ENV: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   RC_TYP: ${{ (github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v'))) && github.event.inputs.change || 'patch' }}
@@ -43,11 +51,18 @@ env:
 
 jobs:
   validation:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
+    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+      github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'cavl' && 'cavl' ||
+      github.ref_name == 'uat' && 'uat' ||
+      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
-      version: ${{ steps.increment.outputs.version }}
+      AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
+      VERSION: ${{ steps.increment.outputs.VERSION }}
 
     steps:
+
       - name: checkout
         uses: actions/checkout@v4
 
@@ -64,12 +79,17 @@ jobs:
               (Parameter Environment) - $RC_ENV
           """
 
+      - name: set environment specific vars
+        id: set-vars
+        run: |
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+
       - name: increment the ${{ env.RC_TYP }} version
         id: increment
         run: |          
           if [[ ${GITHUB_REF_NAME} != 'main' ]]; then
             echo "[INFO] Running on a feature branch, skipping version increment"
-            echo "version=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
           else
             # install yq for parsing yaml files
             sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
@@ -81,49 +101,11 @@ jobs:
             echo "[INFO] New application version v${new_version}"
             
             # outputs
-            echo "version=v${new_version}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=v${new_version}" >> "$GITHUB_OUTPUT"
           fi
 
-  # database:
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-  #     github.ref_name == 'test' && 'test' ||
-  #     github.ref_name == 'uat' && 'uat' ||
-  #     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
-  #   needs: validation
-
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: configure aws credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-region: ${{ env.AWS_REGION }}
-  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-  #         role-session-name: ${{ env.RC_ENV }}-database-build
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
-
-  #     - name: push database migrations
-  #       env:
-  #         RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-  #         VERSION: ${{ needs.validation.outputs.version }}
-  #       run: |
-  #         [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/sql" || rc_path="releases/$VERSION/sql"
-
-  #         aws s3 cp sql s3://$RC_DST/$rc_path/ --recursive --exclude 'local/*'
-
   backend:
-    runs-on: ubuntu-latest
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    runs-on: pcoe-runner-linux-small-prod
     needs: validation
     defaults:
       run:
@@ -151,15 +133,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-backend-app-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
       - name: package and push backend code
         env: 
-          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/backend" || rc_path="releases/$VERSION/backend"
 
@@ -175,14 +157,12 @@ jobs:
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully uploaded"
 
   frontend:
-    runs-on: ubuntu-latest
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    runs-on: pcoe-runner-linux-prod
     needs: 
       - validation
-      - backend
+    defaults:
+      run:
+        working-directory: frontend
 
     permissions:
       id-token: write
@@ -191,19 +171,17 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          repository: ${{ vars.FRONTEND_REPO }}
 
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: frontend/.nvmrc
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-frontend-app-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
@@ -211,33 +189,42 @@ jobs:
       - name: package and push frontend code
         env:
           CI: ""
-          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/frontend" || rc_path="releases/$VERSION/frontend"
 
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
-          api_url="https://${domain_name}/api/graphql"
+          freshdesk_api_url="https://${domain_name}/freshdesk/"
+          graphql_api_url="https://${domain_name}/api/graphql"
+          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
+          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
+          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
           
-          jq --arg api_url "$api_url" '.apiUrl = $api_url | .analyticsId = "1234"' src/config.json > tmp.json && \
+          jq --arg freshdesk_api_url "$freshdesk_api_url" \
+             --arg graphql_api_url "$graphql_api_url" \
+             --arg mapbox_token "$mapbox_token" \
+             --arg mapbox_style "$mapbox_style" \
+             --arg mapbox_satellite_style "$mapbox_satellite_style" \
+             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
             mv tmp.json src/config.json
 
           npm install
           npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
-            ng build
+            ng build -c production
 
           echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
+          aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENV^^}"
 
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs:
       - validation
-      # - database
       - backend
       - frontend
 
@@ -254,7 +241,7 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
             sudo chmod 755 /usr/bin/yq
 
-          new_version=${{ needs.validation.outputs.version }}
+          new_version=${{ needs.validation.outputs.VERSION }}
           yq e -i '.version = "'"$new_version"'"' VERSION
           echo "[INFO] Updated application version to ${new_version}"
 
@@ -272,10 +259,9 @@ jobs:
 
   trigger-deploy-dev:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     needs: 
       - validation
-      # - database
       - backend
       - frontend
       - commit-and-tag
@@ -289,4 +275,4 @@ jobs:
         with:
           repository: ${{ github.repository }}
           event-type: automated-deploy
-          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.version }}" }'
+          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.VERSION }}" }'

@@ -1,0 +1,16 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+:host {
+  display: block;
+}
+.live-vehicle-stats {
+  &__label {
+    color: $govuk-text-colour;
+  }
+  &__graph {
+    min-height: rem(300);
+    margin-top: govuk-spacing(2);
+    box-sizing: border-box;
+    display: flex;
+  }
+}

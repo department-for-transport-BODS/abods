@@ -3,6 +3,7 @@ run-name: deploy application from ${{ github.event_name == 'repository_dispatch'
     github.event_name == 'workflow_dispatch' && (
       (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'cavl' && 'cavl' ||
       github.ref_name == 'uat' && 'uat' ||
       github.ref_name == 'dev' && 'dev'
     ) || 'sandbox' }}
@@ -14,6 +15,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
@@ -24,6 +26,7 @@ env:
     github.event_name == 'workflow_dispatch' && (
       (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'cavl' && 'cavl' ||
       github.ref_name == 'uat' && 'uat' ||
       github.ref_name == 'dev' && 'dev'
     ) || 'sandbox' }}
@@ -38,16 +41,18 @@ permissions:
 
 jobs:
   validation:
-    runs-on: ubuntu-latest
+    runs-on: pcoe-runner-linux-small-prod
     environment: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
       github.event_name == 'workflow_dispatch' && (
         (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
         github.ref_name == 'test' && 'test' ||
+        github.ref_name == 'cavl' && 'cavl' ||
         github.ref_name == 'uat' && 'uat' ||
         github.ref_name == 'dev' && 'dev'
       ) || 'sandbox' }}
     outputs:
-      version: ${{ steps.verify.outputs.version }}
+      AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
+      VERSION: ${{ steps.verify.outputs.VERSION }}
 
     steps:
       - name: configure aws credentials
@@ -87,7 +92,7 @@ jobs:
                 (Release Version)       - ${RC_VER//\//-}
                 (Target Environment)    - $RC_ENV
             """
-            echo "version=${RC_VER//\//-}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=${RC_VER//\//-}" >> "$GITHUB_OUTPUT"
           else
             echo [INFO] Deploying from main branch. Using latest tagged version
             latest_version=$(get_latest_version $RC_SRC 'releases')
@@ -96,13 +101,18 @@ jobs:
                 (Release Version)       - $latest_version (latest)
                 (Target Environment)    - $RC_ENV
             """
-            echo "version=${latest_version}" >> "$GITHUB_OUTPUT"
+            echo "VERSION=${latest_version}" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: set environment specific vars
+        id: set-vars
+        run: |
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
 
       - name: validate release candidate version
         env:
           RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ steps.verify.outputs.version }}
+          VERSION: ${{ steps.verify.outputs.VERSION }}
         run: |
           [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="$RC_SRC/releases/$VERSION" || rc_path="$RC_SRC/releases-dev/$VERSION"
 
@@ -136,68 +146,8 @@ jobs:
             exit 1
           fi
 
-  # database:
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
-  #     github.event_name == 'workflow_dispatch' && (
-  #       (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-  #       github.ref_name == 'test' && 'test' ||
-  #       github.ref_name == 'uat' && 'uat' ||
-  #       github.ref_name == 'dev' && 'dev'
-  #     ) || 'sandbox' }}
-  #   needs: validation
-
-  #   steps:
-  #     - name: configure aws credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-region: ${{ env.AWS_REGION }}
-  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-  #         role-session-name: ${{ env.RC_ENV }}-database-deployment
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
-
-  #     - name: deploy database migrations for ${{ env.RC_ENV }}
-  #       env:
-  #         RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-  #         VERSION: ${{ needs.validation.outputs.version }}
-  #       run: |
-  #         [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases" || rc_path="releases-dev"
-  #         lambda_function_name="${{ vars.PROJECT_NAME }}-${RC_ENV}-pglifecycle-function"
-  #         cat <<EOF > $GITHUB_WORKSPACE/payload.json
-  #         {
-  #           "type": "run_migrations",
-  #           "userCredentialsArn": "${{ vars.PROJECT_NAME }}/${RC_ENV}/rds/user/${{ vars.PROJECT_NAME }}_proxy_rw",
-  #           "targetDatabase": "${{ vars.PROJECT_NAME }}",
-  #           "databaseMigrations": {
-  #             "bucketName": "${RC_SRC}",
-  #             "bucketPrefix": "${rc_path}",
-  #             "releaseVersion": "${VERSION}"
-  #           }
-  #         }
-  #         EOF
-
-  #         openssl base64 -out $GITHUB_WORKSPACE/encoded_payload.json -in $GITHUB_WORKSPACE/payload.json 
-  #         response=$(aws lambda invoke --function-name $lambda_function_name --region $AWS_REGION --payload file://$GITHUB_WORKSPACE/encoded_payload.json response.txt 2>&1)
-  #         if [[ "$response" == *"FunctionError"* || "$response" == *"[FAILURE]"* ]]; then
-  #           echo "[ERROR] Deployment of application component (DATABASE) with version ${VERSION} failed with error:"
-  #           echo "${response}"
-  #           exit 1
-  #         else
-  #           response_payload=$(cat response.txt)
-  #           echo "Response Payload: $response_payload"
-  #           echo "[INFO] Application component (DATABASE) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
-  #         fi
-
   backend:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
-      github.event_name == 'workflow_dispatch' && (
-        (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-        github.ref_name == 'test' && 'test' ||
-        github.ref_name == 'uat' && 'uat' ||
-        github.ref_name == 'dev' && 'dev'
-      ) || 'sandbox' }}
+    runs-on: pcoe-runner-linux-small-prod
     needs: validation
     outputs:
       stack-name: ${{ steps.get-stack.outputs.result }}
@@ -212,15 +162,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-backend-app-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
       - name: retrieve backend
         env:
-          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/backend" || rc_path="releases-dev/$VERSION/backend"
 
@@ -236,7 +186,7 @@ jobs:
 
       - name: deploy backend for ${{ env.RC_ENV }}
         env:
-          VERSION: ${{ needs.validation.outputs.version }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           sam deploy \
             --template-file packaged.yaml \
@@ -245,18 +195,11 @@ jobs:
             --region $AWS_REGION \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --tags "BuiltFrom=${VERSION}"
+            --tags "BuiltFrom=${VERSION} ProjectName=${{ vars.PROJECT_NAME }} Environment=${RC_ENV}"
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
 
   frontend:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
-      github.event_name == 'workflow_dispatch' && (
-        (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-        github.ref_name == 'test' && 'test' ||
-        github.ref_name == 'uat' && 'uat' ||
-        github.ref_name == 'dev' && 'dev'
-      ) || 'sandbox' }}
+    runs-on: pcoe-runner-linux-small-prod
     needs: 
       - validation
       - backend
@@ -266,15 +209,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: ${{ env.RC_ENV }}-frontend-app-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
       - name: retrieve frontend for ${{ env.RC_ENV }}
         env:
-          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
-          VERSION: ${{ needs.validation.outputs.version }}
+          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend" || rc_path="releases-dev/$VERSION/frontend"
 
@@ -301,7 +244,7 @@ jobs:
       
       - name: clear frontend for ${{ env.RC_ENV }}
         run: |
-          aws s3 rm ${{ steps.get-values.outputs.frontend-bucket-name }} --recursive
+          aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}
           echo "[INFO] S3 Bucket for application component (FRONTEND) successfully cleared for ${RC_ENV^^}"
 
       - name: invalidate cloudfront cache for ${{ env.RC_ENV }}
@@ -322,7 +265,8 @@ jobs:
 
       - name: deploy frontend for ${{ env.RC_ENV }}
         env:
-          VERSION: ${{ needs.validation.outputs.version }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          aws s3 cp dist/ ${{ steps.get-values.outputs.frontend-bucket-name }} --recursive
+          aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
+          aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"

@@ -1,0 +1,44 @@
+<app-tabs>
+  <app-tab (opened)="changeOrder(RankingOrder.Descending)" tabTitle="Top 3"></app-tab>
+  <app-tab (opened)="changeOrder(RankingOrder.Ascending)" tabTitle="Bottom 3"></app-tab>
+  <ng-container *ngIf="loaded; else spinner">
+    <table *ngIf="rows.length > 0; else noData" class="ranking-table__data">
+      <thead>
+        <tr>
+          <th class="govuk-visually-hidden">Service</th>
+          <th *ngIf="nocCode === null" class="govuk-visually-hidden">Operator</th>
+          <th class="govuk-visually-hidden">On-time</th>
+          <th class="govuk-visually-hidden">Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td class="ranking-table__service">
+            <app-link [underline]="false" [route]="row.route">{{ row.name }}</app-link>
+          </td>
+          <td class="ranking-table__operator" *ngIf="nocCode === null">
+            <app-tooltip [message]="row.nocCode" [selectable]="true">{{ operatorName(row.nocCode) }}</app-tooltip>
+          </td>
+          <td class="govuk-!-font-weight-bold ranking-table__stat">{{ row.onTimePct }}</td>
+          <td class="ranking-table__trend">
+            <app-change
+              *ngIf="row.trend"
+              [direction]="row.trend"
+              [value]="row.trendPctDiff"
+              size="small"
+              [tooltip]="changeTooltip"
+            ></app-change>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noData>
+      <div class="ranking-table__no-data">
+        <span class="govuk-body">No service data for the selected time period</span>
+      </div>
+    </ng-template>
+  </ng-container>
+  <ng-template #spinner>
+    <div class="ranking-table__loading"><app-spinner [vCentre]="true" size="small"></app-spinner></div>
+  </ng-template>
+</app-tabs>

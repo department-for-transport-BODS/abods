@@ -1,0 +1,685 @@
+scalar DateTime
+scalar Time
+scalar Date
+
+type Query {
+    user(id: String): UserType
+    users:[UserType]
+    apiInfo: ApiInfoType
+    roles: [RoleType]
+    userAlerts: [AlertType]
+    userAlert(alertId: String!): AlertType
+    operator(operatorId: String!): OperatorType
+    operators: OperatorsPage
+    adminAreas(adminAreaIds: [String!]): [AdminAreasType]
+    onTimePerformance: OnTimePerformanceType
+    headwayMetrics: HeadwayMetricsType
+    serviceInfo(serviceId: String!): ServiceInfoType
+    vehicleReplay: VehicleReplayNamespace
+    servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
+    vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
+    timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
+}
+
+type VehicleJourneyType {
+  mode: String
+  operatorId: String
+  servicePatternId: String
+  timingPatternId: String
+  vehicleJourneyId: String
+}
+
+type TimingPatternDetailType {
+  arrivalTimeOffset: Int
+  createdAt: DateTime
+  deletedAt: DateTime
+  departureTimeOffset: Int
+  noPickup: Boolean
+  noSetdown: Boolean
+  requestStop: Boolean
+  stopIndex: Int
+  timingPatternId: String
+  timingPoint: Boolean
+  updatedAt: DateTime
+  version: String
+}
+
+input VehicleReplayFilterInputType {
+  filterOnStartTime: Boolean
+  lineIds: [String]
+  stopIds: [String]
+}
+
+input VehicleReplayInputType {
+  filters: VehicleReplayFilterInputType
+  fromTimestamp: DateTime!
+  toTimestamp: DateTime!
+}
+
+type VehicleReplayNamespace {
+  findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
+  getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
+}
+
+type GpsFeedType {
+  delay: Int!
+  feedStatus: GpsFeedStatus
+  isTimingPoint: Boolean
+  journeyStatus: GpsFeedJourneyStatus!
+  lat: Float
+  lon: Float
+  operatorInfo: OperatorInfoType
+  previousStopInfo: StopInfoType
+  scheduledDeparture: String
+  serviceInfo: ServiceInfoType
+  servicePatternId: String
+  startTime: String
+  ts: String
+  vehicleId: String
+  vehicleJourneyId: String
+}
+
+enum GpsFeedStatus {
+  Active
+  Stale
+}
+
+enum GpsFeedJourneyStatus {
+  Completed
+  Started 
+  Unknown 
+}
+
+input GpsFeedNamespaceGetJourneyArgs {
+  journeyId: String
+  startTime: DateTime
+}
+
+type UniqueJourneyType {
+  serviceInfo: ServiceInfoType
+  startTime: String
+  vehicleJourneyId: String
+}
+
+type ServiceInfoType {
+  serviceId: String
+  serviceName: String
+  serviceNumber: String
+}
+
+type Mutation {
+    login(username: String!, password: String!): LoginResponse
+    logout: Boolean!
+    addUserAlert(payload: AlertInputType!): MutationResponseType!
+    updateUserAlert(alertId: String!, payload: AlertInputType!): MutationResponseType!
+    deleteUserAlert(alertId: String!): MutationResponseType!
+}
+
+type HeadwayMetricsType {
+  frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
+  frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
+  headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
+  headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
+  headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
+  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
+}
+
+input HeadwayInputType {
+  filters: HeadwayFiltersInputType
+  fromTimestamp: DateTime
+  toTimestamp: DateTime
+  sortBy: HeadwaySortType
+}
+
+enum HeadwaySortEnum {
+  ActualWaitTime
+  ExcessWaitTime
+  ScheduledWaitTime
+}
+
+input HeadwaySortType {
+    field: HeadwaySortEnum
+    order: SortOrderEnum
+}
+
+input HeadwayFiltersInputType {
+  dayOfWeekFlags: DayOfWeekFlagsInputType
+  endTime: String
+  granularity: Granularity
+  lineIds: [String]
+  nocCodes: [String]
+  operatorIds: [String]
+  startTime: String
+}
+
+input DayOfWeekFlagsInputType {
+  friday: Boolean
+  monday: Boolean
+  saturday: Boolean
+  sunday: Boolean
+  thursday: Boolean
+  tuesday: Boolean
+  wednesday: Boolean
+}
+
+input FrequentServiceInfoInputType {
+  filters: FrequentServiceInfoFilterType
+  fromTimestamp: DateTime!
+  toTimestamp: DateTime!
+}
+
+input FrequentServiceInfoFilterType {
+  dayOfWeekFlags: DayOfWeekFlagsInputType
+  endTime: String
+  lineId: String
+  noc: String
+  operatorId: String
+  startTime: String
+}
+
+type FrequentServiceType {
+  serviceId: String
+  serviceInfo: ServiceInfoType
+}
+
+type FrequentServiceInfoType {
+  numHours: Int
+  totalHours: Int
+}
+
+type HeadwayDayOfWeekType {
+  dayOfWeek: Int
+  actualWaitTime: Float
+  excessWaitTime: Float
+  scheduledWaitTime: Float
+}
+
+type HeadwayOverviewType {
+  actualWaitTime: Float
+  excessWaitTime: Float
+  scheduledWaitTime: Float
+}
+
+type HeadwayTimeOfDayType {
+  timeOfDay: Time
+  actualWaitTime: Float
+  excessWaitTime: Float
+  scheduledWaitTime: Float
+}
+
+type HeadwayTimeSeriesType {
+  ts: String
+  actualWaitTime: Float
+  excessWaitTime: Float
+  scheduledWaitTime: Float
+}
+
+type TransitModelType {
+  lines(filterBy: LineFilterType): PaginatedLineType
+}
+
+input LineFilterType {
+  lineIds: [String!]
+}
+
+type PaginatedLineType {
+  items: [LineType]
+}
+
+type LineType {
+  lineId: String
+  lineName: String
+  lineNumber: String
+  servicePatterns: [ServicePatternType]
+}
+
+type ServicePatternType {
+  servicePatternId: String
+  name: String
+  stops: [StopType]
+  serviceLinks: [ServiceLinkType]
+}
+
+type StopType {
+  stopId: String
+  stopName: String
+  lon: Float
+  lat: Float
+}
+
+type ServiceLinkType {
+  fromStop: String
+  toStop: String
+  distance: Int
+  routeValidity: String
+  linkRoute: String
+}
+
+
+type AdminAreasType {
+    adminAreaId: String!
+    adminAreaName: String!
+    shape: String!
+}
+
+type OperatorsPage {
+    pageInfo: PageInfo
+    items: [OperatorType]
+}
+
+type OperatorType {
+    name: String
+    nocCode: String
+    operatorId: String
+    adminAreas: [AdminAreaInfoType]
+    transitModel: TransitModelType
+    feedMonitoring: FeedMonitoringType
+}
+
+type FeedMonitoringType {
+  availability: Float
+  feedStatus: Boolean
+  historicalStats: HistoricalStatsType
+  lastOutage: DateTime
+  liveStats: LiveStatsType
+  unavailableSince: DateTime
+  vehicleStats: [VehicleStatsType]
+}
+
+type HistoricalStatsType {
+  availability: Float
+  compliance: Float
+  updateFrequency: Int
+  vehicleStats: [VehicleStatsType]
+}
+
+type VehicleStatsType {
+  actual: Int
+  expected: Int
+  timestamp: DateTime
+}
+
+type LiveStatsType {
+  currentVehicles: Int
+  expectedVehicles: Int
+  feedAlerts: Int
+  feedErrors: Int
+  last20Minutes: [VehicleStatsType]
+  last24Hours: [VehicleStatsType]
+  updateFrequency: Int
+}
+
+type AdminAreaInfoType {
+    adminAreaId: String
+}
+
+input UserUpdateInput {
+    firstName: String!
+    lastName: String!
+    role:RoleReferenceInput
+}
+
+type UserUpdateResponseType {
+    error: String
+    user: UserType
+}
+
+type MutationResponseType {
+    error: String
+    success: Boolean!
+}
+
+type InvitationResponseType {
+    error: String
+    invitation: InvitationType
+}
+
+type InvitationType {
+  accepted: Boolean!
+  email: String!
+  organisation: OrganisationType
+  role: RoleType
+}
+
+input InvitationInput {
+  email: String!
+  organisation: OrganisationReferenceInput
+  role: RoleReferenceInput!
+}
+
+input OrganisationReferenceInput {
+    id: String!
+}
+
+input RoleReferenceInput {
+    id: String!
+}
+
+input AlertReferenceInput {
+    id: String!
+}
+
+input AlertInputType {
+  alertType: AlertTypeEnum
+  sendTo: AlertReferenceInput!
+  eventHysterisis: Int
+  eventThreshold: Int
+}
+
+
+type AlertType {
+    alertId: String!
+    alertType: AlertTypeEnum
+    createdBy: UserType
+    eventHysterisis: Int
+    eventThreshold: Int
+    sendTo: UserType
+}
+
+enum AlertTypeEnum {
+    FeedComplianceFailure
+    FeedFailure
+    VehicleCountDisparity
+}
+
+type ApiInfoType {
+    buildNumber: String
+    version: String
+  }
+
+type FeatureFlagType {
+    consolidateHistogram: Boolean
+    corridorStatsTimezoneEnabled: Boolean
+    freshdeskEnabled: Boolean
+    lineDirectionFiltering: Boolean
+    ssoEnabled: Boolean
+    stopIndexFiltering: Boolean
+    taggingIncludeBankHolidays: Boolean
+    vehicleReplayFromTimestream: Boolean
+}
+
+type LoginResponse {
+    success: Boolean!
+    expiresAt: String
+}
+
+type UserType {
+    id: String!
+    email: String!
+    username: String!
+    firstName: String
+    lastName: String
+    organisation: OrganisationType
+    roles: [RoleType]
+}
+
+type OrganisationType{
+    id: String!
+    name: String!
+}
+
+type RoleType {
+    id: String!
+    name: String!
+    scope: String!
+}
+
+enum ScopeEnum{
+    organisation,
+    system
+}
+
+type OnTimePerformanceType {
+  delayFrequency(inputs: PerformanceInputType!): [DelayFrequencyType]
+  journeyScheduledStartTimes: [JourneyScheduledStartTimes]
+  operatorPerformance(inputs: PerformanceInputType!): OperatorPerformancePage
+  punctualityDayOfWeek(inputs: PerformanceInputType!): [PunctualityDayOfWeekType]
+  punctualityOverview(inputs: PerformanceInputType!): PunctualityTotalsType
+  punctualityTimeOfDay(inputs: PerformanceInputType!): [PunctualityTimeOfDayType]
+  punctualityTimeSeries(inputs: PerformanceInputType!): [PunctualityTimeSeriesType]
+  servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType]
+  servicePunctuality(inputs: ServicePerformanceInputType!): [ServicePunctualityType]
+  stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType]
+}
+
+type DelayFrequencyType {
+  bucket: Int
+  frequency: Int
+}
+
+type JourneyScheduledStartTimes {
+  days: [ShortCodeDayOfWeek]
+  fromDate: DateTime
+  startTimes: [Time]
+  toDate: DateTime
+}
+
+type OperatorPerformancePage {
+  pageInfo: PageInfo
+  items: [OperatorPerformanceType]
+}
+
+
+type OperatorPerformanceType {
+  actualDepartures: Int
+  averageDelay: Float
+  early: Int
+  late: Int
+  name: String
+  nocCode: String
+  onTime: Int
+  operatorId: String
+  scheduledDepartures: Int
+}
+
+
+type PageInfo {
+  next: Int
+  totalCount: Int
+}
+
+type PunctualityDayOfWeekType {
+  dayOfWeek: Int
+  early: Int
+  late: Int
+  onTime: Int
+}
+
+type PunctualityTotalsType {
+  averageDeviation: Float
+  completed: Int
+  early: Int
+  late: Int
+  onTime: Int
+  scheduled: Int
+}
+
+type PunctualityTimeOfDayType {
+  early: Int
+  late: Int
+  onTime: Int
+  timeOfDay: String
+}
+
+type PunctualityTimeSeriesType {
+  early: Int
+  late: Int
+  onTime: Int
+  ts: String
+}
+
+type ServicePerformanceType {
+  actualDepartures: Int
+  averageDelay: Float
+  early: Int
+  late: Int
+  lineId: String
+  onTime: Int
+  scheduledDepartures: Int
+  lineInfo: ServiceInfoType
+  operatorInfo: OperatorInfoType
+}
+
+type ServiceInfoType {
+  serviceId: String
+  serviceName: String
+  serviceNumber: String
+}
+
+type OperatorInfoType {
+  nocCode: String
+  operatorId: String
+  operatorName: String
+}
+
+type IPunctualityType {
+  early: Int
+  late: Int
+  onTime: Int
+}
+
+type ServicePunctualityType {
+  early: Int
+  late: Int
+  lineId: String
+  lineInfo: ServiceInfoType
+  nocCode: String
+  onTime: Int
+  operatorId: String
+  rank: Float
+  trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
+}
+
+type StopPerformanceType {
+  actualDepartures: Int
+  averageDelay: Float
+  early: Int
+  late: Int
+  lineId: String
+  onTime: Int
+  scheduledDepartures: Int
+  stopId: String
+  stopIndex: Int
+  stopInfo: StopInfoType
+  timingPoint: Boolean
+}
+
+
+type StopInfoType {
+  sourceId: String
+  stopId: String
+  stopLocality: LocalityType
+  stopLocation: GpsPointType
+  stopName: String
+}
+
+type LocalityType {
+  localityAreaId: String
+  localityAreaName: String
+  localityId: String
+  localityName: String
+}
+
+type GpsPointType {
+  latitude: Float
+  longitude: Float
+}
+
+enum ShortCodeDayOfWeek {
+  Fri
+  Mon
+  Sat
+  Sun
+  Thu
+  Tue
+  Wed
+}
+
+input PerformanceInputType {
+  filters: PerformanceFiltersInputType
+  fromTimestamp: DateTime!
+  paging: PagingInputType
+  sortBy: PunctualitySortType
+  toTimestamp: DateTime!
+}
+
+input PerformanceFiltersInputType {
+  addNonTagged: Boolean
+  adminAreaIds: [String]
+  dayOfWeekFlags: DayOfWeekFlagsInputType
+  endTime: String
+  excludedDates: [Date]
+  excludeItoLineId: String
+  granularity: Granularity
+  lineDirection: LineDirection
+  lineIds: [String]
+  maxDelay: Int
+  minDelay: Int
+  nocCodes: [String]
+  onTimeMaxMinutes: Int
+  onTimeMinMinutes: Int
+  operatorIds: [String]
+  startTime: String
+  startTimes: [Time]
+  stopsSegment: StopsSegment
+  tagIds: [Int]
+  timingPointsOnly: Boolean
+}
+
+enum Granularity {
+  day
+  hour
+  minute
+  month
+}
+
+enum LineDirection {
+  All
+  Inbound
+  Outbound
+}
+
+enum StopsSegment {
+  First
+  Intermediate
+}
+
+
+input PagingInputType {
+  after: Int
+  first: Int
+}
+
+input PunctualitySortType {
+  field: PunctualitySortEnum
+  order: SortOrderEnum
+}
+
+enum PunctualitySortEnum {
+  Early
+  Late
+  OnTime
+}
+
+enum SortOrderEnum {
+  ASC
+  DESC
+}
+
+enum RankingOrder {
+  ascending
+  descending
+}
+
+input ServicePerformanceFiltersInputType {
+  timingPointsOnly: Boolean
+  operatorIds: [String]
+}
+
+input ServicePerformanceInputType {
+  filters: ServicePerformanceFiltersInputType
+  fromTimestamp: DateTime
+  toTimestamp: DateTime
+  limit: Int
+  order: RankingOrder
+}

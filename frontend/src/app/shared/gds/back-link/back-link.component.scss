@@ -1,0 +1,8 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+@include bp($desktop) {
+  :host {
+    padding-left: govuk-spacing(4);
+  }
+}

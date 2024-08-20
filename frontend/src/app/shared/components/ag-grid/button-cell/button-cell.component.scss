@@ -1,0 +1,7 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+:host {
+  display: flex;
+  flex-direction: row-reverse;
+}
