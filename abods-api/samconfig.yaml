@@ -85,11 +85,11 @@ cavl:
   deploy:
     parameters:
       stack_name: 'abods-itm-cavl-app-stack'
-      s3_prefix: uat
+      s3_prefix: cavl
       capabilities: 'CAPABILITY_NAMED_IAM'
       parameter_overrides:
         ProjectName='abods'
-        Environment='uat'
+        Environment='cavl'
         VpcId='/abods/cavl/vpc/id'
         VpcSubnets='/abods/cavl/vpc/subnets/private'
 
