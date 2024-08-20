@@ -1,0 +1,102 @@
+[
+  {
+    "id": 43000700827,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:39:22Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590096,
+    "title": "Feed Status",
+    "updated_at": "2023-06-02T13:55:11Z",
+    "description": "<p data-pm-slice=\"1 1 []\">This is a feed of matched data. &nbsp;A cross indicates there is an issue with the feed, which may be related to there not being an up to date timetable or a lack of AVL data.&nbsp;</p><p>For BODS a feed is a subscription to a SIRI VM server that publishes Vehicle Monitoring updates. This may include vehicles from several different NOCs (they’ll generally belong to the same parent operator).</p><p>In ABOD a feed is just the updates from all the Vehicles belonging to a single NOC.</p>",
+    "description_text": " This is a feed of matched data.  A cross indicates there is an issue with the feed, which may be related to there not being an up to date timetable or a lack of AVL data.   For BODS a feed is a subscription to a SIRI VM server that publishes Vehicle Monitoring updates. This may include vehicles from several different NOCs (they’ll generally belong to the same parent operator).  In ABOD a feed is just the updates from all the Vehicles belonging to a single NOC. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 3,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700828,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:42:00Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590096,
+    "title": "Vehicle Count",
+    "updated_at": "2023-06-02T13:55:26Z",
+    "description": "<p>The number of vehicles on active (scheduled) journeys we're seeing in the data feed (Automatic Vehicle Location data (AVL) from BODS) vs how many we expect to see based on the schedule provided to BODS. In short, we are matching AVL to schedule data. </p>",
+    "description_text": " The number of vehicles on active (scheduled) journeys we're seeing in the data feed (Automatic Vehicle Location data (AVL) from BODS) vs how many we expect to see based on the schedule provided to BODS. In short, we are matching AVL to schedule data.  ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 1,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700829,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:42:53Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590096,
+    "title": "Current vehicles/expected vehicles",
+    "updated_at": "2023-06-02T13:55:35Z",
+    "description": "<p data-renderer-start-pos=\"6168\">The number of expected vehicles is based on the static data uploaded to BODS</p><p data-renderer-start-pos=\"6246\">The number of current vehicles is based on AVL data</p>",
+    "description_text": " The number of expected vehicles is based on the static data uploaded to BODS  The number of current vehicles is based on AVL data ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 1,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700921,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-28T08:46:02Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590096,
+    "title": "Alerts",
+    "updated_at": "2023-06-02T13:55:43Z",
+    "description": "<p dir=\"ltr\">You can change the parameters for when you receive email notifications regarding your feed in the 'My Account' section under 'Notifications'.</p>",
+    "description_text": " You can change the parameters for when you receive email notifications regarding your feed in the 'My Account' section under 'Notifications'. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  }
+]

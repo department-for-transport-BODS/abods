@@ -1,8 +1,9 @@
+useDotenv: true
 service: apollo-lambda
 provider:
   name: aws
   runtime: nodejs16.x
-  timeout: 30
+  timeout: 899
   httpApi:
     cors:
       allowCredentials: true
@@ -25,6 +26,7 @@ functions:
           path: /
           method: GET
 plugins:
+  - serverless-dotenv-plugin
   - serverless-plugin-typescript
   - serverless-offline
 

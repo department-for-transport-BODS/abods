@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import { ApolloServer } from '@apollo/server';
 import { Context } from './context.js';
-import { bods_user } from '@prisma/client';
+import { bods_organisation, bods_user } from '@prisma/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 
@@ -21,10 +21,15 @@ export type Scalars = {
 export interface RequestContext {
   req: any;
   res: any;
-  sessionUser: bods_user | null;
+  sessionUser: SessionUser;
   db: Context;
   lambdaEvent: any;
   lambdaContext: any;
+}
+
+export interface SessionUser {
+  user: bods_user | null;
+  userOrganisationIDs: number[] | null;
 }
 
 export type AddFirstStopInputType = {
@@ -1516,17 +1521,20 @@ export type ServicePunctualityType = IPunctualityType & {
   __typename?: 'ServicePunctualityType';
   early: Scalars['Int'];
   late: Scalars['Int'];
-  lineId: Scalars['String'];
-  lineInfo: ServiceInfoType;
+  lineId?: Scalars['String'];
+  lineInfo?: ServiceInfoType;
   nocCode?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
-  rank: Scalars['Float'];
+  rank?: Scalars['Float'];
+  averageDelay?: Scalars['Float'];
   /**
    * Get the performance numbers for a previous period
    * for comparison with current period.
    */
   trend?: Maybe<ServicePunctualityType>;
+  scheduledDepartures?: Scalars['Int'];
+  actualDepartures?: Scalars['Int'];
 };
 
 
@@ -1584,7 +1592,7 @@ export type StopPerformanceType = IPunctualityType & {
   lineId?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   scheduledDepartures: Scalars['Int'];
-  stopId: Scalars['String'];
+  stopId: Scalars['Int'] | Scalars['String'];
   stopIndex?: Maybe<Scalars['Int']>;
   stopInfo: StopInfoType;
   timingPoint: Scalars['Boolean'];
@@ -1649,7 +1657,8 @@ export type TransitModelTypeLinesArgs = {
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
   serviceInfo: ServiceInfoType;
-  startTime: Scalars['DateTime'];
+  //startTime: Scalars['DateTime'];
+  startTime: Scalars['String'];
   vehicleJourneyId: Scalars['String'];
 };
 
