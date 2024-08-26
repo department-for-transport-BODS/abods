@@ -1,0 +1,17 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.alerts {
+  &--empty {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+  }
+  &__item {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__edit-link {
+    flex: 0 0 auto;
+  }
+}

@@ -1,0 +1,61 @@
+[
+    {
+      "id": "1",
+      "email": "john.doe@example.com",
+      "username": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe",
+      "password": "1234",
+      "organisation": {
+        "id": "org1",
+        "name": "Acme Corp"
+      },
+      "roles": [
+        {
+          "id": "4",
+          "name": "Administrator",
+          "scope": "organisation"
+        },
+        {
+          "id": "5",
+          "name": "Administrator",
+          "scope": "system"
+        },
+        {
+          "id": "6",
+          "name": "Staff",
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "email": "jane.smith@example.com",
+      "username": "janesmith",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "password": "1234",
+      "organisation": {
+        "id": "org2",
+        "name": "Beta Ltd"
+      },
+      "roles": [
+        {
+          "id": "4",
+          "name": "Administrator",
+          "scope": "organisation"
+        },
+        {
+          "id": "5",
+          "name": "Administrator",
+          "scope": "system"
+        },
+        {
+          "id": "6",
+          "name": "Staff",
+          "scope": "organisation"
+        }
+      ]
+    }
+  ]
+  

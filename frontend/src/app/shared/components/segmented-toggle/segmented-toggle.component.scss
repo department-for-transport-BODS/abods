@@ -1,0 +1,16 @@
+@import 'src/assets/styles/settings/settings';
+
+:host {
+  display: block;
+}
+
+.segmented-toggle {
+  padding: 0;
+  margin: 0;
+  border: 0 none;
+  &__controls {
+    border: 2px solid govuk-colour('black');
+    display: inline-flex;
+    white-space: nowrap;
+  }
+}

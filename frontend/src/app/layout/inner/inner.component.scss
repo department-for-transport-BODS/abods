@@ -1,0 +1,30 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+:host {
+  display: block;
+  max-width: $max-width;
+  margin-right: $window-padding-small-screen;
+  margin-left: $window-padding-small-screen;
+  @include bp($tablet) {
+    margin-right: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+    );
+    margin-left: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+    );
+  }
+
+  @include bp($desktop) {
+    margin-right: $window-padding-large-screen;
+    margin-left: $window-padding-large-screen;
+  }
+
+  @include bp($max-desktop) {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

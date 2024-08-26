@@ -1,0 +1,11 @@
+<div class="govuk-grid-row">
+  <div class="alert-list" *ngIf="loaded">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-6">{{ title }}</h2>
+    <ul *ngIf="events.length > 0; else noEvents" class="alert-list__items">
+      <li *ngFor="let event of events" app-alert [selected]="event.id === selectedId" [alert]="event"></li>
+    </ul>
+    <ng-template #noEvents>
+      <span class="alert-list__no-items"> No events have been observed in the feed for this time period. </span>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+
+mgl-map {
+  height: 440px; //this requires a specific size set rather than the usual 100%
+}
+
+.map {
+  &__loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 2;
+  }
+  &__legend {
+    @include govuk-font(14);
+    background-color: #ffffff;
+    padding: govuk-spacing(1);
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: repeat(8, auto);
+    grid-template-rows: auto;
+  }
+
+  &__dot {
+    border-radius: 100%;
+    margin: govuk-spacing(1);
+    @include square(16px);
+
+    &--high {
+      background-color: govuk-colour('turquoise');
+    }
+    &--med {
+      background-color: govuk-colour('yellow');
+    }
+    &--low {
+      background-color: govuk-colour('red');
+    }
+    &--no-data {
+      background-color: govuk-colour('mid-grey');
+    }
+  }
+}

@@ -1,0 +1,94 @@
+fragment VehicleStat on VehicleStatsType {
+  actual
+  expected
+  timestamp
+}
+
+fragment BasicOperator on OperatorType {
+  name
+  nocCode
+  operatorId
+  feedMonitoring {
+    feedStatus
+    availability
+    lastOutage
+    unavailableSince
+    liveStats {
+      updateFrequency
+    }
+  }
+}
+
+fragment OperatorLiveStatus on OperatorType {
+  name
+  nocCode
+  operatorId
+  feedMonitoring {
+    feedStatus
+    availability
+    lastOutage
+    unavailableSince
+    liveStats {
+      updateFrequency
+      currentVehicles
+      expectedVehicles
+      last24Hours {
+        ...VehicleStat
+      }
+      last20Minutes {
+        ...VehicleStat
+      }
+    }
+  }
+}
+
+fragment OperatorFeedHistory on OperatorType {
+  name
+  nocCode
+  operatorId
+  feedMonitoring {
+    historicalStats(date: $date) {
+      updateFrequency
+      availability
+    }
+    vehicleStats(granularity: minute, start: $start, end: $end) {
+      ...VehicleStat
+    }
+  }
+}
+
+query feedMonitoringList {
+  operators {
+    items {
+      ...BasicOperator
+    }
+  }
+}
+
+query operatorSparklineStats($operatorIds: [String!]) {
+  operators(filterBy: { operatorIds: $operatorIds }) {
+    items {
+      nocCode
+      operatorId
+      feedMonitoring {
+        liveStats {
+          last24Hours {
+            ...VehicleStat
+          }
+        }
+      }
+    }
+  }
+}
+
+query operatorLiveStatus($operatorId: String!) {
+  operator(operatorId: $operatorId) {
+    ...OperatorLiveStatus
+  }
+}
+
+query operatorHistoricStats($operatorId: String!, $date: Date!, $start: DateTime!, $end: DateTime!) {
+  operator(operatorId: $operatorId) {
+    ...OperatorFeedHistory
+  }
+}

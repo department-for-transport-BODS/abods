@@ -1,0 +1,14 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+// ngx-tippy-wrapper theme for gds-tooltip can be found in assets/styles/libs
+
+.tooltip {
+  &--underline {
+    border-bottom: 2px dotted currentColor;
+  }
+
+  &--selectable {
+    user-select: text;
+  }
+}

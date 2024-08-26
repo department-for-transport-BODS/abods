@@ -1,0 +1,122 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-page-header heading="Vehicle journeys"></app-page-header>
+    <form class="journey-search__controls" [formGroup]="form">
+      <div class="govuk-form-group">
+        <app-date
+          formControlName="date"
+          label="Date"
+          [error]="date.errors ? 'Must be within the last 6 months' : undefined"
+          [validRange]="validDateRange"
+        ></app-date>
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="operator">Operator</label>
+        <ng-select
+          class="gds-select journey-search__operators"
+          formControlName="operator"
+          labelForId="operator"
+          placeholder="Select"
+          [clearable]="false"
+          [typeahead]="operatorInputTerm$"
+          (close)="operatorInputTerm$.next('')"
+          [loading]="operatorsLoading"
+        >
+          <ng-template *ngIf="operatorsLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template ng-loadingspinner-tmp>
+            <app-spinner size="x-small"></app-spinner>
+          </ng-template>
+          <ng-option *ngFor="let item of operators$ | async" [value]="item.operatorId"
+            >{{ item.name }} ({{ item.nocCode }})</ng-option
+          >
+        </ng-select>
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="service">Service name</label>
+        <ng-select
+          class="gds-select"
+          [class.journey-search__disabled]="service.disabled"
+          formControlName="service"
+          labelForId="service"
+          placeholder="Select"
+          [loading]="servicesLoading"
+        >
+          <ng-template *ngIf="servicesLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template ng-loadingspinner-tmp>
+            <app-spinner size="x-small" [style.margin-right]="service.value ? '5px' : '0px'"></app-spinner>
+          </ng-template>
+          <ng-option *ngFor="let line of services$ | async" [value]="line.id"
+            >{{ line.number }}: {{ line.name }}</ng-option
+          >
+        </ng-select>
+      </div>
+    </form>
+
+    <nav *ngIf="service.value" class="govuk-pagination journey-search-nav" role="navigation" aria-label="results">
+      <div *ngIf="!pevDisabled" class="govuk-pagination__prev">
+        <a
+          class="govuk-link govuk-pagination__link"
+          [routerLink]="[]"
+          [queryParams]="{
+            date: date.value.minus({ days: 1 }).toUTC().toISO({ format: 'basic', suppressSeconds: true })
+          }"
+          queryParamsHandling="merge"
+          rel="prev"
+        >
+          <svg-icon
+            src="assets/icons/arrow-left.svg"
+            class="govuk-pagination__icon govuk-pagination__icon--prev flex-row align-items-center"
+          ></svg-icon>
+          <span class="govuk-pagination__link-title">Previous</span>
+        </a>
+      </div>
+      <span class="journey-search-nav__date">{{ date.value.toFormat('dd/MM/yyyy') }}</span>
+      <div *ngIf="!nextDisabled" class="govuk-pagination__next">
+        <a
+          class="govuk-link govuk-pagination__link"
+          [routerLink]="[]"
+          [queryParams]="{
+            date: date.value.plus({ days: 1 }).toUTC().toISO({ format: 'basic', suppressSeconds: true })
+          }"
+          queryParamsHandling="merge"
+          rel="next"
+        >
+          <span class="govuk-pagination__link-title">Next</span>
+          <svg-icon
+            src="assets/icons/arrow-right.svg"
+            class="govuk-pagination__icon govuk-pagination__icon--next flex-row align-items-center"
+          ></svg-icon>
+        </a>
+      </div>
+    </nav>
+
+    <app-vehicle-journeys-grid
+      [data]="vehicleJourneys"
+      [loading]="journeysLoading"
+      [operatorId]="operator.value"
+      [serviceId]="service.value"
+    ></app-vehicle-journeys-grid>
+
+    <div
+      *ngIf="noJourneysFound && !errored"
+      class="flex-row justify-content-center govuk-body govuk-!-margin-top-8"
+      role="alert"
+    >
+      No journeys found
+    </div>
+    <div
+      *ngIf="errored && !journeysLoading"
+      class="flex-row justify-content-center govuk-body govuk-!-margin-top-8"
+      role="alert"
+    >
+      <svg-icon
+        class="journey-search__error-icon"
+        src="assets/icons/exclamation-in-circle.svg"
+        [applyClass]="true"
+      ></svg-icon>
+      <span>Sorry, there is a problem finding vehicle journeys. Please try again.</span>
+    </div>
+  </ng-container>
+</app-page>

@@ -1,0 +1,97 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+$dropdown-border-color: govuk-colour('black');
+$dropdown-border-width: 1px;
+$dropdown-background: govuk-colour('white');
+$dropdown-padding: govuk-spacing(2);
+
+$arrow-up-border-top: 0;
+$arrow-up-border-right: 0.3em solid rgba(164, 37, 37, 0);
+$arrow-up-border-bottom: 0.45em solid;
+$arrow-up-border-left: 0.3em solid transparent;
+
+$arrow-down-border-top: 0.45em solid;
+$arrow-down-border-right: 0.3em solid rgba(164, 37, 37, 0);
+$arrow-down-border-bottom: 0;
+$arrow-down-border-left: 0.3em solid transparent;
+
+.dropdown {
+  &__trigger {
+    padding: govuk-spacing(1) $dropdown-padding;
+    background: $dropdown-background;
+    border: $dropdown-border-width solid $dropdown-border-color;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    &:not(:disabled):hover {
+      background: $dropdown-background;
+    }
+  }
+  &__trigger-icon {
+    display: inline-block;
+    margin-left: 0.255em;
+    margin-top: auto;
+    margin-bottom: auto;
+    content: '';
+  }
+}
+
+::ng-deep {
+  .tippy-box[data-theme~='gds-popover'] {
+    padding: $dropdown-padding;
+    position: relative;
+    background-color: $dropdown-background;
+    color: inherit;
+    border-radius: 0;
+    outline: 0;
+    border: $dropdown-border-width solid $dropdown-border-color;
+    font-size: inherit;
+    line-height: inherit;
+    transition-property: transform, visibility, opacity;
+  }
+}
+
+.dropdown--top {
+  .dropdown__trigger-icon {
+    border-top: $arrow-up-border-top;
+    border-right: $arrow-up-border-right;
+    border-bottom: $arrow-up-border-bottom;
+    border-left: $arrow-up-border-left;
+  }
+  &.dropdown--open {
+    .dropdown__trigger-icon {
+      border-top: $arrow-down-border-top;
+      border-right: $arrow-down-border-right;
+      border-bottom: $arrow-down-border-bottom;
+      border-left: $arrow-down-border-left;
+    }
+    ::ng-deep {
+      .tippy-box[data-theme~='gds-popover'] {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.dropdown--bottom {
+  .dropdown__trigger-icon {
+    border-top: $arrow-down-border-top;
+    border-right: $arrow-down-border-right;
+    border-bottom: $arrow-down-border-bottom;
+    border-left: $arrow-down-border-left;
+  }
+  &.dropdown--open {
+    .dropdown__trigger-icon {
+      border-top: $arrow-up-border-top;
+      border-right: $arrow-up-border-right;
+      border-bottom: $arrow-up-border-bottom;
+      border-left: $arrow-up-border-left;
+    }
+    ::ng-deep {
+      .tippy-box[data-theme~='gds-popover'] {
+        border-top: none;
+      }
+    }
+  }
+}

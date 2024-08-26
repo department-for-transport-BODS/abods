@@ -1,0 +1,8 @@
+<div class="govuk-form-group">
+  <label class="govuk-label" [ngClass]="{ 'govuk-visually-hidden': hideLabel }" for="{{ inputId }}" *ngIf="label">
+    {{ label }}
+  </label>
+  <select #selectInput [(ngModel)]="value" (blur)="onTouch($event)" class="govuk-select" id="{{ inputId }}">
+    <ng-content></ng-content>
+  </select>
+</div>

@@ -1,0 +1,47 @@
+<div class="date" (appMouseupOutside)="closeControls()">
+  <gds-text-input
+    [inputId]="inputId"
+    [width]="width"
+    type="date"
+    [label]="label"
+    [max]="validRange.end | dateTimeToIsoDate"
+    [min]="validRange.start | dateTimeToIsoDate"
+    [ngModel]="value | dateTimeToIsoDate"
+    (ngModelChange)="inputChange($event)"
+    (focussed)="openControls()"
+    spaceBelow="0"
+    [noCal]="true"
+    [error]="error"
+    [required]="required"
+    (calClick)="toggleControls()"
+  ></gds-text-input>
+  <div class="date__controls" *ngIf="open">
+    <div class="date__calendar-header">
+      <button
+        (click)="prevMonth($event)"
+        class="date__month-step date__month-step--prev unbuttoned"
+        [ngClass]="{ 'date__month-step--disabled': month < validRange.start }"
+        aria-label="previous month"
+      >
+        <svg-icon class="date__chevron-left" src="../assets/icons/caret-left.svg"></svg-icon>
+      </button>
+      <span class="date__month-name" [ngClass]="{ 'date__month-name--this-month': month.hasSame(today, 'month') }">{{
+        month | dateTimeToFormat: 'MMMM yyyy'
+      }}</span>
+      <button
+        (click)="nextMonth($event)"
+        class="date__month-step date__month-step--next unbuttoned"
+        [ngClass]="{ 'date__month-step--disabled': month.endOf('month') >= validRange.end }"
+        aria-label="next month"
+      >
+        <svg-icon class="date__chevron-right" src="../assets/icons/caret-right.svg"></svg-icon>
+      </button>
+    </div>
+    <app-calendar
+      [month]="month"
+      [selectableRange]="validRange"
+      (dateChange)="calendarChange($event)"
+      [selected]="value"
+    ></app-calendar>
+  </div>
+</div>

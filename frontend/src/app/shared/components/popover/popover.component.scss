@@ -1,0 +1,97 @@
+@use "sass:math";
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+$popover-border-color: $govuk-border-colour;
+$popover-arrow-size: 16px;
+$popover-border-width: 1px;
+$popover-background: white;
+
+$popover-arrow-offset: $popover-arrow-size + $popover-border-width;
+$popover-border-offset: math.div(($popover-arrow-size - $popover-border-width * 2), 2);
+$popover-border-position-offset: $popover-border-width;
+
+.popover {
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    padding-left: 13px; //matches nav__link left padding
+  }
+  &__icon {
+    width: rem(20);
+    height: rem(20);
+    flex-shrink: 0;
+    vertical-align: top;
+  }
+  &__icon + &__label {
+    margin-left: govuk-spacing(2);
+  }
+}
+
+.tippy-box[data-theme~='gds-popover'] {
+  position: relative;
+  background-color: $popover-background;
+  color: inherit;
+  border-radius: 0;
+  outline: 0;
+  border: $popover-border-width solid $popover-border-color;
+  font-size: inherit;
+  line-height: inherit;
+  transition-property: transform, visibility, opacity;
+  > .tippy-arrow {
+    width: rem($popover-arrow-size);
+    height: rem($popover-arrow-size);
+    color: $popover-background;
+    &:after {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      border-color: transparent;
+      border-style: solid;
+    }
+  }
+  .tippy-content {
+    padding: 0;
+  }
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='top'] > .tippy-arrow:before {
+  border-top-color: $popover-background;
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='top'] > .tippy-arrow:after {
+  border-top-color: $popover-border-color;
+  border-width: $popover-border-offset $popover-border-offset 0;
+  top: rem($popover-arrow-offset);
+  left: $popover-border-width;
+}
+
+.tippy-box[data-theme~='gds-popover'][data-placement^='bottom'] > .tippy-arrow:before {
+  border-bottom-color: $popover-background;
+  bottom: rem($popover-arrow-size);
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='bottom'] > .tippy-arrow:after {
+  border-bottom-color: $popover-border-color;
+  border-width: 0 $popover-border-offset $popover-border-offset;
+  bottom: rem($popover-arrow-offset);
+  left: $popover-border-width;
+}
+
+.tippy-box[data-theme~='gds-popover'][data-placement^='left'] > .tippy-arrow:before {
+  border-left-color: $popover-background;
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='left'] > .tippy-arrow:after {
+  border-left-color: $popover-border-color;
+  border-width: $popover-border-offset 0 $popover-border-offset $popover-border-offset;
+  left: rem($popover-arrow-offset);
+  top: $popover-border-width;
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='right'] > .tippy-arrow:before {
+  border-right-color: $popover-background;
+  right: rem($popover-arrow-size);
+}
+.tippy-box[data-theme~='gds-popover'][data-placement^='right'] > .tippy-arrow:after {
+  border-width: $popover-border-offset $popover-border-offset $popover-border-offset 0;
+  right: rem($popover-arrow-offset);
+  top: $popover-border-width;
+  border-right-color: $popover-border-color;
+}

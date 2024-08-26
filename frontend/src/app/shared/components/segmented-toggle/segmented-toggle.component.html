@@ -1,0 +1,4 @@
+<fieldset class="segmented-toggle">
+  <legend *ngIf="legend" class="govuk-label" [ngClass]="{ 'govuk-visually-hidden': hideLegend }">{{ legend }}</legend>
+  <div class="segmented-toggle__controls"><ng-content></ng-content></div>
+</fieldset>

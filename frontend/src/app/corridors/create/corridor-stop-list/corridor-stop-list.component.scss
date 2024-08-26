@@ -1,0 +1,61 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.corridor-stop-list {
+  &__stop {
+    display: flex;
+    justify-content: space-between;
+    padding: govuk-spacing(4) govuk-spacing(1) govuk-spacing(3) govuk-spacing(2);
+    &--added {
+      background-color: govuk-colour('light-grey');
+      position: relative;
+    }
+    // adds blue line linking the stops
+    &--connected {
+      &:before {
+        content: '';
+        position: absolute;
+        display: block;
+        border-left: 5px solid govuk-colour('blue');
+        left: govuk-spacing(4);
+        top: 32px;
+        height: 100%;
+        z-index: $z-content + 1;
+      }
+    }
+    &:hover,
+    &--added {
+      .corridor-stop-list__stop-details:before {
+        border-color: govuk-colour('black');
+      }
+    }
+  }
+  &__stop-details {
+    @include govuk-font(19);
+    position: relative;
+    padding: 0 govuk-spacing(4) 0 govuk-spacing(8);
+    &:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 25px;
+      height: 25px;
+      border: 4px solid govuk-colour('mid-grey');
+      background-color: govuk-colour('white');
+      border-radius: 50%;
+      box-sizing: border-box;
+      z-index: $z-content + 2;
+    }
+  }
+  &__stop-label {
+    @include govuk-responsive-margin(1, 'bottom');
+  }
+  &__naptan {
+    color: $govuk-secondary-text-colour;
+  }
+  &__remove {
+    @include govuk-font(19);
+    padding: 0;
+    margin-right: govuk-spacing(2);
+  }
+}

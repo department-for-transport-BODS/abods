@@ -1,0 +1,14 @@
+<div class="chart-no-data-wrapper">
+  <div *ngIf="noData" class="chart-no-data-wrapper__error">
+    <svg-icon
+      class="chart-no-data-wrapper__error-icon"
+      src="assets/icons/exclamation-in-circle.svg"
+      [applyClass]="true"
+    ></svg-icon>
+
+    <span class="chart-no-data-wrapper__error-message">{{ errorMessage }}</span>
+  </div>
+  <div class="chart-no-data-wrapper__chart" [ngClass]="{ 'chart-no-data-wrapper__chart--loaded': !noData }">
+    <ng-content></ng-content>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.operator-selector {
+  display: flex;
+  align-items: center;
+
+  &__label {
+    display: inline-block;
+    padding-right: 5px;
+  }
+}
+
+.ng-select.gds-select.operator-select {
+  &.ng-select-focused {
+    .ng-select-container {
+      outline: inherit;
+      outline-offset: inherit;
+      color: $govuk-focus-text-colour;
+      background-color: $govuk-focus-colour;
+      box-shadow: 0 -2px $govuk-focus-colour, 0 0 2px $govuk-focus-colour, 0 4px $govuk-focus-text-colour !important;
+    }
+  }
+
+  .ng-select-container {
+    border: none;
+    border-radius: 0;
+    @include govuk-font(24);
+    font-weight: $font-weight-bold;
+    color: $govuk-link-colour;
+    padding: 0;
+    max-width: inherit;
+    min-height: inherit;
+    &:hover {
+      box-shadow: none;
+    }
+    .ng-arrow-wrapper {
+      width: 32px;
+    }
+    .ng-arrow {
+      top: -4px;
+      border-color: govuk-colour('blue');
+      padding: 4px;
+    }
+  }
+
+  &.ng-select-opened {
+    .ng-arrow {
+      top: 0;
+    }
+  }
+
+  .ng-dropdown-panel {
+    min-width: 400px;
+    margin-top: 2px; // allows a little of the focus shadow to be visible
+  }
+}

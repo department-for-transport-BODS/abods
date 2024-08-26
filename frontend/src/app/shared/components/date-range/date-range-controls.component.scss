@@ -1,0 +1,183 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+@import 'src/app/shared/components/date-range/date-control-variables.scss';
+
+:host {
+  position: relative;
+  z-index: $z-popover;
+}
+
+.date-range-controls {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: -2px;
+  width: 90vw;
+  background: govuk-colour('white');
+  border: $border-width solid govuk-colour('black');
+  box-sizing: border-box;
+  width: calc($calendar-width + ($date-range-padding * 2) + ($border-width * 2));
+
+  &__table {
+    border-spacing: 0px 0px;
+  }
+  &__table-cell {
+    padding: 0px;
+    &--included {
+      background-color: govuk-colour('light-grey');
+    }
+    &--end {
+      background-color: govuk-colour('light-grey');
+      border-top-right-radius: 999em;
+      border-bottom-right-radius: 999em;
+    }
+    &--start {
+      background-color: govuk-colour('light-grey');
+      border-top-left-radius: 999em;
+      border-bottom-left-radius: 999em;
+    }
+  }
+
+  &__date-range {
+    padding: $date-range-padding;
+  }
+
+  &__calendar-wrapper {
+    margin-bottom: govuk-spacing(1);
+  }
+
+  &__calendar {
+    width: $calendar-width;
+  }
+
+  &__calendar-header {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: govuk-spacing(1);
+  }
+
+  &__month-name {
+    @include govuk-font(19);
+    &--this-month {
+      font-weight: $govuk-font-weight-bold;
+    }
+  }
+  &__month-step {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: block;
+    width: 24px;
+    height: 24px;
+    color: govuk-colour('blue');
+    &--disabled {
+      pointer-events: none;
+      color: govuk-colour('mid-grey');
+    }
+    &--next {
+      right: 0;
+    }
+    &--prev {
+      left: 0;
+    }
+  }
+
+  &__chevron-left,
+  &__chevron-right {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  &__calendar-day-names {
+    display: flex;
+    align-items: center;
+  }
+
+  &__day,
+  &__day-name {
+    width: $day-width;
+    height: $day-width;
+    display: inline-flex;
+    position: relative;
+    color: govuk-colour('black');
+    align-items: center;
+    justify-content: center;
+    @include govuk-font(19);
+    user-select: none;
+    padding: 3px govuk-spacing(1);
+  }
+
+  &__day {
+    position: relative;
+    &:hover {
+      cursor: pointer;
+      &::after {
+        background-color: $light-grey-alpha;
+        border-radius: 100%;
+        bottom: 0;
+        content: '';
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    }
+    &--today {
+      font-weight: $govuk-font-weight-bold;
+    }
+    &--disabled {
+      color: govuk-colour('mid-grey');
+      pointer-events: none;
+    }
+    &--start,
+    &--end {
+      color: govuk-colour('white');
+    }
+    &--start {
+      border-radius: 100%;
+      background-color: govuk-colour('blue');
+    }
+    &--end {
+      border-radius: 100%;
+      background-color: govuk-colour('blue');
+    }
+    &--included:not(.date-range-controls__day--end, .date-range-controls__day--start) {
+      background-color: govuk-colour('light-grey');
+      &:hover {
+        &::after {
+          background-color: $light-grey-alpha-darken;
+        }
+      }
+    }
+    &--invisible {
+      visibility: hidden;
+    }
+    &--saturday {
+      &::before {
+        content: '';
+        position: absolute;
+        border-left: 1px solid $govuk-border-colour;
+        top: 0;
+        bottom: 0;
+        left: -1px;
+      }
+    }
+  }
+
+  &__buttons {
+    margin-top: govuk-spacing(4);
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+@include bp($tablet) {
+  .date-range-controls {
+    width: calc(($calendar-width * 2) + ($date-range-padding * 2) + ($border-width * 2) + $grid-gap);
+  }
+}

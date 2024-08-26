@@ -1,0 +1,90 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+@mixin skeleton-height($style) {
+  $size-data: map-get($govuk-typography-scale, $style);
+  @if type-of($size-data) == 'map' {
+    $base-breakpoint: map-get($size-data, null);
+    $tablet-breakpoint: map-get($size-data, tablet);
+    @if type-of($base-breakpoint) == 'map' {
+      height: map-get($base-breakpoint, line-height);
+    }
+    @if type-of($tablet-breakpoint) == 'map' {
+      @include bp($tablet) {
+        height: map-get($tablet-breakpoint, line-height);
+      }
+    }
+  }
+}
+
+.skeleton {
+  background: govuk-colour('light-grey');
+  display: block;
+  position: relative;
+  overflow: hidden;
+  &::after {
+    left: 0;
+    height: 100%;
+    content: '';
+    position: absolute;
+    width: 100%;
+    background: linear-gradient(100deg, transparent 5%, rgba(255, 255, 255, 0.6) 25%, transparent 45%);
+    animation: shimmer 3s infinite;
+  }
+  &--heading-xl,
+  &--heading-l,
+  &--heading-m,
+  &--heading-s,
+  &--caption-xl,
+  &--caption-l,
+  &--caption-m,
+  &--caption-s,
+  &--body-l,
+  &--body,
+  &--body-s {
+    transform: scaleY(0.75); // optical adjustment - because line-heights match the actual size - but they look too big.
+  }
+  &--heading-xl {
+    @include skeleton-height(48);
+    margin-bottom: govuk-spacing(8);
+  }
+  &--caption-xl {
+    @include skeleton-height(27);
+    margin-bottom: govuk-spacing(1);
+  }
+  &--heading-l {
+    @include skeleton-height(36);
+  }
+
+  &--body,
+  &--caption-m,
+  &--heading-s {
+    @include skeleton-height(19);
+  }
+  &--body-l,
+  &--caption-l,
+  &--heading-m {
+    @include skeleton-height(24);
+  }
+  &--body-s {
+    @include skeleton-height(16);
+  }
+  &--body-l,
+  &--heading-l {
+    margin-bottom: govuk-spacing(6);
+  }
+  &--body-s,
+  &--body,
+  &--heading-m,
+  &--heading-s {
+    margin-bottom: govuk-spacing(4);
+  }
+}
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

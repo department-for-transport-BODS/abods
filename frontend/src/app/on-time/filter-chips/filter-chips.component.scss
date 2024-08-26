@@ -1,0 +1,17 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.filter-chips {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+
+  &__item {
+    margin-bottom: govuk-spacing(2);
+    margin-right: govuk-spacing(2);
+  }
+}

@@ -1,0 +1,19 @@
+<div class="govuk-radios__item">
+  <input
+    class="govuk-radios__input"
+    [id]="inputId"
+    [attr.data-qa]="inputId"
+    [name]="inputName"
+    type="radio"
+    [(ngModel)]="selectedOption"
+    [value]="value"
+    [attr.aria-describedby]="hintId"
+    [attr.data-aria-controls]="controls"
+    (change)="changeValue(value)"
+    (blur)="onTouched()"
+  />
+  <label class="govuk-label govuk-radios__label" for="{{ inputId }}">
+    {{ label }}
+  </label>
+  <div *ngIf="hint" [id]="hintId" class="govuk-hint govuk-radios__hint">{{ hint }}</div>
+</div>

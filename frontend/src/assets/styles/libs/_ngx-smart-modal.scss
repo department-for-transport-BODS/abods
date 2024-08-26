@@ -1,0 +1,143 @@
+/* NgxSmartModal variables override */
+$dialog-position-top: 40px;
+// Color of overlay background
+$color-overlay: rgba(0, 0, 0, 0.8) !default;
+
+// Body if modal is opened
+body.dialog-open {
+  overflow: hidden;
+}
+
+// Overlay
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: background-color $transition-duration;
+  background-color: transparent;
+  z-index: var(--z-index-modal);
+  display: flex;
+  justify-content: center;
+  &.nsm-overlay-open {
+    background-color: $color-overlay;
+  }
+
+  &.transparent {
+    background-color: transparent;
+  }
+}
+
+// Dialog modal
+.nsm-dialog {
+  position: relative;
+  top: $dialog-position-top;
+  opacity: 1;
+  visibility: visible;
+  min-height: 200px;
+  max-height: calc(100vh - #{$dialog-position-top});
+  width: 640px;
+  max-width: 95%;
+  margin-left: 5px;
+  margin-right: 5px;
+
+  // When dialog is closing
+  &.nsm-dialog-close {
+    opacity: 0;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+.nsm-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  background-clip: padding-box;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  // For performance purpose
+  transform: translate3d(0, 0, 0);
+}
+
+.nsm-body {
+  position: relative;
+  flex: 1 1 auto;
+}
+
+/* *************************
+* Animations
+* *************************/
+
+.nsm-dialog[class*='nsm-dialog-animation-'] {
+  transition: transform $transition-duration $transition-easing, opacity $transition-duration;
+}
+
+.nsm-dialog-animation-fade {
+  opacity: 0;
+  &.nsm-dialog-open {
+    opacity: 1;
+  }
+  &.nsm-dialog-close {
+    opacity: 0;
+  }
+}
+
+// Left to right (ltr)
+.nsm-dialog-animation-ltr {
+  transform: translate3d(-50%, 0, 0);
+
+  &.nsm-dialog-open {
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.nsm-dialog-close {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+// Right to left (ltr)
+.nsm-dialog-animation-rtl {
+  transform: translate3d(50%, 0, 0);
+
+  &.nsm-dialog-open {
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.nsm-dialog-close {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+
+// Top to bottom (ttb)
+.nsm-dialog-animation-ttb {
+  transform: translate3d(0, -50%, 0);
+
+  &.nsm-dialog-open {
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.nsm-dialog-close {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+// Bottom to top (btt)
+.nsm-dialog-animation-btt {
+  transform: translate3d(0, 50%, 0);
+
+  &.nsm-dialog-open {
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.nsm-dialog-close {
+    transform: translate3d(0, 50%, 0);
+  }
+}

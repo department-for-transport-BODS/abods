@@ -1,0 +1,35 @@
+<div class="journey-nav">
+  <span>Journey</span>
+  <ng-container *ngIf="!loading; else skeleton">
+    <a
+      class="journey-nav__link"
+      [class.journey-nav__link--disabled]="!previous"
+      [routerLink]="previous ? ['/vehicle-journeys', previous.vehicleJourneyId] : null"
+      [queryParams]="{ startTime: formatStartTime(previous?.startTime) }"
+      queryParamsHandling="merge"
+      [ngxTippy]="prevTooltip"
+      [tippyProps]="tippyProps"
+    >
+      <svg-icon class="journey-nav__icon" src="assets/icons/caret-left.svg" [applyClass]="true"></svg-icon>
+      <div #prevTooltip>{{ previous?.lineNumber }}: {{ previous?.servicePattern }}</div>
+      <span *ngIf="previous">{{ previous.startTime | dateTimeToFormat: 'HH:mm' }}</span>
+    </a>
+
+    <a
+      class="journey-nav__link"
+      [class.journey-nav__link--disabled]="!next"
+      [routerLink]="next ? ['/vehicle-journeys', next.vehicleJourneyId] : null"
+      [queryParams]="{ startTime: formatStartTime(next?.startTime) }"
+      queryParamsHandling="merge"
+      [ngxTippy]="nextTooltip"
+      [tippyProps]="tippyProps"
+    >
+      <div #nextTooltip>{{ next?.lineNumber }}: {{ next?.servicePattern }}</div>
+      <span *ngIf="next">{{ next.startTime | dateTimeToFormat: 'HH:mm' }}</span>
+      <svg-icon class="journey-nav__icon" src="assets/icons/caret-right.svg" [applyClass]="true"></svg-icon>
+    </a>
+  </ng-container>
+  <ng-template #skeleton
+    ><app-skeleton class="govuk-!-margin-left-2" appearance="body" width="150px"></app-skeleton
+  ></ng-template>
+</div>

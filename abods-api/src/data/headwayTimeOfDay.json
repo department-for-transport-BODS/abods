@@ -1,0 +1,9 @@
+[
+  {
+    "actualWaitTime": 6.2,
+    "excessWaitTime": 0.7,
+    "scheduledWaitTime": 5.5,
+    "timeOfDay": "08:00:00"
+  }
+  
+]

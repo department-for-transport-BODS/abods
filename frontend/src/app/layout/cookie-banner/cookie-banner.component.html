@@ -1,0 +1,48 @@
+<div
+  *ngIf="!hidden"
+  class="govuk-cookie-banner"
+  data-nosnippet
+  role="region"
+  aria-label="Cookies on Analyse Bus Open Data"
+>
+  <div app-inner class="govuk-cookie-banner__message">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Analyse Bus Open Data</h2>
+        <div class="govuk-cookie-banner__content">
+          <ng-container *ngIf="!submitted">
+            <p class="govuk-body">We use some essential cookies to make this service work.</p>
+            <p class="govuk-body">
+              We’d also like to use analytics cookies so we can understand how you use the service and make
+              improvements.
+            </p>
+          </ng-container>
+          <p *ngIf="submitted && analyticsEnabled" class="govuk-body">
+            You’ve accepted analytics cookies. You can
+            <a class="govuk-link" [attr.data-qa]="'view-cookies-accept'" routerLink="/cookies"
+              >change your cookie settings</a
+            >
+            at any time.
+          </p>
+          <p *ngIf="submitted && !analyticsEnabled" class="govuk-body">
+            You’ve rejected analytics cookies. You can
+            <a class="govuk-link" [attr.data-qa]="'view-cookies-reject'" routerLink="/cookies"
+              >change your cookie settings</a
+            >
+            at any time.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="govuk-button-group">
+      <gds-button *ngIf="submitted" buttonId="hide-cookie-message" (click)="onHide()">Hide cookie message</gds-button>
+      <ng-container *ngIf="!submitted">
+        <gds-button (click)="onAccept()" buttonId="accept-cookies">Accept analytics cookies</gds-button>
+        <gds-button (click)="onReject()" buttonId="reject-cookies">Reject analytics cookies</gds-button>
+        <a id="view-cookies" [attr.data-qa]="'view-cookies'" class="govuk-link button-link" routerLink="/cookies"
+          >View cookies</a
+        >
+      </ng-container>
+    </div>
+  </div>
+</div>

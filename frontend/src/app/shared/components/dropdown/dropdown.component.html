@@ -1,0 +1,22 @@
+<div
+  [ngClass]="{
+    'dropdown--open': isOpen,
+    'dropdown--top': position === 'top-start',
+    'dropdown--bottom': position === 'bottom-start'
+  }"
+>
+  <button
+    type="button"
+    [ngxTippy]="dropdownContent"
+    class="govuk-body dropdown__trigger"
+    [tippyName]="identifier"
+    [tippyProps]="tippyProps"
+    [style.width]="triggerWidth"
+  >
+    <span>{{ triggerLabel }}</span>
+    <span class="dropdown__trigger-icon"></span>
+  </button>
+  <div #dropdownContent [style.width]="contentWidth">
+    <ng-content></ng-content>
+  </div>
+</div>

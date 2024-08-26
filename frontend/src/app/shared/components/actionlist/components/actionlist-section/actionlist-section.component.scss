@@ -1,0 +1,19 @@
+@import 'src/assets/styles/settings/settings.scss';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+:host {
+  border-top: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid $govuk-border-colour;
+  margin: 5px 0;
+  padding: 5px 0;
+}
+
+.actionlist-section {
+  &__title {
+    padding: 5px 10px;
+    margin: 0;
+    font-size: rem(16);
+    color: govuk-colour('dark-grey');
+    font-weight: 400;
+  }
+}

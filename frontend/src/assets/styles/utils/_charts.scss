@@ -1,0 +1,43 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+// util styles for amchart styles to share
+
+.amcharts {
+  &__tooltip-heading {
+    margin-bottom: govuk-spacing(2);
+    font-weight: $govuk-font-weight-bold;
+  }
+  &__tooltip-table {
+    display: grid;
+    grid-column-gap: govuk-spacing(1);
+    grid-row-gap: govuk-spacing(1);
+    grid-template-columns: minmax(90px, 1fr) auto;
+    align-items: center;
+    justify-content: space-between;
+    @include govuk-typography-responsive(16);
+    margin-bottom: govuk-spacing(1);
+  }
+  &__tooltip-legend-prefix {
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: govuk-spacing(2);
+    }
+    &--on-time::before {
+      background: raas-colour('on-time');
+    }
+    &--early::before {
+      background: raas-colour('early');
+    }
+    &--late::before {
+      background: raas-colour('late');
+    }
+  }
+  &__tooltip-value {
+    text-align: right;
+    font-weight: $govuk-font-weight-bold;
+  }
+}

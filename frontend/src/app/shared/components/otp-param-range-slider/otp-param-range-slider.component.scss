@@ -1,0 +1,47 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.otp-param-range-slider {
+  &__legend {
+    display: flex;
+    justify-content: space-between;
+    &__label {
+      display: flex;
+      flex-direction: column-reverse;
+      @include govuk-font(19);
+    }
+    &__label-centre {
+      text-align: center;
+      @include govuk-font(16);
+      &__value {
+        color: $govuk-secondary-text-colour;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: normal;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+  }
+  &__marks {
+    display: flex;
+    height: 0;
+    justify-content: center;
+  }
+  &__mark-centre {
+    height: 20px;
+    width: 3px;
+    margin-top: 10px;
+    z-index: 2;
+    background-color: govuk-colour('black');
+  }
+  ::ng-deep {
+    .noUi-connect {
+      background-color: raas-colour('on-time');
+      &:first-child {
+        background-color: raas-colour('early');
+      }
+      &:last-child {
+        background-color: raas-colour('late');
+      }
+    }
+  }
+}

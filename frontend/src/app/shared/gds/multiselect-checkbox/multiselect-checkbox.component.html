@@ -1,0 +1,50 @@
+<ng-select
+  class="gds-multiselect-checkbox gds-select"
+  [items]="options ? options : []"
+  [multiple]="true"
+  [clearable]="false"
+  [closeOnSelect]="false"
+  [clearSearchOnAdd]="true"
+  [placeholder]="placeholderText"
+  [(ngModel)]="selected"
+  bindValue="value"
+  [labelForId]="labelForId ? labelForId : null"
+  [inputAttrs]="ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}"
+  (change)="onOptionChange()"
+>
+  <ng-template ng-multi-label-tmp let-items="items">
+    <div class="ng-value" [ngSwitch]="items?.length || 0">
+      <span class="ng-value-label" *ngSwitchCase="0">{{ placeholderText }}</span>
+      <span class="ng-value-label" *ngSwitchCase="1">{{ $any(items[0]).label }}</span>
+      <span class="ng-value-label" *ngSwitchDefault>{{ items?.length }} {{ pluralLabel }}</span>
+    </div>
+  </ng-template>
+  <ng-template *ngIf="showAll" ng-header-tmp>
+    <div class="gds-multiselect-checkbox__show-all">
+      <strong>{{ showAllLabel }}</strong>
+      <button
+        class="button-link govuk-link"
+        [ngClass]="selected.length === 0 ? 'button-link--disabled' : ''"
+        [disabled]="selected.length === 0"
+        (click)="onShowAll()"
+        type="button"
+      >
+        Show all
+      </button>
+    </div>
+  </ng-template>
+  <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+    <div class="govuk-checkboxes--small">
+      <div class="govuk-checkboxes__item">
+        <input
+          class="govuk-checkboxes__input"
+          [name]="checkboxItemInputId + index"
+          type="checkbox"
+          [value]="item.value"
+          [checked]="item$.selected"
+        />
+        <label class="govuk-label govuk-checkboxes__label" [for]="checkboxItemInputId + index">{{ item.label }}</label>
+      </div>
+    </div>
+  </ng-template>
+</ng-select>

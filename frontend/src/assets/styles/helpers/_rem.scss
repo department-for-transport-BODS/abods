@@ -1,0 +1,27 @@
+@charset "UTF-8";
+@use "sass:math";
+// -----------------------------------------------------------------------------
+// REM
+// -----------------------------------------------------------------------------
+
+//  convert number to rem
+//
+//  @argument  {number (unitless)}  $pxval
+//    text size
+//
+//  @example scss
+//  .element {
+//    font-size: rem(15);
+//  }
+//
+//  CSS Output
+//  .element {
+//    font-size: 0.9375rem;
+//  }
+
+@function rem($pxval) {
+  @if not unitless($pxval) {
+    $pxval: strip-unit($pxval);
+  }
+  @return math.div($pxval, $rem-base) * 1rem;
+}

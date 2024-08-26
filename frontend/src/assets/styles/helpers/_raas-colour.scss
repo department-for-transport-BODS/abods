@@ -1,0 +1,9 @@
+@function raas-colour($parent, $variant: base) {
+  @if map-has-key($raas-colours, $parent) {
+    $parent-map: map-get($raas-colours, $parent);
+    @if map-has-key($parent-map, $variant) {
+      @return map-get($parent-map, $variant);
+    }
+  }
+  @error 'color '#{$parent} - #{$variant}' not found.';
+}

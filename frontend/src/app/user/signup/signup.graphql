@@ -1,0 +1,13 @@
+mutation signUp($key: String!, $password: String!, $firstName: String!, $lastName: String!) {
+  signUp(payload: { key: $key, password: $password, firstName: $firstName, lastName: $lastName }) {
+    error
+    success
+  }
+}
+
+query Invitation($key: String!) {
+  invitation(key: $key) {
+    email
+    accepted
+  }
+}

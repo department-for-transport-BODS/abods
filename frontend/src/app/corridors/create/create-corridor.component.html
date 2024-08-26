@@ -1,0 +1,197 @@
+<app-page>
+  <ng-container ngProjectAs="back-link">
+    <gds-back-link label="All corridors" [route]="['/corridors']"></gds-back-link>
+  </ng-container>
+  <ng-container ngProjectAs="content">
+    <ng-container *ngIf="!errorView; else error">
+      <app-page-header
+        caption="Corridors"
+        [heading]="isEdit ? 'Edit corridor' : 'Create new corridor'"
+      ></app-page-header>
+      <gds-error-summary [errors]="createError"></gds-error-summary>
+      <form
+        [formGroup]="corridorForm"
+        class="create-corridor"
+        (ngSubmit)="isEdit ? updateCorridor() : createCorridor()"
+      >
+        <gds-text-input
+          #corridorName
+          formControlName="name"
+          inputId="corridor-name"
+          type="text"
+          label="Enter a corridor name"
+          width="20"
+          [error]="
+            submitted && name.errors?.required
+              ? 'Name is required'
+              : submitted && name.errors?.maxlength
+              ? 'Maximum length 256 characters'
+              : undefined
+          "
+        ></gds-text-input>
+        <div class="create-corridor__stops-layout">
+          <div class="govuk-!-margin-right-6 create-corridor__form-column">
+            <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
+
+            <app-corridor-stop-list
+              [loading]="loading"
+              [corridorStops]="corridorStops"
+              [isEdit]="isEdit"
+              (mouseLeave)="corridorMap.mapClearHover()"
+              (mouseOver)="corridorMap.mapSetHover($event, true)"
+              (removeLastStop)="removeLastStop()"
+            >
+            </app-corridor-stop-list>
+
+            <ng-container *ngIf="!isEdit && stopList.length === 0">
+              <gds-select
+                class="create-corridor__search-mode-select"
+                inputId="search-mode"
+                label="Search for the first stop in your corridor"
+                formControlName="searchMode"
+              >
+                <option value="location">Location</option>
+                <option value="stop">Stop</option>
+              </gds-select>
+              <div class="create-corridor__search" [ngSwitch]="searchMode.value">
+                <gds-text-input
+                  *ngSwitchCase="'stop'"
+                  formControlName="stopQuery"
+                  inputId="stop-query"
+                  type="text"
+                  label="Stop name or NaPTAN code"
+                  placeholder="Enter four or more characters"
+                  width="20"
+                ></gds-text-input>
+                <div *ngSwitchCase="'location'">
+                  <label class="govuk-label" for="location-query">Location name or postcode</label>
+                  <ng-select
+                    class="gds-select create-corridor__location govuk-input--width-20"
+                    labelForId="location-query"
+                    placeholder="Search"
+                    (change)="selectLocation($event)"
+                    [typeahead]="locationSearch$"
+                    [loading]="locationsLoading"
+                  >
+                    <ng-template ng-loadingspinner-tmp>
+                      <app-spinner size="x-small"></app-spinner>
+                    </ng-template>
+                    <ng-option *ngFor="let location of locations?.features" [value]="location">
+                      {{ location.text }}
+                      <span class="govuk-body-s text-secondary">
+                        {{ [location | geoContext: 'locality', location | geoContext: ['place', 'district']] | join }}
+                      </span>
+                    </ng-option>
+                  </ng-select>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="loading">
+              <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-2">Searching for stops...</h3>
+              <div class="flex-row justify-content-center govuk-!-margin-6">
+                <app-spinner></app-spinner>
+              </div>
+            </ng-container>
+
+            <div *ngIf="noData && stopQuery.errors?.minlength" class="create-corridor__no-stops" id="stop-query-hint">
+              Enter at least 4 characters
+            </div>
+
+            <div *ngIf="noData && stopQuery.valid" [ngSwitch]="stopList.length">
+              <div class="create-corridor__no-stops" *ngSwitchCase="0">Your organisation has no matching stops</div>
+              <div class="create-corridor__no-further-stops" *ngSwitchDefault>No further stops available</div>
+            </div>
+
+            <div *ngIf="hasSelectedLocation && zoomedTooFarOut" class="govuk-error-message">
+              Search area too large, please zoom in to show stops
+            </div>
+
+            <h3
+              *ngIf="matchingStops?.features?.length && !loading"
+              [ngSwitch]="stopList.length"
+              class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-2"
+            >
+              <span *ngSwitchCase="0">{{ matchingStops?.features?.length }} matching stops</span>
+              <span *ngSwitchDefault>Add further stops</span>
+            </h3>
+
+            <app-stop-search-list
+              [matchingStops]="matchingStops"
+              [isFirstStop]="!stopList.length"
+              (mouseOver)="corridorMap.mapSetHover($event, true)"
+              (mouseLeave)="corridorMap.mapClearHover()"
+              (addStop)="addStop($event)"
+            ></app-stop-search-list>
+
+            <div *ngIf="matchingStops || corridorStops" class="flex-row justify-content-between govuk-!-margin-top-6">
+              <gds-button
+                text="Cancel"
+                appearance="secondary"
+                (click)="navigateToPreviousView()"
+                [attr.tabindex]="null"
+              ></gds-button>
+              <div *ngIf="corridorStops && stopList.length > 1">
+                <gds-button
+                  *ngIf="isEdit"
+                  [text]="creating ? undefined : 'Save as new'"
+                  buttonId="save-as-new-btn"
+                  appearance="secondary"
+                  class="govuk-!-margin-right-3"
+                  [disabled]="loading || updating || creating"
+                  (click)="createCorridor()"
+                >
+                  <div *ngIf="creating" class="flex-row justify-content-center">
+                    <app-spinner size="x-small"></app-spinner>
+                  </div>
+                </gds-button>
+                <gds-button
+                  type="submit"
+                  buttonId="finish-btn"
+                  [text]="(isEdit ? updating : creating) ? undefined : isEdit ? 'Save' : 'Finish'"
+                  [disabled]="loading || updating || creating"
+                >
+                  <div *ngIf="isEdit ? updating : creating" class="flex-row justify-content-center">
+                    <app-spinner size="x-small"></app-spinner>
+                  </div>
+                </gds-button>
+              </div>
+            </div>
+            <div *ngIf="isEdit" class="flex-row govuk-!-margin-top-6">
+              <gds-button
+                text="Delete this corridor"
+                appearance="warning"
+                (click)="confirmDeleteCorridor()"
+                [disabled]="loading || updating || creating"
+              ></gds-button>
+            </div>
+          </div>
+
+          <div class="create-corridor__map-column">
+            <app-corridor-map
+              [stopList]="stopList"
+              [matchingStops]="matchingStops"
+              [matchingStopLines]="matchingStopLines"
+              [corridorStops]="corridorStops"
+              [corridorLine]="corridorLine"
+              [otherStops]="otherStops"
+              [nonOrgStops]="nonOrgStops"
+              [displayRecentreButton]="displayRecentreButton()"
+              [resetMoveCounter]="resetMoveCounter"
+              (selectStop)="addStop($event)"
+              (boundsChanged)="boundsChange$.next($event)"
+              (recentreMap)="centreMapBounds()"
+            ></app-corridor-map>
+          </div>
+        </div>
+      </form>
+    </ng-container>
+  </ng-container>
+</app-page>
+
+<ng-template #error>
+  <app-page-header caption="Corridors" [heading]="errorView?.errorHeading" spaceAbove="2"></app-page-header>
+  <p class="govuk-body">{{ errorView?.errorMessage }} Go back to <a [routerLink]="['/corridors']">All corridors</a>?</p>
+</ng-template>
+
+<app-delete-corridor-modal [corridor]="corridor" (deleteCorridor)="deleteCorridor()"></app-delete-corridor-modal>
