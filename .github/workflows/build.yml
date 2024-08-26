@@ -1,68 +1,45 @@
 name: build application
-run-name: build application from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-    github.ref_name == 'test' && 'test' ||
-    github.ref_name == 'cavl' && 'cavl' ||
-    github.ref_name == 'uat' && 'uat' ||
-    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+run-name: build application from ${{ github.ref_name }} @ ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 
 on:
   workflow_dispatch:
-    branches:
-    - main
-    inputs:
-      change:
-        type: choice
-        description: type of change - one of ['patch', 'minor', 'major']
-        required: true
-        default: 'patch'
-        options: 
-        - 'patch'
-        - 'minor'
-        - 'major'
   push:
     branches:
-    - 'main'
     - 'sandbox'
     - 'dev'
-    - 'test'
-    - 'uat'
     paths:
     - 'VERSION'
     - 'abods-api/**'
     - 'frontend/**'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-    github.ref_name == 'test' && 'test' ||
+  group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+    github.event_name == 'release' && 'prod' ||
+    startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+    github.ref_name == 'main' && 'uat' ||
     github.ref_name == 'cavl' && 'cavl' ||
-    github.ref_name == 'uat' && 'uat' ||
+    github.ref_name == 'test' && 'test' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
-  RC_ENV: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-    github.ref_name == 'test' && 'test' ||
-    github.ref_name == 'cavl' && 'cavl' ||
-    github.ref_name == 'uat' && 'uat' ||
-    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
-  RC_TYP: ${{ (github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v'))) && github.event.inputs.change || 'patch' }}
+  RC_ENV: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   RC_DST_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
 
 jobs:
   validation:
     runs-on: pcoe-runner-linux-small-prod
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'cavl' && 'cavl' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    environment: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
       AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
-      VERSION: ${{ steps.increment.outputs.VERSION }}
+      VERSION: ${{ steps.validate.outputs.VERSION }}
+
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
-
       - name: checkout
         uses: actions/checkout@v4
 
@@ -71,38 +48,50 @@ jobs:
         with:
           node-version: 18
 
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-app-build-validation
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
       - name: validate job parameters
+        env:
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
+        id: validate
         run: |
-          echo """ \
-            Executing build and release job using parameters:
-              (Release Type) - $RC_TYP
-              (Parameter Environment) - $RC_ENV
-          """
+          echo "github.ref_name is ${{ github.ref_name }} and condition evaluates to ${{ !(contains(fromJSON('["test", "cavl", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}"
+
+          if [[ ${{ !(github.ref_name == 'test' || github.ref_name == 'cavl' || github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) }} ]]; then
+            if [[ ${GITHUB_REF_NAME} == 'dev' ]]; then
+              # install yq for parsing yaml files
+              sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
+                sudo chmod 755 /usr/bin/yq
+              new_version=$(yq e '.version' VERSION)
+              echo "VERSION=${new_version}" >> "$GITHUB_OUTPUT"
+
+              rc_path="$RC_DST/releases/$new_version"
+              if [[ `aws s3 ls s3://$rc_path|head` ]]; then
+                echo "[INFO] Release candidate version [${new_version}] already exists. Version number must be incremented to allow for a new build. Exiting"
+                exit 1
+              else
+                echo "[INFO] Running on development branch, building as release for promotion through to live"
+              fi
+            else
+              echo "[INFO] Running on feature branch, building as release for sandbox environment"
+              echo "VERSION=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "[ERROR] It is only possible to build from dev or sandbox/a feature branch. Exiting"
+            exit 1
+          fi
 
       - name: set environment specific vars
         id: set-vars
         run: |
           echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
-
-      - name: increment the ${{ env.RC_TYP }} version
-        id: increment
-        run: |          
-          if [[ ${GITHUB_REF_NAME} != 'main' ]]; then
-            echo "[INFO] Running on a feature branch, skipping version increment"
-            echo "VERSION=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
-          else
-            # install yq for parsing yaml files
-            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
-              sudo chmod 755 /usr/bin/yq
-
-            npm install semver
-            current_version=$(yq e '.version' VERSION)
-            new_version=$(node -p "const semver = require('semver'); semver.inc('${current_version#v}', '$RC_TYP', false)")
-            echo "[INFO] New application version v${new_version}"
-            
-            # outputs
-            echo "VERSION=v${new_version}" >> "$GITHUB_OUTPUT"
-          fi
 
   backend:
     runs-on: pcoe-runner-linux-small-prod
@@ -134,7 +123,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ env.RC_ENV }}-backend-app-build
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-backend-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
@@ -143,7 +132,7 @@ jobs:
           RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/backend" || rc_path="releases/$VERSION/backend"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/backend" || rc_path="releases-dev/$VERSION/backend"
 
           sam build && \
             sam package \
@@ -154,12 +143,11 @@ jobs:
           aws s3 cp packaged.yaml s3://$RC_DST/$rc_path/
           aws s3 cp samconfig.yaml s3://$RC_DST/$rc_path/
 
-          echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully uploaded"
+          echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully built uploaded"
 
   frontend:
     runs-on: pcoe-runner-linux-prod
-    needs: 
-      - validation
+    needs: validation
     defaults:
       run:
         working-directory: frontend
@@ -167,6 +155,23 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
+    strategy:
+      matrix:
+        environment: [sandbox, dev, test, cavl, uat]
+        isRelease:
+          - ${{ contains(github.ref, 'dev') }}
+        exclude:
+          - isRelease: false
+            environment: dev
+          - isRelease: false
+            environment: test
+          - isRelease: false
+            environment: cavl
+          - isRelease: false
+            environment: uat
+          - isRelease: true
+            environment: sandbox
 
     steps:
       - name: checkout
@@ -182,20 +187,21 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ env.RC_ENV }}-frontend-app-build
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
       - name: package and push frontend code
         env:
           CI: ""
+          ENVIRONMENT: ${{ matrix.environment }}
           RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ ${GITHUB_REF##*/} != 'main' ]] && rc_path="releases-dev/$VERSION/frontend" || rc_path="releases/$VERSION/frontend"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="releases-dev/$VERSION/frontend/$ENVIRONMENT"
 
           # determine environment variables for build
-          domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
+          domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
           freshdesk_api_url="https://${domain_name}/freshdesk/"
           graphql_api_url="https://${domain_name}/api/graphql"
@@ -215,13 +221,14 @@ jobs:
           npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
             ng build -c production
 
-          echo "[INFO] Uploading application component (FRONTEND) for ${ENV^^}"
+          echo "[INFO] Uploading application component (FRONTEND) for ${ENVIRONMENT^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
           aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
-          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENV^^}"
+
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENVIRONMENT^^}"
 
   commit-and-tag:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
     runs-on: pcoe-runner-linux-small-prod
     needs:
       - validation
@@ -236,29 +243,20 @@ jobs:
         uses: actions/checkout@v4
 
       - name: commit and push changes
+        env:
+          VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          # install yq for parsing yaml files
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
-            sudo chmod 755 /usr/bin/yq
-
-          new_version=${{ needs.validation.outputs.VERSION }}
-          yq e -i '.version = "'"$new_version"'"' VERSION
-          echo "[INFO] Updated application version to ${new_version}"
+          echo "[INFO] Tagging commit as version [${VERSION}]"
 
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git config --global url.https://${{ github.token }}@github.com/.insteadOf https://github.com/
 
-
-          git add VERSION
-          git commit -m "[AUTO] GitHub actions push for version $new_version"
-          git push --force
-
-          git tag $new_version
+          git tag $VERSION
           git push --tags --force
 
   trigger-deploy-dev:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(github.ref, 'main') || startsWith(github.ref, 'refs/tags/v')) }}
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(fromJSON('["test", "cavl", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: pcoe-runner-linux-small-prod
     needs: 
       - validation
@@ -274,5 +272,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: ${{ github.repository }}
-          event-type: automated-deploy
+          event-type: automated-deploy-dev
           client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.VERSION }}" }'
+
