@@ -5,12 +5,20 @@ on:
   workflow_dispatch:
   push:
     branches:
+<<<<<<< HEAD
     - 'sandbox'
     - 'dev'
     paths:
     - 'VERSION'
     - 'abods-api/**'
     - 'frontend/**'
+=======
+    - sandbox
+    - dev
+    - test
+    - uat
+    - main
+>>>>>>> main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
