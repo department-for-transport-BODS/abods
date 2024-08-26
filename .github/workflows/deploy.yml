@@ -68,6 +68,10 @@ jobs:
       AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
       VERSION: ${{ steps.verify.outputs.VERSION }}
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: checkout
         if: ${{ env.RC_VER == 'null' }}
