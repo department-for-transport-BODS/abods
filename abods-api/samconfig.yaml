@@ -84,7 +84,7 @@ uat:
 cavl:
   deploy:
     parameters:
-      stack_name: 'abods-itm-cavl-app-stack'
+      stack_name: 'abods-cavl-app-stack'
       s3_prefix: cavl
       capabilities: 'CAPABILITY_NAMED_IAM'
       parameter_overrides:
