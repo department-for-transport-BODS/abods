@@ -202,7 +202,7 @@ export const getUserAlerts = async (sessionUser: any, db: Context) => {
 
 // Summary: log the user in
 export const loginUser = async (username:string, password:string, db: Context, res: any) => {
-
+  logger.debug(`Logging in user: ${username}`)
   try {
     if (!username || !password) {
       throw('Invalid username or password')
@@ -219,6 +219,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
 
     if(!bodsUser)
     {
+      logger.debug('User not found in bods user table')
       throw("Invalid username or password")
     }
 
@@ -235,6 +236,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
 
       if(!session)
       {
+        logger.debug('Session in tokens table not found')
         await db.prisma.tokens.create({
           data:{
             user_id: bodsUser.id,
@@ -243,6 +245,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
         })
       }
       else{
+        logger.debug({ session }, 'Session found in tokends table')
         await db.prisma.tokens.update({
           where:{
             user_id: bodsUser.id
@@ -259,10 +262,11 @@ export const loginUser = async (username:string, password:string, db: Context, r
         expiresAt: new Date(Date.now() + 60 * 60 * 1000)
       }
     } else {
+      logger.debug('Invalid password entered')
       throw("Invalid username or password")
     }
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     return {
       success: false
     }
