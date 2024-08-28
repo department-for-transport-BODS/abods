@@ -38,7 +38,7 @@ app.use(
 
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
-          logger.debug(`parsing cookie from header: ${cookieHeader}`);
+          logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);
           const cookies = parseCookie(cookieHeader)
           const sessionid = cookies["abods_sessionid"];
 
@@ -46,7 +46,7 @@ app.use(
           if(sessionid) {
             const session = await getSession(sessionid, db);
 
-            logger.debug(`Session retrieved from db: ${session}`);
+            logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
             if(session)
             {
               sessionUser = session;
