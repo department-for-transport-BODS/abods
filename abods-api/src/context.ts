@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 import { initialisePrismaClient } from './prismaClient.js';
+import logger from './logger.js';
 
 export type Context = {
   prisma: PrismaClient
@@ -21,7 +22,7 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
             try {
               return await target[prop](...args);
             } catch (error) {
-              console.error(error);
+              logger.error(error);
 
               if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P1010') {
                 if (retries === maxRetries) {
@@ -44,6 +45,7 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
 };
 
 export const createContext = async (): Promise<Context> => {
+  logger.debug("Creating prisma context for database client")
   let prisma: PrismaClient;
 
   if (!global.prisma) {
