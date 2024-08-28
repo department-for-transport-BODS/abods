@@ -19,8 +19,7 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
   })
   
   logger.debug(
-    { sessionRecord },
-    `session record obtained for session id ${sessionId}: `,
+    `session record obtained for session id ${sessionId}: ${sessionRecord}`,
   );
   if(sessionRecord) {
     // fetch user from bods
@@ -33,7 +32,7 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
       }
     )
 
-    logger.debug({ bodsUser }, 'Retrieved bods user: ');
+    logger.debug(`Retrieved bods user: ${bodsUser}`);
     if(bodsUser)
     {
       sessionUser.user = bodsUser;
@@ -41,7 +40,7 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
     }
   }
 
-  logger.debug({ sessionUser }, "Session user returned: ")
+  logger.debug(`Session user returned: ${sessionUser}`)
   return sessionUser;
 }
 
@@ -245,7 +244,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
         })
       }
       else{
-        logger.debug({ session }, 'Session found in tokends table')
+        logger.debug(`Session found in tokends table: ${session}`)
         await db.prisma.tokens.update({
           where:{
             user_id: bodsUser.id

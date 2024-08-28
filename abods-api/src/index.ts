@@ -38,15 +38,15 @@ app.use(
 
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
-          logger.debug({ cookieHeader }, 'parsing cookie from header: ');
+          logger.debug(`parsing cookie from header: ${cookieHeader}`);
           const cookies = parseCookie(cookieHeader)
           const sessionid = cookies["abods_sessionid"];
 
-          logger.debug({ sessionid }, 'Session id: ');
+          logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
             const session = await getSession(sessionid, db);
 
-            logger.debug({ session }, 'Session retrieved from db: ');
+            logger.debug(`Session retrieved from db: ${session}`);
             if(session)
             {
               sessionUser = session;
