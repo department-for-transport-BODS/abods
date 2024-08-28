@@ -2,8 +2,10 @@ import { Context } from '../../context.js'
 import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, SessionUser, OperatorType } from '../../types.js';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
+import logger from '../../logger.js';
 
 export const getSession = async (sessionId, db: Context) : Promise<SessionUser> =>  {
+  logger.debug("Within get session function")
   let sessionUser: SessionUser = {
     user: null,
     userOrganisationIDs: null
@@ -16,6 +18,10 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
     }
   })
   
+  logger.debug(
+    { sessionRecord },
+    `session record obtained for session id ${sessionId}: `,
+  );
   if(sessionRecord) {
     // fetch user from bods
     const bodsUser = await db.prisma.bods_user.findUnique(
@@ -27,6 +33,7 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
       }
     )
 
+    logger.debug({ bodsUser }, 'Retrieved bods user: ');
     if(bodsUser)
     {
       sessionUser.user = bodsUser;
@@ -34,6 +41,7 @@ export const getSession = async (sessionId, db: Context) : Promise<SessionUser> 
     }
   }
 
+  logger.debug({ sessionUser }, "Session user returned: ")
   return sessionUser;
 }
 

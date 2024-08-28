@@ -30,6 +30,7 @@ app.use(
     context: async ({ req, res }) => {
       const { event, context } = getCurrentInvoke()
       try {
+        logger.debug("Server started and within context block")
         let sessionUser: SessionUser = {
           user: null,
           userOrganisationIDs: null
@@ -37,12 +38,15 @@ app.use(
 
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
+          logger.debug({ cookieHeader }, 'parsing cookie from header: ');
           const cookies = parseCookie(cookieHeader)
           const sessionid = cookies["abods_sessionid"];
 
+          logger.debug({ sessionid }, 'Session id: ');
           if(sessionid) {
             const session = await getSession(sessionid, db);
 
+            logger.debug({ session }, 'Session retrieved from db: ');
             if(session)
             {
               sessionUser = session;
