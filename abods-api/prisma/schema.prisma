@@ -332,7 +332,7 @@ model timetable_threshold_summary {
   day_of_week                         Int
 }
 
-model timetable_summary_operator_tz {
+model timetable_summary_operator_t {
   timetable_id                  Int   @id @default(1)
 	operator_noc                  String
 	date_of_journey               DateTime
