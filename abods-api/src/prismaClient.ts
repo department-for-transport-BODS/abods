@@ -26,8 +26,8 @@ async function getDatabaseUrl(): Promise<string> {
 
 let prisma: PrismaClient;
 
-async function initialisePrismaClient(): Promise<PrismaClient> {
-  if (!prisma) {
+async function initialisePrismaClient(force = false): Promise<PrismaClient> {
+  if (!prisma || force) {
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
       log: ['info'], 
