@@ -30,12 +30,12 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req, res }) => {
       const { event, context } = getCurrentInvoke()
+      let sessionUser: SessionUser = {
+        user: null,
+        userOrganisationIDs: null
+      }
       try {
         logger.debug("Server started and within context block")
-        let sessionUser: SessionUser = {
-          user: null,
-          userOrganisationIDs: null
-        }
 
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
@@ -55,8 +55,9 @@ app.use(
               logger.error(`exception caught***** ${error}`)
               db = await createContext()
               session = await getSession(sessionid, db);
+              logger.error(`error code::::: ${error.code}`)
               logger.error(`type of error::::: ${typeof error}`)
-              logger.error(`error stack::::: ${error.stack}`)
+              logger.error(`error stack::::: ${JSON.stringify(error.stack)}`)
               logger.error(`json error::::: ${JSON.stringify(error)}`)
               if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 logger.error('PrismaClientKnownRequestError check****: ', error.message);
@@ -71,6 +72,7 @@ app.use(
           }
         }
 
+        logger.debug(`Returning session user: ${JSON.stringify(sessionUser)}`);
         return {
           req: req, 
           res: res, 
@@ -80,12 +82,12 @@ app.use(
           lambdaContext: context,
         }
       } catch (error) {
+        logger.error(`111111error code::::: ${error.code}`)
         logger.error(`111111type of error::::: ${typeof error}`)
-        logger.error(`111111error stack::::: ${error.stack}`)
+        logger.error(`111111error stack::::: ${JSON.stringify(error.stack)}`)
         logger.error(`111111json error::::: ${JSON.stringify(error)}`)
-        logger.error("****error in context handling: " + error)
-        return {req: event, 
-          res: context}
+        //logger.error("****error in context handling: " + error)
+        return { req: event, res: context, sessionUser, db };
       }
     }
   })
