@@ -49,24 +49,25 @@ app.use(
 
           logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
-            let session: SessionUser = {
-              user: null,
-              userOrganisationIDs: null
-            }
-            try {
-              session = await getSession(sessionid, db);
-            } catch (error) {
-              logger.error(`exception caught***** ${error}`)
-              db = await createContext()
-              session = await getSession(sessionid, db);
-              logger.error(`error code::::: ${error.code}`)
-              logger.error(`type of error::::: ${typeof error}`)
-              logger.error(`error stack::::: ${JSON.stringify(error.stack)}`)
-              logger.error(`json error::::: ${JSON.stringify(error)}`)
-              if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                logger.error('PrismaClientKnownRequestError check****: ', error.message);
-              }
-            }
+            // const session: SessionUser = {
+            //   user: null,
+            //   userOrganisationIDs: null
+            // }
+            // try {
+            //   session = await getSession(sessionid, db);
+            // } catch (error) {
+            //   logger.error(`exception caught***** ${error}`)
+            //   db = await createContext()
+            //   session = await getSession(sessionid, db);
+            //   logger.error(`error code::::: ${error.code}`)
+            //   logger.error(`type of error::::: ${typeof error}`)
+            //   logger.error(`error stack::::: ${JSON.stringify(error.stack)}`)
+            //   logger.error(`json error::::: ${JSON.stringify(error)}`)
+            //   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            //     logger.error('PrismaClientKnownRequestError check****: ', error.message);
+            //   }
+            // }
+            const session = await getSession(sessionid, db);
 
             logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
             if(session)
