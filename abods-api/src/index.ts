@@ -53,9 +53,9 @@ app.use(
               session = await getSession(sessionid, db);
             } catch (error) {
               logger.error(`exception caught***** ${error}`)
+              db = await createContext()
+              session = await getSession(sessionid, db);
               if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                db = await createContext()
-                session = await getSession(sessionid, db);
                 logger.error('PrismaClientKnownRequestError check****: ', error.message);
               }
             }
