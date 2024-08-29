@@ -17,7 +17,7 @@ let db = await createContext()
 
 setInterval(() => {
   setContext(db);
-}, 600000);
+}, 240000);
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
