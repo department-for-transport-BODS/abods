@@ -11,8 +11,9 @@ import { createContext } from './context.js';
 import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
+import { Prisma } from '@prisma/client';
 
-const db = await createContext()
+let db = await createContext()
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
@@ -44,7 +45,19 @@ app.use(
 
           logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
-            const session = await getSession(sessionid, db);
+            let session: SessionUser = {
+              user: null,
+              userOrganisationIDs: null
+            }
+            try {
+              session = await getSession(sessionid, db);
+            } catch (error) {
+              if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                db = await createContext()
+                session = await getSession(sessionid, db);
+                logger.error('PrismaClientKnownRequestError check****: ', error.message);
+              }
+            }
 
             logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
             if(session)

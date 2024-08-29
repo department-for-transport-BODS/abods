@@ -44,12 +44,12 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
   });
 };
 
-export const createContext = async (): Promise<Context> => {
+export const createContext = async (force?: boolean): Promise<Context> => {
   logger.debug("Creating prisma context for database client")
   let prisma: PrismaClient;
 
-  if (!global.prisma) {
-    global.prisma = await initialisePrismaClient();
+  if (!global.prisma || force) {
+    global.prisma = await initialisePrismaClient(force);
   }
 
   prisma = global.prisma;
