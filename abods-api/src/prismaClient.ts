@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { Signer } from '@aws-sdk/rds-signer';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import logger from './logger.js';
+import { getDate } from './lib/dayjs.js';
 
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
@@ -26,10 +27,16 @@ async function getDatabaseUrl(): Promise<string> {
 }
 
 let prisma: PrismaClient;
+const startTime = getDate()
 
 async function initialisePrismaClient(force = false): Promise<PrismaClient> {
   logger.debug("Initialising prisma client")
-  if (!prisma || force) {
+  logger.debug(`startTime::::: ${startTime.toISOString()}`)
+  logger.debug(`getDate::::: ${getDate().toISOString()}`)
+  const retry = getDate().isAfter(startTime.add(10, 'minute'))
+  logger.debug(`is after 10mins::::: ${retry}`)
+  if (!prisma || force || retry) {
+    logger.debug("Getting database url and prisma client")
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
       log: ['info'], 
