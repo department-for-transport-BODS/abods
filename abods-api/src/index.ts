@@ -80,6 +80,9 @@ app.use(
           lambdaContext: context,
         }
       } catch (error) {
+        logger.error(`111111type of error::::: ${typeof error}`)
+        logger.error(`111111error stack::::: ${error.stack}`)
+        logger.error(`111111json error::::: ${JSON.stringify(error)}`)
         logger.error("****error in context handling: " + error)
         return {req: event, 
           res: context}
