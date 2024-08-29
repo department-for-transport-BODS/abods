@@ -51,7 +51,11 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       }
     });
 
+    if(prisma && retry)
+      await prisma.$disconnect();
+    logger.debug("Before prisma connect")
     await prisma.$connect();
+    logger.debug("after prisma connect")
   }
   return prisma;
 }

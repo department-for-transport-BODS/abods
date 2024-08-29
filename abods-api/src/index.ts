@@ -15,9 +15,9 @@ import { Prisma } from '@prisma/client';
 
 let db = await createContext()
 
-setInterval(() => {
-  setContext(db);
-}, 240000);
+// setInterval(() => {
+//   setContext(db);
+// }, 240000);
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
