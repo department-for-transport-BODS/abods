@@ -7,13 +7,17 @@ import gql from 'graphql-tag';
 import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
-import { createContext } from './context.js';
+import { createContext, setContext } from './context.js';
 import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
 import { Prisma } from '@prisma/client';
 
 let db = await createContext()
+
+setInterval(() => {
+  setContext(db);
+}, 600000);
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
@@ -86,6 +90,9 @@ app.use(
         logger.error(`111111type of error::::: ${typeof error}`)
         logger.error(`111111error stack::::: ${JSON.stringify(error.stack)}`)
         logger.error(`111111json error::::: ${JSON.stringify(error)}`)
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          logger.error('111111PrismaClientKnownRequestError check****: ', error.message);
+        }
         //logger.error("****error in context handling: " + error)
         return { req: event, res: context, sessionUser, db };
       }
