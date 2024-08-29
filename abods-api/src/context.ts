@@ -53,11 +53,13 @@ export const createContext = async (db?: Context,  force?: boolean): Promise<Con
   let prisma: PrismaClient;
 
   if (!global.prisma || force) {
+    logger.debug("Within initialise client")
     global.prisma = await initialisePrismaClient(force);
   }
 
   prisma = global.prisma;
 
+  logger.debug("before prisma wrap")
   const wrappedPrisma = wrapPrismaClient(prisma, 3, db);
   logger.debug("Prisma client created")
   return { prisma: wrappedPrisma };
