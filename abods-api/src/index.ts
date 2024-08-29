@@ -22,7 +22,7 @@ setInterval(() => {
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
