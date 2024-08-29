@@ -12,7 +12,7 @@ export type MockContext = {
 }
 
 
-const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
+const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3, db?: Context) => {
   return new Proxy(prisma, {
     get(target, prop) {
       if (typeof target[prop] === 'function') {
@@ -22,15 +22,19 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
             try {
               return await target[prop](...args);
             } catch (error) {
-              logger.error(error);
+              logger.error(`Error within prisma wrapper: ${JSON.stringify(error)}`);
 
-              if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P1010') {
+              //if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P1000') {
+                if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (retries === maxRetries) {
                   throw new Error(`Authentication error persists after ${maxRetries} retries.`);
                 }
 
                 // Authentication error occurred, force token refresh
                 global.prisma = await initialisePrismaClient(true);
+                db = {
+                  prisma: global.prisma
+                }
                 retries++;
               } else {
                 throw error;
@@ -44,7 +48,7 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
   });
 };
 
-export const createContext = async (force?: boolean): Promise<Context> => {
+export const createContext = async (db?: Context,  force?: boolean): Promise<Context> => {
   logger.debug("Creating prisma context for database client")
   let prisma: PrismaClient;
 
@@ -54,7 +58,8 @@ export const createContext = async (force?: boolean): Promise<Context> => {
 
   prisma = global.prisma;
 
-  const wrappedPrisma = wrapPrismaClient(prisma);
+  const wrappedPrisma = wrapPrismaClient(prisma, 3, db);
+  logger.debug("Prisma client created")
   return { prisma: wrappedPrisma };
 };
 
@@ -67,6 +72,6 @@ export const createMockContext = (): MockContext => {
 export const setContext = async (db: Context) => {
   if(db && db.prisma)
     db.prisma.$disconnect
-  
-  db = await createContext(true)
+
+  db = await createContext(db, true)
 }
