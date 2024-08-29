@@ -51,9 +51,9 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       }
     });
 
+    logger.debug(`Before prisma connect:::: ${databaseUrl}`)
     if(prisma && retry)
       await prisma.$disconnect();
-    logger.debug("Before prisma connect")
     await prisma.$connect();
     logger.debug("after prisma connect")
   }
