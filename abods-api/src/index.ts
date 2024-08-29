@@ -52,6 +52,7 @@ app.use(
             try {
               session = await getSession(sessionid, db);
             } catch (error) {
+              logger.error(`exception caught***** ${error}`)
               if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 db = await createContext()
                 session = await getSession(sessionid, db);
@@ -76,7 +77,7 @@ app.use(
           lambdaContext: context,
         }
       } catch (error) {
-        console.log("error in context handling: " + error)
+        logger.error("****error in context handling: " + error)
         return {req: event, 
           res: context}
       }
