@@ -12,12 +12,10 @@ import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
 import { Prisma } from '@prisma/client';
+import { getDate } from './lib/dayjs.js';
 
 let db = await createContext()
-
-// setInterval(() => {
-//   setContext(db);
-// }, 240000);
+let startTime = getDate()
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
@@ -40,7 +38,10 @@ app.use(
       }
       try {
         logger.debug("Server started and within context block")
-
+        const retry = getDate().isAfter(startTime.add(10, 'minute'))
+        if(retry) {
+          db = await createContext(true)
+        }
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
           logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);

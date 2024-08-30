@@ -12,7 +12,7 @@ export type MockContext = {
 }
 
 
-const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3, db?: Context) => {
+const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3) => {
   return new Proxy(prisma, {
     get(target, prop) {
       if (typeof target[prop] === 'function') {
@@ -32,9 +32,6 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3, db?: Context) =>
 
                 // Authentication error occurred, force token refresh
                 global.prisma = await initialisePrismaClient(true);
-                db = {
-                  prisma: global.prisma
-                }
                 retries++;
               } else {
                 throw error;
@@ -48,7 +45,7 @@ const wrapPrismaClient = (prisma: PrismaClient, maxRetries = 3, db?: Context) =>
   });
 };
 
-export const createContext = async (db?: Context,  force?: boolean): Promise<Context> => {
+export const createContext = async (force?: boolean): Promise<Context> => {
   logger.debug("Creating prisma context for database client")
   let prisma: PrismaClient;
 
@@ -60,7 +57,7 @@ export const createContext = async (db?: Context,  force?: boolean): Promise<Con
   prisma = global.prisma;
 
   logger.debug("before prisma wrap")
-  const wrappedPrisma = wrapPrismaClient(prisma, 3, db);
+  const wrappedPrisma = wrapPrismaClient(prisma, 3);
   logger.debug("Prisma client created")
   return { prisma: wrappedPrisma };
 };
@@ -75,5 +72,5 @@ export const setContext = async (db: Context) => {
   if(db && db.prisma)
     db.prisma.$disconnect
 
-  db = await createContext(db, true)
+  db = await createContext(true)
 }
