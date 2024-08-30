@@ -11,7 +11,6 @@ import { createContext, setContext } from './context.js';
 import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
-import { Prisma } from '@prisma/client';
 import { getDate } from './lib/dayjs.js';
 
 let db = await createContext()
@@ -51,24 +50,6 @@ app.use(
 
           logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
-            // const session: SessionUser = {
-            //   user: null,
-            //   userOrganisationIDs: null
-            // }
-            // try {
-            //   session = await getSession(sessionid, db);
-            // } catch (error) {
-            //   logger.error(`exception caught***** ${error}`)
-            //   db = await createContext()
-            //   session = await getSession(sessionid, db);
-            //   logger.error(`error code::::: ${error.code}`)
-            //   logger.error(`type of error::::: ${typeof error}`)
-            //   logger.error(`error stack::::: ${JSON.stringify(error.stack)}`)
-            //   logger.error(`json error::::: ${JSON.stringify(error)}`)
-            //   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            //     logger.error('PrismaClientKnownRequestError check****: ', error.message);
-            //   }
-            // }
             const session = await getSession(sessionid, db);
 
             logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
@@ -89,14 +70,7 @@ app.use(
           lambdaContext: context,
         }
       } catch (error) {
-        logger.error(`111111error code::::: ${error.code}`)
-        logger.error(`111111type of error::::: ${typeof error}`)
-        logger.error(`111111error stack::::: ${JSON.stringify(error.stack)}`)
-        logger.error(`111111json error::::: ${JSON.stringify(error)}`)
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          logger.error('111111PrismaClientKnownRequestError check****: ', error.message);
-        }
-        //logger.error("****error in context handling: " + error)
+        logger.error("****error in context handling: " + error)
         return { req: event, res: context, sessionUser, db };
       }
     }
