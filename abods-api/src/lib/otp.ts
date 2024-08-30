@@ -186,7 +186,7 @@ export const compareThresholds = async (
       ...timeDifference,
       {
         time_diff_minutes: {
-          gt: onTimeMaxMinutes,
+          gte: onTimeMaxMinutes,
         },
       },
     ];
