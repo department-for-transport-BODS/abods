@@ -41,6 +41,7 @@ app.use(
         const retry = getDate().isAfter(startTime.add(10, 'minute'))
         if(retry) {
           db = await createContext(true)
+          startTime = getDate()
         }
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
