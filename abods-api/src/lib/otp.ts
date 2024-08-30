@@ -200,7 +200,7 @@ export const compareThresholds = async (
       {
         time_diff_minutes: {
           gte: onTimeMinMinutes,
-          lte: onTimeMaxMinutes,
+          lt: onTimeMaxMinutes,
         },
       },
     ];
