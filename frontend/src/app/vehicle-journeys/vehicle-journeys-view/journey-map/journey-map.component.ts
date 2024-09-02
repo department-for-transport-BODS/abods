@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { featureCollection, lineString, point } from '@turf/helpers';
 import { Feature, FeatureCollection, GeoJsonProperties, LineString, Point } from 'geojson';
-import { Map } from 'mapbox-gl';
+import { Map, ScaleControl } from 'mapbox-gl';
 import { pairwise } from '../../../shared/array-operators';
 import { BRITISH_ISLES_BBOX, bbox2d, combineBounds, position } from '../../../shared/geo';
 import { OnTimePerformanceEnum } from '../on-time-performance.enum';
@@ -32,6 +32,7 @@ export class JourneyMapComponent implements OnChanges {
   @Input() loading = false;
 
   map!: Map;
+  enableScaleControl = false;
 
   bounds = BRITISH_ISLES_BBOX;
   moveCounter = 0;
@@ -66,6 +67,16 @@ export class JourneyMapComponent implements OnChanges {
   constructor(private config: ConfigService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (this.map && !this.enableScaleControl) {
+      this.map.addControl(
+        new ScaleControl({
+          maxWidth: 80,
+          unit: 'metric', // You can use 'imperial' or 'nautical' as well
+        })
+      );
+      this.enableScaleControl = true;
+    }
+
     if (changes.view && changes.view.currentValue) {
       this.updateView(changes.view.currentValue);
     }
