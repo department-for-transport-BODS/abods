@@ -30,10 +30,3 @@ export const createMockContext = (): MockContext => {
     prisma: mockDeep<PrismaClient>(),
   }
 }
-
-export const setContext = async (db: Context) => {
-  if(db && db.prisma)
-    db.prisma.$disconnect
-
-  db = await createContext(true)
-}

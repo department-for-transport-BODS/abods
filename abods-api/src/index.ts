@@ -7,7 +7,7 @@ import gql from 'graphql-tag';
 import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
-import { createContext, setContext } from './context.js';
+import { createContext } from './context.js';
 import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
