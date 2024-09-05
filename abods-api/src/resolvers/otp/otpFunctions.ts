@@ -1816,6 +1816,7 @@ const getPrismaFiltersForOTPQuery = (
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
+  const allOperators =  (operatorIds?.length > 0) || !!operatorId
 
   return {
     operator_noc: { in: nocListToFilter },
@@ -1890,7 +1891,9 @@ const getPrismaFiltersForOTPQuery = (
       : {}),
     ...(adminAreaIds && adminAreaIds.length > 0
       ? {
-          admin_areas: {
+          admin_areas: !allOperators ? {
+            hasSome: adminAreaIds.map(Number),
+          } : {
             hasEvery: adminAreaIds.map(Number),
           },
         }

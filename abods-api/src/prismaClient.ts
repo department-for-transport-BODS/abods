@@ -17,11 +17,11 @@ async function getDatabaseUrl(): Promise<string> {
 
   if ((process.env.PROJECT_ENV || 'local') === 'local') {
     const password = process.env.DB_PASSWORD;
-    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true&pool_timeout=20`;
+    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true`;
   } else {
     const token = await generateRdsIamToken(region, hostname, port, username);
     const encodedToken = encodeURIComponent(token);
-    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&sslmode=prefer&ssl=true&pool_timeout=20`;
+    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&sslmode=prefer&ssl=true`;
   }
 }
 
@@ -40,10 +40,6 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
           url: databaseUrl,
         },
       },
-      transactionOptions: {
-        maxWait: 5000,
-        timeout: 5000,
-      }
     });
     await Promise.all([prisma.$disconnect(),prisma.$connect()])
     logger.debug("Prisma has connected to the database")
