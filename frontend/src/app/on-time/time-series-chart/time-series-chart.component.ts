@@ -38,7 +38,7 @@ export class TimeSeriesChartComponent extends BaseChart implements AfterViewInit
     },
     [PerformanceCategories.Late]: {
       name: 'Late',
-      hint: '(> 5 minutes)',
+      hint: '(> 5:59 minutes)',
       fill: this.chartService.colorMap.ochre,
     },
     [PerformanceCategories.Early]: {

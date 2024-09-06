@@ -11,13 +11,15 @@ import { createContext } from './context.js';
 import { SessionUser } from './types.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
+import { getDate } from './lib/dayjs.js';
 
-const db = await createContext()
+let db = await createContext()
+let startTime = getDate()
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
@@ -29,20 +31,28 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req, res }) => {
       const { event, context } = getCurrentInvoke()
+      let sessionUser: SessionUser = {
+        user: null,
+        userOrganisationIDs: null
+      }
       try {
-        let sessionUser: SessionUser = {
-          user: null,
-          userOrganisationIDs: null
+        logger.debug("Server started and within context block")
+        const retry = getDate().isAfter(startTime.add(10, 'minute'))
+        if(retry) {
+          db = await createContext(true)
+          startTime = getDate()
         }
-
         const cookieHeader = getHeader(event.headers, 'Cookie');
         if (cookieHeader) {
+          logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);
           const cookies = parseCookie(cookieHeader)
           const sessionid = cookies["abods_sessionid"];
 
+          logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
             const session = await getSession(sessionid, db);
 
+            logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
             if(session)
             {
               sessionUser = session;
@@ -50,6 +60,7 @@ app.use(
           }
         }
 
+        logger.debug(`Returning session user: ${JSON.stringify(sessionUser)}`);
         return {
           req: req, 
           res: res, 
@@ -59,9 +70,8 @@ app.use(
           lambdaContext: context,
         }
       } catch (error) {
-        console.log("error in context handling: " + error)
-        return {req: event, 
-          res: context}
+        logger.error("****error in context handling: " + error)
+        return { req: event, res: context, sessionUser, db };
       }
     }
   })
