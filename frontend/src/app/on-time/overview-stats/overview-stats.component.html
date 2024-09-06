@@ -29,7 +29,7 @@
     [tooltip]="overview && overview.completed ? onTimeTooltip : noRealtimeDataTooltip"
   ></app-stat>
   <ng-template #onTimeTooltip>
-    {{ onTime | number }} of {{ completed | number }} recorded stop departures were between 1 minute early and 4 minutes
+    {{ onTime | number }} of {{ completed | number }} recorded stop departures were between 1 minute early and 5 minutes
     59 seconds late.
   </ng-template>
   <app-stat
@@ -41,7 +41,7 @@
     id="on-time-overview-stat-late"
   ></app-stat>
   <ng-template #lateTooltip>
-    {{ late | number }} of {{ completed | number }} recorded stop departures were more than 4 minutes 59 seconds late.
+    {{ late | number }} of {{ completed | number }} recorded stop departures were more than 5 minutes 59 seconds late.
   </ng-template>
   <app-stat
     label="Early"
