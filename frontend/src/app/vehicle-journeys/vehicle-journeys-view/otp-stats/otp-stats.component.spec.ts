@@ -42,11 +42,11 @@ describe('OtpStatsComponent', () => {
 
   it('should display correct tooltips', () => {
     expect(spectator.queryAll(StatComponent)[0].tooltip).toEqual(
-      '8 of 9 recorded stop departures were between 1 minute early and 4 minutes 59 seconds late.'
+      '8 of 9 recorded stop departures were between 1 minute early and 5 minutes 59 seconds late.'
     );
 
     expect(spectator.queryAll(StatComponent)[1].tooltip).toEqual(
-      '0 of 9 recorded stop departures were more than 4 minutes 59 seconds late.'
+      '0 of 9 recorded stop departures were more than 5 minutes 59 seconds late.'
     );
 
     expect(spectator.queryAll(StatComponent)[2].tooltip).toEqual(

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { Signer } from '@aws-sdk/rds-signer';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import logger from './logger.js';
 
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
@@ -26,8 +27,11 @@ async function getDatabaseUrl(): Promise<string> {
 
 let prisma: PrismaClient;
 
-async function initialisePrismaClient(): Promise<PrismaClient> {
-  if (!prisma) {
+async function initialisePrismaClient(force = false): Promise<PrismaClient> {
+  logger.debug("Initialising prisma client")
+ 
+  if (!prisma || force ) {
+    logger.debug("Getting database url and prisma client")
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
       log: ['info'], 
@@ -37,8 +41,8 @@ async function initialisePrismaClient(): Promise<PrismaClient> {
         },
       },
     });
-
-    await prisma.$connect();
+    await Promise.all([prisma.$disconnect(),prisma.$connect()])
+    logger.debug("Prisma has connected to the database")
   }
   return prisma;
 }
