@@ -732,41 +732,28 @@ export const getStopsDistribution = async (
 export const getDelayFrequency = async (
   inputs,
   sessionUser: SessionUser,
-  db: Context
+  db: Context,
 ) => {
   try {
     if (!sessionUser.user) {
-      throw "Not authorized";
+      throw 'Not authorized';
     }
 
-    logger.debug("getDelayFrequency");
+    logger.debug('getDelayFrequency');
 
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
-    const {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
-      operatorIds,
-      granularity,
-      lineIds,
-    } = filters;
-
-    let performanceStopDistribution: distribution[] = [];
+    const { filters } = inputs;
+    const { operatorIds } = filters;
 
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
-      logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
+      logger.debug('getDelayFrequency id: ' + JSON.stringify(operatorIds));
       const operators = await getOperators(sessionUser, db);
 
       if (!operators) {
-        throw "No user operators";
+        throw 'No user operators';
       }
 
       const userOperatorIds = operators.map((o) => o.nocCode);
@@ -774,65 +761,13 @@ export const getDelayFrequency = async (
       const operator_noc_to_filter = operatorIds[0];
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
-        let results;
-
-        if (lineIds) {
-          return getStopsDistribution(inputs, userOperatorIds, db)
-        } else {
-          results = await db.prisma.timetable_summary_operator_t.findMany({
-            where: getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-            select: {
-              avg_time_difference: true,
-              completed: true,
-            },
-          });
-        }
-
-        if (results) {
-          results.forEach((res) => {
-            if (res.avg_time_difference) {
-              // get a rounded average time difference for the record
-              const avgDiff = Math.round(res.avg_time_difference);
-
-              if (res.completed > 0) {
-                // is thie performance in minutes (time difference) value already in the array?
-                const index = performanceStopDistribution.findIndex(
-                  (d) => d.performanceInMins == avgDiff
-                );
-                if (index !== -1) {
-                  // it is in the array, add the completed stops to this noOfStops
-                  const element = performanceStopDistribution.find(
-                    (d) => d.performanceInMins == avgDiff
-                  );
-                  performanceStopDistribution.splice(index, 1);
-                  performanceStopDistribution.push({
-                    performanceInMins: avgDiff,
-                    noOfStops: element?.noOfStops
-                      ? element?.noOfStops + res.completed
-                      : res.completed,
-                  });
-                } else {
-                  // add a new entry for this new time difference
-                  performanceStopDistribution.push({
-                    performanceInMins: avgDiff,
-                    noOfStops: res.completed,
-                  });
-                }
-              }
-            }
-          });
+        return getStopsDistribution(inputs, userOperatorIds, db);
+      } else {
+        if (!operators) {
+          throw 'No user operators';
         }
       }
     }
-
-    const unsortedArray = performanceStopDistribution.map((ele) => ({
-      bucket: ele.performanceInMins,
-      frequency: ele.noOfStops,
-    }));
-
-    const sortedArray = unsortedArray.sort((a, b) => a.bucket - b.bucket);
-
-    return sortedArray;
   } catch (error) {
     logger.error(error);
     return null;
