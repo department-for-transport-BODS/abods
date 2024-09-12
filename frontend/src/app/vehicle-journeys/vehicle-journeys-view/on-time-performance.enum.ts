@@ -1,6 +1,6 @@
 import { isNotNullOrUndefined } from '../../shared/rxjs-operators';
 
-const LATE_THRESHOLD = 300;
+const LATE_THRESHOLD = 360;
 const EARLY_THRESHOLD = -60;
 
 export enum OnTimePerformanceEnum {

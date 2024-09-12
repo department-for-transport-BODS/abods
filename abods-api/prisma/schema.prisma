@@ -355,7 +355,6 @@ model performance_statistics {
   operator_noc            String
   line_name               String
   noc_and_line_and_servicecode            String
-  service_name            String
   is_timing_point         Boolean
   date_period_start       DateTime
   date_period_end         DateTime

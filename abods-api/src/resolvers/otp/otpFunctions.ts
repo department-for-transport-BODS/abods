@@ -1029,24 +1029,49 @@ export const getServicePunctuality = async (
       }
   
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
-      const performanceMetrics = await db.prisma.performance_statistics.findMany({
-        where,
-        take: 3,
-        distinct: ["date_period_start", "date_period_end", "date_period_end", "on_time_percentage", "early_count", "late_count", "on_time_count"],
-        orderBy: [{
-          on_time_percentage: orderFilter
-        },{
-          trend_percentage: orderFilter
-        }]
-      })
+      const performanceMetrics =
+        await db.prisma.performance_statistics.findMany({
+          where,
+          take: 3,
+          distinct: [
+            'date_period_start',
+            'date_period_end',
+            'date_period_end',
+            'on_time_percentage',
+            'early_count',
+            'late_count',
+            'on_time_count',
+          ],
+          orderBy: [
+            {
+              on_time_percentage: orderFilter,
+            },
+            {
+              trend_percentage: orderFilter,
+            },
+          ],
+        });
   
-      return performanceMetrics.map((stats) =>({
+      const services = await db.prisma.expected_services.findMany({
+        where: {
+          noc_and_line_and_servicecode: {
+            in: performanceMetrics.map(stat => stat.noc_and_line_and_servicecode)
+          }
+        }
+      })
+      
+      return performanceMetrics.map((stats) => ({
         nocCode: stats.operator_noc,
         lineId: stats.noc_and_line_and_servicecode,
         lineInfo: {
           serviceId: stats.noc_and_line_and_servicecode,
-          serviceName: stats.service_name,
-          serviceNumber: stats.line_name
+          serviceName:
+            services.find(
+              (service) =>
+                service.noc_and_line_and_servicecode ===
+                stats.noc_and_line_and_servicecode,
+            )?.service_name ?? '',
+          serviceNumber: stats.line_name,
         },
         onTime: stats.on_time_count,
         early: stats.early_count,
@@ -1054,9 +1079,9 @@ export const getServicePunctuality = async (
         trend: {
           onTime: stats.trend_on_time_count ?? 0,
           late: stats.trend_late_count ?? 0,
-          early: stats.trend_early_count ?? 0
-        }
-      }))
+          early: stats.trend_early_count ?? 0,
+        },
+      }));
     }
     
     return []
@@ -1200,21 +1225,9 @@ export const getServicePerformance = async (
 
     let servicePunctualities: ServicePunctualityType[] = [];
 
-    // get all services for this operator
-    // get all journies for this service
-    // get all OTP stops for this journey
-
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { filters } = inputs;
     const {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
-      granularity,
     } = filters;
 
     if (operatorIds.length == 1) {
