@@ -3,12 +3,17 @@ import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterSt
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { AuthenticatedUserService } from './authenticated-user.service';
+import { AuthenticationService } from './authentication.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuardService implements CanActivateChild, CanActivate {
-  constructor(private router: Router, private userService: AuthenticatedUserService) {}
+  constructor(
+    private router: Router,
+    private userService: AuthenticatedUserService,
+    private authService: AuthenticationService
+  ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.userService.isAuthenticated$.pipe(
@@ -37,6 +42,13 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
   }
 
   canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    return this.canActivate(childRoute, state);
+    return this.authService.isSessionAlive
+      ? this.canActivate(childRoute, state)
+      : this.redirectToLogin(childRoute, state);
+  }
+
+  redirectToLogin(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return of(false);
   }
 }
