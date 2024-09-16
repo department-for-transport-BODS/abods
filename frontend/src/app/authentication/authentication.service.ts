@@ -98,8 +98,7 @@ export class AuthenticationService {
     }
     const session = JSON.parse(storage);
     const now = new Date().getTime();
-    const expires = new Date(session.expiresAt).getTime();
-    if (now > expires) {
+    if (now > session.expiresAt) {
       return false;
     }
     return true;

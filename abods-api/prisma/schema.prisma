@@ -355,7 +355,6 @@ model performance_statistics {
   operator_noc            String
   line_name               String
   noc_and_line_and_servicecode            String
-  service_name            String
   is_timing_point         Boolean
   date_period_start       DateTime
   date_period_end         DateTime
@@ -373,7 +372,7 @@ model performance_statistics {
   trend_total_count       Int?
   trend_percentage        Decimal?
 
-  @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type, service_name])
+  @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type])
 }
 
 model timetable_summary_service_tz {
