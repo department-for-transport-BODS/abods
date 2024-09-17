@@ -81,7 +81,7 @@ export const getOperatorsDropDown = async (
   }
 
   let orgOperators: { operatorref: string }[] = [];
-  
+
   orgOperators = await getOperatorsFromOrgId(
     sessionUser.userOrganisationIDs,
     db,
@@ -134,14 +134,14 @@ export const getOperators = async (
       where: {
         ...(adminAreaNumberIds.length > 0
           ? {
-              noc_adminareas: {
-                some: {
-                  adminarea_id: {
-                    in: adminAreaNumberIds,
-                  },
+            noc_adminareas: {
+              some: {
+                adminarea_id: {
+                  in: adminAreaNumberIds,
                 },
               },
-            }
+            },
+          }
           : {}),
         operatorOrganisations: {
           some: {
@@ -368,7 +368,7 @@ export const getPunctualityOverview = async (
 
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
-    if( onTimeMinMinutes || onTimeMaxMinutes ) {
+    if (onTimeMinMinutes || onTimeMaxMinutes) {
       return compareThresholds(inputs, sessionUser, db)
     }
 
@@ -413,8 +413,7 @@ export const getPunctualityOverview = async (
       var endTimer = performance.now();
 
       logger.debug(
-        `Call to getPunctualityOverview took ${
-          endTimer - startTimer
+        `Call to getPunctualityOverview took ${endTimer - startTimer
         } milliseconds`
       );
 
@@ -479,7 +478,7 @@ export const getOperatorPerformance = async (
 
     const results = await db.prisma.timetable_summary_operator_t.groupBy({
       by: ["operator_noc"],
-      where:  where,
+      where: where,
       _sum: {
         early_count: true,
         late_count: true,
@@ -495,8 +494,8 @@ export const getOperatorPerformance = async (
       );
       if (operatorOtpStats && operatorOtpStats._sum) {
         let totalOntime = operatorOtpStats._sum.on_time_count
-            ? operatorOtpStats._sum.on_time_count
-            : 0,
+          ? operatorOtpStats._sum.on_time_count
+          : 0,
           totalEarly = operatorOtpStats._sum.early_count
             ? operatorOtpStats._sum.early_count
             : 0,
@@ -536,8 +535,7 @@ export const getOperatorPerformance = async (
     //end - performance timer
     var endTimer = performance.now();
     logger.debug(
-      `Call to getOperatorPerformance took ${
-        endTimer - startTimer
+      `Call to getOperatorPerformance took ${endTimer - startTimer
       } milliseconds`
     );
 
@@ -619,8 +617,8 @@ export const getPunctualityDayOfWeek = async (
           late: 0,
           onTime: 0,
         }));
-        
-        
+
+
         if (results) {
           for (let i = 0; i < dayOfWeek.length; i++) {
             const day = dayOfWeek[i];
@@ -642,7 +640,7 @@ export const getPunctualityDayOfWeek = async (
         return dayOfWeek.filter((week) => {
           if (week.early === 0 && week.late === 0 && week.onTime === 0)
             return false;
-    
+
           return true;
         });
       }
@@ -687,7 +685,7 @@ export const getStopsDistribution = async (
   const { maxDelay, minDelay } = filters;
 
   const where: Prisma.timetable_threshold_summaryWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true,true);
 
   if (maxDelay && minDelay) {
     where.time_diff_minutes = {
@@ -856,7 +854,7 @@ export const getPunctualityTimeOfDay = async (
             late: res._sum.late_count
           })
         });
-     
+
       }
     }
 
@@ -911,7 +909,7 @@ export const getPunctualityTimeSeries = async (
         const end = new Date(toTimestamp);
         const days = getDaysInRange(start, end);
 
-        
+
         let summary: PunctualityTimeSeriesType[] = []
 
         let results;
@@ -922,11 +920,11 @@ export const getPunctualityTimeSeries = async (
             on_time_count: true,
           }
         }
-        
+
         const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
         if (lineIds) {
           results = await db.prisma.timetable_summary_service_tz.groupBy({
-            by: isDayGranularity ? ["date_of_journey"]: ["departure_hour"],
+            by: isDayGranularity ? ["date_of_journey"] : ["departure_hour"],
             where: where,
             _sum: {
               early_count: true,
@@ -936,7 +934,7 @@ export const getPunctualityTimeSeries = async (
           }) ?? [];
         } else {
           results = await db.prisma.timetable_summary_operator_t.groupBy({
-            by: isDayGranularity ? ["date_of_journey"]: ["date_of_journey", "departure_hour"],
+            by: isDayGranularity ? ["date_of_journey"] : ["date_of_journey", "departure_hour"],
             where: where,
             _sum: {
               early_count: true,
@@ -959,7 +957,7 @@ export const getPunctualityTimeSeries = async (
           }
         });
 
-        summary = summary.sort((a,b) => {
+        summary = summary.sort((a, b) => {
           const firstTS = getDate(a.ts)
           const secondTS = getDate(b.ts)
           return firstTS.isAfter(secondTS) ? 1 : -1
@@ -1014,20 +1012,20 @@ export const getServicePunctuality = async (
     let displayData = true
     if (operatorIds) {
       displayData = checkSubArray(operatorNocs, operatorIds)
-    } 
+    }
 
-    if(displayData) {
+    if (displayData) {
       const where: Prisma.performance_statisticsWhereInput = {
         operator_noc: {
           in: operatorIds ? operatorIds : operatorNocs
         },
         date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
       }
-  
-      if(timingPointsOnly) {
+
+      if (timingPointsOnly) {
         where.is_timing_point = timingPointsOnly
       }
-  
+
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
       const performanceMetrics =
         await db.prisma.performance_statistics.findMany({
@@ -1051,7 +1049,7 @@ export const getServicePunctuality = async (
             },
           ],
         });
-  
+
       const services = await db.prisma.expected_services.findMany({
         where: {
           noc_and_line_and_servicecode: {
@@ -1059,7 +1057,7 @@ export const getServicePunctuality = async (
           }
         }
       })
-      
+
       return performanceMetrics.map((stats) => ({
         nocCode: stats.operator_noc,
         lineId: stats.noc_and_line_and_servicecode,
@@ -1083,7 +1081,7 @@ export const getServicePunctuality = async (
         },
       }));
     }
-    
+
     return []
   } catch (error) {
     logger.error(error);
@@ -1154,7 +1152,7 @@ export const getStopPerformance = async (
             longitude: true,
             latitude: true,
             atco_code: true,
-            locality:{
+            locality: {
               select: {
                 gazetteer_id: true,
                 name: true,
@@ -1276,7 +1274,7 @@ export const getServicePerformance = async (
             : 0;
 
           const service = services.find(serv => serv.noc_and_line_and_servicecode === res.noc_and_line_and_servicecode)
-          
+
           servicePunctualities.push({
             lineId: res.noc_and_line_and_servicecode,
             early: res._sum.early_count ? res._sum.early_count : 0,
@@ -1324,7 +1322,7 @@ export const getFrequentServices = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    if(userOperatorIds.includes(operatorId)){
+    if (userOperatorIds.includes(operatorId)) {
       const results = await db.prisma.timetable_summary_service_tz.findMany({
         where: {
           operator_noc: operatorId,
@@ -1337,16 +1335,16 @@ export const getFrequentServices = async (
         select: {
           noc_and_line_and_servicecode: true
         },
-        distinct:['noc_and_line_and_servicecode']
+        distinct: ['noc_and_line_and_servicecode']
       })
-      
+
       return results.map(result => ({
         serviceId: result.noc_and_line_and_servicecode
       }));
     }
 
     return []
-    
+
   } catch (error) {
     logger.error(error);
     return null;
@@ -1399,7 +1397,7 @@ export const getFrequentServiceInfo = async (
       numHours: actualHours,
       totalHours: totalHours,
     };
-    
+
   } catch (error) {
     logger.error(error);
     return null;
@@ -1496,7 +1494,7 @@ export const getHeadwayOverview = async (
       scheduledWaitTime: headway.scheduledWaitTime / (headway.headwayCount * 60),
       excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
     }
-  
+
   } catch (error) {
     logger.error(error);
     return null;
@@ -1584,13 +1582,13 @@ export const getHeadwayTimeSeries = async (
     } = {}
     results.map(result => {
 
-      if (result.departure_hour){
+      if (result.departure_hour) {
         const formatterdeparture = isDayGranularity
           ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
           : getFormattedDate(result.departure_hour);
         const headwayData = headwayMap[formatterdeparture]
 
-        if(headwayData){
+        if (headwayData) {
           headwayData.actual_headway = headwayData.actual_headway + result.actual_headway * result.headway_stops_count
           headwayData.expected_headway = headwayData.expected_headway + result.expected_headway * result.headway_stops_count
           headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time * result.headway_stops_count
@@ -1606,9 +1604,9 @@ export const getHeadwayTimeSeries = async (
       }
     })
 
-    const returnHeadways: HeadwayTimeSeriesType[]  = []
+    const returnHeadways: HeadwayTimeSeriesType[] = []
 
-    for (const [departure_hour, headway] of Object.entries(headwayMap)){
+    for (const [departure_hour, headway] of Object.entries(headwayMap)) {
       returnHeadways.push({
         ts: departure_hour,
         actualWaitTime: headway.actual_headway / (headway.headway_stops_count * 60),
@@ -1617,12 +1615,12 @@ export const getHeadwayTimeSeries = async (
       })
     }
 
-    return returnHeadways.sort((a,b) => {
-      if(getDate(a.ts).isBefore(getDate(b.ts)))
+    return returnHeadways.sort((a, b) => {
+      if (getDate(a.ts).isBefore(getDate(b.ts)))
         return -1
       return 1
     })
-     
+
   } catch (error) {
     logger.error(error);
     return null;
@@ -1715,7 +1713,7 @@ const getPrismaFiltersForOTPQuery = (
     nocListToFilter = userOperatorNocList.filter((o) =>
       operatorIds.includes(o),
     );
-  } else if(operatorId && userOperatorNocList.includes(operatorId)){
+  } else if (operatorId && userOperatorNocList.includes(operatorId)) {
     nocListToFilter = [operatorId]
   } else {
     nocListToFilter = userOperatorNocList;
@@ -1764,7 +1762,7 @@ const getPrismaFiltersForOTPQuery = (
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
-  const allOperators =  (operatorIds?.length > 0) || !!operatorId
+  const allOperators = (operatorIds?.length > 0) || !!operatorId
 
   return {
     operator_noc: { in: nocListToFilter },
@@ -1779,72 +1777,72 @@ const getPrismaFiltersForOTPQuery = (
     ...(startTime && endTime
       ? isThreshold
         ? {
-            departure_hour: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
-            },
-          }
+          departure_hour: {
+            gte: dateOfJourneyFromDateTime.toDate(),
+            lte: dateOfJourneyToDateTime.toDate(),
+          },
+        }
         : {
-            departure_hour_only: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
-            },
-          }
+          departure_hour_only: {
+            gte: dateOfJourneyFromDateTime.toDate(),
+            lte: dateOfJourneyToDateTime.toDate(),
+          },
+        }
       : {
-          ...(startTime
-            ? isThreshold
-              ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
-              : {
-                  departure_hour_only: {
-                    gte: dateOfJourneyFromDateTime.toDate(),
+        ...(startTime
+          ? isThreshold
+            ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
+            : {
+              departure_hour_only: {
+                gte: dateOfJourneyFromDateTime.toDate(),
+              },
+            }
+          : {
+            ...(endTime
+              ? isThreshold
+                ? {
+                  departure_hour: {
+                    lte: dateOfJourneyToDateTime.toDate(),
                   },
                 }
-            : {
-                ...(endTime
-                  ? isThreshold
-                    ? {
-                        departure_hour: {
-                          lte: dateOfJourneyToDateTime.toDate(),
-                        },
-                      }
-                    : {
-                        departure_hour_only: {
-                          lte: dateOfJourneyToDateTime.toDate(),
-                        },
-                      }
-                  : {}),
-              }),
-        }),
-    ...(maxEarlyNumber > 0 && !isServiceGranularity
+                : {
+                  departure_hour_only: {
+                    lte: dateOfJourneyToDateTime.toDate(),
+                  },
+                }
+              : {}),
+          }),
+      }),
+    ...(maxEarlyNumber > 0 && !isServiceGranularity && !isThreshold
       ? {
-          max_early: { lte: maxEarlyNumber },
-        }
+        max_early: { lte: maxEarlyNumber },
+      }
       : {}),
-    ...(maxLateNumber > 0 && !isServiceGranularity
+    ...(maxLateNumber > 0 && !isServiceGranularity && !isThreshold
       ? {
-          max_late: { lte: maxLateNumber },
-        }
+        max_late: { lte: maxLateNumber },
+      }
       : {}),
     ...(lineIds
       ? {
-          noc_and_line_and_servicecode: {
-            in: lineIds,
-          },
-        }
+        noc_and_line_and_servicecode: {
+          in: lineIds,
+        },
+      }
       : {}),
     ...(lineId
       ? {
-          noc_and_line_and_servicecode: lineId,
-        }
+        noc_and_line_and_servicecode: lineId,
+      }
       : {}),
     ...(adminAreaIds && adminAreaIds.length > 0
       ? {
-          admin_areas: !allOperators ? {
-            hasSome: adminAreaIds.map(Number),
-          } : {
-            hasEvery: adminAreaIds.map(Number),
-          },
-        }
+        admin_areas: !allOperators ? {
+          hasSome: adminAreaIds.map(Number),
+        } : {
+          hasEvery: adminAreaIds.map(Number),
+        },
+      }
       : {}),
   };
 };
