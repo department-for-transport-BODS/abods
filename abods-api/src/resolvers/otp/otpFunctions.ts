@@ -685,7 +685,7 @@ export const getStopsDistribution = async (
   const { maxDelay, minDelay } = filters;
 
   const where: Prisma.timetable_threshold_summaryWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true,true);
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
 
   if (maxDelay && minDelay) {
     where.time_diff_minutes = {
