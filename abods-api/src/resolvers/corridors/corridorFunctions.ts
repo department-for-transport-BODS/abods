@@ -634,7 +634,7 @@ export const getJourneyStatsHistogram = (
       const totalJourneyTime = Math.floor(
         (lastStopOfCorridor.actual_departure_time.getTime() -
           firstStopOfCorridor.actual_departure_time.getTime()) /
-          1000,
+          ( 1000 * 60 ),
       );
 
       journeyStats.set(
