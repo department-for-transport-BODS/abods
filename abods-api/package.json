@@ -38,6 +38,7 @@
     "graphql": "^16.8.1",
     "graphql-scalars": "^1.23.0",
     "graphql-tag": "^2.12.6",
+    "haversine-distance": "^1.2.3",
     "ioredis": "^5.4.1",
     "jest-mock-extended": "^3.0.7",
     "node-postgres": "^0.6.2",

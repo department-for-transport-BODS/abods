@@ -39,6 +39,7 @@ import {
   getHourFormattedDate,
 } from '../../lib/dayjs.js';
 import { getPercentile } from '../../lib/utils.js';
+import haversineDistance from 'haversine-distance';
 
 export const listCorridors = async (
   sessionUser: SessionUser,
@@ -303,7 +304,10 @@ export const insertCorridorStops = async (
               ],
             ])
           : '',
-      distance_to_next_stop: 0,
+      distance_to_next_stop: index < stops.length - 1 ? haversineDistance(
+        [Number(stop.longitude), Number(stop.latitude)],
+        [Number(stops[index + 1].longitude), Number(stops[index + 1].latitude)],
+      ): 0,
     });
   });
 
