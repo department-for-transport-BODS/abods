@@ -1,6 +1,6 @@
 import { IResolvers } from "@graphql-tools/utils";
 import { CorridorNamespaceAddFirstStopArgs, CorridorNamespaceAddSubsequentStopsArgs, MutationCreateCorridorArgs, RequestContext } from "../../types";
-import { createCorridor, deleteCorridor, getCorridors, getJourneyStats, getJourneyStatsByDay, getJourneyStatsByHour, getJourneyStatsHistogram, getJourneyStatsPerService, getStats, getStops, getSubsequentStops, getSummaryStats, listCorridors, updateCorridor } from "./corridorFunctions.js";
+import { createCorridor, deleteCorridor, getCorridors, getJourneyStats, getJourneyStatsByDay, getJourneyStatsByHour, getJourneyStatsHistogram, getJourneyStatsPerService, getServiceLinks, getStats, getStops, getSubsequentStops, getSummaryStats, listCorridors, updateCorridor } from "./corridorFunctions.js";
 import { CorridorJourneyStatsOption } from "../../lib/corridor.js";
 
 const corridorResovlers: IResolvers = {
@@ -63,7 +63,6 @@ const corridorResovlers: IResolvers = {
       { sessionUser, db }: RequestContext,
     ) => {
       const histogram = getJourneyStatsHistogram(parents.journeys)
-      console.log("histogram----", histogram)
       return histogram;
     },
     journeyTimePerServiceStats: async (
@@ -74,7 +73,7 @@ const corridorResovlers: IResolvers = {
       return getJourneyStatsPerService(parents.journeys, db);
     },
     serviceLinks: async (parents, _, { sessionUser, db }: RequestContext) => {
-      return {};
+      return getServiceLinks(parents.inputs, db);
     },
   },
   Mutation: {
