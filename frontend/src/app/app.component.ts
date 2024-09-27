@@ -7,6 +7,7 @@ import { PanelService } from './shared/components/panel/panel.service';
 import { Observable } from 'rxjs';
 import { VersionService } from './version/version.service';
 import { AnalyticsService } from './shared/services/analytics.service';
+import { InactivityService } from './authentication/inactivity/inactivity.service';
 
 @Component({
   selector: 'app-root',
@@ -25,8 +26,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     private authService: AuthenticationService,
     private panelService: PanelService,
     private versionService: VersionService,
-    private analyticsService: AnalyticsService
-  ) {}
+    private analyticsService: AnalyticsService,
+    private idle: InactivityService
+  ) {
+    this.idle.$onInactive.subscribe(() => {
+      if (this.authService.isSessionAlive) {
+        this.authService.logout();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.versionService.printVersion();
