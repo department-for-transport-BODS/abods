@@ -15,7 +15,7 @@ import {
 } from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { getBSTDate, getDate, getFormattedDate, getStrHour } from "../../lib/dayjs.js";
+import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate, getStrHour, getStrUTCHour, getUTCDate } from "../../lib/dayjs.js";
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
@@ -848,11 +848,11 @@ export const getPunctualityTimeOfDay = async (
 
         results.forEach((res) => {
           hoursOfDay.push({
-            timeOfDay: getStrHour(res.departure_hour_only),
+            timeOfDay: dbUtcToBstHour(res.departure_hour_only),
             early: res._sum.early_count,
             onTime: res._sum.on_time_count,
-            late: res._sum.late_count
-          })
+            late: res._sum.late_count,
+          });
         });
 
       }
