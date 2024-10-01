@@ -15,7 +15,7 @@ import {
 } from "../../types.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate, getStrHour, getStrUTCHour, getUTCDate } from "../../lib/dayjs.js";
+import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
