@@ -29,11 +29,17 @@ import {
   CorridorUpdateInputType,
   Maybe,
   MutationResponseType,
+  ServiceLinkType,
   SessionUser,
   StopType,
 } from '../../types';
-import { getDate, getDayFormattedDate, getFormattedDate, getHourFormattedDate } from '../../lib/dayjs.js';
+import {
+  getDate,
+  getDayFormattedDate,
+  getHourFormattedDate,
+} from '../../lib/dayjs.js';
 import { getPercentile } from '../../lib/utils.js';
+import haversineDistance from 'haversine-distance';
 
 export const listCorridors = async (
   sessionUser: SessionUser,
@@ -291,11 +297,17 @@ export const insertCorridorStops = async (
       route_to_next_stop:
         index < stops.length - 1
           ? JSON.stringify([
-              [stop.latitude, stop.longitude],
-              [stops[index + 1].latitude, stops[index + 1].longitude],
+              [Number(stop.longitude), Number(stop.latitude)],
+              [
+                Number(stops[index + 1].longitude),
+                Number(stops[index + 1].latitude),
+              ],
             ])
           : '',
-      distance_to_next_stop: 0,
+      distance_to_next_stop: index < stops.length - 1 ? haversineDistance(
+        [Number(stop.longitude), Number(stop.latitude)],
+        [Number(stops[index + 1].longitude), Number(stops[index + 1].latitude)],
+      ): 0,
     });
   });
 
@@ -349,116 +361,128 @@ export const updateCorridor = async (
   };
 };
 
-export const getStats = async(
+export const getStats = async (
   inputs: CorridorStatsInputType,
   sessionUser: SessionUser,
-  db: Context
+  db: Context,
 ) => {
   if (!sessionUser.user) {
     throw 'Not Authorized';
   }
 
-  const {corridorId, fromTimestamp, granularity, stopList, toTimestamp} = inputs
+  const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
+    inputs;
 
   let results: Timetable[] = await db.prisma.timetable.findMany({
     where: {
       stop_id: {
-        in: stopList?.map(Number)
+        in: stopList?.map(Number),
       },
       date_of_journey: {
         gt: fromTimestamp,
-        lte: toTimestamp
-      }
+        lte: toTimestamp,
+      },
     },
     include: {
-      expected_journeys: true
-    }
-  })
+      expected_journeys: true,
+    },
+  });
 
-  const journeyMap: Map<string, Timetable[]> = new Map()
-  let mapKey = ""
-  let existingJourneys: Timetable[] = []
+  const journeyMap: Map<string, Timetable[]> = new Map();
+  let mapKey = '';
+  let existingJourneys: Timetable[] = [];
   results.map((journey) => {
-    mapKey = `${journey.group_id}${journey.vehiclejourney_id}`
+    mapKey = `${journey.group_id}${journey.vehiclejourney_id}`;
     existingJourneys = journeyMap.get(mapKey) || [];
     existingJourneys.push(journey);
     journeyMap.set(mapKey, existingJourneys);
   });
 
-  const journeys = filteredJourneys(stopList?.length ?? 0, journeyMap)
+  const journeys = filteredJourneys(stopList?.length ?? 0, journeyMap);
 
   return {
     inputs,
-    journeys
-  }
-}
+    journeys,
+  };
+};
 
 export const getSummaryStats = (
   inputs: CorridorStatsInputType,
   journeys: Map<string, Timetable[]>,
   sessionUser: SessionUser,
-  db: Context
+  db: Context,
 ): CorridorSummaryStatsType => {
-
-  const scheduledTransits = journeys.size
-  let totalTransits = 0
-  let totalJourneyTime = 0
-  const services = new Set()
+  const scheduledTransits = journeys.size;
+  let totalTransits = 0;
+  let totalJourneyTime = 0;
+  const services = new Set();
   const _ = [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
-    const firstStopOfCorridor = journeys[0].actual_departure_time
-    const lastStopOfCorridor = journeys[journeys.length - 1 ].actual_departure_time
+    const firstStopOfCorridor = journeys[0].actual_departure_time;
+    const lastStopOfCorridor =
+      journeys[journeys.length - 1].actual_departure_time;
     if (firstStopOfCorridor && lastStopOfCorridor) {
       totalTransits += 1;
       totalJourneyTime +=
         (lastStopOfCorridor.getTime() - firstStopOfCorridor.getTime()) / 1000; //In seconds
     }
 
-    const serviceCode =`${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`
-    if (
-      !services.has(serviceCode)
-    ) {
-      services.add(serviceCode)
+    const serviceCode = `${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`;
+    if (!services.has(serviceCode)) {
+      services.add(serviceCode);
     }
-
   });
 
-  const averageJourneyTime = Math.ceil(totalJourneyTime/totalTransits)
+  const averageJourneyTime = Math.ceil(totalJourneyTime / totalTransits);
 
   return {
     totalTransits: totalTransits,
     numberOfServices: services.size,
     averageJourneyTime: averageJourneyTime,
-    scheduledTransits: scheduledTransits
-  }
-}
+    scheduledTransits: scheduledTransits,
+  };
+};
 
 export const getJourneyStatsByDay = (
   journeys: Map<string, Timetable[]>,
-): (CorridorJourneyTimeStatsType| CorridorStatsTimeOfDayType | CorridorStatsDayOfWeekType)[] => {
+): (
+  | CorridorJourneyTimeStatsType
+  | CorridorStatsTimeOfDayType
+  | CorridorStatsDayOfWeekType
+)[] => {
   return getJourneyStats(journeys, CorridorJourneyStatsOption.day);
 };
 
 export const getJourneyStatsByHour = (
   journeys: Map<string, Timetable[]>,
-): (CorridorJourneyTimeStatsType| CorridorStatsTimeOfDayType | CorridorStatsDayOfWeekType)[] => {
+): (
+  | CorridorJourneyTimeStatsType
+  | CorridorStatsTimeOfDayType
+  | CorridorStatsDayOfWeekType
+)[] => {
   return getJourneyStats(journeys, CorridorJourneyStatsOption.hour);
 };
 
-export const getJourneyStats = (journeys: Map<string, Timetable[]>, inputType: CorridorJourneyStatsOption): (CorridorJourneyTimeStatsType| CorridorStatsTimeOfDayType | CorridorStatsDayOfWeekType)[]=> {
-
-  const journeyStats = new Map<string, number[]>()
+export const getJourneyStats = (
+  journeys: Map<string, Timetable[]>,
+  inputType: CorridorJourneyStatsOption,
+): (
+  | CorridorJourneyTimeStatsType
+  | CorridorStatsTimeOfDayType
+  | CorridorStatsDayOfWeekType
+)[] => {
+  const journeyStats = new Map<string, number[]>();
   const _ = [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
 
-    const firstStopOfCorridor = journeys[0]
-    const lastStopOfCorridor = journeys[journeys.length - 1 ]
+    const firstStopOfCorridor = journeys[0];
+    const lastStopOfCorridor = journeys[journeys.length - 1];
 
     if (
       firstStopOfCorridor.actual_departure_time &&
       lastStopOfCorridor.actual_departure_time
     ) {
-      let dateKey: string = ""
+      let dateKey: string = '';
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
           dateKey = getDayFormattedDate(firstStopOfCorridor.date_of_journey);
@@ -471,7 +495,9 @@ export const getJourneyStats = (journeys: Map<string, Timetable[]>, inputType: C
           break;
 
         case CorridorJourneyStatsOption.hour:
-          dateKey = getHourFormattedDate(firstStopOfCorridor.expected_departure_time);
+          dateKey = getHourFormattedDate(
+            firstStopOfCorridor.expected_departure_time,
+          );
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
@@ -485,19 +511,23 @@ export const getJourneyStats = (journeys: Map<string, Timetable[]>, inputType: C
           throw new Error('Invalid journey indicator type provided');
       }
 
-      const journeyTime = journeyStats.get(dateKey) || []
+      const journeyTime = journeyStats.get(dateKey) || [];
       journeyTime.push(
         (lastStopOfCorridor.actual_departure_time.getTime() -
           firstStopOfCorridor.actual_departure_time.getTime()) /
           1000,
       );
-      journeyStats.set(dateKey, journeyTime)
+      journeyStats.set(dateKey, journeyTime);
     }
   });
 
-  const stats: (CorridorJourneyTimeStatsType| CorridorStatsTimeOfDayType | CorridorStatsDayOfWeekType)[] = []
+  const stats: (
+    | CorridorJourneyTimeStatsType
+    | CorridorStatsTimeOfDayType
+    | CorridorStatsDayOfWeekType
+  )[] = [];
   journeyStats.forEach((journeyTimes: number[], key: string) => {
-    journeyTimes.sort((a, b) => a - b)
+    journeyTimes.sort((a, b) => a - b);
 
     stats.push({
       ts: key,
@@ -512,12 +542,12 @@ export const getJourneyStats = (journeys: Map<string, Timetable[]>, inputType: C
       minTransitTime: journeyTimes[0],
       maxTransitTime: journeyTimes[journeyTimes.length - 1],
       percentile25: getPercentile(25, journeyTimes),
-      percentile75: getPercentile(75, journeyTimes)
+      percentile75: getPercentile(75, journeyTimes),
     });
-  })
+  });
 
-  return stats
-}
+  return stats;
+};
 
 export const getJourneyStatsPerService = async (
   journeys: Map<string, Timetable[]>,
@@ -554,7 +584,7 @@ export const getJourneyStatsPerService = async (
         1000;
       journeyTime.recordedTransits += 1;
     }
-    journeyStats.set(service, journeyTime)
+    journeyStats.set(service, journeyTime);
   });
 
   const services = await db.prisma.service_details.findMany({
@@ -604,7 +634,7 @@ export const getJourneyStatsHistogram = (
       const totalJourneyTime = Math.floor(
         (lastStopOfCorridor.actual_departure_time.getTime() -
           firstStopOfCorridor.actual_departure_time.getTime()) /
-          1000,
+          ( 1000 * 60 ),
       );
 
       journeyStats.set(
@@ -623,4 +653,33 @@ export const getJourneyStatsHistogram = (
       })),
     },
   ];
+};
+
+export const getServiceLinks = async (
+  inputs: CorridorStatsInputType,
+  db: Context,
+): Promise<ServiceLinkType[]> => {
+  const { corridorId } = inputs;
+
+  const results = await db.prisma.corridor_stops.findMany({
+    where: {
+      corridor_id: Number(corridorId),
+    },
+  });
+
+  const serviceLinks: ServiceLinkType[] = [];
+
+  results.forEach((stop, index) => {
+    if (index < results.length - 1) {
+      serviceLinks.push({
+        fromStop: stop.stop_id.toString(),
+        toStop: results[index + 1].stop_id.toString(),
+        distance: stop.distance_to_next_stop,
+        routeValidity: 'INVALID',
+        linkRoute: stop.route_to_next_stop,
+      });
+    }
+  });
+
+  return serviceLinks.reverse();
 };
