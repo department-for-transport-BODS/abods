@@ -161,3 +161,13 @@ export const filteredJourneys = (
 
   return filteredJourneyMap;
 };
+
+// export const isCorridorMappedToUserOrg = (corridorId: string , sessionUser: SessionUser, db: Context) => {
+
+//   const result = await db.prisma.corridor.findUnique({
+//     where: {
+//       corridor_id: Number(corridorId),
+//       organisation_id: sessionUser.userOrganisationIDs
+//     }
+//   })
+// }
