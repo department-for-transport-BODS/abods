@@ -34,7 +34,7 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
       field: 'frequent',
       colId: 'freq',
       headerComponent: IconHeaderComponent,
-      headerComponentParams: { src: '/assets/icons/frequent.svg', tooltip: 'Service has periods of frequent running.' },
+      headerComponentParams: { src: '/assets/icons/frequent.svg', tooltip: 'Excess wait time data available.' },
       headerName: 'Frequent service',
       cellRenderer: IconCellRendererComponent,
       cellRendererParams: { src: '/assets/icons/frequent.svg', label: 'Frequent service' },
