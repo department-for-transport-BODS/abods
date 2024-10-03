@@ -1,7 +1,6 @@
 scalar DateTime
 scalar Time
 scalar Date
-scalar JSON
 
 type Query {
     user(id: String): UserType
@@ -21,18 +20,6 @@ type Query {
     vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
     timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
     corridor: CorridorNamespace
-    events: EventsPage
-}
-
-type EventsPage {
-  items: [EventType]
-  pageInfo: PageInfo
-}
-
-type EventType {
-  data: JSON
-  timestamp: DateTime
-  type: String
 }
 
 type CorridorNamespace {
