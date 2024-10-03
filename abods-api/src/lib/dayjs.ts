@@ -140,3 +140,7 @@ export const getDayFormattedDate = (
         .startOf('hour')
         .format('YYYY-MM-DDTHH:mm:ssZ');
 };
+
+export const dbUtcToBstHour = (inputDate: Date): string => {
+  return getUTCDate(inputDate).tz('Europe/London').format('HH:mm:ss');
+};
