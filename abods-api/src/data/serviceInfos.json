@@ -1,0 +1,12 @@
+[
+  {
+    "serviceId": "service1",
+    "serviceName": "Metro Express",
+    "serviceNumber": "M1"
+  },
+  {
+    "serviceId": "service2",
+    "serviceName": "City Circle",
+    "serviceNumber": "C2"
+  }
+]

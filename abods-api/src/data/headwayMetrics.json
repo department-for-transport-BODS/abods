@@ -1,0 +1,48 @@
+[
+  {
+    "frequentServiceInfo": {
+      "numHours": 8,
+      "totalHours": 10
+    },
+    "frequentServices": [
+      {
+        "serviceId": "service123",
+        "serviceInfo": {
+          "serviceId": "service123",
+          "serviceName": "Morning Route",
+          "serviceNumber": "MR1"
+        }
+      }
+    ],
+    "headwayDayOfWeek": [
+      {
+        "actualWaitTime": 5.5,
+        "dayOfWeek": 3,
+        "excessWaitTime": 1.2,
+        "scheduledWaitTime": 4.8
+      }
+    ],
+    "headwayOverview": {
+      "actualWaitTime": 6.0,
+      "excessWaitTime": 0.5,
+      "scheduledWaitTime": 5.5
+    },
+    "headwayTimeOfDay": [
+      {
+        "actualWaitTime": 6.2,
+        "excessWaitTime": 0.7,
+        "scheduledWaitTime": 5.5,
+        "timeOfDay": "08:00:00"
+      }
+    ],
+    "headwayTimeSeries": [
+      {
+        "actualWaitTime": 6.5,
+        "excessWaitTime": 1.0,
+        "scheduledWaitTime": 5.5,
+        "ts": "2024-04-10T12:00:00Z"
+      }
+    ]
+  }
+  
+]

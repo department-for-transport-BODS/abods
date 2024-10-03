@@ -1,0 +1,15 @@
+[
+  {
+    "localityAreaId": "area1",
+    "localityAreaName": "Metro Area",
+    "localityId": "local1",
+    "localityName": "Downtown"
+  },
+  {
+    "localityAreaId": "area2",
+    "localityAreaName": "Urban Area",
+    "localityId": "local2",
+    "localityName": "City Center"
+  }
+]
+

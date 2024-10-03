@@ -1,0 +1,30 @@
+name: checkov
+
+on:
+  pull_request:
+    paths-ignore:
+      - ".github/CODEOWNERS"
+      - ".github/settings.yml"
+      - "README.md"
+      - "CHANGELOG.md"
+      - ".gitignore"
+  
+
+jobs:
+  checkov:
+    name: checkov-action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+
+          directory: ${{ github.workspace }}
+          framework: all
+          skip_check: ""
+          output_format: cli,sarif
+          quiet: true # display only failed checks

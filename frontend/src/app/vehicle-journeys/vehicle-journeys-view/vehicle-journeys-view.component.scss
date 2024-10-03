@@ -1,0 +1,31 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.vehicle-journeys {
+  &__header-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  &__stop-map-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    column-gap: govuk-spacing(8);
+    row-gap: govuk-spacing(6);
+  }
+  &__controls {
+    justify-self: end;
+  }
+  &__sticky-container {
+    position: sticky;
+    top: 0;
+  }
+}
+
+@include bp($to-tablet) {
+  .vehicle-journeys {
+    &__stop-map-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

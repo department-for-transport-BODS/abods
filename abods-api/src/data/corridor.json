@@ -1,0 +1,13 @@
+[
+  {
+    "createdBy": "1",
+    "id": 101,
+    "name": "Central City Corridor",
+    "organisation": "org1",
+    "stops": [
+      "stop1",
+      "stop2"
+    ]
+  }
+  
+]

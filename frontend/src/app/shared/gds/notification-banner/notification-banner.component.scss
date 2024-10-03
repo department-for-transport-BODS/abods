@@ -1,0 +1,17 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.govuk-notification-banner {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+  }
+  &__icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    color: #ffff;
+  }
+}

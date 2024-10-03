@@ -1,0 +1,50 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.paging-panel {
+  @include govuk-font(19);
+  padding-top: govuk-spacing(4);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  &__count {
+    margin-right: govuk-spacing(3);
+  }
+  &__button {
+    padding: 0 govuk-spacing(1);
+    color: $govuk-link-colour; // we have to add this because the govuk- mixin only applies to :link
+    @include govuk-link-common();
+    @include govuk-link-style-default();
+    cursor: pointer;
+  }
+  &__ellipsis {
+    &::before {
+      margin-right: govuk-spacing(1);
+      content: '\2026';
+    }
+  }
+  &__current {
+    padding: govuk-spacing(1);
+    font-weight: $govuk-font-weight-bold;
+  }
+  &__prev {
+    &::before {
+      display: inline-block;
+      margin-right: govuk-spacing(1);
+      content: '\00AB';
+    }
+    &:hover::before {
+      text-decoration: none;
+    }
+  }
+  &__next {
+    &::after {
+      display: inline-block;
+      margin-left: govuk-spacing(1);
+      content: '\00BB';
+    }
+    &:hover::after {
+      text-decoration: none;
+    }
+  }
+}

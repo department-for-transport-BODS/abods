@@ -1,0 +1,66 @@
+<app-page>
+  <ng-container ngProjectAs="back-link">
+    <gds-back-link label="Search" [route]="[returnRoute]" [queryParams]="returnQueryParams"></gds-back-link>
+  </ng-container>
+  <ng-container ngProjectAs="content">
+    <ng-container *ngIf="!errorView; else error">
+      <app-page-header
+        *ngIf="!loading; else skeletonHeader"
+        caption="Vehicle journeys"
+        [heading]="journeyTitle"
+      ></app-page-header>
+      <div class="vehicle-journeys__header-container">
+        <app-journey-info [journeyInfo]="view?.journeyInfo" [loading]="loading"></app-journey-info>
+        <div class="vehicle-journeys__controls">
+          <app-segmented-toggle [(ngModel)]="timingPointsOption" (ngModelChange)="onTimingPointsToggleChange()">
+            <app-segmented-toggle-item
+              name="stops-filter"
+              identifier="all-stops"
+              value="all-stops"
+              label="All stops"
+            ></app-segmented-toggle-item>
+            <app-segmented-toggle-item
+              name="stops-filter"
+              identifier="timing-points"
+              value="timing-points"
+              label="Timing points"
+            ></app-segmented-toggle-item>
+          </app-segmented-toggle>
+          <app-journey-nav [prevNext]="prevNextJourneys" [loading]="loading"></app-journey-nav>
+        </div>
+      </div>
+      <div class="vehicle-journeys__stop-map-grid">
+        <app-stop-list
+          [stopList]="view?.stopList"
+          [loading]="loading"
+          (stopSelected)="onStopSelected($event)"
+          (stopHovered)="onStopHovered($event)"
+        ></app-stop-list>
+        <div>
+          <div class="vehicle-journeys__sticky-container">
+            <app-otp-stats [otpStats]="view?.otpStats" [loading]="loading"></app-otp-stats>
+            <app-journey-map
+              [view]="view"
+              [selectedStop]="selectedStop"
+              [hoveredStop]="hoveredStop"
+              [loading]="loading"
+            ></app-journey-map>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</app-page>
+
+<ng-template #skeletonHeader>
+  <div><span class="govuk-caption-xl govuk-!-margin-bottom-0">Vehicle journeys</span></div>
+  <app-skeleton appearance="heading-xl" width="300px"></app-skeleton>
+</ng-template>
+
+<ng-template #error>
+  <app-page-header caption="Vehicle journeys" [heading]="errorView?.errorHeading" spaceAbove="2"></app-page-header>
+  <p class="govuk-body">
+    {{ errorView?.errorMessage }} Go back to
+    <a [routerLink]="[returnRoute]" [queryParams]="returnQueryParams">Vehicle journeys</a>?
+  </p>
+</ng-template>

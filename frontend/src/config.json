@@ -1,0 +1,33 @@
+{
+  "apiUrl": "",
+  "analyticsId": "",
+  "mapboxToken": "",
+  "mapboxStyle": "",
+  "mapboxSatelliteStyle": "",
+  "vehicleJourneys": {
+    "validDateRange": {
+      "offsetISO": "PT0H",
+      "durationISO": "P6M"
+    }
+  },
+  "otp": {
+    "early": "1",
+    "late": "6"
+  },
+  "defaultCookiePolicy": {
+    "analyticsEnabled": false,
+    "version": 1,
+    "userSubmitted": false
+  },
+  "freshdesk": {
+    "apiUrl": "",
+    "folders": {
+		  "dashboard": "43000590095",
+		  "feedMonitoring": "43000590096",
+		  "otp": "43000590097",
+		  "vehicleJourneys": "43000590098",
+		  "corridors": "43000590099",
+		  "organisation": "43000590100"
+    }
+  }
+}

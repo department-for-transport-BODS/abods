@@ -1,0 +1,109 @@
+version: 0.1
+
+default:
+  global:
+    parameters: {}
+  build:
+    parameters:
+      parallel: true
+  deploy:
+    parameters:
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      confirm_changeset: true
+      region: 'eu-west-2'
+      resolve_s3: false
+  sync:
+    parameters:
+      watch: true
+  local_start_api:
+    parameters:
+      warm_containers: EAGER
+      region: 'eu-west-2'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='local'
+        RdsDbPort=15432
+        RdsDbHostAddr='host.docker.internal'
+  local_invoke:
+    parameters:
+      region: 'eu-west-2'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='local'
+        RdsDbPort=15432
+        RdsDbHostAddr='host.docker.internal'
+
+sandbox:
+  deploy:
+    parameters:
+      stack_name: 'abods-sandbox-app-stack'
+      s3_prefix: sandbox
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='sandbox'
+        VpcId='/abods/sandbox/vpc/id'
+        VpcSubnets='/abods/sandbox/vpc/subnets/private'
+
+dev:
+  deploy:
+    parameters:
+      stack_name: 'abods-dev-app-stack'
+      s3_prefix: dev
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='dev'
+        VpcId='/abods/dev/vpc/id'
+        VpcSubnets='/abods/dev/vpc/subnets/private'
+
+test:
+  deploy:
+    parameters:
+      stack_name: 'abods-test-app-stack'
+      s3_prefix: test
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='test'
+        VpcId='/abods/test/vpc/id'
+        VpcSubnets='/abods/test/vpc/subnets/private'
+
+uat:
+  deploy:
+    parameters:
+      stack_name: 'abods-uat-app-stack'
+      s3_prefix: uat
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='uat'
+        VpcId='/abods/uat/vpc/id'
+        VpcSubnets='/abods/uat/vpc/subnets/private'
+
+cavl:
+  deploy:
+    parameters:
+      stack_name: 'abods-cavl-app-stack'
+      s3_prefix: cavl
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='cavl'
+        VpcId='/abods/cavl/vpc/id'
+        VpcSubnets='/abods/cavl/vpc/subnets/private'
+
+prod:
+  sync:
+    parameters:
+      watch: false
+  deploy:
+    parameters:
+      stack_name: 'abods-prod-app-stack'
+      s3_prefix: prod
+      capabilities: 'CAPABILITY_NAMED_IAM'
+      parameter_overrides:
+        ProjectName='abods'
+        Environment='prod'
+        VpcId='/abods/prod/vpc/id'
+        VpcSubnets='/abods/prod/vpc/subnets/private'

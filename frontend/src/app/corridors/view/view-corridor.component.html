@@ -1,0 +1,352 @@
+<app-page>
+  <ng-container ngProjectAs="back-link">
+    <gds-back-link label="All corridors" [route]="['/corridors']"></gds-back-link>
+  </ng-container>
+  <ng-container ngProjectAs="content">
+    <div *ngIf="corridor || !errorView; else error">
+      <app-page-header
+        *ngIf="corridor; else skeletonHeader"
+        caption="Corridors"
+        [heading]="corridor.name"
+        spaceAbove="2"
+      ></app-page-header>
+      <div class="corridor__date-wrapper">
+        <app-date-range [formControl]="dateRange"></app-date-range>
+        <gds-button
+          [routerLink]="['/corridors/edit/', corridor?.id]"
+          text="Edit corridor"
+          appearance="secondary"
+          spaceBelow="0"
+        ></gds-button>
+      </div>
+
+      <app-segment-selector
+        [stops]="corridor?.stops"
+        [serviceLinks]="stats?.serviceLinks"
+        [isDisabled]="loadingStats && !corridorLine"
+        (selectSegment)="selectedStops$.next($event); onSelectSegment($event)"
+        (deselectSegment)="clearMapSelectedState($event)"
+        (mouseEnterStop)="setMapHoverState($event)"
+        (mouseLeaveStop)="clearMapHoverState($event)"
+      ></app-segment-selector>
+
+      <div class="corridor__summary">
+        <app-stat
+          label="Recorded transits"
+          class="corridor__summary-stat"
+          [statValue]="(stats?.summaryStats?.totalTransits | number) || 'Unavailable'"
+          [statLoaded]="!loadingStats"
+          tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
+        ></app-stat>
+        <app-stat
+          label="Missing transits"
+          class="corridor__summary-stat"
+          [statValue]="(missingTransits | number) || 'Unavailable'"
+          [statLoaded]="!loadingStats"
+          tooltip="The number of journeys in the timetables provided that do not have real-time information recorded against them."
+        ></app-stat>
+        <app-stat
+          label="Average journey time"
+          class="corridor__summary-stat"
+          [statValue]="(averageJourneyTime | durationToFormat: 'mm:ss') || 'Unavailable'"
+          [statLoaded]="!loadingStats"
+          tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
+        ></app-stat>
+        <app-stat
+          label="Average speed"
+          class="corridor__summary-stat"
+          [statValue]="speedStats?.averageSpeed || 'Unavailable'"
+          [statLoaded]="!loadingStats"
+          tooltip="The average speed of buses moving through the corridor according to the real-time information received."
+        ></app-stat>
+        <app-stat
+          label="Services"
+          class="corridor__summary-stat"
+          [statValue]="(stats?.summaryStats?.numberOfServices | number) || 'Unavailable'"
+          [statLoaded]="!loadingStats"
+          tooltip="The total number of different services that pass through this corridor."
+        ></app-stat>
+      </div>
+
+      <div class="corridor__analysis-selector">
+        <h2 class="govuk-!-margin-top-0 govuk-!-margin-bottom-2">Analysis</h2>
+        <gds-radios size="small" layout="inline">
+          <gds-radio-item
+            label="Journey time"
+            name="show-percent"
+            inputId="on-time-grid-show-percent"
+            [(ngModel)]="mode"
+            [value]="'time'"
+          ></gds-radio-item>
+          <gds-radio-item
+            label="Speed"
+            name="show-count"
+            inputId="on-time-grid-show-count"
+            [(ngModel)]="mode"
+            [value]="'speed'"
+          ></gds-radio-item>
+        </gds-radios>
+      </div>
+
+      <div class="corridor__map-wrapper">
+        <div *ngIf="loadingStats && !corridorLine" class="corridor__map-loading">
+          <app-spinner></app-spinner>
+        </div>
+        <mgl-map
+          [style]="mapboxStyle"
+          (styleData)="onStyleLoad()"
+          [fitBounds]="bounds"
+          [fitBoundsOptions]="{ padding: 50, duration: 0, maxZoom: 16 }"
+          (moveStart)="moveCounter = moveCounter + 1"
+          class="corridor__map govuk-!-margin-bottom-7"
+        >
+          <mgl-control position="top-left">
+            <app-dropdown identifier="map-display-menu" triggerLabel="Display options" [width]="200">
+              <p class="govuk-body govuk-!-margin-bottom-2"><strong>Map view</strong></p>
+              <app-map-view-toggle (mapboxStyle)="mapboxStyle = $event"></app-map-view-toggle>
+            </app-dropdown>
+          </mgl-control>
+          <mgl-control position="bottom-left">
+            <app-map-recentre-button
+              *ngIf="moveCounter > 1 && corridorLine"
+              (recentre)="centreMapBounds()"
+            ></app-map-recentre-button>
+          </mgl-control>
+          <ng-container>
+            <mgl-geojson-source
+              *ngIf="corridorLine"
+              id="corridor-line"
+              promoteId="segmentId"
+              [data]="corridorLine"
+            ></mgl-geojson-source>
+            <mgl-geojson-source
+              *ngIf="corridorStops"
+              id="corridor-stops"
+              promoteId="stopId"
+              [data]="corridorStops"
+            ></mgl-geojson-source>
+            <mgl-layer
+              *ngIf="corridorLine"
+              id="corridor-line-layer"
+              type="line"
+              [paint]="{
+                'line-color': ['case', ['boolean', ['feature-state', 'selected'], selectAll], '#1d70b8', '#77a9d4'],
+                'line-width': 5,
+                'line-dasharray': [
+                  'case',
+                  ['boolean', ['get', 'dashedLine'], true],
+                  ['literal', [0.8, 1.6]],
+                  ['literal', [1]]
+                ]
+              }"
+              [layout]="{
+                'line-cap': 'square',
+                'line-join': 'round'
+              }"
+              source="corridor-line"
+            ></mgl-layer>
+            <mgl-layer
+              *ngIf="corridorLine"
+              id="corridor-chevrons"
+              type="symbol"
+              [paint]="{
+                'icon-opacity': ['case', ['boolean', ['feature-state', 'selected'], selectAll], 1, 0]
+              }"
+              [layout]="{
+                'icon-image': 'map-chevron-large',
+                'symbol-placement': 'line',
+                'symbol-spacing': 200
+              }"
+              source="corridor-line"
+            ></mgl-layer>
+            <mgl-layer
+              *ngIf="corridorStops"
+              id="corridor-markers"
+              type="circle"
+              [paint]="{
+                'circle-color': '#ffffff',
+                'circle-radius': 6,
+                'circle-stroke-width': 4,
+                'circle-stroke-color': ['case', ['boolean', ['feature-state', 'hover'], false], '#0b0c0c', '#B1B4B6']
+              }"
+              source="corridor-stops"
+              (layerMouseMove)="popupStop = mapEventStop($event); setMapHoverState(popupStop)"
+              (layerMouseLeave)="clearMapHoverState(popupStop); popupStop = undefined"
+            ></mgl-layer>
+            <mgl-popup
+              *ngIf="popupStop"
+              [lngLat]="popupStop"
+              [closeButton]="false"
+              [closeOnClick]="false"
+              maxWidth="200"
+              [offset]="12"
+              className="gds-popup"
+            >
+              <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+                {{ popupStop.stopName }}
+              </div>
+              <div class="govuk-body-small">{{ popupStop.naptan }}</div>
+            </mgl-popup>
+          </ng-container>
+          <mgl-control mglNavigation></mgl-control>
+        </mgl-map>
+      </div>
+
+      <app-box *ngIf="stats?.journeyTimePerServiceStats?.length" spaceBelow="7" minHeight="600px">
+        <div class="corridor__journey-time">
+          <app-tabs>
+            <app-tab tabTitle="Timeline">
+              <app-box-plot-chart
+                *appTabContent
+                [data]="isTime ? stats?.journeyTimeStats : speedStats?.transitSpeedStats"
+                [loading]="loadingStats"
+                [noData]="
+                  !loadingStats && (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedStats?.length)
+                "
+                [params]="params"
+                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
+                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                xAxisType="date"
+                xAxisTitle="Date"
+                xAxisLabelPosition="column"
+                [yAxisType]="isTime ? 'time' : 'value'"
+                [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
+                [hideOutliers]="hideOutliersJourneyTime"
+              ></app-box-plot-chart>
+              <div class="corridor__hide-outliers">
+                <gds-checkboxes size="small">
+                  <gds-checkboxes-item
+                    inputId="hide-outliers-journey-time"
+                    name="hide-outliers-journey-time"
+                    label="Hide outliers"
+                    [(ngModel)]="hideOutliersJourneyTime"
+                  ></gds-checkboxes-item>
+                </gds-checkboxes>
+              </div>
+            </app-tab>
+            <app-tab tabTitle="Time of day">
+              <app-box-plot-chart
+                *appTabContent
+                [data]="isTime ? stats?.journeyTimeTimeOfDayStats : speedStats?.transitSpeedTimeOfDay"
+                [loading]="loadingStats"
+                [noData]="
+                  !loadingStats &&
+                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedTimeOfDay?.length)
+                "
+                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
+                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                xAxisType="category"
+                xAxisTitle="Time of day"
+                xAxisLabelPosition="bin"
+                [yAxisType]="isTime ? 'time' : 'value'"
+                [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
+                [hideOutliers]="hideOutliersTimeOfDay"
+              ></app-box-plot-chart>
+              <div class="corridor__hide-outliers">
+                <gds-checkboxes size="small">
+                  <gds-checkboxes-item
+                    inputId="hide-outliers-time-of-day"
+                    name="hide-outliers-time-of-day"
+                    label="Hide outliers"
+                    [(ngModel)]="hideOutliersTimeOfDay"
+                  ></gds-checkboxes-item>
+                </gds-checkboxes>
+              </div>
+            </app-tab>
+            <app-tab tabTitle="Day of week">
+              <app-box-plot-chart
+                *appTabContent
+                [data]="isTime ? stats?.journeyTimeDayOfWeekStats : speedStats?.transitSpeedDayOfWeek"
+                [loading]="loadingStats"
+                [noData]="
+                  !loadingStats &&
+                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedDayOfWeek?.length)
+                "
+                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
+                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                xAxisType="category"
+                xAxisTitle="Day of week"
+                xAxisLabelPosition="column"
+                [xAxisCenterd]="true"
+                [yAxisType]="isTime ? 'time' : 'value'"
+                [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
+                [hideOutliers]="hideOutliersDayOfWeek"
+              ></app-box-plot-chart>
+              <div class="corridor__hide-outliers">
+                <gds-checkboxes size="small">
+                  <gds-checkboxes-item
+                    inputId="hide-outliers-day-of-week"
+                    name="hide-outliers-day-of-week"
+                    label="Hide outliers"
+                    [(ngModel)]="hideOutliersDayOfWeek"
+                  ></gds-checkboxes-item>
+                </gds-checkboxes>
+              </div>
+            </app-tab>
+            <app-tab tabTitle="Distribution">
+              <app-histogram-chart
+                *appTabContent
+                [data]="isTime ? stats?.journeyTimeHistogram : speedStats?.transitSpeedHistogram"
+                [loading]="loadingStats"
+                [noData]="
+                  !loadingStats &&
+                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedHistogram?.length)
+                "
+                [chartFillcolor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                [xAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
+                [xAxisLabelPosition]="isTime ? 'bin' : 'column'"
+                yAxisTitle="Number of journeys"
+              ></app-histogram-chart>
+            </app-tab>
+          </app-tabs>
+        </div>
+      </app-box>
+      <app-box *ngIf="!stats?.journeyTimePerServiceStats?.length" spaceBelow="7" minHeight="549px">
+        <app-spinner *ngIf="loadingStats" [vCentre]="true" size="default"></app-spinner>
+        <div *ngIf="!loadingStats" class="corridor--error">
+          <svg-icon
+            class="corridor--error__icon"
+            src="assets/icons/exclamation-in-circle.svg"
+            [applyClass]="true"
+          ></svg-icon>
+          <span class="corridor--error__message"
+            >We have not found any journey time data for the date period selected.</span
+          >
+        </div>
+      </app-box>
+      <h2>Services</h2>
+      <div class="corridor__services">
+        <ag-grid-angular
+          appAgGrid
+          class="ag-theme-compact ag-theme-wrapped-header"
+          [rowData]="stats?.journeyTimePerServiceStats"
+          [columnDefs]="columnDefs"
+          [defaultColDef]="defaultColumnDef"
+          [gridOptions]="gridOptions"
+          (gridReady)="onGridReady($event)"
+          (columnResized)="gridHeaderHeightSetter()"
+          [suppressLoadingOverlay]="true"
+          [suppressNoRowsOverlay]="true"
+        ></ag-grid-angular>
+        <app-spinner *ngIf="loadingStats" [vCentre]="true" size="default"></app-spinner>
+        <div
+          *ngIf="!loadingStats && !stats?.journeyTimePerServiceStats?.length"
+          class="corridor__services--message"
+          role="alert"
+        >
+          No services found.
+        </div>
+      </div>
+    </div>
+    <ng-template #error>
+      <app-page-header caption="Corridors" [heading]="errorView?.errorHeading" spaceAbove="2"></app-page-header>
+      <p class="govuk-body">
+        {{ errorView?.errorMessage }} Go back to <a [routerLink]="['/corridors']">All corridors</a>?
+      </p>
+    </ng-template>
+    <ng-template #skeletonHeader>
+      <div><span class="govuk-caption-xl govuk-!-margin-bottom-0">Corridors</span></div>
+      <app-skeleton appearance="heading-xl" width="300px" spaceAbove="2"></app-skeleton>
+    </ng-template>
+  </ng-container>
+</app-page>

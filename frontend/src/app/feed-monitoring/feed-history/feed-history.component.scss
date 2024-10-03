@@ -1,0 +1,56 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.feed-history {
+  &__nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__stats {
+    margin-top: govuk-spacing(8);
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__stat {
+    border-top: 1px solid $govuk-border-colour;
+    padding-top: govuk-spacing(3);
+    flex-basis: calc(100% - #{govuk-spacing(6)});
+    margin-left: govuk-spacing(3);
+    margin-right: govuk-spacing(3);
+  }
+
+  &--error {
+    position: absolute;
+    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    &__icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 10px;
+      color: $govuk-error-colour;
+    }
+  }
+}
+
+@include bp($phablet) {
+  .feed-history {
+    &__stat {
+      flex-basis: calc(50% - #{govuk-spacing(6)});
+    }
+  }
+}
+
+@include bp($desktop) {
+  .feed-history {
+    &__stat {
+      flex-basis: calc(25% - #{govuk-spacing(6)});
+    }
+  }
+}

@@ -1,0 +1,17 @@
+// use values from settings to feed the normalize process
+@import 'assets/styles/settings/settings.scss';
+
+@import 'assets/styles/base/base.scss';
+@import 'assets/styles/utils/utils.scss';
+@import 'assets/styles/libs/libs.scss';
+
+// Core GDS classes
+@import 'govuk-frontend/govuk/all';
+
+// Mapbox-GL
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+// Override min-width for select fields
+.govuk-select {
+  min-width: fit-content;
+}

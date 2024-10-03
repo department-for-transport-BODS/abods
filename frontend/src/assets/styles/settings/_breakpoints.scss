@@ -1,0 +1,66 @@
+// -----------------------------------------------------------------------------
+// BREAKPOINTS
+// -----------------------------------------------------------------------------
+
+// These variables are the core breakpoints - but used for calculation purposes only
+
+$screen-sm-min: 30em; // 480px Small mobile screen - "phablet"
+$screen-md-min: 48em; // 768px Small screen - "tablet"
+$screen-lg-min: 64em; // 1024px Medium screen - "desktop"
+$screen-xl-min: 80em; // 1280 Medium desktop - "xl-desktop"
+$screen-xxl-min: 90em; // 1440 Large desktop - "xxl-desktop"
+$screen-xxxl-min: 100em; // 1600 Large desktop - "xxl-desktop"
+$screen-max: $max-width + 60px; //minimum screen width before the content area starts reducing in size
+
+$responsive-limit: $screen-md-min;
+
+// Converting breakpoints above to an upper limit for the breakpoint below
+
+$screen-sm-max: ($screen-md-min - 0.0625em); // 767px
+$screen-md-max: ($screen-lg-min - 0.0625em); // 1023px
+$screen-lg-max: ($screen-xl-min - 0.0625em); // 1279px
+$screen-xlg-max: ($screen-xxl-min - 0.0625em); // 1439px
+$screen-xxlg-max: ($screen-xxxl-min - 0.0625em); // 1599px
+// Convert those breakpoints into human-friendly approximate device sizes
+// Use these in conjunction with the bp() mixing to add breakpoints
+// e.g. @include bp($tablet) {}
+
+$phablet: (
+  media: $screen-sm-min,
+);
+$phablet-only: (
+  media: '(min-width: #{$screen-sm-min}) and (max-width: #{$screen-sm-max})',
+);
+$to-tablet: (
+  media: '(max-width: #{$screen-sm-max} )',
+);
+$tablet: (
+  media: $screen-md-min,
+);
+$tablet-only: (
+  media: '(min-width: #{$screen-md-min}) and (max-width: #{$screen-md-max})',
+);
+$to-desktop: (
+  media: '(max-width: #{$screen-md-max})',
+);
+$desktop: (
+  media: $screen-lg-min,
+);
+$desktop-only: (
+  media: '(min-width: #{$screen-lg-min}) and (max-width: #{$screen-lg-max})',
+);
+$to-lg-desktop: (
+  media: '(max-width: #{$screen-lg-max})',
+);
+$lg-desktop: (
+  media: $screen-xl-min,
+);
+$xlg-desktop: (
+  media: $screen-xxl-min,
+);
+$xxlg-desktop: (
+  media: $screen-xxxl-min,
+);
+$max-desktop: (
+  media: $screen-max,
+);

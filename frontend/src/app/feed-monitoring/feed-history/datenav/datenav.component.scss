@@ -1,0 +1,68 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.datenav {
+  margin-top: govuk-spacing(4);
+  margin-bottom: govuk-spacing(2);
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: govuk-spacing(6);
+  }
+  &__controls {
+    display: flex;
+    margin-top: 6px;
+  }
+  &__button {
+    display: flex;
+    align-items: center;
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+    color: $govuk-link-colour;
+    font-weight: $govuk-font-weight-bold;
+    & + & {
+      margin-left: govuk-spacing(2);
+    }
+    &[disabled] {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+  &__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+  &__label {
+    padding-left: govuk-spacing(1);
+    padding-right: govuk-spacing(1);
+  }
+
+  &__day-blocks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5px, 1fr));
+    justify-content: space-between;
+    padding: govuk-spacing(1) 8px;
+    grid-gap: 3px;
+    position: relative;
+    margin-bottom: 25px;
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border: 1px solid $govuk-border-colour;
+      z-index: -1;
+    }
+    &--with-labels {
+      margin-bottom: 0;
+      &::after {
+        bottom: 25px; // match daynav-item padding-bottom
+      }
+    }
+  }
+}

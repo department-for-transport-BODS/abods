@@ -1,0 +1,14 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+//additional modal styling in lib/_ngx-smart-modal
+
+.modal {
+  &__header {
+    background-color: govuk-colour('black');
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

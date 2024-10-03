@@ -1,0 +1,48 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div [ngClass]="formGroupClasses">
+    <gds-fieldset class="govuk-fieldset">
+      <span *ngIf="error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>
+        Please enter a value between 1 and 20 minutes</span
+      >
+      <app-stack childMin="250px" childMax="250px">
+        <gds-text-input
+          inputId="otp-param-input-early"
+          name="otp-param-input-early"
+          formControlName="early"
+          type="number"
+          label="Early"
+          hint="Value greater than"
+          min="1"
+          max="20"
+          [suffix]="early === 1 ? 'minute' : 'minutes'"
+          step="1"
+          width="2"
+          [maxNumber]="20"
+          [minNumber]="1"
+          wholeNumber
+        ></gds-text-input>
+        <gds-text-input
+          inputId="rangeSliderMax"
+          name="rangeSliderMax"
+          formControlName="late"
+          type="number"
+          label="Late"
+          hint="Value greater than or equal to"
+          min="1"
+          max="20"
+          [suffix]="late === 1 ? 'minute' : 'minutes'"
+          step="1"
+          width="2"
+          [maxNumber]="20"
+          [minNumber]="1"
+          wholeNumber
+        ></gds-text-input>
+      </app-stack>
+      <div class="govuk-!-margin-top-4">
+        <app-otp-param-range-slider [(early)]="early" [(late)]="late"></app-otp-param-range-slider>
+      </div>
+    </gds-fieldset>
+  </div>
+  <gds-button type="submit" spaceBelow="2">Compare</gds-button>
+</form>

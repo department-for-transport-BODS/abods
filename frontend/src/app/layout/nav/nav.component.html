@@ -1,0 +1,71 @@
+<div
+  id="navigation"
+  class="nav"
+  [ngClass]="{ 'nav--open': navService.isOpen }"
+  (appMouseupOutside)="navService.navClickOutside($event)"
+>
+  <div class="nav__block" id="nav">
+    <nav>
+      <ul class="govuk-list nav__list">
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/dashboard']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Dashboard
+          </a>
+        </li>
+        <li class="nav__item">
+          <a
+          style="color:grey; pointer-events: none;"
+            class="nav__link disabled"
+            routerLinkActive="nav__link--current"
+            >Feed monitoring
+          </a>
+        </li>
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/on-time']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >On-time performance
+          </a>
+        </li>
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/vehicle-journeys']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Vehicle journeys
+          </a>
+        </li>
+        <li class="nav__item">
+          <!-- <a
+          style="color:grey; pointer-events: none;"
+          class="nav__link disabled"
+          routerLinkActive="nav__link--current"
+            >Corridors
+          </a> -->
+          <a
+            class="nav__link"
+            [routerLink]="['/corridors']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Corridors
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="nav__menu-bottom">
+    <button class="nav__menu-bottom__action-item button-link" (click)="openHelpdesk()">
+      <svg-icon src="assets/icons/question-in-circle.svg"></svg-icon>
+      Help
+    </button>
+    <app-user-account></app-user-account>
+  </div>
+</div>

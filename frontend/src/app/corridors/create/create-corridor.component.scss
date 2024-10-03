@@ -1,0 +1,57 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.create-corridor {
+  &__stops-layout {
+    display: flex;
+    flex-direction: column;
+    @include govuk-responsive-padding(2, 'top');
+    @include bp($tablet) {
+      flex-direction: row;
+    }
+  }
+  &__form-column {
+    flex-shrink: 1;
+    // sets the width to the same width as the text input above
+    @include govuk-font(19);
+    width: 41ex;
+    @include bp($tablet) {
+      width: auto;
+      // flex basis (rather than width) required to decrease width when min-width of map is reached
+      flex-basis: 41ex;
+    }
+  }
+  &__map-column {
+    flex: 1;
+  }
+  &__no-further-stops {
+    @include govuk-responsive-margin(6, 'top');
+  }
+  &__location {
+    @include govuk-font(19);
+    max-width: 41ex;
+    @include govuk-responsive-margin(6, 'bottom');
+  }
+  &__search {
+    margin-top: -(govuk-spacing(2));
+    @media only screen and (min-width: 40em) {
+      margin-top: -(govuk-spacing(4));
+    }
+  }
+}
+
+::ng-deep {
+  &#finish-btn {
+    min-width: 65px;
+    .spinner {
+      &__dot1,
+      &__dot2,
+      &__dot3 {
+        color: #fff;
+      }
+    }
+  }
+  &#save-as-new-btn {
+    min-width: 125px;
+  }
+}

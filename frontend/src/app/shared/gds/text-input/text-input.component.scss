@@ -1,0 +1,72 @@
+@import 'src/assets/styles/settings/settings';
+
+.text-input {
+  &__wrapper {
+    position: relative;
+  }
+  &__label {
+    &--required {
+      &:after {
+        content: '*';
+      }
+    }
+  }
+  &__input {
+    background: transparent;
+    z-index: 0;
+  }
+  &--no-cal {
+    .text-input {
+      &__input {
+        &::-webkit-calendar-picker-indicator {
+          display: none;
+        }
+      }
+    }
+  }
+  &__icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    z-index: $z-content;
+    top: 0;
+    bottom: 0;
+    margin: 4px;
+    padding-right: 4px;
+    background-color: #fff;
+    &--preffix {
+      left: 0;
+    }
+    &--suffix {
+      right: 0;
+    }
+  }
+  &__preffix-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+    margin-left: 3px;
+    pointer-events: none;
+    display: block;
+  }
+  &__suffix-icon {
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
+    pointer-events: none;
+    display: block;
+  }
+  &__search-icon {
+    padding-left: 30px;
+    padding-right: 30px;
+    text-overflow: ellipsis;
+  }
+}
+
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}

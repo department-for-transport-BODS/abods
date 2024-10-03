@@ -1,0 +1,57 @@
+@use "sass:math";
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers.scss';
+
+.status {
+  display: flex;
+  align-items: center;
+  &.status--small,
+  &.status--medium {
+    //height: 25px;
+  }
+  &.status--large & {
+    //height: 35px;
+  }
+  &--active {
+    color: govuk-colour('green');
+  }
+  &--inactive {
+    color: govuk-colour('red');
+  }
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    color: govuk-colour('red');
+    display: block;
+    flex-shrink: 0;
+    .status--active & {
+      color: govuk-colour('green');
+    }
+    .status--small & {
+      width: 20px;
+      height: 20px;
+    }
+    .status--medium & {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__label {
+    text-transform: capitalize;
+    font-weight: $govuk-font-weight-bold;
+    margin-left: govuk-spacing(2);
+
+    .status--small &,
+    .status--medium & {
+      @include govuk-font(19);
+      margin-left: govuk-spacing(1);
+    }
+    .status--large & {
+      font-size: rem(32);
+      line-height: math.div(35, 32);
+      margin-left: govuk-spacing(2);
+    }
+  }
+}

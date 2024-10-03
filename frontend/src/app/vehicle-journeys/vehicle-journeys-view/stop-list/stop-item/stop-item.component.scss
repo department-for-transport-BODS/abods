@@ -1,0 +1,58 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.stop-list-item {
+  min-height: 36px;
+  &__value-container {
+    display: flex;
+    align-items: center;
+    &__align-right {
+      justify-content: flex-end;
+    }
+  }
+  &__icon {
+    color: currentColor;
+    display: block;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    align-self: baseline;
+    &--early {
+      color: raas-colour('early');
+    }
+    &--on-time {
+      color: raas-colour('on-time');
+    }
+    &--late {
+      color: raas-colour('late');
+    }
+    &--no-data {
+      color: govuk-colour('mid-grey');
+    }
+    &--stop {
+      width: 20px;
+      stroke-width: 2px;
+      margin-left: 3px;
+    }
+  }
+  &__name {
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+    text-decoration: none;
+  }
+  &--timing-point {
+    font-size: $font-size-body;
+    font-weight: $font-weight-bold;
+    border-top: 1px solid govuk-colour('mid-grey');
+    border-bottom: 1px solid govuk-colour('mid-grey');
+    padding-top: govuk-spacing(2);
+    padding-bottom: govuk-spacing(2);
+    &--first {
+      border-top: none;
+    }
+  }
+  &__scheduled,
+  &__actual {
+    font-variant-numeric: tabular-nums;
+  }
+}

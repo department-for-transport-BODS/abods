@@ -1,0 +1,16 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.vehicle-journey {
+  &__map-loading {
+    position: absolute;
+    z-index: 999;
+    margin-left: calc(50% - 25px);
+    margin-top: calc(50% - 25px);
+  }
+  &__map {
+    width: 100%;
+    height: 80vh;
+    border: solid 1px $govuk-border-colour;
+  }
+}

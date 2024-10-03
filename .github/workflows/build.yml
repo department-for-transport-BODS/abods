@@ -1,0 +1,273 @@
+name: build application
+run-name: build application from ${{ github.ref_name }} @ ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - 'sandbox'
+    - 'dev'
+    paths:
+    - 'VERSION'
+    - 'abods-api/**'
+    - 'frontend/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+    github.event_name == 'release' && 'prod' ||
+    startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+    github.ref_name == 'main' && 'uat' ||
+    github.ref_name == 'cavl' && 'cavl' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  RC_ENV: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  RC_DST_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    outputs:
+      AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
+      VERSION: ${{ steps.validate.outputs.VERSION }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-app-build-validation
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: validate job parameters
+        env:
+          BRANCH_CONDITION: ${{ !(contains(fromJSON('["test", "cavl", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
+        id: validate
+        run: |
+          if [[ ${BRANCH_CONDITION} == 'true' ]]; then
+            if [[ ${GITHUB_REF_NAME} == 'dev' ]]; then
+              new_version=$(yq e '.version' VERSION)
+              echo "VERSION=${new_version}" >> "$GITHUB_OUTPUT"
+
+              rc_path="$RC_DST/releases/$new_version"
+              if [[ `aws s3 ls s3://$rc_path|head` ]]; then
+                echo "[INFO] Release candidate version [${new_version}] already exists. Version number must be incremented to allow for a new build. Exiting"
+                exit 1
+              else
+                echo "[INFO] Running on development branch, building as release for promotion through to live"
+              fi
+            else
+              echo "[INFO] Running on feature branch, building as release for sandbox environment"
+              echo "VERSION=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "[ERROR] It is only possible to build from dev or sandbox/a feature branch. Exiting"
+            exit 1
+          fi
+
+      - name: set environment specific vars
+        id: set-vars
+        run: |
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+
+  backend:
+    runs-on: ubuntu-latest
+    needs: validation
+    defaults:
+      run:
+        working-directory: abods-api
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: setup sam
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-backend-build
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: package and push backend code
+        env: 
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/backend" || rc_path="releases-dev/$VERSION/backend"
+
+          sam build && \
+            sam package \
+              --s3-bucket $RC_DST \
+              --s3-prefix $rc_path \
+              --output-template-file packaged.yaml
+
+          aws s3 cp packaged.yaml s3://$RC_DST/$rc_path/
+          aws s3 cp samconfig.yaml s3://$RC_DST/$rc_path/
+
+          echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully built uploaded"
+
+  frontend:
+    runs-on: ubuntu-latest
+    needs: validation
+    defaults:
+      run:
+        working-directory: frontend
+
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      matrix:
+        environment: [sandbox, dev, test, cavl, uat]
+        isRelease:
+          - ${{ contains(github.ref, 'dev') }}
+        exclude:
+          - isRelease: false
+            environment: dev
+          - isRelease: false
+            environment: test
+          - isRelease: false
+            environment: cavl
+          - isRelease: false
+            environment: uat
+          - isRelease: true
+            environment: sandbox
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-build
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: package and push frontend code
+        env:
+          CI: ""
+          ENVIRONMENT: ${{ matrix.environment }}
+          RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="releases-dev/$VERSION/frontend/$ENVIRONMENT"
+
+          # determine environment variables for build
+          domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
+            | jq -r '.Parameter.Value'`
+          freshdesk_api_url="https://${domain_name}/freshdesk/"
+          graphql_api_url="https://${domain_name}/api/graphql"
+          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
+          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
+          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
+          
+          jq --arg freshdesk_api_url "$freshdesk_api_url" \
+             --arg graphql_api_url "$graphql_api_url" \
+             --arg mapbox_token "$mapbox_token" \
+             --arg mapbox_style "$mapbox_style" \
+             --arg mapbox_satellite_style "$mapbox_satellite_style" \
+             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
+            mv tmp.json src/config.json
+
+          npm install
+          npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
+            ng build -c production
+
+          echo "[INFO] Uploading application component (FRONTEND) for ${ENVIRONMENT^^}"
+          aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
+          aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
+
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENVIRONMENT^^}"
+
+  commit-and-tag:
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+      - backend
+      - frontend
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: commit and push changes
+        env:
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          echo "[INFO] Tagging commit as version [${VERSION}]"
+
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git config --global url.https://${{ github.token }}@github.com/.insteadOf https://github.com/
+
+          git tag $VERSION
+          git push --tags --force
+
+  trigger-deploy-dev:
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(fromJSON('["test", "cavl", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}
+    runs-on: ubuntu-latest
+    needs: 
+      - validation
+      - backend
+      - frontend
+      - commit-and-tag
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: trigger remote
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          repository: ${{ github.repository }}
+          event-type: automated-deploy-dev
+          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.VERSION }}" }'
+

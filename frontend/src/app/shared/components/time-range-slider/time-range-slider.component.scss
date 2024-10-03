@@ -1,0 +1,17 @@
+@import 'src/assets/styles/settings/settings';
+@import 'src/assets/styles/helpers/helpers';
+
+.time-range-slider {
+  &__textboxes {
+    display: flex;
+    > * {
+      width: 50%;
+    }
+    > *:first-child {
+      margin-right: govuk-spacing(6);
+    }
+    input {
+      width: 100%;
+    }
+  }
+}

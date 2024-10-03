@@ -1,0 +1,27 @@
+<div
+  class="corridor-stop-list__stop corridor-stop-list__stop--matching"
+  *ngFor="let stop of stops"
+  (mouseover)="mouseOver.emit(stop)"
+  (mouseleave)="mouseLeave.emit(stop)"
+>
+  <div class="corridor-stop-list__stop-details corridor-stop-list__stop-details--no-graphic">
+    <div class="corridor-stop-list__stop-label">{{ stop.properties.stopName }}</div>
+    <div class="corridor-stop-list__naptan">{{ stop.properties.localityName }} {{ stop.properties.naptan }}</div>
+  </div>
+  <div>
+    <gds-button
+      [text]="!isFirstStop ? 'Add' : 'Select'"
+      appearance="secondary"
+      spaceBelow="0"
+      (click)="addStop.emit(stop)"
+    ></gds-button>
+  </div>
+</div>
+<gds-button
+  *ngIf="showMoreBtn"
+  text="Show more"
+  appearance="secondary"
+  spaceAbove="4"
+  spaceBelow="2"
+  (click)="showMore()"
+></gds-button>

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Operator A",
+    "nocCode": "A123",
+    "operatorId": "op1"
+  },
+  {
+    "name": "Operator B",
+    "nocCode": "B456",
+    "operatorId": "op2"
+  }
+]

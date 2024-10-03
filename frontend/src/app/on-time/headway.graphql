@@ -1,0 +1,37 @@
+query headwayTimeSeries($params: HeadwayInputType!) {
+  headwayMetrics {
+    headwayTimeSeries(inputs: $params) {
+      ts
+      actual: actualWaitTime
+      scheduled: scheduledWaitTime
+      excess: excessWaitTime
+    }
+  }
+}
+
+query headwayOverview($params: HeadwayInputType!) {
+  headwayMetrics {
+    headwayOverview(inputs: $params) {
+      actual: actualWaitTime
+      scheduled: scheduledWaitTime
+      excess: excessWaitTime
+    }
+  }
+}
+
+query headwayFrequentServices($operatorId: String!, $fromTimestamp: DateTime!, $toTimestamp: DateTime!) {
+  headwayMetrics {
+    frequentServices(operatorId: $operatorId, fromTimestamp: $fromTimestamp, toTimestamp: $toTimestamp) {
+      serviceId
+    }
+  }
+}
+
+query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType) {
+  headwayMetrics {
+    frequentServiceInfo(inputs: $inputs) {
+      numHours
+      totalHours
+    }
+  }
+}

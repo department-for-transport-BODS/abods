@@ -1,0 +1,8 @@
+<div class="chip">
+  <button aria-label="remove filter" class="chip__close unbuttoned" (click)="onClose()" type="button">
+    <svg-icon aria-hidden="true" class="chip__close-icon" src="assets/icons/cross.svg" [applyClass]="true"></svg-icon>
+  </button>
+  <div class="chip__content">
+    <span class="chip__label">{{ label }}:</span><span class="chip__value">{{ value }}</span>
+  </div>
+</div>
