@@ -184,7 +184,7 @@ describe('ViewServiceComponent', () => {
     expect(
       spectator.query(
         byText(
-          '0 hours out of a total 100 service hours during the selected period operated on a frequent service basis. Excess Waiting Time is averaged over the period in which the service is running on a frequent basis.'
+          '0 hours out of a total 100 service hours during the selected period have excess wait time data. Excess Waiting Time is averaged over the period in which the data is available.'
         )
       )
     ).not.toBeVisible();
@@ -256,7 +256,7 @@ describe('ViewServiceComponent', () => {
     expect(
       spectator.query(
         byText(
-          '50 hours out of a total 100 service hours during the selected period operated on a frequent service basis. Excess Waiting Time is averaged over the period in which the service is running on a frequent basis.'
+          '50 hours out of a total 100 service hours during the selected period have excess wait time data. Excess Waiting Time is averaged over the period in which the data is available.'
         )
       )
     ).toBeVisible();

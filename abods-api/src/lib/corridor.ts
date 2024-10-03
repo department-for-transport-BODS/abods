@@ -127,14 +127,6 @@ export const deleteCorridorStops = (corridorId: Number, db: Context) => {
   })
 }
 
-export const deleteCorridorPatterns = (corridorId: Number, db: Context) => {
-  return db.prisma.corridor_servicepatterns.deleteMany({
-    where: {
-      corridor_id: Number(corridorId)
-    }
-  })
-}
-
 export const updateCorridorDb = (
   corridorId: Number,
   corridorName: string,

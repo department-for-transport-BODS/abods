@@ -5,7 +5,6 @@ import {
   CorridorJourneyStatsOption,
   CorridorResultsType,
   deleteCorridorDb,
-  deleteCorridorPatterns,
   deleteCorridorStops,
   filteredJourneys,
   getCorridor,
@@ -113,72 +112,57 @@ export const getSubsequentStops = async (
     throw 'Not Authorized';
   }
 
-  const results = await db.prisma.transmodel_vehiclejourney.findMany({
+  stopList.push('') // Push blank to add comma at the end
+  const stopsPattern = stopList.join(',')
+  const routes = await db.prisma.distinct_routes.findMany({
     where: {
-      stops: {
-        some: {
-          naptan_stop_id: {
-            in: stopList.map(Number),
-          },
-        },
-      },
-    },
-    include: {
-      stops: {
-        orderBy: {
-          sequence_number: 'asc',
-        },
-        include: {
-          naptan_stop: {
-            include: {
-              locality: true,
-            },
-          },
-        },
-      },
-    },
-  });
+      route: {
+        contains: stopsPattern
+      }
+    }
+  })
 
-  const returnStops: StopType[] = [];
-  const stopsSet = new Set();
-  const patternId = new Set();
-
-  const numberStopsList = stopList.map(Number);
-  results.map((journey) => {
-    const stops = journey.stops.map((stop) => stop.naptan_stop_id);
-    if (
-      !patternId.has(journey.service_pattern_id) &&
-      (stopList.length === 1 ||
-        numberStopsList.every((stop) => stop && stops.includes(Number(stop))))
-    ) {
-      patternId.add(journey.service_pattern_id);
-      const lastStopInList = numberStopsList[numberStopsList.length - 1];
-      const stopIndex = stops.indexOf(lastStopInList);
-      if (stopIndex < stops.length - 1) {
-        const nextStop = journey.stops.find(
-          (stop) => stop.naptan_stop.id === stops[stopIndex + 1],
-        );
-        if (!stopsSet.has(nextStop?.atco_code)) {
-          stopsSet.add(nextStop?.atco_code);
-          returnStops.push({
-            adminAreaId:
-              nextStop?.naptan_stop.locality.admin_area_id.toString(),
-            adminAreaName: '',
-            stopId: nextStop?.naptan_stop.id.toString() ?? '',
-            stopName: nextStop?.txc_common_name ?? '',
-            lon: Number(nextStop?.naptan_stop.longitude),
-            lat: Number(nextStop?.naptan_stop.latitude),
-            localityName: nextStop?.naptan_stop.locality.name ?? '',
-            localityId: '',
-            sourceId: '',
-          });
-        }
+  stopList = []
+  routes.map((data) => {
+    const matches = data.route.match(stopsPattern.concat('(.*)'));
+    if (matches && matches[1]) {
+      const commaIndex = matches[1].indexOf(',');
+      const nextStop =
+        commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
+      
+      if (!stopList.includes(nextStop)) {
+        stopList.push(nextStop);
       }
     }
   });
 
-  return returnStops;
-};
+  if (stopList.length > 0) {
+    const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+      where: {
+        id: {
+          in: stopList.map(Number)
+        }
+      },
+      include: {
+        locality: true
+      }
+    })
+  
+    return stops.map((stop) => ({
+      adminAreaId: stop.admin_area_id.toString(),
+      adminAreaName: '',
+      stopId: stop.id.toString(),
+      stopName: stop.common_name,
+      lon: Number(stop.longitude),
+      lat: Number(stop.latitude),
+      localityName: stop.locality.name,
+      localityId: stop.locality_id,
+      sourceId: '',
+    }))
+  }
+  
+  return []
+}
 
 export const createCorridor = async (
   payload: CorridorInputType,
@@ -200,64 +184,11 @@ export const createCorridor = async (
     },
   });
 
-  await Promise.all([
-    insertCorridorServicePatterns(
-      corridor.corridor_id,
-      payload.stopIds.map(String),
-      db,
-    ),
-    insertCorridorStops(corridor.corridor_id, payload.stopIds.map(String), db),
-  ]);
+  await insertCorridorStops(corridor.corridor_id, payload.stopIds.map(String), db)
 
   return {
     success: true,
   };
-};
-
-export const insertCorridorServicePatterns = async (
-  corridor_id: Number,
-  stopIds: string[],
-  db: Context,
-) => {
-  const journeys = await db.prisma.transmodel_vehiclejourney.findMany({
-    where: {
-      stops: {
-        some: {
-          naptan_stop_id: {
-            in: stopIds.map(Number), // Subset of stops to filter journeys
-          },
-        },
-      },
-    },
-    include: {
-      stops: true,
-    },
-  });
-
-  const patternId = new Set();
-
-  const numberStopsList = stopIds.map(Number);
-  const records: {
-    service_pattern_id: number;
-    corridor_id: number;
-  }[] = [];
-  journeys.map((journey) => {
-    const stops = journey.stops.map((stop) => stop.naptan_stop_id);
-    if (
-      !patternId.has(journey.service_pattern_id) &&
-      numberStopsList.every((stop) => stop && stops.includes(Number(stop)))
-    ) {
-      patternId.add(journey.service_pattern_id);
-      records.push({
-        service_pattern_id: journey.service_pattern_id,
-        corridor_id: Number(corridor_id),
-      });
-    }
-  });
-
-  await db.prisma.corridor_servicepatterns.createMany({
-    data: records,
-  });
 };
 
 export const insertCorridorStops = async (
@@ -328,7 +259,6 @@ export const deleteCorridor = async (
   await Promise.all([
     deleteCorridorDb(corridorId, db),
     deleteCorridorStops(corridorId, db),
-    deleteCorridorPatterns(corridorId, db),
   ]);
 
   return {
@@ -348,13 +278,9 @@ export const updateCorridor = async (
   await Promise.all([
     updateCorridorDb(inputs.id, inputs.name, db),
     deleteCorridorStops(inputs.id, db),
-    deleteCorridorPatterns(inputs.id, db),
   ]);
 
-  await Promise.all([
-    insertCorridorServicePatterns(inputs.id, inputs.stopList.map(String), db),
-    insertCorridorStops(inputs.id, inputs.stopList.map(String), db),
-  ]);
+  await insertCorridorStops(inputs.id, inputs.stopList.map(String), db)
 
   return {
     success: true,
