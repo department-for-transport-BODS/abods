@@ -19,6 +19,131 @@ type Query {
     servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
     vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
     timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
+    corridor: CorridorNamespace
+}
+
+type CorridorNamespace {
+  getCorridor(corridorId: Int!): CorridorType
+  corridorList: [CorridorType]
+  stats(inputs: CorridorStatsInputType): CorridorStatsType
+  addFirstStop(inputs: AddFirstStopInputType): [StopType]
+  addSubsequentStops(stopList: [String]): [StopType]
+}
+
+input AddFirstStopInputType {
+  adminAreaIds: [String]
+  searchString: String
+  boundingBox: BoundingBoxInputType
+}
+
+input BoundingBoxInputType {
+  maxLatitude: Float
+  maxLongitude: Float
+  minLatitude: Float
+  minLongitude: Float
+}
+
+type CorridorType {
+  createdBy: UserType
+  id: Int
+  name: String
+  organisation: OrganisationType
+  stops: [StopInfoType]
+}
+
+type CorridorStatsType {
+  summaryStats: CorridorSummaryStatsType
+  journeyTimeStats: [CorridorJourneyTimeStatsType]
+  journeyTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
+  journeyTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
+  journeyTimeHistogram: [CorridorStatsHistogramType]
+  journeyTimePerServiceStats: [CorridorStatsPerServiceType]
+  serviceLinks: [ServiceLinkType]
+}
+
+input CorridorStatsInputType {
+  corridorId: String!
+  fromTimestamp: DateTime!
+  granularity: CorridorGranularity!
+  stopList: [String]
+  toTimestamp: DateTime!
+}
+
+type CorridorSummaryStatsType {
+  averageJourneyTime: Int
+  numberOfServices: Int
+  operatorName: Int
+  percentile95: Float
+  scheduledJourneyTime: Int
+  scheduledTransits: Int
+  totalTransits: Int
+}
+
+type CorridorJourneyTimeStatsType {
+  avgTransitTime: Float
+  maxTransitTime: Int!
+  minTransitTime: Int!
+  percentile25: Float
+  percentile5: Float
+  percentile75: Float
+  percentile95: Float
+  ts: DateTime
+}
+
+type CorridorStatsTimeOfDayType {
+  hour: Int
+  avgTransitTime: Float
+  maxTransitTime: Int!
+  minTransitTime: Int!
+  percentile25: Float
+  percentile5: Float
+  percentile75: Float
+  percentile95: Float
+}
+
+type CorridorStatsDayOfWeekType {
+  avgTransitTime: Float
+  maxTransitTime: Int!
+  minTransitTime: Int!
+  percentile25: Float
+  percentile5: Float
+  percentile75: Float
+  percentile95: Float
+  dow: Int
+}
+
+type CorridorStatsPerServiceType {
+  lineName: String!
+  noc: String
+  operatorName: String
+  recordedTransits: Int
+  scheduledTransits: Int
+  servicePatternName: String!
+  totalJourneyTime: Int
+}
+
+type ServiceLinkType {
+  distance: Int!
+  fromStop: String!
+  linkRoute: String
+  routeValidity: String!
+  toStop: String!
+}
+
+type CorridorStatsHistogramType {
+  hist: [CorridorHistogramType]
+  ts: DateTime
+}
+
+type CorridorHistogramType {
+  bin: Int
+  freq: Int
+}
+
+enum CorridorGranularity {
+  day
+  hour
+  minute
 }
 
 type VehicleJourneyType {
@@ -113,6 +238,9 @@ type Mutation {
     addUserAlert(payload: AlertInputType!): MutationResponseType!
     updateUserAlert(alertId: String!, payload: AlertInputType!): MutationResponseType!
     deleteUserAlert(alertId: String!): MutationResponseType!
+    createCorridor(payload: CreateCorridorMutationVariables): MutationResponseType!
+    updateCorridor(inputs: CorridorUpdateInputType): MutationResponseType!
+    deleteCorridor(corridorId: Int): MutationResponseType!
 }
 
 type HeadwayMetricsType {
@@ -122,6 +250,21 @@ type HeadwayMetricsType {
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
   headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
   headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
+}
+
+input CreateCorridorMutationVariables {
+  name: String
+  stopIds: [String]
+}
+
+input DeleteCorridorMutationVariables {
+  corridorId: Int
+}
+
+input CorridorUpdateInputType {
+  id: Int
+  name: String
+  stopList: [String]
 }
 
 input HeadwayInputType {
@@ -245,6 +388,11 @@ type StopType {
   stopName: String
   lon: Float
   lat: Float
+  adminAreaId: String
+  adminAreaName: String
+  localityId: String
+  localityName: String
+  sourceId: String
 }
 
 type ServiceLinkType {

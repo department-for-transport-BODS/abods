@@ -116,3 +116,31 @@ export const getDateWithTimestamp = (date: Date, time: Date): string => {
 
   return combinedDate.tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
 };
+
+export const getHourFormattedDate = (
+  inputDate: Date | null | undefined,
+  format?: string,
+): string => {
+  return format
+    ? getDate(inputDate).tz('Europe/London').startOf('hour').format(format)
+    : getDate(inputDate)
+        .tz('Europe/London')
+        .startOf('hour')
+        .format('YYYY-MM-DDTHH:mm:ssZ');
+};
+
+export const getDayFormattedDate = (
+  inputDate: Date | null | undefined,
+  format?: string,
+): string => {
+  return format
+    ? getDate(inputDate).tz('Europe/London').startOf('day').format(format)
+    : getDate(inputDate)
+        .tz('Europe/London')
+        .startOf('hour')
+        .format('YYYY-MM-DDTHH:mm:ssZ');
+};
+
+export const dbUtcToBstHour = (inputDate: Date): string => {
+  return getUTCDate(inputDate).tz('Europe/London').format('HH:mm:ss');
+};

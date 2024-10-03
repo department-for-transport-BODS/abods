@@ -43,10 +43,17 @@
           </a>
         </li>
         <li class="nav__item">
-          <a
+          <!-- <a
           style="color:grey; pointer-events: none;"
           class="nav__link disabled"
           routerLinkActive="nav__link--current"
+            >Corridors
+          </a> -->
+          <a
+            class="nav__link"
+            [routerLink]="['/corridors']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
             >Corridors
           </a>
         </li>
