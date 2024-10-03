@@ -158,14 +158,17 @@ export const filteredJourneys = (
   return filteredJourneyMap;
 };
 
-export const isCorridorMappedToUserOrg = async(corridorId: number , sessionUser: SessionUser, db: Context) => {
-
+export const isCorridorMappedToUserOrg = async (
+  corridorId: number,
+  sessionUser: SessionUser,
+  db: Context,
+): Promise<boolean> => {
   const result = await db.prisma.corridor.findFirst({
     where: {
       corridor_id: corridorId,
-      organisation_id: sessionUser.userOrganisationIDs?.[0]
-    }
-  })
+      organisation_id: sessionUser.userOrganisationIDs?.[0],
+    },
+  });
 
-  return !!result
-}
+  return !!result;
+};

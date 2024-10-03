@@ -55,6 +55,12 @@ app.use(
             logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
             if(session)
             {
+              if (
+                !session.userOrganisationIDs ||
+                session.userOrganisationIDs.length === 0
+              ) {
+                throw 'User not mapped to any organisation';
+              }
               sessionUser = session;
             }
           }
