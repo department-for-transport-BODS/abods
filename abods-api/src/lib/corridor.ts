@@ -87,10 +87,14 @@ export const getCorridorList = (db: Context, sessionUser: SessionUser) => {
 export const getCorridor = (
   corridorId: Number,
   db: Context,
+  sessionUser: SessionUser
 ) => {
   return db.prisma.corridor.findUnique({
     where: {
       corridor_id: Number(corridorId),
+      organisation_id: {
+        in: sessionUser.userOrganisationIDs?.filter((o) => o),
+      },
     },
     include: {
       bods_user: true,
@@ -154,12 +158,14 @@ export const filteredJourneys = (
   return filteredJourneyMap;
 };
 
-// export const isCorridorMappedToUserOrg = (corridorId: string , sessionUser: SessionUser, db: Context) => {
+export const isCorridorMappedToUserOrg = async(corridorId: number , sessionUser: SessionUser, db: Context) => {
 
-//   const result = await db.prisma.corridor.findUnique({
-//     where: {
-//       corridor_id: Number(corridorId),
-//       organisation_id: sessionUser.userOrganisationIDs
-//     }
-//   })
-// }
+  const result = await db.prisma.corridor.findFirst({
+    where: {
+      corridor_id: corridorId,
+      organisation_id: sessionUser.userOrganisationIDs?.[0]
+    }
+  })
+
+  return !!result
+}
