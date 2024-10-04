@@ -1604,7 +1604,7 @@ export const getHeadwayTimeSeries = async (
         excess_wait_time: true,
       },
     })
-    logger.info(`After------${results.length}`)
+    logger.info(`After2------${results.length}`)
 
     let headwayMap: {
       [key: string]: {
@@ -1615,7 +1615,7 @@ export const getHeadwayTimeSeries = async (
       }
     } = {}
     results.map(result => {
-
+      logger.info(`loop------${result}`)
       if (result.departure_hour) {
         const formatterdeparture = isDayGranularity
           ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
