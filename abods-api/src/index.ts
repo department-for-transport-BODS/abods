@@ -53,7 +53,7 @@ app.use(
             const session = await getSession(sessionid, db);
 
             logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
-            if(session)
+            if(session && session.user)
             {
               if (
                 !session.userOrganisationIDs ||
