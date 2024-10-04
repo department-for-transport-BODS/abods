@@ -1592,6 +1592,7 @@ export const getHeadwayTimeSeries = async (
       gt: 0
     }
 
+    logger.info("testing before------")
     const results = await db.prisma.timetable_summary_stops_tz.findMany({
       where: where,
       select: {
@@ -1603,6 +1604,7 @@ export const getHeadwayTimeSeries = async (
         excess_wait_time: true,
       },
     })
+    logger.info(`After------${results.length}`)
 
     let headwayMap: {
       [key: string]: {
