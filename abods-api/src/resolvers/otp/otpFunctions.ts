@@ -1638,6 +1638,7 @@ export const getHeadwayTimeSeries = async (
       }
     })
 
+    logger.info(`before for loop------`)
     const returnHeadways: HeadwayTimeSeriesType[] = []
 
     for (const [departure_hour, headway] of Object.entries(headwayMap)) {
@@ -1649,6 +1650,7 @@ export const getHeadwayTimeSeries = async (
       })
     }
 
+    logger.info(`before return------${returnHeadways.length}`)
     return returnHeadways.sort((a, b) => {
       if (getDate(a.ts).isBefore(getDate(b.ts)))
         return -1
