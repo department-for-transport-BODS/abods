@@ -1614,8 +1614,8 @@ export const getHeadwayTimeSeries = async (
         headway_stops_count: number
       }
     } = {}
-    results.map(result => {
-      logger.info(`loop------${result}`)
+    results.map((result, index) => {
+      logger.info(`loop------${index}------${result}`)
       if (result.departure_hour) {
         const formatterdeparture = isDayGranularity
           ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
