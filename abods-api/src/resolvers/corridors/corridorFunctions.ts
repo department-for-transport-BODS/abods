@@ -9,6 +9,7 @@ import {
   filteredJourneys,
   getCorridor,
   getCorridorList,
+  isCorridorMappedToUserOrg,
   returnCorridor,
   returnCorridorType,
   updateCorridorDb,
@@ -64,6 +65,7 @@ export const getCorridors = async (
   const corridor: CorridorResultsType | null = await getCorridor(
     corridorId,
     db,
+    sessionUser
   );
   return corridor ? returnCorridor(corridor) : undefined;
 };
@@ -252,7 +254,10 @@ export const deleteCorridor = async (
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
-  if (!sessionUser.user) {
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+  ) {
     throw 'Not Authorized';
   }
 
@@ -271,7 +276,10 @@ export const updateCorridor = async (
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
-  if (!sessionUser.user) {
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(inputs.id), sessionUser, db)
+  ) {
     throw 'Not Authorized';
   }
 
@@ -292,12 +300,16 @@ export const getStats = async (
   sessionUser: SessionUser,
   db: Context,
 ) => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     inputs;
+
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+  ) {
+    throw 'Not Authorized';
+  }
 
   let results: Timetable[] = await db.prisma.timetable.findMany({
     where: {
