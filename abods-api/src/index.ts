@@ -59,6 +59,7 @@ app.use(
                 !session.userOrganisationIDs ||
                 session.userOrganisationIDs.length === 0
               ) {
+                logger.error('User not mapped to an organisation');
                 throw 'User not mapped to any organisation';
               }
               sessionUser = session;
