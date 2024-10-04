@@ -7,6 +7,7 @@ query corridorsStopSearch($inputs: AddFirstStopInputType) {
       lon
       localityName
       adminAreaId
+      sourceId
     }
   }
 }
@@ -20,6 +21,7 @@ query corridorsSubsequentStops($stopList: [String]!) {
       lat
       localityName
       adminAreaId
+      sourceId
     }
   }
 }

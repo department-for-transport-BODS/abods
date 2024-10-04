@@ -1,4 +1,4 @@
-import { Timetable } from '@prisma/client';
+import { Prisma, Timetable } from '@prisma/client';
 import { Context } from '../../context';
 import {
   CorridorJourneyServiceStatsType,
@@ -79,17 +79,41 @@ export const getStops = async (
     throw 'Not Authorized';
   }
 
+  if(!inputs) {
+    throw 'Invalid inputs'
+  }
+  const { boundingBox, searchString } = inputs;
+
+  const where: Prisma.naptan_stoppoint_latlongWhereInput = {}
+
+  if (searchString) {
+    where.OR = [
+      {
+        atco_code: {
+          contains: searchString,
+        },
+      },
+      {
+        common_name: {
+          contains: searchString,
+          mode: 'insensitive'
+        },
+      },
+    ];
+  } else {
+    where.latitude = {
+      gte: Number(boundingBox?.minLatitude),
+      lte: Number(boundingBox?.maxLatitude),
+    };
+
+    where.longitude = {
+      gte: boundingBox?.minLongitude,
+      lte: boundingBox?.maxLongitude,
+    };
+  }
+
   const results = await db.prisma.naptan_stoppoint_latlong.findMany({
-    where: {
-      latitude: {
-        gte: Number(inputs?.boundingBox?.minLatitude),
-        lte: Number(inputs?.boundingBox?.maxLatitude),
-      },
-      longitude: {
-        gte: inputs?.boundingBox?.minLongitude,
-        lte: inputs?.boundingBox?.maxLongitude,
-      },
-    },
+    where: where,
     include: {
       locality: true,
     },
@@ -102,6 +126,7 @@ export const getStops = async (
     lon: Number(stop.longitude),
     localityName: stop.locality.name,
     adminAreaId: stop.admin_area_id.toString(),
+    sourceId: stop.atco_code
   }));
 };
 
@@ -159,7 +184,7 @@ export const getSubsequentStops = async (
       lat: Number(stop.latitude),
       localityName: stop.locality.name,
       localityId: stop.locality_id,
-      sourceId: '',
+      sourceId: stop.atco_code,
     }))
   }
   

@@ -36,7 +36,7 @@ class ServiceViewModel {
       const totalLast = (onTimeLast ?? 0) + (earlyLast ?? 0) + (lateLast ?? 0);
       this.onTimeLast = totalLast > 0 ? (onTimeLast ?? 0) / totalLast : 0;
 
-      const diff = this.onTime - this.onTimeLast;
+      const diff = (this.onTime - this.onTimeLast) * 100;
       this.trendPctDiff = diff.toFixed(2);
       if (diff <= 0) {
         this.trend = 'decrease';
