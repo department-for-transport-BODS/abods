@@ -21,3 +21,5 @@ test.ipynb
 .idea
 .nvmrc
 session-mananger-plugin.pkg
+.vscode
+kpmg-metadata.yml
