@@ -1,0 +1,17 @@
+name: cleanup branches
+on:
+  schedule:
+  - cron: '0 0 * * *'
+
+jobs:
+  remove-stale-branches:
+    name: remove stale branches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fpicalausa/remove-stale-branches@v1.6.0
+        with:
+          dry-run: true
+          days-before-branch-stale: 60
+          exempt-branches-regex: ^(sandbox|dev|test|cavl|main)$
+          exempt-protected-branches: true
+          operations-per-run: 100

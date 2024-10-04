@@ -1,4 +1,4 @@
-name: "Code Quality Check"
+name: "code quality check"
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 jobs:
   codeql:
     name: Analyze
-    runs-on: pcoe-runner-linux-small-prod
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read

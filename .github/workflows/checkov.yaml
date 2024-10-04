@@ -1,4 +1,4 @@
-name: Checkov
+name: checkov
 
 on:
   pull_request:
@@ -13,7 +13,7 @@ on:
 jobs:
   checkov:
     name: checkov-action
-    runs-on: pcoe-runner-linux-small-prod
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
