@@ -87,7 +87,7 @@ type CorridorJourneyTimeStatsType {
   percentile5: Float
   percentile75: Float
   percentile95: Float
-  ts: DateTime
+  ts: String
 }
 
 type CorridorStatsTimeOfDayType {
@@ -132,7 +132,7 @@ type ServiceLinkType {
 
 type CorridorStatsHistogramType {
   hist: [CorridorHistogramType]
-  ts: DateTime
+  ts: String
 }
 
 type CorridorHistogramType {

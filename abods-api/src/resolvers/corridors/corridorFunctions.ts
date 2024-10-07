@@ -16,7 +16,6 @@ import {
 } from '../../lib/corridor.js';
 import {
   AddFirstStopInputType,
-  CorridorHistogramType,
   CorridorInputType,
   CorridorJourneyTimeStatsType,
   CorridorStatsDayOfWeekType,
