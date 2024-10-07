@@ -1592,7 +1592,6 @@ export const getHeadwayTimeSeries = async (
       gt: 0
     }
 
-    logger.info("testing before------")
     const results = await db.prisma.timetable_summary_stops_tz.findMany({
       where: where,
       select: {
@@ -1604,7 +1603,6 @@ export const getHeadwayTimeSeries = async (
         excess_wait_time: true,
       },
     })
-    logger.info(`After2------${results.length}`)
 
     let headwayMap: {
       [key: string]: {
@@ -1615,7 +1613,6 @@ export const getHeadwayTimeSeries = async (
       }
     } = {}
     results.map((result, index) => {
-      logger.info(`loop------${index}------${result}`)
       if (result.departure_hour) {
         const formatterdeparture = isDayGranularity
           ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')
@@ -1638,7 +1635,6 @@ export const getHeadwayTimeSeries = async (
       }
     })
 
-    logger.info(`before for loop------`)
     const returnHeadways: HeadwayTimeSeriesType[] = []
 
     for (const [departure_hour, headway] of Object.entries(headwayMap)) {
@@ -1650,7 +1646,6 @@ export const getHeadwayTimeSeries = async (
       })
     }
 
-    logger.info(`before return------${returnHeadways.length}`)
     return returnHeadways.sort((a, b) => {
       if (getDate(a.ts).isBefore(getDate(b.ts)))
         return -1
