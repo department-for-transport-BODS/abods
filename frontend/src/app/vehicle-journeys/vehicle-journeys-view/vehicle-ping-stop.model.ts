@@ -29,7 +29,7 @@ export class VehiclePingStop implements Ping {
     vps.stopName = stop?.stopName;
     vps.isTimingPoint = stop.timingPoint;
     vps.scheduledDeparture = calcScheduledDeparture(nearestPing, stop);
-    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.delay ?? 0 });
+    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.actualDelay ?? 0 });
     vps.lat = stop?.lat as number;
     vps.lon = stop?.lon as number;
     vps.ts = DateTime.fromISO(nearestPing.ts);

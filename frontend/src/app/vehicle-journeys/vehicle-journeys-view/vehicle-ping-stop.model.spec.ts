@@ -16,6 +16,7 @@ describe('VehiclePingStop', () => {
     vehicleJourneyId: 'xyz987',
     servicePatternId: '456',
     delay: 120,
+    actualDelay: 120,
     startTime: startTime,
     scheduledDeparture: startTime,
     feedStatus: null,
