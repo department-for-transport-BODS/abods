@@ -218,7 +218,12 @@ export const createCorridor = async (
     },
   });
 
-  await insertCorridorStops(corridor.corridor_id, payload.stopIds.map(String), db)
+  await insertCorridorStops(
+    corridor.corridor_id,
+    payload.stopIds.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,
@@ -229,6 +234,7 @@ export const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
   db: Context,
+  sessionUser: SessionUser
 ) => {
   const numberStopsList = stopIds.map(Number);
 
@@ -240,11 +246,15 @@ export const insertCorridorStops = async (
     distance_to_next_stop: number;
   }[] = [];
 
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
   const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
     where: {
       id: {
         in: numberStopsList,
       },
+      admin_area_id: {
+        in: adminAreas.map((admin) => admin.adminarea_id)
+      }
     },
   });
 
@@ -320,7 +330,12 @@ export const updateCorridor = async (
     deleteCorridorStops(inputs.id, db),
   ]);
 
-  await insertCorridorStops(inputs.id, inputs.stopList.map(String), db)
+  await insertCorridorStops(
+    inputs.id,
+    inputs.stopList.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,
