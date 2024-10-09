@@ -6,9 +6,11 @@ import {
   CorridorResultsType,
   deleteCorridorDb,
   deleteCorridorStops,
+  distinctRoutes,
   filteredJourneys,
   getCorridor,
   getCorridorList,
+  getOrgAdminAreas,
   isCorridorMappedToUserOrg,
   returnCorridor,
   returnCorridorType,
@@ -111,6 +113,12 @@ export const getStops = async (
     };
   }
 
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
+
+  where.admin_area_id = {
+    in: adminAreas.map((admin) => admin.adminarea_id),
+  };
+
   const results = await db.prisma.naptan_stoppoint_latlong.findMany({
     where: where,
     include: {
@@ -140,13 +148,10 @@ export const getSubsequentStops = async (
 
   stopList.push('') // Push blank to add comma at the end
   const stopsPattern = stopList.join(',')
-  const routes = await db.prisma.distinct_routes.findMany({
-    where: {
-      route: {
-        contains: stopsPattern
-      }
-    }
-  })
+  const [routes, adminAreas] = await Promise.all([
+    distinctRoutes(db, stopsPattern),
+    getOrgAdminAreas(db, sessionUser),
+  ]);
 
   stopList = []
   routes.map((data) => {
@@ -167,6 +172,9 @@ export const getSubsequentStops = async (
       where: {
         id: {
           in: stopList.map(Number)
+        },
+        admin_area_id: {
+          in: adminAreas.map(admin => admin.adminarea_id)
         }
       },
       include: {
