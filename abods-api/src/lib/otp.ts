@@ -1,12 +1,21 @@
-import { Prisma } from '@prisma/client';
+import { all_operators, feed_monitoring_hour_summary, Prisma } from '@prisma/client';
 import { Context } from '../context';
 import {
+  FeedMonitoringType,
+  HistoricalStatsType,
   PerformanceInputType,
   PunctualityTotalsType,
   SessionUser,
+  VehicleStatsType,
 } from '../types';
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
+import { Dayjs } from 'dayjs';
+import { getDate, getFormattedDate, getHourFormattedDate } from './dayjs.js';
+
+export type AllOperatorWithFeedSummary = all_operators & {
+  feed_summary: feed_monitoring_hour_summary[];
+};
 
 const getThresholds = async (
   db: Context,
@@ -222,29 +231,35 @@ export const compareThresholds = async (
   return null;
 };
 
-export const getOperatorsFromOrgId = async (orgId: number[], db: Context) => {
+export const getOperatorsFromOrgId = async (
+  orgId: number[],
+  db: Context,
+  userOperatorIds?: string[]
+) => {
+  const where: Prisma.bods_organisationoperatorWhereInput = {
+    organisation_id: {
+      in: orgId,
+    },
+  };
+
+  if (userOperatorIds && userOperatorIds.length > 0) {
+    where.operatorref = {
+      in: userOperatorIds,
+    };
+  } else {
+    where.operatorref = {
+      not: undefined,
+    };
+  }
 
   return db.prisma.bods_organisationoperator.findMany({
-    where: {
-      AND: [
-        {
-          organisation_id: {
-            in: orgId,
-          },
-        },
-        {
-          operatorref: {
-            not: undefined,
-          },
-        }
-      ],
-    },
+    where: where,
     select: {
       operatorref: true,
     },
-    distinct: ['operatorref'],
+    distinct: ["operatorref"],
   });
-}
+};
 
 export const getOperatorsFroServiceDetails = async (
   orgOperators: { operatorref: string }[],
@@ -274,4 +289,123 @@ export const getNocAdminAreas = async (db: Context) => {
       admin_area: true
     }
   })
+}
+
+export const getOperatorWithFeed = (db: Context, operatorRefs: string) => {
+  return db.prisma.all_operators.findUnique({
+    where: {
+      feed_summary: {
+        some: {},
+      },
+      operatorref: operatorRefs,
+    },
+    include: {
+      feed_summary: true,
+    },
+  });
+};
+
+export const getGQLFormatterOperatorData = async  (
+  operator: AllOperatorWithFeedSummary | null
+): Promise<FeedMonitoringType> => {
+  let total_actual_journeys_per_minute = 0;
+  let total_expected_journey_per_minute = 0
+  let lastOutage: Dayjs = getDate("1970-01-01");
+  let unavailable: Dayjs = getDate("1970-01-01");
+  let updateFreq = 0;
+
+  const historicStats: HistoricalStatsType = {
+    vehicleStats: [],
+  };
+  const last24hrs: VehicleStatsType[] = [];
+  
+  if (operator) {
+    operator.feed_summary.map((feed) => {
+      total_actual_journeys_per_minute += feed.actual_journeys_per_minute
+      total_expected_journey_per_minute += feed.expected_journey_per_minute
+
+      const tmpOutage = feed.last_outage
+        ? getDate(feed.last_outage)
+        : undefined;
+      if (tmpOutage && lastOutage.isBefore(tmpOutage)) {
+        lastOutage = tmpOutage;
+      }
+
+      const tmpUnavailable = feed.unavailable_since
+        ? getDate(feed.unavailable_since)
+        : undefined;
+
+      if (tmpUnavailable && unavailable.isBefore(tmpUnavailable)) {
+        unavailable = tmpUnavailable;
+      }
+
+      if (feed.actual_live_location_positions_per_minute > 0) {
+        updateFreq +=
+          (
+            feed.actual_journeys_per_minute_total /
+            feed.actual_live_location_positions_per_minute
+          ) * 60;
+      }
+
+      if (
+        feed.actual_journeys_per_minute > 0 ||
+        feed.expected_journey_per_minute > 0
+      ) {
+        last24hrs.push({
+          timestamp: getHourFormattedDate(feed.received_hour),
+          actual: feed.actual_journeys_per_minute,
+          expected: feed.expected_journey_per_minute,
+        });
+      }
+    });
+  } 
+
+  return {
+    availability:
+      total_actual_journeys_per_minute / total_expected_journey_per_minute,
+    feedStatus: getFeedStatus(unavailable, lastOutage),
+    historicalStats: historicStats,
+    lastOutage: lastOutage.isSame("1970-01-01")
+      ? undefined
+      : getFormattedDate(lastOutage.toDate()),
+    unavailableSince: unavailable.isSame("1970-01-01")
+      ? undefined
+      : getFormattedDate(unavailable.toDate()),
+    vehicleStats: [],
+    liveStats: {
+      updateFrequency: Math.round(updateFreq),
+      last24Hours: last24hrs,
+      last20Minutes: [],
+    },
+  };
+};
+
+export const getFeedMonitoringList = async (
+  db: Context,
+  sessionUser: SessionUser,
+  userOperatorId: string
+) => {
+  if (!sessionUser.userOrganisationIDs) {
+    throw "No organisation mapped to user";
+  }
+
+  const operator: AllOperatorWithFeedSummary | null = await getOperatorWithFeed(
+    db,
+    userOperatorId
+  );
+
+  
+  return getGQLFormatterOperatorData(operator)
+
+};
+
+const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undefined): boolean => {
+  let feedStatus = false
+  if(unavailable){
+    if(!lastOutage || lastOutage?.isBefore(unavailable)) {
+      feedStatus = true
+    }
+  }
+
+  return feedStatus
 }

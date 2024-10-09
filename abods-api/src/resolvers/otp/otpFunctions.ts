@@ -3,6 +3,7 @@ import {
   HeadwayTimeSeriesType,
   LineType,
   OperatorPerformanceType,
+  OperatorSparklineStatsQueryVariables,
   OperatorType,
   PaginatedLineType,
   PunctualityTimeOfDayType,
@@ -16,7 +17,7 @@ import {
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
 import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
-import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
+import { compareThresholds, getFeedMonitoringList, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
 import dayjs from "dayjs";
@@ -41,10 +42,12 @@ interface distribution {
 }
 
 
-
 export const getOperatorList = async (
+  filterBy: {
+    operatorIds: string[];
+  },
   sessionUser: SessionUser,
-  db: Context
+  db: Context,
 ) => {
   try {
     if (!sessionUser.user) {
@@ -53,15 +56,15 @@ export const getOperatorList = async (
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = await getOperatorsDropDown(sessionUser, db)
+    const userOperators = filterBy
+      ? await getOperatorsDropDown(sessionUser, db, filterBy.operatorIds)
+      : await getOperatorsDropDown(sessionUser, db);
 
     if (!userOperators) {
       throw "No operators for user";
     }
 
-    return {
-      items: userOperators,
-    };
+    return userOperators
   } catch (error) {
     logger.error(error);
     return null;
@@ -71,6 +74,7 @@ export const getOperatorList = async (
 export const getOperatorsDropDown = async (
   sessionUser: SessionUser,
   db: Context,
+  userOperatorIds?: string[]
 ): Promise<OperatorType[]> => {
   if (!sessionUser.user) {
     throw "Not Authorized";
@@ -85,6 +89,7 @@ export const getOperatorsDropDown = async (
   orgOperators = await getOperatorsFromOrgId(
     sessionUser.userOrganisationIDs,
     db,
+    userOperatorIds
   );
 
   const [userOperators, adminAreas] = await Promise.all([

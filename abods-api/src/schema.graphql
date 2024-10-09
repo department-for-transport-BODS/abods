@@ -9,8 +9,8 @@ type Query {
     roles: [RoleType]
     userAlerts: [AlertType]
     userAlert(alertId: String!): AlertType
-    operator(operatorId: String!): OperatorType
-    operators: OperatorsPage
+    operator(operatorId: String): OperatorType
+    operators(operatorId: String, filterBy: OperatorFilterInput): OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType
@@ -28,6 +28,10 @@ type CorridorNamespace {
   stats(inputs: CorridorStatsInputType): CorridorStatsType
   addFirstStop(inputs: AddFirstStopInputType): [StopType]
   addSubsequentStops(stopList: [String]): [StopType]
+}
+
+input OperatorFilterInput {
+  operatorIds: [String!]
 }
 
 input AddFirstStopInputType {
@@ -428,9 +432,9 @@ type FeedMonitoringType {
   availability: Float
   feedStatus: Boolean
   historicalStats: HistoricalStatsType
-  lastOutage: DateTime
+  lastOutage: String
   liveStats: LiveStatsType
-  unavailableSince: DateTime
+  unavailableSince: String
   vehicleStats: [VehicleStatsType]
 }
 
@@ -444,7 +448,7 @@ type HistoricalStatsType {
 type VehicleStatsType {
   actual: Int
   expected: Int
-  timestamp: DateTime
+  timestamp: String
 }
 
 type LiveStatsType {
