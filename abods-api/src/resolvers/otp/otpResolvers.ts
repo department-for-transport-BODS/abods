@@ -2,7 +2,8 @@ import { IResolvers } from '@graphql-tools/utils'
 import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
 import { FeedMonitoringType, OperatorType, RequestContext } from '../../types.js';
 import { GraphQLResolveInfo } from 'graphql';
-import { getFeedMonitoringList } from '../../lib/otp.js';
+import { getExpectedJourneys, getFeedMonitoringList, getLast20Mins } from '../../lib/otp.js';
+import { Prisma, SiriVMPositions } from '@prisma/client';
 
 const otpResolvers: IResolvers = {
   Query: {
@@ -144,12 +145,12 @@ const otpResolvers: IResolvers = {
       let feed: FeedMonitoringType | undefined = undefined;
       if (
         queryName === "feedMonitoringList" ||
-        queryName === "operatorSparklineStats"
+        queryName === "operatorSparklineStats" ||
+        queryName === "operatorLiveStatus"
       ) {
         feed = await getFeedMonitoringList(db, sessionUser, parent.operatorId);
       }
 
-      console.log("feed---", feed);
       return {
         operatorId: parent.operatorId,
         ...feed,
@@ -158,14 +159,33 @@ const otpResolvers: IResolvers = {
   },
   FeedMonitoringType: {
     liveStats: async (parent, _, { sessionUser, db }: RequestContext, info) => {
-      const queryName = info.operation.name?.value;
-      if (parent) {
+        const queryName = info.operation.name?.value;
+        let last20Mins: SiriVMPositions[] = []
+        let expected: {
+            group_id: string
+        }[]   = []
+        if (queryName === "operatorLiveStatus") {
+          const [expected, last20Mins] = await Promise.all([
+            getExpectedJourneys(db, parent.operatorId),
+            getLast20Mins(db, parent.operatorId),
+          ]);
+        }
+        
+        const vechileRefs = new Set<string>();
+        const groupIds = new Set(expected.map((journey) => journey.group_id));
+        last20Mins.map((avl) => {
+          if (!vechileRefs.has(avl.vehicle_ref) && groupIds.has(avl.group_id)) {
+            vechileRefs.add(avl.vehicle_ref);
+          }
+        });
         return {
           operatorId: parent.operatorId,
           ...parent.liveStats,
+          expectedVehicles: expected.length,
+          currentVehicles: vechileRefs.size,
+          avl: last20Mins
         };
-      }
-      return parent;
+      
     },
   },
   LiveStatsType: {
@@ -175,7 +195,7 @@ const otpResolvers: IResolvers = {
       { sessionUser, db }: RequestContext,
       info
     ) => {
-      return {};
+      return [];
     },
   },
   TransitModelType: {

@@ -309,7 +309,9 @@ export const getGQLFormatterOperatorData = async  (
   operator: AllOperatorWithFeedSummary | null
 ): Promise<FeedMonitoringType> => {
   let total_actual_journeys_per_minute = 0;
-  let total_expected_journey_per_minute = 0
+  let total_expected_journey_per_minute = 0;
+  let total_actual_journeys_per_minute_total = 0;
+  let total_actual_live_location_positions_per_minute = 0;
   let lastOutage: Dayjs = getDate("1970-01-01");
   let unavailable: Dayjs = getDate("1970-01-01");
   let updateFreq = 0;
@@ -339,13 +341,8 @@ export const getGQLFormatterOperatorData = async  (
         unavailable = tmpUnavailable;
       }
 
-      if (feed.actual_live_location_positions_per_minute > 0) {
-        updateFreq +=
-          (
-            feed.actual_journeys_per_minute_total /
-            feed.actual_live_location_positions_per_minute
-          ) * 60;
-      }
+      total_actual_journeys_per_minute_total += feed.actual_journeys_per_minute_total 
+      total_actual_live_location_positions_per_minute += feed.actual_live_location_positions_per_minute
 
       if (
         feed.actual_journeys_per_minute > 0 ||
@@ -360,9 +357,19 @@ export const getGQLFormatterOperatorData = async  (
     });
   } 
 
+  if (total_actual_live_location_positions_per_minute > 0) {
+    updateFreq =
+      (
+        total_actual_journeys_per_minute_total /
+        total_actual_live_location_positions_per_minute
+      ) * 60;
+  }
+  
   return {
     availability:
-      total_actual_journeys_per_minute / total_expected_journey_per_minute,
+      total_expected_journey_per_minute > 0
+        ? total_actual_journeys_per_minute / total_expected_journey_per_minute
+        : 0,
     feedStatus: getFeedStatus(unavailable, lastOutage),
     historicalStats: historicStats,
     lastOutage: lastOutage.isSame("1970-01-01")
@@ -408,4 +415,34 @@ const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undef
   }
 
   return feedStatus
+}
+
+export const getExpectedJourneys = (db: Context, operatorId: string) => {
+  const currentDate = new Date();
+  return db.prisma.expected_journeys.findMany(({
+    where: {
+      operator_noc: operatorId,
+      date_of_journey: currentDate,
+      expected_journey_start: {
+        lt: currentDate
+      }
+    },
+    select: {
+      group_id: true
+    },
+    distinct: ['group_id']
+  }))
+}
+
+export const getLast20Mins = (db: Context, operatorId: string) => {
+  const currentDate = getDate();
+  return db.prisma.siriVMPositions.findMany({
+    where: {
+      date_of_journey: currentDate.toDate(),
+      operator_ref: operatorId,
+      recorded_at_time: {
+        gt: currentDate.subtract(20, 'minute').toDate()
+      }
+    }
+  })
 }
