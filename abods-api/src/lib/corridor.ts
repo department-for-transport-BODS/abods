@@ -189,7 +189,9 @@ export const getOrgAdminAreas = async (
 ) => {
   const orgOperators = await db.prisma.bods_organisationoperator.findMany({
     where: {
-      organisation_id: sessionUser.userOrganisationIDs?.[0],
+      organisation_id: {
+        in: sessionUser.userOrganisationIDs?.map(Number)
+      }
     },
     select: {
       operatorref: true,
