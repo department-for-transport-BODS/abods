@@ -1019,7 +1019,39 @@ export const getServicePunctuality = async (
         operator_noc: {
           in: operatorIds ? operatorIds : operatorNocs
         },
-        date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD"))
+        date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD")),
+        AND: [
+          {
+            OR: [
+              {
+                on_time_count: {
+                  gt: 0
+                },
+                late_count: {
+                  gt: 0
+                },
+                early_count: {
+                  gt: 0
+                }
+              }
+            ]
+          },
+          {
+            OR: [
+              {
+                trend_on_time_count: {
+                  gt: 0
+                },
+                trend_late_count: {
+                  gt: 0
+                },
+                trend_early_count: {
+                  gt: 0
+                }
+              }
+            ]
+          }
+        ]
       }
 
       if (timingPointsOnly) {
@@ -1580,8 +1612,7 @@ export const getHeadwayTimeSeries = async (
         headway_stops_count: number
       }
     } = {}
-    results.map(result => {
-
+    results.map((result) => {
       if (result.departure_hour) {
         const formatterdeparture = isDayGranularity
           ? getFormattedDate(result.departure_hour, 'YYYY-MM-DD')

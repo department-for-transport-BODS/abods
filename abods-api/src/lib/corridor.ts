@@ -49,7 +49,7 @@ export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
     },
     stops: corridor.corridor_stops?.map((stop) => ({
       stopId: stop.stop_id.toString(),
-      sourceId: '',
+      sourceId: stop.naptan_stop?.atco_code ?? '',
       stopLocality: {
         localityAreaId:
           stop.naptan_stop?.locality?.admin_area_id.toString() ?? '',
@@ -87,10 +87,14 @@ export const getCorridorList = (db: Context, sessionUser: SessionUser) => {
 export const getCorridor = (
   corridorId: Number,
   db: Context,
+  sessionUser: SessionUser
 ) => {
   return db.prisma.corridor.findUnique({
     where: {
       corridor_id: Number(corridorId),
+      organisation_id: {
+        in: sessionUser.userOrganisationIDs?.filter((o) => o),
+      },
     },
     include: {
       bods_user: true,
@@ -153,3 +157,55 @@ export const filteredJourneys = (
 
   return filteredJourneyMap;
 };
+
+export const isCorridorMappedToUserOrg = async (
+  corridorId: number,
+  sessionUser: SessionUser,
+  db: Context,
+): Promise<boolean> => {
+  const result = await db.prisma.corridor.findFirst({
+    where: {
+      corridor_id: corridorId,
+      organisation_id: sessionUser.userOrganisationIDs?.[0],
+    },
+  });
+
+  return !!result;
+};
+
+export const distinctRoutes = (db: Context, stopsPattern: string) => {
+  return db.prisma.distinct_routes.findMany({
+    where: {
+      route: {
+        contains: stopsPattern,
+      },
+    },
+  });
+};
+
+export const getOrgAdminAreas = async (
+  db: Context,
+  sessionUser: SessionUser
+) => {
+  const orgOperators = await db.prisma.bods_organisationoperator.findMany({
+    where: {
+      organisation_id: {
+        in: sessionUser.userOrganisationIDs?.map(Number)
+      }
+    },
+    select: {
+      operatorref: true,
+    },
+  });
+  return db.prisma.noc_adminarea.findMany({
+    where: {
+      national_operator_code: {
+        in: orgOperators.map((op) => op.operatorref),
+      },
+    },
+    select: {
+      adminarea_id: true,
+    },
+  });
+};
+
