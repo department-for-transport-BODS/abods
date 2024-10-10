@@ -5,7 +5,7 @@ import { filter, from, fromEvent, mergeAll, Observable, of, repeat, timeout } fr
   providedIn: 'root',
 })
 export class InactivityService {
-  readonly timeoutDelay = 1000 * 60 * 12; // 30 minutes
+  readonly timeoutDelay = 1000 * 60 * 60 * 12; // 12 hours
   readonly $onInactive: Observable<void>;
 
   constructor() {
