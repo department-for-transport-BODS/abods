@@ -1818,7 +1818,7 @@ export type CorridorsStopSearchQuery = (
     { __typename?: 'CorridorNamespace' }
     & { addFirstStop: Array<Maybe<(
       { __typename?: 'StopType' }
-      & Pick<StopType, 'stopId' | 'stopName' | 'lat' | 'lon' | 'localityName' | 'adminAreaId'>
+      & Pick<StopType, 'stopId' | 'stopName' | 'lat' | 'lon' | 'localityName' | 'adminAreaId' | 'sourceId'>
     )>> }
   ) }
 );
@@ -1834,7 +1834,7 @@ export type CorridorsSubsequentStopsQuery = (
     { __typename?: 'CorridorNamespace' }
     & { addSubsequentStops: Array<Maybe<(
       { __typename?: 'StopType' }
-      & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat' | 'localityName' | 'adminAreaId'>
+      & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat' | 'localityName' | 'adminAreaId' | 'sourceId'>
     )>> }
   ) }
 );

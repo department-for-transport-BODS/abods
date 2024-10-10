@@ -44,23 +44,17 @@ const corridorResovlers: IResolvers = {
         : getJourneyStatsByHour(parents.journeys);
     },
     journeyTimeTimeOfDayStats: async (
-      parents,
-      _,
-      { sessionUser, db }: RequestContext,
+      parents
     ) => {
       return getJourneyStats(parents.journeys, CorridorJourneyStatsOption.hourAsNumber);
     },
     journeyTimeDayOfWeekStats: async (
-      parents,
-      _,
-      { sessionUser, db }: RequestContext,
+      parents
     ) => {
       return getJourneyStats(parents.journeys, CorridorJourneyStatsOption.dayOfWeek);
     },
     journeyTimeHistogram: async (
-      parents,
-      _,
-      { sessionUser, db }: RequestContext,
+      parents
     ) => {
       const histogram = getJourneyStatsHistogram(parents.journeys)
       return histogram;
@@ -68,11 +62,11 @@ const corridorResovlers: IResolvers = {
     journeyTimePerServiceStats: async (
       parents,
       _,
-      { sessionUser, db }: RequestContext,
+      { db }: RequestContext,
     ) => {
       return getJourneyStatsPerService(parents.journeys, db);
     },
-    serviceLinks: async (parents, _, { sessionUser, db }: RequestContext) => {
+    serviceLinks: async (parents, _, { db }: RequestContext) => {
       return getServiceLinks(parents.inputs, db);
     },
   },

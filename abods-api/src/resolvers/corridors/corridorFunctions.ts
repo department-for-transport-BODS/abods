@@ -1,4 +1,4 @@
-import { Timetable } from '@prisma/client';
+import { Prisma, Timetable } from '@prisma/client';
 import { Context } from '../../context';
 import {
   CorridorJourneyServiceStatsType,
@@ -6,16 +6,18 @@ import {
   CorridorResultsType,
   deleteCorridorDb,
   deleteCorridorStops,
+  distinctRoutes,
   filteredJourneys,
   getCorridor,
   getCorridorList,
+  getOrgAdminAreas,
+  isCorridorMappedToUserOrg,
   returnCorridor,
   returnCorridorType,
   updateCorridorDb,
 } from '../../lib/corridor.js';
 import {
   AddFirstStopInputType,
-  CorridorHistogramType,
   CorridorInputType,
   CorridorJourneyTimeStatsType,
   CorridorStatsDayOfWeekType,
@@ -64,6 +66,7 @@ export const getCorridors = async (
   const corridor: CorridorResultsType | null = await getCorridor(
     corridorId,
     db,
+    sessionUser
   );
   return corridor ? returnCorridor(corridor) : undefined;
 };
@@ -77,17 +80,47 @@ export const getStops = async (
     throw 'Not Authorized';
   }
 
+  if(!inputs) {
+    throw 'Invalid inputs'
+  }
+  const { boundingBox, searchString } = inputs;
+
+  const where: Prisma.naptan_stoppoint_latlongWhereInput = {}
+
+  if (searchString) {
+    where.OR = [
+      {
+        atco_code: {
+          contains: searchString,
+        },
+      },
+      {
+        common_name: {
+          contains: searchString,
+          mode: 'insensitive'
+        },
+      },
+    ];
+  } else {
+    where.latitude = {
+      gte: Number(boundingBox?.minLatitude),
+      lte: Number(boundingBox?.maxLatitude),
+    };
+
+    where.longitude = {
+      gte: boundingBox?.minLongitude,
+      lte: boundingBox?.maxLongitude,
+    };
+  }
+
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
+
+  where.admin_area_id = {
+    in: adminAreas.map((admin) => admin.adminarea_id),
+  };
+
   const results = await db.prisma.naptan_stoppoint_latlong.findMany({
-    where: {
-      latitude: {
-        gte: Number(inputs?.boundingBox?.minLatitude),
-        lte: Number(inputs?.boundingBox?.maxLatitude),
-      },
-      longitude: {
-        gte: inputs?.boundingBox?.minLongitude,
-        lte: inputs?.boundingBox?.maxLongitude,
-      },
-    },
+    where: where,
     include: {
       locality: true,
     },
@@ -100,6 +133,7 @@ export const getStops = async (
     lon: Number(stop.longitude),
     localityName: stop.locality.name,
     adminAreaId: stop.admin_area_id.toString(),
+    sourceId: stop.atco_code
   }));
 };
 
@@ -113,18 +147,20 @@ export const getSubsequentStops = async (
   }
 
   stopList.push('') // Push blank to add comma at the end
-  const stopsPattern = stopList.join(',')
-  const routes = await db.prisma.distinct_routes.findMany({
-    where: {
-      route: {
-        contains: stopsPattern
-      }
-    }
-  })
+  let stopsPattern = stopList.join(',')
+  const [routes, adminAreas] = await Promise.all([
+    distinctRoutes(db, stopsPattern),
+    getOrgAdminAreas(db, sessionUser),
+  ]);
 
   stopList = []
   routes.map((data) => {
-    const matches = data.route.match(stopsPattern.concat('(.*)'));
+    const stopIndex = data.route.indexOf(stopsPattern)
+    let matchStopPattern = stopsPattern 
+    if(stopIndex > 0){
+      matchStopPattern = `,${matchStopPattern}`
+    }
+    const matches = data.route.match(matchStopPattern.concat('(.*)'));
     if (matches && matches[1]) {
       const commaIndex = matches[1].indexOf(',');
       const nextStop =
@@ -141,6 +177,9 @@ export const getSubsequentStops = async (
       where: {
         id: {
           in: stopList.map(Number)
+        },
+        admin_area_id: {
+          in: adminAreas.map(admin => admin.adminarea_id)
         }
       },
       include: {
@@ -157,7 +196,7 @@ export const getSubsequentStops = async (
       lat: Number(stop.latitude),
       localityName: stop.locality.name,
       localityId: stop.locality_id,
-      sourceId: '',
+      sourceId: stop.atco_code,
     }))
   }
   
@@ -184,7 +223,12 @@ export const createCorridor = async (
     },
   });
 
-  await insertCorridorStops(corridor.corridor_id, payload.stopIds.map(String), db)
+  await insertCorridorStops(
+    corridor.corridor_id,
+    payload.stopIds.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,
@@ -195,6 +239,7 @@ export const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
   db: Context,
+  sessionUser: SessionUser
 ) => {
   const numberStopsList = stopIds.map(Number);
 
@@ -206,11 +251,15 @@ export const insertCorridorStops = async (
     distance_to_next_stop: number;
   }[] = [];
 
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
   const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
     where: {
       id: {
         in: numberStopsList,
       },
+      admin_area_id: {
+        in: adminAreas.map((admin) => admin.adminarea_id)
+      }
     },
   });
 
@@ -252,7 +301,10 @@ export const deleteCorridor = async (
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
-  if (!sessionUser.user) {
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+  ) {
     throw 'Not Authorized';
   }
 
@@ -271,7 +323,10 @@ export const updateCorridor = async (
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
-  if (!sessionUser.user) {
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(inputs.id), sessionUser, db)
+  ) {
     throw 'Not Authorized';
   }
 
@@ -280,7 +335,12 @@ export const updateCorridor = async (
     deleteCorridorStops(inputs.id, db),
   ]);
 
-  await insertCorridorStops(inputs.id, inputs.stopList.map(String), db)
+  await insertCorridorStops(
+    inputs.id,
+    inputs.stopList.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,
@@ -292,12 +352,16 @@ export const getStats = async (
   sessionUser: SessionUser,
   db: Context,
 ) => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     inputs;
+
+  if (
+    !sessionUser.user ||
+    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+  ) {
+    throw 'Not Authorized';
+  }
 
   let results: Timetable[] = await db.prisma.timetable.findMany({
     where: {

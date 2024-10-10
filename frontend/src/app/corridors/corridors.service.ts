@@ -43,7 +43,10 @@ import { Definitely, nonNullishArray } from '../shared/array-operators';
 import { LngLatBounds } from 'mapbox-gl';
 import { OperatorService } from '../shared/services/operator.service';
 
-export type Stop = Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat' | 'localityName' | 'adminAreaId'> & {
+export type Stop = Pick<
+  StopType,
+  'stopId' | 'stopName' | 'lon' | 'lat' | 'localityName' | 'adminAreaId' | 'sourceId'
+> & {
   naptan: string;
   intId: number;
 };
@@ -85,7 +88,7 @@ const toStop: (stop: StopType | StopInfoType) => Stop = ({ __typename, stopId, s
   stopId,
   stopName,
   ...(isStopLocation(stop) ? { lon: stop.stopLocation.longitude, lat: stop.stopLocation.latitude } : stop),
-  naptan: stopId.substring(2),
+  naptan: stop.sourceId ? stop.sourceId : stopId.substring(2),
   intId: ++uniqueId,
 });
 
