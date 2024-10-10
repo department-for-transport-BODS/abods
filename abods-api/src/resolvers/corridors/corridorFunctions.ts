@@ -6,9 +6,11 @@ import {
   CorridorResultsType,
   deleteCorridorDb,
   deleteCorridorStops,
+  distinctRoutes,
   filteredJourneys,
   getCorridor,
   getCorridorList,
+  getOrgAdminAreas,
   isCorridorMappedToUserOrg,
   returnCorridor,
   returnCorridorType,
@@ -111,6 +113,12 @@ export const getStops = async (
     };
   }
 
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
+
+  where.admin_area_id = {
+    in: adminAreas.map((admin) => admin.adminarea_id),
+  };
+
   const results = await db.prisma.naptan_stoppoint_latlong.findMany({
     where: where,
     include: {
@@ -139,18 +147,20 @@ export const getSubsequentStops = async (
   }
 
   stopList.push('') // Push blank to add comma at the end
-  const stopsPattern = stopList.join(',')
-  const routes = await db.prisma.distinct_routes.findMany({
-    where: {
-      route: {
-        contains: stopsPattern
-      }
-    }
-  })
+  let stopsPattern = stopList.join(',')
+  const [routes, adminAreas] = await Promise.all([
+    distinctRoutes(db, stopsPattern),
+    getOrgAdminAreas(db, sessionUser),
+  ]);
 
   stopList = []
   routes.map((data) => {
-    const matches = data.route.match(stopsPattern.concat('(.*)'));
+    const stopIndex = data.route.indexOf(stopsPattern)
+    let matchStopPattern = stopsPattern 
+    if(stopIndex > 0){
+      matchStopPattern = `,${matchStopPattern}`
+    }
+    const matches = data.route.match(matchStopPattern.concat('(.*)'));
     if (matches && matches[1]) {
       const commaIndex = matches[1].indexOf(',');
       const nextStop =
@@ -167,6 +177,9 @@ export const getSubsequentStops = async (
       where: {
         id: {
           in: stopList.map(Number)
+        },
+        admin_area_id: {
+          in: adminAreas.map(admin => admin.adminarea_id)
         }
       },
       include: {
@@ -210,7 +223,12 @@ export const createCorridor = async (
     },
   });
 
-  await insertCorridorStops(corridor.corridor_id, payload.stopIds.map(String), db)
+  await insertCorridorStops(
+    corridor.corridor_id,
+    payload.stopIds.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,
@@ -221,6 +239,7 @@ export const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
   db: Context,
+  sessionUser: SessionUser
 ) => {
   const numberStopsList = stopIds.map(Number);
 
@@ -232,11 +251,15 @@ export const insertCorridorStops = async (
     distance_to_next_stop: number;
   }[] = [];
 
+  const adminAreas = await getOrgAdminAreas(db, sessionUser);
   const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
     where: {
       id: {
         in: numberStopsList,
       },
+      admin_area_id: {
+        in: adminAreas.map((admin) => admin.adminarea_id)
+      }
     },
   });
 
@@ -312,7 +335,12 @@ export const updateCorridor = async (
     deleteCorridorStops(inputs.id, db),
   ]);
 
-  await insertCorridorStops(inputs.id, inputs.stopList.map(String), db)
+  await insertCorridorStops(
+    inputs.id,
+    inputs.stopList.map(String),
+    db,
+    sessionUser
+  );
 
   return {
     success: true,

@@ -172,3 +172,40 @@ export const isCorridorMappedToUserOrg = async (
 
   return !!result;
 };
+
+export const distinctRoutes = (db: Context, stopsPattern: string) => {
+  return db.prisma.distinct_routes.findMany({
+    where: {
+      route: {
+        contains: stopsPattern,
+      },
+    },
+  });
+};
+
+export const getOrgAdminAreas = async (
+  db: Context,
+  sessionUser: SessionUser
+) => {
+  const orgOperators = await db.prisma.bods_organisationoperator.findMany({
+    where: {
+      organisation_id: {
+        in: sessionUser.userOrganisationIDs?.map(Number)
+      }
+    },
+    select: {
+      operatorref: true,
+    },
+  });
+  return db.prisma.noc_adminarea.findMany({
+    where: {
+      national_operator_code: {
+        in: orgOperators.map((op) => op.operatorref),
+      },
+    },
+    select: {
+      adminarea_id: true,
+    },
+  });
+};
+
