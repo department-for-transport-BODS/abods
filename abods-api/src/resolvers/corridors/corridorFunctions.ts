@@ -147,7 +147,7 @@ export const getSubsequentStops = async (
   }
 
   stopList.push('') // Push blank to add comma at the end
-  const stopsPattern = stopList.join(',')
+  let stopsPattern = stopList.join(',')
   const [routes, adminAreas] = await Promise.all([
     distinctRoutes(db, stopsPattern),
     getOrgAdminAreas(db, sessionUser),
@@ -155,7 +155,12 @@ export const getSubsequentStops = async (
 
   stopList = []
   routes.map((data) => {
-    const matches = data.route.match(stopsPattern.concat('(.*)'));
+    const stopIndex = data.route.indexOf(stopsPattern)
+    let matchStopPattern = stopsPattern 
+    if(stopIndex > 0){
+      matchStopPattern = `,${matchStopPattern}`
+    }
+    const matches = data.route.match(matchStopPattern.concat('(.*)'));
     if (matches && matches[1]) {
       const commaIndex = matches[1].indexOf(',');
       const nextStop =
