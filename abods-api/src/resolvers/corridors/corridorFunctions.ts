@@ -540,10 +540,10 @@ export const getJourneyStats = (
 };
 
 export const getJourneyStatsPerService = async (
-  journeys,
-  db
+  journeys: Map<string, Timetable[]>,
+  db: Context
 ): Promise<CorridorStatsPerServiceType[]> => {
-  const journeyStats = new Map();
+  const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
   const stats: CorridorStatsPerServiceType[] = [];
   const _ = [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
