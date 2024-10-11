@@ -69,7 +69,7 @@ model service_details {
   line_name                    String
   service_name                 String
 
-  operator  all_operators     @relation(fields: [operator_noc], references: [operatorref])
+  operator  all_operators?     @relation(fields: [operator_noc], references: [operatorref])
 }
 
 model Alert {

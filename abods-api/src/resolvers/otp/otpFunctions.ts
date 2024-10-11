@@ -99,7 +99,7 @@ export const getOperatorsDropDown = async (
 
   return userOperators
     .map((op) => ({
-      name: op.operator.name,
+      name: op.operator?.name ?? 'NA',
       nocCode: op.operator_noc,
       operatorId: op.operator_noc,
       adminAreas: adminAreas
