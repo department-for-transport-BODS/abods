@@ -428,7 +428,7 @@ export const getSummaryStats = (
   return {
     totalTransits: totalTransits,
     numberOfServices: services.size,
-    averageJourneyTime: isNaN(averageJourneyTime) ? 0 : averageJourneyTime,,
+    averageJourneyTime: isNaN(averageJourneyTime) ? 0 : averageJourneyTime,
     scheduledTransits: scheduledTransits,
   };
 };
