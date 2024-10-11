@@ -428,7 +428,8 @@ export const getExpectedJourneys = (db: Context, operatorId: string) => {
       }
     },
     select: {
-      group_id: true
+      group_id: true,
+      expected_journey_start: true
     },
     distinct: ['group_id']
   }))

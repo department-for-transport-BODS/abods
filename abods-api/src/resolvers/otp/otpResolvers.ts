@@ -162,7 +162,8 @@ const otpResolvers: IResolvers = {
         const queryName = info.operation.name?.value;
         let last20Mins: SiriVMPositions[] = []
         let expected: {
-            group_id: string
+            group_id: string,
+            eexpected_journey_start: Date
         }[]   = []
         if (queryName === "operatorLiveStatus") {
           const [expected, last20Mins] = await Promise.all([
@@ -183,7 +184,8 @@ const otpResolvers: IResolvers = {
           ...parent.liveStats,
           expectedVehicles: expected.length,
           currentVehicles: vechileRefs.size,
-          avl: last20Mins
+          avl: last20Mins,
+          expected: expected
         };
       
     },
@@ -195,7 +197,9 @@ const otpResolvers: IResolvers = {
       { sessionUser, db }: RequestContext,
       info
     ) => {
-      return [];
+    
+        parent.avl.map()
+        return [];
     },
   },
   TransitModelType: {
