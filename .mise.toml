@@ -1,0 +1,39 @@
+[settings]
+asdf_compat = true
+experimental = true
+legacy_version_file = true
+
+[tools]
+granted = "0.35.1"
+serverless = "3.39.0"
+jq = "1.7.1"
+
+[tasks."setup:api"]
+dir = "abods-api"
+run = "assume --exec -- setup.sh"
+
+[tasks."setup:frontend"]
+dir = "frontend"
+run = "npm install"
+
+[tasks.setup]
+depends = ["setup:api", "setup:frontend"]
+
+[tasks.db]
+dir = "scripts"
+run = "assume --exec -- ./db_connect.sh"
+
+[tasks.api]
+depends = ["setup:api"]
+dir = "abods-api"
+run = "serverless offline"
+
+[tasks."app:sandbox"]
+depends = ["setup:frontend"]
+dir = "frontend"
+run = "npm start -- --proxy-config src/proxy.sandbox.conf.json"
+
+[tasks.app]
+depends = ["setup:frontend"]
+dir = "frontend"
+run = "npm start"
