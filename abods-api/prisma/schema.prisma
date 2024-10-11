@@ -206,7 +206,7 @@ model Timetable {
   stop_id                 Int
   servicepattern_id       Int
   vehiclejourney_id       Int
-  expected_journeys       expected_journeys @relation(fields: [group_id], references: [group_id])
+  expected_journeys       expected_journeys? @relation(fields: [group_id], references: [group_id])
   SiriVMPositions         SiriVMPositions? @relation(fields: [group_id, actual_departure_time], references: [group_id, recorded_at_time])
   stops                   naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
   @@unique([group_id, actual_departure_time])

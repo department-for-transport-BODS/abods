@@ -428,7 +428,7 @@ export const getSummaryStats = (
   return {
     totalTransits: totalTransits,
     numberOfServices: services.size,
-    averageJourneyTime: averageJourneyTime,
+    averageJourneyTime: isNaN(averageJourneyTime) ? 0 : averageJourneyTime,
     scheduledTransits: scheduledTransits,
   };
 };
@@ -590,15 +590,17 @@ export const getJourneyStatsPerService = async (
       const serviceDetails = services.find(
         (service) => service.noc_and_line_and_servicecode === key
       );
-      stats.push({
-        lineName: serviceDetails?.line_name ?? "",
-        operatorName: serviceDetails?.operator?.name,
-        noc: serviceDetails?.operator_noc,
-        servicePatternName: serviceDetails?.service_name ?? "",
-        recordedTransits: journey.recordedTransits,
-        totalJourneyTime: journey.totalJourneyTime,
-        scheduledTransits: journey.scheduledTransits,
-      });
+      if(journey.totalJourneyTime > 0){
+        stats.push({
+          lineName: serviceDetails?.line_name ?? "",
+          operatorName: serviceDetails?.operator?.name ?? "NA",
+          noc: serviceDetails?.operator_noc,
+          servicePatternName: serviceDetails?.service_name ?? "",
+          recordedTransits: journey.recordedTransits,
+          totalJourneyTime: journey.totalJourneyTime,
+          scheduledTransits: journey.scheduledTransits,
+        });
+      }
     });
   }
 
