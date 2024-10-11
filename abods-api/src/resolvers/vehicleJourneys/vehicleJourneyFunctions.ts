@@ -179,23 +179,23 @@ export const getTimetableJourney = async (
         journeyStatus: GpsFeedJourneyStatus.Unknown,
         operatorInfo: {
           operatorId:
-            journey.expected_journeys.expected_service.expected_operator
+            journey.expected_journeys?.expected_service.expected_operator
               .operator_noc ?? '',
           operatorName:
-            journey.expected_journeys.expected_service.expected_operator
+            journey.expected_journeys?.expected_service.expected_operator
               .operator_name ?? '',
           nocCode:
-            journey.expected_journeys.expected_service.expected_operator
+            journey.expected_journeys?.expected_service.expected_operator
               .operator_noc ?? '',
         },
         serviceInfo: {
           serviceId:
-            journey.expected_journeys.expected_service
+            journey.expected_journeys?.expected_service
               .noc_and_line_and_servicecode ?? '',
           serviceNumber:
-            journey.expected_journeys.expected_service.line_name ?? '',
+            journey.expected_journeys?.expected_service.line_name ?? '',
           serviceName:
-            journey.expected_journeys.expected_service.service_name ?? '',
+            journey.expected_journeys?.expected_service.service_name ?? '',
         },
         previousStopInfo: {
           stopId: '',
@@ -264,7 +264,7 @@ export const getJourney = async (
     }
 
     const startTime = getFormattedDate(
-      matchedStop?.Timetable?.expected_journeys.expected_journey_start,
+      matchedStop?.Timetable?.expected_journeys?.expected_journey_start,
     );
 
     const timestamp = getFormattedDate(journey.recorded_at_time);
@@ -296,24 +296,24 @@ export const getJourney = async (
         : GpsFeedJourneyStatus.Unknown,
       operatorInfo: {
         operatorId:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .expected_operator.operator_noc ?? '',
         operatorName:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .expected_operator.operator_name ?? '',
         nocCode:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .expected_operator.operator_noc ?? '',
       },
       serviceInfo: {
         serviceId:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .noc_and_line_and_servicecode ?? '',
         serviceNumber:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .line_name ?? '',
         serviceName:
-          matchedStop?.Timetable?.expected_journeys.expected_service
+          matchedStop?.Timetable?.expected_journeys?.expected_service
             .service_name ?? '',
       },
       previousStopInfo: {
