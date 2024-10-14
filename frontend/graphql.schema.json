@@ -4137,6 +4137,18 @@
             "deprecationReason": null
           },
           {
+            "name": "actualDelay",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "feedStatus",
             "description": null,
             "args": [],

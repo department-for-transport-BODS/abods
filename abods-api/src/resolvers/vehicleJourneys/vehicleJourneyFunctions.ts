@@ -172,6 +172,7 @@ export const getTimetableJourney = async (
         servicePatternId: journey.vehiclejourney_id.toString(),
         isTimingPoint: journey.is_timing_point,
         delay: 0,
+        actualDelay: 0,
         startTime: startTime.toString(),
         scheduledDeparture: stopScheduledTime.toString(),
         lat: Number(journey.stop_latitude),
@@ -285,6 +286,7 @@ export const getJourney = async (
         lastStopIndex === matchedStop?.Timetable?.stop_index && delay < 0
           ? 0
           : delay,
+      actualDelay: delay,
       startTime: startTime.toString(),
       scheduledDeparture: stopScheduledTime.toString(),
       lat: Number(journey.latitude),
