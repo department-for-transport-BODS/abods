@@ -7,7 +7,10 @@ import { GraphQLModule } from "./graphql.module";
 import { HttpClientModule } from "@angular/common/http";
 import { SharedModule } from "./shared/shared.module";
 import { LayoutModule } from "./layout/layout.module";
-import { ConfigService } from "./config/config.service";
+import {
+  ConfigService,
+  EnvironmentConfigService,
+} from "./config/config.service";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AuthenticationModule } from "./authentication/authentication.module";
@@ -44,6 +47,13 @@ import { CookieService } from "ngx-cookie-service";
     CookiePolicyModule,
   ],
   providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (config: EnvironmentConfigService) => async () =>
+        await config.loadConfig(),
+      deps: [EnvironmentConfigService],
+      multi: true,
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: (config: ConfigService) => async () =>

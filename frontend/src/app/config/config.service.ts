@@ -5,7 +5,6 @@ import { firstValueFrom } from "rxjs";
 import { merge } from "lodash-es";
 
 export interface ConfigObject {
-  apiUrl: string;
   envName: string;
   analyticsId: string;
   mapboxToken: string;
@@ -95,36 +94,48 @@ export interface FreshdeskConfig {
   providedIn: "root",
 })
 export class ConfigService {
-  private config?: ConfigObject;
+  private config: ConfigObject;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Will be set in loadConfig at startup
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.config = null as ConfigObject;
+  }
+
+  loadConfig() {
+    return firstValueFrom(
+      this.http.get<ConfigObject>("./config.json").pipe(
+        map((config) => {
+          // TODO: validate that the shape of this response is correct
+          this.config = config;
+        }),
+      ),
+    );
+  }
 
   flag(key: keyof ReturnType<typeof flags>): boolean {
     return flags(this.envName)[key];
   }
 
-  get apiUrl(): string {
-    return this.loadStringValue("apiUrl", "");
-  }
-
   get envName(): string {
-    return this.loadStringValue("envName", "unknown");
+    return this.config.envName || "unknown";
   }
 
   get analyticsId(): string {
-    return this.loadStringValue("analyticsId", "");
+    return this.config.analyticsId || "";
   }
 
   get mapboxToken(): string {
-    return this.loadStringValue("mapboxToken", "");
+    return this.config.mapboxToken || "";
   }
 
   get mapboxStyle() {
-    return this.loadStringValue("mapboxStyle", "");
+    return this.config.mapboxStyle || "";
   }
 
   get mapboxSatelliteStyle() {
-    return this.loadStringValue("mapboxSatelliteStyle", "");
+    return this.config.mapboxSatelliteStyle || "";
   }
 
   get vehicleJourneys(): VehicleJourneysConfig {
@@ -134,11 +145,7 @@ export class ConfigService {
         durationISO: "P6M",
       },
     };
-    return this.loadValue(() => {
-      const config = (this.fetchValue("vehicleJourneys") ||
-        {}) as VehicleJourneysConfig;
-      return merge(defaults, config);
-    }, defaults);
+    return merge(defaults, this.config.vehicleJourneys || {});
   }
 
   get otp(): OtpConfig {
@@ -146,10 +153,7 @@ export class ConfigService {
       late: 6,
       early: 1,
     };
-    return this.loadValue(() => {
-      const config = (this.fetchValue("otp") || {}) as OtpConfig;
-      return merge(defaults, config);
-    }, defaults);
+    return merge(defaults, this.config.otp || {});
   }
 
   get defaultCookiePolicy(): CookiePolicy {
@@ -158,11 +162,7 @@ export class ConfigService {
       version: 1,
       userSubmitted: false,
     };
-    return this.loadValue(() => {
-      const config = (this.fetchValue("defaultCookiePolicy") ||
-        {}) as CookiePolicy;
-      return merge(defaults, config);
-    }, defaults);
+    return merge(defaults, this.config.defaultCookiePolicy || {});
   }
 
   get freshdeskConfig(): FreshdeskConfig {
@@ -177,42 +177,34 @@ export class ConfigService {
         organisation: "",
       },
     };
-    return this.loadValue(() => {
-      const config = (this.fetchValue("freshdesk") || {}) as FreshdeskConfig;
-      return merge(defaults, config);
-    }, defaults);
+    return merge(defaults, this.config.freshdesk || {});
   }
+}
 
-  fetchValue(k: keyof ConfigObject): ConfigObject[keyof ConfigObject] {
-    if (!this.config) {
-      throw new Error("Config not loaded");
-    }
-    if (this.config[k] === undefined) {
-      throw new Error(`${k} not defined in config.json`);
-    }
-    return this.config[k];
+interface EnvironmentConfig {
+  apiUrl: string;
+}
+
+@Injectable({ providedIn: "root" })
+export class EnvironmentConfigService {
+  private config = {} as EnvironmentConfig;
+  constructor(private http: HttpClient) {}
+
+  get apiUrl(): string {
+    return this.config.apiUrl;
   }
 
   loadConfig() {
     return firstValueFrom(
-      this.http
-        .get("./config.json")
-        .pipe(map((config) => (this.config = config as ConfigObject))),
+      this.http.get<EnvironmentConfig>("./config.json").pipe(
+        map((data) => {
+          // Some simple validation to ensure that we are actually getting back what we should be
+          if (!data.apiUrl) {
+            throw new Error("Could not read API URL");
+          }
+          this.config = data as EnvironmentConfig;
+        }),
+      ),
     );
-  }
-
-  loadStringValue(propName: keyof ConfigObject, defaultValue: string): string {
-    return this.loadValue(
-      () => this.fetchValue(propName) as string,
-      defaultValue,
-    );
-  }
-
-  loadValue<T>(getValue: () => T, defaultValue: T): T {
-    try {
-      return getValue();
-    } catch {
-      return defaultValue;
-    }
   }
 }

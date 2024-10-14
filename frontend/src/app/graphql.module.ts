@@ -1,7 +1,7 @@
 import { NgModule } from "@angular/core";
 import { InMemoryCache } from "@apollo/client/core";
 import { HttpLink } from "apollo-angular/http";
-import { ConfigService } from "./config/config.service";
+import { EnvironmentConfigService } from "./config/config.service";
 import { ApolloLink } from "@apollo/client/link/core";
 import { onError } from "@apollo/client/link/error";
 import { APOLLO_OPTIONS } from "apollo-angular";
@@ -10,7 +10,7 @@ import { AuthenticatedUserService } from "./authentication/authenticated-user.se
 
 export function createApollo(
   httpLink: HttpLink,
-  config: ConfigService,
+  config: EnvironmentConfigService,
   router: Router,
   user: AuthenticatedUserService,
 ) {
@@ -84,7 +84,7 @@ export function createApollo(
     {
       provide: APOLLO_OPTIONS,
       useFactory: createApollo,
-      deps: [HttpLink, ConfigService, Router, AuthenticatedUserService],
+      deps: [HttpLink, EnvironmentConfigService, Router, AuthenticatedUserService],
     },
   ],
 })
