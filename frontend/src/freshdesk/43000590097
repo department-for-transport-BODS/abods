@@ -1,30 +1,5 @@
 [
   {
-    "id": 43000721154,
-    "type": 1,
-    "status": 1,
-    "agent_id": 43027820018,
-    "created_at": "2024-02-02T09:54:35Z",
-    "category_id": 43000371971,
-    "folder_id": 43000590097,
-    "title": "Improvements made to on-time performance calculations on 26th Jan 2024",
-    "updated_at": "2024-02-02T09:59:00Z",
-    "description": "<p dir=\"ltr\">On the <strong>26th of Jan 2024</strong>, the following improvements were deployed to the algorithm which is responsible for calculating all departure times in ABOD.</p><p><br></p><ol><li><strong>Stop re-entry recalculation of actuals&nbsp;</strong>– This improvement will ensure that the last known GPS ping from a vehicle is used when calculating departure times. This improvement will benefit scenarios where a vehicle enters a stops radius, then leaves and then re-enters again. In this scenario, the last known GPS ping inside the radius, helping prevent any inaccurate early departures from being calculated.</li><li dir=\"ltr\"><strong>Interpolation of Actuals&nbsp;</strong>– <span dir=\"ltr\" style=\"color: rgb(0, 0, 0); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal;  text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;\">Where reasonable amount of data exists, departures will now be calculated for stops which have been skipped due to low GPS update frequency, allowing for more actuals to be calculated and improving the overall data completeness in ABOD.</span>&nbsp;</li></ol>",
-    "description_text": " ",
-    "seo_data": {
-      "meta_title": "",
-      "meta_description": ""
-    },
-    "tags": [],
-    "attachments": [],
-    "cloud_files": [],
-    "thumbs_up": 0,
-    "thumbs_down": 0,
-    "hits": 0,
-    "suggested": 0,
-    "feedback_count": 0
-  },
-  {
     "id": 43000700824,
     "type": 1,
     "status": 2,
@@ -34,8 +9,8 @@
     "folder_id": 43000590097,
     "title": "How do we match Automatic Vehicle Location (AVL) data to schedules?",
     "updated_at": "2023-06-02T14:03:05Z",
-    "description": "<p data-renderer-start-pos=\"127\">AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.</p>",
-    "description_text": " AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.",
+    "description": "<p data-renderer-start-pos=\"127\">AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.&nbsp;</p>",
+    "description_text": " AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match. ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -59,8 +34,8 @@
     "folder_id": 43000590097,
     "title": "How do we calculate Arrival and Departure times?",
     "updated_at": "2024-03-12T10:57:40Z",
-    "description": "<p data-renderer-start-pos=\"1700\" dir=\"ltr\">The matching algorithm has been shared via email while we are in development. Please reach out for further information if required. </p>",
-    "description_text": " The matching algorithm has been shared via email while we are in development. Please reach out for further information if required ",
+    "description": "<p data-renderer-start-pos=\"1700\" dir=\"ltr\">The matching algorithm has been shared via email whilst we are in development. Please reach out for further information if required.</p>",
+    "description_text": " The matching algorithm has been shared via email whilst we are in development. Please reach out for further information if required. ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
