@@ -83,3 +83,8 @@ In `frontend/`, run `npm install`.
 Then run `npm start` to start the app.
 
 Using the [mise](https://mise.jdx.dev/) task runner, run `mise install` once, then `mise r app` to start the app
+
+## Versions
+
+All changes to the API and Frontend will be deployed after a merge to the sandbox branch.
+When you are ready to push to the next environment, merge another change to update the version number in `VERSION`
