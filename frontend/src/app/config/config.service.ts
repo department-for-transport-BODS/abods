@@ -65,6 +65,7 @@ export interface FreshdeskFolderConfig {
 const environments = ['local', 'sandbox', 'dev', 'test', 'cavl', 'uat'] as const;
 type Environment = typeof environments[number];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function maxEnvironment(current: string, max: Environment): boolean {
   const currentIndex = environments.indexOf(current as Environment);
   const maxIndex = environments.indexOf(max);
@@ -73,11 +74,10 @@ function maxEnvironment(current: string, max: Environment): boolean {
   return maxIndex >= currentIndex;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function flags(currentEnv: string) {
   // TODO: get from API
-  return {
-    corridorsEnabled: maxEnvironment(currentEnv, 'cavl'),
-  } as const;
+  return {} as const;
 }
 
 export interface FreshdeskConfig {
