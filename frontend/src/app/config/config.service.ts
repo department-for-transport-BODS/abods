@@ -68,17 +68,17 @@ type Environment = typeof environments[number];
 function maxEnvironment(current: string, max: Environment): boolean {
   const currentIndex = environments.indexOf(current as Environment);
   const maxIndex = environments.indexOf(max);
+  if (currentIndex < 0 || maxIndex < 0) return false;
 
-  return currentIndex >= 0 && maxIndex >= 0 && maxIndex <= currentIndex;
+  return maxIndex >= currentIndex;
 }
 
 function flags(currentEnv: string) {
+  // TODO: get from API
   return {
     corridorsEnabled: maxEnvironment(currentEnv, 'cavl'),
   } as const;
 }
-
-type FlagKeys = ReturnType<typeof flags>;
 
 export interface FreshdeskConfig {
   /**
@@ -99,7 +99,7 @@ export class ConfigService {
 
   constructor(private http: HttpClient) {}
 
-  flag(key: keyof FlagKeys): boolean {
+  flag(key: keyof ReturnType<typeof flags>): boolean {
     return flags(this.envName)[key];
   }
 
