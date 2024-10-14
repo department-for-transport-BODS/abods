@@ -47,7 +47,7 @@
     <span *ngIf="!stop?.isHidden" class="stop-list-item__actual">
       <div
         *ngIf="stop?.actualDeparture; else noActual"
-        [ngxTippy]="'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss':'+')"
+        [ngxTippy]="'Calculated delay ' + (stop?.actualDelay | formatDuration: 'mm:ss':'+')"
         [tippyProps]="{ theme: 'gds-tooltip' }"
       >
         <span>{{ stop?.actualDeparture | dateTimeToFormat: 'HH:mm' }}</span>
