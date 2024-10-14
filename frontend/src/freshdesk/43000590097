@@ -1,30 +1,5 @@
 [
   {
-    "id": 43000721154,
-    "type": 1,
-    "status": 1,
-    "agent_id": 43027820018,
-    "created_at": "2024-02-02T09:54:35Z",
-    "category_id": 43000371971,
-    "folder_id": 43000590097,
-    "title": "Improvements made to on-time performance calculations on 26th Jan 2024",
-    "updated_at": "2024-02-02T09:59:00Z",
-    "description": "<p dir=\"ltr\">On the <strong>26th of Jan 2024</strong>, the following improvements were deployed to the algorithm which is responsible for calculating all departure times in ABOD.</p><p><br></p><ol><li><strong>Stop re-entry recalculation of actuals&nbsp;</strong>– This improvement will ensure that the last known GPS ping from a vehicle is used when calculating departure times. This improvement will benefit scenarios where a vehicle enters a stops radius, then leaves and then re-enters again. In this scenario, the last known GPS ping inside the radius, helping prevent any inaccurate early departures from being calculated.</li><li dir=\"ltr\"><strong>Interpolation of Actuals&nbsp;</strong>– <span dir=\"ltr\" style=\"color: rgb(0, 0, 0); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal;  text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;\">Where reasonable amount of data exists, departures will now be calculated for stops which have been skipped due to low GPS update frequency, allowing for more actuals to be calculated and improving the overall data completeness in ABOD.</span>&nbsp;</li></ol>",
-    "description_text": " On the 26th of Jan 2024, the following improvements were deployed to the algorithm which is responsible for calculating all departure times in ABOD.      Stop re-entry recalculation of actuals – This improvement will ensure that the last known GPS ping from a vehicle is used when calculating departure times. This improvement will benefit scenarios where a vehicle enters a stops radius, then leaves and then re-enters again. In this scenario, the last known GPS ping inside the radius, helping prevent any inaccurate early departures from being calculated.  Interpolation of Actuals – Where reasonable amount of data exists, departures will now be calculated for stops which have been skipped due to low GPS update frequency, allowing for more actuals to be calculated and improving the overall data completeness in ABOD.   ",
-    "seo_data": {
-      "meta_title": "",
-      "meta_description": ""
-    },
-    "tags": [],
-    "attachments": [],
-    "cloud_files": [],
-    "thumbs_up": 0,
-    "thumbs_down": 0,
-    "hits": 0,
-    "suggested": 0,
-    "feedback_count": 0
-  },
-  {
     "id": 43000700824,
     "type": 1,
     "status": 2,
@@ -34,8 +9,8 @@
     "folder_id": 43000590097,
     "title": "How do we match Automatic Vehicle Location (AVL) data to schedules?",
     "updated_at": "2023-06-02T14:03:05Z",
-    "description": "<p data-renderer-start-pos=\"127\">AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.&nbsp;</p><p data-renderer-start-pos=\"419\" style=\"margin-bottom: 0px; margin-left: 0px; padding: 0px; font-size: 16px; line-height: 1.714; font-weight: 400; color: rgb(23, 43, 77); font-family: -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif; text-align: start; text-indent: 0px;\">&nbsp;</p><p data-renderer-start-pos=\"421\">If a direct match is found the vehicle AVL data is automatically matched to that journey in the schedules. If more than one match is found (for example when a SIRI-VM packet does not contain any matching journey information) the system will then use a best fit algorithm to determine what journey this AVL data should be matched to. This algorithm uses OperatorRef and LineRef but also uses the vehicle’s current location to compare to where it should roughly be at this point in the schedule. From this it determines which journey best matches the current vehicle's AVL data and will use that journey from then on to record arrival and departure times. Although a sophisticated system, this is of course not as accurate as a pure 1-2-1 match and so it’s always suggested to make sure the incoming AVL data contains as much information as possible.</p>",
-    "description_text": " AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.      If a direct match is found the vehicle AVL data is automatically matched to that journey in the schedules. If more than one match is found (for example when a SIRI-VM packet does not contain any matching journey information) the system will then use a best fit algorithm to determine what journey this AVL data should be matched to. This algorithm uses OperatorRef and LineRef but also uses the vehicle’s current location to compare to where it should roughly be at this point in the schedule. From this it determines which journey best matches the current vehicle's AVL data and will use that journey from then on to record arrival and departure times. Although a sophisticated system, this is of course not as accurate as a pure 1-2-1 match and so it’s always suggested to make sure the incoming AVL data contains as much information as possible. ",
+    "description": "<p data-renderer-start-pos=\"127\">AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match.&nbsp;</p>",
+    "description_text": " AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including “OperatorRef”, “LineRef”, “DatedVehicleJourneyRef”, “VehicleJourneyRef” the system will scan the schedules to find a match. ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -59,8 +34,8 @@
     "folder_id": 43000590097,
     "title": "How do we calculate Arrival and Departure times?",
     "updated_at": "2024-03-12T10:57:40Z",
-    "description": "<p data-renderer-start-pos=\"1700\" dir=\"ltr\">As a vehicle travels along its journey the system continually monitors its location against the stops in the schedules. If a vehicle is within a 25 meter radius of the stop it’s considered to be at the stop (and an arrival time would be calculated using the GPS timestamp provided in the SIRI VM data). &nbsp;The system will then continue to monitor the GPS pings until it has left the 25 meter radius of the stop. At this point it will then record the departure time (again using the GPS timestamp provided in the SIRI-VM data).&nbsp;</p><p data-renderer-start-pos=\"1700\" dir=\"ltr\"><br></p><p data-renderer-start-pos=\"2226\">If two GPS pings happen to “straddle” a stop but both are further than 25 meters from the stops location the system will calculate the arrival and departure times using the geometry of the two GPS points against the stop position. It will then look at the timestamps of the GPS points to calculate when the vehicle was at the stop. In this case both the arrival and departure time will be the same.</p><p data-renderer-start-pos=\"2226\"><br></p><p data-renderer-start-pos=\"2626\">Finally the system relies on regular GPS updates to calculate arrivals and departures. If there are infrequent pings and the system determines the vehicle has traveled past more than one stop it will not calculate arrival and departures times for those stops. This is to avoid calculating an inaccurate time because of insufficient data.</p>",
-    "description_text": " As a vehicle travels along its journey the system continually monitors its location against the stops in the schedules. If a vehicle is within a 25 meter radius of the stop it’s considered to be at the stop (and an arrival time would be calculated using the GPS timestamp provided in the SIRI VM data).  The system will then continue to monitor the GPS pings until it has left the 25 meter radius of the stop. At this point it will then record the departure time (again using the GPS timestamp provided in the SIRI-VM data).      If two GPS pings happen to “straddle” a stop but both are further than 25 meters from the stops location the system will calculate the arrival and departure times using the geometry of the two GPS points against the stop position. It will then look at the timestamps of the GPS points to calculate when the vehicle was at the stop. In this case both the arrival and departure time will be the same.     Finally the system relies on regular GPS updates to calculate arrivals and departures. If there are infrequent pings and the system determines the vehicle has traveled past more than one stop it will not calculate arrival and departures times for those stops. This is to avoid calculating an inaccurate time because of insufficient data. ",
+    "description": "<p data-renderer-start-pos=\"1700\" dir=\"ltr\">The matching algorithm has been shared via email whilst we are in development. Please reach out for further information if required.</p>",
+    "description_text": " The matching algorithm has been shared via email whilst we are in development. Please reach out for further information if required. ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -109,8 +84,8 @@
     "folder_id": 43000590097,
     "title": "How do we calculate On Time Performance?",
     "updated_at": "2023-06-02T14:00:33Z",
-    "description": "<ol><li data-renderer-start-pos=\"3126\" dir=\"ltr\">We calculate your punctuality figures by matching your static data with your AVL feeds. Please see \"How do we match Automatic Vehicle Location (AVL) data to schedules?\" for more information.</li><li data-renderer-start-pos=\"3316\">We DO NOT include no data instances in your figures</li><li data-renderer-start-pos=\"3369\">We DO NOT include last stops in your figures</li><li data-renderer-start-pos=\"3415\" dir=\"ltr\">We use the OTC definitions for early and late. Please see the Late, On-Time and Early sections for more information.</li></ol>",
-    "description_text": "  We calculate your punctuality figures by matching your static data with your AVL feeds. Please see \"How do we match Automatic Vehicle Location (AVL) data to schedules?\" for more information.  We DO NOT include no data instances in your figures  We DO NOT include last stops in your figures  We use the OTC definitions for early and late. Please see the Late, On-Time and Early sections for more information.  ",
+    "description": "<ol><li data-renderer-start-pos=\"3126\" dir=\"ltr\">We calculate your punctuality figures by matching your static data with your AVL feeds. Please see \"How do we match Automatic Vehicle Location (AVL) data to schedules?\" for more information.</li><li data-renderer-start-pos=\"3316\">We DO NOT include no data instances in your figures</li><li data-renderer-start-pos=\"3415\" dir=\"ltr\">We use the OTC definitions for early and late. Please see the Late, On-Time and Early sections for more information.</li></ol>",
+    "description_text": "  We calculate your punctuality figures by matching your static data with your AVL feeds. Please see \"How do we match Automatic Vehicle Location (AVL) data to schedules?\" for more information.  We DO NOT include no data instances in your figures  We use the OTC definitions for early and late. Please see the Late, On-Time and Early sections for more information.  ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -234,8 +209,8 @@
     "folder_id": 43000590097,
     "title": "Last Stops",
     "updated_at": "2023-06-02T14:06:28Z",
-    "description": "<p>On-time performance is currently calculated using departures only, so we do not include the arrival time at last stop. This is something we are looking into providing in future.</p>",
-    "description_text": " On-time performance is currently calculated using departures only, so we do not include the arrival time at last stop. This is something we are looking into providing in future. ",
+    "description": "<p>On-time performance is currently calculated using departures for all stops except the arrival time at the last stop.</p>",
+    "description_text": " On-time performance is currently calculated using departures for all stops except the arrival time at the last stop. ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""

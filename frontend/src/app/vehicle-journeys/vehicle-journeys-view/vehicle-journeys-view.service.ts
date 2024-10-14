@@ -37,6 +37,7 @@ export type ApolloGpsFeedType = Pick<
   | 'vehicleJourneyId'
   | 'servicePatternId'
   | 'delay'
+  | 'actualDelay'
   | 'startTime'
   | 'scheduledDeparture'
   | 'feedStatus'

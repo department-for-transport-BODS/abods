@@ -413,7 +413,7 @@ export type GpsFeedInputType = {
 
 /**
  * Vehicle journey status.
- * 
+ *
  * Started - This feed event is for a journey that's supposed to be running.
  * Completed - This feed event is for a journey that's supposed to have been completed.
  */
@@ -441,7 +441,7 @@ export type GpsFeedNamespace = {
   getUnmatchedJourneys: Array<Maybe<GpsFeedType>>;
   /**
    * Get count of matched vehicles.
-   * 
+   *
    * You can filter counts for a set of noc codes.
    * Note that unmatched count are for all unmatched vehicles
    * running on lines that were being operated by operators
@@ -506,7 +506,7 @@ export type GpsFeedShadowNamespace = {
   getUnmatchedJourneys: Array<Maybe<GpsFeedType>>;
   /**
    * Get count of matched vehicles.
-   * 
+   *
    * You can filter counts for a set of noc codes.
    * Note that unmatched count are for all unmatched vehicles
    * running on lines that were being operated by operators
@@ -547,7 +547,7 @@ export type GpsFeedShadowNamespaceGetVehicleCountsArgs = {
 
 /**
  * GPS feed status for each feed event.
- * 
+ *
  * Stale - Latest feed event is more than a minute old.
  * Active - Latest feed event is a not stale.
  */
@@ -560,6 +560,7 @@ export enum GpsFeedStatus {
 export type GpsFeedType = {
   __typename?: 'GpsFeedType';
   delay?: Maybe<Scalars['Int']>;
+  actualDelay?: Maybe<Scalars['Int']>;
   feedStatus?: Maybe<GpsFeedStatus>;
   isTimingPoint?: Maybe<Scalars['Boolean']>;
   journeyStatus?: Maybe<GpsFeedJourneyStatus>;
@@ -1292,7 +1293,7 @@ export type Query = {
   gpsFeed: GpsFeedNamespace;
   /**
    * Namespace for gpsFeedShadow queries.
-   * 
+   *
    * This namespace only exists for aiding QA to test
    * migration from Timestream to Postgres as a data
    * backend. Please deprecate this once that testing
@@ -1336,7 +1337,7 @@ export type Query = {
   vehicleReplay: VehicleReplayNamespace;
   /**
    * Namespace for VehicleReplayShadow queries.
-   * 
+   *
    * This namespace only exists for aiding QA to test
    * migration from Timestream to Postgres as a data
    * backend. Please deprecate this once that testing
@@ -2788,7 +2789,7 @@ export type VehicleJourneyQuery = (
     { __typename?: 'VehicleReplayNamespace' }
     & { getJourney: Array<Maybe<(
       { __typename?: 'GpsFeedType' }
-      & Pick<GpsFeedType, 'ts' | 'lat' | 'lon' | 'vehicleId' | 'vehicleJourneyId' | 'servicePatternId' | 'delay' | 'startTime' | 'scheduledDeparture' | 'isTimingPoint' | 'feedStatus' | 'journeyStatus'>
+      & Pick<GpsFeedType, 'ts' | 'lat' | 'lon' | 'vehicleId' | 'vehicleJourneyId' | 'servicePatternId' | 'delay' | 'actualDelay' | 'startTime' | 'scheduledDeparture' | 'isTimingPoint' | 'feedStatus' | 'journeyStatus'>
       & { operatorInfo?: Maybe<(
         { __typename?: 'OperatorInfoType' }
         & Pick<OperatorInfoType, 'operatorId' | 'operatorName' | 'nocCode'>
@@ -3015,7 +3016,7 @@ export const LoginDocument = gql`
   })
   export class LoginGQL extends Apollo.Mutation<LoginMutation, LoginMutationVariables> {
     document = LoginDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3031,7 +3032,7 @@ export const LogoutDocument = gql`
   })
   export class LogoutGQL extends Apollo.Mutation<LogoutMutation, LogoutMutationVariables> {
     document = LogoutDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3049,7 +3050,7 @@ export const UserDocument = gql`
   })
   export class UserGQL extends Apollo.Query<UserQuery, UserQueryVariables> {
     document = UserDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3075,7 +3076,7 @@ export const CorridorsStopSearchDocument = gql`
   })
   export class CorridorsStopSearchGQL extends Apollo.Query<CorridorsStopSearchQuery, CorridorsStopSearchQueryVariables> {
     document = CorridorsStopSearchDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3101,7 +3102,7 @@ export const CorridorsSubsequentStopsDocument = gql`
   })
   export class CorridorsSubsequentStopsGQL extends Apollo.Query<CorridorsSubsequentStopsQuery, CorridorsSubsequentStopsQueryVariables> {
     document = CorridorsSubsequentStopsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3125,7 +3126,7 @@ export const CorridorsListDocument = gql`
   })
   export class CorridorsListGQL extends Apollo.Query<CorridorsListQuery, CorridorsListQueryVariables> {
     document = CorridorsListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3161,7 +3162,7 @@ export const GetCorridorDocument = gql`
   })
   export class GetCorridorGQL extends Apollo.Query<GetCorridorQuery, GetCorridorQueryVariables> {
     document = GetCorridorDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3233,7 +3234,7 @@ export const CorridorStatsDocument = gql`
   })
   export class CorridorStatsGQL extends Apollo.Query<CorridorStatsQuery, CorridorStatsQueryVariables> {
     document = CorridorStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3252,7 +3253,7 @@ export const CreateCorridorDocument = gql`
   })
   export class CreateCorridorGQL extends Apollo.Mutation<CreateCorridorMutation, CreateCorridorMutationVariables> {
     document = CreateCorridorDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3271,7 +3272,7 @@ export const DeleteCorridorDocument = gql`
   })
   export class DeleteCorridorGQL extends Apollo.Mutation<DeleteCorridorMutation, DeleteCorridorMutationVariables> {
     document = DeleteCorridorDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3290,7 +3291,7 @@ export const UpdateCorridorDocument = gql`
   })
   export class UpdateCorridorGQL extends Apollo.Mutation<UpdateCorridorMutation, UpdateCorridorMutationVariables> {
     document = UpdateCorridorDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3310,7 +3311,7 @@ export const DashboardOperatorListDocument = gql`
   })
   export class DashboardOperatorListGQL extends Apollo.Query<DashboardOperatorListQuery, DashboardOperatorListQueryVariables> {
     document = DashboardOperatorListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3330,7 +3331,7 @@ export const DashboardOperatorVehicleCountsListDocument = gql`
   })
   export class DashboardOperatorVehicleCountsListGQL extends Apollo.Query<DashboardOperatorVehicleCountsListQuery, DashboardOperatorVehicleCountsListQueryVariables> {
     document = DashboardOperatorVehicleCountsListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3352,7 +3353,7 @@ export const DashboardPerformanceStatsDocument = gql`
   })
   export class DashboardPerformanceStatsGQL extends Apollo.Query<DashboardPerformanceStatsQuery, DashboardPerformanceStatsQueryVariables> {
     document = DashboardPerformanceStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3386,7 +3387,7 @@ export const DashboardServiceRankingDocument = gql`
   })
   export class DashboardServiceRankingGQL extends Apollo.Query<DashboardServiceRankingQuery, DashboardServiceRankingQueryVariables> {
     document = DashboardServiceRankingDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3406,7 +3407,7 @@ export const EventsDocument = gql`
   })
   export class EventsGQL extends Apollo.Query<EventsQuery, EventsQueryVariables> {
     document = EventsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3425,7 +3426,7 @@ export const EventStatsDocument = gql`
   })
   export class EventStatsGQL extends Apollo.Query<EventStatsQuery, EventStatsQueryVariables> {
     document = EventStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3445,7 +3446,7 @@ export const FeedMonitoringListDocument = gql`
   })
   export class FeedMonitoringListGQL extends Apollo.Query<FeedMonitoringListQuery, FeedMonitoringListQueryVariables> {
     document = FeedMonitoringListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3473,7 +3474,7 @@ export const OperatorSparklineStatsDocument = gql`
   })
   export class OperatorSparklineStatsGQL extends Apollo.Query<OperatorSparklineStatsQuery, OperatorSparklineStatsQueryVariables> {
     document = OperatorSparklineStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3491,7 +3492,7 @@ export const OperatorLiveStatusDocument = gql`
   })
   export class OperatorLiveStatusGQL extends Apollo.Query<OperatorLiveStatusQuery, OperatorLiveStatusQueryVariables> {
     document = OperatorLiveStatusDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3509,7 +3510,7 @@ export const OperatorHistoricStatsDocument = gql`
   })
   export class OperatorHistoricStatsGQL extends Apollo.Query<OperatorHistoricStatsQuery, OperatorHistoricStatsQueryVariables> {
     document = OperatorHistoricStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3529,7 +3530,7 @@ export const GetAdminAreasDocument = gql`
   })
   export class GetAdminAreasGQL extends Apollo.Query<GetAdminAreasQuery, GetAdminAreasQueryVariables> {
     document = GetAdminAreasDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3552,7 +3553,7 @@ export const HeadwayTimeSeriesDocument = gql`
   })
   export class HeadwayTimeSeriesGQL extends Apollo.Query<HeadwayTimeSeriesQuery, HeadwayTimeSeriesQueryVariables> {
     document = HeadwayTimeSeriesDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3574,7 +3575,7 @@ export const HeadwayOverviewDocument = gql`
   })
   export class HeadwayOverviewGQL extends Apollo.Query<HeadwayOverviewQuery, HeadwayOverviewQueryVariables> {
     document = HeadwayOverviewDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3594,7 +3595,7 @@ export const HeadwayFrequentServicesDocument = gql`
   })
   export class HeadwayFrequentServicesGQL extends Apollo.Query<HeadwayFrequentServicesQuery, HeadwayFrequentServicesQueryVariables> {
     document = HeadwayFrequentServicesDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3615,7 +3616,7 @@ export const HeadwayFrequentServiceInfoDocument = gql`
   })
   export class HeadwayFrequentServiceInfoGQL extends Apollo.Query<HeadwayFrequentServiceInfoQuery, HeadwayFrequentServiceInfoQueryVariables> {
     document = HeadwayFrequentServiceInfoDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3636,7 +3637,7 @@ export const OnTimeDelayFrequencyDocument = gql`
   })
   export class OnTimeDelayFrequencyGQL extends Apollo.Query<OnTimeDelayFrequencyQuery, OnTimeDelayFrequencyQueryVariables> {
     document = OnTimeDelayFrequencyDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3659,7 +3660,7 @@ export const OnTimeTimeSeriesDocument = gql`
   })
   export class OnTimeTimeSeriesGQL extends Apollo.Query<OnTimeTimeSeriesQuery, OnTimeTimeSeriesQueryVariables> {
     document = OnTimeTimeSeriesDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3684,7 +3685,7 @@ export const OnTimeStatsDocument = gql`
   })
   export class OnTimeStatsGQL extends Apollo.Query<OnTimeStatsQuery, OnTimeStatsQueryVariables> {
     document = OnTimeStatsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3707,7 +3708,7 @@ export const OnTimePunctualityTimeOfDayDocument = gql`
   })
   export class OnTimePunctualityTimeOfDayGQL extends Apollo.Query<OnTimePunctualityTimeOfDayQuery, OnTimePunctualityTimeOfDayQueryVariables> {
     document = OnTimePunctualityTimeOfDayDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3730,7 +3731,7 @@ export const OnTimePunctualityDayOfWeekDocument = gql`
   })
   export class OnTimePunctualityDayOfWeekGQL extends Apollo.Query<OnTimePunctualityDayOfWeekQuery, OnTimePunctualityDayOfWeekQueryVariables> {
     document = OnTimePunctualityDayOfWeekDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3761,7 +3762,7 @@ export const OnTimeServicePerformanceListDocument = gql`
   })
   export class OnTimeServicePerformanceListGQL extends Apollo.Query<OnTimeServicePerformanceListQuery, OnTimeServicePerformanceListQueryVariables> {
     document = OnTimeServicePerformanceListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3804,7 +3805,7 @@ export const OnTimeStopPerformanceListDocument = gql`
   })
   export class OnTimeStopPerformanceListGQL extends Apollo.Query<OnTimeStopPerformanceListQuery, OnTimeStopPerformanceListQueryVariables> {
     document = OnTimeStopPerformanceListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3835,7 +3836,7 @@ export const OnTimeOperatorPerformanceListDocument = gql`
   })
   export class OnTimeOperatorPerformanceListGQL extends Apollo.Query<OnTimeOperatorPerformanceListQuery, OnTimeOperatorPerformanceListQueryVariables> {
     document = OnTimeOperatorPerformanceListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3855,7 +3856,7 @@ export const ServiceInfoDocument = gql`
   })
   export class ServiceInfoGQL extends Apollo.Query<ServiceInfoQuery, ServiceInfoQueryVariables> {
     document = ServiceInfoDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3897,7 +3898,7 @@ export const TransitModelServicePatternStopsDocument = gql`
   })
   export class TransitModelServicePatternStopsGQL extends Apollo.Query<TransitModelServicePatternStopsQuery, TransitModelServicePatternStopsQueryVariables> {
     document = TransitModelServicePatternStopsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3915,7 +3916,7 @@ export const ListUsersDocument = gql`
   })
   export class ListUsersGQL extends Apollo.Query<ListUsersQuery, ListUsersQueryVariables> {
     document = ListUsersDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3933,7 +3934,7 @@ export const ListRolesDocument = gql`
   })
   export class ListRolesGQL extends Apollo.Query<ListRolesQuery, ListRolesQueryVariables> {
     document = ListRolesDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3951,7 +3952,7 @@ export const ListUserAlertsDocument = gql`
   })
   export class ListUserAlertsGQL extends Apollo.Query<ListUserAlertsQuery, ListUserAlertsQueryVariables> {
     document = ListUserAlertsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3969,7 +3970,7 @@ export const FetchUserAlertDocument = gql`
   })
   export class FetchUserAlertGQL extends Apollo.Query<FetchUserAlertQuery, FetchUserAlertQueryVariables> {
     document = FetchUserAlertDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3990,7 +3991,7 @@ export const EditUserDocument = gql`
   })
   export class EditUserGQL extends Apollo.Mutation<EditUserMutation, EditUserMutationVariables> {
     document = EditUserDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4009,7 +4010,7 @@ export const RemoveUserDocument = gql`
   })
   export class RemoveUserGQL extends Apollo.Mutation<RemoveUserMutation, RemoveUserMutationVariables> {
     document = RemoveUserDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4031,7 +4032,7 @@ export const InviteUserDocument = gql`
   })
   export class InviteUserGQL extends Apollo.Mutation<InviteUserMutation, InviteUserMutationVariables> {
     document = InviteUserDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4050,7 +4051,7 @@ export const UpdateUserAlertDocument = gql`
   })
   export class UpdateUserAlertGQL extends Apollo.Mutation<UpdateUserAlertMutation, UpdateUserAlertMutationVariables> {
     document = UpdateUserAlertDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4069,7 +4070,7 @@ export const CreateUserAlertDocument = gql`
   })
   export class CreateUserAlertGQL extends Apollo.Mutation<CreateUserAlertMutation, CreateUserAlertMutationVariables> {
     document = CreateUserAlertDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4088,7 +4089,7 @@ export const DeleteUserAlertDocument = gql`
   })
   export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
     document = DeleteUserAlertDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4113,7 +4114,7 @@ export const OperatorListDocument = gql`
   })
   export class OperatorListGQL extends Apollo.Query<OperatorListQuery, OperatorListQueryVariables> {
     document = OperatorListDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4139,7 +4140,7 @@ export const OperatorLinesDocument = gql`
   })
   export class OperatorLinesGQL extends Apollo.Query<OperatorLinesQuery, OperatorLinesQueryVariables> {
     document = OperatorLinesDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4158,7 +4159,7 @@ export const RequestResetPasswordDocument = gql`
   })
   export class RequestResetPasswordGQL extends Apollo.Mutation<RequestResetPasswordMutation, RequestResetPasswordMutationVariables> {
     document = RequestResetPasswordDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4177,7 +4178,7 @@ export const ResetPasswordDocument = gql`
   })
   export class ResetPasswordGQL extends Apollo.Mutation<ResetPasswordMutation, ResetPasswordMutationVariables> {
     document = ResetPasswordDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4193,7 +4194,7 @@ export const VerifyResetPasswordTokenDocument = gql`
   })
   export class VerifyResetPasswordTokenGQL extends Apollo.Mutation<VerifyResetPasswordTokenMutation, VerifyResetPasswordTokenMutationVariables> {
     document = VerifyResetPasswordTokenDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4212,7 +4213,7 @@ export const SignUpDocument = gql`
   })
   export class SignUpGQL extends Apollo.Mutation<SignUpMutation, SignUpMutationVariables> {
     document = SignUpDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4231,7 +4232,7 @@ export const InvitationDocument = gql`
   })
   export class InvitationGQL extends Apollo.Query<InvitationQuery, InvitationQueryVariables> {
     document = InvitationDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4254,7 +4255,7 @@ export const ServicePatternsDocument = gql`
   })
   export class ServicePatternsGQL extends Apollo.Query<ServicePatternsQuery, ServicePatternsQueryVariables> {
     document = ServicePatternsDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4270,6 +4271,7 @@ export const VehicleJourneyDocument = gql`
       vehicleJourneyId
       servicePatternId
       delay
+      actualDelay
       startTime
       scheduledDeparture
       isTimingPoint
@@ -4299,7 +4301,7 @@ export const VehicleJourneyDocument = gql`
   })
   export class VehicleJourneyGQL extends Apollo.Query<VehicleJourneyQuery, VehicleJourneyQueryVariables> {
     document = VehicleJourneyDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4324,7 +4326,7 @@ export const JourneysDocument = gql`
   })
   export class JourneysGQL extends Apollo.Query<JourneysQuery, JourneysQueryVariables> {
     document = JourneysDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4345,7 +4347,7 @@ export const VehicleJourneyTimingPatternDocument = gql`
   })
   export class VehicleJourneyTimingPatternGQL extends Apollo.Query<VehicleJourneyTimingPatternQuery, VehicleJourneyTimingPatternQueryVariables> {
     document = VehicleJourneyTimingPatternDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4367,7 +4369,7 @@ export const TimingPatternDetailDocument = gql`
   })
   export class TimingPatternDetailGQL extends Apollo.Query<TimingPatternDetailQuery, TimingPatternDetailQueryVariables> {
     document = TimingPatternDetailDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4386,7 +4388,7 @@ export const GetVersionDocument = gql`
   })
   export class GetVersionGQL extends Apollo.Query<GetVersionQuery, GetVersionQueryVariables> {
     document = GetVersionDocument;
-    
+
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }

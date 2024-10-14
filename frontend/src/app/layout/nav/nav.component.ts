@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { initAll } from 'govuk-frontend';
 import { HelpdeskPanelService } from '../../shared/components/helpdesk-panel/helpdesk-panel.service';
 import { NavService } from './nav.service';
+import { ConfigService } from '../../config/config.service';
 
 @Component({
   selector: 'app-nav',
@@ -9,7 +10,11 @@ import { NavService } from './nav.service';
   styleUrls: ['./nav.component.scss'],
 })
 export class NavComponent implements OnInit {
-  constructor(public navService: NavService, private helpdeskPanelService: HelpdeskPanelService) {}
+  constructor(
+    public navService: NavService,
+    private helpdeskPanelService: HelpdeskPanelService,
+    public configService: ConfigService
+  ) {}
 
   ngOnInit(): void {
     initAll();

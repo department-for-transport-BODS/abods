@@ -19,6 +19,7 @@ query vehicleJourney($journeyId: String!, $startTime: DateTime!) {
       vehicleJourneyId
       servicePatternId
       delay
+      actualDelay
       startTime
       scheduledDeparture
       isTimingPoint
