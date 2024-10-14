@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { VersionService } from './version/version.service';
 import { AnalyticsService } from './shared/services/analytics.service';
 import { InactivityService } from './authentication/inactivity/inactivity.service';
+import { ConfigService } from './config/config.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     private panelService: PanelService,
     private versionService: VersionService,
     private analyticsService: AnalyticsService,
-    private idle: InactivityService
+    private idle: InactivityService,
+    private configService: ConfigService
   ) {
     this.idle.$onInactive.subscribe(() => {
       if (this.authService.isSessionAlive) {
@@ -37,6 +39,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    console.log('Environment: ' + this.configService.envName);
     this.versionService.printVersion();
     this.analyticsService.initialize();
   }

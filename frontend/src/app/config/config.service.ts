@@ -6,6 +6,7 @@ import { merge } from 'lodash-es';
 
 export interface ConfigObject {
   apiUrl: string;
+  envName: string;
   analyticsId: string;
   mapboxToken: string;
   mapboxStyle: string;
@@ -61,6 +62,24 @@ export interface FreshdeskFolderConfig {
   [key: string]: string;
 }
 
+const environments = ['local', 'sandbox', 'dev', 'test', 'cavl', 'uat'] as const;
+type Environment = typeof environments[number];
+
+function maxEnvironment(current: string, max: Environment): boolean {
+  const currentIndex = environments.indexOf(current as Environment);
+  const maxIndex = environments.indexOf(max);
+
+  return currentIndex >= 0 && maxIndex >= 0 && maxIndex <= currentIndex;
+}
+
+function flags(currentEnv: string) {
+  return {
+    corridorsEnabled: maxEnvironment(currentEnv, 'cavl'),
+  } as const;
+}
+
+type FlagKeys = ReturnType<typeof flags>;
+
 export interface FreshdeskConfig {
   /**
    * Endpoint to freshdesk proxy API
@@ -80,8 +99,16 @@ export class ConfigService {
 
   constructor(private http: HttpClient) {}
 
+  flag(key: keyof FlagKeys): boolean {
+    return flags(this.envName)[key];
+  }
+
   get apiUrl(): string {
     return this.loadStringValue('apiUrl', '');
+  }
+
+  get envName(): string {
+    return this.loadStringValue('envName', 'unknown');
   }
 
   get analyticsId(): string {
