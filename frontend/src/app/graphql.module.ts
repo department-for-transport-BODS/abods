@@ -47,7 +47,7 @@ export function createApollo(
     link: ApolloLink.from([
       error,
       httpLink.create({
-        uri: config.apiUrl,
+        uri: () => config.apiUrl,
         withCredentials: true,
       }),
     ]),

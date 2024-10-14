@@ -6,13 +6,11 @@ import { merge } from "lodash-es";
 
 export interface ConfigObject {
   envName: string;
-  analyticsId: string;
   mapboxToken: string;
   mapboxStyle: string;
   mapboxSatelliteStyle: string;
   vehicleJourneys: VehicleJourneysConfig;
   otp: OtpConfig;
-  defaultCookiePolicy: CookiePolicy;
   freshdesk: FreshdeskConfig;
 }
 
@@ -34,21 +32,6 @@ export interface VehicleJourneysConfig {
 export interface OtpConfig {
   early: number;
   late: number;
-}
-
-export interface CookiePolicy {
-  /**
-   * true = Google Analytics is enabled
-   */
-  analyticsEnabled: boolean;
-  /**
-   * Cookie policy version number
-   */
-  version: number;
-  /**
-   * true = user has submitted their preference and cookie banner is hidden
-   */
-  userSubmitted: boolean;
 }
 
 export interface FreshdeskFolderConfig {
@@ -104,10 +87,16 @@ export class ConfigService {
   }
 
   loadConfig() {
+    if (this.config) {
+      return Promise.resolve();
+    }
+
+    console.log("GETTING AUTHENTICATED DATA");
     return firstValueFrom(
       this.http.get<ConfigObject>("./config.json").pipe(
         map((config) => {
           // TODO: validate that the shape of this response is correct
+          console.log("GOT AUTHENTICATED DATA");
           this.config = config;
         }),
       ),
@@ -120,10 +109,6 @@ export class ConfigService {
 
   get envName(): string {
     return this.config.envName || "unknown";
-  }
-
-  get analyticsId(): string {
-    return this.config.analyticsId || "";
   }
 
   get mapboxToken(): string {
@@ -156,15 +141,6 @@ export class ConfigService {
     return merge(defaults, this.config.otp || {});
   }
 
-  get defaultCookiePolicy(): CookiePolicy {
-    const defaults: CookiePolicy = {
-      analyticsEnabled: false,
-      version: 1,
-      userSubmitted: false,
-    };
-    return merge(defaults, this.config.defaultCookiePolicy || {});
-  }
-
   get freshdeskConfig(): FreshdeskConfig {
     const defaults: FreshdeskConfig = {
       apiUrl: "",
@@ -181,27 +157,60 @@ export class ConfigService {
   }
 }
 
+export interface CookiePolicy {
+  /**
+   * true = Google Analytics is enabled
+   */
+  analyticsEnabled: boolean;
+  /**
+   * Cookie policy version number
+   */
+  version: number;
+  /**
+   * true = user has submitted their preference and cookie banner is hidden
+   */
+  userSubmitted: boolean;
+}
+
 interface EnvironmentConfig {
   apiUrl: string;
+  analyticsId: string;
+  defaultCookiePolicy: CookiePolicy;
 }
 
 @Injectable({ providedIn: "root" })
 export class EnvironmentConfigService {
-  private config = {} as EnvironmentConfig;
-  constructor(private http: HttpClient) {}
+  private config: EnvironmentConfig;
+  constructor(private http: HttpClient) {
+    // Will be set in loadConfig at startup
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.config = null as ConfigObject;
+  }
 
   get apiUrl(): string {
-    return this.config.apiUrl;
+    return this.config?.apiUrl ?? "oaebgabguagvauovgauobgaubg.cauogba";
+  }
+
+  get analyticsId(): string {
+    return this.config.analyticsId || "";
+  }
+
+  get defaultCookiePolicy(): CookiePolicy {
+    const defaults: CookiePolicy = {
+      analyticsEnabled: false,
+      version: 1,
+      userSubmitted: false,
+    };
+    return merge(defaults, this.config.defaultCookiePolicy || {});
   }
 
   loadConfig() {
+    console.log("GETTING UNAUTHENTICATED DATA");
     return firstValueFrom(
       this.http.get<EnvironmentConfig>("./config.json").pipe(
         map((data) => {
-          // Some simple validation to ensure that we are actually getting back what we should be
-          if (!data.apiUrl) {
-            throw new Error("Could not read API URL");
-          }
+          console.log("GOT UNAUTHENTICATED DATA");
           this.config = data as EnvironmentConfig;
         }),
       ),

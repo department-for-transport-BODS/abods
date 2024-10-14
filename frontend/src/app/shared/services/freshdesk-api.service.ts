@@ -47,32 +47,30 @@ export class FreshdeskApiService {
     private http: HttpClient,
   ) {}
 
-  private readonly freshdeskConfig = this.configService.freshdeskConfig;
-
   getFolder(
     folder: keyof FreshdeskFolderConfig,
   ): Observable<FreshdeskArticle[]> {
-    if (folder) {
-      return this.http
-        .get<FreshdeskArticle[]>(
-          this.freshdeskConfig.apiUrl + this.freshdeskConfig.folders[folder],
-          {
-            observe: "body",
-            responseType: "json",
-            withCredentials: true,
-          },
-        )
-        .pipe(
-          retry(3),
-          map((articles: FreshdeskArticle[]) =>
-            articles.filter(
-              (article) => article.status === FreshdeskArticleStatus.PUBLISHED,
-            ),
-          ),
-          catchError(() => of([])),
-        );
-    } else {
+    if (!folder) {
       return of([]);
     }
+    return this.http
+      .get<FreshdeskArticle[]>(
+        this.configService.freshdeskConfig.apiUrl +
+          this.configService.freshdeskConfig.folders[folder],
+        {
+          observe: "body",
+          responseType: "json",
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        retry(3),
+        map((articles: FreshdeskArticle[]) =>
+          articles.filter(
+            (article) => article.status === FreshdeskArticleStatus.PUBLISHED,
+          ),
+        ),
+        catchError(() => of([])),
+      );
   }
 }

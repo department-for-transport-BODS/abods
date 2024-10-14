@@ -1,7 +1,10 @@
 import { Injectable } from "@angular/core";
 import { DateTime } from "luxon";
 import { CookieService } from "ngx-cookie-service";
-import { ConfigService, CookiePolicy } from "../../config/config.service";
+import {
+  CookiePolicy,
+  EnvironmentConfigService,
+} from "../../config/config.service";
 
 export const COOKIE_POLICY_NAME = "abod_cookies_policy";
 
@@ -11,7 +14,7 @@ export const COOKIE_POLICY_NAME = "abod_cookies_policy";
 export class CookiePolicyService {
   constructor(
     private cookieService: CookieService,
-    private configService: ConfigService,
+    private configService: EnvironmentConfigService,
   ) {}
 
   getAnalyticsPolicy(): CookiePolicy {

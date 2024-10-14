@@ -1,5 +1,5 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { APP_INITIALIZER, NgModule } from "@angular/core";
+import { APP_INITIALIZER, Injector, NgModule } from "@angular/core";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -26,6 +26,7 @@ import { GoogleTagManagerModule } from "angular-google-tag-manager";
 import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
 import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
 import { CookieService } from "ngx-cookie-service";
+import { AuthenticationService } from "./authentication/authentication.service";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
@@ -49,27 +50,39 @@ import { CookieService } from "ngx-cookie-service";
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: (config: EnvironmentConfigService) => async () =>
-        await config.loadConfig(),
-      deps: [EnvironmentConfigService],
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (config: ConfigService) => async () =>
-        await config.loadConfig(),
-      deps: [ConfigService],
+      useFactory: (
+        environmentConfig: EnvironmentConfigService,
+        injector: Injector,
+        config: ConfigService,
+      ) => {
+        return async () => {
+          await environmentConfig.loadConfig();
+          const file = await import("./authentication/authentication.service");
+          const auth = injector.get(file.AuthenticationService);
+          if (!auth.isSessionAlive) {
+            console.log("User is not authenticated, can't get config data");
+            return;
+          }
+          await config.loadConfig();
+        };
+      },
+      deps: [EnvironmentConfigService, AuthenticationService, ConfigService],
       multi: true,
     },
     {
       provide: MAPBOX_API_KEY,
-      useFactory: (config: ConfigService) => config.mapboxToken,
+      useFactory: async (config: ConfigService) => {
+        await config.loadConfig();
+        return config.mapboxToken;
+      },
       deps: [ConfigService],
     },
     {
       provide: "googleTagManagerId",
-      useFactory: (config: ConfigService) => config.analyticsId,
-      deps: [ConfigService],
+      useFactory: (config: EnvironmentConfigService) => {
+        return config.analyticsId;
+      },
+      deps: [EnvironmentConfigService],
     },
     PercentPipe,
     CookieService,
