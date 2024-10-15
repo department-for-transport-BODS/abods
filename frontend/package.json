@@ -9,7 +9,6 @@
     "coverage": "ng test --code-coverage=true",
     "lint": "ng lint",
     "codegen": "graphql-codegen --config codegen.yml",
-    "prestart": "graphql-codegen --config codegen.yml",
     "build:stats": "ng build --stats-json",
     "analyze": "webpack-bundle-analyzer dist/raa-client/stats.json",
     "prepare": "cd .. && husky install frontend/.husky",

@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "https://sandbox.analyse-tmp.bus-data.dft.gov.uk/api/graphql/",
+    "changeOrigin": true,
+    "secure": false,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}
