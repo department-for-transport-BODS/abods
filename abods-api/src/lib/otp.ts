@@ -1,4 +1,4 @@
-import { all_operators, feed_monitoring_hour_summary, Prisma } from '@prisma/client';
+import { all_operators, feed_monitoring_hour_summary, Prisma, SiriVMPositions } from '@prisma/client';
 import { Context } from '../context';
 import {
   FeedMonitoringType,
@@ -11,11 +11,17 @@ import {
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
-import { getDate, getFormattedDate, getHourFormattedDate } from './dayjs.js';
+import { getDate, getFormattedDate, getHourFormattedDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = all_operators & {
   feed_summary: feed_monitoring_hour_summary[];
 };
+
+export type ExpectedJourneyType = {
+  group_id: string
+  expected_journey_start: Date
+  expected_journey_end: Date
+}
 
 const getThresholds = async (
   db: Context,
@@ -417,32 +423,76 @@ const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undef
   return feedStatus
 }
 
-export const getExpectedJourneys = (db: Context, operatorId: string) => {
-  const currentDate = new Date();
+export const getExpectedJourneys = async (db: Context, operatorId: string) => {
+  const currentDate = getDate();
   return db.prisma.expected_journeys.findMany(({
     where: {
       operator_noc: operatorId,
-      date_of_journey: currentDate,
+      date_of_journey: currentDate.toDate(),
       expected_journey_start: {
-        lt: currentDate
+        lt: currentDate.toDate(),
+      },
+      expected_journey_end: {
+        gte: currentDate.subtract(20, 'minute').toDate(),
       }
     },
     select: {
-      group_id: true
+      group_id: true,
+      expected_journey_start: true,
+      expected_journey_end: true
     },
     distinct: ['group_id']
   }))
+
 }
 
-export const getLast20Mins = (db: Context, operatorId: string) => {
+export const getLast20Mins = async (db: Context, operatorId: string) => {
   const currentDate = getDate();
   return db.prisma.siriVMPositions.findMany({
     where: {
       date_of_journey: currentDate.toDate(),
       operator_ref: operatorId,
       recorded_at_time: {
-        gt: currentDate.subtract(20, 'minute').toDate()
-      }
-    }
-  })
+        gt: currentDate.subtract(21, "minute").toDate(), // 21 mins to ensure no partial loss of data
+      },
+    },
+  });
+
 }
+
+export const getAvlPerMinute = async (avl: SiriVMPositions[]) => {
+  const journeys = new Map<string, Set<string>>()
+  avl.map((avl) => {
+    const recordedAt = 
+      getDate(avl.recorded_at_time)
+        .set("second", 0)
+        .set("millisecond", 0)
+        .toISOString()
+    const journey = journeys.get(recordedAt) || new Set()
+    if ( 
+      !journey.has(avl.group_id)
+    ) {
+      journey.add(avl.group_id)
+      journeys.set(recordedAt, journey)
+    }
+  });
+
+  return journeys;
+};
+
+export const getExpectedJourneysCount = async (
+  expected: ExpectedJourneyType[],
+  date: Dayjs
+) => {
+  let expectedCount = 0;
+  expected.map((journey) => {
+    const journeyStart = getDate(journey.expected_journey_start);
+    const journeyEnd = getDate(journey.expected_journey_end);
+
+    if (isSameOrAfter(journeyEnd, date) && isSameOrBefore(journeyStart, date)) {
+      expectedCount++;
+    }
+  });
+
+  return expectedCount;
+};
