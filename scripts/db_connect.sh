@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -e
-set -u
-set -o pipefail
+set -euo pipefail
 
 INSTANCE=$(aws ec2 describe-instances --region=eu-west-2 --filters Name=tag:Type,Values=Bastion Name=instance-state-name,Values=running | jq -r '.Reservations[0].Instances[0]')
 INSTANCE_ID=`echo ${INSTANCE} | jq -r '.InstanceId'`
