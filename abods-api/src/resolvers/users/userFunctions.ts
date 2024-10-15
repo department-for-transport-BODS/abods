@@ -207,14 +207,12 @@ export const loginUser = async (username:string, password:string, db: Context, r
       throw('Invalid username or password')
     }
 
-    const bodsUser = await db.prisma.bods_user.findUnique(
-      { 
-        where:{ email: username },
-        include:{
-          userOrganisations: true
-        }
-      }
-    )
+    const bodsUser = await db.prisma.bods_user.findFirst({
+      where: { email: { equals: username, mode: "insensitive" } },
+      include: {
+        userOrganisations: true,
+      },
+    });
 
     if(!bodsUser)
     {
