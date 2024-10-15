@@ -1,5 +1,5 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { APP_INITIALIZER, Injector, NgModule } from "@angular/core";
+import { APP_INITIALIZER, NgModule } from "@angular/core";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -7,10 +7,7 @@ import { GraphQLModule } from "./graphql.module";
 import { HttpClientModule } from "@angular/common/http";
 import { SharedModule } from "./shared/shared.module";
 import { LayoutModule } from "./layout/layout.module";
-import {
-  ConfigService,
-  EnvironmentConfigService,
-} from "./config/config.service";
+import { ConfigService } from "./config/config.service";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AuthenticationModule } from "./authentication/authentication.module";
@@ -26,7 +23,7 @@ import { GoogleTagManagerModule } from "angular-google-tag-manager";
 import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
 import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
 import { CookieService } from "ngx-cookie-service";
-import { AuthenticationService } from "./authentication/authentication.service";
+import { EnvironmentConfig } from "../environmentConfig";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
@@ -50,39 +47,19 @@ import { AuthenticationService } from "./authentication/authentication.service";
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: (
-        environmentConfig: EnvironmentConfigService,
-        injector: Injector,
-        config: ConfigService,
-      ) => {
-        return async () => {
-          await environmentConfig.loadConfig();
-          const file = await import("./authentication/authentication.service");
-          const auth = injector.get(file.AuthenticationService);
-          if (!auth.isSessionAlive) {
-            console.log("User is not authenticated, can't get config data");
-            return;
-          }
-          await config.loadConfig();
-        };
-      },
-      deps: [EnvironmentConfigService, AuthenticationService, ConfigService],
+      useFactory: (config: ConfigService) => () => config.loadConfig(),
+      deps: [ConfigService],
       multi: true,
     },
     {
       provide: MAPBOX_API_KEY,
-      useFactory: async (config: ConfigService) => {
-        await config.loadConfig();
-        return config.mapboxToken;
-      },
+      useFactory: async (config: ConfigService) => config.mapboxToken,
       deps: [ConfigService],
     },
     {
       provide: "googleTagManagerId",
-      useFactory: (config: EnvironmentConfigService) => {
-        return config.analyticsId;
-      },
-      deps: [EnvironmentConfigService],
+      useFactory: () => EnvironmentConfig.analyticsId,
+      deps: [],
     },
     PercentPipe,
     CookieService,

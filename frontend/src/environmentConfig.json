@@ -1,0 +1,9 @@
+{
+  "apiUrl": "http://localhost:4200/api",
+  "analyticsId": "1234",
+  "defaultCookiePolicy": {
+    "analyticsEnabled": false,
+    "version": 1,
+    "userSubmitted": false
+  }
+}

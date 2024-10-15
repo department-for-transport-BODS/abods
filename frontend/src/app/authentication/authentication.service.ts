@@ -13,6 +13,7 @@ import { UserGQL, LoginGQL, LogoutGQL } from "../../generated/graphql";
 import { HideOutliersService } from "../corridors/view/hide-outliers.service";
 import { OtpThresholdDefaultsService } from "../on-time/otp-threshold-form/otp-threshold-defaults.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
+import { ConfigService } from "../config/config.service";
 
 const STORE_SESSION_KEY = "session";
 
@@ -29,6 +30,7 @@ export class AuthenticationService {
     private userService: AuthenticatedUserService,
     private hideOutliersService: HideOutliersService,
     private otpThresholdDefaultsService: OtpThresholdDefaultsService,
+    private configService: ConfigService,
   ) {
     this.checkSession();
     this.userService.isAuthenticated$
@@ -74,6 +76,7 @@ export class AuthenticationService {
               expiresAt: res.data.login.expiresAt,
             }),
           );
+          this.configService.loadConfig();
         } else {
           this.userService.deauthenticateUser();
         }

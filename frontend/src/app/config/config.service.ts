@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { map } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { merge } from "lodash-es";
+import { AuthenticationService } from "../authentication/authentication.service";
 
 export interface ConfigObject {
   envName: string;
@@ -79,7 +80,10 @@ export interface FreshdeskConfig {
 export class ConfigService {
   private config: ConfigObject;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private auth: AuthenticationService,
+  ) {
     // Will be set in loadConfig at startup
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -91,6 +95,11 @@ export class ConfigService {
       return Promise.resolve();
     }
 
+    if (!this.auth.isSessionAlive) {
+      console.log("User is not authenticated, can't get config data");
+      return;
+    }
+
     console.log("GETTING AUTHENTICATED DATA");
     return firstValueFrom(
       this.http.get<ConfigObject>("./config.json").pipe(
@@ -98,17 +107,14 @@ export class ConfigService {
           // TODO: validate that the shape of this response is correct
           console.log("GOT AUTHENTICATED DATA");
           this.config = config;
+          console.log("Environment: " + this.config.envName);
         }),
       ),
     );
   }
 
   flag(key: keyof ReturnType<typeof flags>): boolean {
-    return flags(this.envName)[key];
-  }
-
-  get envName(): string {
-    return this.config.envName || "unknown";
+    return flags(this.config.envName || "unknown")[key];
   }
 
   get mapboxToken(): string {
@@ -154,66 +160,5 @@ export class ConfigService {
       },
     };
     return merge(defaults, this.config.freshdesk || {});
-  }
-}
-
-export interface CookiePolicy {
-  /**
-   * true = Google Analytics is enabled
-   */
-  analyticsEnabled: boolean;
-  /**
-   * Cookie policy version number
-   */
-  version: number;
-  /**
-   * true = user has submitted their preference and cookie banner is hidden
-   */
-  userSubmitted: boolean;
-}
-
-interface EnvironmentConfig {
-  apiUrl: string;
-  analyticsId: string;
-  defaultCookiePolicy: CookiePolicy;
-}
-
-@Injectable({ providedIn: "root" })
-export class EnvironmentConfigService {
-  private config: EnvironmentConfig;
-  constructor(private http: HttpClient) {
-    // Will be set in loadConfig at startup
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.config = null as ConfigObject;
-  }
-
-  get apiUrl(): string {
-    return this.config?.apiUrl ?? "oaebgabguagvauovgauobgaubg.cauogba";
-  }
-
-  get analyticsId(): string {
-    return this.config.analyticsId || "";
-  }
-
-  get defaultCookiePolicy(): CookiePolicy {
-    const defaults: CookiePolicy = {
-      analyticsEnabled: false,
-      version: 1,
-      userSubmitted: false,
-    };
-    return merge(defaults, this.config.defaultCookiePolicy || {});
-  }
-
-  loadConfig() {
-    console.log("GETTING UNAUTHENTICATED DATA");
-    return firstValueFrom(
-      this.http.get<EnvironmentConfig>("./config.json").pipe(
-        map((data) => {
-          console.log("GOT UNAUTHENTICATED DATA");
-          this.config = data as EnvironmentConfig;
-        }),
-      ),
-    );
   }
 }

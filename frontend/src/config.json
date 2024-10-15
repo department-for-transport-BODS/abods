@@ -1,7 +1,5 @@
 {
-  "apiUrl": "http://localhost:4200/api",
   "envName": "local",
-  "analyticsId": "1234",
   "mapboxToken": "",
   "mapboxStyle": "",
   "mapboxSatelliteStyle": "",
@@ -14,11 +12,6 @@
   "otp": {
     "early": "1",
     "late": "6"
-  },
-  "defaultCookiePolicy": {
-    "analyticsEnabled": false,
-    "version": 1,
-    "userSubmitted": false
   },
   "freshdesk": {
     "apiUrl": "",

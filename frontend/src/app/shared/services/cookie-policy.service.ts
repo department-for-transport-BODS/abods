@@ -1,10 +1,7 @@
 import { Injectable } from "@angular/core";
 import { DateTime } from "luxon";
 import { CookieService } from "ngx-cookie-service";
-import {
-  CookiePolicy,
-  EnvironmentConfigService,
-} from "../../config/config.service";
+import { EnvironmentConfig, CookiePolicy } from "../../../environmentConfig";
 
 export const COOKIE_POLICY_NAME = "abod_cookies_policy";
 
@@ -12,10 +9,7 @@ export const COOKIE_POLICY_NAME = "abod_cookies_policy";
   providedIn: "root",
 })
 export class CookiePolicyService {
-  constructor(
-    private cookieService: CookieService,
-    private configService: EnvironmentConfigService,
-  ) {}
+  constructor(private cookieService: CookieService) {}
 
   getAnalyticsPolicy(): CookiePolicy {
     try {
@@ -25,11 +19,11 @@ export class CookiePolicyService {
       if (storedPolicy && this.isLatestVersion(storedPolicy)) {
         return storedPolicy;
       } else {
-        return this.configService.defaultCookiePolicy;
+        return EnvironmentConfig.defaultCookiePolicy;
       }
     } catch {
       // Return disabled as default if no policy cookie set
-      return this.configService.defaultCookiePolicy;
+      return EnvironmentConfig.defaultCookiePolicy;
     }
   }
 
@@ -46,7 +40,7 @@ export class CookiePolicyService {
     if (userSubmitted) {
       const cookie: CookiePolicy = {
         analyticsEnabled: enabled,
-        version: this.configService.defaultCookiePolicy.version,
+        version: EnvironmentConfig.defaultCookiePolicy.version,
         userSubmitted: true,
       };
       this.cookieService.set(
@@ -70,7 +64,7 @@ export class CookiePolicyService {
 
   private isLatestVersion(storedPolicy: CookiePolicy): boolean {
     return (
-      this.configService.defaultCookiePolicy.version === storedPolicy.version
+      EnvironmentConfig.defaultCookiePolicy.version === storedPolicy.version
     );
   }
 }
