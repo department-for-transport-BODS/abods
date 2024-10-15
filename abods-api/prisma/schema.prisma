@@ -268,7 +268,7 @@ model expected_journeys {
   stop_count                  Int
   vehicle_journey_id          Int               
   expected_journey_start      DateTime          @db.Timetz() 
-  expected_journey_end        DateTime          @db.Timetz() 
+  expected_journey_end        DateTime?          @db.Timetz() 
   expected_service            expected_services  @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
   timetable                   Timetable[]
   vehicle_journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])

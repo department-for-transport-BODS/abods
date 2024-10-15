@@ -20,7 +20,7 @@ export type AllOperatorWithFeedSummary = all_operators & {
 export type ExpectedJourneyType = {
   group_id: string
   expected_journey_start: Date
-  expected_journey_end: Date
+  expected_journey_end: Date | null
 }
 
 const getThresholds = async (
@@ -423,42 +423,66 @@ const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undef
   return feedStatus
 }
 
-export const getExpectedJourneys = async (db: Context, operatorId: string) => {
-  const currentDate = getDate();
-  return db.prisma.expected_journeys.findMany(({
-    where: {
-      operator_noc: operatorId,
-      date_of_journey: currentDate.toDate(),
-      expected_journey_start: {
-        lt: currentDate.toDate(),
-      },
-      expected_journey_end: {
-        gte: currentDate.subtract(20, 'minute').toDate(),
-      }
-    },
+export const getExpectedJourneys = async (
+  db: Context,
+  operatorId: string,
+  inputDate: Dayjs,
+  duration?: number
+) => {
+  const where: Prisma.expected_journeysWhereInput = {
+    operator_noc: operatorId,
+    date_of_journey: inputDate.toDate(),
+  };
+
+  if (duration) {
+    where.expected_journey_start = {
+      lt: inputDate.toDate(),
+    };
+
+    where.expected_journey_end = {
+      gte: inputDate.subtract(duration, "minute").toDate(),
+    };
+  }
+
+  return db.prisma.expected_journeys.findMany({
+    where: where,
     select: {
       group_id: true,
       expected_journey_start: true,
-      expected_journey_end: true
+      expected_journey_end: true,
     },
-    distinct: ['group_id']
-  }))
-
-}
-
-export const getLast20Mins = async (db: Context, operatorId: string) => {
-  const currentDate = getDate();
-  return db.prisma.siriVMPositions.findMany({
-    where: {
-      date_of_journey: currentDate.toDate(),
-      operator_ref: operatorId,
-      recorded_at_time: {
-        gt: currentDate.subtract(21, "minute").toDate(), // 21 mins to ensure no partial loss of data
-      },
-    },
+    distinct: ["group_id"],
   });
+};
 
-}
+export const getAvlPoints = async (
+  db: Context,
+  operatorId: string,
+  inputDate: Dayjs,
+  last20Mins?: boolean,
+  groupIds?: string[]
+) => {
+  const where: Prisma.SiriVMPositionsWhereInput = {
+    date_of_journey: inputDate.toDate(),
+    operator_ref: operatorId,
+  };
+
+  if (last20Mins) {
+    where.recorded_at_time = {
+      gt: inputDate.subtract(21, "minute").toDate(), // 21 mins to ensure no partial loss of data
+    };
+  }
+
+  if (groupIds && groupIds.length > 0) {
+    where.group_id = {
+      in: groupIds,
+    };
+  }
+
+  return db.prisma.siriVMPositions.findMany({
+    where: where,
+  });
+};
 
 export const getAvlPerMinute = async (avl: SiriVMPositions[]) => {
   const journeys = new Map<string, Set<string>>()

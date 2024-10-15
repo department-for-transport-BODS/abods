@@ -1,6 +1,7 @@
 scalar DateTime
 scalar Time
 scalar Date
+scalar JSON
 
 type Query {
     user(id: String): UserType
@@ -20,6 +21,24 @@ type Query {
     vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
     timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
     corridor: CorridorNamespace
+    events(operatorId: String, start: DateTime, end: DateTime): EventsPage
+    eventStats(operatorId: String!, start: DateTime, end: DateTime): [EventStatsType]
+}
+
+type EventStatsType {
+  count: Int
+  day: Date
+}
+
+type EventsPage {
+  items: [EventType]
+  pageInfo: PageInfo
+}
+
+type EventType {
+  data: JSON
+  timestamp: String
+  type: String
 }
 
 type CorridorNamespace {
@@ -432,11 +451,11 @@ type OperatorType {
 type FeedMonitoringType {
   availability: Float
   feedStatus: Boolean
-  historicalStats: HistoricalStatsType
+  historicalStats(date: Date): HistoricalStatsType
   lastOutage: String
   liveStats: LiveStatsType
   unavailableSince: String
-  vehicleStats: [VehicleStatsType]
+  vehicleStats(granularity: Granularity!, start: DateTime!, end: DateTime!): [VehicleStatsType]
 }
 
 type HistoricalStatsType {

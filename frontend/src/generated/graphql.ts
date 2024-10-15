@@ -3413,7 +3413,7 @@ export const EventsDocument = gql`
     }
   }
 export const EventStatsDocument = gql`
-    query eventStats($operatorId: String!, $start: Date!, $end: Date!) {
+    query eventStats($operatorId: String!, $start: DateTime!, $end: DateTime!) {
   eventStats(operatorId: $operatorId, start: $start, end: $end) {
     count
     day

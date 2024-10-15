@@ -5,6 +5,7 @@ import otpResolvers from './otp/otpResolvers.js';
 import { customScalarResolvers } from './shared/customScalarResolvers.js';
 import vehicleJourneyResovlers from './vehicleJourneys/vehicleJourneyResolvers.js'
 import corridorResovlers from './corridors/corridorResolvers.js';
+import feedMonitoringResovlers from './feedMonitoring/feedMonitoringResolvers.js';
 
 const resolversArray = [
   customScalarResolvers,
@@ -13,6 +14,7 @@ const resolversArray = [
   otpResolvers,
   vehicleJourneyResovlers,
   corridorResovlers,
+  feedMonitoringResovlers,
 ];
 const resolvers = mergeResolvers(resolversArray);
 
