@@ -14,12 +14,9 @@ import { HideOutliersService } from "../corridors/view/hide-outliers.service";
 import { OtpThresholdDefaultsService } from "../on-time/otp-threshold-form/otp-threshold-defaults.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 import { ConfigService } from "../config/config.service";
+import { SessionService } from "./session.service";
 
-const STORE_SESSION_KEY = "session";
-
-@Injectable({
-  providedIn: "root",
-})
+@Injectable({ providedIn: "root" })
 export class AuthenticationService {
   constructor(
     private apollo: Apollo,
@@ -31,6 +28,7 @@ export class AuthenticationService {
     private hideOutliersService: HideOutliersService,
     private otpThresholdDefaultsService: OtpThresholdDefaultsService,
     private configService: ConfigService,
+    private sessionService: SessionService,
   ) {
     this.checkSession();
     this.userService.isAuthenticated$
@@ -51,8 +49,11 @@ export class AuthenticationService {
     // Listen to storage event to check if user has logged out in another tab/window
     fromEvent(window, "storage")
       .pipe(
-        filter((e: Event) => (e as StorageEvent).key === STORE_SESSION_KEY),
-        switchMap(() => of(this.isSessionAlive)),
+        filter(
+          (e: Event) =>
+            (e as StorageEvent).key === this.sessionService.STORE_SESSION_KEY,
+        ),
+        switchMap(() => of(this.sessionService.isSessionAlive())),
       )
       .subscribe((isAlive: boolean) => {
         if (isAlive) {
@@ -71,7 +72,7 @@ export class AuthenticationService {
       .subscribe((res) => {
         if (res?.data?.login?.success) {
           this.userService.authenticateUser();
-          this.setSession(
+          this.sessionService.setSession(
             JSON.stringify({
               expiresAt: res.data.login.expiresAt,
             }),
@@ -102,44 +103,19 @@ export class AuthenticationService {
     return this.userService.isAuthenticated$;
   }
 
-  get isSessionAlive(): boolean {
-    const storage = this.getSession();
-    if (!storage) {
-      return false;
-    }
-    const session = JSON.parse(storage);
-    const now = new Date().getTime();
-    if (now > session.expiresAt) {
-      return false;
-    }
-    return true;
-  }
-
   checkSession() {
-    if (this.isSessionAlive) {
+    if (this.sessionService.isSessionAlive()) {
       this.userService.authenticateUser();
     } else {
       this.userService.deauthenticateUser();
     }
   }
 
-  setSession(session: string) {
-    localStorage.setItem(STORE_SESSION_KEY, session);
-  }
-
-  getSession() {
-    return localStorage.getItem(STORE_SESSION_KEY);
-  }
-
-  clearSession() {
-    localStorage.removeItem(STORE_SESSION_KEY);
-  }
-
   private onDeauthentication() {
     this.hideOutliersService.resetAll();
     this.otpThresholdDefaultsService.resetAll();
     this.apollo.client.resetStore().catch(console.log);
-    this.clearSession();
+    this.sessionService.clearSession();
     this.router.navigate(["/login"]).catch(console.log);
   }
 }

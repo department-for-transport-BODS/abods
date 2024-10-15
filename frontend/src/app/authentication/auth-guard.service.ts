@@ -9,7 +9,7 @@ import {
 import { Observable, of } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import { AuthenticatedUserService } from "./authenticated-user.service";
-import { AuthenticationService } from "./authentication.service";
+import { SessionService } from "./session.service";
 
 @Injectable({
   providedIn: "root",
@@ -18,7 +18,7 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
   constructor(
     private router: Router,
     private userService: AuthenticatedUserService,
-    private authService: AuthenticationService,
+    private sessionService: SessionService,
   ) {}
 
   canActivate(
@@ -65,7 +65,7 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
     childRoute: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
-    return this.authService.isSessionAlive
+    return this.sessionService.isSessionAlive()
       ? this.canActivate(childRoute, state)
       : this.redirectToLogin(childRoute, state);
   }

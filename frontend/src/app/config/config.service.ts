@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { map } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { merge } from "lodash-es";
-import { AuthenticationService } from "../authentication/authentication.service";
+import { SessionService } from "../authentication/session.service";
 
 export interface ConfigObject {
   envName: string;
@@ -82,7 +82,7 @@ export class ConfigService {
 
   constructor(
     private http: HttpClient,
-    private auth: AuthenticationService,
+    private session: SessionService,
   ) {
     // Will be set in loadConfig at startup
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -95,7 +95,7 @@ export class ConfigService {
       return Promise.resolve();
     }
 
-    if (!this.auth.isSessionAlive) {
+    if (!this.session.isSessionAlive()) {
       console.log("User is not authenticated, can't get config data");
       return;
     }

@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnInit } from "@angular/core";
 import { AuthenticationService } from "./authentication/authentication.service";
+import { SessionService } from "./authentication/session.service";
 import { BrowserTitleService } from "./shared/components/browser-title/browser-title.service";
 import { Event, NavigationEnd, Router } from "@angular/router";
 import { filter } from "rxjs/operators";
@@ -24,13 +25,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     private browserTitleService: BrowserTitleService,
     private router: Router,
     private authService: AuthenticationService,
+    private sessionService: SessionService,
     private panelService: PanelService,
     private versionService: VersionService,
     private analyticsService: AnalyticsService,
     private idle: InactivityService,
   ) {
     this.idle.$onInactive.subscribe(() => {
-      if (this.authService.isSessionAlive) {
+      if (this.sessionService.isSessionAlive()) {
         this.authService.logout();
       }
     });
@@ -53,7 +55,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   get showNav() {
-    return this.authService.isSessionAlive;
+    return this.sessionService.isSessionAlive();
   }
 
   get showPanel(): Observable<boolean> {

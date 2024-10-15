@@ -15,6 +15,7 @@ import {
   UserQuery,
 } from "../../generated/graphql";
 import { AuthenticatedUserService } from "./authenticated-user.service";
+import { SessionService } from "./session.service";
 
 import { AuthenticationService } from "./authentication.service";
 
@@ -25,6 +26,7 @@ describe("AuthenticationService", () => {
   let service: AuthenticationService;
   let userQuery: UserGQL;
   let userService: AuthenticatedUserService;
+  let sessionService: jasmine.SpyObj<SessionService>;
   let loginMutation: LoginGQL;
   let logoutMutation: LogoutGQL;
   let router: Router;
@@ -33,6 +35,12 @@ describe("AuthenticationService", () => {
   const password = "testpass1";
 
   beforeEach(() => {
+    const sessionSpy = jasmine.createSpyObj("SessionService", [
+      "setSession",
+      "clearSession",
+      "isSessionAlive",
+    ]);
+    sessionSpy.isSessionAlive.and.callFake(() => false);
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule.withRoutes([
@@ -41,17 +49,24 @@ describe("AuthenticationService", () => {
         HttpClientTestingModule,
         ApolloTestingModule,
       ],
-      providers: [UserGQL, AuthenticatedUserService, LoginGQL, LogoutGQL],
+      providers: [
+        UserGQL,
+        AuthenticatedUserService,
+        LoginGQL,
+        LogoutGQL,
+        { provide: SessionService, useValue: sessionSpy },
+      ],
     });
     service = TestBed.inject(AuthenticationService);
     userQuery = TestBed.inject(UserGQL);
     userService = TestBed.inject(AuthenticatedUserService);
+    sessionService = TestBed.inject(
+      SessionService,
+    ) as jasmine.SpyObj<SessionService>;
     loginMutation = TestBed.inject(LoginGQL);
     logoutMutation = TestBed.inject(LogoutGQL);
     router = TestBed.inject(Router);
-
     userService.deauthenticateUser();
-    service.clearSession();
   });
 
   it("should be created", () => {
@@ -104,7 +119,7 @@ describe("AuthenticationService", () => {
       });
 
       it("should set session expiry date", () => {
-        expect(service.getSession()).toEqual(
+        expect(sessionService.setSession).toHaveBeenCalledWith(
           '{"expiresAt":"2022-08-01T12:48:48.672212+00:00"}',
         );
       });
@@ -127,7 +142,7 @@ describe("AuthenticationService", () => {
       });
 
       it("should not set session expiry on unsuccessful login", () => {
-        expect(service.getSession()).toBeNull();
+        expect(sessionService.setSession).not.toHaveBeenCalled();
       });
 
       it("should set isAuthenticatedSubject to false on unsuccessful login", () => {
@@ -178,7 +193,7 @@ describe("AuthenticationService", () => {
       });
 
       it("should clear session on successful logout", () => {
-        expect(service.getSession()).toBeNull();
+        expect(sessionService.clearSession).toHaveBeenCalledWith();
       });
 
       it("should navigate to login on successful logout", () => {
@@ -202,32 +217,12 @@ describe("AuthenticationService", () => {
       });
 
       it("should clear session on unsuccessful logout", () => {
-        expect(service.getSession()).toBeNull();
+        expect(sessionService.clearSession).toHaveBeenCalledWith();
       });
 
       it("should navigate to login on unsuccessful logout", () => {
         expect(router.navigate).toHaveBeenCalledWith(["/login"]);
       });
-    });
-  });
-
-  describe("isSessionAlive", () => {
-    it("should return false if there is no session in local storage", () => {
-      expect(service.isSessionAlive).toBeFalse();
-    });
-
-    it("should return false if current timestamp is greater than session expiry timestamp", () => {
-      const session = '{"expiresAt":"2022-08-01T12:48:48.672212+00:00"}';
-      service.setSession(session);
-
-      expect(service.isSessionAlive).toBeFalse();
-    });
-
-    it("should return true if current timestamp is less than session expiry timestamp", () => {
-      const session = '{"expiresAt":"2122-08-01T12:48:48.672212+00:00"}';
-      service.setSession(session);
-
-      expect(service.isSessionAlive).toBeTrue();
     });
   });
 });

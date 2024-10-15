@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { AuthenticationService } from "../../authentication/authentication.service";
+import { SessionService } from "../../authentication/session.service";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 @Component({
   selector: "app-header",
@@ -10,12 +10,12 @@ export class HeaderComponent {
   @Input() service?: string;
 
   constructor(
-    private authService: AuthenticationService,
+    private sessionService: SessionService,
     private helpdeskPanelService: HelpdeskPanelService,
   ) {}
 
   hasSession() {
-    return this.authService.isSessionAlive;
+    return this.sessionService.isSessionAlive();
   }
 
   openHelpdesk() {

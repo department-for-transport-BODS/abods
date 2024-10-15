@@ -15,7 +15,6 @@ import {
 describe("CookiePolicyService", () => {
   let spectator: SpectatorService<CookiePolicyService>;
   let cookieService: SpyObject<CookieService>;
-  let configService: SpyObject<ConfigService>;
 
   const serviceFactory = createServiceFactory({
     service: CookiePolicyService,
@@ -27,7 +26,6 @@ describe("CookiePolicyService", () => {
     Settings.now = () => 1630494000000; // 2021-09-01T12:00:00
     spectator = serviceFactory();
     cookieService = spectator.inject(CookieService);
-    configService = spectator.inject(ConfigService);
   });
 
   it("should create", () => {
@@ -96,12 +94,7 @@ describe("CookiePolicyService", () => {
   it("should return false if cookie policy versions do not match", () => {
     spyOn(spectator.service, "getAnalyticsPolicy").and.returnValue({
       analyticsEnabled: true,
-      version: 1,
-      userSubmitted: true,
-    });
-    spyOnProperty(configService, "defaultCookiePolicy").and.returnValue({
-      analyticsEnabled: true,
-      version: 1.1,
+      version: 0.9,
       userSubmitted: true,
     });
 
@@ -114,41 +107,26 @@ describe("CookiePolicyService", () => {
       version: 1,
       userSubmitted: true,
     });
-    spyOnProperty(configService, "defaultCookiePolicy").and.returnValue({
-      analyticsEnabled: true,
-      version: 1,
-      userSubmitted: false,
-    });
 
     expect(spectator.service.getCookiePolicySubmitted()).toBeTrue();
   });
 
   it("should return default cookie policy if stored version is not latest", () => {
     cookieService.get.andReturn(
-      '{"analyticsEnabled":true,"version":1,"userSubmitted":true}',
+      '{"analyticsEnabled":true,"version":0.9,"userSubmitted":true}',
     );
-    spyOnProperty(configService, "defaultCookiePolicy").and.returnValue({
-      analyticsEnabled: false,
-      version: 1.1,
-      userSubmitted: false,
-    });
 
-    expect(spectator.service.getAnalyticsPolicy().version).toEqual(1.1);
+    expect(spectator.service.getAnalyticsPolicy().version).toEqual(1);
     expect(spectator.service.getAnalyticsPolicy().userSubmitted).toBeFalse();
     expect(spectator.service.getAnalyticsPolicy().analyticsEnabled).toBeFalse();
   });
 
   it("should return stored cookie policy if stored version is latest", () => {
     cookieService.get.andReturn(
-      '{"analyticsEnabled":true,"version":1.1,"userSubmitted":true}',
+      '{"analyticsEnabled":true,"version":1,"userSubmitted":true}',
     );
-    spyOnProperty(configService, "defaultCookiePolicy").and.returnValue({
-      analyticsEnabled: false,
-      version: 1.1,
-      userSubmitted: false,
-    });
 
-    expect(spectator.service.getAnalyticsPolicy().version).toEqual(1.1);
+    expect(spectator.service.getAnalyticsPolicy().version).toEqual(1);
     expect(spectator.service.getAnalyticsPolicy().userSubmitted).toBeTrue();
     expect(spectator.service.getAnalyticsPolicy().analyticsEnabled).toBeTrue();
   });
