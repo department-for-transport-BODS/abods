@@ -148,7 +148,7 @@ const otpResolvers: IResolvers = {
     ) => getHeadwayTimeSeries(inputs, sessionUser, db),
   },
   OperatorsPage: {
-    items: async (parent, _, __, info) => {
+    items: async (parent) => {
       return parent;
     },
   },
