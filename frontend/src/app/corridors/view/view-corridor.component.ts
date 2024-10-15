@@ -118,7 +118,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     {
       headerName: 'Average journey time',
       type: 'numericColumn',
-      valueGetter: ({ data }) => data.totalJourneyTime / data.recordedTransits,
+      valueGetter: ({ data }) => (data.recordedTransits > 0 ? data.totalJourneyTime / data.recordedTransits : 0),
       valueFormatter: ({ value }) => Duration.fromObject({ seconds: value }).toFormat('mm:ss'),
       maxWidth: 160,
     },
@@ -128,7 +128,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       valueGetter: ({ data }) =>
         this.corridorsSpeedmetricService.calculateAvergeSpeedInMph(
           this.corridorsSpeedmetricService.getTotalDistance(),
-          data.totalJourneyTime / data.recordedTransits
+          data.recordedTransits > 0 ? data.totalJourneyTime / data.recordedTransits : 0
         ),
       valueFormatter: ({ value }) => (value ?? 0) + 'mph',
       maxWidth: 160,

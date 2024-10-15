@@ -428,7 +428,7 @@ export const getSummaryStats = (
   return {
     totalTransits: totalTransits,
     numberOfServices: services.size,
-    averageJourneyTime: averageJourneyTime,
+    averageJourneyTime: isNaN(averageJourneyTime) ? 0 : averageJourneyTime,
     scheduledTransits: scheduledTransits,
   };
 };
@@ -592,7 +592,7 @@ export const getJourneyStatsPerService = async (
       );
       stats.push({
         lineName: serviceDetails?.line_name ?? "",
-        operatorName: serviceDetails?.operator?.name,
+        operatorName: serviceDetails?.operator?.name ?? "NA",
         noc: serviceDetails?.operator_noc,
         servicePatternName: serviceDetails?.service_name ?? "",
         recordedTransits: journey.recordedTransits,

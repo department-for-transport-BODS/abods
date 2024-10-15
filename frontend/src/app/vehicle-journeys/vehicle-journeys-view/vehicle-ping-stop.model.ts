@@ -22,6 +22,7 @@ export class VehiclePingStop implements Ping {
   actualDeparture?: DateTime;
   isHidden?: boolean;
   delay?: Duration;
+  actualDelay?: Duration;
 
   static createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: StopDetails): VehiclePingStop {
     const vps = new VehiclePingStop();
@@ -29,13 +30,14 @@ export class VehiclePingStop implements Ping {
     vps.stopName = stop?.stopName;
     vps.isTimingPoint = stop.timingPoint;
     vps.scheduledDeparture = calcScheduledDeparture(nearestPing, stop);
-    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.delay ?? 0 });
+    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.actualDelay ?? 0 });
     vps.lat = stop?.lat as number;
     vps.lon = stop?.lon as number;
     vps.ts = DateTime.fromISO(nearestPing.ts);
     vps.onTimePerformance = getOtpEnum(nearestPing.delay);
     vps.isHidden = false;
     vps.delay = Duration.fromMillis((nearestPing.delay ?? 0) * 1000);
+    vps.actualDelay = Duration.fromMillis((nearestPing.actualDelay ?? 0) * 1000);
     return vps;
   }
 

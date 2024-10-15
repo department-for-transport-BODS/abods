@@ -574,6 +574,7 @@ export enum GpsFeedStatus {
 export type GpsFeedType = {
   __typename?: 'GpsFeedType';
   delay?: Maybe<Scalars['Int']>;
+  actualDelay?: Maybe<Scalars['Int']>;
   feedStatus?: Maybe<GpsFeedStatus>;
   isTimingPoint?: Maybe<Scalars['Boolean']>;
   journeyStatus?: Maybe<GpsFeedJourneyStatus>;
@@ -2806,7 +2807,7 @@ export type VehicleJourneyQuery = (
     { __typename?: 'VehicleReplayNamespace' }
     & { getJourney: Array<Maybe<(
       { __typename?: 'GpsFeedType' }
-      & Pick<GpsFeedType, 'ts' | 'lat' | 'lon' | 'vehicleId' | 'vehicleJourneyId' | 'servicePatternId' | 'delay' | 'startTime' | 'scheduledDeparture' | 'isTimingPoint' | 'feedStatus' | 'journeyStatus'>
+      & Pick<GpsFeedType, 'ts' | 'lat' | 'lon' | 'vehicleId' | 'vehicleJourneyId' | 'servicePatternId' | 'delay' | 'actualDelay' | 'startTime' | 'scheduledDeparture' | 'isTimingPoint' | 'feedStatus' | 'journeyStatus'>
       & { operatorInfo?: Maybe<(
         { __typename?: 'OperatorInfoType' }
         & Pick<OperatorInfoType, 'operatorId' | 'operatorName' | 'nocCode'>

@@ -188,6 +188,7 @@ type VehicleReplayNamespace {
 
 type GpsFeedType {
   delay: Int!
+  actualDelay: Int!
   feedStatus: GpsFeedStatus
   isTimingPoint: Boolean
   journeyStatus: GpsFeedJourneyStatus!

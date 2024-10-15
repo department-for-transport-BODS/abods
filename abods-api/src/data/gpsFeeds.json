@@ -1,5 +1,6 @@
 {
   "delay": 120,
+  "actualDelay": 120,
   "feedStatus": "Active",
   "isTimingPoint": true,
   "journeyStatus": "Started",
