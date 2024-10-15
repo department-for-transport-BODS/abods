@@ -3,13 +3,6 @@ import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
 import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
 import { Ping } from './vehicle-ping.model';
 
-const calcScheduledDeparture = (nearestPing: ApolloGpsFeedType, stop: StopDetails): DateTime => {
-  // GPS feed has granularity in seconds and should be used for scheduledDeparture
-  const scheduledDeparture = DateTime.fromISO(nearestPing.scheduledDeparture);
-  // Fallback to using departureTimeOffset to calculate scheduledDeparture
-  return scheduledDeparture.isValid ? scheduledDeparture : stop.startTime.plus({ minutes: stop.departureTimeOffset });
-};
-
 export class VehiclePingStop implements Ping {
   id!: string;
   lat!: number;
@@ -25,12 +18,20 @@ export class VehiclePingStop implements Ping {
   actualDelay?: Duration;
 
   static createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: StopDetails): VehiclePingStop {
+    // Workaround for the fact that the ping might be matched to the wrong stop
+    const pingDeparture = DateTime.fromISO(nearestPing.scheduledDeparture);
+    const scheduledDeparture = stop.startTime.plus({ minutes: stop.departureTimeOffset });
+    const nearestPingDifferenceSeconds = pingDeparture.isValid
+      ? pingDeparture.diff(scheduledDeparture).as('seconds')
+      : 0;
+    const nearestPingDelay = (nearestPing.actualDelay ?? 0) + nearestPingDifferenceSeconds;
+
     const vps = new VehiclePingStop();
     vps.id = stop?.stopId as string;
     vps.stopName = stop?.stopName;
     vps.isTimingPoint = stop.timingPoint;
-    vps.scheduledDeparture = calcScheduledDeparture(nearestPing, stop);
-    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.actualDelay ?? 0 });
+    vps.scheduledDeparture = scheduledDeparture;
+    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPingDelay });
     vps.lat = stop?.lat as number;
     vps.lon = stop?.lon as number;
     vps.ts = DateTime.fromISO(nearestPing.ts);
