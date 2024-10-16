@@ -26,6 +26,16 @@ Supporting application frontend microservices.
 
 ## Getting started
 
+Many instructions below reference tasks defined in `.mise.toml`. If you prefer running tasks
+without [mise](https://mise.jdx.dev/about.html), then you can reference the file to find the commands to run.
+You will also need to install the tooling defined in the same config.
+
+Some tasks use [granted](https://docs.commonfate.io/granted/introduction) to prompt for AWS profiles to assume. If you
+prefer to assume roles another way, then just ignore those parts.
+
+If you would like to use `mise` as a task runner, then start by running `mise install` to install some necessary tooling.
+Then run `mise tasks` to see the available tasks
+
 ### Manual config
 
 Currently, you need to manually set some values in `frontend/src/config.json` in order to work with mapbox.
@@ -33,12 +43,14 @@ Ask for help setting these values.
 
 ### Run front end against Sandbox API
 
-To run the front end in a dev server, connected to the Sandbox API, follow these steps:
+To run the front end in a dev server, connected to the Sandbox API, then run `mise r app:sandbox` to start the app.
 
-In `frontend/`, run `npm install`.
-Then run `npm start -- --proxy-config src/proxy.sandbox.conf.json` to start the app.
+### Connect to database as read-only user
 
-Using the [mise](https://mise.jdx.dev/) task runner, run `mise install` once, then `mise r app:sandbox` to start the app
+To check the current state of the Sandbox database, begin by starting the DB proxy as stated above, then in another
+terminal run `mise r db-creds`
+
+This will print the necessary details to the terminal, which can be used to connect using your preferred client.
 
 ### Run front end against local API connected to Sandbox DB
 
@@ -51,38 +63,19 @@ To connect a proxy server to the Sandbox DB using AWS SSM, follow these steps:
 First, install the AWS CLI, and
 the [session manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
-Then assume an AWS profile that can access the Sandbox account and run `./scripts/db_connect.sh`.
+The run `mise r db` to start the proxy.
 
-If using [mise](https://mise.jdx.dev/) as a task runner, run `mise install` once, then `mise r db` to start the app.
-You will be prompted to choose an AWS profile that has access to the Sandbox account.
-
-Be aware that the db connection will time out after a period of inactivity.
+**Be aware that the db connection will time out after a period of inactivity.**
 
 #### Run API against Sandbox database
 
-To run the API in a dev server, connected to the Sandbox DB, start by completing the above section, then in another
-terminal follow these steps:
-
-First, install the AWS CLI, and the
-[session manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
-
-In `abods-api`, run `setup.sh` after assuming an AWS role for the sandbox environment.
-Then run `serverless offline` to start the API.
-
-If using [mise](https://mise.jdx.dev/) as a task runner, run `mise install` once, then `mise r api` to start the app.
-You will be prompted to choose an AWS profile that has access to the Sandbox account.
+To run the API in a dev server, connected to the Sandbox DB, begin by starting the DB proxy as stated above, then in
+another terminal run `mise r api` to start the server.
 
 ### Run front end against Sandbox API
 
-To run the front end in a dev server, connected to the Sandbox API, follow these steps:
-
-To run the front end in a dev server, connected to the local API server, start by completing the above section, then in
-another terminal follow these steps:
-
-In `frontend/`, run `npm install`.
-Then run `npm start` to start the app.
-
-Using the [mise](https://mise.jdx.dev/) task runner, run `mise install` once, then `mise r app` to start the app
+To run the front end in a dev server, connected to the local API server, begin by starting the API as stated above, then
+in another terminal run `mise r app` to start the dev server.
 
 ## Versions
 

@@ -9,31 +9,39 @@ serverless = "3.39.0"
 jq = "1.7.1"
 
 [tasks."setup:api"]
+description = "Setup task for the API"
 dir = "abods-api"
-run = "assume --exec -- setup.sh"
+run = "assume --exec -- ./setup.sh"
 
 [tasks."setup:frontend"]
+description = "Setup task for the front end"
 dir = "frontend"
 run = "npm install"
 
-[tasks.setup]
-depends = ["setup:api", "setup:frontend"]
-
 [tasks.db]
+description = "Run a proxy to the sandbox DB using AWS SSM. You will be prompted for an AWS profile with access"
 dir = "scripts"
 run = "assume --exec -- ./db_connect.sh"
 
+[tasks.db-creds]
+description = "Print read only connection info for the sandbox db"
+dir = "scripts"
+run = "assume --exec -- ./get_readonly_db_creds.sh"
+
 [tasks.api]
 depends = ["setup:api"]
+description = "Run the API in a dev server. Expects a local DB proxy to be running. In another terminal run the db task"
 dir = "abods-api"
 run = "serverless offline"
 
 [tasks."app:sandbox"]
 depends = ["setup:frontend"]
+description = "Run the front end in a dev server. Connects to the deployed API in the sandbox environment"
 dir = "frontend"
 run = "npm start -- --proxy-config src/proxy.sandbox.conf.json"
 
 [tasks.app]
 depends = ["setup:frontend"]
+description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
 dir = "frontend"
 run = "npm start"
