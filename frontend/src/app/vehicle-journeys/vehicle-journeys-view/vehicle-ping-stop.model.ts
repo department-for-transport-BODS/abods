@@ -37,7 +37,7 @@ export function createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: Stop
     onTimePerformance: getOtpEnum(nearestPing.delay),
     isHidden: false,
     delay: Duration.fromMillis((nearestPing.delay ?? 0) * 1000),
-    actualDelay: Duration.fromMillis((nearestPing.actualDelay ?? 0) * 1000),
+    actualDelay: Duration.fromMillis(nearestPingDelay * 1000),
   };
 }
 
