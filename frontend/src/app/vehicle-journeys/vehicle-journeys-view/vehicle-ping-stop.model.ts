@@ -3,19 +3,12 @@ import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
 import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
 import { Ping } from './vehicle-ping.model';
 
-const calcScheduledDeparture = (nearestPing: ApolloGpsFeedType, stop: StopDetails): DateTime => {
-  // GPS feed has granularity in seconds and should be used for scheduledDeparture
-  const scheduledDeparture = DateTime.fromISO(nearestPing.scheduledDeparture);
-  // Fallback to using departureTimeOffset to calculate scheduledDeparture
-  return scheduledDeparture.isValid ? scheduledDeparture : stop.startTime.plus({ minutes: stop.departureTimeOffset });
-};
-
-export class VehiclePingStop implements Ping {
-  id!: string;
-  lat!: number;
-  lon!: number;
-  ts!: DateTime;
-  onTimePerformance!: OnTimePerformanceEnum;
+export interface VehiclePingStop extends Ping {
+  id: string;
+  lat: number;
+  lon: number;
+  ts: DateTime;
+  onTimePerformance: OnTimePerformanceEnum;
   stopName?: string;
   isTimingPoint?: boolean;
   scheduledDeparture?: DateTime;
@@ -23,46 +16,57 @@ export class VehiclePingStop implements Ping {
   isHidden?: boolean;
   delay?: Duration;
   actualDelay?: Duration;
+}
 
-  static createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: StopDetails): VehiclePingStop {
-    const vps = new VehiclePingStop();
-    vps.id = stop?.stopId as string;
-    vps.stopName = stop?.stopName;
-    vps.isTimingPoint = stop.timingPoint;
-    vps.scheduledDeparture = calcScheduledDeparture(nearestPing, stop);
-    vps.actualDeparture = vps.scheduledDeparture.plus({ seconds: nearestPing.actualDelay ?? 0 });
-    vps.lat = stop?.lat as number;
-    vps.lon = stop?.lon as number;
-    vps.ts = DateTime.fromISO(nearestPing.ts);
-    vps.onTimePerformance = getOtpEnum(nearestPing.delay);
-    vps.isHidden = false;
-    vps.delay = Duration.fromMillis((nearestPing.delay ?? 0) * 1000);
-    vps.actualDelay = Duration.fromMillis((nearestPing.actualDelay ?? 0) * 1000);
-    return vps;
-  }
+export function createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: StopDetails): VehiclePingStop {
+  // Workaround for the fact that the ping might be matched to the wrong stop
+  const pingDeparture = DateTime.fromISO(nearestPing.scheduledDeparture);
+  const scheduledDeparture = stop.startTime.plus({ minutes: stop.departureTimeOffset });
+  const nearestPingDifferenceSeconds = pingDeparture.isValid ? pingDeparture.diff(scheduledDeparture).as('seconds') : 0;
+  const nearestPingDelay = (nearestPing.actualDelay ?? 0) + nearestPingDifferenceSeconds;
 
-  static createNoDataStop(stop: StopDetails): VehiclePingStop {
-    const vps = new VehiclePingStop();
-    vps.id = stop?.stopId as string;
-    vps.stopName = stop?.stopName;
-    vps.isTimingPoint = stop.timingPoint;
-    vps.onTimePerformance = OnTimePerformanceEnum.NoData;
-    vps.scheduledDeparture = stop.startTime.plus({ minutes: stop.departureTimeOffset });
-    vps.lat = stop?.lat as number;
-    vps.lon = stop?.lon as number;
-    vps.isHidden = false;
-    return vps;
-  }
+  return {
+    id: stop?.stopId as string,
+    stopName: stop?.stopName,
+    isTimingPoint: stop.timingPoint,
+    scheduledDeparture: scheduledDeparture,
+    actualDeparture: scheduledDeparture.plus({ seconds: nearestPingDelay }),
+    lat: stop?.lat as number,
+    lon: stop?.lon as number,
+    ts: DateTime.fromISO(nearestPing.ts),
+    onTimePerformance: getOtpEnum(nearestPing.delay),
+    isHidden: false,
+    delay: Duration.fromMillis((nearestPing.delay ?? 0) * 1000),
+    actualDelay: Duration.fromMillis(nearestPingDelay * 1000),
+  };
+}
 
-  static createHiddenStop(stop: StopDetails): VehiclePingStop {
-    const vps = new VehiclePingStop();
-    vps.id = stop?.stopId as string;
-    vps.stopName = stop?.stopName;
-    vps.isTimingPoint = stop.timingPoint;
-    vps.scheduledDeparture = stop.startTime.plus({ minutes: stop.departureTimeOffset });
-    vps.lat = stop?.lat as number;
-    vps.lon = stop?.lon as number;
-    vps.isHidden = true;
-    return vps;
-  }
+export function createNoDataStop(stop: StopDetails): VehiclePingStop {
+  return {
+    id: stop?.stopId as string,
+    stopName: stop?.stopName,
+    isTimingPoint: stop.timingPoint,
+    onTimePerformance: OnTimePerformanceEnum.NoData,
+    scheduledDeparture: stop.startTime.plus({ minutes: stop.departureTimeOffset }),
+    lat: stop?.lat as number,
+    lon: stop?.lon as number,
+    isHidden: false,
+
+    ts: DateTime.fromSeconds(0),
+  };
+}
+
+export function createHiddenStop(stop: StopDetails): VehiclePingStop {
+  return {
+    id: stop?.stopId as string,
+    stopName: stop?.stopName,
+    isTimingPoint: stop.timingPoint,
+    scheduledDeparture: stop.startTime.plus({ minutes: stop.departureTimeOffset }),
+    lat: stop?.lat as number,
+    lon: stop?.lon as number,
+    isHidden: true,
+
+    ts: DateTime.fromSeconds(0),
+    onTimePerformance: OnTimePerformanceEnum.NoData,
+  };
 }

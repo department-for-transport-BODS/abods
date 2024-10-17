@@ -4,7 +4,7 @@ import { maybeToTypeOrUndefined } from '../../shared/type-helper';
 import { OnTimePerformanceEnum } from './on-time-performance.enum';
 import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
 import { VehiclePing } from './vehicle-ping.model';
-import { VehiclePingStop } from './vehicle-ping-stop.model';
+import { createHiddenStop, createNoDataStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
 
 export interface OnTimePerformanceStat {
   percent: number;
@@ -53,10 +53,9 @@ const findNearestPingToStop = (
     const hashKey = stop?.stopId + matchedStops[i].scheduledDeparture + '';
     if (stopHashMap.has(hashKey)) {
       continue;
-    } else {
-      stopHashMap.set(hashKey, stop);
-      return matchedStops[i];
     }
+    stopHashMap.set(hashKey, stop);
+    return matchedStops[i];
   }
 };
 
@@ -93,15 +92,15 @@ export class VehicleJourneyView {
     if (stop.timingPoint) {
       return VehicleJourneyView.createStop(stop, nearestStopPing);
     } else {
-      return VehiclePingStop.createHiddenStop(stop);
+      return createHiddenStop(stop);
     }
   }
 
   private static createStop(stop: StopDetails, nearestStopPing?: ApolloGpsFeedType): VehiclePingStop {
     if (nearestStopPing) {
-      return VehiclePingStop.createVehiclePingStop(nearestStopPing, stop);
+      return createVehiclePingStop(nearestStopPing, stop);
     } else {
-      return VehiclePingStop.createNoDataStop(stop);
+      return createNoDataStop(stop);
     }
   }
 

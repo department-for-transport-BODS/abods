@@ -40,6 +40,11 @@ description = "Run the front end in a dev server. Connects to the deployed API i
 dir = "frontend"
 run = "npm start -- --proxy-config src/proxy.sandbox.conf.json"
 
+[tasks."app:uat"]
+depends = ["setup:frontend"]
+dir = "frontend"
+run = "npm start -- --proxy-config src/proxy.uat.conf.json"
+
 [tasks.app]
 depends = ["setup:frontend"]
 description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
