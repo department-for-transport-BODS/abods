@@ -407,9 +407,7 @@ export const getFeedMonitoringList = async (
     userOperatorId
   );
 
-  
-  return getGQLFormatterOperatorData(operator)
-
+  return getGQLFormatterOperatorData(operator);
 };
 
 const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undefined): boolean => {

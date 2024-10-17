@@ -1,8 +1,11 @@
 import { IResolvers } from "@graphql-tools/utils";
+import { RequestContext } from "../../types";
 import {
-  RequestContext,
-} from "../../types";
-import { getEventStats, getLiveStats, getVehicleStatsPerOperator } from "./feedMonitoringFunctions.js";
+  getEventStats,
+  getHistoricalStats,
+  getLiveStats,
+  getVehicleStatsPerOperator,
+} from "./feedMonitoringFunctions.js";
 
 import { getVehicleStats } from "../../lib/feedMonitoring.js";
 import { getDate } from "../../lib/dayjs.js";
@@ -17,21 +20,17 @@ const feedMonitoringResovlers: IResolvers = {
     },
   },
   FeedMonitoringType: {
-    historicalStats: async() => {
-        return {
-            updateFrequency: null,
-            availability: null,
-        }
-    },
+    historicalStats: async (parent, { db }: RequestContext) =>
+      getHistoricalStats(parent.operatorId, db),
     vehicleStats: async (parent, { end }, { db }: RequestContext) =>
       getVehicleStatsPerOperator(db, parent.operatorId, end),
 
-    liveStats: async (parent, _, { db }: RequestContext, info) => getLiveStats(parent, db, info),
+    liveStats: async (parent, _, { db }: RequestContext, info) =>
+      getLiveStats(parent, db, info),
   },
   LiveStatsType: {
-    last20Minutes: async (
-      parent
-    ) => getVehicleStats(parent.avl, parent.expected),
+    last20Minutes: async (parent) =>
+      getVehicleStats(parent.avl, parent.expected),
   },
   EventsPage: {
     items: async () => {

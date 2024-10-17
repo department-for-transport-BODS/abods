@@ -1,84 +1,137 @@
 import { SiriVMPositions } from "@prisma/client";
 import { Context } from "../../context.js";
 import { getDate, isSameOrBefore } from "../../lib/dayjs.js";
-import { ExpectedJourneyType, getAvlPoints, getExpectedJourneys } from "../../lib/otp.js";
+import {
+  ExpectedJourneyType,
+  getAvlPoints,
+  getExpectedJourneys,
+} from "../../lib/otp.js";
 import { EventStatsType } from "../../types";
 import { getVehicleStats } from "../../lib/feedMonitoring.js";
 import { GraphQLResolveInfo } from "graphql";
 
 export const getEventStats = (): EventStatsType[] => {
-    const eventStats: EventStatsType[] = [];
-    let startdate = getDate().subtract(90, 'day');
+  const eventStats: EventStatsType[] = [];
+  let startdate = getDate().subtract(90, "day");
 
-    while (isSameOrBefore(startdate, getDate())) {
-      eventStats.push({
-        count: 0,
-        day: startdate.toDate(),
-      });
+  while (isSameOrBefore(startdate, getDate())) {
+    eventStats.push({
+      count: 0,
+      day: startdate.toDate(),
+    });
 
-      startdate = startdate.add(1, "day");
-    }
-    return eventStats;
-}
+    startdate = startdate.add(1, "day");
+  }
+  return eventStats;
+};
 
 export const getVehicleStatsPerOperator = async (
   db: Context,
   operatorId: string,
   statsDate: string
 ) => {
-
+    const currentDate = getDate()
   const expectedJourneys: ExpectedJourneyType[] = await getExpectedJourneys(
     db,
     operatorId,
-    getDate(statsDate),
+    getDate(statsDate)
   );
 
+  console.log("avl---")
   const avl: SiriVMPositions[] = await getAvlPoints(
     db,
     operatorId,
     getDate(statsDate),
     false,
-    expectedJourneys.map(journey => journey.group_id)
+    expectedJourneys.map((journey) => journey.group_id)
   );
-
-  const results = await getVehicleStats(avl, expectedJourneys)
-
+  console.log("stats---", currentDate.diff(getDate(), 'second'))
+  const results = await getVehicleStats(avl, expectedJourneys);
+  console.log("sort---",  currentDate.diff(getDate(), 'second'))
   return results.sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 };
 
-export const getLiveStats = async (parent, db: Context, info: GraphQLResolveInfo) => {
-    const queryName = info.operation.name?.value;
-    let last20Mins: SiriVMPositions[] = [];
-    let expected: ExpectedJourneyType[] = [];
-    const currentDate = getDate()
-    if (queryName === "operatorLiveStatus") {
-      [expected, last20Mins] = await Promise.all([
-        getExpectedJourneys(db, parent.operatorId, currentDate, 90),
-        getAvlPoints(db, parent.operatorId, currentDate, true),
-      ]);
+export const getLiveStats = async (
+  parent,
+  db: Context,
+  info: GraphQLResolveInfo
+) => {
+  const queryName = info.operation.name?.value;
+  let last20Mins: SiriVMPositions[] = [];
+  let expected: ExpectedJourneyType[] = [];
+  const currentDate = getDate();
+  if (queryName === "operatorLiveStatus") {
+    [expected, last20Mins] = await Promise.all([
+      getExpectedJourneys(db, parent.operatorId, currentDate, 90),
+      getAvlPoints(db, parent.operatorId, currentDate, true),
+    ]);
+  }
+
+  const vechileRefs = new Set<string>();
+  const groupIds = new Set(expected.map((journey) => journey.group_id));
+  last20Mins = last20Mins.filter((avl) => {
+    if (groupIds.has(avl.group_id)) {
+      if (!vechileRefs.has(avl.vehicle_ref)) {
+        vechileRefs.add(avl.vehicle_ref);
+      }
+      return true;
     }
 
-    const vechileRefs = new Set<string>();
-    const groupIds = new Set(expected.map((journey) => journey.group_id));
-    last20Mins = last20Mins.filter((avl) => {
-      if (groupIds.has(avl.group_id)) {
-        if (!vechileRefs.has(avl.vehicle_ref)) {
-          vechileRefs.add(avl.vehicle_ref);
-        }
-        return true;
-      }
+    return false;
+  });
 
-      return false;
-    });
+  return {
+    operatorId: parent.operatorId,
+    ...parent.liveStats,
+    expectedVehicles: expected.length,
+    currentVehicles: vechileRefs.size,
+    avl: last20Mins,
+    expected: expected,
+  };
+};
+
+export const getHistoricalStats = async (operatorId: string, db: Context) => {
+    const results = await db.prisma.feed_monitoring_hour_summary.aggregate({
+        where: {
+            operator_noc: operatorId
+        },
+        _avg: {
+            actual_journeys_per_minute: true,
+            expected_journey_per_minute: true,
+            actual_journeys_per_minute_total: true,
+            actual_live_location_positions_per_minute: true
+        }
+    })
+
+    let availability = 0
+    let updateFrequency = 0
+
+    if (
+      results._avg.actual_journeys_per_minute &&
+      results._avg.actual_journeys_per_minute > 0 &&
+      results._avg.expected_journey_per_minute &&
+      results._avg.expected_journey_per_minute > 0
+    ) {
+      availability =
+        results._avg.actual_journeys_per_minute /
+        results._avg.expected_journey_per_minute;
+    }
+
+    if (
+      results._avg.actual_journeys_per_minute_total &&
+      results._avg.actual_journeys_per_minute_total > 0 &&
+      results._avg.actual_live_location_positions_per_minute &&
+      results._avg.actual_live_location_positions_per_minute > 0
+    ) {
+        updateFrequency =
+        results._avg.actual_journeys_per_minute_total /
+        results._avg.actual_live_location_positions_per_minute;
+    }
 
     return {
-      operatorId: parent.operatorId,
-      ...parent.liveStats,
-      expectedVehicles: expected.length,
-      currentVehicles: vechileRefs.size,
-      avl: last20Mins,
-      expected: expected,
-    };
-  }
+        availability,
+        updateFrequency 
+    }
+}
