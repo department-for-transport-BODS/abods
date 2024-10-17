@@ -1,7 +1,7 @@
 {
-  "apiUrl": "",
+  "apiUrl": "http://localhost:4200/api",
   "envName": "local",
-  "analyticsId": "",
+  "analyticsId": "1234",
   "mapboxToken": "",
   "mapboxStyle": "",
   "mapboxSatelliteStyle": "",
@@ -23,12 +23,12 @@
   "freshdesk": {
     "apiUrl": "",
     "folders": {
-		  "dashboard": "43000590095",
-		  "feedMonitoring": "43000590096",
-		  "otp": "43000590097",
-		  "vehicleJourneys": "43000590098",
-		  "corridors": "43000590099",
-		  "organisation": "43000590100"
+      "dashboard": "43000590095",
+      "feedMonitoring": "43000590096",
+      "otp": "43000590097",
+      "vehicleJourneys": "43000590098",
+      "corridors": "43000590099",
+      "organisation": "43000590100"
     }
   }
 }

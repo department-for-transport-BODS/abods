@@ -2,7 +2,7 @@ import { DateTime, Settings } from 'luxon';
 import { GpsFeedJourneyStatus } from '../../../generated/graphql';
 import { OnTimePerformanceEnum } from './on-time-performance.enum';
 import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
-import { VehiclePingStop } from './vehicle-ping-stop.model';
+import { createVehiclePingStop, createNoDataStop } from './vehicle-ping-stop.model';
 
 describe('VehiclePingStop', () => {
   const t1 = '2022-08-18T11:20:00.000+01:00';
@@ -54,67 +54,67 @@ describe('VehiclePingStop', () => {
 
   it('should set actual departure by adding delay to scheduled departure', () => {
     ping.delay = 0;
-    let vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    let vps = createVehiclePingStop(ping, stop);
 
     expect(vps.actualDeparture?.toISO()).toEqual(DateTime.fromISO(startTime).toISO());
 
     ping.delay = 120;
-    vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    vps = createVehiclePingStop(ping, stop);
 
     expect(vps.actualDeparture).toEqual(DateTime.fromISO(startTime).plus({ seconds: 120 }));
   });
 
   it('should create an On Time stop if delay is less than 360', () => {
     ping.delay = 359;
-    const vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    const vps = createVehiclePingStop(ping, stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.OnTime);
   });
 
   it('should create an On Time stop if delay is greater than -61', () => {
     ping.delay = -60;
-    const vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    const vps = createVehiclePingStop(ping, stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.OnTime);
   });
 
   it('should create an Early stop if delay is less than -60', () => {
     ping.delay = -61;
-    const vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    const vps = createVehiclePingStop(ping, stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.Early);
   });
 
   it('should create a Late stop if delay is greater than 359', () => {
     ping.delay = 360;
-    const vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    const vps = createVehiclePingStop(ping, stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.Late);
   });
 
   it('should create a No Data stop if no delay', () => {
     ping.delay = null;
-    const vps = VehiclePingStop.createVehiclePingStop(ping, stop);
+    const vps = createVehiclePingStop(ping, stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.NoData);
   });
 
   it('should create a No Data stop', () => {
-    const vps = VehiclePingStop.createNoDataStop(stop);
+    const vps = createNoDataStop(stop);
 
     expect(vps.onTimePerformance).toEqual(OnTimePerformanceEnum.NoData);
   });
 
   it('should set timing point to false', () => {
     stop.timingPoint = false;
-    const vps = VehiclePingStop.createNoDataStop(stop);
+    const vps = createNoDataStop(stop);
 
     expect(vps.isTimingPoint).toEqual(false);
   });
 
   it('should set timing point to true', () => {
     stop.timingPoint = true;
-    const vps = VehiclePingStop.createNoDataStop(stop);
+    const vps = createNoDataStop(stop);
 
     expect(vps.isTimingPoint).toEqual(true);
   });
