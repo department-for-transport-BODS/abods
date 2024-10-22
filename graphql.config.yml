@@ -1,0 +1,2 @@
+schema: abods-api/src/schema.graphql
+documents: 'frontend/**/*.graphql'

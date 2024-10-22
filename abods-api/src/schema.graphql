@@ -10,7 +10,7 @@ type Query {
     userAlerts: [AlertType]
     userAlert(alertId: String!): AlertType
     operator(operatorId: String!): OperatorType
-    operators: OperatorsPage
+    operators(filterBy: OperatorFilterInput): OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType
@@ -20,6 +20,53 @@ type Query {
     vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
     timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
     corridor: CorridorNamespace
+    invitation(key: String!): InvitationType
+    events(operatorId: String!, start: DateTime!, end: DateTime!):EventResponse
+    eventStats(operatorId: String!, start: Date!, end: Date!):EventStatsResponse
+}
+
+type Mutation {
+    login(username: String!, password: String!): LoginResponse!
+    logout: Boolean!
+    addUserAlert(payload: AlertInputType!): MutationResponseType!
+    updateUserAlert(alertId: String!, payload: AlertInputType!): MutationResponseType!
+    deleteUserAlert(alertId: String!): MutationResponseType!
+    createCorridor(payload: CorridorInputType!): MutationResponseType!
+    updateCorridor(inputs: CorridorUpdateInputType!): MutationResponseType!
+    deleteCorridor(corridorId: Int!): MutationResponseType!
+    requestResetPassword(email:String!): MutationResponseType!
+    resetPassword(uid:String!, token: String!, password:String! confirmPassword:String!): MutationResponseType!
+    verifyResetPasswordToken(uid:String!, token: String!): Boolean!
+    signUp(payload: SignupPayloadType!): MutationResponseType!
+    updateUser(username: String! payload: UserUpdateInput): UserUpdateResponseType!
+    deleteUser(username: String!): MutationResponseType!
+    inviteUser(payload: InvitationInput!): InvitationResponseType!
+}
+
+input OperatorFilterInput {
+  operatorIds: [String!]
+}
+
+input SignupPayloadType {
+    key: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+}
+
+type EventStatsResponse {
+    count: Int!
+    day: Date!
+}
+
+type EventResponse {
+    items: EventType
+}
+
+type EventType {
+    timestamp: String!
+    type: String!
+    data: String!
 }
 
 type CorridorNamespace {
@@ -64,7 +111,7 @@ type CorridorStatsType {
 input CorridorStatsInputType {
   corridorId: String!
   fromTimestamp: DateTime!
-  granularity: CorridorGranularity!
+    granularity: CorridorGranularity!
   stopList: [String]
   toTimestamp: DateTime!
 }
@@ -233,17 +280,6 @@ type ServiceInfoType {
   serviceNumber: String
 }
 
-type Mutation {
-    login(username: String!, password: String!): LoginResponse
-    logout: Boolean!
-    addUserAlert(payload: AlertInputType!): MutationResponseType!
-    updateUserAlert(alertId: String!, payload: AlertInputType!): MutationResponseType!
-    deleteUserAlert(alertId: String!): MutationResponseType!
-    createCorridor(payload: CreateCorridorMutationVariables): MutationResponseType!
-    updateCorridor(inputs: CorridorUpdateInputType): MutationResponseType!
-    deleteCorridor(corridorId: Int): MutationResponseType!
-}
-
 type HeadwayMetricsType {
   frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
   frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
@@ -251,15 +287,6 @@ type HeadwayMetricsType {
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
   headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
   headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
-}
-
-input CreateCorridorMutationVariables {
-  name: String
-  stopIds: [String]
-}
-
-input DeleteCorridorMutationVariables {
-  corridorId: Int
 }
 
 input CorridorUpdateInputType {
@@ -396,15 +423,6 @@ type StopType {
   sourceId: String
 }
 
-type ServiceLinkType {
-  fromStop: String
-  toStop: String
-  distance: Int
-  routeValidity: String
-  linkRoute: String
-}
-
-
 type AdminAreasType {
     adminAreaId: String!
     adminAreaName: String!
@@ -428,11 +446,11 @@ type OperatorType {
 type FeedMonitoringType {
   availability: Float
   feedStatus: Boolean
-  historicalStats: HistoricalStatsType
+  historicalStats(date: Date!): HistoricalStatsType
   lastOutage: DateTime
   liveStats: LiveStatsType
   unavailableSince: DateTime
-  vehicleStats: [VehicleStatsType]
+  vehicleStats(granularity: Granularity, start:DateTime!, end: DateTime!): [VehicleStatsType]
 }
 
 type HistoricalStatsType {
@@ -513,6 +531,11 @@ input AlertInputType {
   sendTo: AlertReferenceInput!
   eventHysterisis: Int
   eventThreshold: Int
+}
+
+input CorridorInputType {
+    name: String
+    stopIds: [String]!
 }
 
 
@@ -667,12 +690,6 @@ type ServicePerformanceType {
   scheduledDepartures: Int
   lineInfo: ServiceInfoType
   operatorInfo: OperatorInfoType
-}
-
-type ServiceInfoType {
-  serviceId: String
-  serviceName: String
-  serviceNumber: String
 }
 
 type OperatorInfoType {
