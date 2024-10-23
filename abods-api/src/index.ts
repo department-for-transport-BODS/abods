@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
 import { createContext } from './context.js';
-import { SessionUser } from './types';
+import { SessionUser } from './types/extra.js';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
 import { getDate } from './lib/dayjs.js';

@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { getApiInfo, getRoles } from './sharedFunctions.js';
-import { RequestContext } from '../../types';
+import { RequestContext } from '../../types/extra.js';
 
 const sharedResolvers: IResolvers = {
   Query: {

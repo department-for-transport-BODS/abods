@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils'
-import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
-import { RequestContext } from '../../types';
+import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayOverview, getHeadwayTimeSeries, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
+import { RequestContext } from '../../types/extra.js';
 import { GraphQLResolveInfo } from 'graphql';
 
 const otpResolvers: IResolvers = {
@@ -14,7 +14,6 @@ const otpResolvers: IResolvers = {
     },
     OnTimePerformanceType: {
         delayFrequency: async (_, { inputs }, {sessionUser, db }: RequestContext) => getDelayFrequency(inputs, sessionUser, db),
-        journeyScheduledStartTimes: async (_, {sessionUser, db }: RequestContext) => getJourneyScheduledStartTimes(sessionUser, db),
         operatorPerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getOperatorPerformance(inputs, sessionUser, db),
         punctualityDayOfWeek: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityDayOfWeek(inputs, sessionUser, db),
         punctualityOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityOverview(inputs, sessionUser, db),
@@ -27,9 +26,7 @@ const otpResolvers: IResolvers = {
     HeadwayMetricsType: {
         frequentServices: async (_, { operatorId, fromTimestamp, toTimestamp }, {sessionUser, db }: RequestContext) => getFrequentServices( operatorId, fromTimestamp, toTimestamp, sessionUser, db),
         frequentServiceInfo: async (_, { inputs }, {sessionUser, db }: RequestContext) => getFrequentServiceInfo(inputs, sessionUser, db),
-        headwayDayOfWeek: async (_, { lineId }, {sessionUser, db }: RequestContext) => getHeadwayDayOfWeek(lineId, sessionUser, db),
-        headwayOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayOverview(inputs, sessionUser, db),      
-        headwayTimeOfDay: async (_, { lineId }, {sessionUser, db }: RequestContext) => getHeadwayTimeOfDay(lineId, sessionUser, db),
+        headwayOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayOverview(inputs, sessionUser, db),
         headwayTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayTimeSeries(inputs, sessionUser, db)
     },
     OperatorType:{

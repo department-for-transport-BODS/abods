@@ -12,7 +12,7 @@ import {
   VehicleJourneyType,
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
-} from '../../types';
+} from '../../types/generated.js';
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,

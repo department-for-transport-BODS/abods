@@ -3,8 +3,8 @@ import { Context } from '../context';
 import {
   PerformanceInputType,
   PunctualityTotalsType,
-  SessionUser,
-} from '../types';
+} from '../types/generated.js';
+import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 

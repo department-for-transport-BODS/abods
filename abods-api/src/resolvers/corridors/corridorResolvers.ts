@@ -1,5 +1,6 @@
 import { IResolvers } from "@graphql-tools/utils";
-import { CorridorNamespaceAddFirstStopArgs, CorridorNamespaceAddSubsequentStopsArgs, MutationCreateCorridorArgs, RequestContext } from "../../types";
+import { CorridorNamespaceAddFirstStopArgs, CorridorNamespaceAddSubsequentStopsArgs, MutationCreateCorridorArgs } from "../../types/generated.js";
+import { RequestContext } from "../../types/extra.js";
 import { createCorridor, deleteCorridor, getCorridors, getJourneyStats, getJourneyStatsByDay, getJourneyStatsByHour, getJourneyStatsHistogram, getJourneyStatsPerService, getServiceLinks, getStats, getStops, getSubsequentStops, getSummaryStats, listCorridors, updateCorridor } from "./corridorFunctions.js";
 import { CorridorJourneyStatsOption } from "../../lib/corridor.js";
 
