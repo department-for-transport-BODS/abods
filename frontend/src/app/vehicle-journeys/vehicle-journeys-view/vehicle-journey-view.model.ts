@@ -1,10 +1,8 @@
 import { DateTime } from 'luxon';
-import { OperatorInfoType, ServiceInfoType } from '../../../generated/graphql';
-import { maybeToTypeOrUndefined } from '../../shared/type-helper';
+import { AvlPoint, Stop } from '../../../generated/graphql';
 import { OnTimePerformanceEnum } from './on-time-performance.enum';
-import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
 import { VehiclePing } from './vehicle-ping.model';
-import { createHiddenStop, createNoDataStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
+import { createHiddenStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
 
 export interface OnTimePerformanceStat {
   percent: number;
@@ -20,10 +18,17 @@ export interface OnTimePerformanceStats {
 }
 
 export interface VehicleJourneyInfo {
-  operatorInfo?: OperatorInfoType;
-  serviceInfo?: ServiceInfoType;
-  vehicleId?: string;
-  startTime?: DateTime;
+  operatorInfo: {
+    nocCode: string;
+    operatorName: string;
+  };
+  serviceInfo: {
+    serviceId: string;
+    serviceName: string;
+    serviceNumber: string;
+  };
+  vehicleId: string;
+  startTime: DateTime;
 }
 
 export interface VehicleJourneyViewParams {
@@ -40,95 +45,70 @@ const calculateOtpStat = (stopList: VehiclePingStop[], statType: OnTimePerforman
   };
 };
 
-const findNearestPingToStop = (
-  journey: ApolloGpsFeedType[],
-  stop: StopDetails,
-  stopHashMap: Map<string, StopDetails>
-): ApolloGpsFeedType | undefined => {
-  // There may be more than one match for the stop
-  // e.g. a circular route will have the same starting and ending stop
-  const matchedStops = journey.filter((point: ApolloGpsFeedType) => point.previousStopInfo?.stopId === stop?.stopId);
-  for (let i = 0; i < matchedStops.length; i++) {
-    // We can use stopId and scheduledDeparture time for a unique key and add it to the hashmap
-    const hashKey = stop?.stopId + matchedStops[i].scheduledDeparture + '';
-    if (stopHashMap.has(hashKey)) {
-      continue;
-    }
-    stopHashMap.set(hashKey, stop);
-    return matchedStops[i];
-  }
-};
-
 export class VehicleJourneyView {
-  stopList: VehiclePingStop[] = [];
-  journeyInfo: VehicleJourneyInfo = {};
-  gpsPingList: VehiclePing[] = [];
-  otpStats: OnTimePerformanceStats = {};
+  stopList: VehiclePingStop[];
+  journeyInfo: VehicleJourneyInfo;
+  gpsPingList: VehiclePing[];
+  otpStats: OnTimePerformanceStats;
 
-  static createView(stops: StopDetails[], journey: ApolloGpsFeedType[], params: VehicleJourneyViewParams) {
-    const view = new VehicleJourneyView();
-    view.stopList = VehicleJourneyView.createStopList(stops, journey, params);
-    view.journeyInfo = VehicleJourneyView.createJourneyInfo(journey);
-    view.otpStats = VehicleJourneyView.createOtpStats(view.stopList.filter((stop) => !stop.isHidden));
-    view.gpsPingList = VehicleJourneyView.createGpsPingList(journey);
-    return view;
-  }
-
-  private static createStopList(stops: StopDetails[], journey: ApolloGpsFeedType[], params: VehicleJourneyViewParams) {
-    const stopHashMap = new Map<string, StopDetails>();
-    return stops.map((stop: StopDetails) => {
-      // Find the nearest ping to previous stop
-      const nearestStopPing = findNearestPingToStop(journey, stop, stopHashMap);
-      // Create stop list for timing points only
-      if (params.timingPointsOnly) {
-        return VehicleJourneyView.createTimingPointStop(stop, nearestStopPing);
+  constructor(journey: AvlPoint[], route: Stop[], params: VehicleJourneyViewParams) {
+    if (!(journey[0] && route[0])) {
+      throw new Error('No data');
+    }
+    journey.sort((a, b) => {
+      if (a.recordedAtTimeUtc < b.recordedAtTimeUtc) {
+        return -1;
       }
-      // Create stop list for all stops
-      return VehicleJourneyView.createStop(stop, nearestStopPing);
+      if (a.recordedAtTimeUtc > b.recordedAtTimeUtc) {
+        return 1;
+      }
+      return 0;
     });
-  }
+    route.sort((a, b) => {
+      if (a.stopIndex < b.stopIndex) {
+        return -1;
+      }
+      if (a.stopIndex > b.stopIndex) {
+        return 1;
+      }
+      return 0;
+    });
 
-  private static createTimingPointStop(stop: StopDetails, nearestStopPing?: ApolloGpsFeedType): VehiclePingStop {
-    if (stop.timingPoint) {
-      return VehicleJourneyView.createStop(stop, nearestStopPing);
-    } else {
-      return createHiddenStop(stop);
-    }
-  }
-
-  private static createStop(stop: StopDetails, nearestStopPing?: ApolloGpsFeedType): VehiclePingStop {
-    if (nearestStopPing) {
-      return createVehiclePingStop(nearestStopPing, stop);
-    } else {
-      return createNoDataStop(stop);
-    }
-  }
-
-  private static createJourneyInfo(journey: ApolloGpsFeedType[]): VehicleJourneyInfo {
-    let info = <VehicleJourneyInfo>{};
-    if (journey[0]) {
-      info = {
-        operatorInfo: maybeToTypeOrUndefined(journey[0].operatorInfo),
-        serviceInfo: maybeToTypeOrUndefined(journey[0].serviceInfo),
-        vehicleId: journey[0].vehicleId,
-        startTime: DateTime.fromISO(journey[0].startTime),
-      };
-    }
-    return info;
-  }
-
-  private static createOtpStats(stopList: VehiclePingStop[]): OnTimePerformanceStats {
-    return <OnTimePerformanceStats>{
-      early: calculateOtpStat(stopList, OnTimePerformanceEnum.Early),
-      late: calculateOtpStat(stopList, OnTimePerformanceEnum.Late),
-      onTime: calculateOtpStat(stopList, OnTimePerformanceEnum.OnTime),
-      noData: calculateOtpStat(stopList, OnTimePerformanceEnum.NoData),
+    const lastStopIndex = Math.max(...route.map((n) => n.stopIndex));
+    const stopList = route.map((stop) =>
+      params.timingPointsOnly && !stop.isTimingPoint
+        ? createHiddenStop(stop, lastStopIndex === stop.stopIndex)
+        : createVehiclePingStop(stop, lastStopIndex === stop.stopIndex)
+    );
+    this.stopList = stopList;
+    this.journeyInfo = {
+      operatorInfo: {
+        nocCode: route[0].operatorNoc,
+        operatorName: route[0].operatorName,
+      },
+      serviceInfo: {
+        serviceName: route[0].serviceName,
+        serviceId: route[0].serviceId,
+        serviceNumber: route[0].lineName,
+      },
+      vehicleId: journey[0].vehicleRef,
+      startTime: DateTime.fromISO(route[0].startTime),
     };
-  }
 
-  private static createGpsPingList(journey: ApolloGpsFeedType[]): VehiclePing[] {
-    return journey
-      .filter((ping) => ping.lon && ping.lat)
-      .map((ping: ApolloGpsFeedType) => VehiclePing.createVehiclePing(ping));
+    let otp: OnTimePerformanceEnum = OnTimePerformanceEnum.NoData;
+    this.gpsPingList = journey.map((ping: AvlPoint) => {
+      const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
+      if (thisMatch) {
+        otp = thisMatch.onTimePerformance;
+      }
+      return new VehiclePing(ping, otp);
+    });
+    const filteredStopList = stopList.filter((stop) => !stop.isHidden);
+    this.otpStats = {
+      early: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.Early),
+      late: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.Late),
+      onTime: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.OnTime),
+      noData: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.NoData),
+    };
   }
 }

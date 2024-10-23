@@ -1,7 +1,9 @@
 import { Resolvers } from '../../types/generated.js';
 import {
   findJourneys,
+  getAvls,
   getJourney,
+  getRoute,
   servicePatternsInfo,
   timingPatternDetail,
   vehicleJourney
@@ -24,7 +26,9 @@ const vehicleJourneyResovlers: Resolvers = {
       _,
       { timingPatternId },
       { sessionUser, db }
-    ) => timingPatternDetail(timingPatternId, sessionUser, db)
+    ) => timingPatternDetail(timingPatternId, sessionUser, db),
+    avls: getAvls,
+    route: getRoute
   },
   VehicleReplayNamespace: {
     findJourneys: (_, { inputs }, { sessionUser, db }) =>
