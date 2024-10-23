@@ -16,7 +16,7 @@
             >Dashboard
           </a>
         </li>
-        <li class="nav__item">
+        <li class="nav__item" *ngIf='configService.flag("feedMonitoring")'>
           <a
             class="nav__link"
             [routerLink]="['/feed-monitoring']"

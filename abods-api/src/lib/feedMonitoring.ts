@@ -4,11 +4,15 @@ import {
   getAvlPerMinute,
   getExpectedJourneysCount,
 } from "./otp.js";
-import { VehicleStatsType } from "../types";
+import { FeedMonitoringType, LiveStatsType, VehicleStatsType } from "../types";
 import { getDate, getFormattedDate } from "./dayjs.js";
 
+export type FeedMonitoringListType = 
+  Omit<FeedMonitoringType, "liveStats" | "historicalStats" | "vehicleStats"> &
+    Partial<LiveStatsType>;
+
 export const getVehicleStats = async (
-  avl: SiriVMPositions[],
+  avl: { group_id: string; recorded_at_time: Date; vehicle_ref: string;}[],
   expected: ExpectedJourneyType[]
 ): Promise<VehicleStatsType[]> => {
   const avlPromise: Map<string, Set<string>> = await getAvlPerMinute(avl ?? []);
@@ -33,3 +37,8 @@ export const getVehicleStats = async (
   await Promise.all(promises);
   return result;
 };
+
+export enum VechileCountType {
+    Actual = 'actual',
+    Expected = 'expected'
+}

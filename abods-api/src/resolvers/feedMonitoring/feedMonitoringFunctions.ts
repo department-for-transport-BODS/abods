@@ -1,14 +1,14 @@
-import { SiriVMPositions } from "@prisma/client";
 import { Context } from "../../context.js";
-import { getDate, isSameOrBefore } from "../../lib/dayjs.js";
+import { getDate, getFormattedDate, isSameOrBefore } from "../../lib/dayjs.js";
 import {
   ExpectedJourneyType,
   getAvlPoints,
   getExpectedJourneys,
 } from "../../lib/otp.js";
 import { EventStatsType } from "../../types";
-import { getVehicleStats } from "../../lib/feedMonitoring.js";
+import { getVehicleStats, VechileCountType } from "../../lib/feedMonitoring.js";
 import { GraphQLResolveInfo } from "graphql";
+import { Dayjs } from "dayjs";
 
 export const getEventStats = (): EventStatsType[] => {
   const eventStats: EventStatsType[] = [];
@@ -28,26 +28,27 @@ export const getEventStats = (): EventStatsType[] => {
 export const getVehicleStatsPerOperator = async (
   db: Context,
   operatorId: string,
-  statsDate: string
+  statsDate: Dayjs
 ) => {
-    const currentDate = getDate()
   const expectedJourneys: ExpectedJourneyType[] = await getExpectedJourneys(
     db,
     operatorId,
-    getDate(statsDate)
+    statsDate,
+    21
   );
 
-  console.log("avl---")
-  const avl: SiriVMPositions[] = await getAvlPoints(
+  const avl: {
+    group_id: string;
+    recorded_at_time: Date;
+    vehicle_ref: string;
+  }[] = await getAvlPoints(
     db,
     operatorId,
-    getDate(statsDate),
+    statsDate,
     false,
     expectedJourneys.map((journey) => journey.group_id)
   );
-  console.log("stats---", currentDate.diff(getDate(), 'second'))
   const results = await getVehicleStats(avl, expectedJourneys);
-  console.log("sort---",  currentDate.diff(getDate(), 'second'))
   return results.sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
@@ -59,7 +60,11 @@ export const getLiveStats = async (
   info: GraphQLResolveInfo
 ) => {
   const queryName = info.operation.name?.value;
-  let last20Mins: SiriVMPositions[] = [];
+  let last20Mins: {
+    group_id: string;
+    recorded_at_time: Date;
+    vehicle_ref: string;
+  }[] = [];
   let expected: ExpectedJourneyType[] = [];
   const currentDate = getDate();
   if (queryName === "operatorLiveStatus") {
@@ -92,46 +97,86 @@ export const getLiveStats = async (
   };
 };
 
-export const getHistoricalStats = async (operatorId: string, db: Context) => {
-    const results = await db.prisma.feed_monitoring_hour_summary.aggregate({
-        where: {
-            operator_noc: operatorId
-        },
-        _avg: {
-            actual_journeys_per_minute: true,
-            expected_journey_per_minute: true,
-            actual_journeys_per_minute_total: true,
-            actual_live_location_positions_per_minute: true
-        }
-    })
+export const getHistoricalStats = async (
+  operatorId: string,
+  date: Date,
+  db: Context
+) => {
+  const result = await db.prisma.feed_monitoring_daily_summary.findFirst({
+    where: {
+      operator_noc: operatorId,
+      date_of_journey: date,
+    },
+  });
 
-    let availability = 0
-    let updateFrequency = 0
+  return {
+    update_frequency: result?.update_frequency,
+    availability: result?.availability,
+  };
+};
 
-    if (
-      results._avg.actual_journeys_per_minute &&
-      results._avg.actual_journeys_per_minute > 0 &&
-      results._avg.expected_journey_per_minute &&
-      results._avg.expected_journey_per_minute > 0
-    ) {
-      availability =
-        results._avg.actual_journeys_per_minute /
-        results._avg.expected_journey_per_minute;
-    }
+export const getVehicles = async (
+  operatorId: string,
+  db: Context,
+  type: VechileCountType
+) => {
+  const result = await db.prisma.feed_monitoring_minute_summary.findFirst({
+    where: {
+      operator_noc: operatorId,
+    },
+    orderBy: {
+      received_interval: "desc",
+    },
+    select: {
+      actual: type === VechileCountType.Actual,
+      expected: type === VechileCountType.Expected,
+    },
+  });
 
-    if (
-      results._avg.actual_journeys_per_minute_total &&
-      results._avg.actual_journeys_per_minute_total > 0 &&
-      results._avg.actual_live_location_positions_per_minute &&
-      results._avg.actual_live_location_positions_per_minute > 0
-    ) {
-        updateFrequency =
-        results._avg.actual_journeys_per_minute_total /
-        results._avg.actual_live_location_positions_per_minute;
-    }
+  return result?.actual;
+};
 
-    return {
-        availability,
-        updateFrequency 
-    }
-}
+export const getLast24Hours = async (operatorId: string, db: Context) => {
+  const result = await db.prisma.feed_monitoring_hourly_summary.findMany({
+    where: {
+      operator_noc: operatorId,
+    },
+    select: {
+      actual: true,
+      expected: true,
+      received_interval: true,
+    },
+    orderBy: {
+      received_interval: "asc",
+    },
+  });
+
+  return result.map((summary) => ({
+    timestamp: getFormattedDate(summary.received_interval),
+    actual: summary.actual,
+    expected: summary.expected,
+  }));
+};
+
+export const getVehicleStatsByMin = async (
+  operatorId: string,
+  start: Date,
+  end: Date,
+  db: Context
+) => {
+  const result = await db.prisma.feed_monitoring_minute_summary.findMany({
+    where: {
+      operator_noc: operatorId,
+      received_interval: {
+        gte: start,
+        lte: end,
+      },
+    },
+  });
+
+  result.map((summary) => ({
+    timestamp: getFormattedDate(summary.received_interval),
+    expected: summary.expected,
+    actual: summary.actual,
+  }));
+};

@@ -1,13 +1,16 @@
 import { IResolvers } from "@graphql-tools/utils";
 import { RequestContext } from "../../types";
 import {
+  getVehicles,
   getEventStats,
   getHistoricalStats,
   getLiveStats,
   getVehicleStatsPerOperator,
+  getLast24Hours,
+  getVehicleStatsByMin,
 } from "./feedMonitoringFunctions.js";
 
-import { getVehicleStats } from "../../lib/feedMonitoring.js";
+import { VechileCountType } from "../../lib/feedMonitoring.js";
 import { getDate } from "../../lib/dayjs.js";
 
 const feedMonitoringResovlers: IResolvers = {
@@ -20,17 +23,20 @@ const feedMonitoringResovlers: IResolvers = {
     },
   },
   FeedMonitoringType: {
-    historicalStats: async (parent, { db }: RequestContext) =>
-      getHistoricalStats(parent.operatorId, db),
-    vehicleStats: async (parent, { end }, { db }: RequestContext) =>
-      getVehicleStatsPerOperator(db, parent.operatorId, end),
-
-    liveStats: async (parent, _, { db }: RequestContext, info) =>
-      getLiveStats(parent, db, info),
+    historicalStats: async ({ operatorId, date }, { db }: RequestContext) =>
+      getHistoricalStats(operatorId, date, db),
+    vehicleStats: async ({ operatorId, start, end }, { db }: RequestContext) =>
+      getVehicleStatsByMin(operatorId, start, end, db),
+    liveStats: async () => {},
   },
   LiveStatsType: {
-    last20Minutes: async (parent) =>
-      getVehicleStats(parent.avl, parent.expected),
+    currentVehicles: async ({ operatorId }, { db }: RequestContext) =>
+      getVehicles(operatorId, db, VechileCountType.Actual),
+    expectedVehicles: async ({ operatorId }, { db }: RequestContext) =>
+      getVehicles(operatorId, db, VechileCountType.Expected),
+    last20Minutes: async ({ operatorId }, { db }: RequestContext) =>
+      getVehicleStatsPerOperator(db, operatorId, getDate()),
+    last24Hours: async ({ operatorId }, db) => getLast24Hours(operatorId, db),
   },
   EventsPage: {
     items: async () => {

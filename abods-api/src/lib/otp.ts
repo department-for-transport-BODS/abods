@@ -1,4 +1,4 @@
-import { all_operators, feed_monitoring_hour_summary, Prisma, SiriVMPositions } from '@prisma/client';
+import { all_operators, feed_monitoring_summary, Prisma, SiriVMPositions } from '@prisma/client';
 import { Context } from '../context';
 import {
   FeedMonitoringType,
@@ -14,7 +14,7 @@ import { Dayjs } from 'dayjs';
 import { getDate, getFormattedDate, getHourFormattedDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = all_operators & {
-  feed_summary: feed_monitoring_hour_summary[];
+  feed_summary: feed_monitoring_summary[];
 };
 
 export type ExpectedJourneyType = {
@@ -311,87 +311,6 @@ export const getOperatorWithFeed = (db: Context, operatorRefs: string) => {
   });
 };
 
-export const getGQLFormatterOperatorData = async  (
-  operator: AllOperatorWithFeedSummary | null
-): Promise<FeedMonitoringType> => {
-  let total_actual_journeys_per_minute = 0;
-  let total_expected_journey_per_minute = 0;
-  let total_actual_journeys_per_minute_total = 0;
-  let total_actual_live_location_positions_per_minute = 0;
-  let lastOutage: Dayjs = getDate("1970-01-01");
-  let unavailable: Dayjs = getDate("1970-01-01");
-  let updateFreq = 0;
-
-  const historicStats: HistoricalStatsType = {
-    vehicleStats: [],
-  };
-  const last24hrs: VehicleStatsType[] = [];
-  
-  if (operator) {
-    operator.feed_summary.map((feed) => {
-      total_actual_journeys_per_minute += feed.actual_journeys_per_minute
-      total_expected_journey_per_minute += feed.expected_journey_per_minute
-
-      const tmpOutage = feed.last_outage
-        ? getDate(feed.last_outage)
-        : undefined;
-      if (tmpOutage && lastOutage.isBefore(tmpOutage)) {
-        lastOutage = tmpOutage;
-      }
-
-      const tmpUnavailable = feed.unavailable_since
-        ? getDate(feed.unavailable_since)
-        : undefined;
-
-      if (tmpUnavailable && unavailable.isBefore(tmpUnavailable)) {
-        unavailable = tmpUnavailable;
-      }
-
-      total_actual_journeys_per_minute_total += feed.actual_journeys_per_minute_total 
-      total_actual_live_location_positions_per_minute += feed.actual_live_location_positions_per_minute
-
-      if (
-        feed.actual_journeys_per_minute > 0 ||
-        feed.expected_journey_per_minute > 0
-      ) {
-        last24hrs.push({
-          timestamp: getHourFormattedDate(feed.received_hour),
-          actual: feed.actual_journeys_per_minute,
-          expected: feed.expected_journey_per_minute,
-        });
-      }
-    });
-  } 
-
-  if (total_actual_live_location_positions_per_minute > 0) {
-    updateFreq =
-      (
-        total_actual_journeys_per_minute_total /
-        total_actual_live_location_positions_per_minute
-      ) * 60;
-  }
-  
-  return {
-    availability:
-      total_expected_journey_per_minute > 0
-        ? total_actual_journeys_per_minute / total_expected_journey_per_minute
-        : 0,
-    feedStatus: getFeedStatus(unavailable, lastOutage),
-    historicalStats: historicStats,
-    lastOutage: lastOutage.isSame("1970-01-01")
-      ? undefined
-      : getFormattedDate(lastOutage.toDate()),
-    unavailableSince: unavailable.isSame("1970-01-01")
-      ? undefined
-      : getFormattedDate(unavailable.toDate()),
-    vehicleStats: [],
-    liveStats: {
-      updateFrequency: Math.round(updateFreq),
-      last24Hours: last24hrs,
-      last20Minutes: [],
-    },
-  };
-};
 
 export const getFeedMonitoringList = async (
   db: Context,
@@ -407,19 +326,30 @@ export const getFeedMonitoringList = async (
     userOperatorId
   );
 
-  return getGQLFormatterOperatorData(operator);
+  return operator?.feed_summary.map((feed) => ({
+    feedStatus: !!feed.last_outage,
+    availability: Number(feed.availability),
+    lastOutage: feed.last_outage,
+    unavailableSince: feed.unavailable_since,
+    liveStats: {
+      updateFrequency: feed.update_frequency,
+    },
+  }));
 };
 
-const getFeedStatus = (unavailable: Dayjs | undefined, lastOutage: Dayjs | undefined): boolean => {
-  let feedStatus = false
-  if(unavailable){
-    if(!lastOutage || lastOutage?.isBefore(unavailable)) {
-      feedStatus = true
+const getFeedStatus = (
+  unavailable: Date | null,
+  lastOutage: Date | null
+): boolean => {
+  let feedStatus = false;
+  if (unavailable) {
+    if (!lastOutage || getDate(lastOutage)?.isBefore(getDate(unavailable))) {
+      feedStatus = true;
     }
   }
 
-  return feedStatus
-}
+  return feedStatus;
+};
 
 export const getExpectedJourneys = async (
   db: Context,
@@ -460,6 +390,7 @@ export const getAvlPoints = async (
   last20Mins?: boolean,
   groupIds?: string[]
 ) => {
+  const currentDate = new Date()
   const where: Prisma.SiriVMPositionsWhereInput = {
     date_of_journey: inputDate.toDate(),
     operator_ref: operatorId,
@@ -479,10 +410,15 @@ export const getAvlPoints = async (
 
   return db.prisma.siriVMPositions.findMany({
     where: where,
+    select: {
+      recorded_at_time: true,
+      group_id: true,
+      vehicle_ref: true
+    }
   });
 };
 
-export const getAvlPerMinute = async (avl: SiriVMPositions[]) => {
+export const getAvlPerMinute = async (avl: { group_id: string; recorded_at_time: Date; vehicle_ref: string;}[]) => {
   const journeys = new Map<string, Set<string>>()
   avl.map((avl) => {
     const recordedAt = 
