@@ -11,6 +11,12 @@ export type FeedMonitoringListType =
   Omit<FeedMonitoringType, "liveStats" | "historicalStats" | "vehicleStats"> &
     Partial<LiveStatsType>;
 
+export enum AlertType {
+  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent',
+  FeedUnavailableEvent = 'FeedUnavailableEvent',
+  FeedAvailableEvent = 'FeedAvailableEvent',
+}
+
 export const getVehicleStats = async (
   avl: { group_id: string; recorded_at_time: Date; vehicle_ref: string;}[],
   expected: ExpectedJourneyType[]
