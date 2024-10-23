@@ -1,6 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { Context } from '../../context';
-import { getDate, getFormattedDate } from '../../lib/dayjs.js';
+import { dbUtcToBstDate, getDate, getFormattedDate } from '../../lib/dayjs.js';
 import logger from '../../logger.js';
 import {
   UniqueJourneyType,
@@ -228,7 +228,7 @@ export const getJourney = async (
   }
   let journeyData: Array<Maybe<GpsFeedType>> = [];
 
-  const journeyDate = new Date(startTime.toISOString().substring(0, 10));
+  const journeyDate = new Date(dbUtcToBstDate(startTime))
 
   const journeys = await db.prisma.siriVMPositions.findMany({
     where: {

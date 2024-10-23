@@ -37,7 +37,6 @@ const vehicleJourneyResovlers: IResolvers = {
       { journeyId, startTime },
       { sessionUser, db }: RequestContext
     ) => getJourney(journeyId, startTime, sessionUser, db),
-    //journeyStopActuals: async(_, { inputs } , {sessionUser, db }: RequestContext) => journeyStopActuals(inputs, sessionUser, db),
   },
 };
 
