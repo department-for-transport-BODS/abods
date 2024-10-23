@@ -1,8 +1,6 @@
-import { all_operators, feed_monitor_summary, Prisma, SiriVMPositions } from '@prisma/client';
+import { all_operators, feed_monitor_summary, Prisma } from '@prisma/client';
 import { Context } from '../context';
 import {
-  FeedMonitoringType,
-  HistoricalStatsType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from '../types/generated.js';
@@ -10,7 +8,7 @@ import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
-import { getDate, getFormattedDate, getHourFormattedDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
+import { getDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = all_operators & {
   feed_summary: feed_monitor_summary[];

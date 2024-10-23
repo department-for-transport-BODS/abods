@@ -1,10 +1,9 @@
-import { SiriVMPositions } from "@prisma/client";
 import {
   ExpectedJourneyType,
   getAvlPerMinute,
   getExpectedJourneysCount,
 } from "./otp.js";
-import { FeedMonitoringType, LiveStatsType, VehicleStatsType } from "../types";
+import { FeedMonitoringType, LiveStatsType, VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
 
 export type FeedMonitoringListType = 

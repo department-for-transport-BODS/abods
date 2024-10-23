@@ -1,16 +1,15 @@
 scalar DateTime
 scalar Date
-scalar JSON
 
 type Query {
     user(id: String): UserType
-    users:[UserType]
-    apiInfo: ApiInfoType
-    roles: [RoleType]
-    userAlerts: [AlertType]
-    userAlert(alertId: String!): AlertType
-    operator(operatorId: String): OperatorType
-    operators(operatorId: String, filterBy: OperatorFilterInput): OperatorsPage
+    users: [UserType!]
+    apiInfo: ApiInfoType!
+    roles: [RoleType!]
+    userAlerts: [AlertType!]
+    userAlert(alertId: String!): AlertType!
+    operator(operatorId: String!): OperatorType
+    operators(operatorId: String, filterBy: OperatorFilterInput): OperatorsPage!
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType!
@@ -407,7 +406,7 @@ type HistoricalStatsType {
 type VehicleStatsType {
   actual: Int
   expected: Int
-  timestamp: String
+  timestamp: DateTime!
 }
 
 type LiveStatsType {

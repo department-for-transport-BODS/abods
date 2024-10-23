@@ -12,6 +12,7 @@ export type Scalars = {
   Float: number;
   Date: any;
   DateTime: any;
+  JSON: any;
 };
 
 
@@ -424,6 +425,7 @@ export type InvitationType = {
   email: Scalars['String'];
 };
 
+
 export type LineFilterType = {
   lineIds?: Maybe<Array<Scalars['String']>>;
 };
@@ -800,6 +802,7 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: Maybe<OperatorFilterInput>;
+  operatorId?: Maybe<Scalars['String']>;
 };
 
 
@@ -1050,7 +1053,7 @@ export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual?: Maybe<Scalars['Int']>;
   expected?: Maybe<Scalars['Int']>;
-  timestamp?: Maybe<Scalars['DateTime']>;
+  timestamp: Scalars['DateTime'];
 };
 
 export type LoginMutationVariables = Exact<{
@@ -2715,7 +2718,7 @@ export const EventsDocument = gql`
     }
   }
 export const EventStatsDocument = gql`
-    query eventStats($operatorId: String!, $start: DateTime!, $end: DateTime!) {
+    query eventStats($operatorId: String!, $start: Date!, $end: Date!) {
   eventStats(operatorId: $operatorId, start: $start, end: $end) {
     count
     day
