@@ -12,7 +12,7 @@ import {
   VehicleJourneyType,
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
-} from '../../types.js';
+} from '../../types';
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
@@ -372,7 +372,7 @@ export const servicePatternsInfo = async (
       },
     );
 
-    const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
+    const stops: Array<StopType> | undefined = vehicleJourney?.stops.map(
       (stop) => {
         return {
           stopId: stop.atco_code,

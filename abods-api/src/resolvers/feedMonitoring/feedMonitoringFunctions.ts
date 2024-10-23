@@ -102,7 +102,7 @@ export const getHistoricalStats = async (
   date: Date,
   db: Context
 ) => {
-  const result = await db.prisma.feed_monitoring_daily_summary.findFirst({
+  const result = await db.prisma.feed_monitor_daily_summary.findFirst({
     where: {
       operator_noc: operatorId,
       date_of_journey: date,
@@ -120,7 +120,7 @@ export const getVehicles = async (
   db: Context,
   type: VechileCountType
 ) => {
-  const result = await db.prisma.feed_monitoring_minute_summary.findFirst({
+  const result = await db.prisma.feed_monitor_minute_summary.findFirst({
     where: {
       operator_noc: operatorId,
     },
@@ -137,7 +137,7 @@ export const getVehicles = async (
 };
 
 export const getLast24Hours = async (operatorId: string, db: Context) => {
-  const result = await db.prisma.feed_monitoring_hourly_summary.findMany({
+  const result = await db.prisma.feed_monitor_hourly_summary.findMany({
     where: {
       operator_noc: operatorId,
     },
@@ -164,7 +164,7 @@ export const getVehicleStatsByMin = async (
   end: Date,
   db: Context
 ) => {
-  const result = await db.prisma.feed_monitoring_minute_summary.findMany({
+  const result = await db.prisma.feed_monitor_minute_summary.findMany({
     where: {
       operator_noc: operatorId,
       received_interval: {

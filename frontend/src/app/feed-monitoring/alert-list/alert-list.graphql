@@ -1,7 +1,9 @@
 fragment Event on EventType {
   timestamp
   type
-  data
+  data {
+    message
+  }
 }
 
 query events($operatorId: String!, $start: DateTime!, $end: DateTime!) {

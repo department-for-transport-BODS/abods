@@ -12,23 +12,18 @@ export type Scalars = {
   Float: number;
   Date: any;
   DateTime: any;
-  EventData: any;
-  Time: any;
 };
 
 
 
 export type AddFirstStopInputType = {
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
   boundingBox?: Maybe<BoundingBoxInputType>;
-  /** Type for add first stop inputs. */
   searchString?: Maybe<Scalars['String']>;
 };
 
 export type AdminAreaInfoType = {
   __typename?: 'AdminAreaInfoType';
   adminAreaId: Scalars['String'];
-  adminAreaName: Scalars['String'];
 };
 
 export type AdminAreasType = {
@@ -39,29 +34,23 @@ export type AdminAreasType = {
 };
 
 export type AlertInputType = {
-  /** The type of the alert. */
   alertType?: Maybe<AlertTypeEnum>;
-  /** How many minutes that an event must perist before alert is sent. */
   eventHysterisis?: Maybe<Scalars['Int']>;
-  /** How many events must be generated before an alert is sent. */
   eventThreshold?: Maybe<Scalars['Int']>;
-  /** User that the alert will send an email to. */
-  sendTo?: Maybe<ObjectReferenceType>;
+  sendTo: AlertReferenceInput;
+};
+
+export type AlertReferenceInput = {
+  id: Scalars['String'];
 };
 
 export type AlertType = {
   __typename?: 'AlertType';
-  /** The id of the alert. */
-  alertId?: Maybe<Scalars['String']>;
-  /** The type of the alert. */
+  alertId: Scalars['String'];
   alertType?: Maybe<AlertTypeEnum>;
-  /** User that created the alert. */
   createdBy?: Maybe<UserType>;
-  /** How many minutes that an event must perist before alert is sent. */
   eventHysterisis?: Maybe<Scalars['Int']>;
-  /** How many events must be generated before an alert is sent. */
   eventThreshold?: Maybe<Scalars['Int']>;
-  /** User that the alert will send an email to. */
   sendTo?: Maybe<UserType>;
 };
 
@@ -74,62 +63,49 @@ export enum AlertTypeEnum {
 export type ApiInfoType = {
   __typename?: 'ApiInfoType';
   buildNumber: Scalars['String'];
-  featureFlags: FeatureFlagType;
-  timezone: Scalars['String'];
   version: Scalars['String'];
 };
 
 export type BoundingBoxInputType = {
-  maxLatitude: Scalars['Float'];
-  maxLongitude: Scalars['Float'];
-  minLatitude: Scalars['Float'];
-  /** Type for a bounded area. */
-  minLongitude: Scalars['Float'];
+  maxLatitude?: Maybe<Scalars['Float']>;
+  maxLongitude?: Maybe<Scalars['Float']>;
+  minLatitude?: Maybe<Scalars['Float']>;
+  minLongitude?: Maybe<Scalars['Float']>;
 };
 
 export enum CorridorGranularity {
   Day = 'day',
   Hour = 'hour',
-  Month = 'month'
+  Minute = 'minute'
 }
 
 export type CorridorHistogramType = {
   __typename?: 'CorridorHistogramType';
-  /** Histogram type. */
   bin?: Maybe<Scalars['Int']>;
   freq?: Maybe<Scalars['Int']>;
 };
 
 export type CorridorInputType = {
-  /** Input type for corridor creation. */
   name: Scalars['String'];
   stopIds: Array<Maybe<Scalars['String']>>;
 };
 
-export type CorridorJourneyTimeStatsType = ICorridorJourneyTimeStats & {
+export type CorridorJourneyTimeStatsType = {
   __typename?: 'CorridorJourneyTimeStatsType';
   avgTransitTime?: Maybe<Scalars['Float']>;
   maxTransitTime: Scalars['Int'];
   minTransitTime: Scalars['Int'];
   percentile25?: Maybe<Scalars['Float']>;
-  percentile5?: Maybe<Scalars['Float']>;
   percentile75?: Maybe<Scalars['Float']>;
-  percentile95?: Maybe<Scalars['Float']>;
-  /** Response for corridor journey time stats. */
-  ts: Scalars['DateTime'];
+  ts?: Maybe<Scalars['String']>;
 };
 
 export type CorridorNamespace = {
   __typename?: 'CorridorNamespace';
-  /** Add first stop in corridor. */
-  addFirstStop: Array<Maybe<StopType>>;
-  /** Add subsequent stops in corridor. */
-  addSubsequentStops: Array<Maybe<StopType>>;
-  /** List corridors. */
+  addFirstStop?: Maybe<Array<Maybe<StopType>>>;
+  addSubsequentStops?: Maybe<Array<Maybe<StopType>>>;
   corridorList?: Maybe<Array<Maybe<CorridorType>>>;
-  /** Get a corridor by id. */
-  getCorridor: CorridorType;
-  /** Add subsequent stops in corridor. */
+  getCorridor?: Maybe<CorridorType>;
   stats?: Maybe<CorridorStatsType>;
 };
 
@@ -140,7 +116,7 @@ export type CorridorNamespaceAddFirstStopArgs = {
 
 
 export type CorridorNamespaceAddSubsequentStopsArgs = {
-  stopList: Array<Maybe<Scalars['String']>>;
+  stopList: Array<Scalars['String']>;
 };
 
 
@@ -150,41 +126,35 @@ export type CorridorNamespaceGetCorridorArgs = {
 
 
 export type CorridorNamespaceStatsArgs = {
-  inputs: CorridorStatsInputType;
+  inputs?: Maybe<CorridorStatsInputType>;
 };
 
-export type CorridorStatsDayOfWeekType = ICorridorJourneyTimeStats & {
+export type CorridorStatsDayOfWeekType = {
   __typename?: 'CorridorStatsDayOfWeekType';
   avgTransitTime?: Maybe<Scalars['Float']>;
-  /** Response for corridor journey time stats grouped by day of week. */
   dow: Scalars['Int'];
   maxTransitTime: Scalars['Int'];
   minTransitTime: Scalars['Int'];
   percentile25?: Maybe<Scalars['Float']>;
-  percentile5?: Maybe<Scalars['Float']>;
   percentile75?: Maybe<Scalars['Float']>;
-  percentile95?: Maybe<Scalars['Float']>;
 };
 
 export type CorridorStatsHistogramType = {
   __typename?: 'CorridorStatsHistogramType';
   hist?: Maybe<Array<Maybe<CorridorHistogramType>>>;
-  /** Response for corridor journey time histogram stats. */
-  ts?: Maybe<Scalars['DateTime']>;
+  ts?: Maybe<Scalars['String']>;
 };
 
 export type CorridorStatsInputType = {
-  /** Input type for corridor stats queries. */
   corridorId: Scalars['String'];
   fromTimestamp: Scalars['DateTime'];
-  granularity?: Maybe<CorridorGranularity>;
+  granularity: CorridorGranularity;
   stopList?: Maybe<Array<Maybe<Scalars['String']>>>;
   toTimestamp: Scalars['DateTime'];
 };
 
 export type CorridorStatsPerServiceType = {
   __typename?: 'CorridorStatsPerServiceType';
-  /** Response for corridor journey time stats grouped by noc code, line and service pattern. */
   lineName: Scalars['String'];
   noc?: Maybe<Scalars['String']>;
   operatorName?: Maybe<Scalars['String']>;
@@ -194,37 +164,24 @@ export type CorridorStatsPerServiceType = {
   totalJourneyTime?: Maybe<Scalars['Int']>;
 };
 
-export type CorridorStatsTimeOfDayType = ICorridorJourneyTimeStats & {
+export type CorridorStatsTimeOfDayType = {
   __typename?: 'CorridorStatsTimeOfDayType';
   avgTransitTime?: Maybe<Scalars['Float']>;
-  /** Response for corridor journey time stats grouped by time of day. */
   hour: Scalars['Int'];
   maxTransitTime: Scalars['Int'];
   minTransitTime: Scalars['Int'];
   percentile25?: Maybe<Scalars['Float']>;
-  percentile5?: Maybe<Scalars['Float']>;
   percentile75?: Maybe<Scalars['Float']>;
-  percentile95?: Maybe<Scalars['Float']>;
 };
 
 export type CorridorStatsType = {
   __typename?: 'CorridorStatsType';
-  /** Journey time stats grouped by day of week. */
-  journeyTimeDayOfWeekStats: Array<Maybe<CorridorStatsDayOfWeekType>>;
-  /** Journey time histogram. */
-  journeyTimeHistogram: Array<Maybe<CorridorStatsHistogramType>>;
-  /** Journey time stats grouped by noc_code, service pattern and line. */
+  journeyTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
+  journeyTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
   journeyTimePerServiceStats: Array<Maybe<CorridorStatsPerServiceType>>;
-  /**
-   * Overview stats for a corridor.
-   * This includes min/max/percentiles journey time
-   */
-  journeyTimeStats: Array<Maybe<CorridorJourneyTimeStatsType>>;
-  /** Journey time stats grouped by time of day. */
-  journeyTimeTimeOfDayStats: Array<Maybe<CorridorStatsTimeOfDayType>>;
-  /** Service link data */
-  serviceLinks: Array<Maybe<ServiceLinkType>>;
-  /** Summary stats for a corridor. */
+  journeyTimeStats?: Maybe<Array<Maybe<CorridorJourneyTimeStatsType>>>;
+  journeyTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
+  serviceLinks?: Maybe<Array<Maybe<ServiceLinkType>>>;
   summaryStats?: Maybe<CorridorSummaryStatsType>;
 };
 
@@ -232,37 +189,25 @@ export type CorridorSummaryStatsType = {
   __typename?: 'CorridorSummaryStatsType';
   averageJourneyTime?: Maybe<Scalars['Int']>;
   numberOfServices?: Maybe<Scalars['Int']>;
-  operatorName?: Maybe<Scalars['String']>;
-  percentile95?: Maybe<Scalars['Float']>;
-  scheduledJourneyTime?: Maybe<Scalars['Int']>;
   scheduledTransits?: Maybe<Scalars['Int']>;
-  /** Response for corridor summary stats. */
   totalTransits?: Maybe<Scalars['Int']>;
 };
 
 export type CorridorType = {
   __typename?: 'CorridorType';
-  createdBy: UserType;
-  /** Response type for corridor queries. */
+  createdBy?: Maybe<UserType>;
   id: Scalars['Int'];
   name: Scalars['String'];
-  organisation?: Maybe<OrganisationType>;
-  stops: Array<Maybe<StopInfoType>>;
+  stops?: Maybe<Array<Maybe<StopInfoType>>>;
 };
 
 export type CorridorUpdateInputType = {
-  /** Input type for updating a corridor. */
   id: Scalars['Int'];
   name: Scalars['String'];
-  stopList: Array<Maybe<Scalars['String']>>;
+  stopList: Array<Scalars['String']>;
 };
 
 
-
-export type DateTimeRangeInput = {
-  fromTimestamp: Scalars['DateTime'];
-  toTimestamp: Scalars['DateTime'];
-};
 
 export type DayOfWeekFlagsInputType = {
   friday: Scalars['Boolean'];
@@ -274,65 +219,44 @@ export type DayOfWeekFlagsInputType = {
   wednesday: Scalars['Boolean'];
 };
 
-/** Type to represent frequence of services in delay buckets. */
 export type DelayFrequencyType = {
   __typename?: 'DelayFrequencyType';
   bucket: Scalars['Int'];
-  frequency: Scalars['Int'];
+  frequency?: Maybe<Scalars['Int']>;
 };
 
+export type EventData = {
+  __typename?: 'EventData';
+  message: Scalars['String'];
+};
 
-export type EventsPage = {
-  __typename?: 'EventsPage';
+export type EventResponse = {
+  __typename?: 'EventResponse';
   items?: Maybe<Array<EventType>>;
-  pageInfo?: Maybe<PageInfo>;
 };
 
 export type EventStatsType = {
   __typename?: 'EventStatsType';
-  /** Total count of events for a day. */
-  count?: Maybe<Scalars['Int']>;
-  /** The day for the event count. */
-  day?: Maybe<Scalars['Date']>;
+  count: Scalars['Int'];
+  day: Scalars['Date'];
 };
 
 export type EventType = {
   __typename?: 'EventType';
-  /** If the feed status is Active, then when was it last down. */
-  data?: Maybe<Scalars['EventData']>;
-  /** Timestamp when the event was generated. */
-  timestamp?: Maybe<Scalars['DateTime']>;
-  /** Type of the event. */
-  type?: Maybe<Scalars['String']>;
-};
-
-export type FeatureFlagType = {
-  __typename?: 'FeatureFlagType';
-  consolidateHistogram: Scalars['Boolean'];
-  corridorStatsTimezoneEnabled: Scalars['Boolean'];
-  freshdeskEnabled: Scalars['Boolean'];
-  lineDirectionFiltering: Scalars['Boolean'];
-  ssoEnabled: Scalars['Boolean'];
-  stopIndexFiltering: Scalars['Boolean'];
-  taggingIncludeBankHolidays: Scalars['Boolean'];
-  vehicleReplayFromTimestream: Scalars['Boolean'];
+  data: EventData;
+  timestamp: Scalars['String'];
+  type: Scalars['String'];
 };
 
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
-  /** This is percentage of availability of the feed in the last 24 hours. */
   availability?: Maybe<Scalars['Float']>;
-  feedStatus: Scalars['Boolean'];
-  /** Feed monitoring vehicle stats - Historical feed stats for a given day. */
-  historicalStats: HistoricalStatsType;
-  /** If the feed status is Active, then when was it last down. */
+  feedStatus?: Maybe<Scalars['Boolean']>;
+  historicalStats?: Maybe<HistoricalStatsType>;
   lastOutage?: Maybe<Scalars['DateTime']>;
-  /** Feed monitoring vehicles stats - over last 24 hours. */
-  liveStats: LiveStatsType;
-  /** If the feed status is Down, then since when was it unavailable. */
+  liveStats?: Maybe<LiveStatsType>;
   unavailableSince?: Maybe<Scalars['DateTime']>;
-  /** Feed monitoring vehicle stats over a custom time range. */
-  vehicleStats: Array<VehicleStatsType>;
+  vehicleStats: Array<Maybe<VehicleStatsType>>;
 };
 
 
@@ -343,243 +267,68 @@ export type FeedMonitoringTypeHistoricalStatsArgs = {
 
 export type FeedMonitoringTypeVehicleStatsArgs = {
   end: Scalars['DateTime'];
-  granularity: Granularity;
+  granularity?: Maybe<Granularity>;
   start: Scalars['DateTime'];
 };
 
-export enum FeedStatusEnum {
-  Down = 'DOWN',
-  Up = 'UP'
-}
-
 export type FrequentServiceInfoFilterType = {
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
-  endTime?: Maybe<Scalars['Time']>;
-  lineId: Scalars['String'];
-  /** Inputs for frequentServiceInfo. */
-  noc?: Maybe<Scalars['String']>;
+  endTime?: Maybe<Scalars['String']>;
+  lineId?: Maybe<Scalars['String']>;
   operatorId?: Maybe<Scalars['String']>;
-  startTime?: Maybe<Scalars['Time']>;
+  startTime?: Maybe<Scalars['String']>;
 };
 
 export type FrequentServiceInfoInputType = {
-  filters: FrequentServiceInfoFilterType;
+  filters?: Maybe<FrequentServiceInfoFilterType>;
   fromTimestamp: Scalars['DateTime'];
   toTimestamp: Scalars['DateTime'];
 };
 
-/** Type to represent info about a particular frequent service. */
 export type FrequentServiceInfoType = {
   __typename?: 'FrequentServiceInfoType';
-  /** Number of hours that the service runs frequently. */
-  numHours: Scalars['Int'];
-  /** Total number of hours the services has actually run. */
-  totalHours: Scalars['Int'];
+  numHours?: Maybe<Scalars['Int']>;
+  totalHours?: Maybe<Scalars['Int']>;
 };
 
-/** Type to represent a frequent service. */
 export type FrequentServiceType = {
   __typename?: 'FrequentServiceType';
   serviceId: Scalars['String'];
-  serviceInfo: ServiceInfoType;
 };
 
-/** Filters for GPS feed. */
-export type GpsFeedFilterInputType = {
-  journeyIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  /** The vehicleIds filters is only used with getUnmatchedJourneys. */
-  vehicleIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-};
-
-/** Type to represent input paramweters to get real-time gps feeds. */
-export type GpsFeedInputType = {
-  filters?: Maybe<GpsFeedFilterInputType>;
-  /**
-   * Whether to load all events for each journey. By default this is false
-   * where the API returns the latest GPS position of each ongoing journey.
-   */
-  loadTrails?: Maybe<Scalars['Boolean']>;
-  /**
-   * A string contains a past interval suffixed with the time-unit. Examples are
-   * - 1h: Gets GPS feed for the last 1 hour
-   * - 10m: Gets GPS feed for the last 10 minutes.
-   * This string must adhere to TimeStream timeAgo specifications.
-   */
-  timeAgo: Scalars['String'];
-};
-
-/**
- * Vehicle journey status.
- *
- * Started - This feed event is for a journey that's supposed to be running.
- * Completed - This feed event is for a journey that's supposed to have been completed.
- */
 export enum GpsFeedJourneyStatus {
   Completed = 'Completed',
   Started = 'Started',
   Unknown = 'Unknown'
 }
 
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespace = {
-  __typename?: 'GpsFeedNamespace';
-  /** Get gps feed for a specific journey. */
-  getJourney: Array<Maybe<GpsFeedType>>;
-  /** Get all journeys from the gps feed. */
-  getJourneys: Array<Maybe<GpsFeedType>>;
-  /** Get all missing journeys from the non tracked journey table. */
-  getMissingJourneys: Array<Maybe<MissingJourneyType>>;
-  /**
-   * Get stale journeys, journeys that have a matched vehicle journey
-   * but haven't sent a GPS feed for more than a minute.
-   */
-  getStaleJourneys: Array<Maybe<GpsFeedType>>;
-  /** Get all unmatched journeys from the gps feed. */
-  getUnmatchedJourneys: Array<Maybe<GpsFeedType>>;
-  /**
-   * Get count of matched vehicles.
-   *
-   * You can filter counts for a set of noc codes.
-   * Note that unmatched count are for all unmatched vehicles
-   * running on lines that were being operated by operators
-   * that were either filtered by nocCodes filter or all
-   * operators that the organisation of the user is
-   * configured with.
-   */
-  getVehicleCounts: VehicleCountType;
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetJourneyArgs = {
-  journeyId: Scalars['String'];
-  startTime: Scalars['DateTime'];
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetJourneysArgs = {
-  inputs: GpsFeedInputType;
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetMissingJourneysArgs = {
-  inputs: GpsFeedInputType;
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetStaleJourneysArgs = {
-  timeAgo: Scalars['String'];
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetUnmatchedJourneysArgs = {
-  inputs: GpsFeedInputType;
-};
-
-
-/** Type to represent all queries related to GPS feeds. */
-export type GpsFeedNamespaceGetVehicleCountsArgs = {
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  timeAgo: Scalars['String'];
-};
-
-export type GpsFeedShadowNamespace = {
-  __typename?: 'GpsFeedShadowNamespace';
-  /** Get gps feed for a specific journey. */
-  getJourney: Array<Maybe<GpsFeedType>>;
-  /** Get all journeys from the gps feed. */
-  getJourneys: Array<Maybe<GpsFeedType>>;
-  /**
-   * Get stale journeys, journeys that have a matched vehicle journey
-   * but haven't sent a GPS feed for more than a minute.
-   */
-  getStaleJourneys: Array<Maybe<GpsFeedType>>;
-  /** Get all unmatched journeys from the gps feed. */
-  getUnmatchedJourneys: Array<Maybe<GpsFeedType>>;
-  /**
-   * Get count of matched vehicles.
-   *
-   * You can filter counts for a set of noc codes.
-   * Note that unmatched count are for all unmatched vehicles
-   * running on lines that were being operated by operators
-   * that were either filtered by nocCodes filter or all
-   * operators that the organisation of the user is
-   * configured with.
-   */
-  getVehicleCounts: VehicleCountType;
-};
-
-
-export type GpsFeedShadowNamespaceGetJourneyArgs = {
-  journeyId: Scalars['String'];
-  startTime: Scalars['DateTime'];
-};
-
-
-export type GpsFeedShadowNamespaceGetJourneysArgs = {
-  inputs: GpsFeedInputType;
-};
-
-
-export type GpsFeedShadowNamespaceGetStaleJourneysArgs = {
-  timeAgo: Scalars['String'];
-};
-
-
-export type GpsFeedShadowNamespaceGetUnmatchedJourneysArgs = {
-  inputs: GpsFeedInputType;
-};
-
-
-export type GpsFeedShadowNamespaceGetVehicleCountsArgs = {
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  timeAgo: Scalars['String'];
-};
-
-/**
- * GPS feed status for each feed event.
- *
- * Stale - Latest feed event is more than a minute old.
- * Active - Latest feed event is a not stale.
- */
 export enum GpsFeedStatus {
   Active = 'Active',
   Stale = 'Stale'
 }
 
-/** Type to represent a GPS feed response. */
 export type GpsFeedType = {
   __typename?: 'GpsFeedType';
-  delay?: Maybe<Scalars['Int']>;
-  actualDelay?: Maybe<Scalars['Int']>;
+  actualDelay: Scalars['Int'];
+  delay: Scalars['Int'];
   feedStatus?: Maybe<GpsFeedStatus>;
   isTimingPoint?: Maybe<Scalars['Boolean']>;
-  journeyStatus?: Maybe<GpsFeedJourneyStatus>;
+  journeyStatus: GpsFeedJourneyStatus;
   lat: Scalars['Float'];
   lon: Scalars['Float'];
   operatorInfo?: Maybe<OperatorInfoType>;
   previousStopInfo?: Maybe<StopInfoType>;
-  scheduledDeparture?: Maybe<Scalars['DateTime']>;
+  scheduledDeparture: Scalars['String'];
   serviceInfo: ServiceInfoType;
   servicePatternId?: Maybe<Scalars['String']>;
-  startTime?: Maybe<Scalars['DateTime']>;
-  ts: Scalars['DateTime'];
+  startTime: Scalars['String'];
+  ts: Scalars['String'];
   vehicleId: Scalars['String'];
   vehicleJourneyId?: Maybe<Scalars['String']>;
 };
 
 export type GpsPointType = {
   __typename?: 'GpsPointType';
-  /** Represents a GPS location */
   latitude: Scalars['Float'];
   longitude: Scalars['Float'];
 };
@@ -591,46 +340,27 @@ export enum Granularity {
   Month = 'month'
 }
 
-/** Type to represent headway metrics per-day-of-week. */
-export type HeadwayDayOfWeekType = IHeadwayType & {
-  __typename?: 'HeadwayDayOfWeekType';
-  actualWaitTime: Scalars['Float'];
-  dayOfWeek: Scalars['Int'];
-  excessWaitTime: Scalars['Float'];
-  scheduledWaitTime: Scalars['Float'];
-};
-
 export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
-  endTime?: Maybe<Scalars['Time']>;
+  endTime?: Maybe<Scalars['String']>;
   granularity?: Maybe<Granularity>;
   lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
   operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  startTime?: Maybe<Scalars['Time']>;
+  startTime?: Maybe<Scalars['String']>;
 };
 
 export type HeadwayInputType = {
   filters?: Maybe<HeadwayFiltersInputType>;
-  fromTimestamp: Scalars['DateTime'];
-  sortBy?: Maybe<HeadwaySortType>;
-  toTimestamp: Scalars['DateTime'];
+  fromTimestamp?: Maybe<Scalars['DateTime']>;
+  toTimestamp?: Maybe<Scalars['DateTime']>;
 };
 
 export type HeadwayMetricsType = {
   __typename?: 'HeadwayMetricsType';
-  /** Get information about a frequent service. */
-  frequentServiceInfo: FrequentServiceInfoType;
-  /** Get a list of frequent services. */
-  frequentServices?: Maybe<Array<FrequentServiceType>>;
-  /** Headway histogram per day of week for a single line. */
-  headwayDayOfWeek?: Maybe<Array<HeadwayDayOfWeekType>>;
-  /** Returns summary headway metrics like excess-wait times. */
-  headwayOverview: HeadwayOverviewType;
-  /** Headway histogram per hour of day for a single line. */
-  headwayTimeOfDay?: Maybe<Array<HeadwayTimeOfDayType>>;
-  /** Headway for a single line as a time-series. */
-  headwayTimeSeries?: Maybe<Array<HeadwayTimeSeriesType>>;
+  frequentServiceInfo?: Maybe<FrequentServiceInfoType>;
+  frequentServices?: Maybe<Array<Maybe<FrequentServiceType>>>;
+  headwayOverview?: Maybe<HeadwayOverviewType>;
+  headwayTimeSeries?: Maybe<Array<Maybe<HeadwayTimeSeriesType>>>;
 };
 
 
@@ -641,14 +371,8 @@ export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
 
 export type HeadwayMetricsTypeFrequentServicesArgs = {
   fromTimestamp: Scalars['DateTime'];
-  noc?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
+  operatorId: Scalars['String'];
   toTimestamp: Scalars['DateTime'];
-};
-
-
-export type HeadwayMetricsTypeHeadwayDayOfWeekArgs = {
-  inputs: HeadwayInputType;
 };
 
 
@@ -657,88 +381,35 @@ export type HeadwayMetricsTypeHeadwayOverviewArgs = {
 };
 
 
-export type HeadwayMetricsTypeHeadwayTimeOfDayArgs = {
-  inputs: HeadwayInputType;
-};
-
-
 export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
   inputs: HeadwayInputType;
 };
 
-/** Type to represent headway overview. */
-export type HeadwayOverviewType = IHeadwayType & {
+export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
   actualWaitTime: Scalars['Float'];
   excessWaitTime: Scalars['Float'];
   scheduledWaitTime: Scalars['Float'];
 };
 
-export enum HeadwaySortEnum {
-  ActualWaitTime = 'actualWaitTime',
-  ExcessWaitTime = 'excessWaitTime',
-  ScheduledWaitTime = 'scheduledWaitTime'
-}
-
-/** Represents a sorting type for list of operators. */
-export type HeadwaySortType = {
-  field?: Maybe<HeadwaySortEnum>;
-  order?: Maybe<SortOrderEnum>;
-};
-
-/** Type to represent headway metrics per time-of-day. */
-export type HeadwayTimeOfDayType = IHeadwayType & {
-  __typename?: 'HeadwayTimeOfDayType';
-  actualWaitTime: Scalars['Float'];
-  excessWaitTime: Scalars['Float'];
-  scheduledWaitTime: Scalars['Float'];
-  timeOfDay: Scalars['Time'];
-};
-
-/** Type to represent headway metrics in a time-series. */
-export type HeadwayTimeSeriesType = IHeadwayType & {
+export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
   actualWaitTime: Scalars['Float'];
   excessWaitTime: Scalars['Float'];
   scheduledWaitTime: Scalars['Float'];
-  ts: Scalars['DateTime'];
-};
-
-export type HistogramInfoType = {
-  __typename?: 'HistogramInfoType';
-  maxHistogramBin: Scalars['Int'];
-  minHistogramBin: Scalars['Int'];
+  ts: Scalars['String'];
 };
 
 export type HistoricalStatsType = {
   __typename?: 'HistoricalStatsType';
   availability?: Maybe<Scalars['Float']>;
-  compliance?: Maybe<Scalars['Float']>;
   updateFrequency?: Maybe<Scalars['Int']>;
-  vehicleStats: Array<Maybe<VehicleStatsType>>;
-};
-
-export type ICorridorJourneyTimeStats = {
-  avgTransitTime?: Maybe<Scalars['Float']>;
-  maxTransitTime: Scalars['Int'];
-  minTransitTime: Scalars['Int'];
-  percentile25?: Maybe<Scalars['Float']>;
-  percentile5?: Maybe<Scalars['Float']>;
-  percentile75?: Maybe<Scalars['Float']>;
-  percentile95?: Maybe<Scalars['Float']>;
-};
-
-/** Interface for headway response. */
-export type IHeadwayType = {
-  actualWaitTime: Scalars['Float'];
-  excessWaitTime: Scalars['Float'];
-  scheduledWaitTime: Scalars['Float'];
 };
 
 export type InvitationInput = {
   email: Scalars['String'];
-  organisation?: Maybe<ObjectReferenceType>;
-  role: ObjectReferenceType;
+  organisation?: Maybe<OrganisationReferenceInput>;
+  role: RoleReferenceInput;
 };
 
 export type InvitationResponseType = {
@@ -751,150 +422,62 @@ export type InvitationType = {
   __typename?: 'InvitationType';
   accepted: Scalars['Boolean'];
   email: Scalars['String'];
-  organisation?: Maybe<OrganisationType>;
-  role?: Maybe<RoleType>;
 };
-
-/** Interface for punctuality response. */
-export type IPunctualityType = {
-  early: Scalars['Int'];
-  late: Scalars['Int'];
-  onTime: Scalars['Int'];
-};
-
-export type JourneyScheduledStartTimes = {
-  __typename?: 'JourneyScheduledStartTimes';
-  days: Array<Maybe<ShortCodeDayOfWeek>>;
-  fromDate: Scalars['Date'];
-  startTimes: Array<Maybe<Scalars['Time']>>;
-  toDate: Scalars['Date'];
-};
-
-export type JourneyScheduledStartTimesInputType = {
-  fromTimestamp: Scalars['DateTime'];
-  lineId?: Maybe<Scalars['String']>;
-  nocCode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
-  toTimestamp: Scalars['DateTime'];
-};
-
-export enum Level {
-  Line = 'line',
-  Operator = 'operator',
-  Stop = 'stop'
-}
-
-export enum LineDirection {
-  All = 'all',
-  Inbound = 'inbound',
-  Outbound = 'outbound'
-}
 
 export type LineFilterType = {
-  /** Filter by a set of line ids. */
   lineIds?: Maybe<Array<Scalars['String']>>;
-};
-
-export type LineInfoType = {
-  __typename?: 'LineInfoType';
-  lineName: Scalars['String'];
-  lineNumber: Scalars['String'];
 };
 
 export type LineType = {
   __typename?: 'LineType';
-  /** Line id's for list of operators. */
   lineId: Scalars['String'];
   lineName: Scalars['String'];
   lineNumber: Scalars['String'];
-  onTimePerformance: Array<Maybe<OnTimePerformanceType>>;
-  servicePatterns: Array<Maybe<ServicePatternType>>;
+  servicePatterns?: Maybe<Array<Maybe<ServicePatternType>>>;
 };
 
 export type LiveStatsType = {
   __typename?: 'LiveStatsType';
-  /** Number  of vehicles running today. */
   currentVehicles?: Maybe<Scalars['Int']>;
-  /** Number of expected vehicles to be running today. */
   expectedVehicles?: Maybe<Scalars['Int']>;
-  /** Number of warning in the feed for today. */
   feedAlerts?: Maybe<Scalars['Int']>;
-  /** Number of errors in the feed for today. */
   feedErrors?: Maybe<Scalars['Int']>;
-  /** Vehicle counts per minute for the last 20 minutes. */
   last20Minutes: Array<Maybe<VehicleStatsType>>;
-  /** Hourly vehicle counts for today. */
   last24Hours: Array<Maybe<VehicleStatsType>>;
   updateFrequency?: Maybe<Scalars['Int']>;
 };
 
-/** Represents information about stop locality */
 export type LocalityType = {
   __typename?: 'LocalityType';
-  localityAreaId: Scalars['String'];
-  localityAreaName: Scalars['String'];
-  localityId: Scalars['String'];
-  localityName: Scalars['String'];
+  localityAreaId?: Maybe<Scalars['String']>;
+  localityAreaName?: Maybe<Scalars['String']>;
+  localityId?: Maybe<Scalars['String']>;
+  localityName?: Maybe<Scalars['String']>;
 };
 
-export type LoginResponseType = {
-  __typename?: 'LoginResponseType';
+export type LoginResponse = {
+  __typename?: 'LoginResponse';
   expiresAt?: Maybe<Scalars['DateTime']>;
   success: Scalars['Boolean'];
 };
 
-/** Type to represent a missing journey */
-export type MissingJourneyType = {
-  __typename?: 'MissingJourneyType';
-  journeyStatus?: Maybe<GpsFeedJourneyStatus>;
-  minuteBeginning?: Maybe<Scalars['Int']>;
-  operatorInfo?: Maybe<OperatorInfoType>;
-  secondsTracked?: Maybe<Scalars['Int']>;
-  serviceInfo: ServiceInfoType;
-  servicePatternId?: Maybe<Scalars['String']>;
-  startTime?: Maybe<Scalars['DateTime']>;
-  ts: Scalars['DateTime'];
-  vehicleJourneyId?: Maybe<Scalars['String']>;
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
-  /** Create an user alert. */
   addUserAlert: MutationResponseType;
-  /** Create a corridor. */
   createCorridor: MutationResponseType;
-  /** Delete a corridor. */
   deleteCorridor: MutationResponseType;
-  /** Delete a user. */
   deleteUser: MutationResponseType;
-  /** Delete an user alert. */
   deleteUserAlert: MutationResponseType;
-  /** Invite a user to signup to the system. */
   inviteUser: InvitationResponseType;
-  login: LoginResponseType;
+  login: LoginResponse;
   logout: Scalars['Boolean'];
-  /**
-   * Initiate a reset password request. This sends an email to the user
-   * to reset the password.
-   */
   requestResetPassword: MutationResponseType;
-  /**
-   * Resets users password once the user follows the reset password link
-   * sent to his or her mailbox.
-   */
   resetPassword: MutationResponseType;
-  /** Adds a user to the system when user signs up by following the invitation link. */
-  signUp: SignUpResponseType;
-  /** Update a corridor. */
+  signUp: MutationResponseType;
   updateCorridor: MutationResponseType;
-  /** Update an organisation config. */
-  updateOrganisationConfig: OrganisationConfigUpdateResponseType;
-  /** Update a user. */
   updateUser: UserUpdateResponseType;
-  /** Edit an user alert. */
   updateUserAlert: MutationResponseType;
-  /** Check if the reset password token is valid. */
-  verifyResetPasswordToken?: Maybe<Scalars['Boolean']>;
+  verifyResetPasswordToken: Scalars['Boolean'];
 };
 
 
@@ -948,7 +531,7 @@ export type MutationResetPasswordArgs = {
 
 
 export type MutationSignUpArgs = {
-  payload: SignUpInput;
+  payload: SignupPayloadType;
 };
 
 
@@ -957,13 +540,8 @@ export type MutationUpdateCorridorArgs = {
 };
 
 
-export type MutationUpdateOrganisationConfigArgs = {
-  payload: OrganisationConfigInputType;
-};
-
-
 export type MutationUpdateUserArgs = {
-  payload: UserInput;
+  payload?: Maybe<UserUpdateInput>;
   username: Scalars['String'];
 };
 
@@ -985,43 +563,22 @@ export type MutationResponseType = {
   success: Scalars['Boolean'];
 };
 
-/** This input object is used to refer to related objects like foreign keys. */
-export type ObjectReferenceType = {
-  id: Scalars['String'];
-};
-
 export type OnTimePerformanceType = {
   __typename?: 'OnTimePerformanceType';
-  /** Delay histogram for services of a given operator. */
   delayFrequency?: Maybe<Array<DelayFrequencyType>>;
-  /** Trip Level OTP */
-  journeyScheduledStartTimes: Array<Maybe<JourneyScheduledStartTimes>>;
-  /** Performance for list of operators */
-  operatorPerformance: OperatorPerformancePage;
-  /** Punctuality histogram per day of week for a single operator. */
+  operatorPerformance?: Maybe<OperatorPerformancePage>;
   punctualityDayOfWeek?: Maybe<Array<PunctualityDayOfWeekType>>;
-  /** Punctuality overview for operators */
   punctualityOverview?: Maybe<PunctualityTotalsType>;
-  /** Punctuality histogram per hour of day for a single operator. */
   punctualityTimeOfDay?: Maybe<Array<PunctualityTimeOfDayType>>;
-  /** Punctuality for a single operator as a time-series. */
   punctualityTimeSeries?: Maybe<Array<PunctualityTimeSeriesType>>;
-  /** Detailed performance per service for an operator. */
   servicePerformance?: Maybe<Array<ServicePerformanceType>>;
-  /** Punctuality per service for an operator. */
-  servicePunctuality?: Maybe<Array<ServicePunctualityType>>;
-  /** Per-stop punctuality for a service. */
+  servicePunctuality?: Maybe<Array<Maybe<ServicePunctualityType>>>;
   stopPerformance?: Maybe<Array<StopPerformanceType>>;
 };
 
 
 export type OnTimePerformanceTypeDelayFrequencyArgs = {
   inputs: PerformanceInputType;
-};
-
-
-export type OnTimePerformanceTypeJourneyScheduledStartTimesArgs = {
-  inputs: JourneyScheduledStartTimesInputType;
 };
 
 
@@ -1064,145 +621,78 @@ export type OnTimePerformanceTypeStopPerformanceArgs = {
   inputs: PerformanceInputType;
 };
 
-export type OperatorFilterType = {
-  /** Filter by feed status. */
-  feedStatus?: Maybe<FeedStatusEnum>;
-  /** Filter by operator name, does a exact search. */
-  name?: Maybe<Scalars['String']>;
-  /** Filter by operator name containing the search term. */
-  name__icontains?: Maybe<Scalars['String']>;
-  /** Filter by a set of noc codes. */
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  /** Filter by a set of operator IDs. */
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+export type OperatorFilterInput = {
+  operatorIds?: Maybe<Array<Scalars['String']>>;
 };
 
 export type OperatorInfoType = {
   __typename?: 'OperatorInfoType';
   nocCode?: Maybe<Scalars['String']>;
-  /** Information about an operator. */
   operatorId?: Maybe<Scalars['String']>;
-  operatorName: Scalars['String'];
+  operatorName?: Maybe<Scalars['String']>;
 };
 
-/** Represents a single page in a paginated response for operator performance results. */
 export type OperatorPerformancePage = {
   __typename?: 'OperatorPerformancePage';
-  items: Array<Maybe<OperatorPerformanceType>>;
+  items?: Maybe<Array<Maybe<OperatorPerformanceType>>>;
   pageInfo?: Maybe<PageInfo>;
 };
 
-/** Type to represent performance metrics for operators. */
-export type OperatorPerformanceType = IPunctualityType & {
+export type OperatorPerformanceType = {
   __typename?: 'OperatorPerformanceType';
-  actualDepartures: Scalars['Int'];
-  averageDelay: Scalars['Float'];
+  actualDepartures?: Maybe<Scalars['Int']>;
+  averageDelay?: Maybe<Scalars['Float']>;
   early: Scalars['Int'];
   late: Scalars['Int'];
   name?: Maybe<Scalars['String']>;
   nocCode?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
-  scheduledDepartures: Scalars['Int'];
-};
-
-export enum OperatorSortEnum {
-  FeedAvailability = 'feed_availability'
-}
-
-export type OperatorSortType = {
-  field?: Maybe<OperatorSortEnum>;
-  order?: Maybe<SortOrderEnum>;
+  scheduledDepartures?: Maybe<Scalars['Int']>;
 };
 
 export type OperatorsPage = {
   __typename?: 'OperatorsPage';
   items: Array<Maybe<OperatorType>>;
-  pageInfo?: Maybe<PageInfo>;
 };
 
 export type OperatorType = {
   __typename?: 'OperatorType';
-  adminAreas?: Maybe<Array<AdminAreaInfoType>>;
-  feedMonitoring: FeedMonitoringType;
+  adminAreas?: Maybe<Array<Maybe<AdminAreaInfoType>>>;
+  feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']>;
-  nocCode?: Maybe<Scalars['String']>;
+  nocCode: Scalars['String'];
   operatorId?: Maybe<Scalars['String']>;
-  transitModel: TransitModelType;
+  transitModel?: Maybe<TransitModelType>;
 };
 
-export type OrganisationConfigDefaultFiltersType = {
-  __typename?: 'OrganisationConfigDefaultFiltersType';
-  timingPoints?: Maybe<Scalars['Boolean']>;
-};
-
-export type OrganisationConfigErrorResponseType = {
-  __typename?: 'OrganisationConfigErrorResponseType';
-  onTimeMaxMinutes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  onTimeMinMinutes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  permissionDenied?: Maybe<Array<Maybe<Scalars['String']>>>;
-  timingPoints?: Maybe<Array<Maybe<Scalars['String']>>>;
-};
-
-export type OrganisationConfigInputType = {
-  onTimeMaxMinutes?: Maybe<Scalars['Int']>;
-  onTimeMinMinutes?: Maybe<Scalars['Int']>;
-  timingPoints?: Maybe<Scalars['Boolean']>;
-};
-
-export type OrganisationConfigOnTimePerformanceType = {
-  __typename?: 'OrganisationConfigOnTimePerformanceType';
-  onTimeMaxMinutes?: Maybe<Scalars['Int']>;
-  onTimeMinMinutes?: Maybe<Scalars['Int']>;
-};
-
-export type OrganisationConfigType = {
-  __typename?: 'OrganisationConfigType';
-  canBeUpdated?: Maybe<Scalars['Boolean']>;
-  defaultFilters?: Maybe<OrganisationConfigDefaultFiltersType>;
-  onTimePerformance?: Maybe<OrganisationConfigOnTimePerformanceType>;
-};
-
-export type OrganisationConfigUpdateResponseType = {
-  __typename?: 'OrganisationConfigUpdateResponseType';
-  error?: Maybe<OrganisationConfigErrorResponseType>;
-  organisationConfig?: Maybe<OrganisationConfigType>;
+export type OrganisationReferenceInput = {
+  id: Scalars['String'];
 };
 
 export type OrganisationType = {
   __typename?: 'OrganisationType';
   id: Scalars['String'];
   name: Scalars['String'];
-  operators?: Maybe<Array<OperatorType>>;
 };
 
 export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']>;
-  totalCount: Scalars['Int'];
+  totalCount?: Maybe<Scalars['Int']>;
 };
 
 export type PaginatedLineType = {
   __typename?: 'PaginatedLineType';
-  items?: Maybe<Array<LineType>>;
-  /** Paginated type for a list of lines. */
-  pageInfo?: Maybe<PageInfo>;
-};
-
-export type PagingInputType = {
-  after?: Maybe<Scalars['Int']>;
-  first?: Maybe<Scalars['Int']>;
+  items?: Maybe<Array<Maybe<LineType>>>;
 };
 
 export type PerformanceFiltersInputType = {
-  addNonTagged?: Maybe<Scalars['Boolean']>;
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  adminAreaIds?: Maybe<Array<Scalars['String']>>;
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
-  endTime?: Maybe<Scalars['Time']>;
-  excludedDates?: Maybe<Array<Maybe<Scalars['Date']>>>;
+  endTime?: Maybe<Scalars['String']>;
   excludeItoLineId?: Maybe<Scalars['String']>;
   granularity?: Maybe<Granularity>;
-  lineDirection?: Maybe<LineDirection>;
   lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
   maxDelay?: Maybe<Scalars['Int']>;
   minDelay?: Maybe<Scalars['Int']>;
@@ -1210,23 +700,17 @@ export type PerformanceFiltersInputType = {
   onTimeMaxMinutes?: Maybe<Scalars['Int']>;
   onTimeMinMinutes?: Maybe<Scalars['Int']>;
   operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  startTime?: Maybe<Scalars['Time']>;
-  startTimes?: Maybe<Array<Maybe<Scalars['Time']>>>;
-  stopsSegment?: Maybe<StopsSegment>;
-  tagIds?: Maybe<Array<Maybe<Scalars['Int']>>>;
+  startTime?: Maybe<Scalars['String']>;
   timingPointsOnly?: Maybe<Scalars['Boolean']>;
 };
 
 export type PerformanceInputType = {
-  filters?: Maybe<PerformanceFiltersInputType>;
+  filters: PerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime'];
-  paging?: Maybe<PagingInputType>;
-  sortBy?: Maybe<PunctualitySortType>;
   toTimestamp: Scalars['DateTime'];
 };
 
-/** Type to represent punctuality histogram per-day-of-week in a day. */
-export type PunctualityDayOfWeekType = IPunctualityType & {
+export type PunctualityDayOfWeekType = {
   __typename?: 'PunctualityDayOfWeekType';
   dayOfWeek: Scalars['Int'];
   early: Scalars['Int'];
@@ -1234,40 +718,25 @@ export type PunctualityDayOfWeekType = IPunctualityType & {
   onTime: Scalars['Int'];
 };
 
-export enum PunctualitySortEnum {
-  Early = 'early',
-  Late = 'late',
-  OnTime = 'on_time'
-}
-
-/** Represents a sorting type for list of operators. */
-export type PunctualitySortType = {
-  field?: Maybe<PunctualitySortEnum>;
-  order?: Maybe<SortOrderEnum>;
-};
-
-/** Type to represent punctuality histogram per-hour in a day. */
-export type PunctualityTimeOfDayType = IPunctualityType & {
+export type PunctualityTimeOfDayType = {
   __typename?: 'PunctualityTimeOfDayType';
   early: Scalars['Int'];
   late: Scalars['Int'];
   onTime: Scalars['Int'];
-  timeOfDay: Scalars['Time'];
+  timeOfDay: Scalars['String'];
 };
 
-/** Type to represent punctuality numbers in a time-series. */
-export type PunctualityTimeSeriesType = IPunctualityType & {
+export type PunctualityTimeSeriesType = {
   __typename?: 'PunctualityTimeSeriesType';
   early: Scalars['Int'];
   late: Scalars['Int'];
   onTime: Scalars['Int'];
-  ts: Scalars['DateTime'];
+  ts: Scalars['String'];
 };
 
-/** Type to represent punctuality of a service. */
-export type PunctualityTotalsType = IPunctualityType & {
+export type PunctualityTotalsType = {
   __typename?: 'PunctualityTotalsType';
-  averageDeviation: Scalars['Float'];
+  averageDeviation?: Maybe<Scalars['Float']>;
   completed: Scalars['Int'];
   early: Scalars['Int'];
   late: Scalars['Int'];
@@ -1277,115 +746,60 @@ export type PunctualityTotalsType = IPunctualityType & {
 
 export type Query = {
   __typename?: 'Query';
-  adminAreas?: Maybe<Array<AdminAreasType>>;
-  /** Gets info about the API */
+  adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo: ApiInfoType;
-  /** Resolve corridor queries. */
   corridor: CorridorNamespace;
-  /** Get events list. */
-  events: EventsPage;
-  /**
-   * Get event stats, get the total number of events
-   * broken down per day for a given date range.
-   */
-  eventStats: Array<EventStatsType>;
-  /** Namespace for GpsFeed queries. */
-  gpsFeed: GpsFeedNamespace;
-  /**
-   * Namespace for gpsFeedShadow queries.
-   *
-   * This namespace only exists for aiding QA to test
-   * migration from Timestream to Postgres as a data
-   * backend. Please deprecate this once that testing
-   * is finished.
-   */
-  gpsFeedShadow: GpsFeedShadowNamespace;
-  /** Resolve headway metrics */
+  events?: Maybe<EventResponse>;
+  eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   headwayMetrics: HeadwayMetricsType;
-  /** Thresholds for the OTP histogram */
-  histogramInfo: HistogramInfoType;
-  /** Get user invitation details for a given key. */
   invitation?: Maybe<InvitationType>;
-  /** Resolve an on-time performance query */
-  onTimePerformance: OnTimePerformanceType;
+  onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators: OperatorsPage;
-  organisationConfig: OrganisationConfigType;
-  /** Real-time performance metrics. */
-  realTimeMetrics: OnTimePerformanceType;
-  /** Resolve all user roles configured in the system. */
-  roles: Array<RoleType>;
-  /** Get meta-data about a service. */
-  serviceInfo: ServiceInfoType;
-  /** Resolve service pattern data */
-  servicePatternsInfo: Array<Maybe<ServicePatternType>>;
-  /** Tag for a journey. */
-  tags?: Maybe<Array<TagType>>;
-  /** Resolve timing pattern detail */
-  timingPatternDetail: Array<Maybe<TimingPatternDetailType>>;
-  /** Resolve transit model data. */
-  transitModel?: Maybe<TransitModelType>;
-  user: UserType;
-  /** Resolve a single user alert by id. */
-  userAlert?: Maybe<AlertType>;
-  /** Resolve all alerts configured for a system. */
-  userAlerts: Array<AlertType>;
-  users: Array<UserType>;
-  /** Resolve VehicleJourney */
+  roles?: Maybe<Array<RoleType>>;
+  serviceInfo?: Maybe<ServiceInfoType>;
+  servicePatternsInfo?: Maybe<Array<Maybe<ServicePatternType>>>;
+  timingPatternDetail?: Maybe<Array<Maybe<TimingPatternDetailType>>>;
+  user?: Maybe<UserType>;
+  userAlert: AlertType;
+  userAlerts?: Maybe<Array<AlertType>>;
+  users?: Maybe<Array<UserType>>;
   vehicleJourney: Array<Maybe<VehicleJourneyType>>;
-  /** Namespace for VehicleReplay queries. */
   vehicleReplay: VehicleReplayNamespace;
-  /**
-   * Namespace for VehicleReplayShadow queries.
-   *
-   * This namespace only exists for aiding QA to test
-   * migration from Timestream to Postgres as a data
-   * backend. Please deprecate this once that testing
-   * is finished.
-   */
-  vehicleReplayShadow: VehicleReplayShadowNamespace;
 };
 
 
 export type QueryAdminAreasArgs = {
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  adminAreaIds?: Maybe<Array<Scalars['String']>>;
 };
 
 
 export type QueryEventsArgs = {
-  after?: Maybe<Scalars['Int']>;
   end: Scalars['DateTime'];
-  first?: Maybe<Scalars['Int']>;
-  nocCode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
+  operatorId: Scalars['String'];
   start: Scalars['DateTime'];
 };
 
 
 export type QueryEventStatsArgs = {
   end: Scalars['Date'];
-  nocCode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
+  operatorId: Scalars['String'];
   start: Scalars['Date'];
 };
 
 
 export type QueryInvitationArgs = {
-  key?: Maybe<Scalars['String']>;
+  key: Scalars['String'];
 };
 
 
 export type QueryOperatorArgs = {
-  nocCode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
+  operatorId: Scalars['String'];
 };
 
 
 export type QueryOperatorsArgs = {
-  after?: Maybe<Scalars['Int']>;
-  filterBy?: Maybe<OperatorFilterType>;
-  first?: Maybe<Scalars['Int']>;
-  sortBy?: Maybe<OperatorSortType>;
+  filterBy?: Maybe<OperatorFilterInput>;
 };
 
 
@@ -1404,8 +818,13 @@ export type QueryTimingPatternDetailArgs = {
 };
 
 
+export type QueryUserArgs = {
+  id?: Maybe<Scalars['String']>;
+};
+
+
 export type QueryUserAlertArgs = {
-  alertId?: Maybe<Scalars['String']>;
+  alertId: Scalars['String'];
 };
 
 
@@ -1417,6 +836,10 @@ export enum RankingOrder {
   Ascending = 'ascending',
   Descending = 'descending'
 }
+
+export type RoleReferenceInput = {
+  id: Scalars['String'];
+};
 
 export type RoleType = {
   __typename?: 'RoleType';
@@ -1446,128 +869,73 @@ export type ServiceLinkType = {
   toStop: Scalars['String'];
 };
 
-/** Represents service patterns and stops along a service. */
 export type ServicePatternType = {
   __typename?: 'ServicePatternType';
-  direction?: Maybe<Scalars['String']>;
-  direction_id?: Maybe<Scalars['Int']>;
   name: Scalars['String'];
   serviceLinks: Array<Maybe<ServiceLinkType>>;
   servicePatternId: Scalars['String'];
-  stops: Array<Maybe<StopType>>;
+  stops?: Maybe<Array<StopType>>;
 };
 
 export type ServicePerformanceFiltersInputType = {
-  addNonTagged?: Maybe<Scalars['Boolean']>;
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
-  endTime?: Maybe<Scalars['Time']>;
-  excludedDates?: Maybe<Array<Maybe<Scalars['Date']>>>;
-  excludeItoLineId?: Maybe<Scalars['String']>;
-  granularity?: Maybe<Granularity>;
-  lineDirection?: Maybe<LineDirection>;
-  lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  onTimeMaxMinutes?: Maybe<Scalars['Int']>;
-  onTimeMinMinutes?: Maybe<Scalars['Int']>;
   operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  startTime?: Maybe<Scalars['Time']>;
-  startTimes?: Maybe<Array<Maybe<Scalars['Time']>>>;
-  stopsSegment?: Maybe<StopsSegment>;
-  tagIds?: Maybe<Array<Maybe<Scalars['Int']>>>;
   timingPointsOnly?: Maybe<Scalars['Boolean']>;
 };
 
 export type ServicePerformanceInputType = {
   filters?: Maybe<ServicePerformanceFiltersInputType>;
-  fromTimestamp: Scalars['DateTime'];
-  limit?: Maybe<Scalars['Int']>;
+  fromTimestamp?: Maybe<Scalars['DateTime']>;
   order?: Maybe<RankingOrder>;
-  toTimestamp: Scalars['DateTime'];
+  toTimestamp?: Maybe<Scalars['DateTime']>;
 };
 
-/**
- * Type to represent performance metrics for services.
- * This may be merged with ServicePunctualityType in the future.
- */
-export type ServicePerformanceType = IPunctualityType & {
+export type ServicePerformanceType = {
   __typename?: 'ServicePerformanceType';
   actualDepartures: Scalars['Int'];
   averageDelay: Scalars['Float'];
   early: Scalars['Int'];
   late: Scalars['Int'];
-  lineId: Scalars['String'];
+  lineId?: Maybe<Scalars['String']>;
   lineInfo: ServiceInfoType;
   onTime: Scalars['Int'];
-  operatorInfo: OperatorInfoType;
   scheduledDepartures: Scalars['Int'];
 };
 
-/** Type to represent puntuality of a service. */
-export type ServicePunctualityType = IPunctualityType & {
+export type ServicePunctualityType = {
   __typename?: 'ServicePunctualityType';
-  early: Scalars['Int'];
-  late: Scalars['Int'];
-  lineId: Scalars['String'];
-  lineInfo: ServiceInfoType;
+  early?: Maybe<Scalars['Int']>;
+  late?: Maybe<Scalars['Int']>;
+  lineId?: Maybe<Scalars['String']>;
+  lineInfo?: Maybe<ServiceInfoType>;
   nocCode?: Maybe<Scalars['String']>;
-  onTime: Scalars['Int'];
-  operatorId?: Maybe<Scalars['String']>;
-  rank: Scalars['Float'];
-  /**
-   * Get the performance numbers for a previous period
-   * for comparison with current period.
-   */
+  onTime?: Maybe<Scalars['Int']>;
+  rank?: Maybe<Scalars['Float']>;
   trend?: Maybe<ServicePunctualityType>;
 };
 
 
-/** Type to represent puntuality of a service. */
 export type ServicePunctualityTypeTrendArgs = {
   fromTimestamp: Scalars['DateTime'];
   toTimestamp: Scalars['DateTime'];
 };
 
-export enum ShortCodeDayOfWeek {
-  Fri = 'Fri',
-  Mon = 'Mon',
-  Sat = 'Sat',
-  Sun = 'Sun',
-  Thu = 'Thu',
-  Tue = 'Tue',
-  Wed = 'Wed'
-}
-
-export type SignUpInput = {
-  firstName?: Maybe<Scalars['String']>;
+export type SignupPayloadType = {
+  firstName: Scalars['String'];
   key: Scalars['String'];
-  lastName?: Maybe<Scalars['String']>;
+  lastName: Scalars['String'];
   password: Scalars['String'];
 };
 
-export type SignUpResponseType = {
-  __typename?: 'SignUpResponseType';
-  error?: Maybe<Scalars['String']>;
-  success: Scalars['Boolean'];
-};
-
-export enum SortOrderEnum {
-  Asc = 'ASC',
-  Desc = 'DESC'
-}
-
-/** Represents information about stops. */
 export type StopInfoType = {
   __typename?: 'StopInfoType';
-  sourceId: Scalars['String'];
+  sourceId?: Maybe<Scalars['String']>;
   stopId: Scalars['String'];
   stopLocality: LocalityType;
   stopLocation: GpsPointType;
   stopName: Scalars['String'];
 };
 
-/** Type to represent performance metrics for stops for a service. */
-export type StopPerformanceType = IPunctualityType & {
+export type StopPerformanceType = {
   __typename?: 'StopPerformanceType';
   actualDepartures: Scalars['Int'];
   averageDelay: Scalars['Float'];
@@ -1576,24 +944,15 @@ export type StopPerformanceType = IPunctualityType & {
   lineId?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   scheduledDepartures: Scalars['Int'];
-  stopId: Scalars['String'];
-  stopIndex?: Maybe<Scalars['Int']>;
+  stopId?: Maybe<Scalars['String']>;
   stopInfo: StopInfoType;
-  timingPoint: Scalars['Boolean'];
+  timingPoint?: Maybe<Scalars['Boolean']>;
 };
 
-export enum StopsSegment {
-  First = 'first',
-  Intermediate = 'intermediate'
-}
-
-/** Represents stops along a service pattern. */
 export type StopType = {
   __typename?: 'StopType';
   adminAreaId?: Maybe<Scalars['String']>;
-  adminAreaName?: Maybe<Scalars['String']>;
   lat: Scalars['Float'];
-  localityId?: Maybe<Scalars['String']>;
   localityName?: Maybe<Scalars['String']>;
   lon: Scalars['Float'];
   sourceId?: Maybe<Scalars['String']>;
@@ -1601,54 +960,30 @@ export type StopType = {
   stopName: Scalars['String'];
 };
 
-export type TagType = {
-  __typename?: 'TagType';
-  id?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
-};
-
-
 export type TimingPatternDetailType = {
   __typename?: 'TimingPatternDetailType';
   arrivalTimeOffset: Scalars['Int'];
-  createdAt: Scalars['DateTime'];
-  deletedAt?: Maybe<Scalars['DateTime']>;
   departureTimeOffset: Scalars['Int'];
-  noPickup: Scalars['Boolean'];
-  noSetdown: Scalars['Boolean'];
-  requestStop: Scalars['Boolean'];
   stopIndex: Scalars['Int'];
   timingPatternId: Scalars['String'];
   timingPoint: Scalars['Boolean'];
-  updatedAt: Scalars['DateTime'];
-  version: Scalars['String'];
 };
 
 export type TransitModelType = {
   __typename?: 'TransitModelType';
-  /** Transit data to fetch lines for an operator. */
   lines: PaginatedLineType;
 };
 
 
 export type TransitModelTypeLinesArgs = {
-  after?: Maybe<Scalars['Int']>;
   filterBy?: Maybe<LineFilterType>;
-  first?: Maybe<Scalars['Int']>;
 };
 
-/** Return type when searching for unique journeys. */
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
   serviceInfo: ServiceInfoType;
-  startTime: Scalars['DateTime'];
-  vehicleJourneyId: Scalars['String'];
-};
-
-export type UserInput = {
-  firstName?: Maybe<Scalars['String']>;
-  lastName?: Maybe<Scalars['String']>;
-  role?: Maybe<ObjectReferenceType>;
+  startTime: Scalars['String'];
+  vehicleJourneyId?: Maybe<Scalars['String']>;
 };
 
 export type UserType = {
@@ -1662,36 +997,32 @@ export type UserType = {
   username: Scalars['String'];
 };
 
+export type UserUpdateInput = {
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  role?: Maybe<RoleReferenceInput>;
+};
+
 export type UserUpdateResponseType = {
   __typename?: 'UserUpdateResponseType';
   error?: Maybe<Scalars['String']>;
   user?: Maybe<UserType>;
 };
 
-/** Type to represent vehicle counts. */
-export type VehicleCountType = {
-  __typename?: 'VehicleCountType';
-  matched: Scalars['Int'];
-  unmatched: Scalars['Int'];
-};
-
 export type VehicleJourneyType = {
   __typename?: 'VehicleJourneyType';
-  mode: Scalars['String'];
-  operatorId: Scalars['String'];
-  servicePatternId: Scalars['String'];
-  timingPatternId: Scalars['String'];
-  vehicleJourneyId: Scalars['String'];
+  mode?: Maybe<Scalars['String']>;
+  operatorId?: Maybe<Scalars['String']>;
+  servicePatternId?: Maybe<Scalars['String']>;
+  timingPatternId?: Maybe<Scalars['String']>;
+  vehicleJourneyId?: Maybe<Scalars['String']>;
 };
 
-/** Filters for vehicle replay API. */
 export type VehicleReplayFilterInputType = {
   filterOnStartTime?: Maybe<Scalars['Boolean']>;
   lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
-  stopIds?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
-/** Type to represent input paramweters to get vehicle replay data. */
 export type VehicleReplayInputType = {
   filters?: Maybe<VehicleReplayFilterInputType>;
   fromTimestamp: Scalars['DateTime'];
@@ -1700,12 +1031,8 @@ export type VehicleReplayInputType = {
 
 export type VehicleReplayNamespace = {
   __typename?: 'VehicleReplayNamespace';
-  /** Find distinct vehicle journeys (distinct vj_id and start_time) */
-  findJourneys: Array<Maybe<UniqueJourneyType>>;
-  /** Get vehicle replay for a single journey. */
+  findJourneys?: Maybe<Array<Maybe<UniqueJourneyType>>>;
   getJourney: Array<Maybe<GpsFeedType>>;
-  /** Vehicle replay API. */
-  getJourneys: Array<Maybe<GpsFeedType>>;
 };
 
 
@@ -1717,37 +1044,6 @@ export type VehicleReplayNamespaceFindJourneysArgs = {
 export type VehicleReplayNamespaceGetJourneyArgs = {
   journeyId: Scalars['String'];
   startTime: Scalars['DateTime'];
-};
-
-
-export type VehicleReplayNamespaceGetJourneysArgs = {
-  inputs: VehicleReplayInputType;
-};
-
-export type VehicleReplayShadowNamespace = {
-  __typename?: 'VehicleReplayShadowNamespace';
-  /** Find distinct vehicle journeys (distinct vj_id and start_time) */
-  findJourneys: Array<Maybe<UniqueJourneyType>>;
-  /** Get vehicle replay for a single journey. */
-  getJourney: Array<Maybe<GpsFeedType>>;
-  /** Vehicle replay API. */
-  getJourneys: Array<Maybe<GpsFeedType>>;
-};
-
-
-export type VehicleReplayShadowNamespaceFindJourneysArgs = {
-  inputs: VehicleReplayInputType;
-};
-
-
-export type VehicleReplayShadowNamespaceGetJourneyArgs = {
-  journeyId: Scalars['String'];
-  startTime: Scalars['DateTime'];
-};
-
-
-export type VehicleReplayShadowNamespaceGetJourneysArgs = {
-  inputs: VehicleReplayInputType;
 };
 
 export type VehicleStatsType = {
@@ -1766,8 +1062,8 @@ export type LoginMutationVariables = Exact<{
 export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login: (
-    { __typename?: 'LoginResponseType' }
-    & Pick<LoginResponseType, 'success' | 'expiresAt'>
+    { __typename?: 'LoginResponse' }
+    & Pick<LoginResponse, 'success' | 'expiresAt'>
   ) }
 );
 
@@ -1784,10 +1080,10 @@ export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UserQuery = (
   { __typename?: 'Query' }
-  & { user: (
+  & { user?: Maybe<(
     { __typename?: 'UserType' }
     & UserFragment
-  ) }
+  )> }
 );
 
 export type CorridorsStopSearchQueryVariables = Exact<{
@@ -1799,15 +1095,15 @@ export type CorridorsStopSearchQuery = (
   { __typename?: 'Query' }
   & { corridor: (
     { __typename?: 'CorridorNamespace' }
-    & { addFirstStop: Array<Maybe<(
+    & { addFirstStop?: Maybe<Array<Maybe<(
       { __typename?: 'StopType' }
       & Pick<StopType, 'stopId' | 'stopName' | 'lat' | 'lon' | 'localityName' | 'adminAreaId' | 'sourceId'>
-    )>> }
+    )>>> }
   ) }
 );
 
 export type CorridorsSubsequentStopsQueryVariables = Exact<{
-  stopList: Array<Maybe<Scalars['String']>>;
+  stopList: Array<Scalars['String']>;
 }>;
 
 
@@ -1815,10 +1111,10 @@ export type CorridorsSubsequentStopsQuery = (
   { __typename?: 'Query' }
   & { corridor: (
     { __typename?: 'CorridorNamespace' }
-    & { addSubsequentStops: Array<Maybe<(
+    & { addSubsequentStops?: Maybe<Array<Maybe<(
       { __typename?: 'StopType' }
       & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat' | 'localityName' | 'adminAreaId' | 'sourceId'>
-    )>> }
+    )>>> }
   ) }
 );
 
@@ -1832,10 +1128,10 @@ export type CorridorsListQuery = (
     & { corridorList?: Maybe<Array<Maybe<(
       { __typename?: 'CorridorType' }
       & Pick<CorridorType, 'id' | 'name'>
-      & { stops: Array<Maybe<(
+      & { stops?: Maybe<Array<Maybe<(
         { __typename?: 'StopInfoType' }
         & Pick<StopInfoType, 'stopId'>
-      )>> }
+      )>>> }
     )>>> }
   ) }
 );
@@ -1849,10 +1145,10 @@ export type GetCorridorQuery = (
   { __typename?: 'Query' }
   & { corridor: (
     { __typename?: 'CorridorNamespace' }
-    & { getCorridor: (
+    & { getCorridor?: Maybe<(
       { __typename?: 'CorridorType' }
       & Pick<CorridorType, 'id' | 'name'>
-      & { stops: Array<Maybe<(
+      & { stops?: Maybe<Array<Maybe<(
         { __typename?: 'StopInfoType' }
         & Pick<StopInfoType, 'stopId' | 'sourceId' | 'stopName'>
         & { stopLocation: (
@@ -1862,8 +1158,8 @@ export type GetCorridorQuery = (
           { __typename?: 'LocalityType' }
           & Pick<LocalityType, 'localityId' | 'localityName' | 'localityAreaId' | 'localityAreaName'>
         ) }
-      )>> }
-    ) }
+      )>>> }
+    )> }
   ) }
 );
 
@@ -1881,29 +1177,29 @@ export type CorridorStatsQuery = (
       & { summaryStats?: Maybe<(
         { __typename?: 'CorridorSummaryStatsType' }
         & Pick<CorridorSummaryStatsType, 'totalTransits' | 'numberOfServices' | 'averageJourneyTime' | 'scheduledTransits'>
-      )>, journeyTimeStats: Array<Maybe<(
+      )>, journeyTimeStats?: Maybe<Array<Maybe<(
         { __typename?: 'CorridorJourneyTimeStatsType' }
         & Pick<CorridorJourneyTimeStatsType, 'ts' | 'minTransitTime' | 'maxTransitTime' | 'avgTransitTime' | 'percentile25' | 'percentile75'>
-      )>>, journeyTimeTimeOfDayStats: Array<Maybe<(
+      )>>>, journeyTimeTimeOfDayStats?: Maybe<Array<Maybe<(
         { __typename?: 'CorridorStatsTimeOfDayType' }
         & Pick<CorridorStatsTimeOfDayType, 'hour' | 'minTransitTime' | 'maxTransitTime' | 'avgTransitTime' | 'percentile25' | 'percentile75'>
-      )>>, journeyTimeDayOfWeekStats: Array<Maybe<(
+      )>>>, journeyTimeDayOfWeekStats?: Maybe<Array<Maybe<(
         { __typename?: 'CorridorStatsDayOfWeekType' }
         & Pick<CorridorStatsDayOfWeekType, 'dow' | 'minTransitTime' | 'maxTransitTime' | 'avgTransitTime' | 'percentile25' | 'percentile75'>
-      )>>, journeyTimePerServiceStats: Array<Maybe<(
+      )>>>, journeyTimePerServiceStats: Array<Maybe<(
         { __typename?: 'CorridorStatsPerServiceType' }
         & Pick<CorridorStatsPerServiceType, 'lineName' | 'servicePatternName' | 'noc' | 'operatorName' | 'totalJourneyTime' | 'recordedTransits' | 'scheduledTransits'>
-      )>>, journeyTimeHistogram: Array<Maybe<(
+      )>>, journeyTimeHistogram?: Maybe<Array<Maybe<(
         { __typename?: 'CorridorStatsHistogramType' }
         & Pick<CorridorStatsHistogramType, 'ts'>
         & { hist?: Maybe<Array<Maybe<(
           { __typename?: 'CorridorHistogramType' }
           & Pick<CorridorHistogramType, 'bin' | 'freq'>
         )>>> }
-      )>>, serviceLinks: Array<Maybe<(
+      )>>>, serviceLinks?: Maybe<Array<Maybe<(
         { __typename?: 'ServiceLinkType' }
         & Pick<ServiceLinkType, 'fromStop' | 'toStop' | 'distance' | 'routeValidity' | 'linkRoute'>
-      )>> }
+      )>>> }
     )> }
   ) }
 );
@@ -1951,26 +1247,26 @@ export type UpdateCorridorMutation = (
 export type OperatorDashboardFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus'>
-    & { liveStats: (
+    & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'feedErrors' | 'feedAlerts'>
-    ) }
-  ) }
+    )> }
+  )> }
 );
 
 export type OperatorDashboardVehicleCountsFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
-    & { liveStats: (
+    & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'currentVehicles' | 'expectedVehicles'>
-    ) }
-  ) }
+    )> }
+  )> }
 );
 
 export type DashboardOperatorListQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2008,13 +1304,13 @@ export type DashboardPerformanceStatsQueryVariables = Exact<{
 
 export type DashboardPerformanceStatsQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { punctualityOverview?: Maybe<(
       { __typename?: 'PunctualityTotalsType' }
       & Pick<PunctualityTotalsType, 'onTime' | 'late' | 'early'>
     )> }
-  ) }
+  )> }
 );
 
 export type DashboardServiceRankingQueryVariables = Exact<{
@@ -2026,25 +1322,29 @@ export type DashboardServiceRankingQueryVariables = Exact<{
 
 export type DashboardServiceRankingQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
-    & { servicePunctuality?: Maybe<Array<(
+    & { servicePunctuality?: Maybe<Array<Maybe<(
       { __typename?: 'ServicePunctualityType' }
       & Pick<ServicePunctualityType, 'nocCode' | 'lineId' | 'onTime' | 'early' | 'late'>
-      & { lineInfo: (
+      & { lineInfo?: Maybe<(
         { __typename?: 'ServiceInfoType' }
         & Pick<ServiceInfoType, 'serviceId' | 'serviceName' | 'serviceNumber'>
-      ), trend?: Maybe<(
+      )>, trend?: Maybe<(
         { __typename?: 'ServicePunctualityType' }
         & Pick<ServicePunctualityType, 'onTime' | 'early' | 'late'>
       )> }
-    )>> }
-  ) }
+    )>>> }
+  )> }
 );
 
 export type EventFragment = (
   { __typename?: 'EventType' }
-  & Pick<EventType, 'timestamp' | 'type' | 'data'>
+  & Pick<EventType, 'timestamp' | 'type'>
+  & { data: (
+    { __typename?: 'EventData' }
+    & Pick<EventData, 'message'>
+  ) }
 );
 
 export type EventsQueryVariables = Exact<{
@@ -2056,13 +1356,13 @@ export type EventsQueryVariables = Exact<{
 
 export type EventsQuery = (
   { __typename?: 'Query' }
-  & { events: (
-    { __typename?: 'EventsPage' }
+  & { events?: Maybe<(
+    { __typename?: 'EventResponse' }
     & { items?: Maybe<Array<(
       { __typename?: 'EventType' }
       & EventFragment
     )>> }
-  ) }
+  )> }
 );
 
 export type EventStatsQueryVariables = Exact<{
@@ -2074,10 +1374,10 @@ export type EventStatsQueryVariables = Exact<{
 
 export type EventStatsQuery = (
   { __typename?: 'Query' }
-  & { eventStats: Array<(
+  & { eventStats?: Maybe<Array<Maybe<(
     { __typename?: 'EventStatsType' }
     & Pick<EventStatsType, 'count' | 'day'>
-  )> }
+  )>>> }
 );
 
 export type VehicleStatFragment = (
@@ -2088,23 +1388,23 @@ export type VehicleStatFragment = (
 export type BasicOperatorFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus' | 'availability' | 'lastOutage' | 'unavailableSince'>
-    & { liveStats: (
+    & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'updateFrequency'>
-    ) }
-  ) }
+    )> }
+  )> }
 );
 
 export type OperatorLiveStatusFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus' | 'availability' | 'lastOutage' | 'unavailableSince'>
-    & { liveStats: (
+    & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'updateFrequency' | 'currentVehicles' | 'expectedVehicles'>
       & { last24Hours: Array<Maybe<(
@@ -2114,23 +1414,23 @@ export type OperatorLiveStatusFragment = (
         { __typename?: 'VehicleStatsType' }
         & VehicleStatFragment
       )>> }
-    ) }
-  ) }
+    )> }
+  )> }
 );
 
 export type OperatorFeedHistoryFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
-    & { historicalStats: (
+    & { historicalStats?: Maybe<(
       { __typename?: 'HistoricalStatsType' }
       & Pick<HistoricalStatsType, 'updateFrequency' | 'availability'>
-    ), vehicleStats: Array<(
+    )>, vehicleStats: Array<Maybe<(
       { __typename?: 'VehicleStatsType' }
       & VehicleStatFragment
-    )> }
-  ) }
+    )>> }
+  )> }
 );
 
 export type FeedMonitoringListQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2159,16 +1459,16 @@ export type OperatorSparklineStatsQuery = (
     & { items: Array<Maybe<(
       { __typename?: 'OperatorType' }
       & Pick<OperatorType, 'nocCode' | 'operatorId'>
-      & { feedMonitoring: (
+      & { feedMonitoring?: Maybe<(
         { __typename?: 'FeedMonitoringType' }
-        & { liveStats: (
+        & { liveStats?: Maybe<(
           { __typename?: 'LiveStatsType' }
           & { last24Hours: Array<Maybe<(
             { __typename?: 'VehicleStatsType' }
             & VehicleStatFragment
           )>> }
-        ) }
-      ) }
+        )> }
+      )> }
     )>> }
   ) }
 );
@@ -2209,11 +1509,11 @@ export type GetAdminAreasQueryVariables = Exact<{
 
 export type GetAdminAreasQuery = (
   { __typename?: 'Query' }
-  & { adminAreas?: Maybe<Array<(
+  & { adminAreas?: Maybe<Array<Maybe<(
     { __typename?: 'AdminAreasType' }
     & Pick<AdminAreasType, 'shape'>
     & { id: AdminAreasType['adminAreaId'], name: AdminAreasType['adminAreaName'] }
-  )>> }
+  )>>> }
 );
 
 export type HeadwayTimeSeriesQueryVariables = Exact<{
@@ -2225,11 +1525,11 @@ export type HeadwayTimeSeriesQuery = (
   { __typename?: 'Query' }
   & { headwayMetrics: (
     { __typename?: 'HeadwayMetricsType' }
-    & { headwayTimeSeries?: Maybe<Array<(
+    & { headwayTimeSeries?: Maybe<Array<Maybe<(
       { __typename?: 'HeadwayTimeSeriesType' }
       & Pick<HeadwayTimeSeriesType, 'ts'>
       & { actual: HeadwayTimeSeriesType['actualWaitTime'], scheduled: HeadwayTimeSeriesType['scheduledWaitTime'], excess: HeadwayTimeSeriesType['excessWaitTime'] }
-    )>> }
+    )>>> }
   ) }
 );
 
@@ -2242,10 +1542,10 @@ export type HeadwayOverviewQuery = (
   { __typename?: 'Query' }
   & { headwayMetrics: (
     { __typename?: 'HeadwayMetricsType' }
-    & { headwayOverview: (
+    & { headwayOverview?: Maybe<(
       { __typename?: 'HeadwayOverviewType' }
       & { actual: HeadwayOverviewType['actualWaitTime'], scheduled: HeadwayOverviewType['scheduledWaitTime'], excess: HeadwayOverviewType['excessWaitTime'] }
-    ) }
+    )> }
   ) }
 );
 
@@ -2260,10 +1560,10 @@ export type HeadwayFrequentServicesQuery = (
   { __typename?: 'Query' }
   & { headwayMetrics: (
     { __typename?: 'HeadwayMetricsType' }
-    & { frequentServices?: Maybe<Array<(
+    & { frequentServices?: Maybe<Array<Maybe<(
       { __typename?: 'FrequentServiceType' }
       & Pick<FrequentServiceType, 'serviceId'>
-    )>> }
+    )>>> }
   ) }
 );
 
@@ -2276,10 +1576,10 @@ export type HeadwayFrequentServiceInfoQuery = (
   { __typename?: 'Query' }
   & { headwayMetrics: (
     { __typename?: 'HeadwayMetricsType' }
-    & { frequentServiceInfo: (
+    & { frequentServiceInfo?: Maybe<(
       { __typename?: 'FrequentServiceInfoType' }
       & Pick<FrequentServiceInfoType, 'numHours' | 'totalHours'>
-    ) }
+    )> }
   ) }
 );
 
@@ -2290,13 +1590,13 @@ export type OnTimeDelayFrequencyQueryVariables = Exact<{
 
 export type OnTimeDelayFrequencyQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { delayFrequency?: Maybe<Array<(
       { __typename?: 'DelayFrequencyType' }
       & Pick<DelayFrequencyType, 'bucket' | 'frequency'>
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimeTimeSeriesQueryVariables = Exact<{
@@ -2306,13 +1606,13 @@ export type OnTimeTimeSeriesQueryVariables = Exact<{
 
 export type OnTimeTimeSeriesQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { punctualityTimeSeries?: Maybe<Array<(
       { __typename?: 'PunctualityTimeSeriesType' }
       & Pick<PunctualityTimeSeriesType, 'ts' | 'onTime' | 'early' | 'late'>
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimeStatsQueryVariables = Exact<{
@@ -2322,13 +1622,13 @@ export type OnTimeStatsQueryVariables = Exact<{
 
 export type OnTimeStatsQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { punctualityOverview?: Maybe<(
       { __typename?: 'PunctualityTotalsType' }
       & Pick<PunctualityTotalsType, 'early' | 'late' | 'onTime' | 'scheduled' | 'completed' | 'averageDeviation'>
     )> }
-  ) }
+  )> }
 );
 
 export type OnTimePunctualityTimeOfDayQueryVariables = Exact<{
@@ -2338,13 +1638,13 @@ export type OnTimePunctualityTimeOfDayQueryVariables = Exact<{
 
 export type OnTimePunctualityTimeOfDayQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { punctualityTimeOfDay?: Maybe<Array<(
       { __typename?: 'PunctualityTimeOfDayType' }
       & Pick<PunctualityTimeOfDayType, 'timeOfDay' | 'onTime' | 'early' | 'late'>
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimePunctualityDayOfWeekQueryVariables = Exact<{
@@ -2354,13 +1654,13 @@ export type OnTimePunctualityDayOfWeekQueryVariables = Exact<{
 
 export type OnTimePunctualityDayOfWeekQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { punctualityDayOfWeek?: Maybe<Array<(
       { __typename?: 'PunctualityDayOfWeekType' }
       & Pick<PunctualityDayOfWeekType, 'dayOfWeek' | 'onTime' | 'early' | 'late'>
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimeServicePerformanceListQueryVariables = Exact<{
@@ -2370,7 +1670,7 @@ export type OnTimeServicePerformanceListQueryVariables = Exact<{
 
 export type OnTimeServicePerformanceListQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { servicePerformance?: Maybe<Array<(
       { __typename?: 'ServicePerformanceType' }
@@ -2380,7 +1680,7 @@ export type OnTimeServicePerformanceListQuery = (
         & Pick<ServiceInfoType, 'serviceId' | 'serviceName' | 'serviceNumber'>
       ) }
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimeStopPerformanceListQueryVariables = Exact<{
@@ -2390,7 +1690,7 @@ export type OnTimeStopPerformanceListQueryVariables = Exact<{
 
 export type OnTimeStopPerformanceListQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
     & { stopPerformance?: Maybe<Array<(
       { __typename?: 'StopPerformanceType' }
@@ -2407,7 +1707,7 @@ export type OnTimeStopPerformanceListQuery = (
         ) }
       ) }
     )>> }
-  ) }
+  )> }
 );
 
 export type OnTimeOperatorPerformanceListQueryVariables = Exact<{
@@ -2417,19 +1717,19 @@ export type OnTimeOperatorPerformanceListQueryVariables = Exact<{
 
 export type OnTimeOperatorPerformanceListQuery = (
   { __typename?: 'Query' }
-  & { onTimePerformance: (
+  & { onTimePerformance?: Maybe<(
     { __typename?: 'OnTimePerformanceType' }
-    & { operatorPerformance: (
+    & { operatorPerformance?: Maybe<(
       { __typename?: 'OperatorPerformancePage' }
       & { pageInfo?: Maybe<(
         { __typename?: 'PageInfo' }
         & Pick<PageInfo, 'totalCount' | 'next'>
-      )>, items: Array<Maybe<(
+      )>, items?: Maybe<Array<Maybe<(
         { __typename?: 'OperatorPerformanceType' }
         & Pick<OperatorPerformanceType, 'nocCode' | 'operatorId' | 'name' | 'early' | 'onTime' | 'late'>
-      )>> }
-    ) }
-  ) }
+      )>>> }
+    )> }
+  )> }
 );
 
 export type ServiceInfoQueryVariables = Exact<{
@@ -2439,10 +1739,10 @@ export type ServiceInfoQueryVariables = Exact<{
 
 export type ServiceInfoQuery = (
   { __typename?: 'Query' }
-  & { serviceInfo: (
+  & { serviceInfo?: Maybe<(
     { __typename?: 'ServiceInfoType' }
     & Pick<ServiceInfoType, 'serviceId' | 'serviceNumber' | 'serviceName'>
-  ) }
+  )> }
 );
 
 export type TransitModelServicePatternStopsQueryVariables = Exact<{
@@ -2455,27 +1755,27 @@ export type TransitModelServicePatternStopsQuery = (
   { __typename?: 'Query' }
   & { operator?: Maybe<(
     { __typename?: 'OperatorType' }
-    & { transitModel: (
+    & { transitModel?: Maybe<(
       { __typename?: 'TransitModelType' }
       & { lines: (
         { __typename?: 'PaginatedLineType' }
-        & { items?: Maybe<Array<(
+        & { items?: Maybe<Array<Maybe<(
           { __typename?: 'LineType' }
           & Pick<LineType, 'lineId' | 'lineName'>
-          & { servicePatterns: Array<Maybe<(
+          & { servicePatterns?: Maybe<Array<Maybe<(
             { __typename?: 'ServicePatternType' }
             & Pick<ServicePatternType, 'servicePatternId' | 'name'>
-            & { stops: Array<Maybe<(
+            & { stops?: Maybe<Array<(
               { __typename?: 'StopType' }
               & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat'>
             )>>, serviceLinks: Array<Maybe<(
               { __typename?: 'ServiceLinkType' }
               & Pick<ServiceLinkType, 'fromStop' | 'toStop' | 'distance' | 'routeValidity' | 'linkRoute'>
             )>> }
-          )>> }
-        )>> }
+          )>>> }
+        )>>> }
       ) }
-    ) }
+    )> }
   )> }
 );
 
@@ -2513,10 +1813,10 @@ export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListUsersQuery = (
   { __typename?: 'Query' }
-  & { users: Array<(
+  & { users?: Maybe<Array<(
     { __typename?: 'UserType' }
     & UserFragment
-  )> }
+  )>> }
 );
 
 export type ListRolesQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2524,10 +1824,10 @@ export type ListRolesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListRolesQuery = (
   { __typename?: 'Query' }
-  & { roles: Array<(
+  & { roles?: Maybe<Array<(
     { __typename?: 'RoleType' }
     & RoleFragment
-  )> }
+  )>> }
 );
 
 export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2535,10 +1835,10 @@ export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListUserAlertsQuery = (
   { __typename?: 'Query' }
-  & { userAlerts: Array<(
+  & { userAlerts?: Maybe<Array<(
     { __typename?: 'AlertType' }
     & AlertFragment
-  )> }
+  )>> }
 );
 
 export type FetchUserAlertQueryVariables = Exact<{
@@ -2548,10 +1848,10 @@ export type FetchUserAlertQueryVariables = Exact<{
 
 export type FetchUserAlertQuery = (
   { __typename?: 'Query' }
-  & { userAlert?: Maybe<(
+  & { userAlert: (
     { __typename?: 'AlertType' }
     & AlertFragment
-  )> }
+  ) }
 );
 
 export type EditUserMutationVariables = Exact<{
@@ -2662,10 +1962,10 @@ export type OperatorListQuery = (
     & { items: Array<Maybe<(
       { __typename?: 'OperatorType' }
       & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-      & { adminAreas?: Maybe<Array<(
+      & { adminAreas?: Maybe<Array<Maybe<(
         { __typename?: 'AdminAreaInfoType' }
         & Pick<AdminAreaInfoType, 'adminAreaId'>
-      )>> }
+      )>>> }
     )>> }
   ) }
 );
@@ -2679,16 +1979,16 @@ export type OperatorLinesQuery = (
   { __typename?: 'Query' }
   & { operator?: Maybe<(
     { __typename?: 'OperatorType' }
-    & { transitModel: (
+    & { transitModel?: Maybe<(
       { __typename?: 'TransitModelType' }
       & { lines: (
         { __typename?: 'PaginatedLineType' }
-        & { items?: Maybe<Array<(
+        & { items?: Maybe<Array<Maybe<(
           { __typename?: 'LineType' }
           & { id: LineType['lineId'], name: LineType['lineName'], number: LineType['lineNumber'] }
-        )>> }
+        )>>> }
       ) }
-    ) }
+    )> }
   )> }
 );
 
@@ -2743,8 +2043,8 @@ export type SignUpMutationVariables = Exact<{
 export type SignUpMutation = (
   { __typename?: 'Mutation' }
   & { signUp: (
-    { __typename?: 'SignUpResponseType' }
-    & Pick<SignUpResponseType, 'error' | 'success'>
+    { __typename?: 'MutationResponseType' }
+    & Pick<MutationResponseType, 'error' | 'success'>
   ) }
 );
 
@@ -2768,13 +2068,13 @@ export type ServicePatternsQueryVariables = Exact<{
 
 export type ServicePatternsQuery = (
   { __typename?: 'Query' }
-  & { servicePatternsInfo: Array<Maybe<(
+  & { servicePatternsInfo?: Maybe<Array<Maybe<(
     { __typename?: 'ServicePatternType' }
-    & { stops: Array<Maybe<(
+    & { stops?: Maybe<Array<(
       { __typename?: 'StopType' }
       & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat'>
     )>> }
-  )>> }
+  )>>> }
 );
 
 export type VehicleJourneyQueryVariables = Exact<{
@@ -2816,14 +2116,14 @@ export type JourneysQuery = (
   { __typename?: 'Query' }
   & { vehicleReplay: (
     { __typename?: 'VehicleReplayNamespace' }
-    & { findJourneys: Array<Maybe<(
+    & { findJourneys?: Maybe<Array<Maybe<(
       { __typename?: 'UniqueJourneyType' }
       & Pick<UniqueJourneyType, 'vehicleJourneyId' | 'startTime'>
       & { serviceInfo: (
         { __typename?: 'ServiceInfoType' }
         & Pick<ServiceInfoType, 'serviceName' | 'serviceNumber'>
       ) }
-    )>> }
+    )>>> }
   ) }
 );
 
@@ -2847,10 +2147,10 @@ export type TimingPatternDetailQueryVariables = Exact<{
 
 export type TimingPatternDetailQuery = (
   { __typename?: 'Query' }
-  & { timingPatternDetail: Array<Maybe<(
+  & { timingPatternDetail?: Maybe<Array<Maybe<(
     { __typename?: 'TimingPatternDetailType' }
     & Pick<TimingPatternDetailType, 'stopIndex' | 'timingPoint' | 'arrivalTimeOffset' | 'departureTimeOffset' | 'timingPatternId'>
-  )>> }
+  )>>> }
 );
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2894,7 +2194,9 @@ export const EventFragmentDoc = gql`
     fragment Event on EventType {
   timestamp
   type
-  data
+  data {
+    message
+  }
 }
     `;
 export const BasicOperatorFragmentDoc = gql`
@@ -3016,7 +2318,7 @@ export const LoginDocument = gql`
   })
   export class LoginGQL extends Apollo.Mutation<LoginMutation, LoginMutationVariables> {
     document = LoginDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3032,7 +2334,7 @@ export const LogoutDocument = gql`
   })
   export class LogoutGQL extends Apollo.Mutation<LogoutMutation, LogoutMutationVariables> {
     document = LogoutDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3050,7 +2352,7 @@ export const UserDocument = gql`
   })
   export class UserGQL extends Apollo.Query<UserQuery, UserQueryVariables> {
     document = UserDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3076,13 +2378,13 @@ export const CorridorsStopSearchDocument = gql`
   })
   export class CorridorsStopSearchGQL extends Apollo.Query<CorridorsStopSearchQuery, CorridorsStopSearchQueryVariables> {
     document = CorridorsStopSearchDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
   }
 export const CorridorsSubsequentStopsDocument = gql`
-    query corridorsSubsequentStops($stopList: [String]!) {
+    query corridorsSubsequentStops($stopList: [String!]!) {
   corridor {
     addSubsequentStops(stopList: $stopList) {
       stopId
@@ -3102,7 +2404,7 @@ export const CorridorsSubsequentStopsDocument = gql`
   })
   export class CorridorsSubsequentStopsGQL extends Apollo.Query<CorridorsSubsequentStopsQuery, CorridorsSubsequentStopsQueryVariables> {
     document = CorridorsSubsequentStopsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3126,7 +2428,7 @@ export const CorridorsListDocument = gql`
   })
   export class CorridorsListGQL extends Apollo.Query<CorridorsListQuery, CorridorsListQueryVariables> {
     document = CorridorsListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3162,7 +2464,7 @@ export const GetCorridorDocument = gql`
   })
   export class GetCorridorGQL extends Apollo.Query<GetCorridorQuery, GetCorridorQueryVariables> {
     document = GetCorridorDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3234,7 +2536,7 @@ export const CorridorStatsDocument = gql`
   })
   export class CorridorStatsGQL extends Apollo.Query<CorridorStatsQuery, CorridorStatsQueryVariables> {
     document = CorridorStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3253,7 +2555,7 @@ export const CreateCorridorDocument = gql`
   })
   export class CreateCorridorGQL extends Apollo.Mutation<CreateCorridorMutation, CreateCorridorMutationVariables> {
     document = CreateCorridorDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3272,7 +2574,7 @@ export const DeleteCorridorDocument = gql`
   })
   export class DeleteCorridorGQL extends Apollo.Mutation<DeleteCorridorMutation, DeleteCorridorMutationVariables> {
     document = DeleteCorridorDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3291,7 +2593,7 @@ export const UpdateCorridorDocument = gql`
   })
   export class UpdateCorridorGQL extends Apollo.Mutation<UpdateCorridorMutation, UpdateCorridorMutationVariables> {
     document = UpdateCorridorDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3311,7 +2613,7 @@ export const DashboardOperatorListDocument = gql`
   })
   export class DashboardOperatorListGQL extends Apollo.Query<DashboardOperatorListQuery, DashboardOperatorListQueryVariables> {
     document = DashboardOperatorListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3331,7 +2633,7 @@ export const DashboardOperatorVehicleCountsListDocument = gql`
   })
   export class DashboardOperatorVehicleCountsListGQL extends Apollo.Query<DashboardOperatorVehicleCountsListQuery, DashboardOperatorVehicleCountsListQueryVariables> {
     document = DashboardOperatorVehicleCountsListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3353,7 +2655,7 @@ export const DashboardPerformanceStatsDocument = gql`
   })
   export class DashboardPerformanceStatsGQL extends Apollo.Query<DashboardPerformanceStatsQuery, DashboardPerformanceStatsQueryVariables> {
     document = DashboardPerformanceStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3387,7 +2689,7 @@ export const DashboardServiceRankingDocument = gql`
   })
   export class DashboardServiceRankingGQL extends Apollo.Query<DashboardServiceRankingQuery, DashboardServiceRankingQueryVariables> {
     document = DashboardServiceRankingDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3407,7 +2709,7 @@ export const EventsDocument = gql`
   })
   export class EventsGQL extends Apollo.Query<EventsQuery, EventsQueryVariables> {
     document = EventsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3426,7 +2728,7 @@ export const EventStatsDocument = gql`
   })
   export class EventStatsGQL extends Apollo.Query<EventStatsQuery, EventStatsQueryVariables> {
     document = EventStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3446,7 +2748,7 @@ export const FeedMonitoringListDocument = gql`
   })
   export class FeedMonitoringListGQL extends Apollo.Query<FeedMonitoringListQuery, FeedMonitoringListQueryVariables> {
     document = FeedMonitoringListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3474,7 +2776,7 @@ export const OperatorSparklineStatsDocument = gql`
   })
   export class OperatorSparklineStatsGQL extends Apollo.Query<OperatorSparklineStatsQuery, OperatorSparklineStatsQueryVariables> {
     document = OperatorSparklineStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3492,7 +2794,7 @@ export const OperatorLiveStatusDocument = gql`
   })
   export class OperatorLiveStatusGQL extends Apollo.Query<OperatorLiveStatusQuery, OperatorLiveStatusQueryVariables> {
     document = OperatorLiveStatusDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3510,7 +2812,7 @@ export const OperatorHistoricStatsDocument = gql`
   })
   export class OperatorHistoricStatsGQL extends Apollo.Query<OperatorHistoricStatsQuery, OperatorHistoricStatsQueryVariables> {
     document = OperatorHistoricStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3530,7 +2832,7 @@ export const GetAdminAreasDocument = gql`
   })
   export class GetAdminAreasGQL extends Apollo.Query<GetAdminAreasQuery, GetAdminAreasQueryVariables> {
     document = GetAdminAreasDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3553,7 +2855,7 @@ export const HeadwayTimeSeriesDocument = gql`
   })
   export class HeadwayTimeSeriesGQL extends Apollo.Query<HeadwayTimeSeriesQuery, HeadwayTimeSeriesQueryVariables> {
     document = HeadwayTimeSeriesDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3575,7 +2877,7 @@ export const HeadwayOverviewDocument = gql`
   })
   export class HeadwayOverviewGQL extends Apollo.Query<HeadwayOverviewQuery, HeadwayOverviewQueryVariables> {
     document = HeadwayOverviewDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3595,7 +2897,7 @@ export const HeadwayFrequentServicesDocument = gql`
   })
   export class HeadwayFrequentServicesGQL extends Apollo.Query<HeadwayFrequentServicesQuery, HeadwayFrequentServicesQueryVariables> {
     document = HeadwayFrequentServicesDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3616,7 +2918,7 @@ export const HeadwayFrequentServiceInfoDocument = gql`
   })
   export class HeadwayFrequentServiceInfoGQL extends Apollo.Query<HeadwayFrequentServiceInfoQuery, HeadwayFrequentServiceInfoQueryVariables> {
     document = HeadwayFrequentServiceInfoDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3637,7 +2939,7 @@ export const OnTimeDelayFrequencyDocument = gql`
   })
   export class OnTimeDelayFrequencyGQL extends Apollo.Query<OnTimeDelayFrequencyQuery, OnTimeDelayFrequencyQueryVariables> {
     document = OnTimeDelayFrequencyDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3660,7 +2962,7 @@ export const OnTimeTimeSeriesDocument = gql`
   })
   export class OnTimeTimeSeriesGQL extends Apollo.Query<OnTimeTimeSeriesQuery, OnTimeTimeSeriesQueryVariables> {
     document = OnTimeTimeSeriesDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3685,7 +2987,7 @@ export const OnTimeStatsDocument = gql`
   })
   export class OnTimeStatsGQL extends Apollo.Query<OnTimeStatsQuery, OnTimeStatsQueryVariables> {
     document = OnTimeStatsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3708,7 +3010,7 @@ export const OnTimePunctualityTimeOfDayDocument = gql`
   })
   export class OnTimePunctualityTimeOfDayGQL extends Apollo.Query<OnTimePunctualityTimeOfDayQuery, OnTimePunctualityTimeOfDayQueryVariables> {
     document = OnTimePunctualityTimeOfDayDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3731,7 +3033,7 @@ export const OnTimePunctualityDayOfWeekDocument = gql`
   })
   export class OnTimePunctualityDayOfWeekGQL extends Apollo.Query<OnTimePunctualityDayOfWeekQuery, OnTimePunctualityDayOfWeekQueryVariables> {
     document = OnTimePunctualityDayOfWeekDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3762,7 +3064,7 @@ export const OnTimeServicePerformanceListDocument = gql`
   })
   export class OnTimeServicePerformanceListGQL extends Apollo.Query<OnTimeServicePerformanceListQuery, OnTimeServicePerformanceListQueryVariables> {
     document = OnTimeServicePerformanceListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3805,7 +3107,7 @@ export const OnTimeStopPerformanceListDocument = gql`
   })
   export class OnTimeStopPerformanceListGQL extends Apollo.Query<OnTimeStopPerformanceListQuery, OnTimeStopPerformanceListQueryVariables> {
     document = OnTimeStopPerformanceListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3836,7 +3138,7 @@ export const OnTimeOperatorPerformanceListDocument = gql`
   })
   export class OnTimeOperatorPerformanceListGQL extends Apollo.Query<OnTimeOperatorPerformanceListQuery, OnTimeOperatorPerformanceListQueryVariables> {
     document = OnTimeOperatorPerformanceListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3856,7 +3158,7 @@ export const ServiceInfoDocument = gql`
   })
   export class ServiceInfoGQL extends Apollo.Query<ServiceInfoQuery, ServiceInfoQueryVariables> {
     document = ServiceInfoDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3898,7 +3200,7 @@ export const TransitModelServicePatternStopsDocument = gql`
   })
   export class TransitModelServicePatternStopsGQL extends Apollo.Query<TransitModelServicePatternStopsQuery, TransitModelServicePatternStopsQueryVariables> {
     document = TransitModelServicePatternStopsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3916,7 +3218,7 @@ export const ListUsersDocument = gql`
   })
   export class ListUsersGQL extends Apollo.Query<ListUsersQuery, ListUsersQueryVariables> {
     document = ListUsersDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3934,7 +3236,7 @@ export const ListRolesDocument = gql`
   })
   export class ListRolesGQL extends Apollo.Query<ListRolesQuery, ListRolesQueryVariables> {
     document = ListRolesDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3952,7 +3254,7 @@ export const ListUserAlertsDocument = gql`
   })
   export class ListUserAlertsGQL extends Apollo.Query<ListUserAlertsQuery, ListUserAlertsQueryVariables> {
     document = ListUserAlertsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3970,7 +3272,7 @@ export const FetchUserAlertDocument = gql`
   })
   export class FetchUserAlertGQL extends Apollo.Query<FetchUserAlertQuery, FetchUserAlertQueryVariables> {
     document = FetchUserAlertDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -3991,7 +3293,7 @@ export const EditUserDocument = gql`
   })
   export class EditUserGQL extends Apollo.Mutation<EditUserMutation, EditUserMutationVariables> {
     document = EditUserDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4010,7 +3312,7 @@ export const RemoveUserDocument = gql`
   })
   export class RemoveUserGQL extends Apollo.Mutation<RemoveUserMutation, RemoveUserMutationVariables> {
     document = RemoveUserDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4032,7 +3334,7 @@ export const InviteUserDocument = gql`
   })
   export class InviteUserGQL extends Apollo.Mutation<InviteUserMutation, InviteUserMutationVariables> {
     document = InviteUserDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4051,7 +3353,7 @@ export const UpdateUserAlertDocument = gql`
   })
   export class UpdateUserAlertGQL extends Apollo.Mutation<UpdateUserAlertMutation, UpdateUserAlertMutationVariables> {
     document = UpdateUserAlertDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4070,7 +3372,7 @@ export const CreateUserAlertDocument = gql`
   })
   export class CreateUserAlertGQL extends Apollo.Mutation<CreateUserAlertMutation, CreateUserAlertMutationVariables> {
     document = CreateUserAlertDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4089,7 +3391,7 @@ export const DeleteUserAlertDocument = gql`
   })
   export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
     document = DeleteUserAlertDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4114,7 +3416,7 @@ export const OperatorListDocument = gql`
   })
   export class OperatorListGQL extends Apollo.Query<OperatorListQuery, OperatorListQueryVariables> {
     document = OperatorListDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4140,7 +3442,7 @@ export const OperatorLinesDocument = gql`
   })
   export class OperatorLinesGQL extends Apollo.Query<OperatorLinesQuery, OperatorLinesQueryVariables> {
     document = OperatorLinesDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4159,7 +3461,7 @@ export const RequestResetPasswordDocument = gql`
   })
   export class RequestResetPasswordGQL extends Apollo.Mutation<RequestResetPasswordMutation, RequestResetPasswordMutationVariables> {
     document = RequestResetPasswordDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4178,7 +3480,7 @@ export const ResetPasswordDocument = gql`
   })
   export class ResetPasswordGQL extends Apollo.Mutation<ResetPasswordMutation, ResetPasswordMutationVariables> {
     document = ResetPasswordDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4194,7 +3496,7 @@ export const VerifyResetPasswordTokenDocument = gql`
   })
   export class VerifyResetPasswordTokenGQL extends Apollo.Mutation<VerifyResetPasswordTokenMutation, VerifyResetPasswordTokenMutationVariables> {
     document = VerifyResetPasswordTokenDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4213,7 +3515,7 @@ export const SignUpDocument = gql`
   })
   export class SignUpGQL extends Apollo.Mutation<SignUpMutation, SignUpMutationVariables> {
     document = SignUpDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4232,7 +3534,7 @@ export const InvitationDocument = gql`
   })
   export class InvitationGQL extends Apollo.Query<InvitationQuery, InvitationQueryVariables> {
     document = InvitationDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4255,7 +3557,7 @@ export const ServicePatternsDocument = gql`
   })
   export class ServicePatternsGQL extends Apollo.Query<ServicePatternsQuery, ServicePatternsQueryVariables> {
     document = ServicePatternsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4301,7 +3603,7 @@ export const VehicleJourneyDocument = gql`
   })
   export class VehicleJourneyGQL extends Apollo.Query<VehicleJourneyQuery, VehicleJourneyQueryVariables> {
     document = VehicleJourneyDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4326,7 +3628,7 @@ export const JourneysDocument = gql`
   })
   export class JourneysGQL extends Apollo.Query<JourneysQuery, JourneysQueryVariables> {
     document = JourneysDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4347,7 +3649,7 @@ export const VehicleJourneyTimingPatternDocument = gql`
   })
   export class VehicleJourneyTimingPatternGQL extends Apollo.Query<VehicleJourneyTimingPatternQuery, VehicleJourneyTimingPatternQueryVariables> {
     document = VehicleJourneyTimingPatternDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4369,7 +3671,7 @@ export const TimingPatternDetailDocument = gql`
   })
   export class TimingPatternDetailGQL extends Apollo.Query<TimingPatternDetailQuery, TimingPatternDetailQueryVariables> {
     document = TimingPatternDetailDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -4388,7 +3690,7 @@ export const GetVersionDocument = gql`
   })
   export class GetVersionGQL extends Apollo.Query<GetVersionQuery, GetVersionQueryVariables> {
     document = GetVersionDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }

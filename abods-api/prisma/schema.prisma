@@ -51,7 +51,7 @@ view all_operators {
   operatorOrganisations bods_organisationoperator[]
   noc_adminareas        noc_adminarea[]
   service_details       service_details[]
-  feed_summary          feed_monitoring_summary[] 
+  feed_summary          feed_monitor_summary[] 
 }
 
 view bods_organisationoperator {
@@ -464,7 +464,7 @@ model distinct_routes {
   route         String  @db.Text
 }
 
-model feed_monitoring_summary {
+model feed_monitor_summary {
   feed_id                                     Int @id @default(1)
   operator_noc                                String
   last_outage                                 DateTime? @db.Timestamptz()
@@ -475,7 +475,7 @@ model feed_monitoring_summary {
   all_operators all_operators @relation(fields: [operator_noc], references: [operatorref])
 }
 
-model feed_monitoring_minute_summary {
+model feed_monitor_minute_summary {
   feed_id                                     Int @id @default(1)
   operator_noc                                String
   date_of_journey                             DateTime
@@ -485,7 +485,7 @@ model feed_monitoring_minute_summary {
   live_locations                              Int
 }
 
-model feed_monitoring_hourly_summary {
+model feed_monitor_hourly_summary {
   feed_id                                     Int @id @default(1)
   operator_noc                                String
   received_interval                           DateTime @db.Timestamptz()
@@ -493,7 +493,7 @@ model feed_monitoring_hourly_summary {
   expected                                    Int
 }
 
-model feed_monitoring_daily_summary {
+model feed_monitor_daily_summary {
   feed_id                                     Int @id @default(1)
   operator_noc                                String
   update_frequency                            Int

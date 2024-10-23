@@ -16,13 +16,29 @@ import { getDate } from "../../lib/dayjs.js";
 const feedMonitoringResovlers: IResolvers = {
   Query: {
     events: async () => {
-      return [{
-        type: AlertType.VehicleCountDisparityEvent,
-        data: {
-          message: "Test1"
+      return [
+        {
+          type: AlertType.VehicleCountDisparityEvent,
+          data: {
+            message: "Test1",
+          },
+          timestamp: getDate().subtract(2, "hour"),
         },
-        timestamp: getDate()
-      }]
+        {
+          type: AlertType.VehicleCountDisparityEvent,
+          data: {
+            message: "Test2",
+          },
+          timestamp: getDate().subtract(3, "hour"),
+        },
+        {
+          type: AlertType.VehicleCountDisparityEvent,
+          data: {
+            message: "Test3",
+          },
+          timestamp: getDate().subtract(4, "hour"),
+        },
+      ];
     },
     eventStats: async () => {
       return getEventStats();

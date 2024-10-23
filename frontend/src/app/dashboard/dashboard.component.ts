@@ -32,12 +32,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedOperatorsVehicleCountsSubject = new Subject<OperatorDashboardVehicleCountsFragment[]>();
 
   private currentVehicles$: Observable<number> = this.selectedOperatorsVehicleCountsSubject.pipe(
-    map((allOperators) => allOperators.reduce((v, op) => v + (op?.feedMonitoring.liveStats?.currentVehicles ?? 0), 0))
+    map((allOperators) => allOperators.reduce((v, op) => v + (op?.feedMonitoring?.liveStats?.currentVehicles ?? 0), 0))
   );
   currentVehicles = 0;
 
   private expectedVehicles$: Observable<number> = this.selectedOperatorsVehicleCountsSubject.pipe(
-    map((allOperators) => allOperators.reduce((v, op) => v + (op?.feedMonitoring.liveStats?.expectedVehicles ?? 0), 0))
+    map((allOperators) => allOperators.reduce((v, op) => v + (op?.feedMonitoring?.liveStats?.expectedVehicles ?? 0), 0))
   );
   expectedVehicles = 0;
 

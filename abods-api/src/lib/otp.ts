@@ -1,4 +1,4 @@
-import { all_operators, feed_monitoring_summary, Prisma, SiriVMPositions } from '@prisma/client';
+import { all_operators, feed_monitor_summary, Prisma, SiriVMPositions } from '@prisma/client';
 import { Context } from '../context';
 import {
   FeedMonitoringType,
@@ -14,7 +14,7 @@ import { Dayjs } from 'dayjs';
 import { getDate, getFormattedDate, getHourFormattedDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = all_operators & {
-  feed_summary: feed_monitoring_summary[];
+  feed_summary: feed_monitor_summary[];
 };
 
 export type ExpectedJourneyType = {

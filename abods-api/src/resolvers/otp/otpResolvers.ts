@@ -22,10 +22,11 @@ import {
   getServicePunctuality,
   getStopPerformance,
 } from "./otpFunctions.js";
-import { FeedMonitoringType, LiveStatsType, RequestContext } from "../../types.js";
+import { RequestContext } from "../../types.js";
 import { GraphQLResolveInfo } from "graphql";
 import { getFeedMonitoringList } from "../../lib/otp.js";
 import { FeedMonitoringListType } from "../../lib/feedMonitoring.js";
+
 
 const otpResolvers: IResolvers = {
   Query: {

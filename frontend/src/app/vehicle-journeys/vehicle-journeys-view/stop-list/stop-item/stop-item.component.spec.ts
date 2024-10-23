@@ -15,15 +15,17 @@ const scheduled = DateTime.fromISO('2022-08-18T11:20:00.000+01:00', { zone: 'utc
 const actual = DateTime.fromISO('2022-08-18T11:22:00.000+01:00', { zone: 'utc' });
 
 export const mockVehicleStopPingFactory = (): VehiclePingStop => {
-  const stop = new VehiclePingStop();
-  stop.id = 'ST01';
-  stop.stopName = 'Stop 1';
-  stop.isTimingPoint = false;
-  stop.onTimePerformance = OnTimePerformanceEnum.OnTime;
-  stop.ts = actual;
-  stop.actualDeparture = stop.ts;
-  stop.scheduledDeparture = scheduled;
-  return stop;
+  return {
+    id: 'ST01',
+    stopName: 'Stop 1',
+    isTimingPoint: false,
+    onTimePerformance: OnTimePerformanceEnum.OnTime,
+    ts: actual,
+    actualDeparture: actual,
+    scheduledDeparture: scheduled,
+    lat: 0,
+    lon: 0,
+  };
 };
 
 describe('StopItemComponent', () => {
@@ -76,8 +78,7 @@ describe('StopItemComponent', () => {
   });
 
   it('should show scheduled time', () => {
-    const stop = mockVehicleStopPingFactory();
-    component.stop = stop;
+    component.stop = mockVehicleStopPingFactory();
     fixture.detectChanges();
     debugEl = fixture.debugElement.query(By.css('.stop-list-item__scheduled'));
 
@@ -85,8 +86,7 @@ describe('StopItemComponent', () => {
   });
 
   it('should show actual time', () => {
-    const stop = mockVehicleStopPingFactory();
-    component.stop = stop;
+    component.stop = mockVehicleStopPingFactory();
     fixture.detectChanges();
     debugEl = fixture.debugElement.query(By.css('.stop-list-item__actual'));
 
