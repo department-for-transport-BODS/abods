@@ -7,6 +7,7 @@ legacy_version_file = true
 granted = "0.35.1"
 serverless = "3.39.0"
 jq = "1.7.1"
+watchexec = "2.2.0"
 
 [tasks."setup:api"]
 description = "Setup task for the API"
@@ -50,3 +51,17 @@ depends = ["setup:frontend"]
 description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
 dir = "frontend"
 run = "npm start"
+
+[tasks."codegen:frontend"]
+dir = "frontend"
+run = "npm run codegen"
+
+[tasks.codegen]
+depends = ["codegen:frontend"]
+
+[tasks."build:frontend"]
+dir = "frontend"
+run = "npm run build"
+
+[tasks.build]
+depends = ["build:frontend"]

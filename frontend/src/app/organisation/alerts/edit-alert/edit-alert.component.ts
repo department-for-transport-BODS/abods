@@ -75,7 +75,8 @@ export class EditAlertComponent implements OnInit, OnDestroy {
     this.subs.forEach((sub) => sub?.unsubscribe());
   }
 
-  loadAlert({ alertId, alertType, eventHysterisis, eventThreshold, sendTo }: AlertFragment) {
+  loadAlert(alert: AlertFragment | null) {
+    const { alertId, alertType, eventHysterisis, eventThreshold, sendTo } = alert || {};
     const value = {
       alertId: alertId ?? '',
       alertType: alertType ?? '',
@@ -95,14 +96,14 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   editAlert(alertId: string) {
     this.subs.push(
       this.organisationService.fetchUserAlert$(alertId).subscribe((alert) => {
-        this.loadAlert(alert ?? {});
+        this.loadAlert(alert);
         this.openEdit.emit(this.editing);
       })
     );
   }
 
   createAlert() {
-    this.loadAlert({});
+    this.loadAlert(null);
     this.openEdit.emit(false);
   }
 

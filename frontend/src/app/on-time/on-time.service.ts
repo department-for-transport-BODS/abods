@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   DelayFrequencyType,
-  IPunctualityType,
   OnTimeDelayFrequencyGQL,
   OnTimeOperatorPerformanceListGQL,
   OnTimePunctualityDayOfWeekGQL,
@@ -27,6 +26,7 @@ import {
 } from 'src/generated/graphql';
 import { keyBy as _keyBy, range as _range, sum, sumBy } from 'lodash-es';
 import { isNotNullOrUndefined, nonNullOrUndefined } from '../shared/rxjs-operators';
+import { IPunctualityType } from '../../generated/extra';
 
 export type PerformanceParams = Omit<PerformanceInputType, 'filters'> & { filters: PerformanceFiltersInputType };
 
