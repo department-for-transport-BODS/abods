@@ -10,13 +10,19 @@ import {
   getVehicleStatsByMin,
 } from "./feedMonitoringFunctions.js";
 
-import { VechileCountType } from "../../lib/feedMonitoring.js";
+import { AlertType, VechileCountType } from "../../lib/feedMonitoring.js";
 import { getDate } from "../../lib/dayjs.js";
 
 const feedMonitoringResovlers: IResolvers = {
   Query: {
     events: async () => {
-      return {};
+      return [{
+        type: AlertType.VehicleCountDisparityEvent,
+        data: {
+          message: "Test1"
+        },
+        timestamp: getDate()
+      }]
     },
     eventStats: async () => {
       return getEventStats();
