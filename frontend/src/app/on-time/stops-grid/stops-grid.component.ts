@@ -202,7 +202,7 @@ export class StopsGridComponent implements OnInit, OnDestroy {
         }),
         map((params) => removeAdminAreaIds(params)),
         switchMap((params) =>
-          this.onTimeService.fetchStopPerformanceList(params as PerformanceInputType).pipe(
+          this.onTimeService.fetchStopPerformanceList(params).pipe(
             catchError(() => {
               this.errored = true;
               return of([]); // Swallow the error, allowing the outer pipeline to continue

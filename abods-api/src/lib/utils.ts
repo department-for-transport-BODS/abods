@@ -1,4 +1,4 @@
-import { DayOfWeekFlagsInputType, Maybe } from '../types.js';
+import { DayOfWeekFlagsInputType, Maybe } from '../types';
 
 export const isDefined = <T>(value: Maybe<T>): value is T => {
   return value !== null && value !== undefined;

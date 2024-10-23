@@ -12,7 +12,7 @@ import {
   ServicePunctualityType,
   SessionUser,
   StopPerformanceType,
-} from "../../types.js";
+} from "../../types";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
 import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
@@ -258,7 +258,6 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
           lineId: service.noc_and_line_and_servicecode,
           lineName: service.service_name,
           lineNumber: service.line_name,
-          onTimePerformance: [],
           servicePatterns: [],
         });
       }
@@ -1312,9 +1311,6 @@ export const getServicePerformance = async (
             early: res._sum.early_count ? res._sum.early_count : 0,
             late: res._sum.late_count ? res._sum.late_count : 0,
             onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
-            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
-            actualDepartures: res._sum.completed ? res._sum.completed : 0,
-            averageDelay: avgDelay,
             lineInfo: {
               serviceId: res.noc_and_line_and_servicecode,
               serviceNumber: res.line_name,

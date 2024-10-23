@@ -13,9 +13,10 @@ import {
 import { CorridorChart, XAxisLabelPosition } from '../corridor-chart/CorridorChart';
 import { CorridorStatsViewParams } from '../../corridors.service';
 import { chartColors } from '../../../shared/components/amcharts/chart.service';
-import { ICorridorJourneyTimeStats, Maybe } from '../../../../generated/graphql';
+import { Maybe } from '../../../../generated/graphql';
 import { Color, ITimeInterval, percent, Rectangle, TimeUnit } from '@amcharts/amcharts4/core';
 import { BaseChartOptions } from '../corridor-chart/BaseChartOption';
+import { ICorridorJourneyTimeStats } from '../../../../generated/extra';
 
 export type YAxisMinValueType = 'yAxisMinValue';
 export type YAxisMaxValueType = 'yAxisMaxValue';

@@ -200,9 +200,13 @@ export class FeedMonitoringComponent implements OnInit, AfterViewInit, OnDestroy
           if (operators.length === 1) {
             this.router.navigate([operators[0].nocCode], { relativeTo: this.route, skipLocationChange: true });
           } else if (operators.length > 0) {
-            this.rawActiveOperators = operators.filter(({ feedMonitoring: { feedStatus } }) => feedStatus);
+            this.rawActiveOperators = operators.filter((o) => {
+              return o.feedMonitoring?.feedStatus;
+            });
             this.filteredActiveOperators = this.rawActiveOperators;
-            this.inactiveOperators = operators.filter(({ feedMonitoring: { feedStatus } }) => !feedStatus);
+            this.inactiveOperators = operators.filter((o) => {
+              return !o.feedMonitoring?.feedStatus;
+            });
             this.loaded = true;
           }
         }

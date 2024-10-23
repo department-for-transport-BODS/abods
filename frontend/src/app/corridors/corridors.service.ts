@@ -15,7 +15,6 @@ import {
   CreateCorridorGQL,
   DeleteCorridorGQL,
   GetCorridorGQL,
-  ICorridorJourneyTimeStats,
   ServiceLinkType,
   StopInfoType,
   StopType,
@@ -42,6 +41,7 @@ import { BoxPlotChartDataItem } from './view/box-plot-chart/box-plot-chart.compo
 import { Definitely, nonNullishArray } from '../shared/array-operators';
 import { LngLatBounds } from 'mapbox-gl';
 import { OperatorService } from '../shared/services/operator.service';
+import { ICorridorJourneyTimeStats } from '../../generated/extra';
 
 export type Stop = Pick<
   StopType,
