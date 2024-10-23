@@ -108,8 +108,8 @@ export const getStops = async (
     };
 
     where.longitude = {
-      gte: boundingBox?.minLongitude,
-      lte: boundingBox?.maxLongitude,
+      gte: Number(boundingBox?.minLongitude),
+      lte: Number(boundingBox?.maxLongitude),
     };
   }
 

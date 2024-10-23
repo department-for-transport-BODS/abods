@@ -77,7 +77,7 @@ type CorridorNamespace {
     corridorList: [CorridorType]
     stats(inputs: CorridorStatsInputType): CorridorStatsType
     addFirstStop(inputs: AddFirstStopInputType): [StopType]
-    addSubsequentStops(stopList: [String]): [StopType]
+    addSubsequentStops(stopList: [String!]!): [StopType]
 }
 
 input AddFirstStopInputType {
@@ -93,6 +93,7 @@ input BoundingBoxInputType {
 }
 
 type CorridorType {
+    createdBy: UserType
     id: Int!
     name: String!
     stops: [StopInfoType]
@@ -185,6 +186,7 @@ enum CorridorGranularity {
 }
 
 type VehicleJourneyType {
+    mode: String
     operatorId: String
     servicePatternId: String
     timingPatternId: String
@@ -265,9 +267,9 @@ type HeadwayMetricsType {
 }
 
 input CorridorUpdateInputType {
-    id: Int
-    name: String
-    stopList: [String]
+    id: Int!
+    name: String!
+    stopList: [String!]!
 }
 
 input HeadwayInputType {
@@ -379,11 +381,11 @@ type OperatorsPage {
 
 type OperatorType {
     name: String
-    nocCode: String
+    nocCode: String!
     operatorId: String
     adminAreas: [AdminAreaInfoType]
-    transitModel: TransitModelType!
-    feedMonitoring: FeedMonitoringType!
+    transitModel: TransitModelType
+    feedMonitoring: FeedMonitoringType
 }
 
 type FeedMonitoringType {
@@ -473,7 +475,7 @@ input AlertInputType {
 }
 
 input CorridorInputType {
-    name: String
+    name: String!
     stopIds: [String]!
 }
 
@@ -500,7 +502,7 @@ type ApiInfoType {
 
 type LoginResponse {
     success: Boolean!
-    expiresAt: String
+    expiresAt: DateTime
 }
 
 type UserType {
@@ -521,7 +523,12 @@ type OrganisationType{
 type RoleType {
     id: String!
     name: String!
-    scope: String!
+    scope: ScopeEnum!
+}
+
+enum ScopeEnum {
+    organisation
+    system
 }
 
 type OnTimePerformanceType {
@@ -547,12 +554,15 @@ type OperatorPerformancePage {
 }
 
 type OperatorPerformanceType {
+    actualDepartures: Int
+    averageDelay: Float
     early: Int!
     late: Int!
     name: String
     nocCode: String
     onTime: Int!
     operatorId: String
+    scheduledDepartures: Int
 }
 
 type PageInfo {
@@ -610,10 +620,11 @@ type OperatorInfoType {
 type ServicePunctualityType {
     early: Int
     late: Int
-    lineId: String!
-    lineInfo: ServiceInfoType!
+    lineId: String
+    lineInfo: ServiceInfoType
     nocCode: String
     onTime: Int
+    rank: Float
     trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
 }
 
@@ -652,13 +663,13 @@ type GpsPointType {
 }
 
 input PerformanceInputType {
-    filters: PerformanceFiltersInputType
+    filters: PerformanceFiltersInputType!
     fromTimestamp: DateTime!
     toTimestamp: DateTime!
 }
 
 input PerformanceFiltersInputType {
-    adminAreaIds: [String]
+    adminAreaIds: [String!]
     dayOfWeekFlags: DayOfWeekFlagsInputType
     endTime: String
     excludeItoLineId: String

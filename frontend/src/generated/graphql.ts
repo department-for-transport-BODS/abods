@@ -86,7 +86,7 @@ export type CorridorHistogramType = {
 };
 
 export type CorridorInputType = {
-  name?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
   stopIds: Array<Maybe<Scalars['String']>>;
 };
 
@@ -116,7 +116,7 @@ export type CorridorNamespaceAddFirstStopArgs = {
 
 
 export type CorridorNamespaceAddSubsequentStopsArgs = {
-  stopList?: Maybe<Array<Maybe<Scalars['String']>>>;
+  stopList: Array<Scalars['String']>;
 };
 
 
@@ -195,15 +195,16 @@ export type CorridorSummaryStatsType = {
 
 export type CorridorType = {
   __typename?: 'CorridorType';
+  createdBy?: Maybe<UserType>;
   id: Scalars['Int'];
   name: Scalars['String'];
   stops?: Maybe<Array<Maybe<StopInfoType>>>;
 };
 
 export type CorridorUpdateInputType = {
-  id?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
-  stopList?: Maybe<Array<Maybe<Scalars['String']>>>;
+  id: Scalars['Int'];
+  name: Scalars['String'];
+  stopList: Array<Scalars['String']>;
 };
 
 
@@ -456,7 +457,7 @@ export type LocalityType = {
 
 export type LoginResponse = {
   __typename?: 'LoginResponse';
-  expiresAt?: Maybe<Scalars['String']>;
+  expiresAt?: Maybe<Scalars['DateTime']>;
   success: Scalars['Boolean'];
 };
 
@@ -639,12 +640,15 @@ export type OperatorPerformancePage = {
 
 export type OperatorPerformanceType = {
   __typename?: 'OperatorPerformanceType';
+  actualDepartures?: Maybe<Scalars['Int']>;
+  averageDelay?: Maybe<Scalars['Float']>;
   early: Scalars['Int'];
   late: Scalars['Int'];
   name?: Maybe<Scalars['String']>;
   nocCode?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
   operatorId?: Maybe<Scalars['String']>;
+  scheduledDepartures?: Maybe<Scalars['Int']>;
 };
 
 export type OperatorsPage = {
@@ -655,11 +659,11 @@ export type OperatorsPage = {
 export type OperatorType = {
   __typename?: 'OperatorType';
   adminAreas?: Maybe<Array<Maybe<AdminAreaInfoType>>>;
-  feedMonitoring: FeedMonitoringType;
+  feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']>;
-  nocCode?: Maybe<Scalars['String']>;
+  nocCode: Scalars['String'];
   operatorId?: Maybe<Scalars['String']>;
-  transitModel: TransitModelType;
+  transitModel?: Maybe<TransitModelType>;
 };
 
 export type OrganisationReferenceInput = {
@@ -684,7 +688,7 @@ export type PaginatedLineType = {
 };
 
 export type PerformanceFiltersInputType = {
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  adminAreaIds?: Maybe<Array<Scalars['String']>>;
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
   endTime?: Maybe<Scalars['String']>;
   excludeItoLineId?: Maybe<Scalars['String']>;
@@ -701,7 +705,7 @@ export type PerformanceFiltersInputType = {
 };
 
 export type PerformanceInputType = {
-  filters?: Maybe<PerformanceFiltersInputType>;
+  filters: PerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime'];
   toTimestamp: Scalars['DateTime'];
 };
@@ -841,8 +845,13 @@ export type RoleType = {
   __typename?: 'RoleType';
   id: Scalars['String'];
   name: Scalars['String'];
-  scope: Scalars['String'];
+  scope: ScopeEnum;
 };
+
+export enum ScopeEnum {
+  Organisation = 'organisation',
+  System = 'system'
+}
 
 export type ServiceInfoType = {
   __typename?: 'ServiceInfoType';
@@ -896,10 +905,11 @@ export type ServicePunctualityType = {
   __typename?: 'ServicePunctualityType';
   early?: Maybe<Scalars['Int']>;
   late?: Maybe<Scalars['Int']>;
-  lineId: Scalars['String'];
-  lineInfo: ServiceInfoType;
+  lineId?: Maybe<Scalars['String']>;
+  lineInfo?: Maybe<ServiceInfoType>;
   nocCode?: Maybe<Scalars['String']>;
   onTime?: Maybe<Scalars['Int']>;
+  rank?: Maybe<Scalars['Float']>;
   trend?: Maybe<ServicePunctualityType>;
 };
 
@@ -1001,6 +1011,7 @@ export type UserUpdateResponseType = {
 
 export type VehicleJourneyType = {
   __typename?: 'VehicleJourneyType';
+  mode?: Maybe<Scalars['String']>;
   operatorId?: Maybe<Scalars['String']>;
   servicePatternId?: Maybe<Scalars['String']>;
   timingPatternId?: Maybe<Scalars['String']>;
@@ -1092,7 +1103,7 @@ export type CorridorsStopSearchQuery = (
 );
 
 export type CorridorsSubsequentStopsQueryVariables = Exact<{
-  stopList: Array<Maybe<Scalars['String']>>;
+  stopList: Array<Scalars['String']>;
 }>;
 
 
@@ -1236,26 +1247,26 @@ export type UpdateCorridorMutation = (
 export type OperatorDashboardFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus'>
     & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'feedErrors' | 'feedAlerts'>
     )> }
-  ) }
+  )> }
 );
 
 export type OperatorDashboardVehicleCountsFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'currentVehicles' | 'expectedVehicles'>
     )> }
-  ) }
+  )> }
 );
 
 export type DashboardOperatorListQueryVariables = Exact<{ [key: string]: never; }>;
@@ -1316,10 +1327,10 @@ export type DashboardServiceRankingQuery = (
     & { servicePunctuality?: Maybe<Array<Maybe<(
       { __typename?: 'ServicePunctualityType' }
       & Pick<ServicePunctualityType, 'nocCode' | 'lineId' | 'onTime' | 'early' | 'late'>
-      & { lineInfo: (
+      & { lineInfo?: Maybe<(
         { __typename?: 'ServiceInfoType' }
         & Pick<ServiceInfoType, 'serviceId' | 'serviceName' | 'serviceNumber'>
-      ), trend?: Maybe<(
+      )>, trend?: Maybe<(
         { __typename?: 'ServicePunctualityType' }
         & Pick<ServicePunctualityType, 'onTime' | 'early' | 'late'>
       )> }
@@ -1377,20 +1388,20 @@ export type VehicleStatFragment = (
 export type BasicOperatorFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus' | 'availability' | 'lastOutage' | 'unavailableSince'>
     & { liveStats?: Maybe<(
       { __typename?: 'LiveStatsType' }
       & Pick<LiveStatsType, 'updateFrequency'>
     )> }
-  ) }
+  )> }
 );
 
 export type OperatorLiveStatusFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & Pick<FeedMonitoringType, 'feedStatus' | 'availability' | 'lastOutage' | 'unavailableSince'>
     & { liveStats?: Maybe<(
@@ -1404,13 +1415,13 @@ export type OperatorLiveStatusFragment = (
         & VehicleStatFragment
       )>> }
     )> }
-  ) }
+  )> }
 );
 
 export type OperatorFeedHistoryFragment = (
   { __typename?: 'OperatorType' }
   & Pick<OperatorType, 'name' | 'nocCode' | 'operatorId'>
-  & { feedMonitoring: (
+  & { feedMonitoring?: Maybe<(
     { __typename?: 'FeedMonitoringType' }
     & { historicalStats?: Maybe<(
       { __typename?: 'HistoricalStatsType' }
@@ -1419,7 +1430,7 @@ export type OperatorFeedHistoryFragment = (
       { __typename?: 'VehicleStatsType' }
       & VehicleStatFragment
     )>> }
-  ) }
+  )> }
 );
 
 export type FeedMonitoringListQueryVariables = Exact<{ [key: string]: never; }>;
@@ -1448,7 +1459,7 @@ export type OperatorSparklineStatsQuery = (
     & { items: Array<Maybe<(
       { __typename?: 'OperatorType' }
       & Pick<OperatorType, 'nocCode' | 'operatorId'>
-      & { feedMonitoring: (
+      & { feedMonitoring?: Maybe<(
         { __typename?: 'FeedMonitoringType' }
         & { liveStats?: Maybe<(
           { __typename?: 'LiveStatsType' }
@@ -1457,7 +1468,7 @@ export type OperatorSparklineStatsQuery = (
             & VehicleStatFragment
           )>> }
         )> }
-      ) }
+      )> }
     )>> }
   ) }
 );
@@ -1744,7 +1755,7 @@ export type TransitModelServicePatternStopsQuery = (
   { __typename?: 'Query' }
   & { operator?: Maybe<(
     { __typename?: 'OperatorType' }
-    & { transitModel: (
+    & { transitModel?: Maybe<(
       { __typename?: 'TransitModelType' }
       & { lines: (
         { __typename?: 'PaginatedLineType' }
@@ -1764,7 +1775,7 @@ export type TransitModelServicePatternStopsQuery = (
           )>>> }
         )>>> }
       ) }
-    ) }
+    )> }
   )> }
 );
 
@@ -1968,7 +1979,7 @@ export type OperatorLinesQuery = (
   { __typename?: 'Query' }
   & { operator?: Maybe<(
     { __typename?: 'OperatorType' }
-    & { transitModel: (
+    & { transitModel?: Maybe<(
       { __typename?: 'TransitModelType' }
       & { lines: (
         { __typename?: 'PaginatedLineType' }
@@ -1977,7 +1988,7 @@ export type OperatorLinesQuery = (
           & { id: LineType['lineId'], name: LineType['lineName'], number: LineType['lineNumber'] }
         )>>> }
       ) }
-    ) }
+    )> }
   )> }
 );
 
@@ -2373,7 +2384,7 @@ export const CorridorsStopSearchDocument = gql`
     }
   }
 export const CorridorsSubsequentStopsDocument = gql`
-    query corridorsSubsequentStops($stopList: [String]!) {
+    query corridorsSubsequentStops($stopList: [String!]!) {
   corridor {
     addSubsequentStops(stopList: $stopList) {
       stopId

@@ -14,19 +14,11 @@ class ServiceViewModel {
   trend?: 'decrease' | 'increase';
   trendPctDiff?: string;
 
-  constructor({
-    onTime,
-    early,
-    late,
-    lineId,
-    lineInfo: { serviceName, serviceNumber },
-    nocCode,
-    trend,
-  }: ServicePunctualityType) {
+  constructor({ onTime, early, late, lineId, lineInfo, nocCode, trend }: ServicePunctualityType) {
     const total = (onTime ?? 0) + (early ?? 0) + (late ?? 0);
     this.nocCode = nocCode as string;
-    this.name = `${serviceNumber}: ${serviceName}`;
-    this.route = ['/on-time/', nocCode as string, lineId];
+    this.name = `${lineInfo?.serviceNumber ?? 'unknown'}: ${lineInfo?.serviceName ?? 'unknown'}`;
+    this.route = ['/on-time/', nocCode as string, lineId ?? ''];
     this.onTime = total > 0 ? (onTime ?? 0) / total : 0;
     this.onTimePct = `${(this.onTime * 100).toFixed(2)}%`;
 

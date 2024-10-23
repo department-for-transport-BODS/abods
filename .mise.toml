@@ -7,7 +7,6 @@ legacy_version_file = true
 granted = "0.35.1"
 serverless = "3.39.0"
 jq = "1.7.1"
-watchexec = "2.2.0"
 
 [tasks."setup:api"]
 description = "Setup task for the API"
@@ -56,12 +55,22 @@ run = "npm start"
 dir = "frontend"
 run = "npm run codegen"
 
+[tasks."codegen:backend"]
+dir = "abods-api"
+run = "npm run codegen"
+
 [tasks.codegen]
-depends = ["codegen:frontend"]
+depends = ["codegen:frontend", "codegen:backend"]
 
 [tasks."build:frontend"]
+depends = ["codegen:frontend"]
 dir = "frontend"
 run = "npm run build"
 
+[tasks."build:backend"]
+depends = ["codegen:backend"]
+dir = "abods-api"
+run = "npm run build"
+
 [tasks.build]
-depends = ["build:frontend"]
+depends = ["build:frontend", "build:backend"]

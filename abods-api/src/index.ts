@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
 import { createContext } from './context.js';
-import { SessionUser } from './types.js';
+import { SessionUser } from './types';
 import { getSession } from './resolvers/users/userFunctions.js';
 import logger from './logger.js';
 import { getDate } from './lib/dayjs.js';
@@ -69,16 +69,14 @@ app.use(
 
         logger.debug(`Returning session user: ${JSON.stringify(sessionUser)}`);
         return {
-          req: req, 
-          res: res, 
+          req,
+          res,
           sessionUser, 
           db,
-          lambdaEvent: event,
-          lambdaContext: context,
         }
       } catch (error) {
         logger.error("****error in context handling: " + error)
-        return { req: event, res: context, sessionUser, db };
+        return { req, res, sessionUser, db };
       }
     }
   })

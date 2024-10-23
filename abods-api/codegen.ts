@@ -4,11 +4,11 @@ const config: CodegenConfig = {
   overwrite: true,
   schema: "./src/schema.graphql",
   generates: {
-    "src/generated/graphql.ts": {
+    "src/types/generated.ts": {
       plugins: ["typescript", "typescript-resolvers"],
       config:{
         useIndexSignature: true,
-        contextType: "../requestContext#RequestContext"
+        contextType: "./extra#RequestContext"
       }
     }
   },

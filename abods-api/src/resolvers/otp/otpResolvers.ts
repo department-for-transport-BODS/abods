@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils'
 import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayDayOfWeek, getHeadwayOverview, getHeadwayTimeOfDay, getHeadwayTimeSeries, getJourneyScheduledStartTimes, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
-import { RequestContext } from '../../types.js';
+import { RequestContext } from '../../types';
 import { GraphQLResolveInfo } from 'graphql';
 
 const otpResolvers: IResolvers = {
