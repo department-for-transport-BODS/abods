@@ -1,10 +1,9 @@
 import { IResolvers } from "@graphql-tools/utils";
-import { RequestContext } from "../../types";
+import { RequestContext } from "../../types/extra.js";
 import {
   getVehicles,
   getEventStats,
   getHistoricalStats,
-  getLiveStats,
   getVehicleStatsPerOperator,
   getLast24Hours,
   getVehicleStatsByMin,

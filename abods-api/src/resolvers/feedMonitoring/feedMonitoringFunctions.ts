@@ -5,7 +5,7 @@ import {
   getAvlPoints,
   getExpectedJourneys,
 } from "../../lib/otp.js";
-import { EventStatsType } from "../../types";
+import { EventStatsType } from "../../types/generated.js";
 import { getVehicleStats, VechileCountType } from "../../lib/feedMonitoring.js";
 import { GraphQLResolveInfo } from "graphql";
 import { Dayjs } from "dayjs";
