@@ -5,9 +5,8 @@ import {
   HistoricalStatsType,
   PerformanceInputType,
   PunctualityTotalsType,
-  SessionUser,
-  VehicleStatsType,
-} from '../types';
+} from '../types/generated.js';
+import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otp/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';

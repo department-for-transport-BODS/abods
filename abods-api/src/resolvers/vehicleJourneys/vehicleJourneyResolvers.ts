@@ -1,4 +1,4 @@
-import { Resolvers } from '../../types';
+import { Resolvers } from '../../types/generated.js';
 import {
   findJourneys,
   getJourney,
@@ -9,6 +9,8 @@ import {
 
 const vehicleJourneyResovlers: Resolvers = {
   Query: {
+    // @ts-ignore
+    vehicleReplay: async () => ({}),
     servicePatternsInfo: async (
       _,
       { servicePatternIds },

@@ -1,5 +1,6 @@
 import { bods_user, corridor, corridor_stops, naptan_adminarea, naptan_locality, naptan_stoppoint_latlong, Timetable } from "@prisma/client";
-import { CorridorType, SessionUser, StopInfoType } from "../types";
+import { CorridorType } from "../types/generated.js";
+import { SessionUser } from "../types/extra.js";
 import { Context } from "../context";
 
 export enum CorridorJourneyStatsOption {

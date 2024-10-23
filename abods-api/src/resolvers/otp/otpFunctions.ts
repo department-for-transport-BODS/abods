@@ -3,7 +3,6 @@ import {
   HeadwayTimeSeriesType,
   LineType,
   OperatorPerformanceType,
-  OperatorSparklineStatsQueryVariables,
   OperatorType,
   PaginatedLineType,
   PunctualityTimeOfDayType,
@@ -11,16 +10,15 @@ import {
   RankingOrder,
   ServicePerformanceInputType,
   ServicePunctualityType,
-  SessionUser,
   StopPerformanceType,
-} from "../../types";
+} from "../../types/generated.js";
+import { SessionUser } from "../../types/extra.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
 import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
 import { compareThresholds, getFeedMonitoringList, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
-import dayjs from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
@@ -651,29 +649,6 @@ export const getPunctualityDayOfWeek = async (
     }
 
     return []
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
-export const getJourneyScheduledStartTimes = async (
-  sessionUser: SessionUser,
-  db: Context
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw "Not authorized";
-    }
-
-    return [
-      {
-        days: ["Mon", "Wed", "Fri"],
-        fromDate: "2024-01-01",
-        startTimes: ["08:00", "10:00", "12:00"],
-        toDate: "2024-01-31",
-      },
-    ];
   } catch (error) {
     logger.error(error);
     return null;
@@ -1437,35 +1412,6 @@ export const getFrequentServiceInfo = async (
   }
 };
 
-export const getHeadwayDayOfWeek = async (
-  lineId,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw 'Not authorized';
-    }
-    return [
-      {
-        dayOfWeek: 1,
-        actualWaitTime: 5.0,
-        excessWaitTime: 0.5,
-        scheduledWaitTime: 4.5,
-      },
-      {
-        dayOfWeek: 2,
-        actualWaitTime: 6.0,
-        excessWaitTime: 0.6,
-        scheduledWaitTime: 5.4,
-      },
-    ];
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
 export const getHeadwayOverview = async (
   inputs,
   sessionUser: SessionUser,
@@ -1528,35 +1474,6 @@ export const getHeadwayOverview = async (
       excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
     }
 
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
-export const getHeadwayTimeOfDay = async (
-  lineId,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw 'Not authorized';
-    }
-    return [
-      {
-        timeOfDay: '08:00',
-        actualWaitTime: 4.0,
-        excessWaitTime: 0.4,
-        scheduledWaitTime: 3.6,
-      },
-      {
-        timeOfDay: '09:00',
-        actualWaitTime: 3.8,
-        excessWaitTime: 0.2,
-        scheduledWaitTime: 3.6,
-      },
-    ];
   } catch (error) {
     logger.error(error);
     return null;
