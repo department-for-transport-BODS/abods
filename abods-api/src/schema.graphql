@@ -406,7 +406,7 @@ type HistoricalStatsType {
 type VehicleStatsType {
   actual: Int
   expected: Int
-  timestamp: DateTime!
+  timestamp: String!
 }
 
 type LiveStatsType {

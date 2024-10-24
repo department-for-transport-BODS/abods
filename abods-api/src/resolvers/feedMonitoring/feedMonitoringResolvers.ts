@@ -59,11 +59,6 @@ const feedMonitoringResovlers: IResolvers = {
       getVehicleStatsPerOperator(db, operatorId, getDate()),
     last24Hours: async ({ operatorId }, db) => getLast24Hours(operatorId, db),
   },
-  EventsPage: {
-    items: async () => {
-      return [];
-    },
-  },
 };
 
 export default feedMonitoringResovlers;

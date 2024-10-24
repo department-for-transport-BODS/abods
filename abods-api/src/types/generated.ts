@@ -17,7 +17,6 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
   DateTime: { input: any; output: any; }
-  JSON: { input: any; output: any; }
 };
 
 export type AddFirstStopInputType = {
@@ -1053,7 +1052,7 @@ export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual?: Maybe<Scalars['Int']['output']>;
   expected?: Maybe<Scalars['Int']['output']>;
-  timestamp: Scalars['DateTime']['output'];
+  timestamp: Scalars['String']['output'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -1181,7 +1180,6 @@ export type ResolversTypes = ResolversObject<{
   InvitationInput: InvitationInput;
   InvitationResponseType: ResolverTypeWrapper<InvitationResponseType>;
   InvitationType: ResolverTypeWrapper<InvitationType>;
-  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   LineFilterType: LineFilterType;
   LineType: ResolverTypeWrapper<LineType>;
   LiveStatsType: ResolverTypeWrapper<LiveStatsType>;
@@ -1286,7 +1284,6 @@ export type ResolversParentTypes = ResolversObject<{
   InvitationInput: InvitationInput;
   InvitationResponseType: InvitationResponseType;
   InvitationType: InvitationType;
-  JSON: Scalars['JSON']['output'];
   LineFilterType: LineFilterType;
   LineType: LineType;
   LiveStatsType: LiveStatsType;
@@ -1581,10 +1578,6 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
-
-export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
-  name: 'JSON';
-}
 
 export type LineTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LineType'] = ResolversParentTypes['LineType']> = ResolversObject<{
   lineId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1916,7 +1909,7 @@ export type VehicleReplayNamespaceResolvers<ContextType = RequestContext, Parent
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
   actual?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   expected?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1953,7 +1946,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
   InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
   InvitationType?: InvitationTypeResolvers<ContextType>;
-  JSON?: GraphQLScalarType;
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
   LocalityType?: LocalityTypeResolvers<ContextType>;

@@ -104,7 +104,7 @@ export class SparklineCellTemplateComponent extends BaseChart implements AfterVi
       const dateTime = DateTime.fromISO(stat.timestamp, { zone: 'utc' });
       return {
         dateTime,
-        timestamp: dateTime.toJSDate(),
+        timestamp: stat.timestamp,
         actual: stat.actual,
       };
     });
@@ -124,7 +124,7 @@ export class SparklineCellTemplateComponent extends BaseChart implements AfterVi
         i += 1;
       } else {
         viewData.push({
-          timestamp: ts.toJSDate(),
+          timestamp: ts.setZone('Europe/London').toISO(),
           actual: 0,
         });
       }

@@ -12,7 +12,6 @@ export type Scalars = {
   Float: number;
   Date: any;
   DateTime: any;
-  JSON: any;
 };
 
 
@@ -424,7 +423,6 @@ export type InvitationType = {
   accepted: Scalars['Boolean'];
   email: Scalars['String'];
 };
-
 
 export type LineFilterType = {
   lineIds?: Maybe<Array<Scalars['String']>>;
@@ -1053,7 +1051,7 @@ export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual?: Maybe<Scalars['Int']>;
   expected?: Maybe<Scalars['Int']>;
-  timestamp: Scalars['DateTime'];
+  timestamp: Scalars['String'];
 };
 
 export type LoginMutationVariables = Exact<{
