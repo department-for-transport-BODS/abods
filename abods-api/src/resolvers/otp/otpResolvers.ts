@@ -33,7 +33,7 @@ const otpResolvers: IResolvers = {
         transitModel: async () => { return {}; },
     },
     TransitModelType: {
-        lines: async (_: any, {lineId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(lineId, sessionUser, db, info),
+        lines: async (_: any, { filterBy } , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(filterBy, sessionUser, db, info),
     }
 }
 

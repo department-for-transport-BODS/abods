@@ -3954,6 +3954,16 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "inputDate",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "lineIds",
             "description": null,
             "type": {

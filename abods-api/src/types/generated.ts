@@ -426,6 +426,7 @@ export type InvitationType = {
 };
 
 export type LineFilterType = {
+  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
