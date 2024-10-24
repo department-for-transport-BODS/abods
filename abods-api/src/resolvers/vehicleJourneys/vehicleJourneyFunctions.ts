@@ -481,7 +481,7 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
   return journey.map(s => ({
     latitude: s.latitude?.toNumber() ?? 0,
     longitude: s.longitude?.toNumber() ?? 0,
-    recordedAtTimeUtc: s.recorded_at_time.toUTCString(),
+    recordedAtTimeUtc: s.recorded_at_time.toISOString(),
     vehicleRef: s.vehicle_ref
   }));
 };
@@ -524,8 +524,8 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
   return route.map(s => ({
     latitude: s.stop_latitude?.toNumber() ?? 0,
     longitude: s.stop_longitude?.toNumber() ?? 0,
-    actualDepartureUtc: s.actual_departure_time?.toUTCString(),
-    scheduledDepartureUtc: (s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)).toUTCString(),
+    actualDepartureUtc: s.actual_departure_time?.toISOString(),
+    scheduledDepartureUtc: (s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)).toISOString(),
     stopIndex: s.stop_index,
     stopId: s.stop_id,
     stopName: s.common_name ?? 'Unknown',
@@ -535,6 +535,6 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
     operatorName: s.expected_journeys?.expected_service.expected_operator.operator_name ?? 'Unknown',
     serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
     serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
-    startTime: s.expected_journeys?.expected_journey_start.toUTCString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toUTCString()
+    startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString()
   }));
 };
