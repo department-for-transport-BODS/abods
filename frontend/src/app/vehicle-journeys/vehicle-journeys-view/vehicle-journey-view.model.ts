@@ -55,24 +55,8 @@ export class VehicleJourneyView {
     if (!(journey[0] && route[0])) {
       throw new Error('No data');
     }
-    journey.sort((a, b) => {
-      if (a.recordedAtTimeUtc < b.recordedAtTimeUtc) {
-        return -1;
-      }
-      if (a.recordedAtTimeUtc > b.recordedAtTimeUtc) {
-        return 1;
-      }
-      return 0;
-    });
-    route.sort((a, b) => {
-      if (a.stopIndex < b.stopIndex) {
-        return -1;
-      }
-      if (a.stopIndex > b.stopIndex) {
-        return 1;
-      }
-      return 0;
-    });
+    journey.sort((a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate());
+    route.sort((a, b) => a.stopIndex - b.stopIndex);
 
     const lastStopIndex = Math.max(...route.map((n) => n.stopIndex));
     const stopList = route.map((stop) =>
