@@ -11,7 +11,6 @@ import {
   CreateCorridorDocument,
   DeleteCorridorDocument,
   GetCorridorDocument,
-  ICorridorJourneyTimeStats,
   ServiceLinkType,
   UpdateCorridorDocument,
 } from '../../generated/graphql';
@@ -26,6 +25,7 @@ import { fakeAsync, flush } from '@angular/core/testing';
 import objectContaining = jasmine.objectContaining;
 import { OperatorService } from '../shared/services/operator.service';
 import { of } from 'rxjs';
+import { ICorridorJourneyTimeStats } from '../../generated/extra';
 
 const journeyTime: ICorridorJourneyTimeStats = {
   avgTransitTime: 5,

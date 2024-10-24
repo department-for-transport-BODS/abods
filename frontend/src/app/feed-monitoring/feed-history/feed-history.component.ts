@@ -118,9 +118,9 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
 
         if (!operator) {
           this.notFound = true;
-        } else if (operator.feedMonitoring.vehicleStats?.length > 0) {
+        } else if ((operator.feedMonitoring?.vehicleStats?.length ?? 0) > 0) {
           this.chartErrored = false;
-          this.vehicleStats = nonNullishArray(operator.feedMonitoring.vehicleStats);
+          this.vehicleStats = nonNullishArray(operator.feedMonitoring?.vehicleStats);
         } else {
           this.noData = true;
         }

@@ -1,6 +1,6 @@
 import { Role } from '@prisma/client';
 import { Context } from '../../context.js';
-import { ApiInfoType, OrganisationType, RoleType, ScopeEnum } from '../../types.js'
+import { RoleType, ScopeEnum } from '../../types/generated.js'
 
 const adminAreas = [
   {

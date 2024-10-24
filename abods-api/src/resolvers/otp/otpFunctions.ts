@@ -10,9 +10,9 @@ import {
   RankingOrder,
   ServicePerformanceInputType,
   ServicePunctualityType,
-  SessionUser,
   StopPerformanceType,
-} from "../../types.js";
+} from "../../types/generated.js";
+import { SessionUser } from "../../types/extra.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
 import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
@@ -258,7 +258,6 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
           lineId: service.noc_and_line_and_servicecode,
           lineName: service.service_name,
           lineNumber: service.line_name,
-          onTimePerformance: [],
           servicePatterns: [],
         });
       }
@@ -647,29 +646,6 @@ export const getPunctualityDayOfWeek = async (
     }
 
     return []
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
-export const getJourneyScheduledStartTimes = async (
-  sessionUser: SessionUser,
-  db: Context
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw "Not authorized";
-    }
-
-    return [
-      {
-        days: ["Mon", "Wed", "Fri"],
-        fromDate: "2024-01-01",
-        startTimes: ["08:00", "10:00", "12:00"],
-        toDate: "2024-01-31",
-      },
-    ];
   } catch (error) {
     logger.error(error);
     return null;
@@ -1312,9 +1288,6 @@ export const getServicePerformance = async (
             early: res._sum.early_count ? res._sum.early_count : 0,
             late: res._sum.late_count ? res._sum.late_count : 0,
             onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
-            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
-            actualDepartures: res._sum.completed ? res._sum.completed : 0,
-            averageDelay: avgDelay,
             lineInfo: {
               serviceId: res.noc_and_line_and_servicecode,
               serviceNumber: res.line_name,
@@ -1436,35 +1409,6 @@ export const getFrequentServiceInfo = async (
   }
 };
 
-export const getHeadwayDayOfWeek = async (
-  lineId,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw 'Not authorized';
-    }
-    return [
-      {
-        dayOfWeek: 1,
-        actualWaitTime: 5.0,
-        excessWaitTime: 0.5,
-        scheduledWaitTime: 4.5,
-      },
-      {
-        dayOfWeek: 2,
-        actualWaitTime: 6.0,
-        excessWaitTime: 0.6,
-        scheduledWaitTime: 5.4,
-      },
-    ];
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
 export const getHeadwayOverview = async (
   inputs,
   sessionUser: SessionUser,
@@ -1527,35 +1471,6 @@ export const getHeadwayOverview = async (
       excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
     }
 
-  } catch (error) {
-    logger.error(error);
-    return null;
-  }
-};
-
-export const getHeadwayTimeOfDay = async (
-  lineId,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
-  try {
-    if (!sessionUser.user) {
-      throw 'Not authorized';
-    }
-    return [
-      {
-        timeOfDay: '08:00',
-        actualWaitTime: 4.0,
-        excessWaitTime: 0.4,
-        scheduledWaitTime: 3.6,
-      },
-      {
-        timeOfDay: '09:00',
-        actualWaitTime: 3.8,
-        excessWaitTime: 0.2,
-        scheduledWaitTime: 3.6,
-      },
-    ];
   } catch (error) {
     logger.error(error);
     return null;

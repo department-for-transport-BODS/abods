@@ -1,6 +1,6 @@
 import {IResolvers} from '@graphql-tools/utils'
 import { getUser, getUsers, getUserAlerts, loginUser, logoutUser, getUserAlert, addUserAlert, updateUserAlert, deleteUserAlert } from './userFunctions.js'
-import { RequestContext } from '../../types.js';
+import { RequestContext } from '../../types/extra.js';
 
 const userResolvers: IResolvers = {
     Query: {

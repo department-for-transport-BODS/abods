@@ -31,9 +31,9 @@ import {
   Maybe,
   MutationResponseType,
   ServiceLinkType,
-  SessionUser,
   StopType,
-} from '../../types';
+} from '../../types/generated.js';
+import { SessionUser } from "../../types/extra.js";
 import {
   getDate,
   getDayFormattedDate,
@@ -108,8 +108,8 @@ export const getStops = async (
     };
 
     where.longitude = {
-      gte: boundingBox?.minLongitude,
-      lte: boundingBox?.maxLongitude,
+      gte: Number(boundingBox?.minLongitude),
+      lte: Number(boundingBox?.maxLongitude),
     };
   }
 

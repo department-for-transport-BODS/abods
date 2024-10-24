@@ -1,5 +1,6 @@
 import { Context } from '../../context.js'
-import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, SessionUser, OperatorType } from '../../types.js';
+import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum } from '../../types/generated.js';
+import { SessionUser } from "../../types/extra.js";
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import logger from '../../logger.js';
