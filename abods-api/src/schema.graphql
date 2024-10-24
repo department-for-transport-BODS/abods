@@ -293,9 +293,8 @@ input CorridorUpdateInputType {
 
 input HeadwayInputType {
     filters: HeadwayFiltersInputType
-    fromTimestamp: DateTime
-    toTimestamp: DateTime
-    sortBy: HeadwaySortType
+    fromTimestamp: DateTime!
+    toTimestamp: DateTime!
 }
 
 enum HeadwaySortEnum {
@@ -313,9 +312,9 @@ input HeadwayFiltersInputType {
     dayOfWeekFlags: DayOfWeekFlagsInputType
     endTime: String
     granularity: Granularity
-    lineIds: [String]
+    lineIds: [String!]
     nocCodes: [String]
-    operatorIds: [String]
+    operatorIds: [String!]
     startTime: String
 }
 
@@ -759,26 +758,25 @@ input PerformanceInputType {
     filters: PerformanceFiltersInputType
     fromTimestamp: DateTime!
     paging: PagingInputType
-    sortBy: PunctualitySortType
     toTimestamp: DateTime!
 }
 
 input PerformanceFiltersInputType {
     addNonTagged: Boolean
-    adminAreaIds: [String]
+    adminAreaIds: [String!]
     dayOfWeekFlags: DayOfWeekFlagsInputType
     endTime: String
     excludedDates: [Date]
     excludeItoLineId: String
     granularity: Granularity
     lineDirection: LineDirection
-    lineIds: [String]
+    lineIds: [String!]
     maxDelay: Int
     minDelay: Int
     nocCodes: [String]
     onTimeMaxMinutes: Int
     onTimeMinMinutes: Int
-    operatorIds: [String]
+    operatorIds: [String!]
     startTime: String
     startTimes: [Time]
     stopsSegment: StopsSegment

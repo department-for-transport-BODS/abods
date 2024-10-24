@@ -95,8 +95,9 @@ export class ControlsComponent implements OnInit, OnChanges, AfterViewInit, OnDe
       const operatorId = ifNullOrUndefinedReturnEmptyString(this.operatorId);
       filters.operatorIds = [operatorId];
     }
-    if (paramMap.get('lineId')) {
-      filters.lineIds = [paramMap.get('lineId')];
+    const lineId = paramMap.get('lineId');
+    if (lineId) {
+      filters.lineIds = [lineId];
     }
 
     if (queryParams.get('dayOfWeek')) {

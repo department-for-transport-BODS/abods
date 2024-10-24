@@ -60,7 +60,7 @@ export const getCorridors = async (
   corridorId: Number,
   sessionUser: SessionUser,
   db: Context,
-): Promise<CorridorType | undefined> => {
+) => {
   if (!sessionUser.user) {
     throw 'Not Authorized';
   }
@@ -69,7 +69,7 @@ export const getCorridors = async (
     db,
     sessionUser
   );
-  return corridor ? returnCorridor(corridor) : undefined;
+  return corridor ? returnCorridor(corridor) : null;
 };
 
 export const getStops = async (
@@ -301,7 +301,7 @@ export const insertCorridorStops = async (
 };
 
 export const deleteCorridor = async (
-  corridorId: Number,
+  corridorId: InputMaybe<number> | undefined,
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
@@ -311,6 +311,8 @@ export const deleteCorridor = async (
   ) {
     throw 'Not Authorized';
   }
+
+  if (!corridorId) throw 'Bad Request'
 
   await Promise.all([
     deleteCorridorDb(corridorId, db),
@@ -323,10 +325,11 @@ export const deleteCorridor = async (
 };
 
 export const updateCorridor = async (
-  inputs: CorridorUpdateInputType,
+  inputs:  InputMaybe<CorridorUpdateInputType> | undefined,
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
+  if (!inputs) throw 'Bad Request'
   if (
     !sessionUser.user ||
     !isCorridorMappedToUserOrg(Number(inputs.id), sessionUser, db)
@@ -334,7 +337,7 @@ export const updateCorridor = async (
     throw 'Not Authorized';
   }
 
-  if (!inputs || !inputs.id || !inputs.name || !inputs.stopList) throw "Bad Request"
+  if (!inputs.id || !inputs.name || !inputs.stopList) throw "Bad Request"
 
   await Promise.all([
     updateCorridorDb(inputs.id, inputs.name, db),
@@ -353,11 +356,15 @@ export const updateCorridor = async (
   };
 };
 
+export type StatsCache = {inputs: CorridorStatsInputType, journeys:Map<string, Timetable[]>}
+
 export const getStats = async (
-  inputs: CorridorStatsInputType,
+  inputs: InputMaybe<CorridorStatsInputType> | undefined,
   sessionUser: SessionUser,
   db: Context,
-) => {
+): Promise<StatsCache> => {
+
+  if (!inputs) throw 'Bad Request'
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     inputs;
@@ -403,10 +410,7 @@ export const getStats = async (
 };
 
 export const getSummaryStats = (
-  inputs: CorridorStatsInputType,
   journeys: Map<string, Timetable[]>,
-  sessionUser: SessionUser,
-  db: Context,
 ): CorridorSummaryStatsType => {
   const scheduledTransits = journeys.size;
   let totalTransits = 0;
@@ -442,9 +446,9 @@ export const getSummaryStats = (
 export const getJourneyStatsByDay = (
   journeys: Map<string, Timetable[]>,
 ): (
-  | CorridorJourneyTimeStatsType
-  | CorridorStatsTimeOfDayType
-  | CorridorStatsDayOfWeekType
+  & CorridorJourneyTimeStatsType
+  & CorridorStatsTimeOfDayType
+  & CorridorStatsDayOfWeekType
 )[] => {
   return getJourneyStats(journeys, CorridorJourneyStatsOption.day);
 };
@@ -452,9 +456,9 @@ export const getJourneyStatsByDay = (
 export const getJourneyStatsByHour = (
   journeys: Map<string, Timetable[]>,
 ): (
-  | CorridorJourneyTimeStatsType
-  | CorridorStatsTimeOfDayType
-  | CorridorStatsDayOfWeekType
+  & CorridorJourneyTimeStatsType
+  & CorridorStatsTimeOfDayType
+  & CorridorStatsDayOfWeekType
 )[] => {
   return getJourneyStats(journeys, CorridorJourneyStatsOption.hour);
 };
@@ -463,9 +467,9 @@ export const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
   inputType: CorridorJourneyStatsOption,
 ): (
-  | CorridorJourneyTimeStatsType
-  | CorridorStatsTimeOfDayType
-  | CorridorStatsDayOfWeekType
+  & CorridorJourneyTimeStatsType
+  & CorridorStatsTimeOfDayType
+  & CorridorStatsDayOfWeekType
 )[] => {
   const journeyStats = new Map<string, number[]>();
   const _ = [...journeys.values()].map((journeys) => {
@@ -518,9 +522,9 @@ export const getJourneyStats = (
   });
 
   const stats: (
-    | CorridorJourneyTimeStatsType
-    | CorridorStatsTimeOfDayType
-    | CorridorStatsDayOfWeekType
+    & CorridorJourneyTimeStatsType
+    & CorridorStatsTimeOfDayType
+    & CorridorStatsDayOfWeekType
   )[] = [];
   journeyStats.forEach((journeyTimes: number[], key: string) => {
     journeyTimes.sort((a, b) => a - b);

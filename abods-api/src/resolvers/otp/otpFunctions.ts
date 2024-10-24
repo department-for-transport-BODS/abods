@@ -1,14 +1,19 @@
 import { Context } from "../../context";
 import {
+  FrequentServiceInfoInputType,
+  HeadwayInputType,
   HeadwayTimeSeriesType,
+  InputMaybe,
   LineType,
   OperatorPerformanceType,
   OperatorType,
   PaginatedLineType,
+  PerformanceInputType,
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   RankingOrder,
   ServicePerformanceInputType,
+  ServicePerformanceType,
   ServicePunctualityType,
   StopPerformanceType,
 } from "../../types/generated.js";
@@ -39,8 +44,6 @@ interface distribution {
   noOfStops: number;
   performanceInMins: number;
 }
-
-
 
 export const getOperatorList = async (
   sessionUser: SessionUser,
@@ -191,7 +194,7 @@ const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
 };
 
 export const getServiceInfo = async (
-  serviceId,
+  serviceId: string,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -272,7 +275,6 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
 };
 
 export const getLines = async (
-  lineIds: string[],
   sessionUser: SessionUser,
   db: Context,
   info: GraphQLResolveInfo
@@ -296,6 +298,7 @@ export const getLines = async (
     // to be added for service maps next
   }
   console.log("operator ref", operatorId)
+  return null;
 }
 
 
@@ -303,7 +306,6 @@ export const getOperator = async (
   operatorRef: string,
   sessionUser: SessionUser,
   db: Context,
-  info: GraphQLResolveInfo
 ) => {
   try {
     if (!sessionUser.user) {
@@ -338,7 +340,7 @@ export const getOperator = async (
 
 
 export const getPunctualityOverview = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -350,7 +352,8 @@ export const getPunctualityOverview = async (
     // start - performance timer
     var startTimer = performance.now();
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -364,6 +367,7 @@ export const getPunctualityOverview = async (
       onTimeMaxMinutes,
       onTimeMinMinutes,
     } = filters;
+    if (!adminAreaIds) throw 'Bad request'
 
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
@@ -417,7 +421,6 @@ export const getPunctualityOverview = async (
       );
 
       return {
-        __typename: "PunctualityTotalsType",
         early: results._sum.early_count,
         late: results._sum.late_count,
         onTime: results._sum.on_time_count,
@@ -435,7 +438,7 @@ export const getPunctualityOverview = async (
 };
 
 export const getOperatorPerformance = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -449,7 +452,8 @@ export const getOperatorPerformance = async (
 
     let opPerformances: OperatorPerformanceType[] = [];
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -461,6 +465,7 @@ export const getOperatorPerformance = async (
       lineIds,
       dayOfWeekFlags,
     } = filters;
+    if (!adminAreaIds) throw 'Bad request'
 
     logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
@@ -546,7 +551,7 @@ export const getOperatorPerformance = async (
 };
 
 export const getPunctualityDayOfWeek = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context,
 ) => {
@@ -555,7 +560,8 @@ export const getPunctualityDayOfWeek = async (
       throw 'Not authorized';
     }
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -568,6 +574,7 @@ export const getPunctualityDayOfWeek = async (
       granularity,
       lineIds,
     } = filters;
+    if (!operatorIds) throw 'Bad request'
 
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
@@ -653,11 +660,12 @@ export const getPunctualityDayOfWeek = async (
 };
 
 export const getStopsDistribution = async (
-  inputs,
+  inputs: PerformanceInputType,
   userOperatorIds: string[],
   db: Context,
 ) => {
   const { filters } = inputs;
+  if (!filters) throw 'Bad request'
   const { maxDelay, minDelay } = filters;
 
   const where: Prisma.timetable_threshold_summaryWhereInput =
@@ -704,7 +712,7 @@ export const getStopsDistribution = async (
 };
 
 export const getDelayFrequency = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context,
 ) => {
@@ -719,7 +727,9 @@ export const getDelayFrequency = async (
     // freq is the count of that difference
 
     const { filters } = inputs;
+    if (!filters) throw 'Bad request'
     const { operatorIds } = filters;
+    if (!operatorIds) throw 'Bad request'
 
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
@@ -742,6 +752,7 @@ export const getDelayFrequency = async (
         }
       }
     }
+    return null;
   } catch (error) {
     logger.error(error);
     return null;
@@ -749,7 +760,7 @@ export const getDelayFrequency = async (
 };
 
 export const getPunctualityTimeOfDay = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -766,7 +777,8 @@ export const getPunctualityTimeOfDay = async (
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -779,6 +791,7 @@ export const getPunctualityTimeOfDay = async (
       granularity,
       lineIds,
     } = filters;
+    if (!operatorIds) throw 'Bad request'
 
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
@@ -842,7 +855,7 @@ export const getPunctualityTimeOfDay = async (
 };
 
 export const getPunctualityTimeSeries = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -853,7 +866,8 @@ export const getPunctualityTimeSeries = async (
 
     logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
-    const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -866,6 +880,7 @@ export const getPunctualityTimeSeries = async (
       granularity,
       lineIds,
     } = filters;
+    if (!operatorIds) throw 'Bad request'
 
     if (operatorIds.length == 1) {
       //if (granularity == "day" && operatorIds.length == 1) {
@@ -1098,7 +1113,7 @@ export const getServicePunctuality = async (
 };
 
 export const getStopPerformance = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -1109,10 +1124,13 @@ export const getStopPerformance = async (
     // for this operator & for this service, get all stops and their OTP stats
 
     const { filters } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       operatorIds,
       lineIds,
     } = filters;
+    if (!operatorIds) throw 'Bad request'
+    if (!lineIds) throw 'Bad request'
 
     let stopPerformances: StopPerformanceType[] = [];
 
@@ -1176,7 +1194,7 @@ export const getStopPerformance = async (
 
         results.forEach((res) => {
           // avg delay
-          const timeInSeconds = res._avg.avg_time_difference
+          const timeInSeconds = res._avg?.avg_time_difference
             ? res._avg.avg_time_difference * 60
             : 0;
 
@@ -1200,11 +1218,11 @@ export const getStopPerformance = async (
                 latitude: Number(stop?.latitude) ?? 0,
               },
             },
-            early: res._sum.early_count ? res._sum.early_count : 0,
-            late: res._sum.late_count ? res._sum.late_count : 0,
-            onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
-            actualDepartures: res._sum.completed ? res._sum.completed : 0,
-            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
+            early: res._sum?.early_count ? res._sum.early_count : 0,
+            late: res._sum?.late_count ? res._sum.late_count : 0,
+            onTime: res._sum?.on_time_count ? res._sum.on_time_count : 0,
+            actualDepartures: res._sum?.completed ? res._sum.completed : 0,
+            scheduledDepartures: res._sum?.scheduled ? res._sum.scheduled : 0,
             averageDelay: timeInSeconds,
             timingPoint: res.is_timing_point ? res.is_timing_point : false,
           });
@@ -1220,7 +1238,7 @@ export const getStopPerformance = async (
 };
 
 export const getServicePerformance = async (
-  inputs,
+  inputs: PerformanceInputType,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -1229,12 +1247,14 @@ export const getServicePerformance = async (
       throw "Not authorized";
     }
 
-    let servicePunctualities: ServicePunctualityType[] = [];
+    let servicePunctualities: ServicePerformanceType[] = [];
 
     const { filters } = inputs;
+    if (!filters) throw 'Bad request'
     const {
       operatorIds,
     } = filters;
+    if (!operatorIds) throw 'Bad request'
 
     if (operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
@@ -1277,7 +1297,7 @@ export const getServicePerformance = async (
         })
 
         results.forEach((res) => {
-          const avgDelay = res._avg.avg_time_difference
+          const avgDelay = res._avg?.avg_time_difference
             ? res._avg.avg_time_difference * 60
             : 0;
 
@@ -1285,15 +1305,16 @@ export const getServicePerformance = async (
 
           servicePunctualities.push({
             lineId: res.noc_and_line_and_servicecode,
-            early: res._sum.early_count ? res._sum.early_count : 0,
-            late: res._sum.late_count ? res._sum.late_count : 0,
-            onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
+            early: res._sum?.early_count ? res._sum.early_count : 0,
+            late: res._sum?.late_count ? res._sum.late_count : 0,
+            onTime: res._sum?.on_time_count ? res._sum.on_time_count : 0,
             lineInfo: {
               serviceId: res.noc_and_line_and_servicecode,
               serviceNumber: res.line_name,
               serviceName: service?.service_name ?? "",
             },
-            rank: 1,
+            actualDepartures: 0,
+            averageDelay: 0,
           });
         });
       }
@@ -1308,9 +1329,9 @@ export const getServicePerformance = async (
 
 // -> OPERATOR PAGE
 export const getFrequentServices = async (
-  operatorId,
-  fromTimestamp,
-  toTimestamp,
+  operatorId: string,
+  fromTimestamp: any,
+  toTimestamp: any,
   sessionUser: SessionUser,
   db: Context
 ) => {
@@ -1357,10 +1378,11 @@ export const getFrequentServices = async (
 };
 
 export const getFrequentServiceInfo = async (
-  inputs,
+  inputs: InputMaybe<FrequentServiceInfoInputType> | undefined,
   sessionUser: SessionUser,
   db: Context,
 ) => {
+  if (!inputs) throw 'Bad request'
   try {
     if (!sessionUser.user) {
       throw 'Not authorized';
@@ -1410,10 +1432,11 @@ export const getFrequentServiceInfo = async (
 };
 
 export const getHeadwayOverview = async (
-  inputs,
+  inputs: HeadwayInputType,
   sessionUser: SessionUser,
   db: Context,
 ) => {
+  if (!inputs) throw 'Bad request'
   try {
     if (!sessionUser.user) {
       throw 'Not authorized';
@@ -1478,7 +1501,7 @@ export const getHeadwayOverview = async (
 };
 
 export const getHeadwayTimeSeries = async (
-  inputs,
+  inputs: HeadwayInputType,
   sessionUser: SessionUser,
   db: Context,
 ) => {
@@ -1488,6 +1511,7 @@ export const getHeadwayTimeSeries = async (
     }
 
     const { filters } = inputs;
+    if (!filters) throw 'Bad request'
     const { granularity } = filters;
 
     const isDayGranularity = granularity === 'day'
@@ -1574,8 +1598,7 @@ export const getHeadwayTimeSeries = async (
 };
 
 export const getAdminAreas = async (
-  adminAreaIds: String[],
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context
 ) => {
   try {
@@ -1634,11 +1657,12 @@ export const getAdminAreas = async (
 };
 
 const getPrismaFiltersForOTPQuery = (
-  inputs,
+  inputs: PerformanceInputType & HeadwayInputType & FrequentServiceInfoInputType,
   userOperatorNocList: string[],
   isThreshold?: boolean,
 ) => {
-  const { fromTimestamp, toTimestamp, filters, paging, sortBy } = inputs;
+  const { fromTimestamp, toTimestamp, filters } = inputs;
+  if (!filters) throw 'Bad request'
   const {
     timingPointsOnly,
     adminAreaIds,
@@ -1708,6 +1732,7 @@ const getPrismaFiltersForOTPQuery = (
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
+  if (!operatorIds) throw 'Bad request'
   const allOperators = (operatorIds?.length > 0) || !!operatorId
 
   return {

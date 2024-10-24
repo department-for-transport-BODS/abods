@@ -379,17 +379,16 @@ export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   granularity?: InputMaybe<Granularity>;
-  lineIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  operatorIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type HeadwayInputType = {
   filters?: InputMaybe<HeadwayFiltersInputType>;
-  fromTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-  sortBy?: InputMaybe<HeadwaySortType>;
-  toTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
+  fromTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['DateTime']['input'];
 };
 
 export type HeadwayMetricsType = {
@@ -782,20 +781,20 @@ export type PagingInputType = {
 
 export type PerformanceFiltersInputType = {
   addNonTagged?: InputMaybe<Scalars['Boolean']['input']>;
-  adminAreaIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<InputMaybe<Scalars['Date']['input']>>>;
   granularity?: InputMaybe<Granularity>;
   lineDirection?: InputMaybe<LineDirection>;
-  lineIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
   minDelay?: InputMaybe<Scalars['Int']['input']>;
   nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   onTimeMaxMinutes?: InputMaybe<Scalars['Int']['input']>;
   onTimeMinMinutes?: InputMaybe<Scalars['Int']['input']>;
-  operatorIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
   startTimes?: InputMaybe<Array<InputMaybe<Scalars['Time']['input']>>>;
   stopsSegment?: InputMaybe<StopsSegment>;
@@ -807,7 +806,6 @@ export type PerformanceInputType = {
   filters?: InputMaybe<PerformanceFiltersInputType>;
   fromTimestamp: Scalars['DateTime']['input'];
   paging?: InputMaybe<PagingInputType>;
-  sortBy?: InputMaybe<PunctualitySortType>;
   toTimestamp: Scalars['DateTime']['input'];
 };
 
