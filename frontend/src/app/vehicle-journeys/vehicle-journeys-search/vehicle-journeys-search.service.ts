@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AvlsGQL, JourneysGQL, RouteGQL } from '../../../generated/graphql';
 import { DateTime } from 'luxon';
-import { Observable, zip } from 'rxjs';
+import { mergeMap, Observable, zip } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { nonNullishArray } from '../../shared/array-operators';
 import { findIndex, sortBy, uniqBy } from 'lodash-es';
@@ -85,16 +85,15 @@ export class VehicleJourneysSearchService {
     view: VehicleJourneyView;
     prevNextJourneys: [VehicleJourney | null, VehicleJourney | null];
   }> {
-    const [_, lineName] = journeyId.split('|');
-    return zip(
-      this.avlsGQL.fetch({ groupId: journeyId }),
-      this.routeGQL.fetch({ groupId: journeyId }),
-      this.fetchNextPrevJourneys(startTime, lineName, journeyId)
-    ).pipe(
-      map(([{ data: { avls } }, { data: { route } }, nav]) => ({
-        view: new VehicleJourneyView(avls, route, viewParams),
-        prevNextJourneys: nav,
-      }))
+    return zip(this.avlsGQL.fetch({ groupId: journeyId }), this.routeGQL.fetch({ groupId: journeyId })).pipe(
+      mergeMap(([{ data: { avls } }, { data: { route } }]) =>
+        this.fetchNextPrevJourneys(startTime, route[0].serviceId, journeyId).pipe(
+          map((prevNextJourneys) => ({
+            view: new VehicleJourneyView(avls, route, viewParams),
+            prevNextJourneys: prevNextJourneys,
+          }))
+        )
+      )
     );
   }
 }
