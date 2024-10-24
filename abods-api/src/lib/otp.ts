@@ -74,7 +74,7 @@ export const compareThresholds = async (
     throw 'No user operators';
   }
 
-  const userOperatorIds = operators.map((o) => o.nocCode);
+  const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o) => !!o);
 
   let opIds: string[] | undefined = operatorIds
     ? operatorIds?.filter(isDefined)
@@ -165,7 +165,7 @@ export const compareThresholds = async (
   let dayOfWeekNumbers: number[] = [];
   if (dayOfWeekFlags) {
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
-    where.day_of_week = { in: dayOfWeekNumbers } 
+    where.day_of_week = { in: dayOfWeekNumbers }
   }
 
   if (onTimeMinMinutes && onTimeMaxMinutes) {

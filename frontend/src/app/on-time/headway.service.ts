@@ -67,7 +67,7 @@ export class HeadwayService {
     return this.overviewGQL
       .watch({ params: pickHeadwayFilters(params) }, { fetchPolicy: 'no-cache' })
       .valueChanges.pipe(
-        map((result) => result.data?.headwayMetrics.headwayOverview),
+        map((result) => result.data?.headwayMetrics?.headwayOverview),
         assertNonNullish()
       );
   }
@@ -85,7 +85,7 @@ export class HeadwayService {
         },
         { fetchPolicy: 'no-cache' }
       )
-      .pipe(map((result) => nonNullishArray(result.data?.headwayMetrics.frequentServices)));
+      .pipe(map((result) => nonNullishArray(result.data?.headwayMetrics?.frequentServices)));
   }
 
   fetchFrequentServiceInfo({
@@ -119,7 +119,7 @@ export class HeadwayService {
         { fetchPolicy: 'no-cache' }
       )
       .valueChanges.pipe(
-        map((result) => result.data?.headwayMetrics.frequentServiceInfo),
+        map((result) => result.data?.headwayMetrics?.frequentServiceInfo),
         assertNonNullish()
       );
   }

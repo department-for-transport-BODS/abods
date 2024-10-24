@@ -23,10 +23,10 @@ export class AuthenticatedUserService {
   }
 
   get authenticatedUserIsAdmin(): boolean {
-    return this.user?.roles.some(({ name }) => name === 'Administrator') ?? false;
+    return this.user?.roles?.some(({ name }) => name === 'Administrator') ?? false;
   }
   get authenticatedUserIsOrgUser(): boolean {
-    return this.user?.roles.some(({ scope }) => scope === 'organisation') ?? false;
+    return this.user?.roles?.some(({ scope }) => scope === 'organisation') ?? false;
   }
 
   setUser(user: UserFragment | null) {

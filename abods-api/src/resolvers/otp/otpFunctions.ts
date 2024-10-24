@@ -378,7 +378,7 @@ export const getPunctualityOverview = async (
       throw "No user operators";
     }
 
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     let results;
     let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
@@ -471,7 +471,7 @@ export const getOperatorPerformance = async (
       throw "No user operators";
     }
 
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
 
@@ -580,7 +580,7 @@ export const getPunctualityDayOfWeek = async (
         throw 'No user operators';
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
 
@@ -730,7 +730,7 @@ export const getDelayFrequency = async (
         throw 'No user operators';
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
 
@@ -791,7 +791,7 @@ export const getPunctualityTimeOfDay = async (
         throw "No user operators";
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
 
@@ -876,7 +876,7 @@ export const getPunctualityTimeSeries = async (
         throw "No user operators";
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
 
@@ -983,7 +983,7 @@ export const getServicePunctuality = async (
 
     const operators = await getOperators(sessionUser, db);
 
-    const operatorNocs = operators?.map((op) => op.nocCode) ?? []
+    const operatorNocs = operators?.map((o) => o.nocCode ?? "").filter((o)=> !!o) ?? [];
 
     let displayData = true
     if (operatorIds) {
@@ -1125,7 +1125,7 @@ export const getStopPerformance = async (
         throw "No user operators";
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
 
@@ -1244,7 +1244,7 @@ export const getServicePerformance = async (
         throw "No user operators";
       }
 
-      const userOperatorIds = operators.map((o) => o.nocCode);
+      const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
       const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
@@ -1372,7 +1372,7 @@ export const getFrequentServiceInfo = async (
       throw 'No user operators';
     }
 
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
       getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
@@ -1425,7 +1425,7 @@ export const getHeadwayOverview = async (
       throw 'No user operators';
     }
 
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
       getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
@@ -1498,7 +1498,7 @@ export const getHeadwayTimeSeries = async (
       throw 'No user operators';
     }
 
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
       getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
@@ -1588,7 +1588,7 @@ export const getAdminAreas = async (
     if (!operators) {
       throw "No operators";
     }
-    const userOperatorIds = operators.map((o) => o.nocCode);
+    const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const adminAreaRecords = await db.prisma.noc_adminarea.findMany({
       where: {

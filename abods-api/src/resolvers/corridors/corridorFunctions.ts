@@ -18,7 +18,6 @@ import {
 } from '../../lib/corridor.js';
 import {
   AddFirstStopInputType,
-  CorridorInputType,
   CorridorJourneyTimeStatsType,
   CorridorStatsDayOfWeekType,
   CorridorStatsHistogramType,
@@ -28,10 +27,12 @@ import {
   CorridorSummaryStatsType,
   CorridorType,
   CorridorUpdateInputType,
+  CorridorInputType,
+  InputMaybe,
   Maybe,
   MutationResponseType,
   ServiceLinkType,
-  StopType,
+  StopType
 } from '../../types/generated.js';
 import { SessionUser } from "../../types/extra.js";
 import {
@@ -138,13 +139,15 @@ export const getStops = async (
 };
 
 export const getSubsequentStops = async (
-  stopList: Array<Maybe<string>>,
+  stopList: InputMaybe<Array<InputMaybe<string>>>|undefined,
   sessionUser: SessionUser,
   db: Context,
 ): Promise<StopType[]> => {
   if (!sessionUser.user) {
     throw 'Not Authorized';
   }
+
+  if (!stopList) throw "Bad Request"
 
   stopList.push('') // Push blank to add comma at the end
   let stopsPattern = stopList.join(',')
@@ -204,13 +207,14 @@ export const getSubsequentStops = async (
 }
 
 export const createCorridor = async (
-  payload: CorridorInputType,
+  payload: InputMaybe<CorridorInputType> | undefined,
   sessionUser: SessionUser,
   db: Context,
 ): Promise<MutationResponseType> => {
   if (!sessionUser.user) {
     throw 'Not Authorized';
   }
+  if (!payload || !payload.name|| !payload.stopIds) throw "Bad Request"
 
   const corridor = await db.prisma.corridor.create({
     data: {
@@ -329,6 +333,8 @@ export const updateCorridor = async (
   ) {
     throw 'Not Authorized';
   }
+
+  if (!inputs || !inputs.id || !inputs.name || !inputs.stopList) throw "Bad Request"
 
   await Promise.all([
     updateCorridorDb(inputs.id, inputs.name, db),
