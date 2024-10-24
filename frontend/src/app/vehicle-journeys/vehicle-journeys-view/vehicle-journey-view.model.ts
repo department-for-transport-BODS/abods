@@ -55,8 +55,10 @@ export class VehicleJourneyView {
     if (!(journey[0] && route[0])) {
       throw new Error('No data');
     }
-    journey.sort((a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate());
-    route.sort((a, b) => a.stopIndex - b.stopIndex);
+    journey = [...journey].sort(
+      (a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate()
+    );
+    route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
 
     const lastStopIndex = Math.max(...route.map((n) => n.stopIndex));
     const stopList = route.map((stop) =>
