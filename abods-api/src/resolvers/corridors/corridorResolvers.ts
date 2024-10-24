@@ -65,7 +65,7 @@ const corridorResovlers: Resolvers = {
       parent,
     ) => {
       const data = parent as StatsCache;
-      return data.inputs.granularity === 'day'
+      return (data.inputs || {}).granularity === 'day'
         ? getJourneyStatsByDay(data.journeys)
         : getJourneyStatsByHour(data.journeys);
     },

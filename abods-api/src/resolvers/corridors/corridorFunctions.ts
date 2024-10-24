@@ -147,7 +147,7 @@ export const getSubsequentStops = async (
     throw 'Not Authorized';
   }
 
-  if (!stopList) throw "Bad Request"
+  stopList = stopList || []
 
   stopList.push('') // Push blank to add comma at the end
   let stopsPattern = stopList.join(',')
@@ -356,7 +356,7 @@ export const updateCorridor = async (
   };
 };
 
-export type StatsCache = {inputs: CorridorStatsInputType, journeys:Map<string, Timetable[]>}
+export type StatsCache = {inputs: InputMaybe<CorridorStatsInputType> | undefined, journeys:Map<string, Timetable[]>}
 
 export const getStats = async (
   inputs: InputMaybe<CorridorStatsInputType> | undefined,
@@ -364,10 +364,8 @@ export const getStats = async (
   db: Context,
 ): Promise<StatsCache> => {
 
-  if (!inputs) throw 'Bad Request'
-
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
-    inputs;
+    inputs || {};
 
   if (
     !sessionUser.user ||
@@ -654,10 +652,10 @@ export const getJourneyStatsHistogram = (
 };
 
 export const getServiceLinks = async (
-  inputs: CorridorStatsInputType,
+  inputs: InputMaybe<CorridorStatsInputType> | undefined,
   db: Context,
 ): Promise<ServiceLinkType[]> => {
-  const { corridorId } = inputs;
+  const { corridorId } = inputs || {};
 
   const results = await db.prisma.corridor_stops.findMany({
     where: {
