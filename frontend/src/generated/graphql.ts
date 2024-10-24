@@ -378,17 +378,16 @@ export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
   endTime?: Maybe<Scalars['String']>;
   granularity?: Maybe<Granularity>;
-  lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  lineIds?: Maybe<Array<Scalars['String']>>;
   nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  operatorIds?: Maybe<Array<Scalars['String']>>;
   startTime?: Maybe<Scalars['String']>;
 };
 
 export type HeadwayInputType = {
   filters?: Maybe<HeadwayFiltersInputType>;
-  fromTimestamp?: Maybe<Scalars['DateTime']>;
-  sortBy?: Maybe<HeadwaySortType>;
-  toTimestamp?: Maybe<Scalars['DateTime']>;
+  fromTimestamp: Scalars['DateTime'];
+  toTimestamp: Scalars['DateTime'];
 };
 
 export type HeadwayMetricsType = {
@@ -781,20 +780,20 @@ export type PagingInputType = {
 
 export type PerformanceFiltersInputType = {
   addNonTagged?: Maybe<Scalars['Boolean']>;
-  adminAreaIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  adminAreaIds?: Maybe<Array<Scalars['String']>>;
   dayOfWeekFlags?: Maybe<DayOfWeekFlagsInputType>;
   endTime?: Maybe<Scalars['String']>;
   excludedDates?: Maybe<Array<Maybe<Scalars['Date']>>>;
   excludeItoLineId?: Maybe<Scalars['String']>;
   granularity?: Maybe<Granularity>;
   lineDirection?: Maybe<LineDirection>;
-  lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  lineIds?: Maybe<Array<Scalars['String']>>;
   maxDelay?: Maybe<Scalars['Int']>;
   minDelay?: Maybe<Scalars['Int']>;
   nocCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
   onTimeMaxMinutes?: Maybe<Scalars['Int']>;
   onTimeMinMinutes?: Maybe<Scalars['Int']>;
-  operatorIds?: Maybe<Array<Maybe<Scalars['String']>>>;
+  operatorIds?: Maybe<Array<Scalars['String']>>;
   startTime?: Maybe<Scalars['String']>;
   startTimes?: Maybe<Array<Maybe<Scalars['Time']>>>;
   stopsSegment?: Maybe<StopsSegment>;
@@ -806,7 +805,6 @@ export type PerformanceInputType = {
   filters?: Maybe<PerformanceFiltersInputType>;
   fromTimestamp: Scalars['DateTime'];
   paging?: Maybe<PagingInputType>;
-  sortBy?: Maybe<PunctualitySortType>;
   toTimestamp: Scalars['DateTime'];
 };
 
