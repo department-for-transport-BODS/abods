@@ -38,7 +38,6 @@ export function createHiddenStop(stop: Stop, isFinalStop: boolean): VehiclePingS
     actualDelay: Duration.fromMillis(0),
     ts: DateTime.fromSeconds(0),
     onTimePerformance: OnTimePerformanceEnum.NoData,
-    actualDeparture: DateTime.fromSeconds(0),
   };
   if (!stop.actualDepartureUtc) {
     return data;
