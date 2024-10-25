@@ -1,10 +1,8 @@
-import { Context } from "../../context";
+import { Context } from "../context.js";
 import {
   FrequentServiceInfoInputType,
   HeadwayInputType,
   HeadwayTimeSeriesType,
-  LineFilterType,
-  InputMaybe,
   LineType,
   OperatorPerformanceType,
   OperatorType,
@@ -13,19 +11,21 @@ import {
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   RankingOrder,
-  ServicePerformanceInputType,
   ServicePerformanceType,
-  ServicePunctualityType,
   StopPerformanceType,
-} from "../../types/generated.js";
-import { SessionUser } from "../../types/extra.js";
-import logger from "../../logger.js";
-import { GraphQLResolveInfo } from "graphql";
-import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
-import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
+  HeadwayMetricsTypeResolvers,
+  OnTimePerformanceTypeResolvers,
+  QueryResolvers,
+  Resolvers,
+  TransitModelTypeResolvers
+} from "../types/generated.js";
+import { SessionUser } from "../types/extra.js";
+import logger from "../logger.js";
+import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
+import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma } from "@prisma/client";
-import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
-import dayjs from "dayjs";
+import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
+import { emptyResolver } from './helpers.js';
 
 interface DayCount {
   dayOfWeek: number;
@@ -34,30 +34,15 @@ interface DayCount {
   late: number;
 }
 
-interface TimeCount {
-  timeOfDay: string;
-  early: number;
-  onTime: number;
-  late: number;
-}
-
-interface distribution {
-  noOfStops: number;
-  performanceInMins: number;
-}
-
-export const getOperatorList = async (
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getOperatorList: QueryResolvers['operators'] = async (_, __, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not Authorized";
     }
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = await getOperatorsDropDown(sessionUser, db)
+    const userOperators = await getOperatorsDropDown(context.sessionUser, context.db)
 
     if (!userOperators) {
       throw "No operators for user";
@@ -72,7 +57,7 @@ export const getOperatorList = async (
   }
 };
 
-export const getOperatorsDropDown = async (
+const getOperatorsDropDown = async (
   sessionUser: SessionUser,
   db: Context,
 ): Promise<OperatorType[]> => {
@@ -194,18 +179,14 @@ const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
   };
 };
 
-export const getServiceInfo = async (
-  serviceId: string,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getServiceInfo: QueryResolvers['serviceInfo'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
     // get user's operator ids
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -213,9 +194,9 @@ export const getServiceInfo = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    const service = await db.prisma.expected_services.findFirst({
+    const service = await context.db.prisma.expected_services.findFirst({
       where: {
-        noc_and_line_and_servicecode: serviceId,
+        noc_and_line_and_servicecode: args.serviceId,
       },
     });
 
@@ -225,7 +206,7 @@ export const getServiceInfo = async (
 
     if (userOperatorIds.includes(service.operator_noc)) {
       return {
-        serviceId: serviceId,
+        serviceId: args.serviceId,
         serviceNumber: service.line_name,
         serviceName: service.service_name,
       };
@@ -280,17 +261,14 @@ const getOperatorLines = async (operatorRef: string, db: Context, filterDate?: D
   return lines;
 };
 
-export const getLines = async (
-  inputs: InputMaybe<LineFilterType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-  info: GraphQLResolveInfo
-): Promise<PaginatedLineType> => {
-  inputs = inputs || {}
+export const getLines: TransitModelTypeResolvers['lines'] = async (_, args, context, info) => {
+  if (!context.sessionUser.user) {
+    throw 'Not authorized';
+  }
   const { operatorId } = info.variableValues as { operatorId: string };
   const operationName: string = info.operation.name?.value ?? "";
 
-  const operators = await getOperators(sessionUser, db);
+  const operators = await getOperators(context.sessionUser, context.db);
 
   if (!operators) {
     throw "No user operators";
@@ -299,11 +277,11 @@ export const getLines = async (
   const userOperatorIds = operators.map((o) => o.nocCode);
 
   if (userOperatorIds.includes(operatorId)) {
-    const inputDate = inputs.inputDate
-      ? new Date(dbUtcToBstDate(inputs.inputDate))
+    const inputDate = args.filterBy?.inputDate
+      ? new Date(dbUtcToBstDate(args.filterBy?.inputDate))
       : undefined;
     if (operationName === "operatorLines") {
-      return getOperatorLines(operatorId, db, inputDate);
+      return getOperatorLines(operatorId, context.db, inputDate);
     }
   }
   return {
@@ -312,22 +290,18 @@ export const getLines = async (
 }
 
 
-export const getOperator = async (
-  operatorRef: string,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getOperator: QueryResolvers['operator'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
     // TODO: is operator id in users' operator id array
-    logger.debug("getOperator op: {0} ", operatorRef);
+    logger.debug("getOperator op: {0} ", args.operatorId);
 
-    const operator = await db.prisma.all_operators.findUnique({
+    const operator = await context.db.prisma.all_operators.findUnique({
       where: {
-        operatorref: operatorRef,
+        operatorref: args.operatorId,
       },
     });
 
@@ -349,20 +323,16 @@ export const getOperator = async (
 };
 
 
-export const getPunctualityOverview = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctualityOverview'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
     // start - performance timer
     var startTimer = performance.now();
 
-    const { filters } = inputs;
+    const { filters } = args.inputs;
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -380,11 +350,11 @@ export const getPunctualityOverview = async (
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
     if (onTimeMinMinutes || onTimeMaxMinutes) {
-      return compareThresholds(inputs, sessionUser, db)
+      return compareThresholds(args.inputs, context.sessionUser, context.db)
     }
 
     // get an array of user's org's operator nocs.
-    const operators = await getOperators(sessionUser, db, adminAreaIds || []);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -393,10 +363,10 @@ export const getPunctualityOverview = async (
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     let results;
-    let prismaFilters = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+    let prismaFilters = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
     if (lineIds) {
-      results = await db.prisma.timetable_summary_service_tz.aggregate({
+      results = await context.db.prisma.timetable_summary_service_tz.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -407,7 +377,7 @@ export const getPunctualityOverview = async (
         },
       });
     } else {
-      results = await db.prisma.timetable_summary_operator_t.aggregate({
+      results = await context.db.prisma.timetable_summary_operator_t.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -445,13 +415,9 @@ export const getPunctualityOverview = async (
   }
 };
 
-export const getOperatorPerformance = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPerformance'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
@@ -460,7 +426,7 @@ export const getOperatorPerformance = async (
 
     let opPerformances: OperatorPerformanceType[] = [];
 
-    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
     const {
       timingPointsOnly,
       adminAreaIds,
@@ -476,7 +442,7 @@ export const getOperatorPerformance = async (
     logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
     // get an array of user's org's operator nocs.
-    const operators = await getOperators(sessionUser, db, adminAreaIds || []);
+    const operators = await getOperators(context.sessionUser, context.db, adminAreaIds || []);
 
     if (!operators) {
       throw "No user operators";
@@ -484,9 +450,9 @@ export const getOperatorPerformance = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
-    const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+    const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
 
-    const results = await db.prisma.timetable_summary_operator_t.groupBy({
+    const results = await context.db.prisma.timetable_summary_operator_t.groupBy({
       by: ["operator_noc"],
       where: where,
       _sum: {
@@ -556,17 +522,13 @@ export const getOperatorPerformance = async (
   }
 };
 
-export const getPunctualityDayOfWeek = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualityDayOfWeek'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw 'Not authorized';
     }
 
-    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
     let {
       timingPointsOnly,
       adminAreaIds,
@@ -587,7 +549,7 @@ export const getPunctualityDayOfWeek = async (
       logger.debug(
         'getPunctualityDayOfWeek id: ' + JSON.stringify(operatorIds),
       );
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
 
       if (!operators) {
         throw 'No user operators';
@@ -600,9 +562,9 @@ export const getPunctualityDayOfWeek = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         let results;
 
-        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+        const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
             by: ["day_of_week"],
             where: where,
             _sum: {
@@ -612,7 +574,7 @@ export const getPunctualityDayOfWeek = async (
             },
           });
         } else {
-          results = await db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
             by: ['day_of_week'],
             where: where,
             _sum: {
@@ -665,7 +627,7 @@ export const getPunctualityDayOfWeek = async (
   }
 };
 
-export const getStopsDistribution = async (
+const getStopsDistribution = async (
   inputs: PerformanceInputType,
   userOperatorIds: string[],
   db: Context,
@@ -716,13 +678,9 @@ export const getStopsDistribution = async (
   }));
 };
 
-export const getDelayFrequency = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getDelayFrequency: OnTimePerformanceTypeResolvers['delayFrequency'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw 'Not authorized';
     }
 
@@ -731,14 +689,14 @@ export const getDelayFrequency = async (
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { filters } = inputs;
+    const { filters } = args.inputs;
     let { operatorIds } = filters || {};
     operatorIds = operatorIds || []
 
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
       logger.debug('getDelayFrequency id: ' + JSON.stringify(operatorIds));
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
 
       if (!operators) {
         throw 'No user operators';
@@ -749,7 +707,7 @@ export const getDelayFrequency = async (
       const operator_noc_to_filter = operatorIds[0];
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
-        return getStopsDistribution(inputs, userOperatorIds, db);
+        return getStopsDistribution(args.inputs, userOperatorIds, context.db);
       } else {
         if (!operators) {
           throw 'No user operators';
@@ -763,13 +721,9 @@ export const getDelayFrequency = async (
   }
 };
 
-export const getPunctualityTimeOfDay = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualityTimeOfDay'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
     // of the 10:30 slot, how many were ontime/early/late example
@@ -781,7 +735,7 @@ export const getPunctualityTimeOfDay = async (
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
     let {
       timingPointsOnly,
       adminAreaIds,
@@ -801,7 +755,7 @@ export const getPunctualityTimeOfDay = async (
       logger.debug(
         "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds)
       );
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -814,10 +768,10 @@ export const getPunctualityTimeOfDay = async (
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         let results;
 
-        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+        const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
 
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
             by: ["departure_hour_only"],
             where: where,
             _sum: {
@@ -827,7 +781,7 @@ export const getPunctualityTimeOfDay = async (
             },
           }) ?? [];
         } else {
-          results = await db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
             by: ["departure_hour_only"],
             where: where,
             _sum: {
@@ -857,19 +811,15 @@ export const getPunctualityTimeOfDay = async (
   }
 };
 
-export const getPunctualityTimeSeries = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctualityTimeSeries'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
     logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
-    const { fromTimestamp, toTimestamp, filters, paging } = inputs;
+    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
     let {
       timingPointsOnly,
       adminAreaIds,
@@ -887,7 +837,7 @@ export const getPunctualityTimeSeries = async (
     if (operatorIds.length == 1) {
       //if (granularity == "day" && operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
       const isDayGranularity = granularity === 'day'
       if (!operators) {
         throw "No user operators";
@@ -906,17 +856,9 @@ export const getPunctualityTimeSeries = async (
         let summary: PunctualityTimeSeriesType[] = []
 
         let results;
-        const queryFields = {
-          _sum: {
-            early_count: true,
-            late_count: true,
-            on_time_count: true,
-          }
-        }
-
-        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+        const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
         if (lineIds) {
-          results = await db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
             by: isDayGranularity ? ["date_of_journey"] : ["departure_hour"],
             where: where,
             _sum: {
@@ -926,7 +868,7 @@ export const getPunctualityTimeSeries = async (
             },
           }) ?? [];
         } else {
-          results = await db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
             by: isDayGranularity ? ["date_of_journey"] : ["date_of_journey", "departure_hour"],
             where: where,
             _sum: {
@@ -978,13 +920,9 @@ function getDaysInRange(startDate: Date, endDate: Date): Date[] {
   return dates;
 }
 
-export const getServicePunctuality = async (
-  inputs: ServicePerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-): Promise<ServicePunctualityType[]> => {
+export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunctuality'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
@@ -993,12 +931,12 @@ export const getServicePunctuality = async (
       fromTimestamp,
       order,
       toTimestamp
-    } = inputs
+    } = args.inputs
 
     const timingPointsOnly = filters?.timingPointsOnly
     const operatorIds = filters?.operatorIds?.filter(isDefined)
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     const operatorNocs = operators?.map((o) => o.nocCode ?? "").filter((o)=> !!o) ?? [];
 
@@ -1053,7 +991,7 @@ export const getServicePunctuality = async (
 
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
       const performanceMetrics =
-        await db.prisma.performance_statistics.findMany({
+        await context.db.prisma.performance_statistics.findMany({
           where,
           take: 3,
           distinct: [
@@ -1075,7 +1013,7 @@ export const getServicePunctuality = async (
           ],
         });
 
-      const services = await db.prisma.expected_services.findMany({
+      const services = await context.db.prisma.expected_services.findMany({
         where: {
           noc_and_line_and_servicecode: {
             in: performanceMetrics.map(stat => stat.noc_and_line_and_servicecode)
@@ -1114,18 +1052,14 @@ export const getServicePunctuality = async (
   }
 };
 
-export const getStopPerformance = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
     // for this operator & for this service, get all stops and their OTP stats
 
-    const { filters } = inputs;
+    const { filters } = args.inputs;
     let {
       operatorIds,
       lineIds,
@@ -1138,7 +1072,7 @@ export const getStopPerformance = async (
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
       logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -1150,8 +1084,8 @@ export const getStopPerformance = async (
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
-        const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
-        const results = await db.prisma.timetable_summary_stops_tz.groupBy({
+        const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
+        const results = await context.db.prisma.timetable_summary_stops_tz.groupBy({
           by: ["stop_id", "common_name", "is_timing_point"],
           where: where,
           _sum: {
@@ -1168,7 +1102,7 @@ export const getStopPerformance = async (
 
         const stopIds: number[] = results.map((res) => res.stop_id)
 
-        const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+        const stops = await context.db.prisma.naptan_stoppoint_latlong.findMany({
           where: {
             id: {
               in: stopIds
@@ -1238,19 +1172,15 @@ export const getStopPerformance = async (
   }
 };
 
-export const getServicePerformance = async (
-  inputs: PerformanceInputType,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerformance'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
     let servicePunctualities: ServicePerformanceType[] = [];
 
-    const { filters } = inputs;
+    const { filters } = args.inputs;
     let {
       operatorIds,
     } = filters || {};
@@ -1258,7 +1188,7 @@ export const getServicePerformance = async (
 
     if (operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
-      const operators = await getOperators(sessionUser, db);
+      const operators = await getOperators(context.sessionUser, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -1267,11 +1197,11 @@ export const getServicePerformance = async (
       const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
       const operator_noc_to_filter = operatorIds[0];
-      const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds)
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
-        const results = await db.prisma.timetable_summary_service_tz.groupBy({
+        const results = await context.db.prisma.timetable_summary_service_tz.groupBy({
           by: ["noc_and_line_and_servicecode", "line_name"],
           where: where,
           _sum: {
@@ -1288,7 +1218,7 @@ export const getServicePerformance = async (
 
         const noc_and_lines = results.map(result => result.noc_and_line_and_servicecode)
 
-        const services = await db.prisma.expected_services.findMany({
+        const services = await context.db.prisma.expected_services.findMany({
           where: {
             noc_and_line_and_servicecode: {
               in: noc_and_lines
@@ -1329,19 +1259,13 @@ export const getServicePerformance = async (
 };
 
 // -> OPERATOR PAGE
-export const getFrequentServices = async (
-  operatorId: string,
-  fromTimestamp: any,
-  toTimestamp: any,
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getFrequentServices: HeadwayMetricsTypeResolvers['frequentServices'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -1349,13 +1273,13 @@ export const getFrequentServices = async (
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    if (userOperatorIds.includes(operatorId)) {
-      const results = await db.prisma.timetable_summary_service_tz.findMany({
+    if (userOperatorIds.includes(args.operatorId)) {
+      const results = await context.db.prisma.timetable_summary_service_tz.findMany({
         where: {
-          operator_noc: operatorId,
+          operator_noc: args.operatorId,
           date_of_journey: {
-            gt: new Date(fromTimestamp),
-            lte: new Date(toTimestamp)
+            gt: new Date(args.fromTimestamp),
+            lte: new Date(args.toTimestamp)
           },
           headway_valid: true
         },
@@ -1378,17 +1302,13 @@ export const getFrequentServices = async (
   }
 };
 
-export const getFrequentServiceInfo = async (
-  inputs: InputMaybe<FrequentServiceInfoInputType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers['frequentServiceInfo'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw 'Not authorized';
     }
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1397,9 +1317,9 @@ export const getFrequentServiceInfo = async (
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
-      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+      getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
-    const results = await db.prisma.timetable_summary_stops_tz.groupBy(
+    const results = await context.db.prisma.timetable_summary_stops_tz.groupBy(
       {
         by: ['departure_hour'],
         where: where,
@@ -1431,17 +1351,13 @@ export const getFrequentServiceInfo = async (
   }
 };
 
-export const getHeadwayOverview = async (
-  inputs: HeadwayInputType,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getHeadwayOverview: HeadwayMetricsTypeResolvers['headwayOverview'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw 'Not authorized';
     }
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1450,13 +1366,13 @@ export const getHeadwayOverview = async (
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
-      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+      getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
     where.headway_stops_count = {
       gt: 0
     }
 
-    const results = await db.prisma.timetable_summary_stops_tz.findMany(
+    const results = await context.db.prisma.timetable_summary_stops_tz.findMany(
       {
         where: where,
         select: {
@@ -1499,22 +1415,18 @@ export const getHeadwayOverview = async (
   }
 };
 
-export const getHeadwayTimeSeries = async (
-  inputs: HeadwayInputType,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
+export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSeries'] = async (_, args, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw 'Not authorized';
     }
 
-    const { filters } = inputs;
+    const { filters } = args.inputs;
     const { granularity } = filters || {};
 
     const isDayGranularity = granularity === 'day'
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1523,13 +1435,13 @@ export const getHeadwayTimeSeries = async (
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
     const where: Prisma.timetable_summary_stops_tzWhereInput =
-      getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+      getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
     where.headway_stops_count = {
       gt: 0
     }
 
-    const results = await db.prisma.timetable_summary_stops_tz.findMany({
+    const results = await context.db.prisma.timetable_summary_stops_tz.findMany({
       where: where,
       select: {
         date_of_journey: true,
@@ -1595,23 +1507,20 @@ export const getHeadwayTimeSeries = async (
   }
 };
 
-export const getAdminAreas = async (
-  sessionUser: SessionUser,
-  db: Context
-) => {
+export const getAdminAreas: QueryResolvers['adminAreas'] = async (_, __, context) => {
   try {
-    if (!sessionUser.user) {
+    if (!context.sessionUser.user) {
       throw "Not authorized";
     }
 
-    const operators = await getOperators(sessionUser, db);
+    const operators = await getOperators(context.sessionUser, context.db);
 
     if (!operators) {
       throw "No operators";
     }
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
-    const adminAreaRecords = await db.prisma.noc_adminarea.findMany({
+    const adminAreaRecords = await context.db.prisma.noc_adminarea.findMany({
       where: {
         national_operator_code: {
           in: userOperatorIds,
@@ -1624,7 +1533,7 @@ export const getAdminAreas = async (
 
     if (adminAreaRecords) {
       const adminareaIds = adminAreaRecords.map((a) => a.adminarea_id);
-      const adminAreas = await db.prisma.naptan_adminarea_with_shape.findMany({
+      const adminAreas = await context.db.prisma.naptan_adminarea_with_shape.findMany({
         where: {
           id: {
             in: adminareaIds,
@@ -1655,7 +1564,7 @@ export const getAdminAreas = async (
 };
 
 const getPrismaFiltersForOTPQuery = (
-  inputs: InputMaybe<PerformanceInputType & HeadwayInputType & FrequentServiceInfoInputType> | undefined,
+  inputs: PerformanceInputType & HeadwayInputType & FrequentServiceInfoInputType,
   userOperatorNocList: string[],
   isThreshold?: boolean,
 ) => {
@@ -1814,3 +1723,39 @@ const getPrismaFiltersForOTPQuery = (
       : {}),
   };
 };
+
+const otpResolvers: Resolvers = {
+    Query: {
+        operators: getOperatorList,
+        operator: getOperator,
+        onTimePerformance: emptyResolver,
+        headwayMetrics: emptyResolver,
+        serviceInfo: getServiceInfo,
+        adminAreas: getAdminAreas,
+    },
+    OnTimePerformanceType: {
+        delayFrequency: getDelayFrequency,
+        operatorPerformance: getOperatorPerformance,
+        punctualityDayOfWeek: getPunctualityDayOfWeek,
+        punctualityOverview: getPunctualityOverview,
+        punctualityTimeOfDay: getPunctualityTimeOfDay,
+        punctualityTimeSeries: getPunctualityTimeSeries,
+        servicePunctuality: getServicePunctuality,
+        stopPerformance: getStopPerformance,
+        servicePerformance: getServicePerformance,
+    },
+    HeadwayMetricsType: {
+        frequentServices: getFrequentServices,
+        frequentServiceInfo: getFrequentServiceInfo,
+        headwayOverview: getHeadwayOverview,
+        headwayTimeSeries: getHeadwayTimeSeries,
+    },
+    OperatorType: {
+        transitModel: emptyResolver,
+    },
+    TransitModelType: {
+        lines: getLines,
+    }
+}
+
+export default otpResolvers;

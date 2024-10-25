@@ -392,7 +392,7 @@ export type HeadwayMetricsType = {
 
 
 export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
-  inputs?: InputMaybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 };
 
 
@@ -1712,7 +1712,7 @@ export type HeadwayDayOfWeekTypeResolvers<ContextType = RequestContext, ParentTy
 }>;
 
 export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayMetricsType'] = ResolversParentTypes['HeadwayMetricsType']> = ResolversObject<{
-  frequentServiceInfo?: Resolver<Maybe<ResolversTypes['FrequentServiceInfoType']>, ParentType, ContextType, Partial<HeadwayMetricsTypeFrequentServiceInfoArgs>>;
+  frequentServiceInfo?: Resolver<Maybe<ResolversTypes['FrequentServiceInfoType']>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServiceInfoArgs, 'inputs'>>;
   frequentServices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FrequentServiceType']>>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServicesArgs, 'fromTimestamp' | 'operatorId' | 'toTimestamp'>>;
   headwayDayOfWeek?: Resolver<Maybe<Array<Maybe<ResolversTypes['HeadwayDayOfWeekType']>>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayDayOfWeekArgs, 'lineId'>>;
   headwayOverview?: Resolver<Maybe<ResolversTypes['HeadwayOverviewType']>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayOverviewArgs, 'inputs'>>;

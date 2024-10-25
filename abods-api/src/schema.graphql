@@ -219,7 +219,7 @@ input SignupPayloadType {
 
 type HeadwayMetricsType {
     frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
-    frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
+    frequentServiceInfo(inputs: FrequentServiceInfoInputType!): FrequentServiceInfoType
     headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
     headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
     headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]

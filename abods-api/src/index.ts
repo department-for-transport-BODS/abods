@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import resolvers from './resolvers/index.js'
 import fs from 'fs'
 import { createContext } from './context.js';
-import { SessionUser } from './types/extra.js';
-import { getSession } from './resolvers/users/userFunctions.js';
+import { RequestContext, SessionUser } from './types/extra.js';
+import { getSession } from './resolvers/userFunctions.js';
 import logger from './logger.js';
 import { getDate } from './lib/dayjs.js';
 
@@ -17,7 +17,7 @@ let db = await createContext()
 let startTime = getDate()
 
 const typeDefs = gql` ${fs.readFileSync(resolve('src/schema.graphql'), 'utf8')}`;
-const server = new ApolloServer({
+const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
 });

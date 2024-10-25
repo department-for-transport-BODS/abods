@@ -27,7 +27,7 @@ query headwayFrequentServices($operatorId: String!, $fromTimestamp: DateTime!, $
   }
 }
 
-query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType) {
+query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType!) {
   headwayMetrics {
     frequentServiceInfo(inputs: $inputs) {
       numHours

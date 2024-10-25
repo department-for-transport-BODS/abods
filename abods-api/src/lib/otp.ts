@@ -5,7 +5,7 @@ import {
   PunctualityTotalsType,
 } from '../types/generated.js';
 import { SessionUser } from "../types/extra.js";
-import { getOperators } from '../resolvers/otp/otpFunctions.js';
+import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 
 const getThresholds = async (
