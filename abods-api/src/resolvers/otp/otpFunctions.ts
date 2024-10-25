@@ -1287,7 +1287,7 @@ export const getServicePerformance = async (
         })
 
         results.forEach((res) => {
-          const avgDelay = res._avg?.avg_time_difference
+          const avgDelay = res._avg.avg_time_difference
             ? res._avg.avg_time_difference * 60
             : 0;
 
@@ -1295,16 +1295,17 @@ export const getServicePerformance = async (
 
           servicePunctualities.push({
             lineId: res.noc_and_line_and_servicecode,
-            early: res._sum?.early_count ? res._sum.early_count : 0,
-            late: res._sum?.late_count ? res._sum.late_count : 0,
-            onTime: res._sum?.on_time_count ? res._sum.on_time_count : 0,
+            early: res._sum.early_count ? res._sum.early_count : 0,
+            late: res._sum.late_count ? res._sum.late_count : 0,
+            onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
+            scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
+            actualDepartures: res._sum.completed ? res._sum.completed : 0,
+            averageDelay: avgDelay,
             lineInfo: {
               serviceId: res.noc_and_line_and_servicecode,
               serviceNumber: res.line_name,
               serviceName: service?.service_name ?? "",
             },
-            actualDepartures: 0,
-            averageDelay: 0,
           });
         });
       }

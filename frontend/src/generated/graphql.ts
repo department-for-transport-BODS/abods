@@ -1008,7 +1008,7 @@ export type ServicePerformanceType = {
   lineInfo: ServiceInfoType;
   onTime: Scalars['Int'];
   operatorInfo?: Maybe<OperatorInfoType>;
-  scheduledDepartures?: Maybe<Scalars['Int']>;
+  scheduledDepartures: Scalars['Int'];
 };
 
 export type ServicePunctualityType = {
@@ -1069,7 +1069,7 @@ export type StopPerformanceType = {
   late: Scalars['Int'];
   lineId?: Maybe<Scalars['String']>;
   onTime: Scalars['Int'];
-  scheduledDepartures?: Maybe<Scalars['Int']>;
+  scheduledDepartures: Scalars['Int'];
   stopId: Scalars['String'];
   stopIndex?: Maybe<Scalars['Int']>;
   stopInfo: StopInfoType;
