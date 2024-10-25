@@ -29,7 +29,7 @@ export class VehicleJourneysSearchService {
         { fetchPolicy: 'no-cache' }
       )
       .pipe(
-        map((result) => nonNullishArray(result.data.vehicleReplay.findJourneys)),
+        map((result) => nonNullishArray(result.data.vehicleReplay?.findJourneys)),
         map((journeys) => uniqBy(sortBy(journeys, 'startTime'), 'vehicleJourneyId')),
         map((journeys) =>
           journeys.map((journey) => ({

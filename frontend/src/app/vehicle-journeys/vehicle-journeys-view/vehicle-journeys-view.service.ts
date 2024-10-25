@@ -125,7 +125,7 @@ export class VehicleJourneysViewService {
       .pipe(
         map(({ data }) => {
           // Sort GPS pings by timestamp
-          const noLocationData = data?.vehicleReplay?.getJourney.some((journey) => !journey?.ts);
+          const noLocationData = data?.vehicleReplay?.getJourney?.some((journey) => !journey?.ts);
           return noLocationData
             ? nonNullishArray(data?.vehicleReplay?.getJourney)
             : sortBy(nonNullishArray(data?.vehicleReplay?.getJourney), (ping: ApolloGpsFeedType) =>
@@ -151,7 +151,7 @@ export class VehicleJourneysViewService {
 
   getTimingPatternForVehicleJourney(vehicleJourneyId: string): Observable<TimingPatternDetail[]> {
     return this.vehicleJourneyTimingPatternGQL.fetch({ vehicleJourneyId }).pipe(
-      map(({ data: { vehicleJourney } }) => vehicleJourney[0]?.timingPatternId as string),
+      map(({ data: { vehicleJourney } }) => vehicleJourney?.[0]?.timingPatternId as string),
       switchMap((timingPatternId) =>
         this.timingPatternDetailGQL
           .fetch({ timingPatternId })

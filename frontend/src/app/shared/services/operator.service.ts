@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OperatorLinesGQL, OperatorListGQL } from '../../../generated/graphql';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { map as _map, flatMap as _flatMap, uniq as _uniq } from 'lodash-es';
 import { nonNullishArray } from '../array-operators';
 import { DateTime } from 'luxon';
@@ -29,7 +29,7 @@ export class OperatorService {
   fetchOperators(): Observable<Operator[]> {
     return this.operatorListQuery.fetch().pipe(
       map((result) =>
-        nonNullishArray(result?.data?.operators.items).map(({ adminAreas, ...operator }) => ({
+        nonNullishArray(result?.data?.operators?.items).map(({ adminAreas, ...operator }) => ({
           ...operator,
           adminAreaIds: _map(nonNullishArray(adminAreas), 'adminAreaId'),
         }))
@@ -43,7 +43,7 @@ export class OperatorService {
 
   fetchLines(operatorId: string, inputDate?: DateTime): Observable<Line[]> {
     return this.operatorLinesGQL.fetch({ operatorId, inputDate }, { fetchPolicy: 'no-cache' }).pipe(
-      map((result) => nonNullishArray(result.data.operator?.transitModel?.lines.items)),
+      map((result) => nonNullishArray(result.data.operator?.transitModel?.lines?.items)),
       map((lines) => lines.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true })))
     );
   }

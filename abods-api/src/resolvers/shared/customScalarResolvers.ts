@@ -3,5 +3,6 @@ import { Resolvers } from '../../types/generated.js';
 
 export const customScalarResolvers: Resolvers = {
     Date: DateResolver,
-    DateTime: DateTimeResolver, 
+    DateTime: DateTimeResolver,
+    Time: TimeResolver
 }

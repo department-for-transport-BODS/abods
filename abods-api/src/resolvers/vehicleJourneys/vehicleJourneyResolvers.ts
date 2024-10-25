@@ -9,28 +9,27 @@ import {
 
 const vehicleJourneyResovlers: Resolvers = {
   Query: {
-    // @ts-ignore
-    vehicleReplay: async () => ({}),
-    servicePatternsInfo: async (
+    vehicleReplay: () => ({}),
+    servicePatternsInfo: (
       _,
       { servicePatternIds },
       { sessionUser, db }
     ) => servicePatternsInfo(servicePatternIds ?? [], sessionUser, db),
-    vehicleJourney: async (
+    vehicleJourney: (
       _,
       { vehicleJourneyId },
       { sessionUser, db }
     ) => vehicleJourney(vehicleJourneyId, sessionUser, db),
-    timingPatternDetail: async (
+    timingPatternDetail: (
       _,
       { timingPatternId },
       { sessionUser, db }
     ) => timingPatternDetail(timingPatternId, sessionUser, db)
   },
   VehicleReplayNamespace: {
-    findJourneys: async (_, { inputs }, { sessionUser, db }) =>
+    findJourneys: (_, { inputs }, { sessionUser, db }) =>
       findJourneys(inputs, sessionUser, db),
-    getJourney: async (
+    getJourney: (
       _,
       { journeyId, startTime },
       { sessionUser, db }
