@@ -1,39 +1,37 @@
-import { IResolvers } from '@graphql-tools/utils'
 import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayOverview, getHeadwayTimeSeries, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
-import { RequestContext } from '../../types/extra.js';
-import { GraphQLResolveInfo } from 'graphql';
+import { Resolvers } from '../../types/generated';
 
-const otpResolvers: IResolvers = {
+const otpResolvers: Resolvers = {
     Query: {
-        operators: async (_: any, __: any, {sessionUser, db }: RequestContext) => getOperatorList(sessionUser, db),
-        operator: async (_: any, {operatorId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getOperator(operatorId, sessionUser, db, info),
-        onTimePerformance: async () => { return {}; }, // stub -> sub-resolvers do the work
-        headwayMetrics: async () => { return {}; }, // stub -> sub-resolvers do the work 
-        serviceInfo: async (_, { serviceId }, {sessionUser, db }: RequestContext) => getServiceInfo(serviceId, sessionUser, db),
-        adminAreas: async (_: any, {adminAreaIds}: {adminAreaIds: string[]}, {sessionUser, db }: RequestContext) => getAdminAreas(adminAreaIds, sessionUser, db),
+        operators: (_, __, {sessionUser, db }) => getOperatorList(sessionUser, db),
+        operator: (_, {operatorId} , {sessionUser, db }) => getOperator(operatorId, sessionUser, db),
+        onTimePerformance: () => { return {}; }, // stub -> sub-resolvers do the work
+        headwayMetrics: () => { return {}; }, // stub -> sub-resolvers do the work 
+        serviceInfo: (_, { serviceId }, {sessionUser, db }) => getServiceInfo(serviceId, sessionUser, db),
+        adminAreas: (_, __, {sessionUser, db }) => getAdminAreas(sessionUser, db),
     },
     OnTimePerformanceType: {
-        delayFrequency: async (_, { inputs }, {sessionUser, db }: RequestContext) => getDelayFrequency(inputs, sessionUser, db),
-        operatorPerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getOperatorPerformance(inputs, sessionUser, db),
-        punctualityDayOfWeek: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityDayOfWeek(inputs, sessionUser, db),
-        punctualityOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityOverview(inputs, sessionUser, db),
-        punctualityTimeOfDay: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityTimeOfDay(inputs, sessionUser, db),
-        punctualityTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getPunctualityTimeSeries(inputs, sessionUser, db),
-        servicePunctuality: async (_, { inputs }, {sessionUser, db }: RequestContext) => getServicePunctuality(inputs, sessionUser, db),
-        stopPerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getStopPerformance(inputs, sessionUser, db),
-        servicePerformance: async (_, { inputs }, {sessionUser, db }: RequestContext) => getServicePerformance(inputs, sessionUser, db)
+        delayFrequency: (_, { inputs }, {sessionUser, db }) => getDelayFrequency(inputs, sessionUser, db),
+        operatorPerformance: (_, { inputs }, {sessionUser, db }) => getOperatorPerformance(inputs, sessionUser, db),
+        punctualityDayOfWeek: (_, { inputs }, {sessionUser, db }) => getPunctualityDayOfWeek(inputs, sessionUser, db),
+        punctualityOverview: (_, { inputs }, {sessionUser, db }) => getPunctualityOverview(inputs, sessionUser, db),
+        punctualityTimeOfDay: (_, { inputs }, {sessionUser, db }) => getPunctualityTimeOfDay(inputs, sessionUser, db),
+        punctualityTimeSeries: (_, { inputs }, {sessionUser, db }) => getPunctualityTimeSeries(inputs, sessionUser, db),
+        servicePunctuality: (_, { inputs }, {sessionUser, db }) => getServicePunctuality(inputs, sessionUser, db),
+        stopPerformance: (_, { inputs }, {sessionUser, db }) => getStopPerformance(inputs, sessionUser, db),
+        servicePerformance: (_, { inputs }, {sessionUser, db }) => getServicePerformance(inputs, sessionUser, db)
     },
     HeadwayMetricsType: {
-        frequentServices: async (_, { operatorId, fromTimestamp, toTimestamp }, {sessionUser, db }: RequestContext) => getFrequentServices( operatorId, fromTimestamp, toTimestamp, sessionUser, db),
-        frequentServiceInfo: async (_, { inputs }, {sessionUser, db }: RequestContext) => getFrequentServiceInfo(inputs, sessionUser, db),
-        headwayOverview: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayOverview(inputs, sessionUser, db),
-        headwayTimeSeries: async (_, { inputs }, {sessionUser, db }: RequestContext) => getHeadwayTimeSeries(inputs, sessionUser, db)
+        frequentServices: (_, { operatorId, fromTimestamp, toTimestamp }, {sessionUser, db }) => getFrequentServices( operatorId, fromTimestamp, toTimestamp, sessionUser, db),
+        frequentServiceInfo: (_, { inputs }, {sessionUser, db }) => getFrequentServiceInfo(inputs, sessionUser, db),
+        headwayOverview: (_, { inputs }, {sessionUser, db }) => getHeadwayOverview(inputs, sessionUser, db),
+        headwayTimeSeries: (_, { inputs }, {sessionUser, db }) => getHeadwayTimeSeries(inputs, sessionUser, db)
     },
     OperatorType:{
-        transitModel: async () => { return {}; },
+        transitModel: () => { return {}; },
     },
     TransitModelType: {
-        lines: async (_: any, {lineId} , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(lineId, sessionUser, db, info),
+        lines: (_, __ , {sessionUser, db }, info) => getLines(sessionUser, db, info),
     }
 }
 

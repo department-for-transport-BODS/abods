@@ -28,7 +28,7 @@ export class OperatorService {
   fetchOperators(): Observable<Operator[]> {
     return this.operatorListQuery.fetch().pipe(
       map((result) =>
-        nonNullishArray(result?.data?.operators.items).map(({ adminAreas, ...operator }) => ({
+        nonNullishArray(result?.data?.operators?.items).map(({ adminAreas, ...operator }) => ({
           ...operator,
           adminAreaIds: _map(nonNullishArray(adminAreas), 'adminAreaId'),
         }))
@@ -42,7 +42,7 @@ export class OperatorService {
 
   fetchLines(operatorId: string): Observable<Line[]> {
     return this.operatorLinesGQL.fetch({ operatorId }, { fetchPolicy: 'no-cache' }).pipe(
-      map((result) => nonNullishArray(result.data.operator?.transitModel?.lines.items)),
+      map((result) => nonNullishArray(result.data.operator?.transitModel?.lines?.items)),
       map((lines) => lines.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true })))
     );
   }

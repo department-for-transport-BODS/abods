@@ -1,91 +1,116 @@
-import { IResolvers } from "@graphql-tools/utils";
-import { CorridorNamespaceAddFirstStopArgs, CorridorNamespaceAddSubsequentStopsArgs, MutationCreateCorridorArgs } from "../../types/generated.js";
-import { RequestContext } from "../../types/extra.js";
-import { createCorridor, deleteCorridor, getCorridors, getJourneyStats, getJourneyStatsByDay, getJourneyStatsByHour, getJourneyStatsHistogram, getJourneyStatsPerService, getServiceLinks, getStats, getStops, getSubsequentStops, getSummaryStats, listCorridors, updateCorridor } from "./corridorFunctions.js";
+import {
+  CorridorNamespaceAddFirstStopArgs,
+  CorridorNamespaceAddSubsequentStopsArgs,
+  CorridorStatsType,
+  MutationCreateCorridorArgs,
+  Resolvers
+} from '../../types/generated.js';
+import {
+  createCorridor,
+  deleteCorridor,
+  getCorridors,
+  getJourneyStats,
+  getJourneyStatsByDay,
+  getJourneyStatsByHour,
+  getJourneyStatsHistogram,
+  getJourneyStatsPerService,
+  getServiceLinks,
+  getStats,
+  getStops,
+  getSubsequentStops,
+  getSummaryStats,
+  listCorridors,
+  StatsCache,
+  updateCorridor
+} from './corridorFunctions.js';
 import { CorridorJourneyStatsOption } from "../../lib/corridor.js";
 
-const corridorResovlers: IResolvers = {
+const corridorResovlers: Resolvers = {
   Query: {
-    corridor: async () => {
+    corridor: () => {
       return {};
     },
   },
   CorridorNamespace: {
-    getCorridor: async (
+    getCorridor: (
       _,
       { corridorId },
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => getCorridors(corridorId, sessionUser, db),
-    corridorList: async (_, __, { sessionUser, db }: RequestContext) =>
+    corridorList: (_, __, { sessionUser, db }) =>
       listCorridors(sessionUser, db),
-    stats: async (_, { inputs }, { sessionUser, db }: RequestContext) =>
-      getStats(inputs, sessionUser, db),
-    addFirstStop: async (
+    stats: (_, { inputs }, { sessionUser, db }) =>
+      // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
+      getStats(inputs, sessionUser, db) as Promise<CorridorStatsType>,
+    addFirstStop: (
       _,
       { inputs }: CorridorNamespaceAddFirstStopArgs,
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => getStops(inputs, sessionUser, db),
-    addSubsequentStops: async (
+    addSubsequentStops: (
       _,
       { stopList }: CorridorNamespaceAddSubsequentStopsArgs,
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => getSubsequentStops(stopList, sessionUser, db),
   },
   CorridorStatsType: {
-    summaryStats: async (
-      { inputs, journeys },
-      _,
-      { sessionUser, db }: RequestContext,
-    ) => getSummaryStats(inputs, journeys, sessionUser, db),
-    journeyTimeStats: async (
-      parents,
+    summaryStats: (
+      parent,
+      _
     ) => {
-      return parents.inputs.granularity === 'day'
-        ? getJourneyStatsByDay(parents.journeys)
-        : getJourneyStatsByHour(parents.journeys);
+      const data = parent as StatsCache;
+      return getSummaryStats(data.journeys);
     },
-    journeyTimeTimeOfDayStats: async (
-      parents
+    journeyTimeStats: (
+      parent,
     ) => {
-      return getJourneyStats(parents.journeys, CorridorJourneyStatsOption.hourAsNumber);
+      const data = parent as StatsCache;
+      return (data.inputs || {}).granularity === 'day'
+        ? getJourneyStatsByDay(data.journeys)
+        : getJourneyStatsByHour(data.journeys);
     },
-    journeyTimeDayOfWeekStats: async (
-      parents
+    journeyTimeTimeOfDayStats: (
+      parent
     ) => {
-      return getJourneyStats(parents.journeys, CorridorJourneyStatsOption.dayOfWeek);
+      const data = parent as StatsCache;
+      return getJourneyStats(data.journeys, CorridorJourneyStatsOption.hourAsNumber);
     },
-    journeyTimeHistogram: async (
-      parents
+    journeyTimeDayOfWeekStats: (
+      parent
     ) => {
-      const histogram = getJourneyStatsHistogram(parents.journeys)
-      return histogram;
+      const data = parent as StatsCache;
+      return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek);
     },
-    journeyTimePerServiceStats: async (
-      parents,
-      _,
-      { db }: RequestContext,
+    journeyTimeHistogram: (
+      parent
     ) => {
-      return getJourneyStatsPerService(parents.journeys, db);
+      const data = parent as StatsCache;
+      return getJourneyStatsHistogram(data.journeys);
     },
-    serviceLinks: async (parents, _, { db }: RequestContext) => {
-      return getServiceLinks(parents.inputs, db);
+    journeyTimePerServiceStats: (parent, _, { db }) => {
+      const data = parent as StatsCache;
+      return getJourneyStatsPerService(data.journeys, db);
+    },
+    serviceLinks: (parent, _, { db }) => {
+      const data = parent as StatsCache;
+      return getServiceLinks(data.inputs, db);
     },
   },
   Mutation: {
-    createCorridor: async (
-      _: any,
+    createCorridor: (
+      _,
       { payload }: MutationCreateCorridorArgs,
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => createCorridor(payload, sessionUser, db),
-    updateCorridor: async (
-      _: any,
+    updateCorridor: (
+      _,
       { inputs },
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => updateCorridor(inputs, sessionUser, db),
-    deleteCorridor: async (
-      _: any,
+    deleteCorridor: (
+      _,
       { corridorId },
-      { sessionUser, db }: RequestContext,
+      { sessionUser, db },
     ) => deleteCorridor(corridorId, sessionUser, db),
   },
 };
