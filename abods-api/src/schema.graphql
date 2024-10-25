@@ -686,7 +686,7 @@ type ServicePerformanceType {
     late: Int!
     lineId: String
     onTime: Int!
-    scheduledDepartures: Int
+    scheduledDepartures: Int!
     lineInfo: ServiceInfoType!
     operatorInfo: OperatorInfoType
 }
@@ -716,7 +716,7 @@ type StopPerformanceType {
     late: Int!
     lineId: String
     onTime: Int!
-    scheduledDepartures: Int
+    scheduledDepartures: Int!
     stopId: String!
     stopIndex: Int
     stopInfo: StopInfoType!
