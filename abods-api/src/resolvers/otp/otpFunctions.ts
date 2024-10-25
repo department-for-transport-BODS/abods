@@ -319,7 +319,6 @@ export const getOperator = async (
       throw "Not authorized";
     }
 
-    console.log("test----")
     // TODO: is operator id in users' operator id array
     logger.debug("getOperator op: {0} ", operatorRef);
 
@@ -339,7 +338,6 @@ export const getOperator = async (
       nocCode: operator.operatorref,
     };
 
-    console.log("operatorPayload----", operatorPayload)
     return operatorPayload;
   } catch (error) {
     console.error(error);
