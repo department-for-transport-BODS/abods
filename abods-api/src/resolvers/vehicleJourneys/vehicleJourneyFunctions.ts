@@ -12,6 +12,7 @@ import {
   VehicleJourneyType,
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
+  QueryResolvers
 } from '../../types/generated.js';
 import { SessionUser } from '../../types/extra';
 
@@ -242,7 +243,7 @@ export const getJourney = async (
   });
 
   let matchedStop = journeys.find((journey) => journey.Timetable?.stop_index);
-  
+
   if (!matchedStop ) {
     return getTimetableJourney(journeyId, journeyDate, db);
   }
@@ -257,7 +258,7 @@ export const getJourney = async (
     return maxIndex;
   }, 0);
 
-  
+
   const journeyCount = journeys.length;
 
   journeyData = journeys.map((journey, index) => {
@@ -469,4 +470,71 @@ export const timingPatternDetail = async (
       version: '1',
     })) ?? []
   );
+};
+
+export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
+  if (!context.sessionUser.user) {
+    throw 'Not Authorized';
+  }
+
+  const journey = await context.db.prisma.siriVMPositions.findMany({ where: { group_id: args.groupId }, include: {} });
+  return journey.map(s => ({
+    latitude: s.latitude?.toNumber() ?? 0,
+    longitude: s.longitude?.toNumber() ?? 0,
+    recordedAtTimeUtc: s.recorded_at_time.toISOString(),
+    vehicleRef: s.vehicle_ref
+  }));
+};
+
+export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
+  if (!context.sessionUser.user) {
+    throw 'Not Authorized';
+  }
+
+  const route = await context.db.prisma.timetable.findMany({
+    where: { group_id: args.groupId }, select: {
+      stop_latitude: true,
+      stop_longitude: true,
+      actual_departure_time: true,
+      expected_departure_time: true,
+      is_timing_point: true,
+      stop_id: true,
+      stop_index: true,
+      common_name: true,
+      expected_journeys: {
+        select: {
+          expected_journey_start: true,
+          expected_service: {
+            select: {
+              service_name: true,
+              noc_and_line_and_servicecode: true,
+              line_name: true,
+              expected_operator: {
+                select: {
+                  operator_noc: true,
+                  operator_name: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+  return route.map(s => ({
+    latitude: s.stop_latitude?.toNumber() ?? 0,
+    longitude: s.stop_longitude?.toNumber() ?? 0,
+    actualDepartureUtc: s.actual_departure_time?.toISOString(),
+    scheduledDepartureUtc: (s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)).toISOString(),
+    stopIndex: s.stop_index,
+    stopId: s.stop_id,
+    stopName: s.common_name ?? 'Unknown',
+    isTimingPoint: s.is_timing_point ?? false,
+    lineName: s.expected_journeys?.expected_service.line_name ?? 'Unknown',
+    operatorNoc: s.expected_journeys?.expected_service.expected_operator.operator_noc ?? 'Unknown',
+    operatorName: s.expected_journeys?.expected_service.expected_operator.operator_name ?? 'Unknown',
+    serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
+    serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
+    startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString()
+  }));
 };

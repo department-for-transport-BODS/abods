@@ -94,7 +94,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           this.prevNextJourneys = prevNextJourneys;
           this.loading = false;
         },
-        error: () => (this.errorView = new VehicleJourneyNotFoundView()),
+        error: (err) => {
+          console.log(err);
+          return (this.errorView = new VehicleJourneyNotFoundView());
+        },
       });
   }
 

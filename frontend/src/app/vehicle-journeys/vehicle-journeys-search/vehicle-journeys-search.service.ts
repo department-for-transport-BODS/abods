@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { JourneysGQL } from '../../../generated/graphql';
+import { AvlsGQL, JourneysGQL, RouteGQL } from '../../../generated/graphql';
 import { DateTime } from 'luxon';
-import { Observable } from 'rxjs';
+import { mergeMap, Observable, zip } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { nonNullishArray } from '../../shared/array-operators';
 import { findIndex, sortBy, uniqBy } from 'lodash-es';
 import { FindJourneysCache } from './find-journeys-cache';
+import { VehicleJourneyView, VehicleJourneyViewParams } from '../vehicle-journeys-view/vehicle-journey-view.model';
 
 export interface VehicleJourney {
   vehicleJourneyId?: string;
@@ -18,7 +19,7 @@ export interface VehicleJourney {
 export class VehicleJourneysSearchService {
   private findJourneysCache = new FindJourneysCache();
 
-  constructor(private journeysGQL: JourneysGQL) {}
+  constructor(private journeysGQL: JourneysGQL, private avlsGQL: AvlsGQL, private routeGQL: RouteGQL) {}
 
   fetchJourneys(from: DateTime, to: DateTime, lineId: string): Observable<VehicleJourney[]> {
     // filterOnStartTime is set to true so we filter on start times directly,
@@ -52,8 +53,8 @@ export class VehicleJourneysSearchService {
     lineId: string,
     journeyId: string
   ): Observable<[VehicleJourney | null, VehicleJourney | null]> {
-    const from = startTime.startOf('day');
-    const to = startTime.startOf('day').plus({ day: 1 });
+    const from = startTime.setZone('Europe/London').startOf('day');
+    const to = from.plus({ day: 1 });
     const cacheKey = FindJourneysCache.generateKey(from, to, lineId);
 
     let obs$ = this.fetchJourneys(from, to, lineId);
@@ -73,6 +74,26 @@ export class VehicleJourneysSearchService {
         const next = idx < journeys.length - 1 ? journeys[idx + 1] : null;
         return [prev, next];
       })
+    );
+  }
+
+  getJourney(
+    journeyId: string,
+    startTime: DateTime,
+    viewParams: VehicleJourneyViewParams
+  ): Observable<{
+    view: VehicleJourneyView;
+    prevNextJourneys: [VehicleJourney | null, VehicleJourney | null];
+  }> {
+    return zip(this.avlsGQL.fetch({ groupId: journeyId }), this.routeGQL.fetch({ groupId: journeyId })).pipe(
+      mergeMap(([{ data: { avls } }, { data: { route } }]) =>
+        this.fetchNextPrevJourneys(startTime, route[0].serviceId, journeyId).pipe(
+          map((prevNextJourneys) => ({
+            view: new VehicleJourneyView(avls, route, viewParams),
+            prevNextJourneys: prevNextJourneys,
+          }))
+        )
+      )
     );
   }
 }

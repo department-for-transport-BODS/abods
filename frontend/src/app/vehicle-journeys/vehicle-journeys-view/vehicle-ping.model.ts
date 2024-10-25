@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
-import { ApolloGpsFeedType } from './vehicle-journeys-view.service';
+import { OnTimePerformanceEnum } from './on-time-performance.enum';
+import { AvlPoint } from '../../../generated/graphql';
 
 export interface Ping {
   id: string;
@@ -11,21 +11,19 @@ export interface Ping {
 }
 
 export class VehiclePing implements Ping {
-  id!: string;
-  lat!: number;
-  lon!: number;
-  ts!: DateTime;
-  onTimePerformance!: OnTimePerformanceEnum;
+  id: string;
+  lat: number;
+  lon: number;
+  ts: DateTime;
+  onTimePerformance: OnTimePerformanceEnum;
   formattedTime?: string;
 
-  static createVehiclePing(ping: ApolloGpsFeedType): VehiclePing {
-    const vp = new VehiclePing();
-    vp.id = ping.lat.toString() + ping.lon.toString() + ping.ts;
-    vp.lat = ping.lat;
-    vp.lon = ping.lon;
-    vp.ts = DateTime.fromISO(ping.ts);
-    vp.onTimePerformance = getOtpEnum(ping.delay);
-    vp.formattedTime = DateTime.fromISO(ping.ts).toFormat('HH:mm:ss');
-    return vp;
+  constructor(ping: AvlPoint, otp: OnTimePerformanceEnum) {
+    this.lat = ping.latitude;
+    this.lon = ping.longitude;
+    this.ts = DateTime.fromISO(ping.recordedAtTimeUtc);
+    this.onTimePerformance = otp;
+    this.formattedTime = this.ts.toFormat('HH:mm:ss');
+    this.id = ping.latitude.toString() + ping.longitude.toString() + ping.recordedAtTimeUtc;
   }
 }

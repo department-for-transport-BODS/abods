@@ -1,4 +1,32 @@
-query servicePatterns($servicePatternIds: [String!]) {
+query avls($groupId: String!) {
+  avls(groupId: $groupId) {
+    recordedAtTimeUtc
+    latitude
+    longitude
+    vehicleRef
+  }
+}
+
+query route($groupId: String!) {
+  route(groupId: $groupId) {
+    actualDepartureUtc
+    scheduledDepartureUtc
+    latitude
+    longitude
+    stopIndex
+    stopName
+    stopId
+    isTimingPoint
+    operatorName
+    operatorNoc
+    lineName
+    serviceId
+    serviceName,
+    startTime
+  }
+}
+
+query servicePatterns($servicePatternIds: [String!]!) {
   servicePatternsInfo(servicePatternIds: $servicePatternIds) {
     stops {
       stopId
