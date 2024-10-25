@@ -53,8 +53,8 @@ export class VehicleJourneysSearchService {
     lineId: string,
     journeyId: string
   ): Observable<[VehicleJourney | null, VehicleJourney | null]> {
-    const from = startTime.startOf('day');
-    const to = startTime.startOf('day').plus({ day: 1 });
+    const from = startTime.setZone('Europe/London').startOf('day');
+    const to = from.plus({ day: 1 });
     const cacheKey = FindJourneysCache.generateKey(from, to, lineId);
 
     let obs$ = this.fetchJourneys(from, to, lineId);
