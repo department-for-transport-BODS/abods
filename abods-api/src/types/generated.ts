@@ -1009,7 +1009,7 @@ export type ServicePerformanceType = {
   lineInfo: ServiceInfoType;
   onTime: Scalars['Int']['output'];
   operatorInfo?: Maybe<OperatorInfoType>;
-  scheduledDepartures?: Maybe<Scalars['Int']['output']>;
+  scheduledDepartures: Scalars['Int']['output'];
 };
 
 export type ServicePunctualityType = {
@@ -1070,7 +1070,7 @@ export type StopPerformanceType = {
   late: Scalars['Int']['output'];
   lineId?: Maybe<Scalars['String']['output']>;
   onTime: Scalars['Int']['output'];
-  scheduledDepartures?: Maybe<Scalars['Int']['output']>;
+  scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopIndex?: Maybe<Scalars['Int']['output']>;
   stopInfo: StopInfoType;
@@ -2022,7 +2022,7 @@ export type ServicePerformanceTypeResolvers<ContextType = RequestContext, Parent
   lineInfo?: Resolver<ResolversTypes['ServiceInfoType'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   operatorInfo?: Resolver<Maybe<ResolversTypes['OperatorInfoType']>, ParentType, ContextType>;
-  scheduledDepartures?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2055,7 +2055,7 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  scheduledDepartures?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopIndex?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
