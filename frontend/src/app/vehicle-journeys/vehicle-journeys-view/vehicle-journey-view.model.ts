@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
-import { AvlPoint, Stop } from '../../../generated/graphql';
-import { OnTimePerformanceEnum } from './on-time-performance.enum';
+import { AvlPoint, OtpEnum, Stop } from '../../../generated/graphql';
 import { VehiclePing } from './vehicle-ping.model';
 import { createHiddenStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
 
@@ -35,7 +34,7 @@ export interface VehicleJourneyViewParams {
   timingPointsOnly: boolean;
 }
 
-const calculateOtpStat = (stopList: VehiclePingStop[], statType: OnTimePerformanceEnum): OnTimePerformanceStat => {
+const calculateOtpStat = (stopList: VehiclePingStop[], statType: OtpEnum | null): OnTimePerformanceStat => {
   const total = stopList.length;
   const value = stopList.filter((stop) => stop.onTimePerformance === statType).length;
   return {
@@ -78,10 +77,10 @@ export class VehicleJourneyView {
         serviceNumber: route[0].lineName,
       },
       vehicleId: journey[0].vehicleRef,
-      startTime: DateTime.fromISO(route[0].startTime),
+      startTime: DateTime.fromISO(route[0].startTime).setZone('Europe/London'),
     };
 
-    let otp: OnTimePerformanceEnum = OnTimePerformanceEnum.NoData;
+    let otp: OtpEnum | null = null;
     this.gpsPingList = journey.map((ping: AvlPoint) => {
       const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
       if (thisMatch) {
@@ -91,10 +90,10 @@ export class VehicleJourneyView {
     });
     const filteredStopList = stopList.filter((stop) => !stop.isHidden);
     this.otpStats = {
-      early: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.Early),
-      late: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.Late),
-      onTime: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.OnTime),
-      noData: calculateOtpStat(filteredStopList, OnTimePerformanceEnum.NoData),
+      early: calculateOtpStat(filteredStopList, OtpEnum.Early),
+      late: calculateOtpStat(filteredStopList, OtpEnum.Late),
+      onTime: calculateOtpStat(filteredStopList, OtpEnum.OnTime),
+      noData: calculateOtpStat(filteredStopList, null),
     };
   }
 }

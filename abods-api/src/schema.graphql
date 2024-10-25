@@ -865,4 +865,11 @@ type Stop {
     serviceId: String!
     serviceName: String!
     startTime: String!
+    otp: OtpEnum
+}
+
+enum OtpEnum {
+    Early,
+    Late,
+    OnTime
 }

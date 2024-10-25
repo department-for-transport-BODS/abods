@@ -3,6 +3,7 @@ import { Context } from '../../context';
 import { getDate, getFormattedDate } from '../../lib/dayjs.js';
 import logger from '../../logger.js';
 import {
+  OtpEnum,
   UniqueJourneyType,
   VehicleReplayInputType,
   Maybe,
@@ -501,6 +502,7 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       stop_id: true,
       stop_index: true,
       common_name: true,
+      otp_state: true,
       expected_journeys: {
         select: {
           expected_journey_start: true,
@@ -535,6 +537,7 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
     operatorName: s.expected_journeys?.expected_service.expected_operator.operator_name ?? 'Unknown',
     serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
     serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
-    startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString()
+    startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString(),
+    otp: s.otp_state ? OtpEnum[s.otp_state] : null,
   }));
 };

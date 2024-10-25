@@ -87,7 +87,7 @@ export class VehicleJourneysSearchService {
   }> {
     return zip(this.avlsGQL.fetch({ groupId: journeyId }), this.routeGQL.fetch({ groupId: journeyId })).pipe(
       mergeMap(([{ data: { avls } }, { data: { route } }]) =>
-        this.fetchNextPrevJourneys(startTime, route[0].serviceId, journeyId).pipe(
+        this.fetchNextPrevJourneys(startTime, route?.[0]?.serviceId ?? '', journeyId).pipe(
           map((prevNextJourneys) => ({
             view: new VehicleJourneyView(avls, route, viewParams),
             prevNextJourneys: prevNextJourneys,

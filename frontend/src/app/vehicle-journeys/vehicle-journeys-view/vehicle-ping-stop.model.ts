@@ -1,13 +1,12 @@
 import { DateTime, Duration } from 'luxon';
-import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
 import { Ping } from './vehicle-ping.model';
-import { Stop } from '../../../generated/graphql';
+import { OtpEnum, Stop } from '../../../generated/graphql';
 
 export interface VehiclePingStop extends Ping {
   id: string;
   lat: number;
   lon: number;
-  onTimePerformance: OnTimePerformanceEnum;
+  onTimePerformance: OtpEnum | null;
   stopName?: string;
   isTimingPoint?: boolean;
   scheduledDeparture: DateTime;
@@ -37,7 +36,7 @@ export function createHiddenStop(stop: Stop, isFinalStop: boolean): VehiclePingS
     delay: Duration.fromMillis(0),
     actualDelay: Duration.fromMillis(0),
     ts: DateTime.fromSeconds(0),
-    onTimePerformance: OnTimePerformanceEnum.NoData,
+    onTimePerformance: stop.otp ?? null,
   };
   if (!stop.actualDepartureUtc) {
     return data;
@@ -51,6 +50,5 @@ export function createHiddenStop(stop: Stop, isFinalStop: boolean): VehiclePingS
     delay: normalised,
     actualDelay: difference,
     ts: DateTime.fromSeconds(0),
-    onTimePerformance: getOtpEnum(normalised.as('seconds')),
   };
 }

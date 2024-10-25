@@ -770,6 +770,12 @@ export type OrganisationType = {
   name: Scalars['String'];
 };
 
+export enum OtpEnum {
+  Early = 'Early',
+  Late = 'Late',
+  OnTime = 'OnTime'
+}
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']>;
@@ -1081,6 +1087,7 @@ export type Stop = {
   longitude: Scalars['Float'];
   operatorName: Scalars['String'];
   operatorNoc: Scalars['String'];
+  otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String'];
   serviceId: Scalars['String'];
   serviceName: Scalars['String'];
@@ -2264,7 +2271,7 @@ export type RouteQuery = (
   { __typename?: 'Query' }
   & { route: Array<(
     { __typename?: 'Stop' }
-    & Pick<Stop, 'actualDepartureUtc' | 'scheduledDepartureUtc' | 'latitude' | 'longitude' | 'stopIndex' | 'stopName' | 'stopId' | 'isTimingPoint' | 'operatorName' | 'operatorNoc' | 'lineName' | 'serviceId' | 'serviceName' | 'startTime'>
+    & Pick<Stop, 'actualDepartureUtc' | 'scheduledDepartureUtc' | 'latitude' | 'longitude' | 'stopIndex' | 'stopName' | 'stopId' | 'isTimingPoint' | 'operatorName' | 'operatorNoc' | 'lineName' | 'serviceId' | 'serviceName' | 'startTime' | 'otp'>
   )> }
 );
 
@@ -3784,6 +3791,7 @@ export const RouteDocument = gql`
     serviceId
     serviceName
     startTime
+    otp
   }
 }
     `;

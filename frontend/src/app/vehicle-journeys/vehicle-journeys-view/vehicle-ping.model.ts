@@ -1,13 +1,12 @@
 import { DateTime } from 'luxon';
-import { OnTimePerformanceEnum } from './on-time-performance.enum';
-import { AvlPoint } from '../../../generated/graphql';
+import { AvlPoint, OtpEnum } from '../../../generated/graphql';
 
 export interface Ping {
   id: string;
   lat: number;
   lon: number;
   ts: DateTime;
-  onTimePerformance: OnTimePerformanceEnum;
+  onTimePerformance: OtpEnum | null;
 }
 
 export class VehiclePing implements Ping {
@@ -15,10 +14,10 @@ export class VehiclePing implements Ping {
   lat: number;
   lon: number;
   ts: DateTime;
-  onTimePerformance: OnTimePerformanceEnum;
+  onTimePerformance: OtpEnum | null;
   formattedTime?: string;
 
-  constructor(ping: AvlPoint, otp: OnTimePerformanceEnum) {
+  constructor(ping: AvlPoint, otp: OtpEnum | null) {
     this.lat = ping.latitude;
     this.lon = ping.longitude;
     this.ts = DateTime.fromISO(ping.recordedAtTimeUtc);
