@@ -12,7 +12,7 @@ query corridorsStopSearch($inputs: AddFirstStopInputType) {
   }
 }
 
-query corridorsSubsequentStops($stopList: [String]!) {
+query corridorsSubsequentStops($stopList: [String!]!) {
   corridor {
     addSubsequentStops(stopList: $stopList) {
       stopId

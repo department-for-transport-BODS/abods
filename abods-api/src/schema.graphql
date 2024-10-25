@@ -4,13 +4,13 @@ scalar Date
 
 type Query {
     user(id: String): UserType
-    users:[UserType]
+    users:[UserType!]
     apiInfo: ApiInfoType
-    roles: [RoleType]
-    userAlerts: [AlertType]
+    roles: [RoleType!]
+    userAlerts: [AlertType!]
     userAlert(alertId: String!): AlertType
     operator(operatorId: String!): OperatorType
-    operators: OperatorsPage
+    operators(filterBy: OperatorFilterInput): OperatorsPage
     adminAreas(adminAreaIds: [String!]): [AdminAreasType]
     onTimePerformance: OnTimePerformanceType
     headwayMetrics: HeadwayMetricsType
@@ -20,217 +20,230 @@ type Query {
     vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
     timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
     corridor: CorridorNamespace
+    invitation(key: String!): InvitationType
+    events(operatorId: String!, start: DateTime!, end: DateTime!):EventResponse
+    eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
+}
+
+input OperatorFilterInput {
+    operatorIds: [String!]
+}
+
+type EventStatsType {
+    count: Int!
+    day: Date!
+}
+
+type EventResponse {
+    items: [EventType!]
+}
+
+type EventType {
+    timestamp: String!
+    type: String!
+    data: EventData!
+}
+
+type EventData {
+    message: String!
 }
 
 type CorridorNamespace {
-  getCorridor(corridorId: Int!): CorridorType
-  corridorList: [CorridorType]
-  stats(inputs: CorridorStatsInputType): CorridorStatsType
-  addFirstStop(inputs: AddFirstStopInputType): [StopType]
-  addSubsequentStops(stopList: [String]): [StopType]
+    getCorridor(corridorId: Int!): CorridorType
+    corridorList: [CorridorType]
+    stats(inputs: CorridorStatsInputType): CorridorStatsType
+    addFirstStop(inputs: AddFirstStopInputType): [StopType]
+    addSubsequentStops(stopList: [String]): [StopType]
 }
 
 input AddFirstStopInputType {
-  adminAreaIds: [String]
-  searchString: String
-  boundingBox: BoundingBoxInputType
+    adminAreaIds: [String]
+    searchString: String
+    boundingBox: BoundingBoxInputType
 }
 
 input BoundingBoxInputType {
-  maxLatitude: Float
-  maxLongitude: Float
-  minLatitude: Float
-  minLongitude: Float
+    maxLatitude: Float
+    maxLongitude: Float
+    minLatitude: Float
+    minLongitude: Float
 }
 
 type CorridorType {
-  createdBy: UserType
-  id: Int
-  name: String
-  organisation: OrganisationType
-  stops: [StopInfoType]
+    createdBy: UserType
+    id: Int!
+    name: String!
+    organisation: OrganisationType
+    stops: [StopInfoType]
 }
 
 type CorridorStatsType {
-  summaryStats: CorridorSummaryStatsType
-  journeyTimeStats: [CorridorJourneyTimeStatsType]
-  journeyTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
-  journeyTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
-  journeyTimeHistogram: [CorridorStatsHistogramType]
-  journeyTimePerServiceStats: [CorridorStatsPerServiceType]
-  serviceLinks: [ServiceLinkType]
+    summaryStats: CorridorSummaryStatsType
+    journeyTimeStats: [CorridorJourneyTimeStatsType]
+    journeyTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
+    journeyTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
+    journeyTimeHistogram: [CorridorStatsHistogramType]
+    journeyTimePerServiceStats: [CorridorStatsPerServiceType]
+    serviceLinks: [ServiceLinkType]
 }
 
 input CorridorStatsInputType {
-  corridorId: String!
-  fromTimestamp: DateTime!
-  granularity: CorridorGranularity!
-  stopList: [String]
-  toTimestamp: DateTime!
+    corridorId: String!
+    fromTimestamp: DateTime!
+    granularity: CorridorGranularity!
+    stopList: [String]
+    toTimestamp: DateTime!
 }
 
 type CorridorSummaryStatsType {
-  averageJourneyTime: Int
-  numberOfServices: Int
-  operatorName: Int
-  percentile95: Float
-  scheduledJourneyTime: Int
-  scheduledTransits: Int
-  totalTransits: Int
+    averageJourneyTime: Int
+    numberOfServices: Int
+    operatorName: Int
+    percentile95: Float
+    scheduledJourneyTime: Int
+    scheduledTransits: Int
+    totalTransits: Int
 }
 
 type CorridorJourneyTimeStatsType {
-  avgTransitTime: Float
-  maxTransitTime: Int!
-  minTransitTime: Int!
-  percentile25: Float
-  percentile5: Float
-  percentile75: Float
-  percentile95: Float
-  ts: String
+    avgTransitTime: Float
+    maxTransitTime: Int!
+    minTransitTime: Int!
+    percentile25: Float
+    percentile5: Float
+    percentile75: Float
+    percentile95: Float
+    ts: String
 }
 
 type CorridorStatsTimeOfDayType {
-  hour: Int
-  avgTransitTime: Float
-  maxTransitTime: Int!
-  minTransitTime: Int!
-  percentile25: Float
-  percentile5: Float
-  percentile75: Float
-  percentile95: Float
+    hour: Int!
+    avgTransitTime: Float
+    maxTransitTime: Int!
+    minTransitTime: Int!
+    percentile25: Float
+    percentile5: Float
+    percentile75: Float
+    percentile95: Float
 }
 
 type CorridorStatsDayOfWeekType {
-  avgTransitTime: Float
-  maxTransitTime: Int!
-  minTransitTime: Int!
-  percentile25: Float
-  percentile5: Float
-  percentile75: Float
-  percentile95: Float
-  dow: Int
+    avgTransitTime: Float
+    maxTransitTime: Int!
+    minTransitTime: Int!
+    percentile25: Float
+    percentile5: Float
+    percentile75: Float
+    percentile95: Float
+    dow: Int!
 }
 
 type CorridorStatsPerServiceType {
-  lineName: String!
-  noc: String
-  operatorName: String
-  recordedTransits: Int
-  scheduledTransits: Int
-  servicePatternName: String!
-  totalJourneyTime: Int
-}
-
-type ServiceLinkType {
-  distance: Int!
-  fromStop: String!
-  linkRoute: String
-  routeValidity: String!
-  toStop: String!
+    lineName: String!
+    noc: String
+    operatorName: String
+    recordedTransits: Int
+    scheduledTransits: Int
+    servicePatternName: String!
+    totalJourneyTime: Int
 }
 
 type CorridorStatsHistogramType {
-  hist: [CorridorHistogramType]
-  ts: String
+    hist: [CorridorHistogramType]
+    ts: String
 }
 
 type CorridorHistogramType {
-  bin: Int
-  freq: Int
+    bin: Int
+    freq: Int
 }
 
 enum CorridorGranularity {
-  day
-  hour
-  minute
+    day
+    hour
+    minute
 }
 
 type VehicleJourneyType {
-  mode: String
-  operatorId: String
-  servicePatternId: String
-  timingPatternId: String
-  vehicleJourneyId: String
+    mode: String
+    operatorId: String
+    servicePatternId: String
+    timingPatternId: String
+    vehicleJourneyId: String
 }
 
 type TimingPatternDetailType {
-  arrivalTimeOffset: Int
-  createdAt: DateTime
-  deletedAt: DateTime
-  departureTimeOffset: Int
-  noPickup: Boolean
-  noSetdown: Boolean
-  requestStop: Boolean
-  stopIndex: Int
-  timingPatternId: String
-  timingPoint: Boolean
-  updatedAt: DateTime
-  version: String
+    arrivalTimeOffset: Int!
+    createdAt: DateTime
+    deletedAt: DateTime
+    departureTimeOffset: Int!
+    noPickup: Boolean
+    noSetdown: Boolean
+    requestStop: Boolean
+    stopIndex: Int!
+    timingPatternId: String!
+    timingPoint: Boolean!
+    updatedAt: DateTime
+    version: String
 }
 
 input VehicleReplayFilterInputType {
-  filterOnStartTime: Boolean
-  lineIds: [String]
-  stopIds: [String]
+    filterOnStartTime: Boolean
+    lineIds: [String]
+    stopIds: [String]
 }
 
 input VehicleReplayInputType {
-  filters: VehicleReplayFilterInputType
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
+    filters: VehicleReplayFilterInputType
+    fromTimestamp: DateTime!
+    toTimestamp: DateTime!
 }
 
 type VehicleReplayNamespace {
-  findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
-  getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
+    findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
+    getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
 }
 
 type GpsFeedType {
-  delay: Int!
-  actualDelay: Int!
-  feedStatus: GpsFeedStatus
-  isTimingPoint: Boolean
-  journeyStatus: GpsFeedJourneyStatus!
-  lat: Float
-  lon: Float
-  operatorInfo: OperatorInfoType
-  previousStopInfo: StopInfoType
-  scheduledDeparture: String
-  serviceInfo: ServiceInfoType
-  servicePatternId: String
-  startTime: String
-  ts: String
-  vehicleId: String
-  vehicleJourneyId: String
+    delay: Int!
+    actualDelay: Int!
+    feedStatus: GpsFeedStatus
+    isTimingPoint: Boolean
+    journeyStatus: GpsFeedJourneyStatus!
+    lat: Float!
+    lon: Float!
+    operatorInfo: OperatorInfoType
+    previousStopInfo: StopInfoType
+    scheduledDeparture: String!
+    serviceInfo: ServiceInfoType!
+    servicePatternId: String
+    startTime: String!
+    ts: String!
+    vehicleId: String!
+    vehicleJourneyId: String
 }
 
 enum GpsFeedStatus {
-  Active
-  Stale
+    Active
+    Stale
 }
 
 enum GpsFeedJourneyStatus {
-  Completed
-  Started 
-  Unknown 
-}
-
-input GpsFeedNamespaceGetJourneyArgs {
-  journeyId: String
-  startTime: DateTime
+    Completed
+    Started
+    Unknown
 }
 
 type UniqueJourneyType {
-  serviceInfo: ServiceInfoType
-  startTime: String
-  vehicleJourneyId: String
+    serviceInfo: ServiceInfoType!
+    startTime: String!
+    vehicleJourneyId: String
 }
 
 type ServiceInfoType {
-  serviceId: String
-  serviceName: String
-  serviceNumber: String
+    serviceId: String!
+    serviceName: String!
+    serviceNumber: String!
 }
 
 type Mutation {
@@ -239,46 +252,55 @@ type Mutation {
     addUserAlert(payload: AlertInputType!): MutationResponseType!
     updateUserAlert(alertId: String!, payload: AlertInputType!): MutationResponseType!
     deleteUserAlert(alertId: String!): MutationResponseType!
-    createCorridor(payload: CreateCorridorMutationVariables): MutationResponseType!
+    createCorridor(payload: CorridorInputType): MutationResponseType!
     updateCorridor(inputs: CorridorUpdateInputType): MutationResponseType!
     deleteCorridor(corridorId: Int): MutationResponseType!
+    requestResetPassword(email:String!): MutationResponseType!
+    resetPassword(uid:String!, token: String!, password:String! confirmPassword:String!): MutationResponseType!
+    verifyResetPasswordToken(uid:String!, token: String!): Boolean!
+    signUp(payload: SignupPayloadType!): MutationResponseType!
+    updateUser(username: String! payload: UserUpdateInput): UserUpdateResponseType!
+    deleteUser(username: String!): MutationResponseType!
+    inviteUser(payload: InvitationInput!): InvitationResponseType!
+}
+
+input SignupPayloadType {
+    key: String!
+    password: String!
+    firstName: String!
+    lastName: String!
 }
 
 type HeadwayMetricsType {
-  frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
-  frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
-  headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
-  headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
-  headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
-  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
+    frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
+    frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
+    headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
+    headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
+    headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
+    headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
 }
 
-input CreateCorridorMutationVariables {
-  name: String
-  stopIds: [String]
-}
-
-input DeleteCorridorMutationVariables {
-  corridorId: Int
+input CorridorInputType {
+    name: String
+    stopIds: [String]
 }
 
 input CorridorUpdateInputType {
-  id: Int
-  name: String
-  stopList: [String]
+    id: Int
+    name: String
+    stopList: [String]
 }
 
 input HeadwayInputType {
-  filters: HeadwayFiltersInputType
-  fromTimestamp: DateTime
-  toTimestamp: DateTime
-  sortBy: HeadwaySortType
+    filters: HeadwayFiltersInputType
+    fromTimestamp: DateTime!
+    toTimestamp: DateTime!
 }
 
 enum HeadwaySortEnum {
-  ActualWaitTime
-  ExcessWaitTime
-  ScheduledWaitTime
+    ActualWaitTime
+    ExcessWaitTime
+    ScheduledWaitTime
 }
 
 input HeadwaySortType {
@@ -287,121 +309,121 @@ input HeadwaySortType {
 }
 
 input HeadwayFiltersInputType {
-  dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: String
-  granularity: Granularity
-  lineIds: [String]
-  nocCodes: [String]
-  operatorIds: [String]
-  startTime: String
+    dayOfWeekFlags: DayOfWeekFlagsInputType
+    endTime: String
+    granularity: Granularity
+    lineIds: [String!]
+    nocCodes: [String]
+    operatorIds: [String!]
+    startTime: String
 }
 
 input DayOfWeekFlagsInputType {
-  friday: Boolean
-  monday: Boolean
-  saturday: Boolean
-  sunday: Boolean
-  thursday: Boolean
-  tuesday: Boolean
-  wednesday: Boolean
+    friday: Boolean!
+    monday: Boolean!
+    saturday: Boolean!
+    sunday: Boolean!
+    thursday: Boolean!
+    tuesday: Boolean!
+    wednesday: Boolean!
 }
 
 input FrequentServiceInfoInputType {
-  filters: FrequentServiceInfoFilterType
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
+    filters: FrequentServiceInfoFilterType
+    fromTimestamp: DateTime!
+    toTimestamp: DateTime!
 }
 
 input FrequentServiceInfoFilterType {
-  dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: String
-  lineId: String
-  noc: String
-  operatorId: String
-  startTime: String
+    dayOfWeekFlags: DayOfWeekFlagsInputType
+    endTime: String
+    lineId: String
+    noc: String
+    operatorId: String
+    startTime: String
 }
 
 type FrequentServiceType {
-  serviceId: String
-  serviceInfo: ServiceInfoType
+    serviceId: String!
+    serviceInfo: ServiceInfoType
 }
 
 type FrequentServiceInfoType {
-  numHours: Int
-  totalHours: Int
+    numHours: Int
+    totalHours: Int
 }
 
 type HeadwayDayOfWeekType {
-  dayOfWeek: Int
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
+    dayOfWeek: Int
+    actualWaitTime: Float
+    excessWaitTime: Float
+    scheduledWaitTime: Float
 }
 
 type HeadwayOverviewType {
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
+    actualWaitTime: Float!
+    excessWaitTime: Float!
+    scheduledWaitTime: Float!
 }
 
 type HeadwayTimeOfDayType {
-  timeOfDay: Time
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
+    timeOfDay: Time
+    actualWaitTime: Float
+    excessWaitTime: Float
+    scheduledWaitTime: Float
 }
 
 type HeadwayTimeSeriesType {
-  ts: String
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
+    ts: String!
+    actualWaitTime: Float!
+    excessWaitTime: Float!
+    scheduledWaitTime: Float!
 }
 
 type TransitModelType {
-  lines(filterBy: LineFilterType): PaginatedLineType
+    lines(filterBy: LineFilterType): PaginatedLineType
 }
 
 input LineFilterType {
-  lineIds: [String!]
+    lineIds: [String!]
 }
 
 type PaginatedLineType {
-  items: [LineType]
+    items: [LineType]
 }
 
 type LineType {
-  lineId: String
-  lineName: String
-  lineNumber: String
-  servicePatterns: [ServicePatternType]
+    lineId: String!
+    lineName: String!
+    lineNumber: String!
+    servicePatterns: [ServicePatternType]
 }
 
 type ServicePatternType {
-  servicePatternId: String
-  name: String
-  stops: [StopType]
-  serviceLinks: [ServiceLinkType]
+    servicePatternId: String!
+    name: String!
+    stops: [StopType!]
+    serviceLinks: [ServiceLinkType!]
 }
 
 type StopType {
-  stopId: String
-  stopName: String
-  lon: Float
-  lat: Float
-  adminAreaId: String
-  adminAreaName: String
-  localityId: String
-  localityName: String
-  sourceId: String
+    stopId: String!
+    stopName: String!
+    lon: Float!
+    lat: Float!
+    adminAreaId: String
+    adminAreaName: String
+    localityId: String
+    localityName: String
+    sourceId: String
 }
 
 type ServiceLinkType {
-  fromStop: String
-  toStop: String
-  distance: Int
-  routeValidity: String
-  linkRoute: String
+    fromStop: String
+    toStop: String
+    distance: Int!
+    routeValidity: String
+    linkRoute: String
 }
 
 
@@ -426,40 +448,40 @@ type OperatorType {
 }
 
 type FeedMonitoringType {
-  availability: Float
-  feedStatus: Boolean
-  historicalStats: HistoricalStatsType
-  lastOutage: DateTime
-  liveStats: LiveStatsType
-  unavailableSince: DateTime
-  vehicleStats: [VehicleStatsType]
+    availability: Float
+    feedStatus: Boolean
+    historicalStats(date: Date!): HistoricalStatsType
+    lastOutage: DateTime
+    liveStats: LiveStatsType
+    unavailableSince: DateTime
+    vehicleStats(granularity: Granularity, start:DateTime!, end: DateTime!): [VehicleStatsType]
 }
 
 type HistoricalStatsType {
-  availability: Float
-  compliance: Float
-  updateFrequency: Int
-  vehicleStats: [VehicleStatsType]
+    availability: Float
+    compliance: Float
+    updateFrequency: Int
+    vehicleStats: [VehicleStatsType]
 }
 
 type VehicleStatsType {
-  actual: Int
-  expected: Int
-  timestamp: DateTime
+    actual: Int
+    expected: Int
+    timestamp: DateTime
 }
 
 type LiveStatsType {
-  currentVehicles: Int
-  expectedVehicles: Int
-  feedAlerts: Int
-  feedErrors: Int
-  last20Minutes: [VehicleStatsType]
-  last24Hours: [VehicleStatsType]
-  updateFrequency: Int
+    currentVehicles: Int
+    expectedVehicles: Int
+    feedAlerts: Int
+    feedErrors: Int
+    last20Minutes: [VehicleStatsType]
+    last24Hours: [VehicleStatsType]
+    updateFrequency: Int
 }
 
 type AdminAreaInfoType {
-    adminAreaId: String
+    adminAreaId: String!
 }
 
 input UserUpdateInput {
@@ -484,16 +506,16 @@ type InvitationResponseType {
 }
 
 type InvitationType {
-  accepted: Boolean!
-  email: String!
-  organisation: OrganisationType
-  role: RoleType
+    accepted: Boolean!
+    email: String!
+    organisation: OrganisationType
+    role: RoleType
 }
 
 input InvitationInput {
-  email: String!
-  organisation: OrganisationReferenceInput
-  role: RoleReferenceInput!
+    email: String!
+    organisation: OrganisationReferenceInput
+    role: RoleReferenceInput!
 }
 
 input OrganisationReferenceInput {
@@ -509,10 +531,10 @@ input AlertReferenceInput {
 }
 
 input AlertInputType {
-  alertType: AlertTypeEnum
-  sendTo: AlertReferenceInput!
-  eventHysterisis: Int
-  eventThreshold: Int
+    alertType: AlertTypeEnum
+    sendTo: AlertReferenceInput!
+    eventHysterisis: Int
+    eventThreshold: Int
 }
 
 
@@ -532,9 +554,9 @@ enum AlertTypeEnum {
 }
 
 type ApiInfoType {
-    buildNumber: String
-    version: String
-  }
+    buildNumber: String!
+    version: String!
+}
 
 type FeatureFlagType {
     consolidateHistogram: Boolean
@@ -559,7 +581,7 @@ type UserType {
     firstName: String
     lastName: String
     organisation: OrganisationType
-    roles: [RoleType]
+    roles: [RoleType!]
 }
 
 type OrganisationType{
@@ -579,256 +601,242 @@ enum ScopeEnum{
 }
 
 type OnTimePerformanceType {
-  delayFrequency(inputs: PerformanceInputType!): [DelayFrequencyType]
-  journeyScheduledStartTimes: [JourneyScheduledStartTimes]
-  operatorPerformance(inputs: PerformanceInputType!): OperatorPerformancePage
-  punctualityDayOfWeek(inputs: PerformanceInputType!): [PunctualityDayOfWeekType]
-  punctualityOverview(inputs: PerformanceInputType!): PunctualityTotalsType
-  punctualityTimeOfDay(inputs: PerformanceInputType!): [PunctualityTimeOfDayType]
-  punctualityTimeSeries(inputs: PerformanceInputType!): [PunctualityTimeSeriesType]
-  servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType]
-  servicePunctuality(inputs: ServicePerformanceInputType!): [ServicePunctualityType]
-  stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType]
+    delayFrequency(inputs: PerformanceInputType!): [DelayFrequencyType!]
+    journeyScheduledStartTimes: [JourneyScheduledStartTimes]
+    operatorPerformance(inputs: PerformanceInputType!): OperatorPerformancePage
+    punctualityDayOfWeek(inputs: PerformanceInputType!): [PunctualityDayOfWeekType!]
+    punctualityOverview(inputs: PerformanceInputType!): PunctualityTotalsType
+    punctualityTimeOfDay(inputs: PerformanceInputType!): [PunctualityTimeOfDayType!]
+    punctualityTimeSeries(inputs: PerformanceInputType!): [PunctualityTimeSeriesType!]
+    servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType!]
+    servicePunctuality(inputs: ServicePerformanceInputType!): [ServicePunctualityType]
+    stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType!]
 }
 
 type DelayFrequencyType {
-  bucket: Int
-  frequency: Int
+    bucket: Int!
+    frequency: Int
 }
 
 type JourneyScheduledStartTimes {
-  days: [ShortCodeDayOfWeek]
-  fromDate: DateTime
-  startTimes: [Time]
-  toDate: DateTime
+    days: [ShortCodeDayOfWeek]
+    fromDate: DateTime
+    startTimes: [Time]
+    toDate: DateTime
 }
 
 type OperatorPerformancePage {
-  pageInfo: PageInfo
-  items: [OperatorPerformanceType]
+    pageInfo: PageInfo
+    items: [OperatorPerformanceType!]
 }
 
 
 type OperatorPerformanceType {
-  actualDepartures: Int
-  averageDelay: Float
-  early: Int
-  late: Int
-  name: String
-  nocCode: String
-  onTime: Int
-  operatorId: String
-  scheduledDepartures: Int
+    actualDepartures: Int
+    averageDelay: Float
+    early: Int!
+    late: Int!
+    name: String
+    nocCode: String
+    onTime: Int!
+    operatorId: String
+    scheduledDepartures: Int
 }
 
 
 type PageInfo {
-  next: Int
-  totalCount: Int
+    next: Int
+    totalCount: Int
 }
 
 type PunctualityDayOfWeekType {
-  dayOfWeek: Int
-  early: Int
-  late: Int
-  onTime: Int
+    dayOfWeek: Int!
+    early: Int!
+    late: Int!
+    onTime: Int!
 }
 
 type PunctualityTotalsType {
-  averageDeviation: Float
-  completed: Int
-  early: Int
-  late: Int
-  onTime: Int
-  scheduled: Int
+    averageDeviation: Float
+    completed: Int!
+    early: Int!
+    late: Int!
+    onTime: Int!
+    scheduled: Int!
 }
 
 type PunctualityTimeOfDayType {
-  early: Int
-  late: Int
-  onTime: Int
-  timeOfDay: String
+    early: Int!
+    late: Int!
+    onTime: Int!
+    timeOfDay: String!
 }
 
 type PunctualityTimeSeriesType {
-  early: Int
-  late: Int
-  onTime: Int
-  ts: String
+    early: Int!
+    late: Int!
+    onTime: Int!
+    ts: String!
 }
 
 type ServicePerformanceType {
-  actualDepartures: Int
-  averageDelay: Float
-  early: Int
-  late: Int
-  lineId: String
-  onTime: Int
-  scheduledDepartures: Int
-  lineInfo: ServiceInfoType
-  operatorInfo: OperatorInfoType
-}
-
-type ServiceInfoType {
-  serviceId: String
-  serviceName: String
-  serviceNumber: String
+    actualDepartures: Int!
+    averageDelay: Float!
+    early: Int!
+    late: Int!
+    lineId: String
+    onTime: Int!
+    scheduledDepartures: Int!
+    lineInfo: ServiceInfoType!
+    operatorInfo: OperatorInfoType
 }
 
 type OperatorInfoType {
-  nocCode: String
-  operatorId: String
-  operatorName: String
-}
-
-type IPunctualityType {
-  early: Int
-  late: Int
-  onTime: Int
+    nocCode: String
+    operatorId: String
+    operatorName: String
 }
 
 type ServicePunctualityType {
-  early: Int
-  late: Int
-  lineId: String
-  lineInfo: ServiceInfoType
-  nocCode: String
-  onTime: Int
-  operatorId: String
-  rank: Float
-  trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
+    early: Int
+    late: Int
+    lineId: String
+    lineInfo: ServiceInfoType
+    nocCode: String
+    onTime: Int
+    operatorId: String
+    rank: Float
+    trend(fromTimestamp: DateTime!, toTimestamp: DateTime!): ServicePunctualityType
 }
 
 type StopPerformanceType {
-  actualDepartures: Int
-  averageDelay: Float
-  early: Int
-  late: Int
-  lineId: String
-  onTime: Int
-  scheduledDepartures: Int
-  stopId: String
-  stopIndex: Int
-  stopInfo: StopInfoType
-  timingPoint: Boolean
+    actualDepartures: Int!
+    averageDelay: Float!
+    early: Int!
+    late: Int!
+    lineId: String
+    onTime: Int!
+    scheduledDepartures: Int!
+    stopId: String!
+    stopIndex: Int
+    stopInfo: StopInfoType!
+    timingPoint: Boolean
 }
 
 
 type StopInfoType {
-  sourceId: String
-  stopId: String
-  stopLocality: LocalityType
-  stopLocation: GpsPointType
-  stopName: String
+    sourceId: String
+    stopId: String!
+    stopLocality: LocalityType!
+    stopLocation: GpsPointType!
+    stopName: String!
 }
 
 type LocalityType {
-  localityAreaId: String
-  localityAreaName: String
-  localityId: String
-  localityName: String
+    localityAreaId: String
+    localityAreaName: String
+    localityId: String
+    localityName: String
 }
 
 type GpsPointType {
-  latitude: Float
-  longitude: Float
+    latitude: Float!
+    longitude: Float!
 }
 
 enum ShortCodeDayOfWeek {
-  Fri
-  Mon
-  Sat
-  Sun
-  Thu
-  Tue
-  Wed
+    Fri
+    Mon
+    Sat
+    Sun
+    Thu
+    Tue
+    Wed
 }
 
 input PerformanceInputType {
-  filters: PerformanceFiltersInputType
-  fromTimestamp: DateTime!
-  paging: PagingInputType
-  sortBy: PunctualitySortType
-  toTimestamp: DateTime!
+    filters: PerformanceFiltersInputType
+    fromTimestamp: DateTime!
+    paging: PagingInputType
+    toTimestamp: DateTime!
 }
 
 input PerformanceFiltersInputType {
-  addNonTagged: Boolean
-  adminAreaIds: [String]
-  dayOfWeekFlags: DayOfWeekFlagsInputType
-  endTime: String
-  excludedDates: [Date]
-  excludeItoLineId: String
-  granularity: Granularity
-  lineDirection: LineDirection
-  lineIds: [String]
-  maxDelay: Int
-  minDelay: Int
-  nocCodes: [String]
-  onTimeMaxMinutes: Int
-  onTimeMinMinutes: Int
-  operatorIds: [String]
-  startTime: String
-  startTimes: [Time]
-  stopsSegment: StopsSegment
-  tagIds: [Int]
-  timingPointsOnly: Boolean
+    addNonTagged: Boolean
+    adminAreaIds: [String!]
+    dayOfWeekFlags: DayOfWeekFlagsInputType
+    endTime: String
+    excludedDates: [Date]
+    excludeItoLineId: String
+    granularity: Granularity
+    lineDirection: LineDirection
+    lineIds: [String!]
+    maxDelay: Int
+    minDelay: Int
+    nocCodes: [String]
+    onTimeMaxMinutes: Int
+    onTimeMinMinutes: Int
+    operatorIds: [String!]
+    startTime: String
+    startTimes: [Time]
+    stopsSegment: StopsSegment
+    tagIds: [Int]
+    timingPointsOnly: Boolean
 }
 
 enum Granularity {
-  day
-  hour
-  minute
-  month
+    day
+    hour
+    minute
+    month
 }
 
 enum LineDirection {
-  All
-  Inbound
-  Outbound
+    All
+    Inbound
+    Outbound
 }
 
 enum StopsSegment {
-  First
-  Intermediate
+    First
+    Intermediate
 }
 
 
 input PagingInputType {
-  after: Int
-  first: Int
+    after: Int
+    first: Int
 }
 
 input PunctualitySortType {
-  field: PunctualitySortEnum
-  order: SortOrderEnum
+    field: PunctualitySortEnum
+    order: SortOrderEnum
 }
 
 enum PunctualitySortEnum {
-  Early
-  Late
-  OnTime
+    Early
+    Late
+    OnTime
 }
 
 enum SortOrderEnum {
-  ASC
-  DESC
+    ASC
+    DESC
 }
 
 enum RankingOrder {
-  ascending
-  descending
+    ascending
+    descending
 }
 
 input ServicePerformanceFiltersInputType {
-  timingPointsOnly: Boolean
-  operatorIds: [String]
+    timingPointsOnly: Boolean
+    operatorIds: [String]
 }
 
 input ServicePerformanceInputType {
-  filters: ServicePerformanceFiltersInputType
-  fromTimestamp: DateTime
-  toTimestamp: DateTime
-  limit: Int
-  order: RankingOrder
+    filters: ServicePerformanceFiltersInputType
+    fromTimestamp: DateTime
+    toTimestamp: DateTime
+    order: RankingOrder
 }

@@ -1,10 +1,12 @@
 import { Context } from '../../context.js'
-import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, SessionUser, OperatorType } from '../../types.js';
+import { RoleType, UserType, AlertType, AlertTypeEnum, ScopeEnum, AlertInputType } from '../../types/generated.js';
+import { SessionUser } from "../../types/extra.js";
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import logger from '../../logger.js';
+import express from 'express';
 
-export const getSession = async (sessionId, db: Context) : Promise<SessionUser> =>  {
+export const getSession = async (sessionId: string, db: Context) : Promise<SessionUser> =>  {
   logger.debug("Within get session function")
   let sessionUser: SessionUser = {
     user: null,
@@ -101,14 +103,14 @@ export const getUsers = async (sessionUser: SessionUser, db: Context) => {
   
 }
 // Summary: fetch a single user by id
-export const getUser = async (id: string, sessionUser: SessionUser, db: Context) => {
+export const getUser = async (sessionUser: SessionUser) => {
   try {
     if(!sessionUser.user){
       throw ("Not authorized")
     }
 
     return {
-      id: sessionUser.user.id,
+      id: sessionUser.user.id.toString(),
       username: sessionUser.user.username,
       email: sessionUser.user.email,
       firstName: sessionUser.user.first_name,
@@ -125,15 +127,15 @@ export const getUser = async (id: string, sessionUser: SessionUser, db: Context)
       },
     ]
     }
-  
+
   } catch (error) {
     console.error(error)
     return null;
-  } 
+  }
 }
 
 // Summary: fetch all user alerts
-export const getUserAlerts = async (sessionUser: any, db: Context) => {
+export const getUserAlerts = async (sessionUser: SessionUser, db: Context) => {
   try {
     
     if(!sessionUser.user)
@@ -147,12 +149,12 @@ export const getUserAlerts = async (sessionUser: any, db: Context) => {
         OR: [
           {
           created_by: {
-            equals: sessionUser.id
+            equals: sessionUser.user.id
           },
           },
           {
             send_to: {
-              equals: sessionUser.id
+              equals: sessionUser.user.id
             },
           }
         ]
@@ -200,7 +202,7 @@ export const getUserAlerts = async (sessionUser: any, db: Context) => {
 }
 
 // Summary: log the user in
-export const loginUser = async (username:string, password:string, db: Context, res: any) => {
+export const loginUser = async (username:string, password:string, db: Context, res: express.Response) => {
   logger.debug(`Logging in user: ${username}`)
   try {
     if (!username || !password) {
@@ -256,7 +258,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
       res.setHeader('Set-Cookie', `abods_sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`)
       return {
         success: true,
-        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000)
+        expiresAt: (new Date(Date.now() + 12 * 60 * 60 * 1000)).toUTCString()
       }
     } else {
       logger.debug('Invalid password entered')
@@ -270,7 +272,7 @@ export const loginUser = async (username:string, password:string, db: Context, r
   } 
 }
 
-export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
+export const logoutUser = async (sessionUser: SessionUser, db: Context) => {
   try {
     if(!sessionUser.user)
     {
@@ -291,7 +293,7 @@ export const logoutUser = async (sessionUser: any, db: Context, req: any) => {
   } 
 }
 
-export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
+export const getUserAlert = async (alertId: string, sessionUser: SessionUser, db: Context) => {
   try {
 
     if(!sessionUser.user)
@@ -311,12 +313,12 @@ export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
           OR: [
             {
               created_by: {
-              equals: sessionUser.id
+              equals: sessionUser.user.id
             },
             },
             {
               send_to: {
-                equals: sessionUser.id
+                equals: sessionUser.user.id
               },
             }
           ]
@@ -339,14 +341,14 @@ export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
       eventHysterisis: alert.event_hysterisis,
       eventThreshold: alert.event_threshold,
       createdBy: alert.created_by_user ? {
-        id: alert.created_by_user.id,
+        id: alert.created_by_user.id.toString(),
         username: alert.created_by_user.username,
         email: alert.created_by_user.email,
         firstName: alert.created_by_user.first_name,
         lastName: alert.created_by_user.last_name
       } : null,
       sendTo: alert.send_to_user ? {
-        id: alert.send_to_user.id,
+        id: alert.send_to_user.id.toString(),
         username: alert.send_to_user.username,
         email: alert.send_to_user.email,
         firstName: alert.send_to_user.first_name,
@@ -358,7 +360,7 @@ export const getUserAlert = async (alertId, sessionUser: any, db: Context) => {
   }
 }
 
-export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
+export const addUserAlert = async (payload: AlertInputType, sessionUser: SessionUser, db: Context) => {
   try {
     if(!sessionUser.user)
       {
@@ -374,7 +376,7 @@ export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
         event_hysterisis: eventHysterisis,
         event_threshold: eventThreshold,
         send_to: Number(sendTo.id),
-        created_by: sessionUser.id
+        created_by: sessionUser.user.id
       }
     })
 
@@ -390,7 +392,7 @@ export const addUserAlert = async (payload, sessionUser: any, db: Context) => {
   } 
 }
 
-export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Context) => {
+export const updateUserAlert = async (alertId: string, payload: AlertInputType, sessionUser: SessionUser, db: Context) => {
   try {
     if(!sessionUser.user)
       {
@@ -435,7 +437,7 @@ export const updateUserAlert = async (alertId, payload, sessionUser: any, db: Co
   } 
 }
 
-export const deleteUserAlert = async (alertId, sessionUser: any, db: Context) => {
+export const deleteUserAlert = async (alertId: string, sessionUser: SessionUser, db: Context) => {
   try {
     if(!sessionUser.user)
     {

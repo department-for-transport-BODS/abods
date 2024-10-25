@@ -1,6 +1,7 @@
 import { Role } from '@prisma/client';
 import { Context } from '../../context.js';
-import { ApiInfoType, OrganisationType, RoleType, ScopeEnum } from '../../types.js'
+import { RoleType, ScopeEnum } from '../../types/generated.js'
+import { SessionUser } from '../../types/extra';
 
 const adminAreas = [
   {
@@ -76,7 +77,7 @@ export const getApiInfo = async (db: Context) => {
 }
 
 // Summary: fetch roles
-export const getRoles = async (sessionUser: any, db: Context) => {
+export const getRoles = async (sessionUser: SessionUser) => {
   try {
     if(!sessionUser.user){
       throw ("Not authorized")

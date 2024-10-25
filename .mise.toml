@@ -50,3 +50,27 @@ depends = ["setup:frontend"]
 description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
 dir = "frontend"
 run = "npm start"
+
+[tasks."codegen:frontend"]
+dir = "frontend"
+run = "npm run codegen"
+
+[tasks."codegen:backend"]
+dir = "abods-api"
+run = "npm run codegen"
+
+[tasks.codegen]
+depends = ["codegen:frontend", "codegen:backend"]
+
+[tasks."build:frontend"]
+depends = ["codegen:frontend"]
+dir = "frontend"
+run = "npm run build"
+
+[tasks."build:backend"]
+depends = ["codegen:backend"]
+dir = "abods-api"
+run = "npm run build"
+
+[tasks.build]
+depends = ["build:frontend", "build:backend"]

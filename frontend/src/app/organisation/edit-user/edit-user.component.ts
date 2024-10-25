@@ -56,7 +56,7 @@ export class EditUserComponent implements OnInit {
       this.user.subscribe((user) => {
         if (user) {
           const { firstName, lastName, username, roles } = user;
-          this.userForm.setValue({ firstName, lastName, username, role: roles[0].id });
+          this.userForm.setValue({ firstName, lastName, username, role: roles?.[0]?.id });
         }
       }),
       combineLatest([this.username, this.userList])

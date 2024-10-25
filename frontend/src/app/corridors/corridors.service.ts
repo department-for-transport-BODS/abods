@@ -15,7 +15,6 @@ import {
   CreateCorridorGQL,
   DeleteCorridorGQL,
   GetCorridorGQL,
-  ICorridorJourneyTimeStats,
   ServiceLinkType,
   StopInfoType,
   StopType,
@@ -42,6 +41,7 @@ import { BoxPlotChartDataItem } from './view/box-plot-chart/box-plot-chart.compo
 import { Definitely, nonNullishArray } from '../shared/array-operators';
 import { LngLatBounds } from 'mapbox-gl';
 import { OperatorService } from '../shared/services/operator.service';
+import { ICorridorJourneyTimeStats } from '../../generated/extra';
 
 export type Stop = Pick<
   StopType,
@@ -192,7 +192,7 @@ export class CorridorsService {
           )
           .pipe(
             map((result) => {
-              const allStops = nonNullishArray(result?.data?.corridor.addFirstStop).map(toStop);
+              const allStops = nonNullishArray(result?.data?.corridor?.addFirstStop).map(toStop);
               const orgStops = allStops.filter((stop) => adminAreaIds.some((id) => id === stop.adminAreaId));
               const nonOrgStops = allStops.filter((stop) => adminAreaIds.every((id) => id !== stop.adminAreaId));
               return {
@@ -208,13 +208,13 @@ export class CorridorsService {
   fetchSubsequentStops(stopList: string[]): Observable<Stop[]> {
     return this.corridorsSubsequentStopsQuery
       .fetch({ stopList }, { fetchPolicy: 'no-cache' })
-      .pipe(map((result) => nonNullishArray(result?.data?.corridor.addSubsequentStops).map(toStop)));
+      .pipe(map((result) => nonNullishArray(result?.data?.corridor?.addSubsequentStops).map(toStop)));
   }
 
   fetchCorridors(): Observable<CorridorSummary[]> {
     return this.corridorsListQuery.fetch(undefined, { fetchPolicy: 'no-cache' }).pipe(
       map((result) =>
-        nonNullishArray(result.data?.corridor.corridorList).map(({ stops, ...corridor }) => ({
+        nonNullishArray(result.data?.corridor?.corridorList).map(({ stops, ...corridor }) => ({
           ...corridor,
           numStops: nonNullishArray(stops).length,
         }))
@@ -228,7 +228,7 @@ export class CorridorsService {
         if (result.errors && result.errors.length > 0) {
           throw result.errors[0].message;
         }
-        return result.data?.corridor.getCorridor;
+        return result.data?.corridor?.getCorridor;
       }),
       assertNonNullish(),
       map(({ stops, ...corridor }) => ({ stops: nonNullishArray(stops).map(toStop), ...corridor }))
@@ -248,7 +248,7 @@ export class CorridorsService {
         },
       })
       .pipe(
-        map((result) => result.data?.corridor.stats),
+        map((result) => result.data?.corridor?.stats),
         assertNonNullish(),
         map((stats) => this.convertStats(stats, params)),
         map((stats) => this.addBoxPlotData(stats))

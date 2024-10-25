@@ -12,11 +12,12 @@ import {
   VehicleJourneyType,
   TimingPatternDetailType,
   GpsFeedJourneyStatus,
-} from '../../types.js';
+} from '../../types/generated.js';
+import { SessionUser } from '../../types/extra';
 
 export const findJourneys = async (
   inputs: VehicleReplayInputType,
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context,
 ): Promise<UniqueJourneyType[]> => {
   if (!sessionUser.user) {
@@ -220,7 +221,7 @@ export const getTimetableJourney = async (
 export const getJourney = async (
   journeyId: string,
   startTime: Date,
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context,
 ): Promise<Array<Maybe<GpsFeedType>>> => {
   if (!sessionUser.user) {
@@ -341,7 +342,7 @@ export const getJourney = async (
 
 export const servicePatternsInfo = async (
   vehicleJourneyId: string[],
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context,
 ): Promise<Array<Maybe<ServicePatternType>>> => {
   if (!sessionUser.user) {
@@ -372,7 +373,7 @@ export const servicePatternsInfo = async (
       },
     );
 
-    const stops: Array<Maybe<StopType>> | undefined = vehicleJourney?.stops.map(
+    const stops: Array<StopType> | undefined = vehicleJourney?.stops.map(
       (stop) => {
         return {
           stopId: stop.atco_code,
@@ -398,7 +399,7 @@ export const servicePatternsInfo = async (
 
 export const vehicleJourney = async (
   vehicleJourneyId: string,
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context,
 ): Promise<Maybe<VehicleJourneyType>[]> => {
   if (!sessionUser.user) {
@@ -433,7 +434,7 @@ export const vehicleJourney = async (
 
 export const timingPatternDetail = async (
   timingPatternId: string,
-  sessionUser: any,
+  sessionUser: SessionUser,
   db: Context,
 ): Promise<Maybe<TimingPatternDetailType>[]> => {
   if (!sessionUser.user) {
