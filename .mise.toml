@@ -51,24 +51,16 @@ description = "Run the front end in a dev server. Expects a local API to be runn
 dir = "frontend"
 run = "npm start"
 
-[tasks."codegen:frontend"]
-dir = "frontend"
-run = "npm run codegen"
-
-[tasks."codegen:backend"]
-dir = "abods-api"
-run = "npm run codegen"
-
 [tasks.codegen]
-depends = ["codegen:frontend", "codegen:backend"]
+run = "npm run codegen"
 
 [tasks."build:frontend"]
-depends = ["codegen:frontend"]
+depends = ["codegen"]
 dir = "frontend"
 run = "npm run build"
 
 [tasks."build:backend"]
-depends = ["codegen:backend"]
+depends = ["codegen"]
 dir = "abods-api"
 run = "npm run build"
 
