@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AvlsGQL, JourneysGQL, RouteGQL } from '../../../generated/graphql';
 import { DateTime } from 'luxon';
-import { mergeMap, Observable, zip } from 'rxjs';
+import { mergeMap, Observable, of, zip } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { nonNullishArray } from '../../shared/array-operators';
-import { findIndex, sortBy, uniqBy } from 'lodash-es';
+import { sortBy, uniqBy } from 'lodash-es';
 import { FindJourneysCache } from './find-journeys-cache';
 import { createVehicleJourneyView, VehicleJourneyView } from '../vehicle-journeys-view/vehicle-journey-view.model';
 
@@ -21,9 +21,18 @@ export class VehicleJourneysSearchService {
 
   constructor(private journeysGQL: JourneysGQL, private avlsGQL: AvlsGQL, private routeGQL: RouteGQL) {}
 
-  fetchJourneys(from: DateTime, to: DateTime, lineId: string): Observable<VehicleJourney[]> {
+  fetchDayJourneys(date: DateTime, lineId: string): Observable<VehicleJourney[]> {
     // filterOnStartTime is set to true so we filter on start times directly,
     // rather than on gps_time which is the default behaviour.
+    const from = date.startOf('day');
+    const to = from.plus({ day: 1 });
+
+    // Return cached result if available
+    const cached = this.findJourneysCache.getItem(from, to, lineId);
+    if (cached) {
+      return of(cached);
+    }
+
     return this.journeysGQL
       .fetch(
         { fromTimestamp: from.toISO(), toTimestamp: to.toISO(), lineId, filterOnStartTime: true },
@@ -41,57 +50,17 @@ export class VehicleJourneysSearchService {
           }))
         ),
         tap((journeys) => {
-          // Cache the result for use on vehice journey view page
-          const cacheKey = FindJourneysCache.generateKey(from, to, lineId);
-          this.findJourneysCache.setItem(cacheKey, journeys);
+          // Cache the result for use on vehicle journey view page
+          this.findJourneysCache.setItem(from, to, lineId, journeys);
         })
       );
   }
 
-  fetchNextPrevJourneys(
-    startTime: DateTime,
-    lineId: string,
-    journeyId: string
-  ): Observable<[VehicleJourney | null, VehicleJourney | null]> {
-    const from = startTime.setZone('Europe/London').startOf('day');
-    const to = from.plus({ day: 1 });
-    const cacheKey = FindJourneysCache.generateKey(from, to, lineId);
-
-    let obs$ = this.fetchJourneys(from, to, lineId);
-
-    // Return cached result from search page
-    if (this.findJourneysCache.hasItem(cacheKey)) {
-      obs$ = this.findJourneysCache.getItem(cacheKey);
-    }
-
-    return obs$.pipe(
-      map((journeys) => {
-        const idx = findIndex(
-          journeys,
-          (journey) => journey.startTime?.toMillis() === startTime.toMillis() && journey.vehicleJourneyId === journeyId
-        );
-        const prev = idx > 0 ? journeys[idx - 1] : null;
-        const next = idx < journeys.length - 1 ? journeys[idx + 1] : null;
-        return [prev, next];
-      })
-    );
-  }
-
-  getJourney(
-    journeyId: string,
-    startTime: DateTime,
-    timingPointsOnly: boolean
-  ): Observable<{
-    view: VehicleJourneyView;
-    prevNextJourneys: [VehicleJourney | null, VehicleJourney | null];
-  }> {
+  getJourney(journeyId: string, startTime: DateTime, timingPointsOnly: boolean): Observable<VehicleJourneyView> {
     return zip(this.avlsGQL.fetch({ groupId: journeyId }), this.routeGQL.fetch({ groupId: journeyId })).pipe(
       mergeMap(([{ data: { avls } }, { data: { route } }]) =>
-        this.fetchNextPrevJourneys(startTime, route?.[0]?.serviceId ?? '', journeyId).pipe(
-          map((prevNextJourneys) => ({
-            view: createVehicleJourneyView(avls, route, timingPointsOnly),
-            prevNextJourneys: prevNextJourneys,
-          }))
+        this.fetchDayJourneys(startTime.setZone('Europe/London'), route?.[0]?.serviceId ?? '').pipe(
+          map((journeys) => createVehicleJourneyView(avls, route, timingPointsOnly, journeys, startTime, journeyId))
         )
       )
     );
