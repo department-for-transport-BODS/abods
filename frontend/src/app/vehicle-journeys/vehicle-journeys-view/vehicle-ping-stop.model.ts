@@ -1,8 +1,7 @@
 import { DateTime, Duration } from 'luxon';
-import { Ping } from './vehicle-ping.model';
 import { OtpEnum, Stop } from '../../../generated/graphql';
 
-export interface VehiclePingStop extends Ping {
+export interface VehiclePingStop {
   id: string;
   lat: number;
   lon: number;
@@ -15,6 +14,7 @@ export interface VehiclePingStop extends Ping {
   isHidden: boolean;
   delay?: Duration;
   actualDelay?: Duration;
+  ts: DateTime;
 }
 
 export function createVehiclePingStop(stop: Stop, isFinalStop: boolean): VehiclePingStop {

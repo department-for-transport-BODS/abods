@@ -1,15 +1,7 @@
 import { DateTime } from 'luxon';
 import { AvlPoint, OtpEnum } from '../../../generated/graphql';
 
-export interface Ping {
-  id: string;
-  lat: number;
-  lon: number;
-  ts: DateTime;
-  onTimePerformance: OtpEnum | null;
-}
-
-export class VehiclePing implements Ping {
+export class VehiclePing {
   id: string;
   lat: number;
   lon: number;
