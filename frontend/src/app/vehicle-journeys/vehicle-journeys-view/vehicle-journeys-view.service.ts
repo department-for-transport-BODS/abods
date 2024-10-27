@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { sortBy } from 'lodash-es';
-import { map, mergeMap, Observable, switchMap, throwError } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import {
   GpsFeedType,
   Maybe,
@@ -12,7 +12,7 @@ import {
   VehicleJourneyTimingPatternGQL,
 } from '../../../generated/graphql';
 import { nonNullishArray } from '../../shared/array-operators';
-import { VehicleJourneyView, VehicleJourneyViewParams } from './vehicle-journey-view.model';
+import { VehicleJourneyView } from './vehicle-journey-view.model';
 import {
   VehicleJourney,
   VehicleJourneysSearchService,
@@ -78,9 +78,9 @@ export class VehicleJourneysViewService {
   getVehicleJourneyViewWithNextPrevJourneys(
     journeyId: string,
     startTime: DateTime,
-    viewParams: VehicleJourneyViewParams
+    timingPointsOnly: boolean
   ): Observable<{ view: VehicleJourneyView; prevNextJourneys: [VehicleJourney | null, VehicleJourney | null] }> {
-    return this.vehicleJourneysSearchService.getJourney(journeyId, startTime, viewParams);
+    return this.vehicleJourneysSearchService.getJourney(journeyId, startTime, timingPointsOnly);
   }
 
   getTimingPatternForVehicleJourney(vehicleJourneyId: string): Observable<TimingPatternDetail[]> {

@@ -1,99 +1,46 @@
-import { DateTime } from 'luxon';
 import { AvlPoint, OtpEnum, Stop } from '../../../generated/graphql';
-import { VehiclePing } from './vehicle-ping.model';
-import { createHiddenStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
+import { createVehiclePing, VehiclePing } from './vehicle-ping.model';
+import { createStopModel, VehiclePingStop } from './vehicle-ping-stop.model';
+import { createJourneyInfo, VehicleJourneyInfo } from './vehicle-journey-info.model';
+import { calculateOnTimePerformance, OnTimePerformanceStats } from './on-time-performance-stats.model';
 
-export interface OnTimePerformanceStat {
-  percent: number;
-  value: number;
-  total: number;
-}
-
-export interface OnTimePerformanceStats {
-  onTime?: OnTimePerformanceStat;
-  late?: OnTimePerformanceStat;
-  early?: OnTimePerformanceStat;
-  noData?: OnTimePerformanceStat;
-}
-
-export interface VehicleJourneyInfo {
-  operatorInfo: {
-    nocCode: string;
-    operatorName: string;
-  };
-  serviceInfo: {
-    serviceId: string;
-    serviceName: string;
-    serviceNumber: string;
-  };
-  vehicleId: string;
-  startTime: DateTime;
-}
-
-export interface VehicleJourneyViewParams {
-  timingPointsOnly: boolean;
-}
-
-const calculateOtpStat = (stopList: VehiclePingStop[], statType: OtpEnum | null): OnTimePerformanceStat => {
-  const total = stopList.length;
-  const value = stopList.filter((stop) => stop.onTimePerformance === statType).length;
-  return {
-    percent: value / total,
-    value: value,
-    total: total,
-  };
-};
-
-export class VehicleJourneyView {
+export interface VehicleJourneyView {
   stopList: VehiclePingStop[];
   journeyInfo: VehicleJourneyInfo;
   gpsPingList: VehiclePing[];
   otpStats: OnTimePerformanceStats;
-
-  constructor(journey: AvlPoint[], route: Stop[], params: VehicleJourneyViewParams) {
-    if (!(journey[0] && route[0])) {
-      throw new Error('No data');
-    }
-    journey = [...journey].sort(
-      (a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate()
-    );
-    route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
-
-    const lastStopIndex = Math.max(...route.map((n) => n.stopIndex));
-    const stopList = route.map((stop) =>
-      params.timingPointsOnly && !stop.isTimingPoint
-        ? createHiddenStop(stop, lastStopIndex === stop.stopIndex)
-        : createVehiclePingStop(stop, lastStopIndex === stop.stopIndex)
-    );
-    this.stopList = stopList;
-    this.journeyInfo = {
-      operatorInfo: {
-        nocCode: route[0].operatorNoc,
-        operatorName: route[0].operatorName,
-      },
-      serviceInfo: {
-        serviceName: route[0].serviceName,
-        serviceId: route[0].serviceId,
-        serviceNumber: route[0].lineName,
-      },
-      vehicleId: journey[0].vehicleRef,
-      startTime: DateTime.fromISO(route[0].startTime).setZone('Europe/London'),
-    };
-
-    let otp: OtpEnum | null = null;
-    this.gpsPingList = journey.map((ping: AvlPoint) => {
-      const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
-      if (thisMatch) {
-        otp = thisMatch.onTimePerformance;
-      }
-      return new VehiclePing(ping, otp);
-    });
-    const filteredStopList = stopList.filter((stop) => !stop.isHidden);
-    this.otpStats = {
-      early: calculateOtpStat(filteredStopList, OtpEnum.Early),
-      late: calculateOtpStat(filteredStopList, OtpEnum.Late),
-      onTime: calculateOtpStat(filteredStopList, OtpEnum.OnTime),
-      noData: calculateOtpStat(filteredStopList, null),
-    };
-  }
 }
+
+export const createVehicleJourneyView = (
+  journey: AvlPoint[],
+  route: Stop[],
+  timingPointsOnly: boolean
+): VehicleJourneyView => {
+  journey = [...journey].sort(
+    (a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate()
+  );
+  route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
+
+  const firstAvlPoint = journey[0];
+  const firstStop = route[0];
+  if (!firstAvlPoint || !firstStop) {
+    throw new Error('No data');
+  }
+
+  const finalStopIndex = Math.max(...route.map((n) => n.stopIndex));
+  const stopList = route.map((stop) => createStopModel(stop, timingPointsOnly, finalStopIndex));
+  let otp: OtpEnum | null = null;
+  const gpsPingList = journey.map((ping: AvlPoint) => {
+    const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
+    if (thisMatch) {
+      otp = thisMatch.onTimePerformance;
+    }
+    return createVehiclePing(ping, otp);
+  });
+  return {
+    stopList: stopList,
+    gpsPingList: gpsPingList,
+    journeyInfo: createJourneyInfo(firstStop, firstAvlPoint),
+    otpStats: calculateOnTimePerformance(stopList),
+  };
+};

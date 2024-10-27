@@ -14,41 +14,29 @@ export interface VehiclePingStop {
   isHidden: boolean;
   delay?: Duration;
   actualDelay?: Duration;
-  ts: DateTime;
 }
 
-export function createVehiclePingStop(stop: Stop, isFinalStop: boolean): VehiclePingStop {
-  return { ...createHiddenStop(stop, isFinalStop), isHidden: false };
-}
-
-export function createHiddenStop(stop: Stop, isFinalStop: boolean): VehiclePingStop {
-  const data = {
+export const createStopModel = (stop: Stop, timingPointsOnly: boolean, finalStopIndex: number) => {
+  const model: VehiclePingStop = {
     id: stop.stopId.toString(),
     stopName: stop.stopName,
     isTimingPoint: stop.isTimingPoint,
+    isHidden: timingPointsOnly && !stop.isTimingPoint,
     scheduledDeparture: DateTime.fromISO(stop.scheduledDepartureUtc),
     lat: stop.latitude,
     lon: stop.longitude,
     actualDepartureTimestamp: stop.actualDepartureUtc ?? undefined,
-
-    isHidden: true,
-
-    delay: Duration.fromMillis(0),
-    actualDelay: Duration.fromMillis(0),
-    ts: DateTime.fromSeconds(0),
     onTimePerformance: stop.otp ?? null,
   };
   if (!stop.actualDepartureUtc) {
-    return data;
+    return model;
   }
-  const pingDeparture = DateTime.fromISO(stop.actualDepartureUtc);
-  const difference = pingDeparture.diff(data.scheduledDeparture);
-  const normalised = isFinalStop ? Duration.fromMillis(0) : difference;
+  const actualDeparture = DateTime.fromISO(stop.actualDepartureUtc);
+  const actualDelay = actualDeparture.diff(model.scheduledDeparture);
   return {
-    ...data,
-    actualDeparture: pingDeparture,
-    delay: normalised,
-    actualDelay: difference,
-    ts: DateTime.fromSeconds(0),
+    ...model,
+    actualDeparture: actualDeparture,
+    actualDelay: actualDelay,
+    delay: finalStopIndex === stop.stopIndex ? Duration.fromMillis(0) : actualDelay,
   };
-}
+};
