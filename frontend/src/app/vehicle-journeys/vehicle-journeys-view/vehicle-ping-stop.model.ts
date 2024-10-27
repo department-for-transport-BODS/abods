@@ -13,10 +13,9 @@ export interface VehiclePingStop {
   actualDepartureTimestamp?: string;
   isHidden: boolean;
   delay?: Duration;
-  actualDelay?: Duration;
 }
 
-export const createStopModel = (stop: Stop, timingPointsOnly: boolean, finalStopIndex: number) => {
+export const createStopModel = (stop: Stop, timingPointsOnly: boolean): VehiclePingStop => {
   const model: VehiclePingStop = {
     id: stop.stopId.toString(),
     stopName: stop.stopName,
@@ -32,11 +31,9 @@ export const createStopModel = (stop: Stop, timingPointsOnly: boolean, finalStop
     return model;
   }
   const actualDeparture = DateTime.fromISO(stop.actualDepartureUtc);
-  const actualDelay = actualDeparture.diff(model.scheduledDeparture);
   return {
     ...model,
-    actualDeparture: actualDeparture,
-    actualDelay: actualDelay,
-    delay: finalStopIndex === stop.stopIndex ? Duration.fromMillis(0) : actualDelay,
+    actualDeparture,
+    delay: actualDeparture.diff(model.scheduledDeparture),
   };
 };

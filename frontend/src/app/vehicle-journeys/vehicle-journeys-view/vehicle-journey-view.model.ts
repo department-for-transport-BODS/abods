@@ -27,8 +27,7 @@ export const createVehicleJourneyView = (
     throw new Error('No data');
   }
 
-  const finalStopIndex = Math.max(...route.map((n) => n.stopIndex));
-  const stopList = route.map((stop) => createStopModel(stop, timingPointsOnly, finalStopIndex));
+  const stopList = route.map((stop) => createStopModel(stop, timingPointsOnly));
   let otp: OtpEnum | null = null;
   const gpsPingList = journey.map((ping: AvlPoint) => {
     const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
