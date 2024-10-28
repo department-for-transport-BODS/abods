@@ -523,10 +523,8 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       }
     }
   });
-  const finalStopIndex = Math.max(...route.map(n=>n.stop_index))
-  return route.map(s => {
-    const otp = s.otp_state ? OtpEnum[s.otp_state] : null
-    return ({
+  return route.map(s =>
+    ({
       latitude: s.stop_latitude?.toNumber() ?? 0,
       longitude: s.stop_longitude?.toNumber() ?? 0,
       actualDepartureUtc: s.actual_departure_time?.toISOString(),
@@ -541,7 +539,6 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
       serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
       startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString(),
-      otp: s.stop_index === finalStopIndex && otp === OtpEnum.Early ? OtpEnum.OnTime : otp
-    });
-  });
+      otp: s.otp_state ? OtpEnum[s.otp_state] : null
+    }));
 };
