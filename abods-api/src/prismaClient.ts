@@ -4,6 +4,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import logger from './logger.js';
 
 const isLocal = (process.env.PROJECT_ENV || 'local') === 'local';
+const logQueries = isLocal && process.env.SUPPRESS_QUERY_LOG === "true";
 
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
@@ -36,7 +37,7 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
     logger.debug("Getting database url and prisma client")
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
-      log: isLocal ? [
+      log: logQueries ? [
         {
           emit: 'event',
           level: 'query',
@@ -60,14 +61,16 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
         },
       },
     });
-    if (isLocal) {
+    if (logQueries) {
       // @ts-ignore
       prisma.$on('query', (e) => {
       // @ts-ignore
         console.log('\nQuery: ' + e.query)
-      // @ts-ignore
-        console.log('Params: ' + e.params)
-      // @ts-ignore
+        if (isLocal) {
+          // @ts-ignore
+          console.log('Params: ' + e.params);
+        }
+        // @ts-ignore
         console.log('Duration: ' + e.duration + 'ms\n')
       })
     }
