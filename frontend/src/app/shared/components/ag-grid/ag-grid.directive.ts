@@ -19,18 +19,19 @@ export class AgGridDirective {
 
   constructor(private formatter: AgGridFormatterService) {}
 
-  export(filename: string, isSkipPinnedBottom = true) {
-    if (!isSkipPinnedBottom) {
-      this.gridApi?.setPinnedBottomRowData([
+  export(filename: string, isSkipPinnedTop = true) {
+    const topRow = this.gridApi?.getPinnedTopRow(0)?.data;
+    if (!isSkipPinnedTop) {
+      this.gridApi?.setPinnedTopRowData([
         {
-          ...this.gridApi?.getPinnedTopRow(0)?.data,
+          ...topRow,
           lineInfo: {
             serviceNumber: 'Total',
             serviceName: '',
-            ...this.gridApi?.getPinnedTopRow(0)?.data.lineInfo,
+            ...topRow.lineInfo,
           },
           stopInfo: {
-            ...this.gridApi?.getPinnedTopRow(0)?.data.stopInfo,
+            ...topRow.stopInfo,
             stopName: 'Total:',
           },
         },
@@ -40,7 +41,7 @@ export class AgGridDirective {
     this.gridApi?.exportDataAsCsv({
       fileName: filename,
       allColumns: true,
-      skipPinnedTop: true,
+      skipPinnedTop: isSkipPinnedTop,
       processCellCallback: (cell) => {
         const columnId = cell.column.getColId();
         if (columnId.endsWith('Pct')) {
@@ -59,6 +60,8 @@ export class AgGridDirective {
       },
     });
 
-    this.gridApi?.setPinnedBottomRowData([]);
+    if (isSkipPinnedTop) {
+      this.gridApi?.setPinnedTopRowData(topRow);
+    }
   }
 }
