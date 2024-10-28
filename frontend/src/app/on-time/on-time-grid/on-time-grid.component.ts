@@ -235,7 +235,7 @@ export class OnTimeGridComponent {
   }
 
   export() {
-    this.onTimeGrid?.export(this.csvFilename ?? 'export', false);
+    this.onTimeGrid?.export(this.csvFilename ?? 'export');
   }
 
   columnName(colId: string) {
