@@ -6,7 +6,7 @@ import { map, tap } from 'rxjs/operators';
 import { nonNullishArray } from '../../shared/array-operators';
 import { findIndex, sortBy, uniqBy } from 'lodash-es';
 import { FindJourneysCache } from './find-journeys-cache';
-import { VehicleJourneyView, VehicleJourneyViewParams } from '../vehicle-journeys-view/vehicle-journey-view.model';
+import { createVehicleJourneyView, VehicleJourneyView } from '../vehicle-journeys-view/vehicle-journey-view.model';
 
 export interface VehicleJourney {
   vehicleJourneyId?: string;
@@ -80,16 +80,16 @@ export class VehicleJourneysSearchService {
   getJourney(
     journeyId: string,
     startTime: DateTime,
-    viewParams: VehicleJourneyViewParams
+    timingPointsOnly: boolean
   ): Observable<{
     view: VehicleJourneyView;
     prevNextJourneys: [VehicleJourney | null, VehicleJourney | null];
   }> {
     return zip(this.avlsGQL.fetch({ groupId: journeyId }), this.routeGQL.fetch({ groupId: journeyId })).pipe(
       mergeMap(([{ data: { avls } }, { data: { route } }]) =>
-        this.fetchNextPrevJourneys(startTime, route[0].serviceId, journeyId).pipe(
+        this.fetchNextPrevJourneys(startTime, route?.[0]?.serviceId ?? '', journeyId).pipe(
           map((prevNextJourneys) => ({
-            view: new VehicleJourneyView(avls, route, viewParams),
+            view: createVehicleJourneyView(avls, route, timingPointsOnly),
             prevNextJourneys: prevNextJourneys,
           }))
         )

@@ -3,6 +3,7 @@ import { Context } from '../../context';
 import { getDate, getFormattedDate } from '../../lib/dayjs.js';
 import logger from '../../logger.js';
 import {
+  OtpEnum,
   UniqueJourneyType,
   VehicleReplayInputType,
   Maybe,
@@ -501,6 +502,7 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       stop_id: true,
       stop_index: true,
       common_name: true,
+      otp_state: true,
       expected_journeys: {
         select: {
           expected_journey_start: true,
@@ -521,20 +523,22 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       }
     }
   });
-  return route.map(s => ({
-    latitude: s.stop_latitude?.toNumber() ?? 0,
-    longitude: s.stop_longitude?.toNumber() ?? 0,
-    actualDepartureUtc: s.actual_departure_time?.toISOString(),
-    scheduledDepartureUtc: (s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)).toISOString(),
-    stopIndex: s.stop_index,
-    stopId: s.stop_id,
-    stopName: s.common_name ?? 'Unknown',
-    isTimingPoint: s.is_timing_point ?? false,
-    lineName: s.expected_journeys?.expected_service.line_name ?? 'Unknown',
-    operatorNoc: s.expected_journeys?.expected_service.expected_operator.operator_noc ?? 'Unknown',
-    operatorName: s.expected_journeys?.expected_service.expected_operator.operator_name ?? 'Unknown',
-    serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
-    serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
-    startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString()
-  }));
+  return route.map(s =>
+    ({
+      latitude: s.stop_latitude?.toNumber() ?? 0,
+      longitude: s.stop_longitude?.toNumber() ?? 0,
+      actualDepartureUtc: s.actual_departure_time?.toISOString(),
+      scheduledDepartureUtc: (s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)).toISOString(),
+      stopIndex: s.stop_index,
+      stopId: s.stop_id,
+      stopName: s.common_name ?? 'Unknown',
+      isTimingPoint: s.is_timing_point ?? false,
+      lineName: s.expected_journeys?.expected_service.line_name ?? 'Unknown',
+      operatorNoc: s.expected_journeys?.expected_service.expected_operator.operator_noc ?? 'Unknown',
+      operatorName: s.expected_journeys?.expected_service.expected_operator.operator_name ?? 'Unknown',
+      serviceName: s.expected_journeys?.expected_service.service_name ?? 'Unknown',
+      serviceId: s.expected_journeys?.expected_service.noc_and_line_and_servicecode ?? 'Unknown',
+      startTime: s.expected_journeys?.expected_journey_start.toISOString() ?? new Date(2000, 0, 1, 0, 0, 0, 0).toISOString(),
+      otp: s.otp_state ? OtpEnum[s.otp_state] : null
+    }));
 };

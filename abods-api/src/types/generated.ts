@@ -771,6 +771,12 @@ export type OrganisationType = {
   name: Scalars['String']['output'];
 };
 
+export enum OtpEnum {
+  Early = 'Early',
+  Late = 'Late',
+  OnTime = 'OnTime'
+}
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']['output']>;
@@ -1082,6 +1088,7 @@ export type Stop = {
   longitude: Scalars['Float']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
+  otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
   serviceId: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -1383,6 +1390,7 @@ export type ResolversTypes = ResolversObject<{
   OperatorsPage: ResolverTypeWrapper<OperatorsPage>;
   OrganisationReferenceInput: OrganisationReferenceInput;
   OrganisationType: ResolverTypeWrapper<OrganisationType>;
+  OtpEnum: OtpEnum;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   PaginatedLineType: ResolverTypeWrapper<PaginatedLineType>;
   PagingInputType: PagingInputType;
@@ -2099,6 +2107,7 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  otp?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
   scheduledDepartureUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

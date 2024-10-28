@@ -3,9 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DateTime } from 'luxon';
 import { LuxonModule } from 'luxon-angular';
-import { VehicleJourneyInfo } from '../vehicle-journey-view.model';
 
 import { JourneyInfoComponent } from './journey-info.component';
+import { VehicleJourneyInfo } from '../vehicle-journey-info.model';
 
 describe('JourneyInfoComponent', () => {
   let component: JourneyInfoComponent;

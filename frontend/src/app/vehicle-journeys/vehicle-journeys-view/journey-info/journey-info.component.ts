@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { DateTime } from 'luxon';
-import { VehicleJourneyInfo } from '../vehicle-journey-view.model';
+import { VehicleJourneyInfo } from '../vehicle-journey-info.model';
 
 @Component({
   selector: 'app-journey-info',

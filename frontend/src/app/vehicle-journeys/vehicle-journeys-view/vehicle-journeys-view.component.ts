@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { combineLatest, map, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { VehicleJourneysViewService } from './vehicle-journeys-view.service';
-import { VehicleJourneyView, VehicleJourneyViewParams } from './vehicle-journey-view.model';
+import { VehicleJourneyView } from './vehicle-journey-view.model';
 import { VehicleJourneyNotFoundView } from './vehicle-journey-not-found-view.model';
 import { VehiclePingStop } from './vehicle-ping-stop.model';
 import { StopHoverEvent } from './stop-list/stop-item/stop-item.component';
@@ -66,25 +66,26 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       takeUntil(this.onDestroy$)
     );
 
-    const viewParams$ = this.route.queryParamMap.pipe(
-      map((queryParamMap) => {
-        return <VehicleJourneyViewParams>{
-          timingPointsOnly:
-            queryParamMap.get('timingPointsOnly') === 'true' || queryParamMap.get('allStops') !== 'true',
-        };
+    const timingPointsOnly$ = this.route.queryParamMap.pipe(
+      map((params) => {
+        return params.get('timingPointsOnly') === 'true' || params.get('allStops') !== 'true';
       }),
       takeUntil(this.onDestroy$)
     );
 
-    viewParams$.subscribe((viewParams) => {
-      this.timingPointsOption = viewParams.timingPointsOnly ? 'timing-points' : 'all-stops';
+    timingPointsOnly$.subscribe((timingPointsOnly) => {
+      this.timingPointsOption = timingPointsOnly ? 'timing-points' : 'all-stops';
     });
 
-    combineLatest([journeyId$, startTime$, viewParams$])
+    combineLatest([journeyId$, startTime$, timingPointsOnly$])
       .pipe(
         tap(() => (this.loading = true)),
-        switchMap(([journeyId, startTime, viewParams]) =>
-          this.vehicleJourneysViewService.getVehicleJourneyViewWithNextPrevJourneys(journeyId, startTime, viewParams)
+        switchMap(([journeyId, startTime, timingPointsOnly]) =>
+          this.vehicleJourneysViewService.getVehicleJourneyViewWithNextPrevJourneys(
+            journeyId,
+            startTime,
+            timingPointsOnly
+          )
         ),
         takeUntil(this.onDestroy$)
       )

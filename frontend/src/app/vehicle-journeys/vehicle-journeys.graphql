@@ -22,7 +22,8 @@ query route($groupId: String!) {
     lineName
     serviceId
     serviceName,
-    startTime
+    startTime,
+    otp,
   }
 }
 

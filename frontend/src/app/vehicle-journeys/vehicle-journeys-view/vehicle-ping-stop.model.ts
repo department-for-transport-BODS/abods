@@ -1,13 +1,11 @@
 import { DateTime, Duration } from 'luxon';
-import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
-import { Ping } from './vehicle-ping.model';
-import { Stop } from '../../../generated/graphql';
+import { OtpEnum, Stop } from '../../../generated/graphql';
 
-export interface VehiclePingStop extends Ping {
+export interface VehiclePingStop {
   id: string;
   lat: number;
   lon: number;
-  onTimePerformance: OnTimePerformanceEnum;
+  onTimePerformance: OtpEnum | null;
   stopName?: string;
   isTimingPoint?: boolean;
   scheduledDeparture: DateTime;
@@ -15,42 +13,27 @@ export interface VehiclePingStop extends Ping {
   actualDepartureTimestamp?: string;
   isHidden: boolean;
   delay?: Duration;
-  actualDelay?: Duration;
 }
 
-export function createVehiclePingStop(stop: Stop, isFinalStop: boolean): VehiclePingStop {
-  return { ...createHiddenStop(stop, isFinalStop), isHidden: false };
-}
-
-export function createHiddenStop(stop: Stop, isFinalStop: boolean): VehiclePingStop {
-  const data = {
+export const createStopModel = (stop: Stop, timingPointsOnly: boolean): VehiclePingStop => {
+  const model: VehiclePingStop = {
     id: stop.stopId.toString(),
     stopName: stop.stopName,
     isTimingPoint: stop.isTimingPoint,
+    isHidden: timingPointsOnly && !stop.isTimingPoint,
     scheduledDeparture: DateTime.fromISO(stop.scheduledDepartureUtc),
     lat: stop.latitude,
     lon: stop.longitude,
     actualDepartureTimestamp: stop.actualDepartureUtc ?? undefined,
-
-    isHidden: true,
-
-    delay: Duration.fromMillis(0),
-    actualDelay: Duration.fromMillis(0),
-    ts: DateTime.fromSeconds(0),
-    onTimePerformance: OnTimePerformanceEnum.NoData,
+    onTimePerformance: stop.otp ?? null,
   };
   if (!stop.actualDepartureUtc) {
-    return data;
+    return model;
   }
-  const pingDeparture = DateTime.fromISO(stop.actualDepartureUtc);
-  const difference = pingDeparture.diff(data.scheduledDeparture);
-  const normalised = isFinalStop ? Duration.fromMillis(0) : difference;
+  const actualDeparture = DateTime.fromISO(stop.actualDepartureUtc);
   return {
-    ...data,
-    actualDeparture: pingDeparture,
-    delay: normalised,
-    actualDelay: difference,
-    ts: DateTime.fromSeconds(0),
-    onTimePerformance: getOtpEnum(normalised.as('seconds')),
+    ...model,
+    actualDeparture,
+    delay: actualDeparture.diff(model.scheduledDeparture),
   };
-}
+};
