@@ -5,7 +5,9 @@ import {
   HeadwayTimeSeriesType,
   InputMaybe,
   LineType,
+  OperatorFilterInput,
   OperatorPerformanceType,
+  OperatorsPage,
   OperatorType,
   PaginatedLineType,
   PerformanceInputType,
@@ -47,12 +49,10 @@ interface distribution {
 
 
 export const getOperatorList = async (
-  filterBy: {
-    operatorIds: string[];
-  },
+  filterBy: InputMaybe<OperatorFilterInput> | undefined,
   sessionUser: SessionUser,
   db: Context,
-) => {
+): Promise<OperatorsPage> => {
   try {
     if (!sessionUser.user) {
       throw "Not Authorized";
@@ -60,7 +60,7 @@ export const getOperatorList = async (
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = filterBy
+    const userOperators = filterBy?.operatorIds
       ? await getOperatorsDropDown(sessionUser, db, filterBy.operatorIds)
       : await getOperatorsDropDown(sessionUser, db);
 
@@ -68,10 +68,12 @@ export const getOperatorList = async (
       throw "No operators for user";
     }
 
-    return userOperators
+    return {
+      items: userOperators
+    }
   } catch (error) {
     logger.error(error);
-    return null;
+    return {};
   }
 };
 

@@ -897,7 +897,6 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: InputMaybe<OperatorFilterInput>;
-  operatorId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
