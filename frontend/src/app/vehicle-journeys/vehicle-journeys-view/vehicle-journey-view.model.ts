@@ -21,9 +21,8 @@ export const createVehicleJourneyView = (
   );
   route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
 
-  const firstAvlPoint = journey[0];
   const firstStop = route[0];
-  if (!firstAvlPoint || !firstStop) {
+  if (!firstStop) {
     throw new Error('No data');
   }
 
@@ -39,7 +38,7 @@ export const createVehicleJourneyView = (
   return {
     stopList: stopList,
     gpsPingList: gpsPingList,
-    journeyInfo: createJourneyInfo(firstStop, firstAvlPoint),
+    journeyInfo: createJourneyInfo(firstStop, journey[0]),
     otpStats: calculateOnTimePerformance(stopList),
   };
 };
