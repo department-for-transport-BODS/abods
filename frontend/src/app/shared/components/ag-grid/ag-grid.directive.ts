@@ -19,7 +19,24 @@ export class AgGridDirective {
 
   constructor(private formatter: AgGridFormatterService) {}
 
-  export(filename: string) {
+  export(filename: string, isSkipPinnedBottom = true) {
+    if (!isSkipPinnedBottom) {
+      this.gridApi?.setPinnedBottomRowData([
+        {
+          ...this.gridApi?.getPinnedTopRow(0)?.data,
+          lineInfo: {
+            serviceNumber: 'Total',
+            serviceName: '',
+            ...this.gridApi?.getPinnedTopRow(0)?.data.lineInfo,
+          },
+          stopInfo: {
+            ...this.gridApi?.getPinnedTopRow(0)?.data.stopInfo,
+            stopName: 'Total:',
+          },
+        },
+      ]);
+    }
+
     this.gridApi?.exportDataAsCsv({
       fileName: filename,
       allColumns: true,
@@ -41,5 +58,7 @@ export class AgGridDirective {
         return cell.column.getDefinition().headerName ?? '';
       },
     });
+
+    this.gridApi?.setPinnedBottomRowData([]);
   }
 }
