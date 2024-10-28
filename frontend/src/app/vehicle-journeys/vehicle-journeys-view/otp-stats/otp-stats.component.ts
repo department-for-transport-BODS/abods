@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { OnTimePerformanceStats } from '../vehicle-journey-view.model';
+
+import { OnTimePerformanceStats } from '../on-time-performance-stats.model';
 
 @Component({
   selector: 'app-otp-stats',

@@ -14,10 +14,10 @@
       <svg-icon
         class="stop-list-item__icon"
         [ngClass]="{
-          'stop-list-item__icon--on-time': stop?.onTimePerformance === 'OnTime',
-          'stop-list-item__icon--early': stop?.onTimePerformance === 'Early',
-          'stop-list-item__icon--late': stop?.onTimePerformance === 'Late',
-          'stop-list-item__icon--no-data': stop?.onTimePerformance === 'NoData',
+          'stop-list-item__icon--on-time': (stop?.onTimePerformance?.toString()) === 'OnTime',
+          'stop-list-item__icon--early': (stop?.onTimePerformance?.toString()) === 'Early',
+          'stop-list-item__icon--late': (stop?.onTimePerformance?.toString()) === 'Late',
+          'stop-list-item__icon--no-data': (stop?.onTimePerformance ?? null) === null,
           'stop-list-item__icon--stop': !stop?.isTimingPoint
         }"
         [applyClass]="true"
@@ -47,7 +47,7 @@
     <span *ngIf="!stop?.isHidden" class="stop-list-item__actual">
       <div
         *ngIf="stop?.actualDeparture; else noActual"
-        [ngxTippy]="'Calculated delay ' + (stop?.actualDelay | formatDuration: 'mm:ss':'+')"
+        [ngxTippy]="'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss':'+')"
         [tippyProps]="{ theme: 'gds-tooltip' }"
       >
         <span>{{ stop?.actualDeparture | dateTimeToFormat: 'HH:mm' }}</span>

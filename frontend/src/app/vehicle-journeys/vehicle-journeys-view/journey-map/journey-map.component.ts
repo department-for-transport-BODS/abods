@@ -4,14 +4,14 @@ import { Feature, FeatureCollection, GeoJsonProperties, LineString, Point } from
 import { Map, ScaleControl } from 'mapbox-gl';
 import { pairwise } from '../../../shared/array-operators';
 import { BRITISH_ISLES_BBOX, bbox2d, combineBounds, position } from '../../../shared/geo';
-import { OnTimePerformanceEnum } from '../on-time-performance.enum';
 import { StopHoverEvent } from '../stop-list/stop-item/stop-item.component';
 import { VehicleJourneyView } from '../vehicle-journey-view.model';
 import { VehiclePing } from '../vehicle-ping.model';
 import { VehiclePingStop } from '../vehicle-ping-stop.model';
 import { ConfigService } from '../../../config/config.service';
+import { OtpEnum } from '../../../../generated/graphql';
 
-type LineSegmentProps = { id: string; onTimePerformance: OnTimePerformanceEnum };
+type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
 
 const segmentToLine = (segment: [VehiclePing, VehiclePing]): Feature<LineString, LineSegmentProps> => {
   return lineString([position(segment[0]), position(segment[1])], {
@@ -47,9 +47,9 @@ export class JourneyMapComponent implements OnChanges {
   tooltipPing?: VehiclePing;
 
   otp = ['get', 'onTimePerformance'];
-  isEarly = ['==', this.otp, OnTimePerformanceEnum.Early];
-  isOnTime = ['==', this.otp, OnTimePerformanceEnum.OnTime];
-  isLate = ['==', this.otp, OnTimePerformanceEnum.Late];
+  isEarly = ['==', this.otp, OtpEnum.Early];
+  isOnTime = ['==', this.otp, OtpEnum.OnTime];
+  isLate = ['==', this.otp, OtpEnum.Late];
   earlyColor = '#d53880';
   onTimeColor = '#4c2c92';
   lateColor = '#e5c700';

@@ -68,6 +68,14 @@ export type ApiInfoType = {
   version: Scalars['String'];
 };
 
+export type AvlPoint = {
+  __typename?: 'AvlPoint';
+  latitude: Scalars['Float'];
+  longitude: Scalars['Float'];
+  recordedAtTimeUtc: Scalars['String'];
+  vehicleRef: Scalars['String'];
+};
+
 export type BoundingBoxInputType = {
   maxLatitude?: Maybe<Scalars['Float']>;
   maxLongitude?: Maybe<Scalars['Float']>;
@@ -762,6 +770,12 @@ export type OrganisationType = {
   name: Scalars['String'];
 };
 
+export enum OtpEnum {
+  Early = 'Early',
+  Late = 'Late',
+  OnTime = 'OnTime'
+}
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']>;
@@ -857,6 +871,7 @@ export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo?: Maybe<ApiInfoType>;
+  avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   events?: Maybe<EventResponse>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -866,6 +881,7 @@ export type Query = {
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   roles?: Maybe<Array<RoleType>>;
+  route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatternsInfo?: Maybe<Array<Maybe<ServicePatternType>>>;
   timingPatternDetail?: Maybe<Array<Maybe<TimingPatternDetailType>>>;
@@ -880,6 +896,11 @@ export type Query = {
 
 export type QueryAdminAreasArgs = {
   adminAreaIds?: Maybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryAvlsArgs = {
+  groupId: Scalars['String'];
 };
 
 
@@ -909,6 +930,11 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: Maybe<OperatorFilterInput>;
+};
+
+
+export type QueryRouteArgs = {
+  groupId: Scalars['String'];
 };
 
 
@@ -1051,6 +1077,25 @@ export enum SortOrderEnum {
   Asc = 'ASC',
   Desc = 'DESC'
 }
+
+export type Stop = {
+  __typename?: 'Stop';
+  actualDepartureUtc?: Maybe<Scalars['String']>;
+  isTimingPoint: Scalars['Boolean'];
+  latitude: Scalars['Float'];
+  lineName: Scalars['String'];
+  longitude: Scalars['Float'];
+  operatorName: Scalars['String'];
+  operatorNoc: Scalars['String'];
+  otp?: Maybe<OtpEnum>;
+  scheduledDepartureUtc: Scalars['String'];
+  serviceId: Scalars['String'];
+  serviceName: Scalars['String'];
+  startTime: Scalars['String'];
+  stopId: Scalars['Int'];
+  stopIndex: Scalars['Int'];
+  stopName: Scalars['String'];
+};
 
 export type StopInfoType = {
   __typename?: 'StopInfoType';
@@ -2204,8 +2249,34 @@ export type InvitationQuery = (
   )> }
 );
 
+export type AvlsQueryVariables = Exact<{
+  groupId: Scalars['String'];
+}>;
+
+
+export type AvlsQuery = (
+  { __typename?: 'Query' }
+  & { avls: Array<(
+    { __typename?: 'AvlPoint' }
+    & Pick<AvlPoint, 'recordedAtTimeUtc' | 'latitude' | 'longitude' | 'vehicleRef'>
+  )> }
+);
+
+export type RouteQueryVariables = Exact<{
+  groupId: Scalars['String'];
+}>;
+
+
+export type RouteQuery = (
+  { __typename?: 'Query' }
+  & { route: Array<(
+    { __typename?: 'Stop' }
+    & Pick<Stop, 'actualDepartureUtc' | 'scheduledDepartureUtc' | 'latitude' | 'longitude' | 'stopIndex' | 'stopName' | 'stopId' | 'isTimingPoint' | 'operatorName' | 'operatorNoc' | 'lineName' | 'serviceId' | 'serviceName' | 'startTime' | 'otp'>
+  )> }
+);
+
 export type ServicePatternsQueryVariables = Exact<{
-  servicePatternIds?: Maybe<Array<Scalars['String']>>;
+  servicePatternIds: Array<Scalars['String']>;
 }>;
 
 
@@ -3682,8 +3753,61 @@ export const InvitationDocument = gql`
       super(apollo);
     }
   }
+export const AvlsDocument = gql`
+    query avls($groupId: String!) {
+  avls(groupId: $groupId) {
+    recordedAtTimeUtc
+    latitude
+    longitude
+    vehicleRef
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class AvlsGQL extends Apollo.Query<AvlsQuery, AvlsQueryVariables> {
+    document = AvlsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const RouteDocument = gql`
+    query route($groupId: String!) {
+  route(groupId: $groupId) {
+    actualDepartureUtc
+    scheduledDepartureUtc
+    latitude
+    longitude
+    stopIndex
+    stopName
+    stopId
+    isTimingPoint
+    operatorName
+    operatorNoc
+    lineName
+    serviceId
+    serviceName
+    startTime
+    otp
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class RouteGQL extends Apollo.Query<RouteQuery, RouteQueryVariables> {
+    document = RouteDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const ServicePatternsDocument = gql`
-    query servicePatterns($servicePatternIds: [String!]) {
+    query servicePatterns($servicePatternIds: [String!]!) {
   servicePatternsInfo(servicePatternIds: $servicePatternIds) {
     stops {
       stopId

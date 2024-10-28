@@ -1,134 +1,44 @@
-import { DateTime } from 'luxon';
-import { OperatorInfoType, ServiceInfoType } from '../../../generated/graphql';
-import { maybeToTypeOrUndefined } from '../../shared/type-helper';
-import { OnTimePerformanceEnum } from './on-time-performance.enum';
-import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
-import { VehiclePing } from './vehicle-ping.model';
-import { createHiddenStop, createNoDataStop, createVehiclePingStop, VehiclePingStop } from './vehicle-ping-stop.model';
+import { AvlPoint, OtpEnum, Stop } from '../../../generated/graphql';
+import { createVehiclePing, VehiclePing } from './vehicle-ping.model';
+import { createStopModel, VehiclePingStop } from './vehicle-ping-stop.model';
+import { createJourneyInfo, VehicleJourneyInfo } from './vehicle-journey-info.model';
+import { calculateOnTimePerformance, OnTimePerformanceStats } from './on-time-performance-stats.model';
 
-export interface OnTimePerformanceStat {
-  percent: number;
-  value: number;
-  total: number;
+export interface VehicleJourneyView {
+  stopList: VehiclePingStop[];
+  journeyInfo: VehicleJourneyInfo;
+  gpsPingList: VehiclePing[];
+  otpStats: OnTimePerformanceStats;
 }
 
-export interface OnTimePerformanceStats {
-  onTime?: OnTimePerformanceStat;
-  late?: OnTimePerformanceStat;
-  early?: OnTimePerformanceStat;
-  noData?: OnTimePerformanceStat;
-}
+export const createVehicleJourneyView = (
+  journey: AvlPoint[],
+  route: Stop[],
+  timingPointsOnly: boolean
+): VehicleJourneyView => {
+  journey = [...journey].sort(
+    (a, b) => new Date(a.recordedAtTimeUtc).getDate() - new Date(b.recordedAtTimeUtc).getDate()
+  );
+  route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
 
-export interface VehicleJourneyInfo {
-  operatorInfo?: OperatorInfoType;
-  serviceInfo?: ServiceInfoType;
-  vehicleId?: string;
-  startTime?: DateTime;
-}
+  const firstStop = route[0];
+  if (!firstStop) {
+    throw new Error('No data');
+  }
 
-export interface VehicleJourneyViewParams {
-  timingPointsOnly: boolean;
-}
-
-const calculateOtpStat = (stopList: VehiclePingStop[], statType: OnTimePerformanceEnum): OnTimePerformanceStat => {
-  const total = stopList.length;
-  const value = stopList.filter((stop) => stop.onTimePerformance === statType).length;
+  const stopList = route.map((stop) => createStopModel(stop, timingPointsOnly));
+  let otp: OtpEnum | null = null;
+  const gpsPingList = journey.map((ping: AvlPoint) => {
+    const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
+    if (thisMatch) {
+      otp = thisMatch.onTimePerformance;
+    }
+    return createVehiclePing(ping, otp);
+  });
   return {
-    percent: value / total,
-    value: value,
-    total: total,
+    stopList: stopList,
+    gpsPingList: gpsPingList,
+    journeyInfo: createJourneyInfo(firstStop, journey[0]),
+    otpStats: calculateOnTimePerformance(stopList),
   };
 };
-
-const findNearestPingToStop = (
-  journey: ApolloGpsFeedType[],
-  stop: StopDetails,
-  stopHashMap: Map<string, StopDetails>
-): ApolloGpsFeedType | undefined => {
-  // There may be more than one match for the stop
-  // e.g. a circular route will have the same starting and ending stop
-  const matchedStops = journey.filter((point: ApolloGpsFeedType) => point.previousStopInfo?.stopId === stop?.stopId);
-  for (let i = 0; i < matchedStops.length; i++) {
-    // We can use stopId and scheduledDeparture time for a unique key and add it to the hashmap
-    const hashKey = stop?.stopId + matchedStops[i].scheduledDeparture + '';
-    if (stopHashMap.has(hashKey)) {
-      continue;
-    }
-    stopHashMap.set(hashKey, stop);
-    return matchedStops[i];
-  }
-};
-
-export class VehicleJourneyView {
-  stopList: VehiclePingStop[] = [];
-  journeyInfo: VehicleJourneyInfo = {};
-  gpsPingList: VehiclePing[] = [];
-  otpStats: OnTimePerformanceStats = {};
-
-  static createView(stops: StopDetails[], journey: ApolloGpsFeedType[], params: VehicleJourneyViewParams) {
-    const view = new VehicleJourneyView();
-    view.stopList = VehicleJourneyView.createStopList(stops, journey, params);
-    view.journeyInfo = VehicleJourneyView.createJourneyInfo(journey);
-    view.otpStats = VehicleJourneyView.createOtpStats(view.stopList.filter((stop) => !stop.isHidden));
-    view.gpsPingList = VehicleJourneyView.createGpsPingList(journey);
-    return view;
-  }
-
-  private static createStopList(stops: StopDetails[], journey: ApolloGpsFeedType[], params: VehicleJourneyViewParams) {
-    const stopHashMap = new Map<string, StopDetails>();
-    return stops.map((stop: StopDetails) => {
-      // Find the nearest ping to previous stop
-      const nearestStopPing = findNearestPingToStop(journey, stop, stopHashMap);
-      // Create stop list for timing points only
-      if (params.timingPointsOnly) {
-        return VehicleJourneyView.createTimingPointStop(stop, nearestStopPing);
-      }
-      // Create stop list for all stops
-      return VehicleJourneyView.createStop(stop, nearestStopPing);
-    });
-  }
-
-  private static createTimingPointStop(stop: StopDetails, nearestStopPing?: ApolloGpsFeedType): VehiclePingStop {
-    if (stop.timingPoint) {
-      return VehicleJourneyView.createStop(stop, nearestStopPing);
-    } else {
-      return createHiddenStop(stop);
-    }
-  }
-
-  private static createStop(stop: StopDetails, nearestStopPing?: ApolloGpsFeedType): VehiclePingStop {
-    if (nearestStopPing) {
-      return createVehiclePingStop(nearestStopPing, stop);
-    } else {
-      return createNoDataStop(stop);
-    }
-  }
-
-  private static createJourneyInfo(journey: ApolloGpsFeedType[]): VehicleJourneyInfo {
-    let info = <VehicleJourneyInfo>{};
-    if (journey[0]) {
-      info = {
-        operatorInfo: maybeToTypeOrUndefined(journey[0].operatorInfo),
-        serviceInfo: maybeToTypeOrUndefined(journey[0].serviceInfo),
-        vehicleId: journey[0].vehicleId,
-        startTime: DateTime.fromISO(journey[0].startTime),
-      };
-    }
-    return info;
-  }
-
-  private static createOtpStats(stopList: VehiclePingStop[]): OnTimePerformanceStats {
-    return <OnTimePerformanceStats>{
-      early: calculateOtpStat(stopList, OnTimePerformanceEnum.Early),
-      late: calculateOtpStat(stopList, OnTimePerformanceEnum.Late),
-      onTime: calculateOtpStat(stopList, OnTimePerformanceEnum.OnTime),
-      noData: calculateOtpStat(stopList, OnTimePerformanceEnum.NoData),
-    };
-  }
-
-  private static createGpsPingList(journey: ApolloGpsFeedType[]): VehiclePing[] {
-    return journey
-      .filter((ping) => ping.lon && ping.lat)
-      .map((ping: ApolloGpsFeedType) => VehiclePing.createVehiclePing(ping));
-  }
-}
