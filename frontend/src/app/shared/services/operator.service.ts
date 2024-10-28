@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { map as _map, flatMap as _flatMap, uniq as _uniq } from 'lodash-es';
 import { nonNullishArray } from '../array-operators';
+import { DateTime } from 'luxon';
 
 export interface Operator {
   name?: string | null;
@@ -40,8 +41,8 @@ export class OperatorService {
     return this.fetchOperators().pipe(map((operators) => operators.find((operator) => operator.nocCode === nocCode)));
   }
 
-  fetchLines(operatorId: string): Observable<Line[]> {
-    return this.operatorLinesGQL.fetch({ operatorId }, { fetchPolicy: 'no-cache' }).pipe(
+  fetchLines(operatorId: string, inputDate?: DateTime): Observable<Line[]> {
+    return this.operatorLinesGQL.fetch({ operatorId, inputDate }, { fetchPolicy: 'no-cache' }).pipe(
       map((result) => nonNullishArray(result.data.operator?.transitModel?.lines?.items)),
       map((lines) => lines.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true })))
     );

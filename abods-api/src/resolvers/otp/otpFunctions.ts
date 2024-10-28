@@ -3,6 +3,7 @@ import {
   FrequentServiceInfoInputType,
   HeadwayInputType,
   HeadwayTimeSeriesType,
+  LineFilterType,
   InputMaybe,
   LineType,
   OperatorPerformanceType,
@@ -20,7 +21,7 @@ import {
 import { SessionUser } from "../../types/extra.js";
 import logger from "../../logger.js";
 import { GraphQLResolveInfo } from "graphql";
-import { dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
+import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from "../../lib/dayjs.js";
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../../lib/utils.js";
@@ -235,11 +236,16 @@ export const getServiceInfo = async (
   }
 };
 
-const getOperatorLines = async (operatorRef: string, db: Context) => {
+const getOperatorLines = async (operatorRef: string, db: Context, filterDate?: Date) => {
+  const where: Prisma.expected_operatorsWhereInput = {
+    operator_noc: operatorRef,
+  }
+  if(filterDate) {
+    where.date_of_journey = filterDate
+  }
+
   const operator = await db.prisma.expected_operators.findMany({
-    where: {
-      operator_noc: operatorRef,
-    },
+    where: where,
     include: {
       expected_services: {
         select: {
@@ -275,16 +281,15 @@ const getOperatorLines = async (operatorRef: string, db: Context) => {
 };
 
 export const getLines = async (
+  inputs: InputMaybe<LineFilterType> | undefined,
   sessionUser: SessionUser,
   db: Context,
   info: GraphQLResolveInfo
-) => {
+): Promise<PaginatedLineType> => {
+  inputs = inputs || {}
   const { operatorId } = info.variableValues as { operatorId: string };
   const operationName: string = info.operation.name?.value ?? "";
 
-  if (operationName === "operatorLines") {
-    return getOperatorLines(operatorId, db);
-  }
   const operators = await getOperators(sessionUser, db);
 
   if (!operators) {
@@ -293,12 +298,17 @@ export const getLines = async (
 
   const userOperatorIds = operators.map((o) => o.nocCode);
 
-
   if (userOperatorIds.includes(operatorId)) {
-    // to be added for service maps next
+    const inputDate = inputs.inputDate
+      ? new Date(dbUtcToBstDate(inputs.inputDate))
+      : undefined;
+    if (operationName === "operatorLines") {
+      return getOperatorLines(operatorId, db, inputDate);
+    }
   }
-  console.log("operator ref", operatorId)
-  return null;
+  return {
+    items: []
+  }
 }
 
 

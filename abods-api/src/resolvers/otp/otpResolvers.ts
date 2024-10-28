@@ -1,5 +1,7 @@
 import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayOverview, getHeadwayTimeSeries, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
 import { Resolvers } from '../../types/generated';
+import { RequestContext } from '../../types/extra.js';
+import { GraphQLResolveInfo } from 'graphql';
 
 const otpResolvers: Resolvers = {
     Query: {
@@ -31,7 +33,7 @@ const otpResolvers: Resolvers = {
         transitModel: () => { return {}; },
     },
     TransitModelType: {
-        lines: (_, __ , {sessionUser, db }, info) => getLines(sessionUser, db, info),
+        lines: async (_: any, { filterBy } , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(filterBy, sessionUser, db, info),
     }
 }
 

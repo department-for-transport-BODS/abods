@@ -486,6 +486,7 @@ export enum LineDirection {
 }
 
 export type LineFilterType = {
+  inputDate?: Maybe<Scalars['DateTime']>;
   lineIds?: Maybe<Array<Scalars['String']>>;
 };
 
@@ -2079,6 +2080,7 @@ export type OperatorListQuery = (
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorId: Scalars['String'];
+  inputDate?: Maybe<Scalars['DateTime']>;
 }>;
 
 
@@ -3486,10 +3488,10 @@ export const OperatorListDocument = gql`
     }
   }
 export const OperatorLinesDocument = gql`
-    query operatorLines($operatorId: String!) {
+    query operatorLines($operatorId: String!, $inputDate: DateTime) {
   operator(operatorId: $operatorId) {
     transitModel {
-      lines {
+      lines(filterBy: {inputDate: $inputDate}) {
         items {
           id: lineId
           name: lineName

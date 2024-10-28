@@ -331,6 +331,7 @@ type TransitModelType {
 
 input LineFilterType {
     lineIds: [String!]
+    inputDate: DateTime
 }
 
 type PaginatedLineType {
