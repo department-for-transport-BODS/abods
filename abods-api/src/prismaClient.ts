@@ -3,6 +3,8 @@ import { Signer } from '@aws-sdk/rds-signer';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import logger from './logger.js';
 
+const isLocal = (process.env.PROJECT_ENV || 'local') === 'local';
+
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
   return signer.getAuthToken();
@@ -15,7 +17,7 @@ async function getDatabaseUrl(): Promise<string> {
   const username = process.env.DB_USER || 'postgres';
   const dbName = process.env.DB_NAME || 'postgres';
 
-  if ((process.env.PROJECT_ENV || 'local') === 'local') {
+  if (isLocal) {
     const password = process.env.DB_PASSWORD;
     return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true`;
   } else {
@@ -34,13 +36,41 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
     logger.debug("Getting database url and prisma client")
     const databaseUrl = await getDatabaseUrl();
     prisma = new PrismaClient({
-      log: ['info'], 
+      log: isLocal ? [
+        {
+          emit: 'event',
+          level: 'query',
+        },
+        {
+          emit: 'stdout',
+          level: 'error',
+        },
+        {
+          emit: 'stdout',
+          level: 'info',
+        },
+        {
+          emit: 'stdout',
+          level: 'warn',
+        },
+      ]: ['info'],
       datasources: {
         db: {
           url: databaseUrl,
         },
       },
     });
+    if (isLocal) {
+      // @ts-ignore
+      prisma.$on('query', (e) => {
+      // @ts-ignore
+        console.log('\nQuery: ' + e.query)
+      // @ts-ignore
+        console.log('Params: ' + e.params)
+      // @ts-ignore
+        console.log('Duration: ' + e.duration + 'ms\n')
+      })
+    }
     await Promise.all([prisma.$disconnect(),prisma.$connect()])
     logger.debug("Prisma has connected to the database")
   }
