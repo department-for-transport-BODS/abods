@@ -203,7 +203,7 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
         debounceTime(200),
         switchMap(({ date, service }) => {
           if (date?.isValid && service) {
-            return this.vehicleJourneysSearchService.fetchJourneys(date, date.plus({ day: 1 }), service).pipe(
+            return this.vehicleJourneysSearchService.fetchDayJourneys(date, service).pipe(
               take(1),
               catchError(() => {
                 this.errored = true;

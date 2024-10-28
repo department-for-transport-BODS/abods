@@ -1,47 +1,34 @@
 import { DateTime } from 'luxon';
-import { Observable, of } from 'rxjs';
 import { VehicleJourney } from './vehicle-journeys-search.service';
 
-type FindJourneysCacheKey = {
-  key: string;
-};
+const generateKey = (from: DateTime, to: DateTime, lineId: string) => `${from.toISO()}-${to.toISO()}-${lineId}`;
 
 export class FindJourneysCache {
   private findJourneysCache: Map<string, { journey: VehicleJourney[]; expires: DateTime }> = new Map();
 
-  static generateKey(from: DateTime, to: DateTime, lineId: string): FindJourneysCacheKey {
-    return { key: `${from.toISO()}-${to.toISO()}-${lineId}` };
-  }
-
-  setItem(key: FindJourneysCacheKey, journey: VehicleJourney[]) {
+  setItem(from: DateTime, to: DateTime, lineId: string, journey: VehicleJourney[]) {
     // Clear cache as we only want to store the last result from findJourneys query
-    this.clearCache();
-    this.findJourneysCache.set(key.key, {
+    this.findJourneysCache.clear();
+    this.findJourneysCache.set(generateKey(from, to, lineId), {
       journey: journey,
       // Cached item will expire in one hour
       expires: DateTime.now().plus({ hours: 1 }),
     });
   }
 
-  hasItem(key: FindJourneysCacheKey): boolean {
-    if (this.findJourneysCache.has(key.key)) {
-      const expires = this.findJourneysCache.get(key.key)?.expires as DateTime;
-      if (expires.toMillis() < DateTime.now().toMillis()) {
-        // Invalidate cache
-        this.findJourneysCache.delete(key.key);
-        return false;
-      } else {
-        return true;
-      }
+  getItem(from: DateTime, to: DateTime, lineId: string): VehicleJourney[] | undefined {
+    const key = generateKey(from, to, lineId);
+    const item = this.findJourneysCache.get(key);
+    if (!item) {
+      return undefined;
     }
-    return false;
-  }
 
-  getItem(key: FindJourneysCacheKey): Observable<VehicleJourney[]> {
-    return of(this.findJourneysCache.get(key.key)?.journey as VehicleJourney[]);
-  }
+    if (item.expires.toMillis() < DateTime.now().toMillis()) {
+      // Invalidate cache
+      this.findJourneysCache.delete(key);
+      return undefined;
+    }
 
-  clearCache(): void {
-    this.findJourneysCache.clear();
+    return item.journey;
   }
 }

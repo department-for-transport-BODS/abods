@@ -1,12 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { combineLatest, map, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { VehicleJourneysViewService } from './vehicle-journeys-view.service';
 import { VehicleJourneyView } from './vehicle-journey-view.model';
 import { VehicleJourneyNotFoundView } from './vehicle-journey-not-found-view.model';
 import { VehiclePingStop } from './vehicle-ping-stop.model';
 import { StopHoverEvent } from './stop-list/stop-item/stop-item.component';
-import { VehicleJourney } from '../vehicle-journeys-search/vehicle-journeys-search.service';
+import {
+  VehicleJourney,
+  VehicleJourneysSearchService,
+} from '../vehicle-journeys-search/vehicle-journeys-search.service';
 import { DateTime } from 'luxon';
 
 type TimingPointsOption = 'timing-points' | 'all-stops';
@@ -21,7 +23,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   errorView?: VehicleJourneyNotFoundView;
   loading = false;
   timingPointsOption: TimingPointsOption = 'timing-points';
-  prevNextJourneys: [VehicleJourney | null, VehicleJourney | null] = [null, null];
+  prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined] = [undefined, undefined];
 
   selectedStop?: VehiclePingStop;
   hoveredStop?: StopHoverEvent;
@@ -33,11 +35,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     return `${this.view?.journeyInfo.serviceInfo?.serviceNumber}: ${this.view?.journeyInfo.serviceInfo?.serviceName}`;
   }
 
-  constructor(
-    private route: ActivatedRoute,
-    private vehicleJourneysViewService: VehicleJourneysViewService,
-    private router: Router
-  ) {}
+  constructor(private route: ActivatedRoute, private service: VehicleJourneysSearchService, private router: Router) {}
 
   private onDestroy$ = new Subject<void>();
 
@@ -81,18 +79,14 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       .pipe(
         tap(() => (this.loading = true)),
         switchMap(([journeyId, startTime, timingPointsOnly]) =>
-          this.vehicleJourneysViewService.getVehicleJourneyViewWithNextPrevJourneys(
-            journeyId,
-            startTime,
-            timingPointsOnly
-          )
+          this.service.getJourney(journeyId, startTime, timingPointsOnly)
         ),
         takeUntil(this.onDestroy$)
       )
       .subscribe({
-        next: ({ view, prevNextJourneys }) => {
+        next: (view) => {
           this.view = view;
-          this.prevNextJourneys = prevNextJourneys;
+          this.prevNextJourneys = view.prevNextJourneys;
           this.loading = false;
         },
         error: (err) => {
