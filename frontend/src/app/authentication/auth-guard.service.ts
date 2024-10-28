@@ -23,7 +23,7 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
             map((user) => {
               if (
                 route.data.roles &&
-                !route.data.roles.some((requiredRole: string) => requiredRole === user.roles[0].name)
+                !route.data.roles.some((requiredRole: string) => requiredRole === user.roles?.[0].name)
               ) {
                 this.router.navigate(['/not-authorised'], { queryParams: { url: state.url } });
                 return false;

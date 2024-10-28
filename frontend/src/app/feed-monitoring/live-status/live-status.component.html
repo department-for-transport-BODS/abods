@@ -70,7 +70,7 @@
           chartId="vehicle-stats-hours"
           [granularity]="hour"
           [nocCode]="nocCode"
-          [dataSource]="operator?.feedMonitoring?.liveStats?.last24Hours"
+          [dataSource]="operator?.feedMonitoring?.liveStats?.last24Hours ?? []"
           [interval]="intervalLast24Hours"
           label="Last 24 hours"
         ></app-live-vehicle-stats>
@@ -79,7 +79,7 @@
           chartId="vehicle-stats-minutes"
           [granularity]="minute"
           [nocCode]="nocCode"
-          [dataSource]="operator?.feedMonitoring?.liveStats?.last20Minutes"
+          [dataSource]="operator?.feedMonitoring?.liveStats?.last20Minutes ?? []"
           [interval]="intervalLast20Minutes"
           label="Last 20 minutes"
         ></app-live-vehicle-stats>

@@ -367,7 +367,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
       return;
     }
     this.corridorsService
-      .deleteCorridor(this.corridor?.id)
+      .deleteCorridor(this.corridor.id)
       .pipe(finalize(() => this.modalService.close('deleteCorridor')))
       .subscribe({
         next: () => this.router.navigate(['/corridors']),

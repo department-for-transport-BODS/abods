@@ -1,0 +1,28 @@
+name: Merge deployment pull request
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  id-token: write
+
+jobs:
+  merge-deployment-pr:
+    if: github.event.review.state == 'approved' && contains(fromJSON('["dev", "test", "main"]'), github.event.pull_request.base.ref)
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: merge
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        
+        git fetch
+        git checkout ${{ github.event.pull_request.base.ref }}
+        git reset ${{ github.sha }}
+        git push

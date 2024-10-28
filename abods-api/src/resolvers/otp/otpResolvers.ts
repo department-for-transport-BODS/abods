@@ -1,24 +1,23 @@
-import { IResolvers } from '@graphql-tools/utils'
 import { getAdminAreas, getDelayFrequency, getFrequentServiceInfo, getFrequentServices, getHeadwayOverview, getHeadwayTimeSeries, getLines, getOperator, getOperatorList, getOperatorPerformance, getPunctualityDayOfWeek, getPunctualityOverview, getPunctualityTimeOfDay, getPunctualityTimeSeries, getServiceInfo, getServicePerformance, getServicePunctuality, getStopPerformance } from './otpFunctions.js';
 import { RequestContext } from '../../types/extra.js';
 import { GraphQLResolveInfo } from 'graphql';
 import { FeedMonitoringListType } from '../../lib/feedMonitoring.js';
 import { getFeedMonitoringList } from '../../lib/otp.js';
+import { FeedMonitoringType, OperatorsPage, OperatorType, Resolvers } from '../../types/generated';
 
-const otpResolvers: IResolvers = {
+const otpResolvers: Resolvers = {
   Query: {
     operators: async (
       _: any,
       { filterBy },
       { sessionUser, db }: RequestContext,
-      info: GraphQLResolveInfo
-    ) => getOperatorList(filterBy, sessionUser, db),
+    ): Promise<OperatorsPage> => getOperatorList(filterBy, sessionUser, db),
     operator: async (
       _: any,
       { operatorId },
       { sessionUser, db }: RequestContext,
       info: GraphQLResolveInfo
-    ) => getOperator(operatorId, sessionUser, db, info),
+    ) => getOperator(operatorId, sessionUser, db),
     onTimePerformance: async () => {
       return {};
     }, // stub -> sub-resolvers do the work
@@ -31,10 +30,10 @@ const otpResolvers: IResolvers = {
       { sessionUser, db }: RequestContext
     ) => getServiceInfo(serviceId, sessionUser, db),
     adminAreas: async (
-      _: any,
-      { adminAreaIds }: { adminAreaIds: string[] },
+      _,
+      __,
       { sessionUser, db }: RequestContext
-    ) => getAdminAreas(adminAreaIds, sessionUser, db),
+    ) => getAdminAreas(sessionUser, db),
   },
   OnTimePerformanceType: {
     delayFrequency: async (_, { inputs }, {sessionUser, db }: RequestContext) => getDelayFrequency(inputs, sessionUser, db),
@@ -55,7 +54,7 @@ const otpResolvers: IResolvers = {
   },
   OperatorsPage: {
     items: async (parent) => {
-      return parent;
+      return parent.items ?? [];
     },
   },
   OperatorType: {
@@ -67,7 +66,7 @@ const otpResolvers: IResolvers = {
       _,
       { sessionUser, db }: RequestContext,
       info
-    ) => {
+    ): Promise<FeedMonitoringType & { operatorId }> => {
       const queryName = info.operation.name?.value;
       let feed: FeedMonitoringListType[] | undefined = [];
       if (
@@ -75,7 +74,7 @@ const otpResolvers: IResolvers = {
         queryName === "operatorSparklineStats" ||
         queryName === "operatorLiveStatus"
       ) {
-        feed = await getFeedMonitoringList(db, sessionUser, parent.operatorId);
+        feed = parent?.operatorId ? await getFeedMonitoringList(db, sessionUser, parent?.operatorId ) : [];
       }
 
       return {
@@ -86,11 +85,11 @@ const otpResolvers: IResolvers = {
   },
   TransitModelType: {
     lines: async (
-      _: any,
-      { lineId },
+      _,
+      __,
       { sessionUser, db }: RequestContext,
       info: GraphQLResolveInfo
-    ) => getLines(lineId, sessionUser, db, info),
+    ) => getLines(sessionUser, db, info),
   },
 };
 

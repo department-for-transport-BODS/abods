@@ -196,7 +196,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             this.granularParams(
               from,
               to,
-              (this.corridor as Corridor).id.toString(),
+              this.corridor?.id?.toString() ?? '',
               stops.length ? stops : (this.corridor?.stops as Stop[])
             )
           ),

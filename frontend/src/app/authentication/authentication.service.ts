@@ -59,7 +59,7 @@ export class AuthenticationService {
       .mutate({ username, password })
       .pipe(first())
       .subscribe((res) => {
-        if (res?.data?.login.success) {
+        if (res?.data?.login?.success) {
           this.userService.authenticateUser();
           this.setSession(
             JSON.stringify({

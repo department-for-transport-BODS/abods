@@ -9,10 +9,10 @@ import { NgxTippyProps } from 'ngx-tippy-wrapper';
   styleUrls: ['./journey-nav.component.scss'],
 })
 export class JourneyNavComponent {
-  @Input() previous: VehicleJourney | null = null;
-  @Input() next: VehicleJourney | null = null;
+  @Input() previous: VehicleJourney | undefined = undefined;
+  @Input() next: VehicleJourney | undefined = undefined;
 
-  @Input() set prevNext([prev, next]: [VehicleJourney | null, VehicleJourney | null]) {
+  @Input() set prevNext([prev, next]: [VehicleJourney | undefined, VehicleJourney | undefined]) {
     this.previous = prev;
     this.next = next;
   }
