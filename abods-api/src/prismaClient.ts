@@ -44,12 +44,28 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       logTypes.push({ emit: 'event', level: 'query', })
     }
     prisma = new PrismaClient({ log: logTypes, datasources: { db: { url: databaseUrl, } } });
-    prisma.$on('error' as never, (e) => logger.error(e))
-    prisma.$on('warn' as never, (e) => logger.warn(e))
-    prisma.$on('info' as never, (e) => logger.info(e))
+    prisma.$on('error' as never, (e) => logger.error({
+        message: "prisma error",
+        // @ts-ignore
+        ...e,
+      }))
+    prisma.$on('warn' as never, (e) => logger.warn({
+        message: "prisma warning",
+        // @ts-ignore
+        ...e,
+      }))
+    prisma.$on('info' as never, (e) => logger.info({
+        message: "prisma log",
+        // @ts-ignore
+        ...e,
+      }))
     if (isLocal) {
       // If we want to log this outside of local dev, then we should consider that this logs query params
-      prisma.$on('query' as never, (e) => logger.info(e))
+      prisma.$on('query' as never, (e) => logger.info({
+        message: "prisma query",
+        // @ts-ignore
+        ...e,
+      }))
     }
     await Promise.all([prisma.$disconnect(),prisma.$connect()])
     logger.debug("Prisma has connected to the database")
