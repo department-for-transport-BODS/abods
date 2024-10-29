@@ -71,13 +71,22 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
     throw 'Not Authorized';
   }
 
-  const journey = await context.db.prisma.siriVMPositions.findMany({ where: { group_id: args.groupId }, include: {} });
-  return journey.map(s => ({
-    latitude: s.latitude?.toNumber() ?? 0,
-    longitude: s.longitude?.toNumber() ?? 0,
-    recordedAtTimeUtc: s.recorded_at_time.toISOString(),
-    vehicleRef: s.vehicle_ref
-  }));
+  const getAvlsForGroupId = async (groupId: string) => {
+    const journey = await context.db.prisma.siriVMPositions.findMany({
+      where: { group_id: groupId },
+      include: {}
+    });
+    return journey.map(s => ({
+      latitude: s.latitude?.toNumber() ?? 0,
+      longitude: s.longitude?.toNumber() ?? 0,
+      recordedAtTimeUtc: s.recorded_at_time.toISOString(),
+      vehicleRef: s.vehicle_ref
+    }));
+  };
+
+  const avls = await getAvlsForGroupId(args.groupId);
+  if (avls.length > 0) return avls
+  return await getAvlsForGroupId(args.groupId.toUpperCase());
 };
 
 export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
