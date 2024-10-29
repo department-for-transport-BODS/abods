@@ -73,8 +73,7 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
 
   const getAvlsForGroupId = async (groupId: string) => {
     const journey = await context.db.prisma.siriVMPositions.findMany({
-      where: { group_id: groupId },
-      include: {}
+      where: { group_id: groupId }
     });
     return journey.map(s => ({
       latitude: s.latitude?.toNumber() ?? 0,
@@ -84,9 +83,14 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
     }));
   };
 
-  const avls = await getAvlsForGroupId(args.groupId);
-  if (avls.length > 0) return avls
-  return await getAvlsForGroupId(args.groupId.toUpperCase());
+  // If we have re-run timetable generation after changing the group id format, we will get no results just querying with the group id from the timetable, so check for old formats too
+  const groupIds = [...new Set([args.groupId, args.groupId.toUpperCase(), args.groupId.toUpperCase().replace("|", "")])]
+
+  for (const groupId of groupIds) {
+    const avls = await getAvlsForGroupId(groupId);
+    if (avls.length > 0) return avls
+  }
+  return []
 };
 
 export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
