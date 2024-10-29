@@ -27,7 +27,7 @@ jobs:
         git reset ${{ github.event.pull_request.head.sha }}
         git push
 
-  trigger-deploy-dev:
+  trigger-deploy:
     runs-on: ubuntu-latest
     needs:
       - merge-deployment-pr
@@ -39,6 +39,7 @@ jobs:
       - name: Read VERSION file
         id: get version
         run: echo "::set-output name=version::$(cat VERSION)"
+
       - name: trigger remote
         uses: peter-evans/repository-dispatch@v3
         with:
