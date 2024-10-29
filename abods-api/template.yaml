@@ -32,12 +32,12 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
   BodsVpcEndpoint:
-    Type: String
+    Type: CommaDelimitedList
     Default: ''
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
   IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
-  HasVpcEndpoint: !Not [!Equals [!Ref BodsVpcEndpoint, '']]
+  HasVpcEndpoint: !Not [!Equals [!Select [0, !Ref BodsVpcEndpoint], '']]
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
@@ -54,7 +54,7 @@ Resources:
           - ['REGIONAL']
         VpcEndpointIds: !If
           - HasVpcEndpoint
-          - [!Ref BodsVpcEndpoint]
+          - !Ref BodsVpcEndpoint
           - !Ref AWS::NoValue
       TracingEnabled: true
       Auth:
