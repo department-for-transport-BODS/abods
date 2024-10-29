@@ -1,0 +1,24 @@
+name: Check for version update
+
+on:
+  pull_request:
+    types: [synchronize]
+    branches:
+      - 'dev'
+
+permissions:
+  id-token: write
+
+jobs:
+  merge-deployment-pr:
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: check version updated
+      run: |
+        git diff --name-only origin/dev | grep '^VERSION$' || (echo "Version file must be updated";exit 1)
+        

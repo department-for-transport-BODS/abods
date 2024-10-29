@@ -488,6 +488,7 @@ export enum LineDirection {
 }
 
 export type LineFilterType = {
+  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 

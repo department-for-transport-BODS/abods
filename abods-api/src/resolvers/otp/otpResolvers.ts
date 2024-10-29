@@ -82,12 +82,7 @@ const otpResolvers: Resolvers = {
     }
   },
   TransitModelType: {
-    lines: async (
-      _,
-      __,
-      { sessionUser, db }: RequestContext,
-      info: GraphQLResolveInfo
-    ) => getLines(sessionUser, db, info),
+    lines: async (_: any, { filterBy } , {sessionUser, db }: RequestContext, info: GraphQLResolveInfo) => getLines(filterBy, sessionUser, db, info),
   },
 };
 

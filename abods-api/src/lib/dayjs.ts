@@ -151,3 +151,6 @@ export const isSameOrBefore = (inputDate: Dayjs, compareDate: Dayjs) => {
 export const isSameOrAfter = (inputDate: Dayjs, compareDate: Dayjs) => {
   return inputDate.isSame(compareDate) || inputDate.isAfter(compareDate)
 }
+export const dbUtcToBstDate = (inputDate: Date | string): string => {
+  return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
+};

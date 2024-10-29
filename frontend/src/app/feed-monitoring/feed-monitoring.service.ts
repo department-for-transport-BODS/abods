@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DateTime } from 'luxon';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 import {
   BasicOperatorFragment,
   EventsGQL,
@@ -47,35 +47,51 @@ export class FeedMonitoringService {
   }
 
   fetchFeedMonitoringList(): Observable<BasicOperatorFragment[] | null> {
-    return this.feedMonitoringListQuery.fetch().pipe(
-      map(({ data }) => {
-        if (!data?.operators?.items?.length) {
-          console.warn('No operators configured for user.');
-          return [];
-        } else {
-          return data?.operators.items?.map((x) => x as BasicOperatorFragment);
+    return this.feedMonitoringListQuery
+      .fetch(
+        {},
+        {
+          fetchPolicy: 'cache-first',
         }
-      }),
-      catchError(() => of(null))
-    );
+      )
+      .pipe(
+        map(({ data }) => {
+          if (!data?.operators?.items?.length) {
+            console.warn('No operators configured for user.');
+            return [];
+          } else {
+            return data?.operators.items?.map((x) => x as BasicOperatorFragment);
+          }
+        }),
+        shareReplay(1),
+        catchError(() => of(null))
+      );
   }
 
   fetchOperatorSparklines(
     operatorIds: string[]
   ): Observable<{ operatorId?: string | null; last24Hours: VehicleStatsType[] }[] | null> {
-    return this.operatorSparklineStatsQuery.fetch({ operatorIds }).pipe(
-      map(({ data }) => {
-        if (!data?.operators?.items) {
-          console.warn('Failed to fetch sparkline stats', operatorIds);
-          return null;
-        } else {
-          return data.operators.items.map((item) => ({
-            operatorId: item?.operatorId,
-            last24Hours: item?.feedMonitoring?.liveStats?.last24Hours?.map((x) => x as VehicleStatsType) ?? [],
-          }));
+    return this.operatorSparklineStatsQuery
+      .fetch(
+        { operatorIds },
+        {
+          fetchPolicy: 'cache-first',
         }
-      })
-    );
+      )
+      .pipe(
+        map(({ data }) => {
+          if (!data?.operators?.items) {
+            console.warn('Failed to fetch sparkline stats', operatorIds);
+            return null;
+          } else {
+            return data.operators.items.map((item) => ({
+              operatorId: item?.operatorId,
+              last24Hours: item?.feedMonitoring?.liveStats?.last24Hours?.map((x) => x as VehicleStatsType) ?? [],
+            }));
+          }
+        }),
+        shareReplay(1)
+      );
   }
 
   fetchOperator(operatorId: string): Observable<OperatorLiveStatusFragment | null> {
@@ -120,8 +136,8 @@ export class FeedMonitoringService {
     return this.eventStatsQuery
       .fetch({
         operatorId,
-        start: end.minus({ days }).startOf('day').toUTC().toJSDate(),
-        end: end.startOf('day').toUTC().toJSDate(),
+        start: end.minus({ days }).startOf('day').toUTC().toISODate(),
+        end: end.startOf('day').toUTC().toISODate(),
       })
       .pipe(map((res) => nonNullishArray(res?.data?.eventStats)));
   }

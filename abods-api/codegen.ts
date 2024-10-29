@@ -8,7 +8,9 @@ const config: CodegenConfig = {
       plugins: ["typescript", "typescript-resolvers"],
       config:{
         useIndexSignature: true,
-        contextType: "./extra#RequestContext"
+        contextType: "./extra#RequestContext",
+        avoidOptionals: false,
+        maybeValue: 'T | undefined | null'
       }
     }
   },

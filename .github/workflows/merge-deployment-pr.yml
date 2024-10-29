@@ -24,5 +24,31 @@ jobs:
         
         git fetch
         git checkout ${{ github.event.pull_request.base.ref }}
-        git reset ${{ github.sha }}
+        git reset ${{ github.event.pull_request.head.sha }}
         git push
+
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - merge-deployment-pr
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Read VERSION file
+        id: getversion
+        run: |
+          version=$(awk '{print $2}' VERSION)
+          echo "::set-output name=version::$version"
+
+      - name: Get target env
+        id: getenv
+        run: echo "::set-output name=env::${{ github.event.pull_request.base.ref != 'main' && github.event.pull_request.base.ref || 'uat' }}"
+
+      - name: trigger remote
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          repository: ${{ github.repository }}
+          event-type: merge-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
+          client-payload: '{ "environment": "${{ steps.getenv.outputs.env }}", "release_version": "${{ steps.getversion.outputs.version }}" }'

@@ -2,7 +2,6 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { OnTimeService, PerformanceParams, StopPerformance } from '../on-time.service';
 import { of, ReplaySubject, Subject } from 'rxjs';
 import { catchError, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { PerformanceInputType } from '../../../generated/graphql';
 import { DateTime } from 'luxon';
 import { TimingRendererComponent } from './timing-renderer/timing-renderer.component';
 import { SelectableTextCellRendererComponent } from 'src/app/shared/components/ag-grid/selectable-text-cell/selectable-text-cell.component';

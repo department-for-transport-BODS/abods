@@ -306,4 +306,18 @@ describe('VehicleJourneysSearchComponent', () => {
       spectator.query(byText('Sorry, there is a problem finding vehicle journeys. Please try again.'))
     ).toBeVisible();
   });
+
+  it('should accept enable service on date change', async () => {
+    await spectator.fixture.whenStable();
+    spectator.typeInElement('2024-10-24', byLabel('Date'));
+    spectator.typeInElement('Stagecoach', byLabel('Operator'));
+    spectator.click(byText('Stagecoach East (SCCM)'));
+    spectator.fixture.detectChanges();
+
+    expect(spectator.component.form.get('operator')?.value).toEqual('OP02');
+    spectator.typeInElement('2024-10-23', byLabel('Date'));
+    spectator.fixture.detectChanges();
+
+    expect('#service').toBeVisible();
+  });
 });
