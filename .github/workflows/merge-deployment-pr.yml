@@ -51,4 +51,4 @@ jobs:
         with:
           repository: ${{ github.repository }}
           event-type: merge-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
-          client-payload: '{ "environment": "${{ steps.getenv.outputs.version }}", "release_version": "${{ steps.getversion.outputs.version }}" }'
+          client-payload: '{ "environment": "${{ steps.getenv.outputs.env }}", "release_version": "${{ steps.getversion.outputs.version }}" }'
