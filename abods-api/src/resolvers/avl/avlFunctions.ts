@@ -1,39 +1,17 @@
 import { Context } from "../../context";
 import logger from "../../logger.js";
-interface AvlFilters {
-  operatorNoc?: string;
-  lineName?: string;
-}
-
-export const buildWhereClause = (filters: AvlFilters) => {
-  const whereClause = {};
-
-  if (filters.operatorNoc) {
-    Object.assign(whereClause, {
-      operatorNoc: {
-        equals: filters.operatorNoc,
-      },
-    });
-  }
-
-  if (filters.lineName) {
-    Object.assign(whereClause, {
-      lineName: {
-        equals: filters.lineName,
-      },
-    });
-  }
-  return whereClause;
-};
+import { AvlFiltersInput } from "../../types/generated";
 
 export const getAVLLineLevelStatus = async (
-  filters: AvlFilters,
+  filters: AvlFiltersInput,
   db: Context
 ) => {
   try {
-    const where = buildWhereClause(filters);
     const avlData = await db.prisma.avl_line_level_monitoring.findMany({
-      where: where,
+      where: {
+        ...(filters.operatorNoc ? { operatorNoc: filters.operatorNoc } : {}),
+        ...(filters.lineName ? { lineName: filters.lineName } : {}),
+      },
       select: {
         operatorNoc: true,
         lineName: true,

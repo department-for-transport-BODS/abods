@@ -71,6 +71,18 @@ export type ApiInfoType = {
   version: Scalars['String']['output'];
 };
 
+export type AvlFiltersInput = {
+  lineName?: InputMaybe<Scalars['String']['input']>;
+  operatorNoc?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AvlLineLevelStatus = {
+  __typename?: 'AvlLineLevelStatus';
+  lastRecordedAtTime: Scalars['DateTime']['output'];
+  lineName: Scalars['String']['output'];
+  operatorNoc: Scalars['String']['output'];
+};
+
 export type AvlPoint = {
   __typename?: 'AvlPoint';
   latitude: Scalars['Float']['output'];
@@ -842,6 +854,7 @@ export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo?: Maybe<ApiInfoType>;
+  avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -864,6 +877,11 @@ export type Query = {
 
 export type QueryAdminAreasArgs = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+
+export type QueryAvlLineLevelStatusArgs = {
+  filters?: InputMaybe<AvlFiltersInput>;
 };
 
 
@@ -1241,6 +1259,8 @@ export type ResolversTypes = ResolversObject<{
   AlertType: ResolverTypeWrapper<AlertType>;
   AlertTypeEnum: AlertTypeEnum;
   ApiInfoType: ResolverTypeWrapper<ApiInfoType>;
+  AvlFiltersInput: AvlFiltersInput;
+  AvlLineLevelStatus: ResolverTypeWrapper<AvlLineLevelStatus>;
   AvlPoint: ResolverTypeWrapper<AvlPoint>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   BoundingBoxInputType: BoundingBoxInputType;
@@ -1361,6 +1381,8 @@ export type ResolversParentTypes = ResolversObject<{
   AlertReferenceInput: AlertReferenceInput;
   AlertType: AlertType;
   ApiInfoType: ApiInfoType;
+  AvlFiltersInput: AvlFiltersInput;
+  AvlLineLevelStatus: AvlLineLevelStatus;
   AvlPoint: AvlPoint;
   Boolean: Scalars['Boolean']['output'];
   BoundingBoxInputType: BoundingBoxInputType;
@@ -1486,6 +1508,13 @@ export type AlertTypeResolvers<ContextType = RequestContext, ParentType extends 
 export type ApiInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ApiInfoType'] = ResolversParentTypes['ApiInfoType']> = ResolversObject<{
   buildNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type AvlLineLevelStatusResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AvlLineLevelStatus'] = ResolversParentTypes['AvlLineLevelStatus']> = ResolversObject<{
+  lastRecordedAtTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1912,6 +1941,7 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AdminAreasType']>>>, ParentType, ContextType, Partial<QueryAdminAreasArgs>>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
+  avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
@@ -2094,6 +2124,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
+  AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
   AvlPoint?: AvlPointResolvers<ContextType>;
   CorridorHistogramType?: CorridorHistogramTypeResolvers<ContextType>;
   CorridorJourneyTimeStatsType?: CorridorJourneyTimeStatsTypeResolvers<ContextType>;
