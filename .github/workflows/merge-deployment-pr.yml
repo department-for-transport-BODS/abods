@@ -36,8 +36,12 @@ jobs:
       contents: write
 
     steps:
+      - name: Read VERSION file
+        id: get version
+        run: echo "::set-output name=version::$(cat VERSION)"
       - name: trigger remote
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: ${{ github.repository }}
           event-type: merge-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
+          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ steps.getversion.outputs.version }}" }'
