@@ -31,11 +31,13 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
-
+  BodsVpcEndpoint:
+    Type: String
+    Default: ''
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
   IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
-
+  HasVpcEndpoint: !Not [!Equals [!Ref BodsVpcEndpoint, '']]
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
@@ -43,10 +45,17 @@ Resources:
   GraphQlApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub  ${ProjectName}-${Environment}-graphql-function-api
+      Name: !Sub ${ProjectName}-${Environment}-graphql-function-api
       StageName: !Ref Environment
       EndpointConfiguration: 
-        Type: REGIONAL
+        Types: !If
+          - HasVpcEndpoint
+          - ['REGIONAL', 'PRIVATE']
+          - ['REGIONAL']
+        VpcEndpointIds: !If
+          - HasVpcEndpoint
+          - [!Ref BodsVpcEndpoint]
+          - !Ref AWS::NoValue
       TracingEnabled: true
       Auth:
         ResourcePolicy:
@@ -58,6 +67,16 @@ Resources:
               Condition:
                 StringEquals:
                   aws:UserAgent: 'Amazon CloudFront'
+            - !If
+              - HasVpcEndpoint
+              - Effect: Allow
+                Principal: '*'
+                Action: execute-api:Invoke
+                Resource: execute-api:/*
+                Condition:
+                  StringEquals:
+                    aws:SourceVpce: !Ref BodsVpcEndpoint
+              - !Ref AWS::NoValue
 
   GraphQlFunction:
     Type: AWS::Serverless::Function
