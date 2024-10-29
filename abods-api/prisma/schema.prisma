@@ -461,3 +461,11 @@ model distinct_routes {
   id            Int @id @default(1)
   route         String  @db.Text
 }
+
+model avl_line_level_monitoring {
+  operatorNoc         String   @map("operator_noc")
+  lineName            String   @map("line_name")
+  lastRecordedAtTime  DateTime @map("last_recorded_at_time")
+
+  @@unique([operatorNoc, lineName], name: "uk_operator_line")
+}
