@@ -11,7 +11,7 @@ import { Dayjs } from 'dayjs';
 import { getDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = all_operators & {
-  feed_summary: feed_monitor_summary[];
+  feed_summary?: feed_monitor_summary | null;
 };
 
 export type ExpectedJourneyType = {
@@ -297,10 +297,10 @@ export const getNocAdminAreas = async (db: Context) => {
 export const getOperatorWithFeed = (db: Context, operatorRefs: string) => {
   return db.prisma.all_operators.findUnique({
     where: {
-      feed_summary: {
-        some: {},
-      },
       operatorref: operatorRefs,
+      feed_summary: {
+        isNot: null
+      }
     },
     include: {
       feed_summary: true,
@@ -323,15 +323,17 @@ export const getFeedMonitoringList = async (
     userOperatorId
   );
 
-  return operator?.feed_summary.map((feed) => ({
-    feedStatus: !!feed.last_outage,
-    availability: Number(feed.availability),
-    lastOutage: feed.last_outage,
-    unavailableSince: feed.unavailable_since,
+  return {
+    operatorId: userOperatorId,
+    feedStatus: !!operator?.feed_summary?.last_outage,
+    availability: Number(operator?.feed_summary?.availability ?? 0),
+    lastOutage: operator?.feed_summary?.last_outage,
+    unavailableSince: operator?.feed_summary?.unavailable_since,
     liveStats: {
-      updateFrequency: feed.update_frequency,
-    },
-  }));
+      operatorId: userOperatorId,
+      updateFrequency: operator?.feed_summary?.update_frequency,
+    }
+  }
 };
 
 const getFeedStatus = (

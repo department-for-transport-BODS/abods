@@ -386,13 +386,14 @@ type OperatorsPage {
 type OperatorType {
     name: String
     nocCode: String
-    operatorId: String
+    operatorId: String!
     adminAreas: [AdminAreaInfoType]
     transitModel: TransitModelType
     feedMonitoring: FeedMonitoringType
 }
 
 type FeedMonitoringType {
+    operatorId: String!
     availability: Float
     feedStatus: Boolean
     historicalStats(date: Date!): HistoricalStatsType
@@ -416,6 +417,7 @@ type VehicleStatsType {
 }
 
 type LiveStatsType {
+    operatorId: String!
     currentVehicles: Int
     expectedVehicles: Int
     feedAlerts: Int

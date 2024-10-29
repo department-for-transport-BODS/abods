@@ -287,6 +287,7 @@ export type FeedMonitoringType = {
   historicalStats?: Maybe<HistoricalStatsType>;
   lastOutage?: Maybe<Scalars['DateTime']>;
   liveStats?: Maybe<LiveStatsType>;
+  operatorId: Scalars['String'];
   unavailableSince?: Maybe<Scalars['DateTime']>;
   vehicleStats?: Maybe<Array<Maybe<VehicleStatsType>>>;
 };
@@ -505,6 +506,7 @@ export type LiveStatsType = {
   feedErrors?: Maybe<Scalars['Int']>;
   last20Minutes?: Maybe<Array<Maybe<VehicleStatsType>>>;
   last24Hours?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  operatorId: Scalars['String'];
   updateFrequency?: Maybe<Scalars['Int']>;
 };
 
@@ -725,7 +727,7 @@ export type OperatorType = {
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']>;
   nocCode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
+  operatorId: Scalars['String'];
   transitModel?: Maybe<TransitModelType>;
 };
 
@@ -896,7 +898,6 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: Maybe<OperatorFilterInput>;
-  operatorId?: Maybe<Scalars['String']>;
 };
 
 

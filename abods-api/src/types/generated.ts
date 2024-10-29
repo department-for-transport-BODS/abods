@@ -1,7 +1,7 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { RequestContext } from './extra';
-export type Maybe<T> = T | null;
-export type InputMaybe<T> = Maybe<T>;
+export type Maybe<T> = T | undefined | null;
+export type InputMaybe<T> = T | undefined | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -288,6 +288,7 @@ export type FeedMonitoringType = {
   historicalStats?: Maybe<HistoricalStatsType>;
   lastOutage?: Maybe<Scalars['DateTime']['output']>;
   liveStats?: Maybe<LiveStatsType>;
+  operatorId: Scalars['String']['output'];
   unavailableSince?: Maybe<Scalars['DateTime']['output']>;
   vehicleStats?: Maybe<Array<Maybe<VehicleStatsType>>>;
 };
@@ -506,6 +507,7 @@ export type LiveStatsType = {
   feedErrors?: Maybe<Scalars['Int']['output']>;
   last20Minutes?: Maybe<Array<Maybe<VehicleStatsType>>>;
   last24Hours?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  operatorId: Scalars['String']['output'];
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -720,7 +722,7 @@ export type OperatorType = {
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']['output']>;
   nocCode?: Maybe<Scalars['String']['output']>;
-  operatorId?: Maybe<Scalars['String']['output']>;
+  operatorId: Scalars['String']['output'];
   transitModel?: Maybe<TransitModelType>;
 };
 
@@ -1650,6 +1652,7 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   historicalStats?: Resolver<Maybe<ResolversTypes['HistoricalStatsType']>, ParentType, ContextType, RequireFields<FeedMonitoringTypeHistoricalStatsArgs, 'date'>>;
   lastOutage?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   liveStats?: Resolver<Maybe<ResolversTypes['LiveStatsType']>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'start'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1759,6 +1762,7 @@ export type LiveStatsTypeResolvers<ContextType = RequestContext, ParentType exte
   feedErrors?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   last20Minutes?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
   last24Hours?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateFrequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1846,7 +1850,7 @@ export type OperatorTypeResolvers<ContextType = RequestContext, ParentType exten
   feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  operatorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   transitModel?: Resolver<Maybe<ResolversTypes['TransitModelType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

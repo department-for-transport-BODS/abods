@@ -62,25 +62,23 @@ const otpResolvers: Resolvers = {
       return {};
     },
     feedMonitoring: async (
-      parent,
+      { operatorId },
       _,
       { sessionUser, db }: RequestContext,
       info
-    ): Promise<FeedMonitoringType & { operatorId }> => {
+    ): Promise<FeedMonitoringType> => {
       const queryName = info.operation.name?.value;
-      let feed: FeedMonitoringListType[] | undefined = [];
-      if (
-        queryName === "feedMonitoringList" ||
-        queryName === "operatorSparklineStats" ||
-        queryName === "operatorLiveStatus"
-      ) {
-        feed = parent?.operatorId ? await getFeedMonitoringList(db, sessionUser, parent?.operatorId ) : [];
-      }
+      let feed: FeedMonitoringListType | undefined = undefined;
+      // if (
+      //   queryName === "feedMonitoringList" ||
+      //   queryName === "operatorSparklineStats" ||
+      //   queryName === "operatorLiveStatus"
+      // ) {
+      //   feed = await getFeedMonitoringList(db, sessionUser, operatorId );
+      // }
 
-      return {
-        operatorId: parent.operatorId,
-        ...feed,
-      };
+      feed = await getFeedMonitoringList(db, sessionUser, operatorId );
+      return feed;
     }
   },
   TransitModelType: {

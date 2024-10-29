@@ -5,7 +5,7 @@ import {
   getAvlPoints,
   getExpectedJourneys,
 } from "../../lib/otp.js";
-import { EventStatsType } from "../../types/generated.js";
+import { EventStatsType, VehicleStatsType } from "../../types/generated.js";
 import { getVehicleStats, VechileCountType } from "../../lib/feedMonitoring.js";
 import { GraphQLResolveInfo } from "graphql";
 import { Dayjs } from "dayjs";
@@ -17,7 +17,7 @@ export const getEventStats = (): EventStatsType[] => {
   while (isSameOrBefore(startdate, getDate())) {
     eventStats.push({
       count: 0,
-      day: startdate.toDate(),
+      day: startdate.format("YYYY-MM-DD"),
     });
 
     startdate = startdate.add(1, "day");
@@ -111,7 +111,7 @@ export const getHistoricalStats = async (
 
   return {
     update_frequency: result?.update_frequency,
-    availability: result?.availability,
+    availability: Number(result?.availability ?? 0),
   };
 };
 
@@ -133,7 +133,7 @@ export const getVehicles = async (
     },
   });
 
-  return result?.actual;
+  return result?.actual ?? 0;
 };
 
 export const getLast24Hours = async (operatorId: string, db: Context) => {
@@ -163,7 +163,7 @@ export const getVehicleStatsByMin = async (
   start: Date,
   end: Date,
   db: Context
-) => {
+): Promise<VehicleStatsType[]> => {
   const result = await db.prisma.feed_monitor_minute_summary.findMany({
     where: {
       operator_noc: operatorId,
@@ -174,7 +174,7 @@ export const getVehicleStatsByMin = async (
     },
   });
 
-  result.map((summary) => ({
+  return result.map((summary) => ({
     timestamp: getFormattedDate(summary.received_interval),
     expected: summary.expected,
     actual: summary.actual,
