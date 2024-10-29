@@ -37,12 +37,18 @@ jobs:
 
     steps:
       - name: Read VERSION file
-        id: get version
-        run: echo "::set-output name=version::$(cat VERSION)"
+        id: getversion
+        run: |
+          version=$(awk '{print $2}' VERSION)
+          echo "::set-output name=version::$version"
+
+      - name: Get target env
+        id: getenv
+        run: echo "::set-output name=env::${{ github.event.pull_request.base.ref != 'main' && github.event.pull_request.base.ref || 'uat' }}"
 
       - name: trigger remote
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: ${{ github.repository }}
           event-type: merge-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
-          client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ steps.getversion.outputs.version }}" }'
+          client-payload: '{ "environment": "${{ steps.getenv.outputs.version }}", "release_version": "${{ steps.getversion.outputs.version }}" }'
