@@ -21,7 +21,7 @@ on:
   release:
     types: [published]
   repository_dispatch:
-    types: [automated-deploy-dev]
+    types: [automated-deploy-dev, merge-dev-to-test, merge-test-to-main]
 
 
 concurrency:

@@ -11,6 +11,8 @@ on:
     - 'VERSION'
     - 'abods-api/**'
     - 'frontend/**'
+  repository_dispatch:
+    types: [merge-sandbox-to-dev]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
