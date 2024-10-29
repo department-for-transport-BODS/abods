@@ -28,5 +28,5 @@ jobs:
         
         git fetch
         git checkout ${{ github.event.pull_request.base.ref }}
-        git reset ${{ github.sha }}
+        git reset ${{ github.event.pull_request.head.sha }}
         git push
