@@ -290,5 +290,5 @@ jobs:
               });
             } catch (err) {
               console.log(err)
-              if (err.message !== `A pull request already exists for ${context.repo.owner}:${branchName}.`) raise err
+              if (err.message !== `A pull request already exists for ${context.repo.owner}:${branchName}.`) throw err
             }
