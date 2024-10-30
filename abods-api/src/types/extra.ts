@@ -5,11 +5,10 @@ import express from 'express';
 export interface RequestContext {
   req: express.Request;
   res: express.Response;
-  sessionUser: SessionUser;
+  sessionUser: SessionUser | null;
   db: Context;
 }
 
-export interface SessionUser {
-  user: bods_user | null;
-  userOrganisationIDs: number[] | null;
+export interface SessionUser extends bods_user {
+  orgIds: number[];
 }

@@ -37,35 +37,29 @@ import {
 } from '../lib/dayjs.js';
 import { getPercentile } from '../lib/utils.js';
 import haversineDistance from 'haversine-distance';
-import { emptyResolver } from './helpers.js';
+import { emptyResolver, requireUserSession } from './helpers.js';
 import { SessionUser } from '../types/extra.js';
 
 export const listCorridors: CorridorNamespaceResolvers['corridorList'] = async (_, __, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  const user = requireUserSession(context)
 
-  const results: CorridorResultsType[] = await getCorridorList(context.db, context.sessionUser);
+  const results: CorridorResultsType[] = await getCorridorList(context.db, user);
 
   return returnCorridorType(results);
 };
 
 export const getCorridors: CorridorNamespaceResolvers['getCorridor'] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  const user = requireUserSession(context)
   const corridor: CorridorResultsType | null = await getCorridor(
     args.corridorId,
     context.db,
-    context.sessionUser
+    user
   );
   return corridor ? returnCorridor(corridor) : null;
 };
 
 export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  const user = requireUserSession(context)
 
   if(!args.inputs) {
     throw 'Invalid inputs'
@@ -100,7 +94,7 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
     };
   }
 
-  const adminAreas = await getOrgAdminAreas(context.db, context.sessionUser);
+  const adminAreas = await getOrgAdminAreas(context.db, user);
 
   where.admin_area_id = {
     in: adminAreas.map((admin) => admin.adminarea_id),
@@ -125,9 +119,7 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
 };
 
 export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  const user = requireUserSession(context)
 
   let stopList = args.stopList || []
 
@@ -135,7 +127,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'
   let stopsPattern = stopList.join(',')
   const [routes, adminAreas] = await Promise.all([
     distinctRoutes(context.db, stopsPattern),
-    getOrgAdminAreas(context.db, context.sessionUser),
+    getOrgAdminAreas(context.db, user),
   ]);
 
   stopList = []
@@ -189,16 +181,14 @@ export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'
 }
 
 export const createCorridor: MutationResolvers['createCorridor'] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  const user = requireUserSession(context)
   if (!args.payload || !args.payload.name|| !args.payload.stopIds) throw "Bad Request"
 
   const corridor = await context.db.prisma.corridor.create({
     data: {
       corridor_name: args.payload.name,
-      organisation_id: context.sessionUser.userOrganisationIDs?.[0] ?? 0,
-      user_id: context.sessionUser.user.id,
+      organisation_id: user.orgIds[0] ?? 0,
+      user_id: user.id,
     },
     select: {
       corridor_id: true,
@@ -209,7 +199,7 @@ export const createCorridor: MutationResolvers['createCorridor'] = async (_, arg
     corridor.corridor_id,
     args.payload.stopIds.map(String),
     context.db,
-    context.sessionUser
+    user
   );
 
   return {
@@ -279,9 +269,9 @@ const insertCorridorStops = async (
 };
 
 export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, args, context) => {
+  const user = requireUserSession(context)
   if (
-    !context.sessionUser.user ||
-    !await isCorridorMappedToUserOrg(Number(args.corridorId), context.sessionUser, context.db)
+    !await isCorridorMappedToUserOrg(Number(args.corridorId), user, context.db)
   ) {
     throw 'Not Authorized';
   }
@@ -300,9 +290,9 @@ export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, arg
 
 export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, args, context) => {
   if (!args.inputs) throw 'Bad Request'
+  const user = requireUserSession(context)
   if (
-    !context.sessionUser.user ||
-    !await isCorridorMappedToUserOrg(Number(args.inputs.id), context.sessionUser, context.db)
+    !await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db)
   ) {
     throw 'Not Authorized';
   }
@@ -318,7 +308,7 @@ export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, arg
     args.inputs.id,
     args.inputs.stopList.map(String),
     context.db,
-    context.sessionUser
+    user
   );
 
   return {
@@ -332,10 +322,10 @@ export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, con
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     args.inputs || {};
+  const user = requireUserSession(context)
 
   if (
-    !context.sessionUser.user ||
-    !await isCorridorMappedToUserOrg(Number(corridorId), context.sessionUser, context.db)
+    !await isCorridorMappedToUserOrg(Number(corridorId), user, context.db)
   ) {
     throw 'Not Authorized';
   }
@@ -507,7 +497,7 @@ const getJourneyStats = (
   return stats;
 };
 
-export const getJourneyStatsPerService: CorridorStatsTypeResolvers['journeyTimePerServiceStats'] = async (parent, _, context) => {
+export const getJourneyStatsPerService: CorridorStatsTypeResolvers['journeyTimePerServiceStats'] = async (parent, _, context): Promise<CorridorStatsPerServiceType[]> => {
   // Data was cached in the output of getStats, and will be removed later
   const data = parent as StatsCache;
   const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();

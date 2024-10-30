@@ -1,7 +1,9 @@
 import logger from '../logger';
 import { QueryResolvers, Resolvers } from '../types/generated';
+import { requireApiToken } from './helpers';
 
 export const getAVLLineLevelStatus: QueryResolvers['avlLineLevelStatus'] = async (_, args, context) => {
+  requireApiToken(context)
   try {
     const avlData = await context.db.prisma.avl_line_level_monitoring.findMany({
       where: {

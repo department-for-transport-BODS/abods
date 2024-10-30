@@ -1,4 +1,5 @@
 import { QueryResolvers, Resolvers } from '../types/generated.js'
+import { requireUserSession } from './helpers';
 
 // Summary: fetch api info
 export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {
@@ -38,9 +39,7 @@ export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {
 // Summary: fetch roles
 export const getRoles: QueryResolvers['roles'] = async (_, __, context ) => {
   try {
-    if(!context.sessionUser.user){
-      throw ("Not authorized")
-    }
+    requireUserSession(context)
 
     return [{
       "id": "1",

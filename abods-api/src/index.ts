@@ -9,7 +9,7 @@ import resolvers from './resolvers/index.js'
 import fs from 'fs'
 import { createContext } from './context.js';
 import { RequestContext, SessionUser } from './types/extra.js';
-import { getSession } from './resolvers/userFunctions.js';
+import { getSession } from './resolvers/userFunctions';
 import logger from './logger.js';
 import { getDate } from './lib/dayjs.js';
 
@@ -31,10 +31,7 @@ app.use(
   expressMiddleware(server, {
     context: async ({ req, res }) => {
       const { event, context } = getCurrentInvoke()
-      let sessionUser: SessionUser = {
-        user: null,
-        userOrganisationIDs: null
-      }
+      let sessionUser: SessionUser| null = null
       try {
         logger.debug("Server started and within context block")
         const retry = getDate().isAfter(startTime.add(10, 'minute'))
@@ -50,19 +47,16 @@ app.use(
 
           logger.debug(`Session id: ${sessionid}`);
           if(sessionid) {
-            const session = await getSession(sessionid, db);
+            const user = await getSession(sessionid, db);
 
-            logger.debug(`Session retrieved from db: ${JSON.stringify(session)}`);
-            if(session && session.user)
+            logger.debug(`Session retrieved from db: ${JSON.stringify(user)}`);
+            if(user)
             {
-              if (
-                !session.userOrganisationIDs ||
-                session.userOrganisationIDs.length === 0
-              ) {
+              if (!user.orgIds || user.orgIds.length === 0) {
                 logger.error('User not mapped to an organisation');
                 throw 'User not mapped to any organisation';
               }
-              sessionUser = session;
+              sessionUser = user;
             }
           }
         }
@@ -71,7 +65,7 @@ app.use(
         return {
           req,
           res,
-          sessionUser, 
+          sessionUser,
           db,
         }
       } catch (error) {
