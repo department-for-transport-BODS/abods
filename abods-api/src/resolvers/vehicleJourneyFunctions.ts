@@ -10,7 +10,7 @@ import {
 import { emptyResolver, requireUserSession } from './helpers.js';
 
 export const findJourneys: VehicleReplayNamespaceResolvers['findJourneys'] = async (_, args, context) => {
-  requireUserSession(context);
+  await requireUserSession(context);
   const lineIds = args.inputs.filters?.lineIds;
 
   let journeysData: UniqueJourneyType[] = [];
@@ -102,7 +102,7 @@ const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
 });
 
 export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
-  requireUserSession(context);
+  await requireUserSession(context);
 
   const getAvlsForGroupId = async (groupId: string) => {
     const journey = await context.db.prisma.siriVMPositions.findMany({
@@ -127,7 +127,7 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
 };
 
 export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
-  requireUserSession(context);
+  await requireUserSession(context);
 
   const route = await context.db.prisma.timetable.findMany({
     where: { group_id: args.groupId }, select: {

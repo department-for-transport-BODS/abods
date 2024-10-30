@@ -13,50 +13,11 @@ import argon2 from 'argon2';
 import logger from '../logger.js';
 import { requireUserSession } from './helpers';
 
-export const getSession = async (sessionId: string, db: Context) : Promise<SessionUser | null> =>  {
-  logger.debug("Within get session function")
-
-  // temporary session token storage
-  const sessionRecord = await db.prisma.tokens.findFirst({
-    where: {
-      token: sessionId
-    }
-  })
-
-  logger.debug(
-    `session record obtained for session id ${sessionId}: ${JSON.stringify(sessionRecord)}`,
-  );
-  if (!sessionRecord) {
-    logger.debug("No Session record found for user");
-    return null;
-  }
-  // fetch user from bods
-  const bodsUser = await db.prisma.bods_user.findUnique(
-    {
-      where: { id: sessionRecord.user_id },
-      include: {
-        userOrganisations: true
-      }
-    }
-  );
-
-  logger.debug(`Retrieved bods user: ${JSON.stringify(bodsUser)}`);
-  if (!bodsUser) {
-    logger.debug("No bods user found");
-    return null;
-  }
-  const sessionUser = {...bodsUser, orgIds: bodsUser.userOrganisations.map(o => o.organisation_id)}
-
-  logger.debug(`Session user returned: ${JSON.stringify(sessionUser)}`)
-  return sessionUser;
-}
-
-
 
 // Summary: fetch all users
 export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     const bodsUsers = await context.db.prisma.bods_user.findMany({
       where:{
@@ -103,7 +64,7 @@ export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
 // Summary: fetch a single user by id
 export const getUser: QueryResolvers['user'] = async (_, __, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     return {
       id: user.id.toString(),
@@ -133,7 +94,7 @@ export const getUser: QueryResolvers['user'] = async (_, __, context) => {
 // Summary: fetch all user alerts
 export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     // fetch alerts ONLY if user is creator or recipient
     const alerts = await context.db.prisma.alert.findMany({
@@ -266,7 +227,7 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
 
 export const logoutUser: MutationResolvers['logout'] = async (_, __, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     await context.db.prisma.tokens.delete({
       where: {
@@ -284,7 +245,7 @@ export const logoutUser: MutationResolvers['logout'] = async (_, __, context) =>
 
 export const getUserAlert: QueryResolvers['userAlert'] = async (_, args, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     if(!args.alertId){
       throw new Error("Alert id required");
@@ -351,7 +312,7 @@ async function getUserAlertFromDb(alertId: string, userId: number, db: Context) 
 
 export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
@@ -380,7 +341,7 @@ export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, c
 
 const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, args, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     const {alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
@@ -421,7 +382,7 @@ const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, args, co
 
 export const deleteUserAlert: MutationResolvers['deleteUserAlert'] = async (_, args, context) => {
   try {
-    const user = requireUserSession(context)
+    const user = await requireUserSession(context)
 
     if(!args.alertId){
       throw new Error("AlertId is required");

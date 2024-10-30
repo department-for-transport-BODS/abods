@@ -5,7 +5,7 @@ import express from 'express';
 export interface RequestContext {
   req: express.Request;
   res: express.Response;
-  sessionUser: SessionUser | null;
+  headers: any;
   db: Context;
 }
 

@@ -39,7 +39,7 @@ export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {
 // Summary: fetch roles
 export const getRoles: QueryResolvers['roles'] = async (_, __, context ) => {
   try {
-    requireUserSession(context)
+    await requireUserSession(context)
 
     return [{
       "id": "1",

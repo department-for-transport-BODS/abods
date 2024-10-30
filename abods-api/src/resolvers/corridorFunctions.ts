@@ -41,7 +41,7 @@ import { emptyResolver, requireUserSession } from './helpers.js';
 import { SessionUser } from '../types/extra.js';
 
 export const listCorridors: CorridorNamespaceResolvers['corridorList'] = async (_, __, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
 
   const results: CorridorResultsType[] = await getCorridorList(context.db, user);
 
@@ -49,7 +49,7 @@ export const listCorridors: CorridorNamespaceResolvers['corridorList'] = async (
 };
 
 export const getCorridors: CorridorNamespaceResolvers['getCorridor'] = async (_, args, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
   const corridor: CorridorResultsType | null = await getCorridor(
     args.corridorId,
     context.db,
@@ -59,7 +59,7 @@ export const getCorridors: CorridorNamespaceResolvers['getCorridor'] = async (_,
 };
 
 export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, args, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
 
   if(!args.inputs) {
     throw 'Invalid inputs'
@@ -119,7 +119,7 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
 };
 
 export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'] = async (_, args, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
 
   let stopList = args.stopList || []
 
@@ -181,7 +181,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'
 }
 
 export const createCorridor: MutationResolvers['createCorridor'] = async (_, args, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
   if (!args.payload || !args.payload.name|| !args.payload.stopIds) throw "Bad Request"
 
   const corridor = await context.db.prisma.corridor.create({
@@ -269,7 +269,7 @@ const insertCorridorStops = async (
 };
 
 export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, args, context) => {
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
   if (
     !await isCorridorMappedToUserOrg(Number(args.corridorId), user, context.db)
   ) {
@@ -290,7 +290,7 @@ export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, arg
 
 export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, args, context) => {
   if (!args.inputs) throw 'Bad Request'
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
   if (
     !await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db)
   ) {
@@ -322,7 +322,7 @@ export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, con
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     args.inputs || {};
-  const user = requireUserSession(context)
+  const user = await requireUserSession(context)
 
   if (
     !await isCorridorMappedToUserOrg(Number(corridorId), user, context.db)
