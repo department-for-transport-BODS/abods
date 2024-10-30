@@ -48,14 +48,7 @@ Resources:
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api
       StageName: !Ref Environment
       EndpointConfiguration: 
-        Types: !If
-          - HasVpcEndpoint
-          - ['REGIONAL', 'PRIVATE']
-          - ['REGIONAL']
-        VpcEndpointIds: !If
-          - HasVpcEndpoint
-          - !Ref BodsVpcEndpoint
-          - !Ref AWS::NoValue
+        Type: REGIONAL
       TracingEnabled: true
       Auth:
         ResourcePolicy:
@@ -67,16 +60,27 @@ Resources:
               Condition:
                 StringEquals:
                   aws:UserAgent: 'Amazon CloudFront'
-            - !If
-              - HasVpcEndpoint
-              - Effect: Allow
-                Principal: '*'
-                Action: execute-api:Invoke
-                Resource: execute-api:/*
-                Condition:
-                  StringEquals:
-                    aws:SourceVpce: !Ref BodsVpcEndpoint
-              - !Ref AWS::NoValue
+
+  PrivateGraphQlApi:
+    Type: AWS::Serverless::Api
+    Condition: HasVpcEndpoint
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
+      StageName: !Ref Environment
+      EndpointConfiguration: 
+        Type: PRIVATE
+        VpcEndpointIds: !Ref BodsVpcEndpoint
+      TracingEnabled: true
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: execute-api:/*
+              Condition:
+                StringEquals:
+                  aws:SourceVpce: !Ref BodsVpcEndpoint
 
   GraphQlFunction:
     Type: AWS::Serverless::Function
@@ -98,6 +102,14 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref GraphQlApi
+        PrivateApiEvents: !If
+          - HasVpcEndpoint
+          - Type: Api
+            Properties:
+              Path: /{proxy+}
+              Method: ANY
+              RestApiId: !Ref PrivateGraphQlApi
+          - !Ref AWS::NoValue
       VpcConfig:
         SubnetIds: !Ref VpcSubnets
         SecurityGroupIds:
