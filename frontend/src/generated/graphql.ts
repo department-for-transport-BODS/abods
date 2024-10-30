@@ -391,7 +391,7 @@ export type HeadwayMetricsType = {
 
 
 export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 };
 
 
@@ -1694,7 +1694,7 @@ export type HeadwayFrequentServicesQuery = (
 );
 
 export type HeadwayFrequentServiceInfoQueryVariables = Exact<{
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 }>;
 
 
@@ -2987,7 +2987,7 @@ export const HeadwayFrequentServicesDocument = gql`
     }
   }
 export const HeadwayFrequentServiceInfoDocument = gql`
-    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType) {
+    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType!) {
   headwayMetrics {
     frequentServiceInfo(inputs: $inputs) {
       numHours

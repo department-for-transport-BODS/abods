@@ -1,4 +1,4 @@
-import { getUser, getUserAlerts, getUserByUsername, getUsers} from '../src/resolvers/users/userFunctions.js'
+import { getUser, getUserAlerts, getUsers} from '../src/resolvers/userFunctions.js'
 import { MockContext, Context, createMockContext } from '../src/context.js'
 import { Alert } from '@prisma/client'
 

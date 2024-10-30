@@ -3685,9 +3685,13 @@
                 "name": "inputs",
                 "description": null,
                 "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "FrequentServiceInfoInputType",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "FrequentServiceInfoInputType",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               }
