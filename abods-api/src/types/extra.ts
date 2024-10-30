@@ -1,5 +1,4 @@
 import { Context } from '../context';
-import { bods_user } from '@prisma/client';
 import express from 'express';
 
 export interface RequestContext {
@@ -9,6 +8,11 @@ export interface RequestContext {
   db: Context;
 }
 
-export interface SessionUser extends bods_user {
+export interface SessionUser {
+  id: number
+  username: string
+  email: string
+  first_name: string | null
+  last_name: string | null
   orgIds: number[];
 }

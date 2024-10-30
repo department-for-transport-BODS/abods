@@ -1,4 +1,4 @@
-import { RequestContext } from '../types/extra';
+import { RequestContext, SessionUser } from '../types/extra';
 import logger from '../logger';
 
 export const emptyResolver = async () => ({});
@@ -51,7 +51,14 @@ export const requireUserSession = async (context: RequestContext) => {
     logger.error('User not mapped to an organisation');
     throw 'User not mapped to any organisation';
   }
-  const sessionUser = { ...bodsUser, orgIds: bodsUser.userOrganisations.map(o => o.organisation_id) };
+  const sessionUser: SessionUser = {
+    id: bodsUser.id,
+    username: bodsUser.username,
+    email: bodsUser.email,
+    first_name: bodsUser.first_name,
+    last_name: bodsUser.last_name,
+    orgIds: bodsUser.userOrganisations.map(o => o.organisation_id)
+  };
 
   logger.debug(`Session user returned: ${JSON.stringify(sessionUser)}`);
   return sessionUser;
