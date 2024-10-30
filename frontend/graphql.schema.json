@@ -1218,7 +1218,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "AvlFiltersInput",
-        "description": null,
+        "description": "Filters for AvlLineLevelStatus\n\nBODS integration uses this so ensure all changes are backwards compatible",
         "fields": null,
         "inputFields": [
           {
@@ -1249,7 +1249,7 @@
       {
         "kind": "OBJECT",
         "name": "AvlLineLevelStatus",
-        "description": null,
+        "description": "Last Received AVL for on a Line basis\n\nBODS integrates with this endpoint so ensure all changes are backwards compatible",
         "fields": [
           {
             "name": "lastRecordedAtTime",

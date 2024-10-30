@@ -1,4 +1,3 @@
-import { Context } from '../context.js'
 import {
   RoleType,
   AlertTypeEnum,
@@ -11,14 +10,14 @@ import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import logger from '../logger.js';
 import { requireUserSession } from './helpers.js';
-
+import { PrismaClient } from '@prisma/client';
 
 // Summary: fetch all users
 export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
   try {
     const user = await requireUserSession(context)
 
-    const bodsUsers = await context.db.prisma.bods_user.findMany({
+    const bodsUsers = await context.db.bods_user.findMany({
       where:{
         userOrganisations:{
           every:{
@@ -96,7 +95,7 @@ export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, conte
     const user = await requireUserSession(context)
 
     // fetch alerts ONLY if user is creator or recipient
-    const alerts = await context.db.prisma.alert.findMany({
+    const alerts = await context.db.alert.findMany({
       where:{
         OR: [
           {
@@ -161,7 +160,7 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
       throw('Invalid username or password')
     }
 
-    const bodsUser = await context.db.prisma.bods_user.findFirst({
+    const bodsUser = await context.db.bods_user.findFirst({
       where: { email: { equals: args.username, mode: "insensitive" } },
       include: {
         userOrganisations: true,
@@ -178,7 +177,7 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
     if (await argon2.verify(strippedPassword, args.password)) {
       const sessionId = uuidv4();
       const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
-      const session = await context.db.prisma.tokens.findUnique({
+      const session = await context.db.tokens.findUnique({
         where:{
           user_id: bodsUser.id
         }
@@ -188,7 +187,7 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
       if(!session)
       {
         logger.debug('Session in tokens table not found')
-        await context.db.prisma.tokens.create({
+        await context.db.tokens.create({
           data:{
             user_id: bodsUser.id,
             token: sessionId
@@ -197,7 +196,7 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
       }
       else{
         logger.debug(`Session found in tokends table: ${JSON.stringify(session)}`)
-        await context.db.prisma.tokens.update({
+        await context.db.tokens.update({
           where:{
             user_id: bodsUser.id
           },
@@ -228,7 +227,7 @@ export const logoutUser: MutationResolvers['logout'] = async (_, __, context) =>
   try {
     const user = await requireUserSession(context)
 
-    await context.db.prisma.tokens.delete({
+    await context.db.tokens.delete({
       where: {
         user_id: user.id
       }
@@ -256,9 +255,9 @@ export const getUserAlert: QueryResolvers['userAlert'] = async (_, args, context
   }
 }
 
-async function getUserAlertFromDb(alertId: string, userId: number, db: Context) {
+async function getUserAlertFromDb(alertId: string, userId: number, db: PrismaClient) {
   // fetch alert by id and ONLY if user is creator or recipient
-  const alert = await db.prisma.alert.findUnique({
+  const alert = await db.alert.findUnique({
     where: {
       id: alertId,
       AND: {
@@ -316,7 +315,7 @@ export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, c
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
     // TODO: check if sendto user id is in one of the same organisations as created_by user
-    await context.db.prisma.alert.create({
+    await context.db.alert.create({
       data:{
         alert: alertType,
         event_hysterisis: eventHysterisis,
@@ -355,7 +354,7 @@ const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, args, co
       throw new Error("Alert not found");
     }
 
-    await context.db.prisma.alert.update({
+    await context.db.alert.update({
       where:{
         id: alert.alertId
       },
@@ -390,7 +389,7 @@ export const deleteUserAlert: MutationResolvers['deleteUserAlert'] = async (_, a
     var alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if(alert){
-      await context.db.prisma.alert.delete({where: {id:args.alertId}})
+      await context.db.alert.delete({where: {id:args.alertId}})
     }
     else{
       throw ("Not Authorized")

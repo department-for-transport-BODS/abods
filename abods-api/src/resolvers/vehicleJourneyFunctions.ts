@@ -17,7 +17,7 @@ export const findJourneys: VehicleReplayNamespaceResolvers['findJourneys'] = asy
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
     const currentTime = getDate();
     const toTimestamp = getDate(args.inputs.toTimestamp).subtract(4, 'hour');
-    let journeys = await context.db.prisma.expected_journeys.findMany({
+    let journeys = await context.db.expected_journeys.findMany({
       where: {
         noc_and_line_and_servicecode: lineIds[0],
         date_of_journey: toTimestamp.toDate(),
@@ -105,7 +105,7 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
   await requireUserSession(context);
 
   const getAvlsForGroupId = async (groupId: string) => {
-    const journey = await context.db.prisma.siriVMPositions.findMany({
+    const journey = await context.db.siriVMPositions.findMany({
       where: { group_id: groupId }
     });
     return journey.map(s => ({
@@ -129,7 +129,7 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
 export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
   await requireUserSession(context);
 
-  const route = await context.db.prisma.timetable.findMany({
+  const route = await context.db.timetable.findMany({
     where: { group_id: args.groupId }, select: {
       stop_latitude: true,
       stop_longitude: true,

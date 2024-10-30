@@ -68,11 +68,21 @@ export type ApiInfoType = {
   version: Scalars['String'];
 };
 
+/**
+ * Filters for AvlLineLevelStatus
+ * 
+ * BODS integration uses this so ensure all changes are backwards compatible
+ */
 export type AvlFiltersInput = {
   lineName?: Maybe<Scalars['String']>;
   operatorNoc?: Maybe<Scalars['String']>;
 };
 
+/**
+ * Last Received AVL for on a Line basis
+ * 
+ * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ */
 export type AvlLineLevelStatus = {
   __typename?: 'AvlLineLevelStatus';
   lastRecordedAtTime: Scalars['DateTime'];

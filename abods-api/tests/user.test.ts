@@ -1,192 +1,147 @@
-import { getUser, getUserAlerts, getUsers} from '../src/resolvers/userFunctions.js'
-import { MockContext, Context, createMockContext } from '../src/context.js'
-import { Alert } from '@prisma/client'
+import { AlertTypeEnum } from '../src/types/generated';
 
-let mockCtx: MockContext
-let ctx: Context
+const mockUserRecord = {
+  id: 1234,
+  email: 'john.doe@example.com',
+  username: 'johndoe',
+  first_name: 'John',
+  last_name: 'Doe',
+  orgIds: [123]
+};
+jest.mock('../src/resolvers/helpers', () => {
+  return {
+    __esModule: true,
+    requireUserSession: () => Promise.resolve(mockUserRecord)
+  };
+});
 
-beforeEach(() => {
-  mockCtx = createMockContext()
-  ctx = mockCtx as unknown as Context
-})
+import { getUser, getUserAlerts, getUsers } from '../src/resolvers/userFunctions.js';
 
-describe("User functionality testing", () => {
-  // USERS
+describe('User functionality testing', () => {
   test('should return multiple users', async () => {
-
-    const testOutputUsers = [
-      {
-        id: '1234',
-        email: "john.doe@example.com",
-        username: "johndoe",
-        firstName: "John",
-        lastName: "Doe",
-        organisation: undefined,
-        roles: null
-      }
-    ]
-
     const testDbUsers = [
       {
         id: '1234',
-        email: "john.doe@example.com",
-        username: "johndoe",
-        first_name: "John",
-        last_name: "Doe",
-        password: "1234",
-        organisation_id: "1234",
-        token:''
+        email: 'john.doe@example.com',
+        username: 'johndoe',
+        first_name: 'John',
+        last_name: 'Doe',
+        organisation_id: '1234'
+      },
+      {
+        id: '4321',
+        email: 'jane.doe@example.com',
+        username: 'janedoe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        organisation_id: '4321'
       }
     ];
 
-    const testDbRoles = [
+    const testOutputUsers = [
       {
-        id: "1",
-        name: "Staff",
-        scope: "organisation"
+        email: 'john.doe@example.com',
+        firstName: 'John',
+        id: '1234',
+        lastName: 'Doe',
+        organisation: {
+          id: '123',
+          name: '123'
+        },
+        roles: [
+          {
+            id: '1',
+            name: 'Staff',
+            scope: 'organisation'
+          }
+        ],
+        username: 'johndoe'
+      },
+      {
+        email: 'jane.doe@example.com',
+        firstName: 'Jane',
+        id: '4321',
+        lastName: 'Doe',
+        organisation: {
+          id: '123',
+          name: '123'
+        },
+        roles: [
+          {
+            id: '1',
+            name: 'Staff',
+            scope: 'organisation'
+          }
+        ],
+        username: 'janedoe'
       }
-    ]
+    ];
 
-    mockCtx.prisma.user.findMany.mockResolvedValue(testDbUsers)
-    mockCtx.prisma.role.findMany.mockResolvedValue(testDbRoles)
-    await expect(getUsers(ctx)).resolves.toEqual(testOutputUsers)
-  })
+    const db = { bods_user: { findMany: jest.fn() } };
+
+    db.bods_user.findMany.mockResolvedValue(testDbUsers);
+    await expect((getUsers as any)({}, {}, { db })).resolves.toEqual(testOutputUsers);
+    expect(db.bods_user.findMany).toBeCalledTimes(1);
+    expect(db.bods_user.findMany.mock.calls[0][0].where.userOrganisations.every.organisation_id.in).toEqual(mockUserRecord.orgIds);
+  });
   test('should return user by id', async () => {
-    const dbUser = {
-      id: '1234',
-      email: "john.doe@example.com",
-      username: "johndoe",
-      first_name: "John",
-      last_name: "Doe",
-      password: "1234",
-      organisation_id: "1234",
-      token:''
-    }
-
     const outputUser = {
-      id: '1234',
-      email: "john.doe@example.com",
-      username: "johndoe",
-      firstName: "John",
-      lastName: "Doe",
-      organisation: undefined,
-      roles: null
-    }
+      id: mockUserRecord.id.toString(),
+      username: mockUserRecord.username,
+      email: mockUserRecord.email,
+      firstName: mockUserRecord.first_name,
+      lastName: mockUserRecord.last_name,
+      roles: [
+        {
+          'id': '1',
+          'name': 'Staff',
+          'scope': 'organisation'
+        },
+        {
+          'id': '2',
+          'name': 'Administrator',
+          'scope': 'organisation'
+        }
+      ]
+    };
 
-    mockCtx.prisma.user.findUnique.mockResolvedValue(dbUser)
-    await expect(getUser('1234', ctx)).resolves.toEqual(outputUser)
-  })
-  test('should return user by username', async () => {
-    const dbUser = {
-      id: '1234',
-      email: "john.doe@example.com",
-      username: "johndoe",
-      first_name: "John",
-      last_name: "Doe",
-      password: "1234",
-      organisation_id: "1234",
-      token:''
-    }
+    await expect((getUser as any)({}, {}, {})).resolves.toEqual(outputUser);
+  });
 
-    const outputUser = {
-      id: '1234',
-      email: "john.doe@example.com",
-      username: "johndoe",
-      firstName: "John",
-      lastName: "Doe",
-      organisation: undefined,
-      roles: null
-    }
-
-      const testDbRoles = [
-      {
-        id: "1",
-        name: "Staff",
-        scope: "organisation"
-      }
-    ]
-
-    mockCtx.prisma.user.findUnique.mockResolvedValue(dbUser)
-    mockCtx.prisma.role.findMany.mockResolvedValue(testDbRoles)
-    await expect(getUserByUsername('johndoe', ctx)).resolves.toEqual(outputUser)
-  })
-  test('should reset a users password', async () => {
-    // const user = {
-    //   id: '1234',
-    //   email: "john.doe@example.com",
-    //   username: "johndoe",
-    //   first_name: "John",
-    //   last_name: "Doe",
-    //   password: "1234",
-    //   token:''
-    // }
-
-    // mockCtx.prisma.user.findUnique.mockResolvedValue(user)
-    // await expect(getUser('1234', ctx)).resolves.toEqual(user)
-    expect(1).resolves.toEqual(1)
-  })
-  test('reset password', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('verify password reset token', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('update user details', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('delete a user', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-
-  // ALERTS
   test('get users alerts', async () => {
-        const testOutputAlerts = [
-      {
-        id: '1234',
-        alert_id: null,
-        event_hysterisis: 10,
-        event_threshold: "johndoe",
-        firstName: "John",
-        lastName: "Doe",
-        organisation: undefined,
-        roles: null
+    const testDbAlerts = [{
+      id: '1234',
+      alert: 'FeedComplianceFailure',
+      event_hysterisis: 10,
+      event_threshold: 20,
+      created_by_user: mockUserRecord,
+      send_to_user: mockUserRecord
+    }];
+    const testOutputAlerts = [{
+      alertId: '1234',
+      alertType: AlertTypeEnum.FeedComplianceFailure,
+      eventHysterisis: 10,
+      eventThreshold: 20,
+      createdBy: {
+        id: mockUserRecord.id.toString(),
+        username: mockUserRecord.username,
+        email: mockUserRecord.email,
+        firstName: mockUserRecord.first_name,
+        lastName: mockUserRecord.last_name,
+        roles: []
+      },
+      sendTo: {
+        id: mockUserRecord.id.toString(),
+        username: mockUserRecord.username,
+        email: mockUserRecord.email,
+        firstName: mockUserRecord.first_name,
+        lastName: mockUserRecord.last_name,
+        roles: []
       }
-    ]
+    }];
 
-    const testDbAlerts = [
-      {
-        id: '1234',
-        email: "john.doe@example.com",
-        username: "johndoe",
-        first_name: "John",
-        last_name: "Doe",
-        password: "1234",
-        organisation_id: "1234",
-        token:''
-      }
-    ];
-
-    const testDbRoles = [
-      {
-        id: "1",
-        name: "Staff",
-        scope: "organisation"
-      }
-    ]
-
-    mockCtx.prisma.alert.findMany.mockResolvedValue(testDbAlerts)
-    await expect(getUserAlerts(ctx)).resolves.toEqual(testOutputUsers)
-  })
-  test('get 1 alert', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('add an alert', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('update an alert', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-  test('delete an alert', async () => {
-    expect(1).resolves.toEqual(1)
-  })
-})
+    const db = { alert: { findMany: jest.fn() } };
+    db.alert.findMany.mockResolvedValue(testDbAlerts);
+    await expect((getUserAlerts as any)({}, {}, { db })).resolves.toEqual(testOutputAlerts);
+  });
+});

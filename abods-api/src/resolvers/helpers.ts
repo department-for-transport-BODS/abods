@@ -30,7 +30,7 @@ export const requireUserSession = async (context: RequestContext) => {
   logger.debug('Within get session function');
 
   // temporary session token storage
-  const sessionRecord = await context.db.prisma.tokens.findFirst({
+  const sessionRecord = await context.db.tokens.findFirst({
     where: {
       token: sessionId
     }
@@ -44,7 +44,7 @@ export const requireUserSession = async (context: RequestContext) => {
     throw 'Not Authorized';
   }
   // fetch user from bods
-  const bodsUser = await context.db.prisma.bods_user.findUnique(
+  const bodsUser = await context.db.bods_user.findUnique(
     {
       where: { id: sessionRecord.user_id },
       include: {
