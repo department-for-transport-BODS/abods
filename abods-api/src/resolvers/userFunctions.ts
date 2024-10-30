@@ -11,67 +11,20 @@ import { SessionUser } from "../types/extra.js";
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import logger from '../logger.js';
-
-export const getSession = async (sessionId: string, db: Context) : Promise<SessionUser> =>  {
-  logger.debug("Within get session function")
-  let sessionUser: SessionUser = {
-    user: null,
-    userOrganisationIDs: null
-  }
-
-  // temporary session token storage
-  const sessionRecord = await db.prisma.tokens.findFirst({
-    where: {
-      token: sessionId
-    }
-  })
-  
-  logger.debug(
-    `session record obtained for session id ${sessionId}: ${JSON.stringify(sessionRecord)}`,
-  );
-  if(sessionRecord) {
-    // fetch user from bods
-    const bodsUser = await db.prisma.bods_user.findUnique(
-      {
-        where:{ id: sessionRecord.user_id },
-        include:{
-          userOrganisations: true
-        }
-      }
-    )
-
-    logger.debug(`Retrieved bods user: ${JSON.stringify(bodsUser)}`);
-    if(bodsUser)
-    {
-      sessionUser.user = bodsUser;
-      sessionUser.userOrganisationIDs = bodsUser.userOrganisations.map(o=>o.organisation_id);
-    }
-  }
-
-  logger.debug(`Session user returned: ${JSON.stringify(sessionUser)}`)
-  return sessionUser;
-}
-
+import { requireUserSession } from './helpers';
 
 
 // Summary: fetch all users
 export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
   try {
-    if(!context.sessionUser.user){
-      throw ("Not authorized")
-    }
+    const user = await requireUserSession(context)
 
-    if(!context.sessionUser.userOrganisationIDs){
-      throw ("User not in any organisations")
-    }
-
-    const orgIds = context.sessionUser.userOrganisationIDs;
     const bodsUsers = await context.db.prisma.bods_user.findMany({
       where:{
         userOrganisations:{
           every:{
             organisation_id:{
-              in: orgIds
+              in: user.orgIds
             }
           }
         }
@@ -89,9 +42,9 @@ export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
         email: thisUser.email,
         firstName: thisUser.first_name,
         lastName: thisUser.last_name,
-        organisation: context.sessionUser.userOrganisationIDs ? {
-          id: String(context.sessionUser.userOrganisationIDs[0]),
-          name: String(context.sessionUser.userOrganisationIDs[0])
+        organisation: user.orgIds ? {
+          id: String(user.orgIds[0]),
+          name: String(user.orgIds[0])
         } : null,
         roles: [{
           "id": "1",
@@ -111,16 +64,14 @@ export const getUsers: QueryResolvers['users'] = async (_, __, context) => {
 // Summary: fetch a single user by id
 export const getUser: QueryResolvers['user'] = async (_, __, context) => {
   try {
-    if(!context.sessionUser.user){
-      throw ("Not authorized")
-    }
+    const user = await requireUserSession(context)
 
     return {
-      id: context.sessionUser.user.id.toString(),
-      username: context.sessionUser.user.username,
-      email: context.sessionUser.user.email,
-      firstName: context.sessionUser.user.first_name,
-      lastName: context.sessionUser.user.last_name,
+      id: user.id.toString(),
+      username: user.username,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
       roles: [{
         "id": "1",
         "name": "Staff",
@@ -143,11 +94,7 @@ export const getUser: QueryResolvers['user'] = async (_, __, context) => {
 // Summary: fetch all user alerts
 export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, context) => {
   try {
-    
-    if(!context.sessionUser.user)
-    {
-      throw ("Not Authorized")
-    }
+    const user = await requireUserSession(context)
 
     // fetch alerts ONLY if user is creator or recipient
     const alerts = await context.db.prisma.alert.findMany({
@@ -155,12 +102,12 @@ export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, conte
         OR: [
           {
           created_by: {
-            equals: context.sessionUser.user.id
+            equals: user.id
           },
           },
           {
             send_to: {
-              equals: context.sessionUser.user.id
+              equals: user.id
             },
           }
         ]
@@ -280,14 +227,11 @@ export const loginUser: MutationResolvers['login'] = async (_, args, context) =>
 
 export const logoutUser: MutationResolvers['logout'] = async (_, __, context) => {
   try {
-    if(!context.sessionUser.user)
-    {
-      throw ("Not Authorized")
-    }
+    const user = await requireUserSession(context)
 
     await context.db.prisma.tokens.delete({
       where: {
-        user_id: context.sessionUser.user.id
+        user_id: user.id
       }
     })
 
@@ -301,17 +245,13 @@ export const logoutUser: MutationResolvers['logout'] = async (_, __, context) =>
 
 export const getUserAlert: QueryResolvers['userAlert'] = async (_, args, context) => {
   try {
-
-    if(!context.sessionUser.user)
-    {
-      throw ("Not Authorized")
-    }
+    const user = await requireUserSession(context)
 
     if(!args.alertId){
       throw new Error("Alert id required");
     }
 
-    return getUserAlertFromDb(args.alertId, context.sessionUser.user.id, context.db)
+    return getUserAlertFromDb(args.alertId, user.id, context.db)
   } catch (error) {
     return null;
   }
@@ -372,10 +312,7 @@ async function getUserAlertFromDb(alertId: string, userId: number, db: Context) 
 
 export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, context) => {
   try {
-    if(!context.sessionUser.user)
-      {
-        throw ("Not Authorized")
-      }
+    const user = await requireUserSession(context)
 
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
@@ -386,7 +323,7 @@ export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, c
         event_hysterisis: eventHysterisis,
         event_threshold: eventThreshold,
         send_to: Number(sendTo.id),
-        created_by: context.sessionUser.user.id
+        created_by: user.id
       }
     })
 
@@ -402,12 +339,9 @@ export const addUserAlert: MutationResolvers['addUserAlert'] = async (_, args, c
   }
 }
 
-export const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, args, context) => {
+const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, args, context) => {
   try {
-    if(!context.sessionUser.user)
-      {
-        throw ("Not Authorized")
-      }
+    const user = await requireUserSession(context)
 
     const {alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
@@ -415,7 +349,7 @@ export const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, a
       throw new Error("AlertId is required");
     }
 
-    var alert = await getUserAlertFromDb(args.alertId, context.sessionUser.user.id, context.db);
+    var alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if(!alert)
     {
@@ -448,16 +382,13 @@ export const updateUserAlert: MutationResolvers['updateUserAlert'] = async (_, a
 
 export const deleteUserAlert: MutationResolvers['deleteUserAlert'] = async (_, args, context) => {
   try {
-    if(!context.sessionUser.user)
-    {
-      throw ("Not Authorized")
-    }
+    const user = await requireUserSession(context)
 
     if(!args.alertId){
       throw new Error("AlertId is required");
     }
 
-    var alert = await getUserAlertFromDb(args.alertId, context.sessionUser.user.id, context.db);
+    var alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if(alert){
       await context.db.prisma.alert.delete({where: {id:args.alertId}})

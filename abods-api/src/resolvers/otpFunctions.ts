@@ -25,7 +25,7 @@ import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate }
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
-import { emptyResolver } from './helpers.js';
+import { emptyResolver, requireUserSession } from './helpers.js';
 
 interface DayCount {
   dayOfWeek: number;
@@ -36,13 +36,11 @@ interface DayCount {
 
 export const getOperatorList: QueryResolvers['operators'] = async (_, __, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not Authorized";
-    }
+    const user = await requireUserSession(context)
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = await getOperatorsDropDown(context.sessionUser, context.db)
+    const userOperators = await getOperatorsDropDown(user, context.db)
 
     if (!userOperators) {
       throw "No operators for user";
@@ -58,23 +56,10 @@ export const getOperatorList: QueryResolvers['operators'] = async (_, __, contex
 };
 
 const getOperatorsDropDown = async (
-  sessionUser: SessionUser,
+  user: SessionUser,
   db: Context,
 ): Promise<OperatorType[]> => {
-  if (!sessionUser.user) {
-    throw "Not Authorized";
-  }
-
-  if (!sessionUser.userOrganisationIDs) {
-    throw "User not in any organisations";
-  }
-
-  let orgOperators: { operatorref: string }[] = [];
-
-  orgOperators = await getOperatorsFromOrgId(
-    sessionUser.userOrganisationIDs,
-    db,
-  );
+  const orgOperators = await getOperatorsFromOrgId(user.orgIds, db);
 
   const [userOperators, adminAreas] = await Promise.all([
     getOperatorsFroServiceDetails(orgOperators, db),
@@ -100,19 +85,11 @@ const getOperatorsDropDown = async (
 }
 
 export const getOperators = async (
-  sessionUser: SessionUser,
+  user: SessionUser,
   db: Context,
   adminAreaIds?: string[]
 ) => {
   try {
-    if (!sessionUser.user) {
-      throw "Not Authorized";
-    }
-
-    if (!sessionUser.userOrganisationIDs) {
-      throw "User not in any organisations";
-    }
-
     let adminAreaNumberIds: number[] = [];
 
     if (adminAreaIds && adminAreaIds.length > 0) {
@@ -135,7 +112,7 @@ export const getOperators = async (
         operatorOrganisations: {
           some: {
             organisation_id: {
-              in: sessionUser.userOrganisationIDs,
+              in: user.orgIds,
             },
           },
         },
@@ -181,12 +158,10 @@ const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
 
 export const getServiceInfo: QueryResolvers['serviceInfo'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     // get user's operator ids
-    const operators = await getOperators(context.sessionUser, context.db);
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -262,13 +237,11 @@ const getOperatorLines = async (operatorRef: string, db: Context, filterDate?: D
 };
 
 export const getLines: TransitModelTypeResolvers['lines'] = async (_, args, context, info) => {
-  if (!context.sessionUser.user) {
-    throw 'Not authorized';
-  }
+  const user = await requireUserSession(context)
   const { operatorId } = info.variableValues as { operatorId: string };
   const operationName: string = info.operation.name?.value ?? "";
 
-  const operators = await getOperators(context.sessionUser, context.db);
+  const operators = await getOperators(user, context.db);
 
   if (!operators) {
     throw "No user operators";
@@ -292,9 +265,7 @@ export const getLines: TransitModelTypeResolvers['lines'] = async (_, args, cont
 
 export const getOperator: QueryResolvers['operator'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    await requireUserSession(context)
 
     // TODO: is operator id in users' operator id array
     logger.debug("getOperator op: {0} ", args.operatorId);
@@ -325,9 +296,7 @@ export const getOperator: QueryResolvers['operator'] = async (_, args, context) 
 
 export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctualityOverview'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     // start - performance timer
     var startTimer = performance.now();
@@ -350,11 +319,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
     logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
     if (onTimeMinMinutes || onTimeMaxMinutes) {
-      return compareThresholds(args.inputs, context.sessionUser, context.db)
+      return compareThresholds(args.inputs, user, context.db)
     }
 
     // get an array of user's org's operator nocs.
-    const operators = await getOperators(context.sessionUser, context.db);
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -417,9 +386,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
 
 export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPerformance'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     // start - performance timer
     var startTimer = performance.now();
@@ -442,7 +409,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPer
     logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
     // get an array of user's org's operator nocs.
-    const operators = await getOperators(context.sessionUser, context.db, adminAreaIds || []);
+    const operators = await getOperators(user, context.db, adminAreaIds || []);
 
     if (!operators) {
       throw "No user operators";
@@ -524,9 +491,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPer
 
 export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualityDayOfWeek'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw 'Not authorized';
-    }
+    const user = await requireUserSession(context)
 
     const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
     let {
@@ -549,7 +514,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
       logger.debug(
         'getPunctualityDayOfWeek id: ' + JSON.stringify(operatorIds),
       );
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
 
       if (!operators) {
         throw 'No user operators';
@@ -680,9 +645,7 @@ const getStopsDistribution = async (
 
 export const getDelayFrequency: OnTimePerformanceTypeResolvers['delayFrequency'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw 'Not authorized';
-    }
+    const user = await requireUserSession(context)
 
     logger.debug('getDelayFrequency');
 
@@ -696,7 +659,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers['delayFrequency']
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
       logger.debug('getDelayFrequency id: ' + JSON.stringify(operatorIds));
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
 
       if (!operators) {
         throw 'No user operators';
@@ -723,9 +686,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers['delayFrequency']
 
 export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualityTimeOfDay'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
     // of the 10:30 slot, how many were ontime/early/late example
 
     const hoursOfDay: PunctualityTimeOfDayType[] = []
@@ -755,7 +716,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
       logger.debug(
         "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds)
       );
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -813,9 +774,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
 
 export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctualityTimeSeries'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
@@ -837,7 +796,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
     if (operatorIds.length == 1) {
       //if (granularity == "day" && operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
       const isDayGranularity = granularity === 'day'
       if (!operators) {
         throw "No user operators";
@@ -922,9 +881,7 @@ function getDaysInRange(startDate: Date, endDate: Date): Date[] {
 
 export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunctuality'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     const {
       filters,
@@ -936,7 +893,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
     const timingPointsOnly = filters?.timingPointsOnly
     const operatorIds = filters?.operatorIds?.filter(isDefined)
 
-    const operators = await getOperators(context.sessionUser, context.db);
+    const operators = await getOperators(user, context.db);
 
     const operatorNocs = operators?.map((o) => o.nocCode ?? "").filter((o)=> !!o) ?? [];
 
@@ -1054,9 +1011,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
 
 export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
     // for this operator & for this service, get all stops and their OTP stats
 
     const { filters } = args.inputs;
@@ -1072,7 +1027,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
     // fetch all otp records group by time difference
     if (operatorIds.length == 1) {
       logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -1174,9 +1129,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
 
 export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerformance'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
+    const user = await requireUserSession(context)
 
     let servicePunctualities: ServicePerformanceType[] = [];
 
@@ -1188,7 +1141,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerfo
 
     if (operatorIds.length == 1) {
       // get an array of user's org's operator nocs.
-      const operators = await getOperators(context.sessionUser, context.db);
+      const operators = await getOperators(user, context.db);
 
       if (!operators) {
         throw "No user operators";
@@ -1261,11 +1214,8 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerfo
 // -> OPERATOR PAGE
 export const getFrequentServices: HeadwayMetricsTypeResolvers['frequentServices'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
-
-    const operators = await getOperators(context.sessionUser, context.db);
+    const user = await requireUserSession(context)
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw "No user operators";
@@ -1304,11 +1254,8 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers['frequentServices'
 
 export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers['frequentServiceInfo'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw 'Not authorized';
-    }
-
-    const operators = await getOperators(context.sessionUser, context.db);
+    const user = await requireUserSession(context)
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1353,11 +1300,8 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers['frequentServic
 
 export const getHeadwayOverview: HeadwayMetricsTypeResolvers['headwayOverview'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw 'Not authorized';
-    }
-
-    const operators = await getOperators(context.sessionUser, context.db);
+    const user = await requireUserSession(context)
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1417,16 +1361,14 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers['headwayOverview'] 
 
 export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSeries'] = async (_, args, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw 'Not authorized';
-    }
+    const user = await requireUserSession(context)
 
     const { filters } = args.inputs;
     const { granularity } = filters || {};
 
     const isDayGranularity = granularity === 'day'
 
-    const operators = await getOperators(context.sessionUser, context.db);
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw 'No user operators';
@@ -1509,11 +1451,8 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
 
 export const getAdminAreas: QueryResolvers['adminAreas'] = async (_, __, context) => {
   try {
-    if (!context.sessionUser.user) {
-      throw "Not authorized";
-    }
-
-    const operators = await getOperators(context.sessionUser, context.db);
+    const user = await requireUserSession(context)
+    const operators = await getOperators(user, context.db);
 
     if (!operators) {
       throw "No operators";

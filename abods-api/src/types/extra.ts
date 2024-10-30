@@ -1,15 +1,18 @@
 import { Context } from '../context';
-import { bods_user } from '@prisma/client';
 import express from 'express';
 
 export interface RequestContext {
   req: express.Request;
   res: express.Response;
-  sessionUser: SessionUser;
+  headers: any;
   db: Context;
 }
 
 export interface SessionUser {
-  user: bods_user | null;
-  userOrganisationIDs: number[] | null;
+  id: number
+  username: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  orgIds: number[];
 }
