@@ -32,7 +32,7 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
   BodsVpcEndpoint:
-    Type: CommaDelimitedList
+    Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
     Default: ''
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
