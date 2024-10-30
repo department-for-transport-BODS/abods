@@ -1,5 +1,5 @@
 import { QueryResolvers, Resolvers } from '../types/generated.js'
-import { requireUserSession } from './helpers';
+import { requireUserSession } from './helpers.js';
 
 // Summary: fetch api info
 export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {

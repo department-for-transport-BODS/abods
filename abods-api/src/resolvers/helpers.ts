@@ -1,5 +1,5 @@
-import { RequestContext, SessionUser } from '../types/extra';
-import logger from '../logger';
+import { RequestContext, SessionUser } from '../types/extra.js';
+import logger from '../logger.js';
 
 export const emptyResolver = async () => ({});
 

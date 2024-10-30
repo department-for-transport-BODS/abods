@@ -5,7 +5,7 @@ import otpResolvers from './otpFunctions.js';
 import vehicleJourneyResolvers from './vehicleJourneyFunctions.js';
 import corridorResolvers from './corridorFunctions.js';
 import avlResolvers from './avlFunctions.js';
-import { Resolvers } from '../types/generated';
+import { Resolvers } from '../types/generated.js';
 import { DateResolver, DateTimeResolver, TimeResolver } from 'graphql-scalars';
 
 export const customScalarResolvers: Resolvers = {

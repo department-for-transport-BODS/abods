@@ -1,5 +1,5 @@
 import { Prisma, Timetable } from '@prisma/client';
-import { Context } from '../context';
+import { Context } from '../context.js';
 import {
   CorridorJourneyServiceStatsType,
   CorridorJourneyStatsOption,

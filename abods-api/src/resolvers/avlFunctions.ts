@@ -1,6 +1,6 @@
-import logger from '../logger';
-import { QueryResolvers, Resolvers } from '../types/generated';
-import { requireApiToken } from './helpers';
+import logger from '../logger.js';
+import { QueryResolvers, Resolvers } from '../types/generated.js';
+import { requireApiToken } from './helpers.js';
 
 export const getAVLLineLevelStatus: QueryResolvers['avlLineLevelStatus'] = async (_, args, context) => {
   requireApiToken(context)
