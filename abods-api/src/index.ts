@@ -29,26 +29,20 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
-      const { event, context } = getCurrentInvoke()
-      const headers = event.headers
-      try {
-        logger.debug("Server started and within context block")
-        const retry = getDate().isAfter(startTime.add(10, 'minute'))
-        if(retry) {
-          db = await createContext(true)
-          startTime = getDate()
+      const { event } = getCurrentInvoke();
+      const headers = event.headers;
+      logger.debug('Server started and within context block');
+      const retry = getDate().isAfter(startTime.add(10, 'minute'));
+      if (retry) {
+        try {
+          db = await createContext(true);
+          startTime = getDate();
+        } catch (error) {
+          logger.error(error)
+          logger.error("Failed to create database context");
         }
-
-        return {
-          req,
-          res,
-          headers,
-          db,
-        }
-      } catch (error) {
-        logger.error("****error in context handling: " + error)
-        return { req, res, headers, db };
       }
+      return { req, res, headers, db };
     }
   })
 );
