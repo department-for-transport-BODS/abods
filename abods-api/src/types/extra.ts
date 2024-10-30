@@ -1,4 +1,4 @@
-import { Context } from '../context';
+import { Context } from '../context.js';
 import express from 'express';
 
 export interface RequestContext {

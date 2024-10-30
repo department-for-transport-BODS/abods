@@ -7,11 +7,10 @@ import {
   QueryResolvers,
   MutationResolvers
 } from '../types/generated.js';
-import { SessionUser } from "../types/extra.js";
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 import logger from '../logger.js';
-import { requireUserSession } from './helpers';
+import { requireUserSession } from './helpers.js';
 
 
 // Summary: fetch all users
