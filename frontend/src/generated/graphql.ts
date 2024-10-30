@@ -68,6 +68,18 @@ export type ApiInfoType = {
   version: Scalars['String'];
 };
 
+export type AvlFiltersInput = {
+  lineName?: Maybe<Scalars['String']>;
+  operatorNoc?: Maybe<Scalars['String']>;
+};
+
+export type AvlLineLevelStatus = {
+  __typename?: 'AvlLineLevelStatus';
+  lastRecordedAtTime: Scalars['DateTime'];
+  lineName: Scalars['String'];
+  operatorNoc: Scalars['String'];
+};
+
 export type AvlPoint = {
   __typename?: 'AvlPoint';
   latitude: Scalars['Float'];
@@ -841,6 +853,7 @@ export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo?: Maybe<ApiInfoType>;
+  avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   events?: Maybe<EventResponse>;
@@ -863,6 +876,11 @@ export type Query = {
 
 export type QueryAdminAreasArgs = {
   adminAreaIds?: Maybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryAvlLineLevelStatusArgs = {
+  filters?: Maybe<AvlFiltersInput>;
 };
 
 

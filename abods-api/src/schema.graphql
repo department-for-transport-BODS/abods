@@ -22,6 +22,7 @@ type Query {
     eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
     avls(groupId: String!): [AvlPoint!]!
     route(groupId: String!): [Stop!]!
+    avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 }
 
 input OperatorFilterInput {
@@ -816,4 +817,15 @@ enum OtpEnum {
     Early,
     Late,
     OnTime
+}
+
+input AvlFiltersInput {
+  operatorNoc: String
+  lineName: String
+}
+
+type AvlLineLevelStatus {
+  operatorNoc: String!
+  lineName: String!
+  lastRecordedAtTime: DateTime!
 }
