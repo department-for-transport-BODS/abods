@@ -16,7 +16,8 @@
     "start": "npm run build && node ./dist/localServer.js",
     "start:dev": "concurrently \"npm run watch\" \"node ./dist/localServer.js\"",
     "start:sam": "npm run sam:build && npm run sam:start",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen --config codegen.ts",
+    "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
