@@ -65,9 +65,6 @@ export const requireUserSession = async (context: RequestContext) => {
   return sessionUser;
 };
 
-export const requireApiToken = (context: RequestContext) => {
-  // todo
-};
 
 function getHeader(headers: IncomingHttpHeaders, name: string) {
   return headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name];
