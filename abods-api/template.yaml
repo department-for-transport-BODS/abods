@@ -66,6 +66,7 @@ Resources:
     Condition: HasVpcEndpoint
     Properties:
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
+      Description: "Private API to allow BODS to access platform via VPC Endpoint"
       StageName: !Ref Environment
       EndpointConfiguration: 
         Type: PRIVATE
