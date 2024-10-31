@@ -819,11 +819,21 @@ enum OtpEnum {
     OnTime
 }
 
+"""
+Filters for AvlLineLevelStatus
+
+BODS integration uses this so ensure all changes are backwards compatible
+"""
 input AvlFiltersInput {
   operatorNoc: String
   lineName: String
 }
 
+"""
+Last Received AVL for on a Line basis
+
+BODS integrates with this endpoint so ensure all changes are backwards compatible
+"""
 type AvlLineLevelStatus {
   operatorNoc: String!
   lineName: String!
