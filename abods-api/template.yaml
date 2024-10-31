@@ -104,8 +104,18 @@ Resources:
             - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
             - !Ref ProjectName
           DB_USER: !Sub '${ProjectName}_proxy_rw'
+          M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref GraphQLAPITokenSecret
+  GraphQLAPITokenSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${ProjectName}/${Environment}/GraphQLTokenAuthConfig
+      Description: 'This Secret is used to set the HMAC and allowed API Key for BODS to connect to private endpoints'
+
 
   GraphQlFunctionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
