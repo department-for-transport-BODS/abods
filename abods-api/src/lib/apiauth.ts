@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import logger from "../logger.js";
 import { RequestContext } from "../types/extra.js";
-import { GraphQLError, GraphQLResolveInfo } from "graphql";
+import { GraphQLResolveInfo } from "graphql";
 import { AuthContext } from "../context.js";
 import { throwUnauthenticatedError } from "../resolvers/helpers.js";
 export const hashApiKey = (key: string, hmacSecret: string): string => {
