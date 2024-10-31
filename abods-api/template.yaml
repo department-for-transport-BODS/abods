@@ -31,11 +31,13 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
-
+  BodsVpcEndpoint:
+    Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
+    Default: ''
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
   IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
-
+  HasVpcEndpoint: !Not [!Equals [!Select [0, !Ref BodsVpcEndpoint], '']]
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
@@ -43,7 +45,7 @@ Resources:
   GraphQlApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub  ${ProjectName}-${Environment}-graphql-function-api
+      Name: !Sub ${ProjectName}-${Environment}-graphql-function-api
       StageName: !Ref Environment
       EndpointConfiguration: 
         Type: REGIONAL
@@ -58,6 +60,28 @@ Resources:
               Condition:
                 StringEquals:
                   aws:UserAgent: 'Amazon CloudFront'
+
+  PrivateGraphQlApi:
+    Type: AWS::Serverless::Api
+    Condition: HasVpcEndpoint
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
+      Description: "Private API to allow BODS to access platform via VPC Endpoint"
+      StageName: !Ref Environment
+      EndpointConfiguration: 
+        Type: PRIVATE
+        VpcEndpointIds: !Ref BodsVpcEndpoint
+      TracingEnabled: true
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: execute-api:/*
+              Condition:
+                StringEquals:
+                  aws:SourceVpce: !Ref BodsVpcEndpoint
 
   GraphQlFunction:
     Type: AWS::Serverless::Function
@@ -79,6 +103,14 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref GraphQlApi
+        PrivateApiEvents: !If
+          - HasVpcEndpoint
+          - Type: Api
+            Properties:
+              Path: /{proxy+}
+              Method: ANY
+              RestApiId: !Ref PrivateGraphQlApi
+          - !Ref AWS::NoValue
       VpcConfig:
         SubnetIds: !Ref VpcSubnets
         SecurityGroupIds:

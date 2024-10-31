@@ -44,6 +44,7 @@ sandbox:
         Environment='sandbox'
         VpcId='/abods/sandbox/vpc/id'
         VpcSubnets='/abods/sandbox/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/sandbox/external/bods-apigw-vpc-endpoint-ids'
 
 dev:
   deploy:
@@ -56,6 +57,7 @@ dev:
         Environment='dev'
         VpcId='/abods/dev/vpc/id'
         VpcSubnets='/abods/dev/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/dev/external/bods-apigw-vpc-endpoint-ids'
 
 test:
   deploy:
@@ -68,6 +70,7 @@ test:
         Environment='test'
         VpcId='/abods/test/vpc/id'
         VpcSubnets='/abods/test/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/test/external/bods-apigw-vpc-endpoint-ids'
 
 uat:
   deploy:
@@ -80,6 +83,7 @@ uat:
         Environment='uat'
         VpcId='/abods/uat/vpc/id'
         VpcSubnets='/abods/uat/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/uat/external/bods-apigw-vpc-endpoint-ids'
 
 cavl:
   deploy:
@@ -92,6 +96,7 @@ cavl:
         Environment='cavl'
         VpcId='/abods/cavl/vpc/id'
         VpcSubnets='/abods/cavl/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/cavl/external/bods-apigw-vpc-endpoint-ids'
 
 prod:
   sync:
@@ -107,3 +112,4 @@ prod:
         Environment='prod'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'
+        BodsVpcEndpoint='/abods/prod/external/bods-apigw-vpc-endpoint-ids'
