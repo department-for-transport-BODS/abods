@@ -1,9 +1,8 @@
 import crypto from "crypto";
 import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import logger from "../logger.js";
-import { RequestContext } from "../types/extra.js";
+import { AuthContext, RequestContext } from "../types/extra.js";
 import { GraphQLResolveInfo } from "graphql";
-import { AuthContext } from "../context.js";
 import { throwUnauthenticatedError } from "../resolvers/helpers.js";
 export const hashApiKey = (key: string, hmacSecret: string): string => {
   if (!key || !hmacSecret) {
@@ -22,7 +21,7 @@ type AuthResult = {
 };
 
 export const requireApiToken = (context: RequestContext): AuthResult => {
-  if (!context.db.apiKeyAuth) {
+  if (!context.apiKeyAuth) {
     logger.error("API authentication is disabled due to missing config");
     return {
       isAuthenticated: false,
@@ -40,8 +39,8 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
   }
 
   try {
-    const hashedToken = hashApiKey(providedToken, context.db.apiKeyAuth.Hmac);
-    const isValid = hashedToken === context.db.apiKeyAuth.allowedTokenHash;
+    const hashedToken = hashApiKey(providedToken, context.apiKeyAuth.Hmac);
+    const isValid = hashedToken === context.apiKeyAuth.allowedTokenHash;
 
     return {
       isAuthenticated: isValid,
