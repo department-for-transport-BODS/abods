@@ -4,6 +4,7 @@ import logger from "../logger.js";
 import { RequestContext } from "../types/extra.js";
 import { GraphQLError, GraphQLResolveInfo } from "graphql";
 import { AuthContext } from "../context.js";
+import { throwUnauthenticatedError } from "../resolvers/helpers.js";
 export const hashApiKey = (key: string, hmacSecret: string): string => {
   if (!key || !hmacSecret) {
     throw new Error("Key and HMAC secret are required");
@@ -120,13 +121,7 @@ export const tokenAuthRequiredResolver = <TResult, TParent, TArgs>(
     const authResult = requireApiToken(context);
 
     if (!authResult.isAuthenticated) {
-      throw new GraphQLError(authResult.message || "Unauthorized", {
-        extensions: {
-          code: "UNAUTHENTICATED",
-          http: { status: 401 },
-          path: info.path.key,
-        },
-      });
+      throwUnauthenticatedError(authResult.message, info.path.key);
     }
 
     return resolver(parent, args, context, info);
