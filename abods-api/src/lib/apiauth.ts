@@ -56,14 +56,14 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
 };
 
 const getClientHashFromAWS = async (): Promise<AuthContext> => {
-  if (!process.env.M2M_SECRET_AWS_REGION || !process.env.M2M_API_SECRET_NAME) {
+  if (!process.env.AWS_REGION || !process.env.M2M_API_SECRET_NAME) {
     throw new Error(
       "API Token Auth Hash: AWS region and secret name are required"
     );
   }
 
   const secretsManager = new SecretsManager({
-    region: process.env.M2M_SECRET_AWS_REGION,
+    region: process.env.AWS_REGION,
   });
 
   const response = await secretsManager.getSecretValue({
