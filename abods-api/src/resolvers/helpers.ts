@@ -76,13 +76,12 @@ export const requireUserSession = async (context: RequestContext) => {
 };
 
 
-function getHeader(headers: IncomingHttpHeaders, name: string) {
+function getHeader(headers: IncomingHttpHeaders, name: string): string | string[] | undefined {
   return headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name];
 }
 
-const parseCookie = (str: string) =>
-  str
-    .split(';')
+const parseCookie = (str: string | string[]) =>
+  (typeof str === 'string' ? str.split(';') : str)
     .map((v) => v.split('='))
     .reduce((acc: { [key: string]: string }, v) => {
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
