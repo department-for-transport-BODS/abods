@@ -63,7 +63,6 @@ Resources:
 
   PrivateGraphQlApi:
     Type: AWS::Serverless::Api
-    Condition: HasVpcEndpoint
     Properties:
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
       Description: "Private API to allow BODS to access platform via VPC Endpoint"
@@ -103,14 +102,12 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref GraphQlApi
-        PrivateApiEvents: !If
-          - HasVpcEndpoint
-          - Type: Api
-            Properties:
-              Path: /{proxy+}
-              Method: ANY
-              RestApiId: !Ref PrivateGraphQlApi
-          - !Ref AWS::NoValue
+        PrivateApiEvents: 
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref PrivateGraphQlApi
       VpcConfig:
         SubnetIds: !Ref VpcSubnets
         SecurityGroupIds:
