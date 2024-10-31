@@ -23,8 +23,7 @@ export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
         });
       if (!avlData || avlData.length === 0) {
         logger.debug(
-          "No AVL data found. Filters: ",
-          JSON.stringify(args.filters)
+          "No AVL data found. Filters: " + JSON.stringify(args.filters)
         );
         return [];
       }
