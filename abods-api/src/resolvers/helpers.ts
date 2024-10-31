@@ -1,5 +1,16 @@
 import { RequestContext, SessionUser } from '../types/extra.js';
 import logger from '../logger.js';
+import { IncomingHttpHeaders } from 'http';
+import { GraphQLError } from "graphql";
+export const throwUnauthenticatedError = (message: string | undefined, path: string | number | undefined): never => {
+  throw new GraphQLError(message || "Unauthorized", {
+    extensions: {
+      code: "UNAUTHENTICATED",
+      http: { status: 401 },
+      path,
+    },
+  });
+};
 
 export const emptyResolver = async () => ({});
 
@@ -64,11 +75,8 @@ export const requireUserSession = async (context: RequestContext) => {
   return sessionUser;
 };
 
-export const requireApiToken = (context: RequestContext) => {
-  // todo
-};
 
-function getHeader(headers, name) {
+function getHeader(headers: IncomingHttpHeaders, name: string) {
   return headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name];
 }
 
