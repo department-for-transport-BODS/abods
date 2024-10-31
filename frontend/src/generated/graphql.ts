@@ -68,6 +68,28 @@ export type ApiInfoType = {
   version: Scalars['String'];
 };
 
+/**
+ * Filters for AvlLineLevelStatus
+ * 
+ * BODS integration uses this so ensure all changes are backwards compatible
+ */
+export type AvlFiltersInput = {
+  lineName?: Maybe<Scalars['String']>;
+  operatorNoc?: Maybe<Scalars['String']>;
+};
+
+/**
+ * Last Received AVL for on a Line basis
+ * 
+ * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ */
+export type AvlLineLevelStatus = {
+  __typename?: 'AvlLineLevelStatus';
+  lastRecordedAtTime: Scalars['DateTime'];
+  lineName: Scalars['String'];
+  operatorNoc: Scalars['String'];
+};
+
 export type AvlPoint = {
   __typename?: 'AvlPoint';
   latitude: Scalars['Float'];
@@ -380,7 +402,7 @@ export type HeadwayMetricsType = {
 
 
 export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 };
 
 
@@ -843,6 +865,7 @@ export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo?: Maybe<ApiInfoType>;
+  avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   events?: Maybe<EventResponse>;
@@ -865,6 +888,11 @@ export type Query = {
 
 export type QueryAdminAreasArgs = {
   adminAreaIds?: Maybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryAvlLineLevelStatusArgs = {
+  filters?: Maybe<AvlFiltersInput>;
 };
 
 
@@ -1678,7 +1706,7 @@ export type HeadwayFrequentServicesQuery = (
 );
 
 export type HeadwayFrequentServiceInfoQueryVariables = Exact<{
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 }>;
 
 
@@ -2971,7 +2999,7 @@ export const HeadwayFrequentServicesDocument = gql`
     }
   }
 export const HeadwayFrequentServiceInfoDocument = gql`
-    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType) {
+    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType!) {
   headwayMetrics {
     frequentServiceInfo(inputs: $inputs) {
       numHours

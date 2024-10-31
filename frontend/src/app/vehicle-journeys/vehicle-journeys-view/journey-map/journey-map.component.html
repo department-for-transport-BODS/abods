@@ -131,7 +131,7 @@
       className="gds-popup"
     >
       <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
-        Received at: {{ tooltipPing.formattedTime }}
+        Received at: {{ tooltipPing.ts | dateTimeToFormat: 'HH:mm:ss'  }}
       </div>
     </mgl-popup>
   </ng-container>

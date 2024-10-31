@@ -21,7 +21,7 @@ on:
   release:
     types: [published]
   repository_dispatch:
-    types: [automated-deploy-dev, merge-dev-to-test, merge-test-to-main]
+    types: [automated-deploy-dev]
 
 
 concurrency:
@@ -265,32 +265,3 @@ jobs:
           aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
           aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"
-
-  create-pull-request:
-    runs-on: ubuntu-latest
-    needs:
-      - frontend
-    permissions: write-all
-    steps:
-      - name: Create Pull Request
-        uses: actions/github-script@v6
-        if: contains(fromJSON('["refs/heads/sandbox", "refs/heads/dev", "refs/heads/test"]'), github.ref)
-        with:
-          script: |
-            const branchName = context.ref.split("/").pop()
-            const nextBranch = {"sandbox": "dev", "dev": "test", "test": "main"}[branchName]
-            try {
-                await github.rest.pulls.create({
-                    title: `${branchName} -> ${nextBranch}`,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    head: branchName,
-                    base: nextBranch,
-                    body: `This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.`
-                });
-            } catch (err) {
-                if (err.status !== 422) throw err
-                if (err.response.data.message !== `Validation Failed`) throw err
-                if (err.response.data.errors[0]?.message !== `A pull request already exists for ${context.repo.owner}:${branchName}.`) throw err
-                console.log("A PR already exists")
-            }

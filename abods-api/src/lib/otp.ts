@@ -1,11 +1,10 @@
-import { all_operators, feed_monitor_summary, Prisma } from '@prisma/client';
-import { Context } from '../context';
+import { all_operators, feed_monitor_summary, Prisma, PrismaClient } from '@prisma/client';
 import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from '../types/generated.js';
 import { SessionUser } from "../types/extra.js";
-import { getOperators } from '../resolvers/otp/otpFunctions.js';
+import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
 import { getDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
@@ -21,12 +20,12 @@ export type ExpectedJourneyType = {
 }
 
 const getThresholds = async (
-  db: Context,
+  db: PrismaClient,
   where: Prisma.timetable_threshold_summaryWhereInput,
 ) => {
   const whereCopy = { ...where };
 
-  const result = db.prisma.timetable_threshold_summary.aggregate({
+  const result = db.timetable_threshold_summary.aggregate({
     _sum: {
       otp_count: true,
     },
@@ -37,7 +36,7 @@ const getThresholds = async (
 };
 
 const aggThresholds = async (
-  db: Context,
+  db: PrismaClient,
   whereEarly: Prisma.timetable_threshold_summaryWhereInput,
   whereLate: Prisma.timetable_threshold_summaryWhereInput,
   whereOnTime: Prisma.timetable_threshold_summaryWhereInput,
@@ -62,7 +61,7 @@ const aggThresholds = async (
 export const compareThresholds = async (
   inputs: PerformanceInputType,
   sessionUser: SessionUser,
-  db: Context,
+  db: PrismaClient,
 ): Promise<PunctualityTotalsType | null> => {
   const { fromTimestamp, toTimestamp, filters } = inputs;
 
@@ -234,11 +233,7 @@ export const compareThresholds = async (
   return null;
 };
 
-export const getOperatorsFromOrgId = async (
-  orgId: number[],
-  db: Context,
-  userOperatorIds?: string[]
-) => {
+export const getOperatorsFromOrgId = async (orgId: number[], db: PrismaClient, userOperatorIds?: string[]) => {
   const where: Prisma.bods_organisationoperatorWhereInput = {
     organisation_id: {
       in: orgId,
@@ -255,7 +250,7 @@ export const getOperatorsFromOrgId = async (
     };
   }
 
-  return db.prisma.bods_organisationoperator.findMany({
+  return db.bods_organisationoperator.findMany({
     where: where,
     select: {
       operatorref: true,
@@ -266,9 +261,9 @@ export const getOperatorsFromOrgId = async (
 
 export const getOperatorsFroServiceDetails = async (
   orgOperators: { operatorref: string }[],
-  db: Context,
+  db: PrismaClient,
 ) => {
-  return db.prisma.service_details.findMany({
+  return db.service_details.findMany({
     where: {
       operator_noc: {
         in: orgOperators.map((operator) => operator.operatorref),
@@ -286,16 +281,16 @@ export const getOperatorsFroServiceDetails = async (
   });
 };
 
-export const getNocAdminAreas = async (db: Context) => {
-  return db.prisma.noc_adminarea.findMany({
+export const getNocAdminAreas = async (db: PrismaClient) => {
+  return db.noc_adminarea.findMany({
     include: {
       admin_area: true
     }
   })
 }
 
-export const getOperatorWithFeed = (db: Context, operatorRefs: string) => {
-  return db.prisma.all_operators.findUnique({
+export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
+  return db.all_operators.findUnique({
     where: {
       operatorref: operatorRefs,
       feed_summary: {
@@ -310,14 +305,9 @@ export const getOperatorWithFeed = (db: Context, operatorRefs: string) => {
 
 
 export const getFeedMonitoringList = async (
-  db: Context,
-  sessionUser: SessionUser,
+  db: PrismaClient,
   userOperatorId: string
 ) => {
-  if (!sessionUser.userOrganisationIDs) {
-    throw "No organisation mapped to user";
-  }
-
   const operator: AllOperatorWithFeedSummary | null = await getOperatorWithFeed(
     db,
     userOperatorId
@@ -351,7 +341,7 @@ const getFeedStatus = (
 };
 
 export const getExpectedJourneys = async (
-  db: Context,
+  db: PrismaClient,
   operatorId: string,
   inputDate: Dayjs,
   duration?: number
@@ -371,7 +361,7 @@ export const getExpectedJourneys = async (
     };
   }
 
-  return db.prisma.expected_journeys.findMany({
+  return db.expected_journeys.findMany({
     where: where,
     select: {
       group_id: true,
@@ -383,7 +373,7 @@ export const getExpectedJourneys = async (
 };
 
 export const getAvlPoints = async (
-  db: Context,
+  db: PrismaClient,
   operatorId: string,
   inputDate: Dayjs,
   last20Mins?: boolean,
@@ -407,7 +397,7 @@ export const getAvlPoints = async (
     };
   }
 
-  return db.prisma.siriVMPositions.findMany({
+  return db.siriVMPositions.findMany({
     where: where,
     select: {
       recorded_at_time: true,
@@ -420,13 +410,13 @@ export const getAvlPoints = async (
 export const getAvlPerMinute = async (avl: { group_id: string; recorded_at_time: Date; vehicle_ref: string;}[]) => {
   const journeys = new Map<string, Set<string>>()
   avl.map((avl) => {
-    const recordedAt = 
+    const recordedAt =
       getDate(avl.recorded_at_time)
         .set("second", 0)
         .set("millisecond", 0)
         .toISOString()
     const journey = journeys.get(recordedAt) || new Set()
-    if ( 
+    if (
       !journey.has(avl.group_id)
     ) {
       journey.add(avl.group_id)

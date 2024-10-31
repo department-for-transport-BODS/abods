@@ -51,7 +51,7 @@ view all_operators {
   operatorOrganisations bods_organisationoperator[]
   noc_adminareas        noc_adminarea[]
   service_details       service_details[]
-  feed_summary          feed_monitor_summary?        
+  feed_summary          feed_monitor_summary?
 }
 
 view bods_organisationoperator {
@@ -267,8 +267,8 @@ model expected_journeys {
   noc_and_line_and_servicecode                  String
   stop_count                  Int
   vehicle_journey_id          Int               
-  expected_journey_start      DateTime          @db.Timetz() 
-  expected_journey_end        DateTime?          @db.Timetz() 
+  expected_journey_start      DateTime          @db.Timetz()
+  expected_journey_end        DateTime?          @db.Timetz()
   expected_service            expected_services  @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
   timetable                   Timetable[]
   vehicle_journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
@@ -462,6 +462,14 @@ model corridor_stops {
 model distinct_routes {
   id            Int @id @default(1)
   route         String  @db.Text
+}
+
+model avl_line_level_monitoring {
+  operatorNoc         String   @map("operator_noc")
+  lineName            String   @map("line_name")
+  lastRecordedAtTime  DateTime @map("last_recorded_at_time")
+
+  @@unique([operatorNoc, lineName], name: "uk_operator_line")
 }
 
 model feed_monitor_summary {

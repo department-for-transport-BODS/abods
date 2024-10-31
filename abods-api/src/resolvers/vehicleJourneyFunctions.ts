@@ -1,29 +1,23 @@
 import { Dayjs } from 'dayjs';
-import { Context } from '../../context';
-import { getDate, getFormattedDate } from '../../lib/dayjs.js';
+import { getDate, getFormattedDate } from '../lib/dayjs.js';
 import {
   OtpEnum,
   UniqueJourneyType,
-  VehicleReplayInputType,
-  QueryResolvers
-} from '../../types/generated.js';
-import { SessionUser } from '../../types/extra';
+  QueryResolvers,
+  Resolvers,
+  VehicleReplayNamespaceResolvers
+} from '../types/generated.js';
+import { emptyResolver, requireUserSession } from './helpers.js';
 
-export const findJourneys = async (
-  inputs: VehicleReplayInputType,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<UniqueJourneyType[]> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
-  const lineIds = inputs.filters?.lineIds;
+export const findJourneys: VehicleReplayNamespaceResolvers['findJourneys'] = async (_, args, context) => {
+  await requireUserSession(context);
+  const lineIds = args.inputs.filters?.lineIds;
 
   let journeysData: UniqueJourneyType[] = [];
   if (lineIds && lineIds.length > 0 && lineIds[0]) {
     const currentTime = getDate();
-    const toTimestamp = getDate(inputs.toTimestamp).subtract(4, 'hour');
-    let journeys = await db.prisma.expected_journeys.findMany({
+    const toTimestamp = getDate(args.inputs.toTimestamp).subtract(4, 'hour');
+    let journeys = await context.db.expected_journeys.findMany({
       where: {
         noc_and_line_and_servicecode: lineIds[0],
         date_of_journey: toTimestamp.toDate(),
@@ -66,13 +60,52 @@ export const findJourneys = async (
   return journeysData;
 };
 
+const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
+  latitude: true,
+  longitude: true,
+  vehicle_ref: true,
+  recorded_at_time: true,
+  Timetable: {
+    select: {
+      date_of_journey: true,
+      common_name: true,
+      atco_code: true,
+      stop_index: true,
+      expected_departure_time: true,
+      is_timing_point: true,
+      vehiclejourney_id: true,
+      time_difference: true,
+      expected_journeys: {
+        select: {
+          expected_journey_start: true,
+          expected_service: {
+            select: {
+              noc_and_line_and_servicecode: true,
+              service_name: true,
+              line_name: true,
+              expected_operator: {
+                select: {
+                  operator_noc: true,
+                  operator_name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: {
+      group_id: journeyId,
+      date_of_journey: journeyDate,
+    },
+  },
+});
+
 export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  await requireUserSession(context);
 
   const getAvlsForGroupId = async (groupId: string) => {
-    const journey = await context.db.prisma.siriVMPositions.findMany({
+    const journey = await context.db.siriVMPositions.findMany({
       where: { group_id: groupId }
     });
     return journey.map(s => ({
@@ -94,11 +127,9 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
 };
 
 export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
-  if (!context.sessionUser.user) {
-    throw 'Not Authorized';
-  }
+  await requireUserSession(context);
 
-  const route = await context.db.prisma.timetable.findMany({
+  const route = await context.db.timetable.findMany({
     where: { group_id: args.groupId }, select: {
       stop_latitude: true,
       stop_longitude: true,
@@ -148,3 +179,16 @@ export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
       otp: s.otp_state ? OtpEnum[s.otp_state] : null
     }));
 };
+
+const vehicleJourneyResolvers: Resolvers = {
+  Query: {
+    vehicleReplay: emptyResolver,
+    avls: getAvls,
+    route: getRoute
+  },
+  VehicleReplayNamespace: {
+    findJourneys: findJourneys,
+  }
+};
+
+export default vehicleJourneyResolvers;

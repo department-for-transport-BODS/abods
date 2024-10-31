@@ -39,20 +39,27 @@
     </button>
   </div>
   <div class="stop-list-item__value-container stop-list-item__value-container__align-right">
-    <span *ngIf="!stop?.isHidden" class="stop-list-item__scheduled">{{
-      stop?.scheduledDeparture ? (stop?.scheduledDeparture | dateTimeToFormat: 'HH:mm') : '-'
-    }}</span>
+    <div *ngIf="!stop?.isHidden" class="stop-list-item__scheduled">
+      <div class="stop-list-item__time-container">
+        <span
+          class="stop-list-item__time-container--minutes">{{ stop?.scheduledDeparture | dateTimeToFormat: 'HH:mm' }}</span>
+        <span
+          class="stop-list-item__time-container--seconds">:{{ stop?.scheduledDeparture | dateTimeToFormat: 'ss' }}</span>
+      </div>
+    </div>
   </div>
   <div class="stop-list-item__value-container stop-list-item__value-container__align-right">
     <span *ngIf="!stop?.isHidden" class="stop-list-item__actual">
-      <div
-        *ngIf="stop?.actualDeparture; else noActual"
-        [ngxTippy]="'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss':'+')"
-        [tippyProps]="{ theme: 'gds-tooltip' }"
-      >
-        <span>{{ stop?.actualDeparture | dateTimeToFormat: 'HH:mm' }}</span>
+      <div *ngIf="stop?.actualDeparture; else empty"
+           [ngxTippy]="'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss':'+')"
+           [tippyProps]="{ theme: 'gds-tooltip' }"
+           class="stop-list-item__time-container">
+        <span
+          class="stop-list-item__time-container--minutes">{{ stop?.actualDeparture | dateTimeToFormat: 'HH:mm' }}</span>
+        <span
+          class="stop-list-item__time-container--seconds">:{{ stop?.actualDeparture | dateTimeToFormat: 'ss' }}</span>
       </div>
-      <ng-template #noActual>-</ng-template>
+      <ng-template #empty>-</ng-template>
     </span>
   </div>
 </div>

@@ -74,6 +74,13 @@
                     ]
                 },
                 {
+                    "resource": "AWS::Serverless::Api.PrivateGraphQlApi",
+                    "check_ids": [
+                        "CKV_AWS_120",
+                        "CKV_AWS_76"
+                    ]
+                },
+                {
                     "resource": "AWS::Serverless::Function.GraphQlFunction",
                     "check_ids": [
                         "CKV_AWS_115",

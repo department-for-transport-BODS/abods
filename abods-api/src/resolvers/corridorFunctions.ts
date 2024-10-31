@@ -1,5 +1,4 @@
-import { Prisma, Timetable } from '@prisma/client';
-import { Context } from '../../context';
+import { Prisma, PrismaClient, Timetable } from '@prisma/client';
 import {
   CorridorJourneyServiceStatsType,
   CorridorJourneyStatsOption,
@@ -15,76 +14,56 @@ import {
   returnCorridor,
   returnCorridorType,
   updateCorridorDb,
-} from '../../lib/corridor.js';
+} from '../lib/corridor.js';
 import {
-  AddFirstStopInputType,
   CorridorJourneyTimeStatsType,
   CorridorStatsDayOfWeekType,
-  CorridorStatsHistogramType,
   CorridorStatsInputType,
   CorridorStatsPerServiceType,
   CorridorStatsTimeOfDayType,
-  CorridorSummaryStatsType,
-  CorridorType,
-  CorridorUpdateInputType,
-  CorridorInputType,
   InputMaybe,
-  Maybe,
-  MutationResponseType,
   ServiceLinkType,
-  StopType
-} from '../../types/generated.js';
-import { SessionUser } from "../../types/extra.js";
+  Resolvers,
+  CorridorStatsType,
+  MutationResolvers,
+  CorridorNamespaceResolvers,
+  CorridorStatsTypeResolvers
+} from '../types/generated.js';
 import {
   getDate,
   getDayFormattedDate,
   getHourFormattedDate,
-} from '../../lib/dayjs.js';
-import { getPercentile } from '../../lib/utils.js';
+} from '../lib/dayjs.js';
+import { getPercentile } from '../lib/utils.js';
 import haversineDistance from 'haversine-distance';
+import { emptyResolver, requireUserSession } from './helpers.js';
+import { SessionUser } from '../types/extra.js';
 
-export const listCorridors = async (
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<CorridorType[]> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
+export const listCorridors: CorridorNamespaceResolvers['corridorList'] = async (_, __, context) => {
+  const user = await requireUserSession(context)
 
-  const results: CorridorResultsType[] = await getCorridorList(db, sessionUser);
+  const results: CorridorResultsType[] = await getCorridorList(context.db, user);
 
   return returnCorridorType(results);
 };
 
-export const getCorridors = async (
-  corridorId: Number,
-  sessionUser: SessionUser,
-  db: Context,
-) => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
+export const getCorridors: CorridorNamespaceResolvers['getCorridor'] = async (_, args, context) => {
+  const user = await requireUserSession(context)
   const corridor: CorridorResultsType | null = await getCorridor(
-    corridorId,
-    db,
-    sessionUser
+    args.corridorId,
+    context.db,
+    user
   );
   return corridor ? returnCorridor(corridor) : null;
 };
 
-export const getStops = async (
-  inputs: Maybe<AddFirstStopInputType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<StopType[]> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
+export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, args, context) => {
+  const user = await requireUserSession(context)
 
-  if(!inputs) {
+  if(!args.inputs) {
     throw 'Invalid inputs'
   }
-  const { boundingBox, searchString } = inputs;
+  const { boundingBox, searchString } = args.inputs;
 
   const where: Prisma.naptan_stoppoint_latlongWhereInput = {}
 
@@ -114,13 +93,13 @@ export const getStops = async (
     };
   }
 
-  const adminAreas = await getOrgAdminAreas(db, sessionUser);
+  const adminAreas = await getOrgAdminAreas(context.db, user);
 
   where.admin_area_id = {
     in: adminAreas.map((admin) => admin.adminarea_id),
   };
 
-  const results = await db.prisma.naptan_stoppoint_latlong.findMany({
+  const results = await context.db.naptan_stoppoint_latlong.findMany({
     where: where,
     include: {
       locality: true,
@@ -138,22 +117,16 @@ export const getStops = async (
   }));
 };
 
-export const getSubsequentStops = async (
-  stopList: InputMaybe<Array<InputMaybe<string>>>|undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<StopType[]> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
+export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'] = async (_, args, context) => {
+  const user = await requireUserSession(context)
 
-  stopList = stopList || []
+  let stopList = args.stopList || []
 
   stopList.push('') // Push blank to add comma at the end
   let stopsPattern = stopList.join(',')
   const [routes, adminAreas] = await Promise.all([
-    distinctRoutes(db, stopsPattern),
-    getOrgAdminAreas(db, sessionUser),
+    distinctRoutes(context.db, stopsPattern),
+    getOrgAdminAreas(context.db, user),
   ]);
 
   stopList = []
@@ -176,7 +149,7 @@ export const getSubsequentStops = async (
   });
 
   if (stopList.length > 0) {
-    const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+    const stops = await context.db.naptan_stoppoint_latlong.findMany({
       where: {
         id: {
           in: stopList.map(Number)
@@ -206,21 +179,15 @@ export const getSubsequentStops = async (
   return []
 }
 
-export const createCorridor = async (
-  payload: InputMaybe<CorridorInputType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<MutationResponseType> => {
-  if (!sessionUser.user) {
-    throw 'Not Authorized';
-  }
-  if (!payload || !payload.name|| !payload.stopIds) throw "Bad Request"
+export const createCorridor: MutationResolvers['createCorridor'] = async (_, args, context) => {
+  const user = await requireUserSession(context)
+  if (!args.payload || !args.payload.name|| !args.payload.stopIds) throw "Bad Request"
 
-  const corridor = await db.prisma.corridor.create({
+  const corridor = await context.db.corridor.create({
     data: {
-      corridor_name: payload.name,
-      organisation_id: sessionUser.userOrganisationIDs?.[0] ?? 0,
-      user_id: sessionUser.user?.id ?? 0,
+      corridor_name: args.payload.name,
+      organisation_id: user.orgIds[0] ?? 0,
+      user_id: user.id,
     },
     select: {
       corridor_id: true,
@@ -229,9 +196,9 @@ export const createCorridor = async (
 
   await insertCorridorStops(
     corridor.corridor_id,
-    payload.stopIds.map(String),
-    db,
-    sessionUser
+    args.payload.stopIds.map(String),
+    context.db,
+    user
   );
 
   return {
@@ -239,10 +206,10 @@ export const createCorridor = async (
   };
 };
 
-export const insertCorridorStops = async (
+const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
-  db: Context,
+  db: PrismaClient,
   sessionUser: SessionUser
 ) => {
   const numberStopsList = stopIds.map(Number);
@@ -256,7 +223,7 @@ export const insertCorridorStops = async (
   }[] = [];
 
   const adminAreas = await getOrgAdminAreas(db, sessionUser);
-  const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+  const stops = await db.naptan_stoppoint_latlong.findMany({
     where: {
       id: {
         in: numberStopsList,
@@ -295,28 +262,24 @@ export const insertCorridorStops = async (
     });
   });
 
-  await db.prisma.corridor_stops.createMany({
+  await db.corridor_stops.createMany({
     data: records,
   });
 };
 
-export const deleteCorridor = async (
-  corridorId: InputMaybe<number> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<MutationResponseType> => {
+export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, args, context) => {
+  const user = await requireUserSession(context)
   if (
-    !sessionUser.user ||
-    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+    !await isCorridorMappedToUserOrg(Number(args.corridorId), user, context.db)
   ) {
     throw 'Not Authorized';
   }
 
-  if (!corridorId) throw 'Bad Request'
+  if (!args.corridorId) throw 'Bad Request'
 
   await Promise.all([
-    deleteCorridorDb(corridorId, db),
-    deleteCorridorStops(corridorId, db),
+    deleteCorridorDb(args.corridorId, context.db),
+    deleteCorridorStops(args.corridorId, context.db),
   ]);
 
   return {
@@ -324,31 +287,27 @@ export const deleteCorridor = async (
   };
 };
 
-export const updateCorridor = async (
-  inputs:  InputMaybe<CorridorUpdateInputType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<MutationResponseType> => {
-  if (!inputs) throw 'Bad Request'
+export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, args, context) => {
+  if (!args.inputs) throw 'Bad Request'
+  const user = await requireUserSession(context)
   if (
-    !sessionUser.user ||
-    !isCorridorMappedToUserOrg(Number(inputs.id), sessionUser, db)
+    !await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db)
   ) {
     throw 'Not Authorized';
   }
 
-  if (!inputs.id || !inputs.name || !inputs.stopList) throw "Bad Request"
+  if (!args.inputs.id || !args.inputs.name || !args.inputs.stopList) throw "Bad Request"
 
   await Promise.all([
-    updateCorridorDb(inputs.id, inputs.name, db),
-    deleteCorridorStops(inputs.id, db),
+    updateCorridorDb(args.inputs.id, args.inputs.name, context.db),
+    deleteCorridorStops(args.inputs.id, context.db),
   ]);
 
   await insertCorridorStops(
-    inputs.id,
-    inputs.stopList.map(String),
-    db,
-    sessionUser
+    args.inputs.id,
+    args.inputs.stopList.map(String),
+    context.db,
+    user
   );
 
   return {
@@ -356,25 +315,21 @@ export const updateCorridor = async (
   };
 };
 
-export type StatsCache = {inputs: InputMaybe<CorridorStatsInputType> | undefined, journeys:Map<string, Timetable[]>}
+type StatsCache = {inputs: InputMaybe<CorridorStatsInputType> | undefined, journeys:Map<string, Timetable[]>}
 
-export const getStats = async (
-  inputs: InputMaybe<CorridorStatsInputType> | undefined,
-  sessionUser: SessionUser,
-  db: Context,
-): Promise<StatsCache> => {
+export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, context) => {
 
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
-    inputs || {};
+    args.inputs || {};
+  const user = await requireUserSession(context)
 
   if (
-    !sessionUser.user ||
-    !isCorridorMappedToUserOrg(Number(corridorId), sessionUser, db)
+    !await isCorridorMappedToUserOrg(Number(corridorId), user, context.db)
   ) {
     throw 'Not Authorized';
   }
 
-  let results: Timetable[] = await db.prisma.timetable.findMany({
+  let results: Timetable[] = await context.db.timetable.findMany({
     where: {
       stop_id: {
         in: stopList?.map(Number),
@@ -401,20 +356,18 @@ export const getStats = async (
 
   const journeys = filteredJourneys(stopList?.length ?? 0, journeyMap);
 
-  return {
-    inputs,
-    journeys,
-  };
+  // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
+  return { inputs: args.inputs, journeys } as CorridorStatsType;
 };
 
-export const getSummaryStats = (
-  journeys: Map<string, Timetable[]>,
-): CorridorSummaryStatsType => {
-  const scheduledTransits = journeys.size;
+export const getSummaryStats: CorridorStatsTypeResolvers['summaryStats'] = (parent) => {
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
+  const scheduledTransits = data.journeys.size;
   let totalTransits = 0;
   let totalJourneyTime = 0;
   const services = new Set();
-  const _ = [...journeys.values()].map((journeys) => {
+  [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
     const firstStopOfCorridor = journeys[0].actual_departure_time;
     const lastStopOfCorridor =
@@ -441,36 +394,32 @@ export const getSummaryStats = (
   };
 };
 
-export const getJourneyStatsByDay = (
-  journeys: Map<string, Timetable[]>,
-): (
-  & CorridorJourneyTimeStatsType
-  & CorridorStatsTimeOfDayType
-  & CorridorStatsDayOfWeekType
-)[] => {
-  return getJourneyStats(journeys, CorridorJourneyStatsOption.day);
-};
+export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers['journeyTimeTimeOfDayStats'] = (parent)=>{
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
+  return getJourneyStats(data.journeys, CorridorJourneyStatsOption.hourAsNumber)
+}
 
-export const getJourneyStatsByHour = (
-  journeys: Map<string, Timetable[]>,
-): (
-  & CorridorJourneyTimeStatsType
-  & CorridorStatsTimeOfDayType
-  & CorridorStatsDayOfWeekType
-)[] => {
-  return getJourneyStats(journeys, CorridorJourneyStatsOption.hour);
-};
+export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers['journeyTimeDayOfWeekStats'] = (parent)=>{
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
+  return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek)
+}
 
-export const getJourneyStats = (
+export const getJourneyTimeStats: CorridorStatsTypeResolvers['journeyTimeStats'] = (parent)=>{
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
+  return (data.inputs || {}).granularity === 'day'
+    ? getJourneyStats(data.journeys, CorridorJourneyStatsOption.day)
+    : getJourneyStats(data.journeys, CorridorJourneyStatsOption.hour);
+}
+
+const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
   inputType: CorridorJourneyStatsOption,
-): (
-  & CorridorJourneyTimeStatsType
-  & CorridorStatsTimeOfDayType
-  & CorridorStatsDayOfWeekType
-)[] => {
+) => {
   const journeyStats = new Map<string, number[]>();
-  const _ = [...journeys.values()].map((journeys) => {
+  [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
 
     const firstStopOfCorridor = journeys[0];
@@ -547,13 +496,12 @@ export const getJourneyStats = (
   return stats;
 };
 
-export const getJourneyStatsPerService = async (
-  journeys: Map<string, Timetable[]>,
-  db: Context
-): Promise<CorridorStatsPerServiceType[]> => {
+export const getJourneyStatsPerService: CorridorStatsTypeResolvers['journeyTimePerServiceStats'] = async (parent, _, context): Promise<CorridorStatsPerServiceType[]> => {
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
   const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
   const stats: CorridorStatsPerServiceType[] = [];
-  const _ = [...journeys.values()].map((journeys) => {
+  [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
     const firstStopOfCorridor = journeys[0];
     const lastStopOfCorridor = journeys[journeys.length - 1];
@@ -583,7 +531,7 @@ export const getJourneyStatsPerService = async (
 
   
   if (journeyStats.size > 0) {
-    const services = await db.prisma.service_details.findMany({
+    const services = await context.db.service_details.findMany({
       where: {
         noc_and_line_and_servicecode: {
           in: [...journeyStats.keys()],
@@ -613,12 +561,12 @@ export const getJourneyStatsPerService = async (
   return stats;
 };
 
-export const getJourneyStatsHistogram = (
-  journeys: Map<string, Timetable[]>,
-): CorridorStatsHistogramType[] => {
+export const getJourneyStatsHistogram: CorridorStatsTypeResolvers['journeyTimeHistogram'] = (parent) => {
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
   const journeyStats = new Map<string, number>();
 
-  const _ = [...journeys.values()].map((journeys) => {
+  [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
 
     const firstStopOfCorridor = journeys[0];
@@ -651,13 +599,12 @@ export const getJourneyStatsHistogram = (
   ];
 };
 
-export const getServiceLinks = async (
-  inputs: InputMaybe<CorridorStatsInputType> | undefined,
-  db: Context,
-): Promise<ServiceLinkType[]> => {
-  const { corridorId } = inputs || {};
+export const getServiceLinks: CorridorStatsTypeResolvers['serviceLinks'] = async (parent, _, context) => {
+  // Data was cached in the output of getStats, and will be removed later
+  const data = parent as StatsCache;
+  const { corridorId } = data.inputs || {};
 
-  const results = await db.prisma.corridor_stops.findMany({
+  const results = await context.db.corridor_stops.findMany({
     where: {
       corridor_id: Number(corridorId),
     },
@@ -679,3 +626,31 @@ export const getServiceLinks = async (
 
   return serviceLinks.reverse();
 };
+const corridorResovlers: Resolvers = {
+  Query: {
+    corridor: emptyResolver,
+  },
+  CorridorNamespace: {
+    getCorridor: getCorridors,
+    corridorList: listCorridors,
+    stats: getStats,
+    addFirstStop: getStops,
+    addSubsequentStops: getSubsequentStops,
+  },
+  CorridorStatsType: {
+    summaryStats: getSummaryStats,
+    journeyTimeStats: getJourneyTimeStats,
+    journeyTimeTimeOfDayStats: getJourneyTimeOfDayStats,
+    journeyTimeDayOfWeekStats: getJourneyDayOfWeekStats,
+    journeyTimeHistogram: getJourneyStatsHistogram,
+    journeyTimePerServiceStats: getJourneyStatsPerService,
+    serviceLinks: getServiceLinks,
+  },
+  Mutation: {
+    createCorridor: createCorridor,
+    updateCorridor: updateCorridor,
+    deleteCorridor: deleteCorridor,
+  },
+};
+
+export default corridorResovlers;

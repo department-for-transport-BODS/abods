@@ -22,6 +22,7 @@ type Query {
     eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
     avls(groupId: String!): [AvlPoint!]!
     route(groupId: String!): [Stop!]!
+    avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 }
 
 input OperatorFilterInput {
@@ -218,7 +219,7 @@ input SignupPayloadType {
 
 type HeadwayMetricsType {
     frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
-    frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
+    frequentServiceInfo(inputs: FrequentServiceInfoInputType!): FrequentServiceInfoType
     headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
     headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
     headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
@@ -818,4 +819,25 @@ enum OtpEnum {
     Early,
     Late,
     OnTime
+}
+
+"""
+Filters for AvlLineLevelStatus
+
+BODS integration uses this so ensure all changes are backwards compatible
+"""
+input AvlFiltersInput {
+  operatorNoc: String
+  lineName: String
+}
+
+"""
+Last Received AVL for on a Line basis
+
+BODS integrates with this endpoint so ensure all changes are backwards compatible
+"""
+type AvlLineLevelStatus {
+  operatorNoc: String!
+  lineName: String!
+  lastRecordedAtTime: DateTime!
 }
