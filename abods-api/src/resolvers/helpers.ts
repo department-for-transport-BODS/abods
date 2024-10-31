@@ -1,5 +1,6 @@
 import { RequestContext, SessionUser } from '../types/extra.js';
 import logger from '../logger.js';
+import { IncomingHttpHeaders } from 'http';
 
 export const emptyResolver = async () => ({});
 
@@ -68,7 +69,7 @@ export const requireApiToken = (context: RequestContext) => {
   // todo
 };
 
-function getHeader(headers, name) {
+function getHeader(headers: IncomingHttpHeaders, name: string) {
   return headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name];
 }
 

@@ -1,10 +1,10 @@
 import { Context } from '../context.js';
 import express from 'express';
-
+import { IncomingHttpHeaders } from 'http';
 export interface RequestContext {
   req: express.Request;
   res: express.Response;
-  headers: any;
+  headers: IncomingHttpHeaders;
   db: Context;
 }
 

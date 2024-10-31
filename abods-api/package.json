@@ -21,6 +21,7 @@
   "dependencies": {
     "@apollo/server": "^4.10.2",
     "@as-integrations/aws-lambda": "^3.1.0",
+    "@aws-sdk/client-secrets-manager": "^3.682.0",
     "@aws-sdk/credential-providers": "^3.577.0",
     "@aws-sdk/rds-signer": "^3.577.0",
     "@codegenie/serverless-express": "^4.14.1",

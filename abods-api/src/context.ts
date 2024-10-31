@@ -1,18 +1,26 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
-import { initialisePrismaClient } from './prismaClient.js';
-import logger from './logger.js';
+import { PrismaClient, Prisma } from "@prisma/client";
+import { mockDeep, DeepMockProxy } from "jest-mock-extended";
+import { initialisePrismaClient } from "./prismaClient.js";
+import logger from "./logger.js";
+import { getAPITokenHash } from "./lib/apiauth.js";
+
+export type AuthContext = {
+  allowedTokenHash: string;
+  Hmac: string;
+};
 
 export type Context = {
-  prisma: PrismaClient
-}
+  prisma: PrismaClient;
+  apiKeyAuth?: AuthContext;
+};
 
 export type MockContext = {
-  prisma: DeepMockProxy<PrismaClient>
-}
+  prisma: DeepMockProxy<PrismaClient>;
+  apiKeyAuth?: AuthContext;
+};
 
 export const createContext = async (force?: boolean): Promise<Context> => {
-  logger.debug("Creating prisma context for database client")
+  logger.debug("Creating prisma context for database client");
   let prisma: PrismaClient;
 
   if (!global.prisma || force) {
@@ -21,12 +29,18 @@ export const createContext = async (force?: boolean): Promise<Context> => {
 
   prisma = global.prisma;
 
-  logger.debug("Prisma client created")
-  return { prisma: prisma };
+  logger.debug("Prisma client created");
+  const apiKeyAuth = await getAPITokenHash();
+
+  return { prisma: prisma, apiKeyAuth: apiKeyAuth };
 };
 
 export const createMockContext = (): MockContext => {
   return {
     prisma: mockDeep<PrismaClient>(),
-  }
-}
+    apiKeyAuth: {
+      allowedTokenHash: "test",
+      Hmac: "Test",
+    },
+  };
+};
