@@ -115,7 +115,7 @@ Resources:
     Properties:
       Name: !Sub ${ProjectName}/${Environment}/GraphQLTokenAuthConfig
       Description: 'This Secret is used to set the HMAC and allowed API Key for BODS to connect to private endpoints'
-      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/lambda/id}}'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/id}}'
 
 
   GraphQlFunctionSecurityGroup:
