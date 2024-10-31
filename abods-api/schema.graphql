@@ -183,7 +183,7 @@ type VehicleReplayNamespace {
 type UniqueJourneyType {
     serviceInfo: ServiceInfoType!
     startTime: String!
-    vehicleJourneyId: String
+    groupId: String
 }
 
 type ServiceInfoType {

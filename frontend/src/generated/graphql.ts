@@ -1132,9 +1132,9 @@ export type TransitModelTypeLinesArgs = {
 
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
+  groupId?: Maybe<Scalars['String']['output']>;
   serviceInfo: ServiceInfoType;
   startTime: Scalars['String']['output'];
-  vehicleJourneyId?: Maybe<Scalars['String']['output']>;
 };
 
 export type UserType = {
@@ -1616,7 +1616,7 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', vehicleReplay?: { __typename?: 'VehicleReplayNamespace', findJourneys?: Array<{ __typename?: 'UniqueJourneyType', vehicleJourneyId?: string | null, startTime: string, serviceInfo: { __typename?: 'ServiceInfoType', serviceName: string, serviceNumber: string } } | null> | null } | null };
+export type JourneysQuery = { __typename?: 'Query', vehicleReplay?: { __typename?: 'VehicleReplayNamespace', findJourneys?: Array<{ __typename?: 'UniqueJourneyType', groupId?: string | null, startTime: string, serviceInfo: { __typename?: 'ServiceInfoType', serviceName: string, serviceNumber: string } } | null> | null } | null };
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3078,7 +3078,7 @@ export const JourneysDocument = gql`
     findJourneys(
       inputs: {fromTimestamp: $fromTimestamp, toTimestamp: $toTimestamp, filters: {lineIds: [$lineId], filterOnStartTime: $filterOnStartTime}}
     ) {
-      vehicleJourneyId
+      groupId
       startTime
       serviceInfo {
         serviceName

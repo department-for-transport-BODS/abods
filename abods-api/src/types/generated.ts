@@ -1132,9 +1132,9 @@ export type TransitModelTypeLinesArgs = {
 
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
+  groupId?: Maybe<Scalars['String']['output']>;
   serviceInfo: ServiceInfoType;
   startTime: Scalars['String']['output'];
-  vehicleJourneyId?: Maybe<Scalars['String']['output']>;
 };
 
 export type UserType = {
@@ -2094,9 +2094,9 @@ export type TransitModelTypeResolvers<ContextType = RequestContext, ParentType e
 }>;
 
 export type UniqueJourneyTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UniqueJourneyType'] = ResolversParentTypes['UniqueJourneyType']> = ResolversObject<{
+  groupId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   serviceInfo?: Resolver<ResolversTypes['ServiceInfoType'], ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  vehicleJourneyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

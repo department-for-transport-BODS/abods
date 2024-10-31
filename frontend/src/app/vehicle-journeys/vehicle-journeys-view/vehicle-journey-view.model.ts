@@ -44,7 +44,7 @@ export const createVehicleJourneyView = (
 
   let idx = -1;
   journeys.forEach((v, i) => {
-    if (v.startTime?.toMillis() === startTime.toMillis() && v.vehicleJourneyId === journeyId) {
+    if (v.startTime?.toMillis() === startTime.toMillis() && v.groupId === journeyId) {
       idx = i;
     }
   });

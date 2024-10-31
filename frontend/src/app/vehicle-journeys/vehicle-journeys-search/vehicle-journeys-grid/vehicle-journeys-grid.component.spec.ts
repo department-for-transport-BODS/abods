@@ -19,31 +19,31 @@ describe('VehicleJourneysGridComponent', () => {
   const t5 = DateTime.fromISO('2022-08-01T15:55:00');
   const journeys: VehicleJourney[] = [
     {
-      vehicleJourneyId: 'VJefdb0f42',
+      groupId: 'VJefdb0f42',
       startTime: t1,
       servicePattern: 'St Annes - Blackpool Town Centre',
       lineNumber: '76',
     },
     {
-      vehicleJourneyId: 'VJf3c22dad',
+      groupId: 'VJf3c22dad',
       startTime: t2,
       servicePattern: 'Poulton-le-Fylde - St Annes',
       lineNumber: '76',
     },
     {
-      vehicleJourneyId: 'VJa3968321',
+      groupId: 'VJa3968321',
       startTime: t3,
       servicePattern: 'Blackpool Town Centre - St Annes',
       lineNumber: '76',
     },
     {
-      vehicleJourneyId: 'VJ4aa8804d',
+      groupId: 'VJ4aa8804d',
       startTime: t4,
       servicePattern: 'Blackpool Town Centre - St Annes',
       lineNumber: '76',
     },
     {
-      vehicleJourneyId: 'VJa921fcb5',
+      groupId: 'VJa921fcb5',
       startTime: t5,
       servicePattern: 'St Annes - Blackpool Town Centre',
       lineNumber: '76',
@@ -85,7 +85,7 @@ describe('VehicleJourneysGridComponent', () => {
     expect(gridEls[2].textContent).toContain('15:38');
   });
 
-  it('should add routerLink to start times with vehicleJourneyId and query params', async () => {
+  it('should add routerLink to start times with groupId and query params', async () => {
     component.operatorId = 'OP3';
     component.serviceId = 'LI4728';
     component.ngOnChanges({ data: <SimpleChange>{ currentValue: journeys } });
