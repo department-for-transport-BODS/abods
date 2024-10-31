@@ -37,7 +37,6 @@ Parameters:
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
   IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
-  HasVpcEndpoint: !Not [!Equals [!Select [0, !Ref BodsVpcEndpoint], '']]
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
