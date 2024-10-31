@@ -4,7 +4,7 @@ import { requireUserSession } from './helpers.js';
 // Summary: fetch api info
 export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {
   try {
-    const apiInfo = await context.db.prisma.apiInfo.findFirst({
+    const apiInfo = await context.db.apiInfo.findFirst({
       include: {
         feature_flag: true
       }

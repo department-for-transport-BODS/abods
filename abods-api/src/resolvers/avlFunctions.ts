@@ -6,7 +6,7 @@ export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
   async (_, args, context) => {
     try {
       const avlData =
-        await context.db.prisma.avl_line_level_monitoring.findMany({
+        await context.db.avl_line_level_monitoring.findMany({
           where: {
             ...(args.filters?.operatorNoc
               ? { operatorNoc: args.filters.operatorNoc }

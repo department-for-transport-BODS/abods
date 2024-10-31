@@ -1,4 +1,3 @@
-import { Context } from "../context.js";
 import {
   FrequentServiceInfoInputType,
   HeadwayInputType,
@@ -23,7 +22,7 @@ import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from './helpers.js';
 
@@ -57,7 +56,7 @@ export const getOperatorList: QueryResolvers['operators'] = async (_, __, contex
 
 const getOperatorsDropDown = async (
   user: SessionUser,
-  db: Context,
+  db: PrismaClient,
 ): Promise<OperatorType[]> => {
   const orgOperators = await getOperatorsFromOrgId(user.orgIds, db);
 
@@ -86,7 +85,7 @@ const getOperatorsDropDown = async (
 
 export const getOperators = async (
   user: SessionUser,
-  db: Context,
+  db: PrismaClient,
   adminAreaIds?: string[]
 ) => {
   try {
@@ -96,7 +95,7 @@ export const getOperators = async (
       adminAreaNumberIds = adminAreaIds.map((str) => parseInt(str, 10));
     }
 
-    const operators = await db.prisma.all_operators.findMany({
+    const operators = await db.all_operators.findMany({
       where: {
         ...(adminAreaNumberIds.length > 0
           ? {
@@ -169,7 +168,7 @@ export const getServiceInfo: QueryResolvers['serviceInfo'] = async (_, args, con
 
     const userOperatorIds = operators.map((o) => o.nocCode);
 
-    const service = await context.db.prisma.expected_services.findFirst({
+    const service = await context.db.expected_services.findFirst({
       where: {
         noc_and_line_and_servicecode: args.serviceId,
       },
@@ -192,7 +191,7 @@ export const getServiceInfo: QueryResolvers['serviceInfo'] = async (_, args, con
   }
 };
 
-const getOperatorLines = async (operatorRef: string, db: Context, filterDate?: Date) => {
+const getOperatorLines = async (operatorRef: string, db: PrismaClient, filterDate?: Date) => {
   const where: Prisma.expected_operatorsWhereInput = {
     operator_noc: operatorRef,
   }
@@ -200,7 +199,7 @@ const getOperatorLines = async (operatorRef: string, db: Context, filterDate?: D
     where.date_of_journey = filterDate
   }
 
-  const operator = await db.prisma.expected_operators.findMany({
+  const operator = await db.expected_operators.findMany({
     where: where,
     include: {
       expected_services: {
@@ -270,7 +269,7 @@ export const getOperator: QueryResolvers['operator'] = async (_, args, context) 
     // TODO: is operator id in users' operator id array
     logger.debug("getOperator op: {0} ", args.operatorId);
 
-    const operator = await context.db.prisma.all_operators.findUnique({
+    const operator = await context.db.all_operators.findUnique({
       where: {
         operatorref: args.operatorId,
       },
@@ -335,7 +334,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
     let prismaFilters = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
     if (lineIds) {
-      results = await context.db.prisma.timetable_summary_service_tz.aggregate({
+      results = await context.db.timetable_summary_service_tz.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -346,7 +345,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
         },
       });
     } else {
-      results = await context.db.prisma.timetable_summary_operator_t.aggregate({
+      results = await context.db.timetable_summary_operator_t.aggregate({
         where: prismaFilters,
         _sum: {
           early_count: true,
@@ -419,7 +418,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPer
 
     const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
 
-    const results = await context.db.prisma.timetable_summary_operator_t.groupBy({
+    const results = await context.db.timetable_summary_operator_t.groupBy({
       by: ["operator_noc"],
       where: where,
       _sum: {
@@ -529,7 +528,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
 
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
         if (lineIds) {
-          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.timetable_summary_service_tz.groupBy({
             by: ["day_of_week"],
             where: where,
             _sum: {
@@ -539,7 +538,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
             },
           });
         } else {
-          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.timetable_summary_operator_t.groupBy({
             by: ['day_of_week'],
             where: where,
             _sum: {
@@ -595,7 +594,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
 const getStopsDistribution = async (
   inputs: PerformanceInputType,
   userOperatorIds: string[],
-  db: Context,
+  db: PrismaClient,
 ) => {
   const { filters } = inputs;
   const { maxDelay, minDelay } = filters || {};
@@ -618,7 +617,7 @@ const getStopsDistribution = async (
     };
   }
 
-  const results = await db.prisma.timetable_threshold_summary.groupBy({
+  const results = await db.timetable_threshold_summary.groupBy({
     by: ['time_diff_minutes'],
     where: where,
     _sum: {
@@ -732,7 +731,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
 
         if (lineIds) {
-          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.timetable_summary_service_tz.groupBy({
             by: ["departure_hour_only"],
             where: where,
             _sum: {
@@ -742,7 +741,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
             },
           }) ?? [];
         } else {
-          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.timetable_summary_operator_t.groupBy({
             by: ["departure_hour_only"],
             where: where,
             _sum: {
@@ -817,7 +816,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
         let results;
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
         if (lineIds) {
-          results = await context.db.prisma.timetable_summary_service_tz.groupBy({
+          results = await context.db.timetable_summary_service_tz.groupBy({
             by: isDayGranularity ? ["date_of_journey"] : ["departure_hour"],
             where: where,
             _sum: {
@@ -827,7 +826,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
             },
           }) ?? [];
         } else {
-          results = await context.db.prisma.timetable_summary_operator_t.groupBy({
+          results = await context.db.timetable_summary_operator_t.groupBy({
             by: isDayGranularity ? ["date_of_journey"] : ["date_of_journey", "departure_hour"],
             where: where,
             _sum: {
@@ -948,7 +947,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
 
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc"
       const performanceMetrics =
-        await context.db.prisma.performance_statistics.findMany({
+        await context.db.performance_statistics.findMany({
           where,
           take: 3,
           distinct: [
@@ -970,7 +969,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
           ],
         });
 
-      const services = await context.db.prisma.expected_services.findMany({
+      const services = await context.db.expected_services.findMany({
         where: {
           noc_and_line_and_servicecode: {
             in: performanceMetrics.map(stat => stat.noc_and_line_and_servicecode)
@@ -1040,7 +1039,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds)
-        const results = await context.db.prisma.timetable_summary_stops_tz.groupBy({
+        const results = await context.db.timetable_summary_stops_tz.groupBy({
           by: ["stop_id", "common_name", "is_timing_point"],
           where: where,
           _sum: {
@@ -1057,7 +1056,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
 
         const stopIds: number[] = results.map((res) => res.stop_id)
 
-        const stops = await context.db.prisma.naptan_stoppoint_latlong.findMany({
+        const stops = await context.db.naptan_stoppoint_latlong.findMany({
           where: {
             id: {
               in: stopIds
@@ -1154,7 +1153,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerfo
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
         // get a sum per day
-        const results = await context.db.prisma.timetable_summary_service_tz.groupBy({
+        const results = await context.db.timetable_summary_service_tz.groupBy({
           by: ["noc_and_line_and_servicecode", "line_name"],
           where: where,
           _sum: {
@@ -1171,7 +1170,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerfo
 
         const noc_and_lines = results.map(result => result.noc_and_line_and_servicecode)
 
-        const services = await context.db.prisma.expected_services.findMany({
+        const services = await context.db.expected_services.findMany({
           where: {
             noc_and_line_and_servicecode: {
               in: noc_and_lines
@@ -1224,7 +1223,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers['frequentServices'
     const userOperatorIds = operators.map((o) => o.nocCode);
 
     if (userOperatorIds.includes(args.operatorId)) {
-      const results = await context.db.prisma.timetable_summary_service_tz.findMany({
+      const results = await context.db.timetable_summary_service_tz.findMany({
         where: {
           operator_noc: args.operatorId,
           date_of_journey: {
@@ -1266,7 +1265,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers['frequentServic
     const where: Prisma.timetable_summary_stops_tzWhereInput =
       getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
-    const results = await context.db.prisma.timetable_summary_stops_tz.groupBy(
+    const results = await context.db.timetable_summary_stops_tz.groupBy(
       {
         by: ['departure_hour'],
         where: where,
@@ -1316,7 +1315,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers['headwayOverview'] 
       gt: 0
     }
 
-    const results = await context.db.prisma.timetable_summary_stops_tz.findMany(
+    const results = await context.db.timetable_summary_stops_tz.findMany(
       {
         where: where,
         select: {
@@ -1383,7 +1382,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
       gt: 0
     }
 
-    const results = await context.db.prisma.timetable_summary_stops_tz.findMany({
+    const results = await context.db.timetable_summary_stops_tz.findMany({
       where: where,
       select: {
         date_of_journey: true,
@@ -1459,7 +1458,7 @@ export const getAdminAreas: QueryResolvers['adminAreas'] = async (_, __, context
     }
     const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o)=> !!o);
 
-    const adminAreaRecords = await context.db.prisma.noc_adminarea.findMany({
+    const adminAreaRecords = await context.db.noc_adminarea.findMany({
       where: {
         national_operator_code: {
           in: userOperatorIds,
@@ -1472,7 +1471,7 @@ export const getAdminAreas: QueryResolvers['adminAreas'] = async (_, __, context
 
     if (adminAreaRecords) {
       const adminareaIds = adminAreaRecords.map((a) => a.adminarea_id);
-      const adminAreas = await context.db.prisma.naptan_adminarea_with_shape.findMany({
+      const adminAreas = await context.db.naptan_adminarea_with_shape.findMany({
         where: {
           id: {
             in: adminareaIds,

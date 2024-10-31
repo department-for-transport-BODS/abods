@@ -1,6 +1,6 @@
-import { Context } from "../context.js";
 import express from "express";
 import { IncomingHttpHeaders } from "http";
+import { PrismaClient } from '@prisma/client';
 
 export type AuthContext = {
   allowedTokenHash: string;
@@ -11,7 +11,7 @@ export interface RequestContext {
   req: express.Request;
   res: express.Response;
   headers: IncomingHttpHeaders;
-  db: Context;
+  db: PrismaClient;
   apiKeyAuth?: AuthContext;
 }
 

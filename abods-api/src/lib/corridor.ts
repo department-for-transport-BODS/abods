@@ -1,7 +1,6 @@
-import { bods_user, corridor, corridor_stops, naptan_adminarea, naptan_locality, naptan_stoppoint_latlong, Timetable } from "@prisma/client";
+import { bods_user, corridor, corridor_stops, naptan_adminarea, naptan_locality, naptan_stoppoint_latlong, PrismaClient, Timetable } from "@prisma/client";
 import { CorridorType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
-import { Context } from "../context.js";
 
 export enum CorridorJourneyStatsOption {
   day,
@@ -71,8 +70,8 @@ export const returnCorridorType = (results: CorridorResultsType[]): CorridorType
     return results.map((corridor) => returnCorridor(corridor));
 } 
 
-export const getCorridorList = (db: Context, sessionUser: SessionUser) => {
-    return db.prisma.corridor.findMany({
+export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
+    return db.corridor.findMany({
         where: {
           organisation_id: {
             in: sessionUser.orgIds,
@@ -87,10 +86,10 @@ export const getCorridorList = (db: Context, sessionUser: SessionUser) => {
 
 export const getCorridor = (
   corridorId: Number,
-  db: Context,
+  db: PrismaClient,
   sessionUser: SessionUser
 ) => {
-  return db.prisma.corridor.findUnique({
+  return db.corridor.findUnique({
     where: {
       corridor_id: Number(corridorId),
       organisation_id: {
@@ -116,16 +115,16 @@ export const getCorridor = (
   });
 };
 
-export const deleteCorridorDb = (corridorId: Number, db: Context) => {
-  return db.prisma.corridor.delete({
+export const deleteCorridorDb = (corridorId: Number, db: PrismaClient) => {
+  return db.corridor.delete({
     where: {
       corridor_id: Number(corridorId)
     }
   })
 }
 
-export const deleteCorridorStops = (corridorId: Number, db: Context) => {
-  return db.prisma.corridor_stops.deleteMany({
+export const deleteCorridorStops = (corridorId: Number, db: PrismaClient) => {
+  return db.corridor_stops.deleteMany({
     where: {
       corridor_id: Number(corridorId)
     }
@@ -135,10 +134,10 @@ export const deleteCorridorStops = (corridorId: Number, db: Context) => {
 export const updateCorridorDb = (
   corridorId: Number,
   corridorName: string,
-  db: Context,
+  db: PrismaClient,
 ) => {
 
-  return db.prisma.corridor.update({
+  return db.corridor.update({
     where: {
       corridor_id: Number(corridorId)
     },
@@ -162,9 +161,9 @@ export const filteredJourneys = (
 export const isCorridorMappedToUserOrg = async (
   corridorId: number,
   user: SessionUser,
-  db: Context,
+  db: PrismaClient,
 ): Promise<boolean> => {
-  const result = await db.prisma.corridor.findFirst({
+  const result = await db.corridor.findFirst({
     where: {
       corridor_id: corridorId,
       organisation_id: user.orgIds[0],
@@ -174,8 +173,8 @@ export const isCorridorMappedToUserOrg = async (
   return !!result;
 };
 
-export const distinctRoutes = (db: Context, stopsPattern: string) => {
-  return db.prisma.distinct_routes.findMany({
+export const distinctRoutes = (db: PrismaClient, stopsPattern: string) => {
+  return db.distinct_routes.findMany({
     where: {
       route: {
         contains: stopsPattern,
@@ -185,10 +184,10 @@ export const distinctRoutes = (db: Context, stopsPattern: string) => {
 };
 
 export const getOrgAdminAreas = async (
-  db: Context,
+  db: PrismaClient,
   user: SessionUser
 ) => {
-  const orgOperators = await db.prisma.bods_organisationoperator.findMany({
+  const orgOperators = await db.bods_organisationoperator.findMany({
     where: {
       organisation_id: {
         in: user.orgIds
@@ -198,7 +197,7 @@ export const getOrgAdminAreas = async (
       operatorref: true,
     },
   });
-  return db.prisma.noc_adminarea.findMany({
+  return db.noc_adminarea.findMany({
     where: {
       national_operator_code: {
         in: orgOperators.map((op) => op.operatorref),

@@ -1,5 +1,4 @@
-import { Prisma, Timetable } from '@prisma/client';
-import { Context } from '../context.js';
+import { Prisma, PrismaClient, Timetable } from '@prisma/client';
 import {
   CorridorJourneyServiceStatsType,
   CorridorJourneyStatsOption,
@@ -100,7 +99,7 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
     in: adminAreas.map((admin) => admin.adminarea_id),
   };
 
-  const results = await context.db.prisma.naptan_stoppoint_latlong.findMany({
+  const results = await context.db.naptan_stoppoint_latlong.findMany({
     where: where,
     include: {
       locality: true,
@@ -150,7 +149,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'
   });
 
   if (stopList.length > 0) {
-    const stops = await context.db.prisma.naptan_stoppoint_latlong.findMany({
+    const stops = await context.db.naptan_stoppoint_latlong.findMany({
       where: {
         id: {
           in: stopList.map(Number)
@@ -184,7 +183,7 @@ export const createCorridor: MutationResolvers['createCorridor'] = async (_, arg
   const user = await requireUserSession(context)
   if (!args.payload || !args.payload.name|| !args.payload.stopIds) throw "Bad Request"
 
-  const corridor = await context.db.prisma.corridor.create({
+  const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
       organisation_id: user.orgIds[0] ?? 0,
@@ -210,7 +209,7 @@ export const createCorridor: MutationResolvers['createCorridor'] = async (_, arg
 const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
-  db: Context,
+  db: PrismaClient,
   sessionUser: SessionUser
 ) => {
   const numberStopsList = stopIds.map(Number);
@@ -224,7 +223,7 @@ const insertCorridorStops = async (
   }[] = [];
 
   const adminAreas = await getOrgAdminAreas(db, sessionUser);
-  const stops = await db.prisma.naptan_stoppoint_latlong.findMany({
+  const stops = await db.naptan_stoppoint_latlong.findMany({
     where: {
       id: {
         in: numberStopsList,
@@ -263,7 +262,7 @@ const insertCorridorStops = async (
     });
   });
 
-  await db.prisma.corridor_stops.createMany({
+  await db.corridor_stops.createMany({
     data: records,
   });
 };
@@ -330,7 +329,7 @@ export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, con
     throw 'Not Authorized';
   }
 
-  let results: Timetable[] = await context.db.prisma.timetable.findMany({
+  let results: Timetable[] = await context.db.timetable.findMany({
     where: {
       stop_id: {
         in: stopList?.map(Number),
@@ -532,7 +531,7 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers['journeyTimeP
 
   
   if (journeyStats.size > 0) {
-    const services = await context.db.prisma.service_details.findMany({
+    const services = await context.db.service_details.findMany({
       where: {
         noc_and_line_and_servicecode: {
           in: [...journeyStats.keys()],
@@ -605,7 +604,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers['serviceLinks'] = async
   const data = parent as StatsCache;
   const { corridorId } = data.inputs || {};
 
-  const results = await context.db.prisma.corridor_stops.findMany({
+  const results = await context.db.corridor_stops.findMany({
     where: {
       corridor_id: Number(corridorId),
     },
