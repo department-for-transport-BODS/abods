@@ -55,4 +55,11 @@
   &__actual {
     font-variant-numeric: tabular-nums;
   }
+  &__time-container {
+    white-space:nowrap;
+
+    &--seconds {
+      font-size: calc(100% - 4px);
+    }
+  }
 }

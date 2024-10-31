@@ -8,7 +8,6 @@ export function createVehiclePing(ping: AvlPoint, otp: OtpEnum | null) {
     lon: ping.longitude,
     ts: timestamp,
     onTimePerformance: otp,
-    formattedTime: timestamp.toFormat('HH:mm:ss'),
     id: ping.latitude.toString() + ping.longitude.toString() + ping.recordedAtTimeUtc,
   };
 }
