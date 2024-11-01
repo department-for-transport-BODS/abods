@@ -49,8 +49,9 @@ view all_operators {
   operatorref           String                      @id
   name                  String
   operatorOrganisations bods_organisationoperator[]
-  noc_adminareas noc_adminarea[]
-  service_details service_details[]
+  noc_adminareas        noc_adminarea[]
+  service_details       service_details[]
+  feed_summary          feed_monitor_summary?
 }
 
 view bods_organisationoperator {
@@ -266,7 +267,8 @@ model expected_journeys {
   noc_and_line_and_servicecode                  String
   stop_count                  Int
   vehicle_journey_id          Int               
-  expected_journey_start      DateTime          @db.Timetz()      
+  expected_journey_start      DateTime          @db.Timetz()
+  expected_journey_end        DateTime?          @db.Timetz()
   expected_service            expected_services  @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
   timetable                   Timetable[]
   vehicle_journey             transmodel_vehiclejourney @relation(fields: [vehicle_journey_id], references: [id])
@@ -468,4 +470,41 @@ model avl_line_level_monitoring {
   lastRecordedAtTime  DateTime @map("last_recorded_at_time")
 
   @@unique([operatorNoc, lineName], name: "uk_operator_line")
+}
+
+model feed_monitor_summary {
+  id                                          Int @id @default(1)
+  operator_noc                                String @unique
+  last_outage                                 DateTime? @db.Timestamptz()
+  unavailable_since                           DateTime? @db.Timestamptz()
+  update_frequency                            Int?
+  availability                                Decimal
+
+  all_operators all_operators @relation(fields: [operator_noc], references: [operatorref])
+}
+
+model feed_monitor_minute_summary {
+  id                                          Int @id @default(1)
+  operator_noc                                String
+  date_of_journey                             DateTime
+  received_interval                           DateTime @db.Timestamptz()
+  actual                                      Int
+  expected                                    Int
+  live_locations                              Int
+}
+
+model feed_monitor_hourly_summary {
+  id                                          Int @id @default(1)
+  operator_noc                                String
+  received_interval                           DateTime @db.Timestamptz()
+  actual                                      Int
+  expected                                    Int
+}
+
+model feed_monitor_daily_summary {
+  id                                          Int @id @default(1)
+  operator_noc                                String
+  update_frequency                            Int
+  availability                                Decimal
+  date_of_journey                             DateTime
 }
