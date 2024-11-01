@@ -20,7 +20,7 @@ let startTime = getDate();
 let apiKeyAuth = await getAPITokenHash();
 
 const typeDefs = gql`
-  ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
+  ${fs.readFileSync(resolve("../schema.graphql"), "utf8")}
 `;
 const server = new ApolloServer<RequestContext>({
   typeDefs,

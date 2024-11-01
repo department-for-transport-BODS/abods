@@ -1,2 +1,2 @@
-schema: abods-api/schema.graphql
+schema: schema.graphql
 documents: 'frontend/**/*.graphql'

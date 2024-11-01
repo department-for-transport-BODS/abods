@@ -3,7 +3,7 @@ import { DateResolver, DateTimeResolver, TimeResolver } from 'graphql-scalars';
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: 'abods-api/schema.graphql',
+  schema: 'schema.graphql',
   documents: 'frontend/**/*.graphql',
   generates: {
     'frontend/src/generated/graphql.ts': {
