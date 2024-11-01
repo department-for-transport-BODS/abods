@@ -188,7 +188,12 @@ Resources:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
                 Resource: !Ref GraphQLAPITokenSecret
-
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                Resource:
+                  Fn::Sub: '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
   GraphQlFunctionLoggingPolicy:
     Type: 'AWS::IAM::Policy'
     Condition: IsNotLocal
