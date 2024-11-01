@@ -1,15 +1,25 @@
-import { Context } from '../context';
-import { bods_user } from '@prisma/client';
-import express from 'express';
+import express from "express";
+import { IncomingHttpHeaders } from "http";
+import { PrismaClient } from '@prisma/client';
+
+export type AuthContext = {
+  allowedTokenHash: string;
+  Hmac: string;
+};
 
 export interface RequestContext {
   req: express.Request;
   res: express.Response;
-  sessionUser: SessionUser;
-  db: Context;
+  headers: IncomingHttpHeaders;
+  db: PrismaClient;
+  apiKeyAuth?: AuthContext;
 }
 
 export interface SessionUser {
-  user: bods_user | null;
-  userOrganisationIDs: number[] | null;
+  id: number;
+  username: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  orgIds: number[];
 }

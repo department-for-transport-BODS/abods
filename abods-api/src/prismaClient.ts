@@ -1,7 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { Signer } from '@aws-sdk/rds-signer';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import logger from './logger.js';
+
+const isLocal = (process.env.PROJECT_ENV || 'local') === 'local';
 
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
@@ -15,7 +17,7 @@ async function getDatabaseUrl(): Promise<string> {
   const username = process.env.DB_USER || 'postgres';
   const dbName = process.env.DB_NAME || 'postgres';
 
-  if ((process.env.PROJECT_ENV || 'local') === 'local') {
+  if (isLocal) {
     const password = process.env.DB_PASSWORD;
     return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true`;
   } else {
@@ -33,14 +35,38 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
   if (!prisma || force ) {
     logger.debug("Getting database url and prisma client")
     const databaseUrl = await getDatabaseUrl();
-    prisma = new PrismaClient({
-      log: ['info'], 
-      datasources: {
-        db: {
-          url: databaseUrl,
-        },
-      },
-    });
+    const logTypes: Prisma.LogDefinition[] = [
+      { emit: 'event', level: 'error', },
+      { emit: 'event', level: 'info', },
+      { emit: 'event', level: 'warn', },
+    ];
+    if (isLocal) {
+      logTypes.push({ emit: 'event', level: 'query', })
+    }
+    prisma = new PrismaClient({ log: logTypes, datasources: { db: { url: databaseUrl, } } });
+    prisma.$on('error' as never, (e) => logger.error({
+        message: "prisma error",
+        // @ts-ignore
+        ...e,
+      }))
+    prisma.$on('warn' as never, (e) => logger.warn({
+        message: "prisma warning",
+        // @ts-ignore
+        ...e,
+      }))
+    prisma.$on('info' as never, (e) => logger.info({
+        message: "prisma log",
+        // @ts-ignore
+        ...e,
+      }))
+    if (isLocal) {
+      // If we want to log this outside of local dev, then we should consider that this logs query params
+      prisma.$on('query' as never, (e) => logger.info({
+        message: "prisma query",
+        // @ts-ignore
+        ...e,
+      }))
+    }
     await Promise.all([prisma.$disconnect(),prisma.$connect()])
     logger.debug("Prisma has connected to the database")
   }

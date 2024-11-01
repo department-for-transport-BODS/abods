@@ -1,20 +1,19 @@
-import { Prisma } from '@prisma/client';
-import { Context } from '../context';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from '../types/generated.js';
 import { SessionUser } from "../types/extra.js";
-import { getOperators } from '../resolvers/otp/otpFunctions.js';
+import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 
 const getThresholds = async (
-  db: Context,
+  db: PrismaClient,
   where: Prisma.timetable_threshold_summaryWhereInput,
 ) => {
   const whereCopy = { ...where };
 
-  const result = db.prisma.timetable_threshold_summary.aggregate({
+  const result = db.timetable_threshold_summary.aggregate({
     _sum: {
       otp_count: true,
     },
@@ -25,7 +24,7 @@ const getThresholds = async (
 };
 
 const aggThresholds = async (
-  db: Context,
+  db: PrismaClient,
   whereEarly: Prisma.timetable_threshold_summaryWhereInput,
   whereLate: Prisma.timetable_threshold_summaryWhereInput,
   whereOnTime: Prisma.timetable_threshold_summaryWhereInput,
@@ -50,7 +49,7 @@ const aggThresholds = async (
 export const compareThresholds = async (
   inputs: PerformanceInputType,
   sessionUser: SessionUser,
-  db: Context,
+  db: PrismaClient,
 ): Promise<PunctualityTotalsType | null> => {
   const { fromTimestamp, toTimestamp, filters } = inputs;
 
@@ -222,9 +221,9 @@ export const compareThresholds = async (
   return null;
 };
 
-export const getOperatorsFromOrgId = async (orgId: number[], db: Context) => {
+export const getOperatorsFromOrgId = async (orgId: number[], db: PrismaClient) => {
 
-  return db.prisma.bods_organisationoperator.findMany({
+  return db.bods_organisationoperator.findMany({
     where: {
       AND: [
         {
@@ -248,9 +247,9 @@ export const getOperatorsFromOrgId = async (orgId: number[], db: Context) => {
 
 export const getOperatorsFroServiceDetails = async (
   orgOperators: { operatorref: string }[],
-  db: Context,
+  db: PrismaClient,
 ) => {
-  return db.prisma.service_details.findMany({
+  return db.service_details.findMany({
     where: {
       operator_noc: {
         in: orgOperators.map((operator) => operator.operatorref),
@@ -268,8 +267,8 @@ export const getOperatorsFroServiceDetails = async (
   });
 };
 
-export const getNocAdminAreas = async (db: Context) => {
-  return db.prisma.noc_adminarea.findMany({
+export const getNocAdminAreas = async (db: PrismaClient) => {
+  return db.noc_adminarea.findMany({
     include: {
       admin_area: true
     }

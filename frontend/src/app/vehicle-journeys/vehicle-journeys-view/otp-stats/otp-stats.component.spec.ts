@@ -1,8 +1,8 @@
 import { byTextContent, createComponentFactory, Spectator } from '@ngneat/spectator';
 import { StatComponent } from 'src/app/shared/components/stat/stat.component';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { OnTimePerformanceStats } from '../vehicle-journey-view.model';
 import { OtpStatsComponent } from './otp-stats.component';
+import { OnTimePerformanceStats } from '../on-time-performance-stats.model';
 
 const otpStats: OnTimePerformanceStats = {
   early: {

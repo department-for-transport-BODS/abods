@@ -1,72 +1,39 @@
 import { DateTime, Duration } from 'luxon';
-import { getOtpEnum, OnTimePerformanceEnum } from './on-time-performance.enum';
-import { ApolloGpsFeedType, StopDetails } from './vehicle-journeys-view.service';
-import { Ping } from './vehicle-ping.model';
+import { OtpEnum, Stop } from '../../../generated/graphql';
 
-export interface VehiclePingStop extends Ping {
+export interface VehiclePingStop {
   id: string;
   lat: number;
   lon: number;
-  ts: DateTime;
-  onTimePerformance: OnTimePerformanceEnum;
+  onTimePerformance: OtpEnum | null;
   stopName?: string;
   isTimingPoint?: boolean;
-  scheduledDeparture?: DateTime;
+  scheduledDeparture: DateTime;
   actualDeparture?: DateTime;
-  isHidden?: boolean;
+  actualDepartureTimestamp?: string;
+  isHidden: boolean;
   delay?: Duration;
-  actualDelay?: Duration;
 }
 
-export function createVehiclePingStop(nearestPing: ApolloGpsFeedType, stop: StopDetails): VehiclePingStop {
-  // Workaround for the fact that the ping might be matched to the wrong stop
-  const pingDeparture = DateTime.fromISO(nearestPing.scheduledDeparture);
-  const scheduledDeparture = stop.startTime.plus({ minutes: stop.departureTimeOffset });
-  const nearestPingDifferenceSeconds = pingDeparture.isValid ? pingDeparture.diff(scheduledDeparture).as('seconds') : 0;
-  const nearestPingDelay = (nearestPing.actualDelay ?? 0) + nearestPingDifferenceSeconds;
-
-  return {
-    id: stop?.stopId as string,
-    stopName: stop?.stopName,
-    isTimingPoint: stop.timingPoint,
-    scheduledDeparture: scheduledDeparture,
-    actualDeparture: scheduledDeparture.plus({ seconds: nearestPingDelay }),
-    lat: stop?.lat as number,
-    lon: stop?.lon as number,
-    ts: DateTime.fromISO(nearestPing.ts),
-    onTimePerformance: getOtpEnum(nearestPing.delay),
-    isHidden: false,
-    delay: Duration.fromMillis((nearestPing.delay ?? 0) * 1000),
-    actualDelay: Duration.fromMillis(nearestPingDelay * 1000),
+export const createStopModel = (stop: Stop, timingPointsOnly: boolean): VehiclePingStop => {
+  const model: VehiclePingStop = {
+    id: stop.stopId.toString(),
+    stopName: stop.stopName,
+    isTimingPoint: stop.isTimingPoint,
+    isHidden: timingPointsOnly && !stop.isTimingPoint,
+    scheduledDeparture: DateTime.fromISO(stop.scheduledDepartureUtc),
+    lat: stop.latitude,
+    lon: stop.longitude,
+    actualDepartureTimestamp: stop.actualDepartureUtc ?? undefined,
+    onTimePerformance: stop.otp ?? null,
   };
-}
-
-export function createNoDataStop(stop: StopDetails): VehiclePingStop {
+  if (!stop.actualDepartureUtc) {
+    return model;
+  }
+  const actualDeparture = DateTime.fromISO(stop.actualDepartureUtc);
   return {
-    id: stop?.stopId as string,
-    stopName: stop?.stopName,
-    isTimingPoint: stop.timingPoint,
-    onTimePerformance: OnTimePerformanceEnum.NoData,
-    scheduledDeparture: stop.startTime.plus({ minutes: stop.departureTimeOffset }),
-    lat: stop?.lat as number,
-    lon: stop?.lon as number,
-    isHidden: false,
-
-    ts: DateTime.fromSeconds(0),
+    ...model,
+    actualDeparture,
+    delay: actualDeparture.diff(model.scheduledDeparture),
   };
-}
-
-export function createHiddenStop(stop: StopDetails): VehiclePingStop {
-  return {
-    id: stop?.stopId as string,
-    stopName: stop?.stopName,
-    isTimingPoint: stop.timingPoint,
-    scheduledDeparture: stop.startTime.plus({ minutes: stop.departureTimeOffset }),
-    lat: stop?.lat as number,
-    lon: stop?.lon as number,
-    isHidden: true,
-
-    ts: DateTime.fromSeconds(0),
-    onTimePerformance: OnTimePerformanceEnum.NoData,
-  };
-}
+};

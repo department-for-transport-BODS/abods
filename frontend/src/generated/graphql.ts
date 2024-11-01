@@ -68,6 +68,36 @@ export type ApiInfoType = {
   version: Scalars['String'];
 };
 
+/**
+ * Filters for AvlLineLevelStatus
+ * 
+ * BODS integration uses this so ensure all changes are backwards compatible
+ */
+export type AvlFiltersInput = {
+  lineName?: Maybe<Scalars['String']>;
+  operatorNoc?: Maybe<Scalars['String']>;
+};
+
+/**
+ * Last Received AVL for on a Line basis
+ * 
+ * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ */
+export type AvlLineLevelStatus = {
+  __typename?: 'AvlLineLevelStatus';
+  lastRecordedAtTime: Scalars['DateTime'];
+  lineName: Scalars['String'];
+  operatorNoc: Scalars['String'];
+};
+
+export type AvlPoint = {
+  __typename?: 'AvlPoint';
+  latitude: Scalars['Float'];
+  longitude: Scalars['Float'];
+  recordedAtTimeUtc: Scalars['String'];
+  vehicleRef: Scalars['String'];
+};
+
 export type BoundingBoxInputType = {
   maxLatitude?: Maybe<Scalars['Float']>;
   maxLongitude?: Maybe<Scalars['Float']>;
@@ -322,37 +352,6 @@ export type FrequentServiceType = {
   serviceInfo?: Maybe<ServiceInfoType>;
 };
 
-export enum GpsFeedJourneyStatus {
-  Completed = 'Completed',
-  Started = 'Started',
-  Unknown = 'Unknown'
-}
-
-export enum GpsFeedStatus {
-  Active = 'Active',
-  Stale = 'Stale'
-}
-
-export type GpsFeedType = {
-  __typename?: 'GpsFeedType';
-  actualDelay: Scalars['Int'];
-  delay: Scalars['Int'];
-  feedStatus?: Maybe<GpsFeedStatus>;
-  isTimingPoint?: Maybe<Scalars['Boolean']>;
-  journeyStatus: GpsFeedJourneyStatus;
-  lat: Scalars['Float'];
-  lon: Scalars['Float'];
-  operatorInfo?: Maybe<OperatorInfoType>;
-  previousStopInfo?: Maybe<StopInfoType>;
-  scheduledDeparture: Scalars['String'];
-  serviceInfo: ServiceInfoType;
-  servicePatternId?: Maybe<Scalars['String']>;
-  startTime: Scalars['String'];
-  ts: Scalars['String'];
-  vehicleId: Scalars['String'];
-  vehicleJourneyId?: Maybe<Scalars['String']>;
-};
-
 export type GpsPointType = {
   __typename?: 'GpsPointType';
   latitude: Scalars['Float'];
@@ -402,7 +401,7 @@ export type HeadwayMetricsType = {
 
 
 export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 };
 
 
@@ -509,6 +508,7 @@ export enum LineDirection {
 }
 
 export type LineFilterType = {
+  inputDate?: Maybe<Scalars['DateTime']>;
   lineIds?: Maybe<Array<Scalars['String']>>;
 };
 
@@ -762,6 +762,12 @@ export type OrganisationType = {
   name: Scalars['String'];
 };
 
+export enum OtpEnum {
+  Early = 'Early',
+  Late = 'Late',
+  OnTime = 'OnTime'
+}
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']>;
@@ -857,6 +863,8 @@ export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
   apiInfo?: Maybe<ApiInfoType>;
+  avlLineLevelStatus: Array<AvlLineLevelStatus>;
+  avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   events?: Maybe<EventResponse>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -866,20 +874,28 @@ export type Query = {
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   roles?: Maybe<Array<RoleType>>;
+  route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
-  servicePatternsInfo?: Maybe<Array<Maybe<ServicePatternType>>>;
-  timingPatternDetail?: Maybe<Array<Maybe<TimingPatternDetailType>>>;
   user?: Maybe<UserType>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
-  vehicleJourney?: Maybe<Array<Maybe<VehicleJourneyType>>>;
   vehicleReplay?: Maybe<VehicleReplayNamespace>;
 };
 
 
 export type QueryAdminAreasArgs = {
   adminAreaIds?: Maybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryAvlLineLevelStatusArgs = {
+  filters?: Maybe<AvlFiltersInput>;
+};
+
+
+export type QueryAvlsArgs = {
+  groupId: Scalars['String'];
 };
 
 
@@ -912,18 +928,13 @@ export type QueryOperatorsArgs = {
 };
 
 
+export type QueryRouteArgs = {
+  groupId: Scalars['String'];
+};
+
+
 export type QueryServiceInfoArgs = {
   serviceId: Scalars['String'];
-};
-
-
-export type QueryServicePatternsInfoArgs = {
-  servicePatternIds?: Maybe<Array<Scalars['String']>>;
-};
-
-
-export type QueryTimingPatternDetailArgs = {
-  timingPatternId: Scalars['String'];
 };
 
 
@@ -934,11 +945,6 @@ export type QueryUserArgs = {
 
 export type QueryUserAlertArgs = {
   alertId: Scalars['String'];
-};
-
-
-export type QueryVehicleJourneyArgs = {
-  vehicleJourneyId: Scalars['String'];
 };
 
 export enum RankingOrder {
@@ -1052,6 +1058,25 @@ export enum SortOrderEnum {
   Desc = 'DESC'
 }
 
+export type Stop = {
+  __typename?: 'Stop';
+  actualDepartureUtc?: Maybe<Scalars['String']>;
+  isTimingPoint: Scalars['Boolean'];
+  latitude: Scalars['Float'];
+  lineName: Scalars['String'];
+  longitude: Scalars['Float'];
+  operatorName: Scalars['String'];
+  operatorNoc: Scalars['String'];
+  otp?: Maybe<OtpEnum>;
+  scheduledDepartureUtc: Scalars['String'];
+  serviceId: Scalars['String'];
+  serviceName: Scalars['String'];
+  startTime: Scalars['String'];
+  stopId: Scalars['Int'];
+  stopIndex: Scalars['Int'];
+  stopName: Scalars['String'];
+};
+
 export type StopInfoType = {
   __typename?: 'StopInfoType';
   sourceId?: Maybe<Scalars['String']>;
@@ -1095,22 +1120,6 @@ export type StopType = {
 };
 
 
-export type TimingPatternDetailType = {
-  __typename?: 'TimingPatternDetailType';
-  arrivalTimeOffset: Scalars['Int'];
-  createdAt?: Maybe<Scalars['DateTime']>;
-  deletedAt?: Maybe<Scalars['DateTime']>;
-  departureTimeOffset: Scalars['Int'];
-  noPickup?: Maybe<Scalars['Boolean']>;
-  noSetdown?: Maybe<Scalars['Boolean']>;
-  requestStop?: Maybe<Scalars['Boolean']>;
-  stopIndex: Scalars['Int'];
-  timingPatternId: Scalars['String'];
-  timingPoint: Scalars['Boolean'];
-  updatedAt?: Maybe<Scalars['DateTime']>;
-  version?: Maybe<Scalars['String']>;
-};
-
 export type TransitModelType = {
   __typename?: 'TransitModelType';
   lines?: Maybe<PaginatedLineType>;
@@ -1151,15 +1160,6 @@ export type UserUpdateResponseType = {
   user?: Maybe<UserType>;
 };
 
-export type VehicleJourneyType = {
-  __typename?: 'VehicleJourneyType';
-  mode?: Maybe<Scalars['String']>;
-  operatorId?: Maybe<Scalars['String']>;
-  servicePatternId?: Maybe<Scalars['String']>;
-  timingPatternId?: Maybe<Scalars['String']>;
-  vehicleJourneyId?: Maybe<Scalars['String']>;
-};
-
 export type VehicleReplayFilterInputType = {
   filterOnStartTime?: Maybe<Scalars['Boolean']>;
   lineIds?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -1175,18 +1175,11 @@ export type VehicleReplayInputType = {
 export type VehicleReplayNamespace = {
   __typename?: 'VehicleReplayNamespace';
   findJourneys?: Maybe<Array<Maybe<UniqueJourneyType>>>;
-  getJourney?: Maybe<Array<Maybe<GpsFeedType>>>;
 };
 
 
 export type VehicleReplayNamespaceFindJourneysArgs = {
   inputs: VehicleReplayInputType;
-};
-
-
-export type VehicleReplayNamespaceGetJourneyArgs = {
-  journeyId: Scalars['String'];
-  startTime: Scalars['DateTime'];
 };
 
 export type VehicleStatsType = {
@@ -1711,7 +1704,7 @@ export type HeadwayFrequentServicesQuery = (
 );
 
 export type HeadwayFrequentServiceInfoQueryVariables = Exact<{
-  inputs?: Maybe<FrequentServiceInfoInputType>;
+  inputs: FrequentServiceInfoInputType;
 }>;
 
 
@@ -2115,6 +2108,7 @@ export type OperatorListQuery = (
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorId: Scalars['String'];
+  inputDate?: Maybe<Scalars['DateTime']>;
 }>;
 
 
@@ -2204,46 +2198,29 @@ export type InvitationQuery = (
   )> }
 );
 
-export type ServicePatternsQueryVariables = Exact<{
-  servicePatternIds?: Maybe<Array<Scalars['String']>>;
+export type AvlsQueryVariables = Exact<{
+  groupId: Scalars['String'];
 }>;
 
 
-export type ServicePatternsQuery = (
+export type AvlsQuery = (
   { __typename?: 'Query' }
-  & { servicePatternsInfo?: Maybe<Array<Maybe<(
-    { __typename?: 'ServicePatternType' }
-    & { stops?: Maybe<Array<(
-      { __typename?: 'StopType' }
-      & Pick<StopType, 'stopId' | 'stopName' | 'lon' | 'lat'>
-    )>> }
-  )>>> }
+  & { avls: Array<(
+    { __typename?: 'AvlPoint' }
+    & Pick<AvlPoint, 'recordedAtTimeUtc' | 'latitude' | 'longitude' | 'vehicleRef'>
+  )> }
 );
 
-export type VehicleJourneyQueryVariables = Exact<{
-  journeyId: Scalars['String'];
-  startTime: Scalars['DateTime'];
+export type RouteQueryVariables = Exact<{
+  groupId: Scalars['String'];
 }>;
 
 
-export type VehicleJourneyQuery = (
+export type RouteQuery = (
   { __typename?: 'Query' }
-  & { vehicleReplay?: Maybe<(
-    { __typename?: 'VehicleReplayNamespace' }
-    & { getJourney?: Maybe<Array<Maybe<(
-      { __typename?: 'GpsFeedType' }
-      & Pick<GpsFeedType, 'ts' | 'lat' | 'lon' | 'vehicleId' | 'vehicleJourneyId' | 'servicePatternId' | 'delay' | 'actualDelay' | 'startTime' | 'scheduledDeparture' | 'isTimingPoint' | 'feedStatus' | 'journeyStatus'>
-      & { operatorInfo?: Maybe<(
-        { __typename?: 'OperatorInfoType' }
-        & Pick<OperatorInfoType, 'operatorId' | 'operatorName' | 'nocCode'>
-      )>, serviceInfo: (
-        { __typename?: 'ServiceInfoType' }
-        & Pick<ServiceInfoType, 'serviceId' | 'serviceName' | 'serviceNumber'>
-      ), previousStopInfo?: Maybe<(
-        { __typename?: 'StopInfoType' }
-        & Pick<StopInfoType, 'stopId' | 'stopName'>
-      )> }
-    )>>> }
+  & { route: Array<(
+    { __typename?: 'Stop' }
+    & Pick<Stop, 'actualDepartureUtc' | 'scheduledDepartureUtc' | 'latitude' | 'longitude' | 'stopIndex' | 'stopName' | 'stopId' | 'isTimingPoint' | 'operatorName' | 'operatorNoc' | 'lineName' | 'serviceId' | 'serviceName' | 'startTime' | 'otp'>
   )> }
 );
 
@@ -2268,32 +2245,6 @@ export type JourneysQuery = (
       ) }
     )>>> }
   )> }
-);
-
-export type VehicleJourneyTimingPatternQueryVariables = Exact<{
-  vehicleJourneyId: Scalars['String'];
-}>;
-
-
-export type VehicleJourneyTimingPatternQuery = (
-  { __typename?: 'Query' }
-  & { vehicleJourney?: Maybe<Array<Maybe<(
-    { __typename?: 'VehicleJourneyType' }
-    & Pick<VehicleJourneyType, 'vehicleJourneyId' | 'servicePatternId' | 'timingPatternId' | 'operatorId'>
-  )>>> }
-);
-
-export type TimingPatternDetailQueryVariables = Exact<{
-  timingPatternId: Scalars['String'];
-}>;
-
-
-export type TimingPatternDetailQuery = (
-  { __typename?: 'Query' }
-  & { timingPatternDetail?: Maybe<Array<Maybe<(
-    { __typename?: 'TimingPatternDetailType' }
-    & Pick<TimingPatternDetailType, 'stopIndex' | 'timingPoint' | 'arrivalTimeOffset' | 'departureTimeOffset' | 'timingPatternId'>
-  )>>> }
 );
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
@@ -3046,7 +2997,7 @@ export const HeadwayFrequentServicesDocument = gql`
     }
   }
 export const HeadwayFrequentServiceInfoDocument = gql`
-    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType) {
+    query headwayFrequentServiceInfo($inputs: FrequentServiceInfoInputType!) {
   headwayMetrics {
     frequentServiceInfo(inputs: $inputs) {
       numHours
@@ -3565,10 +3516,10 @@ export const OperatorListDocument = gql`
     }
   }
 export const OperatorLinesDocument = gql`
-    query operatorLines($operatorId: String!) {
+    query operatorLines($operatorId: String!, $inputDate: DateTime) {
   operator(operatorId: $operatorId) {
     transitModel {
-      lines {
+      lines(filterBy: {inputDate: $inputDate}) {
         items {
           id: lineId
           name: lineName
@@ -3682,15 +3633,13 @@ export const InvitationDocument = gql`
       super(apollo);
     }
   }
-export const ServicePatternsDocument = gql`
-    query servicePatterns($servicePatternIds: [String!]) {
-  servicePatternsInfo(servicePatternIds: $servicePatternIds) {
-    stops {
-      stopId
-      stopName
-      lon
-      lat
-    }
+export const AvlsDocument = gql`
+    query avls($groupId: String!) {
+  avls(groupId: $groupId) {
+    recordedAtTimeUtc
+    latitude
+    longitude
+    vehicleRef
   }
 }
     `;
@@ -3698,45 +3647,31 @@ export const ServicePatternsDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class ServicePatternsGQL extends Apollo.Query<ServicePatternsQuery, ServicePatternsQueryVariables> {
-    document = ServicePatternsDocument;
+  export class AvlsGQL extends Apollo.Query<AvlsQuery, AvlsQueryVariables> {
+    document = AvlsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
   }
-export const VehicleJourneyDocument = gql`
-    query vehicleJourney($journeyId: String!, $startTime: DateTime!) {
-  vehicleReplay {
-    getJourney(journeyId: $journeyId, startTime: $startTime) {
-      ts
-      lat
-      lon
-      vehicleId
-      vehicleJourneyId
-      servicePatternId
-      delay
-      actualDelay
-      startTime
-      scheduledDeparture
-      isTimingPoint
-      operatorInfo {
-        operatorId
-        operatorName
-        nocCode
-      }
-      serviceInfo {
-        serviceId
-        serviceName
-        serviceNumber
-      }
-      previousStopInfo {
-        stopId
-        stopName
-      }
-      feedStatus
-      journeyStatus
-    }
+export const RouteDocument = gql`
+    query route($groupId: String!) {
+  route(groupId: $groupId) {
+    actualDepartureUtc
+    scheduledDepartureUtc
+    latitude
+    longitude
+    stopIndex
+    stopName
+    stopId
+    isTimingPoint
+    operatorName
+    operatorNoc
+    lineName
+    serviceId
+    serviceName
+    startTime
+    otp
   }
 }
     `;
@@ -3744,8 +3679,8 @@ export const VehicleJourneyDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class VehicleJourneyGQL extends Apollo.Query<VehicleJourneyQuery, VehicleJourneyQueryVariables> {
-    document = VehicleJourneyDocument;
+  export class RouteGQL extends Apollo.Query<RouteQuery, RouteQueryVariables> {
+    document = RouteDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
@@ -3771,49 +3706,6 @@ export const JourneysDocument = gql`
   })
   export class JourneysGQL extends Apollo.Query<JourneysQuery, JourneysQueryVariables> {
     document = JourneysDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const VehicleJourneyTimingPatternDocument = gql`
-    query vehicleJourneyTimingPattern($vehicleJourneyId: String!) {
-  vehicleJourney(vehicleJourneyId: $vehicleJourneyId) {
-    vehicleJourneyId
-    servicePatternId
-    timingPatternId
-    operatorId
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class VehicleJourneyTimingPatternGQL extends Apollo.Query<VehicleJourneyTimingPatternQuery, VehicleJourneyTimingPatternQueryVariables> {
-    document = VehicleJourneyTimingPatternDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const TimingPatternDetailDocument = gql`
-    query timingPatternDetail($timingPatternId: String!) {
-  timingPatternDetail(timingPatternId: $timingPatternId) {
-    stopIndex
-    timingPoint
-    arrivalTimeOffset
-    departureTimeOffset
-    timingPatternId
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class TimingPatternDetailGQL extends Apollo.Query<TimingPatternDetailQuery, TimingPatternDetailQueryVariables> {
-    document = TimingPatternDetailDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

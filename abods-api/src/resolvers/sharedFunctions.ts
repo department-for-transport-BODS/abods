@@ -1,50 +1,10 @@
-import { Role } from '@prisma/client';
-import { Context } from '../../context.js';
-import { RoleType, ScopeEnum } from '../../types/generated.js'
-import { SessionUser } from '../../types/extra';
-
-const adminAreas = [
-  {
-    "adminAreaId": "area1",
-    "adminAreaName": "Area1Name"
-  },
-  {
-    "adminAreaId": "area2",
-    "adminAreaName": "Area2Name"
-  }
-]
-
-export const getOrganisation = async (id, sessionUser: any, db: Context) => {
-  try {
-    if(!sessionUser.user){
-      throw ("Not authorized")
-    }
-
-    if(!id)
-    {
-      throw("Invalid Id")
-    }
-
-    //TODO: check if user is part of org
-
-    const org = await db.prisma.bods_organisation.findUnique({where:{id:id}});
-
-    if(!org){
-      throw("No organisation found")
-    }
-
-    return org;
-
-  } catch (error) {
-    console.error(error)
-    return null;
-  }
-}
+import { QueryResolvers, Resolvers } from '../types/generated.js'
+import { requireUserSession } from './helpers.js';
 
 // Summary: fetch api info
-export const getApiInfo = async (db: Context) => {
+export const getApiInfo: QueryResolvers['apiInfo'] = async (_, __, context) => {
   try {
-    const apiInfo = await db.prisma.apiInfo.findFirst({
+    const apiInfo = await context.db.apiInfo.findFirst({
       include: {
         feature_flag: true
       }
@@ -77,11 +37,9 @@ export const getApiInfo = async (db: Context) => {
 }
 
 // Summary: fetch roles
-export const getRoles = async (sessionUser: SessionUser) => {
+export const getRoles: QueryResolvers['roles'] = async (_, __, context ) => {
   try {
-    if(!sessionUser.user){
-      throw ("Not authorized")
-    }
+    await requireUserSession(context)
 
     return [{
       "id": "1",
@@ -101,10 +59,11 @@ export const getRoles = async (sessionUser: SessionUser) => {
   } 
 }
 
-export const mapRoleToRoleType = (role: Role): RoleType | undefined => {
-  return {
-    id: String(role.id),
-    name: role.name.trim(),
-    scope: role.scope.trim() as ScopeEnum
+const sharedResolvers: Resolvers = {
+  Query: {
+    apiInfo: getApiInfo,
+    roles: getRoles
   }
 }
+
+export default sharedResolvers;

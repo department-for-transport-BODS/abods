@@ -1,45 +1,29 @@
-query servicePatterns($servicePatternIds: [String!]) {
-  servicePatternsInfo(servicePatternIds: $servicePatternIds) {
-    stops {
-      stopId
-      stopName
-      lon
-      lat
-    }
+query avls($groupId: String!) {
+  avls(groupId: $groupId) {
+    recordedAtTimeUtc
+    latitude
+    longitude
+    vehicleRef
   }
 }
 
-query vehicleJourney($journeyId: String!, $startTime: DateTime!) {
-  vehicleReplay {
-    getJourney(journeyId: $journeyId, startTime: $startTime) {
-      ts
-      lat
-      lon
-      vehicleId
-      vehicleJourneyId
-      servicePatternId
-      delay
-      actualDelay
-      startTime
-      scheduledDeparture
-      isTimingPoint
-      operatorInfo {
-        operatorId
-        operatorName
-        nocCode
-      }
-      serviceInfo {
-        serviceId
-        serviceName
-        serviceNumber
-      }
-      previousStopInfo {
-        stopId
-        stopName
-      }
-      feedStatus
-      journeyStatus
-    }
+query route($groupId: String!) {
+  route(groupId: $groupId) {
+    actualDepartureUtc
+    scheduledDepartureUtc
+    latitude
+    longitude
+    stopIndex
+    stopName
+    stopId
+    isTimingPoint
+    operatorName
+    operatorNoc
+    lineName
+    serviceId
+    serviceName,
+    startTime,
+    otp,
   }
 }
 
@@ -59,24 +43,5 @@ query journeys($fromTimestamp: DateTime!, $toTimestamp: DateTime!, $lineId: Stri
         serviceNumber
       }
     }
-  }
-}
-
-query vehicleJourneyTimingPattern($vehicleJourneyId: String!) {
-  vehicleJourney(vehicleJourneyId: $vehicleJourneyId) {
-    vehicleJourneyId
-    servicePatternId
-    timingPatternId
-    operatorId
-  }
-}
-
-query timingPatternDetail($timingPatternId: String!) {
-  timingPatternDetail(timingPatternId: $timingPatternId) {
-    stopIndex
-    timingPoint
-    arrivalTimeOffset
-    departureTimeOffset
-    timingPatternId
   }
 }

@@ -20,10 +20,27 @@ export class AgGridDirective {
   constructor(private formatter: AgGridFormatterService) {}
 
   export(filename: string) {
+    const topRow = this.gridApi?.getPinnedTopRow(0)?.data;
+
+    this.gridApi?.setPinnedTopRowData([
+      {
+        ...topRow,
+        lineInfo: {
+          serviceNumber: 'Total',
+          serviceName: '',
+          ...topRow.lineInfo,
+        },
+        stopInfo: {
+          ...topRow.stopInfo,
+          stopName: 'Total:',
+        },
+      },
+    ]);
+
     this.gridApi?.exportDataAsCsv({
       fileName: filename,
       allColumns: true,
-      skipPinnedTop: true,
+      skipPinnedTop: false,
       processCellCallback: (cell) => {
         const columnId = cell.column.getColId();
         if (columnId.endsWith('Pct')) {
@@ -41,5 +58,7 @@ export class AgGridDirective {
         return cell.column.getDefinition().headerName ?? '';
       },
     });
+
+    this.gridApi?.setPinnedTopRowData(topRow);
   }
 }

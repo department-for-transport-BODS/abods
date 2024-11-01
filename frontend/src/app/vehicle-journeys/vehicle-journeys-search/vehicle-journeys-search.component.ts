@@ -109,6 +109,12 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
       .pipe(
         distinctUntilChanged((a: DateTime, b: DateTime) => a.equals(b)),
         map((date) => date.toUTC().toISO({ format: 'basic', suppressSeconds: true })),
+        tap(() => {
+          if (this.operator.value) {
+            this.servicesLoading = true;
+            this.service.reset();
+          }
+        }),
         takeUntil(this.destroy$)
       )
       .subscribe((date) => this.router.navigate([], { queryParams: { date: date }, queryParamsHandling: 'merge' }));
@@ -155,6 +161,12 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
       takeUntil(this.destroy$)
     );
 
+    const date$: Observable<string> = this.route.queryParamMap.pipe(
+      distinctUntilChanged(),
+      map((queryParams) => queryParams.get('date') as string),
+      takeUntil(this.destroy$)
+    );
+
     const operator$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
       map((queryParams) => queryParams.get('operator') as string),
@@ -178,11 +190,13 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
       takeUntil(this.destroy$)
     );
 
-    this.services$ = operator$.pipe(
-      distinctUntilChanged(),
-      filter((operatorId) => operatorId !== null),
-      switchMap((operatorId) =>
-        this.operatorService.fetchLines(operatorId).pipe(
+    this.services$ = combineLatest([operator$, date$]).pipe(
+      filter(([operatorId, _]) => operatorId !== null),
+      distinctUntilChanged(([prevOperatorId, prevDate], [currOperatorId, currDate]) => {
+        return prevOperatorId === currOperatorId && prevDate === currDate;
+      }),
+      switchMap(([operatorId, _]) =>
+        this.operatorService.fetchLines(operatorId, this.date.value).pipe(
           take(1),
           startWith([]),
           finalize(() => (this.servicesLoading = false))
@@ -203,7 +217,7 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
         debounceTime(200),
         switchMap(({ date, service }) => {
           if (date?.isValid && service) {
-            return this.vehicleJourneysSearchService.fetchJourneys(date, date.plus({ day: 1 }), service).pipe(
+            return this.vehicleJourneysSearchService.fetchDayJourneys(date, service).pipe(
               take(1),
               catchError(() => {
                 this.errored = true;

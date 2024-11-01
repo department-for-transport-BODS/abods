@@ -21,3 +21,6 @@ test.ipynb
 .idea
 .nvmrc
 session-mananger-plugin.pkg
+
+
+generated_api_secrets/

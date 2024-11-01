@@ -11,10 +11,10 @@ query operatorList {
   }
 }
 
-query operatorLines($operatorId: String!) {
+query operatorLines($operatorId: String!, $inputDate: DateTime) {
   operator(operatorId: $operatorId) {
     transitModel {
-      lines {
+      lines(filterBy: {inputDate: $inputDate}) {
         items {
           id: lineId
           name: lineName

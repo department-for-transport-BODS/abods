@@ -16,13 +16,13 @@ type Query {
     headwayMetrics: HeadwayMetricsType
     serviceInfo(serviceId: String!): ServiceInfoType
     vehicleReplay: VehicleReplayNamespace
-    servicePatternsInfo(servicePatternIds: [String!]): [ServicePatternType]
-    vehicleJourney(vehicleJourneyId: String!):  [VehicleJourneyType]
-    timingPatternDetail(timingPatternId: String!): [TimingPatternDetailType]
     corridor: CorridorNamespace
     invitation(key: String!): InvitationType
     events(operatorId: String!, start: DateTime!, end: DateTime!):EventResponse
     eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
+    avls(groupId: String!): [AvlPoint!]!
+    route(groupId: String!): [Stop!]!
+    avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 }
 
 input OperatorFilterInput {
@@ -164,29 +164,6 @@ enum CorridorGranularity {
     minute
 }
 
-type VehicleJourneyType {
-    mode: String
-    operatorId: String
-    servicePatternId: String
-    timingPatternId: String
-    vehicleJourneyId: String
-}
-
-type TimingPatternDetailType {
-    arrivalTimeOffset: Int!
-    createdAt: DateTime
-    deletedAt: DateTime
-    departureTimeOffset: Int!
-    noPickup: Boolean
-    noSetdown: Boolean
-    requestStop: Boolean
-    stopIndex: Int!
-    timingPatternId: String!
-    timingPoint: Boolean!
-    updatedAt: DateTime
-    version: String
-}
-
 input VehicleReplayFilterInputType {
     filterOnStartTime: Boolean
     lineIds: [String]
@@ -201,37 +178,6 @@ input VehicleReplayInputType {
 
 type VehicleReplayNamespace {
     findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
-    getJourney(journeyId: String!, startTime: DateTime!): [GpsFeedType]
-}
-
-type GpsFeedType {
-    delay: Int!
-    actualDelay: Int!
-    feedStatus: GpsFeedStatus
-    isTimingPoint: Boolean
-    journeyStatus: GpsFeedJourneyStatus!
-    lat: Float!
-    lon: Float!
-    operatorInfo: OperatorInfoType
-    previousStopInfo: StopInfoType
-    scheduledDeparture: String!
-    serviceInfo: ServiceInfoType!
-    servicePatternId: String
-    startTime: String!
-    ts: String!
-    vehicleId: String!
-    vehicleJourneyId: String
-}
-
-enum GpsFeedStatus {
-    Active
-    Stale
-}
-
-enum GpsFeedJourneyStatus {
-    Completed
-    Started
-    Unknown
 }
 
 type UniqueJourneyType {
@@ -273,7 +219,7 @@ input SignupPayloadType {
 
 type HeadwayMetricsType {
     frequentServices(operatorId: String!, fromTimestamp: DateTime!, toTimestamp: DateTime!): [FrequentServiceType]
-    frequentServiceInfo(inputs: FrequentServiceInfoInputType): FrequentServiceInfoType
+    frequentServiceInfo(inputs: FrequentServiceInfoInputType!): FrequentServiceInfoType
     headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
     headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
     headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
@@ -386,6 +332,7 @@ type TransitModelType {
 
 input LineFilterType {
     lineIds: [String!]
+    inputDate: DateTime
 }
 
 type PaginatedLineType {
@@ -839,4 +786,56 @@ input ServicePerformanceInputType {
     fromTimestamp: DateTime
     toTimestamp: DateTime
     order: RankingOrder
+}
+
+type AvlPoint {
+    recordedAtTimeUtc: String!
+    latitude: Float!
+    longitude: Float!
+    vehicleRef: String!
+}
+
+type Stop {
+    actualDepartureUtc: String
+    scheduledDepartureUtc: String!
+    latitude: Float!
+    longitude: Float!
+    stopIndex: Int!
+    stopId: Int!
+    stopName: String!
+    isTimingPoint: Boolean!
+    lineName: String!
+    operatorNoc: String!
+    operatorName: String!
+    serviceId: String!
+    serviceName: String!
+    startTime: String!
+    otp: OtpEnum
+}
+
+enum OtpEnum {
+    Early,
+    Late,
+    OnTime
+}
+
+"""
+Filters for AvlLineLevelStatus
+
+BODS integration uses this so ensure all changes are backwards compatible
+"""
+input AvlFiltersInput {
+  operatorNoc: String
+  lineName: String
+}
+
+"""
+Last Received AVL for on a Line basis
+
+BODS integrates with this endpoint so ensure all changes are backwards compatible
+"""
+type AvlLineLevelStatus {
+  operatorNoc: String!
+  lineName: String!
+  lastRecordedAtTime: DateTime!
 }
