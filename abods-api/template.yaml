@@ -135,9 +135,7 @@ Resources:
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
-      Policies:
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref GraphQLAPITokenSecret
+
   GraphQLAPITokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -182,6 +180,14 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
+      Policies:
+        - PolicyName: SecretsManagerGetSecretValueForAPIToken
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:  
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref GraphQLAPITokenSecret
 
   GraphQlFunctionLoggingPolicy:
     Type: 'AWS::IAM::Policy'
