@@ -191,6 +191,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - kms:Decrypt
+                  - kms:DescribeKey
                 Resource:
                   Fn::Sub: '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
   GraphQlFunctionLoggingPolicy:
