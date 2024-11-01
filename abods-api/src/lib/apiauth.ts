@@ -76,9 +76,19 @@ const getClientHashFromAWS = async (): Promise<AuthContext> => {
 
   const secret: AuthContext = JSON.parse(response.SecretString);
   if (!secret.allowedTokenHash || !secret.Hmac) {
+    const missingFields = {
+      allowedTokenHash: !secret.allowedTokenHash,
+      Hmac: !secret.Hmac,
+    };
+    logger.error(
+      "Invalid secret format - missing required fields",
+      missingFields
+    );
     throw new Error("Invalid Secret Format in AWS Secrets Manager for Tokens");
   }
-
+  logger.info(
+    "Sucessfully retrived API Token Hash and Hmac from Secrets Manager"
+  );
   return {
     allowedTokenHash: secret.allowedTokenHash,
     Hmac: secret.Hmac,
@@ -99,8 +109,10 @@ export const getAPITokenHash = async (): Promise<AuthContext | undefined> => {
   try {
     return await getClientHashFromAWS();
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     logger.warn(
-      "API Token authentication is disabled: Failed to get API key hash"
+      `API Token authentication is disabled: Failed to get API key hash - Error: ${errorMessage}`
     );
     return undefined;
   }
