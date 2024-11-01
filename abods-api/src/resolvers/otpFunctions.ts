@@ -20,8 +20,8 @@ import {
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
-import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
-import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
+import { DateTimeScalar, dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
+import { compareThresholds, getFeedMonitoringList, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from './helpers.js';
@@ -317,15 +317,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
 
     const { filters } = args.inputs;
     const {
-      timingPointsOnly,
-      adminAreaIds,
-      operatorIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
       lineIds,
-      dayOfWeekFlags,
       onTimeMaxMinutes,
       onTimeMinMinutes,
     } = filters || {};
@@ -407,17 +399,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPer
 
     let opPerformances: OperatorPerformanceType[] = [];
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     const {
-      timingPointsOnly,
       adminAreaIds,
-      operatorIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      lineIds,
-      dayOfWeekFlags,
     } = filters || {};
 
     logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
@@ -507,17 +491,9 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
   try {
     const user = await requireUserSession(context)
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
-      granularity,
       lineIds,
     } = filters || {};
 
@@ -710,17 +686,9 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
-      granularity,
       lineIds,
     } = filters || {};
     operatorIds = operatorIds || []
@@ -792,15 +760,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
 
     logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
       granularity,
       lineIds,
@@ -821,11 +782,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
       const operator_noc_to_filter = operatorIds[0];
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
-        const start = new Date(fromTimestamp);
-        const end = new Date(toTimestamp);
-        const days = getDaysInRange(start, end);
-
-
+        
         let summary: PunctualityTimeSeriesType[] = []
 
         let results;
@@ -856,8 +813,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
           if (result._sum) {
             summary.push({
               ts: isDayGranularity
-                ? getFormattedDate(result.date_of_journey)
-                : getFormattedDate(result.departure_hour),
+                ? result.date_of_journey
+                : result.departure_hour,
               early: result._sum.early_count,
               late: result._sum.late_count,
               onTime: result._sum.on_time_count,
@@ -901,7 +858,6 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
       filters,
       fromTimestamp,
       order,
-      toTimestamp
     } = args.inputs
 
     const timingPointsOnly = filters?.timingPointsOnly
@@ -1679,6 +1635,7 @@ const getPrismaFiltersForOTPQuery = (
 };
 
 const otpResolvers: Resolvers = {
+    DateTime: DateTimeScalar,
     Query: {
         operators: getOperatorList,
         operator: getOperator,
@@ -1706,6 +1663,7 @@ const otpResolvers: Resolvers = {
     },
     OperatorType: {
         transitModel: emptyResolver,
+        feedMonitoring: getFeedMonitoringList,
     },
     TransitModelType: {
         lines: getLines,

@@ -1,17 +1,17 @@
-import { getDate, getFormattedDate, isSameOrBefore } from "../lib/dayjs";
+import { getDate, getFormattedDate, isSameOrBefore } from "../lib/dayjs.js";
 import {
   ExpectedJourneyType,
   getAvlPoints,
   getExpectedJourneys,
-} from "../lib/otp";
+} from "../lib/otp.js";
 import {
   EventStatsType, FeedMonitoringTypeResolvers,
   LiveStatsTypeResolvers,
   QueryResolvers,
   Resolvers,
   VehicleStatsType
-} from '../types/generated';
-import { AlertType, getVehicleStats, VechileCountType } from '../lib/feedMonitoring';
+} from '../types/generated.js';
+import { AlertType, getVehicleStats, VechileCountType } from '../lib/feedMonitoring.js';
 import { GraphQLResolveInfo } from "graphql";
 import { PrismaClient } from '@prisma/client';
 
@@ -157,11 +157,12 @@ export const getLast24Hours: LiveStatsTypeResolvers['last24Hours'] = async (pare
     },
   });
 
-  return result.map((summary) => ({
-    timestamp: getFormattedDate(summary.received_interval),
-    actual: summary.actual,
-    expected: summary.expected,
-  }));
+  return result
+    .map((summary) => ({
+      timestamp: summary.received_interval,
+      actual: summary.actual,
+      expected: summary.expected,
+    }));
 };
 
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers['vehicleStats'] = async (parent, args, context, info): Promise<VehicleStatsType[]> => {

@@ -1188,7 +1188,7 @@ export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual?: Maybe<Scalars['Int']>;
   expected?: Maybe<Scalars['Int']>;
-  timestamp: Scalars['String'];
+  timestamp: Scalars['DateTime'];
 };
 
 export type LoginMutationVariables = Exact<{

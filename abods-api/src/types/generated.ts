@@ -464,7 +464,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type HistoricalStatsType = {
@@ -849,7 +849,7 @@ export type PunctualityTimeSeriesType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type PunctualityTotalsType = {
@@ -1188,7 +1188,7 @@ export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual?: Maybe<Scalars['Int']['output']>;
   expected?: Maybe<Scalars['Int']['output']>;
-  timestamp: Scalars['String']['output'];
+  timestamp: Scalars['DateTime']['output'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -1753,7 +1753,7 @@ export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentT
   actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1938,7 +1938,7 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2129,7 +2129,7 @@ export type VehicleReplayNamespaceResolvers<ContextType = RequestContext, Parent
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
   actual?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   expected?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

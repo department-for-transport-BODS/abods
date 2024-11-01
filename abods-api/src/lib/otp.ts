@@ -9,7 +9,7 @@ import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
 import { getDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
 
-export type AllOperatorWithFeedSummary = all_operators & {
+export type AllOperatorWithFeedSummary = feed_monitor_summary & {
   feed_summary?: feed_monitor_summary | null;
 };
 
@@ -290,38 +290,31 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
 }
 
 export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
-  return db.all_operators.findUnique({
+  return db.feed_monitor_summary.findUnique({
     where: {
-      operatorref: operatorRefs,
-      feed_summary: {
-        isNot: null
-      }
-    },
-    include: {
-      feed_summary: true,
+      operator_noc: operatorRefs,
     },
   });
 };
 
 
 export const getFeedMonitoringList = async (
-  db: PrismaClient,
-  userOperatorId: string
+  parent, args, context
 ) => {
-  const operator: AllOperatorWithFeedSummary | null = await getOperatorWithFeed(
-    db,
-    userOperatorId
+  const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
+    context.db,
+    parent.operatorId
   );
 
   return {
-    operatorId: userOperatorId,
-    feedStatus: !!operator?.feed_summary?.last_outage,
-    availability: Number(operator?.feed_summary?.availability ?? 0),
-    lastOutage: operator?.feed_summary?.last_outage,
-    unavailableSince: operator?.feed_summary?.unavailable_since,
+    operatorId: parent.operatorId,
+    feedStatus: !!feed_summary?.last_outage,
+    availability: Number(feed_summary?.availability ?? 0),
+    lastOutage: feed_summary?.last_outage,
+    unavailableSince: feed_summary?.unavailable_since,
     liveStats: {
-      operatorId: userOperatorId,
-      updateFrequency: operator?.feed_summary?.update_frequency,
+      operatorId: parent.operatorId,
+      updateFrequency: feed_summary?.update_frequency,
     }
   }
 };

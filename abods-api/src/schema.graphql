@@ -320,7 +320,7 @@ type HeadwayTimeOfDayType {
 }
 
 type HeadwayTimeSeriesType {
-    ts: String!
+    ts: DateTime!
     actualWaitTime: Float!
     excessWaitTime: Float!
     scheduledWaitTime: Float!
@@ -415,7 +415,7 @@ type HistoricalStatsType {
 type VehicleStatsType {
   actual: Int
   expected: Int
-  timestamp: String!
+  timestamp: DateTime!
 }
 
 type LiveStatsType {
@@ -625,7 +625,7 @@ type PunctualityTimeSeriesType {
     early: Int!
     late: Int!
     onTime: Int!
-    ts: String!
+    ts: DateTime!
 }
 
 type ServicePerformanceType {
