@@ -32,6 +32,7 @@
       <div class="vehicle-journeys__stop-map-grid">
         <app-stop-list
           [stopList]="view?.stopList"
+          [timingPointsOnly]="timingPointsOption === 'timing-points'"
           [loading]="loading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"

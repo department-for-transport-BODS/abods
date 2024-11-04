@@ -32,7 +32,7 @@ export const createVehicleJourneyView = (
     throw new Error('No data');
   }
 
-  const stopList = route.map((stop) => createStopModel(stop, timingPointsOnly));
+  const stopList = route.map((stop) => createStopModel(stop));
   let otp: OtpEnum | null = null;
   const gpsPingList = journey.map((ping: AvlPoint) => {
     const thisMatch = stopList.find((s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc);
@@ -52,7 +52,7 @@ export const createVehicleJourneyView = (
     stopList: stopList,
     gpsPingList: gpsPingList,
     journeyInfo: createJourneyInfo(firstStop, journey[0]),
-    otpStats: calculateOnTimePerformance(stopList),
+    otpStats: calculateOnTimePerformance(stopList, timingPointsOnly),
     prevNextJourneys: [journeys[idx - 1], journeys[idx + 1]],
   };
 };
