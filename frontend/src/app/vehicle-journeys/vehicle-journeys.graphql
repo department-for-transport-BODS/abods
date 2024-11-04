@@ -36,7 +36,7 @@ query journeys($fromTimestamp: DateTime!, $toTimestamp: DateTime!, $lineId: Stri
         filters: { lineIds: [$lineId], filterOnStartTime: $filterOnStartTime }
       }
     ) {
-      vehicleJourneyId
+      groupId
       startTime
       serviceInfo {
         serviceName

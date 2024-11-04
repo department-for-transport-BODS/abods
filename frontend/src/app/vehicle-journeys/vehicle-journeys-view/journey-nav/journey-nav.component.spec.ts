@@ -31,13 +31,13 @@ describe('JourneyNavComponent', () => {
     spectator = createComponent();
     spectator.component.prevNext = [
       {
-        vehicleJourneyId: 'VJ001',
+        groupId: 'VJ001',
         startTime: DateTime.fromISO('2022-08-01T08:45:00.000'),
         servicePattern: 'Chesterfield - Worksop',
         lineNumber: '77',
       },
       {
-        vehicleJourneyId: 'VJ003',
+        groupId: 'VJ003',
         startTime: DateTime.fromISO('2022-08-01T09:05:00.000'),
         servicePattern: 'Worksop - Chesterfield',
         lineNumber: '77',

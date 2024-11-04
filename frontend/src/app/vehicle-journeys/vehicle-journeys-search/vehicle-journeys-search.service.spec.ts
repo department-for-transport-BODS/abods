@@ -11,92 +11,92 @@ const data = {
   vehicleReplay: {
     findJourneys: [
       {
-        vehicleJourneyId: 'VJ0c5bcd05',
+        groupId: 'VJ0c5bcd05',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd05',
+        groupId: 'VJ0c5bcd05',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd05',
+        groupId: 'VJ0c5bcd05',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd04',
+        groupId: 'VJ0c5bcd04',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd04',
+        groupId: 'VJ0c5bcd04',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd04',
+        groupId: 'VJ0c5bcd04',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd04',
+        groupId: 'VJ0c5bcd04',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ0c5bcd04',
+        groupId: 'VJ0c5bcd04',
         startTime: '2022-09-01T08:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ41f09c9c',
+        groupId: 'VJ41f09c9c',
         startTime: '2022-09-01T08:55:00',
         serviceInfo: { serviceName: 'Worksop - Chesterfield', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ41f09c9c',
+        groupId: 'VJ41f09c9c',
         startTime: '2022-09-01T08:55:00',
         serviceInfo: { serviceName: 'Worksop - Chesterfield', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ41f09c9c',
+        groupId: 'VJ41f09c9c',
         startTime: '2022-09-01T08:55:00',
         serviceInfo: { serviceName: 'Worksop - Chesterfield', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ41f09c9c',
+        groupId: 'VJ41f09c9c',
         startTime: '2022-09-01T08:55:00',
         serviceInfo: { serviceName: 'Worksop - Chesterfield', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ41f09c9c',
+        groupId: 'VJ41f09c9c',
         startTime: '2022-09-01T08:55:00',
         serviceInfo: { serviceName: 'Worksop - Chesterfield', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ9be619bc',
+        groupId: 'VJ9be619bc',
         startTime: '2022-09-01T07:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ9be619bc',
+        groupId: 'VJ9be619bc',
         startTime: '2022-09-01T07:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ9be619bc',
+        groupId: 'VJ9be619bc',
         startTime: '2022-09-01T07:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ9be619bc',
+        groupId: 'VJ9be619bc',
         startTime: '2022-09-01T07:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
       {
-        vehicleJourneyId: 'VJ9be619bc',
+        groupId: 'VJ9be619bc',
         startTime: '2022-09-01T07:35:00',
         serviceInfo: { serviceName: 'Chesterfield - Worksop', serviceNumber: '77' },
       },
@@ -128,19 +128,19 @@ describe('VehicleJourneysSearchService', () => {
         .subscribe((actual) => {
           expect(actual).not.toBeNull();
           expect(actual.length).toEqual(4);
-          expect(actual[0].vehicleJourneyId).toEqual('VJ9be619bc');
+          expect(actual[0].groupId).toEqual('VJ9be619bc');
           expect(actual[0].startTime).toEqual(DateTime.fromISO('2022-09-01T07:35:00'));
           expect(actual[0].servicePattern).toEqual('Chesterfield - Worksop');
           expect(actual[0].lineNumber).toEqual('77');
-          expect(actual[1].vehicleJourneyId).toEqual('VJ0c5bcd05');
+          expect(actual[1].groupId).toEqual('VJ0c5bcd05');
           expect(actual[1].startTime).toEqual(DateTime.fromISO('2022-09-01T08:35:00'));
           expect(actual[1].servicePattern).toEqual('Chesterfield - Worksop');
           expect(actual[1].lineNumber).toEqual('77');
-          expect(actual[2].vehicleJourneyId).toEqual('VJ0c5bcd04');
+          expect(actual[2].groupId).toEqual('VJ0c5bcd04');
           expect(actual[2].startTime).toEqual(DateTime.fromISO('2022-09-01T08:35:00'));
           expect(actual[2].servicePattern).toEqual('Chesterfield - Worksop');
           expect(actual[2].lineNumber).toEqual('77');
-          expect(actual[3].vehicleJourneyId).toEqual('VJ41f09c9c');
+          expect(actual[3].groupId).toEqual('VJ41f09c9c');
           expect(actual[3].startTime).toEqual(DateTime.fromISO('2022-09-01T08:55:00'));
           expect(actual[3].servicePattern).toEqual('Worksop - Chesterfield');
           expect(actual[3].lineNumber).toEqual('77');
@@ -169,10 +169,10 @@ describe('VehicleJourneysSearchService', () => {
 
           const [prev, next] = actual;
 
-          expect(prev?.vehicleJourneyId).toEqual('VJ0c5bcd05');
+          expect(prev?.groupId).toEqual('VJ0c5bcd05');
           expect(prev?.startTime).toEqual(DateTime.fromISO('2022-09-01T08:35:00'));
 
-          expect(next?.vehicleJourneyId).toEqual('VJ41f09c9c');
+          expect(next?.groupId).toEqual('VJ41f09c9c');
           expect(next?.startTime).toEqual(DateTime.fromISO('2022-09-01T08:55:00'));
         });
 

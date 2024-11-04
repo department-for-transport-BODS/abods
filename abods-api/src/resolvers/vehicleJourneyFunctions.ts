@@ -46,7 +46,7 @@ export const findJourneys: VehicleReplayNamespaceResolvers['findJourneys'] = asy
 
       const journeyDescription: string = journey.journey_pattern_description;
       return {
-        vehicleJourneyId: journey.group_id,
+        groupId: journey.group_id,
         startTime: formattedDate.toString(),
         serviceInfo: {
           serviceName: journeyDescription,
@@ -59,47 +59,6 @@ export const findJourneys: VehicleReplayNamespaceResolvers['findJourneys'] = asy
 
   return journeysData;
 };
-
-const getJourneyInputs = (journeyId: string, journeyDate: Date) => ({
-  latitude: true,
-  longitude: true,
-  vehicle_ref: true,
-  recorded_at_time: true,
-  Timetable: {
-    select: {
-      date_of_journey: true,
-      common_name: true,
-      atco_code: true,
-      stop_index: true,
-      expected_departure_time: true,
-      is_timing_point: true,
-      vehiclejourney_id: true,
-      time_difference: true,
-      expected_journeys: {
-        select: {
-          expected_journey_start: true,
-          expected_service: {
-            select: {
-              noc_and_line_and_servicecode: true,
-              service_name: true,
-              line_name: true,
-              expected_operator: {
-                select: {
-                  operator_noc: true,
-                  operator_name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    where: {
-      group_id: journeyId,
-      date_of_journey: journeyDate,
-    },
-  },
-});
 
 export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
   await requireUserSession(context);

@@ -9,7 +9,7 @@ import { FindJourneysCache } from './find-journeys-cache';
 import { createVehicleJourneyView, VehicleJourneyView } from '../vehicle-journeys-view/vehicle-journey-view.model';
 
 export interface VehicleJourney {
-  vehicleJourneyId?: string;
+  groupId?: string;
   startTime?: DateTime;
   servicePattern: string;
   lineNumber: string;
@@ -40,10 +40,10 @@ export class VehicleJourneysSearchService {
       )
       .pipe(
         map((result) => nonNullishArray(result.data.vehicleReplay?.findJourneys)),
-        map((journeys) => uniqBy(sortBy(journeys, 'startTime'), 'vehicleJourneyId')),
+        map((journeys) => uniqBy(sortBy(journeys, 'startTime'), 'groupId')),
         map((journeys) =>
           journeys.map((journey) => ({
-            vehicleJourneyId: journey.vehicleJourneyId ?? undefined,
+            groupId: journey.groupId ?? undefined,
             startTime: DateTime.fromISO(journey.startTime),
             servicePattern: journey.serviceInfo.serviceName,
             lineNumber: journey.serviceInfo.serviceNumber,
