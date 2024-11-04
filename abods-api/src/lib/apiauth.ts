@@ -28,16 +28,23 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
       message: "Authentication required for endpoint but not configured",
     };
   }
+
   logger.info(
-    "Request Headers: " +
-      JSON.stringify({
-        headers: context.headers,
-      })
+    `Authorization Header Present: ${!!context.headers.Authorization}`
   );
-  logger.info(
-    `Authorization Header Present: ${!!context.headers.authorization}`
-  );
-  const providedToken = context.headers.authorization?.replace("Bearer ", "");
+  const authHeaderData = context.headers.Authorization;
+  if (!authHeaderData) {
+    return {
+      isAuthenticated: false,
+      message: "Authorization is missing",
+    };
+  }
+
+  const providedToken: string = (
+    typeof authHeaderData === "string"
+      ? authHeaderData
+      : authHeaderData.join("")
+  ).replace("Bearer ", "");
 
   if (!providedToken) {
     return {
