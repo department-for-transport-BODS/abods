@@ -906,7 +906,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
         operator_noc: {
           in: operatorIds ? operatorIds : operatorNocs
         },
-        date_period_start: new Date(getBSTDate(fromTimestamp, "YYYY-MM-DD")),
+        date_period_start: new Date(getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD")),
         AND: [
           {
             OR: [

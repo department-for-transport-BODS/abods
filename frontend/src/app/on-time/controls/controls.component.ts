@@ -179,8 +179,8 @@ export class ControlsComponent implements OnInit, OnChanges, AfterViewInit, OnDe
     combineLatest([this.filtersSubject, fromTo$])
       .pipe(
         map(([filters, { from, to }]) => ({
-          fromTimestamp: from,
-          toTimestamp: to,
+          fromTimestamp: from.toISO(),
+          toTimestamp: to.toISO(),
           filters,
         }))
       )

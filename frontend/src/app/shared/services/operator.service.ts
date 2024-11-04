@@ -42,7 +42,7 @@ export class OperatorService {
   }
 
   fetchLines(operatorId: string, inputDate?: DateTime): Observable<Line[]> {
-    return this.operatorLinesGQL.fetch({ operatorId, inputDate }, { fetchPolicy: 'no-cache' }).pipe(
+    return this.operatorLinesGQL.fetch({ operatorId, inputDate: inputDate?.toISO() }, { fetchPolicy: 'no-cache' }).pipe(
       map((result) => nonNullishArray(result.data.operator?.transitModel?.lines?.items)),
       map((lines) => lines.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true })))
     );

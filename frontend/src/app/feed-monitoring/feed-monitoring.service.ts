@@ -110,7 +110,7 @@ export class FeedMonitoringService {
   }
 
   fetchAlerts(operatorId: string, start: DateTime, end: DateTime): Observable<EventType[] | null> {
-    return this.eventsQuery.fetch({ operatorId, start: start.toUTC().toJSDate(), end: end.toUTC().toJSDate() }).pipe(
+    return this.eventsQuery.fetch({ operatorId, start: start.toUTC().toISO(), end: end.toUTC().toISO() }).pipe(
       map((res) => res?.data?.events?.items ?? null),
       catchError(() => of(null))
     );
@@ -120,8 +120,8 @@ export class FeedMonitoringService {
     return this.eventStatsQuery
       .fetch({
         operatorId,
-        start: end.minus({ days }).startOf('day').toUTC().toJSDate(),
-        end: end.startOf('day').toUTC().toJSDate(),
+        start: end.minus({ days }).startOf('day').toUTC().toISO(),
+        end: end.startOf('day').toUTC().toISO(),
       })
       .pipe(map((res) => nonNullishArray(res?.data?.eventStats)));
   }
