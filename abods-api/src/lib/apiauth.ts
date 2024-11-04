@@ -28,7 +28,15 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
       message: "Authentication required for endpoint but not configured",
     };
   }
-
+  logger.info(
+    "Request Headers: " +
+      JSON.stringify({
+        headers: context.headers,
+      })
+  );
+  logger.info(
+    `Authorization Header Present: ${!!context.headers.authorization}`
+  );
   const providedToken = context.headers.authorization?.replace("Bearer ", "");
 
   if (!providedToken) {
