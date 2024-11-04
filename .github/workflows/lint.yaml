@@ -1,0 +1,22 @@
+name: lint
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions: read-all
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
+      - name: Install
+        run: |
+          npm i
+      - name: Check formatting
+        run: |
+          npm run fmt:check
