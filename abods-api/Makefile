@@ -1,7 +1,7 @@
 .PHONY: build-lambda-common clean copy-build-artefacts 
 .PHONY: build-GraphQlFunction build-RuntimeDependenciesLayer
 
-GRAPHQL_SCHEMA=../schema.graphql
+GRAPHQL_SCHEMA=schema.graphql
 SRC_DIR=$(PWD)/src
 
 cmd-exists-%:
