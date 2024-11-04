@@ -24,5 +24,5 @@ export interface SessionUser {
   email: string;
   first_name: string | null;
   last_name: string | null;
-  orgIds: number[];
+  orgId: number;
 }

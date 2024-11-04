@@ -225,14 +225,12 @@ export const compareThresholds = async (
 };
 
 export const getOperatorsFromOrgId = async (
-  orgId: number[],
+  orgId: number,
   db: PrismaClient,
   userOperatorIds?: string[],
 ) => {
   const where: Prisma.bods_organisationoperatorWhereInput = {
-    organisation_id: {
-      in: orgId,
-    },
+    organisation_id: orgId,
   };
 
   if (userOperatorIds && userOperatorIds.length > 0) {

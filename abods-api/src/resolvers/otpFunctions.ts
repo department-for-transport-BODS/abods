@@ -90,7 +90,7 @@ const getOperatorsDropDown = async (
   userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
   const orgOperators = await getOperatorsFromOrgId(
-    user.orgIds,
+    user.orgId,
     db,
     userOperatorIds,
   );
@@ -129,9 +129,7 @@ export const getOperators = async (
           adminAreaIds && adminAreaIds.length > 0
             ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
             : Prisma.skip,
-        operatorOrganisations: {
-          some: { organisation_id: { in: user.orgIds } },
-        },
+        operatorOrganisations: { some: { organisation_id: user.orgId } },
       },
       include: { noc_adminarea: true },
     });
