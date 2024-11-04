@@ -1,11 +1,11 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .link {
   &--with-arrows {
     &::after {
       margin-left: govuk-spacing(1);
-      content: '\00BB';
+      content: "\00BB";
     }
   }
   &--no-underline {

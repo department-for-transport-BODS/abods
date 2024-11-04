@@ -1,14 +1,26 @@
-<div class="govuk-form-group" [attr.id]="identifier" [ngClass]="{ 'govuk-form-group--error': error }">
-  <fieldset class="govuk-fieldset" [attr.aria-describedby]="hint ? identifier + '-hint' : null">
-    <span *ngIf="error" [attr.id]="identifier + '-error'" class="govuk-error-message">
+<div
+  class="govuk-form-group"
+  [attr.id]="identifier"
+  [ngClass]="{ 'govuk-form-group--error': error }"
+>
+  <fieldset
+    class="govuk-fieldset"
+    [attr.aria-describedby]="hint ? identifier + '-hint' : null"
+  >
+    <span
+      *ngIf="error"
+      [attr.id]="identifier + '-error'"
+      class="govuk-error-message"
+    >
       <span class="govuk-visually-hidden">Error:</span> {{ error }}
     </span>
     <legend
       class="govuk-fieldset__legend"
       [ngClass]="{
         'govuk-fieldset__legend--s': legendSize === 'small',
-        'govuk-fieldset__legend--m': size === 'small' || legendSize === 'medium',
-        'govuk-fieldset__legend--l': size !== 'small' || legendSize === 'large'
+        'govuk-fieldset__legend--m':
+          size === 'small' || legendSize === 'medium',
+        'govuk-fieldset__legend--l': size !== 'small' || legendSize === 'large',
       }"
       *ngIf="legend"
     >
@@ -16,13 +28,15 @@
         {{ legend }}
       </h1>
     </legend>
-    <div *ngIf="hint" [attr.id]="identifier + '-hint'" class="govuk-hint">{{ hint }}</div>
+    <div *ngIf="hint" [attr.id]="identifier + '-hint'" class="govuk-hint">
+      {{ hint }}
+    </div>
     <div
       class="govuk-radios"
       [ngClass]="{
         'govuk-radios--small': size === 'small',
         'govuk-radios--inline': layout === 'inline',
-        'govuk-radios--conditional': conditional === true
+        'govuk-radios--conditional': conditional === true,
       }"
       data-module="govuk-radios"
     >

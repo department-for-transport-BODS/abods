@@ -1,9 +1,9 @@
-import { HelpdeskResolver } from './helpdesk.resolver';
-import { HelpdeskDataService } from '../services/helpdesk-data.service';
-import { SpectatorService, createServiceFactory } from '@ngneat/spectator';
-import { ActivatedRoute } from '@angular/router';
+import { HelpdeskResolver } from "./helpdesk.resolver";
+import { HelpdeskDataService } from "../services/helpdesk-data.service";
+import { SpectatorService, createServiceFactory } from "@ngneat/spectator";
+import { ActivatedRoute } from "@angular/router";
 
-describe('HelpdeskResolver', () => {
+describe("HelpdeskResolver", () => {
   let spectator: SpectatorService<HelpdeskResolver>;
   let route: ActivatedRoute;
   let resolver: HelpdeskResolver;
@@ -14,7 +14,11 @@ describe('HelpdeskResolver', () => {
     providers: [
       {
         provide: ActivatedRoute,
-        useValue: { snapshot: { data: { helpdeskFolder: 'otp', helpdeskTitle: 'On time' } } },
+        useValue: {
+          snapshot: {
+            data: { helpdeskFolder: "otp", helpdeskTitle: "On time" },
+          },
+        },
       },
     ],
     mocks: [HelpdeskDataService],
@@ -27,19 +31,19 @@ describe('HelpdeskResolver', () => {
     resolver = spectator.service;
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(resolver).toBeTruthy();
   });
 
-  it('should always return true', () => {
+  it("should always return true", () => {
     resolver.resolve(route.snapshot).subscribe((data) => {
       expect(data).toBeTrue();
     });
   });
 
-  it('should call loadData with helpdeskFolder and title', () => {
+  it("should call loadData with helpdeskFolder and title", () => {
     resolver.resolve(route.snapshot);
 
-    expect(helpdeskDataService.loadData).toHaveBeenCalledWith('otp', 'On time');
+    expect(helpdeskDataService.loadData).toHaveBeenCalledWith("otp", "On time");
   });
 });

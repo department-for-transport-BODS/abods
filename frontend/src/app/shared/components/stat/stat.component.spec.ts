@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { StatComponent } from './stat.component';
+import { StatComponent } from "./stat.component";
 
-describe('StatComponent', () => {
+describe("StatComponent", () => {
   let component: StatComponent<unknown>;
   let fixture: ComponentFixture<StatComponent<unknown>>;
 
@@ -18,7 +18,7 @@ describe('StatComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

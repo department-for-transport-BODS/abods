@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .paging-panel {
   @include govuk-font(19);
@@ -20,7 +20,7 @@
   &__ellipsis {
     &::before {
       margin-right: govuk-spacing(1);
-      content: '\2026';
+      content: "\2026";
     }
   }
   &__current {
@@ -31,7 +31,7 @@
     &::before {
       display: inline-block;
       margin-right: govuk-spacing(1);
-      content: '\00AB';
+      content: "\00AB";
     }
     &:hover::before {
       text-decoration: none;
@@ -41,7 +41,7 @@
     &::after {
       display: inline-block;
       margin-left: govuk-spacing(1);
-      content: '\00BB';
+      content: "\00BB";
     }
     &:hover::after {
       text-decoration: none;

@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings.scss';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings.scss";
+@import "src/assets/styles/helpers/helpers.scss";
 :host {
   margin-bottom: 0 !important;
 }
@@ -12,12 +12,12 @@
   color: inherit;
   text-decoration: none;
   &:hover:not(.actionlist-action--disabled) {
-    background-color: govuk-colour('light-grey');
+    background-color: govuk-colour("light-grey");
   }
   &:focus-visible:not(.actionlist-action--disabled) {
     outline: 0;
-    background-color: govuk-colour('yellow');
-    box-shadow: 0 -2px govuk-colour('yellow');
+    background-color: govuk-colour("yellow");
+    box-shadow: 0 -2px govuk-colour("yellow");
   }
   &--disabled {
     pointer-events: none;

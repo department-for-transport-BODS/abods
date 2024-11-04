@@ -39,16 +39,23 @@
                 (click)="prevMonth($event)"
                 tabindex="-1"
                 class="date-range-controls__month-step date-range-controls__month-step--prev unbuttoned"
-                [ngClass]="{ 'date-range-controls__month-step--disabled': prevMonthDisabled }"
+                [ngClass]="{
+                  'date-range-controls__month-step--disabled':
+                    prevMonthDisabled,
+                }"
               >
-                <svg-icon class="date-range-controls__chevron-left" src="../assets/icons/caret-left.svg"></svg-icon>
+                <svg-icon
+                  class="date-range-controls__chevron-left"
+                  src="../assets/icons/caret-left.svg"
+                ></svg-icon>
               </button>
               <span
                 class="date-range-controls__month-name"
                 [ngClass]="{
-                  'date-range-controls__month-name--this-month': monthLeft.contains(today)
+                  'date-range-controls__month-name--this-month':
+                    monthLeft.contains(today),
                 }"
-                >{{ monthLeft.start | dateTimeToFormat: 'MMM yyyy' }}</span
+                >{{ monthLeft.start | dateTimeToFormat: "MMM yyyy" }}</span
               >
             </div>
             <app-calendar
@@ -62,17 +69,24 @@
               <span
                 class="date-range-controls__month-name"
                 [ngClass]="{
-                  'date-range-controls__month-name--this-month': monthRight.contains(today)
+                  'date-range-controls__month-name--this-month':
+                    monthRight.contains(today),
                 }"
-                >{{ monthRight.start | dateTimeToFormat: 'MMM yyyy' }}</span
+                >{{ monthRight.start | dateTimeToFormat: "MMM yyyy" }}</span
               >
               <button
                 (click)="nextMonth($event)"
                 tabindex="-1"
                 class="date-range-controls__month-step date-range-controls__month-step--next unbuttoned"
-                [ngClass]="{ 'date-range-controls__month-step--disabled': nextMonthDisabled }"
+                [ngClass]="{
+                  'date-range-controls__month-step--disabled':
+                    nextMonthDisabled,
+                }"
               >
-                <svg-icon class="date-range-controls__chevron-right" src="../assets/icons/caret-right.svg"></svg-icon>
+                <svg-icon
+                  class="date-range-controls__chevron-right"
+                  src="../assets/icons/caret-right.svg"
+                ></svg-icon>
               </button>
             </div>
             <app-calendar
@@ -84,8 +98,18 @@
         </app-stack>
       </div>
       <section class="date-range-controls__buttons">
-        <gds-button appearance="secondary" (click)="cancel()" text="Cancel" spaceBelow="0"></gds-button>
-        <gds-button [disabled]="invalidDates" type="submit" text="Apply" spaceBelow="0"></gds-button>
+        <gds-button
+          appearance="secondary"
+          (click)="cancel()"
+          text="Cancel"
+          spaceBelow="0"
+        ></gds-button>
+        <gds-button
+          [disabled]="invalidDates"
+          type="submit"
+          text="Apply"
+          spaceBelow="0"
+        ></gds-button>
       </section>
     </div>
   </form>

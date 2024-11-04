@@ -7,9 +7,17 @@
   (mapLoad)="map = $event"
 >
   <mgl-control position="top-left">
-    <app-dropdown identifier="map-display-menu" triggerLabel="Display options" [width]="200">
-      <p class="govuk-body govuk-!-margin-bottom-2"><strong>Map view</strong></p>
-      <app-map-view-toggle (mapboxStyle)="mapboxStyle = $event"></app-map-view-toggle>
+    <app-dropdown
+      identifier="map-display-menu"
+      triggerLabel="Display options"
+      [width]="200"
+    >
+      <p class="govuk-body govuk-!-margin-bottom-2">
+        <strong>Map view</strong>
+      </p>
+      <app-map-view-toggle
+        (mapboxStyle)="mapboxStyle = $event"
+      ></app-map-view-toggle>
     </app-dropdown>
   </mgl-control>
   <mgl-control position="bottom-left">
@@ -30,10 +38,26 @@
     id="matching-stop-lines"
     [data]="matchingStopLines"
   ></mgl-geojson-source>
-  <mgl-geojson-source *ngIf="corridorStops" id="corridor-stops" [data]="corridorStops"></mgl-geojson-source>
-  <mgl-geojson-source *ngIf="corridorLine" id="corridor-line" [data]="corridorLine"></mgl-geojson-source>
-  <mgl-geojson-source *ngIf="otherStops" id="other-stops" [data]="otherStops"></mgl-geojson-source>
-  <mgl-geojson-source *ngIf="nonOrgStops" id="non-org-stops" [data]="nonOrgStops"></mgl-geojson-source>
+  <mgl-geojson-source
+    *ngIf="corridorStops"
+    id="corridor-stops"
+    [data]="corridorStops"
+  ></mgl-geojson-source>
+  <mgl-geojson-source
+    *ngIf="corridorLine"
+    id="corridor-line"
+    [data]="corridorLine"
+  ></mgl-geojson-source>
+  <mgl-geojson-source
+    *ngIf="otherStops"
+    id="other-stops"
+    [data]="otherStops"
+  ></mgl-geojson-source>
+  <mgl-geojson-source
+    *ngIf="nonOrgStops"
+    id="non-org-stops"
+    [data]="nonOrgStops"
+  ></mgl-geojson-source>
   <mgl-layer
     *ngIf="corridorStops"
     id="corridor-markers"
@@ -43,7 +67,7 @@
       'circle-radius': 6,
       'circle-stroke-width': 4,
       'circle-stroke-color': '#0b0c0c',
-      'circle-pitch-alignment': 'map'
+      'circle-pitch-alignment': 'map',
     }"
     source="corridor-stops"
     (layerMouseMove)="mapSetHover(stop($event))"
@@ -56,9 +80,17 @@
     [filter]="['has', 'point_count']"
     [paint]="{
       'circle-color': '#0b0c0c',
-      'circle-radius': ['interpolate', ['linear'], ['get', 'point_count'], 10, 16, 300, 33],
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'point_count'],
+        10,
+        16,
+        300,
+        33,
+      ],
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#0b0c0c'
+      'circle-stroke-color': '#0b0c0c',
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -68,9 +100,17 @@
     type="circle"
     [filter]="['has', 'point_count']"
     [paint]="{
-      'circle-radius': ['interpolate', ['linear'], ['get', 'point_count'], 10, 14, 300, 31],
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'point_count'],
+        10,
+        14,
+        300,
+        31,
+      ],
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff'
+      'circle-stroke-color': '#ffffff',
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -86,7 +126,7 @@
       'text-size': 16,
       'text-line-height': 1.25,
       'text-allow-overlap': true,
-      'text-ignore-placement': true
+      'text-ignore-placement': true,
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -103,9 +143,9 @@
         'case',
         ['boolean', ['feature-state', 'hover'], stopList.length === 0],
         '#0b0c0c',
-        '#B1B4B6'
+        '#B1B4B6',
       ],
-      'circle-pitch-alignment': 'map'
+      'circle-pitch-alignment': 'map',
     }"
     source="matching-stops"
     [before]="corridorStops ? 'corridor-markers' : 'matching-stop-clusters'"
@@ -119,11 +159,16 @@
     type="line"
     [paint]="{
       'line-color': '#1d70b8',
-      'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 5, 0]
+      'line-width': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        5,
+        0,
+      ],
     }"
     [layout]="{
       'line-cap': 'round',
-      'line-join': 'round'
+      'line-join': 'round',
     }"
     source="matching-stop-lines"
     [before]="matchingStops ? 'matching-stop-markers' : undefined"
@@ -133,12 +178,17 @@
     id="matching-stop-chevrons"
     type="symbol"
     [paint]="{
-      'icon-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1, 0]
+      'icon-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0,
+      ],
     }"
     [layout]="{
       'icon-image': 'map-chevron-large',
       'symbol-placement': 'line',
-      'symbol-spacing': 200
+      'symbol-spacing': 200,
     }"
     source="matching-stop-lines"
   ></mgl-layer>
@@ -148,11 +198,11 @@
     type="line"
     [paint]="{
       'line-color': '#1d70b8',
-      'line-width': 5
+      'line-width': 5,
     }"
     [layout]="{
       'line-cap': 'round',
-      'line-join': 'round'
+      'line-join': 'round',
     }"
     source="corridor-line"
     [before]="corridorStops ? 'corridor-markers' : undefined"
@@ -164,7 +214,7 @@
     [layout]="{
       'icon-image': 'map-chevron-large',
       'symbol-placement': 'line',
-      'symbol-spacing': 200
+      'symbol-spacing': 200,
     }"
     source="corridor-line"
   ></mgl-layer>
@@ -174,11 +224,25 @@
     type="circle"
     [paint]="{
       'circle-color': '#28A197',
-      'circle-radius': ['interpolate', ['exponential', 0.6], ['zoom'], 11, 2, 13, 5],
-      'circle-pitch-alignment': 'map'
+      'circle-radius': [
+        'interpolate',
+        ['exponential', 0.6],
+        ['zoom'],
+        11,
+        2,
+        13,
+        5,
+      ],
+      'circle-pitch-alignment': 'map',
     }"
     source="other-stops"
-    [before]="matchingStops ? 'matching-stop-markers' : corridorStops ? 'corridor-markers' : undefined"
+    [before]="
+      matchingStops
+        ? 'matching-stop-markers'
+        : corridorStops
+          ? 'corridor-markers'
+          : undefined
+    "
     (layerMouseMove)="mapSetHover(stop($event))"
     (layerMouseLeave)="mapClearHover()"
   ></mgl-layer>
@@ -188,14 +252,23 @@
     type="circle"
     [paint]="{
       'circle-color': '#B1B4B6',
-      'circle-radius': ['interpolate', ['exponential', 0.6], ['zoom'], 11, 2, 13, 5],
-      'circle-pitch-alignment': 'map'
+      'circle-radius': [
+        'interpolate',
+        ['exponential', 0.6],
+        ['zoom'],
+        11,
+        2,
+        13,
+        5,
+      ],
+      'circle-pitch-alignment': 'map',
     }"
     source="non-org-stops"
     [before]="nonOrgStopLayerBeforeId"
     (layerMouseMove)="
       mapSetHover(stop($event));
-      stopTooltipMessage = 'We can\'t find any services from your organisation\'s data that use this stop'
+      stopTooltipMessage =
+        'We can\'t find any services from your organisation\'s data that use this stop'
     "
     (layerMouseLeave)="mapClearHover(); stopTooltipMessage = undefined"
   ></mgl-layer>
@@ -209,10 +282,15 @@
     className="gds-popup"
   >
     <div [style.max-width]="'200px'">
-      <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+      <div
+        class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
+      >
         {{ hoveredStop.properties.stopName }}
       </div>
-      <div class="govuk-body-small">{{ hoveredStop.properties.localityName }} {{ hoveredStop.properties.naptan }}</div>
+      <div class="govuk-body-small">
+        {{ hoveredStop.properties.localityName }}
+        {{ hoveredStop.properties.naptan }}
+      </div>
       <ng-container *ngIf="stopTooltipMessage">
         <hr />
         <div class="govuk-body-small">{{ stopTooltipMessage }}</div>

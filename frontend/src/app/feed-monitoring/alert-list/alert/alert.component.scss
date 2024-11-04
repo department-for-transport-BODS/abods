@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .alert {
   display: flex;
@@ -11,13 +11,13 @@
     height: 24px;
     flex-shrink: 0;
     .alert--warning & {
-      color: govuk-colour('orange');
+      color: govuk-colour("orange");
     }
     .alert--error & {
       color: $govuk-error-colour;
     }
     .alert--success & {
-      color: govuk-colour('green');
+      color: govuk-colour("green");
     }
   }
 
@@ -52,13 +52,15 @@
     position: relative;
     &:before {
       position: absolute;
-      content: '';
+      content: "";
       top: 0;
       bottom: 0;
       opacity: 0;
       left: 0;
       right: 0;
-      box-shadow: 0 0 0 4px white, 0 0 0 8px $govuk-focus-colour;
+      box-shadow:
+        0 0 0 4px white,
+        0 0 0 8px $govuk-focus-colour;
       animation: flashborder 2s ease-in;
       animation-fill-mode: forwards;
     }

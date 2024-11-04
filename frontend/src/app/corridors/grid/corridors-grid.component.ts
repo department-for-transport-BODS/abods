@@ -1,26 +1,37 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ColDef, ComponentStateChangedEvent, ICellRendererParams } from 'ag-grid-community';
-import { RouterLinkCellRendererComponent } from '../../shared/components/ag-grid/router-link-cell/router-link-cell.component';
-import { Corridor, CorridorsService, CorridorSummary } from '../corridors.service';
-import { distinctUntilChanged, finalize, map, takeUntil } from 'rxjs/operators';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import {
+  ColDef,
+  ComponentStateChangedEvent,
+  ICellRendererParams,
+} from "ag-grid-community";
+import { RouterLinkCellRendererComponent } from "../../shared/components/ag-grid/router-link-cell/router-link-cell.component";
+import {
+  Corridor,
+  CorridorsService,
+  CorridorSummary,
+} from "../corridors.service";
+import { distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Subject } from "rxjs";
 
 @Component({
-  selector: 'app-corridors-grid',
-  templateUrl: 'corridors-grid.component.html',
-  styleUrls: ['./corridors-grid.component.scss'],
+  selector: "app-corridors-grid",
+  templateUrl: "corridors-grid.component.html",
+  styleUrls: ["./corridors-grid.component.scss"],
 })
 export class CorridorsGridComponent implements OnInit, OnDestroy {
   columnDefs: ColDef[] = [
     {
-      field: 'name',
-      headerName: 'Name',
+      field: "name",
+      headerName: "Name",
       cellRenderer: RouterLinkCellRendererComponent,
-      cellRendererParams: { routerLinkGetter: (params: ICellRendererParams) => [params.data.id] },
-      comparator: (a, b) => a?.trim().localeCompare(b?.trim(), undefined, { numeric: true }),
+      cellRendererParams: {
+        routerLinkGetter: (params: ICellRendererParams) => [params.data.id],
+      },
+      comparator: (a, b) =>
+        a?.trim().localeCompare(b?.trim(), undefined, { numeric: true }),
       minWidth: 200,
-      sort: 'asc',
+      sort: "asc",
       flex: 4,
       getQuickFilterText: ({ value }) => value,
       suppressNavigable: false,
@@ -28,17 +39,19 @@ export class CorridorsGridComponent implements OnInit, OnDestroy {
       wrapText: true,
     },
     {
-      field: 'numStops',
-      headerName: 'Stops',
+      field: "numStops",
+      headerName: "Stops",
       flex: 1,
     },
     {
       cellRenderer: RouterLinkCellRendererComponent,
       cellRendererParams: {
-        value: 'Edit',
-        display: 'flex',
-        flexDirection: 'row-reverse',
-        routerLinkGetter: (params: ICellRendererParams) => ['edit/' + params.data.id],
+        value: "Edit",
+        display: "flex",
+        flexDirection: "row-reverse",
+        routerLinkGetter: (params: ICellRendererParams) => [
+          "edit/" + params.data.id,
+        ],
       },
       suppressNavigable: false,
       sortable: false,
@@ -51,17 +64,21 @@ export class CorridorsGridComponent implements OnInit, OnDestroy {
     resizable: false,
     suppressNavigable: true,
     suppressMovable: true,
-    getQuickFilterText: () => '',
+    getQuickFilterText: () => "",
   };
 
   data: CorridorSummary[] = [];
-  gridFilter = '';
+  gridFilter = "";
   loading = true;
   errored = false;
   noMatches = false;
   corridorForDeletion?: Corridor;
 
-  constructor(private corridorsService: CorridorsService, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private corridorsService: CorridorsService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
 
   private destroy$ = new Subject<void>();
 
@@ -76,12 +93,12 @@ export class CorridorsGridComponent implements OnInit, OnDestroy {
 
     this.route.queryParamMap
       .pipe(
-        map((paramMap) => paramMap.get('search')),
+        map((paramMap) => paramMap.get("search")),
         distinctUntilChanged(),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((param) => {
-        this.gridFilter = decodeURIComponent(param || '');
+        this.gridFilter = decodeURIComponent(param || "");
       });
   }
 
@@ -100,7 +117,7 @@ export class CorridorsGridComponent implements OnInit, OnDestroy {
       queryParams: {
         search: encodeURIComponent(this.gridFilter),
       },
-      queryParamsHandling: 'merge',
+      queryParamsHandling: "merge",
     });
   }
 }

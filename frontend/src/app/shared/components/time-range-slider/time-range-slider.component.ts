@@ -1,20 +1,20 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 /**
  * TODO This class has too many responsibilities. Split off a time-formatter control
  *  and a 'two inputs reflecting one model value' control.
  */
 @Component({
-  selector: 'app-time-range-slider',
-  templateUrl: './time-range-slider.component.html',
-  styleUrls: ['./time-range-slider.component.scss'],
+  selector: "app-time-range-slider",
+  templateUrl: "./time-range-slider.component.html",
+  styleUrls: ["./time-range-slider.component.scss"],
 })
 export class TimeRangeSliderComponent {
   @Input() labelMin?: string;
   @Input() labelMax?: string;
   @Input() legend?: string;
-  @Input() legendSize?: 's' | 'm' | 'l';
-  @Input() error = '';
+  @Input() legendSize?: "s" | "m" | "l";
+  @Input() error = "";
   _startHour = 0;
   get sliderStartHour() {
     return this._startHour;
@@ -25,7 +25,7 @@ export class TimeRangeSliderComponent {
   }
 
   get inputStartHour() {
-    return this._startHour.toString().padStart(2, '0');
+    return this._startHour.toString().padStart(2, "0");
   }
   set inputStartHour(val: string) {
     this._startHour = parseInt(val, 10);
@@ -42,7 +42,7 @@ export class TimeRangeSliderComponent {
   }
 
   get inputEndHour() {
-    return (this._endHour - 1).toString().padStart(2, '0');
+    return (this._endHour - 1).toString().padStart(2, "0");
   }
   set inputEndHour(val: string) {
     this._endHour = parseInt(val, 10) + 1;
@@ -57,7 +57,7 @@ export class TimeRangeSliderComponent {
     }
   }
   get startTime() {
-    return `${this._startHour.toString().padStart(2, '0')}:00`;
+    return `${this._startHour.toString().padStart(2, "0")}:00`;
   }
   @Output() startTimeChange = new EventEmitter<string>();
 
@@ -69,7 +69,7 @@ export class TimeRangeSliderComponent {
     }
   }
   get endTime() {
-    return `${(this._endHour - 1).toString().padStart(2, '0')}:59`;
+    return `${(this._endHour - 1).toString().padStart(2, "0")}:59`;
   }
   @Output() endTimeChange = new EventEmitter<string>();
 
@@ -81,7 +81,7 @@ export class TimeRangeSliderComponent {
 
   get formGroupClasses() {
     return {
-      ['govuk-form-group--error']: !!this.error,
+      ["govuk-form-group--error"]: !!this.error,
     };
   }
 }

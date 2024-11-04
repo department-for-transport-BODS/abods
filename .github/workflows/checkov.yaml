@@ -1,7 +1,6 @@
 name: checkov
 
-on:
-  push
+on: push
 
 jobs:
   checkov:
@@ -15,7 +14,6 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-
           directory: ${{ github.workspace }}
           framework: all
           skip_check: ""

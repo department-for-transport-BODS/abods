@@ -1,20 +1,33 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { featureCollection, lineString, point } from '@turf/helpers';
-import { Feature, FeatureCollection, GeoJsonProperties, LineString, Point } from 'geojson';
-import { Map, ScaleControl } from 'mapbox-gl';
-import { pairwise } from '../../../shared/array-operators';
-import { BRITISH_ISLES_BBOX, bbox2d, combineBounds, position } from '../../../shared/geo';
-import { StopHoverEvent } from '../stop-list/stop-item/stop-item.component';
-import { VehicleJourneyView } from '../vehicle-journey-view.model';
-import { VehiclePing } from '../vehicle-ping.model';
-import { VehiclePingStop } from '../vehicle-ping-stop.model';
-import { ConfigService } from '../../../config/config.service';
-import { OtpEnum } from '../../../../generated/graphql';
-import { DateTime } from 'luxon';
+import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { featureCollection, lineString, point } from "@turf/helpers";
+import {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  LineString,
+  Point,
+} from "geojson";
+import { Map, ScaleControl } from "mapbox-gl";
+import { pairwise } from "../../../shared/array-operators";
+import {
+  BRITISH_ISLES_BBOX,
+  bbox2d,
+  combineBounds,
+  position,
+} from "../../../shared/geo";
+import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
+import { VehicleJourneyView } from "../vehicle-journey-view.model";
+import { VehiclePing } from "../vehicle-ping.model";
+import { VehiclePingStop } from "../vehicle-ping-stop.model";
+import { ConfigService } from "../../../config/config.service";
+import { OtpEnum } from "../../../../generated/graphql";
+import { DateTime } from "luxon";
 
 type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
 
-const segmentToLine = (segment: [VehiclePing, VehiclePing]): Feature<LineString, LineSegmentProps> => {
+const segmentToLine = (
+  segment: [VehiclePing, VehiclePing],
+): Feature<LineString, LineSegmentProps> => {
   return lineString([position(segment[0]), position(segment[1])], {
     id: segment[0].id + segment[1].id,
     onTimePerformance: segment[0].onTimePerformance,
@@ -22,9 +35,9 @@ const segmentToLine = (segment: [VehiclePing, VehiclePing]): Feature<LineString,
 };
 
 @Component({
-  selector: 'app-journey-map',
-  templateUrl: './journey-map.component.html',
-  styleUrls: ['./journey-map.component.scss'],
+  selector: "app-journey-map",
+  templateUrl: "./journey-map.component.html",
+  styleUrls: ["./journey-map.component.scss"],
 })
 export class JourneyMapComponent implements OnChanges {
   protected readonly DateTime = DateTime;
@@ -38,7 +51,7 @@ export class JourneyMapComponent implements OnChanges {
 
   bounds = BRITISH_ISLES_BBOX;
   moveCounter = 0;
-  cursorStyle = '';
+  cursorStyle = "";
 
   stops?: FeatureCollection<Point, VehiclePingStop>;
   timingPoints?: FeatureCollection<Point, VehiclePingStop>;
@@ -48,14 +61,14 @@ export class JourneyMapComponent implements OnChanges {
   tooltipStop?: VehiclePingStop;
   tooltipPing?: VehiclePing;
 
-  otp = ['get', 'onTimePerformance'];
-  isEarly = ['==', this.otp, OtpEnum.Early];
-  isOnTime = ['==', this.otp, OtpEnum.OnTime];
-  isLate = ['==', this.otp, OtpEnum.Late];
-  earlyColor = '#d53880';
-  onTimeColor = '#4c2c92';
-  lateColor = '#e5c700';
-  noDataColor = '#b1b4b6';
+  otp = ["get", "onTimePerformance"];
+  isEarly = ["==", this.otp, OtpEnum.Early];
+  isOnTime = ["==", this.otp, OtpEnum.OnTime];
+  isLate = ["==", this.otp, OtpEnum.Late];
+  earlyColor = "#d53880";
+  onTimeColor = "#4c2c92";
+  lateColor = "#e5c700";
+  noDataColor = "#b1b4b6";
 
   private _mapboxStyle: string = this.config.mapboxStyle;
 
@@ -73,8 +86,8 @@ export class JourneyMapComponent implements OnChanges {
       this.map.addControl(
         new ScaleControl({
           maxWidth: 80,
-          unit: 'metric', // You can use 'imperial' or 'nautical' as well
-        })
+          unit: "metric", // You can use 'imperial' or 'nautical' as well
+        }),
       );
       this.enableScaleControl = true;
     }
@@ -102,13 +115,21 @@ export class JourneyMapComponent implements OnChanges {
 
   private updateView(view: VehicleJourneyView) {
     this.stops = featureCollection(
-      view.stopList.filter((stop) => !stop.isTimingPoint).map((stop) => point(position(stop), stop))
+      view.stopList
+        .filter((stop) => !stop.isTimingPoint)
+        .map((stop) => point(position(stop), stop)),
     );
     this.timingPoints = featureCollection(
-      view.stopList.filter((stop) => stop.isTimingPoint).map((stop) => point(position(stop), stop))
+      view.stopList
+        .filter((stop) => stop.isTimingPoint)
+        .map((stop) => point(position(stop), stop)),
     );
-    this.line = featureCollection(pairwise(view.gpsPingList).map((segment) => segmentToLine(segment)));
-    this.pings = featureCollection(view.gpsPingList.map((ping) => point(position(ping), ping)));
+    this.line = featureCollection(
+      pairwise(view.gpsPingList).map((segment) => segmentToLine(segment)),
+    );
+    this.pings = featureCollection(
+      view.gpsPingList.map((ping) => point(position(ping), ping)),
+    );
 
     this.setJourneyBounds();
   }
@@ -116,9 +137,13 @@ export class JourneyMapComponent implements OnChanges {
   private updateBoundsToSelectedStop(selectedStop: VehiclePingStop) {
     let selected: Feature<Point, VehiclePingStop> | undefined;
     if (selectedStop.isTimingPoint) {
-      selected = this.timingPoints?.features.find((stop) => stop.properties.id === selectedStop.id);
+      selected = this.timingPoints?.features.find(
+        (stop) => stop.properties.id === selectedStop.id,
+      );
     } else {
-      selected = this.stops?.features.find((stop) => stop.properties.id === selectedStop.id);
+      selected = this.stops?.features.find(
+        (stop) => stop.properties.id === selectedStop.id,
+      );
     }
     if (selected) {
       this.bounds = bbox2d(selected);
@@ -127,48 +152,60 @@ export class JourneyMapComponent implements OnChanges {
 
   private updateHoveredStopState(hoveredStop: StopHoverEvent) {
     switch (hoveredStop.event) {
-      case 'enter':
+      case "enter":
         this.onStopMouseEnter(hoveredStop.stop);
         break;
-      case 'leave':
+      case "leave":
         this.onStopMouseLeave();
         break;
     }
   }
 
   onStopMouseEnter(stop?: VehiclePingStop | GeoJsonProperties) {
-    this.cursorStyle = 'pointer';
+    this.cursorStyle = "pointer";
     if (!stop) {
       return;
     }
     this.tooltipStop = stop as VehiclePingStop;
-    this.map.setFeatureState({ source: 'journey-stops', id: this.tooltipStop.id }, { hover: true });
+    this.map.setFeatureState(
+      { source: "journey-stops", id: this.tooltipStop.id },
+      { hover: true },
+    );
   }
 
   onStopMouseLeave() {
-    this.cursorStyle = '';
+    this.cursorStyle = "";
     if (!this.tooltipStop) {
       return;
     }
-    this.map.removeFeatureState({ source: 'journey-stops', id: this.tooltipStop.id }, 'hover');
+    this.map.removeFeatureState(
+      { source: "journey-stops", id: this.tooltipStop.id },
+      "hover",
+    );
     this.tooltipStop = undefined;
   }
 
   onPingMouseEnter(ping?: VehiclePing | GeoJsonProperties) {
-    this.cursorStyle = 'pointer';
+    this.cursorStyle = "pointer";
     if (!ping) {
       return;
     }
     this.tooltipPing = ping as VehiclePing;
-    this.map.setFeatureState({ source: 'journey-pings', id: this.tooltipPing.id }, { hover: true });
+    this.map.setFeatureState(
+      { source: "journey-pings", id: this.tooltipPing.id },
+      { hover: true },
+    );
   }
 
   onPingMouseLeave() {
-    this.cursorStyle = '';
+    this.cursorStyle = "";
     if (!this.tooltipPing) {
       return;
     }
-    this.map.removeFeatureState({ source: 'journey-pings', id: this.tooltipPing.id }, 'hover');
+    this.map.removeFeatureState(
+      { source: "journey-pings", id: this.tooltipPing.id },
+      "hover",
+    );
     this.tooltipPing = undefined;
   }
 

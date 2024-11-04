@@ -1,8 +1,8 @@
-import { formatNumber } from '@angular/common';
-import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { formatNumber } from "@angular/common";
+import { Inject, LOCALE_ID, Pipe, PipeTransform } from "@angular/core";
 
-export type DistanceUnit = 'm' | 'km' | 'yd' | 'mi';
-export type UnitFormat = 'none' | 'short' | 'long';
+export type DistanceUnit = "m" | "km" | "yd" | "mi";
+export type UnitFormat = "none" | "short" | "long";
 
 // All factors are to transform from meters.
 export const M_FACTOR = 1;
@@ -16,8 +16,11 @@ export const MI_FACTOR = 1609.344;
  * @param fromUnit The unit to convert from.
  * @param toUnit The unit to convert to.
  */
-export const convertDistance = (value: number, fromUnit: DistanceUnit, toUnit: DistanceUnit): number =>
-  CONVERT_DISTANCE_MAP[fromUnit](value, toUnit);
+export const convertDistance = (
+  value: number,
+  fromUnit: DistanceUnit,
+  toUnit: DistanceUnit,
+): number => CONVERT_DISTANCE_MAP[fromUnit](value, toUnit);
 
 /**
  * Wrapper for `formatNumber` that always increments the smallest digit if the value if greater than 0.
@@ -25,12 +28,16 @@ export const convertDistance = (value: number, fromUnit: DistanceUnit, toUnit: D
  * @param locale Specifies what locale format rules to use. See https://angular.io/api/common/DecimalPipe#locale.
  * @param digitsInfo Sets digit and decimal representation. Uses Angular number pipe format. See https://angular.io/api/common/DecimalPipe#digitsinfo.
  */
-export const formatDistance = (value: number, locale: string, digitsInfo?: string): string => {
+export const formatDistance = (
+  value: number,
+  locale: string,
+  digitsInfo?: string,
+): string => {
   let str: string = formatNumber(value, locale, digitsInfo);
   // If value is a positive distance we increment the smallest decimal
   if (value > 0 && parseFloat(str) === 0) {
-    const lastIndex = str.lastIndexOf('0');
-    const replacement = '1';
+    const lastIndex = str.lastIndexOf("0");
+    const replacement = "1";
     str = str.substring(0, lastIndex) + replacement;
   }
   return str;
@@ -42,8 +49,11 @@ export const formatDistance = (value: number, locale: string, digitsInfo?: strin
  * @param unit The unit to format the value to.
  * @param unitFormat Short or long form e.g. `100 mi` or `100 miles`.
  */
-export const formatDistanceUnit = (value: string | number, unit: DistanceUnit, unitFormat: UnitFormat) =>
-  value + UNIT_FORMATTER_MAP[unit](value, unitFormat);
+export const formatDistanceUnit = (
+  value: string | number,
+  unit: DistanceUnit,
+  unitFormat: UnitFormat,
+) => value + UNIT_FORMATTER_MAP[unit](value, unitFormat);
 
 // Conversion map from meters.
 const METER_CONVERSION_MAP: Record<DistanceUnit, ConvertFromMeters> = {
@@ -54,33 +64,39 @@ const METER_CONVERSION_MAP: Record<DistanceUnit, ConvertFromMeters> = {
 };
 // Conversion map from a unit to another unit.
 const CONVERT_DISTANCE_MAP: Record<DistanceUnit, ConvertDistance> = {
-  m: (distance: number, toUnit: DistanceUnit) => METER_CONVERSION_MAP[toUnit](distance),
-  km: (distance: number, toUnit: DistanceUnit) => METER_CONVERSION_MAP[toUnit](distance * KM_FACTOR),
-  yd: (distance: number, toUnit: DistanceUnit) => METER_CONVERSION_MAP[toUnit](distance * YD_FACTOR),
-  mi: (distance: number, toUnit: DistanceUnit) => METER_CONVERSION_MAP[toUnit](distance * MI_FACTOR),
+  m: (distance: number, toUnit: DistanceUnit) =>
+    METER_CONVERSION_MAP[toUnit](distance),
+  km: (distance: number, toUnit: DistanceUnit) =>
+    METER_CONVERSION_MAP[toUnit](distance * KM_FACTOR),
+  yd: (distance: number, toUnit: DistanceUnit) =>
+    METER_CONVERSION_MAP[toUnit](distance * YD_FACTOR),
+  mi: (distance: number, toUnit: DistanceUnit) =>
+    METER_CONVERSION_MAP[toUnit](distance * MI_FACTOR),
 };
 // Handle the formatting of units consistently.
 const UNIT_FORMATTER_MAP: Record<DistanceUnit, UnitFormatter> = {
   m: (value: string | number, unitFormat: UnitFormat) =>
-    unitFormat == 'short' ? 'm' : value == 1 ? ' meter' : ' meters',
+    unitFormat == "short" ? "m" : value == 1 ? " meter" : " meters",
   km: (value: string | number, unitFormat: UnitFormat) =>
-    unitFormat == 'short' ? 'km' : value == 1 ? ' kilometer' : ' kilometers',
+    unitFormat == "short" ? "km" : value == 1 ? " kilometer" : " kilometers",
   yd: (value: string | number, unitFormat: UnitFormat) =>
-    unitFormat == 'short' ? 'yd' : value == 1 ? ' yard' : ' yards',
+    unitFormat == "short" ? "yd" : value == 1 ? " yard" : " yards",
   mi: (value: string | number, unitFormat: UnitFormat) =>
-    unitFormat == 'short' ? 'mi' : value == 1 ? ' mile' : ' miles',
+    unitFormat == "short" ? "mi" : value == 1 ? " mile" : " miles",
 };
 
-export const isValue = (value: number | string | null | undefined): value is number | string => {
-  return !(value == null || value === '' || value !== value);
+export const isValue = (
+  value: number | string | null | undefined,
+): value is number | string => {
+  return !(value == null || value === "" || value !== value);
 };
 
 export const strToNumber = (value: number | string): number => {
   // Convert strings to numbers
-  if (typeof value === 'string' && !isNaN(Number(value) - parseFloat(value))) {
+  if (typeof value === "string" && !isNaN(Number(value) - parseFloat(value))) {
     return Number(value);
   }
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     throw new Error(`${value} is not a number`);
   }
   return value;
@@ -91,7 +107,7 @@ type ConvertFromMeters = (meters: number) => number;
 type UnitFormatter = (value: string | number, unitFormat: UnitFormat) => string;
 
 @Pipe({
-  name: 'distance',
+  name: "distance",
 })
 export class DistancePipe implements PipeTransform {
   constructor(@Inject(LOCALE_ID) private _locale: string) {}
@@ -110,7 +126,7 @@ export class DistancePipe implements PipeTransform {
     toUnit: DistanceUnit,
     digitsInfo?: string,
     unitFormat?: UnitFormat,
-    locale?: string
+    locale?: string,
   ): string | null {
     if (!isValue(value)) {
       return null;
@@ -121,8 +137,12 @@ export class DistancePipe implements PipeTransform {
     try {
       const dist = convertDistance(strToNumber(value), fromUnit, toUnit);
 
-      if (unitFormat !== undefined && unitFormat !== 'none') {
-        return formatDistanceUnit(formatDistance(dist, locale, digitsInfo), toUnit, unitFormat);
+      if (unitFormat !== undefined && unitFormat !== "none") {
+        return formatDistanceUnit(
+          formatDistance(dist, locale, digitsInfo),
+          toUnit,
+          unitFormat,
+        );
       } else {
         return formatDistance(dist, locale, digitsInfo);
       }

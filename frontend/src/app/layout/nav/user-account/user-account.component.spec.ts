@@ -1,18 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { LayoutModule } from '../../layout.module';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { RouterTestingModule } from "@angular/router/testing";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { SharedModule } from "src/app/shared/shared.module";
+import { LayoutModule } from "../../layout.module";
 
-import { UserAccountComponent } from './user-account.component';
+import { UserAccountComponent } from "./user-account.component";
 
-describe('UserAccountComponent', () => {
+describe("UserAccountComponent", () => {
   let component: UserAccountComponent;
   let fixture: ComponentFixture<UserAccountComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule, LayoutModule, RouterTestingModule, ApolloTestingModule],
+      imports: [
+        SharedModule,
+        LayoutModule,
+        RouterTestingModule,
+        ApolloTestingModule,
+      ],
       declarations: [UserAccountComponent],
     }).compileComponents();
   });
@@ -23,7 +28,7 @@ describe('UserAccountComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

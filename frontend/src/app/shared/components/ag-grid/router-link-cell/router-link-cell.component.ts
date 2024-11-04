@@ -1,7 +1,12 @@
-import { Component, ElementRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Params, QueryParamsHandling } from '@angular/router';
-import { AgRendererComponent } from 'ag-grid-angular';
-import { ICellRendererParams } from 'ag-grid-community';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  ViewEncapsulation,
+} from "@angular/core";
+import { Params, QueryParamsHandling } from "@angular/router";
+import { AgRendererComponent } from "ag-grid-angular";
+import { ICellRendererParams } from "ag-grid-community";
 
 export interface RouterLinkCellRendererParams extends ICellRendererParams {
   routerLinkGetter: (params: ICellRendererParams) => unknown[] | string | null;
@@ -10,9 +15,9 @@ export interface RouterLinkCellRendererParams extends ICellRendererParams {
   queryParamsHandling?: QueryParamsHandling;
   bold?: boolean;
   noWrap?: boolean;
-  textOverflow?: 'ellipsis' | 'visible' | 'clip';
-  display: 'block' | 'flex';
-  flexDirection: 'row' | 'row-reverse';
+  textOverflow?: "ellipsis" | "visible" | "clip";
+  display: "block" | "flex";
+  flexDirection: "row" | "row-reverse";
 }
 
 @Component({
@@ -26,7 +31,7 @@ export interface RouterLinkCellRendererParams extends ICellRendererParams {
       >{{ label }}</a
     >
   </div>`,
-  styleUrls: ['./router-link-cell.component.scss'],
+  styleUrls: ["./router-link-cell.component.scss"],
   encapsulation: ViewEncapsulation.None,
 })
 export class RouterLinkCellRendererComponent implements AgRendererComponent {
@@ -36,11 +41,11 @@ export class RouterLinkCellRendererComponent implements AgRendererComponent {
   queryParamsHandling?: QueryParamsHandling | null;
   bold?: boolean;
   noWrap?: boolean;
-  textOverflow?: 'ellipsis' | 'visible' | 'clip';
-  display?: 'block' | 'flex';
-  flexDirection?: 'row' | 'row-reverse';
+  textOverflow?: "ellipsis" | "visible" | "clip";
+  display?: "block" | "flex";
+  flexDirection?: "row" | "row-reverse";
 
-  @ViewChild('link') linkElement?: ElementRef<HTMLElement>;
+  @ViewChild("link") linkElement?: ElementRef<HTMLElement>;
 
   refresh(params: RouterLinkCellRendererParams): boolean {
     this.agInit(params);
@@ -58,13 +63,13 @@ export class RouterLinkCellRendererComponent implements AgRendererComponent {
     this.queryParamsHandling = params.queryParamsHandling;
     this.bold = params.bold;
     this.noWrap = params.noWrap;
-    this.textOverflow = params.textOverflow ?? 'ellipsis';
+    this.textOverflow = params.textOverflow ?? "ellipsis";
     this.display = params.display;
     this.flexDirection = params.flexDirection;
 
     // accessibility - ag-grid seems to swallow keyboard events.
-    params.eGridCell.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
+    params.eGridCell.addEventListener("keypress", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
         this.linkElement?.nativeElement.click();
       }
     });
@@ -72,11 +77,13 @@ export class RouterLinkCellRendererComponent implements AgRendererComponent {
 
   get classNames() {
     return {
-      'router-link-cell--bold': this.bold,
-      'router-link-cell--no-wrap': this.noWrap,
+      "router-link-cell--bold": this.bold,
+      "router-link-cell--no-wrap": this.noWrap,
       [`router-link-cell--overflow-${this.textOverflow}`]: this.textOverflow,
-      'router-link-cell--flex-row': this.display === 'flex' && this.flexDirection === 'row',
-      'router-link-cell--flex-row-reverse': this.display === 'flex' && this.flexDirection === 'row-reverse',
+      "router-link-cell--flex-row":
+        this.display === "flex" && this.flexDirection === "row",
+      "router-link-cell--flex-row-reverse":
+        this.display === "flex" && this.flexDirection === "row-reverse",
     };
   }
 }

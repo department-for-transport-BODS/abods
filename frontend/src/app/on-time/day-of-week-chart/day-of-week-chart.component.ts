@@ -1,11 +1,15 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { DayOfWeekData, OnTimeService, PerformanceParams } from '../on-time.service';
-import { switchMap, takeUntil } from 'rxjs/operators';
-import { AsyncStatus, withStatus } from '../pending.model';
+import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Observable, ReplaySubject, Subject } from "rxjs";
+import {
+  DayOfWeekData,
+  OnTimeService,
+  PerformanceParams,
+} from "../on-time.service";
+import { switchMap, takeUntil } from "rxjs/operators";
+import { AsyncStatus, withStatus } from "../pending.model";
 
 @Component({
-  selector: 'app-day-of-week-chart',
+  selector: "app-day-of-week-chart",
   template: `<app-stacked-histogram-chart
     [data]="data$ | async"
     [status$]="status$.asObservable()"
@@ -31,9 +35,12 @@ export class DayOfWeekChartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.data$ = this.params$.pipe(
       switchMap((params) => {
-        return withStatus(() => this.service.fetchOnTimePunctualityDayOfWeekData(params), this.status$);
+        return withStatus(
+          () => this.service.fetchOnTimePunctualityDayOfWeekData(params),
+          this.status$,
+        );
       }),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
   }
 

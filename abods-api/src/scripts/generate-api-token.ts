@@ -46,7 +46,7 @@ const main = async () => {
 
   const outputDir = path.join(
     argv.outDir ?? "generated",
-    Date.now().toString()
+    Date.now().toString(),
   );
   await fs.mkdir(outputDir, { recursive: true });
 
@@ -62,7 +62,7 @@ const main = async () => {
       Hmac: hmacSecret,
     },
     null,
-    2
+    2,
   );
 
   await fs.writeFile(path.join(outputDir, "secrets.json"), awsSecretContent);

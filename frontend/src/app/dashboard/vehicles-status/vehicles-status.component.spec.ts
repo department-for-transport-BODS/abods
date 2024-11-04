@@ -1,11 +1,11 @@
-import { RouterTestingModule } from '@angular/router/testing';
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { RouterTestingModule } from "@angular/router/testing";
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "src/app/shared/shared.module";
 
-import { VehiclesStatusComponent } from './vehicles-status.component';
+import { VehiclesStatusComponent } from "./vehicles-status.component";
 
-describe('VehiclesStatusComponent', () => {
+describe("VehiclesStatusComponent", () => {
   let spectator: Spectator<VehiclesStatusComponent>;
   let component: VehiclesStatusComponent;
 
@@ -20,7 +20,7 @@ describe('VehiclesStatusComponent', () => {
     component = spectator.component;
   });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator.detectChanges();
 
     expect(component).toBeTruthy();

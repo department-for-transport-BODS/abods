@@ -1,19 +1,18 @@
+import { Session } from "express-session";
+import { Request } from "express";
 
-import { Session } from 'express-session';
-import { Request } from 'express';
-
-declare module 'express-session' {
+declare module "express-session" {
   interface SessionData {
     user: {
       id: string;
-    }
+    };
   }
 }
 
-declare module 'express' { 
+declare module "express" {
   export interface Request {
     user?: {
-      id: string
-    }
+      id: string;
+    };
   }
 }

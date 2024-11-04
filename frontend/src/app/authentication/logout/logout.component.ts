@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { AuthenticationService } from '../authentication.service';
+import { Component } from "@angular/core";
+import { AuthenticationService } from "../authentication.service";
 
 @Component({
-  selector: 'app-logout',
-  templateUrl: './logout.component.html',
+  selector: "app-logout",
+  templateUrl: "./logout.component.html",
 })
 export class LogoutComponent {
   constructor(private authenticationService: AuthenticationService) {}

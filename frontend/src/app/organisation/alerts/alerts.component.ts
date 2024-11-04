@@ -1,15 +1,21 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgxSmartModalComponent, NgxSmartModalService } from 'ngx-smart-modal';
-import { Subscription } from 'rxjs';
-import { AuthenticatedUserService } from 'src/app/authentication/authenticated-user.service';
-import { UserFragment } from 'src/generated/graphql';
-import { AlertViewModel } from '../models';
-import { OrganisationService } from '../organisation.service';
-import { EditAlertComponent } from './edit-alert/edit-alert.component';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
+import { NgxSmartModalComponent, NgxSmartModalService } from "ngx-smart-modal";
+import { Subscription } from "rxjs";
+import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
+import { UserFragment } from "src/generated/graphql";
+import { AlertViewModel } from "../models";
+import { OrganisationService } from "../organisation.service";
+import { EditAlertComponent } from "./edit-alert/edit-alert.component";
 @Component({
-  selector: 'app-alerts',
-  templateUrl: './alerts.component.html',
-  styleUrls: ['./alerts.component.scss'],
+  selector: "app-alerts",
+  templateUrl: "./alerts.component.html",
+  styleUrls: ["./alerts.component.scss"],
 })
 export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(EditAlertComponent) editAlertComponent?: EditAlertComponent;
@@ -27,7 +33,7 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     public ngxSmartModalService: NgxSmartModalService,
     private service: OrganisationService,
-    private authService: AuthenticatedUserService
+    private authService: AuthenticatedUserService,
   ) {}
 
   ngOnInit(): void {
@@ -38,12 +44,12 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
       this.authService.authenticatedUser$.subscribe((user) => {
         this.authenticatedUser = user;
-      })
+      }),
     );
   }
 
   ngAfterViewInit(): void {
-    this.editModal = this.ngxSmartModalService.getModal('editAlertModal');
+    this.editModal = this.ngxSmartModalService.getModal("editAlertModal");
   }
 
   ngOnDestroy(): void {
@@ -68,6 +74,10 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get authUserIsAdmin() {
-    return this.authenticatedUser?.roles?.some(({ name }) => name === 'Administrator') ?? false;
+    return (
+      this.authenticatedUser?.roles?.some(
+        ({ name }) => name === "Administrator",
+      ) ?? false
+    );
   }
 }

@@ -1,12 +1,22 @@
-import { ChangeDetectorRef, Component, ContentChildren, forwardRef, Input, QueryList } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { SegmentedToggleItemComponent } from './segmented-toggle-item/segmented-toggle-item.component';
-import { SEGMENTED_TOGGLE_GROUP, SegmentedToggleGroup } from './segmented-toggle-group';
+import {
+  ChangeDetectorRef,
+  Component,
+  ContentChildren,
+  forwardRef,
+  Input,
+  QueryList,
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { SegmentedToggleItemComponent } from "./segmented-toggle-item/segmented-toggle-item.component";
+import {
+  SEGMENTED_TOGGLE_GROUP,
+  SegmentedToggleGroup,
+} from "./segmented-toggle-group";
 
 @Component({
-  selector: 'app-segmented-toggle',
-  templateUrl: './segmented-toggle.component.html',
-  styleUrls: ['./segmented-toggle.component.scss'],
+  selector: "app-segmented-toggle",
+  templateUrl: "./segmented-toggle.component.html",
+  styleUrls: ["./segmented-toggle.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -19,11 +29,14 @@ import { SEGMENTED_TOGGLE_GROUP, SegmentedToggleGroup } from './segmented-toggle
     },
   ],
 })
-export class SegmentedToggleComponent implements ControlValueAccessor, SegmentedToggleGroup {
+export class SegmentedToggleComponent
+  implements ControlValueAccessor, SegmentedToggleGroup
+{
   @Input() legend?: string;
   @Input() hideLegend = true;
 
-  @ContentChildren(SegmentedToggleItemComponent) items?: QueryList<SegmentedToggleItemComponent>;
+  @ContentChildren(SegmentedToggleItemComponent)
+  items?: QueryList<SegmentedToggleItemComponent>;
 
   selected: SegmentedToggleItemComponent | null = null;
 

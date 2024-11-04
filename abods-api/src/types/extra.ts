@@ -1,6 +1,6 @@
 import express from "express";
 import { IncomingHttpHeaders } from "http";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 export type AuthContext = {
   allowedTokenHash: string;

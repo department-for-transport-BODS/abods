@@ -1,6 +1,6 @@
 @use "sass:math";
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .status {
   display: flex;
@@ -13,20 +13,20 @@
     //height: 35px;
   }
   &--active {
-    color: govuk-colour('green');
+    color: govuk-colour("green");
   }
   &--inactive {
-    color: govuk-colour('red');
+    color: govuk-colour("red");
   }
 
   &__icon {
     width: 32px;
     height: 32px;
-    color: govuk-colour('red');
+    color: govuk-colour("red");
     display: block;
     flex-shrink: 0;
     .status--active & {
-      color: govuk-colour('green');
+      color: govuk-colour("green");
     }
     .status--small & {
       width: 20px;

@@ -1,10 +1,19 @@
-<div [ngClass]="operatorSelectorClasses" *ngIf="operator && allOperators; else loading">
-  <span *ngIf="allOperators && allOperators.length === 1" class="govuk-caption-l"
+<div
+  [ngClass]="operatorSelectorClasses"
+  *ngIf="operator && allOperators; else loading"
+>
+  <span
+    *ngIf="allOperators && allOperators.length === 1"
+    class="govuk-caption-l"
     >{{ operator.name }} ({{ operator.nocCode }})</span
   >
   <ng-container *ngIf="allOperators && allOperators.length > 1">
     <div class="operator-selector__label">
-      <label class="govuk-caption-l govuk-!-margin-bottom-0" for="operator_selector">Operator</label>
+      <label
+        class="govuk-caption-l govuk-!-margin-bottom-0"
+        for="operator_selector"
+        >Operator</label
+      >
     </div>
     <div class="operator-selector__selector">
       <ng-select
@@ -26,6 +35,10 @@
 
 <ng-template #loading>
   <div class="operator-selector">
-    <app-skeleton appearance="caption-l" width="300px" spaceBelow="6"></app-skeleton>
+    <app-skeleton
+      appearance="caption-l"
+      width="300px"
+      spaceBelow="6"
+    ></app-skeleton>
   </div>
 </ng-template>

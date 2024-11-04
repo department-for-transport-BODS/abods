@@ -1,10 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from "@angular/core";
 @Component({
-  selector: 'gds-checkboxes',
+  selector: "gds-checkboxes",
   template: `
     <div class="govuk-form-group" [ngClass]="formGroupClasses">
       <fieldset class="govuk-fieldset">
-        <legend *ngIf="legend" class="govuk-fieldset__legend" [ngClass]="legendClasses">
+        <legend
+          *ngIf="legend"
+          class="govuk-fieldset__legend"
+          [ngClass]="legendClasses"
+        >
           {{ legend }}
         </legend>
         <span *ngIf="error" class="govuk-error-message">
@@ -16,13 +20,13 @@ import { Component, Input } from '@angular/core';
       </fieldset>
     </div>
   `,
-  styleUrls: ['checkboxes.component.scss'],
+  styleUrls: ["checkboxes.component.scss"],
 })
 export class CheckboxesComponent {
-  @Input() size?: 'small';
-  @Input() layout?: 'horizontal' | '2-column';
+  @Input() size?: "small";
+  @Input() layout?: "horizontal" | "2-column";
   @Input() legend?: string;
-  @Input() legendSize?: 's' | 'm' | 'l';
+  @Input() legendSize?: "s" | "m" | "l";
   @Input() error?: string;
 
   get checkboxesClasses() {
@@ -41,7 +45,7 @@ export class CheckboxesComponent {
 
   get formGroupClasses() {
     return {
-      ['govuk-form-group--error']: !!this.error,
+      ["govuk-form-group--error"]: !!this.error,
     };
   }
 }

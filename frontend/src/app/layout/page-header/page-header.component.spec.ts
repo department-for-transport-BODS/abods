@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PageHeaderComponent } from './page-header.component';
+import { PageHeaderComponent } from "./page-header.component";
 
-describe('PageHeaderComponent', () => {
+describe("PageHeaderComponent", () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
 
@@ -18,7 +18,7 @@ describe('PageHeaderComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

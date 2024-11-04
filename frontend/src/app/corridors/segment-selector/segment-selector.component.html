@@ -7,7 +7,11 @@
     [disabled]="first"
     (click)="scrollLeft()"
   >
-    <svg-icon class="segment-selector-controls__icon" src="assets/icons/caret-left.svg" [applyClass]="true"></svg-icon>
+    <svg-icon
+      class="segment-selector-controls__icon"
+      src="assets/icons/caret-left.svg"
+      [applyClass]="true"
+    ></svg-icon>
     <span class="govuk-visually-hidden">Show previous stops</span>
   </button>
   <button
@@ -19,16 +23,22 @@
     (click)="scrollRight()"
   >
     <span class="govuk-visually-hidden">Show next stops</span>
-    <svg-icon class="segment-selector-controls__icon" src="assets/icons/caret-right.svg" [applyClass]="true"></svg-icon>
+    <svg-icon
+      class="segment-selector-controls__icon"
+      src="assets/icons/caret-right.svg"
+      [applyClass]="true"
+    ></svg-icon>
   </button>
 </div>
 
 <div
   class="segment-selector-mask"
   [ngClass]="{
-    'segment-selector-mask--mask-left': showScrollControls && !first && !(!last && !first),
-    'segment-selector-mask--mask-right': showScrollControls && !last && !(!last && !first),
-    'segment-selector-mask--mask-both': showScrollControls && !last && !first
+    'segment-selector-mask--mask-left':
+      showScrollControls && !first && !(!last && !first),
+    'segment-selector-mask--mask-right':
+      showScrollControls && !last && !(!last && !first),
+    'segment-selector-mask--mask-both': showScrollControls && !last && !first,
   }"
 >
   <div class="segment-selector-container" #scrollContent>
@@ -40,14 +50,20 @@
           [ngxTippy]="tooltip"
           tabindex="0"
           role="listitem"
-          [attr.aria-label]="'Stop - ' + stop.stopName + ' (NaPTAN code: ' + stop.naptan + ')'"
+          [attr.aria-label]="
+            'Stop - ' + stop.stopName + ' (NaPTAN code: ' + stop.naptan + ')'
+          "
           [tippyName]="stop.naptan"
           [tippyProps]="tippyProps"
           (mouseenter)="mouseEnterStop.emit(stop)"
           (mouseleave)="mouseLeaveStop.emit(stop)"
         >
           <div #tooltip>
-            <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">{{ stop.stopName }}</div>
+            <div
+              class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
+            >
+              {{ stop.stopName }}
+            </div>
             <div class="govuk-body-small">{{ stop.naptan }}</div>
           </div>
         </div>
@@ -67,20 +83,31 @@
           type="button"
           class="unbuttoned segment-selector__segment"
           [ngClass]="{
-            'segment-selector__segment--active': isSelected(segment) && !isInvalidServiceLink(segment),
-            'segment-selector__segment__invalid-service-link': isInvalidServiceLink(segment) && !isSelected(segment),
+            'segment-selector__segment--active':
+              isSelected(segment) && !isInvalidServiceLink(segment),
+            'segment-selector__segment__invalid-service-link':
+              isInvalidServiceLink(segment) && !isSelected(segment),
             'segment-selector__segment__invalid-service-link--active':
-              isInvalidServiceLink(segment) && isSelected(segment)
+              isInvalidServiceLink(segment) && isSelected(segment),
           }"
           (click)="onSelect(segment)"
           [disabled]="isDisabled"
         >
-          <span class="govuk-visually-hidden">Segment - {{ segment[0].stopName }}, {{ segment[1].stopName }}</span>
+          <span class="govuk-visually-hidden"
+            >Segment - {{ segment[0].stopName }},
+            {{ segment[1].stopName }}</span
+          >
         </button>
       </div>
       <div class="segment-selector__distances-wrapper">
-        <div *ngFor="let segment of segments" class="segment-selector__distance">
-          <span>{{ getSegmentDistance(segment) | distance: 'm':'mi':'1.1-1':'short' }}</span>
+        <div
+          *ngFor="let segment of segments"
+          class="segment-selector__distance"
+        >
+          <span>{{
+            getSegmentDistance(segment)
+              | distance: "m" : "mi" : "1.1-1" : "short"
+          }}</span>
           <span *ngIf="isInvalidServiceLink(segment)">*</span>
         </div>
       </div>
@@ -90,6 +117,7 @@
 
 <div class="segment-selector-hint" *ngIf="containsInvalidServiceLink()">
   <span class="segment-selector-hint__text"
-    >* Dashed line indicates speed and distance are based on straight-line measurement</span
+    >* Dashed line indicates speed and distance are based on straight-line
+    measurement</span
   >
 </div>

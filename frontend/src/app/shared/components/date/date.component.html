@@ -23,18 +23,30 @@
         [ngClass]="{ 'date__month-step--disabled': month < validRange.start }"
         aria-label="previous month"
       >
-        <svg-icon class="date__chevron-left" src="../assets/icons/caret-left.svg"></svg-icon>
+        <svg-icon
+          class="date__chevron-left"
+          src="../assets/icons/caret-left.svg"
+        ></svg-icon>
       </button>
-      <span class="date__month-name" [ngClass]="{ 'date__month-name--this-month': month.hasSame(today, 'month') }">{{
-        month | dateTimeToFormat: 'MMMM yyyy'
-      }}</span>
+      <span
+        class="date__month-name"
+        [ngClass]="{
+          'date__month-name--this-month': month.hasSame(today, 'month'),
+        }"
+        >{{ month | dateTimeToFormat: "MMMM yyyy" }}</span
+      >
       <button
         (click)="nextMonth($event)"
         class="date__month-step date__month-step--next unbuttoned"
-        [ngClass]="{ 'date__month-step--disabled': month.endOf('month') >= validRange.end }"
+        [ngClass]="{
+          'date__month-step--disabled': month.endOf('month') >= validRange.end,
+        }"
         aria-label="next month"
       >
-        <svg-icon class="date__chevron-right" src="../assets/icons/caret-right.svg"></svg-icon>
+        <svg-icon
+          class="date__chevron-right"
+          src="../assets/icons/caret-right.svg"
+        ></svg-icon>
       </button>
     </div>
     <app-calendar

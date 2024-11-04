@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .range-slider {
   .ng2-nouislider {
@@ -12,7 +12,7 @@
     .noUi-handle {
       cursor: pointer;
       border-radius: 0;
-      border: 2px solid govuk-colour('black');
+      border: 2px solid govuk-colour("black");
       box-shadow: none;
       height: 40px;
       width: 15px;
@@ -24,7 +24,9 @@
       }
 
       &:focus {
-        box-shadow: 0 0 0 1.5px $govuk-input-border-colour, 0 0 0 4px $govuk-focus-colour;
+        box-shadow:
+          0 0 0 1.5px $govuk-input-border-colour,
+          0 0 0 4px $govuk-focus-colour;
         outline: none;
       }
 
@@ -37,7 +39,7 @@
     }
   }
   .noUi-target {
-    border: 2px solid govuk-colour('black');
+    border: 2px solid govuk-colour("black");
     border-radius: 0;
     cursor: pointer;
     box-shadow: none;
@@ -48,7 +50,7 @@
   }
 
   .noUi-connect {
-    background: govuk-colour('black');
-    border: 3px solid govuk-colour('white');
+    background: govuk-colour("black");
+    border: 3px solid govuk-colour("white");
   }
 }
