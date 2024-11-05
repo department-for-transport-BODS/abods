@@ -380,8 +380,8 @@ export const getAvlPoints = async (
 
   if (last20Mins) {
     where.recorded_at_time = {
-      gt: inputDate.subtract(21, "minute").toDate(),
-      lte: inputDate.subtract(1, "minute").toDate(),
+      gte: inputDate.subtract(21, "minute").set('second', 0).toDate(),
+      lte: inputDate.set('second', 0).toDate(),
     };
   }
 
