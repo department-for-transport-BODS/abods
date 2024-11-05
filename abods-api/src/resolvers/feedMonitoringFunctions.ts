@@ -1,4 +1,4 @@
-import { getDate, getFormattedDate, isSameOrBefore } from "../lib/dayjs.js";
+import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
   ExpectedJourneyType,
   getAvlPoints,
@@ -19,7 +19,7 @@ export const getEventStats: QueryResolvers['eventStats'] = () => {
   const eventStats: EventStatsType[] = [];
   let startdate = getDate().subtract(90, "day");
 
-  while (isSameOrBefore(startdate, getDate())) {
+  while (!startdate.isAfter(getDate())) {
     eventStats.push({
       count: 0,
       day: startdate.format("YYYY-MM-DD"),
@@ -50,10 +50,11 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers['last20Minutes']
       context.db,
       parent.operatorId,
       statsDate,
-      false,
+      true,
       expectedJourneys.map((journey) => journey.group_id)
     );
     const results = await getVehicleStats(avl, expectedJourneys);
+
     return results.sort(
       (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );

@@ -180,7 +180,9 @@ describe('LiveStatusComponent', () => {
 
   it(`should show operator current vehicles`, () => {
     const operator = fakeOperatorLiveStatus(true);
-    operator.feedMonitoring.liveStats.currentVehicles = 1732;
+    if (operator.feedMonitoring?.liveStats) {
+      operator.feedMonitoring.liveStats.currentVehicles = 1732;
+    }
 
     spyOnProperty(service, 'listOperators').and.returnValue(of([operator]));
     spyOn(service, 'fetchOperator').and.returnValue(of(operator));
@@ -200,7 +202,9 @@ describe('LiveStatusComponent', () => {
 
   it(`should show operator expected vehicles`, () => {
     const operator = fakeOperatorLiveStatus(true);
-    operator.feedMonitoring.liveStats.expectedVehicles = 437;
+    if (operator.feedMonitoring?.liveStats) {
+      operator.feedMonitoring.liveStats.expectedVehicles = 437;
+    }
 
     spyOnProperty(service, 'listOperators').and.returnValue(of([operator]));
     spyOn(service, 'fetchOperator').and.returnValue(of(operator));
@@ -220,7 +224,9 @@ describe('LiveStatusComponent', () => {
 
   it(`should show operator update frequency`, () => {
     const operator = fakeOperatorLiveStatus(true);
-    operator.feedMonitoring.liveStats.updateFrequency = 56;
+    if (operator.feedMonitoring?.liveStats) {
+      operator.feedMonitoring.liveStats.updateFrequency = 56;
+    }
     spyOnProperty(service, 'listOperators').and.returnValue(of([operator]));
     spyOn(service, 'fetchOperator').and.returnValue(of(operator));
 
@@ -274,7 +280,9 @@ describe('LiveStatusComponent', () => {
 
   it(`should show message with link to BODS when expected vehicles equals 0`, () => {
     const operator = fakeOperatorLiveStatus(true);
-    operator.feedMonitoring.liveStats.expectedVehicles = 0;
+    if (operator.feedMonitoring?.liveStats) {
+      operator.feedMonitoring.liveStats.expectedVehicles = 0;
+    }
     spyOnProperty(service, 'listOperators').and.returnValue(of([operator]));
     spyOn(service, 'fetchOperator').and.returnValue(of(operator));
 

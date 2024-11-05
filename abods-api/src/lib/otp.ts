@@ -1,4 +1,4 @@
-import { all_operators, feed_monitor_summary, Prisma, PrismaClient } from '@prisma/client';
+import { feed_monitor_summary, Prisma, PrismaClient } from '@prisma/client';
 import {
   PerformanceInputType,
   PunctualityTotalsType,
@@ -7,7 +7,7 @@ import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
-import { getDate, isSameOrAfter, isSameOrBefore } from './dayjs.js';
+import { getDate } from './dayjs.js';
 
 export type AllOperatorWithFeedSummary = feed_monitor_summary & {
   feed_summary?: feed_monitor_summary | null;
@@ -380,7 +380,8 @@ export const getAvlPoints = async (
 
   if (last20Mins) {
     where.recorded_at_time = {
-      gt: inputDate.subtract(21, "minute").toDate(), // 21 mins to ensure no partial loss of data
+      gt: inputDate.subtract(21, "minute").toDate(),
+      lte: inputDate.subtract(1, "minute").toDate(),
     };
   }
 
@@ -429,7 +430,7 @@ export const getExpectedJourneysCount = async (
     const journeyStart = getDate(journey.expected_journey_start);
     const journeyEnd = getDate(journey.expected_journey_end);
 
-    if (isSameOrAfter(journeyEnd, date) && isSameOrBefore(journeyStart, date)) {
+    if (!journeyEnd.isBefore(date) && !journeyStart.isAfter(date)) {
       expectedCount++;
     }
   });

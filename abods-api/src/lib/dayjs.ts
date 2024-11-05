@@ -145,13 +145,6 @@ export const dbUtcToBstHour = (inputDate: Date): string => {
   return getUTCDate(inputDate).tz('Europe/London').format('HH:mm:ss');
 };
 
-export const isSameOrBefore = (inputDate: Dayjs, compareDate: Dayjs) => {
-  return inputDate.isSame(compareDate) || inputDate.isBefore(compareDate)
-}
-
-export const isSameOrAfter = (inputDate: Dayjs, compareDate: Dayjs) => {
-  return inputDate.isSame(compareDate) || inputDate.isAfter(compareDate)
-}
 export const dbUtcToBstDate = (inputDate: Date | string): string => {
   return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
 };
