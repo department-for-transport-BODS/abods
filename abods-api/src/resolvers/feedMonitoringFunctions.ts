@@ -165,7 +165,7 @@ export const getLast24Hours: LiveStatsTypeResolvers['last24Hours'] = async (pare
 
   return result
     .map((summary) => ({
-      timestamp: summary.received_interval,
+      timestamp: getFormattedDate(summary.received_interval),
       actual: summary.actual,
       expected: summary.expected,
     }));

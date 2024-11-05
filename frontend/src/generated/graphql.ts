@@ -903,9 +903,9 @@ export type QueryAvlsArgs = {
 
 
 export type QueryEventStatsArgs = {
-  end: Scalars['Date']['input'];
+  end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
 };
 
 
@@ -1307,8 +1307,8 @@ export type EventsQuery = { __typename?: 'Query', events?: { __typename?: 'Event
 
 export type EventStatsQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
-  end: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
+  end: Scalars['DateTime']['input'];
 }>;
 
 
@@ -2176,7 +2176,7 @@ export const EventsDocument = gql`
     }
   }
 export const EventStatsDocument = gql`
-    query eventStats($operatorId: String!, $start: Date!, $end: Date!) {
+    query eventStats($operatorId: String!, $start: DateTime!, $end: DateTime!) {
   eventStats(operatorId: $operatorId, start: $start, end: $end) {
     count
     day

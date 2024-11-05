@@ -19,7 +19,7 @@ type Query {
     corridor: CorridorNamespace
     invitation(key: String!): InvitationType
     events(operatorId: String!, start: DateTime!, end: DateTime!):EventResponse
-    eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
+    eventStats(operatorId: String!, start: DateTime!, end: DateTime!):[EventStatsType]
     avls(groupId: String!): [AvlPoint!]!
     route(groupId: String!): [Stop!]!
     avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!

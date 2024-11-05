@@ -166,7 +166,8 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   }
 
   formatAvailability(f?: number) {
-    return `${f}%`;
+    if (f === undefined || f === null) return '0.00%';
+    return `${(f * 100).toFixed(2)}%`;
   }
 
   newAlerts(alerts: AlertListViewModel[]) {

@@ -903,9 +903,9 @@ export type QueryAvlsArgs = {
 
 
 export type QueryEventStatsArgs = {
-  end: Scalars['Date']['input'];
+  end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
 };
 
 
