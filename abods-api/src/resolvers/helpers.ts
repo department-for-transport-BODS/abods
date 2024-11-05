@@ -76,7 +76,7 @@ export const requireUserSession = async (context: RequestContext) => {
 };
 
 
-function getHeader(headers: IncomingHttpHeaders, name: string): string | string[] | undefined {
+export function getHeader(headers: IncomingHttpHeaders, name: string): string | string[] | undefined {
   return headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name];
 }
 

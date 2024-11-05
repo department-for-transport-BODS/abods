@@ -32,28 +32,34 @@ export const getEventStats: QueryResolvers['eventStats'] = () => {
 
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers['last20Minutes'] = async (parent, _, context) => {
   const statsDate = getDate()
-  const expectedJourneys: ExpectedJourneyType[] = await getExpectedJourneys(
-    context.db,
-    parent.operatorId,
-    statsDate,
-    21
-  );
+  let expectedJourneys: ExpectedJourneyType[] = []
+  
+  if(parent.operatorId){
+    expectedJourneys = await getExpectedJourneys(
+      context.db,
+      parent.operatorId,
+      statsDate,
+      21
+    );
 
-  const avl: {
-    group_id: string;
-    recorded_at_time: Date;
-    vehicle_ref: string;
-  }[] = await getAvlPoints(
-    context.db,
-    parent.operatorId,
-    statsDate,
-    false,
-    expectedJourneys.map((journey) => journey.group_id)
-  );
-  const results = await getVehicleStats(avl, expectedJourneys);
-  return results.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  );
+    const avl: {
+      group_id: string;
+      recorded_at_time: Date;
+      vehicle_ref: string;
+    }[] = await getAvlPoints(
+      context.db,
+      parent.operatorId,
+      statsDate,
+      false,
+      expectedJourneys.map((journey) => journey.group_id)
+    );
+    const results = await getVehicleStats(avl, expectedJourneys);
+    return results.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+  }
+
+  return []
 };
 
 export const getLiveStats = async (
@@ -114,11 +120,11 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers['historicalStats'] 
 };
 
 export const getExpectedVehicles : LiveStatsTypeResolvers['expectedVehicles'] = (parent, _, context) =>{
-  return getVehicles(parent.operatorId, context.db, VechileCountType.Expected)
+  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VechileCountType.Expected) : 0
 }
 
 export const getActualVehicles : LiveStatsTypeResolvers['currentVehicles'] = (parent, _, context) =>{
-  return getVehicles(parent.operatorId, context.db, VechileCountType.Actual)
+  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VechileCountType.Actual) : 0
 }
 
 export const getVehicles = async (
@@ -220,7 +226,7 @@ const feedMonitoringResolvers: Resolvers = {
   FeedMonitoringType: {
     historicalStats: getHistoricalStats,
     vehicleStats: getVehicleStatsByMin,
-    liveStats: async (parent) => parent.liveStats,
+    liveStats: async (parent) => parent.liveStats ?? {},
   },
   LiveStatsType: {
     currentVehicles: getActualVehicles,

@@ -11,8 +11,8 @@ const calculateOtpStat = (stopList: VehiclePingStop[], statType: OtpEnum | null)
   };
 };
 
-export const calculateOnTimePerformance = (stopList: VehiclePingStop[]) => {
-  const filteredStopList = stopList.filter((stop) => !stop.isHidden);
+export const calculateOnTimePerformance = (stopList: VehiclePingStop[], timingPointsOnly: boolean) => {
+  const filteredStopList = stopList.filter((stop) => stop.isTimingPoint || !timingPointsOnly);
   return {
     early: calculateOtpStat(filteredStopList, OtpEnum.Early),
     late: calculateOtpStat(filteredStopList, OtpEnum.Late),

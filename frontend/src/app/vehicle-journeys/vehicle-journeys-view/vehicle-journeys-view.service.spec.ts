@@ -221,11 +221,11 @@ describe('VehicleJourneysViewService', () => {
   });
 
   describe('getTimingPatternForVehicleJourney', () => {
-    it('should call with vehicleJourneyId', () => {
+    it('should call with groupId', () => {
       service.getTimingPatternForVehicleJourney(journeyId).subscribe();
       const op1 = controller.expectOne(VehicleJourneyTimingPatternDocument);
 
-      expect(op1.operation.variables.vehicleJourneyId).toEqual(journeyId);
+      expect(op1.operation.variables.groupId).toEqual(journeyId);
 
       op1.flush({
         data: {

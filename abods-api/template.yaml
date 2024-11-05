@@ -135,15 +135,13 @@ Resources:
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
-      Policies:
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref GraphQLAPITokenSecret
+
   GraphQLAPITokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: !Sub ${ProjectName}/${Environment}/GraphQLTokenAuthConfig
       Description: 'This Secret is used to set the HMAC and allowed API Key for BODS to connect to private endpoints'
-      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/secretsmanager/id}}'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
 
 
   GraphQlFunctionSecurityGroup:
@@ -182,7 +180,20 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
-
+      Policies:
+        - PolicyName: SecretsManagerGetSecretValueForAPIToken
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:  
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref GraphQLAPITokenSecret
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                Resource:
+                  Fn::Sub: '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
   GraphQlFunctionLoggingPolicy:
     Type: 'AWS::IAM::Policy'
     Condition: IsNotLocal
@@ -307,7 +318,7 @@ Resources:
               - POST
               - PATCH
               - DELETE
-            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # Managed-CachingDisabled
+            CachePolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/backendcachepolicy/id}}' # CachingDisabledWithAuth
             OriginRequestPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/originrequestpolicy/id}}' # CustomCookiesPolicy
             ResponseHeadersPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/responseheaderspolicy/id}}' # CustomHeadersPolicy
         Logging:

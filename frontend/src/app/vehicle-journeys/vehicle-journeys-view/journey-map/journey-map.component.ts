@@ -10,6 +10,7 @@ import { VehiclePing } from '../vehicle-ping.model';
 import { VehiclePingStop } from '../vehicle-ping-stop.model';
 import { ConfigService } from '../../../config/config.service';
 import { OtpEnum } from '../../../../generated/graphql';
+import { DateTime } from 'luxon';
 
 type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
 
@@ -26,6 +27,7 @@ const segmentToLine = (segment: [VehiclePing, VehiclePing]): Feature<LineString,
   styleUrls: ['./journey-map.component.scss'],
 })
 export class JourneyMapComponent implements OnChanges {
+  protected readonly DateTime = DateTime;
   @Input() view?: VehicleJourneyView;
   @Input() selectedStop?: VehiclePingStop;
   @Input() hoveredStop?: StopHoverEvent;

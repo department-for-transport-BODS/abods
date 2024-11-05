@@ -20,7 +20,7 @@
       <div *ngFor="let journey of pattern">
         <a
           class="govuk-link govuk-body journey-search-grid__time"
-          [routerLink]="['/vehicle-journeys', journey.vehicleJourneyId]"
+          [routerLink]="['/vehicle-journeys', journey.groupId]"
           [queryParams]="{
             startTime: journey.startTime?.toUTC()?.toISO({ format: 'basic', suppressSeconds: true }),
             operator: operatorId,

@@ -11,16 +11,14 @@ export interface VehiclePingStop {
   scheduledDeparture: DateTime;
   actualDeparture?: DateTime;
   actualDepartureTimestamp?: string;
-  isHidden: boolean;
   delay?: Duration;
 }
 
-export const createStopModel = (stop: Stop, timingPointsOnly: boolean): VehiclePingStop => {
+export const createStopModel = (stop: Stop): VehiclePingStop => {
   const model: VehiclePingStop = {
     id: stop.stopId.toString(),
     stopName: stop.stopName,
     isTimingPoint: stop.isTimingPoint,
-    isHidden: timingPointsOnly && !stop.isTimingPoint,
     scheduledDeparture: DateTime.fromISO(stop.scheduledDepartureUtc),
     lat: stop.latitude,
     lon: stop.longitude,

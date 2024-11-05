@@ -13,7 +13,12 @@ export type StopHoverEvent = {
 })
 export class StopItemComponent {
   @Input() stop?: VehiclePingStop;
+  @Input() timingPointsOnly = false;
   @Input() firstItem?: boolean;
   @Output() stopSelected = new EventEmitter<VehiclePingStop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
+
+  get displayTimingDetails() {
+    return !this.timingPointsOnly || (this.stop?.isTimingPoint ?? false);
+  }
 }
