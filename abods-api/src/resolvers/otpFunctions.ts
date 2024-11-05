@@ -132,7 +132,7 @@ export const getOperators = async (
         },
       },
       include: {
-        noc_adminareas: true,
+        noc_adminarea: true,
       },
     });
 
@@ -143,7 +143,7 @@ export const getOperators = async (
     const userOperators = operators.map((operator): OperatorType => {
       return mapOperatorToOperatorType(
         operator,
-        operator.noc_adminareas
+        operator.noc_adminarea
       ) as OperatorType;
     });
     return userOperators.sort((a, b) =>
@@ -1014,7 +1014,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
           },
         });
 
-        const stopIds: number[] = results.map((res) => res.stop_id)
+        const stopIds = results.map((res) => res.stop_id)
 
         const stops = await context.db.naptan_stoppoint_latlong.findMany({
           where: {
@@ -1044,7 +1044,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers['stopPerformance
         results.forEach((res) => {
           // avg delay
           const timeInSeconds = res._avg?.avg_time_difference
-            ? res._avg.avg_time_difference * 60
+            ? res._avg.avg_time_difference.toNumber() * 60
             : 0;
 
           const stop = stops.find((dbStop) => dbStop.id === res.stop_id)
@@ -1140,7 +1140,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers['servicePerfo
 
         results.forEach((res) => {
           const avgDelay = res._avg.avg_time_difference
-            ? res._avg.avg_time_difference * 60
+            ? res._avg.avg_time_difference.toNumber() * 60
             : 0;
 
           const service = services.find(serv => serv.noc_and_line_and_servicecode === res.noc_and_line_and_servicecode)
@@ -1242,7 +1242,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers['frequentServic
     results.map((result) => {
       if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
 
-      if (result._sum.actual_headway && result._sum.actual_headway > 0)
+      if (result._sum.actual_headway && result._sum.actual_headway.toNumber() > 0)
         actualHours += 1;
     });
 
@@ -1296,11 +1296,11 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers['headwayOverview'] 
 
     headway = results.reduce((acc, currentHeadway) => {
       acc.actualWaitTime +=
-        currentHeadway.actual_headway * currentHeadway.headway_stops_count;
+        currentHeadway.actual_headway.toNumber() * currentHeadway.headway_stops_count;
       acc.scheduledWaitTime +=
-        currentHeadway.expected_headway * currentHeadway.headway_stops_count;
+        currentHeadway.expected_headway.toNumber() * currentHeadway.headway_stops_count;
       acc.excessWaitTime +=
-        currentHeadway.excess_wait_time * currentHeadway.headway_stops_count;
+        currentHeadway.excess_wait_time.toNumber() * currentHeadway.headway_stops_count;
       acc.headwayCount += currentHeadway.headway_stops_count
 
       return acc
@@ -1371,15 +1371,15 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
         const headwayData = headwayMap[formatterdeparture]
 
         if (headwayData) {
-          headwayData.actual_headway = headwayData.actual_headway + result.actual_headway * result.headway_stops_count
-          headwayData.expected_headway = headwayData.expected_headway + result.expected_headway * result.headway_stops_count
-          headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time * result.headway_stops_count
+          headwayData.actual_headway = headwayData.actual_headway + result.actual_headway.toNumber() * result.headway_stops_count
+          headwayData.expected_headway = headwayData.expected_headway + result.expected_headway.toNumber() * result.headway_stops_count
+          headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time.toNumber() * result.headway_stops_count
           headwayData.headway_stops_count += result.headway_stops_count
         } else {
           headwayMap[formatterdeparture] = {
-            actual_headway: result.actual_headway * result.headway_stops_count,
-            expected_headway: result.expected_headway * result.headway_stops_count,
-            excess_wait_time: result.excess_wait_time * result.headway_stops_count,
+            actual_headway: result.actual_headway.toNumber() * result.headway_stops_count,
+            expected_headway: result.expected_headway.toNumber() * result.headway_stops_count,
+            excess_wait_time: result.excess_wait_time.toNumber() * result.headway_stops_count,
             headway_stops_count: result.headway_stops_count
           }
         }

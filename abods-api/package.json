@@ -9,6 +9,7 @@
     "watch": "tsc --watch",
     "test": "jest",
     "prisma:generate": "prisma generate",
+    "prisma:pull": "prisma db pull",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
     "sam:build": "sam build",
