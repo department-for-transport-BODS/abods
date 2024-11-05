@@ -20,7 +20,7 @@ import {
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
-import { DateTimeScalar, dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
+import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
 import { compareThresholds, getFeedMonitoringList, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
@@ -813,8 +813,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
           if (result._sum) {
             summary.push({
               ts: isDayGranularity
-                ? result.date_of_journey
-                : result.departure_hour,
+                ? getFormattedDate(result.date_of_journey)
+                : getFormattedDate(result.departure_hour),
               early: result._sum.early_count,
               late: result._sum.late_count,
               onTime: result._sum.on_time_count,
@@ -838,17 +838,6 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
     return null;
   }
 };
-
-function getDaysInRange(startDate: Date, endDate: Date): Date[] {
-  const dates: Date[] = [];
-  let currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    dates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dates;
-}
 
 export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunctuality'] = async (_, args, context) => {
   try {
@@ -1635,7 +1624,6 @@ const getPrismaFiltersForOTPQuery = (
 };
 
 const otpResolvers: Resolvers = {
-    DateTime: DateTimeScalar,
     Query: {
         operators: getOperatorList,
         operator: getOperator,

@@ -156,7 +156,6 @@ export const dbUtcToBstDate = (inputDate: Date | string): string => {
   return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
 };
 
-
 export const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
   description: 'A custom scalar to handle ISO 8601 date-time format with timezone offset',
