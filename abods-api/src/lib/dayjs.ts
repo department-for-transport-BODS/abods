@@ -147,3 +147,9 @@ export const dbUtcToBstHour = (inputDate: Date): string => {
 export const dbUtcToBstDate = (inputDate: Date | string): string => {
   return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
 };
+
+export const utcToBstDBInput = (
+  inputDate: Date | string | undefined
+): Date | undefined => {
+  return inputDate ? getUTCDate(inputDate).tz("Europe/London").toDate() : undefined;
+};
