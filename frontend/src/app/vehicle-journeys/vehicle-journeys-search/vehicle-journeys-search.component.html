@@ -23,11 +23,15 @@
           (close)="operatorInputTerm$.next('')"
           [loading]="operatorsLoading"
         >
-          <ng-template *ngIf="operatorsLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template *ngIf="operatorsLoading" ng-label-tmp
+            >Loading...</ng-template
+          >
           <ng-template ng-loadingspinner-tmp>
             <app-spinner size="x-small"></app-spinner>
           </ng-template>
-          <ng-option *ngFor="let item of operators$ | async" [value]="item.operatorId"
+          <ng-option
+            *ngFor="let item of operators$ | async"
+            [value]="item.operatorId"
             >{{ item.name }} ({{ item.nocCode }})</ng-option
           >
         </ng-select>
@@ -43,9 +47,14 @@
           placeholder="Select"
           [loading]="servicesLoading"
         >
-          <ng-template *ngIf="servicesLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template *ngIf="servicesLoading" ng-label-tmp
+            >Loading...</ng-template
+          >
           <ng-template ng-loadingspinner-tmp>
-            <app-spinner size="x-small" [style.margin-right]="service.value ? '5px' : '0px'"></app-spinner>
+            <app-spinner
+              size="x-small"
+              [style.margin-right]="service.value ? '5px' : '0px'"
+            ></app-spinner>
           </ng-template>
           <ng-option *ngFor="let line of services$ | async" [value]="line.id"
             >{{ line.number }}: {{ line.name }}</ng-option
@@ -54,13 +63,21 @@
       </div>
     </form>
 
-    <nav *ngIf="service.value" class="govuk-pagination journey-search-nav" role="navigation" aria-label="results">
+    <nav
+      *ngIf="service.value"
+      class="govuk-pagination journey-search-nav"
+      role="navigation"
+      aria-label="results"
+    >
       <div *ngIf="!pevDisabled" class="govuk-pagination__prev">
         <a
           class="govuk-link govuk-pagination__link"
           [routerLink]="[]"
           [queryParams]="{
-            date: date.value.minus({ days: 1 }).toUTC().toISO({ format: 'basic', suppressSeconds: true })
+            date: date.value
+              .minus({ days: 1 })
+              .toUTC()
+              .toISO({ format: 'basic', suppressSeconds: true }),
           }"
           queryParamsHandling="merge"
           rel="prev"
@@ -72,13 +89,18 @@
           <span class="govuk-pagination__link-title">Previous</span>
         </a>
       </div>
-      <span class="journey-search-nav__date">{{ date.value.toFormat('dd/MM/yyyy') }}</span>
+      <span class="journey-search-nav__date">{{
+        date.value.toFormat("dd/MM/yyyy")
+      }}</span>
       <div *ngIf="!nextDisabled" class="govuk-pagination__next">
         <a
           class="govuk-link govuk-pagination__link"
           [routerLink]="[]"
           [queryParams]="{
-            date: date.value.plus({ days: 1 }).toUTC().toISO({ format: 'basic', suppressSeconds: true })
+            date: date.value
+              .plus({ days: 1 })
+              .toUTC()
+              .toISO({ format: 'basic', suppressSeconds: true }),
           }"
           queryParamsHandling="merge"
           rel="next"
@@ -116,7 +138,10 @@
         src="assets/icons/exclamation-in-circle.svg"
         [applyClass]="true"
       ></svg-icon>
-      <span>Sorry, there is a problem finding vehicle journeys. Please try again.</span>
+      <span
+        >Sorry, there is a problem finding vehicle journeys. Please try
+        again.</span
+      >
     </div>
   </ng-container>
 </app-page>

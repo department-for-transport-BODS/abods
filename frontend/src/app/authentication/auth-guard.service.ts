@@ -1,21 +1,30 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { AuthenticatedUserService } from './authenticated-user.service';
-import { AuthenticationService } from './authentication.service';
+import { Injectable } from "@angular/core";
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  CanActivateChild,
+  Router,
+  RouterStateSnapshot,
+} from "@angular/router";
+import { Observable, of } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
+import { AuthenticatedUserService } from "./authenticated-user.service";
+import { AuthenticationService } from "./authentication.service";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class AuthGuardService implements CanActivateChild, CanActivate {
   constructor(
     private router: Router,
     private userService: AuthenticatedUserService,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<boolean> {
     return this.userService.isAuthenticated$.pipe(
       switchMap((isAuthenticated) => {
         if (isAuthenticated) {
@@ -23,32 +32,45 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
             map((user) => {
               if (
                 route.data.roles &&
-                !route.data.roles.some((requiredRole: string) => requiredRole === user.roles?.[0].name)
+                !route.data.roles.some(
+                  (requiredRole: string) =>
+                    requiredRole === user.roles?.[0].name,
+                )
               ) {
-                this.router.navigate(['/not-authorised'], { queryParams: { url: state.url } });
+                this.router.navigate(["/not-authorised"], {
+                  queryParams: { url: state.url },
+                });
                 return false;
               }
 
               return true;
-            })
+            }),
           );
         } else {
           // not logged in so redirect to login page with the return url
-          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+          this.router.navigate(["/login"], {
+            queryParams: { returnUrl: state.url },
+          });
           return of(false);
         }
-      })
+      }),
     );
   }
 
-  canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  canActivateChild(
+    childRoute: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<boolean> {
     return this.authService.isSessionAlive
       ? this.canActivate(childRoute, state)
       : this.redirectToLogin(childRoute, state);
   }
 
-  redirectToLogin(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  redirectToLogin(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<boolean> {
+    this.router.navigate(["/login"], { queryParams: { returnUrl: state.url } });
     return of(false);
   }
 }

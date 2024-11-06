@@ -1,11 +1,11 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .create-corridor {
   &__stops-layout {
     display: flex;
     flex-direction: column;
-    @include govuk-responsive-padding(2, 'top');
+    @include govuk-responsive-padding(2, "top");
     @include bp($tablet) {
       flex-direction: row;
     }
@@ -25,12 +25,12 @@
     flex: 1;
   }
   &__no-further-stops {
-    @include govuk-responsive-margin(6, 'top');
+    @include govuk-responsive-margin(6, "top");
   }
   &__location {
     @include govuk-font(19);
     max-width: 41ex;
-    @include govuk-responsive-margin(6, 'bottom');
+    @include govuk-responsive-margin(6, "bottom");
   }
   &__search {
     margin-top: -(govuk-spacing(2));

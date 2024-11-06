@@ -1,6 +1,9 @@
 <app-page>
   <ng-container ngProjectAs="back-link">
-    <gds-back-link label="All corridors" [route]="['/corridors']"></gds-back-link>
+    <gds-back-link
+      label="All corridors"
+      [route]="['/corridors']"
+    ></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
@@ -25,8 +28,8 @@
             submitted && name.errors?.required
               ? 'Name is required'
               : submitted && name.errors?.maxlength
-              ? 'Maximum length 256 characters'
-              : undefined
+                ? 'Maximum length 256 characters'
+                : undefined
           "
         ></gds-text-input>
         <div class="create-corridor__stops-layout">
@@ -53,7 +56,10 @@
                 <option value="location">Location</option>
                 <option value="stop">Stop</option>
               </gds-select>
-              <div class="create-corridor__search" [ngSwitch]="searchMode.value">
+              <div
+                class="create-corridor__search"
+                [ngSwitch]="searchMode.value"
+              >
                 <gds-text-input
                   *ngSwitchCase="'stop'"
                   formControlName="stopQuery"
@@ -64,7 +70,9 @@
                   width="20"
                 ></gds-text-input>
                 <div *ngSwitchCase="'location'">
-                  <label class="govuk-label" for="location-query">Location name or postcode</label>
+                  <label class="govuk-label" for="location-query"
+                    >Location name or postcode</label
+                  >
                   <ng-select
                     class="gds-select create-corridor__location govuk-input--width-20"
                     labelForId="location-query"
@@ -76,10 +84,18 @@
                     <ng-template ng-loadingspinner-tmp>
                       <app-spinner size="x-small"></app-spinner>
                     </ng-template>
-                    <ng-option *ngFor="let location of locations?.features" [value]="location">
+                    <ng-option
+                      *ngFor="let location of locations?.features"
+                      [value]="location"
+                    >
                       {{ location.text }}
                       <span class="govuk-body-s text-secondary">
-                        {{ [location | geoContext: 'locality', location | geoContext: ['place', 'district']] | join }}
+                        {{
+                          [
+                            location | geoContext: "locality",
+                            location | geoContext: ["place", "district"],
+                          ] | join
+                        }}
                       </span>
                     </ng-option>
                   </ng-select>
@@ -88,22 +104,37 @@
             </ng-container>
 
             <ng-container *ngIf="loading">
-              <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-2">Searching for stops...</h3>
+              <h3
+                class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-2"
+              >
+                Searching for stops...
+              </h3>
               <div class="flex-row justify-content-center govuk-!-margin-6">
                 <app-spinner></app-spinner>
               </div>
             </ng-container>
 
-            <div *ngIf="noData && stopQuery.errors?.minlength" class="create-corridor__no-stops" id="stop-query-hint">
+            <div
+              *ngIf="noData && stopQuery.errors?.minlength"
+              class="create-corridor__no-stops"
+              id="stop-query-hint"
+            >
               Enter at least 4 characters
             </div>
 
             <div *ngIf="noData && stopQuery.valid" [ngSwitch]="stopList.length">
-              <div class="create-corridor__no-stops" *ngSwitchCase="0">Your organisation has no matching stops</div>
-              <div class="create-corridor__no-further-stops" *ngSwitchDefault>No further stops available</div>
+              <div class="create-corridor__no-stops" *ngSwitchCase="0">
+                Your organisation has no matching stops
+              </div>
+              <div class="create-corridor__no-further-stops" *ngSwitchDefault>
+                No further stops available
+              </div>
             </div>
 
-            <div *ngIf="hasSelectedLocation && zoomedTooFarOut" class="govuk-error-message">
+            <div
+              *ngIf="hasSelectedLocation && zoomedTooFarOut"
+              class="govuk-error-message"
+            >
               Search area too large, please zoom in to show stops
             </div>
 
@@ -112,7 +143,9 @@
               [ngSwitch]="stopList.length"
               class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-2"
             >
-              <span *ngSwitchCase="0">{{ matchingStops?.features?.length }} matching stops</span>
+              <span *ngSwitchCase="0"
+                >{{ matchingStops?.features?.length }} matching stops</span
+              >
               <span *ngSwitchDefault>Add further stops</span>
             </h3>
 
@@ -124,7 +157,10 @@
               (addStop)="addStop($event)"
             ></app-stop-search-list>
 
-            <div *ngIf="matchingStops || corridorStops" class="flex-row justify-content-between govuk-!-margin-top-6">
+            <div
+              *ngIf="matchingStops || corridorStops"
+              class="flex-row justify-content-between govuk-!-margin-top-6"
+            >
               <gds-button
                 text="Cancel"
                 appearance="secondary"
@@ -148,10 +184,19 @@
                 <gds-button
                   type="submit"
                   buttonId="finish-btn"
-                  [text]="(isEdit ? updating : creating) ? undefined : isEdit ? 'Save' : 'Finish'"
+                  [text]="
+                    (isEdit ? updating : creating)
+                      ? undefined
+                      : isEdit
+                        ? 'Save'
+                        : 'Finish'
+                  "
                   [disabled]="loading || updating || creating"
                 >
-                  <div *ngIf="isEdit ? updating : creating" class="flex-row justify-content-center">
+                  <div
+                    *ngIf="isEdit ? updating : creating"
+                    class="flex-row justify-content-center"
+                  >
                     <app-spinner size="x-small"></app-spinner>
                   </div>
                 </gds-button>
@@ -190,8 +235,18 @@
 </app-page>
 
 <ng-template #error>
-  <app-page-header caption="Corridors" [heading]="errorView?.errorHeading" spaceAbove="2"></app-page-header>
-  <p class="govuk-body">{{ errorView?.errorMessage }} Go back to <a [routerLink]="['/corridors']">All corridors</a>?</p>
+  <app-page-header
+    caption="Corridors"
+    [heading]="errorView?.errorHeading"
+    spaceAbove="2"
+  ></app-page-header>
+  <p class="govuk-body">
+    {{ errorView?.errorMessage }} Go back to
+    <a [routerLink]="['/corridors']">All corridors</a>?
+  </p>
 </ng-template>
 
-<app-delete-corridor-modal [corridor]="corridor" (deleteCorridor)="deleteCorridor()"></app-delete-corridor-modal>
+<app-delete-corridor-modal
+  [corridor]="corridor"
+  (deleteCorridor)="deleteCorridor()"
+></app-delete-corridor-modal>

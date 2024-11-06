@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 import {
   AlertFragment,
   AlertTypeEnum,
@@ -15,10 +15,10 @@ import {
   ListUserAlertsDocument,
   CreateUserAlertGQL,
   DeleteUserAlertGQL,
-} from 'src/generated/graphql';
-import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
-import { GraphQLError } from 'graphql';
+} from "src/generated/graphql";
+import { Observable, of } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
+import { GraphQLError } from "graphql";
 
 interface MutationResponse<T> {
   error?: string | null;
@@ -26,22 +26,29 @@ interface MutationResponse<T> {
   result?: T | null;
 }
 
-const failureResponse = <T>(error: string): MutationResponse<T> => ({ error, success: false });
+const failureResponse = <T>(error: string): MutationResponse<T> => ({
+  error,
+  success: false,
+});
 
 const serverFailureResponse = <T>(): MutationResponse<T> =>
-  failureResponse('There was an error communicating with the server, please try again.');
+  failureResponse(
+    "There was an error communicating with the server, please try again.",
+  );
 
-const mutationFailureResponse = <T>(errors: Readonly<GraphQLError[] | undefined>): MutationResponse<T> => {
+const mutationFailureResponse = <T>(
+  errors: Readonly<GraphQLError[] | undefined>,
+): MutationResponse<T> => {
   return failureResponse(
     errors
       ?.map(({ message }) => message)
       .filter((message) => message)
-      .join(' ') ?? 'The was an unknown error'
+      .join(" ") ?? "The was an unknown error",
   );
 };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OrganisationService {
   constructor(
@@ -54,33 +61,45 @@ export class OrganisationService {
     private fetchUserAlert: FetchUserAlertGQL,
     private updateUserAlert: UpdateUserAlertGQL,
     private createUserAlert: CreateUserAlertGQL,
-    private deleteUserAlert: DeleteUserAlertGQL
+    private deleteUserAlert: DeleteUserAlertGQL,
   ) {}
 
   userListDirty = false;
 
   fetchUser(username: string): Observable<UserFragment | undefined> {
-    return this.listUsers$().pipe(map((users) => users.find((user) => user.username === username)));
+    return this.listUsers$().pipe(
+      map((users) => users.find((user) => user.username === username)),
+    );
   }
 
   listUsers$(): Observable<UserFragment[]> {
-    return this.listUsers.fetch({}, { fetchPolicy: this.userListDirty ? 'no-cache' : 'cache-first' }).pipe(
-      tap(() => (this.userListDirty = false)),
-      map((res) => res.data?.users ?? [])
-    );
+    return this.listUsers
+      .fetch(
+        {},
+        { fetchPolicy: this.userListDirty ? "no-cache" : "cache-first" },
+      )
+      .pipe(
+        tap(() => (this.userListDirty = false)),
+        map((res) => res.data?.users ?? []),
+      );
   }
 
   listOrgRoles$(): Observable<RoleFragment[]> {
     return this.listRoles
       .fetch()
-      .pipe(map(({ data }) => data?.roles?.filter(({ scope }) => scope === 'organisation') ?? []));
+      .pipe(
+        map(
+          ({ data }) =>
+            data?.roles?.filter(({ scope }) => scope === "organisation") ?? [],
+        ),
+      );
   }
 
   editUser$(
     username: string,
     firstName: string,
     lastName: string,
-    role: string
+    role: string,
   ): Observable<MutationResponse<UserFragment>> {
     return this.editUser.mutate({ username, firstName, lastName, role }).pipe(
       tap(() => (this.userListDirty = true)),
@@ -97,7 +116,7 @@ export class OrganisationService {
           error,
         };
       }),
-      catchError(() => of(serverFailureResponse<UserFragment>()))
+      catchError(() => of(serverFailureResponse<UserFragment>())),
     );
   }
 
@@ -116,11 +135,15 @@ export class OrganisationService {
           error,
         };
       }),
-      catchError(() => of(serverFailureResponse<void>()))
+      catchError(() => of(serverFailureResponse<void>())),
     );
   }
 
-  inviteUser$(email: string, roleId: string, organisationId: string): Observable<MutationResponse<void>> {
+  inviteUser$(
+    email: string,
+    roleId: string,
+    organisationId: string,
+  ): Observable<MutationResponse<void>> {
     return this.inviteUser.mutate({ email, roleId, organisationId }).pipe(
       map(({ data, errors }) => {
         if (!data) {
@@ -134,16 +157,20 @@ export class OrganisationService {
           error,
         };
       }),
-      catchError(() => of(serverFailureResponse<void>()))
+      catchError(() => of(serverFailureResponse<void>())),
     );
   }
 
   listUserAlerts$(): Observable<AlertFragment[]> {
-    return this.listUserAlerts.watch().valueChanges.pipe(map((res) => res.data?.userAlerts ?? []));
+    return this.listUserAlerts
+      .watch()
+      .valueChanges.pipe(map((res) => res.data?.userAlerts ?? []));
   }
 
   fetchUserAlert$(alertId: string): Observable<AlertFragment | null> {
-    return this.fetchUserAlert.fetch({ alertId }).pipe(map((res) => res.data?.userAlert ?? null));
+    return this.fetchUserAlert
+      .fetch({ alertId })
+      .pipe(map((res) => res.data?.userAlert ?? null));
   }
 
   updateUserAlert$(
@@ -151,14 +178,14 @@ export class OrganisationService {
     alertType: AlertTypeEnum,
     sendToId: string,
     eventHysterisis?: number,
-    eventThreshold?: number
+    eventThreshold?: number,
   ): Observable<MutationResponse<void>> {
     return this.updateUserAlert
       .mutate(
         { alertId, alertType, sendToId, eventHysterisis, eventThreshold },
         {
           refetchQueries: [{ query: ListUserAlertsDocument }],
-        }
+        },
       )
       .pipe(
         map(({ data, errors }) => {
@@ -168,7 +195,7 @@ export class OrganisationService {
 
           return data.updateUserAlert;
         }),
-        catchError(() => of(serverFailureResponse<void>()))
+        catchError(() => of(serverFailureResponse<void>())),
       );
   }
 
@@ -176,12 +203,12 @@ export class OrganisationService {
     alertType: AlertTypeEnum,
     sendToId: string,
     eventHysterisis?: number,
-    eventThreshold?: number
+    eventThreshold?: number,
   ): Observable<MutationResponse<void>> {
     return this.createUserAlert
       .mutate(
         { alertType, sendToId, eventHysterisis, eventThreshold },
-        { refetchQueries: [{ query: ListUserAlertsDocument }] }
+        { refetchQueries: [{ query: ListUserAlertsDocument }] },
       )
       .pipe(
         map(({ data, errors }) => {
@@ -191,20 +218,25 @@ export class OrganisationService {
 
           return data.addUserAlert;
         }),
-        catchError(() => of(serverFailureResponse<void>()))
+        catchError(() => of(serverFailureResponse<void>())),
       );
   }
 
   deleteUserAlert$(alertId: string): Observable<MutationResponse<void>> {
-    return this.deleteUserAlert.mutate({ alertId }, { refetchQueries: [{ query: ListUserAlertsDocument }] }).pipe(
-      map(({ data, errors }) => {
-        if (!data) {
-          return mutationFailureResponse<void>(errors);
-        }
+    return this.deleteUserAlert
+      .mutate(
+        { alertId },
+        { refetchQueries: [{ query: ListUserAlertsDocument }] },
+      )
+      .pipe(
+        map(({ data, errors }) => {
+          if (!data) {
+            return mutationFailureResponse<void>(errors);
+          }
 
-        return data.deleteUserAlert;
-      }),
-      catchError(() => of(serverFailureResponse<void>()))
-    );
+          return data.deleteUserAlert;
+        }),
+        catchError(() => of(serverFailureResponse<void>())),
+      );
   }
 }

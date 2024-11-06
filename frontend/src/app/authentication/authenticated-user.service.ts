@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { UserFragment } from 'src/generated/graphql';
+import { Injectable } from "@angular/core";
+import { Observable, ReplaySubject } from "rxjs";
+import { filter, map } from "rxjs/operators";
+import { UserFragment } from "src/generated/graphql";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class AuthenticatedUserService {
   private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
@@ -18,15 +18,19 @@ export class AuthenticatedUserService {
   get authenticatedUser$(): Observable<UserFragment> {
     return this.userSubject.pipe(
       filter((u) => u !== null),
-      map((u) => u as UserFragment)
+      map((u) => u as UserFragment),
     );
   }
 
   get authenticatedUserIsAdmin(): boolean {
-    return this.user?.roles?.some(({ name }) => name === 'Administrator') ?? false;
+    return (
+      this.user?.roles?.some(({ name }) => name === "Administrator") ?? false
+    );
   }
   get authenticatedUserIsOrgUser(): boolean {
-    return this.user?.roles?.some(({ scope }) => scope === 'organisation') ?? false;
+    return (
+      this.user?.roles?.some(({ scope }) => scope === "organisation") ?? false
+    );
   }
 
   setUser(user: UserFragment | null) {

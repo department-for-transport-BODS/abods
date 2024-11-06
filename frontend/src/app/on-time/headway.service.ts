@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 import {
   FrequentServiceInfoType,
   HeadwayFrequentServiceInfoGQL,
@@ -6,13 +6,13 @@ import {
   HeadwayInputType,
   HeadwayOverviewGQL,
   HeadwayTimeSeriesGQL,
-} from '../../generated/graphql';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { nonNullishArray, NullishArray } from '../shared/array-operators';
-import { assertNonNullish } from '../shared/rxjs-operators';
-import { pick } from 'lodash-es';
-import { PerformanceParams } from './on-time.service';
+} from "../../generated/graphql";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { nonNullishArray, NullishArray } from "../shared/array-operators";
+import { assertNonNullish } from "../shared/rxjs-operators";
+import { pick } from "lodash-es";
+import { PerformanceParams } from "./on-time.service";
 
 export interface Headway {
   actual: number;
@@ -28,11 +28,13 @@ export interface FrequentService {
   serviceId: string;
 }
 
-export type HeadwayParams = Omit<HeadwayInputType, 'sortBy'>;
+export type HeadwayParams = Omit<HeadwayInputType, "sortBy">;
 
-const assertHasOneElement: (arr: NullishArray<string>) => asserts arr is [string] = (arr) => {
+const assertHasOneElement: (
+  arr: NullishArray<string>,
+) => asserts arr is [string] = (arr) => {
   if (!arr?.length || arr[0] === null || arr[0] === undefined) {
-    throw new Error('Array must have one element'); // This should never happen
+    throw new Error("Array must have one element"); // This should never happen
   }
 };
 
@@ -41,40 +43,64 @@ const assertHasOneElement: (arr: NullishArray<string>) => asserts arr is [string
  * raise an error when types overlap sufficiently, and exact types have yet to be implemented.
  * @see https://github.com/microsoft/TypeScript/issues/12936
  */
-const pickHeadwayFilters = ({ filters, ...params }: PerformanceParams | HeadwayParams): HeadwayParams => ({
+const pickHeadwayFilters = ({
+  filters,
+  ...params
+}: PerformanceParams | HeadwayParams): HeadwayParams => ({
   ...params,
-  filters: pick(filters, ['dayOfWeekFlags', 'endTime', 'granularity', 'lineIds', 'operatorIds', 'startTime']),
+  filters: pick(filters, [
+    "dayOfWeekFlags",
+    "endTime",
+    "granularity",
+    "lineIds",
+    "operatorIds",
+    "startTime",
+  ]),
 });
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class HeadwayService {
   constructor(
     private timeSeriesGQL: HeadwayTimeSeriesGQL,
     private overviewGQL: HeadwayOverviewGQL,
     private frequentServicesGQL: HeadwayFrequentServicesGQL,
-    private frequentServiceInfoGQL: HeadwayFrequentServiceInfoGQL
+    private frequentServiceInfoGQL: HeadwayFrequentServiceInfoGQL,
   ) {}
 
   fetchTimeSeries(params: HeadwayParams): Observable<HeadwayTimeSeries[]> {
     return this.timeSeriesGQL
-      .fetch({ params: pickHeadwayFilters(params) }, { fetchPolicy: 'no-cache' })
-      .pipe(map((result) => nonNullishArray(result.data?.headwayMetrics?.headwayTimeSeries)));
+      .fetch(
+        { params: pickHeadwayFilters(params) },
+        { fetchPolicy: "no-cache" },
+      )
+      .pipe(
+        map((result) =>
+          nonNullishArray(result.data?.headwayMetrics?.headwayTimeSeries),
+        ),
+      );
   }
 
   fetchOverview(params: HeadwayParams): Observable<Headway> {
     return this.overviewGQL
-      .watch({ params: pickHeadwayFilters(params) }, { fetchPolicy: 'no-cache' })
+      .watch(
+        { params: pickHeadwayFilters(params) },
+        { fetchPolicy: "no-cache" },
+      )
       .valueChanges.pipe(
         map((result) => result.data?.headwayMetrics?.headwayOverview),
-        assertNonNullish()
+        assertNonNullish(),
       );
   }
 
-  fetchFrequentServices({ filters, fromTimestamp, toTimestamp }: HeadwayParams): Observable<FrequentService[]> {
+  fetchFrequentServices({
+    filters,
+    fromTimestamp,
+    toTimestamp,
+  }: HeadwayParams): Observable<FrequentService[]> {
     assertHasOneElement(filters?.operatorIds);
-    const [operatorId] = filters?.operatorIds ?? [''];
+    const [operatorId] = filters?.operatorIds ?? [""];
 
     return this.frequentServicesGQL
       .fetch(
@@ -83,9 +109,13 @@ export class HeadwayService {
           fromTimestamp,
           toTimestamp,
         },
-        { fetchPolicy: 'no-cache' }
+        { fetchPolicy: "no-cache" },
       )
-      .pipe(map((result) => nonNullishArray(result.data?.headwayMetrics?.frequentServices)));
+      .pipe(
+        map((result) =>
+          nonNullishArray(result.data?.headwayMetrics?.frequentServices),
+        ),
+      );
   }
 
   fetchFrequentServiceInfo({
@@ -95,8 +125,8 @@ export class HeadwayService {
   }: HeadwayParams): Observable<FrequentServiceInfoType> {
     assertHasOneElement(filters?.operatorIds);
     assertHasOneElement(filters?.lineIds);
-    const [operatorId] = filters?.operatorIds ?? [''];
-    const [lineId] = filters?.lineIds ?? [''];
+    const [operatorId] = filters?.operatorIds ?? [""];
+    const [lineId] = filters?.lineIds ?? [""];
     const dayOfWeekFlags = filters?.dayOfWeekFlags;
     const startTime = filters?.startTime;
     const endTime = filters?.endTime;
@@ -116,11 +146,11 @@ export class HeadwayService {
             toTimestamp,
           },
         },
-        { fetchPolicy: 'no-cache' }
+        { fetchPolicy: "no-cache" },
       )
       .valueChanges.pipe(
         map((result) => result.data?.headwayMetrics?.frequentServiceInfo),
-        assertNonNullish()
+        assertNonNullish(),
       );
   }
 }

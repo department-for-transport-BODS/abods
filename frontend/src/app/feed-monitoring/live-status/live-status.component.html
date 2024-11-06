@@ -1,9 +1,16 @@
 <app-page *ngIf="!(notFound && !chartsErrored); else operatorNotFound"
-  ><ng-container ngProjectAs="back-link" *ngIf="allOperators && allOperators.length > 1">
+  ><ng-container
+    ngProjectAs="back-link"
+    *ngIf="allOperators && allOperators.length > 1"
+  >
     <gds-back-link label="All operators"></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
-    <app-page-header caption="Feed monitoring" heading="Live status" spaceBelow="2"></app-page-header>
+    <app-page-header
+      caption="Feed monitoring"
+      heading="Live status"
+      spaceBelow="2"
+    ></app-page-header>
 
     <app-operator-selector
       [allOperators]="allOperators"
@@ -14,9 +21,15 @@
 
     <div class="live-status__info">
       <div class="live-status__meta">
-        <div class="live-status__date">{{ lastCheck | dateTimeToFormat: 'dd MMMM yyyy' }}</div>
+        <div class="live-status__date">
+          {{ lastCheck | dateTimeToFormat: "dd MMMM yyyy" }}
+        </div>
       </div>
-      <a [routerLink]="['feed-history']" class="govuk-link live-status__feed-history">View feed history</a>
+      <a
+        [routerLink]="['feed-history']"
+        class="govuk-link live-status__feed-history"
+        >View feed history</a
+      >
     </div>
 
     <div class="live-status__stats">
@@ -59,8 +72,11 @@
     </div>
 
     <div *ngIf="showBodsLink" class="govuk-inset-text">
-      If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are
-      up to date <a target="_blank" rel="noopener" class="govuk-link" [href]="bodsLink">here</a>.
+      If the number of expected vehicles is zero and you were expecting
+      vehicles, please check your BODS timetables are up to date
+      <a target="_blank" rel="noopener" class="govuk-link" [href]="bodsLink"
+        >here</a
+      >.
     </div>
 
     <app-box *ngIf="!chartsLoading && !chartsErrored">
@@ -79,14 +95,20 @@
           chartId="vehicle-stats-minutes"
           [granularity]="minute"
           [nocCode]="nocCode"
-          [dataSource]="operator?.feedMonitoring?.liveStats?.last20Minutes ?? []"
+          [dataSource]="
+            operator?.feedMonitoring?.liveStats?.last20Minutes ?? []
+          "
           [interval]="intervalLast20Minutes"
           label="Last 20 minutes"
         ></app-live-vehicle-stats>
       </div>
     </app-box>
     <app-box *ngIf="chartsLoading && !chartsErrored" minHeight="335px">
-      <app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner>
+      <app-spinner
+        [vCentre]="true"
+        message="Loading..."
+        size="default"
+      ></app-spinner>
     </app-box>
     <app-box *ngIf="chartsErrored" minHeight="335px">
       <div class="live-status__charts--error">
@@ -101,7 +123,12 @@
         >
       </div>
     </app-box>
-    <app-alert-list *ngIf="operatorId" [operatorId]="operatorId" title="Recent alerts" [mode]="alertMode.LiveStatus">
+    <app-alert-list
+      *ngIf="operatorId"
+      [operatorId]="operatorId"
+      title="Recent alerts"
+      [mode]="alertMode.LiveStatus"
+    >
     </app-alert-list>
   </ng-container>
 </app-page>
@@ -109,10 +136,16 @@
 <ng-template #operatorNotFound>
   <app-page>
     <ng-container ngProjectAs="back-link">
-      <gds-back-link [route]="['/feed-monitoring']" label="Feed monitoring"></gds-back-link>
+      <gds-back-link
+        [route]="['/feed-monitoring']"
+        label="Feed monitoring"
+      ></gds-back-link>
     </ng-container>
     <ng-container ngProjectAs="content">
-      <app-page-header caption="Feed monitoring" heading="Not found"></app-page-header>
+      <app-page-header
+        caption="Feed monitoring"
+        heading="Not found"
+      ></app-page-header>
       <p class="govuk-body">
         Operator not found, or you do not have permission to view. Go back to
         <a [routerLink]="['/feed-monitoring']">Feed monitoring</a>?

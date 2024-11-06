@@ -1,6 +1,9 @@
 <app-page>
   <ng-container ngProjectAs="content">
-    <app-browser-title title="Sign in" [renderTitle]="false"></app-browser-title>
+    <app-browser-title
+      title="Sign in"
+      [renderTitle]="false"
+    ></app-browser-title>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds-from-desktop">
@@ -37,7 +40,11 @@
           </div>
           <div class="govuk-grid-column-one-third-from-desktop govuk-body">
             <h2 class="govuk-heading-m">Forgot your password?</h2>
-            <a class="govuk-link" href="https://publish.bus-data.dft.gov.uk/account/password/reset/">Reset your password</a>
+            <a
+              class="govuk-link"
+              href="https://publish.bus-data.dft.gov.uk/account/password/reset/"
+              >Reset your password</a
+            >
           </div>
         </div>
       </gds-fieldset>

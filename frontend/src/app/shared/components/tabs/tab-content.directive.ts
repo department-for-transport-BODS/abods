@@ -1,5 +1,11 @@
-import { ChangeDetectorRef, Directive, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { TabComponent } from './tab/tab.component';
+import {
+  ChangeDetectorRef,
+  Directive,
+  OnInit,
+  TemplateRef,
+  ViewContainerRef,
+} from "@angular/core";
+import { TabComponent } from "./tab/tab.component";
 
 /**
  * Structural directive to allow the tabs component to conditionally include tab content rather than just hiding and
@@ -13,14 +19,14 @@ import { TabComponent } from './tab/tab.component';
  *   </app-tabs>
  */
 @Directive({
-  selector: '[appTabContent]',
+  selector: "[appTabContent]",
 })
 export class TabContentDirective implements OnInit {
   constructor(
     private templateRef: TemplateRef<unknown>,
     private viewContainerRef: ViewContainerRef,
     private enclosingTab: TabComponent,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {

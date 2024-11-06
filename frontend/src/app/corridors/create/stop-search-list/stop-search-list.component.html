@@ -4,9 +4,15 @@
   (mouseover)="mouseOver.emit(stop)"
   (mouseleave)="mouseLeave.emit(stop)"
 >
-  <div class="corridor-stop-list__stop-details corridor-stop-list__stop-details--no-graphic">
-    <div class="corridor-stop-list__stop-label">{{ stop.properties.stopName }}</div>
-    <div class="corridor-stop-list__naptan">{{ stop.properties.localityName }} {{ stop.properties.naptan }}</div>
+  <div
+    class="corridor-stop-list__stop-details corridor-stop-list__stop-details--no-graphic"
+  >
+    <div class="corridor-stop-list__stop-label">
+      {{ stop.properties.stopName }}
+    </div>
+    <div class="corridor-stop-list__naptan">
+      {{ stop.properties.localityName }} {{ stop.properties.naptan }}
+    </div>
   </div>
   <div>
     <gds-button

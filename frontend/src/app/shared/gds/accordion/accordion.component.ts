@@ -5,15 +5,15 @@ import {
   Component,
   ContentChildren,
   QueryList,
-} from '@angular/core';
-import { AccordionSectionComponent } from './accordion-section/accordion-section.component';
+} from "@angular/core";
+import { AccordionSectionComponent } from "./accordion-section/accordion-section.component";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-accordion',
-  templateUrl: './accordion.component.html',
-  styleUrls: ['./accordion.component.scss'],
+  selector: "gds-accordion",
+  templateUrl: "./accordion.component.html",
+  styleUrls: ["./accordion.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccordionComponent implements AfterContentChecked {
@@ -22,7 +22,8 @@ export class AccordionComponent implements AfterContentChecked {
     return this._uid;
   }
 
-  @ContentChildren(AccordionSectionComponent) sections!: QueryList<AccordionSectionComponent>;
+  @ContentChildren(AccordionSectionComponent)
+  sections!: QueryList<AccordionSectionComponent>;
 
   expandedAll = false;
 

@@ -1,5 +1,5 @@
-import { DateTime, Duration } from 'luxon';
-import { OtpEnum, Stop } from '../../../generated/graphql';
+import { DateTime, Duration } from "luxon";
+import { OtpEnum, Stop } from "../../../generated/graphql";
 
 export interface VehiclePingStop {
   id: string;

@@ -1,12 +1,16 @@
-import { Component, forwardRef, Input } from '@angular/core';
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, forwardRef, Input } from "@angular/core";
+import {
+  ControlValueAccessor,
+  FormControl,
+  NG_VALUE_ACCESSOR,
+} from "@angular/forms";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-password-input',
-  templateUrl: './password-input.component.html',
-  styleUrls: ['./password-input.component.scss'],
+  selector: "gds-password-input",
+  templateUrl: "./password-input.component.html",
+  styleUrls: ["./password-input.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -25,23 +29,23 @@ export class PasswordInputComponent implements ControlValueAccessor {
   }
 
   protected _uid = `gds-password-input-${nextUniqueId++}`;
-  protected _id = '';
+  protected _id = "";
 
-  @Input() width?: '10' | '20';
+  @Input() width?: "10" | "20";
   @Input() label?: string;
   @Input() error?: string;
   @Input() required = false;
   @Input() autocomplete?: string;
 
   control = new FormControl();
-  suffixLabel = 'Show';
-  type = 'password';
+  suffixLabel = "Show";
+  type = "password";
 
   get inputClasses() {
     return {
-      'govuk-input password-input__input': true,
+      "govuk-input password-input__input": true,
       [`password-input__width--${this.width}`]: this.width,
-      'govuk-input--error': this.error,
+      "govuk-input--error": this.error,
     };
   }
 
@@ -62,12 +66,12 @@ export class PasswordInputComponent implements ControlValueAccessor {
   }
 
   hidePassword() {
-    this.suffixLabel = 'Show';
-    this.type = 'password';
+    this.suffixLabel = "Show";
+    this.type = "password";
   }
 
   showPassword() {
-    this.suffixLabel = 'Hide';
-    this.type = 'text';
+    this.suffixLabel = "Hide";
+    this.type = "text";
   }
 }

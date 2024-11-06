@@ -1,10 +1,10 @@
 // tippy theme
 $tooltip-arrow-size: 16px;
-$tooltip-background: govuk-colour('black');
+$tooltip-background: govuk-colour("black");
 $tooltip-colour: white;
 
 $tooltip-arrow-offset: $tooltip-arrow-size;
-.tippy-box[data-theme~='gds-tooltip'] {
+.tippy-box[data-theme~="gds-tooltip"] {
   position: relative;
   background-color: $tooltip-background;
   border: 0 none;
@@ -19,7 +19,7 @@ $tooltip-arrow-offset: $tooltip-arrow-size;
     height: rem($tooltip-arrow-size);
     color: $tooltip-background;
     &:after {
-      content: '';
+      content: "";
       position: absolute;
       z-index: -1;
       border-color: transparent;
@@ -31,20 +31,24 @@ $tooltip-arrow-offset: $tooltip-arrow-size;
     padding: govuk-spacing(2);
   }
 }
-.tippy-box[data-theme~='gds-tooltip'][data-placement^='top'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-tooltip"][data-placement^="top"]
+  > .tippy-arrow:before {
   border-top-color: $tooltip-background;
 }
 
-.tippy-box[data-theme~='gds-tooltip'][data-placement^='bottom'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-tooltip"][data-placement^="bottom"]
+  > .tippy-arrow:before {
   border-bottom-color: $tooltip-background;
   bottom: rem($tooltip-arrow-size);
 }
 
-.tippy-box[data-theme~='gds-tooltip'][data-placement^='left'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-tooltip"][data-placement^="left"]
+  > .tippy-arrow:before {
   border-left-color: $tooltip-background;
 }
 
-.tippy-box[data-theme~='gds-tooltip'][data-placement^='right'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-tooltip"][data-placement^="right"]
+  > .tippy-arrow:before {
   border-right-color: $tooltip-background;
   right: rem($tooltip-arrow-size);
 }

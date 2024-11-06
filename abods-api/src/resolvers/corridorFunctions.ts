@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Timetable } from '@prisma/client';
+import { Prisma, PrismaClient, Timetable } from "@prisma/client";
 import {
   CorridorJourneyServiceStatsType,
   CorridorJourneyStatsOption,
@@ -14,7 +14,7 @@ import {
   returnCorridor,
   returnCorridorType,
   updateCorridorDb,
-} from '../lib/corridor.js';
+} from "../lib/corridor.js";
 import {
   CorridorJourneyTimeStatsType,
   CorridorStatsDayOfWeekType,
@@ -27,46 +27,61 @@ import {
   CorridorStatsType,
   MutationResolvers,
   CorridorNamespaceResolvers,
-  CorridorStatsTypeResolvers
-} from '../types/generated.js';
+  CorridorStatsTypeResolvers,
+} from "../types/generated.js";
 import {
   getDate,
   getDayFormattedDate,
   getHourFormattedDate,
   utcToBstDBInput,
-} from '../lib/dayjs.js';
-import { getPercentile } from '../lib/utils.js';
-import haversineDistance from 'haversine-distance';
-import { emptyResolver, requireUserSession } from './helpers.js';
-import { SessionUser } from '../types/extra.js';
+} from "../lib/dayjs.js";
+import { getPercentile } from "../lib/utils.js";
+import haversineDistance from "haversine-distance";
+import { emptyResolver, requireUserSession } from "./helpers.js";
+import { SessionUser } from "../types/extra.js";
 
-export const listCorridors: CorridorNamespaceResolvers['corridorList'] = async (_, __, context) => {
-  const user = await requireUserSession(context)
+export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
+  _,
+  __,
+  context,
+) => {
+  const user = await requireUserSession(context);
 
-  const results: CorridorResultsType[] = await getCorridorList(context.db, user);
+  const results: CorridorResultsType[] = await getCorridorList(
+    context.db,
+    user,
+  );
 
   return returnCorridorType(results);
 };
 
-export const getCorridors: CorridorNamespaceResolvers['getCorridor'] = async (_, args, context) => {
-  const user = await requireUserSession(context)
+export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
+  _,
+  args,
+  context,
+) => {
+  const user = await requireUserSession(context);
   const corridor: CorridorResultsType | null = await getCorridor(
     args.corridorId,
     context.db,
-    user
+    user,
   );
   return corridor ? returnCorridor(corridor) : null;
 };
 
-export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, args, context) => {
-  const user = await requireUserSession(context)
+export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
+  _,
+  args,
+  context,
+) => {
+  const user = await requireUserSession(context);
 
-  if(!args.inputs) {
-    throw 'Invalid inputs'
+  if (!args.inputs) {
+    throw "Invalid inputs";
   }
   const { boundingBox, searchString } = args.inputs;
 
-  const where: Prisma.naptan_stoppoint_latlongWhereInput = {}
+  const where: Prisma.naptan_stoppoint_latlongWhereInput = {};
 
   if (searchString) {
     where.OR = [
@@ -78,7 +93,7 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
       {
         common_name: {
           contains: searchString,
-          mode: 'insensitive'
+          mode: "insensitive",
         },
       },
     ];
@@ -114,75 +129,81 @@ export const getStops: CorridorNamespaceResolvers['addFirstStop'] = async (_, ar
     lon: Number(stop.longitude),
     localityName: stop.locality.name,
     adminAreaId: stop.admin_area_id.toString(),
-    sourceId: stop.atco_code
+    sourceId: stop.atco_code,
   }));
 };
 
-export const getSubsequentStops: CorridorNamespaceResolvers['addSubsequentStops'] = async (_, args, context) => {
-  const user = await requireUserSession(context)
+export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"] =
+  async (_, args, context) => {
+    const user = await requireUserSession(context);
 
-  let stopList = args.stopList || []
+    let stopList = args.stopList || [];
 
-  stopList.push('') // Push blank to add comma at the end
-  let stopsPattern = stopList.join(',')
-  const [routes, adminAreas] = await Promise.all([
-    distinctRoutes(context.db, stopsPattern),
-    getOrgAdminAreas(context.db, user),
-  ]);
+    stopList.push(""); // Push blank to add comma at the end
+    let stopsPattern = stopList.join(",");
+    const [routes, adminAreas] = await Promise.all([
+      distinctRoutes(context.db, stopsPattern),
+      getOrgAdminAreas(context.db, user),
+    ]);
 
-  stopList = []
-  routes.map((data) => {
-    const stopIndex = data.route.indexOf(stopsPattern)
-    let matchStopPattern = stopsPattern 
-    if(stopIndex > 0){
-      matchStopPattern = `,${matchStopPattern}`
-    }
-    const matches = data.route.match(matchStopPattern.concat('(.*)'));
-    if (matches && matches[1]) {
-      const commaIndex = matches[1].indexOf(',');
-      const nextStop =
-        commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
-      
-      if (!stopList.includes(nextStop)) {
-        stopList.push(nextStop);
+    stopList = [];
+    routes.map((data) => {
+      const stopIndex = data.route.indexOf(stopsPattern);
+      let matchStopPattern = stopsPattern;
+      if (stopIndex > 0) {
+        matchStopPattern = `,${matchStopPattern}`;
       }
-    }
-  });
+      const matches = data.route.match(matchStopPattern.concat("(.*)"));
+      if (matches && matches[1]) {
+        const commaIndex = matches[1].indexOf(",");
+        const nextStop =
+          commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
 
-  if (stopList.length > 0) {
-    const stops = await context.db.naptan_stoppoint_latlong.findMany({
-      where: {
-        id: {
-          in: stopList.map(Number)
-        },
-        admin_area_id: {
-          in: adminAreas.map(admin => admin.adminarea_id)
+        if (!stopList.includes(nextStop)) {
+          stopList.push(nextStop);
         }
-      },
-      include: {
-        locality: true
       }
-    })
-  
-    return stops.map((stop) => ({
-      adminAreaId: stop.admin_area_id.toString(),
-      adminAreaName: '',
-      stopId: stop.id.toString(),
-      stopName: stop.common_name,
-      lon: Number(stop.longitude),
-      lat: Number(stop.latitude),
-      localityName: stop.locality.name,
-      localityId: stop.locality_id,
-      sourceId: stop.atco_code,
-    }))
-  }
-  
-  return []
-}
+    });
 
-export const createCorridor: MutationResolvers['createCorridor'] = async (_, args, context) => {
-  const user = await requireUserSession(context)
-  if (!args.payload || !args.payload.name|| !args.payload.stopIds) throw "Bad Request"
+    if (stopList.length > 0) {
+      const stops = await context.db.naptan_stoppoint_latlong.findMany({
+        where: {
+          id: {
+            in: stopList.map(Number),
+          },
+          admin_area_id: {
+            in: adminAreas.map((admin) => admin.adminarea_id),
+          },
+        },
+        include: {
+          locality: true,
+        },
+      });
+
+      return stops.map((stop) => ({
+        adminAreaId: stop.admin_area_id.toString(),
+        adminAreaName: "",
+        stopId: stop.id.toString(),
+        stopName: stop.common_name,
+        lon: Number(stop.longitude),
+        lat: Number(stop.latitude),
+        localityName: stop.locality.name,
+        localityId: stop.locality_id,
+        sourceId: stop.atco_code,
+      }));
+    }
+
+    return [];
+  };
+
+export const createCorridor: MutationResolvers["createCorridor"] = async (
+  _,
+  args,
+  context,
+) => {
+  const user = await requireUserSession(context);
+  if (!args.payload || !args.payload.name || !args.payload.stopIds)
+    throw "Bad Request";
 
   const corridor = await context.db.corridor.create({
     data: {
@@ -199,7 +220,7 @@ export const createCorridor: MutationResolvers['createCorridor'] = async (_, arg
     corridor.corridor_id,
     args.payload.stopIds.map(String),
     context.db,
-    user
+    user,
   );
 
   return {
@@ -211,7 +232,7 @@ const insertCorridorStops = async (
   corridor_id: Number,
   stopIds: string[],
   db: PrismaClient,
-  sessionUser: SessionUser
+  sessionUser: SessionUser,
 ) => {
   const numberStopsList = stopIds.map(Number);
 
@@ -230,8 +251,8 @@ const insertCorridorStops = async (
         in: numberStopsList,
       },
       admin_area_id: {
-        in: adminAreas.map((admin) => admin.adminarea_id)
-      }
+        in: adminAreas.map((admin) => admin.adminarea_id),
+      },
     },
   });
 
@@ -255,11 +276,17 @@ const insertCorridorStops = async (
                 Number(stops[index + 1].latitude),
               ],
             ])
-          : '',
-      distance_to_next_stop: index < stops.length - 1 ? haversineDistance(
-        [Number(stop.longitude), Number(stop.latitude)],
-        [Number(stops[index + 1].longitude), Number(stops[index + 1].latitude)],
-      ): 0,
+          : "",
+      distance_to_next_stop:
+        index < stops.length - 1
+          ? haversineDistance(
+              [Number(stop.longitude), Number(stop.latitude)],
+              [
+                Number(stops[index + 1].longitude),
+                Number(stops[index + 1].latitude),
+              ],
+            )
+          : 0,
     });
   });
 
@@ -268,15 +295,23 @@ const insertCorridorStops = async (
   });
 };
 
-export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, args, context) => {
-  const user = await requireUserSession(context)
+export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
+  _,
+  args,
+  context,
+) => {
+  const user = await requireUserSession(context);
   if (
-    !await isCorridorMappedToUserOrg(Number(args.corridorId), user, context.db)
+    !(await isCorridorMappedToUserOrg(
+      Number(args.corridorId),
+      user,
+      context.db,
+    ))
   ) {
-    throw 'Not Authorized';
+    throw "Not Authorized";
   }
 
-  if (!args.corridorId) throw 'Bad Request'
+  if (!args.corridorId) throw "Bad Request";
 
   await Promise.all([
     deleteCorridorDb(args.corridorId, context.db),
@@ -288,16 +323,21 @@ export const deleteCorridor: MutationResolvers['deleteCorridor'] = async (_, arg
   };
 };
 
-export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, args, context) => {
-  if (!args.inputs) throw 'Bad Request'
-  const user = await requireUserSession(context)
+export const updateCorridor: MutationResolvers["updateCorridor"] = async (
+  _,
+  args,
+  context,
+) => {
+  if (!args.inputs) throw "Bad Request";
+  const user = await requireUserSession(context);
   if (
-    !await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db)
+    !(await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db))
   ) {
-    throw 'Not Authorized';
+    throw "Not Authorized";
   }
 
-  if (!args.inputs.id || !args.inputs.name || !args.inputs.stopList) throw "Bad Request"
+  if (!args.inputs.id || !args.inputs.name || !args.inputs.stopList)
+    throw "Bad Request";
 
   await Promise.all([
     updateCorridorDb(args.inputs.id, args.inputs.name, context.db),
@@ -308,7 +348,7 @@ export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, arg
     args.inputs.id,
     args.inputs.stopList.map(String),
     context.db,
-    user
+    user,
   );
 
   return {
@@ -316,18 +356,24 @@ export const updateCorridor: MutationResolvers['updateCorridor'] = async (_, arg
   };
 };
 
-type StatsCache = {inputs: InputMaybe<CorridorStatsInputType> | undefined, journeys:Map<string, Timetable[]>}
+type StatsCache = {
+  inputs: InputMaybe<CorridorStatsInputType> | undefined;
+  journeys: Map<string, Timetable[]>;
+};
 
-export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, context) => {
-
+export const getStats: CorridorNamespaceResolvers["stats"] = async (
+  _,
+  args,
+  context,
+) => {
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     args.inputs || {};
-  const user = await requireUserSession(context)
+  const user = await requireUserSession(context);
 
   if (
-    !await isCorridorMappedToUserOrg(Number(corridorId), user, context.db)
+    !(await isCorridorMappedToUserOrg(Number(corridorId), user, context.db))
   ) {
-    throw 'Not Authorized';
+    throw "Not Authorized";
   }
 
   let results: Timetable[] = await context.db.timetable.findMany({
@@ -346,7 +392,7 @@ export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, con
   });
 
   const journeyMap: Map<string, Timetable[]> = new Map();
-  let mapKey = '';
+  let mapKey = "";
   let existingJourneys: Timetable[] = [];
   results.map((journey) => {
     mapKey = `${journey.group_id}${journey.vehiclejourney_id}`;
@@ -361,7 +407,9 @@ export const getStats: CorridorNamespaceResolvers['stats'] = async (_, args, con
   return { inputs: args.inputs, journeys } as CorridorStatsType;
 };
 
-export const getSummaryStats: CorridorStatsTypeResolvers['summaryStats'] = (parent) => {
+export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
+  parent,
+) => {
   // Data was cached in the output of getStats, and will be removed later
   const data = parent as StatsCache;
   const scheduledTransits = data.journeys.size;
@@ -395,25 +443,31 @@ export const getSummaryStats: CorridorStatsTypeResolvers['summaryStats'] = (pare
   };
 };
 
-export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers['journeyTimeTimeOfDayStats'] = (parent)=>{
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  return getJourneyStats(data.journeys, CorridorJourneyStatsOption.hourAsNumber)
-}
+export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTimeOfDayStats"] =
+  (parent) => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    return getJourneyStats(
+      data.journeys,
+      CorridorJourneyStatsOption.hourAsNumber,
+    );
+  };
 
-export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers['journeyTimeDayOfWeekStats'] = (parent)=>{
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek)
-}
+export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDayOfWeekStats"] =
+  (parent) => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek);
+  };
 
-export const getJourneyTimeStats: CorridorStatsTypeResolvers['journeyTimeStats'] = (parent)=>{
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  return (data.inputs || {}).granularity === 'day'
-    ? getJourneyStats(data.journeys, CorridorJourneyStatsOption.day)
-    : getJourneyStats(data.journeys, CorridorJourneyStatsOption.hour);
-}
+export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"] =
+  (parent) => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    return (data.inputs || {}).granularity === "day"
+      ? getJourneyStats(data.journeys, CorridorJourneyStatsOption.day)
+      : getJourneyStats(data.journeys, CorridorJourneyStatsOption.hour);
+  };
 
 const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
@@ -430,7 +484,7 @@ const getJourneyStats = (
       firstStopOfCorridor.actual_departure_time &&
       lastStopOfCorridor.actual_departure_time
     ) {
-      let dateKey: string = '';
+      let dateKey: string = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
           dateKey = getDayFormattedDate(firstStopOfCorridor.date_of_journey);
@@ -450,13 +504,13 @@ const getJourneyStats = (
 
         case CorridorJourneyStatsOption.hourAsNumber:
           dateKey = getDate(firstStopOfCorridor.expected_departure_time)
-            .tz('Europe/London')
+            .tz("Europe/London")
             .hour()
             .toString();
           break;
 
         default:
-          throw new Error('Invalid journey indicator type provided');
+          throw new Error("Invalid journey indicator type provided");
       }
 
       const journeyTime = journeyStats.get(dateKey) || [];
@@ -469,11 +523,9 @@ const getJourneyStats = (
     }
   });
 
-  const stats: (
-    & CorridorJourneyTimeStatsType
-    & CorridorStatsTimeOfDayType
-    & CorridorStatsDayOfWeekType
-  )[] = [];
+  const stats: (CorridorJourneyTimeStatsType &
+    CorridorStatsTimeOfDayType &
+    CorridorStatsDayOfWeekType)[] = [];
   journeyStats.forEach((journeyTimes: number[], key: string) => {
     journeyTimes.sort((a, b) => a - b);
 
@@ -497,136 +549,138 @@ const getJourneyStats = (
   return stats;
 };
 
-export const getJourneyStatsPerService: CorridorStatsTypeResolvers['journeyTimePerServiceStats'] = async (parent, _, context): Promise<CorridorStatsPerServiceType[]> => {
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
-  const stats: CorridorStatsPerServiceType[] = [];
-  [...data.journeys.values()].map((journeys) => {
-    journeys.sort((a, b) => a.stop_index - b.stop_index);
-    const firstStopOfCorridor = journeys[0];
-    const lastStopOfCorridor = journeys[journeys.length - 1];
-    // noc_line_and_servicecode
-    const service = `${firstStopOfCorridor.operator_noc}-${firstStopOfCorridor.line_name}-${firstStopOfCorridor.service_code}`;
-    let journeyTime = journeyStats.get(service) || {
-      totalJourneyTime: 0,
-      recordedTransits: 0,
-      scheduledTransits: 0,
-      lineName: firstStopOfCorridor.line_name,
-      operatorNoc: firstStopOfCorridor.operator_noc,
-      serviceCode: firstStopOfCorridor.service_code,
-    };
-    journeyTime.scheduledTransits += 1;
-    if (
-      firstStopOfCorridor.actual_departure_time &&
-      lastStopOfCorridor.actual_departure_time
-    ) {
-      journeyTime.totalJourneyTime +=
-        (lastStopOfCorridor.actual_departure_time.getTime() -
-          firstStopOfCorridor.actual_departure_time.getTime()) /
-        1000;
-      journeyTime.recordedTransits += 1;
-    }
-    journeyStats.set(service, journeyTime);
-  });
+export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimePerServiceStats"] =
+  async (parent, _, context): Promise<CorridorStatsPerServiceType[]> => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
+    const stats: CorridorStatsPerServiceType[] = [];
+    [...data.journeys.values()].map((journeys) => {
+      journeys.sort((a, b) => a.stop_index - b.stop_index);
+      const firstStopOfCorridor = journeys[0];
+      const lastStopOfCorridor = journeys[journeys.length - 1];
+      // noc_line_and_servicecode
+      const service = `${firstStopOfCorridor.operator_noc}-${firstStopOfCorridor.line_name}-${firstStopOfCorridor.service_code}`;
+      let journeyTime = journeyStats.get(service) || {
+        totalJourneyTime: 0,
+        recordedTransits: 0,
+        scheduledTransits: 0,
+        lineName: firstStopOfCorridor.line_name,
+        operatorNoc: firstStopOfCorridor.operator_noc,
+        serviceCode: firstStopOfCorridor.service_code,
+      };
+      journeyTime.scheduledTransits += 1;
+      if (
+        firstStopOfCorridor.actual_departure_time &&
+        lastStopOfCorridor.actual_departure_time
+      ) {
+        journeyTime.totalJourneyTime +=
+          (lastStopOfCorridor.actual_departure_time.getTime() -
+            firstStopOfCorridor.actual_departure_time.getTime()) /
+          1000;
+        journeyTime.recordedTransits += 1;
+      }
+      journeyStats.set(service, journeyTime);
+    });
 
-  
-  if (journeyStats.size > 0) {
-    const services = await context.db.service_details.findMany({
-      where: {
-        noc_and_line_and_servicecode: {
-          in: [...journeyStats.keys()],
+    if (journeyStats.size > 0) {
+      const services = await context.db.service_details.findMany({
+        where: {
+          noc_and_line_and_servicecode: {
+            in: [...journeyStats.keys()],
+          },
         },
+        include: {
+          operator: true,
+        },
+      });
+
+      journeyStats.forEach((journey, key) => {
+        const serviceDetails = services.find(
+          (service) => service.noc_and_line_and_servicecode === key,
+        );
+        stats.push({
+          lineName: serviceDetails?.line_name ?? "",
+          operatorName: serviceDetails?.operator?.name ?? "NA",
+          noc: serviceDetails?.operator_noc,
+          servicePatternName: serviceDetails?.service_name ?? "",
+          recordedTransits: journey.recordedTransits,
+          totalJourneyTime: journey.totalJourneyTime,
+          scheduledTransits: journey.scheduledTransits,
+        });
+      });
+    }
+
+    return stats;
+  };
+
+export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHistogram"] =
+  (parent) => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    const journeyStats = new Map<string, number>();
+
+    [...data.journeys.values()].map((journeys) => {
+      journeys.sort((a, b) => a.stop_index - b.stop_index);
+
+      const firstStopOfCorridor = journeys[0];
+      const lastStopOfCorridor = journeys[journeys.length - 1];
+      if (
+        firstStopOfCorridor.actual_departure_time &&
+        lastStopOfCorridor.actual_departure_time
+      ) {
+        const totalJourneyTime = Math.floor(
+          (lastStopOfCorridor.actual_departure_time.getTime() -
+            firstStopOfCorridor.actual_departure_time.getTime()) /
+            (1000 * 60),
+        );
+
+        journeyStats.set(
+          totalJourneyTime.toString(),
+          (journeyStats.get(totalJourneyTime.toString()) || 0) + 1,
+        );
+      }
+    });
+
+    return [
+      {
+        ts: null,
+        hist: Array.from(journeyStats, ([key, value]) => ({
+          bin: Number(key),
+          freq: value,
+        })),
       },
-      include: {
-        operator: true,
+    ];
+  };
+
+export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
+  async (parent, _, context) => {
+    // Data was cached in the output of getStats, and will be removed later
+    const data = parent as StatsCache;
+    const { corridorId } = data.inputs || {};
+
+    const results = await context.db.corridor_stops.findMany({
+      where: {
+        corridor_id: Number(corridorId),
       },
     });
 
-    journeyStats.forEach((journey, key) => {
-      const serviceDetails = services.find(
-        (service) => service.noc_and_line_and_servicecode === key
-      );
-      stats.push({
-        lineName: serviceDetails?.line_name ?? "",
-        operatorName: serviceDetails?.operator?.name ?? "NA",
-        noc: serviceDetails?.operator_noc,
-        servicePatternName: serviceDetails?.service_name ?? "",
-        recordedTransits: journey.recordedTransits,
-        totalJourneyTime: journey.totalJourneyTime,
-        scheduledTransits: journey.scheduledTransits,
-      });
+    const serviceLinks: ServiceLinkType[] = [];
+
+    results.forEach((stop, index) => {
+      if (index < results.length - 1) {
+        serviceLinks.push({
+          fromStop: stop.stop_id.toString(),
+          toStop: results[index + 1].stop_id.toString(),
+          distance: stop.distance_to_next_stop,
+          routeValidity: "INVALID",
+          linkRoute: stop.route_to_next_stop,
+        });
+      }
     });
-  }
 
-  return stats;
-};
-
-export const getJourneyStatsHistogram: CorridorStatsTypeResolvers['journeyTimeHistogram'] = (parent) => {
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  const journeyStats = new Map<string, number>();
-
-  [...data.journeys.values()].map((journeys) => {
-    journeys.sort((a, b) => a.stop_index - b.stop_index);
-
-    const firstStopOfCorridor = journeys[0];
-    const lastStopOfCorridor = journeys[journeys.length - 1];
-    if (
-      firstStopOfCorridor.actual_departure_time &&
-      lastStopOfCorridor.actual_departure_time
-    ) {
-      const totalJourneyTime = Math.floor(
-        (lastStopOfCorridor.actual_departure_time.getTime() -
-          firstStopOfCorridor.actual_departure_time.getTime()) /
-          ( 1000 * 60 ),
-      );
-
-      journeyStats.set(
-        totalJourneyTime.toString(),
-        (journeyStats.get(totalJourneyTime.toString()) || 0) + 1,
-      );
-    }
-  });
-
-  return [
-    {
-      ts: null,
-      hist: Array.from(journeyStats, ([key, value]) => ({
-        bin: Number(key),
-        freq: value,
-      })),
-    },
-  ];
-};
-
-export const getServiceLinks: CorridorStatsTypeResolvers['serviceLinks'] = async (parent, _, context) => {
-  // Data was cached in the output of getStats, and will be removed later
-  const data = parent as StatsCache;
-  const { corridorId } = data.inputs || {};
-
-  const results = await context.db.corridor_stops.findMany({
-    where: {
-      corridor_id: Number(corridorId),
-    },
-  });
-
-  const serviceLinks: ServiceLinkType[] = [];
-
-  results.forEach((stop, index) => {
-    if (index < results.length - 1) {
-      serviceLinks.push({
-        fromStop: stop.stop_id.toString(),
-        toStop: results[index + 1].stop_id.toString(),
-        distance: stop.distance_to_next_stop,
-        routeValidity: 'INVALID',
-        linkRoute: stop.route_to_next_stop,
-      });
-    }
-  });
-
-  return serviceLinks.reverse();
-};
+    return serviceLinks.reverse();
+  };
 const corridorResovlers: Resolvers = {
   Query: {
     corridor: emptyResolver,

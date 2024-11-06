@@ -1,28 +1,36 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, ViewEncapsulation } from '@angular/core';
-import { NgxTippyProps, NgxTippyService } from 'ngx-tippy-wrapper';
-import type { Placement } from 'tippy.js';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  Input,
+  ViewEncapsulation,
+} from "@angular/core";
+import { NgxTippyProps, NgxTippyService } from "ngx-tippy-wrapper";
+import type { Placement } from "tippy.js";
 
 @Component({
-  selector: 'app-popover',
-  templateUrl: './popover.component.html',
-  styleUrls: ['./popover.component.scss'],
+  selector: "app-popover",
+  templateUrl: "./popover.component.html",
+  styleUrls: ["./popover.component.scss"],
   encapsulation: ViewEncapsulation.None,
 })
 export class PopoverComponent implements OnInit {
   @Input() triggerLabel!: string;
   @Input() triggerIcon?: string;
-  @Input() triggerType: 'button' | 'link' = 'link';
+  @Input() triggerType: "button" | "link" = "link";
   @Input() identifier!: string;
   @Input() position?: Placement;
 
-  @ViewChild('popoverContent', { read: ElementRef, static: true }) popoverContent!: ElementRef;
+  @ViewChild("popoverContent", { read: ElementRef, static: true })
+  popoverContent!: ElementRef;
 
   tippyProps: NgxTippyProps = {
-    trigger: 'click',
+    trigger: "click",
     allowHTML: true,
     interactive: true,
-    theme: 'gds-popover',
-    role: 'menu',
+    theme: "gds-popover",
+    role: "menu",
     zIndex: 90,
   };
 
@@ -39,7 +47,8 @@ export class PopoverComponent implements OnInit {
   }
 
   setPositionForPopover(): void {
-    (this.tippyProps.placement = this.position || 'auto'),
-      (this.tippyProps.offset = this.triggerType === 'button' ? [0, 30] : [0, 20]);
+    (this.tippyProps.placement = this.position || "auto"),
+      (this.tippyProps.offset =
+        this.triggerType === "button" ? [0, 30] : [0, 20]);
   }
 }

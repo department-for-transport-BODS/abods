@@ -1,6 +1,9 @@
 <app-page>
   <ng-container ngProjectAs="back-link">
-    <gds-back-link label="All corridors" [route]="['/corridors']"></gds-back-link>
+    <gds-back-link
+      label="All corridors"
+      [route]="['/corridors']"
+    ></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
     <div *ngIf="corridor || !errorView; else error">
@@ -34,7 +37,9 @@
         <app-stat
           label="Recorded transits"
           class="corridor__summary-stat"
-          [statValue]="(stats?.summaryStats?.totalTransits | number) || 'Unavailable'"
+          [statValue]="
+            (stats?.summaryStats?.totalTransits | number) || 'Unavailable'
+          "
           [statLoaded]="!loadingStats"
           tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
         ></app-stat>
@@ -48,7 +53,9 @@
         <app-stat
           label="Average journey time"
           class="corridor__summary-stat"
-          [statValue]="(averageJourneyTime | durationToFormat: 'mm:ss') || 'Unavailable'"
+          [statValue]="
+            (averageJourneyTime | durationToFormat: 'mm:ss') || 'Unavailable'
+          "
           [statLoaded]="!loadingStats"
           tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
         ></app-stat>
@@ -62,7 +69,9 @@
         <app-stat
           label="Services"
           class="corridor__summary-stat"
-          [statValue]="(stats?.summaryStats?.numberOfServices | number) || 'Unavailable'"
+          [statValue]="
+            (stats?.summaryStats?.numberOfServices | number) || 'Unavailable'
+          "
           [statLoaded]="!loadingStats"
           tooltip="The total number of different services that pass through this corridor."
         ></app-stat>
@@ -89,7 +98,10 @@
       </div>
 
       <div class="corridor__map-wrapper">
-        <div *ngIf="loadingStats && !corridorLine" class="corridor__map-loading">
+        <div
+          *ngIf="loadingStats && !corridorLine"
+          class="corridor__map-loading"
+        >
           <app-spinner></app-spinner>
         </div>
         <mgl-map
@@ -101,9 +113,17 @@
           class="corridor__map govuk-!-margin-bottom-7"
         >
           <mgl-control position="top-left">
-            <app-dropdown identifier="map-display-menu" triggerLabel="Display options" [width]="200">
-              <p class="govuk-body govuk-!-margin-bottom-2"><strong>Map view</strong></p>
-              <app-map-view-toggle (mapboxStyle)="mapboxStyle = $event"></app-map-view-toggle>
+            <app-dropdown
+              identifier="map-display-menu"
+              triggerLabel="Display options"
+              [width]="200"
+            >
+              <p class="govuk-body govuk-!-margin-bottom-2">
+                <strong>Map view</strong>
+              </p>
+              <app-map-view-toggle
+                (mapboxStyle)="mapboxStyle = $event"
+              ></app-map-view-toggle>
             </app-dropdown>
           </mgl-control>
           <mgl-control position="bottom-left">
@@ -130,18 +150,23 @@
               id="corridor-line-layer"
               type="line"
               [paint]="{
-                'line-color': ['case', ['boolean', ['feature-state', 'selected'], selectAll], '#1d70b8', '#77a9d4'],
+                'line-color': [
+                  'case',
+                  ['boolean', ['feature-state', 'selected'], selectAll],
+                  '#1d70b8',
+                  '#77a9d4',
+                ],
                 'line-width': 5,
                 'line-dasharray': [
                   'case',
                   ['boolean', ['get', 'dashedLine'], true],
                   ['literal', [0.8, 1.6]],
-                  ['literal', [1]]
-                ]
+                  ['literal', [1]],
+                ],
               }"
               [layout]="{
                 'line-cap': 'square',
-                'line-join': 'round'
+                'line-join': 'round',
               }"
               source="corridor-line"
             ></mgl-layer>
@@ -150,12 +175,17 @@
               id="corridor-chevrons"
               type="symbol"
               [paint]="{
-                'icon-opacity': ['case', ['boolean', ['feature-state', 'selected'], selectAll], 1, 0]
+                'icon-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'selected'], selectAll],
+                  1,
+                  0,
+                ],
               }"
               [layout]="{
                 'icon-image': 'map-chevron-large',
                 'symbol-placement': 'line',
-                'symbol-spacing': 200
+                'symbol-spacing': 200,
               }"
               source="corridor-line"
             ></mgl-layer>
@@ -167,11 +197,20 @@
                 'circle-color': '#ffffff',
                 'circle-radius': 6,
                 'circle-stroke-width': 4,
-                'circle-stroke-color': ['case', ['boolean', ['feature-state', 'hover'], false], '#0b0c0c', '#B1B4B6']
+                'circle-stroke-color': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  '#0b0c0c',
+                  '#B1B4B6',
+                ],
               }"
               source="corridor-stops"
-              (layerMouseMove)="popupStop = mapEventStop($event); setMapHoverState(popupStop)"
-              (layerMouseLeave)="clearMapHoverState(popupStop); popupStop = undefined"
+              (layerMouseMove)="
+                popupStop = mapEventStop($event); setMapHoverState(popupStop)
+              "
+              (layerMouseLeave)="
+                clearMapHoverState(popupStop); popupStop = undefined
+              "
             ></mgl-layer>
             <mgl-popup
               *ngIf="popupStop"
@@ -182,7 +221,9 @@
               [offset]="12"
               className="gds-popup"
             >
-              <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+              <div
+                class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
+              >
                 {{ popupStop.stopName }}
               </div>
               <div class="govuk-body-small">{{ popupStop.naptan }}</div>
@@ -192,20 +233,35 @@
         </mgl-map>
       </div>
 
-      <app-box *ngIf="stats?.journeyTimePerServiceStats?.length" spaceBelow="7" minHeight="600px">
+      <app-box
+        *ngIf="stats?.journeyTimePerServiceStats?.length"
+        spaceBelow="7"
+        minHeight="600px"
+      >
         <div class="corridor__journey-time">
           <app-tabs>
             <app-tab tabTitle="Timeline">
               <app-box-plot-chart
                 *appTabContent
-                [data]="isTime ? stats?.journeyTimeStats : speedStats?.transitSpeedStats"
+                [data]="
+                  isTime
+                    ? stats?.journeyTimeStats
+                    : speedStats?.transitSpeedStats
+                "
                 [loading]="loadingStats"
                 [noData]="
-                  !loadingStats && (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedStats?.length)
+                  !loadingStats &&
+                  (isTime
+                    ? !stats?.journeyTimeStats?.length
+                    : !speedStats?.transitSpeedStats?.length)
                 "
                 [params]="params"
-                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
-                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                [whiskerFillColor]="
+                  isTime ? chartColors.purple : chartColors.green
+                "
+                [boxFillColor]="
+                  isTime ? chartColors.lightPurple : chartColors.brightGreen
+                "
                 xAxisType="date"
                 xAxisTitle="Date"
                 xAxisLabelPosition="column"
@@ -227,14 +283,24 @@
             <app-tab tabTitle="Time of day">
               <app-box-plot-chart
                 *appTabContent
-                [data]="isTime ? stats?.journeyTimeTimeOfDayStats : speedStats?.transitSpeedTimeOfDay"
+                [data]="
+                  isTime
+                    ? stats?.journeyTimeTimeOfDayStats
+                    : speedStats?.transitSpeedTimeOfDay
+                "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
-                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedTimeOfDay?.length)
+                  (isTime
+                    ? !stats?.journeyTimeStats?.length
+                    : !speedStats?.transitSpeedTimeOfDay?.length)
                 "
-                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
-                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                [whiskerFillColor]="
+                  isTime ? chartColors.purple : chartColors.green
+                "
+                [boxFillColor]="
+                  isTime ? chartColors.lightPurple : chartColors.brightGreen
+                "
                 xAxisType="category"
                 xAxisTitle="Time of day"
                 xAxisLabelPosition="bin"
@@ -256,14 +322,24 @@
             <app-tab tabTitle="Day of week">
               <app-box-plot-chart
                 *appTabContent
-                [data]="isTime ? stats?.journeyTimeDayOfWeekStats : speedStats?.transitSpeedDayOfWeek"
+                [data]="
+                  isTime
+                    ? stats?.journeyTimeDayOfWeekStats
+                    : speedStats?.transitSpeedDayOfWeek
+                "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
-                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedDayOfWeek?.length)
+                  (isTime
+                    ? !stats?.journeyTimeStats?.length
+                    : !speedStats?.transitSpeedDayOfWeek?.length)
                 "
-                [whiskerFillColor]="isTime ? chartColors.purple : chartColors.green"
-                [boxFillColor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                [whiskerFillColor]="
+                  isTime ? chartColors.purple : chartColors.green
+                "
+                [boxFillColor]="
+                  isTime ? chartColors.lightPurple : chartColors.brightGreen
+                "
                 xAxisType="category"
                 xAxisTitle="Day of week"
                 xAxisLabelPosition="column"
@@ -286,13 +362,21 @@
             <app-tab tabTitle="Distribution">
               <app-histogram-chart
                 *appTabContent
-                [data]="isTime ? stats?.journeyTimeHistogram : speedStats?.transitSpeedHistogram"
+                [data]="
+                  isTime
+                    ? stats?.journeyTimeHistogram
+                    : speedStats?.transitSpeedHistogram
+                "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
-                  (isTime ? !stats?.journeyTimeStats?.length : !speedStats?.transitSpeedHistogram?.length)
+                  (isTime
+                    ? !stats?.journeyTimeStats?.length
+                    : !speedStats?.transitSpeedHistogram?.length)
                 "
-                [chartFillcolor]="isTime ? chartColors.lightPurple : chartColors.brightGreen"
+                [chartFillcolor]="
+                  isTime ? chartColors.lightPurple : chartColors.brightGreen
+                "
                 [xAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
                 [xAxisLabelPosition]="isTime ? 'bin' : 'column'"
                 yAxisTitle="Number of journeys"
@@ -301,8 +385,16 @@
           </app-tabs>
         </div>
       </app-box>
-      <app-box *ngIf="!stats?.journeyTimePerServiceStats?.length" spaceBelow="7" minHeight="549px">
-        <app-spinner *ngIf="loadingStats" [vCentre]="true" size="default"></app-spinner>
+      <app-box
+        *ngIf="!stats?.journeyTimePerServiceStats?.length"
+        spaceBelow="7"
+        minHeight="549px"
+      >
+        <app-spinner
+          *ngIf="loadingStats"
+          [vCentre]="true"
+          size="default"
+        ></app-spinner>
         <div *ngIf="!loadingStats" class="corridor--error">
           <svg-icon
             class="corridor--error__icon"
@@ -310,7 +402,8 @@
             [applyClass]="true"
           ></svg-icon>
           <span class="corridor--error__message"
-            >We have not found any journey time data for the date period selected.</span
+            >We have not found any journey time data for the date period
+            selected.</span
           >
         </div>
       </app-box>
@@ -328,7 +421,11 @@
           [suppressLoadingOverlay]="true"
           [suppressNoRowsOverlay]="true"
         ></ag-grid-angular>
-        <app-spinner *ngIf="loadingStats" [vCentre]="true" size="default"></app-spinner>
+        <app-spinner
+          *ngIf="loadingStats"
+          [vCentre]="true"
+          size="default"
+        ></app-spinner>
         <div
           *ngIf="!loadingStats && !stats?.journeyTimePerServiceStats?.length"
           class="corridor__services--message"
@@ -339,14 +436,25 @@
       </div>
     </div>
     <ng-template #error>
-      <app-page-header caption="Corridors" [heading]="errorView?.errorHeading" spaceAbove="2"></app-page-header>
+      <app-page-header
+        caption="Corridors"
+        [heading]="errorView?.errorHeading"
+        spaceAbove="2"
+      ></app-page-header>
       <p class="govuk-body">
-        {{ errorView?.errorMessage }} Go back to <a [routerLink]="['/corridors']">All corridors</a>?
+        {{ errorView?.errorMessage }} Go back to
+        <a [routerLink]="['/corridors']">All corridors</a>?
       </p>
     </ng-template>
     <ng-template #skeletonHeader>
-      <div><span class="govuk-caption-xl govuk-!-margin-bottom-0">Corridors</span></div>
-      <app-skeleton appearance="heading-xl" width="300px" spaceAbove="2"></app-skeleton>
+      <div>
+        <span class="govuk-caption-xl govuk-!-margin-bottom-0">Corridors</span>
+      </div>
+      <app-skeleton
+        appearance="heading-xl"
+        width="300px"
+        spaceAbove="2"
+      ></app-skeleton>
     </ng-template>
   </ng-container>
 </app-page>

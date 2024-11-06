@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { InnerComponent } from './inner.component';
+import { InnerComponent } from "./inner.component";
 
-describe('InnerComponent', () => {
+describe("InnerComponent", () => {
   let component: InnerComponent;
   let fixture: ComponentFixture<InnerComponent>;
 
@@ -18,7 +18,7 @@ describe('InnerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,8 +1,8 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .alert-list {
-  @include govuk-grid-column('full');
+  @include govuk-grid-column("full");
   margin-top: govuk-spacing(8);
   &__items {
     margin: 0;
@@ -16,6 +16,6 @@
 }
 @include bp($lg-desktop) {
   .alert-list {
-    @include govuk-grid-column('two-thirds');
+    @include govuk-grid-column("two-thirds");
   }
 }

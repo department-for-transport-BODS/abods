@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute, Params, QueryParamsHandling } from '@angular/router';
+import { Component, Input } from "@angular/core";
+import { ActivatedRoute, Params, QueryParamsHandling } from "@angular/router";
 
 @Component({
-  selector: 'gds-back-link',
+  selector: "gds-back-link",
   template: `
     <a
       *ngIf="hasParentOrRouterLink"
@@ -13,7 +13,7 @@ import { ActivatedRoute, Params, QueryParamsHandling } from '@angular/router';
       >{{ label }}</a
     >
   `,
-  styleUrls: ['./back-link.component.scss'],
+  styleUrls: ["./back-link.component.scss"],
 })
 export class BackLinkComponent {
   @Input() label?: string;

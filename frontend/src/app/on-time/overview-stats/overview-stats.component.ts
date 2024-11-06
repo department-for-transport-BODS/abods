@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { PerformanceParams, PunctualityOverview } from '../on-time.service';
-import { Headway } from '../headway.service';
-import { Observable } from 'rxjs';
-import { HelpdeskPanelService } from '../../shared/components/helpdesk-panel/helpdesk-panel.service';
+import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
+import { PerformanceParams, PunctualityOverview } from "../on-time.service";
+import { Headway } from "../headway.service";
+import { Observable } from "rxjs";
+import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 
 @Component({
-  selector: 'app-overview-stats',
-  templateUrl: './overview-stats.component.html',
-  styleUrls: ['./overview-stats.component.scss'],
+  selector: "app-overview-stats",
+  templateUrl: "./overview-stats.component.html",
+  styleUrls: ["./overview-stats.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverviewStatsComponent {

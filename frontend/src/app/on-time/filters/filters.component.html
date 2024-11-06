@@ -1,7 +1,13 @@
 <form (submit)="apply()">
   <div class="filters__heading">
     <h2 class="govuk-heading-l">Refine results</h2>
-    <button type="button" class="filters__close-button button-link govuk-link" (click)="cancel()">Close</button>
+    <button
+      type="button"
+      class="filters__close-button button-link govuk-link"
+      (click)="cancel()"
+    >
+      Close
+    </button>
   </div>
   <div class="filters__scrollbox">
     <div class="filters__scrollbox-content">
@@ -80,11 +86,18 @@
         [error]="getErrors('startTime', 'endTime', 'startEndTime')"
       ></app-time-range-slider>
       <fieldset class="govuk-fieldset">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Performance</legend>
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+          Performance
+        </legend>
         <div class="filters__2-col">
           <div class="govuk-form-group">
             <label class="govuk-label" for="maxEarly">Maximum early</label>
-            <select class="govuk-select" id="maxEarly" name="maxEarly" [(ngModel)]="minDelayStr">
+            <select
+              class="govuk-select"
+              id="maxEarly"
+              name="maxEarly"
+              [(ngModel)]="minDelayStr"
+            >
               <option value="none" selected>No limit</option>
               <option value="-10">10 minutes</option>
               <option value="-20">20 minutes</option>
@@ -96,7 +109,12 @@
           </div>
           <div class="govuk-form-group">
             <label class="govuk-label" for="maxLate">Maximum late</label>
-            <select class="govuk-select" id="maxLate" name="maxLate" [(ngModel)]="maxDelayStr">
+            <select
+              class="govuk-select"
+              id="maxLate"
+              name="maxLate"
+              [(ngModel)]="maxDelayStr"
+            >
               <option value="none" selected>No limit</option>
               <option value="10">10 minutes</option>
               <option value="20">20 minutes</option>
@@ -110,7 +128,9 @@
       </fieldset>
       <fieldset *ngIf="showAdminAreas" class="govuk-fieldset">
         <div class="govuk-form-group">
-          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Area</legend>
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+            Area
+          </legend>
           <gds-multiselect-checkbox
             [options]="adminAreas$ | async"
             [(selected)]="adminAreaIds"
@@ -122,12 +142,19 @@
         </div>
       </fieldset>
       <div class="filters__reset">
-        <button type="button" class="button-link" (click)="resetToDefault()">Reset to defaults</button>
+        <button type="button" class="button-link" (click)="resetToDefault()">
+          Reset to defaults
+        </button>
       </div>
     </div>
   </div>
   <div class="filters__button-group">
-    <gds-button text="Cancel" appearance="secondary" type="button" (click)="cancel()"></gds-button>
+    <gds-button
+      text="Cancel"
+      appearance="secondary"
+      type="button"
+      (click)="cancel()"
+    ></gds-button>
     <gds-button text="Apply" type="submit"></gds-button>
   </div>
 </form>

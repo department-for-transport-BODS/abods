@@ -9,14 +9,22 @@
   [(ngModel)]="selected"
   bindValue="value"
   [labelForId]="labelForId ? labelForId : null"
-  [inputAttrs]="ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}"
+  [inputAttrs]="
+    ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}
+  "
   (change)="onOptionChange()"
 >
   <ng-template ng-multi-label-tmp let-items="items">
     <div class="ng-value" [ngSwitch]="items?.length || 0">
-      <span class="ng-value-label" *ngSwitchCase="0">{{ placeholderText }}</span>
-      <span class="ng-value-label" *ngSwitchCase="1">{{ $any(items[0]).label }}</span>
-      <span class="ng-value-label" *ngSwitchDefault>{{ items?.length }} {{ pluralLabel }}</span>
+      <span class="ng-value-label" *ngSwitchCase="0">{{
+        placeholderText
+      }}</span>
+      <span class="ng-value-label" *ngSwitchCase="1">{{
+        $any(items[0]).label
+      }}</span>
+      <span class="ng-value-label" *ngSwitchDefault
+        >{{ items?.length }} {{ pluralLabel }}</span
+      >
     </div>
   </ng-template>
   <ng-template *ngIf="showAll" ng-header-tmp>
@@ -33,7 +41,12 @@
       </button>
     </div>
   </ng-template>
-  <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+  <ng-template
+    ng-option-tmp
+    let-item="item"
+    let-item$="item$"
+    let-index="index"
+  >
     <div class="govuk-checkboxes--small">
       <div class="govuk-checkboxes__item">
         <input
@@ -43,7 +56,11 @@
           [value]="item.value"
           [checked]="item$.selected"
         />
-        <label class="govuk-label govuk-checkboxes__label" [for]="checkboxItemInputId + index">{{ item.label }}</label>
+        <label
+          class="govuk-label govuk-checkboxes__label"
+          [for]="checkboxItemInputId + index"
+          >{{ item.label }}</label
+        >
       </div>
     </div>
   </ng-template>

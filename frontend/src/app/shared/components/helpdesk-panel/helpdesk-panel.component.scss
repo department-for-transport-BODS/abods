@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .helpdesk-overlay {
   background-color: rgba(0, 0, 0, 0.8);
@@ -26,7 +26,7 @@
   height: 100%;
   border: none;
   padding: govuk-spacing(4);
-  background: govuk-colour('white');
+  background: govuk-colour("white");
   z-index: $z-modal;
   transform: translateX(100%);
   transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);

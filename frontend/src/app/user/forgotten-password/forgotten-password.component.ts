@@ -1,13 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { FormErrors } from 'src/app/shared/gds/error-summary/error-summary.component';
-import { UserService } from '../user.service';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  AbstractControl,
+} from "@angular/forms";
+import { Subscription } from "rxjs";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
+import { UserService } from "../user.service";
 
 @Component({
-  selector: 'app-forgotten-password',
-  templateUrl: './forgotten-password.component.html',
+  selector: "app-forgotten-password",
+  templateUrl: "./forgotten-password.component.html",
 })
 export class ForgottenPasswordComponent implements OnInit, OnDestroy {
   forgottenPasswordForm: FormGroup;
@@ -18,20 +23,25 @@ export class ForgottenPasswordComponent implements OnInit, OnDestroy {
 
   resetSuccess = false;
 
-  constructor(private formBuilder: FormBuilder, private userService: UserService) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private userService: UserService,
+  ) {
     this.forgottenPasswordForm = this.formBuilder.group(
       {
-        email: ['', [Validators.required, Validators.email]],
+        email: ["", [Validators.required, Validators.email]],
       },
-      { updateOn: 'blur' }
+      { updateOn: "blur" },
     );
   }
 
   ngOnInit() {
     this.subs.push(
-      this.forgottenPasswordForm.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(() => {
-        this.resetForm();
-      })
+      this.forgottenPasswordForm.valueChanges
+        .pipe(debounceTime(200), distinctUntilChanged())
+        .subscribe(() => {
+          this.resetForm();
+        }),
     );
   }
 
@@ -62,7 +72,7 @@ export class ForgottenPasswordComponent implements OnInit, OnDestroy {
           this.resetSuccess = true;
         }
         this.loading = false;
-      })
+      }),
     );
   }
 
@@ -72,7 +82,7 @@ export class ForgottenPasswordComponent implements OnInit, OnDestroy {
 
   getErrorString(prop: AbstractControl) {
     if (prop.errors?.required || prop.errors?.email) {
-      return 'Please enter a valid email address.';
+      return "Please enter a valid email address.";
     }
   }
 

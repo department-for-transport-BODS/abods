@@ -1,9 +1,9 @@
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { TabsComponent } from '../tabs.component';
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { TabsComponent } from "../tabs.component";
 
-import { TabComponent } from './tab.component';
+import { TabComponent } from "./tab.component";
 
-describe('TabComponent', () => {
+describe("TabComponent", () => {
   const createComponent = createComponentFactory({
     component: TabComponent,
     declarations: [TabComponent, TabsComponent],
@@ -17,7 +17,7 @@ describe('TabComponent', () => {
     component = spectator.component;
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

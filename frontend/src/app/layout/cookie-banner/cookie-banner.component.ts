@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
-import { AnalyticsService } from '../../shared/services/analytics.service';
-import { CookiePolicyService } from '../../shared/services/cookie-policy.service';
+import { Component } from "@angular/core";
+import { AnalyticsService } from "../../shared/services/analytics.service";
+import { CookiePolicyService } from "../../shared/services/cookie-policy.service";
 
 @Component({
-  selector: 'app-cookie-banner',
-  templateUrl: './cookie-banner.component.html',
-  styleUrls: ['./cookie-banner.component.scss'],
+  selector: "app-cookie-banner",
+  templateUrl: "./cookie-banner.component.html",
+  styleUrls: ["./cookie-banner.component.scss"],
 })
 export class CookieBannerComponent {
   hidden = false;
@@ -15,7 +15,10 @@ export class CookieBannerComponent {
     return this.cookiePolicyService.getAnalyticsPolicy().analyticsEnabled;
   }
 
-  constructor(private analyticsService: AnalyticsService, private cookiePolicyService: CookiePolicyService) {
+  constructor(
+    private analyticsService: AnalyticsService,
+    private cookiePolicyService: CookiePolicyService,
+  ) {
     this.hidden = this.cookiePolicyService.getCookiePolicySubmitted();
   }
 

@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { NotificationBannerComponent } from './notification-banner.component';
+import { NotificationBannerComponent } from "./notification-banner.component";
 
-describe('NotificationBannerComponent', () => {
+describe("NotificationBannerComponent", () => {
   let component: NotificationBannerComponent;
   let fixture: ComponentFixture<NotificationBannerComponent>;
 
@@ -18,7 +18,7 @@ describe('NotificationBannerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

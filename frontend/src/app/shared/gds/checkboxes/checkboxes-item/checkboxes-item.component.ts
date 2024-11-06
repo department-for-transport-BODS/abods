@@ -1,10 +1,16 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
+} from "@angular/core";
+import { NG_VALUE_ACCESSOR } from "@angular/forms";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-checkboxes-item',
+  selector: "gds-checkboxes-item",
   template: `
     <div class="govuk-checkboxes__item checkboxes-item">
       <input
@@ -17,10 +23,14 @@ let nextUniqueId = 0;
         [disabled]="disabled"
         (change)="checkedChanged($event)"
       />
-      <label class="govuk-label checkboxes-item__label govuk-checkboxes__label" [for]="inputId">{{ label }}</label>
+      <label
+        class="govuk-label checkboxes-item__label govuk-checkboxes__label"
+        [for]="inputId"
+        >{{ label }}</label
+      >
     </div>
   `,
-  styleUrls: ['checkboxes-item.component.scss'],
+  styleUrls: ["checkboxes-item.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

@@ -1,21 +1,26 @@
-import { HttpClient } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Spectator, createComponentFactory, byText, SpyObject } from '@ngneat/spectator';
-import { SvgIconRegistryService } from 'angular-svg-icon';
-import { DateTime, Settings } from 'luxon';
-import { NgxSmartModalModule, NgxSmartModalService } from 'ngx-smart-modal';
-import { of, throwError } from 'rxjs';
-import { ConfigService } from '../../config/config.service';
-import { SharedModule } from '../../shared/shared.module';
-import { OnTimeService, PerformanceParams } from '../on-time.service';
-import { OtpThresholdFormComponent } from '../otp-threshold-form/otp-threshold-form.component';
+import { HttpClient } from "@angular/common/http";
+import { ReactiveFormsModule } from "@angular/forms";
+import {
+  Spectator,
+  createComponentFactory,
+  byText,
+  SpyObject,
+} from "@ngneat/spectator";
+import { SvgIconRegistryService } from "angular-svg-icon";
+import { DateTime, Settings } from "luxon";
+import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
+import { of, throwError } from "rxjs";
+import { ConfigService } from "../../config/config.service";
+import { SharedModule } from "../../shared/shared.module";
+import { OnTimeService, PerformanceParams } from "../on-time.service";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
 import {
   OtpThresholdModalComponent,
   OtpThresholdModalData,
   OTP_THRESHOLD_MODAL_ID,
-} from './otp-threshold-modal.component';
+} from "./otp-threshold-modal.component";
 
-describe('OtpThresholdModalComponent', () => {
+describe("OtpThresholdModalComponent", () => {
   let spectator: Spectator<OtpThresholdModalComponent>;
   let component: OtpThresholdModalComponent;
   let ngxSmartModalService: NgxSmartModalService;
@@ -24,7 +29,10 @@ describe('OtpThresholdModalComponent', () => {
   const modalData = <OtpThresholdModalData>{
     params: {
       fromTimestamp: DateTime.now().toISO().toString() as string,
-      toTimestamp: DateTime.now().plus({ days: 1 }).toISO().toString() as string,
+      toTimestamp: DateTime.now()
+        .plus({ days: 1 })
+        .toISO()
+        .toString() as string,
       filters: {},
     },
     defaultValues: {
@@ -54,49 +62,59 @@ describe('OtpThresholdModalComponent', () => {
     spectator.detectChanges();
   });
 
-  it('should create the component', () => {
+  it("should create the component", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show default percentages on modal opening', () => {
+  it("should show default percentages on modal opening", () => {
     expect(component.tableData.onTime.defaultValue).toEqual(0.7);
     expect(component.tableData.early.defaultValue).toEqual(0.1);
     expect(component.tableData.late.defaultValue).toEqual(0.2);
-    expect(spectator.query(byText('70%'))).toBeVisible();
-    expect(spectator.query(byText('20%'))).toBeVisible();
-    expect(spectator.query(byText('10%'))).toBeVisible();
+    expect(spectator.query(byText("70%"))).toBeVisible();
+    expect(spectator.query(byText("20%"))).toBeVisible();
+    expect(spectator.query(byText("10%"))).toBeVisible();
   });
 
-  it('should call fetchOnTimeStats on compare with default values', () => {
-    spectator.click(byText('Compare'));
+  it("should call fetchOnTimeStats on compare with default values", () => {
+    spectator.click(byText("Compare"));
 
     const expected: PerformanceParams = {
       fromTimestamp: modalData.params?.fromTimestamp,
       toTimestamp: modalData.params?.toTimestamp,
-      filters: { ...modalData.params?.filters, onTimeMaxMinutes: 6, onTimeMinMinutes: -1 },
+      filters: {
+        ...modalData.params?.filters,
+        onTimeMaxMinutes: 6,
+        onTimeMinMinutes: -1,
+      },
     };
 
     expect(onTimeService.fetchOnTimeStats).toHaveBeenCalledWith(expected);
   });
 
-  it('should display comparison values', () => {
-    onTimeService.fetchOnTimeStats.and.returnValue(of({ early: 35, late: 5, onTime: 60, completed: 100 }));
-    spectator.click(byText('Compare'));
+  it("should display comparison values", () => {
+    onTimeService.fetchOnTimeStats.and.returnValue(
+      of({ early: 35, late: 5, onTime: 60, completed: 100 }),
+    );
+    spectator.click(byText("Compare"));
     spectator.detectChanges();
 
     expect(component.tableData.onTime.comparisonValue).toEqual(0.6);
     expect(component.tableData.early.comparisonValue).toEqual(0.35);
     expect(component.tableData.late.comparisonValue).toEqual(0.05);
-    expect(spectator.query(byText('60%'))).toBeVisible();
-    expect(spectator.query(byText('35%'))).toBeVisible();
-    expect(spectator.query(byText('5%'))).toBeVisible();
+    expect(spectator.query(byText("60%"))).toBeVisible();
+    expect(spectator.query(byText("35%"))).toBeVisible();
+    expect(spectator.query(byText("5%"))).toBeVisible();
   });
 
-  it('should show error message on error', () => {
-    onTimeService.fetchOnTimeStats.and.returnValue(throwError(() => 'error'));
-    spectator.click(byText('Compare'));
+  it("should show error message on error", () => {
+    onTimeService.fetchOnTimeStats.and.returnValue(throwError(() => "error"));
+    spectator.click(byText("Compare"));
     spectator.detectChanges();
 
-    expect(spectator.query(byText('There was an issue comparing data, please try again.'))).toBeVisible();
+    expect(
+      spectator.query(
+        byText("There was an issue comparing data, please try again."),
+      ),
+    ).toBeVisible();
   });
 });

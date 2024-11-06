@@ -1,8 +1,8 @@
-import { RouterTestingModule } from '@angular/router/testing';
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { LinkComponent } from './link.component';
+import { RouterTestingModule } from "@angular/router/testing";
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { LinkComponent } from "./link.component";
 
-describe('LinkComponent', () => {
+describe("LinkComponent", () => {
   let spectator: Spectator<LinkComponent>;
   let component: LinkComponent;
 
@@ -17,7 +17,7 @@ describe('LinkComponent', () => {
     component = spectator.component;
   });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator.detectChanges();
 
     expect(component).toBeTruthy();

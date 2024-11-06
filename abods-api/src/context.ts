@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-import { initialisePrismaClient } from './prismaClient.js';
-import logger from './logger.js';
+import { PrismaClient } from "@prisma/client";
+import { initialisePrismaClient } from "./prismaClient.js";
+import logger from "./logger.js";
 
 export const createContext = async (force?: boolean): Promise<PrismaClient> => {
-  logger.debug("Creating prisma context for database client")
+  logger.debug("Creating prisma context for database client");
   let prisma: PrismaClient;
 
   if (!global.prisma || force) {
@@ -12,6 +12,6 @@ export const createContext = async (force?: boolean): Promise<PrismaClient> => {
 
   prisma = global.prisma;
 
-  logger.debug("Prisma client created")
+  logger.debug("Prisma client created");
   return prisma;
 };

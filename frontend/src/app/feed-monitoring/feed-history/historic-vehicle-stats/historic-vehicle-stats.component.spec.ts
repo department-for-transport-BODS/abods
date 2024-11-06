@@ -1,13 +1,16 @@
-import { Spectator, createComponentFactory } from '@ngneat/spectator';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { Spectator, createComponentFactory } from "@ngneat/spectator";
+import { SharedModule } from "src/app/shared/shared.module";
 
-import { HistoricVehicleStatsComponent } from './historic-vehicle-stats.component';
+import { HistoricVehicleStatsComponent } from "./historic-vehicle-stats.component";
 
-describe('HistoricVehicleStatsComponent', () => {
+describe("HistoricVehicleStatsComponent", () => {
   let spectator: Spectator<HistoricVehicleStatsComponent>;
-  const createComponent = createComponentFactory({ component: HistoricVehicleStatsComponent, imports: [SharedModule] });
+  const createComponent = createComponentFactory({
+    component: HistoricVehicleStatsComponent,
+    imports: [SharedModule],
+  });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator = createComponent();
 
     expect(spectator.component).toBeTruthy();

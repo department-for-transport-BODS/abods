@@ -1,7 +1,7 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
-  name: 'freshdeskHtmlFormatter',
+  name: "freshdeskHtmlFormatter",
 })
 export class FreshdeskHtmlFormatterPipe implements PipeTransform {
   transform(value: string): string {
@@ -11,6 +11,6 @@ export class FreshdeskHtmlFormatterPipe implements PipeTransform {
 
   private replaceWidthValues(value: string): string {
     const widthRegex = /width: \d*px;/gm;
-    return value.replace(widthRegex, 'width: 100%;');
+    return value.replace(widthRegex, "width: 100%;");
   }
 }

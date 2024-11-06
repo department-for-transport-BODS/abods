@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 /* eslint-disable @angular-eslint/component-selector */
 @Component({
-  selector: '[app-actionlist-action]',
-  templateUrl: 'actionlist-action.component.html',
-  styleUrls: ['./actionlist-action.component.scss'],
+  selector: "[app-actionlist-action]",
+  templateUrl: "actionlist-action.component.html",
+  styleUrls: ["./actionlist-action.component.scss"],
 })
 export class ActionListActionComponent {
   @Input() route?: unknown[] | string; // use when routing to an internal page
@@ -13,9 +13,9 @@ export class ActionListActionComponent {
 
   get actionListActionClasses() {
     return {
-      'actionlist-action': true,
+      "actionlist-action": true,
       unbuttoned: !this.route,
-      'actionlist-action--disabled': this.disabled,
+      "actionlist-action--disabled": this.disabled,
     };
   }
 }

@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .otp-legend {
   display: flex;
@@ -14,13 +14,13 @@
     height: 16px;
     margin-right: govuk-spacing(1);
     &--on-time {
-      background-color: raas-colour('on-time');
+      background-color: raas-colour("on-time");
     }
     &--early {
-      background-color: raas-colour('early');
+      background-color: raas-colour("early");
     }
     &--late {
-      background-color: raas-colour('late');
+      background-color: raas-colour("late");
     }
   }
 

@@ -7,16 +7,20 @@ import {
   Input,
   Output,
   ViewChild,
-} from '@angular/core';
-import { GDSSpacingSizes } from 'src/app/shared/types';
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+} from "@angular/core";
+import { GDSSpacingSizes } from "src/app/shared/types";
+import {
+  ControlValueAccessor,
+  FormControl,
+  NG_VALUE_ACCESSOR,
+} from "@angular/forms";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-text-input',
-  templateUrl: './text-input.component.html',
-  styleUrls: ['./text-input.component.scss'],
+  selector: "gds-text-input",
+  templateUrl: "./text-input.component.html",
+  styleUrls: ["./text-input.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -35,24 +39,24 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   protected _uid = `gds-input-${nextUniqueId++}`;
-  protected _id = '';
+  protected _id = "";
 
-  @Input() type: 'text' | 'search' | 'number' | 'date' = 'text';
-  @Input() prefix = '';
-  @Input() suffix = '';
-  @Input() width?: '2' | '3' | '5' | '10' | '20';
+  @Input() type: "text" | "search" | "number" | "date" = "text";
+  @Input() prefix = "";
+  @Input() suffix = "";
+  @Input() width?: "2" | "3" | "5" | "10" | "20";
   @Input() label?: string;
   @Input() hideLabel = false;
   @Input() isLabelHeader = false;
-  @Input() hint = '';
+  @Input() hint = "";
   @Input() error?: string;
   @Input() required = false;
   @Input() readonly = false;
-  @Input() step = '';
-  @Input() inputMode = '';
-  @Input() pattern = '';
-  @Input() max = '';
-  @Input() min = '';
+  @Input() step = "";
+  @Input() inputMode = "";
+  @Input() pattern = "";
+  @Input() max = "";
+  @Input() min = "";
   @Input() spaceBelow?: GDSSpacingSizes;
   @Input() spaceAbove?: GDSSpacingSizes;
   @Input() noCal = false;
@@ -65,7 +69,7 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   @Output() blurred = new EventEmitter<Event>();
   @Output() calClick = new EventEmitter<Event>();
 
-  @ViewChild('textInput') textInput?: ElementRef;
+  @ViewChild("textInput") textInput?: ElementRef;
   control = new FormControl();
 
   get value(): string {
@@ -90,19 +94,19 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
 
   get containerClasses() {
     return {
-      'govuk-form-group text-input': true,
-      'text-input--no-cal': this.noCal || this.type === 'search',
-      'govuk-form-group--error': this.error,
+      "govuk-form-group text-input": true,
+      "text-input--no-cal": this.noCal || this.type === "search",
+      "govuk-form-group--error": this.error,
       [`govuk-!-margin-bottom-${this.spaceBelow}`]: this.spaceBelow,
       [`govuk-!-margin-top-${this.spaceAbove}`]: this.spaceAbove,
     };
   }
   get inputClasses() {
     return {
-      'govuk-input text-input__input': true,
+      "govuk-input text-input__input": true,
       [`govuk-input--width-${this.width}`]: this.width,
-      'govuk-input--error': this.error,
-      'text-input__search-icon': this.type === 'search',
+      "govuk-input--error": this.error,
+      "text-input__search-icon": this.type === "search",
     };
   }
 
@@ -127,7 +131,7 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   clearInput() {
-    this.control.patchValue('');
+    this.control.patchValue("");
     this.control.updateValueAndValidity();
   }
 }

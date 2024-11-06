@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { DateTime } from 'luxon';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import { DateTime } from "luxon";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import {
   DashboardOperatorListGQL,
   DashboardOperatorVehicleCountsListGQL,
@@ -12,9 +12,9 @@ import {
   PerformanceFiltersInputType,
   RankingOrder,
   ServicePerformanceInputType,
-} from '../../generated/graphql';
-import { PerformanceCategories } from './dashboard.types';
-import { PerformanceParams } from '../on-time/on-time.service';
+} from "../../generated/graphql";
+import { PerformanceCategories } from "./dashboard.types";
+import { PerformanceParams } from "../on-time/on-time.service";
 
 export interface PunctualityQueryResult {
   result: { [key in PerformanceCategories]: number } | null;
@@ -22,42 +22,65 @@ export interface PunctualityQueryResult {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class DashboardService {
   constructor(
     private operatorListQuery: DashboardOperatorListGQL,
     private operatorVehicleCountsListQuery: DashboardOperatorVehicleCountsListGQL,
     private dashboardPerformanceStatsQuery: DashboardPerformanceStatsGQL,
-    private dashboardServiceRankingQuery: DashboardServiceRankingGQL
+    private dashboardServiceRankingQuery: DashboardServiceRankingGQL,
   ) {}
 
   get listOperators(): Observable<OperatorDashboardFragment[]> {
     return this.operatorListQuery
       .fetch()
-      .pipe(map(({ data }) => data?.operators?.items?.map((x) => x as OperatorDashboardFragment) ?? []));
+      .pipe(
+        map(
+          ({ data }) =>
+            data?.operators?.items?.map(
+              (x) => x as OperatorDashboardFragment,
+            ) ?? [],
+        ),
+      );
   }
 
-  get listOperatorVehicleCounts(): Observable<OperatorDashboardVehicleCountsFragment[]> {
+  get listOperatorVehicleCounts(): Observable<
+    OperatorDashboardVehicleCountsFragment[]
+  > {
     return this.operatorVehicleCountsListQuery
       .fetch()
-      .pipe(map(({ data }) => data?.operators?.items?.map((x) => x as OperatorDashboardVehicleCountsFragment) ?? []));
+      .pipe(
+        map(
+          ({ data }) =>
+            data?.operators?.items?.map(
+              (x) => x as OperatorDashboardVehicleCountsFragment,
+            ) ?? [],
+        ),
+      );
   }
 
   getPunctualityStats(
     filters: PerformanceFiltersInputType,
     from: DateTime,
-    to: DateTime
+    to: DateTime,
   ): Observable<PunctualityQueryResult> {
-    const params: PerformanceParams = { fromTimestamp: from.toISO(), toTimestamp: to.toISO(), filters };
+    const params: PerformanceParams = {
+      fromTimestamp: from.toISO(),
+      toTimestamp: to.toISO(),
+      filters,
+    };
     return this.dashboardPerformanceStatsQuery
       .fetch(
         { params },
         // Currently there's no way for Apollo to cache this without an id field, so disable the cache
-        { fetchPolicy: 'no-cache' }
+        { fetchPolicy: "no-cache" },
       )
       .pipe(
-        map(({ data, errors }) => ({ result: data?.onTimePerformance?.punctualityOverview ?? null, success: !errors }))
+        map(({ data, errors }) => ({
+          result: data?.onTimePerformance?.punctualityOverview ?? null,
+          success: !errors,
+        })),
       );
   }
 
@@ -67,7 +90,7 @@ export class DashboardService {
     to: DateTime,
     order: RankingOrder,
     trendFrom: DateTime,
-    trendTo: DateTime
+    trendTo: DateTime,
   ) {
     const params: ServicePerformanceInputType = {
       fromTimestamp: from.toISO(),
@@ -83,7 +106,7 @@ export class DashboardService {
           trendTo: trendTo.toISO(),
         },
         // Currently there's no way for Apollo to cache this without an id field, so disable the cache
-        { fetchPolicy: 'no-cache' }
+        { fetchPolicy: "no-cache" },
       )
       .pipe(map(({ data }) => data?.onTimePerformance?.servicePunctuality));
   }

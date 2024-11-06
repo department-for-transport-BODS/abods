@@ -1,11 +1,19 @@
-import { Component, EventEmitter, OnInit, Input, Output, ViewChild, ElementRef } from '@angular/core';
-import { DateTime } from 'luxon';
-import { NgxTippyProps } from 'ngx-tippy-wrapper';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Input,
+  Output,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
+import { DateTime } from "luxon";
+import { NgxTippyProps } from "ngx-tippy-wrapper";
 
 @Component({
-  selector: 'app-datenav-item',
-  templateUrl: './datenav-item.component.html',
-  styleUrls: ['./datenav-item.component.scss'],
+  selector: "app-datenav-item",
+  templateUrl: "./datenav-item.component.html",
+  styleUrls: ["./datenav-item.component.scss"],
 })
 export class DatenavItemComponent implements OnInit {
   @Input() heat?: number;
@@ -14,16 +22,16 @@ export class DatenavItemComponent implements OnInit {
   @Input() active? = false;
   @Output() selectDate: EventEmitter<DateTime> = new EventEmitter<DateTime>();
 
-  @ViewChild('navButton') button?: ElementRef;
+  @ViewChild("navButton") button?: ElementRef;
 
   tippyProps: NgxTippyProps = {
-    placement: 'top',
-    theme: 'gds-tooltip',
+    placement: "top",
+    theme: "gds-tooltip",
     zIndex: 90,
   };
 
   ngOnInit(): void {
-    this.tippyProps.content = this.date?.toFormat('d MMMM');
+    this.tippyProps.content = this.date?.toFormat("d MMMM");
   }
 
   get firstOfTheMonth() {
@@ -32,10 +40,10 @@ export class DatenavItemComponent implements OnInit {
 
   get dateNavItemClasses() {
     return {
-      'unbuttoned datenav__item': true,
+      "unbuttoned datenav__item": true,
       [`datenav__item--heat-${this.heat}`]: this.heat,
-      'datenav__item--active': this.active,
-      'datenav__item--month-start': this.firstOfTheMonth,
+      "datenav__item--active": this.active,
+      "datenav__item--month-start": this.firstOfTheMonth,
     };
   }
 }

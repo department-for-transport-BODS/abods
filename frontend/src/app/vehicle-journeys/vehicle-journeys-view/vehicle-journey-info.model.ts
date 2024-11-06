@@ -1,5 +1,5 @@
-import { DateTime } from 'luxon';
-import { AvlPoint, Stop } from '../../../generated/graphql';
+import { DateTime } from "luxon";
+import { AvlPoint, Stop } from "../../../generated/graphql";
 
 export const createJourneyInfo = (stop: Stop, ping: AvlPoint | undefined) => ({
   operatorInfo: {
@@ -11,7 +11,7 @@ export const createJourneyInfo = (stop: Stop, ping: AvlPoint | undefined) => ({
     serviceId: stop.serviceId,
     serviceNumber: stop.lineName,
   },
-  vehicleId: ping?.vehicleRef ?? 'Unknown',
+  vehicleId: ping?.vehicleRef ?? "Unknown",
   startTime: DateTime.fromISO(stop.startTime),
 });
 

@@ -1,12 +1,12 @@
-import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { Spectator, createComponentFactory } from "@ngneat/spectator";
 
-import { NotAuthorisedComponent } from './not-authorised.component';
+import { NotAuthorisedComponent } from "./not-authorised.component";
 
-describe('NotAuthorisedComponent', () => {
+describe("NotAuthorisedComponent", () => {
   let spectator: Spectator<NotAuthorisedComponent>;
   const createComponent = createComponentFactory(NotAuthorisedComponent);
 
-  it('should create', () => {
+  it("should create", () => {
     spectator = createComponent();
 
     expect(spectator.component).toBeTruthy();

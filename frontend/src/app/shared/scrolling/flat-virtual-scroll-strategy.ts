@@ -1,5 +1,8 @@
-import { CdkVirtualScrollViewport, VirtualScrollStrategy } from '@angular/cdk/scrolling';
-import { of } from 'rxjs';
+import {
+  CdkVirtualScrollViewport,
+  VirtualScrollStrategy,
+} from "@angular/cdk/scrolling";
+import { of } from "rxjs";
 
 /**
  * Virtual scroll strategy for testing. Tells the viewport to just draw every element.
@@ -12,8 +15,13 @@ export class FlatVirtualScrollStrategy implements VirtualScrollStrategy {
 
   attach(viewport: CdkVirtualScrollViewport) {
     this.viewport = viewport;
-    this.viewport?.setTotalContentSize(this.viewport?.getDataLength() * this.itemSize);
-    this.viewport?.setRenderedRange({ start: 0, end: this.viewport?.getDataLength() });
+    this.viewport?.setTotalContentSize(
+      this.viewport?.getDataLength() * this.itemSize,
+    );
+    this.viewport?.setRenderedRange({
+      start: 0,
+      end: this.viewport?.getDataLength(),
+    });
     this.viewport?.setRenderedContentOffset(0);
   }
 
@@ -22,8 +30,13 @@ export class FlatVirtualScrollStrategy implements VirtualScrollStrategy {
   }
 
   onDataLengthChanged() {
-    this.viewport?.setTotalContentSize(this.viewport?.getDataLength() * this.itemSize);
-    this.viewport?.setRenderedRange({ start: 0, end: this.viewport?.getDataLength() });
+    this.viewport?.setTotalContentSize(
+      this.viewport?.getDataLength() * this.itemSize,
+    );
+    this.viewport?.setRenderedRange({
+      start: 0,
+      end: this.viewport?.getDataLength(),
+    });
   }
 
   /* eslint-disable @typescript-eslint/no-empty-function */

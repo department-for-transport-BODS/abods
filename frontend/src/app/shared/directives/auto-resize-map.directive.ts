@@ -1,12 +1,21 @@
-import { AfterViewChecked, Directive, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
-import { Map } from 'mapbox-gl';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {
+  AfterViewChecked,
+  Directive,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+} from "@angular/core";
+import { Map } from "mapbox-gl";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Directive({
-  selector: 'mgl-map[appAutoResizeMap]',
+  selector: "mgl-map[appAutoResizeMap]",
 })
-export class AutoResizeMapDirective implements OnInit, AfterViewChecked, OnDestroy {
+export class AutoResizeMapDirective
+  implements OnInit, AfterViewChecked, OnDestroy
+{
   @Input() appAutoResizeMap!: Map;
 
   private resizeMap$ = new Subject<void>();

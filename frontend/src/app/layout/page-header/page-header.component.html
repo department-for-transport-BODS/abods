@@ -11,6 +11,9 @@
   </gds-notification-banner>
   <span class="govuk-caption-xl" *ngIf="caption">{{ caption }}</span>
   <h1 class="govuk-heading-xl page-header__title" *ngIf="heading">
-    <app-browser-title title="{{ heading }}" [renderTitle]="true"></app-browser-title>
+    <app-browser-title
+      title="{{ heading }}"
+      [renderTitle]="true"
+    ></app-browser-title>
   </h1>
 </header>
