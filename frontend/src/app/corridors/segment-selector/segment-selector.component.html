@@ -38,7 +38,7 @@
       showScrollControls && !first && !(!last && !first),
     'segment-selector-mask--mask-right':
       showScrollControls && !last && !(!last && !first),
-    'segment-selector-mask--mask-both': showScrollControls && !last && !first,
+    'segment-selector-mask--mask-both': showScrollControls && !last && !first
   }"
 >
   <div class="segment-selector-container" #scrollContent>
@@ -88,7 +88,7 @@
             'segment-selector__segment__invalid-service-link':
               isInvalidServiceLink(segment) && !isSelected(segment),
             'segment-selector__segment__invalid-service-link--active':
-              isInvalidServiceLink(segment) && isSelected(segment),
+              isInvalidServiceLink(segment) && isSelected(segment)
           }"
           (click)="onSelect(segment)"
           [disabled]="isDisabled"

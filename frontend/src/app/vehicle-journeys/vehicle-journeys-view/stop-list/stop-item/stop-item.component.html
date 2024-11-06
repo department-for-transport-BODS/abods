@@ -2,7 +2,7 @@
   class="stop-list-item"
   [ngClass]="{
     'stop-list-item--timing-point': stop?.isTimingPoint,
-    'stop-list-item--timing-point--first': stop?.isTimingPoint && firstItem,
+    'stop-list-item--timing-point--first': stop?.isTimingPoint && firstItem
   }"
 >
   <div class="stop-list-item__value-container">
@@ -22,7 +22,7 @@
             stop?.onTimePerformance?.toString() === 'Late',
           'stop-list-item__icon--no-data':
             (stop?.onTimePerformance ?? null) === null,
-          'stop-list-item__icon--stop': !stop?.isTimingPoint,
+          'stop-list-item__icon--stop': !stop?.isTimingPoint
         }"
         [applyClass]="true"
         [src]="

@@ -23,7 +23,7 @@
             'date-range-controls__table-cell--end': _selected.end?.hasSame(
               day.date,
               'day'
-            ),
+            )
           }"
         >
           <div
@@ -49,7 +49,7 @@
                 day.date,
                 'day'
               ),
-              'date-range-controls__day--saturday': day.isSaturday,
+              'date-range-controls__day--saturday': day.isSaturday
             }"
             (click)="dateChange.emit(day.date)"
           >

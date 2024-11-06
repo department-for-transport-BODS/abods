@@ -43,8 +43,8 @@ import { ConfigService } from "../../config/config.service";
           'case',
           ['boolean', ['feature-state', 'hover'], false],
           0.8,
-          0.3,
-        ],
+          0.3
+        ]
       }"
       [filter]="
         adminAreaIds.length
