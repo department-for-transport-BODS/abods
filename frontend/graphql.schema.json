@@ -338,6 +338,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "FeedAvailableEvent",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "FeedComplianceFailure",
             "description": null,
             "isDeprecated": false,
@@ -350,7 +356,19 @@
             "deprecationReason": null
           },
           {
+            "name": "FeedUnavailableEvent",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "VehicleCountDisparity",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "VehicleCountDisparityEvent",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -2381,6 +2399,22 @@
             "deprecationReason": null
           },
           {
+            "name": "operatorId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "unavailableSince",
             "description": null,
             "args": [],
@@ -3481,7 +3515,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "DateTime",
                 "ofType": null
               }
             },
@@ -4027,6 +4061,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "VehicleStatsType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "operatorId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -5433,9 +5483,13 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6341,7 +6395,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "DateTime",
                 "ofType": null
               }
             },
@@ -6615,7 +6669,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "Date",
+                    "name": "DateTime",
                     "ofType": null
                   }
                 },
@@ -6647,7 +6701,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "Date",
+                    "name": "DateTime",
                     "ofType": null
                   }
                 },

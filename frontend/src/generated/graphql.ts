@@ -60,9 +60,12 @@ export type AlertType = {
 };
 
 export enum AlertTypeEnum {
+  FeedAvailableEvent = 'FeedAvailableEvent',
   FeedComplianceFailure = 'FeedComplianceFailure',
   FeedFailure = 'FeedFailure',
-  VehicleCountDisparity = 'VehicleCountDisparity'
+  FeedUnavailableEvent = 'FeedUnavailableEvent',
+  VehicleCountDisparity = 'VehicleCountDisparity',
+  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent'
 }
 
 export type ApiInfoType = {
@@ -310,6 +313,7 @@ export type FeedMonitoringType = {
   historicalStats?: Maybe<HistoricalStatsType>;
   lastOutage?: Maybe<Scalars['DateTime']['output']>;
   liveStats?: Maybe<LiveStatsType>;
+  operatorId: Scalars['String']['output'];
   unavailableSince?: Maybe<Scalars['DateTime']['output']>;
   vehicleStats?: Maybe<Array<Maybe<VehicleStatsType>>>;
 };
@@ -463,7 +467,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type HistoricalStatsType = {
@@ -529,6 +533,7 @@ export type LiveStatsType = {
   feedErrors?: Maybe<Scalars['Int']['output']>;
   last20Minutes?: Maybe<Array<Maybe<VehicleStatsType>>>;
   last24Hours?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  operatorId: Scalars['String']['output'];
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -743,7 +748,7 @@ export type OperatorType = {
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']['output']>;
   nocCode?: Maybe<Scalars['String']['output']>;
-  operatorId?: Maybe<Scalars['String']['output']>;
+  operatorId: Scalars['String']['output'];
   transitModel?: Maybe<TransitModelType>;
 };
 
@@ -847,7 +852,7 @@ export type PunctualityTimeSeriesType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type PunctualityTotalsType = {
@@ -901,9 +906,9 @@ export type QueryAvlsArgs = {
 
 
 export type QueryEventStatsArgs = {
-  end: Scalars['Date']['input'];
+  end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
 };
 
 
@@ -1262,19 +1267,19 @@ export type UpdateCorridorMutationVariables = Exact<{
 
 export type UpdateCorridorMutation = { __typename?: 'Mutation', updateCorridor: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
 
-export type OperatorDashboardFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null };
+export type OperatorDashboardFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null };
 
-export type OperatorDashboardVehicleCountsFragment = { __typename?: 'OperatorType', nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', currentVehicles?: number | null, expectedVehicles?: number | null } | null } | null };
+export type OperatorDashboardVehicleCountsFragment = { __typename?: 'OperatorType', nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', currentVehicles?: number | null, expectedVehicles?: number | null } | null } | null };
 
 export type DashboardOperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboardOperatorListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null } | null> | null } | null };
+export type DashboardOperatorListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null } | null> | null } | null };
 
 export type DashboardOperatorVehicleCountsListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboardOperatorVehicleCountsListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', currentVehicles?: number | null, expectedVehicles?: number | null } | null } | null } | null> | null } | null };
+export type DashboardOperatorVehicleCountsListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', currentVehicles?: number | null, expectedVehicles?: number | null } | null } | null } | null> | null } | null };
 
 export type DashboardPerformanceStatsQueryVariables = Exact<{
   params: PerformanceInputType;
@@ -1305,8 +1310,8 @@ export type EventsQuery = { __typename?: 'Query', events?: { __typename?: 'Event
 
 export type EventStatsQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
-  end: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
+  end: Scalars['DateTime']['input'];
 }>;
 
 
@@ -1314,30 +1319,30 @@ export type EventStatsQuery = { __typename?: 'Query', eventStats?: Array<{ __typ
 
 export type VehicleStatFragment = { __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string };
 
-export type BasicOperatorFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null };
+export type BasicOperatorFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null };
 
-export type OperatorLiveStatusFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
+export type OperatorLiveStatusFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
 
-export type OperatorFeedHistoryFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null };
+export type OperatorFeedHistoryFragment = { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null };
 
 export type FeedMonitoringListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FeedMonitoringListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null } | null> | null } | null };
+export type FeedMonitoringListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null } | null> | null } | null };
 
 export type OperatorSparklineStatsQueryVariables = Exact<{
   operatorIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
 }>;
 
 
-export type OperatorSparklineStatsQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null } | null> | null } | null };
+export type OperatorSparklineStatsQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null } | null> | null } | null };
 
 export type OperatorLiveStatusQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
 }>;
 
 
-export type OperatorLiveStatusQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null } | null };
+export type OperatorLiveStatusQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null } | null };
 
 export type OperatorHistoricStatsQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
@@ -1347,7 +1352,7 @@ export type OperatorHistoricStatsQueryVariables = Exact<{
 }>;
 
 
-export type OperatorHistoricStatsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
+export type OperatorHistoricStatsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
 
 export type GetAdminAreasQueryVariables = Exact<{
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
@@ -1542,7 +1547,7 @@ export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OperatorListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId?: string | null, adminAreas?: Array<{ __typename?: 'AdminAreaInfoType', adminAreaId: string } | null> | null } | null> | null } | null };
+export type OperatorListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, adminAreas?: Array<{ __typename?: 'AdminAreaInfoType', adminAreaId: string } | null> | null } | null> | null } | null };
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
@@ -2174,7 +2179,7 @@ export const EventsDocument = gql`
     }
   }
 export const EventStatsDocument = gql`
-    query eventStats($operatorId: String!, $start: Date!, $end: Date!) {
+    query eventStats($operatorId: String!, $start: DateTime!, $end: DateTime!) {
   eventStats(operatorId: $operatorId, start: $start, end: $end) {
     count
     day

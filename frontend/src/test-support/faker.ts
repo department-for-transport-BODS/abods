@@ -18,10 +18,16 @@ export function fakeOperatorLiveStatus(feedStatus: boolean): OperatorLiveStatusF
     feedMonitoring: {
       feedStatus,
       availability: faker.random.float({ min: 0.5, max: 1, precision: 0.00000001 }),
-      lastOutage: feedStatus ? DateTime.local().minus({ minutes: faker.random.number({ min: 1, max: 10000 }) }) : null,
+      lastOutage: feedStatus
+        ? DateTime.local()
+            .minus({ minutes: faker.random.number({ min: 1, max: 10000 }) })
+            .toISO()
+        : null,
       unavailableSince: feedStatus
         ? null
-        : DateTime.local().minus({ minutes: faker.random.number({ min: 1, max: 100 }) }),
+        : DateTime.local()
+            .minus({ minutes: faker.random.number({ min: 1, max: 100 }) })
+            .toISO(),
       liveStats: {
         updateFrequency: faker.random.number({ min: 20, max: 60 }),
         currentVehicles: faker.random.number({ min: 0, max: 30 }),
@@ -63,7 +69,7 @@ export function fakeEvent({
   const between = Interval.fromDateTimes(start, end ?? start);
   return {
     type: type ?? faker.random.arrayElement(['VehicleCountDisparityEvent', 'FeedUnavailableEvent']),
-    timestamp: between.start.plus({ milliseconds: faker.random.number(between.toDuration().milliseconds) }),
+    timestamp: between.start.plus({ milliseconds: faker.random.number(between.toDuration().milliseconds) }).toISO(),
     data: { message: message ?? faker.lorem.text(12) },
   };
 }
