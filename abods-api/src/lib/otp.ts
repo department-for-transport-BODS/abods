@@ -6,6 +6,7 @@ import {
 import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
+import { utcToBstDBInput } from './dayjs.js';
 
 const getThresholds = async (
   db: PrismaClient,
@@ -88,8 +89,8 @@ export const compareThresholds = async (
       in: opIds ? opIds : userOperatorIds,
     },
     date_of_journey: {
-      gt: new Date(fromTimestamp),
-      lte: new Date(toTimestamp),
+      gte: utcToBstDBInput(fromTimestamp),
+      lt: utcToBstDBInput(toTimestamp),
     },
   };
 

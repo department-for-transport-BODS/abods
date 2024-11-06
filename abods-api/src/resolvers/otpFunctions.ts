@@ -20,7 +20,7 @@ import {
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
-import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
+import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate, utcToBstDBInput } from '../lib/dayjs.js';
 import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
@@ -1227,8 +1227,8 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers['frequentServices'
         where: {
           operator_noc: args.operatorId,
           date_of_journey: {
-            gt: new Date(args.fromTimestamp),
-            lte: new Date(args.toTimestamp)
+            gte: utcToBstDBInput(args.fromTimestamp),
+            lt: utcToBstDBInput(args.toTimestamp)
           },
           headway_valid: true
         },
