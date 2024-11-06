@@ -99,7 +99,7 @@ export const getOperators = async (
       where: {
         ...(adminAreaNumberIds.length > 0
           ? {
-            noc_adminareas: {
+            noc_adminarea: {
               some: {
                 adminarea_id: {
                   in: adminAreaNumberIds,
