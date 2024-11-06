@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:production": "ng build -c production",
     "test": "ng test",
     "coverage": "ng test --code-coverage=true",
     "lint": "ng lint",
