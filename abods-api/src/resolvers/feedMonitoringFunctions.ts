@@ -168,9 +168,10 @@ const getEvents: QueryResolvers['events'] = async () => {
   };
 };
 
-export const getFeedMonitoringList =  async (
+export const getFeedMonitoringList: OperatorTypeResolvers['feedMonitoring'] = async (
   parent, _, context
-): Promise<QueryResolvers['feedMonitoring']> => {
+) => {
+  if (!parent.operatorId) throw "Parent data not set"
   const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
     context.db,
     parent.operatorId
@@ -193,6 +194,9 @@ const feedMonitoringResolvers: Resolvers = {
   Query: {
     events: getEvents,
     eventStats: getEventStats,
+  },
+  OperatorType: {
+    feedMonitoring: getFeedMonitoringList,
   },
   FeedMonitoringType: {
     historicalStats: getHistoricalStats,

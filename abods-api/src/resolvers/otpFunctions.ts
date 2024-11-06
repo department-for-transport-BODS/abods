@@ -25,7 +25,6 @@ import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperator
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from './helpers.js';
-import { getFeedMonitoringList } from "./feedMonitoringFunctions.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -1652,7 +1651,6 @@ const otpResolvers: Resolvers = {
     },
     OperatorType: {
         transitModel: emptyResolver,
-        feedMonitoring: getFeedMonitoringList,
     },
     TransitModelType: {
         lines: getLines,
