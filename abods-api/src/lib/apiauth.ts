@@ -3,7 +3,7 @@ import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import logger from "../logger.js";
 import { AuthContext, RequestContext } from "../types/extra.js";
 import { GraphQLResolveInfo } from "graphql";
-import { throwUnauthenticatedError } from "../resolvers/helpers.js";
+import { throwUnauthenticatedError, getHeader } from "../resolvers/helpers.js";
 export const hashApiKey = (key: string, hmacSecret: string): string => {
   if (!key || !hmacSecret) {
     throw new Error("Key and HMAC secret are required");
@@ -29,12 +29,25 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
     };
   }
 
-  const providedToken = context.headers.authorization?.replace("Bearer ", "");
+  const authHeaderData = getHeader(context.headers, "Authorization");
+
+  if (!authHeaderData) {
+    return {
+      isAuthenticated: false,
+      message: "Authorization Header is missing is missing",
+    };
+  }
+
+  const providedToken: string = (
+    typeof authHeaderData === "string"
+      ? authHeaderData
+      : authHeaderData.join("")
+  ).replace("Bearer ", "");
 
   if (!providedToken) {
     return {
       isAuthenticated: false,
-      message: "API token is required",
+      message: "API token is required in format Bearer <api-key>",
     };
   }
 

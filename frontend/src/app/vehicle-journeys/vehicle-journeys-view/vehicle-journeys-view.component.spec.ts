@@ -48,13 +48,13 @@ describe('VehicleJourneysViewComponent', () => {
     timingPointsOnly: true,
   };
   const mockPrevJourney = <VehicleJourney>{
-    vehicleJourneyId: 'VJ564d30c786cf4cae8a2276393b3263dc',
+    groupId: 'VJ564d30c786cf4cae8a2276393b3263dc',
     startTime: DateTime.fromISO('2022-08-18T11:07:00.000+01:00'),
     lineNumber: '5',
     servicePattern: 'Bristol to Bath',
   };
   const mockNextJourney = <VehicleJourney>{
-    vehicleJourneyId: 'VJ849a1ba0f34c4d3fad757a7fee47636d',
+    groupId: 'VJ849a1ba0f34c4d3fad757a7fee47636d',
     startTime: DateTime.fromISO('2022-08-18T11:37:00.000+01:00'),
     lineNumber: '5',
     servicePattern: 'Bristol to Bath',

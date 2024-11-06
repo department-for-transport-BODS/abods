@@ -13,7 +13,7 @@ describe('VehiclePingStop', () => {
     lat: 52.4139834,
     lon: -1.78000502,
     vehicleId: 'ABC-123',
-    vehicleJourneyId: 'xyz987',
+    groupId: 'xyz987',
     servicePatternId: '456',
     delay: 120,
     actualDelay: 120,

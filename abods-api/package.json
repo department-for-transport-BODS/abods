@@ -9,6 +9,7 @@
     "watch": "tsc --watch",
     "test": "jest",
     "prisma:generate": "prisma generate",
+    "prisma:pull": "prisma db pull",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
     "sam:build": "sam build",
@@ -16,8 +17,8 @@
     "start": "npm run build && node ./dist/localServer.js",
     "start:dev": "concurrently \"npm run watch\" \"node ./dist/localServer.js\"",
     "start:sam": "npm run sam:build && npm run sam:start",
-    "codegen": "graphql-codegen --config codegen.ts",
-    "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts"
+    "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
+    "prepare": "(npm run prisma:generate);"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
@@ -54,9 +55,6 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.3",
-    "@graphql-codegen/typescript": "4.1.0",
-    "@graphql-codegen/typescript-resolvers": "4.3.0",
     "@types/connect-redis": "^0.0.23",
     "@types/ioredis": "^5.0.0",
     "@types/node": "^20.12.5",

@@ -5,8 +5,8 @@ describe('FindJourneysCache', () => {
   let cache: FindJourneysCache;
   const key1 = { key: 'test-key-1' };
   const key2 = { key: 'test-key-2' };
-  const journeys1 = [{ vehicleJourneyId: 'VJ1', servicePattern: 'SP1', lineNumber: 'LN1' }];
-  const journeys2 = [{ vehicleJourneyId: 'VJ2', servicePattern: 'SP2', lineNumber: 'LN2' }];
+  const journeys1 = [{ groupId: 'VJ1', servicePattern: 'SP1', lineNumber: 'LN1' }];
+  const journeys2 = [{ groupId: 'VJ2', servicePattern: 'SP2', lineNumber: 'LN2' }];
 
   beforeEach(() => {
     Settings.defaultZone = 'utc';
@@ -22,7 +22,7 @@ describe('FindJourneysCache', () => {
 
     result$.subscribe((journey) => {
       expect(journey.length).toEqual(1);
-      expect(journey[0].vehicleJourneyId).toEqual('VJ1');
+      expect(journey[0].groupId).toEqual('VJ1');
       expect(journey[0].servicePattern).toEqual('SP1');
       expect(journey[0].lineNumber).toEqual('LN1');
     });
@@ -39,7 +39,7 @@ describe('FindJourneysCache', () => {
 
     result$.subscribe((journey) => {
       expect(journey.length).toEqual(1);
-      expect(journey[0].vehicleJourneyId).toEqual('VJ2');
+      expect(journey[0].groupId).toEqual('VJ2');
       expect(journey[0].servicePattern).toEqual('SP2');
       expect(journey[0].lineNumber).toEqual('LN2');
     });

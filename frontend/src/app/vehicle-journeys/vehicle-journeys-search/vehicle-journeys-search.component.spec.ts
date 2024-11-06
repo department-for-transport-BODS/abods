@@ -55,31 +55,31 @@ describe('VehicleJourneysSearchComponent', () => {
         fetchJourneys: () =>
           of([
             {
-              vehicleJourneyId: 'VJefdb0f42',
+              groupId: 'VJefdb0f42',
               startTime: DateTime.fromISO('2022-08-01T06:45:00'),
               servicePattern: 'St Annes - Blackpool Town Centre',
               lineNumber: '76',
             },
             {
-              vehicleJourneyId: 'VJf3c22dad',
+              groupId: 'VJf3c22dad',
               startTime: DateTime.fromISO('2022-08-01T06:55:00'),
               servicePattern: 'Poulton-le-Fylde - St Annes',
               lineNumber: '76',
             },
             {
-              vehicleJourneyId: 'VJa3968321',
+              groupId: 'VJa3968321',
               startTime: DateTime.fromISO('2022-08-01T07:28:00'),
               servicePattern: 'Blackpool Town Centre - St Annes',
               lineNumber: '76',
             },
             {
-              vehicleJourneyId: 'VJ4aa8804d',
+              groupId: 'VJ4aa8804d',
               startTime: DateTime.fromISO('2022-08-01T15:38:00'),
               servicePattern: 'Blackpool Town Centre - St Annes',
               lineNumber: '76',
             },
             {
-              vehicleJourneyId: 'VJa921fcb5',
+              groupId: 'VJa921fcb5',
               startTime: DateTime.fromISO('2022-08-01T15:55:00'),
               servicePattern: 'St Annes - Blackpool Town Centre',
               lineNumber: '76',

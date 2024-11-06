@@ -1,10 +1,10 @@
 import {
-  RoleType,
   AlertTypeEnum,
-  ScopeEnum,
-  Resolvers,
+  MutationResolvers,
   QueryResolvers,
-  MutationResolvers
+  Resolvers,
+  RoleType,
+  ScopeEnum
 } from '../types/generated.js';
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
@@ -121,12 +121,12 @@ export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, conte
       throw new Error("Alerts not found");
     }
 
-    const userAlerts = alerts.map((alert) => {
+    return alerts.map((alert) => {
       return {
         alertId: alert.id,
         alertType: alert.alert?.trim() as AlertTypeEnum,
-        eventHysterisis: alert.event_hysterisis,
-        eventThreshold: alert.event_threshold,
+        eventHysterisis: alert.event_hysterisis?.toNumber(),
+        eventThreshold: alert.event_threshold?.toNumber(),
         createdBy: alert.created_by_user ? {
           id: String(alert.created_by_user.id),
           username: alert.created_by_user.username,
@@ -144,9 +144,7 @@ export const getUserAlerts: QueryResolvers['userAlerts'] = async (_, args, conte
           roles: new Array<RoleType>
         } : null,
       }
-    })
-
-    return userAlerts;
+    });
   } catch (error) {
     return null;
   }
@@ -289,8 +287,8 @@ async function getUserAlertFromDb(alertId: string, userId: number, db: PrismaCli
   return {
     alertId: alert.id,
       alertType: alert.alert?.trim() as AlertTypeEnum,
-    eventHysterisis: alert.event_hysterisis,
-    eventThreshold: alert.event_threshold,
+    eventHysterisis: alert.event_hysterisis?.toNumber(),
+    eventThreshold: alert.event_threshold?.toNumber(),
     createdBy: alert.created_by_user ? {
       id: alert.created_by_user.id.toString(),
       username: alert.created_by_user.username,

@@ -183,7 +183,7 @@ type VehicleReplayNamespace {
 type UniqueJourneyType {
     serviceInfo: ServiceInfoType!
     startTime: String!
-    vehicleJourneyId: String
+    groupId: String
 }
 
 type ServiceInfoType {
@@ -414,7 +414,7 @@ type HistoricalStatsType {
 type VehicleStatsType {
     actual: Int
     expected: Int
-    timestamp: DateTime
+    timestamp: DateTime!
 }
 
 type LiveStatsType {
@@ -783,8 +783,8 @@ input ServicePerformanceFiltersInputType {
 
 input ServicePerformanceInputType {
     filters: ServicePerformanceFiltersInputType
-    fromTimestamp: DateTime
-    toTimestamp: DateTime
+    fromTimestamp: DateTime!
+    toTimestamp: DateTime!
     order: RankingOrder
 }
 

@@ -49,7 +49,7 @@ export class DashboardService {
     from: DateTime,
     to: DateTime
   ): Observable<PunctualityQueryResult> {
-    const params: PerformanceParams = { fromTimestamp: from.toJSDate(), toTimestamp: to.toJSDate(), filters };
+    const params: PerformanceParams = { fromTimestamp: from.toISO(), toTimestamp: to.toISO(), filters };
     return this.dashboardPerformanceStatsQuery
       .fetch(
         { params },
@@ -70,8 +70,8 @@ export class DashboardService {
     trendTo: DateTime
   ) {
     const params: ServicePerformanceInputType = {
-      fromTimestamp: from.toJSDate(),
-      toTimestamp: to.toJSDate(),
+      fromTimestamp: from.toISO(),
+      toTimestamp: to.toISO(),
       order,
       filters,
     };
@@ -79,8 +79,8 @@ export class DashboardService {
       .fetch(
         {
           params,
-          trendFrom: trendFrom.toJSDate(),
-          trendTo: trendTo.toJSDate(),
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
         },
         // Currently there's no way for Apollo to cache this without an id field, so disable the cache
         { fetchPolicy: 'no-cache' }
