@@ -3,24 +3,19 @@
 
 # dotenv / environment variables file
 .env
+.env.local
+.env.*.local
 
 ### NodeJS ###
-# Dependency directories
-**/node_modules/**
-**/dist/**
-**/.build/**
+node_modules
+dist
+.build
+.angular
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Logs
-logs
-*.log
-npm-debug.log*
-test.ipynb
 .idea
-.nvmrc
-session-mananger-plugin.pkg
 
+# System Files
+.DS_Store
+Thumbs.db
 
 generated_api_secrets/
