@@ -3,7 +3,7 @@ import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from '../types/generated.js';
-import { AVLType, SessionUser } from "../types/extra.js";
+import { SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
@@ -401,7 +401,7 @@ export const getAvlPoints = async (
   });
 };
 
-export const getAvlPerMinute = async (avl: AVLType[]) => {
+export const getAvlPerMinute = async (avl: Awaited<ReturnType<typeof getAvlPoints>>) => {
   const journeys = new Map<string, Set<string>>()
   avl.map((avl) => {
     const recordedAt =

@@ -1,11 +1,11 @@
 import {
   ExpectedJourneyType,
   getAvlPerMinute,
+  getAvlPoints,
   getExpectedJourneysCount,
 } from "./otp.js";
 import { FeedMonitoringType, LiveStatsType, VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
-import { AVLType } from "../types/extra.js";
 
 export type FeedMonitoringListType = 
   Omit<FeedMonitoringType, "liveStats" | "historicalStats" | "vehicleStats"> &
@@ -18,7 +18,7 @@ export enum AlertType {
 }
 
 export const getVehicleStats = async (
-  avl: AVLType[],
+  avl: Awaited<ReturnType<typeof getAvlPoints>>,
   expected: ExpectedJourneyType[]
 ): Promise<VehicleStatsType[]> => {
   const avlPromise: Map<string, Set<string>> = await getAvlPerMinute(avl ?? []);

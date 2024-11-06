@@ -14,7 +14,6 @@ import {
 import { AlertType, getVehicleStats, VechileCountType } from '../lib/feedMonitoring.js';
 import { GraphQLResolveInfo } from "graphql";
 import { PrismaClient } from '@prisma/client';
-import { AVLType } from "../types/extra.js";
 
 export const getEventStats: QueryResolvers['eventStats'] = () => {
   const eventStats: EventStatsType[] = [];
@@ -43,7 +42,7 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers['last20Minutes']
       21
     );
 
-    const avl: AVLType[] = await getAvlPoints(
+    const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
       context.db,
       parent.operatorId,
       statsDate,
@@ -66,7 +65,7 @@ export const getLiveStats = async (
   info: GraphQLResolveInfo
 ) => {
   const queryName = info.operation.name?.value;
-  let last20Mins: AVLType[] = [];
+  let last20Mins: Awaited<ReturnType<typeof getAvlPoints>> = [];
   let expected: ExpectedJourneyType[] = [];
   const currentDate = getDate();
   if (queryName === "operatorLiveStatus") {
