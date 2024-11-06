@@ -8,13 +8,6 @@ import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { utcToBstDBInput } from './dayjs.js';
 
-
-export type ExpectedJourneyType = {
-  group_id: string
-  expected_journey_start: Date
-  expected_journey_end: Date | null
-}
-
 const getThresholds = async (
   db: PrismaClient,
   where: Prisma.timetable_threshold_summaryWhereInput,

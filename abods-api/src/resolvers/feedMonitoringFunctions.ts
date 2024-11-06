@@ -1,8 +1,5 @@
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
-  ExpectedJourneyType,
-} from "../lib/otp.js";
-import {
   AlertTypeEnum,
   EventStatsType, FeedMonitoringTypeResolvers,
   LiveStatsTypeResolvers,
@@ -11,8 +8,7 @@ import {
   Resolvers,
   VehicleStatsType
 } from '../types/generated.js';
-import { getAvlPoints, getExpectedJourneys, getOperatorWithFeed, getVehicleStats, VehicleCountType } from '../lib/feedMonitoring.js';
-import { GraphQLResolveInfo } from "graphql";
+import { ExpectedJourneyType, getAvlPoints, getExpectedJourneys, getOperatorWithFeed, getVehicleStats, VehicleCountType } from '../lib/feedMonitoring.js';
 import { feed_monitor_summary, PrismaClient } from '@prisma/client';
 
 export const getEventStats: QueryResolvers['eventStats'] = () => {

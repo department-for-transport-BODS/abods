@@ -1,10 +1,13 @@
-import {
-  ExpectedJourneyType,
-} from "./otp.js";
 import { VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
 import { feed_monitor_summary, Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
+
+export type ExpectedJourneyType = {
+  group_id: string
+  expected_journey_start: Date
+  expected_journey_end: Date | null
+}
 
 export const getVehicleStats = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
