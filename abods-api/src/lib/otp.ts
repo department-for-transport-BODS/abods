@@ -3,7 +3,7 @@ import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from '../types/generated.js';
-import { SessionUser } from "../types/extra.js";
+import { AVLType, SessionUser } from "../types/extra.js";
 import { getOperators } from '../resolvers/otpFunctions.js';
 import { getDayOfWeekNumbers, isDefined } from './utils.js';
 import { Dayjs } from 'dayjs';
@@ -401,7 +401,7 @@ export const getAvlPoints = async (
   });
 };
 
-export const getAvlPerMinute = async (avl: { group_id: string; recorded_at_time: Date; vehicle_ref: string;}[]) => {
+export const getAvlPerMinute = async (avl: AVLType[]) => {
   const journeys = new Map<string, Set<string>>()
   avl.map((avl) => {
     const recordedAt =
@@ -410,7 +410,7 @@ export const getAvlPerMinute = async (avl: { group_id: string; recorded_at_time:
         .set("millisecond", 0)
         .toISOString()
     const journey = journeys.get(recordedAt) || new Set()
-    if (
+    if (avl.group_id &&
       !journey.has(avl.group_id)
     ) {
       journey.add(avl.group_id)

@@ -82,9 +82,9 @@ const getOperatorsDropDown = async (
 
   return userOperators
     .map((op) => ({
-      name: op.operator?.name ?? 'NA',
+      name: op.operator?.name ?? 'unknown',
       nocCode: op.operator_noc,
-      operatorId: op.operator_noc,
+      operatorId: op.operator_noc ?? 'unknown',
       adminAreas: adminAreas
         .filter((area) => area.national_operator_code === op.operator_noc)
         .map((area) => ({

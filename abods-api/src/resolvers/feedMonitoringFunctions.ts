@@ -14,6 +14,7 @@ import {
 import { AlertType, getVehicleStats, VechileCountType } from '../lib/feedMonitoring.js';
 import { GraphQLResolveInfo } from "graphql";
 import { PrismaClient } from '@prisma/client';
+import { AVLType } from "../types/extra.js";
 
 export const getEventStats: QueryResolvers['eventStats'] = () => {
   const eventStats: EventStatsType[] = [];
@@ -42,11 +43,7 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers['last20Minutes']
       21
     );
 
-    const avl: {
-      group_id: string;
-      recorded_at_time: Date;
-      vehicle_ref: string;
-    }[] = await getAvlPoints(
+    const avl: AVLType[] = await getAvlPoints(
       context.db,
       parent.operatorId,
       statsDate,
@@ -69,11 +66,7 @@ export const getLiveStats = async (
   info: GraphQLResolveInfo
 ) => {
   const queryName = info.operation.name?.value;
-  let last20Mins: {
-    group_id: string;
-    recorded_at_time: Date;
-    vehicle_ref: string;
-  }[] = [];
+  let last20Mins: AVLType[] = [];
   let expected: ExpectedJourneyType[] = [];
   const currentDate = getDate();
   if (queryName === "operatorLiveStatus") {
@@ -86,7 +79,7 @@ export const getLiveStats = async (
   const vechileRefs = new Set<string>();
   const groupIds = new Set(expected.map((journey) => journey.group_id));
   last20Mins = last20Mins.filter((avl) => {
-    if (groupIds.has(avl.group_id)) {
+    if (avl.group_id && groupIds.has(avl.group_id)) {
       if (!vechileRefs.has(avl.vehicle_ref)) {
         vechileRefs.add(avl.vehicle_ref);
       }

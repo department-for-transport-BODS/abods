@@ -23,3 +23,9 @@ export interface SessionUser {
   last_name: string | null;
   orgIds: number[];
 }
+
+export type AVLType = {
+  group_id: string | null;
+  recorded_at_time: Date;
+  vehicle_ref: string;
+}
