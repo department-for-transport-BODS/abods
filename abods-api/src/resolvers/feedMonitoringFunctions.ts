@@ -1,19 +1,19 @@
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
   ExpectedJourneyType,
-  getAvlPoints,
-  getExpectedJourneys,
 } from "../lib/otp.js";
 import {
+  AlertTypeEnum,
   EventStatsType, FeedMonitoringTypeResolvers,
   LiveStatsTypeResolvers,
+  OperatorTypeResolvers,
   QueryResolvers,
   Resolvers,
   VehicleStatsType
 } from '../types/generated.js';
-import { AlertType, getVehicleStats, VechileCountType } from '../lib/feedMonitoring.js';
+import { getAvlPoints, getExpectedJourneys, getOperatorWithFeed, getVehicleStats, VehicleCountType } from '../lib/feedMonitoring.js';
 import { GraphQLResolveInfo } from "graphql";
-import { PrismaClient } from '@prisma/client';
+import { feed_monitor_summary, PrismaClient } from '@prisma/client';
 
 export const getEventStats: QueryResolvers['eventStats'] = () => {
   const eventStats: EventStatsType[] = [];
@@ -59,45 +59,6 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers['last20Minutes']
   return []
 };
 
-export const getLiveStats = async (
-  parent,
-  db: PrismaClient,
-  info: GraphQLResolveInfo
-) => {
-  const queryName = info.operation.name?.value;
-  let last20Mins: Awaited<ReturnType<typeof getAvlPoints>> = [];
-  let expected: ExpectedJourneyType[] = [];
-  const currentDate = getDate();
-  if (queryName === "operatorLiveStatus") {
-    [expected, last20Mins] = await Promise.all([
-      getExpectedJourneys(db, parent.operatorId, currentDate, 90),
-      getAvlPoints(db, parent.operatorId, currentDate, true),
-    ]);
-  }
-
-  const vechileRefs = new Set<string>();
-  const groupIds = new Set(expected.map((journey) => journey.group_id));
-  last20Mins = last20Mins.filter((avl) => {
-    if (avl.group_id && groupIds.has(avl.group_id)) {
-      if (!vechileRefs.has(avl.vehicle_ref)) {
-        vechileRefs.add(avl.vehicle_ref);
-      }
-      return true;
-    }
-
-    return false;
-  });
-
-  return {
-    operatorId: parent.operatorId,
-    ...parent.liveStats,
-    expectedVehicles: expected.length,
-    currentVehicles: vechileRefs.size,
-    avl: last20Mins,
-    expected: expected,
-  };
-};
-
 export const getHistoricalStats: FeedMonitoringTypeResolvers['historicalStats'] = async (parent, args, context) => {
   const result = await context.db.feed_monitor_daily_summary.findFirst({
     where: {
@@ -113,17 +74,17 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers['historicalStats'] 
 };
 
 export const getExpectedVehicles : LiveStatsTypeResolvers['expectedVehicles'] = (parent, _, context) =>{
-  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VechileCountType.Expected) : 0
+  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VehicleCountType.Expected) : 0
 }
 
 export const getActualVehicles : LiveStatsTypeResolvers['currentVehicles'] = (parent, _, context) =>{
-  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VechileCountType.Actual) : 0
+  return parent.operatorId ? getVehicles(parent.operatorId, context.db, VehicleCountType.Actual) : 0
 }
 
 export const getVehicles = async (
   operatorId: string,
   db: PrismaClient,
-  type: VechileCountType
+  type: VehicleCountType
 ) => {
   const result = await db.feed_monitor_minute_summary.findFirst({
     where: {
@@ -133,8 +94,8 @@ export const getVehicles = async (
       received_interval: "desc",
     },
     select: {
-      actual: type === VechileCountType.Actual,
-      expected: type === VechileCountType.Expected,
+      actual: type === VehicleCountType.Actual,
+      expected: type === VehicleCountType.Expected,
     },
   });
 
@@ -187,21 +148,21 @@ const getEvents: QueryResolvers['events'] = async () => {
   return {
     items: [
       {
-        type: AlertType.VehicleCountDisparityEvent,
+        type: AlertTypeEnum.VehicleCountDisparityEvent,
         data: {
           message: "Test1",
         },
         timestamp: currentDate.subtract(2, "hour").toISOString(),
       },
       {
-        type: AlertType.VehicleCountDisparityEvent,
+        type: AlertTypeEnum.VehicleCountDisparityEvent,
         data: {
           message: "Test2",
         },
         timestamp: currentDate.subtract(3, "hour").toISOString(),
       },
       {
-        type: AlertType.VehicleCountDisparityEvent,
+        type: AlertTypeEnum.VehicleCountDisparityEvent,
         data: {
           message: "Test3",
         },
@@ -209,6 +170,27 @@ const getEvents: QueryResolvers['events'] = async () => {
       },
     ]
   };
+};
+
+export const getFeedMonitoringList =  async (
+  parent, _, context
+): Promise<QueryResolvers['feedMonitoring']> => {
+  const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
+    context.db,
+    parent.operatorId
+  );
+
+  return {
+    operatorId: parent.operatorId,
+    feedStatus: !!feed_summary?.last_outage,
+    availability: Number(feed_summary?.availability ?? 0),
+    lastOutage: feed_summary?.last_outage,
+    unavailableSince: feed_summary?.unavailable_since,
+    liveStats: {
+      operatorId: parent.operatorId,
+      updateFrequency: feed_summary?.update_frequency,
+    }
+  }
 };
 
 const feedMonitoringResolvers: Resolvers = {

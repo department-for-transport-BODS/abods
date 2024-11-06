@@ -148,27 +148,3 @@ export const dbUtcToBstHour = (inputDate: Date): string => {
 export const dbUtcToBstDate = (inputDate: Date | string): string => {
   return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
 };
-
-export const DateTimeScalar = new GraphQLScalarType({
-  name: 'DateTime',
-  description: 'A custom scalar to handle ISO 8601 date-time format with timezone offset',
-
-  // Parses the client input to dayjs format
-  parseValue(value: string) {
-    return dayjs(value).toDate(); // Converts incoming ISO string to JavaScript Date object
-  },
-
-  // Serializes the Date object to a specific format
-  serialize(value: Date) {
-    // Convert JavaScript Date to ISO format with timezone offset
-    return dayjs(value).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ'); // Default ISO 8601 with timezone
-  },
-
-  // Parses literal values in the AST
-  parseLiteral(ast) {
-    if (ast.kind === Kind.STRING) {
-      return dayjs(ast.value).toDate(); // Converts incoming ISO string to Date
-    }
-    return null; // Invalid format returns null
-  },
-});

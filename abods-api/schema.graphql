@@ -500,6 +500,9 @@ enum AlertTypeEnum {
     FeedComplianceFailure
     FeedFailure
     VehicleCountDisparity
+    VehicleCountDisparityEvent
+    FeedUnavailableEvent,
+    FeedAvailableEvent,
 }
 
 type ApiInfoType {

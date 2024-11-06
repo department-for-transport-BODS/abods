@@ -60,9 +60,12 @@ export type AlertType = {
 };
 
 export enum AlertTypeEnum {
+  FeedAvailableEvent = 'FeedAvailableEvent',
   FeedComplianceFailure = 'FeedComplianceFailure',
   FeedFailure = 'FeedFailure',
-  VehicleCountDisparity = 'VehicleCountDisparity'
+  FeedUnavailableEvent = 'FeedUnavailableEvent',
+  VehicleCountDisparity = 'VehicleCountDisparity',
+  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent'
 }
 
 export type ApiInfoType = {

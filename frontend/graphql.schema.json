@@ -338,6 +338,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "FeedAvailableEvent",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "FeedComplianceFailure",
             "description": null,
             "isDeprecated": false,
@@ -350,7 +356,19 @@
             "deprecationReason": null
           },
           {
+            "name": "FeedUnavailableEvent",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "VehicleCountDisparity",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "VehicleCountDisparityEvent",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

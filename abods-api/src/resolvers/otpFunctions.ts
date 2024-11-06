@@ -21,10 +21,11 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate } from '../lib/dayjs.js';
-import { compareThresholds, getFeedMonitoringList, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
+import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from './helpers.js';
+import { getFeedMonitoringList } from "./feedMonitoringFunctions.js";
 
 interface DayCount {
   dayOfWeek: number;
