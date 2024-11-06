@@ -21,7 +21,7 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { dbUtcToBstDate, dbUtcToBstHour, getBSTDate, getDate, getFormattedDate, utcToBstDBInput } from '../lib/dayjs.js';
-import { compareThresholds, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
+import { compareThresholds, formatDuration, getNocAdminAreas, getOperatorsFromOrgId, getOperatorsFroServiceDetails } from "../lib/otp.js"
 import { Prisma, PrismaClient } from '@prisma/client';
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from './helpers.js';
@@ -1390,7 +1390,6 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
         headway_stops_count: true,
         actual_headway: true,
         expected_headway: true,
-        excess_wait_time: true,
       },
     })
 
@@ -1398,7 +1397,6 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
       [key: string]: {
         actual_headway: number,
         expected_headway: number,
-        excess_wait_time: number,
         headway_stops_count: number
       }
     } = {}
@@ -1412,13 +1410,11 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
         if (headwayData) {
           headwayData.actual_headway = headwayData.actual_headway + result.actual_headway.toNumber() * result.headway_stops_count
           headwayData.expected_headway = headwayData.expected_headway + result.expected_headway.toNumber() * result.headway_stops_count
-          headwayData.excess_wait_time = headwayData.excess_wait_time + result.excess_wait_time.toNumber() * result.headway_stops_count
           headwayData.headway_stops_count += result.headway_stops_count
         } else {
           headwayMap[formatterdeparture] = {
             actual_headway: result.actual_headway.toNumber() * result.headway_stops_count,
             expected_headway: result.expected_headway.toNumber() * result.headway_stops_count,
-            excess_wait_time: result.excess_wait_time.toNumber() * result.headway_stops_count,
             headway_stops_count: result.headway_stops_count
           }
         }
@@ -1428,11 +1424,14 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
     const returnHeadways: HeadwayTimeSeriesType[] = []
 
     for (const [departure_hour, headway] of Object.entries(headwayMap)) {
+      const actualWaitTime = formatDuration(headway.actual_headway / (headway.headway_stops_count * 60))
+      const scheduledWaitTime = formatDuration(headway.expected_headway / (headway.headway_stops_count * 60))
+      const excessWaitTime = Math.abs(scheduledWaitTime - actualWaitTime)
       returnHeadways.push({
         ts: departure_hour,
-        actualWaitTime: headway.actual_headway / (headway.headway_stops_count * 60),
-        scheduledWaitTime: headway.expected_headway / (headway.headway_stops_count * 60),
-        excessWaitTime: headway.excess_wait_time / (headway.headway_stops_count * 60)
+        actualWaitTime,
+        scheduledWaitTime,
+        excessWaitTime
       })
     }
 
