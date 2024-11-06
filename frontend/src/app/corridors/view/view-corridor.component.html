@@ -154,19 +154,19 @@
                   'case',
                   ['boolean', ['feature-state', 'selected'], selectAll],
                   '#1d70b8',
-                  '#77a9d4',
+                  '#77a9d4'
                 ],
                 'line-width': 5,
                 'line-dasharray': [
                   'case',
                   ['boolean', ['get', 'dashedLine'], true],
                   ['literal', [0.8, 1.6]],
-                  ['literal', [1]],
-                ],
+                  ['literal', [1]]
+                ]
               }"
               [layout]="{
                 'line-cap': 'square',
-                'line-join': 'round',
+                'line-join': 'round'
               }"
               source="corridor-line"
             ></mgl-layer>
@@ -179,13 +179,13 @@
                   'case',
                   ['boolean', ['feature-state', 'selected'], selectAll],
                   1,
-                  0,
-                ],
+                  0
+                ]
               }"
               [layout]="{
                 'icon-image': 'map-chevron-large',
                 'symbol-placement': 'line',
-                'symbol-spacing': 200,
+                'symbol-spacing': 200
               }"
               source="corridor-line"
             ></mgl-layer>
@@ -201,8 +201,8 @@
                   'case',
                   ['boolean', ['feature-state', 'hover'], false],
                   '#0b0c0c',
-                  '#B1B4B6',
-                ],
+                  '#B1B4B6'
+                ]
               }"
               source="corridor-stops"
               (layerMouseMove)="

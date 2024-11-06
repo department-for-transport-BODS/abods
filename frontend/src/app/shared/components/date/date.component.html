@@ -31,7 +31,7 @@
       <span
         class="date__month-name"
         [ngClass]="{
-          'date__month-name--this-month': month.hasSame(today, 'month'),
+          'date__month-name--this-month': month.hasSame(today, 'month')
         }"
         >{{ month | dateTimeToFormat: "MMMM yyyy" }}</span
       >
@@ -39,7 +39,7 @@
         (click)="nextMonth($event)"
         class="date__month-step date__month-step--next unbuttoned"
         [ngClass]="{
-          'date__month-step--disabled': month.endOf('month') >= validRange.end,
+          'date__month-step--disabled': month.endOf('month') >= validRange.end
         }"
         aria-label="next month"
       >

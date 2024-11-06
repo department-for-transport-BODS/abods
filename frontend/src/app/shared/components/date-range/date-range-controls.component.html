@@ -40,8 +40,7 @@
                 tabindex="-1"
                 class="date-range-controls__month-step date-range-controls__month-step--prev unbuttoned"
                 [ngClass]="{
-                  'date-range-controls__month-step--disabled':
-                    prevMonthDisabled,
+                  'date-range-controls__month-step--disabled': prevMonthDisabled
                 }"
               >
                 <svg-icon
@@ -53,7 +52,7 @@
                 class="date-range-controls__month-name"
                 [ngClass]="{
                   'date-range-controls__month-name--this-month':
-                    monthLeft.contains(today),
+                    monthLeft.contains(today)
                 }"
                 >{{ monthLeft.start | dateTimeToFormat: "MMM yyyy" }}</span
               >
@@ -70,7 +69,7 @@
                 class="date-range-controls__month-name"
                 [ngClass]="{
                   'date-range-controls__month-name--this-month':
-                    monthRight.contains(today),
+                    monthRight.contains(today)
                 }"
                 >{{ monthRight.start | dateTimeToFormat: "MMM yyyy" }}</span
               >
@@ -79,8 +78,7 @@
                 tabindex="-1"
                 class="date-range-controls__month-step date-range-controls__month-step--next unbuttoned"
                 [ngClass]="{
-                  'date-range-controls__month-step--disabled':
-                    nextMonthDisabled,
+                  'date-range-controls__month-step--disabled': nextMonthDisabled
                 }"
               >
                 <svg-icon

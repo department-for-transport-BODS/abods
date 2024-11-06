@@ -67,7 +67,7 @@
       'circle-radius': 6,
       'circle-stroke-width': 4,
       'circle-stroke-color': '#0b0c0c',
-      'circle-pitch-alignment': 'map',
+      'circle-pitch-alignment': 'map'
     }"
     source="corridor-stops"
     (layerMouseMove)="mapSetHover(stop($event))"
@@ -87,10 +87,10 @@
         10,
         16,
         300,
-        33,
+        33
       ],
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#0b0c0c',
+      'circle-stroke-color': '#0b0c0c'
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -107,10 +107,10 @@
         10,
         14,
         300,
-        31,
+        31
       ],
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff',
+      'circle-stroke-color': '#ffffff'
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -126,7 +126,7 @@
       'text-size': 16,
       'text-line-height': 1.25,
       'text-allow-overlap': true,
-      'text-ignore-placement': true,
+      'text-ignore-placement': true
     }"
     source="matching-stops"
   ></mgl-layer>
@@ -143,9 +143,9 @@
         'case',
         ['boolean', ['feature-state', 'hover'], stopList.length === 0],
         '#0b0c0c',
-        '#B1B4B6',
+        '#B1B4B6'
       ],
-      'circle-pitch-alignment': 'map',
+      'circle-pitch-alignment': 'map'
     }"
     source="matching-stops"
     [before]="corridorStops ? 'corridor-markers' : 'matching-stop-clusters'"
@@ -163,12 +163,12 @@
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         5,
-        0,
-      ],
+        0
+      ]
     }"
     [layout]="{
       'line-cap': 'round',
-      'line-join': 'round',
+      'line-join': 'round'
     }"
     source="matching-stop-lines"
     [before]="matchingStops ? 'matching-stop-markers' : undefined"
@@ -182,13 +182,13 @@
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0,
-      ],
+        0
+      ]
     }"
     [layout]="{
       'icon-image': 'map-chevron-large',
       'symbol-placement': 'line',
-      'symbol-spacing': 200,
+      'symbol-spacing': 200
     }"
     source="matching-stop-lines"
   ></mgl-layer>
@@ -198,11 +198,11 @@
     type="line"
     [paint]="{
       'line-color': '#1d70b8',
-      'line-width': 5,
+      'line-width': 5
     }"
     [layout]="{
       'line-cap': 'round',
-      'line-join': 'round',
+      'line-join': 'round'
     }"
     source="corridor-line"
     [before]="corridorStops ? 'corridor-markers' : undefined"
@@ -214,7 +214,7 @@
     [layout]="{
       'icon-image': 'map-chevron-large',
       'symbol-placement': 'line',
-      'symbol-spacing': 200,
+      'symbol-spacing': 200
     }"
     source="corridor-line"
   ></mgl-layer>
@@ -231,9 +231,9 @@
         11,
         2,
         13,
-        5,
+        5
       ],
-      'circle-pitch-alignment': 'map',
+      'circle-pitch-alignment': 'map'
     }"
     source="other-stops"
     [before]="
@@ -259,9 +259,9 @@
         11,
         2,
         13,
-        5,
+        5
       ],
-      'circle-pitch-alignment': 'map',
+      'circle-pitch-alignment': 'map'
     }"
     source="non-org-stops"
     [before]="nonOrgStopLayerBeforeId"
