@@ -1,6 +1,5 @@
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
-  AlertTypeEnum,
   EventResponse,
   EventStatsType,
   FeedMonitoringType,

@@ -1,13 +1,12 @@
-import { Dayjs } from "dayjs";
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
+  AvlPoint,
   OtpEnum,
-  UniqueJourneyType,
   QueryResolvers,
   Resolvers,
-  VehicleReplayNamespaceResolvers,
-  AvlPoint,
   Stop,
+  UniqueJourneyType,
+  VehicleReplayNamespaceResolvers,
 } from "../types/generated.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 

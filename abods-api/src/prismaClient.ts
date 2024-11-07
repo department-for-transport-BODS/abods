@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Signer } from "@aws-sdk/rds-signer";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import logger from "./logger.js";
