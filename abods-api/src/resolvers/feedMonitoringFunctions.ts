@@ -75,7 +75,7 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] 
     });
 
     return {
-      update_frequency: result?.update_frequency,
+      updateFrequency: result?.update_frequency,
       availability: Number(result?.availability ?? 0),
     };
   };
