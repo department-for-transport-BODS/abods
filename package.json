@@ -4,7 +4,7 @@
     "fmt": "prettier -w .",
     "fmt:check": "prettier --check .",
     "postinstall": "(cd abods-api && npm install); (cd frontend && npm install)",
-    "prepare": "(npm run codegen) && husky install"
+    "prepare": "(npm run codegen) && husky"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.3",
