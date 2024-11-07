@@ -1,20 +1,18 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { SharedModule } from '../../shared.module';
-import { BrowserTitleComponent } from './browser-title.component';
+import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "../../shared.module";
+import { BrowserTitleComponent } from "./browser-title.component";
 
-describe('BrowserTitleComponent', () => {
+describe("BrowserTitleComponent", () => {
   let component: BrowserTitleComponent;
   let fixture: ComponentFixture<BrowserTitleComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [BrowserTitleComponent],
-        imports: [SharedModule, LayoutModule],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [BrowserTitleComponent],
+      imports: [SharedModule, LayoutModule],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BrowserTitleComponent);
@@ -22,7 +20,7 @@ describe('BrowserTitleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

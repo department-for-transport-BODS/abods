@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .journey-search {
   &__controls {
@@ -48,10 +48,16 @@
 // implemented support for anything to replace it - likely CSS shadow parts
 // @see https://drafts.csswg.org/css-shadow-parts
 
-:host ::ng-deep .ng-select.gds-select.journey-search__operators .ng-dropdown-panel {
+:host
+  ::ng-deep
+  .ng-select.gds-select.journey-search__operators
+  .ng-dropdown-panel {
   min-width: 400px;
 }
 
-:host ::ng-deep .ng-select.gds-select.journey-search__services .ng-dropdown-panel {
+:host
+  ::ng-deep
+  .ng-select.gds-select.journey-search__services
+  .ng-dropdown-panel {
   min-width: 500px;
 }

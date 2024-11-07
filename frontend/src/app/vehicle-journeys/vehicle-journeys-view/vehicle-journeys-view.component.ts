@@ -1,41 +1,48 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { combineLatest, map, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { VehicleJourneyView } from './vehicle-journey-view.model';
-import { VehicleJourneyNotFoundView } from './vehicle-journey-not-found-view.model';
-import { VehiclePingStop } from './vehicle-ping-stop.model';
-import { StopHoverEvent } from './stop-list/stop-item/stop-item.component';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Params, Router } from "@angular/router";
+import { combineLatest, map, Subject, switchMap, takeUntil, tap } from "rxjs";
+import { VehicleJourneyView } from "./vehicle-journey-view.model";
+import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
+import { VehiclePingStop } from "./vehicle-ping-stop.model";
+import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import {
   VehicleJourney,
   VehicleJourneysSearchService,
-} from '../vehicle-journeys-search/vehicle-journeys-search.service';
-import { DateTime } from 'luxon';
+} from "../vehicle-journeys-search/vehicle-journeys-search.service";
+import { DateTime } from "luxon";
 
-type TimingPointsOption = 'timing-points' | 'all-stops';
+type TimingPointsOption = "timing-points" | "all-stops";
 
 @Component({
-  selector: 'app-vehicle-journeys-view',
-  templateUrl: './vehicle-journeys-view.component.html',
-  styleUrls: ['./vehicle-journeys-view.component.scss'],
+  selector: "app-vehicle-journeys-view",
+  templateUrl: "./vehicle-journeys-view.component.html",
+  styleUrls: ["./vehicle-journeys-view.component.scss"],
 })
 export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   view?: VehicleJourneyView;
   errorView?: VehicleJourneyNotFoundView;
   loading = false;
-  timingPointsOption: TimingPointsOption = 'timing-points';
-  prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined] = [undefined, undefined];
+  timingPointsOption: TimingPointsOption = "timing-points";
+  prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined] = [
+    undefined,
+    undefined,
+  ];
 
   selectedStop?: VehiclePingStop;
   hoveredStop?: StopHoverEvent;
 
-  returnRoute = '/vehicle-journeys';
+  returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
 
   get journeyTitle(): string {
     return `${this.view?.journeyInfo.serviceInfo?.serviceNumber}: ${this.view?.journeyInfo.serviceInfo?.serviceName}`;
   }
 
-  constructor(private route: ActivatedRoute, private service: VehicleJourneysSearchService, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: VehicleJourneysSearchService,
+    private router: Router,
+  ) {}
 
   private onDestroy$ = new Subject<void>();
 
@@ -43,45 +50,52 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     this.route.queryParamMap
       .pipe(
         map((queryParams) => ({
-          date: DateTime.fromISO(queryParams.get('startTime') as string)
-            .startOf('day')
+          date: DateTime.fromISO(queryParams.get("startTime") as string)
+            .startOf("day")
             .toUTC()
-            ?.toISO({ format: 'basic', suppressSeconds: true }),
-          operator: queryParams.get('operator'),
-          service: queryParams.get('service'),
+            ?.toISO({ format: "basic", suppressSeconds: true }),
+          operator: queryParams.get("operator"),
+          service: queryParams.get("service"),
         })),
-        takeUntil(this.onDestroy$)
+        takeUntil(this.onDestroy$),
       )
       .subscribe((params) => (this.returnQueryParams = params));
 
     const journeyId$ = this.route.paramMap.pipe(
-      map((paramMap) => paramMap.get('journeyId') as string),
-      takeUntil(this.onDestroy$)
+      map((paramMap) => paramMap.get("journeyId") as string),
+      takeUntil(this.onDestroy$),
     );
 
     const startTime$ = this.route.queryParamMap.pipe(
-      map((queryParamMap) => DateTime.fromISO(queryParamMap.get('startTime') as string)),
-      takeUntil(this.onDestroy$)
+      map((queryParamMap) =>
+        DateTime.fromISO(queryParamMap.get("startTime") as string),
+      ),
+      takeUntil(this.onDestroy$),
     );
 
     const timingPointsOnly$ = this.route.queryParamMap.pipe(
       map((params) => {
-        return params.get('timingPointsOnly') === 'true' || params.get('allStops') !== 'true';
+        return (
+          params.get("timingPointsOnly") === "true" ||
+          params.get("allStops") !== "true"
+        );
       }),
-      takeUntil(this.onDestroy$)
+      takeUntil(this.onDestroy$),
     );
 
     timingPointsOnly$.subscribe((timingPointsOnly) => {
-      this.timingPointsOption = timingPointsOnly ? 'timing-points' : 'all-stops';
+      this.timingPointsOption = timingPointsOnly
+        ? "timing-points"
+        : "all-stops";
     });
 
     combineLatest([journeyId$, startTime$, timingPointsOnly$])
       .pipe(
         tap(() => (this.loading = true)),
         switchMap(([journeyId, startTime, timingPointsOnly]) =>
-          this.service.getJourney(journeyId, startTime, timingPointsOnly)
+          this.service.getJourney(journeyId, startTime, timingPointsOnly),
         ),
-        takeUntil(this.onDestroy$)
+        takeUntil(this.onDestroy$),
       )
       .subscribe({
         next: (view) => {
@@ -102,8 +116,11 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   }
 
   onTimingPointsToggleChange() {
-    const allStops = this.timingPointsOption === 'all-stops' ? true : null;
-    this.router.navigate([], { queryParams: { allStops }, queryParamsHandling: 'merge' });
+    const allStops = this.timingPointsOption === "all-stops" ? true : null;
+    this.router.navigate([], {
+      queryParams: { allStops },
+      queryParamsHandling: "merge",
+    });
   }
 
   onStopSelected(stop: VehiclePingStop) {

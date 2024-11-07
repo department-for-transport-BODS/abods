@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 @mixin square($size) {
   width: $size;
@@ -35,16 +35,16 @@ mgl-map {
     @include square(16px);
 
     &--high {
-      background-color: govuk-colour('turquoise');
+      background-color: govuk-colour("turquoise");
     }
     &--med {
-      background-color: govuk-colour('yellow');
+      background-color: govuk-colour("yellow");
     }
     &--low {
-      background-color: govuk-colour('red');
+      background-color: govuk-colour("red");
     }
     &--no-data {
-      background-color: govuk-colour('mid-grey');
+      background-color: govuk-colour("mid-grey");
     }
   }
 }

@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .on-time {
   &__filter-row {
@@ -77,7 +77,8 @@
   }
 }
 
-@media screen and (min-width: 890px) and (max-width: 1024px), (min-width: 1185px) {
+@media screen and (min-width: 890px) and (max-width: 1024px),
+  (min-width: 1185px) {
   .on-time {
     &__chart-footer {
       flex-direction: row;

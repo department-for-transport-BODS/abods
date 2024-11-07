@@ -1,6 +1,13 @@
-import { ComponentFactoryResolver, ComponentRef, Injectable, OnDestroy, Type, ViewContainerRef } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {
+  ComponentFactoryResolver,
+  ComponentRef,
+  Injectable,
+  OnDestroy,
+  Type,
+  ViewContainerRef,
+} from "@angular/core";
+import { Observable, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 export interface ComponentInput {
   name: string;
@@ -31,8 +38,15 @@ export class DynamicPanelComponentLoaderService implements OnDestroy {
     this.destroy$.complete();
   }
 
-  loadComponent(component: DynamicComponent, viewContainerRef: ViewContainerRef, destroy$: Subject<any>) {
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component.component);
+  loadComponent(
+    component: DynamicComponent,
+    viewContainerRef: ViewContainerRef,
+    destroy$: Subject<any>,
+  ) {
+    const componentFactory =
+      this.componentFactoryResolver.resolveComponentFactory(
+        component.component,
+      );
 
     viewContainerRef.clear();
 
@@ -61,7 +75,10 @@ export class DynamicPanelComponentLoaderService implements OnDestroy {
     if (input.value instanceof Observable) {
       input.value
         .pipe(takeUntil(this.destroy$))
-        .subscribe((value: any) => ((<any>this.componentRef.instance)[input.name] = value));
+        .subscribe(
+          (value: any) =>
+            ((<any>this.componentRef.instance)[input.name] = value),
+        );
     } else {
       (<any>this.componentRef.instance)[input.name] = input.value;
     }

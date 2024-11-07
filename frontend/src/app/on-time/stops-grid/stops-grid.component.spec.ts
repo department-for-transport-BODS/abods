@@ -1,22 +1,22 @@
-import { FormsModule } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { AgGridModule } from 'ag-grid-angular';
-import { DateTime } from 'luxon';
-import { of } from 'rxjs';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { OnTimeService, StopPerformance } from '../on-time.service';
+import { FormsModule } from "@angular/forms";
+import { RouterTestingModule } from "@angular/router/testing";
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { AgGridModule } from "ag-grid-angular";
+import { DateTime } from "luxon";
+import { of } from "rxjs";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "src/app/shared/shared.module";
+import { OnTimeService, StopPerformance } from "../on-time.service";
 
-import { StopsGridComponent } from './stops-grid.component';
-import { TimingRendererComponent } from './timing-renderer/timing-renderer.component';
-import { CommonModule, PercentPipe } from '@angular/common';
-import { fakeAsync, flush, tick } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { OnTimeModule } from '../on-time.module';
-import { ApolloTestingModule } from 'apollo-angular/testing';
+import { StopsGridComponent } from "./stops-grid.component";
+import { TimingRendererComponent } from "./timing-renderer/timing-renderer.component";
+import { CommonModule, PercentPipe } from "@angular/common";
+import { fakeAsync, flush, tick } from "@angular/core/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { OnTimeModule } from "../on-time.module";
+import { ApolloTestingModule } from "apollo-angular/testing";
 
-describe('StopsGridComponent', () => {
+describe("StopsGridComponent", () => {
   let spectator: Spectator<StopsGridComponent>;
   let service: OnTimeService;
 
@@ -40,18 +40,18 @@ describe('StopsGridComponent', () => {
 
   const stops: StopPerformance[] = [
     {
-      lineId: 'LI00001',
-      stopId: 'ST000000000001',
+      lineId: "LI00001",
+      stopId: "ST000000000001",
       stopInfo: {
-        sourceId: '',
-        stopName: 'Something road',
-        stopId: 'ST000000000001',
+        sourceId: "",
+        stopName: "Something road",
+        stopId: "ST000000000001",
         stopLocation: { latitude: 56.7686, longitude: 0.4567 },
         stopLocality: {
-          localityId: 'L1',
-          localityAreaId: 'LA1',
-          localityName: 'Somewhere',
-          localityAreaName: 'Some Town',
+          localityId: "L1",
+          localityAreaId: "LA1",
+          localityName: "Somewhere",
+          localityAreaName: "Some Town",
         },
       },
       scheduledDepartures: 31,
@@ -68,18 +68,18 @@ describe('StopsGridComponent', () => {
       timingPoint: false,
     },
     {
-      lineId: 'LI00001',
-      stopId: 'ST000000000002',
+      lineId: "LI00001",
+      stopId: "ST000000000002",
       stopInfo: {
-        sourceId: '',
-        stopName: 'Thingy street',
-        stopId: 'ST000000000002',
+        sourceId: "",
+        stopName: "Thingy street",
+        stopId: "ST000000000002",
         stopLocation: { latitude: 56.7686, longitude: 0.4567 },
         stopLocality: {
-          localityId: 'L1',
-          localityAreaId: 'LA1',
-          localityName: 'Somewhere',
-          localityAreaName: 'Some Town',
+          localityId: "L1",
+          localityAreaId: "LA1",
+          localityName: "Somewhere",
+          localityAreaName: "Some Town",
         },
       },
       scheduledDepartures: 29,
@@ -102,66 +102,94 @@ describe('StopsGridComponent', () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it('should call service without admin area ids', () => {
+  it("should call service without admin area ids", () => {
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO('2021-02-01T00:00:00Z').toJSDate(),
-      toTimestamp: DateTime.fromISO('2021-03-01T00:00:00Z').toJSDate(),
-      filters: { nocCodes: ['NOC1'], adminAreaIds: ['AA050'] },
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      filters: { nocCodes: ["NOC1"], adminAreaIds: ["AA050"] },
     };
 
-    const spy = spyOn(service, 'fetchStopPerformanceList').and.returnValue(of(stops));
+    const spy = spyOn(service, "fetchStopPerformanceList").and.returnValue(
+      of(stops),
+    );
     spectator.detectChanges();
 
     expect(spy).toHaveBeenCalledWith(
       jasmine.objectContaining({
-        fromTimestamp: DateTime.fromISO('2021-02-01T00:00:00Z').toJSDate(),
-        toTimestamp: DateTime.fromISO('2021-03-01T00:00:00Z').toJSDate(),
-        filters: { nocCodes: ['NOC1'] },
-      })
+        fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
+        toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+        filters: { nocCodes: ["NOC1"] },
+      }),
     );
   });
 
-  it('should display some data', fakeAsync(() => {
+  it("should display some data", fakeAsync(() => {
     const expected = [
-      ['000000000001', '', 'Something road', '31', '96.8%', '+00:12', '93.3%', '0%', '6.7%'],
-      ['000000000002', 'Timing point', 'Thingy street', '29', '93.1%', '+00:44', '89.7%', '3.4%', '10.3%'],
+      [
+        "000000000001",
+        "",
+        "Something road",
+        "31",
+        "96.8%",
+        "+00:12",
+        "93.3%",
+        "0%",
+        "6.7%",
+      ],
+      [
+        "000000000002",
+        "Timing point",
+        "Thingy street",
+        "29",
+        "93.1%",
+        "+00:44",
+        "89.7%",
+        "3.4%",
+        "10.3%",
+      ],
     ];
 
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO('2021-02-01T00:00:00Z').toJSDate(),
-      toTimestamp: DateTime.fromISO('2021-03-01T00:00:00Z').toJSDate(),
-      filters: { nocCodes: ['NOC1'] },
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      filters: { nocCodes: ["NOC1"] },
     };
 
-    spyOn(service, 'fetchStopPerformanceList').and.returnValue(of(stops));
+    spyOn(service, "fetchStopPerformanceList").and.returnValue(of(stops));
 
     spectator.detectChanges();
     tick(100);
 
-    const row1 = spectator.queryAll('[role="row"][row-index="0"] [role="gridcell"]').map((e) => e.textContent?.trim());
+    const row1 = spectator
+      .queryAll('[role="row"][row-index="0"] [role="gridcell"]')
+      .map((e) => e.textContent?.trim());
 
     expect(row1).toEqual(expected[0]);
 
-    const row2 = spectator.queryAll('[role="row"][row-index="1"] [role="gridcell"]').map((e) => e.textContent?.trim());
+    const row2 = spectator
+      .queryAll('[role="row"][row-index="1"] [role="gridcell"]')
+      .map((e) => e.textContent?.trim());
 
     expect(row2).toEqual(expected[1]);
     flush(100);
   }));
 
-  it('should calculate summary row correctly', fakeAsync(() => {
+  it("should calculate summary row correctly", fakeAsync(() => {
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO('2021-02-01T00:00:00Z').toJSDate(),
-      toTimestamp: DateTime.fromISO('2021-03-01T00:00:00Z').toJSDate(),
-      filters: { nocCodes: ['NOC1'] },
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      filters: { nocCodes: ["NOC1"] },
     };
 
-    spyOn(service, 'fetchStopPerformanceList').and.returnValue(of(stops));
+    spyOn(service, "fetchStopPerformanceList").and.returnValue(of(stops));
 
     spectator.detectChanges();
     tick(100);
 
-    const expected = ['', '', '', '60', '95%', '+00:27', '90%', '1.7%', '8.3%'];
-    const summary = spectator.queryAll('[role="row"][row-index="t-0"] [role="gridcell"]').map((e) => e.textContent);
+    const expected = ["", "", "", "60", "95%", "+00:27", "90%", "1.7%", "8.3%"];
+    const summary = spectator
+      .queryAll('[role="row"][row-index="t-0"] [role="gridcell"]')
+      .map((e) => e.textContent);
 
     expect(summary).toEqual(expected);
 

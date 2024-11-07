@@ -1,31 +1,31 @@
-import { FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormGroup, ValidationErrors, Validators } from "@angular/forms";
 
 export class PasswordValidator {
   static passwordPolicyText = [
-    'be at least 8 characters long',
-    'contain at least one number',
-    'contain both lowercase and uppercase characters',
-    'contain at least one special character',
+    "be at least 8 characters long",
+    "contain at least one number",
+    "contain both lowercase and uppercase characters",
+    "contain at least one special character",
   ];
 
   static getErrorText(errors: { [key: string]: boolean }): string | undefined {
     if (errors.minlength) {
-      return 'Password must be at least 8 characters long.';
+      return "Password must be at least 8 characters long.";
     }
     if (errors.lowerCase) {
-      return 'Password must contain at least one lowercase character.';
+      return "Password must contain at least one lowercase character.";
     }
     if (errors.upperCase) {
-      return 'Password must contain at least one uppercase character.';
+      return "Password must contain at least one uppercase character.";
     }
     if (errors.digits) {
-      return 'Password must contain at least one number.';
+      return "Password must contain at least one number.";
     }
     if (errors.specialChars) {
-      return 'Password must contain at least one special character.';
+      return "Password must contain at least one special character.";
     }
     if (errors.mismatch) {
-      return 'Passwords do not match.';
+      return "Passwords do not match.";
     }
   }
 
@@ -71,11 +71,15 @@ export class PasswordValidator {
     ];
   }
 
-  static confirmPasswords(passwordField: string): (control: FormGroup) => ValidationErrors | null {
+  static confirmPasswords(
+    passwordField: string,
+  ): (control: FormGroup) => ValidationErrors | null {
     return (control: FormGroup) => {
       const password = control.parent?.get(passwordField)?.value;
       const confirmPassword = control?.value;
-      return password && confirmPassword && password !== confirmPassword ? { mismatch: true } : null;
+      return password && confirmPassword && password !== confirmPassword
+        ? { mismatch: true }
+        : null;
     };
   }
 }

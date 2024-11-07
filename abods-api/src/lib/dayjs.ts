@@ -1,11 +1,11 @@
-import dayjs, { Dayjs } from 'dayjs';
-import utc from 'dayjs/plugin/utc.js';
-import timezone from 'dayjs/plugin/timezone.js';
-import { GraphQLScalarType, Kind } from 'graphql';
+import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+import { GraphQLScalarType, Kind } from "graphql";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.locale('en');
+dayjs.locale("en");
 
 export const getDate = (
   date?: string | Date | null,
@@ -27,20 +27,20 @@ export const getUTCDate = (date?: string | Date): Dayjs => {
 
 export const parseTimetz = (timetz: Dayjs): Dayjs => {
   return dayjs()
-    .set('hour', timetz.hour())
-    .set('minute', timetz.minute())
-    .set('second', timetz.second());
+    .set("hour", timetz.hour())
+    .set("minute", timetz.minute())
+    .set("second", timetz.second());
 };
 
 export const getDateLocale = (utcString: string): Dayjs => {
-  return dayjs.tz(utcString, 'Europe/London');
+  return dayjs.tz(utcString, "Europe/London");
 };
 
 export const getDateUTC = (
   journeyDate: Dayjs,
   hour: Dayjs | undefined,
 ): Dayjs => {
-  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(
+  const utcString = `${journeyDate.format("YYYY-MM-DD")}T${getStrUTCHour(
     hour,
   )}Z`;
   return dayjs.utc(utcString);
@@ -50,22 +50,22 @@ export const dbGmtToUtc = (
   journeyDate: Dayjs,
   hour: Dayjs | undefined,
 ): Dayjs => {
-  const utcString = `${journeyDate.format('YYYY-MM-DD')}T${getStrUTCHour(
+  const utcString = `${journeyDate.format("YYYY-MM-DD")}T${getStrUTCHour(
     hour,
   )}`;
   return getDateLocale(utcString);
 };
 
 export const getStrHour = (hour: Dayjs | undefined): string => {
-  return hour ? dayjs(hour).format('HH:mm:ss') : '00:00:00';
+  return hour ? dayjs(hour).format("HH:mm:ss") : "00:00:00";
 };
 
 export const getStrUTCHour = (hour: Dayjs | undefined): string => {
-  return hour ? dayjs.utc(hour).format('HH:mm:ss') : '00:00:00';
+  return hour ? dayjs.utc(hour).format("HH:mm:ss") : "00:00:00";
 };
 
 export const getBSTDate = (date: Date | Dayjs, format: string): string => {
-  return dayjs(date).tz('Europe/London').format(format);
+  return dayjs(date).tz("Europe/London").format(format);
 };
 
 export const getStrDateRange = (startDate: Date, endDate: Date): string[] => {
@@ -75,8 +75,8 @@ export const getStrDateRange = (startDate: Date, endDate: Date): string[] => {
   const toDate = getDate(endDate);
 
   while (fromDate.isBefore(toDate)) {
-    strDates.push(getBSTDate(fromDate, 'YYYY-MM-DD'));
-    fromDate = fromDate.add(1, 'day');
+    strDates.push(getBSTDate(fromDate, "YYYY-MM-DD"));
+    fromDate = fromDate.add(1, "day");
   }
   return strDates;
 };
@@ -86,18 +86,18 @@ export const overwriteDate = (
   overwriteDate: Dayjs,
 ): Dayjs => {
   return inputDate
-    .set('year', overwriteDate.year())
-    .set('month', overwriteDate.month())
-    .set('day', overwriteDate.date());
+    .set("year", overwriteDate.year())
+    .set("month", overwriteDate.month())
+    .set("day", overwriteDate.date());
 };
 
 export const getFormattedDate = (
   inputDate: Date | null | undefined,
-  format?: string
+  format?: string,
 ): string => {
   return format
-    ? getDate(inputDate).tz('Europe/London').format(format)
-    : getDate(inputDate).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
+    ? getDate(inputDate).tz("Europe/London").format(format)
+    : getDate(inputDate).tz("Europe/London").format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
 export const getDateWithTimestamp = (date: Date, time: Date): string => {
@@ -114,7 +114,7 @@ export const getDateWithTimestamp = (date: Date, time: Date): string => {
     new Date(year, month, day, hours, minutes, seconds, milliseconds),
   );
 
-  return combinedDate.tz('Europe/London').format('YYYY-MM-DDTHH:mm:ssZ');
+  return combinedDate.tz("Europe/London").format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
 export const getHourFormattedDate = (
@@ -122,11 +122,11 @@ export const getHourFormattedDate = (
   format?: string,
 ): string => {
   return format
-    ? getDate(inputDate).tz('Europe/London').startOf('hour').format(format)
+    ? getDate(inputDate).tz("Europe/London").startOf("hour").format(format)
     : getDate(inputDate)
-        .tz('Europe/London')
-        .startOf('hour')
-        .format('YYYY-MM-DDTHH:mm:ssZ');
+        .tz("Europe/London")
+        .startOf("hour")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
 export const getDayFormattedDate = (
@@ -134,23 +134,25 @@ export const getDayFormattedDate = (
   format?: string,
 ): string => {
   return format
-    ? getDate(inputDate).tz('Europe/London').startOf('day').format(format)
+    ? getDate(inputDate).tz("Europe/London").startOf("day").format(format)
     : getDate(inputDate)
-        .tz('Europe/London')
-        .startOf('hour')
-        .format('YYYY-MM-DDTHH:mm:ssZ');
+        .tz("Europe/London")
+        .startOf("hour")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
 export const dbUtcToBstHour = (inputDate: Date): string => {
-  return getUTCDate(inputDate).tz('Europe/London').format('HH:mm:ss');
+  return getUTCDate(inputDate).tz("Europe/London").format("HH:mm:ss");
 };
 
 export const dbUtcToBstDate = (inputDate: Date | string): string => {
-  return getUTCDate(inputDate).tz('Europe/London').format('YYYY-MM-DD');
+  return getUTCDate(inputDate).tz("Europe/London").format("YYYY-MM-DD");
 };
 
 export const utcToBstDBInput = (
-  inputDate: Date | string | undefined
+  inputDate: Date | string | undefined,
 ): Date | undefined => {
-  return inputDate ? getUTCDate(inputDate).tz("Europe/London").toDate() : undefined;
+  return inputDate
+    ? getUTCDate(inputDate).tz("Europe/London").toDate()
+    : undefined;
 };

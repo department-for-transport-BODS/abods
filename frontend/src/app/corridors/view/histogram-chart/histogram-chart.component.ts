@@ -1,20 +1,41 @@
-import { AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { AxisRenderer, CategoryAxis, ColumnSeries, ValueAxis, XYChart, XYCursor } from '@amcharts/amcharts4/charts';
-import { CorridorChart, XAxisLabelPosition } from '../corridor-chart/CorridorChart';
-import { chartColors } from '../../../shared/components/amcharts/chart.service';
-import { CorridorHistogramType } from '../../../../generated/graphql';
-import { Color } from '@amcharts/amcharts4/core';
-import { BaseChartOptions } from '../corridor-chart/BaseChartOption';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+} from "@angular/core";
+import {
+  AxisRenderer,
+  CategoryAxis,
+  ColumnSeries,
+  ValueAxis,
+  XYChart,
+  XYCursor,
+} from "@amcharts/amcharts4/charts";
+import {
+  CorridorChart,
+  XAxisLabelPosition,
+} from "../corridor-chart/CorridorChart";
+import { chartColors } from "../../../shared/components/amcharts/chart.service";
+import { CorridorHistogramType } from "../../../../generated/graphql";
+import { Color } from "@amcharts/amcharts4/core";
+import { BaseChartOptions } from "../corridor-chart/BaseChartOption";
 
-export type XAxisDataCategory = 'xAxisCategory';
+export type XAxisDataCategory = "xAxisCategory";
 export type HistogramChartDataItem = CorridorHistogramType & {
   xAxisCategory: string;
   xAxisLabel: string;
 };
 
 @Component({
-  selector: 'app-histogram-chart',
-  template: `<am4-xy-chart class="chart" [data]="data" theme="frozen"></am4-xy-chart>`,
+  selector: "app-histogram-chart",
+  template: `<am4-xy-chart
+    class="chart"
+    [data]="data"
+    theme="frozen"
+  ></am4-xy-chart>`,
   styles: [
     `
       .chart {
@@ -23,7 +44,9 @@ export type HistogramChartDataItem = CorridorHistogramType & {
     `,
   ],
 })
-export class HistogramChartComponent implements CorridorChart<HistogramChartDataItem[]>, OnChanges, AfterViewInit {
+export class HistogramChartComponent
+  implements CorridorChart<HistogramChartDataItem[]>, OnChanges, AfterViewInit
+{
   @Input() data?: HistogramChartDataItem[];
   @Input() loading?: boolean;
   @Input() noData = false;
@@ -36,7 +59,7 @@ export class HistogramChartComponent implements CorridorChart<HistogramChartData
   xAxis!: CategoryAxis<AxisRenderer>;
   yAxis!: ValueAxis<AxisRenderer>;
 
-  private readonly xAxisDataCategory: XAxisDataCategory = 'xAxisCategory';
+  private readonly xAxisDataCategory: XAxisDataCategory = "xAxisCategory";
   private columnSeries!: ColumnSeries;
   private baseChartOptions = new BaseChartOptions<HistogramChartDataItem[]>()
     .builder()
@@ -84,12 +107,12 @@ export class HistogramChartComponent implements CorridorChart<HistogramChartData
 
     this.columnSeries = this.chart.series.push(new ColumnSeries());
     this.columnSeries.dataFields.categoryX = this.xAxisDataCategory;
-    this.columnSeries.dataFields.valueY = 'freq';
+    this.columnSeries.dataFields.valueY = "freq";
     this.columnSeries.fill = this.chartFillcolor;
     this.columnSeries.stroke = this.chartFillcolor;
 
     const cursor = new XYCursor();
-    cursor.behavior = 'none';
+    cursor.behavior = "none";
     cursor.lineY.disabled = true;
     cursor.lineX.disabled = true;
     cursor.snapToSeries = this.columnSeries;
@@ -99,7 +122,7 @@ export class HistogramChartComponent implements CorridorChart<HistogramChartData
     <div style="margin-bottom: 5px;"><b>{freq} journeys</b></div>`;
 
     if (this.columnSeries.tooltip) {
-      this.columnSeries.tooltip.pointerOrientation = 'vertical';
+      this.columnSeries.tooltip.pointerOrientation = "vertical";
       this.columnSeries.tooltip.getFillFromObject = false;
       this.columnSeries.tooltip.label.fill = chartColors.black;
       this.columnSeries.tooltip.label.padding(10, 10, 5, 10);

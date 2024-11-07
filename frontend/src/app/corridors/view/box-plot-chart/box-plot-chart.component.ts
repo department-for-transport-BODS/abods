@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+} from "@angular/core";
 import {
   AxisRenderer,
   Bullet,
@@ -9,22 +16,31 @@ import {
   ValueAxis,
   XYChart,
   XYCursor,
-} from '@amcharts/amcharts4/charts';
-import { CorridorChart, XAxisLabelPosition } from '../corridor-chart/CorridorChart';
-import { CorridorStatsViewParams } from '../../corridors.service';
-import { chartColors } from '../../../shared/components/amcharts/chart.service';
-import { Maybe } from '../../../../generated/graphql';
-import { Color, ITimeInterval, percent, Rectangle, TimeUnit } from '@amcharts/amcharts4/core';
-import { BaseChartOptions } from '../corridor-chart/BaseChartOption';
-import { ICorridorJourneyTimeStats } from '../../../../generated/extra';
+} from "@amcharts/amcharts4/charts";
+import {
+  CorridorChart,
+  XAxisLabelPosition,
+} from "../corridor-chart/CorridorChart";
+import { CorridorStatsViewParams } from "../../corridors.service";
+import { chartColors } from "../../../shared/components/amcharts/chart.service";
+import { Maybe } from "../../../../generated/graphql";
+import {
+  Color,
+  ITimeInterval,
+  percent,
+  Rectangle,
+  TimeUnit,
+} from "@amcharts/amcharts4/core";
+import { BaseChartOptions } from "../corridor-chart/BaseChartOption";
+import { ICorridorJourneyTimeStats } from "../../../../generated/extra";
 
-export type YAxisMinValueType = 'yAxisMinValue';
-export type YAxisMaxValueType = 'yAxisMaxValue';
-export type YAxisMeanValueType = 'yAxisMeanValue';
-export type YAxisPercentile25Type = 'percentile25';
-export type YAxisPercentile75Type = 'percentile75';
-export type XAxisType = 'category' | 'date';
-export type YAxisType = 'value' | 'time';
+export type YAxisMinValueType = "yAxisMinValue";
+export type YAxisMaxValueType = "yAxisMaxValue";
+export type YAxisMeanValueType = "yAxisMeanValue";
+export type YAxisPercentile25Type = "percentile25";
+export type YAxisPercentile75Type = "percentile75";
+export type XAxisType = "category" | "date";
+export type YAxisType = "value" | "time";
 export type BoxPlotChartDataItem = {
   yAxisMinValue?: number;
   yAxisMaxValue?: number;
@@ -35,8 +51,12 @@ export type BoxPlotChartDataItem = {
 };
 
 @Component({
-  selector: 'app-box-plot-chart',
-  template: `<am4-xy-chart class="chart" [data]="data" theme="frozen"></am4-xy-chart>`,
+  selector: "app-box-plot-chart",
+  template: `<am4-xy-chart
+    class="chart"
+    [data]="data"
+    theme="frozen"
+  ></am4-xy-chart>`,
   styles: [
     `
       .chart {
@@ -46,7 +66,11 @@ export type BoxPlotChartDataItem = {
   ],
 })
 export class BoxPlotChartComponent
-  implements CorridorChart<(ICorridorJourneyTimeStats & BoxPlotChartDataItem)[]>, OnChanges, AfterViewInit {
+  implements
+    CorridorChart<(ICorridorJourneyTimeStats & BoxPlotChartDataItem)[]>,
+    OnChanges,
+    AfterViewInit
+{
   @Input() data?: (ICorridorJourneyTimeStats & BoxPlotChartDataItem)[];
   @Input() loading?: boolean;
   @Input() noData = false;
@@ -86,11 +110,11 @@ export class BoxPlotChartComponent
     .zoomOutButtonDisbled()
     .build();
 
-  private readonly yAxisMinValueType: YAxisMinValueType = 'yAxisMinValue';
-  private readonly yAxisMaxValueType: YAxisMaxValueType = 'yAxisMaxValue';
-  private readonly yAxisMeanValueType: YAxisMeanValueType = 'yAxisMeanValue';
-  private readonly percentile25: YAxisPercentile25Type = 'percentile25';
-  private readonly percentile75: YAxisPercentile75Type = 'percentile75';
+  private readonly yAxisMinValueType: YAxisMinValueType = "yAxisMinValue";
+  private readonly yAxisMaxValueType: YAxisMaxValueType = "yAxisMaxValue";
+  private readonly yAxisMeanValueType: YAxisMeanValueType = "yAxisMeanValue";
+  private readonly percentile25: YAxisPercentile25Type = "percentile25";
+  private readonly percentile75: YAxisPercentile75Type = "percentile75";
 
   ngOnChanges(changes: SimpleChanges): void {
     // Change detection for base chart options
@@ -126,15 +150,15 @@ export class BoxPlotChartComponent
 
     if (this.xAxisCenterd) {
       this.xAxis.width = percent(45);
-      this.xAxis.align = 'center';
+      this.xAxis.align = "center";
       this.xAxis.renderer.line.strokeOpacity = 0;
       const dummyAxis = this.chart.xAxes.push(new ValueAxis());
       dummyAxis.renderer.inside = true;
       dummyAxis.renderer.line.strokeOpacity = 0.15;
     }
 
-    this.chart.dateFormatter.inputDateFormat = 'yyyy-MM-ddTHH:mm:ss';
-    this.chart.durationFormatter.durationFormat = 'm:ss';
+    this.chart.dateFormatter.inputDateFormat = "yyyy-MM-ddTHH:mm:ss";
+    this.chart.durationFormatter.durationFormat = "m:ss";
 
     this.xAxis.renderer.grid.template.location = 0.5;
 
@@ -153,9 +177,9 @@ export class BoxPlotChartComponent
   }
 
   private setXAxis(xAxisType: XAxisType) {
-    if (xAxisType === 'category') {
+    if (xAxisType === "category") {
       this.xAxis = this.chart.xAxes.push(new CategoryAxis());
-      this.xAxis.dataFields.category = 'category';
+      this.xAxis.dataFields.category = "category";
     } else {
       this.xAxis = this.chart.xAxes.push(new DateAxis());
     }
@@ -168,7 +192,7 @@ export class BoxPlotChartComponent
 
   private switchYAxis(yAxisType: YAxisType) {
     // We have to hide and show axes as cannot remove and replace with different AxisRenderer type
-    if (yAxisType === 'time') {
+    if (yAxisType === "time") {
       this.yAxis2.hide();
       this.whiskerSeries.yAxis = this.yAxis;
       this.boxSeries.yAxis = this.yAxis;
@@ -176,9 +200,9 @@ export class BoxPlotChartComponent
       this.yAxis.renderer.dx = 30;
       this.yAxis.title.dx = 10;
       this.yAxis.show();
-    } else if (yAxisType === 'value') {
+    } else if (yAxisType === "value") {
       this.yAxis.hide();
-      this.yAxis2.title.text = this.yAxisTitle ? this.yAxisTitle : '';
+      this.yAxis2.title.text = this.yAxisTitle ? this.yAxisTitle : "";
       this.whiskerSeries.yAxis = this.yAxis2;
       this.boxSeries.yAxis = this.yAxis2;
       this.meanSeries.yAxis = this.yAxis2;
@@ -199,16 +223,16 @@ export class BoxPlotChartComponent
       count: 1,
     };
     const gridIntervals: ITimeInterval[] =
-      params.granularity === 'hour'
+      params.granularity === "hour"
         ? [
-            { timeUnit: 'hour', count: 1 },
-            { timeUnit: 'hour', count: 3 },
-            { timeUnit: 'hour', count: 6 },
+            { timeUnit: "hour", count: 1 },
+            { timeUnit: "hour", count: 3 },
+            { timeUnit: "hour", count: 6 },
           ]
         : [
-            { timeUnit: 'day', count: 1 },
-            { timeUnit: 'day', count: 2 },
-            { timeUnit: 'day', count: 7 },
+            { timeUnit: "day", count: 1 },
+            { timeUnit: "day", count: 2 },
+            { timeUnit: "day", count: 7 },
           ];
     xAxis.gridIntervals.setAll(gridIntervals);
 
@@ -219,8 +243,8 @@ export class BoxPlotChartComponent
   }
 
   private createBoxPlotSeries() {
-    const type = this.xAxisType === 'category' ? 'categoryX' : 'dateX';
-    const dataField = this.xAxisType === 'category' ? 'category' : 'ts';
+    const type = this.xAxisType === "category" ? "categoryX" : "dateX";
+    const dataField = this.xAxisType === "category" ? "category" : "ts";
 
     const whiskerSeries = this.chart.series.push(new ColumnSeries());
     whiskerSeries.dataFields[type] = dataField;
@@ -237,8 +261,8 @@ export class BoxPlotChartComponent
       const rect = bullet.createChild(Rectangle);
       rect.width = 10;
       rect.height = 2;
-      rect.horizontalCenter = 'middle';
-      rect.verticalCenter = 'middle';
+      rect.horizontalCenter = "middle";
+      rect.verticalCenter = "middle";
       rect.strokeWidth = 0;
       return rect;
     };
@@ -277,7 +301,7 @@ export class BoxPlotChartComponent
     makeLine(meanBullet);
 
     const cursor = new XYCursor();
-    cursor.behavior = 'none';
+    cursor.behavior = "none";
     cursor.lineY.disabled = true;
     cursor.lineX.disabled = true;
     this.chart.cursor = cursor;
@@ -285,7 +309,7 @@ export class BoxPlotChartComponent
     this.boxSeries.columns.template.tooltipHTML = this.tooltipHtml();
 
     if (this.boxSeries.tooltip) {
-      this.boxSeries.tooltip.pointerOrientation = 'vertical';
+      this.boxSeries.tooltip.pointerOrientation = "vertical";
       this.boxSeries.tooltip.getFillFromObject = false;
       this.boxSeries.tooltip.label.fill = chartColors.black;
       this.boxSeries.tooltip.label.padding(10, 10, 5, 10);
@@ -301,14 +325,14 @@ export class BoxPlotChartComponent
 
   private tooltipHtml() {
     let headingFormat: string;
-    if (this.xAxisType === 'date') {
-      let dateFormat = 'EEE, MMM dd';
-      if (this.params?.granularity === 'hour') {
+    if (this.xAxisType === "date") {
+      let dateFormat = "EEE, MMM dd";
+      if (this.params?.granularity === "hour") {
         dateFormat = `HH:mm ${dateFormat}`;
       }
       headingFormat = `dateX.formatDate('${dateFormat}')`;
     } else {
-      headingFormat = 'binLabel';
+      headingFormat = "binLabel";
     }
 
     return `
@@ -316,21 +340,27 @@ export class BoxPlotChartComponent
       <div class="amcharts__tooltip-table">
         <span>Mean</span>
         <span class="amcharts__tooltip-value">${
-          this.yAxisType === 'time' ? '{yAxisMeanValue.formatDuration("m:ss")}' : '{yAxisMeanValue}mph'
+          this.yAxisType === "time"
+            ? '{yAxisMeanValue.formatDuration("m:ss")}'
+            : "{yAxisMeanValue}mph"
         }</span>
         <span>Minimum</span>
         <span class="amcharts__tooltip-value">${
-          this.yAxisType === 'time' ? '{minTransitTime.formatDuration("m:ss")}' : '{minTransitTime}mph'
+          this.yAxisType === "time"
+            ? '{minTransitTime.formatDuration("m:ss")}'
+            : "{minTransitTime}mph"
         }</span>
         <span>Maximum</span>
         <span class="amcharts__tooltip-value">${
-          this.yAxisType === 'time' ? '{maxTransitTime.formatDuration("m:ss")}' : '{maxTransitTime}mph'
+          this.yAxisType === "time"
+            ? '{maxTransitTime.formatDuration("m:ss")}'
+            : "{maxTransitTime}mph"
         }</span>
         <span>25th - 75th percentile</span>
         <span class="amcharts__tooltip-value">${
-          this.yAxisType === 'time'
+          this.yAxisType === "time"
             ? '{percentile25.formatDuration("m:ss")} - {percentile75.formatDuration("m:ss")}'
-            : '{percentile25} - {percentile75}mph'
+            : "{percentile25} - {percentile75}mph"
         }</span>
       </div>`;
   }

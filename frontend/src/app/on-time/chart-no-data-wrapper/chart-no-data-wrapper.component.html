@@ -8,7 +8,10 @@
 
     <span class="chart-no-data-wrapper__error-message">{{ errorMessage }}</span>
   </div>
-  <div class="chart-no-data-wrapper__chart" [ngClass]="{ 'chart-no-data-wrapper__chart--loaded': !noData }">
+  <div
+    class="chart-no-data-wrapper__chart"
+    [ngClass]="{ 'chart-no-data-wrapper__chart--loaded': !noData }"
+  >
     <ng-content></ng-content>
   </div>
 </div>

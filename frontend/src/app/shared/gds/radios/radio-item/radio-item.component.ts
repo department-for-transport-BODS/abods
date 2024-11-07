@@ -1,12 +1,18 @@
-import { Component, forwardRef, Input, ElementRef, Renderer2 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  Component,
+  forwardRef,
+  Input,
+  ElementRef,
+  Renderer2,
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-radio-item',
-  templateUrl: './radio-item.component.html',
-  styleUrls: ['./radio-item.component.scss'],
+  selector: "gds-radio-item",
+  templateUrl: "./radio-item.component.html",
+  styleUrls: ["./radio-item.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -16,12 +22,12 @@ let nextUniqueId = 0;
   ],
 })
 export class RadioItemComponent implements ControlValueAccessor {
-  @Input() inputName = '';
+  @Input() inputName = "";
   @Input() label?: string;
-  @Input() value = '';
+  @Input() value = "";
   @Input() inputId = `gds-radio-item-${nextUniqueId++}`;
   @Input() hint?: string;
-  @Input() selectedOption = '';
+  @Input() selectedOption = "";
   @Input() controls: string | null = null;
 
   changeValue(value: string) {
@@ -35,9 +41,16 @@ export class RadioItemComponent implements ControlValueAccessor {
     // Do nothing
   };
 
-  constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {}
+  constructor(
+    private _renderer: Renderer2,
+    private _elementRef: ElementRef,
+  ) {}
   writeValue(value: string): void {
-    this._renderer.setProperty(this._elementRef, 'checked', value === this._elementRef.nativeElement.value);
+    this._renderer.setProperty(
+      this._elementRef,
+      "checked",
+      value === this._elementRef.nativeElement.value,
+    );
     this.selectedOption = value;
   }
   registerOnChange(fn: (_: unknown) => unknown): void {
@@ -48,6 +61,6 @@ export class RadioItemComponent implements ControlValueAccessor {
   }
 
   get hintId() {
-    return this.hint ? `${this.inputId}-hint` : '';
+    return this.hint ? `${this.inputId}-hint` : "";
   }
 }

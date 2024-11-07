@@ -1,8 +1,8 @@
-import { LngLat } from 'mapbox-gl';
-import { Feature, Point } from 'geojson';
+import { LngLat } from "mapbox-gl";
+import { Feature, Point } from "geojson";
 
 export interface GeocodingResult {
-  type: 'FeatureCollection';
+  type: "FeatureCollection";
   features: GeocodingFeature[];
   query: string[];
   attribution: string;
@@ -47,18 +47,18 @@ export interface ReverseParams {
 }
 
 export const dataTypes = [
-  'poi',
-  'address',
-  'neighborhood',
-  'locality',
-  'place',
-  'district',
-  'postcode',
-  'region',
-  'country',
+  "poi",
+  "address",
+  "neighborhood",
+  "locality",
+  "place",
+  "district",
+  "postcode",
+  "region",
+  "country",
 ] as const;
 
-export type DataType = typeof dataTypes[number];
+export type DataType = (typeof dataTypes)[number];
 
 export interface Coordinates {
   latitude: number;

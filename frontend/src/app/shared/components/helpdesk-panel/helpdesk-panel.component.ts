@@ -1,12 +1,15 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { HelpdeskData, HelpdeskDataService } from '../../services/helpdesk-data.service';
-import { HelpdeskPanelService } from './helpdesk-panel.service';
+import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
+import { Subject, takeUntil } from "rxjs";
+import {
+  HelpdeskData,
+  HelpdeskDataService,
+} from "../../services/helpdesk-data.service";
+import { HelpdeskPanelService } from "./helpdesk-panel.service";
 
 @Component({
-  selector: 'app-helpdesk-panel',
-  templateUrl: './helpdesk-panel.component.html',
-  styleUrls: ['./helpdesk-panel.component.scss'],
+  selector: "app-helpdesk-panel",
+  templateUrl: "./helpdesk-panel.component.html",
+  styleUrls: ["./helpdesk-panel.component.scss"],
 })
 export class HelpdeskPanelComponent implements OnInit, OnDestroy {
   get isOpen(): boolean {
@@ -15,7 +18,10 @@ export class HelpdeskPanelComponent implements OnInit, OnDestroy {
 
   data: HelpdeskData | null = null;
 
-  constructor(private helpdeskPanelService: HelpdeskPanelService, private helpdeskDataService: HelpdeskDataService) {}
+  constructor(
+    private helpdeskPanelService: HelpdeskPanelService,
+    private helpdeskDataService: HelpdeskDataService,
+  ) {}
 
   private destroy$ = new Subject<void>();
 
@@ -31,7 +37,7 @@ export class HelpdeskPanelComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener("document:keydown.escape")
   closeHelpdesk() {
     if (this.helpdeskPanelService.isOpen) {
       this.helpdeskPanelService.close();

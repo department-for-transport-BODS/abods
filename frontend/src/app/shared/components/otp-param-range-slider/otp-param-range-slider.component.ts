@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 
 @Component({
-  selector: 'app-otp-param-range-slider',
-  templateUrl: './otp-param-range-slider.component.html',
-  styleUrls: ['./otp-param-range-slider.component.scss'],
+  selector: "app-otp-param-range-slider",
+  templateUrl: "./otp-param-range-slider.component.html",
+  styleUrls: ["./otp-param-range-slider.component.scss"],
 })
 export class OtpParamRangeSliderComponent {
   @Input() early!: number;

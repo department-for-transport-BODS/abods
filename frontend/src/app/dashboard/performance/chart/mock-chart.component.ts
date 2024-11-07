@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
-import { PerformanceCategories } from '../../dashboard.types';
+import { Component, Input } from "@angular/core";
+import { PerformanceCategories } from "../../dashboard.types";
 
 @Component({
-  selector: 'app-performance-chart',
-  template: '<div></div>',
+  selector: "app-performance-chart",
+  template: "<div></div>",
   styleUrls: [],
 })
 

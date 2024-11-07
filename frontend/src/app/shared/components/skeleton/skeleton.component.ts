@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
-import { GDSTypeSizes, GDSSpacingSizes } from 'src/app/shared/types';
+import { Component, Input } from "@angular/core";
+import { GDSTypeSizes, GDSSpacingSizes } from "src/app/shared/types";
 @Component({
-  selector: 'app-skeleton',
-  template: '<div [ngClass]="skeletonClasses" [style.width]="width" [style.height]="height"></div>',
-  styleUrls: ['./skeleton.component.scss'],
+  selector: "app-skeleton",
+  template:
+    '<div [ngClass]="skeletonClasses" [style.width]="width" [style.height]="height"></div>',
+  styleUrls: ["./skeleton.component.scss"],
 })
 export class SkeletonComponent {
   @Input() width?: string;

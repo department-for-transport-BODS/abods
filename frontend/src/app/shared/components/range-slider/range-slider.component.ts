@@ -1,12 +1,21 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
-import { NouisliderComponent } from 'ng2-nouislider';
-import { Subject } from 'rxjs';
-import { debounceTime, pairwise, startWith, takeUntil } from 'rxjs/operators';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  ViewEncapsulation,
+} from "@angular/core";
+import { NouisliderComponent } from "ng2-nouislider";
+import { Subject } from "rxjs";
+import { debounceTime, pairwise, startWith, takeUntil } from "rxjs/operators";
 
 @Component({
-  selector: 'app-range-slider',
-  templateUrl: './range-slider.component.html',
-  styleUrls: ['./range-slider.component.scss'],
+  selector: "app-range-slider",
+  templateUrl: "./range-slider.component.html",
+  styleUrls: ["./range-slider.component.scss"],
   encapsulation: ViewEncapsulation.None,
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
@@ -23,7 +32,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
 
   value: [number, number] = [this.min, this.max];
 
-  @ViewChild('nouislider') slider!: NouisliderComponent;
+  @ViewChild("nouislider") slider!: NouisliderComponent;
 
   onSliderChange(value: [number, number]) {
     if (this.lowerEndLimit && value[0] > this.lowerEndLimit) {
@@ -55,7 +64,12 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.change
-      .pipe(debounceTime(1), startWith([NaN, NaN] as [number, number]), pairwise(), takeUntil(this.destroyed))
+      .pipe(
+        debounceTime(1),
+        startWith([NaN, NaN] as [number, number]),
+        pairwise(),
+        takeUntil(this.destroyed),
+      )
       .subscribe(([[oldLo, oldUp], [lo, up]]) => {
         if (oldLo !== lo) {
           this.lowerChange.emit(lo);

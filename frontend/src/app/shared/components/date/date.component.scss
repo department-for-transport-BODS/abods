@@ -1,6 +1,6 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
-@import 'src/app/shared/components/date-range/date-control-variables.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
+@import "src/app/shared/components/date-range/date-control-variables.scss";
 
 .date {
   position: relative;
@@ -10,9 +10,11 @@
     left: 0;
     top: 100%;
     margin-top: -2px;
-    width: calc($calendar-width + ($date-range-padding * 2) + ($border-width * 2));
-    background: govuk-colour('white');
-    border: 2px solid govuk-colour('black');
+    width: calc(
+      $calendar-width + ($date-range-padding * 2) + ($border-width * 2)
+    );
+    background: govuk-colour("white");
+    border: 2px solid govuk-colour("black");
     box-sizing: border-box;
     padding: govuk-spacing(4);
   }
@@ -38,10 +40,10 @@
     display: block;
     width: 24px;
     height: 24px;
-    color: govuk-colour('blue');
+    color: govuk-colour("blue");
     &--disabled {
       pointer-events: none;
-      color: govuk-colour('mid-grey');
+      color: govuk-colour("mid-grey");
     }
     &--next {
       right: 0;

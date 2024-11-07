@@ -1,4 +1,10 @@
-<ngx-smart-modal #modal [identifier]="identifier" [closable]="false" class="modal" [refocus]="false">
+<ngx-smart-modal
+  #modal
+  [identifier]="identifier"
+  [closable]="false"
+  class="modal"
+  [refocus]="false"
+>
   <div class="modal__header">
     <span class="modal__logo">
       <svg
@@ -24,7 +30,12 @@
         ></image>
       </svg>
     </span>
-    <button aria-label="Close modal" class="modal__close" (click)="modal.close()" type="button">
+    <button
+      aria-label="Close modal"
+      class="modal__close"
+      (click)="modal.close()"
+      type="button"
+    >
       <svg-icon
         aria-hidden="true"
         class="modal__close-icon"
@@ -35,7 +46,9 @@
   </div>
   <div class="modal__content-scroll">
     <div class="modal__content">
-      <h2 class="govuk-heading-l modal__heading" *ngIf="modalTitle">{{ modalTitle }}</h2>
+      <h2 class="govuk-heading-l modal__heading" *ngIf="modalTitle">
+        {{ modalTitle }}
+      </h2>
       <ng-content></ng-content>
     </div>
   </div>

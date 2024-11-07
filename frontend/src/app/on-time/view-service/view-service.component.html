@@ -1,6 +1,10 @@
 <app-page *ngIf="!lineNotFound; else lineNotFoundPage">
   <ng-container ngProjectAs="back-link">
-    <gds-back-link label="All services" [route]="['../']" queryParamsHandling="preserve"></gds-back-link>
+    <gds-back-link
+      label="All services"
+      [route]="['../']"
+      queryParamsHandling="preserve"
+    ></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
     <app-page-header
@@ -11,11 +15,18 @@
       spaceBelow="2"
     ></app-page-header>
     <ng-template #skeleton>
-      <app-skeleton appearance="caption-l" width="300px" spaceAbove="2" spaceBelow="2"></app-skeleton>
+      <app-skeleton
+        appearance="caption-l"
+        width="300px"
+        spaceAbove="2"
+        spaceBelow="2"
+      ></app-skeleton>
     </ng-template>
     <ng-container *ngIf="operator">
       <div class="on-time__operator">
-        <span class="govuk-caption-l govuk-!-margin-bottom-4">{{ operator.name }} ({{ operator.nocCode }})</span>
+        <span class="govuk-caption-l govuk-!-margin-bottom-4"
+          >{{ operator.name }} ({{ operator.nocCode }})</span
+        >
       </div>
       <app-controls
         [operatorId]="operator.operatorId"
@@ -58,16 +69,27 @@
                 </app-chart-no-data-wrapper>
                 <div
                   class="on-time__chart-footer"
-                  *ngIf="!frequentServiceInfoLoading && (frequentServiceInfo?.numHours || 0) > 0"
+                  *ngIf="
+                    !frequentServiceInfoLoading &&
+                    (frequentServiceInfo?.numHours || 0) > 0
+                  "
                 >
-                  <div class="on-time__service-info" *ngIf="overviewMode === 'excess-wait-time'">
+                  <div
+                    class="on-time__service-info"
+                    *ngIf="overviewMode === 'excess-wait-time'"
+                  >
                     {{ frequentServiceInfo?.numHours }} hours out of a total
-                    {{ frequentServiceInfo?.totalHours }} service hours during the selected period have
-                    excess wait time data. Excess Waiting Time is averaged over the period in which the
-                    data is available.
+                    {{ frequentServiceInfo?.totalHours }} service hours during
+                    the selected period have excess wait time data. Excess
+                    Waiting Time is averaged over the period in which the data
+                    is available.
                   </div>
                   <div class="on-time__mode-select">
-                    <label class="govuk-label on-time__mode-label" for="overviewMode">Show:</label>
+                    <label
+                      class="govuk-label on-time__mode-label"
+                      for="overviewMode"
+                      >Show:</label
+                    >
                     <select
                       class="govuk-select"
                       id="overviewMode"
@@ -75,8 +97,12 @@
                       [ngModel]="overviewMode"
                       (ngModelChange)="overviewModeChanged($event)"
                     >
-                      <option ngValue="on-time-performance">On-time performance</option>
-                      <option ngValue="excess-wait-time">Excess waiting time</option>
+                      <option ngValue="on-time-performance">
+                        On-time performance
+                      </option>
+                      <option ngValue="excess-wait-time">
+                        Excess waiting time
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -85,7 +111,11 @@
           </app-tab>
           <app-tab tabTitle="Distribution" id="distribution">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
                 <app-delay-frequency-chart
                   class="on-time__dist-chart"
                   [params]="params$ | async"
@@ -95,21 +125,38 @@
           </app-tab>
           <app-tab tabTitle="Time of day" id="time-of-day">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
-                <app-time-of-day-chart class="on-time__tod-chart" [params]="params$ | async"></app-time-of-day-chart>
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
+                <app-time-of-day-chart
+                  class="on-time__tod-chart"
+                  [params]="params$ | async"
+                ></app-time-of-day-chart>
               </app-chart-no-data-wrapper>
             </div>
           </app-tab>
           <app-tab tabTitle="Day of week" id="day-of-week">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
-                <app-day-of-week-chart class="on-time__dow-chart" [params]="params$ | async"></app-day-of-week-chart>
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
+                <app-day-of-week-chart
+                  class="on-time__dow-chart"
+                  [params]="params$ | async"
+                ></app-day-of-week-chart>
               </app-chart-no-data-wrapper>
             </div>
           </app-tab>
-          <app-tab  tabTitle="Map" id="map">
+          <app-tab tabTitle="Map" id="map">
             <div class="on-time__wrapper" *appTabContent>
-              <app-service-map [timingPointsOnly]="timingPointsOnly" [params]="params$ | async"></app-service-map>
+              <app-service-map
+                [timingPointsOnly]="timingPointsOnly"
+                [params]="params$ | async"
+              ></app-service-map>
             </div>
           </app-tab>
         </app-tabs>
@@ -138,7 +185,10 @@
       ></gds-back-link>
     </ng-container>
     <ng-container ngProjectAs="content">
-      <app-page-header caption="On-time performance" heading="Not found"></app-page-header>
+      <app-page-header
+        caption="On-time performance"
+        heading="Not found"
+      ></app-page-header>
       <p class="govuk-body">
         Service not found, or you do not have permission to view. Go back to
         <a [routerLink]="['../']">operator</a>?

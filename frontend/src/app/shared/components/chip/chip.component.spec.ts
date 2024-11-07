@@ -1,10 +1,10 @@
-import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import { DebugElement } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 
-import { ChipComponent } from './chip.component';
+import { ChipComponent } from "./chip.component";
 
-describe('ChipComponent', () => {
+describe("ChipComponent", () => {
   let component: ChipComponent;
   let fixture: ComponentFixture<ChipComponent>;
   let buttonEl: DebugElement;
@@ -18,17 +18,17 @@ describe('ChipComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ChipComponent);
     component = fixture.componentInstance;
-    buttonEl = fixture.debugElement.query(By.css('.chip__close'));
+    buttonEl = fixture.debugElement.query(By.css(".chip__close"));
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit on close', () => {
-    spyOn(component.closeChip, 'emit');
-    buttonEl.triggerEventHandler('click', null);
+  it("should emit on close", () => {
+    spyOn(component.closeChip, "emit");
+    buttonEl.triggerEventHandler("click", null);
 
     expect(component.closeChip.emit).toHaveBeenCalledWith();
   });

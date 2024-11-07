@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Feature, FeatureCollection, Point } from 'geojson';
-import { Stop } from '../../corridors.service';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Feature, FeatureCollection, Point } from "geojson";
+import { Stop } from "../../corridors.service";
 
 @Component({
-  selector: 'app-corridor-stop-list',
-  templateUrl: './corridor-stop-list.component.html',
-  styleUrls: ['./corridor-stop-list.component.scss'],
+  selector: "app-corridor-stop-list",
+  templateUrl: "./corridor-stop-list.component.html",
+  styleUrls: ["./corridor-stop-list.component.scss"],
 })
 export class CorridorStopListComponent {
   @Input() corridorStops?: FeatureCollection<Point, Stop>;

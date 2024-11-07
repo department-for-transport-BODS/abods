@@ -1,8 +1,8 @@
-import { createDirectiveFactory, SpectatorDirective } from '@ngneat/spectator';
-import { WindowVirtualScrollDirective } from './window-virtual-scroll.directive';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { createDirectiveFactory, SpectatorDirective } from "@ngneat/spectator";
+import { WindowVirtualScrollDirective } from "./window-virtual-scroll.directive";
+import { ScrollingModule } from "@angular/cdk/scrolling";
 
-describe('WindowVirtualScrollDirective', () => {
+describe("WindowVirtualScrollDirective", () => {
   let spectator: SpectatorDirective<WindowVirtualScrollDirective>;
   const createDirective = createDirectiveFactory({
     directive: WindowVirtualScrollDirective,
@@ -17,8 +17,8 @@ describe('WindowVirtualScrollDirective', () => {
       </cdk-virtual-scroll-viewport>`);
   });
 
-  it('should attach and respond to scroll events', (done) => {
-    spectator.dispatchFakeEvent(spectator.element, 'scroll');
+  it("should attach and respond to scroll events", (done) => {
+    spectator.dispatchFakeEvent(spectator.element, "scroll");
     const scroll = spectator.directive.scrollStrategy;
     scroll.scrolledIndexChange.subscribe((i) => {
       expect(i).toEqual(0);

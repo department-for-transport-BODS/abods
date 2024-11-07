@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NgxTippyModule } from 'ngx-tippy-wrapper';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
 
-import { DatenavItemComponent } from './datenav-item.component';
+import { DatenavItemComponent } from "./datenav-item.component";
 
-describe('DatenavItemComponent', () => {
+describe("DatenavItemComponent", () => {
   let component: DatenavItemComponent;
   let fixture: ComponentFixture<DatenavItemComponent>;
 
@@ -20,7 +20,7 @@ describe('DatenavItemComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,18 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { LayoutModule } from '../layout.module';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { RouterTestingModule } from "@angular/router/testing";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { SharedModule } from "src/app/shared/shared.module";
+import { LayoutModule } from "../layout.module";
 
-import { NavComponent } from './nav.component';
+import { NavComponent } from "./nav.component";
 
-describe('NavComponent', () => {
+describe("NavComponent", () => {
   let component: NavComponent;
   let fixture: ComponentFixture<NavComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule, LayoutModule, ApolloTestingModule],
+      imports: [
+        SharedModule,
+        RouterTestingModule,
+        LayoutModule,
+        ApolloTestingModule,
+      ],
       declarations: [NavComponent],
     }).compileComponents();
   });
@@ -23,7 +28,7 @@ describe('NavComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,19 +1,24 @@
-import { Injectable } from '@angular/core';
-import { DateTime } from 'luxon';
-import { CookieService } from 'ngx-cookie-service';
-import { ConfigService, CookiePolicy } from '../../config/config.service';
+import { Injectable } from "@angular/core";
+import { DateTime } from "luxon";
+import { CookieService } from "ngx-cookie-service";
+import { ConfigService, CookiePolicy } from "../../config/config.service";
 
-export const COOKIE_POLICY_NAME = 'abod_cookies_policy';
+export const COOKIE_POLICY_NAME = "abod_cookies_policy";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class CookiePolicyService {
-  constructor(private cookieService: CookieService, private configService: ConfigService) {}
+  constructor(
+    private cookieService: CookieService,
+    private configService: ConfigService,
+  ) {}
 
   getAnalyticsPolicy(): CookiePolicy {
     try {
-      const storedPolicy: CookiePolicy = JSON.parse(this.cookieService.get(COOKIE_POLICY_NAME));
+      const storedPolicy: CookiePolicy = JSON.parse(
+        this.cookieService.get(COOKIE_POLICY_NAME),
+      );
       if (storedPolicy && this.isLatestVersion(storedPolicy)) {
         return storedPolicy;
       } else {
@@ -30,7 +35,7 @@ export class CookiePolicyService {
       const cookies = this.cookieService.getAll();
       for (const name in cookies) {
         // Remove all GA cookies
-        if (name.startsWith('_ga')) {
+        if (name.startsWith("_ga")) {
           this.cookieService.delete(name);
         }
       }
@@ -45,7 +50,7 @@ export class CookiePolicyService {
         COOKIE_POLICY_NAME,
         JSON.stringify(cookie),
         DateTime.local().plus({ year: 1 }).toJSDate(),
-        '/'
+        "/",
       );
     }
   }
@@ -61,6 +66,8 @@ export class CookiePolicyService {
   }
 
   private isLatestVersion(storedPolicy: CookiePolicy): boolean {
-    return this.configService.defaultCookiePolicy.version === storedPolicy.version;
+    return (
+      this.configService.defaultCookiePolicy.version === storedPolicy.version
+    );
   }
 }

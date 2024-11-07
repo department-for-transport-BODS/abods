@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges } from '@angular/core';
-import { BrowserTitleService } from './browser-title.service';
+import { Component, Input, OnChanges } from "@angular/core";
+import { BrowserTitleService } from "./browser-title.service";
 
 /*
  * This component will update the browser page title with the content of this element
@@ -8,7 +8,7 @@ import { BrowserTitleService } from './browser-title.service';
  * but is also included in page-header to ensure that page title and browser title are in sync by default
  */
 @Component({
-  selector: 'app-browser-title',
+  selector: "app-browser-title",
   template: `<ng-container *ngIf="renderTitle">{{ title }}</ng-container>`,
 })
 export class BrowserTitleComponent implements OnChanges {

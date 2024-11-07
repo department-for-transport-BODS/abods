@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { SharedModule } from "src/app/shared/shared.module";
 
-import { OperatorSelectorComponent } from './operator-selector.component';
+import { OperatorSelectorComponent } from "./operator-selector.component";
 
-describe('OperatorSelectorComponent', () => {
+describe("OperatorSelectorComponent", () => {
   let component: OperatorSelectorComponent;
   let fixture: ComponentFixture<OperatorSelectorComponent>;
 
@@ -20,7 +20,7 @@ describe('OperatorSelectorComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 @Component({
-  selector: 'gds-notification-banner',
-  templateUrl: './notification-banner.component.html',
-  styleUrls: ['./notification-banner.component.scss'],
+  selector: "gds-notification-banner",
+  templateUrl: "./notification-banner.component.html",
+  styleUrls: ["./notification-banner.component.scss"],
 })
 export class NotificationBannerComponent {
   @Input() identifier!: string;

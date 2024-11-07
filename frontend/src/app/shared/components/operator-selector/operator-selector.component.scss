@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .operator-selector {
   display: flex;
@@ -18,7 +18,10 @@
       outline-offset: inherit;
       color: $govuk-focus-text-colour;
       background-color: $govuk-focus-colour;
-      box-shadow: 0 -2px $govuk-focus-colour, 0 0 2px $govuk-focus-colour, 0 4px $govuk-focus-text-colour !important;
+      box-shadow:
+        0 -2px $govuk-focus-colour,
+        0 0 2px $govuk-focus-colour,
+        0 4px $govuk-focus-text-colour !important;
     }
   }
 
@@ -39,7 +42,7 @@
     }
     .ng-arrow {
       top: -4px;
-      border-color: govuk-colour('blue');
+      border-color: govuk-colour("blue");
       padding: 4px;
     }
   }

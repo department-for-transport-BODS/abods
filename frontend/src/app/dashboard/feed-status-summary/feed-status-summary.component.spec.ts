@@ -1,10 +1,10 @@
-import { RouterTestingModule } from '@angular/router/testing';
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { FeedStatusSummaryComponent } from './feed-status-summary.component';
+import { RouterTestingModule } from "@angular/router/testing";
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "src/app/shared/shared.module";
+import { FeedStatusSummaryComponent } from "./feed-status-summary.component";
 
-describe('FeedStatusSummaryComponent', () => {
+describe("FeedStatusSummaryComponent", () => {
   let spectator: Spectator<FeedStatusSummaryComponent>;
   let component: FeedStatusSummaryComponent;
 
@@ -19,7 +19,7 @@ describe('FeedStatusSummaryComponent', () => {
     component = spectator.component;
   });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator.detectChanges();
 
     expect(component).toBeTruthy();

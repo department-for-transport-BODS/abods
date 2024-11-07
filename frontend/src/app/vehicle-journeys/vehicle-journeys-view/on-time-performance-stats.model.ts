@@ -1,9 +1,14 @@
-import { VehiclePingStop } from './vehicle-ping-stop.model';
-import { OtpEnum } from '../../../generated/graphql';
+import { VehiclePingStop } from "./vehicle-ping-stop.model";
+import { OtpEnum } from "../../../generated/graphql";
 
-const calculateOtpStat = (stopList: VehiclePingStop[], statType: OtpEnum | null) => {
+const calculateOtpStat = (
+  stopList: VehiclePingStop[],
+  statType: OtpEnum | null,
+) => {
   const total = stopList.length;
-  const value = stopList.filter((stop) => stop.onTimePerformance === statType).length;
+  const value = stopList.filter(
+    (stop) => stop.onTimePerformance === statType,
+  ).length;
   return {
     percent: value / total,
     value: value,
@@ -11,8 +16,13 @@ const calculateOtpStat = (stopList: VehiclePingStop[], statType: OtpEnum | null)
   };
 };
 
-export const calculateOnTimePerformance = (stopList: VehiclePingStop[], timingPointsOnly: boolean) => {
-  const filteredStopList = stopList.filter((stop) => stop.isTimingPoint || !timingPointsOnly);
+export const calculateOnTimePerformance = (
+  stopList: VehiclePingStop[],
+  timingPointsOnly: boolean,
+) => {
+  const filteredStopList = stopList.filter(
+    (stop) => stop.isTimingPoint || !timingPointsOnly,
+  );
   return {
     early: calculateOtpStat(filteredStopList, OtpEnum.Early),
     late: calculateOtpStat(filteredStopList, OtpEnum.Late),
@@ -21,4 +31,6 @@ export const calculateOnTimePerformance = (stopList: VehiclePingStop[], timingPo
   };
 };
 
-export type OnTimePerformanceStats = ReturnType<typeof calculateOnTimePerformance>;
+export type OnTimePerformanceStats = ReturnType<
+  typeof calculateOnTimePerformance
+>;
