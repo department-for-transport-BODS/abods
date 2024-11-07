@@ -17,6 +17,19 @@ import {
   QueryResolvers,
   Resolvers,
   TransitModelTypeResolvers,
+  OperatorsPage,
+  ServiceInfoType,
+  Maybe,
+  OperatorPerformancePage,
+  PunctualityTotalsType,
+  PunctualityDayOfWeekType,
+  ResolverTypeWrapper,
+  DelayFrequencyType,
+  ServicePunctualityType,
+  FrequentServiceType,
+  HeadwayOverviewType,
+  AdminAreasType,
+  FrequentServiceInfoType,
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
@@ -61,7 +74,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   _,
   args,
   context,
-) => {
+): Promise<OperatorsPage> => {
   try {
     const user = await requireUserSession(context);
 
@@ -174,7 +187,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
   _,
   args,
   context,
-) => {
+): Promise<Maybe<ServiceInfoType>> => {
   try {
     const user = await requireUserSession(context);
 
@@ -263,7 +276,7 @@ export const getLines: TransitModelTypeResolvers["lines"] = async (
   args,
   context,
   info,
-) => {
+): Promise<PaginatedLineType> => {
   const user = await requireUserSession(context);
   const { operatorId } = info.variableValues as { operatorId: string };
   const operationName: string = info.operation.name?.value ?? "";
@@ -293,7 +306,7 @@ export const getOperator: QueryResolvers["operator"] = async (
   _,
   args,
   context,
-) => {
+): Promise<Maybe<OperatorType>> => {
   try {
     await requireUserSession(context);
 
@@ -324,7 +337,7 @@ export const getOperator: QueryResolvers["operator"] = async (
 };
 
 export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctualityOverview"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<PunctualityTotalsType>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -409,7 +422,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
   };
 
 export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPerformance"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<OperatorPerformancePage>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -512,7 +525,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
   };
 
 export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualityDayOfWeek"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<PunctualityDayOfWeekType[]>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -660,7 +673,7 @@ const getStopsDistribution = async (
 };
 
 export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<DelayFrequencyType[]>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -704,7 +717,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
   };
 
 export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualityTimeOfDay"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<PunctualityTimeOfDayType[]>> => {
     try {
       const user = await requireUserSession(context);
       // of the 10:30 slot, how many were ontime/early/late example
@@ -788,7 +801,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
   };
 
 export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctualityTimeSeries"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<PunctualityTimeSeriesType[]>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -878,7 +891,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
   };
 
 export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunctuality"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<ServicePunctualityType[]> => {
     try {
       const user = await requireUserSession(context);
 
@@ -1009,7 +1022,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
   };
 
 export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<StopPerformanceType[]>> => {
     try {
       const user = await requireUserSession(context);
       // for this operator & for this service, get all stops and their OTP stats
@@ -1130,7 +1143,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
   };
 
 export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerformance"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<ServicePerformanceType[]>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -1224,7 +1237,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
 // -> OPERATOR PAGE
 export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<FrequentServiceType[]>> => {
     try {
       const user = await requireUserSession(context);
       const operators = await getOperators(user, context.db);
@@ -1264,7 +1277,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
   };
 
 export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServiceInfo"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<FrequentServiceInfoType>> => {
     try {
       const user = await requireUserSession(context);
       const operators = await getOperators(user, context.db);
@@ -1313,7 +1326,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
   };
 
 export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<HeadwayOverviewType>> => {
     try {
       const user = await requireUserSession(context);
       const operators = await getOperators(user, context.db);
@@ -1378,7 +1391,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
   };
 
 export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSeries"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<Maybe<HeadwayTimeSeriesType[]>> => {
     try {
       const user = await requireUserSession(context);
 
@@ -1489,7 +1502,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
   _,
   __,
   context,
-) => {
+): Promise<Maybe<AdminAreasType[]>> => {
   try {
     const user = await requireUserSession(context);
     const operators = await getOperators(user, context.db);

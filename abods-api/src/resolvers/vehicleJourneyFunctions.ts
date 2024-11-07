@@ -6,11 +6,13 @@ import {
   QueryResolvers,
   Resolvers,
   VehicleReplayNamespaceResolvers,
+  AvlPoint,
+  Stop,
 } from "../types/generated.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 
 export const findJourneys: VehicleReplayNamespaceResolvers["findJourneys"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<UniqueJourneyType[]> => {
     await requireUserSession(context);
     const lineIds = args.inputs.filters?.lineIds;
 
@@ -55,7 +57,11 @@ export const findJourneys: VehicleReplayNamespaceResolvers["findJourneys"] =
     return [];
   };
 
-export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
+export const getAvls: QueryResolvers["avls"] = async (
+  _,
+  args,
+  context,
+): Promise<AvlPoint[]> => {
   await requireUserSession(context);
 
   const getAvlsForGroupId = async (groupId: string) => {
@@ -86,7 +92,11 @@ export const getAvls: QueryResolvers["avls"] = async (_, args, context) => {
   return [];
 };
 
-export const getRoute: QueryResolvers["route"] = async (_, args, context) => {
+export const getRoute: QueryResolvers["route"] = async (
+  _,
+  args,
+  context,
+): Promise<Stop[]> => {
   await requireUserSession(context);
 
   const route = await context.db.timetable.findMany({

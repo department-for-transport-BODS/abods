@@ -28,6 +28,12 @@ import {
   MutationResolvers,
   CorridorNamespaceResolvers,
   CorridorStatsTypeResolvers,
+  CorridorType,
+  Maybe,
+  StopType,
+  MutationResponseType,
+  CorridorSummaryStatsType,
+  CorridorStatsHistogramType,
 } from "../types/generated.js";
 import {
   getDate,
@@ -44,7 +50,7 @@ export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
   __,
   context,
-) => {
+): Promise<CorridorType[]> => {
   const user = await requireUserSession(context);
 
   const results: CorridorResultsType[] = await getCorridorList(
@@ -59,7 +65,7 @@ export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
   _,
   args,
   context,
-) => {
+): Promise<Maybe<CorridorType>> => {
   const user = await requireUserSession(context);
   const corridor: CorridorResultsType | null = await getCorridor(
     args.corridorId,
@@ -73,7 +79,7 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
   _,
   args,
   context,
-) => {
+): Promise<StopType[]> => {
   const user = await requireUserSession(context);
 
   if (!args.inputs) {
@@ -134,7 +140,7 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
 };
 
 export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<StopType[]> => {
     const user = await requireUserSession(context);
 
     let stopList = args.stopList || [];
@@ -200,7 +206,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
   if (!args.payload || !args.payload.name || !args.payload.stopIds)
     throw "Bad Request";
@@ -299,7 +305,7 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
   if (
     !(await isCorridorMappedToUserOrg(
@@ -327,7 +333,7 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   if (!args.inputs) throw "Bad Request";
   const user = await requireUserSession(context);
   if (
@@ -365,7 +371,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,
   args,
   context,
-) => {
+): Promise<CorridorStatsType> => {
   const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
     args.inputs || {};
   const user = await requireUserSession(context);
@@ -409,7 +415,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   parent,
-) => {
+): CorridorSummaryStatsType => {
   // Data was cached in the output of getStats, and will be removed later
   const data = parent as StatsCache;
   const scheduledTransits = data.journeys.size;
@@ -444,7 +450,11 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
 };
 
 export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTimeOfDayStats"] =
-  (parent) => {
+  (
+    parent,
+  ): (CorridorJourneyTimeStatsType &
+    CorridorStatsTimeOfDayType &
+    CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return getJourneyStats(
@@ -454,14 +464,22 @@ export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTi
   };
 
 export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDayOfWeekStats"] =
-  (parent) => {
+  (
+    parent,
+  ): (CorridorJourneyTimeStatsType &
+    CorridorStatsTimeOfDayType &
+    CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek);
   };
 
 export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"] =
-  (parent) => {
+  (
+    parent,
+  ): (CorridorJourneyTimeStatsType &
+    CorridorStatsTimeOfDayType &
+    CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return (data.inputs || {}).granularity === "day"
@@ -615,7 +633,7 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
   };
 
 export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHistogram"] =
-  (parent) => {
+  (parent): CorridorStatsHistogramType[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     const journeyStats = new Map<string, number>();
@@ -654,7 +672,7 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
   };
 
 export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
-  async (parent, _, context) => {
+  async (parent, _, context): Promise<ServiceLinkType[]> => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     const { corridorId } = data.inputs || {};

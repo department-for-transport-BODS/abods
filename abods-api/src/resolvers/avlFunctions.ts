@@ -1,9 +1,13 @@
 import logger from "../logger.js";
-import { QueryResolvers, Resolvers } from "../types/generated";
+import {
+  AvlLineLevelStatus,
+  QueryResolvers,
+  Resolvers,
+} from "../types/generated";
 import { tokenAuthRequiredResolver } from "../lib/apiauth.js";
 
 export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
-  async (_, args, context) => {
+  async (_, args, context): Promise<AvlLineLevelStatus[]> => {
     try {
       const avlData = await context.db.avl_line_level_monitoring.findMany({
         where: {
