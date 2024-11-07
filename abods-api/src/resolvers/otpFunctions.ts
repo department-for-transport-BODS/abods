@@ -33,32 +33,47 @@ interface DayCount {
   late: number;
 }
 
-export const getOperatorList: QueryResolvers['operators'] = async (_, __, context) => {
+interface TimeCount {
+  timeOfDay: string;
+  early: number;
+  onTime: number;
+  late: number;
+}
+
+interface distribution {
+  noOfStops: number;
+  performanceInMins: number;
+}
+
+export const getOperatorList: QueryResolvers['operators'] = async (_, args, context) => {
   try {
     const user = await requireUserSession(context)
 
     logger.debug(new Date().toLocaleString() + " getOperatorList");
 
-    const userOperators = await getOperatorsDropDown(user, context.db)
+    const userOperators = args.filterBy?.operatorIds
+      ? await getOperatorsDropDown(user, context.db, args.filterBy.operatorIds)
+      : await getOperatorsDropDown(user, context.db);
 
     if (!userOperators) {
       throw "No operators for user";
     }
 
     return {
-      items: userOperators,
-    };
+      items: userOperators
+    }
   } catch (error) {
     logger.error(error);
-    return null;
+    return {};
   }
 };
 
 const getOperatorsDropDown = async (
   user: SessionUser,
   db: PrismaClient,
+  userOperatorIds?: string[]
 ): Promise<OperatorType[]> => {
-  const orgOperators = await getOperatorsFromOrgId(user.orgIds, db);
+  const orgOperators = await getOperatorsFromOrgId(user.orgIds, db, userOperatorIds);
 
   const [userOperators, adminAreas] = await Promise.all([
     getOperatorsFroServiceDetails(orgOperators, db),
@@ -67,9 +82,9 @@ const getOperatorsDropDown = async (
 
   return userOperators
     .map((op) => ({
-      name: op.operator?.name ?? 'NA',
+      name: op.operator?.name ?? 'unknown',
       nocCode: op.operator_noc,
-      operatorId: op.operator_noc,
+      operatorId: op.operator_noc ?? 'unknown',
       adminAreas: adminAreas
         .filter((area) => area.national_operator_code === op.operator_noc)
         .map((area) => ({
@@ -302,15 +317,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers['punctuality
 
     const { filters } = args.inputs;
     const {
-      timingPointsOnly,
-      adminAreaIds,
-      operatorIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
       lineIds,
-      dayOfWeekFlags,
       onTimeMaxMinutes,
       onTimeMinMinutes,
     } = filters || {};
@@ -392,17 +399,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers['operatorPer
 
     let opPerformances: OperatorPerformanceType[] = [];
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     const {
-      timingPointsOnly,
       adminAreaIds,
-      operatorIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      lineIds,
-      dayOfWeekFlags,
     } = filters || {};
 
     logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
@@ -492,17 +491,9 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers['punctualit
   try {
     const user = await requireUserSession(context)
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
-      granularity,
       lineIds,
     } = filters || {};
 
@@ -695,17 +686,9 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers['punctualit
     // bucket is the number difference in the OTP table
     // freq is the count of that difference
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
-      granularity,
       lineIds,
     } = filters || {};
     operatorIds = operatorIds || []
@@ -777,15 +760,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
 
     logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
-    const { fromTimestamp, toTimestamp, filters, paging } = args.inputs;
+    const { filters } = args.inputs;
     let {
-      timingPointsOnly,
-      adminAreaIds,
-      startTime,
-      endTime,
-      maxDelay,
-      minDelay,
-      dayOfWeekFlags,
       operatorIds,
       granularity,
       lineIds,
@@ -806,11 +782,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
       const operator_noc_to_filter = operatorIds[0];
 
       if (userOperatorIds.includes(operator_noc_to_filter)) {
-        const start = new Date(fromTimestamp);
-        const end = new Date(toTimestamp);
-        const days = getDaysInRange(start, end);
-
-
+        
         let summary: PunctualityTimeSeriesType[] = []
 
         let results;
@@ -867,17 +839,6 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers['punctuali
   }
 };
 
-function getDaysInRange(startDate: Date, endDate: Date): Date[] {
-  const dates: Date[] = [];
-  let currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    dates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dates;
-}
-
 export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunctuality'] = async (_, args, context) => {
   try {
     const user = await requireUserSession(context)
@@ -886,7 +847,6 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers['servicePunct
       filters,
       fromTimestamp,
       order,
-      toTimestamp
     } = args.inputs
 
     const timingPointsOnly = filters?.timingPointsOnly
@@ -1402,6 +1362,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers['headwayTimeSerie
         headway_stops_count: number
       }
     } = {}
+
     results.map((result) => {
       if (result.departure_hour) {
         const formatterdeparture = isDayGranularity

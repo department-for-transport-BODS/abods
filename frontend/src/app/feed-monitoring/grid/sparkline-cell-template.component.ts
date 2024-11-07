@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { Granularity, VehicleStatsType } from 'src/generated/graphql';
+import { Granularity, Maybe, VehicleStatsType } from 'src/generated/graphql';
 import { ChartService } from 'src/app/shared/components/amcharts/chart.service';
 
 import * as am4core from '@amcharts/amcharts4/core';
@@ -104,7 +104,7 @@ export class SparklineCellTemplateComponent extends BaseChart implements AfterVi
       const dateTime = DateTime.fromISO(stat.timestamp, { zone: 'utc' });
       return {
         dateTime,
-        timestamp: dateTime.toISO(),
+        timestamp: dateTime.toJSDate(),
         actual: stat.actual,
       };
     });
@@ -114,7 +114,11 @@ export class SparklineCellTemplateComponent extends BaseChart implements AfterVi
     const minDateTime = protoViewData[0].dateTime;
     const maxDateTime = protoViewData[protoViewData.length - 1].dateTime;
 
-    const viewData: VehicleStatsType[] = [];
+    const viewData: {
+      dateTime?: DateTime;
+      timestamp: Date;
+      actual: Maybe<number> | undefined;
+    }[] = [];
 
     let i = 0;
     for (let ts = minDateTime; ts <= maxDateTime; ts = ts.plus({ hours: 1 })) {
@@ -124,7 +128,7 @@ export class SparklineCellTemplateComponent extends BaseChart implements AfterVi
         i += 1;
       } else {
         viewData.push({
-          timestamp: ts.toISO(),
+          timestamp: ts.toJSDate(),
           actual: 0,
         });
       }

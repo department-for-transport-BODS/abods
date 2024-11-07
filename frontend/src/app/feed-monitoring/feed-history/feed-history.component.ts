@@ -4,9 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DateTime } from 'luxon';
 import { combineLatest, of, Subject } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { OperatorFeedHistoryFragment, VehicleStatsType } from 'src/generated/graphql';
+import { AlertTypeEnum, OperatorFeedHistoryFragment, VehicleStatsType } from 'src/generated/graphql';
 import { nonNullishArray } from '../../shared/array-operators';
-import { AlertListViewModel, AlertMode, AlertType } from '../alert-list/alert-list-view-model';
+import { AlertListViewModel, AlertMode } from '../alert-list/alert-list-view-model';
 import { EventStats, FeedMonitoringService } from '../feed-monitoring.service';
 import { IHeatmap } from './datenav/datenav.component';
 
@@ -41,7 +41,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
 
   vehicleStats?: VehicleStatsType[];
 
-  alerts: { timestamp: DateTime; type: AlertType; id: string }[] = [];
+  alerts: { timestamp: DateTime; type: AlertTypeEnum; id: string }[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -166,7 +166,8 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   }
 
   formatAvailability(f?: number) {
-    return `${f}%`;
+    if (f === undefined || f === null) return '0.00%';
+    return `${(f * 100).toFixed(2)}%`;
   }
 
   newAlerts(alerts: AlertListViewModel[]) {
