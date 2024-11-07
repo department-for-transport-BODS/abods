@@ -294,18 +294,6 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
-export type FeatureFlagType = {
-  __typename?: 'FeatureFlagType';
-  consolidateHistogram?: Maybe<Scalars['Boolean']['output']>;
-  corridorStatsTimezoneEnabled?: Maybe<Scalars['Boolean']['output']>;
-  freshdeskEnabled?: Maybe<Scalars['Boolean']['output']>;
-  lineDirectionFiltering?: Maybe<Scalars['Boolean']['output']>;
-  ssoEnabled?: Maybe<Scalars['Boolean']['output']>;
-  stopIndexFiltering?: Maybe<Scalars['Boolean']['output']>;
-  taggingIncludeBankHolidays?: Maybe<Scalars['Boolean']['output']>;
-  vehicleReplayFromTimestream?: Maybe<Scalars['Boolean']['output']>;
-};
-
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -1301,7 +1289,6 @@ export type ResolversTypes = ResolversObject<{
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
   EventType: ResolverTypeWrapper<Partial<EventType>>;
-  FeatureFlagType: ResolverTypeWrapper<Partial<FeatureFlagType>>;
   FeedMonitoringType: ResolverTypeWrapper<Partial<FeedMonitoringType>>;
   Float: ResolverTypeWrapper<Partial<Scalars['Float']['output']>>;
   FrequentServiceInfoFilterType: ResolverTypeWrapper<Partial<FrequentServiceInfoFilterType>>;
@@ -1422,7 +1409,6 @@ export type ResolversParentTypes = ResolversObject<{
   EventResponse: Partial<EventResponse>;
   EventStatsType: Partial<EventStatsType>;
   EventType: Partial<EventType>;
-  FeatureFlagType: Partial<FeatureFlagType>;
   FeedMonitoringType: Partial<FeedMonitoringType>;
   Float: Partial<Scalars['Float']['output']>;
   FrequentServiceInfoFilterType: Partial<FrequentServiceInfoFilterType>;
@@ -1674,18 +1660,6 @@ export type EventTypeResolvers<ContextType = RequestContext, ParentType extends 
   data?: Resolver<ResolversTypes['EventData'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type FeatureFlagTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FeatureFlagType'] = ResolversParentTypes['FeatureFlagType']> = ResolversObject<{
-  consolidateHistogram?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  corridorStatsTimezoneEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  freshdeskEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  lineDirectionFiltering?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  ssoEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  stopIndexFiltering?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  taggingIncludeBankHolidays?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  vehicleReplayFromTimestream?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2160,7 +2134,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   EventResponse?: EventResponseResolvers<ContextType>;
   EventStatsType?: EventStatsTypeResolvers<ContextType>;
   EventType?: EventTypeResolvers<ContextType>;
-  FeatureFlagType?: FeatureFlagTypeResolvers<ContextType>;
   FeedMonitoringType?: FeedMonitoringTypeResolvers<ContextType>;
   FrequentServiceInfoType?: FrequentServiceInfoTypeResolvers<ContextType>;
   FrequentServiceType?: FrequentServiceTypeResolvers<ContextType>;

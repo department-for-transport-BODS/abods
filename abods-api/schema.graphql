@@ -533,17 +533,6 @@ type ApiInfoType {
   version: String!
 }
 
-type FeatureFlagType {
-  consolidateHistogram: Boolean
-  corridorStatsTimezoneEnabled: Boolean
-  freshdeskEnabled: Boolean
-  lineDirectionFiltering: Boolean
-  ssoEnabled: Boolean
-  stopIndexFiltering: Boolean
-  taggingIncludeBankHolidays: Boolean
-  vehicleReplayFromTimestream: Boolean
-}
-
 type LoginResponse {
   success: Boolean!
   expiresAt: String
