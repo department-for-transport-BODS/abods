@@ -1,9 +1,9 @@
-import { byText, createComponentFactory, Spectator } from '@ngneat/spectator';
-import { NgxTippyModule } from 'ngx-tippy-wrapper';
+import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
 
-import { DropdownComponent } from './dropdown.component';
+import { DropdownComponent } from "./dropdown.component";
 
-describe('DropdownComponent', () => {
+describe("DropdownComponent", () => {
   let spectator: Spectator<DropdownComponent>;
 
   const createComponent = createComponentFactory({
@@ -16,14 +16,14 @@ describe('DropdownComponent', () => {
     spectator = createComponent();
   });
 
-  it('should create the component', () => {
+  it("should create the component", () => {
     expect(spectator.component).toBeTruthy();
   });
 
-  it('should set trigger label', () => {
-    spectator.component.triggerLabel = 'test';
+  it("should set trigger label", () => {
+    spectator.component.triggerLabel = "test";
     spectator.detectChanges();
 
-    expect(spectator.query(byText('test'))).toBeVisible();
+    expect(spectator.query(byText("test"))).toBeVisible();
   });
 });

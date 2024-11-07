@@ -1,6 +1,6 @@
-import { Axis, XYChart } from '@amcharts/amcharts4/charts';
+import { Axis, XYChart } from "@amcharts/amcharts4/charts";
 
-export type XAxisLabelPosition = 'bin' | 'column';
+export type XAxisLabelPosition = "bin" | "column";
 
 export interface CorridorChart<TDataType> {
   data?: TDataType;

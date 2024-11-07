@@ -1,14 +1,19 @@
-import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, convertToParamMap, Router, UrlTree } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { of } from 'rxjs';
-import { UserFragment } from 'src/generated/graphql';
+import { TestBed } from "@angular/core/testing";
+import {
+  ActivatedRouteSnapshot,
+  convertToParamMap,
+  Router,
+  UrlTree,
+} from "@angular/router";
+import { RouterTestingModule } from "@angular/router/testing";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { of } from "rxjs";
+import { UserFragment } from "src/generated/graphql";
 
-import { OrganisationUserGuard } from './organisation-user.guard';
-import { OrganisationService } from './organisation.service';
+import { OrganisationUserGuard } from "./organisation-user.guard";
+import { OrganisationService } from "./organisation.service";
 
-describe('OrganisationUserGuard', () => {
+describe("OrganisationUserGuard", () => {
   let guard: OrganisationUserGuard;
   let organisationService: OrganisationService;
   let router: Router;
@@ -26,7 +31,7 @@ describe('OrganisationUserGuard', () => {
         {
           provide: Router,
           useValue: {
-            parseUrl: () => <UrlTree>{ toString: () => '' },
+            parseUrl: () => <UrlTree>{ toString: () => "" },
           },
         },
       ],
@@ -36,28 +41,36 @@ describe('OrganisationUserGuard', () => {
     router = TestBed.inject(Router);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(guard).toBeTruthy();
   });
 
-  it('should return true if user is part of organisation', () => {
-    spyOn(organisationService, 'fetchUser').and.returnValue(of(<UserFragment>{ email: 'test@test.con' }));
+  it("should return true if user is part of organisation", () => {
+    spyOn(organisationService, "fetchUser").and.returnValue(
+      of(<UserFragment>{ email: "test@test.con" }),
+    );
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{ paramMap: convertToParamMap({ email: 'test@test.con' }) })
+      .canActivate(<ActivatedRouteSnapshot>{
+        paramMap: convertToParamMap({ email: "test@test.con" }),
+      })
       .subscribe((value) => {
         expect(value).toBeTrue();
       });
   });
 
-  it('should return organisation/user-not-found if user is not part of organisation', () => {
-    spyOn(organisationService, 'fetchUser').and.returnValue(of(undefined));
-    spyOn(router, 'parseUrl').and.returnValue(<UrlTree>{ toString: () => 'organisation/user-not-found' });
+  it("should return organisation/user-not-found if user is not part of organisation", () => {
+    spyOn(organisationService, "fetchUser").and.returnValue(of(undefined));
+    spyOn(router, "parseUrl").and.returnValue(<UrlTree>{
+      toString: () => "organisation/user-not-found",
+    });
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{ paramMap: convertToParamMap({ email: 'test@test.con' }) })
+      .canActivate(<ActivatedRouteSnapshot>{
+        paramMap: convertToParamMap({ email: "test@test.con" }),
+      })
       .subscribe((value) => {
-        expect(value.toString()).toEqual('organisation/user-not-found');
+        expect(value.toString()).toEqual("organisation/user-not-found");
       });
   });
 });

@@ -1,12 +1,21 @@
-import { DateTime } from 'luxon';
-import { VehicleJourney } from './vehicle-journeys-search.service';
+import { DateTime } from "luxon";
+import { VehicleJourney } from "./vehicle-journeys-search.service";
 
-const generateKey = (from: DateTime, to: DateTime, lineId: string) => `${from.toISO()}-${to.toISO()}-${lineId}`;
+const generateKey = (from: DateTime, to: DateTime, lineId: string) =>
+  `${from.toISO()}-${to.toISO()}-${lineId}`;
 
 export class FindJourneysCache {
-  private findJourneysCache: Map<string, { journey: VehicleJourney[]; expires: DateTime }> = new Map();
+  private findJourneysCache: Map<
+    string,
+    { journey: VehicleJourney[]; expires: DateTime }
+  > = new Map();
 
-  setItem(from: DateTime, to: DateTime, lineId: string, journey: VehicleJourney[]) {
+  setItem(
+    from: DateTime,
+    to: DateTime,
+    lineId: string,
+    journey: VehicleJourney[],
+  ) {
     // Clear cache as we only want to store the last result from findJourneys query
     this.findJourneysCache.clear();
     this.findJourneysCache.set(generateKey(from, to, lineId), {
@@ -16,7 +25,11 @@ export class FindJourneysCache {
     });
   }
 
-  getItem(from: DateTime, to: DateTime, lineId: string): VehicleJourney[] | undefined {
+  getItem(
+    from: DateTime,
+    to: DateTime,
+    lineId: string,
+  ): VehicleJourney[] | undefined {
     const key = generateKey(from, to, lineId);
     const item = this.findJourneysCache.get(key);
     if (!item) {

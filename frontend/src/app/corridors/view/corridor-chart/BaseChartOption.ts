@@ -1,5 +1,5 @@
-import { SimpleChanges } from '@angular/core';
-import { CorridorChart } from './CorridorChart';
+import { SimpleChanges } from "@angular/core";
+import { CorridorChart } from "./CorridorChart";
 import {
   ChartDisableXAxisTooltip,
   ChartDisableYAxisTooltip,
@@ -14,10 +14,13 @@ import {
   ChartYAxisProperties,
   ChartYAxisTitle,
   ChartZoomOutButtonDisbled,
-} from './options';
+} from "./options";
 
 export interface BaseChartOption<TDataType> {
-  onChanges?(changes: SimpleChanges, component?: CorridorChart<TDataType>): void;
+  onChanges?(
+    changes: SimpleChanges,
+    component?: CorridorChart<TDataType>,
+  ): void;
   afterViewInit(component: CorridorChart<TDataType>): void;
 }
 

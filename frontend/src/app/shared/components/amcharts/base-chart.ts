@@ -1,24 +1,27 @@
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-import { ChartService } from './chart.service';
-import { AsyncStatus } from '../../../on-time/pending.model';
-import { ITheme } from '@amcharts/amcharts4/core';
+import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
+import { ChartService } from "./chart.service";
+import { AsyncStatus } from "../../../on-time/pending.model";
+import { ITheme } from "@amcharts/amcharts4/core";
 
 export class BaseChart {
   protected screens: { [k: string]: am4core.Container } = {};
 
   protected chart!: am4charts.XYChart;
 
-  constructor(protected theme: ITheme, protected chartService: ChartService) {}
+  constructor(
+    protected theme: ITheme,
+    protected chartService: ChartService,
+  ) {}
 
   set asyncStatus(status: AsyncStatus) {
-    if (status === 'complete') {
+    if (status === "complete") {
       this.screens.loadingScreen?.hide();
-    } else if (status === 'loading') {
+    } else if (status === "loading") {
       this.screens.errorScreen?.hide();
       this.screens.noDataScreen?.hide();
       this.showLoadingScreen();
-    } else if (status === 'error') {
+    } else if (status === "error") {
       this.showErrorMessage();
     }
   }
@@ -37,10 +40,15 @@ export class BaseChart {
     this.createChart();
   }
 
-  showMessage(screen: string, create: (noDataScreen?: am4core.Container) => void) {
+  showMessage(
+    screen: string,
+    create: (noDataScreen?: am4core.Container) => void,
+  ) {
     if (!this.screens[screen]) {
       if (this.chart?.tooltipContainer) {
-        const container = this.chart.tooltipContainer.createChild(am4core.Container);
+        const container = this.chart.tooltipContainer.createChild(
+          am4core.Container,
+        );
         create(container);
         this.screens[screen] = container;
       }
@@ -49,10 +57,12 @@ export class BaseChart {
   }
 
   showLoadingScreen() {
-    this.showMessage('loadingScreen', (o) => this.chartService.getSpinnerObject(o));
+    this.showMessage("loadingScreen", (o) =>
+      this.chartService.getSpinnerObject(o),
+    );
   }
 
   showErrorMessage() {
-    this.showMessage('errorScreen', (o) => this.chartService.getErrorObject(o));
+    this.showMessage("errorScreen", (o) => this.chartService.getErrorObject(o));
   }
 }

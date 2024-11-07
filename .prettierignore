@@ -1,0 +1,8 @@
+*.json
+frontend/src/assets/js/govuk.js
+package-lock.json
+
+# Generated code
+/abods-api/src/types/generated.ts
+/frontend/src/generated/graphql.ts
+/frontend/graphql.schema.json

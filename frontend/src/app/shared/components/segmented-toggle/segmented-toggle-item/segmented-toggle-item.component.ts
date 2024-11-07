@@ -1,12 +1,23 @@
-import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, Optional, Output } from '@angular/core';
-import { SEGMENTED_TOGGLE_GROUP, SegmentedToggleGroup } from '../segmented-toggle-group';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Inject,
+  Input,
+  Optional,
+  Output,
+} from "@angular/core";
+import {
+  SEGMENTED_TOGGLE_GROUP,
+  SegmentedToggleGroup,
+} from "../segmented-toggle-group";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'app-segmented-toggle-item',
-  templateUrl: './segmented-toggle-item.component.html',
-  styleUrls: ['./segmented-toggle-item.component.scss'],
+  selector: "app-segmented-toggle-item",
+  templateUrl: "./segmented-toggle-item.component.html",
+  styleUrls: ["./segmented-toggle-item.component.scss"],
 })
 export class SegmentedToggleItemComponent {
   @Input()
@@ -36,8 +47,10 @@ export class SegmentedToggleItemComponent {
   private _selected = false;
 
   constructor(
-    @Optional() @Inject(SEGMENTED_TOGGLE_GROUP) private group: SegmentedToggleGroup,
-    private changeDetector: ChangeDetectorRef
+    @Optional()
+    @Inject(SEGMENTED_TOGGLE_GROUP)
+    private group: SegmentedToggleGroup,
+    private changeDetector: ChangeDetectorRef,
   ) {}
 
   onChanged(event: Event) {

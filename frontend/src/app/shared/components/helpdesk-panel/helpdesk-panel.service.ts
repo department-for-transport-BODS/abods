@@ -1,8 +1,8 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { DOCUMENT } from "@angular/common";
+import { Inject, Injectable, OnDestroy } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class HelpdeskPanelService implements OnDestroy {
   get isOpen(): boolean {
@@ -29,14 +29,14 @@ export class HelpdeskPanelService implements OnDestroy {
   private addBodyClass() {
     if (this._document.body) {
       // Used to hide scroll bar on body when helpdesk panel is open
-      this._document.body.classList.add('helpdesk-open');
+      this._document.body.classList.add("helpdesk-open");
     }
   }
 
   private removeBodyClass() {
     if (this._document.body) {
       // Remove when closing panel to show scroll bar on body
-      this._document.body.classList.remove('helpdesk-open');
+      this._document.body.classList.remove("helpdesk-open");
     }
   }
 }

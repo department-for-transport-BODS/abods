@@ -1,7 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { Period } from 'src/app/shared/components/date-range/date-range.types';
-import { WindowDatetimes } from 'src/app/shared/services/date-range.service';
-import { RankingOrder, ServicePunctualityType } from 'src/generated/graphql';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import { Period } from "src/app/shared/components/date-range/date-range.types";
+import { WindowDatetimes } from "src/app/shared/services/date-range.service";
+import { RankingOrder, ServicePunctualityType } from "src/generated/graphql";
 
 class ServiceViewModel {
   name: string;
@@ -11,14 +19,22 @@ class ServiceViewModel {
   nocCode: string;
   showTrend = false;
   onTimeLast?: number;
-  trend?: 'decrease' | 'increase';
+  trend?: "decrease" | "increase";
   trendPctDiff?: string;
 
-  constructor({ onTime, early, late, lineId, lineInfo, nocCode, trend }: ServicePunctualityType) {
+  constructor({
+    onTime,
+    early,
+    late,
+    lineId,
+    lineInfo,
+    nocCode,
+    trend,
+  }: ServicePunctualityType) {
     const total = (onTime ?? 0) + (early ?? 0) + (late ?? 0);
     this.nocCode = nocCode as string;
-    this.name = `${lineInfo?.serviceNumber ?? 'unknown'}: ${lineInfo?.serviceName ?? 'unknown'}`;
-    this.route = ['/on-time/', nocCode as string, lineId ?? ''];
+    this.name = `${lineInfo?.serviceNumber ?? "unknown"}: ${lineInfo?.serviceName ?? "unknown"}`;
+    this.route = ["/on-time/", nocCode as string, lineId ?? ""];
     this.onTime = total > 0 ? (onTime ?? 0) / total : 0;
     this.onTimePct = `${(this.onTime * 100).toFixed(2)}%`;
 
@@ -31,24 +47,26 @@ class ServiceViewModel {
       const diff = (this.onTime - this.onTimeLast) * 100;
       this.trendPctDiff = diff.toFixed(2);
       if (diff <= 0) {
-        this.trend = 'decrease';
+        this.trend = "decrease";
       } else {
-        this.trend = 'increase';
+        this.trend = "increase";
       }
     }
   }
 }
 @Component({
-  selector: 'app-performance-ranking',
-  templateUrl: './ranking-table.component.html',
-  styleUrls: ['./ranking-table.component.scss'],
+  selector: "app-performance-ranking",
+  templateUrl: "./ranking-table.component.html",
+  styleUrls: ["./ranking-table.component.scss"],
 })
 export class PerformanceRankingComponent implements OnInit, OnChanges {
   @Input() services?: ServicePunctualityType[];
   @Input() loaded = false;
 
   @Input() nocCode: string | null = null;
-  @Input() operators?: { nocCode?: string | null; name?: string | null }[] | null;
+  @Input() operators?:
+    | { nocCode?: string | null; name?: string | null }[]
+    | null;
 
   @Input() fromTo: WindowDatetimes | null = null;
   @Input() period?: Period;
@@ -70,7 +88,8 @@ export class PerformanceRankingComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.services) {
-      const services = changes.services.currentValue as ServicePunctualityType[];
+      const services = changes.services
+        .currentValue as ServicePunctualityType[];
       this.updateRows(services);
     }
   }
@@ -80,30 +99,31 @@ export class PerformanceRankingComponent implements OnInit, OnChanges {
   }
 
   operatorName(nocCode: string) {
-    return this.operators?.find((operator) => operator.nocCode === nocCode)?.name;
+    return this.operators?.find((operator) => operator.nocCode === nocCode)
+      ?.name;
   }
 
   get changeTooltip() {
-    let previousPeriodDescription = '';
+    let previousPeriodDescription = "";
     switch (this.period) {
       case Period.Last7:
-        previousPeriodDescription = 'previous 7 days';
+        previousPeriodDescription = "previous 7 days";
         break;
       case Period.Last28:
-        previousPeriodDescription = 'previous 28 days';
+        previousPeriodDescription = "previous 28 days";
         break;
       case Period.LastMonth:
-        previousPeriodDescription = 'previous month';
+        previousPeriodDescription = "previous month";
         break;
       case Period.MonthToDate:
-        previousPeriodDescription = 'equivalent period last month';
+        previousPeriodDescription = "equivalent period last month";
         break;
     }
 
-    let previousDateStr = '';
+    let previousDateStr = "";
     if (this.fromTo) {
       const { trendFrom, trendTo } = this.fromTo;
-      previousDateStr = ` (${trendFrom.toFormat('d MMMM')} - ${trendTo.toFormat('d MMMM')})`;
+      previousDateStr = ` (${trendFrom.toFormat("d MMMM")} - ${trendTo.toFormat("d MMMM")})`;
     }
     return `Change in on-time percentage from ${previousPeriodDescription}${previousDateStr}`;
   }

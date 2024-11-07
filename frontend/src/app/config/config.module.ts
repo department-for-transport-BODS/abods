@@ -1,7 +1,7 @@
-import { InjectionToken, NgModule } from '@angular/core';
-import { ConfigService } from './config.service';
+import { InjectionToken, NgModule } from "@angular/core";
+import { ConfigService } from "./config.service";
 
-const API_URL = new InjectionToken<string>('ApiUrl');
+const API_URL = new InjectionToken<string>("ApiUrl");
 
 @NgModule({
   providers: [

@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
-import { GDSSpacingSizes } from 'src/app/shared/types';
+import { Component, Input } from "@angular/core";
+import { GDSSpacingSizes } from "src/app/shared/types";
 
 @Component({
-  selector: 'gds-button',
+  selector: "gds-button",
   template: `
     <button
       [ngClass]="buttonClasses"
@@ -21,17 +21,17 @@ import { GDSSpacingSizes } from 'src/app/shared/types';
 export class ButtonComponent {
   @Input() text?: string;
   @Input() disabled = false;
-  @Input() appearance?: 'secondary' | 'warning';
+  @Input() appearance?: "secondary" | "warning";
   @Input() spaceBelow?: GDSSpacingSizes;
   @Input() spaceAbove?: GDSSpacingSizes;
-  @Input() type: 'submit' | 'button' = 'button';
+  @Input() type: "submit" | "button" = "button";
   @Input() buttonId?: string;
 
   get buttonClasses() {
     return {
-      'govuk-button': true,
+      "govuk-button": true,
       [`govuk-button--${this.appearance}`]: this.appearance,
-      'govuk-button--disabled': this.disabled,
+      "govuk-button--disabled": this.disabled,
       [`govuk-!-margin-bottom-${this.spaceBelow}`]: this.spaceBelow,
       [`govuk-!-margin-top-${this.spaceAbove}`]: this.spaceAbove,
     };

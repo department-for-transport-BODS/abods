@@ -3,8 +3,12 @@
   <table class="feed-status-summary">
     <thead>
       <tr>
-        <th class="feed-status-summary__heading"><span class="govuk-visually-hidden">Status</span></th>
-        <th class="feed-status-summary__heading"><span class="govuk-visually-hidden">Operators</span></th>
+        <th class="feed-status-summary__heading">
+          <span class="govuk-visually-hidden">Status</span>
+        </th>
+        <th class="feed-status-summary__heading">
+          <span class="govuk-visually-hidden">Operators</span>
+        </th>
         <th class="feed-status-summary__heading">Alerts</th>
         <th class="feed-status-summary__heading">Errors</th>
       </tr>
@@ -12,22 +16,36 @@
     <tbody>
       <tr *ngFor="let operator of operators">
         <td class="feed-status-summary__status">
-          <app-status [active]="operator.feedMonitoring?.feedStatus ?? false" size="small" [label]="false"></app-status>
+          <app-status
+            [active]="operator.feedMonitoring?.feedStatus ?? false"
+            size="small"
+            [label]="false"
+          ></app-status>
         </td>
         <td class="feed-status-summary__operator">
-          <app-tooltip [message]="operator.nocCode" [selectable]="true">{{ operator.name }}</app-tooltip>
+          <app-tooltip [message]="operator.nocCode" [selectable]="true">{{
+            operator.name
+          }}</app-tooltip>
         </td>
-        <td class="feed-status-summary__count feed-status-summary__count--alerts">
+        <td
+          class="feed-status-summary__count feed-status-summary__count--alerts"
+        >
           {{ operator.feedMonitoring?.liveStats?.feedAlerts || 0 }}
         </td>
-        <td class="feed-status-summary__count feed-status-summary__count--errors">
+        <td
+          class="feed-status-summary__count feed-status-summary__count--errors"
+        >
           {{ operator.feedMonitoring?.liveStats?.feedErrors || 0 }}
         </td>
       </tr>
     </tbody>
   </table>
   <div class="feed-status-summary__footer">
-    <app-link [route]="['/feed-monitoring/']" weight="bold" [arrows]="true" [underline]="false"
+    <app-link
+      [route]="['/feed-monitoring/']"
+      weight="bold"
+      [arrows]="true"
+      [underline]="false"
       >Feed monitoring</app-link
     >
   </div>

@@ -1,32 +1,40 @@
-import { NgModule } from '@angular/core';
-import { InMemoryCache, ServerError } from '@apollo/client/core';
-import { HttpLink } from 'apollo-angular/http';
-import { ConfigService } from './config/config.service';
-import { ApolloLink } from '@apollo/client/link/core';
-import { onError } from '@apollo/client/link/error';
-import { APOLLO_OPTIONS } from 'apollo-angular';
-import { Router } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { InMemoryCache, ServerError } from "@apollo/client/core";
+import { HttpLink } from "apollo-angular/http";
+import { ConfigService } from "./config/config.service";
+import { ApolloLink } from "@apollo/client/link/core";
+import { onError } from "@apollo/client/link/error";
+import { APOLLO_OPTIONS } from "apollo-angular";
+import { Router } from "@angular/router";
 
-export function createApollo(httpLink: HttpLink, config: ConfigService, router: Router) {
+export function createApollo(
+  httpLink: HttpLink,
+  config: ConfigService,
+  router: Router,
+) {
   const error = onError(({ networkError, graphQLErrors }) => {
     if (graphQLErrors) {
-      graphQLErrors.map(({ message, locations, path }) => console.warn('[GraphQL error]', message, locations, path));
+      graphQLErrors.map(({ message, locations, path }) =>
+        console.warn("[GraphQL error]", message, locations, path),
+      );
     }
 
     if (networkError) {
-      console.warn('[Network error]', networkError);
+      console.warn("[Network error]", networkError);
     }
 
     if (
-      graphQLErrors?.some(({ message }) => message === 'Access denied for unauthenticated user') ||
+      graphQLErrors?.some(
+        ({ message }) => message === "Access denied for unauthenticated user",
+      ) ||
       (networkError as ServerError)?.statusCode === 401
     ) {
       // Clear session so they can re authenticate
-      localStorage.removeItem('session');
+      localStorage.removeItem("session");
       // Navigate to login
       const { url } = router.routerState.snapshot;
-      if (!url.startsWith('/login')) {
-        router.navigate(['/login'], { queryParams: { returnUrl: url } });
+      if (!url.startsWith("/login")) {
+        router.navigate(["/login"], { queryParams: { returnUrl: url } });
       }
     }
   });
@@ -45,7 +53,7 @@ export function createApollo(httpLink: HttpLink, config: ConfigService, router: 
           fields: {
             userAlert(_, { args, toReference }) {
               return toReference({
-                __typename: 'UserAlert',
+                __typename: "UserAlert",
                 id: args?.alertId,
               });
             },
@@ -55,13 +63,13 @@ export function createApollo(httpLink: HttpLink, config: ConfigService, router: 
     }),
     defaultOptions: {
       watchQuery: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
       },
       query: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
       },
       mutate: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
       },
     },
   };

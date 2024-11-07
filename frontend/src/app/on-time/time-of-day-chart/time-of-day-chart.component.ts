@@ -1,11 +1,15 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { OnTimeService, PerformanceParams, TimeOfDayData } from '../on-time.service';
-import { switchMap, takeUntil } from 'rxjs/operators';
-import { AsyncStatus, withStatus } from '../pending.model';
+import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Observable, ReplaySubject, Subject } from "rxjs";
+import {
+  OnTimeService,
+  PerformanceParams,
+  TimeOfDayData,
+} from "../on-time.service";
+import { switchMap, takeUntil } from "rxjs/operators";
+import { AsyncStatus, withStatus } from "../pending.model";
 
 @Component({
-  selector: 'app-time-of-day-chart',
+  selector: "app-time-of-day-chart",
   template: `<app-stacked-histogram-chart
     [data]="data$ | async"
     [status$]="status$.asObservable()"
@@ -29,8 +33,13 @@ export class TimeOfDayChartComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.data$ = this.params$.pipe(
-      switchMap((params) => withStatus(() => this.service.fetchOnTimePunctualityTimeOfDayData(params), this.status$)),
-      takeUntil(this.destroy$)
+      switchMap((params) =>
+        withStatus(
+          () => this.service.fetchOnTimePunctualityTimeOfDayData(params),
+          this.status$,
+        ),
+      ),
+      takeUntil(this.destroy$),
     );
   }
 

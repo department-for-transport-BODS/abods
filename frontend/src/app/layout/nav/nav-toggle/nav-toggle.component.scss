@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 :host {
   flex-shrink: 0;
   @include bp($desktop) {
@@ -11,7 +11,7 @@
     text-decoration: none;
   }
   &::after {
-    content: '';
+    content: "";
     margin-left: govuk-spacing(1);
     @include govuk-shape-arrow(down, 10px, 8px, inline-block);
     border-top-color: currentColor;
@@ -23,9 +23,9 @@
     }
   }
   &--light {
-    color: govuk-colour('white');
+    color: govuk-colour("white");
     &:focus {
-      color: govuk-colour('black');
+      color: govuk-colour("black");
     }
   }
 }

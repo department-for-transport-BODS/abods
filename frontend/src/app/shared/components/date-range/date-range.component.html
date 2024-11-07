@@ -12,8 +12,15 @@
         (keydowned)="preventKeystroke($event)"
         spaceBelow="0"
       ></gds-text-input>
-      <button (click)="toggleControls($event)" class="date-range__button unbuttoned">
-        <svg-icon class="date-range__icon" src="assets/icons/calendar.svg" [applyClass]="true"></svg-icon>
+      <button
+        (click)="toggleControls($event)"
+        class="date-range__button unbuttoned"
+      >
+        <svg-icon
+          class="date-range__icon"
+          src="assets/icons/calendar.svg"
+          [applyClass]="true"
+        ></svg-icon>
         <div class="govuk-visually-hidden">Open date range picker</div>
       </button>
     </div>

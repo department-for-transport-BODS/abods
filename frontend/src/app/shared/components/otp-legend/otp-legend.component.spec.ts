@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { OtpLegendComponent } from './otp-legend.component';
+import { OtpLegendComponent } from "./otp-legend.component";
 
-describe('OtpLegendComponent', () => {
+describe("OtpLegendComponent", () => {
   let component: OtpLegendComponent;
   let fixture: ComponentFixture<OtpLegendComponent>;
 
@@ -18,7 +18,7 @@ describe('OtpLegendComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

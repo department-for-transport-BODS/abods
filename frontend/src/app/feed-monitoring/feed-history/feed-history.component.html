@@ -3,7 +3,11 @@
     <gds-back-link label="Live status"></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
-    <app-page-header caption="Feed monitoring" heading="Feed history" spaceBelow="2"></app-page-header>
+    <app-page-header
+      caption="Feed monitoring"
+      heading="Feed history"
+      spaceBelow="2"
+    ></app-page-header>
 
     <app-operator-selector
       [allOperators]="allOperators"
@@ -11,7 +15,11 @@
       (operatorChange)="changeOperator($event)"
     ></app-operator-selector>
 
-    <app-datenav [stats]="alertStats" [date]="date" (dateSelected)="changeDate($event)"></app-datenav>
+    <app-datenav
+      [stats]="alertStats"
+      [date]="date"
+      (dateSelected)="changeDate($event)"
+    ></app-datenav>
 
     <app-historic-vehicle-stats
       *ngIf="!chartErrored && !noData && !loading"
@@ -23,7 +31,11 @@
     ></app-historic-vehicle-stats>
 
     <app-box *ngIf="loading" minHeight="385px">
-      <app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner>
+      <app-spinner
+        [vCentre]="true"
+        message="Loading..."
+        size="default"
+      ></app-spinner>
     </app-box>
 
     <app-box *ngIf="chartErrored" minHeight="385px">
@@ -33,7 +45,9 @@
           src="assets/icons/exclamation-in-circle.svg"
           [applyClass]="true"
         ></svg-icon>
-        <span class="feed-history--error__message">There was an error loading the chart data, please try again.</span>
+        <span class="feed-history--error__message"
+          >There was an error loading the chart data, please try again.</span
+        >
       </div>
     </app-box>
 
@@ -44,7 +58,9 @@
           src="assets/icons/exclamation-in-circle.svg"
           [applyClass]="true"
         ></svg-icon>
-        <span class="feed-history--error__message">No data found for the date selected.</span>
+        <span class="feed-history--error__message"
+          >No data found for the date selected.</span
+        >
       </div>
     </app-box>
 
@@ -52,7 +68,9 @@
       <app-stat
         label="Feed availability"
         class="feed-history__stat feed-history__availability"
-        [statValue]="operator?.feedMonitoring?.historicalStats?.availability || 0"
+        [statValue]="
+          operator?.feedMonitoring?.historicalStats?.availability || 0
+        "
         [statFormatter]="formatAvailability"
         [statLoaded]="!loading"
         tooltip="The percentage of the day the feed was active when vehicles were expected to be running"
@@ -61,7 +79,9 @@
       <app-stat
         label="Average update frequency"
         class="feed-history__stat feed-history__update-frequency"
-        [statValue]="operator?.feedMonitoring?.historicalStats?.updateFrequency || 0"
+        [statValue]="
+          operator?.feedMonitoring?.historicalStats?.updateFrequency || 0
+        "
         [statFormatter]="formatUpdateFrequency"
         [statLoaded]="!loading"
         id="historic-stat-frequency"
@@ -85,7 +105,10 @@
       <gds-back-link label="Feed monitoring"></gds-back-link>
     </ng-container>
     <ng-container ngProjectAs="content">
-      <app-page-header caption="Feed monitoring" heading="Not found"></app-page-header>
+      <app-page-header
+        caption="Feed monitoring"
+        heading="Not found"
+      ></app-page-header>
       <p class="govuk-body">
         Operator not found, or you do not have permission to view. Go back to
         <a [routerLink]="['/feed-monitoring']">Feed monitoring</a>?

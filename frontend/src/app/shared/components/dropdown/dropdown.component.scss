@@ -1,9 +1,9 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
-$dropdown-border-color: govuk-colour('black');
+$dropdown-border-color: govuk-colour("black");
 $dropdown-border-width: 1px;
-$dropdown-background: govuk-colour('white');
+$dropdown-background: govuk-colour("white");
 $dropdown-padding: govuk-spacing(2);
 
 $arrow-up-border-top: 0;
@@ -33,12 +33,12 @@ $arrow-down-border-left: 0.3em solid transparent;
     margin-left: 0.255em;
     margin-top: auto;
     margin-bottom: auto;
-    content: '';
+    content: "";
   }
 }
 
 ::ng-deep {
-  .tippy-box[data-theme~='gds-popover'] {
+  .tippy-box[data-theme~="gds-popover"] {
     padding: $dropdown-padding;
     position: relative;
     background-color: $dropdown-background;
@@ -67,7 +67,7 @@ $arrow-down-border-left: 0.3em solid transparent;
       border-left: $arrow-down-border-left;
     }
     ::ng-deep {
-      .tippy-box[data-theme~='gds-popover'] {
+      .tippy-box[data-theme~="gds-popover"] {
         border-bottom: none;
       }
     }
@@ -89,7 +89,7 @@ $arrow-down-border-left: 0.3em solid transparent;
       border-left: $arrow-up-border-left;
     }
     ::ng-deep {
-      .tippy-box[data-theme~='gds-popover'] {
+      .tippy-box[data-theme~="gds-popover"] {
         border-top: none;
       }
     }

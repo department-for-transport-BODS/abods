@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { NavToggleComponent } from './nav-toggle.component';
+import { NavToggleComponent } from "./nav-toggle.component";
 
-describe('NavToggleComponent', () => {
+describe("NavToggleComponent", () => {
   let component: NavToggleComponent;
   let fixture: ComponentFixture<NavToggleComponent>;
 
@@ -18,7 +18,7 @@ describe('NavToggleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

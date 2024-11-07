@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 @Component({
-  selector: 'app-tab',
+  selector: "app-tab",
   template: `
     <div class="tab__content" [hidden]="!active">
       <ng-content></ng-content>
     </div>
   `,
-  styleUrls: ['./tab.component.scss'],
+  styleUrls: ["./tab.component.scss"],
 })
 export class TabComponent {
   @Input() id?: string;

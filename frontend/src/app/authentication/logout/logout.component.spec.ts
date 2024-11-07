@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { AuthenticationService } from '../authentication.service';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { RouterTestingModule } from "@angular/router/testing";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { AuthenticationService } from "../authentication.service";
 
-import { LogoutComponent } from './logout.component';
+import { LogoutComponent } from "./logout.component";
 
-describe('LogoutComponent', () => {
+describe("LogoutComponent", () => {
   let component: LogoutComponent;
   let fixture: ComponentFixture<LogoutComponent>;
   let authenticationService: AuthenticationService;
@@ -19,7 +19,7 @@ describe('LogoutComponent', () => {
         {
           provide: AuthenticationService,
           useValue: {
-            logout: jasmine.createSpy('logout'),
+            logout: jasmine.createSpy("logout"),
           },
         },
       ],
@@ -33,11 +33,11 @@ describe('LogoutComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call logout', () => {
+  it("should call logout", () => {
     component.logout();
 
     expect(authenticationService.logout).toHaveBeenCalledWith();

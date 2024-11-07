@@ -1,25 +1,25 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { AuthenticationService } from './authentication/authentication.service';
-import { BrowserTitleService } from './shared/components/browser-title/browser-title.service';
-import { Event, NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { PanelService } from './shared/components/panel/panel.service';
-import { Observable } from 'rxjs';
-import { VersionService } from './version/version.service';
-import { AnalyticsService } from './shared/services/analytics.service';
-import { InactivityService } from './authentication/inactivity/inactivity.service';
-import { ConfigService } from './config/config.service';
+import { AfterViewInit, Component, OnInit } from "@angular/core";
+import { AuthenticationService } from "./authentication/authentication.service";
+import { BrowserTitleService } from "./shared/components/browser-title/browser-title.service";
+import { Event, NavigationEnd, Router } from "@angular/router";
+import { filter } from "rxjs/operators";
+import { PanelService } from "./shared/components/panel/panel.service";
+import { Observable } from "rxjs";
+import { VersionService } from "./version/version.service";
+import { AnalyticsService } from "./shared/services/analytics.service";
+import { InactivityService } from "./authentication/inactivity/inactivity.service";
+import { ConfigService } from "./config/config.service";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit, AfterViewInit {
   skipLinkContent?: string;
   skipLinkNav?: string;
-  title = 'raa-client';
-  service = 'Analyse Bus Open Data';
+  title = "raa-client";
+  service = "Analyse Bus Open Data";
 
   constructor(
     private browserTitleService: BrowserTitleService,
@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     private versionService: VersionService,
     private analyticsService: AnalyticsService,
     private idle: InactivityService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {
     this.idle.$onInactive.subscribe(() => {
       if (this.authService.isSessionAlive) {
@@ -39,18 +39,20 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    console.log('Environment: ' + this.configService.envName);
+    console.log("Environment: " + this.configService.envName);
     this.versionService.printVersion();
     this.analyticsService.initialize();
   }
 
   ngAfterViewInit() {
     this.browserTitleService.applicationTitle = this.service;
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((navEnd: Event) => {
-      const route = (navEnd as NavigationEnd).urlAfterRedirects.split('#')[0];
-      this.skipLinkContent = `${route}#content`;
-      this.skipLinkNav = `${route}#navigation`;
-    });
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe((navEnd: Event) => {
+        const route = (navEnd as NavigationEnd).urlAfterRedirects.split("#")[0];
+        this.skipLinkContent = `${route}#content`;
+        this.skipLinkNav = `${route}#navigation`;
+      });
   }
 
   get showNav() {

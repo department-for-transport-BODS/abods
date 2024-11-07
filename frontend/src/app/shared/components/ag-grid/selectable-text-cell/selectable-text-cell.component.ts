@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
-import { AgRendererComponent } from 'ag-grid-angular';
-import { ICellRendererParams, ValueGetterParams } from 'ag-grid-community';
+import { Component } from "@angular/core";
+import { AgRendererComponent } from "ag-grid-angular";
+import { ICellRendererParams, ValueGetterParams } from "ag-grid-community";
 
 export interface SelectableTextCellRendererParams extends ICellRendererParams {
   bold?: boolean;
   noWrap?: boolean;
-  textOverflow?: 'ellipsis' | 'visible' | 'clip';
+  textOverflow?: "ellipsis" | "visible" | "clip";
   tooltipValueGetter?: (params: ValueGetterParams) => any;
 }
 
@@ -25,16 +25,18 @@ export interface SelectableTextCellRendererParams extends ICellRendererParams {
         <ng-container *ngTemplateOutlet="selectableText"></ng-container>
       </app-tooltip>
     </ng-template> `,
-  styleUrls: ['./selectable-text-cell.component.scss'],
+  styleUrls: ["./selectable-text-cell.component.scss"],
 })
-export class SelectableTextCellRendererComponent implements AgRendererComponent {
+export class SelectableTextCellRendererComponent
+  implements AgRendererComponent
+{
   label?: string;
   bold?: boolean;
   noWrap?: boolean;
   withTooltip = false;
   tooltipText?: string;
 
-  textOverflow?: 'ellipsis' | 'visible' | 'clip';
+  textOverflow?: "ellipsis" | "visible" | "clip";
 
   refresh(params: SelectableTextCellRendererParams): boolean {
     this.agInit(params);
@@ -45,7 +47,7 @@ export class SelectableTextCellRendererComponent implements AgRendererComponent 
     this.label = params.valueFormatted ?? params.value;
     this.bold = params.bold;
     this.noWrap = params.noWrap;
-    this.textOverflow = params.textOverflow ?? 'ellipsis';
+    this.textOverflow = params.textOverflow ?? "ellipsis";
     this.withTooltip = !!params.tooltipValueGetter;
     if (params.tooltipValueGetter) {
       this.tooltipText = params.tooltipValueGetter(params as ValueGetterParams);
@@ -54,9 +56,10 @@ export class SelectableTextCellRendererComponent implements AgRendererComponent 
 
   get classNames() {
     return {
-      'selectable-text-cell--bold': this.bold,
-      'selectable-text-cell--no-wrap': this.noWrap,
-      [`selectable-text-cell--overflow-${this.textOverflow}`]: this.textOverflow,
+      "selectable-text-cell--bold": this.bold,
+      "selectable-text-cell--no-wrap": this.noWrap,
+      [`selectable-text-cell--overflow-${this.textOverflow}`]:
+        this.textOverflow,
     };
   }
 }

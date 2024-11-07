@@ -14,9 +14,16 @@
           *ngFor="let day of row; let i = index"
           class="date-range-controls__table-cell"
           [ngClass]="{
-            'date-range-controls__table-cell--included': selectedInterval?.contains(day.date),
-            'date-range-controls__table-cell--start': _selected.start?.hasSame(day.date, 'day'),
-            'date-range-controls__table-cell--end': _selected.end?.hasSame(day.date, 'day')
+            'date-range-controls__table-cell--included':
+              selectedInterval?.contains(day.date),
+            'date-range-controls__table-cell--start': _selected.start?.hasSame(
+              day.date,
+              'day'
+            ),
+            'date-range-controls__table-cell--end': _selected.end?.hasSame(
+              day.date,
+              'day'
+            )
           }"
         >
           <div
@@ -31,9 +38,17 @@
               'date-range-controls__day--selected': day.isSelected,
               'date-range-controls__day--disabled': !day.isSelectable,
               'date-range-controls__day--invisible': !day.isVisible,
-              'date-range-controls__day--included': selectedInterval?.contains(day.date),
-              'date-range-controls__day--start': _selected.start?.hasSame(day.date, 'day'),
-              'date-range-controls__day--end': _selected.end?.hasSame(day.date, 'day'),
+              'date-range-controls__day--included': selectedInterval?.contains(
+                day.date
+              ),
+              'date-range-controls__day--start': _selected.start?.hasSame(
+                day.date,
+                'day'
+              ),
+              'date-range-controls__day--end': _selected.end?.hasSame(
+                day.date,
+                'day'
+              ),
               'date-range-controls__day--saturday': day.isSaturday
             }"
             (click)="dateChange.emit(day.date)"

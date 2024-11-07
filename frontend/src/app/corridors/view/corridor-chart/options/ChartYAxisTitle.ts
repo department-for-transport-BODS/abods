@@ -1,6 +1,6 @@
-import { SimpleChanges } from '@angular/core';
-import { BaseChartOption } from '../BaseChartOption';
-import { CorridorChart } from '../CorridorChart';
+import { SimpleChanges } from "@angular/core";
+import { BaseChartOption } from "../BaseChartOption";
+import { CorridorChart } from "../CorridorChart";
 
 export class ChartYAxisTitle<TDataType> implements BaseChartOption<TDataType> {
   onChanges(changes: SimpleChanges, component: CorridorChart<TDataType>): void {
@@ -10,6 +10,8 @@ export class ChartYAxisTitle<TDataType> implements BaseChartOption<TDataType> {
   }
 
   afterViewInit(component: CorridorChart<TDataType>): void {
-    component.yAxis.title.text = component.yAxisTitle ? component.yAxisTitle : '';
+    component.yAxis.title.text = component.yAxisTitle
+      ? component.yAxisTitle
+      : "";
   }
 }

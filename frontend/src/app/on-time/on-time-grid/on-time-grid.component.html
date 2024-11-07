@@ -1,5 +1,8 @@
 <div class="on-time-grid">
-  <div class="on-time-grid--loaded" [ngClass]="{ 'on-time-grid--hidden': loading || errored }">
+  <div
+    class="on-time-grid--loaded"
+    [ngClass]="{ 'on-time-grid--hidden': loading || errored }"
+  >
     <div class="on-time-grid__controls">
       <div class="on-time-grid__controls--filter">
         <gds-text-input
@@ -13,7 +16,10 @@
       </div>
       <div class="on-time-grid__options">
         <div>
-          <button class="button-link govuk-link on-time-grid__display-options-btn" (click)="openDisplayOptions()">
+          <button
+            class="button-link govuk-link on-time-grid__display-options-btn"
+            (click)="openDisplayOptions()"
+          >
             Display options
           </button>
         </div>
@@ -69,12 +75,19 @@
     </div>
   </div>
   <div class="on-time-grid--loading" *ngIf="loading">
-    <app-spinner [vCentre]="true" message="Loading..." size="default"> </app-spinner>
+    <app-spinner [vCentre]="true" message="Loading..." size="default">
+    </app-spinner>
   </div>
   <div class="on-time-grid--errored" *ngIf="errored">
     <div class="on-time-grid--error">
-      <svg-icon class="on-time-grid__icon" src="assets/icons/exclamation-in-circle.svg" [applyClass]="true"></svg-icon>
-      <span class="on-time-grid__message">There was an error loading the {{ noun }} data, please try again.</span>
+      <svg-icon
+        class="on-time-grid__icon"
+        src="assets/icons/exclamation-in-circle.svg"
+        [applyClass]="true"
+      ></svg-icon>
+      <span class="on-time-grid__message"
+        >There was an error loading the {{ noun }} data, please try again.</span
+      >
     </div>
   </div>
 </div>
@@ -87,13 +100,25 @@
           [formControlName]="column.colId"
           [value]="column.colId"
           [label]="column.title"
-          [ngClass]="{ 'on-time-grid__checkboxes-col-2': i >= columnDescriptions.length / 2 }"
+          [ngClass]="{
+            'on-time-grid__checkboxes-col-2': i >= columnDescriptions.length / 2
+          }"
         ></gds-checkboxes-item>
       </div>
     </gds-checkboxes>
-    <button class="button-link govuk-link on-time-grid__show-btn" (click)="selectAllColumns()">Show all</button>
+    <button
+      class="button-link govuk-link on-time-grid__show-btn"
+      (click)="selectAllColumns()"
+    >
+      Show all
+    </button>
     <div class="flex-row justify-content-between govuk-!-margin-top-6">
-      <gds-button text="Cancel" spaceBelow="0" appearance="secondary" (click)="closeDisplayOptions()"></gds-button>
+      <gds-button
+        text="Cancel"
+        spaceBelow="0"
+        appearance="secondary"
+        (click)="closeDisplayOptions()"
+      ></gds-button>
       <gds-button type="submit" text="Update" spaceBelow="0"></gds-button>
     </div>
   </form>

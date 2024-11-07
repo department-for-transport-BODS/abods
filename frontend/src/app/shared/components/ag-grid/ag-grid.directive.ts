@@ -1,15 +1,15 @@
-import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
-import { AgGridEvent, ColumnApi, GridApi } from 'ag-grid-community';
-import { AgGridFormatterService } from './ag-grid-formatter.service';
+import { Directive, EventEmitter, HostListener, Output } from "@angular/core";
+import { AgGridEvent, ColumnApi, GridApi } from "ag-grid-community";
+import { AgGridFormatterService } from "./ag-grid-formatter.service";
 
 @Directive({
-  selector: 'ag-grid-angular[appAgGrid]',
+  selector: "ag-grid-angular[appAgGrid]",
 })
 export class AgGridDirective {
   gridApi?: GridApi;
   columnApi?: ColumnApi;
 
-  @HostListener('gridReady', ['$event']) gridReady(event: AgGridEvent<any>) {
+  @HostListener("gridReady", ["$event"]) gridReady(event: AgGridEvent<any>) {
     this.gridApi = event.api;
     this.columnApi = event.columnApi;
     this.agGridReady.emit();
@@ -26,13 +26,13 @@ export class AgGridDirective {
       {
         ...topRow,
         lineInfo: {
-          serviceNumber: 'Total',
-          serviceName: '',
+          serviceNumber: "Total",
+          serviceName: "",
           ...topRow.lineInfo,
         },
         stopInfo: {
           ...topRow.stopInfo,
-          stopName: 'Total:',
+          stopName: "Total:",
         },
       },
     ]);
@@ -43,19 +43,19 @@ export class AgGridDirective {
       skipPinnedTop: false,
       processCellCallback: (cell) => {
         const columnId = cell.column.getColId();
-        if (columnId.endsWith('Pct')) {
+        if (columnId.endsWith("Pct")) {
           return this.formatter.percentValueFormatter(cell);
-        } else if (columnId === 'averageDelay') {
+        } else if (columnId === "averageDelay") {
           return this.formatter.averageDelayValueExportFormatter(cell);
         }
         return cell.value;
       },
       processHeaderCallback: (cell) => {
         const columnId = cell.column.getColId();
-        if (columnId === 'averageDelay') {
-          return 'Av. delay (seconds)';
+        if (columnId === "averageDelay") {
+          return "Av. delay (seconds)";
         }
-        return cell.column.getDefinition().headerName ?? '';
+        return cell.column.getDefinition().headerName ?? "";
       },
     });
 

@@ -1,6 +1,6 @@
 @use "sass:math";
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 $popover-border-color: $govuk-border-colour;
 $popover-arrow-size: 16px;
@@ -8,7 +8,10 @@ $popover-border-width: 1px;
 $popover-background: white;
 
 $popover-arrow-offset: $popover-arrow-size + $popover-border-width;
-$popover-border-offset: math.div(($popover-arrow-size - $popover-border-width * 2), 2);
+$popover-border-offset: math.div(
+  ($popover-arrow-size - $popover-border-width * 2),
+  2
+);
 $popover-border-position-offset: $popover-border-width;
 
 .popover {
@@ -29,7 +32,7 @@ $popover-border-position-offset: $popover-border-width;
   }
 }
 
-.tippy-box[data-theme~='gds-popover'] {
+.tippy-box[data-theme~="gds-popover"] {
   position: relative;
   background-color: $popover-background;
   color: inherit;
@@ -44,7 +47,7 @@ $popover-border-position-offset: $popover-border-width;
     height: rem($popover-arrow-size);
     color: $popover-background;
     &:after {
-      content: '';
+      content: "";
       position: absolute;
       z-index: -1;
       border-color: transparent;
@@ -55,42 +58,52 @@ $popover-border-position-offset: $popover-border-width;
     padding: 0;
   }
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='top'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-popover"][data-placement^="top"]
+  > .tippy-arrow:before {
   border-top-color: $popover-background;
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='top'] > .tippy-arrow:after {
+.tippy-box[data-theme~="gds-popover"][data-placement^="top"]
+  > .tippy-arrow:after {
   border-top-color: $popover-border-color;
   border-width: $popover-border-offset $popover-border-offset 0;
   top: rem($popover-arrow-offset);
   left: $popover-border-width;
 }
 
-.tippy-box[data-theme~='gds-popover'][data-placement^='bottom'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-popover"][data-placement^="bottom"]
+  > .tippy-arrow:before {
   border-bottom-color: $popover-background;
   bottom: rem($popover-arrow-size);
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='bottom'] > .tippy-arrow:after {
+.tippy-box[data-theme~="gds-popover"][data-placement^="bottom"]
+  > .tippy-arrow:after {
   border-bottom-color: $popover-border-color;
   border-width: 0 $popover-border-offset $popover-border-offset;
   bottom: rem($popover-arrow-offset);
   left: $popover-border-width;
 }
 
-.tippy-box[data-theme~='gds-popover'][data-placement^='left'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-popover"][data-placement^="left"]
+  > .tippy-arrow:before {
   border-left-color: $popover-background;
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='left'] > .tippy-arrow:after {
+.tippy-box[data-theme~="gds-popover"][data-placement^="left"]
+  > .tippy-arrow:after {
   border-left-color: $popover-border-color;
-  border-width: $popover-border-offset 0 $popover-border-offset $popover-border-offset;
+  border-width: $popover-border-offset 0 $popover-border-offset
+    $popover-border-offset;
   left: rem($popover-arrow-offset);
   top: $popover-border-width;
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='right'] > .tippy-arrow:before {
+.tippy-box[data-theme~="gds-popover"][data-placement^="right"]
+  > .tippy-arrow:before {
   border-right-color: $popover-background;
   right: rem($popover-arrow-size);
 }
-.tippy-box[data-theme~='gds-popover'][data-placement^='right'] > .tippy-arrow:after {
-  border-width: $popover-border-offset $popover-border-offset $popover-border-offset 0;
+.tippy-box[data-theme~="gds-popover"][data-placement^="right"]
+  > .tippy-arrow:after {
+  border-width: $popover-border-offset $popover-border-offset
+    $popover-border-offset 0;
   right: rem($popover-arrow-offset);
   top: $popover-border-width;
   border-right-color: $popover-border-color;

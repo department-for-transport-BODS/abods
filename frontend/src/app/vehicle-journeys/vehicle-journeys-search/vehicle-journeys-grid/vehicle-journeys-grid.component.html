@@ -15,18 +15,22 @@
 
 <ng-container *ngIf="patterns.length > 0">
   <div *ngFor="let pattern of patterns; let last = last">
-    <h2 class="govuk-!-margin-top-6">{{ pattern[0].lineNumber }}: {{ pattern[0].servicePattern }}</h2>
+    <h2 class="govuk-!-margin-top-6">
+      {{ pattern[0].lineNumber }}: {{ pattern[0].servicePattern }}
+    </h2>
     <div class="journey-search-grid">
       <div *ngFor="let journey of pattern">
         <a
           class="govuk-link govuk-body journey-search-grid__time"
           [routerLink]="['/vehicle-journeys', journey.groupId]"
           [queryParams]="{
-            startTime: journey.startTime?.toUTC()?.toISO({ format: 'basic', suppressSeconds: true }),
+            startTime: journey.startTime
+              ?.toUTC()
+              ?.toISO({ format: 'basic', suppressSeconds: true }),
             operator: operatorId,
             service: serviceId
           }"
-          >{{ journey.startTime?.toFormat('HH:mm') }}</a
+          >{{ journey.startTime?.toFormat("HH:mm") }}</a
         >
       </div>
     </div>
