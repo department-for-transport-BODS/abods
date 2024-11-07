@@ -1,24 +1,36 @@
 name: pr-checks
 on:
   pull_request:
-    types: [synchronize]
+    branches:
+      - sandbox
 
 permissions: read-all
 
 jobs:
-  formatting:
+  formatting-and-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: "0"
+
       - uses: actions/setup-node@v1
         with:
           node-version: 18
+
       - name: Install
-        run: |
-          npm i
+        run: npm i
+
+      - name: Check for changes
+        run: git diff --name-only --exit-code HEAD || (echo "It looks like generated files haven't been updated. You can do that by running 'npm install' in the root directory"; false)
+
       - name: Check formatting
-        run: |
-          npm run fmt:check
+        if: success() || failure()
+        run: npm run fmt:check
+
+      - name: Run linters
+        if: success() || failure()
+        run: npm run lint:check
 
   build-backend:
     runs-on: ubuntu-latest

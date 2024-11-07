@@ -19,3 +19,5 @@ dist
 Thumbs.db
 
 generated_api_secrets/
+
+.eslintcache
