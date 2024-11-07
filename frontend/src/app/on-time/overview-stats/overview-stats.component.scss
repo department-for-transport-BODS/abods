@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .on-time-overview {
   &__stats {
@@ -46,14 +46,14 @@
   @include govuk-font(19);
   svg-icon {
     display: inline-flex;
-    color: govuk-colour('blue');
+    color: govuk-colour("blue");
     width: 20px;
     height: 20px;
     margin-right: govuk-spacing(1);
   }
   &:focus {
     svg-icon {
-      color: govuk-colour('black');
+      color: govuk-colour("black");
     }
   }
 }

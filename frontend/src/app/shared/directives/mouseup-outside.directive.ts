@@ -1,12 +1,18 @@
-import { Directive, ElementRef, EventEmitter, HostListener, Output } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Output,
+} from "@angular/core";
 
 @Directive({
-  selector: '[appMouseupOutside]',
+  selector: "[appMouseupOutside]",
 })
 export class MouseupOutsideDirective {
   @Output() appMouseupOutside = new EventEmitter<HTMLElement>();
 
-  @HostListener('document:mouseup', ['$event.target'])
+  @HostListener("document:mouseup", ["$event.target"])
   documentClick = (target: HTMLElement) => {
     if (!this.elRef.nativeElement.contains(target)) {
       this.appMouseupOutside.emit(target);

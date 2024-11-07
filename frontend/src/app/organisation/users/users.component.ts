@@ -1,13 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgxSmartModalService } from 'ngx-smart-modal';
-import { Subscription } from 'rxjs';
-import { RoleFragment, UserFragment } from 'src/generated/graphql';
-import { OrganisationService } from '../organisation.service';
-import { AuthenticatedUserService } from 'src/app/authentication/authenticated-user.service';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { NgxSmartModalService } from "ngx-smart-modal";
+import { Subscription } from "rxjs";
+import { RoleFragment, UserFragment } from "src/generated/graphql";
+import { OrganisationService } from "../organisation.service";
+import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 @Component({
-  selector: 'app-users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss'],
+  selector: "app-users",
+  templateUrl: "./users.component.html",
+  styleUrls: ["./users.component.scss"],
 })
 export class UsersComponent implements OnInit, OnDestroy {
   submitted = false;
@@ -35,7 +35,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   constructor(
     private service: OrganisationService,
     private authService: AuthenticatedUserService,
-    public ngxSmartModalService: NgxSmartModalService
+    public ngxSmartModalService: NgxSmartModalService,
   ) {}
 
   ngOnInit(): void {
@@ -48,8 +48,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.errored = true;
         }
       }),
-      this.authService.authenticatedUser$.subscribe((u) => (this.authenticatedUser = u)),
-      this.service.listOrgRoles$().subscribe((rs) => (this.roles = rs))
+      this.authService.authenticatedUser$.subscribe(
+        (u) => (this.authenticatedUser = u),
+      ),
+      this.service.listOrgRoles$().subscribe((rs) => (this.roles = rs)),
     );
   }
 
@@ -58,6 +60,6 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   openModal(): void {
-    this.ngxSmartModalService.getModal('inviteUser').open();
+    this.ngxSmartModalService.getModal("inviteUser").open();
   }
 }

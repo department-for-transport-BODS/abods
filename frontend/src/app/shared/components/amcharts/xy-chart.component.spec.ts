@@ -1,7 +1,7 @@
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { XYChartComponent } from './xy-chart.component';
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { XYChartComponent } from "./xy-chart.component";
 
-describe('XYChartComponent', () => {
+describe("XYChartComponent", () => {
   let spectator: Spectator<XYChartComponent>;
 
   const createComponent = createComponentFactory({
@@ -12,7 +12,7 @@ describe('XYChartComponent', () => {
     spectator = createComponent();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator.detectChanges();
 
     expect(spectator.component).toBeTruthy();

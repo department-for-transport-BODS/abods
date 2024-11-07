@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { SegmentedToggleItemComponent } from './segmented-toggle-item.component';
+import { SegmentedToggleItemComponent } from "./segmented-toggle-item.component";
 
-describe('SegmentedToggleItemComponent', () => {
+describe("SegmentedToggleItemComponent", () => {
   let component: SegmentedToggleItemComponent;
   let fixture: ComponentFixture<SegmentedToggleItemComponent>;
 
@@ -18,7 +18,7 @@ describe('SegmentedToggleItemComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

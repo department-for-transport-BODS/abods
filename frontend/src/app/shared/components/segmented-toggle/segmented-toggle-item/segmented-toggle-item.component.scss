@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 .segmented-toggle-item {
   display: inline-flex;
@@ -8,18 +8,18 @@
   &__label {
     @include govuk-font(19);
     padding: govuk-spacing(1) govuk-spacing(2);
-    background-color: govuk-colour('light-grey');
+    background-color: govuk-colour("light-grey");
     cursor: pointer;
     .segmented-toggle-item__input:checked + & {
-      color: govuk-colour('white');
-      background-color: govuk-colour('blue');
+      color: govuk-colour("white");
+      background-color: govuk-colour("blue");
       font-weight: $govuk-font-weight-bold;
       pointer-events: none;
     }
     .segmented-toggle-item__input:focus-visible + & {
       outline: 0;
-      background-color: govuk-colour('yellow');
-      color: govuk-colour('black');
+      background-color: govuk-colour("yellow");
+      color: govuk-colour("black");
     }
   }
 }

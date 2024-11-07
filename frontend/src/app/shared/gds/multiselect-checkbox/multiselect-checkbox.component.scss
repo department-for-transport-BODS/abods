@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .gds-multiselect-checkbox {
   width: 100%;
@@ -7,7 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: govuk-colour('light-grey');
+    background: govuk-colour("light-grey");
     padding: govuk-spacing(2);
     @include govuk-font($size: 19, $line-height: 1.25);
     margin-bottom: govuk-spacing(1);
@@ -53,7 +53,7 @@
         .govuk-checkboxes__item
         .govuk-checkboxes__input:not(:disabled)
         + .govuk-checkboxes__label:before {
-        box-shadow: 0 0 0 10px govuk-colour('mid-grey');
+        box-shadow: 0 0 0 10px govuk-colour("mid-grey");
       }
     }
   }

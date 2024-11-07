@@ -1,6 +1,10 @@
 <app-page>
   <ng-container ngProjectAs="back-link" *ngIf="!singleOperator">
-    <gds-back-link label="All operators" [route]="['../']" queryParamsHandling="preserve"></gds-back-link>
+    <gds-back-link
+      label="All operators"
+      [route]="['../']"
+      queryParamsHandling="preserve"
+    ></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
     <app-page-header
@@ -18,7 +22,10 @@
       ></app-operator-selector>
     </div>
     <ng-container *ngIf="operator">
-      <app-controls [operatorId]="operator.operatorId" (params)="params$.next($event)"></app-controls>
+      <app-controls
+        [operatorId]="operator.operatorId"
+        (params)="params$.next($event)"
+      ></app-controls>
       <app-box [padding]="['6', '5', '6', '5']" spaceAbove="6" spaceBelow="8">
         <app-tabs (tabChanged)="tabChanged($event)">
           <app-tab tabTitle="Timeline" id="timeline">
@@ -37,7 +44,11 @@
           </app-tab>
           <app-tab tabTitle="Distribution" id="distribution">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
                 <app-delay-frequency-chart
                   class="on-time__dist-chart"
                   [params]="params$ | async"
@@ -47,15 +58,29 @@
           </app-tab>
           <app-tab tabTitle="Time of day" id="time-of-day">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
-                <app-time-of-day-chart class="on-time__tod-chart" [params]="params$ | async"></app-time-of-day-chart>
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
+                <app-time-of-day-chart
+                  class="on-time__tod-chart"
+                  [params]="params$ | async"
+                ></app-time-of-day-chart>
               </app-chart-no-data-wrapper>
             </div>
           </app-tab>
           <app-tab tabTitle="Day of week" id="day-of-week">
             <div class="on-time__wrapper">
-              <app-chart-no-data-wrapper *appTabContent [noData]="noData" [dataExpected]="dataExpected">
-                <app-day-of-week-chart class="on-time__dow-chart" [params]="params$ | async"></app-day-of-week-chart>
+              <app-chart-no-data-wrapper
+                *appTabContent
+                [noData]="noData"
+                [dataExpected]="dataExpected"
+              >
+                <app-day-of-week-chart
+                  class="on-time__dow-chart"
+                  [params]="params$ | async"
+                ></app-day-of-week-chart>
               </app-chart-no-data-wrapper>
             </div>
           </app-tab>

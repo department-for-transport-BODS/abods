@@ -16,7 +16,7 @@
             >Dashboard
           </a>
         </li>
-        <li class="nav__item" *ngIf='configService.flag("feedMonitoring")'>
+        <li class="nav__item" *ngIf="configService.flag('feedMonitoring')">
           <a
             class="nav__link"
             [routerLink]="['/feed-monitoring']"
@@ -25,9 +25,9 @@
             >Feed monitoring
           </a>
         </li>
-        <li class="nav__item" *ngIf='!configService.flag("feedMonitoring")'>
+        <li class="nav__item" *ngIf="!configService.flag('feedMonitoring')">
           <a
-            style="color:grey; pointer-events: none;"
+            style="color: grey; pointer-events: none"
             class="nav__link disabled"
             routerLinkActive="nav__link--current"
             >Feed monitoring
@@ -65,7 +65,10 @@
   </div>
 
   <div class="nav__menu-bottom">
-    <button class="nav__menu-bottom__action-item button-link" (click)="openHelpdesk()">
+    <button
+      class="nav__menu-bottom__action-item button-link"
+      (click)="openHelpdesk()"
+    >
       <svg-icon src="assets/icons/question-in-circle.svg"></svg-icon>
       Help
     </button>

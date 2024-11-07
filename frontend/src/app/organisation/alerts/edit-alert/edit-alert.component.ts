@@ -1,16 +1,25 @@
-import { EventEmitter, OnDestroy } from '@angular/core';
-import { Component, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { AuthenticatedUserService } from 'src/app/authentication/authenticated-user.service';
-import { FormErrors } from 'src/app/shared/gds/error-summary/error-summary.component';
-import { AlertFragment, AlertTypeEnum, UserFragment } from 'src/generated/graphql';
-import { OrganisationService } from '../../organisation.service';
+import { EventEmitter, OnDestroy } from "@angular/core";
+import { Component, OnInit, Output } from "@angular/core";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { Subscription } from "rxjs";
+import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
+import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
+import {
+  AlertFragment,
+  AlertTypeEnum,
+  UserFragment,
+} from "src/generated/graphql";
+import { OrganisationService } from "../../organisation.service";
 
 @Component({
-  selector: 'app-edit-alert',
-  templateUrl: './edit-alert.component.html',
-  styleUrls: ['./edit-alert.component.scss'],
+  selector: "app-edit-alert",
+  templateUrl: "./edit-alert.component.html",
+  styleUrls: ["./edit-alert.component.scss"],
 })
 export class EditAlertComponent implements OnInit, OnDestroy {
   @Output() closeEdit = new EventEmitter();
@@ -33,14 +42,14 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private organisationService: OrganisationService,
-    private authService: AuthenticatedUserService
+    private authService: AuthenticatedUserService,
   ) {
     this.alertForm = this.formBuilder.group({
-      alertId: '',
-      alertType: ['', Validators.required],
+      alertId: "",
+      alertType: ["", Validators.required],
       eventThreshold: [1],
-      sendToId: [{ value: '', disabled: true }, Validators.required],
-      eventHysterisis: ['5'],
+      sendToId: [{ value: "", disabled: true }, Validators.required],
+      eventHysterisis: ["5"],
     });
   }
 
@@ -51,23 +60,27 @@ export class EditAlertComponent implements OnInit, OnDestroy {
       }),
       this.authService.authenticatedUser$.subscribe((user) => {
         this.authenticatedUser = user;
-        if (user?.roles?.some(({ name }) => name === 'Administrator')) {
-          this.alertForm.get('sendToId')?.enable();
+        if (user?.roles?.some(({ name }) => name === "Administrator")) {
+          this.alertForm.get("sendToId")?.enable();
         }
-      })
+      }),
     );
     if (this.alertTypeControl) {
       this.subs.push(
         this.alertTypeControl.valueChanges.subscribe((type) => {
           this.updateConditionalValidation(type);
-        })
+        }),
       );
     }
   }
 
   updateConditionalValidation(type: AlertTypeEnum) {
-    const ctrl = this.alertForm.get('eventThreshold');
-    ctrl?.setValidators(type === AlertTypeEnum.VehicleCountDisparity ? [Validators.required, Validators.min(1)] : []);
+    const ctrl = this.alertForm.get("eventThreshold");
+    ctrl?.setValidators(
+      type === AlertTypeEnum.VehicleCountDisparity
+        ? [Validators.required, Validators.min(1)]
+        : [],
+    );
     ctrl?.updateValueAndValidity();
   }
 
@@ -76,13 +89,14 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   }
 
   loadAlert(alert: AlertFragment | null) {
-    const { alertId, alertType, eventHysterisis, eventThreshold, sendTo } = alert || {};
+    const { alertId, alertType, eventHysterisis, eventThreshold, sendTo } =
+      alert || {};
     const value = {
-      alertId: alertId ?? '',
-      alertType: alertType ?? '',
+      alertId: alertId ?? "",
+      alertType: alertType ?? "",
       eventHysterisis: eventHysterisis ?? 5,
       eventThreshold: eventThreshold ?? 1,
-      sendToId: sendTo?.id ?? this.authenticatedUser?.id ?? '',
+      sendToId: sendTo?.id ?? this.authenticatedUser?.id ?? "",
     };
 
     this.errors = [];
@@ -98,7 +112,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
       this.organisationService.fetchUserAlert$(alertId).subscribe((alert) => {
         this.loadAlert(alert);
         this.openEdit.emit(this.editing);
-      })
+      }),
     );
   }
 
@@ -108,7 +122,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   }
 
   userDisplayName({ firstName, lastName, username }: UserFragment) {
-    if (firstName && firstName !== '' && lastName) {
+    if (firstName && firstName !== "" && lastName) {
       return `${firstName} ${lastName}`;
     }
     return username;
@@ -131,28 +145,43 @@ export class EditAlertComponent implements OnInit, OnDestroy {
     if (this.editing) {
       this.subs.push(
         this.organisationService
-          .updateUserAlert$(this.alertId, this.alertType, this.sendToId, this.eventHysterisis, this.eventThreshold)
+          .updateUserAlert$(
+            this.alertId,
+            this.alertType,
+            this.sendToId,
+            this.eventHysterisis,
+            this.eventThreshold,
+          )
           .subscribe(({ success, error }) => {
             if (success) {
               this.closeEdit.emit();
             } else {
-              this.errors = [{ error: error ?? 'There was an error updating the alert' }];
+              this.errors = [
+                { error: error ?? "There was an error updating the alert" },
+              ];
               this.submitted = false;
             }
-          })
+          }),
       );
     } else {
       this.subs.push(
         this.organisationService
-          .createUserAlert$(this.alertType, this.sendToId, this.eventHysterisis, this.eventThreshold)
+          .createUserAlert$(
+            this.alertType,
+            this.sendToId,
+            this.eventHysterisis,
+            this.eventThreshold,
+          )
           .subscribe(({ success, error }) => {
             if (success) {
               this.closeEdit.emit();
             } else {
-              this.errors = [{ error: error ?? 'There was an error creating the alert' }];
+              this.errors = [
+                { error: error ?? "There was an error creating the alert" },
+              ];
               this.submitted = false;
             }
-          })
+          }),
       );
     }
   }
@@ -167,23 +196,27 @@ export class EditAlertComponent implements OnInit, OnDestroy {
     this.submitted = true;
 
     this.subs.push(
-      this.organisationService.deleteUserAlert$(this.alertId).subscribe(({ success, error }) => {
-        if (success) {
-          this.closeEdit.emit();
-        } else {
-          this.errors = [{ error: error ?? 'There was an error deleting the alert' }];
-          this.submitted = false;
-        }
-      })
+      this.organisationService
+        .deleteUserAlert$(this.alertId)
+        .subscribe(({ success, error }) => {
+          if (success) {
+            this.closeEdit.emit();
+          } else {
+            this.errors = [
+              { error: error ?? "There was an error deleting the alert" },
+            ];
+            this.submitted = false;
+          }
+        }),
     );
   }
 
   get alertId() {
-    return this.alertForm.get('alertId')?.value as string;
+    return this.alertForm.get("alertId")?.value as string;
   }
 
   get alertTypeControl() {
-    return this.alertForm.get('alertType');
+    return this.alertForm.get("alertType");
   }
 
   get alertType() {
@@ -191,13 +224,13 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   }
 
   get sendToId() {
-    return this.alertForm.get('sendToId')?.value as string;
+    return this.alertForm.get("sendToId")?.value as string;
   }
 
   get eventHysterisis() {
     switch (this.alertType) {
       case AlertTypeEnum.FeedFailure:
-        return parseInt(this.alertForm.get('eventHysterisis')?.value, 10);
+        return parseInt(this.alertForm.get("eventHysterisis")?.value, 10);
     }
 
     return 0;
@@ -206,7 +239,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
   get eventThreshold() {
     switch (this.alertType) {
       case AlertTypeEnum.VehicleCountDisparity:
-        return parseInt(this.alertForm.get('eventThreshold')?.value, 10);
+        return parseInt(this.alertForm.get("eventThreshold")?.value, 10);
     }
     return 0;
   }
@@ -217,12 +250,12 @@ export class EditAlertComponent implements OnInit, OnDestroy {
 
   getErrorString(controlName: string, prop: AbstractControl) {
     if (prop.errors?.required) {
-      if (controlName === 'alertType') {
-        return 'Please select a notification type';
+      if (controlName === "alertType") {
+        return "Please select a notification type";
       }
-      return 'This field is required.';
+      return "This field is required.";
     } else if (prop.errors?.min) {
-      const { min } = prop.errors?.min ?? '';
+      const { min } = prop.errors?.min ?? "";
       return `Value must be at least ${min}`;
     }
   }

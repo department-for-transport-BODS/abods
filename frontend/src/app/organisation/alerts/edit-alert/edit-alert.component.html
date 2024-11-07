@@ -1,6 +1,11 @@
 <form [formGroup]="alertForm" (ngSubmit)="onSubmit()">
   <gds-error-summary [errors]="errors" id="alert-error"></gds-error-summary>
-  <gds-radios legend="Notification type" size="small" [conditional]="true" [error]="getError('alertType')">
+  <gds-radios
+    legend="Notification type"
+    size="small"
+    [conditional]="true"
+    [error]="getError('alertType')"
+  >
     <gds-radio-item
       label="Feed failure"
       name="alert-type"
@@ -9,10 +14,13 @@
       [value]="AlertTypeEnum.FeedFailure"
       controls="feed-failure-hint"
     ></gds-radio-item>
-    <gds-radio-conditional id="feed-failure-hint" [visible]="alertType === AlertTypeEnum.FeedFailure"
+    <gds-radio-conditional
+      id="feed-failure-hint"
+      [visible]="alertType === AlertTypeEnum.FeedFailure"
       ><p class="govuk-body text-secondary">
-        A feed failure occurs when no data has been received, or the feed contains no vehicles at a time when vehicles
-        are scheduled to be running.
+        A feed failure occurs when no data has been received, or the feed
+        contains no vehicles at a time when vehicles are scheduled to be
+        running.
       </p></gds-radio-conditional
     >
     <gds-radio-item
@@ -23,10 +31,14 @@
       [value]="AlertTypeEnum.VehicleCountDisparity"
       controls="count-disparity-hint"
     ></gds-radio-item>
-    <gds-radio-conditional id="count-disparity-hint" [visible]="alertType === AlertTypeEnum.VehicleCountDisparity">
+    <gds-radio-conditional
+      id="count-disparity-hint"
+      [visible]="alertType === AlertTypeEnum.VehicleCountDisparity"
+    >
       <p class="govuk-body text-secondary">
-        A vehicle count disparity alert occurs when there is a difference between the number of vehicles in the feed and
-        the number of vehicles scheduled to be running.
+        A vehicle count disparity alert occurs when there is a difference
+        between the number of vehicles in the feed and the number of vehicles
+        scheduled to be running.
       </p>
     </gds-radio-conditional>
   </gds-radios>
@@ -44,7 +56,11 @@
       <option value="25">25 minutes</option>
       <option value="30">30 minutes</option>
     </gds-select>
-    <gds-select inputId="feed-failure-send-to" formControlName="sendToId" label="Send a notification to">
+    <gds-select
+      inputId="feed-failure-send-to"
+      formControlName="sendToId"
+      label="Send a notification to"
+    >
       <option *ngFor="let user of users" [value]="user.id">
         {{ userDisplayName(user) }}
       </option>
@@ -62,15 +78,23 @@
       type="number"
       [error]="getError('eventThreshold')"
     ></gds-text-input>
-    <gds-select inputId="count-disparity-send-to" formControlName="sendToId" label="Send a notification to">
-      <option *ngFor="let user of users" [value]="user.id">{{ userDisplayName(user) }}</option>
+    <gds-select
+      inputId="count-disparity-send-to"
+      formControlName="sendToId"
+      label="Send a notification to"
+    >
+      <option *ngFor="let user of users" [value]="user.id">
+        {{ userDisplayName(user) }}
+      </option>
     </gds-select>
   </div>
   <ng-container *ngIf="editing">
     <!-- delete alert -->
     <app-box *ngIf="!confirmDeleteAlert"
       ><div class="flex-row justify-content-between align-items-center">
-        <div class="govuk-body govuk-!-margin-bottom-0">Delete this feed notification</div>
+        <div class="govuk-body govuk-!-margin-bottom-0">
+          Delete this feed notification
+        </div>
         <div>
           <gds-button
             text="Delete"
@@ -83,16 +107,29 @@
     <app-box *ngIf="confirmDeleteAlert">
       <div class="flex-column">
         <div class="govuk-body">
-          <span class="govuk-!-font-weight-bold">This operation cannot be undone</span>. Are you sure you wish to delete
-          this notification?
+          <span class="govuk-!-font-weight-bold"
+            >This operation cannot be undone</span
+          >. Are you sure you wish to delete this notification?
         </div>
         <div>
-          <gds-button text="Yes, please delete" appearance="warning" spaceBelow="0" (click)="onDelete()"></gds-button>
+          <gds-button
+            text="Yes, please delete"
+            appearance="warning"
+            spaceBelow="0"
+            (click)="onDelete()"
+          ></gds-button>
         </div></div
     ></app-box>
   </ng-container>
-  <div class="flex-row justify-content-between align-items-center govuk-!-margin-top-6">
-    <gds-button text="Cancel" appearance="secondary" spaceBelow="0" (click)="closeEdit.emit()"></gds-button>
+  <div
+    class="flex-row justify-content-between align-items-center govuk-!-margin-top-6"
+  >
+    <gds-button
+      text="Cancel"
+      appearance="secondary"
+      spaceBelow="0"
+      (click)="closeEdit.emit()"
+    ></gds-button>
     <gds-button
       [text]="editing ? 'Update notification' : 'Create notification'"
       type="submit"

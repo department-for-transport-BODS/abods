@@ -1,13 +1,13 @@
-import { Component, forwardRef, HostListener, Input } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { DateTime, Interval } from 'luxon';
+import { Component, forwardRef, HostListener, Input } from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { DateTime, Interval } from "luxon";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'app-date',
-  templateUrl: 'date.component.html',
-  styleUrls: ['./date.component.scss'],
+  selector: "app-date",
+  templateUrl: "date.component.html",
+  styleUrls: ["./date.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -20,13 +20,13 @@ export class DateComponent implements ControlValueAccessor {
   @Input() inputId = `date-${nextUniqueId++}`;
   @Input() label?: string;
   @Input() error?: string;
-  @Input() width?: '2' | '3' | '5' | '10' | '20';
+  @Input() width?: "2" | "3" | "5" | "10" | "20";
   @Input() validRange = Interval.before(DateTime.local(), { years: 5 });
   @Input() required = false;
 
   readonly today = DateTime.local();
   value?: DateTime | null;
-  month = this.today.startOf('month');
+  month = this.today.startOf("month");
   open = false;
 
   onChange: (value: DateTime | null | undefined) => void = () => undefined;
@@ -47,7 +47,7 @@ export class DateComponent implements ControlValueAccessor {
     this.open = true;
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener("document:keydown.escape")
   closeControls() {
     this.open = false;
   }
@@ -67,9 +67,9 @@ export class DateComponent implements ControlValueAccessor {
   }
 
   inputChange(value: string | null | undefined) {
-    this.value = typeof value === 'string' ? DateTime.fromISO(value) : value;
+    this.value = typeof value === "string" ? DateTime.fromISO(value) : value;
     if (this.value?.isValid) {
-      this.month = this.value?.startOf('month');
+      this.month = this.value?.startOf("month");
     }
     this.onChange(this.value);
   }

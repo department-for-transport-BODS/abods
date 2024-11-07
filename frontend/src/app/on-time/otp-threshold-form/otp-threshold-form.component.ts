@@ -1,9 +1,15 @@
-import { AfterViewInit, Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { NgxSmartModalService } from 'ngx-smart-modal';
-import { Subject, takeUntil } from 'rxjs';
-import { OTP_THRESHOLD_MODAL_ID } from '../otp-threshold-modal/otp-threshold-modal.component';
-import { OtpThresholdDefaultsService } from './otp-threshold-defaults.service';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  Output,
+} from "@angular/core";
+import { FormBuilder, FormControl, Validators } from "@angular/forms";
+import { NgxSmartModalService } from "ngx-smart-modal";
+import { Subject, takeUntil } from "rxjs";
+import { OTP_THRESHOLD_MODAL_ID } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OtpThresholdDefaultsService } from "./otp-threshold-defaults.service";
 
 export interface OtpThresholdParams {
   late: number;
@@ -16,9 +22,9 @@ interface OtpThresholdForm {
 }
 
 @Component({
-  selector: 'app-otp-threshold-form',
-  templateUrl: './otp-threshold-form.component.html',
-  styleUrls: ['./otp-threshold-form.component.scss'],
+  selector: "app-otp-threshold-form",
+  templateUrl: "./otp-threshold-form.component.html",
+  styleUrls: ["./otp-threshold-form.component.scss"],
 })
 export class OtpThresholdFormComponent implements AfterViewInit, OnDestroy {
   @Output() compare = new EventEmitter<OtpThresholdParams>();
@@ -58,7 +64,7 @@ export class OtpThresholdFormComponent implements AfterViewInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private otpThresholdDefaultsService: OtpThresholdDefaultsService,
-    private modalService: NgxSmartModalService
+    private modalService: NgxSmartModalService,
   ) {}
 
   private destroy$ = new Subject<void>();
@@ -88,8 +94,8 @@ export class OtpThresholdFormComponent implements AfterViewInit, OnDestroy {
 
   get formGroupClasses() {
     return {
-      ['govuk-form-group']: true,
-      ['govuk-form-group--error']: this.error,
+      ["govuk-form-group"]: true,
+      ["govuk-form-group--error"]: this.error,
     };
   }
 }

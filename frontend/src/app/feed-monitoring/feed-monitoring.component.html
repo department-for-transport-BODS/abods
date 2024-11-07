@@ -1,6 +1,9 @@
 <app-page>
   <ng-container ngProjectAs="content"
-    ><app-page-header heading="Feed monitoring" spaceAbove="2"></app-page-header>
+    ><app-page-header
+      heading="Feed monitoring"
+      spaceAbove="2"
+    ></app-page-header>
     <div *ngIf="loaded && inactiveOperators.length > 0">
       <h2 class="govuk-heading-m">Inactive feeds</h2>
       <div class="feed-monitoring__inactive-grid">
@@ -23,8 +26,14 @@
       <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Active feeds</h2>
 
       <div class="govuk-form-group">
-        <label class="govuk-label" for="activeFilter">Search for an operator</label>
-        <input class="govuk-input govuk-input--width-20" id="activeFilter" (input)="activeFilterChanged($event)" />
+        <label class="govuk-label" for="activeFilter"
+          >Search for an operator</label
+        >
+        <input
+          class="govuk-input govuk-input--width-20"
+          id="activeFilter"
+          (input)="activeFilterChanged($event)"
+        />
       </div>
 
       <div class="feed-monitoring__active-grid">
@@ -40,7 +49,9 @@
           [paginationPageSize]="10"
           [pagination]="true"
           [suppressPaginationPanel]="true"
-          (paginationChanged)="paginationChanged($event); paging.paginationChanged($event)"
+          (paginationChanged)="
+            paginationChanged($event); paging.paginationChanged($event)
+          "
           [postSortRows]="postSortRows.bind(this)"
         >
         </ag-grid-angular>
@@ -49,10 +60,13 @@
     </div>
     <ng-template #loading>
       <div class="feed-monitoring__loading">
-        <app-spinner [vCentre]="true" message="Loading..." size="default"> </app-spinner>
+        <app-spinner [vCentre]="true" message="Loading..." size="default">
+        </app-spinner>
       </div>
     </ng-template>
 
-    <app-feed-monitoring-sparkline-cell-template #sparklineTemplate></app-feed-monitoring-sparkline-cell-template>
+    <app-feed-monitoring-sparkline-cell-template
+      #sparklineTemplate
+    ></app-feed-monitoring-sparkline-cell-template>
   </ng-container>
 </app-page>

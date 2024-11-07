@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+import { Injectable } from "@angular/core";
+import { Title } from "@angular/platform-browser";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class BrowserTitleService {
   private page?: string;
@@ -22,7 +22,9 @@ export class BrowserTitleService {
 
   private updateTitle() {
     if (this.application) {
-      const title = (this.page && this.page !== '' ? this.page + ': ' : '') + this.application;
+      const title =
+        (this.page && this.page !== "" ? this.page + ": " : "") +
+        this.application;
       this.titleService.setTitle(title);
     }
   }

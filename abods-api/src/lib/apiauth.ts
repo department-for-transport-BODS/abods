@@ -71,7 +71,7 @@ export const requireApiToken = (context: RequestContext): AuthResult => {
 const getClientHashFromAWS = async (): Promise<AuthContext> => {
   if (!process.env.AWS_REGION || !process.env.M2M_API_SECRET_NAME) {
     throw new Error(
-      "API Token Auth Hash: AWS region and secret name are required"
+      "API Token Auth Hash: AWS region and secret name are required",
     );
   }
 
@@ -95,12 +95,12 @@ const getClientHashFromAWS = async (): Promise<AuthContext> => {
     };
     logger.error(
       "Invalid secret format - missing required fields",
-      missingFields
+      missingFields,
     );
     throw new Error("Invalid Secret Format in AWS Secrets Manager for Tokens");
   }
   logger.info(
-    "Sucessfully retrived API Token Hash and Hmac from Secrets Manager"
+    "Sucessfully retrived API Token Hash and Hmac from Secrets Manager",
   );
   return {
     allowedTokenHash: secret.allowedTokenHash,
@@ -111,7 +111,7 @@ const getClientHashFromAWS = async (): Promise<AuthContext> => {
 export const getAPITokenHash = async (): Promise<AuthContext | undefined> => {
   if (process.env.M2M_API_KEY_HASH && process.env.M2M_API_KEY_HMAC) {
     logger.warn(
-      "Using Client Token Hash and HMAC from M2M_API_KEY_HASH env var"
+      "Using Client Token Hash and HMAC from M2M_API_KEY_HASH env var",
     );
     return {
       allowedTokenHash: process.env.M2M_API_KEY_HASH,
@@ -125,7 +125,7 @@ export const getAPITokenHash = async (): Promise<AuthContext | undefined> => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     logger.warn(
-      `API Token authentication is disabled: Failed to get API key hash - Error: ${errorMessage}`
+      `API Token authentication is disabled: Failed to get API key hash - Error: ${errorMessage}`,
     );
     return undefined;
   }
@@ -135,11 +135,11 @@ type ResolverFunction<TResult, TParent, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: RequestContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<TResult> | TResult;
 
 export const tokenAuthRequiredResolver = <TResult, TParent, TArgs>(
-  resolver: ResolverFunction<TResult, TParent, TArgs>
+  resolver: ResolverFunction<TResult, TParent, TArgs>,
 ): ResolverFunction<TResult, TParent, TArgs> => {
   return async (parent, args, context, info) => {
     const authResult = requireApiToken(context);

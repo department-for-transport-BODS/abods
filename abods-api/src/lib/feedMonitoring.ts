@@ -4,21 +4,26 @@ import { feed_monitor_summary, Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
 export type ExpectedJourneyType = {
-  group_id: string
-  expected_journey_start: Date
-  expected_journey_end: Date | null
-}
+  group_id: string;
+  expected_journey_start: Date;
+  expected_journey_end: Date | null;
+};
 
 export const getVehicleStats = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
-  expected: ExpectedJourneyType[]
+  expected: ExpectedJourneyType[],
 ): Promise<VehicleStatsType[]> => {
-  const avlPromise: Record<string, Set<string>> = await getAvlPerMinute(avl ?? []);
+  const avlPromise: Record<string, Set<string>> = await getAvlPerMinute(
+    avl ?? [],
+  );
   const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
 
   const result: VehicleStatsType[] = [];
-  Object.entries(avlPromise).forEach(([timestamp ,avlJourneys]) => {
-    const expected = getExpectedJourneysCount(expectedJourneys, getDate(timestamp))
+  Object.entries(avlPromise).forEach(([timestamp, avlJourneys]) => {
+    const expected = getExpectedJourneysCount(
+      expectedJourneys,
+      getDate(timestamp),
+    );
     result.push({
       timestamp: getFormattedDate(getDate(timestamp).toDate()),
       expected,
@@ -30,10 +35,9 @@ export const getVehicleStats = async (
 };
 
 export enum VehicleCountType {
-    Actual = 'actual',
-    Expected = 'expected'
+  Actual = "actual",
+  Expected = "expected",
 }
-
 
 export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
   return db.feed_monitor_summary.findUnique({
@@ -47,7 +51,7 @@ export const getExpectedJourneys = async (
   db: PrismaClient,
   operatorId: string,
   inputDate: Dayjs,
-  duration?: number
+  duration?: number,
 ) => {
   const where: Prisma.expected_journeysWhereInput = {
     operator_noc: operatorId,
@@ -80,9 +84,9 @@ export const getAvlPoints = async (
   operatorId: string,
   inputDate: Dayjs,
   last20Mins?: boolean,
-  groupIds?: string[]
+  groupIds?: string[],
 ) => {
-  const currentDate = new Date()
+  const currentDate = new Date();
   const where: Prisma.SiriVMPositionsWhereInput = {
     date_of_journey: inputDate.toDate(),
     operator_ref: operatorId,
@@ -90,8 +94,8 @@ export const getAvlPoints = async (
 
   if (last20Mins) {
     where.recorded_at_time = {
-      gte: inputDate.subtract(21, "minute").set('second', 0).toDate(),
-      lte: inputDate.set('second', 0).toDate(),
+      gte: inputDate.subtract(21, "minute").set("second", 0).toDate(),
+      lte: inputDate.set("second", 0).toDate(),
     };
   }
 
@@ -106,31 +110,34 @@ export const getAvlPoints = async (
     select: {
       recorded_at_time: true,
       group_id: true,
-      vehicle_ref: true
-    }
+      vehicle_ref: true,
+    },
   });
 };
 
-export const getAvlPerMinute = async (avl: Awaited<ReturnType<typeof getAvlPoints>>) => {
-  const avlSecondBuckets: Record<string, Set<string>> = {}
+export const getAvlPerMinute = async (
+  avl: Awaited<ReturnType<typeof getAvlPoints>>,
+) => {
+  const avlSecondBuckets: Record<string, Set<string>> = {};
   for (const a of avl) {
-    if (!a.group_id) continue
+    if (!a.group_id) continue;
     const recordedAt = getDate(a.recorded_at_time)
-      .set('second', 0)
-      .set('millisecond', 0)
+      .set("second", 0)
+      .set("millisecond", 0)
       .toISOString();
     avlSecondBuckets[recordedAt] = avlSecondBuckets[recordedAt] ?? new Set();
     avlSecondBuckets[recordedAt].add(a.group_id);
   }
-  return avlSecondBuckets
-}
+  return avlSecondBuckets;
+};
 
 export const getExpectedJourneysCount = (
   expected: ExpectedJourneyType[],
-  date: Dayjs
+  date: Dayjs,
 ) => {
-  return expected.filter(j =>
-    !getDate(j.expected_journey_end).isBefore(date) &&
-    !getDate(j.expected_journey_start).isAfter(date)
-  ).length
+  return expected.filter(
+    (j) =>
+      !getDate(j.expected_journey_end).isBefore(date) &&
+      !getDate(j.expected_journey_start).isAfter(date),
+  ).length;
 };

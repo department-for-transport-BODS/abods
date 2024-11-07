@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 :host {
   display: flex;
   flex-grow: 1;
@@ -31,6 +31,6 @@
     width: 24px;
     height: 24px;
     margin-bottom: 10px;
-    color: govuk-colour('orange');
+    color: govuk-colour("orange");
   }
 }

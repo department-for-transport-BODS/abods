@@ -2,11 +2,24 @@
   <ng-container ngProjectAs="content">
     <div class="govuk-grid-row govuk-body">
       <div class="govuk-grid-column-two-thirds">
-        <app-page-header heading="Cookies" spaceAbove="2" spaceBelow="6"></app-page-header>
-        <p>Cookies are small files saved on your phone, tablet or computer when you visit a website.</p>
-        <p>We use cookies to make this site work and collect information about how you use our service.</p>
+        <app-page-header
+          heading="Cookies"
+          spaceAbove="2"
+          spaceBelow="6"
+        ></app-page-header>
+        <p>
+          Cookies are small files saved on your phone, tablet or computer when
+          you visit a website.
+        </p>
+        <p>
+          We use cookies to make this site work and collect information about
+          how you use our service.
+        </p>
         <h2>Essential cookies (strictly necessary)</h2>
-        <p>We use an essential cookie to remember when you accept or reject cookies on our website.</p>
+        <p>
+          We use an essential cookie to remember when you accept or reject
+          cookies on our website.
+        </p>
         <table class="govuk-table">
           <caption class="govuk-table__caption">
             Essential cookies we use
@@ -20,16 +33,21 @@
           </thead>
           <tbody class="govuk-table__body">
             <tr class="govuk-table__row">
-              <th scope="row" class="govuk-table__header">abod_cookies_policy</th>
-              <td class="govuk-table__cell">Saves your cookie consent settings</td>
+              <th scope="row" class="govuk-table__header">
+                abod_cookies_policy
+              </th>
+              <td class="govuk-table__cell">
+                Saves your cookie consent settings
+              </td>
               <td class="govuk-table__cell">1 year</td>
             </tr>
           </tbody>
         </table>
         <h2>Analytics cookies (optional)</h2>
         <p>
-          With your permission, we use Google Analytics to collect data about how you use this service. This information
-          helps us to improve our service.
+          With your permission, we use Google Analytics to collect data about
+          how you use this service. This information helps us to improve our
+          service.
         </p>
         <p>Google Analytics stores anonymised information about:</p>
         <ul class="govuk-list govuk-list--bullet">
@@ -39,7 +57,9 @@
           <li>what you click on while you visit the site</li>
           <li>the device and browser you use</li>
         </ul>
-        <p>Google is not allowed to use or share our analytics data with anyone.</p>
+        <p>
+          Google is not allowed to use or share our analytics data with anyone.
+        </p>
         <table class="govuk-table">
           <caption class="govuk-table__caption">
             Analytics cookies we use
@@ -58,13 +78,18 @@
               <td class="govuk-table__cell">2 years</td>
             </tr>
             <tr class="govuk-table__row">
-              <th scope="row" class="govuk-table__header">_ga_[container-id]</th>
+              <th scope="row" class="govuk-table__header">
+                _ga_[container-id]
+              </th>
               <td class="govuk-table__cell">Used to persist session state</td>
               <td class="govuk-table__cell">2 years</td>
             </tr>
           </tbody>
         </table>
-        <gds-radios legend="Do you want to accept analytics cookies?" legendSize="small">
+        <gds-radios
+          legend="Do you want to accept analytics cookies?"
+          legendSize="small"
+        >
           <gds-radio-item
             label="Yes"
             name="accept-cookies"

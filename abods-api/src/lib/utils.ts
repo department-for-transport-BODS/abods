@@ -1,4 +1,4 @@
-import { DayOfWeekFlagsInputType, Maybe } from '../types/generated.js';
+import { DayOfWeekFlagsInputType, Maybe } from "../types/generated.js";
 
 export const isDefined = <T>(value: Maybe<T>): value is T => {
   return value !== null && value !== undefined;
@@ -22,8 +22,8 @@ export const checkSubArray = (
   mainArray: string[],
   subArray: string | string[],
 ): boolean => {
-  if(typeof subArray === 'string'){
-    return mainArray.includes(subArray)
+  if (typeof subArray === "string") {
+    return mainArray.includes(subArray);
   } else {
     return subArray.every((element) => mainArray.includes(element));
   }
@@ -50,4 +50,4 @@ export const getPercentile = (percentile: number, sortedArray: number[]) => {
 
   // Perform linear interpolation between the two closest values
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
-}
+};

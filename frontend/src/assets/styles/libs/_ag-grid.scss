@@ -1,6 +1,6 @@
-@import '../settings/settings.scss';
-@import '../helpers/helpers.scss';
-@import 'ag-grid-community/src/styles/ag-grid.scss';
+@import "../settings/settings.scss";
+@import "../helpers/helpers.scss";
+@import "ag-grid-community/src/styles/ag-grid.scss";
 // @import 'ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine.scss';
 
 // adds space above 'no rows' display so it doesn't overlap the header
@@ -57,7 +57,10 @@
   &.ag-header-active {
     color: $govuk-focus-text-colour;
     background-color: $govuk-focus-colour;
-    box-shadow: 0 -2px $govuk-focus-colour, 0 0 2px $govuk-focus-colour, 0 4px $govuk-focus-text-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
   }
   &:hover:not(:focus-visible) {
     color: $govuk-link-colour;
@@ -82,19 +85,19 @@
   position: relative;
   margin-left: 8px;
   width: 10px;
-  color: govuk-colour('mid-grey');
+  color: govuk-colour("mid-grey");
   &:before,
   &:after {
     position: absolute;
     font-size: rem(8);
   }
   &:before {
-    content: '\25b2';
+    content: "\25b2";
     top: 50%;
     transform: translateY(-100%);
   }
   &:after {
-    content: '\25bc';
+    content: "\25bc";
     top: 50%;
     transform: translateY(-2px);
   }
@@ -105,13 +108,13 @@
 
 .ag-icon-asc {
   &:before {
-    content: '\25b2'; //arrow up
+    content: "\25b2"; //arrow up
   }
 }
 
 .ag-icon-desc {
   &:before {
-    content: '\25bc'; //arrow down
+    content: "\25bc"; //arrow down
   }
 }
 
@@ -145,11 +148,16 @@
 
 .ag-cell {
   padding-right: govuk-spacing(4);
-  @include govuk-font(19, $weight: 'regular', $tabular: true, $line-height: false);
+  @include govuk-font(
+    19,
+    $weight: "regular",
+    $tabular: true,
+    $line-height: false
+  );
   display: grid;
   align-items: center;
   &.ag-cell-error {
-    color: govuk-colour('red');
+    color: govuk-colour("red");
     font-weight: $govuk-font-weight-bold;
   }
   &.ag-right-aligned-cell {
@@ -164,7 +172,10 @@
   &:focus-visible .govuk-link {
     color: $govuk-focus-text-colour;
     background-color: $govuk-focus-colour;
-    box-shadow: 0 -2px $govuk-focus-colour, 0 0 2px $govuk-focus-colour, 0 4px $govuk-focus-text-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
   }
   &:focus-visible .button-link {
     outline: 0;
@@ -207,7 +218,7 @@
     height: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: govuk-colour('mid-grey');
+    background-color: govuk-colour("mid-grey");
     border-radius: 3px;
     border: none;
   }
@@ -215,7 +226,7 @@
     background: transparent;
   }
   scrollbar-width: thin;
-  scrollbar-color: govuk-colour('mid-grey') transparent;
+  scrollbar-color: govuk-colour("mid-grey") transparent;
 }
 
 .ag-center-cols-clipper {
@@ -228,7 +239,9 @@
 //////////////
 
 .ag-root-wrapper {
-  padding-bottom: govuk-spacing(1); // added so that paging focus styles don't get cropped
+  padding-bottom: govuk-spacing(
+    1
+  ); // added so that paging focus styles don't get cropped
 }
 
 //styling for a more compact grid with smaller type
@@ -238,7 +251,7 @@
   }
   .ag-cell {
     min-height: rem(45);
-    @include govuk-font(16, $weight: 'regular', $tabular: true);
+    @include govuk-font(16, $weight: "regular", $tabular: true);
   }
 }
 // allows line-wrapping on headers for grids of this type

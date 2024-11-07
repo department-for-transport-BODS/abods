@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PagingPanelComponent } from './paging-panel.component';
-import { GridApi, PaginationChangedEvent } from 'ag-grid-community';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { PagingPanelComponent } from "./paging-panel.component";
+import { GridApi, PaginationChangedEvent } from "ag-grid-community";
 
-describe('PagingPanelComponent', () => {
+describe("PagingPanelComponent", () => {
   let component: PagingPanelComponent;
   let fixture: ComponentFixture<PagingPanelComponent>;
 
@@ -18,11 +18,11 @@ describe('PagingPanelComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should only update from AG-Grid events, not from the Angular lifecycle', () => {
+  it("should only update from AG-Grid events, not from the Angular lifecycle", () => {
     let rowCount = 78;
     const api = {
       paginationGetPageSize: () => 10,

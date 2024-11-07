@@ -9,6 +9,9 @@
   &:focus {
     color: $govuk-focus-text-colour;
     background: $govuk-focus-colour;
-    box-shadow: 0 -2px $govuk-focus-colour, 0 0 2px $govuk-focus-colour, 0 4px $govuk-focus-text-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
   }
 }

@@ -87,7 +87,12 @@ query operatorLiveStatus($operatorId: String!) {
   }
 }
 
-query operatorHistoricStats($operatorId: String!, $date: Date!, $start: DateTime!, $end: DateTime!) {
+query operatorHistoricStats(
+  $operatorId: String!
+  $date: Date!
+  $start: DateTime!
+  $end: DateTime!
+) {
   operator(operatorId: $operatorId) {
     ...OperatorFeedHistory
   }

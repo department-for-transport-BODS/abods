@@ -1,6 +1,6 @@
-import { AgRendererComponent } from 'ag-grid-angular';
-import { Component } from '@angular/core';
-import { ICellRendererParams } from 'ag-grid-community';
+import { AgRendererComponent } from "ag-grid-angular";
+import { Component } from "@angular/core";
+import { ICellRendererParams } from "ag-grid-community";
 
 @Component({
   template: `<div class="timing-cell" tabindex="-1" *ngIf="params?.value">
@@ -12,7 +12,7 @@ import { ICellRendererParams } from 'ag-grid-community';
     ></svg-icon>
     <span class="govuk-visually-hidden">Timing point</span>
   </div>`,
-  styleUrls: ['./timing-renderer.component.scss'],
+  styleUrls: ["./timing-renderer.component.scss"],
 })
 export class TimingRendererComponent implements AgRendererComponent {
   params?: ICellRendererParams;

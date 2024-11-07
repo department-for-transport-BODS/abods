@@ -48,7 +48,11 @@ query dashboardPerformanceStats($params: PerformanceInputType!) {
   }
 }
 
-query dashboardServiceRanking($params: ServicePerformanceInputType!, $trendFrom: DateTime!, $trendTo: DateTime!) {
+query dashboardServiceRanking(
+  $params: ServicePerformanceInputType!
+  $trendFrom: DateTime!
+  $trendTo: DateTime!
+) {
   onTimePerformance {
     servicePunctuality(inputs: $params) {
       nocCode

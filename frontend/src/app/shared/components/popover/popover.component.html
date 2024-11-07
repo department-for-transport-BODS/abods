@@ -6,7 +6,12 @@
     [tippyProps]="tippyProps"
     *ngIf="triggerType === 'link'"
   >
-    <svg-icon class="popover__icon" [applyClass]="true" src="assets/icons/{{ triggerIcon }}.svg" *ngIf="triggerIcon">
+    <svg-icon
+      class="popover__icon"
+      [applyClass]="true"
+      src="assets/icons/{{ triggerIcon }}.svg"
+      *ngIf="triggerIcon"
+    >
     </svg-icon>
     <span class="popover__label">{{ triggerLabel }}</span>
   </button>

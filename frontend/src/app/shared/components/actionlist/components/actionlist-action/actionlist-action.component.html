@@ -5,6 +5,11 @@
 <a [routerLink]="route" *ngIf="route" [ngClass]="actionListActionClasses"
   ><ng-container *ngTemplateOutlet="itemContent"></ng-container
 ></a>
-<button (click)="onClick.emit($event)" [disabled]="disabled" *ngIf="!route" [ngClass]="actionListActionClasses">
+<button
+  (click)="onClick.emit($event)"
+  [disabled]="disabled"
+  *ngIf="!route"
+  [ngClass]="actionListActionClasses"
+>
   <ng-container *ngTemplateOutlet="itemContent"></ng-container>
 </button>

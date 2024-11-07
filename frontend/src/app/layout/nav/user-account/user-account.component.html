@@ -1,16 +1,19 @@
 <div class="user-account">
-  <a href="https://publish.bus-data.dft.gov.uk/account/manage/invite/" target="_blank">
-    <button
-    class="user-account__invite-button button-link"
+  <a
+    href="https://publish.bus-data.dft.gov.uk/account/manage/invite/"
+    target="_blank"
   >
-    <div>
-      <svg-icon src="assets/icons/plus.svg"> </svg-icon>
-    </div>
-    <span>Invite a new user</span>
-  </button>
+    <button class="user-account__invite-button button-link">
+      <div>
+        <svg-icon src="assets/icons/plus.svg"> </svg-icon>
+      </div>
+      <span>Invite a new user</span>
+    </button>
   </a>
 
-  <app-invite-user-modal [identifier]="'inviteUserFromNav'"></app-invite-user-modal>
+  <app-invite-user-modal
+    [identifier]="'inviteUserFromNav'"
+  ></app-invite-user-modal>
   <app-popover
     position="right-end"
     identifier="user-account-menu"
@@ -19,7 +22,9 @@
     triggerType="link"
   >
     <ul app-actionlist>
-      <li app-actionlist-action [disabled]="true" route="my-account">My account</li>
+      <li app-actionlist-action [disabled]="true" route="my-account">
+        My account
+      </li>
       <li app-actionlist-section title="My organisation">
         <ul class="govuk-list govuk-!-margin-bottom-0">
           <!-- <li app-actionlist-action [disabled]="true" route="organisation-settings">Organisation settings</li> -->

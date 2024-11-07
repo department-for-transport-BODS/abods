@@ -1,14 +1,20 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
-import { BaseChart } from 'src/app/shared/components/amcharts/base-chart';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+} from "@angular/core";
+import { Subject, Observable } from "rxjs";
+import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
 
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-import am4themes_animated from '@amcharts/amcharts4/themes/animated';
-import { ChartService } from 'src/app/shared/components/amcharts/chart.service';
-import { PerformanceCategories } from '../../dashboard/dashboard.types';
-import { AsyncStatus } from '../pending.model';
-import { takeUntil } from 'rxjs/operators';
+import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
+import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+import { ChartService } from "src/app/shared/components/amcharts/chart.service";
+import { PerformanceCategories } from "../../dashboard/dashboard.types";
+import { AsyncStatus } from "../pending.model";
+import { takeUntil } from "rxjs/operators";
 
 const TOOLTIP_HTML = `<header class="amcharts__tooltip-heading">{tooltipLabel}</header>
     <div class="amcharts__tooltip-table">
@@ -21,11 +27,14 @@ const TOOLTIP_HTML = `<header class="amcharts__tooltip-heading">{tooltipLabel}</
     </div>`;
 
 @Component({
-  selector: 'app-stacked-histogram-chart',
-  template: '',
-  styles: [':host { display: block; min-height: 100%; width: 100%;}'],
+  selector: "app-stacked-histogram-chart",
+  template: "",
+  styles: [":host { display: block; min-height: 100%; width: 100%;}"],
 })
-export class StackedHistogramChartComponent extends BaseChart implements AfterViewInit, OnDestroy {
+export class StackedHistogramChartComponent
+  extends BaseChart
+  implements AfterViewInit, OnDestroy
+{
   destroy$ = new Subject<void>();
   data$ = new Subject<unknown[]>();
 
@@ -41,23 +50,25 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
 
   @Input()
   set status$(obs: Observable<AsyncStatus>) {
-    obs.pipe(takeUntil(this.destroy$)).subscribe((status) => (this.asyncStatus = status));
+    obs
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((status) => (this.asyncStatus = status));
   }
 
   legend = {
     [PerformanceCategories.OnTime]: {
-      name: 'On-Time',
-      hint: '',
+      name: "On-Time",
+      hint: "",
       fill: this.chartService.colorMap.purple,
     },
     [PerformanceCategories.Late]: {
-      name: 'Late',
-      hint: '(> 5:59 minutes)',
+      name: "Late",
+      hint: "(> 5:59 minutes)",
       fill: this.chartService.colorMap.ochre,
     },
     [PerformanceCategories.Early]: {
-      name: 'Early',
-      hint: '(> 1 minute)',
+      name: "Early",
+      hint: "(> 1 minute)",
       fill: this.chartService.colorMap.pink,
     },
   };
@@ -71,20 +82,26 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     }
   };
 
-  constructor(chartService: ChartService, private elementRef: ElementRef) {
+  constructor(
+    chartService: ChartService,
+    private elementRef: ElementRef,
+  ) {
     super(am4themes_animated, chartService);
   }
 
   ngAfterViewInit(): void {
     if (!this.category) {
-      throw new Error('Must specify a category');
+      throw new Error("Must specify a category");
     }
     this.chartService.browserOnly(() => this.renderChart());
     this.data$.subscribe((data) => (this.chart.data = data));
   }
 
   createChart(): void {
-    this.chart = am4core.create(this.elementRef.nativeElement, am4charts.XYChart);
+    this.chart = am4core.create(
+      this.elementRef.nativeElement,
+      am4charts.XYChart,
+    );
 
     this.chart.padding(10, 10, 0, 0);
     this.chart.margin(0, 0, 0, 0);
@@ -96,7 +113,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
 
     if (this.centerAxis) {
       categoryAxis.width = am4core.percent(45);
-      categoryAxis.align = 'center';
+      categoryAxis.align = "center";
     }
 
     const label = categoryAxis.renderer.labels.template;
@@ -109,17 +126,17 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
       categoryAxis.tooltip.disabled = true;
     }
 
-    categoryAxis.events.on('sizechanged', (ev) => {
+    categoryAxis.events.on("sizechanged", (ev) => {
       const axis = ev.target;
       const cellWidth = axis.pixelWidth / (axis.endIndex - axis.startIndex);
       if (cellWidth < axis.renderer.labels.template.maxWidth) {
         axis.renderer.labels.template.rotation = -45;
-        axis.renderer.labels.template.horizontalCenter = 'right';
-        axis.renderer.labels.template.verticalCenter = 'middle';
+        axis.renderer.labels.template.horizontalCenter = "right";
+        axis.renderer.labels.template.verticalCenter = "middle";
       } else {
         axis.renderer.labels.template.rotation = 0;
-        axis.renderer.labels.template.horizontalCenter = 'middle';
-        axis.renderer.labels.template.verticalCenter = 'top';
+        axis.renderer.labels.template.horizontalCenter = "middle";
+        axis.renderer.labels.template.verticalCenter = "top";
       }
     });
 
@@ -127,13 +144,20 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     valueAxis.max = 1;
     valueAxis.renderer.minGridDistance = 30;
     valueAxis.renderer.labels.template.fontSize = 13;
-    valueAxis.renderer.grid.template.adapter.add('disabled', (disabled, target) => {
-      return (target.dataItem as am4charts.ValueAxisDataItem)?.value === 1 || disabled;
-    });
-    valueAxis.renderer.labels.template.fill = this.chartService.colorMap.legendaryGrey;
+    valueAxis.renderer.grid.template.adapter.add(
+      "disabled",
+      (disabled, target) => {
+        return (
+          (target.dataItem as am4charts.ValueAxisDataItem)?.value === 1 ||
+          disabled
+        );
+      },
+    );
+    valueAxis.renderer.labels.template.fill =
+      this.chartService.colorMap.legendaryGrey;
     valueAxis.renderer.line.strokeOpacity = 0.15;
     valueAxis.numberFormatter = new am4core.NumberFormatter();
-    valueAxis.numberFormatter.numberFormat = '#%';
+    valueAxis.numberFormatter.numberFormat = "#%";
     if (valueAxis.tooltip) {
       valueAxis.tooltip.disabled = true;
     }
@@ -152,7 +176,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
       const tooltip = series.tooltip!;
 
       tooltip.animationDuration = 150;
-      tooltip.pointerOrientation = 'vertical';
+      tooltip.pointerOrientation = "vertical";
       tooltip.getFillFromObject = false;
       tooltip.stroke = this.chartService.colorMap.black;
       tooltip.label.fill = this.chartService.colorMap.black;
@@ -161,7 +185,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
       tooltip.background.cornerRadius = 0;
       tooltip.background.fillOpacity = 1;
       tooltip.background.filters.clear();
-      tooltip.background.fill = am4core.color('#fff');
+      tooltip.background.fill = am4core.color("#fff");
       tooltip.background.stroke = this.chartService.colorMap.black;
     }
 
@@ -172,7 +196,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     noDataPattern.fill = this.chart.colors.getIndex(1);
 
     const noDataSeries = this.chart.series.push(new am4charts.ColumnSeries());
-    noDataSeries.dataFields.valueY = 'noData';
+    noDataSeries.dataFields.valueY = "noData";
     noDataSeries.dataFields.categoryX = this.category;
     noDataSeries.columns.template.fill = noDataPattern;
     noDataSeries.columns.template.width = am4core.percent(55);
@@ -183,11 +207,11 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     cursor.maxTooltipDistance = -1;
     cursor.lineX.disabled = true;
     cursor.lineY.disabled = true;
-    cursor.behavior = 'none';
+    cursor.behavior = "none";
 
     const legend = (this.chart.legend = new am4charts.Legend());
-    legend.position = 'bottom';
-    legend.contentAlign = 'left';
+    legend.position = "bottom";
+    legend.contentAlign = "left";
     legend.itemContainers.template.togglable = false;
     legend.labels.template.text = `[bold]{name}[/] [${this.chartService.colorMap.legendaryGrey}]{hint}[/]`;
     legend.labels.template.fontSize = 16;
@@ -197,9 +221,12 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
     legend.itemContainers.template.paddingBottom = 0;
     legend.useDefaultMarker = false;
     legend.clickable = false;
-    legend.itemContainers.template.cursorOverStyle = am4core.MouseCursorStyle.default;
+    legend.itemContainers.template.cursorOverStyle =
+      am4core.MouseCursorStyle.default;
 
-    const marker = legend.markers.template.children.getIndex(0) as am4core.RoundedRectangle;
+    const marker = legend.markers.template.children.getIndex(
+      0,
+    ) as am4core.RoundedRectangle;
 
     // reduce the legend marker size
     if (marker) {
@@ -207,7 +234,7 @@ export class StackedHistogramChartComponent extends BaseChart implements AfterVi
       marker.height = 15;
       marker.width = 15;
       marker.marginTop = 3;
-      marker.valign = 'top';
+      marker.valign = "top";
     }
 
     legend.data = Object.values(this.legend);

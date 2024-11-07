@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 @include bp($to-tablet) {
   .nav {
@@ -45,7 +45,7 @@
   box-sizing: content-box;
   padding-right: govuk-spacing(4);
   margin-right: govuk-spacing(6);
-  background-color: govuk-colour('white');
+  background-color: govuk-colour("white");
   z-index: $z-menu;
 
   &__block {
@@ -73,7 +73,7 @@
       font-weight: $govuk-font-weight-bold;
       position: relative;
       &::before {
-        content: '';
+        content: "";
         position: absolute;
         left: 0;
         top: 0;
@@ -89,9 +89,9 @@
 
     &:focus {
       outline: 0;
-      color: govuk-colour('black');
-      background-color: govuk-colour('yellow');
-      box-shadow: 0 4px govuk-colour('black');
+      color: govuk-colour("black");
+      background-color: govuk-colour("yellow");
+      box-shadow: 0 4px govuk-colour("black");
     }
   }
 
@@ -106,14 +106,14 @@
       align-items: center;
       svg-icon {
         display: inline-flex;
-        color: govuk-colour('blue');
+        color: govuk-colour("blue");
         width: 20px;
         height: 20px;
         margin-right: govuk-spacing(2);
       }
       &:focus {
         svg-icon {
-          color: govuk-colour('black');
+          color: govuk-colour("black");
         }
       }
     }
