@@ -1462,12 +1462,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       for (const [departure_hour, headway] of Object.entries(headwayMap)) {
         returnHeadways.push({
           ts: departure_hour,
+          // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
           actualWaitTime:
-            headway.actual_headway / (headway.headway_stops_count * 60),
+            Math.round(headway.actual_headway / headway.headway_stops_count) /
+            60,
           scheduledWaitTime:
-            headway.expected_headway / (headway.headway_stops_count * 60),
+            Math.round(headway.expected_headway / headway.headway_stops_count) /
+            60,
           excessWaitTime:
-            headway.excess_wait_time / (headway.headway_stops_count * 60),
+            Math.round(headway.excess_wait_time / headway.headway_stops_count) /
+            60,
         });
       }
 
