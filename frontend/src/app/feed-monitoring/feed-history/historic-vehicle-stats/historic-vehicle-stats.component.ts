@@ -8,7 +8,7 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { Granularity, VehicleStatsType } from 'src/generated/graphql';
+import { AlertTypeEnum, Granularity, VehicleStatsType } from 'src/generated/graphql';
 import { ChartService } from 'src/app/shared/components/amcharts/chart.service';
 
 import * as am4core from '@amcharts/amcharts4/core';
@@ -16,7 +16,6 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_frozen from '@amcharts/amcharts4/themes/frozen';
 import { DateTime, Interval } from 'luxon';
 import { VehicleStatsViewModel } from '../../types';
-import { AlertType } from '../../alert-list/alert-list-view-model';
 import { BaseChart } from 'src/app/shared/components/amcharts/base-chart';
 
 @Component({
@@ -29,7 +28,7 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
   @Input() dataSource?: VehicleStatsType[];
   @Input() date?: DateTime;
 
-  @Input() alertsDataSource?: { timestamp: DateTime; type: AlertType; id: string }[];
+  @Input() alertsDataSource?: { timestamp: DateTime; type: AlertTypeEnum; id: string }[];
 
   @Output() alertSelected = new EventEmitter<string>();
 
@@ -99,15 +98,18 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     this.screens.loadingScreen?.hide();
   }
 
-  get bulletFills(): { [k in AlertType]: am4core.Color } {
+  get bulletFills(): { [k in AlertTypeEnum]: am4core.Color } {
     return {
-      [AlertType.FeedAvailableEvent]: this.chartService.colorMap.green,
-      [AlertType.FeedUnavailableEvent]: this.chartService.colorMap.red,
-      [AlertType.VehicleCountDisparityEvent]: this.chartService.colorMap.orange,
+      [AlertTypeEnum.FeedAvailableEvent]: this.chartService.colorMap.green,
+      [AlertTypeEnum.FeedUnavailableEvent]: this.chartService.colorMap.red,
+      [AlertTypeEnum.VehicleCountDisparityEvent]: this.chartService.colorMap.orange,
+      [AlertTypeEnum.VehicleCountDisparity]: this.chartService.colorMap.orange,
+      [AlertTypeEnum.FeedFailure]: this.chartService.colorMap.red,
+      [AlertTypeEnum.FeedComplianceFailure]: this.chartService.colorMap.orange,
     };
   }
 
-  setTimelineData(data: { timestamp: DateTime; type: AlertType; id: string }[]) {
+  setTimelineData(data: { timestamp: DateTime; type: AlertTypeEnum; id: string }[]) {
     if (!this.timelineSeries) {
       return;
     }

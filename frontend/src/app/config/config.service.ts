@@ -77,7 +77,9 @@ function maxEnvironment(current: string, max: Environment): boolean {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function flags(currentEnv: string) {
   // TODO: get from API
-  return {} as const;
+  return {
+    feedMonitoring: maxEnvironment(currentEnv, 'cavl'),
+  } as const;
 }
 
 export interface FreshdeskConfig {

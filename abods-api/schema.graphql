@@ -19,7 +19,7 @@ type Query {
     corridor: CorridorNamespace
     invitation(key: String!): InvitationType
     events(operatorId: String!, start: DateTime!, end: DateTime!):EventResponse
-    eventStats(operatorId: String!, start: Date!, end: Date!):[EventStatsType]
+    eventStats(operatorId: String!, start: DateTime!, end: DateTime!):[EventStatsType]
     avls(groupId: String!): [AvlPoint!]!
     route(groupId: String!): [Stop!]!
     avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
@@ -320,7 +320,7 @@ type HeadwayTimeOfDayType {
 }
 
 type HeadwayTimeSeriesType {
-    ts: String!
+    ts: DateTime!
     actualWaitTime: Float!
     excessWaitTime: Float!
     scheduledWaitTime: Float!
@@ -388,13 +388,14 @@ type OperatorsPage {
 type OperatorType {
     name: String
     nocCode: String
-    operatorId: String
+    operatorId: String!
     adminAreas: [AdminAreaInfoType]
     transitModel: TransitModelType
     feedMonitoring: FeedMonitoringType
 }
 
 type FeedMonitoringType {
+    operatorId: String!
     availability: Float
     feedStatus: Boolean
     historicalStats(date: Date!): HistoricalStatsType
@@ -418,6 +419,7 @@ type VehicleStatsType {
 }
 
 type LiveStatsType {
+    operatorId: String!
     currentVehicles: Int
     expectedVehicles: Int
     feedAlerts: Int
@@ -498,6 +500,9 @@ enum AlertTypeEnum {
     FeedComplianceFailure
     FeedFailure
     VehicleCountDisparity
+    VehicleCountDisparityEvent
+    FeedUnavailableEvent,
+    FeedAvailableEvent,
 }
 
 type ApiInfoType {
@@ -623,7 +628,7 @@ type PunctualityTimeSeriesType {
     early: Int!
     late: Int!
     onTime: Int!
-    ts: String!
+    ts: DateTime!
 }
 
 type ServicePerformanceType {

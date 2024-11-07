@@ -77,7 +77,10 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
           this.operator = operatorLiveStatus;
           this.lastCheck = DateTime.local();
           this.intervalLast24Hours = Interval.before(this.lastCheck, Duration.fromObject({ hours: 24 }));
-          this.intervalLast20Minutes = Interval.before(this.lastCheck, Duration.fromObject({ minutes: 20 }));
+          this.intervalLast20Minutes = Interval.before(
+            this.lastCheck.minus({ minutes: 1 }), // Subtract a minute as the avls for the current minute is yet to be processed
+            Duration.fromObject({ minutes: 20 })
+          );
         } else {
           this.notFound = true;
         }

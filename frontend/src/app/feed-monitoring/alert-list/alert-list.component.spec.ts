@@ -7,10 +7,11 @@ import { FeedMonitoringService } from '../feed-monitoring.service';
 import { AlertListComponent } from './alert-list.component';
 import * as Faker from 'faker';
 import { DateTime } from 'luxon';
-import { AlertMode, AlertType } from './alert-list-view-model';
+import { AlertMode } from './alert-list-view-model';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { AlertComponent } from './alert/alert.component';
 import { dateTimeCloseEnoughToEqualityMatcher } from 'src/test-support/equality';
+import { AlertTypeEnum } from '../../../generated/graphql';
 
 describe('AlertListComponent', () => {
   let spectator: Spectator<AlertListComponent>;
@@ -69,7 +70,7 @@ describe('AlertListComponent', () => {
     const message = 'This text should be there';
 
     service.fetchAlerts.and.callFake((_, start, end) =>
-      of([fakeEvent({ message, start, end, type: AlertType.VehicleCountDisparityEvent })])
+      of([fakeEvent({ message, start, end, type: AlertTypeEnum.VehicleCountDisparityEvent })])
     );
 
     spectator.detectChanges();
@@ -78,9 +79,9 @@ describe('AlertListComponent', () => {
   });
 
   const typeTestCases = [
-    { type: AlertType.FeedUnavailableEvent, title: 'Feed data unavailable' },
-    { type: AlertType.VehicleCountDisparityEvent, title: 'Vehicle count disparity' },
-    { type: AlertType.FeedAvailableEvent, title: 'Feed data available' },
+    { type: AlertTypeEnum.FeedUnavailableEvent, title: 'Feed data unavailable' },
+    { type: AlertTypeEnum.VehicleCountDisparityEvent, title: 'Vehicle count disparity' },
+    { type: AlertTypeEnum.FeedAvailableEvent, title: 'Feed data available' },
   ];
 
   typeTestCases.forEach(({ type, title }) =>

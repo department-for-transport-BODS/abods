@@ -4,6 +4,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import logger from './logger.js';
 
 const isLocal = (process.env.PROJECT_ENV || 'local') === 'local';
+const allowDBQuery = isLocal && (process.env.SUPPRESS_DB_QUERY || 'false') === 'true'
 
 async function generateRdsIamToken(region: string, hostname: string, port: number, username: string): Promise<string> {
   const signer = new Signer({ hostname, port, username, region, credentials: fromNodeProviderChain() });
@@ -40,7 +41,7 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       { emit: 'event', level: 'info', },
       { emit: 'event', level: 'warn', },
     ];
-    if (isLocal) {
+    if (allowDBQuery) {
       logTypes.push({ emit: 'event', level: 'query', })
     }
     prisma = new PrismaClient({ log: logTypes, datasources: { db: { url: databaseUrl, } } });
@@ -59,7 +60,7 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
         // @ts-ignore
         ...e,
       }))
-    if (isLocal) {
+    if (allowDBQuery) {
       // If we want to log this outside of local dev, then we should consider that this logs query params
       prisma.$on('query' as never, (e) => logger.info({
         message: "prisma query",

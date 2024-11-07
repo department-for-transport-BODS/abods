@@ -60,9 +60,12 @@ export type AlertType = {
 };
 
 export enum AlertTypeEnum {
+  FeedAvailableEvent = 'FeedAvailableEvent',
   FeedComplianceFailure = 'FeedComplianceFailure',
   FeedFailure = 'FeedFailure',
-  VehicleCountDisparity = 'VehicleCountDisparity'
+  FeedUnavailableEvent = 'FeedUnavailableEvent',
+  VehicleCountDisparity = 'VehicleCountDisparity',
+  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent'
 }
 
 export type ApiInfoType = {
@@ -310,6 +313,7 @@ export type FeedMonitoringType = {
   historicalStats?: Maybe<HistoricalStatsType>;
   lastOutage?: Maybe<Scalars['DateTime']['output']>;
   liveStats?: Maybe<LiveStatsType>;
+  operatorId: Scalars['String']['output'];
   unavailableSince?: Maybe<Scalars['DateTime']['output']>;
   vehicleStats?: Maybe<Array<Maybe<VehicleStatsType>>>;
 };
@@ -463,7 +467,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type HistoricalStatsType = {
@@ -529,6 +533,7 @@ export type LiveStatsType = {
   feedErrors?: Maybe<Scalars['Int']['output']>;
   last20Minutes?: Maybe<Array<Maybe<VehicleStatsType>>>;
   last24Hours?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  operatorId: Scalars['String']['output'];
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -743,7 +748,7 @@ export type OperatorType = {
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name?: Maybe<Scalars['String']['output']>;
   nocCode?: Maybe<Scalars['String']['output']>;
-  operatorId?: Maybe<Scalars['String']['output']>;
+  operatorId: Scalars['String']['output'];
   transitModel?: Maybe<TransitModelType>;
 };
 
@@ -847,7 +852,7 @@ export type PunctualityTimeSeriesType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type PunctualityTotalsType = {
@@ -901,9 +906,9 @@ export type QueryAvlsArgs = {
 
 
 export type QueryEventStatsArgs = {
-  end: Scalars['Date']['input'];
+  end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
-  start: Scalars['Date']['input'];
+  start: Scalars['DateTime']['input'];
 };
 
 
@@ -1690,6 +1695,7 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   historicalStats?: Resolver<Maybe<ResolversTypes['HistoricalStatsType']>, ParentType, ContextType, RequireFields<FeedMonitoringTypeHistoricalStatsArgs, 'date'>>;
   lastOutage?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   liveStats?: Resolver<Maybe<ResolversTypes['LiveStatsType']>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'start'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1750,7 +1756,7 @@ export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentT
   actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1799,6 +1805,7 @@ export type LiveStatsTypeResolvers<ContextType = RequestContext, ParentType exte
   feedErrors?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   last20Minutes?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
   last24Hours?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateFrequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1886,7 +1893,7 @@ export type OperatorTypeResolvers<ContextType = RequestContext, ParentType exten
   feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  operatorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   transitModel?: Resolver<Maybe<ResolversTypes['TransitModelType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1934,7 +1941,7 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
