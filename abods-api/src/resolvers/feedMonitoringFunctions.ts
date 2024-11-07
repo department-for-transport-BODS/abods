@@ -168,31 +168,8 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
   };
 
 const getEvents: QueryResolvers["events"] = async () => {
-  const currentDate = getDate();
   return {
-    items: [
-      {
-        type: AlertTypeEnum.VehicleCountDisparityEvent,
-        data: {
-          message: "Test1",
-        },
-        timestamp: currentDate.subtract(2, "hour").toISOString(),
-      },
-      {
-        type: AlertTypeEnum.VehicleCountDisparityEvent,
-        data: {
-          message: "Test2",
-        },
-        timestamp: currentDate.subtract(3, "hour").toISOString(),
-      },
-      {
-        type: AlertTypeEnum.VehicleCountDisparityEvent,
-        data: {
-          message: "Test3",
-        },
-        timestamp: currentDate.subtract(4, "hour").toISOString(),
-      },
-    ],
+    items: [],
   };
 };
 
