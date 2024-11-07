@@ -95,27 +95,28 @@ export const getOperators = async (
       adminAreaNumberIds = adminAreaIds.map((str) => parseInt(str, 10));
     }
 
-    const operators = await db.all_operators.findMany({
-      where: {
-        ...(adminAreaNumberIds.length > 0
-          ? {
-            noc_adminarea: {
-              some: {
-                adminarea_id: {
-                  in: adminAreaNumberIds,
-                },
-              },
-            },
-          }
-          : {}),
-        operatorOrganisations: {
-          some: {
-            organisation_id: {
-              in: user.orgIds,
-            },
+    const where: Prisma.all_operatorsWhereInput = {
+      operatorOrganisations: {
+        some: {
+          organisation_id: {
+            in: user.orgIds,
           },
         },
-      },
+      }
+    }
+
+    if(adminAreaNumberIds.length > 0){
+      where.noc_adminarea = {
+        some: {
+          adminarea_id: {
+            in: adminAreaNumberIds,
+          },
+        },
+      }
+    }
+    
+    const operators = await db.all_operators.findMany({
+      where: where,
       include: {
         noc_adminarea: true,
       },
