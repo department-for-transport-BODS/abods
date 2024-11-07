@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { LiveVehicleStatsComponent } from './live-vehicle-stats.component';
+import { LiveVehicleStatsComponent } from "./live-vehicle-stats.component";
 
-describe('LiveVehicleStatsComponent', () => {
+describe("LiveVehicleStatsComponent", () => {
   let component: LiveVehicleStatsComponent;
   let fixture: ComponentFixture<LiveVehicleStatsComponent>;
 
@@ -19,7 +19,7 @@ describe('LiveVehicleStatsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

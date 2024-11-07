@@ -1,8 +1,8 @@
-import { byText, createComponentFactory, Spectator } from '@ngneat/spectator';
+import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
 
-import { MapRecentreButtonComponent } from './map-recentre-button.component';
+import { MapRecentreButtonComponent } from "./map-recentre-button.component";
 
-describe('MapRecentreButtonComponent', () => {
+describe("MapRecentreButtonComponent", () => {
   let spectator: Spectator<MapRecentreButtonComponent>;
 
   const createComponent = createComponentFactory({
@@ -13,13 +13,13 @@ describe('MapRecentreButtonComponent', () => {
     spectator = createComponent();
   });
 
-  it('should create the component', () => {
+  it("should create the component", () => {
     expect(spectator.component).toBeTruthy();
   });
 
-  it('should emit on click', () => {
-    spyOn(spectator.component.recentre, 'emit');
-    spectator.click(byText('Re-centre'));
+  it("should emit on click", () => {
+    spyOn(spectator.component.recentre, "emit");
+    spectator.click(byText("Re-centre"));
 
     expect(spectator.component.recentre.emit).toHaveBeenCalledWith();
   });

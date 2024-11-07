@@ -1,15 +1,27 @@
-import { DOCUMENT } from '@angular/common';
-import { Directive, ElementRef, HostBinding, Inject, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { DOCUMENT } from "@angular/common";
+import {
+  Directive,
+  ElementRef,
+  HostBinding,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from "@angular/core";
 
 @Directive({
-  selector: '[appTrapFocus]',
+  selector: "[appTrapFocus]",
 })
 export class TrapFocusDirective implements OnChanges, OnDestroy {
   @Input() appTrapFocus!: boolean;
 
-  @HostBinding('tabIndex') tabIndex = '';
+  @HostBinding("tabIndex") tabIndex = "";
 
-  constructor(private el: ElementRef, @Inject(DOCUMENT) private document: Document) {}
+  constructor(
+    private el: ElementRef,
+    @Inject(DOCUMENT) private document: Document,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.appTrapFocus.currentValue) {
@@ -24,18 +36,18 @@ export class TrapFocusDirective implements OnChanges, OnDestroy {
   }
 
   start() {
-    window.addEventListener('keydown', this.trapFocus);
-    this.tabIndex = '-1';
+    window.addEventListener("keydown", this.trapFocus);
+    this.tabIndex = "-1";
     this.el.nativeElement.focus();
   }
 
   stop() {
-    window.removeEventListener('keydown', this.trapFocus);
-    this.tabIndex = '';
+    window.removeEventListener("keydown", this.trapFocus);
+    this.tabIndex = "";
   }
 
   private trapFocus = (event: KeyboardEvent) => {
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       try {
         const el = this.el.nativeElement;
 

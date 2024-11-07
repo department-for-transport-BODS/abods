@@ -1,9 +1,24 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, Validators } from '@angular/forms';
-import { DateTime, Duration, Interval } from 'luxon';
-import { Line, Operator, OperatorService } from '../../shared/services/operator.service';
-import { CustomValidators } from '../../shared/validators/custom-validators';
-import { combineLatest, Observable, of, Subject, switchMap } from 'rxjs';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from "@angular/core";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  Validators,
+} from "@angular/forms";
+import { DateTime, Duration, Interval } from "luxon";
+import {
+  Line,
+  Operator,
+  OperatorService,
+} from "../../shared/services/operator.service";
+import { CustomValidators } from "../../shared/validators/custom-validators";
+import { combineLatest, Observable, of, Subject, switchMap } from "rxjs";
 import {
   catchError,
   debounceTime,
@@ -15,30 +30,41 @@ import {
   take,
   takeUntil,
   tap,
-} from 'rxjs/operators';
-import { VehicleJourney, VehicleJourneysSearchService } from './vehicle-journeys-search.service';
-import { ConfigService } from '../../config/config.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { isEqual as _isEqual } from 'lodash-es';
+} from "rxjs/operators";
+import {
+  VehicleJourney,
+  VehicleJourneysSearchService,
+} from "./vehicle-journeys-search.service";
+import { ConfigService } from "../../config/config.service";
+import { ActivatedRoute, Router } from "@angular/router";
+import { isEqual as _isEqual } from "lodash-es";
 
 @Component({
-  selector: 'app-vehicle-journeys-search',
-  templateUrl: './vehicle-journeys-search.component.html',
-  styleUrls: ['./vehicle-journeys-search.component.scss'],
+  selector: "app-vehicle-journeys-search",
+  templateUrl: "./vehicle-journeys-search.component.html",
+  styleUrls: ["./vehicle-journeys-search.component.scss"],
 })
-export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, OnDestroy {
+export class VehicleJourneysSearchComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   validDateRange = Interval.before(
-    DateTime.local().endOf('day').minus(Duration.fromISO(this.offsetISO)),
-    Duration.fromISO(this.durationISO)
+    DateTime.local().endOf("day").minus(Duration.fromISO(this.offsetISO)),
+    Duration.fromISO(this.durationISO),
   );
 
   form = this.formBuilder.group({
-    date: new FormControl<DateTime>(DateTime.local().startOf('day').minus(Duration.fromISO(this.offsetISO)), [
-      Validators.required,
-      CustomValidators.dateWithinRange(this.validDateRange),
-    ]),
+    date: new FormControl<DateTime>(
+      DateTime.local().startOf("day").minus(Duration.fromISO(this.offsetISO)),
+      [
+        Validators.required,
+        CustomValidators.dateWithinRange(this.validDateRange),
+      ],
+    ),
     operator: new FormControl<string | null>(null, Validators.required),
-    service: new FormControl<string | null>({ value: null, disabled: true }, Validators.required),
+    service: new FormControl<string | null>(
+      { value: null, disabled: true },
+      Validators.required,
+    ),
   });
 
   get journeysLoading(): boolean {
@@ -63,15 +89,15 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
   private destroy$ = new Subject<void>();
 
   get date(): AbstractControl<DateTime> {
-    return this.form.get('date') as AbstractControl<DateTime>;
+    return this.form.get("date") as AbstractControl<DateTime>;
   }
 
   get operator(): AbstractControl<string> {
-    return this.form.get('operator') as AbstractControl<string>;
+    return this.form.get("operator") as AbstractControl<string>;
   }
 
   get service(): AbstractControl<string> {
-    return this.form.get('service') as AbstractControl<string>;
+    return this.form.get("service") as AbstractControl<string>;
   }
 
   get offsetISO(): string {
@@ -83,7 +109,11 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
   }
 
   get noJourneysFound(): boolean {
-    return !this.journeysLoading && this.vehicleJourneys.length === 0 && this.service.value !== null;
+    return (
+      !this.journeysLoading &&
+      this.vehicleJourneys.length === 0 &&
+      this.service.value !== null
+    );
   }
 
   get pevDisabled(): boolean {
@@ -101,23 +131,30 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
     private configService: ConfigService,
     private router: Router,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.date.valueChanges
       .pipe(
         distinctUntilChanged((a: DateTime, b: DateTime) => a.equals(b)),
-        map((date) => date.toUTC().toISO({ format: 'basic', suppressSeconds: true })),
+        map((date) =>
+          date.toUTC().toISO({ format: "basic", suppressSeconds: true }),
+        ),
         tap(() => {
           if (this.operator.value) {
             this.servicesLoading = true;
             this.service.reset();
           }
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
-      .subscribe((date) => this.router.navigate([], { queryParams: { date: date }, queryParamsHandling: 'merge' }));
+      .subscribe((date) =>
+        this.router.navigate([], {
+          queryParams: { date: date },
+          queryParamsHandling: "merge",
+        }),
+      );
 
     this.operator.valueChanges
       .pipe(
@@ -131,78 +168,85 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
           }
           this.service.reset();
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((operator) =>
         this.router.navigate([], {
           queryParams: { operator: operator, service: null },
-          queryParamsHandling: 'merge',
-        })
+          queryParamsHandling: "merge",
+        }),
       );
 
     this.service.valueChanges
       .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((service) =>
-        this.router.navigate([], { queryParams: { service: service }, queryParamsHandling: 'merge' })
+        this.router.navigate([], {
+          queryParams: { service: service },
+          queryParamsHandling: "merge",
+        }),
       );
 
     this.route.queryParamMap
       .pipe(
         distinctUntilChanged(),
-        map((queryParams) => DateTime.fromISO(String(queryParams.get('date')))),
+        map((queryParams) => DateTime.fromISO(String(queryParams.get("date")))),
         filter((date) => date.isValid),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((date) => this.date.setValue(date));
 
     const service$ = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get('service') as string),
-      takeUntil(this.destroy$)
+      map((queryParams) => queryParams.get("service") as string),
+      takeUntil(this.destroy$),
     );
 
     const date$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get('date') as string),
-      takeUntil(this.destroy$)
+      map((queryParams) => queryParams.get("date") as string),
+      takeUntil(this.destroy$),
     );
 
     const operator$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get('operator') as string),
-      takeUntil(this.destroy$)
+      map((queryParams) => queryParams.get("operator") as string),
+      takeUntil(this.destroy$),
     );
     operator$.subscribe((operator) => this.operator.setValue(operator));
 
     combineLatest({ operator: operator$, service: service$ })
       .pipe(
         filter(({ operator }) => operator !== null),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe(({ service }) => this.service.setValue(service));
 
     this.operators$ = this.operatorInputTerm$.pipe(
-      startWith(''),
+      startWith(""),
       tap(() => (this.operatorsLoading = true)),
       switchMap((term: string) =>
-        this.operatorService.searchOperators(term).pipe(finalize(() => (this.operatorsLoading = false)))
+        this.operatorService
+          .searchOperators(term)
+          .pipe(finalize(() => (this.operatorsLoading = false))),
       ),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
 
     this.services$ = combineLatest([operator$, date$]).pipe(
       filter(([operatorId, _]) => operatorId !== null),
-      distinctUntilChanged(([prevOperatorId, prevDate], [currOperatorId, currDate]) => {
-        return prevOperatorId === currOperatorId && prevDate === currDate;
-      }),
+      distinctUntilChanged(
+        ([prevOperatorId, prevDate], [currOperatorId, currDate]) => {
+          return prevOperatorId === currOperatorId && prevDate === currDate;
+        },
+      ),
       switchMap(([operatorId, _]) =>
         this.operatorService.fetchLines(operatorId, this.date.value).pipe(
           take(1),
           startWith([]),
-          finalize(() => (this.servicesLoading = false))
-        )
+          finalize(() => (this.servicesLoading = false)),
+        ),
       ),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
 
     this.form.valueChanges
@@ -217,18 +261,20 @@ export class VehicleJourneysSearchComponent implements OnInit, AfterViewInit, On
         debounceTime(200),
         switchMap(({ date, service }) => {
           if (date?.isValid && service) {
-            return this.vehicleJourneysSearchService.fetchDayJourneys(date, service).pipe(
-              take(1),
-              catchError(() => {
-                this.errored = true;
-                return of([]);
-              })
-            );
+            return this.vehicleJourneysSearchService
+              .fetchDayJourneys(date, service)
+              .pipe(
+                take(1),
+                catchError(() => {
+                  this.errored = true;
+                  return of([]);
+                }),
+              );
           } else {
             return of([]);
           }
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((journeys) => {
         this.vehicleJourneys = journeys;

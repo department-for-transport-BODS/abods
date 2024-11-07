@@ -1,13 +1,19 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, HostListener } from '@angular/core';
-import { FromTo, FromToPreset, Period, Preset } from './date-range.types';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { DateTime } from 'luxon';
-import { DateRangeService } from '../../services/date-range.service';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  forwardRef,
+  HostListener,
+} from "@angular/core";
+import { FromTo, FromToPreset, Period, Preset } from "./date-range.types";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { DateTime } from "luxon";
+import { DateRangeService } from "../../services/date-range.service";
 
 @Component({
-  selector: 'app-date-range',
-  templateUrl: './date-range.component.html',
-  styleUrls: ['./date-range.component.scss'],
+  selector: "app-date-range",
+  templateUrl: "./date-range.component.html",
+  styleUrls: ["./date-range.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -28,8 +34,14 @@ export class DateRangeComponent implements ControlValueAccessor {
     this.writeValue({ ...fromTo, preset: Preset.Custom });
   }
 
-  constructor(private dateRangeService: DateRangeService, private changeDetector: ChangeDetectorRef) {
-    this.value = dateRangeService.calculatePresetPeriod(Period.Last7, DateTime.local());
+  constructor(
+    private dateRangeService: DateRangeService,
+    private changeDetector: ChangeDetectorRef,
+  ) {
+    this.value = dateRangeService.calculatePresetPeriod(
+      Period.Last7,
+      DateTime.local(),
+    );
   }
 
   onChange: (value: FromToPreset) => void = () => {
@@ -52,16 +64,16 @@ export class DateRangeComponent implements ControlValueAccessor {
   get fromToStr(): string {
     const { from, to } = this.value;
     if (from && to) {
-      return `${from.toFormat('dd MMM yyyy')} - ${to.minus({ days: 1 }).toFormat('dd MMM yyyy')}`;
+      return `${from.toFormat("dd MMM yyyy")} - ${to.minus({ days: 1 }).toFormat("dd MMM yyyy")}`;
     }
-    return '';
+    return "";
   }
 
   openControls() {
     this.open = true;
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener("document:keydown.escape")
   closeControls() {
     this.open = false;
   }
@@ -83,7 +95,10 @@ export class DateRangeComponent implements ControlValueAccessor {
   selectPresetDateRange(preset: string) {
     const period = preset as Preset;
     if (period !== Preset.Custom) {
-      this.value = this.dateRangeService.calculatePresetPeriod(period, DateTime.local());
+      this.value = this.dateRangeService.calculatePresetPeriod(
+        period,
+        DateTime.local(),
+      );
       this.onChange(this.value);
     }
   }

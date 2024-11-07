@@ -1,14 +1,17 @@
-import { createServiceFactory, SpectatorService } from '@ngneat/spectator';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { OrganisationService } from './organisation.service';
+import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { OrganisationService } from "./organisation.service";
 
-describe('OrganisationService', () => {
+describe("OrganisationService", () => {
   let spectator: SpectatorService<OrganisationService>;
-  const createService = createServiceFactory({ service: OrganisationService, imports: [ApolloTestingModule] });
+  const createService = createServiceFactory({
+    service: OrganisationService,
+    imports: [ApolloTestingModule],
+  });
 
   beforeEach(() => (spectator = createService()));
 
-  it('should...', () => {
+  it("should...", () => {
     expect(spectator.service).toBeTruthy();
   });
 });

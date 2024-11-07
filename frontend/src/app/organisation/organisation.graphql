@@ -61,8 +61,16 @@ query fetchUserAlert($alertId: String!) {
   }
 }
 
-mutation editUser($username: String!, $firstName: String!, $lastName: String!, $role: String!) {
-  updateUser(username: $username, payload: { firstName: $firstName, lastName: $lastName, role: { id: $role } }) {
+mutation editUser(
+  $username: String!
+  $firstName: String!
+  $lastName: String!
+  $role: String!
+) {
+  updateUser(
+    username: $username
+    payload: { firstName: $firstName, lastName: $lastName, role: { id: $role } }
+  ) {
     error
     user {
       ...User
@@ -77,8 +85,18 @@ mutation removeUser($username: String!) {
   }
 }
 
-mutation inviteUser($email: String!, $organisationId: String!, $roleId: String!) {
-  inviteUser(payload: { email: $email, organisation: { id: $organisationId }, role: { id: $roleId } }) {
+mutation inviteUser(
+  $email: String!
+  $organisationId: String!
+  $roleId: String!
+) {
+  inviteUser(
+    payload: {
+      email: $email
+      organisation: { id: $organisationId }
+      role: { id: $roleId }
+    }
+  ) {
     invitation {
       email
       accepted
@@ -108,7 +126,12 @@ mutation updateUserAlert(
   }
 }
 
-mutation createUserAlert($alertType: AlertTypeEnum, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
+mutation createUserAlert(
+  $alertType: AlertTypeEnum
+  $sendToId: String!
+  $eventHysterisis: Int
+  $eventThreshold: Int
+) {
   addUserAlert(
     payload: {
       alertType: $alertType

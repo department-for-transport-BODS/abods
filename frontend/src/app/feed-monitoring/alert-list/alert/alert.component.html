@@ -1,5 +1,10 @@
 <div [id]="alert.id" class="alert" [ngClass]="alertClasses">
-  <svg-icon class="alert__icon" [applyClass]="true" [src]="'/assets/icons/' + alert.icon + '.svg'" aria-hidden="true">
+  <svg-icon
+    class="alert__icon"
+    [applyClass]="true"
+    [src]="'/assets/icons/' + alert.icon + '.svg'"
+    aria-hidden="true"
+  >
   </svg-icon>
   <div class="alert__detail">
     <div class="alert__header">

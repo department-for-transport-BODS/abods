@@ -1,8 +1,11 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { DateTime } from 'luxon';
-import { Observable, catchError, map, of, retry } from 'rxjs';
-import { ConfigService, FreshdeskFolderConfig } from '../../config/config.service';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { DateTime } from "luxon";
+import { Observable, catchError, map, of, retry } from "rxjs";
+import {
+  ConfigService,
+  FreshdeskFolderConfig,
+} from "../../config/config.service";
 
 export interface FreshdeskArticle {
   id: string;
@@ -36,27 +39,37 @@ export enum FreshdeskArticleStatus {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class FreshdeskApiService {
-  constructor(private configService: ConfigService, private http: HttpClient) {}
+  constructor(
+    private configService: ConfigService,
+    private http: HttpClient,
+  ) {}
 
   private readonly freshdeskConfig = this.configService.freshdeskConfig;
 
-  getFolder(folder: keyof FreshdeskFolderConfig): Observable<FreshdeskArticle[]> {
+  getFolder(
+    folder: keyof FreshdeskFolderConfig,
+  ): Observable<FreshdeskArticle[]> {
     if (folder) {
       return this.http
-        .get<FreshdeskArticle[]>(this.freshdeskConfig.apiUrl + this.freshdeskConfig.folders[folder], {
-          observe: 'body',
-          responseType: 'json',
-          withCredentials: true,
-        })
+        .get<FreshdeskArticle[]>(
+          this.freshdeskConfig.apiUrl + this.freshdeskConfig.folders[folder],
+          {
+            observe: "body",
+            responseType: "json",
+            withCredentials: true,
+          },
+        )
         .pipe(
           retry(3),
           map((articles: FreshdeskArticle[]) =>
-            articles.filter((article) => article.status === FreshdeskArticleStatus.PUBLISHED)
+            articles.filter(
+              (article) => article.status === FreshdeskArticleStatus.PUBLISHED,
+            ),
           ),
-          catchError(() => of([]))
+          catchError(() => of([])),
         );
     } else {
       return of([]);

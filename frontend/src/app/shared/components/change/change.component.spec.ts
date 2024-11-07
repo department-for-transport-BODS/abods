@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SharedModule } from '../../shared.module';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { SharedModule } from "../../shared.module";
 
-import { ChangeComponent } from './change.component';
+import { ChangeComponent } from "./change.component";
 
-describe('ChangeComponent', () => {
+describe("ChangeComponent", () => {
   let component: ChangeComponent;
   let fixture: ComponentFixture<ChangeComponent>;
 
@@ -20,7 +20,7 @@ describe('ChangeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

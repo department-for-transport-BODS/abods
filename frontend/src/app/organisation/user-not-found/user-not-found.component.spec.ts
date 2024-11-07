@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { UserNotFoundComponent } from './user-not-found.component';
+import { UserNotFoundComponent } from "./user-not-found.component";
 
-describe('UserNotFoundComponent', () => {
+describe("UserNotFoundComponent", () => {
   let component: UserNotFoundComponent;
   let fixture: ComponentFixture<UserNotFoundComponent>;
 
@@ -18,7 +18,7 @@ describe('UserNotFoundComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

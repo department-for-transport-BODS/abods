@@ -1,34 +1,34 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { AuthGuardService } from '../authentication/auth-guard.service';
-import { FeedMonitoringComponent } from './feed-monitoring.component';
-import { FeedHistoryComponent } from './feed-history/feed-history.component';
-import { LiveStatusComponent } from './live-status/live-status.component';
-import { HelpdeskResolver } from '../shared/resolvers/helpdesk.resolver';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
+import { AuthGuardService } from "../authentication/auth-guard.service";
+import { FeedMonitoringComponent } from "./feed-monitoring.component";
+import { FeedHistoryComponent } from "./feed-history/feed-history.component";
+import { LiveStatusComponent } from "./live-status/live-status.component";
+import { HelpdeskResolver } from "../shared/resolvers/helpdesk.resolver";
 
 export const FeedMonitoringRoutes: Routes = [
   {
-    path: '',
+    path: "",
 
     canActivateChild: [AuthGuardService],
 
     children: [
       {
-        path: '',
+        path: "",
         component: FeedMonitoringComponent,
       },
       {
-        path: ':nocCode',
+        path: ":nocCode",
         component: LiveStatusComponent,
       },
       {
-        path: ':nocCode/feed-history',
+        path: ":nocCode/feed-history",
         component: FeedHistoryComponent,
       },
     ],
     data: {
-      helpdeskFolder: 'feedMonitoring',
-      helpdeskTitle: 'Feed monitoring',
+      helpdeskFolder: "feedMonitoring",
+      helpdeskTitle: "Feed monitoring",
     },
     resolve: { helpdesk: HelpdeskResolver },
   },

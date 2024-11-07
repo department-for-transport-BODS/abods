@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 enum HideOutlierKey {
-  JourneyTime = 'hideOutliersJourneyTime',
-  TimeOfDay = 'hideOutliersTimeOfDay',
-  DayOfWeek = 'hideOutliersDayOfWeek',
+  JourneyTime = "hideOutliersJourneyTime",
+  TimeOfDay = "hideOutliersTimeOfDay",
+  DayOfWeek = "hideOutliersDayOfWeek",
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class HideOutliersService {
   get hideOutliersJourneyTime(): boolean {

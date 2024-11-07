@@ -1,6 +1,10 @@
 <div class="govuk-form-group" [ngClass]="formGroupClasses">
   <fieldset class="govuk-fieldset">
-    <legend *ngIf="legend" class="govuk-fieldset__legend" [ngClass]="legendClasses">
+    <legend
+      *ngIf="legend"
+      class="govuk-fieldset__legend"
+      [ngClass]="legendClasses"
+    >
       {{ legend }}
     </legend>
     <span *ngIf="error" class="govuk-error-message">

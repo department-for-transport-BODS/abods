@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DynamicPanelComponentHostDirective } from './dynamic-panel-component-host.directive';
-import { DynamicComponent, DynamicPanelComponentLoaderService } from './dynamic-panel-component-loader.service';
+import { Component } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { DynamicPanelComponentHostDirective } from "./dynamic-panel-component-host.directive";
+import {
+  DynamicComponent,
+  DynamicPanelComponentLoaderService,
+} from "./dynamic-panel-component-loader.service";
 
-import { PanelComponent } from './panel.component';
-import { PanelService } from './panel.service';
+import { PanelComponent } from "./panel.component";
+import { PanelService } from "./panel.service";
 
 @Component({})
 class TestDynamicComponent {}
 
-describe('PanelComponent', () => {
+describe("PanelComponent", () => {
   let component: PanelComponent;
   let fixture: ComponentFixture<PanelComponent>;
   let panelService: PanelService;
@@ -34,30 +37,32 @@ describe('PanelComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  describe('ngAfterViewInit', () => {
-    it('should call loadComponent if component returned from panelService', () => {
+  describe("ngAfterViewInit", () => {
+    it("should call loadComponent if component returned from panelService", () => {
       panelService.setComponent(dynamicComponent);
-      spyOn(component['dynamicComponentLoaderService'], 'loadComponent');
+      spyOn(component["dynamicComponentLoaderService"], "loadComponent");
       component.ngAfterViewInit();
 
-      expect(component['dynamicComponentLoaderService'].loadComponent).toHaveBeenCalledWith(
+      expect(
+        component["dynamicComponentLoaderService"].loadComponent,
+      ).toHaveBeenCalledWith(
         dynamicComponent,
         component.dynamicComponentHost.viewContainerRef,
-        component['destroy$']
+        component["destroy$"],
       );
     });
   });
 
-  describe('close', () => {
-    it('should call close', () => {
-      spyOn(component['panelService'], 'close');
+  describe("close", () => {
+    it("should call close", () => {
+      spyOn(component["panelService"], "close");
       component.close();
 
-      expect(component['panelService'].close).toHaveBeenCalledWith();
+      expect(component["panelService"].close).toHaveBeenCalledWith();
     });
   });
 });

@@ -1,4 +1,4 @@
-@import 'src/assets/styles/settings/settings';
+@import "src/assets/styles/settings/settings";
 
 :host {
   display: block;
@@ -9,7 +9,7 @@
   margin: 0;
   border: 0 none;
   &__controls {
-    border: 2px solid govuk-colour('black');
+    border: 2px solid govuk-colour("black");
     display: inline-flex;
     white-space: nowrap;
   }

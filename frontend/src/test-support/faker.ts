@@ -1,5 +1,5 @@
-import faker from 'faker';
-import { DateTime, Interval } from 'luxon';
+import faker from "faker";
+import { DateTime, Interval } from "luxon";
 import {
   EventFragment,
   OperatorInfoType,
@@ -7,9 +7,11 @@ import {
   ServiceInfoType,
   ServicePerformanceType,
   ServicePunctualityType,
-} from 'src/generated/graphql';
+} from "src/generated/graphql";
 
-export function fakeOperatorLiveStatus(feedStatus: boolean): OperatorLiveStatusFragment {
+export function fakeOperatorLiveStatus(
+  feedStatus: boolean,
+): OperatorLiveStatusFragment {
   const name = faker.company.companyName();
   return {
     name,
@@ -17,11 +19,21 @@ export function fakeOperatorLiveStatus(feedStatus: boolean): OperatorLiveStatusF
     operatorId: faker.random.alphaNumeric(4),
     feedMonitoring: {
       feedStatus,
-      availability: faker.random.float({ min: 0.5, max: 1, precision: 0.00000001 }),
-      lastOutage: feedStatus ? DateTime.local().minus({ minutes: faker.random.number({ min: 1, max: 10000 }) }) : null,
+      availability: faker.random.float({
+        min: 0.5,
+        max: 1,
+        precision: 0.00000001,
+      }),
+      lastOutage: feedStatus
+        ? DateTime.local()
+            .minus({ minutes: faker.random.number({ min: 1, max: 10000 }) })
+            .toISO()
+        : null,
       unavailableSince: feedStatus
         ? null
-        : DateTime.local().minus({ minutes: faker.random.number({ min: 1, max: 100 }) }),
+        : DateTime.local()
+            .minus({ minutes: faker.random.number({ min: 1, max: 100 }) })
+            .toISO(),
       liveStats: {
         updateFrequency: faker.random.number({ min: 20, max: 60 }),
         currentVehicles: faker.random.number({ min: 0, max: 30 }),
@@ -32,7 +44,10 @@ export function fakeOperatorLiveStatus(feedStatus: boolean): OperatorLiveStatusF
           return {
             actual,
             expected,
-            timestamp: DateTime.local().startOf('hour').minus({ hours: i }).toISO(),
+            timestamp: DateTime.local()
+              .startOf("hour")
+              .minus({ hours: i })
+              .toISO(),
           };
         }),
         last20Minutes: [...Array(20)].map((_, i) => {
@@ -41,7 +56,10 @@ export function fakeOperatorLiveStatus(feedStatus: boolean): OperatorLiveStatusF
           return {
             actual,
             expected,
-            timestamp: DateTime.local().startOf('minute').minus({ minutes: i }).toISO(),
+            timestamp: DateTime.local()
+              .startOf("minute")
+              .minus({ minutes: i })
+              .toISO(),
           };
         }),
       },
@@ -62,8 +80,17 @@ export function fakeEvent({
 }): EventFragment {
   const between = Interval.fromDateTimes(start, end ?? start);
   return {
-    type: type ?? faker.random.arrayElement(['VehicleCountDisparityEvent', 'FeedUnavailableEvent']),
-    timestamp: between.start.plus({ milliseconds: faker.random.number(between.toDuration().milliseconds) }),
+    type:
+      type ??
+      faker.random.arrayElement([
+        "VehicleCountDisparityEvent",
+        "FeedUnavailableEvent",
+      ]),
+    timestamp: between.start
+      .plus({
+        milliseconds: faker.random.number(between.toDuration().milliseconds),
+      })
+      .toISO(),
     data: { message: message ?? faker.lorem.text(12) },
   };
 }
@@ -76,7 +103,9 @@ export function fakeDashboardPunctualityStats() {
   };
 }
 
-export function fakeDashboardServiceRanking(overrides?: Partial<ServicePunctualityType>): ServicePunctualityType {
+export function fakeDashboardServiceRanking(
+  overrides?: Partial<ServicePunctualityType>,
+): ServicePunctualityType {
   const lineInfo: ServiceInfoType = overrides?.lineInfo ?? {
     serviceId: faker.random.number(100).toString(),
     serviceName: `${faker.address.city()} to ${faker.address.city()}`,
@@ -89,7 +118,9 @@ export function fakeDashboardServiceRanking(overrides?: Partial<ServicePunctuali
     onTime: overrides?.onTime ?? faker.random.number(1000),
     early: overrides?.early ?? faker.random.number(1000),
     late: overrides?.late ?? faker.random.number(1000),
-    rank: overrides?.rank ?? faker.random.number({ min: 1, max: 5, precision: 0.01 }),
+    rank:
+      overrides?.rank ??
+      faker.random.number({ min: 1, max: 5, precision: 0.01 }),
     trend:
       overrides?.trend ??
       ({
@@ -100,16 +131,19 @@ export function fakeDashboardServiceRanking(overrides?: Partial<ServicePunctuali
   };
 }
 
-export function fakeOnTimeServicePerformance(overrides?: Partial<ServicePerformanceType>): ServicePerformanceType {
+export function fakeOnTimeServicePerformance(
+  overrides?: Partial<ServicePerformanceType>,
+): ServicePerformanceType {
   const lineInfo: ServiceInfoType = overrides?.lineInfo ?? {
     serviceId: faker.random.number(100).toString(),
     serviceName: `${faker.address.city()} to ${faker.address.city()}`,
     serviceNumber: faker.random.number(100).toString(),
   };
-  const scheduledDepartures = overrides?.scheduledDepartures ?? faker.random.number(3000);
+  const scheduledDepartures =
+    overrides?.scheduledDepartures ?? faker.random.number(3000);
   const operatorInfo: OperatorInfoType = overrides?.operatorInfo ?? {
     nocCode: faker.random.alpha({ count: 4, upcase: true }),
-    operatorId: `OP${faker.random.number(199).toString().padStart(3, '0')}`,
+    operatorId: `OP${faker.random.number(199).toString().padStart(3, "0")}`,
     operatorName: faker.company.companyName(),
   };
   return {
@@ -118,9 +152,11 @@ export function fakeOnTimeServicePerformance(overrides?: Partial<ServicePerforma
     late: overrides?.late ?? faker.random.number(1000),
     lineId: overrides?.lineId ?? faker.random.number(100).toString(),
     lineInfo,
-    averageDelay: overrides?.averageDelay ?? faker.random.number({ min: -60, max: 600 }),
+    averageDelay:
+      overrides?.averageDelay ?? faker.random.number({ min: -60, max: 600 }),
     scheduledDepartures,
-    actualDepartures: overrides?.actualDepartures ?? faker.random.number(scheduledDepartures),
+    actualDepartures:
+      overrides?.actualDepartures ?? faker.random.number(scheduledDepartures),
     operatorInfo,
   };
 }

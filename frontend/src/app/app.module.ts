@@ -1,28 +1,28 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { BrowserModule } from "@angular/platform-browser";
+import { APP_INITIALIZER, NgModule } from "@angular/core";
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { GraphQLModule } from './graphql.module';
-import { HttpClientModule } from '@angular/common/http';
-import { SharedModule } from './shared/shared.module';
-import { LayoutModule } from './layout/layout.module';
-import { ConfigService } from './config/config.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthenticationModule } from './authentication/authentication.module';
-import { PercentPipe, ViewportScroller } from '@angular/common';
-import { Event, Router, Scroll } from '@angular/router';
-import { filter, pairwise } from 'rxjs/operators';
-import { UserModule } from './user/user.module';
+import { AppRoutingModule } from "./app-routing.module";
+import { AppComponent } from "./app.component";
+import { GraphQLModule } from "./graphql.module";
+import { HttpClientModule } from "@angular/common/http";
+import { SharedModule } from "./shared/shared.module";
+import { LayoutModule } from "./layout/layout.module";
+import { ConfigService } from "./config/config.service";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { AuthenticationModule } from "./authentication/authentication.module";
+import { PercentPipe, ViewportScroller } from "@angular/common";
+import { Event, Router, Scroll } from "@angular/router";
+import { filter, pairwise } from "rxjs/operators";
+import { UserModule } from "./user/user.module";
 
-import { NotFoundComponent } from './not-found/not-found.component';
-import { NotAuthorisedComponent } from './not-authorised/not-authorised.component';
-import { MAPBOX_API_KEY, NgxMapboxGLModule } from 'ngx-mapbox-gl';
-import { GoogleTagManagerModule } from 'angular-google-tag-manager';
-import { PrivacyPolicyModule } from './privacy-policy/privacy-policy.module';
-import { CookiePolicyModule } from './cookie-policy/cookie-policy.module';
-import { CookieService } from 'ngx-cookie-service';
+import { NotFoundComponent } from "./not-found/not-found.component";
+import { NotAuthorisedComponent } from "./not-authorised/not-authorised.component";
+import { MAPBOX_API_KEY, NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { GoogleTagManagerModule } from "angular-google-tag-manager";
+import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
+import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
+import { CookieService } from "ngx-cookie-service";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
@@ -46,7 +46,8 @@ import { CookieService } from 'ngx-cookie-service';
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: (config: ConfigService) => async () => await config.loadConfig(),
+      useFactory: (config: ConfigService) => async () =>
+        await config.loadConfig(),
       deps: [ConfigService],
       multi: true,
     },
@@ -56,7 +57,7 @@ import { CookieService } from 'ngx-cookie-service';
       deps: [ConfigService],
     },
     {
-      provide: 'googleTagManagerId',
+      provide: "googleTagManagerId",
       useFactory: (config: ConfigService) => config.analyticsId,
       deps: [ConfigService],
     },
@@ -66,7 +67,10 @@ import { CookieService } from 'ngx-cookie-service';
   bootstrap: [AppComponent],
 })
 export class AppModule {
-  constructor(private router: Router, private viewportScroller: ViewportScroller) {
+  constructor(
+    private router: Router,
+    private viewportScroller: ViewportScroller,
+  ) {
     this.handleScrollOnNavigation();
   }
 
@@ -83,7 +87,7 @@ export class AppModule {
     this.router.events
       .pipe(
         filter((e: Event): e is Scroll => e instanceof Scroll),
-        pairwise()
+        pairwise(),
       )
       .subscribe((e: Scroll[]) => {
         const previous = e[0];
@@ -110,6 +114,6 @@ export class AppModule {
 
   private getBaseRoute(url: string): string {
     // return url without query params
-    return url.split('?')[0];
+    return url.split("?")[0];
   }
 }

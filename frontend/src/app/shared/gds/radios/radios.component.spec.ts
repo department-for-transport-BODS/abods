@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { RadiosComponent } from './radios.component';
+import { RadiosComponent } from "./radios.component";
 
-describe('RadiosComponent', () => {
+describe("RadiosComponent", () => {
   let component: RadiosComponent;
   let fixture: ComponentFixture<RadiosComponent>;
 
@@ -18,7 +18,7 @@ describe('RadiosComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { LayoutModule } from '../layout/layout.module';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { RouterTestingModule } from "@angular/router/testing";
+import { LayoutModule } from "../layout/layout.module";
 
-import { CorridorsComponent } from './corridors.component';
+import { CorridorsComponent } from "./corridors.component";
 
-describe('CorridorsComponent', () => {
+describe("CorridorsComponent", () => {
   let component: CorridorsComponent;
   let fixture: ComponentFixture<CorridorsComponent>;
 
@@ -21,7 +21,7 @@ describe('CorridorsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

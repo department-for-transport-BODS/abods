@@ -1,6 +1,6 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { requiredNoWhitespaceValidator } from './required-no-whitespace.validator';
-import { DateTime, Interval } from 'luxon';
+import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
+import { requiredNoWhitespaceValidator } from "./required-no-whitespace.validator";
+import { DateTime, Interval } from "luxon";
 
 export class CustomValidators {
   /**
@@ -10,7 +10,9 @@ export class CustomValidators {
    * @param control
    * @returns `ValidationErrors | null`
    */
-  static requiredNoWhitespace(control: AbstractControl): ValidationErrors | null {
+  static requiredNoWhitespace(
+    control: AbstractControl,
+  ): ValidationErrors | null {
     return requiredNoWhitespaceValidator(control);
   }
 
@@ -18,8 +20,13 @@ export class CustomValidators {
    * Checks that the control value is within the start and end of the specified interval.
    * @param range The range of dates that should be considered valid
    */
-  static dateWithinRange = (range: Interval): ValidatorFn => (control) =>
-    control.value instanceof DateTime && control.value.isValid && range.isValid && !range.contains(control.value)
-      ? { dateWithinRange: true }
-      : null;
+  static dateWithinRange =
+    (range: Interval): ValidatorFn =>
+    (control) =>
+      control.value instanceof DateTime &&
+      control.value.isValid &&
+      range.isValid &&
+      !range.contains(control.value)
+        ? { dateWithinRange: true }
+        : null;
 }

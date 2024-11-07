@@ -1,7 +1,10 @@
-import { byText, createComponentFactory, Spectator } from '@ngneat/spectator';
-import { NoRowsOverlayComponent, NoRowsOverlayParams } from './no-rows-overlay.component';
+import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
+import {
+  NoRowsOverlayComponent,
+  NoRowsOverlayParams,
+} from "./no-rows-overlay.component";
 
-describe('NoRowsOverlayComponent', () => {
+describe("NoRowsOverlayComponent", () => {
   let spectator: Spectator<NoRowsOverlayComponent>;
   let component: NoRowsOverlayComponent;
 
@@ -14,10 +17,10 @@ describe('NoRowsOverlayComponent', () => {
     component = spectator.component;
   });
 
-  it('should show no matches message when mode set', () => {
-    component.agInit(<NoRowsOverlayParams>{ message: 'Computer says no' });
+  it("should show no matches message when mode set", () => {
+    component.agInit(<NoRowsOverlayParams>{ message: "Computer says no" });
     spectator.detectChanges();
 
-    expect(spectator.query(byText('Computer says no'))).toBeVisible();
+    expect(spectator.query(byText("Computer says no"))).toBeVisible();
   });
 });

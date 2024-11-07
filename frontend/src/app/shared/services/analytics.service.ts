@@ -1,10 +1,17 @@
-import { Injectable } from '@angular/core';
-import { debounceTime, filter, first, map, mergeMap, skip } from 'rxjs/operators';
-import { NavigationEnd, Router } from '@angular/router';
-import { AuthenticatedUserService } from '../../authentication/authenticated-user.service';
-import { GoogleTagManagerService } from 'angular-google-tag-manager';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { CookiePolicyService } from './cookie-policy.service';
+import { Injectable } from "@angular/core";
+import {
+  debounceTime,
+  filter,
+  first,
+  map,
+  mergeMap,
+  skip,
+} from "rxjs/operators";
+import { NavigationEnd, Router } from "@angular/router";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { GoogleTagManagerService } from "angular-google-tag-manager";
+import { BehaviorSubject, combineLatest } from "rxjs";
+import { CookiePolicyService } from "./cookie-policy.service";
 
 export interface AnalyticsUserProperties {
   abodUserId: string;
@@ -15,7 +22,7 @@ export interface AnalyticsUserProperties {
 /**
  * Provides additional tags to populate user properties.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AnalyticsService {
   get userProperties$() {
     return this.userService.authenticatedUser$.pipe(
@@ -25,8 +32,8 @@ export class AnalyticsService {
             abodUserId: user?.id,
             abodOrgId: user?.organisation?.id,
             abodOrgName: user?.organisation?.name,
-          }
-      )
+          },
+      ),
     );
   }
 
@@ -34,7 +41,7 @@ export class AnalyticsService {
     private router: Router,
     private userService: AuthenticatedUserService,
     private tagManagerService: GoogleTagManagerService,
-    private cookiePolicyService: CookiePolicyService
+    private cookiePolicyService: CookiePolicyService,
   ) {
     const policy = this.cookiePolicyService.getAnalyticsPolicy();
     policy.analyticsEnabled ? this.enableAnalytics() : this.disableAnalytics();
@@ -61,9 +68,11 @@ export class AnalyticsService {
         map((obs) => obs[1]),
         first(),
         mergeMap((user) => {
-          this.tagManagerService.getDataLayer().push({ event: 'userData', ...user });
+          this.tagManagerService
+            .getDataLayer()
+            .push({ event: "userData", ...user });
           return this.tagManagerService.addGtmToDom();
-        })
+        }),
       )
       .subscribe();
 
@@ -73,7 +82,9 @@ export class AnalyticsService {
         filter(([enabled]) => enabled),
         map((obs) => obs[1]),
         skip(1),
-        mergeMap((user) => this.tagManagerService.pushTag({ event: 'userData', ...user }))
+        mergeMap((user) =>
+          this.tagManagerService.pushTag({ event: "userData", ...user }),
+        ),
       )
       .subscribe();
 
@@ -82,9 +93,15 @@ export class AnalyticsService {
       .pipe(
         filter(([enabled]) => enabled),
         map((obs) => obs[1]),
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
         debounceTime(100),
-        mergeMap((event) => this.tagManagerService.pushTag({ page_path: event.urlAfterRedirects }))
+        mergeMap((event) =>
+          this.tagManagerService.pushTag({
+            page_path: event.urlAfterRedirects,
+          }),
+        ),
       )
       .subscribe();
   }

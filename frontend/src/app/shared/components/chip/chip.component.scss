@@ -1,8 +1,8 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .chip {
-  border: 1px solid govuk-colour('black');
+  border: 1px solid govuk-colour("black");
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
@@ -26,7 +26,7 @@
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
     &:hover {
-      background: govuk-colour('light-grey');
+      background: govuk-colour("light-grey");
     }
     &:focus {
       background: $govuk-focus-colour;
@@ -34,7 +34,7 @@
   }
 
   &__close-icon {
-    color: govuk-colour('black');
+    color: govuk-colour("black");
     width: 1.5rem;
     height: 1.5rem;
   }

@@ -5,15 +5,16 @@ on:
   workflow_dispatch:
   push:
     branches:
-    - 'sandbox'
-    - 'dev'
+      - "sandbox"
+      - "dev"
     paths:
-    - 'VERSION'
-    - 'abods-api/**'
-    - 'frontend/**'
+      - "VERSION"
+      - "abods-api/**"
+      - "frontend/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+  group:
+    ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
     github.event_name == 'release' && 'prod' ||
     startsWith(github.ref, 'refs/tags/v') && 'prod' ||
     github.ref_name == 'main' && 'uat' ||
@@ -124,7 +125,7 @@ jobs:
           role-skip-session-tagging: true
 
       - name: package and push backend code
-        env: 
+        env:
           RC_DST: ${{ env.RC_DST_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
@@ -204,7 +205,7 @@ jobs:
           mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
           mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
           mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
-          
+
           jq --arg freshdesk_api_url "$freshdesk_api_url" \
              --arg graphql_api_url "$graphql_api_url" \
              --arg mapbox_token "$mapbox_token" \
@@ -255,7 +256,7 @@ jobs:
   trigger-deploy-dev:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(fromJSON('["test", "cavl", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - validation
       - backend
       - frontend
@@ -271,4 +272,3 @@ jobs:
           repository: ${{ github.repository }}
           event-type: automated-deploy-dev
           client-payload: '{ "environment": "${{ env.RC_ENV }}", "release_version": "${{ needs.validation.outputs.VERSION }}" }'
-

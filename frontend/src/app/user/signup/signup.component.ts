@@ -1,16 +1,21 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { FormErrors } from 'src/app/shared/gds/error-summary/error-summary.component';
-import { PasswordValidator } from 'src/app/shared/validators/password.validator';
-import { InvitationType } from 'src/generated/graphql';
-import { UserService } from '../user.service';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, ParamMap } from "@angular/router";
+import { Subscription } from "rxjs";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
+import { PasswordValidator } from "src/app/shared/validators/password.validator";
+import { InvitationType } from "src/generated/graphql";
+import { UserService } from "../user.service";
 
 @Component({
-  selector: 'app-signup',
-  templateUrl: './signup.component.html',
+  selector: "app-signup",
+  templateUrl: "./signup.component.html",
 })
 export class SignupComponent implements OnInit, OnDestroy {
   signUpForm: FormGroup;
@@ -24,43 +29,65 @@ export class SignupComponent implements OnInit, OnDestroy {
   invitationFetched = false;
   signUpSuccess = false;
   passwordPolicy = PasswordValidator.passwordPolicyText;
-  constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private signUpService: UserService) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
+    private signUpService: UserService,
+  ) {
     this.signUpForm = this.formBuilder.group({
-      key: [''],
+      key: [""],
       firstName: [
-        '',
-        [Validators.required, Validators.pattern(/^(\s*[\p{Letter}'().,&/-]+\s*)*(?!\s)[\p{Letter}'().,&/-]*$/u)],
+        "",
+        [
+          Validators.required,
+          Validators.pattern(
+            /^(\s*[\p{Letter}'().,&/-]+\s*)*(?!\s)[\p{Letter}'().,&/-]*$/u,
+          ),
+        ],
       ],
       lastName: [
-        '',
-        [Validators.required, Validators.pattern(/^(\s*[\p{Letter}'().,&/-]+\s*)*(?!\s)[\p{Letter}'().,&/-]*$/u)],
+        "",
+        [
+          Validators.required,
+          Validators.pattern(
+            /^(\s*[\p{Letter}'().,&/-]+\s*)*(?!\s)[\p{Letter}'().,&/-]*$/u,
+          ),
+        ],
       ],
-      password: ['', [Validators.required, ...PasswordValidator.passwordValidators]],
-      confirmPassword: ['', [Validators.required, PasswordValidator.confirmPasswords('password')]],
+      password: [
+        "",
+        [Validators.required, ...PasswordValidator.passwordValidators],
+      ],
+      confirmPassword: [
+        "",
+        [Validators.required, PasswordValidator.confirmPasswords("password")],
+      ],
     });
   }
 
   ngOnInit() {
     this.subscriptions.push(
       this.route.paramMap.subscribe((params: ParamMap) => {
-        if (params.get('key')) {
-          this.key.setValue(params.get('key'));
-          this.signUpService.invitation$(params.get('key') as string).subscribe((res) => {
-            this.invitationFetched = true;
-            this.invitation = res;
-          });
+        if (params.get("key")) {
+          this.key.setValue(params.get("key"));
+          this.signUpService
+            .invitation$(params.get("key") as string)
+            .subscribe((res) => {
+              this.invitationFetched = true;
+              this.invitation = res;
+            });
         }
       }),
       this.signUpForm.controls.password.valueChanges.subscribe(() => {
         this.signUpForm.controls.confirmPassword.updateValueAndValidity();
-      })
+      }),
     );
     this.subscriptions.push(
       (this.formSubscription = this.signUpForm.valueChanges
         .pipe(debounceTime(200), distinctUntilChanged())
         .subscribe(() => {
           this.resetForm();
-        }))
+        })),
     );
   }
 
@@ -91,7 +118,12 @@ export class SignupComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.subscriptions.push(
       this.signUpService
-        .signUp$(this.key.value, this.password.value, this.firstName.value.trim(), this.lastName.value.trim())
+        .signUp$(
+          this.key.value,
+          this.password.value,
+          this.firstName.value.trim(),
+          this.lastName.value.trim(),
+        )
         .subscribe((res) => {
           if (res.error) {
             this.errors.push({ error: res.error });
@@ -99,7 +131,7 @@ export class SignupComponent implements OnInit, OnDestroy {
             this.signUpSuccess = true;
           }
           this.loading = false;
-        })
+        }),
     );
   }
 
@@ -110,10 +142,10 @@ export class SignupComponent implements OnInit, OnDestroy {
   getErrorString(controlName: string, prop: AbstractControl) {
     if (prop.errors) {
       if (prop.errors.required) {
-        return 'This field is required.';
+        return "This field is required.";
       } else if (prop.errors.pattern) {
-        if (controlName === 'firstName' || controlName === 'lastName') {
-          return 'Name contains an invalid character';
+        if (controlName === "firstName" || controlName === "lastName") {
+          return "Name contains an invalid character";
         }
       }
       return PasswordValidator.getErrorText(prop.errors);
@@ -128,26 +160,26 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   get firstName() {
-    return this.signUpForm.get('firstName') as AbstractControl;
+    return this.signUpForm.get("firstName") as AbstractControl;
   }
 
   get lastName() {
-    return this.signUpForm.get('lastName') as AbstractControl;
+    return this.signUpForm.get("lastName") as AbstractControl;
   }
 
   get username() {
-    return this.signUpForm.get('username') as AbstractControl;
+    return this.signUpForm.get("username") as AbstractControl;
   }
 
   get password() {
-    return this.signUpForm.get('password') as AbstractControl;
+    return this.signUpForm.get("password") as AbstractControl;
   }
 
   get confirmPassword() {
-    return this.signUpForm.get('confirmPassword') as AbstractControl;
+    return this.signUpForm.get("confirmPassword") as AbstractControl;
   }
 
   get key() {
-    return this.signUpForm.get('key') as AbstractControl;
+    return this.signUpForm.get("key") as AbstractControl;
   }
 }

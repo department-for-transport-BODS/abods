@@ -17,26 +17,26 @@ Parameters:
     Description: The environment into which the stack is being deployed
   ProjectName:
     Description: The name of the project
-    Default: 'abods'
+    Default: "abods"
     Type: String
   RdsDbHostAddr:
     Type: String
-    Default: ''
+    Default: ""
   RdsDbPort:
     Type: Number
     Default: 5432
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
-    Default: ''
+    Default: ""
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
-    Default: ''
+    Default: ""
   BodsVpcEndpoint:
     Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
-    Default: ''
+    Default: ""
 Conditions:
-  IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
-  IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
+  IsNotLocal: !Not [!Equals [!Ref Environment, "local"]]
+  IsNotProd: !Not [!Equals [!Ref Environment, "prod"]]
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
@@ -46,19 +46,19 @@ Resources:
     Properties:
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api
       StageName: !Ref Environment
-      EndpointConfiguration: 
+      EndpointConfiguration:
         Type: REGIONAL
       TracingEnabled: true
       Auth:
         ResourcePolicy:
           CustomStatements:
             - Effect: Allow
-              Principal: '*'
+              Principal: "*"
               Action: execute-api:Invoke
               Resource: execute-api:/*
               Condition:
                 StringEquals:
-                  aws:UserAgent: 'Amazon CloudFront'
+                  aws:UserAgent: "Amazon CloudFront"
 
   PrivateGraphQlApi:
     Type: AWS::Serverless::Api
@@ -66,7 +66,7 @@ Resources:
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
       Description: "Private API to allow BODS to access platform via VPC Endpoint"
       StageName: !Ref Environment
-      EndpointConfiguration: 
+      EndpointConfiguration:
         Type: PRIVATE
         VpcEndpointIds: !Ref BodsVpcEndpoint
       TracingEnabled: true
@@ -74,7 +74,7 @@ Resources:
         ResourcePolicy:
           CustomStatements:
             - Effect: Allow
-              Principal: '*'
+              Principal: "*"
               Action: execute-api:Invoke
               Resource: execute-api:/*
               Condition:
@@ -86,14 +86,14 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
-      FunctionName: !Sub  ${ProjectName}-${Environment}-graphql-function
+      FunctionName: !Sub ${ProjectName}-${Environment}-graphql-function
       Role: !GetAtt GraphQlFunctionExecutionRole.Arn
       CodeUri: .
       Handler: dist/index.default
-      KmsKeyArn: !If 
+      KmsKeyArn: !If
         - IsNotLocal
-        - !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/lambda/arn}}'
-        - !Ref 'AWS::NoValue'
+        - !Sub "{{resolve:ssm:/${ProjectName}/shared/kms/lambda/arn}}"
+        - !Ref "AWS::NoValue"
       Events:
         ApiEvents:
           Type: Api
@@ -101,7 +101,7 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref GraphQlApi
-        PrivateApiEvents: 
+        PrivateApiEvents:
           Type: Api
           Properties:
             Path: /{proxy+}
@@ -111,7 +111,7 @@ Resources:
         SubnetIds: !Ref VpcSubnets
         SecurityGroupIds:
           - !GetAtt GraphQlFunctionSecurityGroup.GroupId
-          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
+          - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}"
       Environment:
         Variables:
           PROJECT_ENV: !Ref Environment
@@ -119,19 +119,19 @@ Resources:
           CORS_ORIGIN: !If
             - IsNotLocal
             - !Sub
-              - 'https://${CloudFrontDomainName}'
-              - CloudFrontDomainName: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
-            - 'http://localhost:4200'
+              - "https://${CloudFrontDomainName}"
+              - CloudFrontDomainName: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
+            - "http://localhost:4200"
           DB_HOST: !If
             - IsNotLocal
-            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
+            - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}"
             - !Ref RdsDbHostAddr
           DB_PORT: !Ref RdsDbPort
           DB_NAME: !If
             - IsNotLocal
-            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
+            - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}"
             - !Ref ProjectName
-          DB_USER: !Sub '${ProjectName}_proxy_rw'
+          DB_USER: !Sub "${ProjectName}_proxy_rw"
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
@@ -140,38 +140,37 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: !Sub ${ProjectName}/${Environment}/GraphQLTokenAuthConfig
-      Description: 'This Secret is used to set the HMAC and allowed API Key for BODS to connect to private endpoints'
-      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
-
+      Description: "This Secret is used to set the HMAC and allowed API Key for BODS to connect to private endpoints"
+      KmsKeyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
 
   GraphQlFunctionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-graphql-function Lambda'
-      GroupName: !Sub '${ProjectName}-${Environment}-graphql-function'
-      SecurityGroupEgress: 
-        - IpProtocol: '-1'
-          CidrIp: '0.0.0.0/0'
+      GroupDescription: !Sub "Security group for ${ProjectName}-${Environment}-graphql-function Lambda"
+      GroupName: !Sub "${ProjectName}-${Environment}-graphql-function"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
-          Value: !Sub '${ProjectName}-${Environment}-graphql-function'
+          Value: !Sub "${ProjectName}-${Environment}-graphql-function"
 
   GraphQlFunctionLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: "AWS::Logs::LogGroup"
     Condition: IsNotLocal
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-graphql-function'
-      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-${Environment}-graphql-function"
+      KmsKeyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}"
       RetentionInDays: 30
 
   GraphQlFunctionExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Condition: IsNotLocal
     Properties:
-      RoleName: !Sub '${ProjectName}-${Environment}-graphql-function-execution-role'
+      RoleName: !Sub "${ProjectName}-${Environment}-graphql-function-execution-role"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -179,12 +178,12 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
+        - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}"
       Policies:
         - PolicyName: SecretsManagerGetSecretValueForAPIToken
           PolicyDocument:
             Version: "2012-10-17"
-            Statement:  
+            Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
                 Resource: !Ref GraphQLAPITokenSecret
@@ -193,16 +192,16 @@ Resources:
                   - kms:Decrypt
                   - kms:DescribeKey
                 Resource:
-                  Fn::Sub: '{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}'
+                  Fn::Sub: "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
   GraphQlFunctionLoggingPolicy:
-    Type: 'AWS::IAM::Policy'
+    Type: "AWS::IAM::Policy"
     Condition: IsNotLocal
     Properties:
-      PolicyName: !Sub '${ProjectName}-${Environment}-graphql-function-logging-policy'
+      PolicyName: !Sub "${ProjectName}-${Environment}-graphql-function-logging-policy"
       Roles:
         - !Ref GraphQlFunctionExecutionRole
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -229,7 +228,7 @@ Resources:
     Type: AWS::S3::Bucket
     Condition: IsNotLocal
     Properties:
-      BucketName: !Sub '${ProjectName}-${Environment}-deployment-frontend'
+      BucketName: !Sub "${ProjectName}-${Environment}-deployment-frontend"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -247,15 +246,15 @@ Resources:
           - Sid: AllowCloudFrontServicePrincipal
             Effect: Allow
             Principal:
-              Service: 'cloudfront.amazonaws.com'
-            Action: 's3:GetObject'
+              Service: "cloudfront.amazonaws.com"
+            Action: "s3:GetObject"
             Resource: !Sub
-              - 'arn:aws:s3:::${Bucket}/*'
+              - "arn:aws:s3:::${Bucket}/*"
               - Bucket: !Ref FrontendBucket
             Condition:
               StringEquals:
                 aws:SourceArn: !Sub
-                  - 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+                  - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
                   - Distribution: !Ref CloudFrontDistribution
 
   CloudFrontDistribution:
@@ -264,11 +263,11 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        Comment: !Sub '${ProjectName}-${Environment}-cdn'
+        Comment: !Sub "${ProjectName}-${Environment}-cdn"
         Aliases:
-          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+          - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
         ViewerCertificate:
-          AcmCertificateArn: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/acm/certificate/arn}}'
+          AcmCertificateArn: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/acm/certificate/arn}}"
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: sni-only
         Origins:
@@ -276,10 +275,10 @@ Resources:
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
             OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
             S3OriginConfig:
-              OriginAccessIdentity: ''
+              OriginAccessIdentity: ""
           - Id: backendApi
-            DomainName: !Sub '${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com'
-            OriginPath: !Sub '/${Environment}'
+            DomainName: !Sub "${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com"
+            OriginPath: !Sub "/${Environment}"
             CustomOriginConfig:
               OriginProtocolPolicy: https-only
         DefaultRootObject: index.html
@@ -294,23 +293,23 @@ Resources:
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
         CacheBehaviors:
           - TargetOriginId: frontendBucket
-            PathPattern: '/freshdesk/*'
+            PathPattern: "/freshdesk/*"
             ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods: 
+            AllowedMethods:
               - GET
-              - HEAD        
+              - HEAD
             OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
             CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
             FunctionAssociations:
               - EventType: viewer-request
-                FunctionARN: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/function/checkcookie/arn}}'
+                FunctionARN: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/function/checkcookie/arn}}"
           - TargetOriginId: backendApi
-            PathPattern: '/api/*'
+            PathPattern: "/api/*"
             DefaultTTL: 0
             MinTTL: 0
             MaxTTL: 0
             ViewerProtocolPolicy: https-only
-            AllowedMethods: 
+            AllowedMethods:
               - GET
               - HEAD
               - OPTIONS
@@ -318,24 +317,24 @@ Resources:
               - POST
               - PATCH
               - DELETE
-            CachePolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/backendcachepolicy/id}}' # CachingDisabledWithAuth
-            OriginRequestPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/originrequestpolicy/id}}' # CustomCookiesPolicy
-            ResponseHeadersPolicyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/cloudfront/responseheaderspolicy/id}}' # CustomHeadersPolicy
+            CachePolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/backendcachepolicy/id}}" # CachingDisabledWithAuth
+            OriginRequestPolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/originrequestpolicy/id}}" # CustomCookiesPolicy
+            ResponseHeadersPolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/responseheaderspolicy/id}}" # CustomHeadersPolicy
         Logging:
-          Bucket: !Sub '${ProjectName}-shared-cdn-logging-${AWS::AccountId}.s3.amazonaws.com' 
+          Bucket: !Sub "${ProjectName}-shared-cdn-logging-${AWS::AccountId}.s3.amazonaws.com"
           Prefix: !Ref Environment
         CustomErrorResponses:
           - ErrorCode: 403
             ErrorCachingMinTTL: 10
             ResponseCode: 200
-            ResponsePagePath: '/index.html'
+            ResponsePagePath: "/index.html"
 
   CloudFrontOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
         Name: !Sub ${ProjectName}-${Environment}-cdn-oac
-        Description: !Sub 'CloudFront access control used for access to ${ProjectName}-${Environment}-deployment-frontend S3 bucket'
+        Description: !Sub "CloudFront access control used for access to ${ProjectName}-${Environment}-deployment-frontend S3 bucket"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -343,14 +342,14 @@ Resources:
   CloudFrontRoute53RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneId: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/id}}'
-      RecordSets: 
-        - Name: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+      HostedZoneId: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/id}}"
+      RecordSets:
+        - Name: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
           Type: A
           AliasTarget:
             DNSName: !GetAtt CloudFrontDistribution.DomainName
             HostedZoneId: Z2FDTNDATAQYW2
-        - Name: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+        - Name: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
           Type: AAAA
           AliasTarget:
             DNSName: !GetAtt CloudFrontDistribution.DomainName
@@ -358,16 +357,16 @@ Resources:
 
 Outputs:
   ApiGatewayUrl:
-    Description: 'API Gateway endpoint URL for FastAPI'
-    Value: !Sub 'https://${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+    Description: "API Gateway endpoint URL for FastAPI"
+    Value: !Sub "https://${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
   CloudFrontDistributionId:
-    Description: 'CloudFront Distribution ID'
+    Description: "CloudFront Distribution ID"
     Value: !Ref CloudFrontDistribution
   CloudFrontDistributionUrl:
-    Description: 'CloudFront Distribution Domain Name URL'
+    Description: "CloudFront Distribution Domain Name URL"
     Value: !Sub
-      - 'https://${CloudFrontDomainName}'
-      - CloudFrontDomainName: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}'
+      - "https://${CloudFrontDomainName}"
+      - CloudFrontDomainName: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
   FrontendBucketName:
-    Description: 'Name of Frontend S3 Bucket'
-    Value: !Sub 's3://${FrontendBucket}'
+    Description: "Name of Frontend S3 Bucket"
+    Value: !Sub "s3://${FrontendBucket}"

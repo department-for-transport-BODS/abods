@@ -1,6 +1,10 @@
 <app-page>
   <ng-container ngProjectAs="content"
-    ><app-page-header heading="Dashboard" spaceAbove="2" spaceBelow="2"></app-page-header>
+    ><app-page-header
+      heading="Dashboard"
+      spaceAbove="2"
+      spaceBelow="2"
+    ></app-page-header>
     <div class="dashboard__controls">
       <app-operator-selector
         [allOperators]="allOperatorsSubject | async"
@@ -9,7 +13,10 @@
         [allowAll]="true"
       >
       </app-operator-selector>
-      <app-segmented-toggle [(ngModel)]="timingPointsOption" (ngModelChange)="onTimingPointsToggleChange()">
+      <app-segmented-toggle
+        [(ngModel)]="timingPointsOption"
+        (ngModelChange)="onTimingPointsToggleChange()"
+      >
         <app-segmented-toggle-item
           name="stops-filter"
           identifier="all-stops"
@@ -28,7 +35,11 @@
       <div class="dashboard__performance">
         <app-box spaceBelow="6">
           <h2 class="govuk-heading-m">On-time performance</h2>
-          <app-performance [filters]="performanceFilters$" [operators]="allOperatorsSubject | async" [nocCode]="nocCode"></app-performance>
+          <app-performance
+            [filters]="performanceFilters$"
+            [operators]="allOperatorsSubject | async"
+            [nocCode]="nocCode"
+          ></app-performance>
         </app-box>
       </div>
       <div class="dashboard__feeds">
@@ -40,7 +51,9 @@
           ></app-vehicles-status>
         </div>
         <div class="dashboard__feed-alerts">
-          <app-feed-status-summary [operators]="feedStatusOperators"></app-feed-status-summary>
+          <app-feed-status-summary
+            [operators]="feedStatusOperators"
+          ></app-feed-status-summary>
         </div>
       </div>
     </div>

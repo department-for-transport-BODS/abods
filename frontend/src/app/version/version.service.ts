@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of, zip } from 'rxjs';
-import { GetVersionGQL } from '../../generated/graphql';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { catchError, map, Observable, of, zip } from "rxjs";
+import { GetVersionGQL } from "../../generated/graphql";
 
 interface IVersion {
   version: string;
@@ -14,8 +14,8 @@ export class Version implements IVersion {
 
   static createUnknown() {
     const v = new Version();
-    v.version = 'unknown';
-    v.buildNumber = 'unknown';
+    v.version = "unknown";
+    v.buildNumber = "unknown";
     return v;
   }
 
@@ -28,38 +28,45 @@ export class Version implements IVersion {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class VersionService {
-  constructor(private http: HttpClient, private versionGQL: GetVersionGQL) {}
+  constructor(
+    private http: HttpClient,
+    private versionGQL: GetVersionGQL,
+  ) {}
 
   printVersion() {
     const frontEndVersion$ = this.getFrontEndVersion();
     const apiVersion$ = this.getApiVersion();
     const dwhVersion$ = this.getDwhVersion();
 
-    zip(frontEndVersion$, apiVersion$, dwhVersion$).subscribe(([frontEndVersion, apiVersion, dwhVersion]) => {
-      console.table({
-        FE: frontEndVersion,
-        API: apiVersion,
-        DWH: dwhVersion,
-      });
-    });
+    zip(frontEndVersion$, apiVersion$, dwhVersion$).subscribe(
+      ([frontEndVersion, apiVersion, dwhVersion]) => {
+        console.table({
+          FE: frontEndVersion,
+          API: apiVersion,
+          DWH: dwhVersion,
+        });
+      },
+    );
   }
 
   getFrontEndVersion(): Observable<Version> {
     return this.http
-      .get<IVersion>('./version.json', { responseType: 'json' })
+      .get<IVersion>("./version.json", { responseType: "json" })
       .pipe(
         map((data) => Version.create(data)),
-        catchError(() => of(Version.createUnknown()))
+        catchError(() => of(Version.createUnknown())),
       );
   }
 
   getApiVersion(): Observable<Version> {
     return this.versionGQL.fetch().pipe(
-      map(({ data }) => (data.apiInfo ? Version.create(data.apiInfo) : Version.createUnknown())),
-      catchError(() => of(Version.createUnknown()))
+      map(({ data }) =>
+        data.apiInfo ? Version.create(data.apiInfo) : Version.createUnknown(),
+      ),
+      catchError(() => of(Version.createUnknown())),
     );
   }
 

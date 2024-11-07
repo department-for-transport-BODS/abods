@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
-import { Granularity, VehicleStatsType } from 'src/generated/graphql';
+import { Component, Input } from "@angular/core";
+import { Granularity, VehicleStatsType } from "src/generated/graphql";
 
 @Component({
-  selector: 'app-live-vehicle-stats',
-  template: '<div></div>',
+  selector: "app-live-vehicle-stats",
+  template: "<div></div>",
   styleUrls: [],
 })
 

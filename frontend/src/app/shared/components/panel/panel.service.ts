@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { DynamicComponent } from './dynamic-panel-component-loader.service';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable } from "rxjs";
+import { DynamicComponent } from "./dynamic-panel-component-loader.service";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PanelService {
   private componentSubject = new BehaviorSubject<DynamicComponent | null>(null);
-  component$: Observable<DynamicComponent | null> = this.componentSubject.asObservable();
+  component$: Observable<DynamicComponent | null> =
+    this.componentSubject.asObservable();
 
   private isOpenSubject = new BehaviorSubject<boolean>(false);
   isOpen$: Observable<boolean> = this.isOpenSubject.asObservable();

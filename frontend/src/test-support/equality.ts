@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { DateTime } from "luxon";
 
 export function dateTimeCloseEnoughToEqualityMatcher(first: any, second: any) {
   if (first?.isLuxonDateTime && second?.isLuxonDateTime) {

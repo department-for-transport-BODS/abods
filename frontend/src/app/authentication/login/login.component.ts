@@ -1,13 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { FormErrors } from 'src/app/shared/gds/error-summary/error-summary.component';
-import { AuthenticationService } from '../authentication.service';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Subject, takeUntil } from "rxjs";
+import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
+import { AuthenticationService } from "../authentication.service";
 
 @Component({
-  selector: 'app-auth-login',
-  templateUrl: './login.component.html',
+  selector: "app-auth-login",
+  templateUrl: "./login.component.html",
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
@@ -22,11 +27,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
   ) {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
+      username: ["", Validators.required],
+      password: ["", Validators.required],
     });
   }
 
@@ -35,19 +40,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.resetForm();
     });
     this.returnUrl = this.route.snapshot.queryParams.returnUrl;
-    this.authenticationService.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe((isAuth) => {
-      if (isAuth) {
-        this.loading = false;
-        this.router.navigateByUrl(this.returnUrl ?? '/');
-      } else {
-        if (this.submitted) {
-          this.errors.push({
-            error: 'Sign in failed, check username and password.',
-            label: 'login-username',
-          });
+    this.authenticationService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isAuth) => {
+        if (isAuth) {
+          this.loading = false;
+          this.router.navigateByUrl(this.returnUrl ?? "/");
+        } else {
+          if (this.submitted) {
+            this.errors.push({
+              error: "Sign in failed, check username and password.",
+              label: "login-username",
+            });
+          }
         }
-      }
-    });
+      });
   }
 
   ngOnDestroy() {
@@ -76,7 +83,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     this.loading = true;
-    this.authenticationService.login(this.f?.username.value, this.f?.password.value);
+    this.authenticationService.login(
+      this.f?.username.value,
+      this.f?.password.value,
+    );
   }
 
   hasError(prop: AbstractControl) {
@@ -85,7 +95,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   getErrorString(prop: AbstractControl) {
     if (prop.errors?.required) {
-      return 'This field is required.';
+      return "This field is required.";
     }
   }
 
@@ -97,6 +107,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onEmailBlur() {
-    this.router.navigate(['./'], { skipLocationChange: true });
+    this.router.navigate(["./"], { skipLocationChange: true });
   }
 }

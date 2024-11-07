@@ -7,6 +7,8 @@
   [ngClass]="dateNavItemClasses"
   [disabled]="disabled"
 >
-  <span class="govuk-visually-hidden">{{ date?.toFormat('d MMMM') }}</span>
+  <span class="govuk-visually-hidden">{{ date?.toFormat("d MMMM") }}</span>
 </button>
-<span *ngIf="firstOfTheMonth" class="datenav__month-label">{{ date?.toFormat('MMM') }}</span>
+<span *ngIf="firstOfTheMonth" class="datenav__month-label">{{
+  date?.toFormat("MMM")
+}}</span>

@@ -1,19 +1,35 @@
-import { ViewportScroller } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DateTime } from 'luxon';
-import { combineLatest, of, Subject } from 'rxjs';
-import { catchError, delay, distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { OperatorFeedHistoryFragment, VehicleStatsType } from 'src/generated/graphql';
-import { nonNullishArray } from '../../shared/array-operators';
-import { AlertListViewModel, AlertMode, AlertType } from '../alert-list/alert-list-view-model';
-import { EventStats, FeedMonitoringService } from '../feed-monitoring.service';
-import { IHeatmap } from './datenav/datenav.component';
+import { ViewportScroller } from "@angular/common";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { DateTime } from "luxon";
+import { combineLatest, of, Subject } from "rxjs";
+import {
+  catchError,
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from "rxjs/operators";
+import {
+  AlertTypeEnum,
+  OperatorFeedHistoryFragment,
+  VehicleStatsType,
+} from "src/generated/graphql";
+import { nonNullishArray } from "../../shared/array-operators";
+import {
+  AlertListViewModel,
+  AlertMode,
+} from "../alert-list/alert-list-view-model";
+import { EventStats, FeedMonitoringService } from "../feed-monitoring.service";
+import { IHeatmap } from "./datenav/datenav.component";
 
 @Component({
-  selector: 'app-history',
-  templateUrl: './feed-history.component.html',
-  styleUrls: ['./feed-history.component.scss'],
+  selector: "app-history",
+  templateUrl: "./feed-history.component.html",
+  styleUrls: ["./feed-history.component.scss"],
 })
 export class FeedHistoryComponent implements OnInit, OnDestroy {
   constructor(
@@ -21,7 +37,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private viewportScroller: ViewportScroller,
-    private change: ChangeDetectorRef
+    private change: ChangeDetectorRef,
   ) {}
 
   loading = true;
@@ -30,8 +46,12 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   noData = false;
 
   operator: OperatorFeedHistoryFragment | null = null;
-  operatorId = '';
-  allOperators?: { name?: string | null; nocCode: string; operatorId: string }[];
+  operatorId = "";
+  allOperators?: {
+    name?: string | null;
+    nocCode: string;
+    operatorId: string;
+  }[];
 
   date?: DateTime;
 
@@ -41,54 +61,72 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
 
   vehicleStats?: VehicleStatsType[];
 
-  alerts: { timestamp: DateTime; type: AlertType; id: string }[] = [];
+  alerts: { timestamp: DateTime; type: AlertTypeEnum; id: string }[] = [];
 
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
     const noc$ = this.route.paramMap.pipe(
-      filter((pm) => pm.has('nocCode')),
-      map((pm) => pm.get('nocCode') as string),
-      distinctUntilChanged()
+      filter((pm) => pm.has("nocCode")),
+      map((pm) => pm.get("nocCode") as string),
+      distinctUntilChanged(),
     );
 
     const date$ = this.route.queryParamMap.pipe(
       tap((qpm) => {
-        if (!qpm.has('date')) {
-          this.router.navigate(['.'], {
+        if (!qpm.has("date")) {
+          this.router.navigate(["."], {
             relativeTo: this.route,
-            queryParams: { date: DateTime.local().minus({ day: 1 }).toFormat('yyyy-MM-dd') },
+            queryParams: {
+              date: DateTime.local().minus({ day: 1 }).toFormat("yyyy-MM-dd"),
+            },
             replaceUrl: true,
-            queryParamsHandling: 'merge',
+            queryParamsHandling: "merge",
           });
         }
       }),
-      filter((qpm) => qpm.has('date')),
-      map((qpm) => DateTime.fromISO(qpm.get('date') as string)),
-      distinctUntilChanged()
+      filter((qpm) => qpm.has("date")),
+      map((qpm) => DateTime.fromISO(qpm.get("date") as string)),
+      distinctUntilChanged(),
     );
 
-    date$.pipe(takeUntil(this.destroy$)).subscribe((date) => (this.date = date));
+    date$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((date) => (this.date = date));
 
     const operatorData$ = noc$.pipe(
       switchMap((noc) =>
         this.fmService.listOperators.pipe(
           map((allOperators) => {
-            const operatorId = allOperators?.find((operator) => operator.nocCode === noc)?.operatorId || '';
-            return { allOperators: allOperators, noc: noc, operatorId: operatorId };
-          })
-        )
-      )
+            const operatorId =
+              allOperators?.find((operator) => operator.nocCode === noc)
+                ?.operatorId || "";
+            return {
+              allOperators: allOperators,
+              noc: noc,
+              operatorId: operatorId,
+            };
+          }),
+        ),
+      ),
     );
 
     operatorData$
       .pipe(
         switchMap((opData) =>
           this.fmService
-            .fetchAlertStats(opData.operatorId as string, DateTime.local().toUTC().minus({ day: 1 }))
-            .pipe(map((data) => ({ ...opData, stats: this.cleanUpAlertStats(data) })))
+            .fetchAlertStats(
+              opData.operatorId as string,
+              DateTime.local().toUTC().minus({ day: 1 }),
+            )
+            .pipe(
+              map((data) => ({
+                ...opData,
+                stats: this.cleanUpAlertStats(data),
+              })),
+            ),
         ),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe(({ operatorId, allOperators, stats }) => {
         this.operatorId = operatorId;
@@ -105,12 +143,14 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
           this.noData = false;
           this.loading = true;
         }),
-        switchMap(([{ operatorId }, date]) => this.fmService.fetchOperatorHistory(operatorId, date)),
+        switchMap(([{ operatorId }, date]) =>
+          this.fmService.fetchOperatorHistory(operatorId, date),
+        ),
         catchError(() => {
           this.chartErrored = true;
           return of(null);
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((operator) => {
         this.loading = false;
@@ -120,7 +160,9 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
           this.notFound = true;
         } else if ((operator.feedMonitoring?.vehicleStats?.length ?? 0) > 0) {
           this.chartErrored = false;
-          this.vehicleStats = nonNullishArray(operator.feedMonitoring?.vehicleStats);
+          this.vehicleStats = nonNullishArray(
+            operator.feedMonitoring?.vehicleStats,
+          );
         } else {
           this.noData = true;
         }
@@ -130,12 +172,14 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
       .pipe(
         filter((alert) => alert !== null),
         delay(5000),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe(() => this.selectedAlert.next(null));
   }
 
-  private cleanUpAlertStats(stats: EventStats[]): { heat: number; date: DateTime }[] {
+  private cleanUpAlertStats(
+    stats: EventStats[],
+  ): { heat: number; date: DateTime }[] {
     const max: number = Math.max(...stats.map(({ count }) => count ?? 0));
 
     return stats.map(({ count, day }) => ({
@@ -150,23 +194,24 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   }
 
   changeOperator({ nocCode }: { nocCode: string }) {
-    this.router.navigate(['/', 'feed-monitoring', nocCode, 'feed-history']);
+    this.router.navigate(["/", "feed-monitoring", nocCode, "feed-history"]);
   }
 
   changeDate(date: DateTime) {
-    this.router.navigate(['.'], {
+    this.router.navigate(["."], {
       relativeTo: this.route,
       queryParams: { date: date.toISODate() },
-      queryParamsHandling: 'merge',
+      queryParamsHandling: "merge",
     });
   }
 
   formatUpdateFrequency(f?: number) {
-    return f ? `${f}s` : '-';
+    return f ? `${f}s` : "-";
   }
 
   formatAvailability(f?: number) {
-    return `${f}%`;
+    if (f === undefined || f === null) return "0.00%";
+    return `${(f * 100).toFixed(2)}%`;
   }
 
   newAlerts(alerts: AlertListViewModel[]) {

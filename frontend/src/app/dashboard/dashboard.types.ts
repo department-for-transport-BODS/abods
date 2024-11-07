@@ -1,5 +1,5 @@
 export enum PerformanceCategories {
-  OnTime = 'onTime',
-  Late = 'late',
-  Early = 'early',
+  OnTime = "onTime",
+  Late = "late",
+  Early = "early",
 }

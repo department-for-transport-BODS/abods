@@ -1,6 +1,6 @@
 @use "sass:math";
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 :host {
   margin-bottom: govuk-spacing(4);

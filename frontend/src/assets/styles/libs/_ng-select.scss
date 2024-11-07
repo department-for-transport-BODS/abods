@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 .ng-select.gds-select {
   &.ng-select-focused {
@@ -8,7 +8,7 @@
       outline-offset: 0;
       box-shadow: inset 0 0 0 $govuk-border-width-form-element;
       .ng-arrow {
-        border-color: govuk-colour('black');
+        border-color: govuk-colour("black");
       }
     }
     .ng-placeholder {
@@ -48,7 +48,7 @@
           padding-left: 0;
         }
         .ng-value-icon {
-          color: solid govuk-colour('black');
+          color: solid govuk-colour("black");
           @include govuk-font($size: 19, $weight: bold);
         }
       }
@@ -59,7 +59,7 @@
     }
     .ng-arrow {
       top: -3px;
-      border: solid govuk-colour('black');
+      border: solid govuk-colour("black");
       border-width: 0 2px 2px 0;
       padding: 3px;
       transform: rotate(45deg);
@@ -69,7 +69,7 @@
       min-width: 17px;
     }
     .ng-clear {
-      color: solid govuk-colour('black');
+      color: solid govuk-colour("black");
       @include govuk-font($size: 19, $weight: bold);
     }
     &.ng-has-value {
@@ -87,8 +87,8 @@
   .ng-dropdown-panel {
     min-width: 240px;
     padding: govuk-spacing(1);
-    border: 1px solid govuk-colour('black');
-    background: govuk-colour('white');
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
     border-radius: 0;
     .ng-dropdown-panel-items {
       max-height: 230px;
@@ -97,14 +97,14 @@
         height: 5px;
       }
       &::-webkit-scrollbar-thumb {
-        background-color: govuk-colour('mid-grey');
+        background-color: govuk-colour("mid-grey");
         border: none;
       }
       &::-webkit-scrollbar-track {
         background: transparent;
       }
       scrollbar-width: thin;
-      scrollbar-color: govuk-colour('mid-grey') transparent;
+      scrollbar-color: govuk-colour("mid-grey") transparent;
     }
     .ng-option {
       white-space: normal;
@@ -121,7 +121,7 @@
 
     .ng-option-marked,
     .ng-option-selected.ng-option-marked {
-      background-color: govuk-colour('blue');
+      background-color: govuk-colour("blue");
       .ng-option-label,
       .ng-option-label .text-secondary {
         color: #fff !important;

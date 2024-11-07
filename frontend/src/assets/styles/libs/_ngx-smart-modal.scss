@@ -61,7 +61,9 @@ body.dialog-open {
   pointer-events: auto;
   background-clip: padding-box;
   background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.08);
   padding: 0;
   // For performance purpose
   transform: translate3d(0, 0, 0);
@@ -76,8 +78,10 @@ body.dialog-open {
 * Animations
 * *************************/
 
-.nsm-dialog[class*='nsm-dialog-animation-'] {
-  transition: transform $transition-duration $transition-easing, opacity $transition-duration;
+.nsm-dialog[class*="nsm-dialog-animation-"] {
+  transition:
+    transform $transition-duration $transition-easing,
+    opacity $transition-duration;
 }
 
 .nsm-dialog-animation-fade {

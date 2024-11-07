@@ -24,7 +24,9 @@
       [suppressPaginationPanel]="true"
       (gridReady)="gridReady$.next()"
       (filterChanged)="filterChanged($event)"
-      (paginationChanged)="paginationChanged$.next($event); paging.paginationChanged($event)"
+      (paginationChanged)="
+        paginationChanged$.next($event); paging.paginationChanged($event)
+      "
       [noRowsOverlayComponent]="overlayComponent"
       [noRowsOverlayComponentParams]="overlayParams"
     >
@@ -32,9 +34,21 @@
     <app-paging-panel #paging noun="operator"></app-paging-panel>
   </ng-container>
   <app-sparkline-factory></app-sparkline-factory>
-  <app-spinner *ngIf="loading" [vCentre]="true" message="Loading..." size="default"> </app-spinner>
+  <app-spinner
+    *ngIf="loading"
+    [vCentre]="true"
+    message="Loading..."
+    size="default"
+  >
+  </app-spinner>
   <div class="operator-grid--errored" *ngIf="errored">
-    <svg-icon class="operator-grid__icon" src="assets/icons/exclamation-in-circle.svg" [applyClass]="true"></svg-icon>
-    <span class="operator-grid__message">There was an error loading operator data, please try again.</span>
+    <svg-icon
+      class="operator-grid__icon"
+      src="assets/icons/exclamation-in-circle.svg"
+      [applyClass]="true"
+    ></svg-icon>
+    <span class="operator-grid__message"
+      >There was an error loading operator data, please try again.</span
+    >
   </div>
 </div>

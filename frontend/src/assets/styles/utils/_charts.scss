@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers.scss";
 
 // util styles for amchart styles to share
 
@@ -20,20 +20,20 @@
   }
   &__tooltip-legend-prefix {
     &::before {
-      content: '';
+      content: "";
       display: inline-block;
       width: 10px;
       height: 10px;
       margin-right: govuk-spacing(2);
     }
     &--on-time::before {
-      background: raas-colour('on-time');
+      background: raas-colour("on-time");
     }
     &--early::before {
-      background: raas-colour('early');
+      background: raas-colour("early");
     }
     &--late::before {
-      background: raas-colour('late');
+      background: raas-colour("late");
     }
   }
   &__tooltip-value {

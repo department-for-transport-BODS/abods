@@ -1,6 +1,6 @@
 @use "sass:math";
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 $stop-size: 30px;
 $stop-surround: 3px;
@@ -21,18 +21,18 @@ $segment-min-width: 75px;
     z-index: $z-content + 1;
   }
   &__stop {
-    background-color: govuk-colour('white');
+    background-color: govuk-colour("white");
     border-radius: 50%;
     width: $stop-size;
     height: $stop-size;
     pointer-events: auto;
     border: 5px solid $govuk-border-colour;
-    box-shadow: 0 0 0 $stop-surround govuk-colour('white');
+    box-shadow: 0 0 0 $stop-surround govuk-colour("white");
     &:hover {
-      border-color: govuk-colour('black');
+      border-color: govuk-colour("black");
     }
     &:focus {
-      border-color: govuk-colour('black');
+      border-color: govuk-colour("black");
       box-shadow: 0 0 0 $stop-surround $govuk-focus-colour;
       outline: none;
     }
@@ -46,7 +46,7 @@ $segment-min-width: 75px;
     padding: 0 ($stop-size + $stop-surround);
   }
   &__segment {
-    background-color: govuk-colour('light-grey');
+    background-color: govuk-colour("light-grey");
     width: 100%;
     min-width: $segment-min-width;
     height: math.div(($stop-size - 2px), 2);
@@ -56,17 +56,19 @@ $segment-min-width: 75px;
       margin-left: ($stop-size + $stop-surround * 2);
     }
     &:hover {
-      background-color: govuk-colour('light-blue');
+      background-color: govuk-colour("light-blue");
     }
     &:focus {
       position: relative;
       position: relative;
-      background-color: govuk-colour('light-blue');
-      box-shadow: 0 2px 0 1px $govuk-focus-text-colour, 0 -1px 0 3px $govuk-focus-colour;
+      background-color: govuk-colour("light-blue");
+      box-shadow:
+        0 2px 0 1px $govuk-focus-text-colour,
+        0 -1px 0 3px $govuk-focus-colour;
     }
     &:active,
     &--active {
-      background-color: govuk-colour('blue');
+      background-color: govuk-colour("blue");
     }
     &--all {
       margin: 0 ($stop-size + $stop-surround) 2px;
@@ -79,28 +81,28 @@ $segment-min-width: 75px;
     &__invalid-service-link {
       background: repeating-linear-gradient(
         to right,
-        govuk-colour('light-grey'),
-        govuk-colour('light-grey') 10px,
-        govuk-colour('white') 4px,
-        govuk-colour('white') 14px
+        govuk-colour("light-grey"),
+        govuk-colour("light-grey") 10px,
+        govuk-colour("white") 4px,
+        govuk-colour("white") 14px
       );
       &:hover {
         background: repeating-linear-gradient(
           to right,
-          govuk-colour('light-blue'),
-          govuk-colour('light-blue') 10px,
-          govuk-colour('white') 4px,
-          govuk-colour('white') 14px
+          govuk-colour("light-blue"),
+          govuk-colour("light-blue") 10px,
+          govuk-colour("white") 4px,
+          govuk-colour("white") 14px
         );
       }
       &:active,
       &--active {
         background: repeating-linear-gradient(
           to right,
-          govuk-colour('blue'),
-          govuk-colour('blue') 10px,
-          govuk-colour('white') 4px,
-          govuk-colour('white') 14px
+          govuk-colour("blue"),
+          govuk-colour("blue") 10px,
+          govuk-colour("white") 4px,
+          govuk-colour("white") 14px
         );
       }
     }
@@ -117,19 +119,35 @@ $segment-min-width: 75px;
 .segment-selector-hint {
   margin-top: 15px;
   &__text {
-    color: govuk-colour('dark-grey');
+    color: govuk-colour("dark-grey");
   }
 }
 
 .segment-selector-mask {
   display: grid;
   &--mask-right {
-    -webkit-mask-image: linear-gradient(90deg, rgba(255, 255, 255, 1) 95%, rgba(255, 255, 255, 0));
-    mask-image: linear-gradient(90deg, rgba(255, 255, 255, 1) 95%, rgba(255, 255, 255, 0));
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 1) 95%,
+      rgba(255, 255, 255, 0)
+    );
+    mask-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 1) 95%,
+      rgba(255, 255, 255, 0)
+    );
   }
   &--mask-left {
-    -webkit-mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 5%);
-    mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 5%);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 1) 5%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 1) 5%
+    );
   }
   &--mask-both {
     -webkit-mask-image: linear-gradient(

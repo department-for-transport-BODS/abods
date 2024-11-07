@@ -1,13 +1,16 @@
-import { Component, Input } from '@angular/core';
-import { GDSSpacingSizes } from 'src/app/shared/types';
+import { Component, Input } from "@angular/core";
+import { GDSSpacingSizes } from "src/app/shared/types";
 @Component({
-  selector: 'app-box',
-  template: '<div [ngClass]="boxClasses" [style.minHeight]="minHeight"><ng-content></ng-content></div>',
-  styleUrls: ['./box.component.scss'],
+  selector: "app-box",
+  template:
+    '<div [ngClass]="boxClasses" [style.minHeight]="minHeight"><ng-content></ng-content></div>',
+  styleUrls: ["./box.component.scss"],
 })
 export class BoxComponent {
   @Input() minHeight?: string;
-  @Input() padding?: GDSSpacingSizes | [GDSSpacingSizes, GDSSpacingSizes, GDSSpacingSizes, GDSSpacingSizes];
+  @Input() padding?:
+    | GDSSpacingSizes
+    | [GDSSpacingSizes, GDSSpacingSizes, GDSSpacingSizes, GDSSpacingSizes];
   @Input() spaceAbove?: GDSSpacingSizes;
   @Input() spaceBelow?: GDSSpacingSizes;
 

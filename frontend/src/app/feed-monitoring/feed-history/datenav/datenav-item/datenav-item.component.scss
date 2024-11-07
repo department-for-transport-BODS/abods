@@ -1,6 +1,6 @@
 @use "sass:math";
-@import 'src/assets/styles/settings/settings';
-@import 'src/assets/styles/helpers/helpers';
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
 
 :host {
   display: block;
@@ -16,22 +16,22 @@
     width: 100%;
     z-index: $z-content;
     &--heat-1 {
-      background-color: raas-colour('heat', 1);
+      background-color: raas-colour("heat", 1);
     }
     &--heat-2 {
-      background-color: raas-colour('heat', 2);
+      background-color: raas-colour("heat", 2);
     }
     &--heat-3 {
-      background-color: raas-colour('heat', 3);
+      background-color: raas-colour("heat", 3);
     }
     &--heat-4 {
-      background-color: raas-colour('heat', 4);
+      background-color: raas-colour("heat", 4);
     }
     &--heat-5 {
-      background-color: raas-colour('heat', 5);
+      background-color: raas-colour("heat", 5);
     }
     &--heat-6 {
-      background-color: raas-colour('heat', 6);
+      background-color: raas-colour("heat", 6);
     }
 
     &--active {
@@ -39,7 +39,9 @@
       z-index: $z-content + 1;
       border-radius: 1px;
       position: relative; // required to make active item appear above inactive ones.
-      box-shadow: 0 0 0 1.5px $govuk-input-border-colour, 0 0 0 4px $govuk-focus-colour;
+      box-shadow:
+        0 0 0 1.5px $govuk-input-border-colour,
+        0 0 0 4px $govuk-focus-colour;
     }
     &:hover {
       z-index: $z-content + 1;

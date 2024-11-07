@@ -1,15 +1,19 @@
-import { merge, Observable, OperatorFunction } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { merge, Observable, OperatorFunction } from "rxjs";
+import { filter, map } from "rxjs/operators";
 
-export function isNotNullOrUndefined<T>(value: T | undefined | null): value is T {
+export function isNotNullOrUndefined<T>(
+  value: T | undefined | null,
+): value is T {
   return value !== null && value !== undefined;
 }
 
-export function ifNullOrUndefinedReturnEmptyString(value: string | undefined | null): string {
+export function ifNullOrUndefinedReturnEmptyString(
+  value: string | undefined | null,
+): string {
   if (value !== null && value !== undefined) {
     return value;
   } else {
-    return '';
+    return "";
   }
 }
 
@@ -18,19 +22,25 @@ export function ifNullOrUndefinedReturnEmptyString(value: string | undefined | n
  * but using a type guard to allow Typescript to infer that subsequent emissions have a value.
  * @deprecated use assertNonNullish() instead
  */
-export function nonNullOrUndefined<T>(): OperatorFunction<T | null | undefined, T> {
+export function nonNullOrUndefined<T>(): OperatorFunction<
+  T | null | undefined,
+  T
+> {
   return (source$) => source$.pipe(filter(isNotNullOrUndefined));
 }
 
-export function assertNonNullish<T>(): OperatorFunction<T | null | undefined, T> {
+export function assertNonNullish<T>(): OperatorFunction<
+  T | null | undefined,
+  T
+> {
   return (source$) =>
     source$.pipe(
       map((value) => {
         if (!isNotNullOrUndefined(value)) {
-          throw new Error('Expected non-nullish value');
+          throw new Error("Expected non-nullish value");
         }
         return value;
-      })
+      }),
     );
 }
 
@@ -46,16 +56,18 @@ type ObservableInputTuple<T> = {
  *   combine(a,b) ---[A,]-[,B]-[,B]|
  * @param sources
  */
-export function combine<A extends readonly unknown[]>(sources: readonly [...ObservableInputTuple<A>]): Observable<A> {
+export function combine<A extends readonly unknown[]>(
+  sources: readonly [...ObservableInputTuple<A>],
+): Observable<A> {
   return merge(
     ...sources.map((source, index) =>
       source.pipe(
         map((value) => {
           const values = new Array(sources.length);
           values[index] = value;
-          return (values as unknown) as A;
-        })
-      )
-    )
+          return values as unknown as A;
+        }),
+      ),
+    ),
   );
 }

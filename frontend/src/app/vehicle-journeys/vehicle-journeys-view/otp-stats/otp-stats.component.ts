@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from "@angular/core";
 
-import { OnTimePerformanceStats } from '../on-time-performance-stats.model';
+import { OnTimePerformanceStats } from "../on-time-performance-stats.model";
 
 @Component({
-  selector: 'app-otp-stats',
-  templateUrl: './otp-stats.component.html',
-  styleUrls: ['./otp-stats.component.scss'],
+  selector: "app-otp-stats",
+  templateUrl: "./otp-stats.component.html",
+  styleUrls: ["./otp-stats.component.scss"],
 })
 export class OtpStatsComponent {
   @Input() otpStats?: OnTimePerformanceStats;

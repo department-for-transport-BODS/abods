@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { HideOutliersService } from './hide-outliers.service';
+import { HideOutliersService } from "./hide-outliers.service";
 
-describe('HideOutliersService', () => {
+describe("HideOutliersService", () => {
   let service: HideOutliersService;
 
   beforeEach(() => {
@@ -10,17 +10,17 @@ describe('HideOutliersService', () => {
     service = TestBed.inject(HideOutliersService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 
-  it('should set all outliers to false on init', () => {
+  it("should set all outliers to false on init", () => {
     expect(service.hideOutliersDayOfWeek).toBeFalse();
     expect(service.hideOutliersTimeOfDay).toBeFalse();
     expect(service.hideOutliersDayOfWeek).toBeFalse();
   });
 
-  it('should reset all to false', () => {
+  it("should reset all to false", () => {
     service.hideOutliersDayOfWeek = true;
     service.hideOutliersTimeOfDay = true;
     service.hideOutliersDayOfWeek = true;

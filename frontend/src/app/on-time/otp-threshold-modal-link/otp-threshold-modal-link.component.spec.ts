@@ -1,10 +1,13 @@
-import { Spectator, createComponentFactory, byText } from '@ngneat/spectator';
-import { DateTime, Settings } from 'luxon';
-import { NgxSmartModalService } from 'ngx-smart-modal';
-import { OtpThresholdModalData, OTP_THRESHOLD_MODAL_ID } from '../otp-threshold-modal/otp-threshold-modal.component';
-import { OtpThresholdModalLinkComponent } from './otp-threshold-modal-link.component';
+import { Spectator, createComponentFactory, byText } from "@ngneat/spectator";
+import { DateTime, Settings } from "luxon";
+import { NgxSmartModalService } from "ngx-smart-modal";
+import {
+  OtpThresholdModalData,
+  OTP_THRESHOLD_MODAL_ID,
+} from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link.component";
 
-describe('OtpThresholdModalLinkComponent', () => {
+describe("OtpThresholdModalLinkComponent", () => {
   let spectator: Spectator<OtpThresholdModalLinkComponent>;
   let component: OtpThresholdModalLinkComponent;
   let service: NgxSmartModalService;
@@ -33,22 +36,26 @@ describe('OtpThresholdModalLinkComponent', () => {
     Settings.now = () => 1630494000000; // 2021-09-01T12:00:00
   });
 
-  it('should create the component', () => {
+  it("should create the component", () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set modal data on open', () => {
+  it("should set modal data on open", () => {
     component.modalData = modalData;
 
-    spectator.click(byText('Compare thresholds'));
+    spectator.click(byText("Compare thresholds"));
 
-    expect(service.setModalData).toHaveBeenCalledWith(modalData, OTP_THRESHOLD_MODAL_ID, true);
+    expect(service.setModalData).toHaveBeenCalledWith(
+      modalData,
+      OTP_THRESHOLD_MODAL_ID,
+      true,
+    );
   });
 
-  it('should open modal', () => {
+  it("should open modal", () => {
     component.modalData = modalData;
 
-    spectator.click(byText('Compare thresholds'));
+    spectator.click(byText("Compare thresholds"));
 
     expect(service.open).toHaveBeenCalledWith(OTP_THRESHOLD_MODAL_ID);
   });

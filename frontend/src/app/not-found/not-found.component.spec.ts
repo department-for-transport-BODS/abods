@@ -1,12 +1,12 @@
-import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { Spectator, createComponentFactory } from "@ngneat/spectator";
 
-import { NotFoundComponent } from './not-found.component';
+import { NotFoundComponent } from "./not-found.component";
 
-describe('NotFoundComponent', () => {
+describe("NotFoundComponent", () => {
   let spectator: Spectator<NotFoundComponent>;
   const createComponent = createComponentFactory(NotFoundComponent);
 
-  it('should create', () => {
+  it("should create", () => {
     spectator = createComponent();
 
     expect(spectator.component).toBeTruthy();

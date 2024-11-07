@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DateTime } from 'luxon';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { DateTime } from "luxon";
 
 export interface IHeatmap {
   heat: number;
@@ -7,9 +7,9 @@ export interface IHeatmap {
   active?: boolean;
 }
 @Component({
-  selector: 'app-datenav',
-  templateUrl: './datenav.component.html',
-  styleUrls: ['./datenav.component.scss'],
+  selector: "app-datenav",
+  templateUrl: "./datenav.component.html",
+  styleUrls: ["./datenav.component.scss"],
 })
 export class DatenavComponent {
   @Input() stats: IHeatmap[] | undefined = [];
