@@ -275,8 +275,3 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
     }
   })
 }
-
-export const formatDuration = (input: number) => {
-  const mins = Math.floor(input)
-  return mins + Math.floor((input - mins)* 60) / 60
-}
