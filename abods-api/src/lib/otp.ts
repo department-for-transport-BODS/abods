@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { feed_monitor_summary, Prisma, PrismaClient } from '@prisma/client';
 import {
   PerformanceInputType,
   PunctualityTotalsType,
@@ -222,29 +222,31 @@ export const compareThresholds = async (
   return null;
 };
 
-export const getOperatorsFromOrgId = async (orgId: number[], db: PrismaClient) => {
+export const getOperatorsFromOrgId = async (orgId: number[], db: PrismaClient, userOperatorIds?: string[]) => {
+  const where: Prisma.bods_organisationoperatorWhereInput = {
+    organisation_id: {
+      in: orgId,
+    },
+  };
+
+  if (userOperatorIds && userOperatorIds.length > 0) {
+    where.operatorref = {
+      in: userOperatorIds,
+    };
+  } else {
+    where.operatorref = {
+      not: undefined,
+    };
+  }
 
   return db.bods_organisationoperator.findMany({
-    where: {
-      AND: [
-        {
-          organisation_id: {
-            in: orgId,
-          },
-        },
-        {
-          operatorref: {
-            not: undefined,
-          },
-        }
-      ],
-    },
+    where: where,
     select: {
       operatorref: true,
     },
-    distinct: ['operatorref'],
+    distinct: ["operatorref"],
   });
-}
+};
 
 export const getOperatorsFroServiceDetails = async (
   orgOperators: { operatorref: string }[],

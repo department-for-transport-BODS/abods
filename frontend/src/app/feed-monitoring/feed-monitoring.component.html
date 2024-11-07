@@ -1,8 +1,7 @@
 <app-page>
   <ng-container ngProjectAs="content"
     ><app-page-header heading="Feed monitoring" spaceAbove="2"></app-page-header>
-    Under Maintenance
-    <!-- <div *ngIf="loaded && inactiveOperators.length > 0">
+    <div *ngIf="loaded && inactiveOperators.length > 0">
       <h2 class="govuk-heading-m">Inactive feeds</h2>
       <div class="feed-monitoring__inactive-grid">
         <ag-grid-angular
@@ -47,7 +46,7 @@
         </ag-grid-angular>
         <app-paging-panel #paging noun="feed"></app-paging-panel>
       </div>
-    </div> -->
+    </div>
     <ng-template #loading>
       <div class="feed-monitoring__loading">
         <app-spinner [vCentre]="true" message="Loading..." size="default"> </app-spinner>
