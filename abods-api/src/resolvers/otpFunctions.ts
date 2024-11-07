@@ -123,36 +123,17 @@ export const getOperators = async (
   adminAreaIds?: string[],
 ) => {
   try {
-    let adminAreaNumberIds: number[] = [];
-
-    if (adminAreaIds && adminAreaIds.length > 0) {
-      adminAreaNumberIds = adminAreaIds.map((str) => parseInt(str, 10));
-    }
-
     const operators = await db.all_operators.findMany({
       where: {
-        ...(adminAreaNumberIds.length > 0
-          ? {
-              noc_adminareas: {
-                some: {
-                  adminarea_id: {
-                    in: adminAreaNumberIds,
-                  },
-                },
-              },
-            }
-          : {}),
+        noc_adminarea:
+          adminAreaIds && adminAreaIds.length > 0
+            ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
+            : undefined,
         operatorOrganisations: {
-          some: {
-            organisation_id: {
-              in: user.orgIds,
-            },
-          },
+          some: { organisation_id: { in: user.orgIds } },
         },
       },
-      include: {
-        noc_adminarea: true,
-      },
+      include: { noc_adminarea: true },
     });
 
     if (!operators) {
@@ -170,7 +151,7 @@ export const getOperators = async (
     );
   } catch (error) {
     logger.error(error);
-    return null;
+    return [];
   }
 };
 
@@ -1481,12 +1462,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       for (const [departure_hour, headway] of Object.entries(headwayMap)) {
         returnHeadways.push({
           ts: departure_hour,
+          // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
           actualWaitTime:
-            headway.actual_headway / (headway.headway_stops_count * 60),
+            Math.round(headway.actual_headway / headway.headway_stops_count) /
+            60,
           scheduledWaitTime:
-            headway.expected_headway / (headway.headway_stops_count * 60),
+            Math.round(headway.expected_headway / headway.headway_stops_count) /
+            60,
           excessWaitTime:
-            headway.excess_wait_time / (headway.headway_stops_count * 60),
+            Math.round(headway.excess_wait_time / headway.headway_stops_count) /
+            60,
         });
       }
 
