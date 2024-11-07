@@ -1,4 +1,4 @@
-import { getDate, getFormattedDate } from "../lib/dayjs.js";
+import { getDate, getFormattedDate, getUTCDate } from "../lib/dayjs.js";
 import {
   AlertTypeEnum,
   EventStatsType,
@@ -21,7 +21,7 @@ import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 
 export const getEventStats: QueryResolvers["eventStats"] = () => {
   const eventStats: EventStatsType[] = [];
-  const currentDate = getDate().startOf("day")
+  const currentDate = getDate()
   let startdate = currentDate.subtract(90, "day");
 
   while (startdate.isBefore(currentDate)) {
