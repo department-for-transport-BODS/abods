@@ -1,12 +1,20 @@
 <ng-container *ngIf="loaded; else chartSpinner">
   <div *ngIf="!hasData && !errored" class="performance__no-data">
-    <span class="govuk-body">No punctuality data for the selected time period</span>
+    <span class="govuk-body"
+      >No punctuality data for the selected time period</span
+    >
   </div>
   <div *ngIf="!hasData && errored" class="performance__no-data">
-    <span class="govuk-body">There was an error fetching the punctuality data</span>
+    <span class="govuk-body"
+      >There was an error fetching the punctuality data</span
+    >
   </div>
   <div class="performance__chart" *ngIf="hasData">
-    <app-performance-chart [sourceData]="stats" [nocCode]="nocCode" chartId="performance-chart"></app-performance-chart>
+    <app-performance-chart
+      [sourceData]="stats"
+      [nocCode]="nocCode"
+      chartId="performance-chart"
+    ></app-performance-chart>
   </div>
 </ng-container>
 <app-performance-ranking
@@ -33,13 +41,21 @@
     <option value="lastMonth">Last month</option>
   </select>
   <div class="performance__link">
-    <app-link [route]="nocCode ? ['/on-time', nocCode] : ['/on-time']" weight="bold" [arrows]="true" [underline]="false"
+    <app-link
+      [route]="nocCode ? ['/on-time', nocCode] : ['/on-time']"
+      weight="bold"
+      [arrows]="true"
+      [underline]="false"
       >On-time performance</app-link
     >
   </div>
 </div>
 <ng-template #chartSpinner>
   <app-box *ngIf="!loaded" minHeight="360px">
-    <app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner>
+    <app-spinner
+      [vCentre]="true"
+      message="Loading..."
+      size="default"
+    ></app-spinner>
   </app-box>
 </ng-template>

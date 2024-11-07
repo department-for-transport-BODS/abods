@@ -1,4 +1,13 @@
-import { bods_user, corridor, corridor_stops, naptan_adminarea, naptan_locality, naptan_stoppoint_latlong, PrismaClient, Timetable } from "@prisma/client";
+import {
+  bods_user,
+  corridor,
+  corridor_stops,
+  naptan_adminarea,
+  naptan_locality,
+  naptan_stoppoint_latlong,
+  PrismaClient,
+  Timetable,
+} from "@prisma/client";
 import { CorridorType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 
@@ -10,18 +19,18 @@ export enum CorridorJourneyStatsOption {
 }
 
 export type AdminArea = {
-  admin_area?: naptan_adminarea
-}
+  admin_area?: naptan_adminarea;
+};
 
 export type NaptanLocality = {
-  locality?: naptan_locality & AdminArea
-}
+  locality?: naptan_locality & AdminArea;
+};
 
 export type StopWithLocality = {
-  naptan_stop?: naptan_stoppoint_latlong & NaptanLocality
-}
+  naptan_stop?: naptan_stoppoint_latlong & NaptanLocality;
+};
 
-export type CorridorStopsWithNaptanStops = corridor_stops & StopWithLocality
+export type CorridorStopsWithNaptanStops = corridor_stops & StopWithLocality;
 
 export type CorridorResultsType = corridor & {
   bods_user?: bods_user;
@@ -29,13 +38,13 @@ export type CorridorResultsType = corridor & {
 };
 
 export type CorridorJourneyServiceStatsType = {
-  totalJourneyTime: number
-  recordedTransits: number
-  scheduledTransits: number
-  operatorNoc: string | null,
-  serviceCode: string | null,
-  lineName: string | null
-}
+  totalJourneyTime: number;
+  recordedTransits: number;
+  scheduledTransits: number;
+  operatorNoc: string | null;
+  serviceCode: string | null;
+  lineName: string | null;
+};
 
 export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
   return {
@@ -47,47 +56,50 @@ export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
       roles: [],
       username: corridor.bods_user?.username ?? "",
     },
-    stops: corridor.corridor_stops?.map((stop) => ({
-      stopId: stop.stop_id.toString(),
-      sourceId: stop.naptan_stop?.atco_code ?? '',
-      stopLocality: {
-        localityAreaId:
-          stop.naptan_stop?.locality?.admin_area_id.toString() ?? '',
-        localityAreaName: stop.naptan_stop?.locality?.admin_area?.name ?? '',
-        localityId: stop.naptan_stop?.locality_id.toString() ?? '',
-        localityName: stop.naptan_stop?.locality?.name ?? '',
-      },
-      stopLocation: {
-        latitude: Number(stop.naptan_stop?.latitude),
-        longitude: Number(stop.naptan_stop?.longitude),
-      },
-      stopName: stop.naptan_stop?.common_name ?? '',
-    })) ?? [],
+    stops:
+      corridor.corridor_stops?.map((stop) => ({
+        stopId: stop.stop_id.toString(),
+        sourceId: stop.naptan_stop?.atco_code ?? "",
+        stopLocality: {
+          localityAreaId:
+            stop.naptan_stop?.locality?.admin_area_id.toString() ?? "",
+          localityAreaName: stop.naptan_stop?.locality?.admin_area?.name ?? "",
+          localityId: stop.naptan_stop?.locality_id.toString() ?? "",
+          localityName: stop.naptan_stop?.locality?.name ?? "",
+        },
+        stopLocation: {
+          latitude: Number(stop.naptan_stop?.latitude),
+          longitude: Number(stop.naptan_stop?.longitude),
+        },
+        stopName: stop.naptan_stop?.common_name ?? "",
+      })) ?? [],
   };
 };
 
-export const returnCorridorType = (results: CorridorResultsType[]): CorridorType[] => {
-    return results.map((corridor) => returnCorridor(corridor));
-} 
+export const returnCorridorType = (
+  results: CorridorResultsType[],
+): CorridorType[] => {
+  return results.map((corridor) => returnCorridor(corridor));
+};
 
 export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
-    return db.corridor.findMany({
-        where: {
-          organisation_id: {
-            in: sessionUser.orgIds,
-          },
-        },
-        include: {
-          corridor_stops: true,
-          bods_user: true,
-        },
-      });
-}
+  return db.corridor.findMany({
+    where: {
+      organisation_id: {
+        in: sessionUser.orgIds,
+      },
+    },
+    include: {
+      corridor_stops: true,
+      bods_user: true,
+    },
+  });
+};
 
 export const getCorridor = (
   corridorId: Number,
   db: PrismaClient,
-  sessionUser: SessionUser
+  sessionUser: SessionUser,
 ) => {
   return db.corridor.findUnique({
     where: {
@@ -118,33 +130,32 @@ export const getCorridor = (
 export const deleteCorridorDb = (corridorId: Number, db: PrismaClient) => {
   return db.corridor.delete({
     where: {
-      corridor_id: Number(corridorId)
-    }
-  })
-}
+      corridor_id: Number(corridorId),
+    },
+  });
+};
 
 export const deleteCorridorStops = (corridorId: Number, db: PrismaClient) => {
   return db.corridor_stops.deleteMany({
     where: {
-      corridor_id: Number(corridorId)
-    }
-  })
-}
+      corridor_id: Number(corridorId),
+    },
+  });
+};
 
 export const updateCorridorDb = (
   corridorId: Number,
   corridorName: string,
   db: PrismaClient,
 ) => {
-
   return db.corridor.update({
     where: {
-      corridor_id: Number(corridorId)
+      corridor_id: Number(corridorId),
     },
     data: {
-      corridor_name: corridorName
-    }
-  })
+      corridor_name: corridorName,
+    },
+  });
 };
 
 export const filteredJourneys = (
@@ -183,15 +194,12 @@ export const distinctRoutes = (db: PrismaClient, stopsPattern: string) => {
   });
 };
 
-export const getOrgAdminAreas = async (
-  db: PrismaClient,
-  user: SessionUser
-) => {
+export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
   const orgOperators = await db.bods_organisationoperator.findMany({
     where: {
       organisation_id: {
-        in: user.orgIds
-      }
+        in: user.orgIds,
+      },
     },
     select: {
       operatorref: true,
@@ -208,4 +216,3 @@ export const getOrgAdminAreas = async (
     },
   });
 };
-

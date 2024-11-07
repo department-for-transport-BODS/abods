@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { firstValueFrom } from 'rxjs';
-import { merge } from 'lodash-es';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { map } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
+import { merge } from "lodash-es";
 
 export interface ConfigObject {
   apiUrl: string;
@@ -62,8 +62,15 @@ export interface FreshdeskFolderConfig {
   [key: string]: string;
 }
 
-const environments = ['local', 'sandbox', 'dev', 'test', 'cavl', 'uat'] as const;
-type Environment = typeof environments[number];
+const environments = [
+  "local",
+  "sandbox",
+  "dev",
+  "test",
+  "cavl",
+  "uat",
+] as const;
+type Environment = (typeof environments)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function maxEnvironment(current: string, max: Environment): boolean {
@@ -77,7 +84,9 @@ function maxEnvironment(current: string, max: Environment): boolean {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function flags(currentEnv: string) {
   // TODO: get from API
-  return {} as const;
+  return {
+    feedMonitoring: maxEnvironment(currentEnv, "cavl"),
+  } as const;
 }
 
 export interface FreshdeskConfig {
@@ -92,7 +101,7 @@ export interface FreshdeskConfig {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ConfigService {
   private config?: ConfigObject;
@@ -104,38 +113,39 @@ export class ConfigService {
   }
 
   get apiUrl(): string {
-    return this.loadStringValue('apiUrl', '');
+    return this.loadStringValue("apiUrl", "");
   }
 
   get envName(): string {
-    return this.loadStringValue('envName', 'unknown');
+    return this.loadStringValue("envName", "unknown");
   }
 
   get analyticsId(): string {
-    return this.loadStringValue('analyticsId', '');
+    return this.loadStringValue("analyticsId", "");
   }
 
   get mapboxToken(): string {
-    return this.loadStringValue('mapboxToken', '');
+    return this.loadStringValue("mapboxToken", "");
   }
 
   get mapboxStyle() {
-    return this.loadStringValue('mapboxStyle', '');
+    return this.loadStringValue("mapboxStyle", "");
   }
 
   get mapboxSatelliteStyle() {
-    return this.loadStringValue('mapboxSatelliteStyle', '');
+    return this.loadStringValue("mapboxSatelliteStyle", "");
   }
 
   get vehicleJourneys(): VehicleJourneysConfig {
     const defaults: VehicleJourneysConfig = {
       validDateRange: {
-        offsetISO: 'PT0H',
-        durationISO: 'P6M',
+        offsetISO: "PT0H",
+        durationISO: "P6M",
       },
     };
     return this.loadValue(() => {
-      const config = (this.fetchValue('vehicleJourneys') || {}) as VehicleJourneysConfig;
+      const config = (this.fetchValue("vehicleJourneys") ||
+        {}) as VehicleJourneysConfig;
       return merge(defaults, config);
     }, defaults);
   }
@@ -146,7 +156,7 @@ export class ConfigService {
       early: 1,
     };
     return this.loadValue(() => {
-      const config = (this.fetchValue('otp') || {}) as OtpConfig;
+      const config = (this.fetchValue("otp") || {}) as OtpConfig;
       return merge(defaults, config);
     }, defaults);
   }
@@ -158,32 +168,33 @@ export class ConfigService {
       userSubmitted: false,
     };
     return this.loadValue(() => {
-      const config = (this.fetchValue('defaultCookiePolicy') || {}) as CookiePolicy;
+      const config = (this.fetchValue("defaultCookiePolicy") ||
+        {}) as CookiePolicy;
       return merge(defaults, config);
     }, defaults);
   }
 
   get freshdeskConfig(): FreshdeskConfig {
     const defaults: FreshdeskConfig = {
-      apiUrl: '',
+      apiUrl: "",
       folders: {
-        dashboard: '',
-        feedMonitoring: '',
-        otp: '',
-        vehicleJourneys: '',
-        corridors: '',
-        organisation: '',
+        dashboard: "",
+        feedMonitoring: "",
+        otp: "",
+        vehicleJourneys: "",
+        corridors: "",
+        organisation: "",
       },
     };
     return this.loadValue(() => {
-      const config = (this.fetchValue('freshdesk') || {}) as FreshdeskConfig;
+      const config = (this.fetchValue("freshdesk") || {}) as FreshdeskConfig;
       return merge(defaults, config);
     }, defaults);
   }
 
   fetchValue(k: keyof ConfigObject): ConfigObject[keyof ConfigObject] {
     if (!this.config) {
-      throw new Error('Config not loaded');
+      throw new Error("Config not loaded");
     }
     if (this.config[k] === undefined) {
       throw new Error(`${k} not defined in config.json`);
@@ -192,11 +203,18 @@ export class ConfigService {
   }
 
   loadConfig() {
-    return firstValueFrom(this.http.get('./config.json').pipe(map((config) => (this.config = config as ConfigObject))));
+    return firstValueFrom(
+      this.http
+        .get("./config.json")
+        .pipe(map((config) => (this.config = config as ConfigObject))),
+    );
   }
 
   loadStringValue(propName: keyof ConfigObject, defaultValue: string): string {
-    return this.loadValue(() => this.fetchValue(propName) as string, defaultValue);
+    return this.loadValue(
+      () => this.fetchValue(propName) as string,
+      defaultValue,
+    );
   }
 
   loadValue<T>(getValue: () => T, defaultValue: T): T {

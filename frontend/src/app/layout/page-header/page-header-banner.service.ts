@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { Observable, Subject } from "rxjs";
 
 export interface PageHeaderBanner {
   title: string;
@@ -11,7 +11,7 @@ export interface PageHeaderBanner {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PageHeaderBannerService {
   private _banner$ = new Subject<PageHeaderBanner | null>();

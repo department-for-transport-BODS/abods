@@ -1,9 +1,19 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef } from '@angular/core';
-import { byText, createComponentFactory, Spectator } from '@ngneat/spectator';
-import { Observable, of, Subject } from 'rxjs';
-import { DynamicPanelComponentHostDirective } from './dynamic-panel-component-host.directive';
-import { DynamicComponent, DynamicPanelComponentLoaderService } from './dynamic-panel-component-loader.service';
+import { CommonModule } from "@angular/common";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  ViewContainerRef,
+} from "@angular/core";
+import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
+import { Observable, of, Subject } from "rxjs";
+import { DynamicPanelComponentHostDirective } from "./dynamic-panel-component-host.directive";
+import {
+  DynamicComponent,
+  DynamicPanelComponentLoaderService,
+} from "./dynamic-panel-component-loader.service";
 
 @Component({
   template: `
@@ -28,7 +38,7 @@ class TestHostComponent {
   dynamicComponentHost!: DynamicPanelComponentHostDirective;
 }
 
-describe('DynamicPanelComponentLoaderService', () => {
+describe("DynamicPanelComponentLoaderService", () => {
   let spectator: Spectator<TestHostComponent>;
   let service: DynamicPanelComponentLoaderService;
   let component: TestHostComponent;
@@ -40,22 +50,22 @@ describe('DynamicPanelComponentLoaderService', () => {
       component: TestDynamicComponent,
       inputs: [
         {
-          name: 'testInput1',
-          value: 'test1',
+          name: "testInput1",
+          value: "test1",
         },
         {
-          name: 'testInput2',
+          name: "testInput2",
           value: of(2),
         },
       ],
       outputs: [
         {
-          name: 'testOutput1',
-          outputEvent: () => 'output1',
+          name: "testOutput1",
+          outputEvent: () => "output1",
         },
         {
-          name: 'testOutput2',
-          outputEvent: () => 'output2',
+          name: "testOutput2",
+          outputEvent: () => "output2",
         },
       ],
     };
@@ -79,12 +89,12 @@ describe('DynamicPanelComponentLoaderService', () => {
     dynamicComponent = createDynamicComponent();
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 
-  describe('loadComponent', () => {
-    it('should load component', () => {
+  describe("loadComponent", () => {
+    it("should load component", () => {
       service.loadComponent(dynamicComponent, ref, destroy$);
       const instance = service.getComponentInstance<TestDynamicComponent>();
 
@@ -92,42 +102,46 @@ describe('DynamicPanelComponentLoaderService', () => {
       expect(instance instanceof TestDynamicComponent).toBeTrue();
     });
 
-    it('should set inputs', () => {
+    it("should set inputs", () => {
       service.loadComponent(dynamicComponent, ref, destroy$);
       spectator.detectChanges();
 
-      expect(spectator.query(byText('test1'))).toBeVisible();
-      expect(spectator.query(byText('2'))).toBeVisible();
+      expect(spectator.query(byText("test1"))).toBeVisible();
+      expect(spectator.query(byText("2"))).toBeVisible();
     });
 
-    it('should not set inputs', () => {
+    it("should not set inputs", () => {
       dynamicComponent.inputs = [];
       service.loadComponent(dynamicComponent, ref, destroy$);
       spectator.detectChanges();
 
-      expect(spectator.query(byText('test1'))).not.toBeVisible();
-      expect(spectator.query(byText('2'))).not.toBeVisible();
+      expect(spectator.query(byText("test1"))).not.toBeVisible();
+      expect(spectator.query(byText("2"))).not.toBeVisible();
     });
 
-    it('should set outputs', () => {
-      spyOn(dynamicComponent.outputs[0], 'outputEvent');
-      spyOn(dynamicComponent.outputs[1], 'outputEvent');
+    it("should set outputs", () => {
+      spyOn(dynamicComponent.outputs[0], "outputEvent");
+      spyOn(dynamicComponent.outputs[1], "outputEvent");
       service.loadComponent(dynamicComponent, ref, destroy$);
       spectator.detectChanges();
-      spectator.click(byText('Button 1'));
+      spectator.click(byText("Button 1"));
 
-      expect(dynamicComponent.outputs[0].outputEvent).toHaveBeenCalledWith(undefined);
-      expect(dynamicComponent.outputs[1].outputEvent).not.toHaveBeenCalledWith(undefined);
+      expect(dynamicComponent.outputs[0].outputEvent).toHaveBeenCalledWith(
+        undefined,
+      );
+      expect(dynamicComponent.outputs[1].outputEvent).not.toHaveBeenCalledWith(
+        undefined,
+      );
     });
   });
 
-  describe('ngOnDestroy', () => {
-    it('should call destory on componentRef', () => {
+  describe("ngOnDestroy", () => {
+    it("should call destory on componentRef", () => {
       service.loadComponent(dynamicComponent, ref, destroy$);
-      spyOn(service['componentRef'], 'destroy');
+      spyOn(service["componentRef"], "destroy");
       service.ngOnDestroy();
 
-      expect(service['componentRef'].destroy).toHaveBeenCalledWith();
+      expect(service["componentRef"].destroy).toHaveBeenCalledWith();
     });
   });
 });

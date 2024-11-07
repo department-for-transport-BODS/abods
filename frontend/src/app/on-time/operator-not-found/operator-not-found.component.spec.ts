@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { OperatorNotFoundComponent } from './operator-not-found.component';
+import { OperatorNotFoundComponent } from "./operator-not-found.component";
 
-describe('OperatorNotFoundComponent', () => {
+describe("OperatorNotFoundComponent", () => {
   let component: OperatorNotFoundComponent;
   let fixture: ComponentFixture<OperatorNotFoundComponent>;
 
@@ -18,7 +18,7 @@ describe('OperatorNotFoundComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

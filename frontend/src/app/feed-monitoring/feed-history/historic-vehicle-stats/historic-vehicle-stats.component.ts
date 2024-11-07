@@ -7,29 +7,39 @@ import {
   OnDestroy,
   Output,
   SimpleChanges,
-} from '@angular/core';
-import { Granularity, VehicleStatsType } from 'src/generated/graphql';
-import { ChartService } from 'src/app/shared/components/amcharts/chart.service';
+} from "@angular/core";
+import {
+  AlertTypeEnum,
+  Granularity,
+  VehicleStatsType,
+} from "src/generated/graphql";
+import { ChartService } from "src/app/shared/components/amcharts/chart.service";
 
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-import am4themes_frozen from '@amcharts/amcharts4/themes/frozen';
-import { DateTime, Interval } from 'luxon';
-import { VehicleStatsViewModel } from '../../types';
-import { AlertType } from '../../alert-list/alert-list-view-model';
-import { BaseChart } from 'src/app/shared/components/amcharts/base-chart';
+import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
+import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
+import { DateTime, Interval } from "luxon";
+import { VehicleStatsViewModel } from "../../types";
+import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
 
 @Component({
-  selector: 'app-historic-vehicle-stats',
-  templateUrl: './historic-vehicle-stats.component.html',
-  styleUrls: ['./historic-vehicle-stats.component.scss'],
+  selector: "app-historic-vehicle-stats",
+  templateUrl: "./historic-vehicle-stats.component.html",
+  styleUrls: ["./historic-vehicle-stats.component.scss"],
 })
-export class HistoricVehicleStatsComponent extends BaseChart implements OnChanges, AfterViewInit, OnDestroy {
+export class HistoricVehicleStatsComponent
+  extends BaseChart
+  implements OnChanges, AfterViewInit, OnDestroy
+{
   @Input() chartId?: string;
   @Input() dataSource?: VehicleStatsType[];
   @Input() date?: DateTime;
 
-  @Input() alertsDataSource?: { timestamp: DateTime; type: AlertType; id: string }[];
+  @Input() alertsDataSource?: {
+    timestamp: DateTime;
+    type: AlertTypeEnum;
+    id: string;
+  }[];
 
   @Output() alertSelected = new EventEmitter<string>();
 
@@ -48,7 +58,11 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
         this.setTimelineData(this.alertsDataSource);
       }
     }
-    if (changes.alertsDataSource && changes.alertsDataSource.currentValue && this.timelineSeries) {
+    if (
+      changes.alertsDataSource &&
+      changes.alertsDataSource.currentValue &&
+      this.timelineSeries
+    ) {
       this.setTimelineData(changes.alertsDataSource.currentValue);
     }
   }
@@ -59,7 +73,7 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     }
 
     const protoViewData = withData.map((stat) => {
-      const dateTime = DateTime.fromISO(stat.timestamp, { zone: 'utc' });
+      const dateTime = DateTime.fromISO(stat.timestamp, { zone: "utc" });
       return {
         dateTime,
         timestamp: dateTime.toJSDate(),
@@ -68,8 +82,11 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
       };
     });
 
-    const minDateTime = this.date?.startOf('day').toUTC() ?? protoViewData[0].dateTime;
-    const maxDateTime = this.date?.endOf('day').toUTC() ?? protoViewData[protoViewData.length - 1].dateTime;
+    const minDateTime =
+      this.date?.startOf("day").toUTC() ?? protoViewData[0].dateTime;
+    const maxDateTime =
+      this.date?.endOf("day").toUTC() ??
+      protoViewData[protoViewData.length - 1].dateTime;
 
     this.chartInterval = Interval.fromDateTimes(minDateTime, maxDateTime);
 
@@ -80,7 +97,11 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     const outagePattern = this.createPattern();
     const expectedFill = this.chart.colors.getIndex(2);
 
-    for (let ts = minDateTime; this.chartInterval.contains(ts); ts = ts.plus({ minute: 1 })) {
+    for (
+      let ts = minDateTime;
+      this.chartInterval.contains(ts);
+      ts = ts.plus({ minute: 1 })
+    ) {
       const candidateStat = protoViewData[i];
       if (!candidateStat || !candidateStat.dateTime.equals(ts)) {
         viewData.push({
@@ -90,7 +111,11 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
           expected: 0,
         });
       } else {
-        viewData.push({ ...candidateStat, expectedFill: candidateStat.actual === 0 ? outagePattern : expectedFill });
+        viewData.push({
+          ...candidateStat,
+          expectedFill:
+            candidateStat.actual === 0 ? outagePattern : expectedFill,
+        });
         i += 1;
       }
     }
@@ -99,22 +124,30 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     this.screens.loadingScreen?.hide();
   }
 
-  get bulletFills(): { [k in AlertType]: am4core.Color } {
+  get bulletFills(): { [k in AlertTypeEnum]: am4core.Color } {
     return {
-      [AlertType.FeedAvailableEvent]: this.chartService.colorMap.green,
-      [AlertType.FeedUnavailableEvent]: this.chartService.colorMap.red,
-      [AlertType.VehicleCountDisparityEvent]: this.chartService.colorMap.orange,
+      [AlertTypeEnum.FeedAvailableEvent]: this.chartService.colorMap.green,
+      [AlertTypeEnum.FeedUnavailableEvent]: this.chartService.colorMap.red,
+      [AlertTypeEnum.VehicleCountDisparityEvent]:
+        this.chartService.colorMap.orange,
+      [AlertTypeEnum.VehicleCountDisparity]: this.chartService.colorMap.orange,
+      [AlertTypeEnum.FeedFailure]: this.chartService.colorMap.red,
+      [AlertTypeEnum.FeedComplianceFailure]: this.chartService.colorMap.orange,
     };
   }
 
-  setTimelineData(data: { timestamp: DateTime; type: AlertType; id: string }[]) {
+  setTimelineData(
+    data: { timestamp: DateTime; type: AlertTypeEnum; id: string }[],
+  ) {
     if (!this.timelineSeries) {
       return;
     }
 
     this.timelineSeries.data = data
       // only plot events that are in the same time period as the main graph
-      .filter(({ timestamp }) => this.chartInterval?.contains(timestamp) ?? true)
+      .filter(
+        ({ timestamp }) => this.chartInterval?.contains(timestamp) ?? true,
+      )
       .map(({ timestamp, type, id }) => ({
         timestamp: timestamp.toJSDate(),
         value: 0,
@@ -134,7 +167,8 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
 
     const dateAxis = this.chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = this.chartService.colorMap.legendaryGrey;
+    dateAxis.renderer.labels.template.fill =
+      this.chartService.colorMap.legendaryGrey;
     dateAxis.baseInterval = {
       timeUnit: Granularity.Minute,
       count: 1,
@@ -147,8 +181,8 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     dateAxis.groupData = true;
     dateAxis.groupCount = 100;
     dateAxis.groupIntervals.setAll([
-      { timeUnit: 'minute', count: 1 },
-      { timeUnit: 'minute', count: 10 },
+      { timeUnit: "minute", count: 1 },
+      { timeUnit: "minute", count: 10 },
     ]);
 
     if (dateAxis.tooltip) {
@@ -186,7 +220,7 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
 
     timelineAxis.height = 30;
     timelineAxis.renderer.grid.template.strokeWidth = 3;
-    timelineAxis.renderer.grid.template.strokeLinecap = 'round';
+    timelineAxis.renderer.grid.template.strokeLinecap = "round";
 
     if (timelineAxis.tooltip) {
       timelineAxis.tooltip.disabled = true;
@@ -206,11 +240,11 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
       return;
     }
     const series = this.chart.series.push(new am4charts.LineSeries());
-    series.name = 'Vehicle journeys';
-    series.dataFields.dateX = 'timestamp';
-    series.dataFields.valueY = 'actual';
+    series.name = "Vehicle journeys";
+    series.dataFields.dateX = "timestamp";
+    series.dataFields.valueY = "actual";
     series.rangeChangeEasing = am4core.ease.linear;
-    series.groupFields.valueY = 'low';
+    series.groupFields.valueY = "low";
 
     series.yAxis = axis;
 
@@ -224,14 +258,14 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
         <span style="float:right; margin-left:5px;"><b>{expected}</b></span>
       </div>`;
     if (series.tooltip) {
-      series.tooltip.pointerOrientation = 'vertical';
+      series.tooltip.pointerOrientation = "vertical";
       series.tooltip.getFillFromObject = false;
       series.tooltip.label.fill = this.chart.colors.getIndex(5);
       series.tooltip.label.padding(10, 10, 5, 10);
       series.tooltip.background.cornerRadius = 0;
       series.tooltip.background.filters.clear();
       series.tooltip.background.fillOpacity = 1;
-      series.tooltip.background.fill = am4core.color('#fff');
+      series.tooltip.background.fill = am4core.color("#fff");
       series.tooltip.background.stroke = this.chart.colors.getIndex(5);
     }
     series.stroke = this.chart.colors.getIndex(0);
@@ -249,18 +283,18 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
       return;
     }
     const series = this.chart.series.push(new am4charts.LineSeries());
-    series.name = 'Expected vehicles';
-    series.dataFields.dateX = 'timestamp';
-    series.dataFields.valueY = 'expected';
+    series.name = "Expected vehicles";
+    series.dataFields.dateX = "timestamp";
+    series.dataFields.valueY = "expected";
     series.rangeChangeEasing = am4core.ease.linear;
-    series.groupFields.valueY = 'low';
+    series.groupFields.valueY = "low";
 
     series.yAxis = axis;
 
     series.stroke = this.chart.colors.getIndex(2);
     series.fill = this.chart.colors.getIndex(2);
 
-    series.propertyFields.fill = 'expectedFill';
+    series.propertyFields.fill = "expectedFill";
 
     series.fillOpacity = 1;
 
@@ -275,16 +309,16 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     }
     const series = this.chart.series.push(new am4charts.XYSeries());
 
-    series.dataFields.dateX = 'timestamp';
-    series.dataFields.valueY = 'value';
+    series.dataFields.dateX = "timestamp";
+    series.dataFields.valueY = "value";
 
     series.yAxis = axis;
 
     const bullet = series.bullets.push(new am4charts.Bullet());
 
     bullet.clickable = true;
-    bullet.propertyFields.id = 'id';
-    bullet.events.on('hit', (ev) => this.alertSelected.emit(ev.target.id));
+    bullet.propertyFields.id = "id";
+    bullet.events.on("hit", (ev) => this.alertSelected.emit(ev.target.id));
     bullet.cursorOverStyle = am4core.MouseCursorStyle.pointer;
     bullet.setStateOnChildren = true;
 
@@ -294,13 +328,13 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     circle.width = 12;
     circle.height = 12;
 
-    const hover = circle.states.create('hover');
+    const hover = circle.states.create("hover");
     hover.properties.width = 16;
     hover.properties.height = 16;
 
     circle.stroke = this.chartService.colorMap.lightGrey;
     circle.strokeWidth = 2;
-    circle.propertyFields.fill = 'fill';
+    circle.propertyFields.fill = "fill";
 
     return series;
   }
@@ -312,7 +346,7 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     this.chart.paddingRight = 20;
     this.chart.paddingLeft = 0;
 
-    this.chart.leftAxesContainer.layout = 'vertical';
+    this.chart.leftAxesContainer.layout = "vertical";
 
     this.createDateAxis();
     const valueAxis = this.createValueAxis();
@@ -331,7 +365,7 @@ export class HistoricVehicleStatsComponent extends BaseChart implements OnChange
     }
 
     this.chart.cursor = new am4charts.XYCursor();
-    this.chart.cursor.behavior = 'zoomX';
+    this.chart.cursor.behavior = "zoomX";
     this.chart.cursor.lineY.disabled = true;
     this.chart.cursor.lineX.stroke = this.chartService.colorMap.black;
     this.chart.cursor.lineX.strokeWidth = 2;

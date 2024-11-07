@@ -1,10 +1,10 @@
-import { HttpClientModule } from '@angular/common/http';
-import { TestBed } from '@angular/core/testing';
-import { ConfigService } from '../../config/config.service';
+import { HttpClientModule } from "@angular/common/http";
+import { TestBed } from "@angular/core/testing";
+import { ConfigService } from "../../config/config.service";
 
-import { OtpThresholdDefaultsService } from './otp-threshold-defaults.service';
+import { OtpThresholdDefaultsService } from "./otp-threshold-defaults.service";
 
-describe('OtpThresholdFormService', () => {
+describe("OtpThresholdFormService", () => {
   let service: OtpThresholdDefaultsService;
 
   beforeEach(() => {
@@ -15,16 +15,16 @@ describe('OtpThresholdFormService', () => {
     service = TestBed.inject(OtpThresholdDefaultsService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 
-  it('should return deafults from config service', () => {
+  it("should return deafults from config service", () => {
     expect(service.early).toEqual(1);
     expect(service.late).toEqual(6);
   });
 
-  it('should reset all to false', () => {
+  it("should reset all to false", () => {
     service.early = 10;
     service.late = 20;
 

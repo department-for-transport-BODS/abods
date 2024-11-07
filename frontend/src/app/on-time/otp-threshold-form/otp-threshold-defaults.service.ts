@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
-import { ConfigService } from '../../config/config.service';
+import { Injectable } from "@angular/core";
+import { ConfigService } from "../../config/config.service";
 
 enum OtpThresholdKey {
-  Early = 'otpCompareThresholdEarly',
-  Late = 'otpCompareThresholdLate',
+  Early = "otpCompareThresholdEarly",
+  Late = "otpCompareThresholdLate",
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OtpThresholdDefaultsService {
   get early(): number {

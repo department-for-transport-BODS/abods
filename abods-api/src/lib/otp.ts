@@ -1,12 +1,12 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { feed_monitor_summary, Prisma, PrismaClient } from "@prisma/client";
 import {
   PerformanceInputType,
   PunctualityTotalsType,
-} from '../types/generated.js';
+} from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
-import { getOperators } from '../resolvers/otpFunctions.js';
-import { getDayOfWeekNumbers, isDefined } from './utils.js';
-import { utcToBstDBInput } from './dayjs.js';
+import { getOperators } from "../resolvers/otpFunctions.js";
+import { getDayOfWeekNumbers, isDefined } from "./utils.js";
+import { utcToBstDBInput } from "./dayjs.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -71,10 +71,12 @@ export const compareThresholds = async (
   const operators = await getOperators(sessionUser, db);
 
   if (!operators) {
-    throw 'No user operators';
+    throw "No user operators";
   }
 
-  const userOperatorIds = operators.map((o) => o.nocCode ?? "").filter((o) => !!o);
+  const userOperatorIds = operators
+    .map((o) => o.nocCode ?? "")
+    .filter((o) => !!o);
 
   let opIds: string[] | undefined = operatorIds
     ? operatorIds?.filter(isDefined)
@@ -120,14 +122,14 @@ export const compareThresholds = async (
   } = {};
 
   if (startTime) {
-    const [hours, minutes, seconds] = startTime.split(':').map(Number);
+    const [hours, minutes, seconds] = startTime.split(":").map(Number);
     start.setHours(hours);
     start.setMinutes(minutes);
     departure_hour.gte = start;
   }
 
   if (endTime) {
-    const [hours, minutes, seconds] = endTime.split(':').map(Number);
+    const [hours, minutes, seconds] = endTime.split(":").map(Number);
     end.setHours(hours);
     end.setMinutes(minutes);
     departure_hour.lte = end;
@@ -165,7 +167,7 @@ export const compareThresholds = async (
   let dayOfWeekNumbers: number[] = [];
   if (dayOfWeekFlags) {
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
-    where.day_of_week = { in: dayOfWeekNumbers }
+    where.day_of_week = { in: dayOfWeekNumbers };
   }
 
   if (onTimeMinMinutes && onTimeMaxMinutes) {
@@ -222,29 +224,35 @@ export const compareThresholds = async (
   return null;
 };
 
-export const getOperatorsFromOrgId = async (orgId: number[], db: PrismaClient) => {
+export const getOperatorsFromOrgId = async (
+  orgId: number[],
+  db: PrismaClient,
+  userOperatorIds?: string[],
+) => {
+  const where: Prisma.bods_organisationoperatorWhereInput = {
+    organisation_id: {
+      in: orgId,
+    },
+  };
+
+  if (userOperatorIds && userOperatorIds.length > 0) {
+    where.operatorref = {
+      in: userOperatorIds,
+    };
+  } else {
+    where.operatorref = {
+      not: undefined,
+    };
+  }
 
   return db.bods_organisationoperator.findMany({
-    where: {
-      AND: [
-        {
-          organisation_id: {
-            in: orgId,
-          },
-        },
-        {
-          operatorref: {
-            not: undefined,
-          },
-        }
-      ],
-    },
+    where: where,
     select: {
       operatorref: true,
     },
-    distinct: ['operatorref'],
+    distinct: ["operatorref"],
   });
-}
+};
 
 export const getOperatorsFroServiceDetails = async (
   orgOperators: { operatorref: string }[],
@@ -264,14 +272,14 @@ export const getOperatorsFroServiceDetails = async (
         },
       },
     },
-    distinct: ['operator_noc'],
+    distinct: ["operator_noc"],
   });
 };
 
 export const getNocAdminAreas = async (db: PrismaClient) => {
   return db.noc_adminarea.findMany({
     include: {
-      admin_area: true
-    }
-  })
-}
+      admin_area: true,
+    },
+  });
+};

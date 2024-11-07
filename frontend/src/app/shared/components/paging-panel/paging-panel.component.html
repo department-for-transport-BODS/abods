@@ -1,5 +1,8 @@
 <div class="paging-panel" *ngIf="total && rowCount">
-  <span class="paging-panel__count">Showing {{ firstRow }} - {{ lastRow }} of {{ rowCount }} {{ pluralNoun }}</span>
+  <span class="paging-panel__count"
+    >Showing {{ firstRow }} - {{ lastRow }} of {{ rowCount }}
+    {{ pluralNoun }}</span
+  >
   <div *ngIf="total > 1" class="paging-panel__controls">
     <button
       class="button-link paging-panel__prev"
@@ -10,13 +13,22 @@
       Prev
     </button>
     <ng-container *ngIf="!stickToStart">
-      <button class="button-link paging-panel__button" (click)="firstPage()">1</button>
+      <button class="button-link paging-panel__button" (click)="firstPage()">
+        1
+      </button>
       <span class="paging-panel__ellipsis"></span>
     </ng-container>
     <ng-template ngFor [ngForOf]="pages" let-page>
-      <span *ngIf="current === page; else pageBtn" class="paging-panel__current">{{ page + 1 }}</span>
+      <span
+        *ngIf="current === page; else pageBtn"
+        class="paging-panel__current"
+        >{{ page + 1 }}</span
+      >
       <ng-template #pageBtn>
-        <button class="button-link paging-panel__button" (click)="goToPage(page)">
+        <button
+          class="button-link paging-panel__button"
+          (click)="goToPage(page)"
+        >
           {{ page + 1 }}
         </button>
       </ng-template>
@@ -27,7 +39,12 @@
         {{ total }}
       </button>
     </ng-container>
-    <button class="button-link paging-panel__next" aria-label="Next page" (click)="nextPage()" *ngIf="!isLastPage">
+    <button
+      class="button-link paging-panel__next"
+      aria-label="Next page"
+      (click)="nextPage()"
+      *ngIf="!isLastPage"
+    >
       Next
     </button>
   </div>

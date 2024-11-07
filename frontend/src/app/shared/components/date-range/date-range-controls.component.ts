@@ -1,14 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { DateTime, Duration, Interval } from 'luxon';
-import { FromTo } from './date-range.types';
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { DateTime, Duration, Interval } from "luxon";
+import { FromTo } from "./date-range.types";
 
 // Analogous to a Luxon Interval, but allows for partially constructed object
-export type DateRange = Partial<Pick<Interval, 'start' | 'end'>>;
+export type DateRange = Partial<Pick<Interval, "start" | "end">>;
 
 @Component({
-  selector: 'app-date-range-controls',
-  templateUrl: './date-range-controls.component.html',
-  styleUrls: ['./date-range-controls.component.scss'],
+  selector: "app-date-range-controls",
+  templateUrl: "./date-range-controls.component.html",
+  styleUrls: ["./date-range-controls.component.scss"],
 })
 export class DateRangeControlsComponent implements OnInit {
   /*
@@ -27,29 +27,32 @@ export class DateRangeControlsComponent implements OnInit {
   @Output() closeControls = new EventEmitter();
 
   get ending(): string {
-    return this.end?.isValid ? this.end.toFormat('yyyy-MM-dd') : '';
+    return this.end?.isValid ? this.end.toFormat("yyyy-MM-dd") : "";
   }
   set ending(value: string) {
-    this.end = DateTime.fromFormat(value, 'yyyy-MM-dd').startOf('day');
+    this.end = DateTime.fromFormat(value, "yyyy-MM-dd").startOf("day");
   }
 
   get starting(): string {
-    return this.start?.isValid ? this.start.toFormat('yyyy-MM-dd') : '';
+    return this.start?.isValid ? this.start.toFormat("yyyy-MM-dd") : "";
   }
   set starting(value: string) {
-    this.start = DateTime.fromFormat(value, 'yyyy-MM-dd').startOf('day');
+    this.start = DateTime.fromFormat(value, "yyyy-MM-dd").startOf("day");
   }
 
   start?: DateTime;
   end?: DateTime;
   monthLeft!: Interval;
   monthRight!: Interval;
-  today = DateTime.local().startOf('day');
-  validInterval = Interval.before(this.today, Duration.fromObject({ years: 5 }));
+  today = DateTime.local().startOf("day");
+  validInterval = Interval.before(
+    this.today,
+    Duration.fromObject({ years: 5 }),
+  );
   handlingBlur = false;
   startFocused = false;
   endFocused = false;
-  readonly placeholder = 'dd/mm/yyyy';
+  readonly placeholder = "dd/mm/yyyy";
 
   get invalidDates(): boolean {
     if (!this.end?.isValid) {
@@ -73,7 +76,10 @@ export class DateRangeControlsComponent implements OnInit {
 
   get rangeInclusive(): DateRange {
     if (this.start?.isValid && this.end?.isValid) {
-      return { start: DateTime.min(this.start, this.end), end: DateTime.max(this.start, this.end) };
+      return {
+        start: DateTime.min(this.start, this.end),
+        end: DateTime.max(this.start, this.end),
+      };
     } else if (this.start?.isValid || this.end?.isValid) {
       const date = this.start?.isValid ? this.start : this.end;
       return { start: date, end: date };
@@ -83,9 +89,13 @@ export class DateRangeControlsComponent implements OnInit {
   }
 
   ngOnInit() {
-    const thisMonth = this.start?.isValid ? this.start.startOf('month') : DateTime.local().startOf('month');
+    const thisMonth = this.start?.isValid
+      ? this.start.startOf("month")
+      : DateTime.local().startOf("month");
 
-    this.monthLeft = Interval.after(thisMonth.minus({ months: 1 }), { months: 1 });
+    this.monthLeft = Interval.after(thisMonth.minus({ months: 1 }), {
+      months: 1,
+    });
     this.monthRight = Interval.after(thisMonth, { months: 1 });
   }
 
@@ -108,13 +118,17 @@ export class DateRangeControlsComponent implements OnInit {
     $event.preventDefault();
     const nextMonth = this.monthRight.start;
     this.monthLeft = Interval.after(nextMonth, { months: 1 });
-    this.monthRight = Interval.after(nextMonth.plus({ months: 1 }), { months: 1 });
+    this.monthRight = Interval.after(nextMonth.plus({ months: 1 }), {
+      months: 1,
+    });
   }
 
   prevMonth($event: Event) {
     $event.preventDefault();
     const prevMonth = this.monthLeft.start;
-    this.monthLeft = Interval.after(prevMonth.minus({ months: 1 }), { months: 1 });
+    this.monthLeft = Interval.after(prevMonth.minus({ months: 1 }), {
+      months: 1,
+    });
     this.monthRight = Interval.after(prevMonth, { months: 1 });
   }
 

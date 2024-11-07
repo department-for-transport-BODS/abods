@@ -6,12 +6,12 @@ import {
   EventEmitter,
   Output,
   QueryList,
-} from '@angular/core';
-import { TabComponent } from 'src/app/shared/components/tabs/tab/tab.component';
-import { startWith } from 'rxjs/operators';
+} from "@angular/core";
+import { TabComponent } from "src/app/shared/components/tabs/tab/tab.component";
+import { startWith } from "rxjs/operators";
 
 @Component({
-  selector: 'app-tabs',
+  selector: "app-tabs",
   template: `
     <div class="tabs">
       <ul class="tabs__list">
@@ -30,7 +30,7 @@ import { startWith } from 'rxjs/operators';
       <ng-content></ng-content>
     </div>
   `,
-  styleUrls: ['./tabs.component.scss'],
+  styleUrls: ["./tabs.component.scss"],
 })
 export class TabsComponent implements AfterContentInit {
   @Output() tabChanged = new EventEmitter<TabComponent>();

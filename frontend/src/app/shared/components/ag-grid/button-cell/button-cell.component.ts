@@ -1,6 +1,6 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AgRendererComponent } from 'ag-grid-angular';
-import { ICellRendererParams } from 'ag-grid-community';
+import { Component, ElementRef, ViewChild } from "@angular/core";
+import { AgRendererComponent } from "ag-grid-angular";
+import { ICellRendererParams } from "ag-grid-community";
 
 export interface ButtonCellRendererParams extends ICellRendererParams {
   label?: string;
@@ -8,12 +8,19 @@ export interface ButtonCellRendererParams extends ICellRendererParams {
 }
 
 @Component({
-  template: `<button #button type="button" class="button-link" (click)="onClick($event)">{{ label }}</button>`,
-  styleUrls: ['./button-cell.component.scss'],
+  template: `<button
+    #button
+    type="button"
+    class="button-link"
+    (click)="onClick($event)"
+  >
+    {{ label }}
+  </button>`,
+  styleUrls: ["./button-cell.component.scss"],
 })
 export class ButtonCellRendererComponent implements AgRendererComponent {
   label?: string;
-  @ViewChild('button') buttonElement?: ElementRef<HTMLElement>;
+  @ViewChild("button") buttonElement?: ElementRef<HTMLElement>;
 
   onClick: (event: MouseEvent) => void = () => {
     // Do nothing
@@ -29,8 +36,8 @@ export class ButtonCellRendererComponent implements AgRendererComponent {
     this.onClick = params.click(params);
 
     // accessibility - ag-grid seems to swallow keyboard events.
-    params.eGridCell.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
+    params.eGridCell.addEventListener("keypress", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
         this.buttonElement?.nativeElement.click();
       }
     });

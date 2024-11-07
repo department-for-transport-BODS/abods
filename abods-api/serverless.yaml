@@ -17,7 +17,7 @@ provider:
         - Authorization
 functions:
   graphql:
-    handler: src/index.default 
+    handler: src/index.default
     events:
       - httpApi:
           path: /

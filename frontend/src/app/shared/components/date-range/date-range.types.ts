@@ -1,14 +1,14 @@
-import { DateTime } from 'luxon';
+import { DateTime } from "luxon";
 
 export enum Period {
-  Last28 = 'last28',
-  Last7 = 'last7',
-  LastMonth = 'lastMonth',
-  MonthToDate = 'monthToDate',
+  Last28 = "last28",
+  Last7 = "last7",
+  LastMonth = "lastMonth",
+  MonthToDate = "monthToDate",
 }
 
 export enum Custom {
-  Custom = 'custom',
+  Custom = "custom",
 }
 
 export type Preset = Period | Custom;
@@ -32,7 +32,7 @@ export interface Day {
 }
 
 export class NullDay implements Day {
-  date = DateTime.invalid('NullDay');
+  date = DateTime.invalid("NullDay");
   isToday = false;
   isSelected = false;
   isSelectable = false;

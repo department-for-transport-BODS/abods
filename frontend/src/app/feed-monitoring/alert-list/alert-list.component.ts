@@ -1,21 +1,30 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { DateTime } from 'luxon';
-import { combineLatest, of, Subject } from 'rxjs';
-import { filter, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { EventType } from 'src/generated/graphql';
-import { FeedMonitoringService } from '../feed-monitoring.service';
-import { AlertMode, AlertListViewModel } from './alert-list-view-model';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import { DateTime } from "luxon";
+import { combineLatest, of, Subject } from "rxjs";
+import { filter, switchMap, takeUntil, tap } from "rxjs/operators";
+import { EventType } from "src/generated/graphql";
+import { FeedMonitoringService } from "../feed-monitoring.service";
+import { AlertMode, AlertListViewModel } from "./alert-list-view-model";
 
 @Component({
-  selector: 'app-alert-list',
-  templateUrl: './alert-list.component.html',
-  styleUrls: ['./alert-list.component.scss'],
+  selector: "app-alert-list",
+  templateUrl: "./alert-list.component.html",
+  styleUrls: ["./alert-list.component.scss"],
 })
 export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
   @Input() mode!: AlertMode;
   @Input() date?: DateTime;
   @Input() selectedId: string | null = null;
-  @Input() operatorId = '';
+  @Input() operatorId = "";
   @Output() alerts = new EventEmitter<AlertListViewModel[]>();
 
   constructor(private fmService: FeedMonitoringService) {}
@@ -32,9 +41,9 @@ export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
 
   get title() {
     if (this.mode === AlertMode.LiveStatus) {
-      return 'Recent alerts';
+      return "Recent alerts";
     } else {
-      return `Alerts for ${this.start?.toFormat('dd MMMM yyyy')}`;
+      return `Alerts for ${this.start?.toFormat("dd MMMM yyyy")}`;
     }
   }
 
@@ -50,8 +59,9 @@ export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
     if (this.mode === AlertMode.LiveStatus) {
       return this.end.minus({ days: 1 });
     } else {
-      const date = this.date ?? DateTime.local().startOf('day').minus({ days: 1 });
-      return date.startOf('day');
+      const date =
+        this.date ?? DateTime.local().startOf("day").minus({ days: 1 });
+      return date.startOf("day");
     }
   }
 
@@ -61,12 +71,16 @@ export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
         tap(() => (this.loaded = false)),
         switchMap(() => {
           if (this.start && this.end) {
-            return this.fmService.fetchAlerts(this.operatorId, this.start, this.end);
+            return this.fmService.fetchAlerts(
+              this.operatorId,
+              this.start,
+              this.end,
+            );
           }
           return of([]);
         }),
         filter((events) => events !== null),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe((events) => {
         this.events = (events as EventType[])

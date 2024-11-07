@@ -1,13 +1,20 @@
-import { EventEmitter, Output, Renderer2 } from '@angular/core';
-import { Component, Input, forwardRef, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { EventEmitter, Output, Renderer2 } from "@angular/core";
+import {
+  Component,
+  Input,
+  forwardRef,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 let nextUniqueId = 0;
 
 @Component({
-  selector: 'gds-select',
-  templateUrl: './select.component.html',
-  styleUrls: ['./select.component.css'],
+  selector: "gds-select",
+  templateUrl: "./select.component.html",
+  styleUrls: ["./select.component.css"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -42,12 +49,12 @@ export class SelectComponent implements ControlValueAccessor, AfterViewInit {
   @Output() selected = new EventEmitter<string>();
 
   protected _uid = `gds-input-${nextUniqueId++}`;
-  selectedValue = '';
-  protected _id = '';
+  selectedValue = "";
+  protected _id = "";
 
   disabled = false;
 
-  @ViewChild('selectInput') selectInput?: ElementRef;
+  @ViewChild("selectInput") selectInput?: ElementRef;
 
   constructor(private _renderer: Renderer2) {}
 
@@ -73,13 +80,21 @@ export class SelectComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this._renderer.setProperty(this.selectInput?.nativeElement, 'disabled', this.disabled);
+    this._renderer.setProperty(
+      this.selectInput?.nativeElement,
+      "disabled",
+      this.disabled,
+    );
   }
 
   setDisabledState(isDisabled: boolean) {
     this.disabled = isDisabled;
     if (this.selectInput) {
-      this._renderer.setProperty(this.selectInput?.nativeElement, 'disabled', isDisabled);
+      this._renderer.setProperty(
+        this.selectInput?.nativeElement,
+        "disabled",
+        isDisabled,
+      );
     }
   }
 }

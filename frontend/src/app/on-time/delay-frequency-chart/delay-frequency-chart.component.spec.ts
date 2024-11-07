@@ -1,20 +1,20 @@
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
-import { ApolloTestingModule } from 'apollo-angular/testing';
-import { of } from 'rxjs';
-import { LayoutModule } from 'src/app/layout/layout.module';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { OnTimeService } from '../on-time.service';
-import { DelayFrequencyChartComponent } from './delay-frequency-chart.component';
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { of } from "rxjs";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "src/app/shared/shared.module";
+import { OnTimeService } from "../on-time.service";
+import { DelayFrequencyChartComponent } from "./delay-frequency-chart.component";
 import {
   onTimeInputParams,
   onTimeInputParamsAlt,
   onTimeInputParamsAltTs,
   onTimeInputParamsTimingPointFalse,
   onTimeInputParamsTimingPointTrue,
-} from '../on-time.test-constants';
-import { PerformanceCategories } from 'src/app/dashboard/dashboard.types';
+} from "../on-time.test-constants";
+import { PerformanceCategories } from "src/app/dashboard/dashboard.types";
 
-describe('DelayFrequencyChartComponent', () => {
+describe("DelayFrequencyChartComponent", () => {
   let spectator: Spectator<DelayFrequencyChartComponent>;
   let component: DelayFrequencyChartComponent;
   let service: OnTimeService;
@@ -31,30 +31,36 @@ describe('DelayFrequencyChartComponent', () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it('should create', () => {
+  it("should create", () => {
     spectator.detectChanges();
 
     expect(spectator.component).toBeTruthy();
   });
 
-  it('should request data', () => {
+  it("should request data", () => {
     component.params = onTimeInputParams;
 
-    const spy = spyOn(service, 'fetchOnTimeDelayFrequencyData').and.returnValue(of());
+    const spy = spyOn(service, "fetchOnTimeDelayFrequencyData").and.returnValue(
+      of(),
+    );
 
     spectator.detectChanges();
 
     expect(spy).toHaveBeenCalledWith(onTimeInputParams);
   });
 
-  it('should re-request data if nocCode changes', () => {
+  it("should re-request data if nocCode changes", () => {
     component.params = onTimeInputParams;
 
-    const spy = spyOn(service, 'fetchOnTimeDelayFrequencyData').and.returnValue(of());
+    const spy = spyOn(service, "fetchOnTimeDelayFrequencyData").and.returnValue(
+      of(),
+    );
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParams));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParams),
+    );
 
     spy.calls.reset();
 
@@ -62,16 +68,22 @@ describe('DelayFrequencyChartComponent', () => {
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParamsAlt));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParamsAlt),
+    );
   });
 
-  it('should re-request data if dates change', () => {
+  it("should re-request data if dates change", () => {
     component.params = onTimeInputParams;
-    const spy = spyOn(service, 'fetchOnTimeDelayFrequencyData').and.returnValue(of());
+    const spy = spyOn(service, "fetchOnTimeDelayFrequencyData").and.returnValue(
+      of(),
+    );
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParams));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParams),
+    );
 
     spy.calls.reset();
 
@@ -79,17 +91,23 @@ describe('DelayFrequencyChartComponent', () => {
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParamsAltTs));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParamsAltTs),
+    );
   });
 
-  it('should re-request data if timing points filter changes', () => {
+  it("should re-request data if timing points filter changes", () => {
     component.params = onTimeInputParamsTimingPointFalse;
 
-    const spy = spyOn(service, 'fetchOnTimeDelayFrequencyData').and.returnValue(of());
+    const spy = spyOn(service, "fetchOnTimeDelayFrequencyData").and.returnValue(
+      of(),
+    );
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParamsTimingPointFalse));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParamsTimingPointFalse),
+    );
 
     spy.calls.reset();
 
@@ -97,12 +115,20 @@ describe('DelayFrequencyChartComponent', () => {
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining(onTimeInputParamsTimingPointTrue));
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining(onTimeInputParamsTimingPointTrue),
+    );
   });
 
-  it('should return correct category based on heuristic function', () => {
-    expect(spectator.component.heuristic(-2)).toEqual(PerformanceCategories.Early);
-    expect(spectator.component.heuristic(0)).toEqual(PerformanceCategories.OnTime);
-    expect(spectator.component.heuristic(6)).toEqual(PerformanceCategories.Late);
+  it("should return correct category based on heuristic function", () => {
+    expect(spectator.component.heuristic(-2)).toEqual(
+      PerformanceCategories.Early,
+    );
+    expect(spectator.component.heuristic(0)).toEqual(
+      PerformanceCategories.OnTime,
+    );
+    expect(spectator.component.heuristic(6)).toEqual(
+      PerformanceCategories.Late,
+    );
   });
 });

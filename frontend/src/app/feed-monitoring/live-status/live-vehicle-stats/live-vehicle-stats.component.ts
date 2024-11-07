@@ -1,20 +1,30 @@
-import { AfterViewInit, Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
-import { Granularity, VehicleStatsType } from 'src/generated/graphql';
-import { ChartService } from 'src/app/shared/components/amcharts/chart.service';
-import { BaseChart } from 'src/app/shared/components/amcharts/base-chart';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from "@angular/core";
+import { Granularity, VehicleStatsType } from "src/generated/graphql";
+import { ChartService } from "src/app/shared/components/amcharts/chart.service";
+import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
 
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-import am4themes_frozen from '@amcharts/amcharts4/themes/frozen';
-import { DateTime, Interval } from 'luxon';
-import { VehicleStatsViewModel } from '../../types';
+import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
+import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
+import { DateTime, Interval } from "luxon";
+import { VehicleStatsViewModel } from "../../types";
 
 @Component({
-  selector: 'app-live-vehicle-stats',
-  templateUrl: './live-vehicle-stats.component.html',
-  styleUrls: ['./live-vehicle-stats.component.scss'],
+  selector: "app-live-vehicle-stats",
+  templateUrl: "./live-vehicle-stats.component.html",
+  styleUrls: ["./live-vehicle-stats.component.scss"],
 })
-export class LiveVehicleStatsComponent extends BaseChart implements AfterViewInit, OnDestroy, OnChanges {
+export class LiveVehicleStatsComponent
+  extends BaseChart
+  implements AfterViewInit, OnDestroy, OnChanges
+{
   private chartData: VehicleStatsViewModel[] = [];
   private dateAxis?: am4charts.DateAxis;
   private patternedColumns: am4charts.DateAxisDataItem[] = [];
@@ -38,7 +48,7 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
     if (changes.dataSource) {
       const data = changes.dataSource.currentValue as VehicleStatsType[];
       this.chartData = data.map((stat) => {
-        const dateTime = DateTime.fromISO(stat.timestamp, { zone: 'utc' });
+        const dateTime = DateTime.fromISO(stat.timestamp, { zone: "utc" });
         return {
           ...stat,
           dateTime,
@@ -76,9 +86,9 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
 
   createPatternedColumn(dateTime: DateTime) {
     if (!this.dateAxis) {
-      throw new Error('Chart not initialized'); // This should never happen
+      throw new Error("Chart not initialized"); // This should never happen
     }
-    const unit = this.granularity === Granularity.Minute ? 'minutes' : 'hours';
+    const unit = this.granularity === Granularity.Minute ? "minutes" : "hours";
 
     const column = this.dateAxis.axisRanges.create();
     column.date = dateTime.plus({ [unit]: 0.1 }).toJSDate();
@@ -100,9 +110,12 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
     if (!this.chart) {
       return;
     }
-    const dateAxis = (this.dateAxis = this.chart.xAxes.push(new am4charts.DateAxis()));
+    const dateAxis = (this.dateAxis = this.chart.xAxes.push(
+      new am4charts.DateAxis(),
+    ));
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = this.chartService.colorMap.legendaryGrey;
+    dateAxis.renderer.labels.template.fill =
+      this.chartService.colorMap.legendaryGrey;
     dateAxis.baseInterval = {
       timeUnit: this.granularity as am4core.TimeUnit,
       count: 1,
@@ -141,7 +154,7 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
   }
 
   getTooltipText(type: string) {
-    return type + ': [bold]{valueY}';
+    return type + ": [bold]{valueY}";
   }
 
   createActualSeries() {
@@ -149,9 +162,9 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
       return;
     }
     const series = this.chart.series.push(new am4charts.ColumnSeries());
-    series.name = 'Vehicle journeys';
-    series.dataFields.dateX = 'timestamp';
-    series.dataFields.valueY = 'actual';
+    series.name = "Vehicle journeys";
+    series.dataFields.dateX = "timestamp";
+    series.dataFields.valueY = "actual";
     series.clustered = false;
     series.fill = this.chart.colors.getIndex(0);
     series.strokeWidth = 0;
@@ -166,7 +179,7 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
         <span style="float:right; margin-left:5px;"><b>{expected}</b></span>
       </div>`;
     if (series.tooltip) {
-      series.tooltip.pointerOrientation = 'vertical';
+      series.tooltip.pointerOrientation = "vertical";
       series.tooltip.getFillFromObject = false;
       series.tooltip.stroke = this.chart.colors.getIndex(5);
       series.tooltip.label.fill = this.chart.colors.getIndex(5);
@@ -174,7 +187,7 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
       series.tooltip.background.cornerRadius = 0;
       series.tooltip.background.fillOpacity = 1;
       series.tooltip.background.filters.clear();
-      series.tooltip.background.fill = am4core.color('#fff');
+      series.tooltip.background.fill = am4core.color("#fff");
       series.tooltip.background.stroke = this.chart.colors.getIndex(5);
     }
 
@@ -186,13 +199,13 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
       return;
     }
     const series = this.chart.series.push(new am4charts.StepLineSeries());
-    series.name = 'Expected vehicles';
+    series.name = "Expected vehicles";
     if (series.dataFields) {
-      series.dataFields.dateX = 'timestamp';
-      series.dataFields.valueY = 'expected';
+      series.dataFields.dateX = "timestamp";
+      series.dataFields.valueY = "expected";
     }
     series.defaultState.transitionDuration = 100;
-    series.strokeLinecap = 'round';
+    series.strokeLinecap = "round";
     series.noRisers = true;
     series.strokeWidth = 2;
     series.stroke = this.chart.colors.getIndex(2);
@@ -219,7 +232,7 @@ export class LiveVehicleStatsComponent extends BaseChart implements AfterViewIni
     this.createPatternedColumns();
 
     this.chart.cursor = new am4charts.XYCursor();
-    this.chart.cursor.behavior = 'none';
+    this.chart.cursor.behavior = "none";
     this.chart.cursor.lineY.disabled = true;
     this.chart.cursor.lineX.stroke = this.chart.colors.getIndex(5);
     this.chart.cursor.lineX.strokeWidth = 2;

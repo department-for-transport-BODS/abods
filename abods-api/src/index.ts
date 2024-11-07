@@ -50,7 +50,7 @@ app.use(
       }
       return { req, res, headers, db, apiKeyAuth };
     },
-  })
+  }),
 );
 
 const handler = serverlessExpress({ app });

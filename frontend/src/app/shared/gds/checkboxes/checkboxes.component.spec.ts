@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { CheckboxesComponent } from './checkboxes.component';
+import { CheckboxesComponent } from "./checkboxes.component";
 
-describe('CheckboxesComponent', () => {
+describe("CheckboxesComponent", () => {
   let component: CheckboxesComponent;
   let fixture: ComponentFixture<CheckboxesComponent>;
 
@@ -18,7 +18,7 @@ describe('CheckboxesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

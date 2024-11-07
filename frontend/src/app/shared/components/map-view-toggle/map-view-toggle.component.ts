@@ -1,15 +1,15 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { ConfigService } from '../../../config/config.service';
+import { Component, EventEmitter, Output } from "@angular/core";
+import { ConfigService } from "../../../config/config.service";
 
 enum MapboxStyleOption {
-  Default = 'default',
-  satellite = 'satellite',
+  Default = "default",
+  satellite = "satellite",
 }
 
 @Component({
-  selector: 'app-map-view-toggle',
-  templateUrl: './map-view-toggle.component.html',
-  styleUrls: ['./map-view-toggle.component.scss'],
+  selector: "app-map-view-toggle",
+  templateUrl: "./map-view-toggle.component.html",
+  styleUrls: ["./map-view-toggle.component.scss"],
 })
 export class MapViewToggleComponent {
   @Output() mapboxStyle = new EventEmitter<string>();

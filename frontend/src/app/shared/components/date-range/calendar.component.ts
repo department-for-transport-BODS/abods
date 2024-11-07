@@ -1,10 +1,17 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { DateTime, Interval } from 'luxon';
-import { Day, NullDay } from './date-range.types';
-import { DateRange } from './date-range-controls.component';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import { DateTime, Interval } from "luxon";
+import { Day, NullDay } from "./date-range.types";
+import { DateRange } from "./date-range-controls.component";
 
 function* daysOf(interval: Interval) {
-  let cursor = interval.start.startOf('day');
+  let cursor = interval.start.startOf("day");
   while (cursor < interval.end) {
     yield cursor;
     cursor = cursor.plus({ days: 1 });
@@ -12,18 +19,21 @@ function* daysOf(interval: Interval) {
 }
 
 @Component({
-  selector: 'app-calendar',
-  templateUrl: 'calendar.component.html',
-  styleUrls: ['date-range-controls.component.scss'],
+  selector: "app-calendar",
+  templateUrl: "calendar.component.html",
+  styleUrls: ["date-range-controls.component.scss"],
 })
 export class CalendarComponent implements OnChanges {
-  @Input() selectableRange = Interval.before(DateTime.local().minus({ days: 1 }), { years: 5 });
+  @Input() selectableRange = Interval.before(
+    DateTime.local().minus({ days: 1 }),
+    { years: 5 },
+  );
   @Output() dateChange = new EventEmitter<DateTime>();
 
   _selected: DateRange = {};
   selectedInterval?: Interval;
-  today = DateTime.local().startOf('day');
-  dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  today = DateTime.local().startOf("day");
+  dayNames = ["M", "T", "W", "T", "F", "S", "S"];
 
   table: Day[][] = [];
 
@@ -36,7 +46,9 @@ export class CalendarComponent implements OnChanges {
     }
     this._selected = value;
     this.selectedInterval =
-      value.start?.isValid && value.end?.isValid ? Interval.fromDateTimes(value.start, value.end) : undefined;
+      value.start?.isValid && value.end?.isValid
+        ? Interval.fromDateTimes(value.start, value.end)
+        : undefined;
   }
 
   @Input() month?: Interval | DateTime;
@@ -47,9 +59,13 @@ export class CalendarComponent implements OnChanges {
     }
     this.table = [];
     const month =
-      this.month instanceof DateTime ? Interval.after(this.month.startOf('month'), { month: 1 }) : this.month;
+      this.month instanceof DateTime
+        ? Interval.after(this.month.startOf("month"), { month: 1 })
+        : this.month;
 
-    const leadingBlanks: NullDay[] = Array.from({ length: month.start.weekday - 1 }).map(() => new NullDay());
+    const leadingBlanks: NullDay[] = Array.from({
+      length: month.start.weekday - 1,
+    }).map(() => new NullDay());
     const days: Day[] = Array.from(daysOf(month)).map((date) => ({
       date,
       isToday: date.equals(this.today),

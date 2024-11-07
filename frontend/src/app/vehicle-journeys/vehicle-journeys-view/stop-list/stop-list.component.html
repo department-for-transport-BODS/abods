@@ -6,14 +6,16 @@
 </div>
 <ng-container *ngIf="!loading; else skeleton">
   <app-stop-item
-    *ngFor="let stop of stopList; let first = first;"
+    *ngFor="let stop of stopList; let first = first"
     [firstItem]="first"
     [stop]="stop"
     [timingPointsOnly]="timingPointsOnly"
     (stopSelected)="stopSelected.emit($event)"
     (stopHovered)="stopHovered.emit($event)"
   ></app-stop-item>
-  <div *ngIf="!loading && !isStopList" class="no-stops"><span>No stops available</span></div>
+  <div *ngIf="!loading && !isStopList" class="no-stops">
+    <span>No stops available</span>
+  </div>
 </ng-container>
 
 <ng-template #skeleton>

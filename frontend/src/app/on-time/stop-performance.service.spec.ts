@@ -1,19 +1,29 @@
-import { createServiceFactory } from '@ngneat/spectator';
-import { StopPerformance } from './on-time.service';
-import { StopPerformanceService } from './stop-performance.service';
-import { SpectatorService } from '@ngneat/spectator/lib/spectator-service/spectator-service';
-import { ServicePattern } from './transit-model.service';
+import { createServiceFactory } from "@ngneat/spectator";
+import { StopPerformance } from "./on-time.service";
+import { StopPerformanceService } from "./stop-performance.service";
+import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
+import { ServicePattern } from "./transit-model.service";
 import objectContaining = jasmine.objectContaining;
 
-const stopPerf = (early: number, onTime: number, late: number, stopId = 'S00001'): StopPerformance => ({
-  lineId: 'LN001',
+const stopPerf = (
+  early: number,
+  onTime: number,
+  late: number,
+  stopId = "S00001",
+): StopPerformance => ({
+  lineId: "LN001",
   stopId,
   stopInfo: {
-    sourceId: '',
-    stopName: 'Bus stop',
+    sourceId: "",
+    stopName: "Bus stop",
     stopId: stopId,
     stopLocation: { latitude: 56.7686, longitude: 0.4567 },
-    stopLocality: { localityId: 'L001', localityAreaId: 'LA001', localityName: 'Area', localityAreaName: 'Town' },
+    stopLocality: {
+      localityId: "L001",
+      localityAreaId: "LA001",
+      localityName: "Area",
+      localityAreaName: "Town",
+    },
   },
   early,
   onTime,
@@ -29,27 +39,27 @@ const stopPerf = (early: number, onTime: number, late: number, stopId = 'S00001'
   completedRatio: 0,
 });
 
-describe('StopPerformanceService', () => {
+describe("StopPerformanceService", () => {
   let spectator: SpectatorService<StopPerformanceService>;
   const serviceFactory = createServiceFactory(StopPerformanceService);
 
   beforeEach(() => (spectator = serviceFactory()));
 
-  it('should merge OTP and transit model data', () => {
+  it("should merge OTP and transit model data", () => {
     const otpModel: StopPerformance[] = [
-      stopPerf(2, 1, 3, 'ST00001'),
-      stopPerf(4, 5, 6, 'ST00002'),
-      stopPerf(7, 8, 9, 'ST00003'),
+      stopPerf(2, 1, 3, "ST00001"),
+      stopPerf(4, 5, 6, "ST00002"),
+      stopPerf(7, 8, 9, "ST00003"),
     ];
     const transitModel: ServicePattern[] = [
       {
-        servicePatternId: '001',
-        name: 'A to B',
+        servicePatternId: "001",
+        name: "A to B",
         stops: [
-          { stopId: 'ST00001', stopName: 'A', lat: 50, lon: 0 },
-          { stopId: 'ST00002', stopName: 'B', lat: 51, lon: 0 },
-          { stopId: 'ST00003', stopName: 'C', lat: 52, lon: 0 },
-          { stopId: 'ST09999', stopName: 'Unknown', lat: 54, lon: 0 },
+          { stopId: "ST00001", stopName: "A", lat: 50, lon: 0 },
+          { stopId: "ST00002", stopName: "B", lat: 51, lon: 0 },
+          { stopId: "ST00003", stopName: "C", lat: 52, lon: 0 },
+          { stopId: "ST09999", stopName: "Unknown", lat: 54, lon: 0 },
         ],
         serviceLinks: [],
       },
@@ -59,19 +69,33 @@ describe('StopPerformanceService', () => {
 
     expect(actual?.length).toBeDefined();
 
-    const stop1 = actual.find((stop) => stop.stopId === 'ST00001');
+    const stop1 = actual.find((stop) => stop.stopId === "ST00001");
 
     expect(stop1).toBeDefined();
-    expect(stop1).toEqual(objectContaining({ stopId: 'ST00001', lat: 50, lon: 0, early: 2, noData: false }));
+    expect(stop1).toEqual(
+      objectContaining({
+        stopId: "ST00001",
+        lat: 50,
+        lon: 0,
+        early: 2,
+        noData: false,
+      }),
+    );
 
-    const unknownStop = actual.find((stop) => stop.stopId === 'ST09999');
+    const unknownStop = actual.find((stop) => stop.stopId === "ST09999");
 
     expect(unknownStop).toBeDefined();
-    expect(unknownStop).toEqual(objectContaining({ stopId: 'ST09999', lat: 54, lon: 0, noData: true }));
+    expect(unknownStop).toEqual(
+      objectContaining({ stopId: "ST09999", lat: 54, lon: 0, noData: true }),
+    );
   });
 
-  it('should produce normalized values', () => {
-    const stopPerformance: StopPerformance[] = [stopPerf(2, 1, 7), stopPerf(1, 7, 2), stopPerf(3, 6, 1)];
+  it("should produce normalized values", () => {
+    const stopPerformance: StopPerformance[] = [
+      stopPerf(2, 1, 7),
+      stopPerf(1, 7, 2),
+      stopPerf(3, 6, 1),
+    ];
 
     const actual = spectator.service.normalize(stopPerformance);
 
@@ -83,8 +107,12 @@ describe('StopPerformanceService', () => {
     expect(actual[0].lateNorm).toBeGreaterThan(1);
   });
 
-  it('should not produce normalized value of NaN when there is zero total lateness', () => {
-    const stopPerformance: StopPerformance[] = [stopPerf(3, 7, 0), stopPerf(1, 9, 0), stopPerf(2, 8, 0)];
+  it("should not produce normalized value of NaN when there is zero total lateness", () => {
+    const stopPerformance: StopPerformance[] = [
+      stopPerf(3, 7, 0),
+      stopPerf(1, 9, 0),
+      stopPerf(2, 8, 0),
+    ];
 
     const actual = spectator.service.normalize(stopPerformance);
 
@@ -95,8 +123,11 @@ describe('StopPerformanceService', () => {
     expect(actual[2].lateNorm).not.toBeNaN();
   });
 
-  it('should not produce normalized value of NaN when a stop is 100% early or late', () => {
-    const stopPerformance: StopPerformance[] = [stopPerf(3, 0, 0), stopPerf(0, 0, 2)];
+  it("should not produce normalized value of NaN when a stop is 100% early or late", () => {
+    const stopPerformance: StopPerformance[] = [
+      stopPerf(3, 0, 0),
+      stopPerf(0, 0, 2),
+    ];
 
     const actual = spectator.service.normalize(stopPerformance);
 
@@ -106,20 +137,20 @@ describe('StopPerformanceService', () => {
     expect(actual[1].lateNorm).not.toBeNaN();
   });
 
-  it('should tolerate zeroes in on-time performance data', () => {
+  it("should tolerate zeroes in on-time performance data", () => {
     const stopPerformance: StopPerformance[] = [
-      stopPerf(1, 0, 0, 'ST00001'),
-      stopPerf(0, 1, 0, 'ST00002'),
-      stopPerf(0, 0, 1, 'ST00003'),
+      stopPerf(1, 0, 0, "ST00001"),
+      stopPerf(0, 1, 0, "ST00002"),
+      stopPerf(0, 0, 1, "ST00003"),
     ];
     const transitModel: ServicePattern[] = [
       {
-        servicePatternId: '001',
-        name: 'A to B',
+        servicePatternId: "001",
+        name: "A to B",
         stops: [
-          { stopId: 'ST00001', stopName: 'A', lat: 50, lon: 0 },
-          { stopId: 'ST00002', stopName: 'B', lat: 51, lon: 0 },
-          { stopId: 'ST00003', stopName: 'C', lat: 52, lon: 0 },
+          { stopId: "ST00001", stopName: "A", lat: 50, lon: 0 },
+          { stopId: "ST00002", stopName: "B", lat: 51, lon: 0 },
+          { stopId: "ST00003", stopName: "C", lat: 52, lon: 0 },
         ],
         serviceLinks: [],
       },

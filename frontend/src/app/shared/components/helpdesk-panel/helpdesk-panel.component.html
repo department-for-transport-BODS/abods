@@ -1,4 +1,7 @@
-<div class="helpdesk-overlay" [ngClass]="{ 'helpdesk-overlay--open': isOpen }"></div>
+<div
+  class="helpdesk-overlay"
+  [ngClass]="{ 'helpdesk-overlay--open': isOpen }"
+></div>
 <div
   class="helpdesk-panel"
   [ngClass]="{ 'helpdesk-panel--open': isOpen }"
@@ -7,7 +10,11 @@
 >
   <div class="helpdesk-panel__heading">
     <h2 class="govuk-heading-l">{{ data?.title }}</h2>
-    <button type="button" class="helpdesk-panel__close-button button-link govuk-link" (click)="closeHelpdesk()">
+    <button
+      type="button"
+      class="helpdesk-panel__close-button button-link govuk-link"
+      (click)="closeHelpdesk()"
+    >
       Close
     </button>
   </div>
@@ -18,7 +25,10 @@
       [heading]="article.title"
       [summary]="article.seo_data.meta_description"
     >
-      <div class="govuk-body" [innerHTML]="article.description | freshdeskHtmlFormatter | trustMe"></div>
+      <div
+        class="govuk-body"
+        [innerHTML]="article.description | freshdeskHtmlFormatter | trustMe"
+      ></div>
     </gds-accordion-section>
   </gds-accordion>
 
@@ -28,7 +38,12 @@
       <p>We are working on adding more.</p>
       <p>
         If you have any questions or would like to leave feedback please email
-        <a class="govuk-link" href="mailto:bodshelpdesk@kpmg.co.uk" target="_blank">bodshelpdesk@kpmg.co.uk</a>
+        <a
+          class="govuk-link"
+          href="mailto:bodshelpdesk@kpmg.co.uk"
+          target="_blank"
+          >bodshelpdesk&#64;kpmg.co.uk</a
+        >
       </p>
     </div>
   </ng-template>

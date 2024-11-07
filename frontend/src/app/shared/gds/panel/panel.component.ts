@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from "@angular/core";
 
 @Component({
-  selector: 'gds-panel',
+  selector: "gds-panel",
   template: `
     <div class="govuk-panel govuk-panel--confirmation">
       <h1 *ngIf="title" class="govuk-panel__title">

@@ -1,6 +1,10 @@
-import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY, VirtualScrollStrategy } from '@angular/cdk/scrolling';
-import { fromEvent, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import {
+  CdkVirtualScrollViewport,
+  VIRTUAL_SCROLL_STRATEGY,
+  VirtualScrollStrategy,
+} from "@angular/cdk/scrolling";
+import { fromEvent, Observable, Subject } from "rxjs";
+import { distinctUntilChanged, takeUntil } from "rxjs/operators";
 import {
   AfterViewChecked,
   ChangeDetectorRef,
@@ -9,7 +13,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
-} from '@angular/core';
+} from "@angular/core";
 
 /**
  * Somewhere you'll also need to following styles...
@@ -32,7 +36,9 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
   private readonly destroy = new Subject<void>();
 
   constructor(private itemSize: number) {
-    this.scrolledIndexChange = this._scrolledIndexChange.pipe(distinctUntilChanged());
+    this.scrolledIndexChange = this._scrolledIndexChange.pipe(
+      distinctUntilChanged(),
+    );
     this.destroy$ = this.destroy.asObservable();
   }
 
@@ -41,7 +47,7 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
     this._updateTotalContentSize();
     this._updateRenderedRange();
 
-    fromEvent(window, 'scroll')
+    fromEvent(window, "scroll")
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this._updateRenderedRange();
@@ -90,7 +96,9 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
       return;
     }
 
-    this.viewport.setTotalContentSize(this.viewport.getDataLength() * this.itemSize);
+    this.viewport.setTotalContentSize(
+      this.viewport.getDataLength() * this.itemSize,
+    );
   }
 
   private _updateRenderedRange() {
@@ -99,10 +107,12 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
     }
 
     const viewportSize = window.innerHeight;
-    const viewportRect = this.viewport.elementRef.nativeElement.getBoundingClientRect();
+    const viewportRect =
+      this.viewport.elementRef.nativeElement.getBoundingClientRect();
 
     const top = Math.max(0, -viewportRect.top);
-    const bottom = Math.min(viewportSize, viewportRect.bottom) - viewportRect.top;
+    const bottom =
+      Math.min(viewportSize, viewportRect.bottom) - viewportRect.top;
 
     const start = Math.floor(top / this.itemSize);
     const end = Math.ceil(bottom / this.itemSize);
@@ -114,22 +124,27 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
 }
 
 @Directive({
-  selector: 'cdk-virtual-scroll-viewport[windowScrollStrategy]', // eslint-disable-line @angular-eslint/directive-selector
+  selector: "cdk-virtual-scroll-viewport[windowScrollStrategy]", // eslint-disable-line @angular-eslint/directive-selector
   providers: [
     {
       provide: VIRTUAL_SCROLL_STRATEGY,
-      useFactory: (directive: WindowVirtualScrollDirective) => directive.scrollStrategy,
+      useFactory: (directive: WindowVirtualScrollDirective) =>
+        directive.scrollStrategy,
       deps: [forwardRef(() => WindowVirtualScrollDirective)],
     },
   ],
 })
-export class WindowVirtualScrollDirective implements OnChanges, AfterViewChecked {
+export class WindowVirtualScrollDirective
+  implements OnChanges, AfterViewChecked
+{
   @Input() itemHeight = 0;
-  scrollStrategy: WindowVirtualScrollStrategy = new WindowVirtualScrollStrategy(this.itemHeight);
+  scrollStrategy: WindowVirtualScrollStrategy = new WindowVirtualScrollStrategy(
+    this.itemHeight,
+  );
   constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges) {
-    if ('itemHeight' in changes) {
+    if ("itemHeight" in changes) {
       this.scrollStrategy.update(this.itemHeight);
       this.changeDetectorRef.detectChanges();
     }

@@ -1,5 +1,5 @@
-@import 'src/assets/styles/settings/settings.scss';
-@import 'src/assets/styles/helpers/helpers.scss';
+@import "src/assets/styles/settings/settings.scss";
+@import "src/assets/styles/helpers/helpers.scss";
 
 :host {
   border-top: 1px solid $govuk-border-colour;
@@ -13,7 +13,7 @@
     padding: 5px 10px;
     margin: 0;
     font-size: rem(16);
-    color: govuk-colour('dark-grey');
+    color: govuk-colour("dark-grey");
     font-weight: 400;
   }
 }

@@ -1,4 +1,4 @@
-@import 'govuk-frontend/govuk/helpers/_colour.scss';
+@import "govuk-frontend/govuk/helpers/_colour.scss";
 
 // -----------------------------------------------------------------------------
 // Colors
@@ -15,13 +15,13 @@ $raas-colours: (
     6: #d4351c,
   ),
   on-time: (
-    base: govuk-colour('purple'),
+    base: govuk-colour("purple"),
   ),
   late: (
     base: #e5c700,
   ),
   early: (
-    base: govuk-colour('pink'),
+    base: govuk-colour("pink"),
   ),
 );
 

@@ -21,13 +21,18 @@ query route($groupId: String!) {
     operatorNoc
     lineName
     serviceId
-    serviceName,
-    startTime,
-    otp,
+    serviceName
+    startTime
+    otp
   }
 }
 
-query journeys($fromTimestamp: DateTime!, $toTimestamp: DateTime!, $lineId: String!, $filterOnStartTime: Boolean!) {
+query journeys(
+  $fromTimestamp: DateTime!
+  $toTimestamp: DateTime!
+  $lineId: String!
+  $filterOnStartTime: Boolean!
+) {
   vehicleReplay {
     findJourneys(
       inputs: {
