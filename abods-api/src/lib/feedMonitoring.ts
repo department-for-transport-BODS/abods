@@ -1,6 +1,6 @@
 import { VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
-import { feed_monitor_summary, Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
 export type ExpectedJourneyType = {

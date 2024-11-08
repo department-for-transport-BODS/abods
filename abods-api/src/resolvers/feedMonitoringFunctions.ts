@@ -1,7 +1,10 @@
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
+  EventResponse,
   EventStatsType,
+  FeedMonitoringType,
   FeedMonitoringTypeResolvers,
+  HistoricalStatsType,
   LiveStatsTypeResolvers,
   OperatorTypeResolvers,
   QueryResolvers,
@@ -22,7 +25,7 @@ export const getEventStats: QueryResolvers["eventStats"] = () => {
   const eventStats: EventStatsType[] = [];
   // Get data for the previous 90 days before today
   const currentTime = getDate()
-  let startdate = today.subtract(90, "day");
+  let startdate = currentTime.subtract(90, "day");
 
   while (startdate.isBefore(currentTime)) {
     eventStats.push({
@@ -30,13 +33,13 @@ export const getEventStats: QueryResolvers["eventStats"] = () => {
       day: startdate.format("YYYY-MM-DD"),
     });
 
-    startdate = startdate.add(1, "day");
-  }
-  return eventStats;
-};
+      startdate = startdate.add(1, "day");
+    }
+    return eventStats;
+  };
 
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
-  async (parent, _, context) => {
+  async (parent, _, context): Promise<VehicleStatsType[]> => {
     const statsDate = getDate();
     let expectedJourneys: ExpectedJourneyType[] = [];
 
@@ -67,7 +70,7 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"]
   };
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
-  async (parent, args, context) => {
+  async (parent, args, context): Promise<HistoricalStatsType> => {
     const result = await context.db.feed_monitor_daily_summary.findFirst({
       where: {
         operator_noc: parent.operatorId,
@@ -85,20 +88,20 @@ export const getExpectedVehicles: LiveStatsTypeResolvers["expectedVehicles"] = (
   parent,
   _,
   context,
-) => {
+): Promise<number> => {
   return parent.operatorId
     ? getVehicles(parent.operatorId, context.db, VehicleCountType.Expected)
-    : 0;
+    : Promise.resolve(0);
 };
 
 export const getActualVehicles: LiveStatsTypeResolvers["currentVehicles"] = (
   parent,
   _,
   context,
-) => {
+): Promise<number> => {
   return parent.operatorId
     ? getVehicles(parent.operatorId, context.db, VehicleCountType.Actual)
-    : 0;
+    : Promise.resolve(0);
 };
 
 export const getVehicles = async (
@@ -127,7 +130,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   args,
   context,
   info,
-) => {
+): Promise<VehicleStatsType[]> => {
   const result = await context.db.feed_monitor_hourly_summary.findMany({
     where: {
       operator_noc: parent.operatorId,
@@ -168,14 +171,15 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
     }));
   };
 
-const getEvents: QueryResolvers["events"] = async () => {
-  return {
-    items: [],
+const getEvents: QueryResolvers["events"] =
+  async (): Promise<EventResponse> => {
+    return {
+      items: [],
+    };
   };
-};
 
 export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
-  async (parent, _, context) => {
+  async (parent, _, context): Promise<FeedMonitoringType> => {
     if (!parent.operatorId) throw "Parent data not set";
     const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
       context.db,
