@@ -20,7 +20,8 @@ import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 
 export const getEventStats: QueryResolvers["eventStats"] = () => {
   const eventStats: EventStatsType[] = [];
-  const today = getDate()
+  // Get data for the previous 90 days before today
+  const currentTime = getDate()
   let startdate = today.subtract(90, "day");
 
   while (startdate.isBefore(today)) {
