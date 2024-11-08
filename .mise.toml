@@ -66,3 +66,7 @@ run = "npm run build"
 
 [tasks.build]
 depends = ["build:frontend", "build:backend"]
+
+[tasks.start]
+description = "Run db proxy, api, and frontend"
+run = "assume --exec -- npm start"

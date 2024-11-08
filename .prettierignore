@@ -7,6 +7,6 @@ package-lock.json
 /frontend/src/generated/graphql.ts
 /frontend/graphql.schema.json
 
-.husky/pre-commit
-.prettierignore
+# Files that can't be parsed
+.*
 VERSION

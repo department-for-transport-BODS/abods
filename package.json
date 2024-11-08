@@ -4,6 +4,10 @@
     "fmt": "prettier -w .",
     "fmt:check": "prettier --check .",
     "postinstall": "(cd abods-api && npm install); (cd frontend && npm install)",
+    "db": "./scripts/db_connect.sh",
+    "start:api": "(cd abods-api && npm run start:local)",
+    "start:app": "(cd frontend && npm start)",
+    "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",
     "prepare": "(npm run codegen) && husky"
   },
   "devDependencies": {
@@ -13,6 +17,7 @@
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
     "@graphql-codegen/typescript-operations": "^4.3.0",
     "@graphql-codegen/typescript-resolvers": "^4.3.0",
+    "concurrently": "^9.1.0",
     "graphql-scalars": "^1.23.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
