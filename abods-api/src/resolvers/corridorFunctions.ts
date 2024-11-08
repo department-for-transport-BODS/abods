@@ -17,6 +17,7 @@ import {
   updateCorridorDb,
 } from "../lib/corridor.js";
 import {
+  CorridorGranularity,
   CorridorJourneyTimeStatsType,
   CorridorNamespaceResolvers,
   CorridorStatsDayOfWeekType,
@@ -29,7 +30,6 @@ import {
   CorridorSummaryStatsType,
   CorridorType,
   EstimatedToggle,
-  InputMaybe,
   Maybe,
   MutationResolvers,
   MutationResponseType,
@@ -162,7 +162,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
         matchStopPattern = `,${matchStopPattern}`;
       }
       const matches = data.route.match(matchStopPattern.concat("(.*)"));
-      if (matches && matches[1]) {
+      if (matches?.[1]) {
         const commaIndex = matches[1].indexOf(",");
         const nextStop = Number(
           commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1],
@@ -211,8 +211,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   context,
 ): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
-  if (!args.payload?.name || !args.payload.stopIds)
-    throw "Bad Request";
+  if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
   if (!user.orgIds[0]) throw "Invalid session data";
 
   const corridor = await context.db.corridor.create({
@@ -495,7 +494,7 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    return (data.inputs || {}).granularity === "day"
+    return data.inputs?.granularity === CorridorGranularity.Day
       ? getJourneyStats(
           data.journeys,
           CorridorJourneyStatsOption.day,

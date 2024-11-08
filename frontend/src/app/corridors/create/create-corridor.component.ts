@@ -137,7 +137,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     );
 
     const resetLocationSearch$ = combineLatest([
-      this.stopList$.pipe(startWith(([] as CorridorStop[]))),
+      this.stopList$.pipe(startWith([] as CorridorStop[])),
       this.searchMode.valueChanges.pipe(startWith("location")),
     ]).pipe(share());
 

@@ -76,4 +76,4 @@ const main = async () => {
   console.log(awsSecretContent);
 };
 
-main();
+await main();

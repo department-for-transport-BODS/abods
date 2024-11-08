@@ -8,11 +8,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import {
-  AlertTypeEnum,
-  Granularity,
-  VehicleStatsType,
-} from "src/generated/graphql";
+import { AlertTypeEnum, VehicleStatsType } from "src/generated/graphql";
 import { ChartService } from "src/app/shared/components/amcharts/chart.service";
 
 import * as am4core from "@amcharts/amcharts4/core";

@@ -215,10 +215,11 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
         this.data = data.map((op) => {
           return {
             ...op,
-            adminAreaIds: operators
-              .find((a) => a?.operatorId === op.operatorId)
-              ?.adminAreaIds?.map((a) => a)
-              .filter((a) => params.filters.adminAreaIds?.includes(a))!,
+            adminAreaIds:
+              operators
+                .find((a) => a?.operatorId === op.operatorId)
+                ?.adminAreaIds?.map((a) => a)
+                .filter((a) => params.filters.adminAreaIds?.includes(a)) ?? [],
           };
         });
       });

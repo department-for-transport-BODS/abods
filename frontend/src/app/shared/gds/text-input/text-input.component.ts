@@ -117,7 +117,11 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   setDisabledState(isDisabled: boolean) {
-    isDisabled ? this.control.disable() : this.control.enable();
+    if (isDisabled) {
+      this.control.disable();
+    } else {
+      this.control.enable();
+    }
   }
 
   preventCalendarPopupFF(event: Event) {

@@ -114,22 +114,22 @@ export class FilterChipsComponent implements OnChanges {
   }
 
   onClearDayOfWeekFilter() {
-    const { dayOfWeekFlags, ...filters } = this.filters;
+    const { dayOfWeekFlags: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearTimeRangeFilter() {
-    const { startTime, endTime, ...filters } = this.filters;
+    const { startTime: _, endTime: __, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearMinDelayFilter() {
-    const { minDelay, ...filters } = this.filters;
+    const { minDelay: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearMaxDelayFilter() {
-    const { maxDelay, ...filters } = this.filters;
+    const { maxDelay: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 

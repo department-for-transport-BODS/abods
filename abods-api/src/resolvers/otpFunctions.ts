@@ -58,18 +58,6 @@ interface DayCount {
   late: number;
 }
 
-interface TimeCount {
-  timeOfDay: string;
-  early: number;
-  onTime: number;
-  late: number;
-}
-
-interface distribution {
-  noOfStops: number;
-  performanceInMins: number;
-}
-
 export const getOperatorList: QueryResolvers["operators"] = async (
   _,
   args,
@@ -497,9 +485,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         },
       });
 
-      for (let i = 0; i < operators.length; i++) {
+      for (const item of operators) {
         const operatorOtpStats = results.find(
-          (o) => o.operator_noc == operators[i].nocCode,
+          (o) => o.operator_noc == item.nocCode,
         );
         if (operatorOtpStats && operatorOtpStats._sum) {
           const totalOntime = operatorOtpStats._sum.on_time_count
@@ -519,9 +507,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               : 0;
 
           const opPerformance: OperatorPerformanceType = {
-            nocCode: operators[i].nocCode,
-            operatorId: operators[i].nocCode,
-            name: operators[i].name,
+            nocCode: item.nocCode,
+            operatorId: item.nocCode,
+            name: item.name,
             early: totalEarly,
             late: totalLate,
             onTime: totalOntime,
@@ -561,10 +549,8 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     try {
       const user = await requireUserSession(context);
 
-      const { filters } = args.inputs;
-      let { operatorIds, lineIds } = filters || {};
-
-      operatorIds = operatorIds || [];
+      const lineIds = args.inputs.filters.lineIds;
+      const operatorIds = args.inputs.filters.operatorIds || [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -761,9 +747,8 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
       // bucket is the number difference in the OTP table
       // freq is the count of that difference
 
-      const { filters } = args.inputs;
-      let { operatorIds, lineIds } = filters || {};
-      operatorIds = operatorIds || [];
+      const operatorIds = args.inputs.filters?.operatorIds || [];
+      const lineIds = args.inputs.filters?.lineIds;
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -842,8 +827,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
       logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
 
       const { filters } = args.inputs;
-      let { operatorIds, granularity, lineIds } = filters || {};
-      operatorIds = operatorIds || [];
+      const { granularity, lineIds } = filters || {};
+      const operatorIds = filters?.operatorIds || [];
 
       if (operatorIds.length == 1) {
         //if (granularity == "day" && operatorIds.length == 1) {
@@ -1153,8 +1138,8 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 },
                 sourceId: stop?.atco_code ?? "",
                 stopLocation: {
-                  longitude: Number(stop?.longitude) ?? 0,
-                  latitude: Number(stop?.latitude) ?? 0,
+                  longitude: stop?.longitude ?? 0,
+                  latitude: stop?.latitude ?? 0,
                 },
               },
               early: res._sum?.early_count ? res._sum.early_count : 0,
@@ -1596,10 +1581,9 @@ const getPrismaFiltersForOTPQuery = (
   isThreshold?: boolean,
 ) => {
   const { fromTimestamp, toTimestamp, filters } = inputs || {};
-  let {
+  const {
     timingPointsOnly,
     adminAreaIds,
-    operatorIds,
     operatorId,
     startTime,
     endTime,
@@ -1609,7 +1593,7 @@ const getPrismaFiltersForOTPQuery = (
     lineId,
     dayOfWeekFlags,
   } = filters || {};
-  operatorIds = operatorIds || [];
+  const operatorIds = filters?.operatorIds || [];
 
   // filter list of users' nocs to either operator nocs from filter OR full list
   let nocListToFilter: string[] = [];
@@ -1628,10 +1612,6 @@ const getPrismaFiltersForOTPQuery = (
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
-  // parse startime and endtime minutes/hours
-  const start = new Date();
-  const end = new Date();
-
   // date_of_journey - add an hour to from timestamp to prevent single day condition issues
   const fromMlSeconds = new Date(fromTimestamp).getTime();
   const addMlSeconds = 60 * 60 * 1000;
@@ -1643,7 +1623,7 @@ const getPrismaFiltersForOTPQuery = (
   );
 
   if (startTime && startTime !== "00:00") {
-    const [hours, minutes, seconds] = startTime.split(":").map(Number);
+    const [hours, minutes, _] = startTime.split(":").map(Number);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("hour", hours);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
       "minute",
@@ -1654,7 +1634,7 @@ const getPrismaFiltersForOTPQuery = (
   }
 
   if (endTime) {
-    const [hours, minutes, seconds] = endTime.split(":").map(Number);
+    const [hours, minutes, _] = endTime.split(":").map(Number);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("hour", hours);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("minute", minutes);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("second", 0);

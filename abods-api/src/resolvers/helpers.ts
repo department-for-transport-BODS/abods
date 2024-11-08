@@ -16,7 +16,7 @@ export const throwUnauthenticatedError = (
   });
 };
 
-export const emptyResolver = async () => ({});
+export const emptyResolver = () => ({});
 
 export const requireUserSession = async (context: RequestContext) => {
   const cookieHeader = getHeader(context.headers, "Cookie");

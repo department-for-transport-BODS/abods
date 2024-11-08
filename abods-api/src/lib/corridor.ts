@@ -162,11 +162,9 @@ export const filteredJourneys = (
   stopCount: number,
   journeyMap: Map<string, Timetable[]>,
 ): Map<string, Timetable[]> => {
-  const filteredJourneyMap = new Map<string, Timetable[]>(
-    [...journeyMap.entries()].filter(([key, arr]) => arr.length === stopCount),
+  return new Map<string, Timetable[]>(
+    [...journeyMap.entries()].filter(([_, arr]) => arr.length === stopCount),
   );
-
-  return filteredJourneyMap;
 };
 
 export const isCorridorMappedToUserOrg = async (

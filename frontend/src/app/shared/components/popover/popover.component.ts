@@ -47,8 +47,7 @@ export class PopoverComponent implements OnInit {
   }
 
   setPositionForPopover(): void {
-    (this.tippyProps.placement = this.position || "auto"),
-      (this.tippyProps.offset =
-        this.triggerType === "button" ? [0, 30] : [0, 20]);
+    this.tippyProps.placement = this.position || "auto";
+    this.tippyProps.offset = this.triggerType === "button" ? [0, 30] : [0, 20];
   }
 }

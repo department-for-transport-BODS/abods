@@ -88,6 +88,7 @@ const getClientHashFromAWS = async (): Promise<AuthContext> => {
     throw new Error("Token Hash Secret not found in AWS Secrets Manager");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const secret: AuthContext = JSON.parse(response.SecretString);
   if (!secret.allowedTokenHash || !secret.Hmac) {
     const missingFields = {

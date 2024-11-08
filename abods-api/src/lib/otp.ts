@@ -122,14 +122,14 @@ export const compareThresholds = async (
   } = {};
 
   if (startTime) {
-    const [hours, minutes, seconds] = startTime.split(":").map(Number);
+    const [hours, minutes, _] = startTime.split(":").map(Number);
     start.setHours(hours);
     start.setMinutes(minutes);
     departure_hour.gte = start;
   }
 
   if (endTime) {
-    const [hours, minutes, seconds] = endTime.split(":").map(Number);
+    const [hours, minutes, _] = endTime.split(":").map(Number);
     end.setHours(hours);
     end.setMinutes(minutes);
     departure_hour.lte = end;

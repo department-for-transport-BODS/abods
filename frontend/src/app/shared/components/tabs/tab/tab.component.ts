@@ -21,7 +21,11 @@ export class TabComponent {
 
   set active(value: boolean) {
     if (value !== this._active) {
-      value ? this.opened.emit() : this.closed.emit();
+      if (value) {
+        this.opened.emit();
+      } else {
+        this.closed.emit();
+      }
     }
     this._active = value;
   }

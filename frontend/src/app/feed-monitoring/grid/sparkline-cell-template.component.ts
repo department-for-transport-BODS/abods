@@ -40,9 +40,8 @@ export class SparklineCellTemplateComponent
     this.subs.push(
       this.processingQueue
         .pipe(
-          filter(
-            ({ data }) =>
-              data && data.some(({ actual }) => actual && actual > 0),
+          filter(({ data }) =>
+            data?.some(({ actual }) => actual && actual > 0),
           ),
           concatMap(({ data, callback }) => {
             if (this.renderedCharts.has(data)) {
@@ -70,7 +69,7 @@ export class SparklineCellTemplateComponent
     }
     const invalidSprites = am4core.registry.invalidSprites[this.chart.uid];
 
-    if (invalidSprites && invalidSprites.length) {
+    if (invalidSprites?.length) {
       am4core.registry.events.once("exitframe", () => {
         this.createImage(callback);
       });

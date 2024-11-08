@@ -11,9 +11,11 @@ export class ChartNoDataScreen<TDataType>
 
   onChanges(changes: SimpleChanges): void {
     if (changes.noData && this.noDataScreen) {
-      changes.noData.currentValue
-        ? this.noDataScreen.show()
-        : this.noDataScreen.hide();
+      if (changes.noData.currentValue) {
+        this.noDataScreen.show();
+      } else {
+        this.noDataScreen.hide();
+      }
     }
   }
 
@@ -22,7 +24,11 @@ export class ChartNoDataScreen<TDataType>
       component.chart.tooltipContainer?.createChild(Container);
     if (this.noDataScreen) {
       messageScreen(this.noDataScreen, "warn", "No data");
-      component.noData ? this.noDataScreen.show(0) : this.noDataScreen.hide(0);
+      if (component.noData) {
+        this.noDataScreen.show(0);
+      } else {
+        this.noDataScreen.hide(0);
+      }
     }
   }
 }

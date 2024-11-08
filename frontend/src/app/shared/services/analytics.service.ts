@@ -44,7 +44,11 @@ export class AnalyticsService {
     private cookiePolicyService: CookiePolicyService,
   ) {
     const policy = this.cookiePolicyService.getAnalyticsPolicy();
-    policy.analyticsEnabled ? this.enableAnalytics() : this.disableAnalytics();
+    if (policy.analyticsEnabled) {
+      this.enableAnalytics();
+    } else {
+      this.disableAnalytics();
+    }
   }
 
   private analyticsEnabled$ = new BehaviorSubject<boolean>(false);

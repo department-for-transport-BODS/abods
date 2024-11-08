@@ -11,9 +11,11 @@ export class ChartLoadingScreen<TDataType>
 
   onChanges(changes: SimpleChanges): void {
     if (changes.loading && this.loadingScreen) {
-      changes.loading.currentValue
-        ? this.loadingScreen.show()
-        : this.loadingScreen.hide();
+      if (changes.loading.currentValue) {
+        this.loadingScreen.show();
+      } else {
+        this.loadingScreen.hide();
+      }
     }
   }
 
@@ -22,9 +24,11 @@ export class ChartLoadingScreen<TDataType>
       component.chart.tooltipContainer?.createChild(Container);
     if (this.loadingScreen) {
       loadingSpinner(this.loadingScreen);
-      component.loading
-        ? this.loadingScreen.show(0)
-        : this.loadingScreen.hide(0);
+      if (component.loading) {
+        this.loadingScreen.show(0);
+      } else {
+        this.loadingScreen.hide(0);
+      }
     }
   }
 }

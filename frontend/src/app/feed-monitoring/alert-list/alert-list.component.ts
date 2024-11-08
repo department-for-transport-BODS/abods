@@ -11,7 +11,6 @@ import {
 import { DateTime } from "luxon";
 import { combineLatest, of, Subject } from "rxjs";
 import { filter, switchMap, takeUntil, tap } from "rxjs/operators";
-import { EventType } from "src/generated/graphql";
 import { FeedMonitoringService } from "../feed-monitoring.service";
 import { AlertMode, AlertListViewModel } from "./alert-list-view-model";
 

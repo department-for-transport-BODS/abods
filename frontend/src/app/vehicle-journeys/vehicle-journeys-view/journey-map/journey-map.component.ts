@@ -21,7 +21,10 @@ import { AvlPoint, OtpEnum, Stop } from "../../../../generated/graphql";
 import { DateTime } from "luxon";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
 
-interface LineSegmentProps { id: string; onTimePerformance: OtpEnum | null }
+interface LineSegmentProps {
+  id: string;
+  onTimePerformance: OtpEnum | null;
+}
 
 export const createStopModel = (stop: Stop, estimated: boolean) => ({
   id: stop.stopId.toString(),

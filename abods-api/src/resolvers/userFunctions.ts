@@ -167,7 +167,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
           : null,
       };
     });
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -282,7 +282,7 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
     }
 
     return getUserAlertFromDb(args.alertId, user.id, context.db);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -372,9 +372,9 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       success: false,
     };
   }
@@ -416,9 +416,9 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       success: false,
     };
   }
@@ -448,9 +448,9 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       success: false,
     };
   }

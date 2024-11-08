@@ -58,7 +58,6 @@ export class XYChartComponent implements OnInit, OnDestroy {
     return this.chart;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
     private zone: NgZone,

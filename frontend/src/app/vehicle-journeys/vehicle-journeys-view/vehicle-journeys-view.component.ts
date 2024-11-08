@@ -20,7 +20,10 @@ import { DateTime } from "luxon";
 import { AvlPoint, AvlsGQL, RouteGQL, Stop } from "../../../generated/graphql";
 import { distinctUntilChanged } from "rxjs/operators";
 
-export interface JourneyInfo { stops: Stop[]; avls: AvlPoint[] }
+export interface JourneyInfo {
+  stops: Stop[];
+  avls: AvlPoint[];
+}
 
 @Component({
   selector: "app-vehicle-journeys-view",
