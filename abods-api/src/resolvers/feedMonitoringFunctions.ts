@@ -24,7 +24,7 @@ export const getEventStats: QueryResolvers["eventStats"] = () => {
   const currentTime = getDate()
   let startdate = today.subtract(90, "day");
 
-  while (startdate.isBefore(today)) {
+  while (startdate.isBefore(currentTime)) {
     eventStats.push({
       count: 0,
       day: startdate.format("YYYY-MM-DD"),
