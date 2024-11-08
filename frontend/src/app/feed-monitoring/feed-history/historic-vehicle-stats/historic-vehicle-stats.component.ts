@@ -82,11 +82,10 @@ export class HistoricVehicleStatsComponent
       };
     });
 
-    const minDateTime =
-      this.date?.startOf("day").toUTC() ?? protoViewData[0].dateTime;
-    const maxDateTime =
-      this.date?.endOf("day").toUTC() ??
-      protoViewData[protoViewData.length - 1].dateTime;
+    const minDateTime = protoViewData[0].dateTime;
+    const maxDateTime = protoViewData[protoViewData.length - 1].dateTime.plus({
+      minutes: 1,
+    });
 
     this.chartInterval = Interval.fromDateTimes(minDateTime, maxDateTime);
 
