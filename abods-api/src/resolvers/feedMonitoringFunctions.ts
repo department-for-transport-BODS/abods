@@ -21,21 +21,22 @@ import {
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 
-export const getEventStats: QueryResolvers["eventStats"] =
-  (): EventStatsType[] => {
-    const eventStats: EventStatsType[] = [];
-    let startdate = getDate().subtract(90, "day");
+export const getEventStats: QueryResolvers["eventStats"] = () => {
+  const eventStats: EventStatsType[] = [];
+  // Get data for the previous 90 days before today
+  const currentTime = getDate();
+  let startdate = currentTime.subtract(90, "day");
 
-    while (!startdate.isAfter(getDate())) {
-      eventStats.push({
-        count: 0,
-        day: startdate.format("YYYY-MM-DD"),
-      });
+  while (startdate.isBefore(currentTime)) {
+    eventStats.push({
+      count: 0,
+      day: startdate.format("YYYY-MM-DD"),
+    });
 
-      startdate = startdate.add(1, "day");
-    }
-    return eventStats;
-  };
+    startdate = startdate.add(1, "day");
+  }
+  return eventStats;
+};
 
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
   async (parent, _, context): Promise<VehicleStatsType[]> => {
