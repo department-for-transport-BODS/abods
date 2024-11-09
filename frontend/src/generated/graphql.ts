@@ -21,7 +21,7 @@ export type Scalars = {
 };
 
 export type AddFirstStopInputType = {
-  adminAreaIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
   searchString?: InputMaybe<Scalars['String']['input']>;
 };
@@ -39,7 +39,7 @@ export type AdminAreasType = {
 };
 
 export type AlertInputType = {
-  alertType?: InputMaybe<AlertTypeEnum>;
+  alertType: AlertTypeEnum;
   eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
   eventThreshold?: InputMaybe<Scalars['Int']['input']>;
   sendTo: AlertReferenceInput;
@@ -105,10 +105,10 @@ export type AvlPoint = {
 };
 
 export type BoundingBoxInputType = {
-  maxLatitude?: InputMaybe<Scalars['Float']['input']>;
-  maxLongitude?: InputMaybe<Scalars['Float']['input']>;
-  minLatitude?: InputMaybe<Scalars['Float']['input']>;
-  minLongitude?: InputMaybe<Scalars['Float']['input']>;
+  maxLatitude: Scalars['Float']['input'];
+  maxLongitude: Scalars['Float']['input'];
+  minLatitude: Scalars['Float']['input'];
+  minLongitude: Scalars['Float']['input'];
 };
 
 export enum CorridorGranularity {
@@ -124,8 +124,8 @@ export type CorridorHistogramType = {
 };
 
 export type CorridorInputType = {
-  name?: InputMaybe<Scalars['String']['input']>;
-  stopIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  name: Scalars['String']['input'];
+  stopIds: Array<Scalars['String']['input']>;
 };
 
 export type CorridorJourneyTimeStatsType = {
@@ -183,7 +183,7 @@ export type CorridorStatsDayOfWeekType = {
 
 export type CorridorStatsHistogramType = {
   __typename?: 'CorridorStatsHistogramType';
-  hist?: Maybe<Array<Maybe<CorridorHistogramType>>>;
+  hist?: Maybe<Array<CorridorHistogramType>>;
   ts?: Maybe<Scalars['String']['output']>;
 };
 
@@ -191,7 +191,7 @@ export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
   fromTimestamp: Scalars['DateTime']['input'];
   granularity: CorridorGranularity;
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stopList: Array<Scalars['String']['input']>;
   toTimestamp: Scalars['DateTime']['input'];
 };
 
@@ -250,9 +250,9 @@ export type CorridorType = {
 };
 
 export type CorridorUpdateInputType = {
-  id?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  id: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  stopList: Array<Scalars['String']['input']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -328,7 +328,7 @@ export type FrequentServiceInfoFilterType = {
 };
 
 export type FrequentServiceInfoInputType = {
-  filters?: InputMaybe<FrequentServiceInfoFilterType>;
+  filters: FrequentServiceInfoFilterType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -371,13 +371,13 @@ export type HeadwayFiltersInputType = {
   endTime?: InputMaybe<Scalars['String']['input']>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type HeadwayInputType = {
-  filters?: InputMaybe<HeadwayFiltersInputType>;
+  filters: HeadwayFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -438,8 +438,8 @@ export enum HeadwaySortEnum {
 }
 
 export type HeadwaySortType = {
-  field?: InputMaybe<HeadwaySortEnum>;
-  order?: InputMaybe<SortOrderEnum>;
+  field: HeadwaySortEnum;
+  order: SortOrderEnum;
 };
 
 export type HeadwayTimeOfDayType = {
@@ -468,7 +468,7 @@ export type HistoricalStatsType = {
 
 export type InvitationInput = {
   email: Scalars['String']['input'];
-  organisation?: InputMaybe<OrganisationReferenceInput>;
+  organisation: OrganisationReferenceInput;
   role: RoleReferenceInput;
 };
 
@@ -565,12 +565,12 @@ export type MutationAddUserAlertArgs = {
 
 
 export type MutationCreateCorridorArgs = {
-  payload?: InputMaybe<CorridorInputType>;
+  payload: CorridorInputType;
 };
 
 
 export type MutationDeleteCorridorArgs = {
-  corridorId?: InputMaybe<Scalars['Int']['input']>;
+  corridorId: Scalars['Int']['input'];
 };
 
 
@@ -614,12 +614,12 @@ export type MutationSignUpArgs = {
 
 
 export type MutationUpdateCorridorArgs = {
-  inputs?: InputMaybe<CorridorUpdateInputType>;
+  inputs: CorridorUpdateInputType;
 };
 
 
 export type MutationUpdateUserArgs = {
-  payload?: InputMaybe<UserUpdateInput>;
+  payload: UserUpdateInput;
   username: Scalars['String']['input'];
 };
 
@@ -701,7 +701,7 @@ export type OnTimePerformanceTypeStopPerformanceArgs = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds: Array<Scalars['String']['input']>;
 };
 
 export type OperatorInfoType = {
@@ -774,8 +774,8 @@ export type PaginatedLineType = {
 };
 
 export type PagingInputType = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after: Scalars['Int']['input'];
+  first: Scalars['Int']['input'];
 };
 
 export type PerformanceFiltersInputType = {
@@ -784,25 +784,25 @@ export type PerformanceFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
-  excludedDates?: InputMaybe<Array<InputMaybe<Scalars['Date']['input']>>>;
+  excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
   lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
   minDelay?: InputMaybe<Scalars['Int']['input']>;
-  nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   onTimeMaxMinutes?: InputMaybe<Scalars['Int']['input']>;
   onTimeMinMinutes?: InputMaybe<Scalars['Int']['input']>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
-  startTimes?: InputMaybe<Array<InputMaybe<Scalars['Time']['input']>>>;
+  startTimes?: InputMaybe<Array<Scalars['Time']['input']>>;
   stopsSegment?: InputMaybe<StopsSegment>;
-  tagIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  tagIds?: InputMaybe<Array<Scalars['Int']['input']>>;
   timingPointsOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PerformanceInputType = {
-  filters?: InputMaybe<PerformanceFiltersInputType>;
+  filters: PerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   paging?: InputMaybe<PagingInputType>;
   toTimestamp: Scalars['DateTime']['input'];
@@ -823,8 +823,8 @@ export enum PunctualitySortEnum {
 }
 
 export type PunctualitySortType = {
-  field?: InputMaybe<PunctualitySortEnum>;
-  order?: InputMaybe<SortOrderEnum>;
+  field: PunctualitySortEnum;
+  order: SortOrderEnum;
 };
 
 export type PunctualityTimeOfDayType = {
@@ -879,7 +879,7 @@ export type Query = {
 
 
 export type QueryAdminAreasArgs = {
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adminAreaIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -929,11 +929,6 @@ export type QueryRouteArgs = {
 
 export type QueryServiceInfoArgs = {
   serviceId: Scalars['String']['input'];
-};
-
-
-export type QueryUserArgs = {
-  id?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -987,14 +982,14 @@ export type ServicePatternType = {
 };
 
 export type ServicePerformanceFiltersInputType = {
-  operatorIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   timingPointsOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ServicePerformanceInputType = {
-  filters?: InputMaybe<ServicePerformanceFiltersInputType>;
+  filters: ServicePerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
-  order?: InputMaybe<RankingOrder>;
+  order: RankingOrder;
   toTimestamp: Scalars['DateTime']['input'];
 };
 
@@ -1144,7 +1139,7 @@ export type UserType = {
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role?: InputMaybe<RoleReferenceInput>;
+  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1155,12 +1150,12 @@ export type UserUpdateResponseType = {
 
 export type VehicleReplayFilterInputType = {
   filterOnStartTime?: InputMaybe<Scalars['Boolean']['input']>;
-  lineIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  stopIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  stopIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type VehicleReplayInputType = {
-  filters?: InputMaybe<VehicleReplayFilterInputType>;
+  filters: VehicleReplayFilterInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -1231,11 +1226,11 @@ export type CorridorStatsQueryVariables = Exact<{
 }>;
 
 
-export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageJourneyTime?: number | null, scheduledTransits?: number | null } | null, journeyTimeStats?: Array<{ __typename?: 'CorridorJourneyTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalJourneyTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, journeyTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null } | null> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null } | null> | null } | null } | null };
+export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageJourneyTime?: number | null, scheduledTransits?: number | null } | null, journeyTimeStats?: Array<{ __typename?: 'CorridorJourneyTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalJourneyTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, journeyTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null }> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null } | null> | null } | null } | null };
 
 export type CreateCorridorMutationVariables = Exact<{
   name: Scalars['String']['input'];
-  stopIds: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+  stopIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
@@ -1319,7 +1314,7 @@ export type FeedMonitoringListQueryVariables = Exact<{ [key: string]: never; }>;
 export type FeedMonitoringListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items?: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null } | null> | null } | null };
 
 export type OperatorSparklineStatsQueryVariables = Exact<{
-  operatorIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
@@ -1343,7 +1338,7 @@ export type OperatorHistoricStatsQueryVariables = Exact<{
 export type OperatorHistoricStatsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
 
 export type GetAdminAreasQueryVariables = Exact<{
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  adminAreaIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
@@ -1506,7 +1501,7 @@ export type InviteUserMutation = { __typename?: 'Mutation', inviteUser: { __type
 
 export type UpdateUserAlertMutationVariables = Exact<{
   alertId: Scalars['String']['input'];
-  alertType?: InputMaybe<AlertTypeEnum>;
+  alertType: AlertTypeEnum;
   sendToId: Scalars['String']['input'];
   eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
   eventThreshold?: InputMaybe<Scalars['Int']['input']>;
@@ -1516,7 +1511,7 @@ export type UpdateUserAlertMutationVariables = Exact<{
 export type UpdateUserAlertMutation = { __typename?: 'Mutation', updateUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
 
 export type CreateUserAlertMutationVariables = Exact<{
-  alertType?: InputMaybe<AlertTypeEnum>;
+  alertType: AlertTypeEnum;
   sendToId: Scalars['String']['input'];
   eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
   eventThreshold?: InputMaybe<Scalars['Int']['input']>;
@@ -1994,7 +1989,7 @@ export const CorridorStatsDocument = gql`
     }
   }
 export const CreateCorridorDocument = gql`
-    mutation createCorridor($name: String!, $stopIds: [String]!) {
+    mutation createCorridor($name: String!, $stopIds: [String!]!) {
   createCorridor(payload: {name: $name, stopIds: $stopIds}) {
     success
     error
@@ -2206,7 +2201,7 @@ export const FeedMonitoringListDocument = gql`
     }
   }
 export const OperatorSparklineStatsDocument = gql`
-    query operatorSparklineStats($operatorIds: [String!]) {
+    query operatorSparklineStats($operatorIds: [String!]!) {
   operators(filterBy: {operatorIds: $operatorIds}) {
     items {
       nocCode
@@ -2270,7 +2265,7 @@ export const OperatorHistoricStatsDocument = gql`
     }
   }
 export const GetAdminAreasDocument = gql`
-    query getAdminAreas($adminAreaIds: [String!]) {
+    query getAdminAreas($adminAreaIds: [String!]!) {
   adminAreas(adminAreaIds: $adminAreaIds) {
     id: adminAreaId
     name: adminAreaName
@@ -2801,7 +2796,7 @@ export const InviteUserDocument = gql`
     }
   }
 export const UpdateUserAlertDocument = gql`
-    mutation updateUserAlert($alertId: String!, $alertType: AlertTypeEnum, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
+    mutation updateUserAlert($alertId: String!, $alertType: AlertTypeEnum!, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
   updateUserAlert(
     alertId: $alertId
     payload: {alertType: $alertType, sendTo: {id: $sendToId}, eventHysterisis: $eventHysterisis, eventThreshold: $eventThreshold}
@@ -2823,7 +2818,7 @@ export const UpdateUserAlertDocument = gql`
     }
   }
 export const CreateUserAlertDocument = gql`
-    mutation createUserAlert($alertType: AlertTypeEnum, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
+    mutation createUserAlert($alertType: AlertTypeEnum!, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
   addUserAlert(
     payload: {alertType: $alertType, sendTo: {id: $sendToId}, eventHysterisis: $eventHysterisis, eventThreshold: $eventThreshold}
   ) {

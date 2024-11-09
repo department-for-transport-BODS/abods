@@ -3,7 +3,7 @@ scalar Time
 scalar Date
 
 type Query {
-  user(id: String): UserType
+  user: UserType
   users: [UserType!]
   apiInfo: ApiInfoType
   roles: [RoleType!]
@@ -11,7 +11,7 @@ type Query {
   userAlert(alertId: String!): AlertType
   operator(operatorId: String!): OperatorType
   operators(filterBy: OperatorFilterInput): OperatorsPage
-  adminAreas(adminAreaIds: [String!]): [AdminAreasType]
+  adminAreas(adminAreaIds: [String!]!): [AdminAreasType]
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
   serviceInfo(serviceId: String!): ServiceInfoType
@@ -30,7 +30,7 @@ type Query {
 }
 
 input OperatorFilterInput {
-  operatorIds: [String!]
+  operatorIds: [String!]!
 }
 
 type EventStatsType {
@@ -61,16 +61,16 @@ type CorridorNamespace {
 }
 
 input AddFirstStopInputType {
-  adminAreaIds: [String]
+  adminAreaIds: [String!]
   searchString: String
   boundingBox: BoundingBoxInputType
 }
 
 input BoundingBoxInputType {
-  maxLatitude: Float
-  maxLongitude: Float
-  minLatitude: Float
-  minLongitude: Float
+  maxLatitude: Float!
+  maxLongitude: Float!
+  minLatitude: Float!
+  minLongitude: Float!
 }
 
 type CorridorType {
@@ -95,7 +95,7 @@ input CorridorStatsInputType {
   corridorId: String!
   fromTimestamp: DateTime!
   granularity: CorridorGranularity!
-  stopList: [String]
+  stopList: [String!]!
   toTimestamp: DateTime!
 }
 
@@ -153,7 +153,7 @@ type CorridorStatsPerServiceType {
 }
 
 type CorridorStatsHistogramType {
-  hist: [CorridorHistogramType]
+  hist: [CorridorHistogramType!]
   ts: String
 }
 
@@ -170,12 +170,12 @@ enum CorridorGranularity {
 
 input VehicleReplayFilterInputType {
   filterOnStartTime: Boolean
-  lineIds: [String]
-  stopIds: [String]
+  lineIds: [String!]
+  stopIds: [String!]
 }
 
 input VehicleReplayInputType {
-  filters: VehicleReplayFilterInputType
+  filters: VehicleReplayFilterInputType!
   fromTimestamp: DateTime!
   toTimestamp: DateTime!
 }
@@ -205,9 +205,9 @@ type Mutation {
     payload: AlertInputType!
   ): MutationResponseType!
   deleteUserAlert(alertId: String!): MutationResponseType!
-  createCorridor(payload: CorridorInputType): MutationResponseType!
-  updateCorridor(inputs: CorridorUpdateInputType): MutationResponseType!
-  deleteCorridor(corridorId: Int): MutationResponseType!
+  createCorridor(payload: CorridorInputType!): MutationResponseType!
+  updateCorridor(inputs: CorridorUpdateInputType!): MutationResponseType!
+  deleteCorridor(corridorId: Int!): MutationResponseType!
   requestResetPassword(email: String!): MutationResponseType!
   resetPassword(
     uid: String!
@@ -219,7 +219,7 @@ type Mutation {
   signUp(payload: SignupPayloadType!): MutationResponseType!
   updateUser(
     username: String!
-    payload: UserUpdateInput
+    payload: UserUpdateInput!
   ): UserUpdateResponseType!
   deleteUser(username: String!): MutationResponseType!
   inviteUser(payload: InvitationInput!): InvitationResponseType!
@@ -248,18 +248,18 @@ type HeadwayMetricsType {
 }
 
 input CorridorInputType {
-  name: String
-  stopIds: [String]
+  name: String!
+  stopIds: [String!]!
 }
 
 input CorridorUpdateInputType {
-  id: Int
-  name: String
-  stopList: [String]
+  id: Int!
+  name: String!
+  stopList: [String!]!
 }
 
 input HeadwayInputType {
-  filters: HeadwayFiltersInputType
+  filters: HeadwayFiltersInputType!
   fromTimestamp: DateTime!
   toTimestamp: DateTime!
 }
@@ -271,8 +271,8 @@ enum HeadwaySortEnum {
 }
 
 input HeadwaySortType {
-  field: HeadwaySortEnum
-  order: SortOrderEnum
+  field: HeadwaySortEnum!
+  order: SortOrderEnum!
 }
 
 input HeadwayFiltersInputType {
@@ -280,7 +280,7 @@ input HeadwayFiltersInputType {
   endTime: String
   granularity: Granularity
   lineIds: [String!]
-  nocCodes: [String]
+  nocCodes: [String!]
   operatorIds: [String!]
   startTime: String
 }
@@ -296,7 +296,7 @@ input DayOfWeekFlagsInputType {
 }
 
 input FrequentServiceInfoInputType {
-  filters: FrequentServiceInfoFilterType
+  filters: FrequentServiceInfoFilterType!
   fromTimestamp: DateTime!
   toTimestamp: DateTime!
 }
@@ -460,7 +460,7 @@ type AdminAreaInfoType {
 input UserUpdateInput {
   firstName: String!
   lastName: String!
-  role: RoleReferenceInput
+  role: RoleReferenceInput!
 }
 
 type UserUpdateResponseType {
@@ -487,7 +487,7 @@ type InvitationType {
 
 input InvitationInput {
   email: String!
-  organisation: OrganisationReferenceInput
+  organisation: OrganisationReferenceInput!
   role: RoleReferenceInput!
 }
 
@@ -504,7 +504,7 @@ input AlertReferenceInput {
 }
 
 input AlertInputType {
-  alertType: AlertTypeEnum
+  alertType: AlertTypeEnum!
   sendTo: AlertReferenceInput!
   eventHysterisis: Int
   eventThreshold: Int
@@ -727,7 +727,7 @@ enum ShortCodeDayOfWeek {
 }
 
 input PerformanceInputType {
-  filters: PerformanceFiltersInputType
+  filters: PerformanceFiltersInputType!
   fromTimestamp: DateTime!
   paging: PagingInputType
   toTimestamp: DateTime!
@@ -738,21 +738,21 @@ input PerformanceFiltersInputType {
   adminAreaIds: [String!]
   dayOfWeekFlags: DayOfWeekFlagsInputType
   endTime: String
-  excludedDates: [Date]
+  excludedDates: [Date!]
   excludeItoLineId: String
   granularity: Granularity
   lineDirection: LineDirection
   lineIds: [String!]
   maxDelay: Int
   minDelay: Int
-  nocCodes: [String]
+  nocCodes: [String!]
   onTimeMaxMinutes: Int
   onTimeMinMinutes: Int
   operatorIds: [String!]
   startTime: String
-  startTimes: [Time]
+  startTimes: [Time!]
   stopsSegment: StopsSegment
-  tagIds: [Int]
+  tagIds: [Int!]
   timingPointsOnly: Boolean
 }
 
@@ -775,13 +775,13 @@ enum StopsSegment {
 }
 
 input PagingInputType {
-  after: Int
-  first: Int
+  after: Int!
+  first: Int!
 }
 
 input PunctualitySortType {
-  field: PunctualitySortEnum
-  order: SortOrderEnum
+  field: PunctualitySortEnum!
+  order: SortOrderEnum!
 }
 
 enum PunctualitySortEnum {
@@ -802,14 +802,14 @@ enum RankingOrder {
 
 input ServicePerformanceFiltersInputType {
   timingPointsOnly: Boolean
-  operatorIds: [String]
+  operatorIds: [String!]
 }
 
 input ServicePerformanceInputType {
-  filters: ServicePerformanceFiltersInputType
+  filters: ServicePerformanceFiltersInputType!
   fromTimestamp: DateTime!
   toTimestamp: DateTime!
-  order: RankingOrder
+  order: RankingOrder!
 }
 
 type AvlPoint {

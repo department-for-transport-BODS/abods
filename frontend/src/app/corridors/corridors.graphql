@@ -128,7 +128,7 @@ query corridorStats($params: CorridorStatsInputType!) {
   }
 }
 
-mutation createCorridor($name: String!, $stopIds: [String]!) {
+mutation createCorridor($name: String!, $stopIds: [String!]!) {
   createCorridor(payload: { name: $name, stopIds: $stopIds }) {
     success
     error

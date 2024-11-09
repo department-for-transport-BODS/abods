@@ -107,7 +107,7 @@ mutation inviteUser(
 
 mutation updateUserAlert(
   $alertId: String!
-  $alertType: AlertTypeEnum
+  $alertType: AlertTypeEnum!
   $sendToId: String!
   $eventHysterisis: Int
   $eventThreshold: Int
@@ -127,7 +127,7 @@ mutation updateUserAlert(
 }
 
 mutation createUserAlert(
-  $alertType: AlertTypeEnum
+  $alertType: AlertTypeEnum!
   $sendToId: String!
   $eventHysterisis: Int
   $eventThreshold: Int
