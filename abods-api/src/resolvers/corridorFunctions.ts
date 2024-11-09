@@ -105,13 +105,13 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
     ];
   } else {
     where.latitude = {
-      gte: Number(boundingBox?.minLatitude),
-      lte: Number(boundingBox?.maxLatitude),
+      gte: boundingBox?.minLatitude ?? 0,
+      lte: boundingBox?.maxLatitude ?? 0,
     };
 
     where.longitude = {
-      gte: Number(boundingBox?.minLongitude),
-      lte: Number(boundingBox?.maxLongitude),
+      gte: boundingBox?.minLongitude ?? 0,
+      lte: boundingBox?.maxLongitude ?? 0,
     };
   }
 
@@ -152,7 +152,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
       getOrgAdminAreas(context.db, user),
     ]);
 
-    stopList = [];
+    const newStopList: number[] = [];
     routes.map((data) => {
       const stopIndex = data.route.indexOf(stopsPattern);
       let matchStopPattern = stopsPattern;
@@ -162,20 +162,21 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
       const matches = data.route.match(matchStopPattern.concat("(.*)"));
       if (matches && matches[1]) {
         const commaIndex = matches[1].indexOf(",");
-        const nextStop =
-          commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
+        const nextStop = Number(
+          commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1],
+        );
 
-        if (!stopList.includes(nextStop)) {
-          stopList.push(nextStop);
+        if (!newStopList.includes(nextStop)) {
+          newStopList.push(nextStop);
         }
       }
     });
 
-    if (stopList.length > 0) {
+    if (newStopList.length > 0) {
       const stops = await context.db.naptan_stoppoint_latlong.findMany({
         where: {
           id: {
-            in: stopList.map(Number),
+            in: newStopList,
           },
           admin_area_id: {
             in: adminAreas.map((admin) => admin.adminarea_id),
@@ -210,11 +211,12 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const user = await requireUserSession(context);
   if (!args.payload || !args.payload.name || !args.payload.stopIds)
     throw "Bad Request";
+  if (!user.orgIds[0]) throw "Invalid session data";
 
   const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
-      organisation_id: user.orgIds[0] ?? 0,
+      organisation_id: user.orgIds[0],
       user_id: user.id,
     },
     select: {
@@ -385,7 +387,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   let results: Timetable[] = await context.db.timetable.findMany({
     where: {
       stop_id: {
-        in: stopList?.map(Number),
+        in: stopList?.map(Number) ?? Prisma.skip,
       },
       date_of_journey: {
         gte: utcToBstDBInput(fromTimestamp),
@@ -679,7 +681,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
 
     const results = await context.db.corridor_stops.findMany({
       where: {
-        corridor_id: Number(corridorId),
+        corridor_id: Number(corridorId ?? 0),
       },
     });
 

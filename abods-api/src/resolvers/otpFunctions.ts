@@ -140,7 +140,7 @@ export const getOperators = async (
         noc_adminarea:
           adminAreaIds && adminAreaIds.length > 0
             ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
-            : undefined,
+            : Prisma.skip,
         operatorOrganisations: {
           some: { organisation_id: { in: user.orgIds } },
         },
@@ -912,7 +912,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
       if (displayData) {
         const where: Prisma.performance_statisticsWhereInput = {
           operator_noc: {
-            in: operatorIds ? operatorIds : operatorNocs,
+            in: operatorIds ?? operatorNocs,
           },
           date_period_start: new Date(
             getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD"),
