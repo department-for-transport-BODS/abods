@@ -9,6 +9,25 @@ export type ExpectedJourneyType = {
   expected_journey_end: Date | null;
 };
 
+export const fillTimestampGaps = (avl: Record<string, Set<string>>) => {
+  let previousMinute: Dayjs | undefined = undefined;
+  const timestamps = Object.keys(avl).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+  );
+  timestamps.forEach((timestamp) => {
+    const currentTime = getDate(timestamp);
+    if (previousMinute) {
+      // 1 minute = 60000 milliseconds
+      while (currentTime.diff(previousMinute) > 60 * 1000) {
+        previousMinute = previousMinute?.add(1, "minute");
+        const key = previousMinute.toISOString();
+        avl[key] = new Set<string>();
+      }
+    }
+    previousMinute = getDate(timestamp);
+  });
+};
+
 export const getVehicleStats = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
   expected: ExpectedJourneyType[],
@@ -17,6 +36,10 @@ export const getVehicleStats = async (
     avl ?? [],
   );
   const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
+
+  if (Object.keys(avlPerMinute).length < 21) {
+    fillTimestampGaps(avlPerMinute);
+  }
 
   return Object.entries(avlPerMinute).map(([timestamp, avlJourneys]) => {
     const minute = getDate(timestamp);
