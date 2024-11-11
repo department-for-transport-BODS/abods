@@ -6,3 +6,6 @@ package-lock.json
 /abods-api/src/types/generated.ts
 /frontend/src/generated/graphql.ts
 /frontend/graphql.schema.json
+
+.husky/pre-commit
+.prettierignore
