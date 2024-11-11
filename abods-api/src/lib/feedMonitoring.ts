@@ -20,7 +20,7 @@ export const getVehicleStats = async (
 
   const result: VehicleStatsType[] = [];
   Object.entries(avlPerMinute).forEach(([timestamp, avlJourneys]) => {
-    const eachMinuteTimestamp = getDate(timestamp)
+    const eachMinuteTimestamp = getDate(timestamp);
     const expected = getExpectedJourneysCount(
       expectedJourneys,
       eachMinuteTimestamp,
@@ -28,8 +28,10 @@ export const getVehicleStats = async (
     const actual = expected.filter(
       (journey) =>
         avlJourneys.has(journey.group_id) &&
-        !eachMinuteTimestamp.isBefore(getDate(journey.expected_journey_start)) &&
-        eachMinuteTimestamp.isBefore(journey.expected_journey_end)
+        !eachMinuteTimestamp.isBefore(
+          getDate(journey.expected_journey_start),
+        ) &&
+        eachMinuteTimestamp.isBefore(journey.expected_journey_end),
     ).length;
 
     result.push({
