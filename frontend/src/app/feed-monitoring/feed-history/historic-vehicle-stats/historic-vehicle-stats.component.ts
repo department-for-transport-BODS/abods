@@ -82,11 +82,10 @@ export class HistoricVehicleStatsComponent
       };
     });
 
-    const minDateTime =
-      this.date?.startOf("day").toUTC() ?? protoViewData[0].dateTime;
-    const maxDateTime =
-      this.date?.endOf("day").toUTC() ??
-      protoViewData[protoViewData.length - 1].dateTime;
+    const minDateTime = protoViewData[0].dateTime;
+    const maxDateTime = protoViewData[protoViewData.length - 1].dateTime.plus({
+      minutes: 1,
+    });
 
     this.chartInterval = Interval.fromDateTimes(minDateTime, maxDateTime);
 
@@ -170,7 +169,7 @@ export class HistoricVehicleStatsComponent
     dateAxis.renderer.labels.template.fill =
       this.chartService.colorMap.legendaryGrey;
     dateAxis.baseInterval = {
-      timeUnit: Granularity.Minute,
+      timeUnit: "second",
       count: 1,
     };
 
@@ -179,11 +178,6 @@ export class HistoricVehicleStatsComponent
     dateAxis.renderer.cellEndLocation = 1;
 
     dateAxis.groupData = true;
-    dateAxis.groupCount = 100;
-    dateAxis.groupIntervals.setAll([
-      { timeUnit: "minute", count: 1 },
-      { timeUnit: "minute", count: 10 },
-    ]);
 
     if (dateAxis.tooltip) {
       dateAxis.tooltip.disabled = true;
@@ -243,19 +237,21 @@ export class HistoricVehicleStatsComponent
     series.name = "Vehicle journeys";
     series.dataFields.dateX = "timestamp";
     series.dataFields.valueY = "actual";
+    series.dataFields.customValue = "expected";
     series.rangeChangeEasing = am4core.ease.linear;
-    series.groupFields.valueY = "low";
+    series.groupFields.valueY = "open";
+    series.groupFields.customValue = "open";
 
     series.yAxis = axis;
 
     series.tooltipHTML = `
-      <div style="margin-bottom: 5px;"><b>{dateX.formatDate('HH:mm')}</b></div>
+      <div style="margin-bottom: 5px;"><b>{dateX.open.formatDate('HH:mm')}</b></div>
       <div style="margin-bottom: 5px; display:flex">
-        <span style="flex-grow:1">Vehicle journeys</span><span style="margin-left:5px;"><b>{valueY}</b></span>
+        <span style="flex-grow:1">Vehicle journeys</span><span style="margin-left:5px;"><b>{valueY.open}</b></span>
       </div>
       <div style="margin-bottom: 5px; display: flex;">
         <span style="flex-grow:1">Expected vehicle journeys</span>
-        <span style="float:right; margin-left:5px;"><b>{expected}</b></span>
+        <span style="float:right; margin-left:5px;"><b>{customValue.open}</b></span>
       </div>`;
     if (series.tooltip) {
       series.tooltip.pointerOrientation = "vertical";
@@ -287,7 +283,7 @@ export class HistoricVehicleStatsComponent
     series.dataFields.dateX = "timestamp";
     series.dataFields.valueY = "expected";
     series.rangeChangeEasing = am4core.ease.linear;
-    series.groupFields.valueY = "low";
+    series.groupFields.valueY = "open";
 
     series.yAxis = axis;
 
