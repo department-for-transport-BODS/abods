@@ -200,7 +200,7 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name
 
   let result: VehicleStatsType[] = []
-  
+
   if(queryName === 'feedMonitoringList'){
     result = await getFeedMonitoringVehicleStats(
       context.db,
