@@ -72,7 +72,7 @@ export const getFeedMonitoringVehicleStats = async (
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
   async (parent, _, context, __, duration?: number) => {
     if (parent.operatorId) {
-      return getFeedMonitoringVehicleStats(context.db, parent.operatorId, 21);
+      return getFeedMonitoringVehicleStats(context.db, parent.operatorId, 21); // Current minute is ignored, so go back 21, to get 20 mins worth of data
     }
 
     return [];
