@@ -4,8 +4,10 @@ import {
   EventStatsType,
   FeedMonitoringType,
   FeedMonitoringTypeResolvers,
+  LiveStatsType,
   HistoricalStatsType,
   LiveStatsTypeResolvers,
+  Maybe,
   OperatorTypeResolvers,
   QueryResolvers,
   Resolvers,
@@ -39,32 +41,38 @@ export const getEventStats: QueryResolvers["eventStats"] =
     return eventStats;
   };
 
+export const getFeedMonitoringVehicleStats = async (
+  db: PrismaClient,
+  operatorId: string,
+  duration: number,
+) => {
+  const statsDate = getDate();
+  let expectedJourneys: ExpectedJourneyType[] = [];
+  expectedJourneys = await getExpectedJourneys(
+    db,
+    operatorId,
+    statsDate,
+    duration,
+  );
+
+  const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
+    db,
+    operatorId,
+    statsDate,
+    duration,
+    expectedJourneys.map((journey) => journey.group_id),
+  );
+  const results = await getVehicleStats(avl, expectedJourneys);
+
+  return results.sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+};
+
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
-  async (parent, _, context): Promise<VehicleStatsType[]> => {
-    const currentTime = getDate();
-    let expectedJourneys: ExpectedJourneyType[] = [];
-
+  async (parent, _, context, __, duration?: number) => {
     if (parent.operatorId) {
-      expectedJourneys = await getExpectedJourneys(
-        context.db,
-        parent.operatorId,
-        currentTime,
-        21,
-      );
-
-      const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
-        context.db,
-        parent.operatorId,
-        currentTime,
-        true,
-        expectedJourneys.map((journey) => journey.group_id),
-      );
-      const results = await getVehicleStats(avl, expectedJourneys);
-
-      return results.sort(
-        (a, b) =>
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-      );
+      return getFeedMonitoringVehicleStats(context.db, parent.operatorId, 21); // Current minute is ignored, so go back 21, to get 20 mins worth of data
     }
 
     return [];
@@ -85,26 +93,6 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] 
     };
   };
 
-export const getExpectedVehicles: LiveStatsTypeResolvers["expectedVehicles"] = (
-  parent,
-  _,
-  context,
-): Promise<number> => {
-  return parent.operatorId
-    ? getVehicles(parent.operatorId, context.db, VehicleCountType.Expected)
-    : Promise.resolve(0);
-};
-
-export const getActualVehicles: LiveStatsTypeResolvers["currentVehicles"] = (
-  parent,
-  _,
-  context,
-): Promise<number> => {
-  return parent.operatorId
-    ? getVehicles(parent.operatorId, context.db, VehicleCountType.Actual)
-    : Promise.resolve(0);
-};
-
 export const getVehicles = async (
   operatorId: string,
   db: PrismaClient,
@@ -123,7 +111,10 @@ export const getVehicles = async (
     },
   });
 
-  return result?.actual ?? 0;
+  if (type === VehicleCountType.Actual) {
+    return result?.actual ?? 0;
+  }
+  return result?.expected ?? 0;
 };
 
 export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
@@ -200,6 +191,34 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
     };
   };
 
+export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
+  parent,
+  _,
+  context,
+  info,
+): Promise<LiveStatsType> => {
+  const queryName = info.operation.name;
+
+  let result: VehicleStatsType[] = [];
+
+  if (queryName === "feedMonitoringList") {
+    result = await getFeedMonitoringVehicleStats(
+      context.db,
+      parent.operatorId,
+      21, // Current minute is ignored, so go back 21, to get 20 mins worth of data
+    );
+  }
+
+  return {
+    ...parent.liveStats,
+    currentVehicles:
+      result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
+    expectedVehicles:
+      result.length > 0 ? result[result.length - 1].expected ?? 0 : 0,
+    last20Minutes: result,
+  };
+};
+
 const feedMonitoringResolvers: Resolvers = {
   Query: {
     events: getEvents,
@@ -211,12 +230,9 @@ const feedMonitoringResolvers: Resolvers = {
   FeedMonitoringType: {
     historicalStats: getHistoricalStats,
     vehicleStats: getVehicleStatsByMin,
-    liveStats: async (parent) => parent.liveStats ?? {},
+    liveStats: getLiveStats,
   },
   LiveStatsType: {
-    currentVehicles: getActualVehicles,
-    expectedVehicles: getExpectedVehicles,
-    last20Minutes: getVehicleStatsPerOperator,
     last24Hours: getLast24Hours,
   },
 };
