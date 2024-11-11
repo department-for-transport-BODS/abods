@@ -128,14 +128,3 @@ export const getAvlPerMinute = async (
   }
   return avlSecondBuckets;
 };
-
-export const getExpectedJourneysCount = (
-  expected: ExpectedJourneyType[],
-  date: Dayjs,
-) => {
-  return expected.filter(
-    (j) =>
-      getDate(j.expected_journey_end).isAfter(date) &&
-      !getDate(j.expected_journey_start).isAfter(date),
-  );
-};
