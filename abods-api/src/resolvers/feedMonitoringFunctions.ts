@@ -210,12 +210,12 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   }
 
   return {
+    ...parent.liveStats,
     currentVehicles:
       result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
     expectedVehicles:
       result.length > 0 ? result[result.length - 1].expected ?? 0 : 0,
     last20Minutes: result,
-    ...parent.liveStats,
   };
 };
 
