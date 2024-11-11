@@ -205,7 +205,7 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
-      21,
+      21, // Current minute is ignored, so go back 21, to get 20 mins worth of data
     );
   }
   
