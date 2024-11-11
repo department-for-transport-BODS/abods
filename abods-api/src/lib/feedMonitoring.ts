@@ -83,7 +83,7 @@ export const getAvlPoints = async (
   db: PrismaClient,
   operatorId: string,
   inputDate: Dayjs,
-  last20Mins?: boolean,
+  duration?: number,
   groupIds?: string[],
 ) => {
   const currentDate = new Date();
@@ -92,9 +92,9 @@ export const getAvlPoints = async (
     operator_ref: operatorId,
   };
 
-  if (last20Mins) {
+  if (duration) {
     where.recorded_at_time = {
-      gte: inputDate.subtract(21, "minute").set("second", 0).toDate(),
+      gte: inputDate.subtract(duration, "minute").set("second", 0).toDate(),
       lte: inputDate.set("second", 0).toDate(),
     };
   }
