@@ -15,7 +15,6 @@ import {
   ExpectedJourneyType,
   getAvlPoints,
   getExpectedJourneys,
-  getMinuteExpectedJourney,
   getOperatorWithFeed,
   getVehicleStats,
   VehicleCountType,
