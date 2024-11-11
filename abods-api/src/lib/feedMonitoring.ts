@@ -21,7 +21,7 @@ export const getVehicleStats = async (
   return Object.entries(avlPerMinute).map(([timestamp, avlJourneys]) => {
     const minute = getDate(timestamp);
     const expected = expectedJourneys
-      .filter((j) => !minute.isBefore(j.expected_journey_start))
+      .filter((j) => minute.isSameOrAfter(j.expected_journey_start))
       .filter((j) => minute.isBefore(j.expected_journey_end));
 
     return {
