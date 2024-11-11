@@ -84,7 +84,6 @@ export const getAvlPoints = async (
   duration?: number,
   groupIds?: string[],
 ) => {
-  const currentDate = new Date();
   const where: Prisma.SiriVMPositionsWhereInput = {
     date_of_journey: inputDate.toDate(),
     operator_ref: operatorId,
@@ -92,8 +91,8 @@ export const getAvlPoints = async (
 
   if (duration) {
     where.recorded_at_time = {
-      gte: inputDate.subtract(duration, "minute").set("second", 0).toDate(),
-      lte: inputDate.set("second", 0).toDate(),
+      gte: inputDate.subtract(duration, "minute").startOf("second").toDate(),
+      lt: inputDate.startOf("second").toDate(),
     };
   }
 
