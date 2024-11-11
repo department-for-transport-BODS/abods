@@ -40,21 +40,21 @@ export const getEventStats: QueryResolvers["eventStats"] = () => {
 
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
   async (parent, _, context): Promise<VehicleStatsType[]> => {
-    const statsDate = getDate();
+    const currentTime = getDate();
     let expectedJourneys: ExpectedJourneyType[] = [];
 
     if (parent.operatorId) {
       expectedJourneys = await getExpectedJourneys(
         context.db,
         parent.operatorId,
-        statsDate,
+        currentTime,
         21,
       );
 
       const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
         context.db,
         parent.operatorId,
-        statsDate,
+        currentTime,
         true,
         expectedJourneys.map((journey) => journey.group_id),
       );
