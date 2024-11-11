@@ -195,20 +195,20 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   parent,
   _,
   context,
-  info
+  info,
 ): Promise<LiveStatsType> => {
-  const queryName = info.operation.name
+  const queryName = info.operation.name;
 
-  let result: VehicleStatsType[] = []
+  let result: VehicleStatsType[] = [];
 
-  if(queryName === 'feedMonitoringList'){
+  if (queryName === "feedMonitoringList") {
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
       21, // Current minute is ignored, so go back 21, to get 20 mins worth of data
     );
   }
-  
+
   return {
     currentVehicles:
       result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
