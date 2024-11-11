@@ -22,7 +22,7 @@ export const getVehicleStats = async (
     const minute = getDate(timestamp);
     const expected = expectedJourneys
       .filter((j) => !minute.isBefore(j.expected_journey_start))
-      .filter((j) => !minute.isAfter(j.expected_journey_end));
+      .filter((j) => minute.isBefore(j.expected_journey_end));
 
     return {
       timestamp: getFormattedDate(getDate(timestamp).toDate()),
@@ -91,8 +91,8 @@ export const getAvlPoints = async (
 
   if (duration) {
     where.recorded_at_time = {
-      gte: inputDate.subtract(duration, "minute").startOf("second").toDate(),
-      lt: inputDate.startOf("second").toDate(),
+      gte: inputDate.subtract(duration, "minute").startOf("minute").toDate(),
+      lt: inputDate.startOf("minute").toDate(),
     };
   }
 
