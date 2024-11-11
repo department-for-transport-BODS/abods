@@ -46,7 +46,7 @@ export const getFeedMonitoringVehicleStats = async (
   operatorId: string,
   duration: number,
 ) => {
-  const statsDate = getDate('2024-11-11T15:59:00.000Z');
+  const statsDate = getDate();
   let expectedJourneys: ExpectedJourneyType[] = [];
   expectedJourneys = await getExpectedJourneys(
     db,
