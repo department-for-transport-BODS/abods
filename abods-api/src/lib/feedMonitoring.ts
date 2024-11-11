@@ -18,30 +18,18 @@ export const getVehicleStats = async (
   );
   const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
 
-  const result: VehicleStatsType[] = [];
-  Object.entries(avlPerMinute).forEach(([timestamp, avlJourneys]) => {
-    const eachMinuteTimestamp = getDate(timestamp);
-    const expected = getExpectedJourneysCount(
-      expectedJourneys,
-      eachMinuteTimestamp,
-    );
-    const actual = expected.filter(
-      (journey) =>
-        avlJourneys.has(journey.group_id) &&
-        !eachMinuteTimestamp.isBefore(
-          getDate(journey.expected_journey_start),
-        ) &&
-        eachMinuteTimestamp.isBefore(journey.expected_journey_end),
-    ).length;
+  return Object.entries(avlPerMinute).map(([timestamp, avlJourneys]) => {
+    const minute = getDate(timestamp);
+    const expected = expectedJourneys
+      .filter((j) => !minute.isBefore(j.expected_journey_start))
+      .filter((j) => !minute.isAfter(j.expected_journey_end));
 
-    result.push({
+    return {
       timestamp: getFormattedDate(getDate(timestamp).toDate()),
       expected: expected.length,
-      actual,
-    });
+      actual: expected.filter((j) => avlJourneys.has(j.group_id)).length,
+    };
   });
-
-  return result;
 };
 
 export enum VehicleCountType {
