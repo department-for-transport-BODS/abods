@@ -1,9 +1,11 @@
 import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
-  AlertTypeEnum,
+  EventResponse,
   EventStatsType,
+  FeedMonitoringType,
   FeedMonitoringTypeResolvers,
   LiveStatsType,
+  HistoricalStatsType,
   LiveStatsTypeResolvers,
   Maybe,
   OperatorTypeResolvers,
@@ -21,25 +23,28 @@ import {
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 
-export const getEventStats: QueryResolvers["eventStats"] = () => {
-  const eventStats: EventStatsType[] = [];
-  let startdate = getDate().subtract(90, "day");
+export const getEventStats: QueryResolvers["eventStats"] =
+  (): EventStatsType[] => {
+    const eventStats: EventStatsType[] = [];
+    // Get data for the previous 90 days before today
+    const currentTime = getDate();
+    let startdate = currentTime.subtract(90, "day");
 
-  while (!startdate.isAfter(getDate())) {
-    eventStats.push({
-      count: 0,
-      day: startdate.format("YYYY-MM-DD"),
-    });
+    while (startdate.isBefore(currentTime)) {
+      eventStats.push({
+        count: 0,
+        day: startdate.format("YYYY-MM-DD"),
+      });
 
-    startdate = startdate.add(1, "day");
-  }
-  return eventStats;
-};
+      startdate = startdate.add(1, "day");
+    }
+    return eventStats;
+  };
 
 export const getFeedMonitoringVehicleStats = async (
   db: PrismaClient,
   operatorId: string,
-  duration: number
+  duration: number,
 ) => {
   const statsDate = getDate();
   let expectedJourneys: ExpectedJourneyType[] = [];
@@ -47,7 +52,7 @@ export const getFeedMonitoringVehicleStats = async (
     db,
     operatorId,
     statsDate,
-    duration
+    duration,
   );
 
   const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
@@ -55,15 +60,14 @@ export const getFeedMonitoringVehicleStats = async (
     operatorId,
     statsDate,
     duration,
-    expectedJourneys.map((journey) => journey.group_id)
+    expectedJourneys.map((journey) => journey.group_id),
   );
   const results = await getVehicleStats(avl, expectedJourneys);
 
   return results.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
   );
 };
-
 
 export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"] =
   async (parent, _, context, __, duration?: number) => {
@@ -75,7 +79,7 @@ export const getVehicleStatsPerOperator: LiveStatsTypeResolvers["last20Minutes"]
   };
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
-  async (parent, args, context) => {
+  async (parent, args, context): Promise<HistoricalStatsType> => {
     const result = await context.db.feed_monitor_daily_summary.findFirst({
       where: {
         operator_noc: parent.operatorId,
@@ -87,7 +91,7 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] 
       updateFrequency: result?.update_frequency,
       availability: Number(result?.availability ?? 0),
     };
-};
+  };
 
 export const getVehicles = async (
   operatorId: string,
@@ -107,7 +111,7 @@ export const getVehicles = async (
     },
   });
 
-  if(type === VehicleCountType.Actual){
+  if (type === VehicleCountType.Actual) {
     return result?.actual ?? 0;
   }
   return result?.expected ?? 0;
@@ -118,7 +122,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   args,
   context,
   info,
-) => {
+): Promise<VehicleStatsType[]> => {
   const result = await context.db.feed_monitor_hourly_summary.findMany({
     where: {
       operator_noc: parent.operatorId,
@@ -159,14 +163,15 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
     }));
   };
 
-const getEvents: QueryResolvers["events"] = async () => {
-  return {
-    items: [],
+const getEvents: QueryResolvers["events"] =
+  async (): Promise<EventResponse> => {
+    return {
+      items: [],
+    };
   };
-};
 
 export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
-  async (parent, _, context) => {
+  async (parent, _, context): Promise<FeedMonitoringType> => {
     if (!parent.operatorId) throw "Parent data not set";
     const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
       context.db,
@@ -189,16 +194,19 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
 export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   parent,
   _,
-  context
+  context,
 ): Promise<LiveStatsType> => {
   const result = await getFeedMonitoringVehicleStats(
     context.db,
     parent.operatorId,
-    1
+    21,
   );
   return {
-    currentVehicles: result[0].actual ?? 0,
-    expectedVehicles: result[0].expected ?? 0,
+    currentVehicles:
+      result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
+    expectedVehicles:
+      result.length > 0 ? result[result.length - 1].expected ?? 0 : 0,
+    last20Minutes: result,
     ...parent.liveStats,
   };
 };
@@ -217,7 +225,6 @@ const feedMonitoringResolvers: Resolvers = {
     liveStats: getLiveStats,
   },
   LiveStatsType: {
-    last20Minutes: getVehicleStatsPerOperator,
     last24Hours: getLast24Hours,
   },
 };

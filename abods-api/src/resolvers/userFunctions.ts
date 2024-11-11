@@ -1,10 +1,15 @@
 import {
+  AlertType,
   AlertTypeEnum,
+  LoginResponse,
+  Maybe,
   MutationResolvers,
+  MutationResponseType,
   QueryResolvers,
   Resolvers,
   RoleType,
   ScopeEnum,
+  UserType,
 } from "../types/generated.js";
 import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2";
@@ -13,7 +18,11 @@ import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 
 // Summary: fetch all users
-export const getUsers: QueryResolvers["users"] = async (_, __, context) => {
+export const getUsers: QueryResolvers["users"] = async (
+  _,
+  __,
+  context,
+): Promise<Maybe<UserType[]>> => {
   try {
     const user = await requireUserSession(context);
 
@@ -62,7 +71,11 @@ export const getUsers: QueryResolvers["users"] = async (_, __, context) => {
   }
 };
 // Summary: fetch a single user by id
-export const getUser: QueryResolvers["user"] = async (_, __, context) => {
+export const getUser: QueryResolvers["user"] = async (
+  _,
+  __,
+  context,
+): Promise<Maybe<UserType>> => {
   try {
     const user = await requireUserSession(context);
 
@@ -96,7 +109,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
   _,
   args,
   context,
-) => {
+): Promise<Maybe<AlertType[]>> => {
   try {
     const user = await requireUserSession(context);
 
@@ -164,7 +177,7 @@ export const loginUser: MutationResolvers["login"] = async (
   _,
   args,
   context,
-) => {
+): Promise<LoginResponse> => {
   logger.debug(`Logging in user: ${args.username}`);
   try {
     if (!args.username || !args.password) {
@@ -239,7 +252,7 @@ export const logoutUser: MutationResolvers["logout"] = async (
   _,
   __,
   context,
-) => {
+): Promise<boolean> => {
   try {
     const user = await requireUserSession(context);
 
@@ -260,7 +273,7 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
   _,
   args,
   context,
-) => {
+): Promise<Maybe<AlertType>> => {
   try {
     const user = await requireUserSession(context);
 
@@ -338,7 +351,7 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   try {
     const user = await requireUserSession(context);
 
@@ -371,7 +384,7 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   try {
     const user = await requireUserSession(context);
 
@@ -415,7 +428,7 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
   _,
   args,
   context,
-) => {
+): Promise<MutationResponseType> => {
   try {
     const user = await requireUserSession(context);
 

@@ -1,6 +1,6 @@
 import { VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
-import { feed_monitor_summary, Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
 export type ExpectedJourneyType = {
@@ -13,21 +13,31 @@ export const getVehicleStats = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
   expected: ExpectedJourneyType[],
 ): Promise<VehicleStatsType[]> => {
-  const avlPromise: Record<string, Set<string>> = await getAvlPerMinute(
+  const avlPerMinute: Record<string, Set<string>> = await getAvlPerMinute(
     avl ?? [],
   );
   const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
 
   const result: VehicleStatsType[] = [];
-  Object.entries(avlPromise).forEach(([timestamp, avlJourneys]) => {
+  Object.entries(avlPerMinute).forEach(([timestamp, avlJourneys]) => {
+    const eachMinuteTimestamp = getDate(timestamp);
     const expected = getExpectedJourneysCount(
       expectedJourneys,
-      getDate(timestamp),
+      eachMinuteTimestamp,
     );
+    const actual = expected.filter(
+      (journey) =>
+        avlJourneys.has(journey.group_id) &&
+        !eachMinuteTimestamp.isBefore(
+          getDate(journey.expected_journey_start),
+        ) &&
+        eachMinuteTimestamp.isBefore(journey.expected_journey_end),
+    ).length;
+
     result.push({
       timestamp: getFormattedDate(getDate(timestamp).toDate()),
-      expected,
-      actual: avlJourneys.size,
+      expected: expected.length,
+      actual,
     });
   });
 
@@ -137,7 +147,7 @@ export const getExpectedJourneysCount = (
 ) => {
   return expected.filter(
     (j) =>
-      !getDate(j.expected_journey_end).isBefore(date) &&
+      getDate(j.expected_journey_end).isAfter(date) &&
       !getDate(j.expected_journey_start).isAfter(date),
-  ).length;
+  );
 };

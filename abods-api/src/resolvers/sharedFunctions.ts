@@ -1,8 +1,18 @@
-import { QueryResolvers, Resolvers } from "../types/generated.js";
+import {
+  ApiInfoType,
+  Maybe,
+  QueryResolvers,
+  Resolvers,
+  RoleType,
+} from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 
 // Summary: fetch api info
-export const getApiInfo: QueryResolvers["apiInfo"] = async (_, __, context) => {
+export const getApiInfo: QueryResolvers["apiInfo"] = async (
+  _,
+  __,
+  context,
+): Promise<Maybe<ApiInfoType>> => {
   try {
     const apiInfo = await context.db.apiInfo.findFirst({
       include: {
@@ -16,21 +26,7 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (_, __, context) => {
 
     return {
       buildNumber: apiInfo.build_number,
-      timezone: apiInfo.timezone,
       version: apiInfo.version,
-      featureFlags: {
-        consolidateHistogram: apiInfo.feature_flag?.consolidate_histogram,
-        corridorStatsTimezoneEnabled:
-          apiInfo.feature_flag?.corridor_stats_timezone_enabled,
-        freshdeskEnabled: apiInfo.feature_flag?.freshdesk_enabled,
-        lineDirectionFiltering: apiInfo.feature_flag?.line_direction_filtering,
-        ssoEnabled: apiInfo.feature_flag?.sso_enabled,
-        stopIndexFiltering: apiInfo.feature_flag?.stop_index_filtering,
-        taggingIncludeBankHolidays:
-          apiInfo.feature_flag?.tagging_include_bank_holidays,
-        vehicleReplayFromTimestream:
-          apiInfo.feature_flag?.vehicle_replay_from_timestream,
-      },
     };
   } catch (error) {
     console.error(error);
@@ -39,7 +35,11 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (_, __, context) => {
 };
 
 // Summary: fetch roles
-export const getRoles: QueryResolvers["roles"] = async (_, __, context) => {
+export const getRoles: QueryResolvers["roles"] = async (
+  _,
+  __,
+  context,
+): Promise<Maybe<RoleType[]>> => {
   try {
     await requireUserSession(context);
 

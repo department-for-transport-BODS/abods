@@ -294,18 +294,6 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
-export type FeatureFlagType = {
-  __typename?: 'FeatureFlagType';
-  consolidateHistogram?: Maybe<Scalars['Boolean']['output']>;
-  corridorStatsTimezoneEnabled?: Maybe<Scalars['Boolean']['output']>;
-  freshdeskEnabled?: Maybe<Scalars['Boolean']['output']>;
-  lineDirectionFiltering?: Maybe<Scalars['Boolean']['output']>;
-  ssoEnabled?: Maybe<Scalars['Boolean']['output']>;
-  stopIndexFiltering?: Maybe<Scalars['Boolean']['output']>;
-  taggingIncludeBankHolidays?: Maybe<Scalars['Boolean']['output']>;
-  vehicleReplayFromTimestream?: Maybe<Scalars['Boolean']['output']>;
-};
-
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;

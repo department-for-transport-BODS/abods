@@ -3,7 +3,8 @@ import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import logger from "../logger.js";
 import { AuthContext, RequestContext } from "../types/extra.js";
 import { GraphQLResolveInfo } from "graphql";
-import { throwUnauthenticatedError, getHeader } from "../resolvers/helpers.js";
+import { getHeader, throwUnauthenticatedError } from "../resolvers/helpers.js";
+
 export const hashApiKey = (key: string, hmacSecret: string): string => {
   if (!key || !hmacSecret) {
     throw new Error("Key and HMAC secret are required");
