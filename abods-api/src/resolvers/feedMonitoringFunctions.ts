@@ -62,7 +62,12 @@ export const getFeedMonitoringVehicleStats = async (
     duration,
     expectedJourneys.map((journey) => journey.group_id),
   );
-  const results = await getVehicleStats(avl, expectedJourneys);
+  const results = await getVehicleStats(
+    avl,
+    expectedJourneys,
+    statsDate,
+    duration,
+  );
 
   return results.sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
