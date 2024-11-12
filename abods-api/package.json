@@ -14,6 +14,7 @@
     "prisma:studio": "prisma studio",
     "sam:build": "sam build",
     "sam:start": "sam local start-api --port 3000",
+    "start:local": "serverless offline",
     "start": "npm run build && node ./dist/localServer.js",
     "start:dev": "concurrently \"npm run watch\" \"node ./dist/localServer.js\"",
     "start:sam": "npm run sam:build && npm run sam:start",
