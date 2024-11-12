@@ -15,7 +15,7 @@ export const getPerMinuteTimestamps = (
 ) => {
   const avlPerMinute: Record<string, Set<string>> = {};
   let minute = currentTime.subtract(duration, "minute").startOf("minute");
-  while (minute.isBefore(currentTime)) {
+  while (minute.isBefore(currentTime.startOf("minute"))) {
     const key = minute.toISOString();
     avlPerMinute[key] = new Set<string>();
     minute = minute.add(1, "minute");
