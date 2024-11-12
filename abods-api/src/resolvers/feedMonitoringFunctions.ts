@@ -62,7 +62,12 @@ export const getFeedMonitoringVehicleStats = async (
     duration,
     expectedJourneys.map((journey) => journey.group_id),
   );
-  const results = await getVehicleStats(avl, expectedJourneys);
+  const results = await getVehicleStats(
+    avl,
+    expectedJourneys,
+    statsDate,
+    duration,
+  );
 
   return results.sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
@@ -195,7 +200,7 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
-      21, // Current minute is ignored, so go back 21, to get 20 mins worth of data
+      21, // 21 minutes of data is displayed in frontend
     );
   }
 

@@ -9,12 +9,31 @@ export type ExpectedJourneyType = {
   expected_journey_end: Date | null;
 };
 
+export const getPerMinuteTimestamps = (
+  currentTime: Dayjs,
+  duration: number,
+) => {
+  const avlPerMinute: Record<string, Set<string>> = {};
+  let minute = currentTime.subtract(duration, "minute").startOf("minute");
+  while (minute.isBefore(currentTime)) {
+    const key = minute.toISOString();
+    avlPerMinute[key] = new Set<string>();
+    minute = minute.add(1, "minute");
+  }
+
+  return avlPerMinute;
+};
+
 export const getVehicleStats = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
   expected: ExpectedJourneyType[],
+  currentTime: Dayjs,
+  duration: number,
 ): Promise<VehicleStatsType[]> => {
   const avlPerMinute: Record<string, Set<string>> = await getAvlPerMinute(
     avl ?? [],
+    currentTime,
+    duration,
   );
   const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
 
@@ -114,16 +133,22 @@ export const getAvlPoints = async (
 
 export const getAvlPerMinute = async (
   avl: Awaited<ReturnType<typeof getAvlPoints>>,
+  currentTime: Dayjs,
+  duration: number,
 ) => {
-  const avlSecondBuckets: Record<string, Set<string>> = {};
+  const avlPerMinute: Record<string, Set<string>> = getPerMinuteTimestamps(
+    currentTime,
+    duration,
+  );
+
   for (const a of avl) {
     if (!a.group_id) continue;
     const recordedAt = getDate(a.recorded_at_time)
-      .set("second", 0)
-      .set("millisecond", 0)
+      .startOf("minute")
       .toISOString();
-    avlSecondBuckets[recordedAt] = avlSecondBuckets[recordedAt] ?? new Set();
-    avlSecondBuckets[recordedAt].add(a.group_id);
+    avlPerMinute[recordedAt] = avlPerMinute[recordedAt] ?? new Set();
+    avlPerMinute[recordedAt].add(a.group_id);
   }
-  return avlSecondBuckets;
+
+  return avlPerMinute;
 };
