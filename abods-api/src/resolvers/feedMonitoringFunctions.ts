@@ -76,6 +76,7 @@ export const getFeedMonitoringVehicleStats = async (
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
   async (parent, args, context): Promise<HistoricalStatsType> => {
+    if (!parent.operatorId) throw "Invalid data";
     const result = await context.db.feed_monitor_daily_summary.findFirst({
       where: {
         operator_noc: parent.operatorId,
@@ -119,6 +120,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   context,
   info,
 ): Promise<VehicleStatsType[]> => {
+  if (!parent.operatorId) throw "Invalid data";
   const result = await context.db.feed_monitor_hourly_summary.findMany({
     where: {
       operator_noc: parent.operatorId,
@@ -142,6 +144,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
 
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
   async (parent, args, context, info): Promise<VehicleStatsType[]> => {
+    if (!parent.operatorId) throw "Invalid data";
     const result = await context.db.feed_monitor_minute_summary.findMany({
       where: {
         operator_noc: parent.operatorId,

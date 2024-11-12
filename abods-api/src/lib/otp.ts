@@ -102,7 +102,7 @@ export const compareThresholds = async (
 
   if (lineIds && lineIds.length > 0) {
     where.noc_and_line_and_servicecode = {
-      in: lineIds?.filter(isDefined),
+      in: lineIds,
     };
   }
 
@@ -238,10 +238,6 @@ export const getOperatorsFromOrgId = async (
   if (userOperatorIds && userOperatorIds.length > 0) {
     where.operatorref = {
       in: userOperatorIds,
-    };
-  } else {
-    where.operatorref = {
-      not: undefined,
     };
   }
 

@@ -1,4 +1,4 @@
-query getAdminAreas($adminAreaIds: [String!]) {
+query getAdminAreas($adminAreaIds: [String!]!) {
   adminAreas(adminAreaIds: $adminAreaIds) {
     id: adminAreaId
     name: adminAreaName

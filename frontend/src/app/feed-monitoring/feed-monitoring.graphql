@@ -65,7 +65,7 @@ query feedMonitoringList {
   }
 }
 
-query operatorSparklineStats($operatorIds: [String!]) {
+query operatorSparklineStats($operatorIds: [String!]!) {
   operators(filterBy: { operatorIds: $operatorIds }) {
     items {
       nocCode

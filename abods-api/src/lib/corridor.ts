@@ -97,13 +97,13 @@ export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
 };
 
 export const getCorridor = (
-  corridorId: Number,
+  corridorId: number,
   db: PrismaClient,
   sessionUser: SessionUser,
 ) => {
   return db.corridor.findUnique({
     where: {
-      corridor_id: Number(corridorId),
+      corridor_id: corridorId,
       organisation_id: {
         in: sessionUser.orgIds,
       },
@@ -127,30 +127,30 @@ export const getCorridor = (
   });
 };
 
-export const deleteCorridorDb = (corridorId: Number, db: PrismaClient) => {
+export const deleteCorridorDb = (corridorId: number, db: PrismaClient) => {
   return db.corridor.delete({
     where: {
-      corridor_id: Number(corridorId),
+      corridor_id: corridorId,
     },
   });
 };
 
-export const deleteCorridorStops = (corridorId: Number, db: PrismaClient) => {
+export const deleteCorridorStops = (corridorId: number, db: PrismaClient) => {
   return db.corridor_stops.deleteMany({
     where: {
-      corridor_id: Number(corridorId),
+      corridor_id: corridorId,
     },
   });
 };
 
 export const updateCorridorDb = (
-  corridorId: Number,
+  corridorId: number,
   corridorName: string,
   db: PrismaClient,
 ) => {
   return db.corridor.update({
     where: {
-      corridor_id: Number(corridorId),
+      corridor_id: corridorId,
     },
     data: {
       corridor_name: corridorName,

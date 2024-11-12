@@ -14,13 +14,14 @@ export const findJourneys: VehicleReplayNamespaceResolvers["findJourneys"] =
   async (_, args, context): Promise<UniqueJourneyType[]> => {
     await requireUserSession(context);
     const lineIds = args.inputs.filters?.lineIds;
+    const firstLineId = lineIds?.[0];
 
-    if (lineIds && lineIds.length > 0 && lineIds[0]) {
+    if (firstLineId) {
       const currentTime = getDate();
       const toTimestamp = getDate(args.inputs.toTimestamp).subtract(4, "hour");
       let journeys = await context.db.expected_journeys.findMany({
         where: {
-          noc_and_line_and_servicecode: lineIds[0],
+          noc_and_line_and_servicecode: firstLineId,
           date_of_journey: toTimestamp.toDate(),
         },
         include: {

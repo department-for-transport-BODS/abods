@@ -21,7 +21,7 @@ export type Scalars = {
 };
 
 export type AddFirstStopInputType = {
-  adminAreaIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
   searchString?: InputMaybe<Scalars['String']['input']>;
 };
@@ -39,7 +39,7 @@ export type AdminAreasType = {
 };
 
 export type AlertInputType = {
-  alertType?: InputMaybe<AlertTypeEnum>;
+  alertType: AlertTypeEnum;
   eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
   eventThreshold?: InputMaybe<Scalars['Int']['input']>;
   sendTo: AlertReferenceInput;
@@ -105,10 +105,10 @@ export type AvlPoint = {
 };
 
 export type BoundingBoxInputType = {
-  maxLatitude?: InputMaybe<Scalars['Float']['input']>;
-  maxLongitude?: InputMaybe<Scalars['Float']['input']>;
-  minLatitude?: InputMaybe<Scalars['Float']['input']>;
-  minLongitude?: InputMaybe<Scalars['Float']['input']>;
+  maxLatitude: Scalars['Float']['input'];
+  maxLongitude: Scalars['Float']['input'];
+  minLatitude: Scalars['Float']['input'];
+  minLongitude: Scalars['Float']['input'];
 };
 
 export enum CorridorGranularity {
@@ -124,8 +124,8 @@ export type CorridorHistogramType = {
 };
 
 export type CorridorInputType = {
-  name?: InputMaybe<Scalars['String']['input']>;
-  stopIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  name: Scalars['String']['input'];
+  stopIds: Array<Scalars['String']['input']>;
 };
 
 export type CorridorJourneyTimeStatsType = {
@@ -151,12 +151,12 @@ export type CorridorNamespace = {
 
 
 export type CorridorNamespaceAddFirstStopArgs = {
-  inputs?: InputMaybe<AddFirstStopInputType>;
+  inputs: AddFirstStopInputType;
 };
 
 
 export type CorridorNamespaceAddSubsequentStopsArgs = {
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stopList: Array<Scalars['String']['input']>;
 };
 
 
@@ -166,7 +166,7 @@ export type CorridorNamespaceGetCorridorArgs = {
 
 
 export type CorridorNamespaceStatsArgs = {
-  inputs?: InputMaybe<CorridorStatsInputType>;
+  inputs: CorridorStatsInputType;
 };
 
 export type CorridorStatsDayOfWeekType = {
@@ -183,7 +183,7 @@ export type CorridorStatsDayOfWeekType = {
 
 export type CorridorStatsHistogramType = {
   __typename?: 'CorridorStatsHistogramType';
-  hist?: Maybe<Array<Maybe<CorridorHistogramType>>>;
+  hist?: Maybe<Array<CorridorHistogramType>>;
   ts?: Maybe<Scalars['String']['output']>;
 };
 
@@ -191,7 +191,7 @@ export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
   fromTimestamp: Scalars['DateTime']['input'];
   granularity: CorridorGranularity;
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stopList: Array<Scalars['String']['input']>;
   toTimestamp: Scalars['DateTime']['input'];
 };
 
@@ -250,9 +250,9 @@ export type CorridorType = {
 };
 
 export type CorridorUpdateInputType = {
-  id?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  id: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  stopList: Array<Scalars['String']['input']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -314,7 +314,7 @@ export type FeedMonitoringTypeHistoricalStatsArgs = {
 
 export type FeedMonitoringTypeVehicleStatsArgs = {
   end: Scalars['DateTime']['input'];
-  granularity?: InputMaybe<Granularity>;
+  granularity: Granularity;
   start: Scalars['DateTime']['input'];
 };
 
@@ -328,7 +328,7 @@ export type FrequentServiceInfoFilterType = {
 };
 
 export type FrequentServiceInfoInputType = {
-  filters?: InputMaybe<FrequentServiceInfoFilterType>;
+  filters: FrequentServiceInfoFilterType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -371,13 +371,13 @@ export type HeadwayFiltersInputType = {
   endTime?: InputMaybe<Scalars['String']['input']>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type HeadwayInputType = {
-  filters?: InputMaybe<HeadwayFiltersInputType>;
+  filters: HeadwayFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -438,8 +438,8 @@ export enum HeadwaySortEnum {
 }
 
 export type HeadwaySortType = {
-  field?: InputMaybe<HeadwaySortEnum>;
-  order?: InputMaybe<SortOrderEnum>;
+  field: HeadwaySortEnum;
+  order: SortOrderEnum;
 };
 
 export type HeadwayTimeOfDayType = {
@@ -468,7 +468,7 @@ export type HistoricalStatsType = {
 
 export type InvitationInput = {
   email: Scalars['String']['input'];
-  organisation?: InputMaybe<OrganisationReferenceInput>;
+  organisation: OrganisationReferenceInput;
   role: RoleReferenceInput;
 };
 
@@ -565,12 +565,12 @@ export type MutationAddUserAlertArgs = {
 
 
 export type MutationCreateCorridorArgs = {
-  payload?: InputMaybe<CorridorInputType>;
+  payload: CorridorInputType;
 };
 
 
 export type MutationDeleteCorridorArgs = {
-  corridorId?: InputMaybe<Scalars['Int']['input']>;
+  corridorId: Scalars['Int']['input'];
 };
 
 
@@ -614,12 +614,12 @@ export type MutationSignUpArgs = {
 
 
 export type MutationUpdateCorridorArgs = {
-  inputs?: InputMaybe<CorridorUpdateInputType>;
+  inputs: CorridorUpdateInputType;
 };
 
 
 export type MutationUpdateUserArgs = {
-  payload?: InputMaybe<UserUpdateInput>;
+  payload: UserUpdateInput;
   username: Scalars['String']['input'];
 };
 
@@ -701,7 +701,7 @@ export type OnTimePerformanceTypeStopPerformanceArgs = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds: Array<Scalars['String']['input']>;
 };
 
 export type OperatorInfoType = {
@@ -774,8 +774,8 @@ export type PaginatedLineType = {
 };
 
 export type PagingInputType = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after: Scalars['Int']['input'];
+  first: Scalars['Int']['input'];
 };
 
 export type PerformanceFiltersInputType = {
@@ -784,25 +784,25 @@ export type PerformanceFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
-  excludedDates?: InputMaybe<Array<InputMaybe<Scalars['Date']['input']>>>;
+  excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
   lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
   minDelay?: InputMaybe<Scalars['Int']['input']>;
-  nocCodes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   onTimeMaxMinutes?: InputMaybe<Scalars['Int']['input']>;
   onTimeMinMinutes?: InputMaybe<Scalars['Int']['input']>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
-  startTimes?: InputMaybe<Array<InputMaybe<Scalars['Time']['input']>>>;
+  startTimes?: InputMaybe<Array<Scalars['Time']['input']>>;
   stopsSegment?: InputMaybe<StopsSegment>;
-  tagIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  tagIds?: InputMaybe<Array<Scalars['Int']['input']>>;
   timingPointsOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PerformanceInputType = {
-  filters?: InputMaybe<PerformanceFiltersInputType>;
+  filters: PerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   paging?: InputMaybe<PagingInputType>;
   toTimestamp: Scalars['DateTime']['input'];
@@ -823,8 +823,8 @@ export enum PunctualitySortEnum {
 }
 
 export type PunctualitySortType = {
-  field?: InputMaybe<PunctualitySortEnum>;
-  order?: InputMaybe<SortOrderEnum>;
+  field: PunctualitySortEnum;
+  order: SortOrderEnum;
 };
 
 export type PunctualityTimeOfDayType = {
@@ -879,7 +879,7 @@ export type Query = {
 
 
 export type QueryAdminAreasArgs = {
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adminAreaIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -929,11 +929,6 @@ export type QueryRouteArgs = {
 
 export type QueryServiceInfoArgs = {
   serviceId: Scalars['String']['input'];
-};
-
-
-export type QueryUserArgs = {
-  id?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -987,14 +982,14 @@ export type ServicePatternType = {
 };
 
 export type ServicePerformanceFiltersInputType = {
-  operatorIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   timingPointsOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ServicePerformanceInputType = {
-  filters?: InputMaybe<ServicePerformanceFiltersInputType>;
+  filters: ServicePerformanceFiltersInputType;
   fromTimestamp: Scalars['DateTime']['input'];
-  order?: InputMaybe<RankingOrder>;
+  order: RankingOrder;
   toTimestamp: Scalars['DateTime']['input'];
 };
 
@@ -1120,7 +1115,7 @@ export type TransitModelType = {
 
 
 export type TransitModelTypeLinesArgs = {
-  filterBy?: InputMaybe<LineFilterType>;
+  filterBy: LineFilterType;
 };
 
 export type UniqueJourneyType = {
@@ -1144,7 +1139,7 @@ export type UserType = {
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role?: InputMaybe<RoleReferenceInput>;
+  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1155,12 +1150,12 @@ export type UserUpdateResponseType = {
 
 export type VehicleReplayFilterInputType = {
   filterOnStartTime?: InputMaybe<Scalars['Boolean']['input']>;
-  lineIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  stopIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  stopIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type VehicleReplayInputType = {
-  filters?: InputMaybe<VehicleReplayFilterInputType>;
+  filters: VehicleReplayFilterInputType;
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -1546,11 +1541,11 @@ export type CorridorJourneyTimeStatsTypeResolvers<ContextType = RequestContext, 
 }>;
 
 export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorNamespace'] = ResolversParentTypes['CorridorNamespace']> = ResolversObject<{
-  addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, Partial<CorridorNamespaceAddFirstStopArgs>>;
-  addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, Partial<CorridorNamespaceAddSubsequentStopsArgs>>;
+  addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddFirstStopArgs, 'inputs'>>;
+  addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddSubsequentStopsArgs, 'stopList'>>;
   corridorList?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorType']>>>, ParentType, ContextType>;
   getCorridor?: Resolver<Maybe<ResolversTypes['CorridorType']>, ParentType, ContextType, RequireFields<CorridorNamespaceGetCorridorArgs, 'corridorId'>>;
-  stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, Partial<CorridorNamespaceStatsArgs>>;
+  stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, RequireFields<CorridorNamespaceStatsArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1567,7 +1562,7 @@ export type CorridorStatsDayOfWeekTypeResolvers<ContextType = RequestContext, Pa
 }>;
 
 export type CorridorStatsHistogramTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsHistogramType'] = ResolversParentTypes['CorridorStatsHistogramType']> = ResolversObject<{
-  hist?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorHistogramType']>>>, ParentType, ContextType>;
+  hist?: Resolver<Maybe<Array<ResolversTypes['CorridorHistogramType']>>, ParentType, ContextType>;
   ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1671,7 +1666,7 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   liveStats?: Resolver<Maybe<ResolversTypes['LiveStatsType']>, ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'start'>>;
+  vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'granularity' | 'start'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1800,8 +1795,8 @@ export type LoginResponseResolvers<ContextType = RequestContext, ParentType exte
 
 export type MutationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   addUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationAddUserAlertArgs, 'payload'>>;
-  createCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, Partial<MutationCreateCorridorArgs>>;
-  deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, Partial<MutationDeleteCorridorArgs>>;
+  createCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationCreateCorridorArgs, 'payload'>>;
+  deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteCorridorArgs, 'corridorId'>>;
   deleteUser?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'username'>>;
   deleteUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserAlertArgs, 'alertId'>>;
   inviteUser?: Resolver<ResolversTypes['InvitationResponseType'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'payload'>>;
@@ -1810,8 +1805,8 @@ export type MutationResolvers<ContextType = RequestContext, ParentType extends R
   requestResetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationRequestResetPasswordArgs, 'email'>>;
   resetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'confirmPassword' | 'password' | 'token' | 'uid'>>;
   signUp?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'payload'>>;
-  updateCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, Partial<MutationUpdateCorridorArgs>>;
-  updateUser?: Resolver<ResolversTypes['UserUpdateResponseType'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'username'>>;
+  updateCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationUpdateCorridorArgs, 'inputs'>>;
+  updateUser?: Resolver<ResolversTypes['UserUpdateResponseType'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'payload' | 'username'>>;
   updateUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationUpdateUserAlertArgs, 'alertId' | 'payload'>>;
   verifyResetPasswordToken?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationVerifyResetPasswordTokenArgs, 'token' | 'uid'>>;
 }>;
@@ -1930,7 +1925,7 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
 }>;
 
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AdminAreasType']>>>, ParentType, ContextType, Partial<QueryAdminAreasArgs>>;
+  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AdminAreasType']>>>, ParentType, ContextType, RequireFields<QueryAdminAreasArgs, 'adminAreaIds'>>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
@@ -1945,7 +1940,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   route?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType, RequireFields<QueryRouteArgs, 'groupId'>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
-  user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType, Partial<QueryUserArgs>>;
+  user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
@@ -2070,7 +2065,7 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type TransitModelTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['TransitModelType'] = ResolversParentTypes['TransitModelType']> = ResolversObject<{
-  lines?: Resolver<Maybe<ResolversTypes['PaginatedLineType']>, ParentType, ContextType, Partial<TransitModelTypeLinesArgs>>;
+  lines?: Resolver<Maybe<ResolversTypes['PaginatedLineType']>, ParentType, ContextType, RequireFields<TransitModelTypeLinesArgs, 'filterBy'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
