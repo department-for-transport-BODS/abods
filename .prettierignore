@@ -9,3 +9,4 @@ package-lock.json
 
 .husky/pre-commit
 .prettierignore
+VERSION
