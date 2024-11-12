@@ -151,12 +151,12 @@ export type CorridorNamespace = {
 
 
 export type CorridorNamespaceAddFirstStopArgs = {
-  inputs?: InputMaybe<AddFirstStopInputType>;
+  inputs: AddFirstStopInputType;
 };
 
 
 export type CorridorNamespaceAddSubsequentStopsArgs = {
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stopList: Array<Scalars['String']['input']>;
 };
 
 
@@ -166,7 +166,7 @@ export type CorridorNamespaceGetCorridorArgs = {
 
 
 export type CorridorNamespaceStatsArgs = {
-  inputs?: InputMaybe<CorridorStatsInputType>;
+  inputs: CorridorStatsInputType;
 };
 
 export type CorridorStatsDayOfWeekType = {
@@ -314,7 +314,7 @@ export type FeedMonitoringTypeHistoricalStatsArgs = {
 
 export type FeedMonitoringTypeVehicleStatsArgs = {
   end: Scalars['DateTime']['input'];
-  granularity?: InputMaybe<Granularity>;
+  granularity: Granularity;
   start: Scalars['DateTime']['input'];
 };
 
@@ -1115,7 +1115,7 @@ export type TransitModelType = {
 
 
 export type TransitModelTypeLinesArgs = {
-  filterBy?: InputMaybe<LineFilterType>;
+  filterBy: LineFilterType;
 };
 
 export type UniqueJourneyType = {
@@ -1196,7 +1196,7 @@ export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: string }> | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
-  inputs?: InputMaybe<AddFirstStopInputType>;
+  inputs: AddFirstStopInputType;
 }>;
 
 
@@ -1805,7 +1805,7 @@ export const UserDocument = gql`
     }
   }
 export const CorridorsStopSearchDocument = gql`
-    query corridorsStopSearch($inputs: AddFirstStopInputType) {
+    query corridorsStopSearch($inputs: AddFirstStopInputType!) {
   corridor {
     addFirstStop(inputs: $inputs) {
       stopId
