@@ -83,6 +83,13 @@ export const getExpectedJourneys = async (
     where.expected_journey_end = {
       gte: inputDate.subtract(duration, "minute").toDate(),
     };
+  } else {
+    where.expected_journey_start = {
+      gte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
+    };
+    where.expected_journey_end = {
+      lt: inputDate.startOf("minute").toDate(),
+    };
   }
 
   return db.expected_journeys.findMany({
@@ -102,18 +109,22 @@ export const getAvlPoints = async (
   inputDate: Dayjs,
   duration?: number,
   groupIds?: string[],
-) => {
+): Promise<
+  | { group_id: string | null }[]
+  | { recorded_at_time: Date; group_id: string; vehicle_ref: string }[]
+> => {
   const where: Prisma.SiriVMPositionsWhereInput = {
     date_of_journey: inputDate.toDate(),
     operator_ref: operatorId,
   };
 
-  if (duration) {
-    where.recorded_at_time = {
-      gte: inputDate.subtract(duration, "minute").startOf("minute").toDate(),
-      lt: inputDate.startOf("minute").toDate(),
-    };
-  }
+  where.recorded_at_time = {
+    gte: inputDate
+      .subtract(duration ?? 1, "minute")
+      .startOf("minute")
+      .toDate(),
+    lt: inputDate.startOf("minute").toDate(),
+  };
 
   if (groupIds && groupIds.length > 0) {
     where.group_id = {
@@ -123,11 +134,16 @@ export const getAvlPoints = async (
 
   return db.siriVMPositions.findMany({
     where: where,
-    select: {
-      recorded_at_time: true,
-      group_id: true,
-      vehicle_ref: true,
-    },
+    select: duration
+      ? {
+          recorded_at_time: true,
+          group_id: true,
+          vehicle_ref: true,
+        }
+      : {
+          group_id: true,
+        },
+    distinct: duration ? Prisma.skip : ["group_id"],
   });
 };
 
@@ -141,7 +157,11 @@ export const getAvlPerMinute = async (
     duration,
   );
 
-  for (const a of avl) {
+  for (const a of avl as {
+    recorded_at_time: Date;
+    group_id: string;
+    vehicle_ref: string;
+  }[]) {
     if (!a.group_id) continue;
     const recordedAt = getDate(a.recorded_at_time)
       .startOf("minute")
