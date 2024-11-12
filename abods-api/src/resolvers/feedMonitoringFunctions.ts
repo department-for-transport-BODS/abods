@@ -44,8 +44,8 @@ export const getEventStats: QueryResolvers["eventStats"] =
 export const getFeedMonitoringVehicleStats = async (
   db: PrismaClient,
   operatorId: string,
-  duration: number,
-) => {
+  duration?: number,
+): Promise<VehicleStatsType[]> => {
   const statsDate = getDate();
   let expectedJourneys: ExpectedJourneyType[] = [];
   expectedJourneys = await getExpectedJourneys(
@@ -62,16 +62,33 @@ export const getFeedMonitoringVehicleStats = async (
     duration,
     expectedJourneys.map((journey) => journey.group_id),
   );
-  const results = await getVehicleStats(
-    avl,
-    expectedJourneys,
-    statsDate,
-    duration,
-  );
 
-  return results.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
+  if (duration) {
+    const results = await getVehicleStats(
+      avl,
+      expectedJourneys,
+      statsDate,
+      duration,
+    );
+
+    return results.sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
+  }
+
+  // console.log("expected---", expectedJourneys)
+  // console.log("avl---", avl.length)
+  return [
+    {
+      timestamp: statsDate
+        .startOf("minute")
+        .subtract(1, "minute")
+        .toISOString(),
+      actual: avl.length,
+      expected: expectedJourneys.length,
+    },
+  ];
 };
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
@@ -205,6 +222,10 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
       parent.operatorId,
       21, // 21 minutes of data is displayed in frontend
     );
+  }
+
+  if (queryName === "dashboardOperatorVehicleCountsList") {
+    result = await getFeedMonitoringVehicleStats(context.db, parent.operatorId);
   }
 
   return {
