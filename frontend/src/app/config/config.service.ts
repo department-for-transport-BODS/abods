@@ -100,12 +100,10 @@ export class ConfigService {
       return;
     }
 
-    console.log("GETTING AUTHENTICATED DATA");
     return firstValueFrom(
       this.http.get<ConfigObject>("./config.json").pipe(
         map((config) => {
           // TODO: validate that the shape of this response is correct
-          console.log("GOT AUTHENTICATED DATA");
           this.config = config;
           console.log("Environment: " + this.config.envName);
         }),
