@@ -16,20 +16,12 @@
             >Dashboard
           </a>
         </li>
-        <li class="nav__item" *ngIf="configService.flag('feedMonitoring')">
+        <li class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/feed-monitoring']"
             routerLinkActive="nav__link--current"
             (click)="navService.closeMenu()"
-            >Feed monitoring
-          </a>
-        </li>
-        <li class="nav__item" *ngIf="!configService.flag('feedMonitoring')">
-          <a
-            style="color: grey; pointer-events: none"
-            class="nav__link disabled"
-            routerLinkActive="nav__link--current"
             >Feed monitoring
           </a>
         </li>
