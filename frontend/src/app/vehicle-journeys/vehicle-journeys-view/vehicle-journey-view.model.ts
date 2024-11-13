@@ -28,10 +28,8 @@ export const createVehicleJourneyView = (
   startTime: DateTime,
   journeyId: string,
 ): VehicleJourneyView => {
-  journey = [...journey].sort(
-    (a, b) =>
-      new Date(a.recordedAtTimeUtc).getDate() -
-      new Date(b.recordedAtTimeUtc).getDate(),
+  journey = [...journey].sort((a, b) =>
+    a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
   );
   route = [...route].sort((a, b) => a.stopIndex - b.stopIndex);
 
