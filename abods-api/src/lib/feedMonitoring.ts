@@ -85,10 +85,10 @@ export const getExpectedJourneys = async (
     };
   } else {
     where.expected_journey_start = {
-      gte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
+      lte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
     };
     where.expected_journey_end = {
-      lt: inputDate.startOf("minute").toDate(),
+      gt: inputDate.startOf("minute").toDate(),
     };
   }
 

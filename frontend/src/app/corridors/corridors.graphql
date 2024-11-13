@@ -1,4 +1,4 @@
-query corridorsStopSearch($inputs: AddFirstStopInputType) {
+query corridorsStopSearch($inputs: AddFirstStopInputType!) {
   corridor {
     addFirstStop(inputs: $inputs) {
       stopId

@@ -47,21 +47,14 @@ export const getFeedMonitoringVehicleStats = async (
   duration?: number,
 ): Promise<VehicleStatsType[]> => {
   const statsDate = getDate();
-  let expectedJourneys: ExpectedJourneyType[] = [];
-  expectedJourneys = await getExpectedJourneys(
-    db,
-    operatorId,
-    statsDate,
-    duration,
-  );
 
-  const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
-    db,
-    operatorId,
-    statsDate,
-    duration,
-    expectedJourneys.map((journey) => journey.group_id),
-  );
+  let [expectedJourneys, avl] = await Promise.all([
+    getExpectedJourneys(db, operatorId, statsDate, duration),
+    getAvlPoints(db, operatorId, statsDate, duration),
+  ]);
+
+  const setExp = new Set(expectedJourneys.map((j) => j.group_id));
+  avl = avl.filter((j) => setExp.has(j.group_id ?? ""));
 
   if (duration) {
     const results = await getVehicleStats(
@@ -77,8 +70,6 @@ export const getFeedMonitoringVehicleStats = async (
     );
   }
 
-  // console.log("expected---", expectedJourneys)
-  // console.log("avl---", avl.length)
   return [
     {
       timestamp: statsDate
@@ -216,16 +207,16 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name?.value;
 
   let result: VehicleStatsType[] = [];
-  if (queryName === "operatorLiveStatus") {
+  if (
+    queryName === "operatorLiveStatus" ||
+    queryName === "dashboardOperatorVehicleCountsList"
+  ) {
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
-      21, // 21 minutes of data is displayed in frontend
+      // 21 minutes of vehicle count is displayed in frontend. Undefined is set to return previous min vehicle counts
+      queryName === "dashboardOperatorVehicleCountsList" ? undefined : 21,
     );
-  }
-
-  if (queryName === "dashboardOperatorVehicleCountsList") {
-    result = await getFeedMonitoringVehicleStats(context.db, parent.operatorId);
   }
 
   return {

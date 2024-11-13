@@ -151,12 +151,12 @@ export type CorridorNamespace = {
 
 
 export type CorridorNamespaceAddFirstStopArgs = {
-  inputs?: InputMaybe<AddFirstStopInputType>;
+  inputs: AddFirstStopInputType;
 };
 
 
 export type CorridorNamespaceAddSubsequentStopsArgs = {
-  stopList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stopList: Array<Scalars['String']['input']>;
 };
 
 
@@ -166,7 +166,7 @@ export type CorridorNamespaceGetCorridorArgs = {
 
 
 export type CorridorNamespaceStatsArgs = {
-  inputs?: InputMaybe<CorridorStatsInputType>;
+  inputs: CorridorStatsInputType;
 };
 
 export type CorridorStatsDayOfWeekType = {
@@ -314,7 +314,7 @@ export type FeedMonitoringTypeHistoricalStatsArgs = {
 
 export type FeedMonitoringTypeVehicleStatsArgs = {
   end: Scalars['DateTime']['input'];
-  granularity?: InputMaybe<Granularity>;
+  granularity: Granularity;
   start: Scalars['DateTime']['input'];
 };
 
@@ -1115,7 +1115,7 @@ export type TransitModelType = {
 
 
 export type TransitModelTypeLinesArgs = {
-  filterBy?: InputMaybe<LineFilterType>;
+  filterBy: LineFilterType;
 };
 
 export type UniqueJourneyType = {
@@ -1541,11 +1541,11 @@ export type CorridorJourneyTimeStatsTypeResolvers<ContextType = RequestContext, 
 }>;
 
 export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorNamespace'] = ResolversParentTypes['CorridorNamespace']> = ResolversObject<{
-  addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, Partial<CorridorNamespaceAddFirstStopArgs>>;
-  addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, Partial<CorridorNamespaceAddSubsequentStopsArgs>>;
+  addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddFirstStopArgs, 'inputs'>>;
+  addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddSubsequentStopsArgs, 'stopList'>>;
   corridorList?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorType']>>>, ParentType, ContextType>;
   getCorridor?: Resolver<Maybe<ResolversTypes['CorridorType']>, ParentType, ContextType, RequireFields<CorridorNamespaceGetCorridorArgs, 'corridorId'>>;
-  stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, Partial<CorridorNamespaceStatsArgs>>;
+  stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, RequireFields<CorridorNamespaceStatsArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1666,7 +1666,7 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   liveStats?: Resolver<Maybe<ResolversTypes['LiveStatsType']>, ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'start'>>;
+  vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'granularity' | 'start'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2065,7 +2065,7 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type TransitModelTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['TransitModelType'] = ResolversParentTypes['TransitModelType']> = ResolversObject<{
-  lines?: Resolver<Maybe<ResolversTypes['PaginatedLineType']>, ParentType, ContextType, Partial<TransitModelTypeLinesArgs>>;
+  lines?: Resolver<Maybe<ResolversTypes['PaginatedLineType']>, ParentType, ContextType, RequireFields<TransitModelTypeLinesArgs, 'filterBy'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

@@ -55,9 +55,9 @@ type EventData {
 type CorridorNamespace {
   getCorridor(corridorId: Int!): CorridorType
   corridorList: [CorridorType]
-  stats(inputs: CorridorStatsInputType): CorridorStatsType
-  addFirstStop(inputs: AddFirstStopInputType): [StopType]
-  addSubsequentStops(stopList: [String]): [StopType]
+  stats(inputs: CorridorStatsInputType!): CorridorStatsType
+  addFirstStop(inputs: AddFirstStopInputType!): [StopType]
+  addSubsequentStops(stopList: [String!]!): [StopType]
 }
 
 input AddFirstStopInputType {
@@ -348,7 +348,7 @@ type HeadwayTimeSeriesType {
 }
 
 type TransitModelType {
-  lines(filterBy: LineFilterType): PaginatedLineType
+  lines(filterBy: LineFilterType!): PaginatedLineType
 }
 
 input LineFilterType {
@@ -423,7 +423,7 @@ type FeedMonitoringType {
   liveStats: LiveStatsType
   unavailableSince: DateTime
   vehicleStats(
-    granularity: Granularity
+    granularity: Granularity!
     start: DateTime!
     end: DateTime!
   ): [VehicleStatsType]

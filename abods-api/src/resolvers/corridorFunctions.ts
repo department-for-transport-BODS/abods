@@ -365,7 +365,7 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
 };
 
 type StatsCache = {
-  inputs: InputMaybe<CorridorStatsInputType> | undefined;
+  inputs: CorridorStatsInputType;
   journeys: Map<string, Timetable[]>;
 };
 
@@ -374,8 +374,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   args,
   context,
 ): Promise<CorridorStatsType> => {
-  const { corridorId, fromTimestamp, granularity, stopList, toTimestamp } =
-    args.inputs || {};
+  const { corridorId, fromTimestamp, stopList, toTimestamp } = args.inputs;
   const user = await requireUserSession(context);
 
   if (
@@ -387,7 +386,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   let results: Timetable[] = await context.db.timetable.findMany({
     where: {
       stop_id: {
-        in: stopList?.map(Number) ?? Prisma.skip,
+        in: stopList.map(Number),
       },
       date_of_journey: {
         gte: utcToBstDBInput(fromTimestamp),
@@ -677,11 +676,10 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
   async (parent, _, context): Promise<ServiceLinkType[]> => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    const { corridorId } = data.inputs || {};
 
     const results = await context.db.corridor_stops.findMany({
       where: {
-        corridor_id: Number(corridorId ?? 0),
+        corridor_id: Number(data.inputs.corridorId),
       },
     });
 
