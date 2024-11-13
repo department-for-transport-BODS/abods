@@ -75,7 +75,9 @@ export const getExpectedJourneys = async (
     date_of_journey: inputDate.toDate(),
   };
 
-  let select: Prisma.expected_journeysSelect = {};
+  let select: Prisma.expected_journeysSelect = {
+    group_id: true,
+  };
   if (duration) {
     where.expected_journey_start = {
       lt: inputDate.toDate(),
@@ -85,20 +87,14 @@ export const getExpectedJourneys = async (
       gte: inputDate.subtract(duration, "minute").toDate(),
     };
 
-    select = {
-      group_id: true,
-      expected_journey_start: true,
-      expected_journey_end: true,
-    };
+    select.expected_journey_start = true;
+    select.expected_journey_end = true;
   } else {
     where.expected_journey_start = {
       lte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
     };
     where.expected_journey_end = {
       gt: inputDate.startOf("minute").toDate(),
-    };
-    select = {
-      group_id: true,
     };
   }
 
