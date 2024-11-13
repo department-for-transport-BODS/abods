@@ -1,0 +1,29 @@
+query config {
+  config {
+    envName
+    mapboxToken
+    mapboxSatelliteStyle
+    mapboxStyle
+    freshdesk {
+      apiUrl
+      folders {
+        corridors
+        dashboard
+        feedMonitoring
+        organisation
+        otp
+        vehicleJourneys
+      }
+    }
+    otp {
+      early
+      late
+    }
+    vehicleJourneys {
+      validDateRange {
+        durationISO
+        offsetISO
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { BehaviorSubject, map, Observable, Subject, takeUntil } from "rxjs";
-import { FreshdeskFolderConfig } from "../../config/config.service";
 import { FreshdeskApiService, FreshdeskArticle } from "./freshdesk-api.service";
+import { FreshdeskFolders } from "../../../generated/graphql";
 
 export interface HelpdeskData {
   title: string;
@@ -26,7 +26,7 @@ export class HelpdeskDataService implements OnDestroy {
     return this.currentHelpdeskData$.asObservable();
   }
 
-  loadData(folder: keyof FreshdeskFolderConfig, title: string) {
+  loadData(folder: keyof FreshdeskFolders, title: string) {
     this.freshdeskApiService
       .getFolder(folder)
       .pipe(

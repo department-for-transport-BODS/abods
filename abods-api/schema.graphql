@@ -3,6 +3,7 @@ scalar Time
 scalar Date
 
 type Query {
+  config: ConfigData!
   user: UserType
   users: [UserType!]
   apiInfo: ApiInfoType
@@ -44,6 +45,44 @@ type DashboardVehicles {
   operatorId: String!
   expected: Int!
   actual: Int!
+}
+
+type ConfigData {
+  envName: String!
+  mapboxToken: String!
+  mapboxStyle: String!
+  mapboxSatelliteStyle: String!
+  vehicleJourneys: VehicleJourneysConfig!
+  otp: OtpConfig!
+  freshdesk: FreshdeskConfig!
+}
+
+type VehicleJourneysConfig {
+  validDateRange: ValidDateRange!
+}
+
+type ValidDateRange {
+  offsetISO: String!
+  durationISO: String!
+}
+
+type OtpConfig {
+  early: Int!
+  late: Int!
+}
+
+type FreshdeskConfig {
+  apiUrl: String!
+  folders: FreshdeskFolders!
+}
+
+type FreshdeskFolders {
+  dashboard: String!
+  feedMonitoring: String!
+  otp: String!
+  vehicleJourneys: String!
+  corridors: String!
+  organisation: String!
 }
 
 input OperatorFilterInput {

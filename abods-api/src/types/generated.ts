@@ -112,6 +112,17 @@ export type BoundingBoxInputType = {
   minLongitude: Scalars['Float']['input'];
 };
 
+export type ConfigData = {
+  __typename?: 'ConfigData';
+  envName: Scalars['String']['output'];
+  freshdesk: FreshdeskConfig;
+  mapboxSatelliteStyle: Scalars['String']['output'];
+  mapboxStyle: Scalars['String']['output'];
+  mapboxToken: Scalars['String']['output'];
+  otp: OtpConfig;
+  vehicleJourneys: VehicleJourneysConfig;
+};
+
 export enum CorridorGranularity {
   Day = 'day',
   Hour = 'hour',
@@ -340,6 +351,22 @@ export type FrequentServiceInfoType = {
 export type FrequentServiceType = {
   __typename?: 'FrequentServiceType';
   serviceId: Scalars['String']['output'];
+};
+
+export type FreshdeskConfig = {
+  __typename?: 'FreshdeskConfig';
+  apiUrl: Scalars['String']['output'];
+  folders: FreshdeskFolders;
+};
+
+export type FreshdeskFolders = {
+  __typename?: 'FreshdeskFolders';
+  corridors: Scalars['String']['output'];
+  dashboard: Scalars['String']['output'];
+  feedMonitoring: Scalars['String']['output'];
+  organisation: Scalars['String']['output'];
+  otp: Scalars['String']['output'];
+  vehicleJourneys: Scalars['String']['output'];
 };
 
 export type GpsPointType = {
@@ -698,6 +725,12 @@ export type OrganisationType = {
   name: Scalars['String']['output'];
 };
 
+export type OtpConfig = {
+  __typename?: 'OtpConfig';
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+};
+
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -786,6 +819,7 @@ export type Query = {
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
+  config: ConfigData;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -1090,6 +1124,17 @@ export type UserUpdateResponseType = {
   user?: Maybe<UserType>;
 };
 
+export type ValidDateRange = {
+  __typename?: 'ValidDateRange';
+  durationISO: Scalars['String']['output'];
+  offsetISO: Scalars['String']['output'];
+};
+
+export type VehicleJourneysConfig = {
+  __typename?: 'VehicleJourneysConfig';
+  validDateRange: ValidDateRange;
+};
+
 export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual: Scalars['Int']['output'];
@@ -1182,6 +1227,7 @@ export type ResolversTypes = ResolversObject<{
   AvlPoint: ResolverTypeWrapper<Partial<AvlPoint>>;
   Boolean: ResolverTypeWrapper<Partial<Scalars['Boolean']['output']>>;
   BoundingBoxInputType: ResolverTypeWrapper<Partial<BoundingBoxInputType>>;
+  ConfigData: ResolverTypeWrapper<Partial<ConfigData>>;
   CorridorGranularity: ResolverTypeWrapper<Partial<CorridorGranularity>>;
   CorridorHistogramType: ResolverTypeWrapper<Partial<CorridorHistogramType>>;
   CorridorInputType: ResolverTypeWrapper<Partial<CorridorInputType>>;
@@ -1211,6 +1257,8 @@ export type ResolversTypes = ResolversObject<{
   FrequentServiceInfoInputType: ResolverTypeWrapper<Partial<FrequentServiceInfoInputType>>;
   FrequentServiceInfoType: ResolverTypeWrapper<Partial<FrequentServiceInfoType>>;
   FrequentServiceType: ResolverTypeWrapper<Partial<FrequentServiceType>>;
+  FreshdeskConfig: ResolverTypeWrapper<Partial<FreshdeskConfig>>;
+  FreshdeskFolders: ResolverTypeWrapper<Partial<FreshdeskFolders>>;
   GpsPointType: ResolverTypeWrapper<Partial<GpsPointType>>;
   Granularity: ResolverTypeWrapper<Partial<Granularity>>;
   HeadwayFiltersInputType: ResolverTypeWrapper<Partial<HeadwayFiltersInputType>>;
@@ -1240,6 +1288,7 @@ export type ResolversTypes = ResolversObject<{
   OperatorsPage: ResolverTypeWrapper<Partial<OperatorsPage>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
   OrganisationType: ResolverTypeWrapper<Partial<OrganisationType>>;
+  OtpConfig: ResolverTypeWrapper<Partial<OtpConfig>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
   PagingInputType: ResolverTypeWrapper<Partial<PagingInputType>>;
@@ -1275,6 +1324,8 @@ export type ResolversTypes = ResolversObject<{
   UserType: ResolverTypeWrapper<Partial<UserType>>;
   UserUpdateInput: ResolverTypeWrapper<Partial<UserUpdateInput>>;
   UserUpdateResponseType: ResolverTypeWrapper<Partial<UserUpdateResponseType>>;
+  ValidDateRange: ResolverTypeWrapper<Partial<ValidDateRange>>;
+  VehicleJourneysConfig: ResolverTypeWrapper<Partial<VehicleJourneysConfig>>;
   VehicleStatsType: ResolverTypeWrapper<Partial<VehicleStatsType>>;
 }>;
 
@@ -1292,6 +1343,7 @@ export type ResolversParentTypes = ResolversObject<{
   AvlPoint: Partial<AvlPoint>;
   Boolean: Partial<Scalars['Boolean']['output']>;
   BoundingBoxInputType: Partial<BoundingBoxInputType>;
+  ConfigData: Partial<ConfigData>;
   CorridorHistogramType: Partial<CorridorHistogramType>;
   CorridorInputType: Partial<CorridorInputType>;
   CorridorJourneyTimeStatsType: Partial<CorridorJourneyTimeStatsType>;
@@ -1320,6 +1372,8 @@ export type ResolversParentTypes = ResolversObject<{
   FrequentServiceInfoInputType: Partial<FrequentServiceInfoInputType>;
   FrequentServiceInfoType: Partial<FrequentServiceInfoType>;
   FrequentServiceType: Partial<FrequentServiceType>;
+  FreshdeskConfig: Partial<FreshdeskConfig>;
+  FreshdeskFolders: Partial<FreshdeskFolders>;
   GpsPointType: Partial<GpsPointType>;
   HeadwayFiltersInputType: Partial<HeadwayFiltersInputType>;
   HeadwayInputType: Partial<HeadwayInputType>;
@@ -1346,6 +1400,7 @@ export type ResolversParentTypes = ResolversObject<{
   OperatorsPage: Partial<OperatorsPage>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
   OrganisationType: Partial<OrganisationType>;
+  OtpConfig: Partial<OtpConfig>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
   PerformanceFiltersInputType: Partial<PerformanceFiltersInputType>;
@@ -1376,6 +1431,8 @@ export type ResolversParentTypes = ResolversObject<{
   UserType: Partial<UserType>;
   UserUpdateInput: Partial<UserUpdateInput>;
   UserUpdateResponseType: Partial<UserUpdateResponseType>;
+  ValidDateRange: Partial<ValidDateRange>;
+  VehicleJourneysConfig: Partial<VehicleJourneysConfig>;
   VehicleStatsType: Partial<VehicleStatsType>;
 }>;
 
@@ -1420,6 +1477,17 @@ export type AvlPointResolvers<ContextType = RequestContext, ParentType extends R
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   recordedAtTimeUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   vehicleRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ConfigDataResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ConfigData'] = ResolversParentTypes['ConfigData']> = ResolversObject<{
+  envName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  freshdesk?: Resolver<ResolversTypes['FreshdeskConfig'], ParentType, ContextType>;
+  mapboxSatelliteStyle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  mapboxStyle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  mapboxToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  otp?: Resolver<ResolversTypes['OtpConfig'], ParentType, ContextType>;
+  vehicleJourneys?: Resolver<ResolversTypes['VehicleJourneysConfig'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1575,6 +1643,22 @@ export type FrequentServiceInfoTypeResolvers<ContextType = RequestContext, Paren
 
 export type FrequentServiceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FrequentServiceType'] = ResolversParentTypes['FrequentServiceType']> = ResolversObject<{
   serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type FreshdeskConfigResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FreshdeskConfig'] = ResolversParentTypes['FreshdeskConfig']> = ResolversObject<{
+  apiUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  folders?: Resolver<ResolversTypes['FreshdeskFolders'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type FreshdeskFoldersResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FreshdeskFolders'] = ResolversParentTypes['FreshdeskFolders']> = ResolversObject<{
+  corridors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  dashboard?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  feedMonitoring?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  organisation?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  otp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vehicleJourneys?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1740,6 +1824,12 @@ export type OrganisationTypeResolvers<ContextType = RequestContext, ParentType e
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OtpConfigResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OtpConfig'] = ResolversParentTypes['OtpConfig']> = ResolversObject<{
+  early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type PageInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   next?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1785,6 +1875,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
+  config?: Resolver<ResolversTypes['ConfigData'], ParentType, ContextType>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
@@ -1947,6 +2038,17 @@ export type UserUpdateResponseTypeResolvers<ContextType = RequestContext, Parent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type ValidDateRangeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ValidDateRange'] = ResolversParentTypes['ValidDateRange']> = ResolversObject<{
+  durationISO?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  offsetISO?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type VehicleJourneysConfigResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleJourneysConfig'] = ResolversParentTypes['VehicleJourneysConfig']> = ResolversObject<{
+  validDateRange?: Resolver<ResolversTypes['ValidDateRange'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1961,6 +2063,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
   AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
   AvlPoint?: AvlPointResolvers<ContextType>;
+  ConfigData?: ConfigDataResolvers<ContextType>;
   CorridorHistogramType?: CorridorHistogramTypeResolvers<ContextType>;
   CorridorJourneyTimeStatsType?: CorridorJourneyTimeStatsTypeResolvers<ContextType>;
   CorridorNamespace?: CorridorNamespaceResolvers<ContextType>;
@@ -1982,6 +2085,8 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   FeedMonitoringType?: FeedMonitoringTypeResolvers<ContextType>;
   FrequentServiceInfoType?: FrequentServiceInfoTypeResolvers<ContextType>;
   FrequentServiceType?: FrequentServiceTypeResolvers<ContextType>;
+  FreshdeskConfig?: FreshdeskConfigResolvers<ContextType>;
+  FreshdeskFolders?: FreshdeskFoldersResolvers<ContextType>;
   GpsPointType?: GpsPointTypeResolvers<ContextType>;
   HeadwayMetricsType?: HeadwayMetricsTypeResolvers<ContextType>;
   HeadwayOverviewType?: HeadwayOverviewTypeResolvers<ContextType>;
@@ -2002,6 +2107,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   OperatorType?: OperatorTypeResolvers<ContextType>;
   OperatorsPage?: OperatorsPageResolvers<ContextType>;
   OrganisationType?: OrganisationTypeResolvers<ContextType>;
+  OtpConfig?: OtpConfigResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;
@@ -2022,6 +2128,8 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   Time?: GraphQLScalarType;
   UserType?: UserTypeResolvers<ContextType>;
   UserUpdateResponseType?: UserUpdateResponseTypeResolvers<ContextType>;
+  ValidDateRange?: ValidDateRangeResolvers<ContextType>;
+  VehicleJourneysConfig?: VehicleJourneysConfigResolvers<ContextType>;
   VehicleStatsType?: VehicleStatsTypeResolvers<ContextType>;
 }>;
 

@@ -112,6 +112,17 @@ export type BoundingBoxInputType = {
   minLongitude: Scalars['Float']['input'];
 };
 
+export type ConfigData = {
+  __typename?: 'ConfigData';
+  envName: Scalars['String']['output'];
+  freshdesk: FreshdeskConfig;
+  mapboxSatelliteStyle: Scalars['String']['output'];
+  mapboxStyle: Scalars['String']['output'];
+  mapboxToken: Scalars['String']['output'];
+  otp: OtpConfig;
+  vehicleJourneys: VehicleJourneysConfig;
+};
+
 export enum CorridorGranularity {
   Day = 'day',
   Hour = 'hour',
@@ -340,6 +351,22 @@ export type FrequentServiceInfoType = {
 export type FrequentServiceType = {
   __typename?: 'FrequentServiceType';
   serviceId: Scalars['String']['output'];
+};
+
+export type FreshdeskConfig = {
+  __typename?: 'FreshdeskConfig';
+  apiUrl: Scalars['String']['output'];
+  folders: FreshdeskFolders;
+};
+
+export type FreshdeskFolders = {
+  __typename?: 'FreshdeskFolders';
+  corridors: Scalars['String']['output'];
+  dashboard: Scalars['String']['output'];
+  feedMonitoring: Scalars['String']['output'];
+  organisation: Scalars['String']['output'];
+  otp: Scalars['String']['output'];
+  vehicleJourneys: Scalars['String']['output'];
 };
 
 export type GpsPointType = {
@@ -698,6 +725,12 @@ export type OrganisationType = {
   name: Scalars['String']['output'];
 };
 
+export type OtpConfig = {
+  __typename?: 'OtpConfig';
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+};
+
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -786,6 +819,7 @@ export type Query = {
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
+  config: ConfigData;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -1090,6 +1124,17 @@ export type UserUpdateResponseType = {
   user?: Maybe<UserType>;
 };
 
+export type ValidDateRange = {
+  __typename?: 'ValidDateRange';
+  durationISO: Scalars['String']['output'];
+  offsetISO: Scalars['String']['output'];
+};
+
+export type VehicleJourneysConfig = {
+  __typename?: 'VehicleJourneysConfig';
+  validDateRange: ValidDateRange;
+};
+
 export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual: Scalars['Int']['output'];
@@ -1114,6 +1159,11 @@ export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null } | null };
+
+export type ConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ConfigQuery = { __typename?: 'Query', config: { __typename?: 'ConfigData', envName: string, mapboxToken: string, mapboxSatelliteStyle: string, mapboxStyle: string, freshdesk: { __typename?: 'FreshdeskConfig', apiUrl: string, folders: { __typename?: 'FreshdeskFolders', corridors: string, dashboard: string, feedMonitoring: string, organisation: string, otp: string, vehicleJourneys: string } }, otp: { __typename?: 'OtpConfig', early: number, late: number }, vehicleJourneys: { __typename?: 'VehicleJourneysConfig', validDateRange: { __typename?: 'ValidDateRange', durationISO: string, offsetISO: string } } } };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1703,6 +1753,48 @@ export const UserDocument = gql`
   })
   export class UserGQL extends Apollo.Query<UserQuery, UserQueryVariables> {
     document = UserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ConfigDocument = gql`
+    query config {
+  config {
+    envName
+    mapboxToken
+    mapboxSatelliteStyle
+    mapboxStyle
+    freshdesk {
+      apiUrl
+      folders {
+        corridors
+        dashboard
+        feedMonitoring
+        organisation
+        otp
+        vehicleJourneys
+      }
+    }
+    otp {
+      early
+      late
+    }
+    vehicleJourneys {
+      validDateRange {
+        durationISO
+        offsetISO
+      }
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ConfigGQL extends Apollo.Query<ConfigQuery, ConfigQueryVariables> {
+    document = ConfigDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

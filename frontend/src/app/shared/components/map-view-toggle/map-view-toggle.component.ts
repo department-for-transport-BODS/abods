@@ -19,8 +19,8 @@ export class MapViewToggleComponent {
   constructor(private config: ConfigService) {}
 
   private styles = {
-    [MapboxStyleOption.Default]: this.config.mapboxStyle,
-    [MapboxStyleOption.satellite]: this.config.mapboxSatelliteStyle,
+    [MapboxStyleOption.Default]: this.config.data.mapboxStyle,
+    [MapboxStyleOption.satellite]: this.config.data.mapboxSatelliteStyle,
   };
 
   onStyleChange() {

@@ -2,10 +2,8 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { DateTime } from "luxon";
 import { Observable, catchError, map, of, retry } from "rxjs";
-import {
-  ConfigService,
-  FreshdeskFolderConfig,
-} from "../../config/config.service";
+import { ConfigService } from "../../config/config.service";
+import { FreshdeskFolders } from "../../../generated/graphql";
 
 export interface FreshdeskArticle {
   id: string;
@@ -47,16 +45,14 @@ export class FreshdeskApiService {
     private http: HttpClient,
   ) {}
 
-  getFolder(
-    folder: keyof FreshdeskFolderConfig,
-  ): Observable<FreshdeskArticle[]> {
+  getFolder(folder: keyof FreshdeskFolders): Observable<FreshdeskArticle[]> {
     if (!folder) {
       return of([]);
     }
     return this.http
       .get<FreshdeskArticle[]>(
-        this.configService.freshdeskConfig.apiUrl +
-          this.configService.freshdeskConfig.folders[folder],
+        this.configService.data.freshdesk.apiUrl +
+          this.configService.data.freshdesk.folders[folder],
         {
           observe: "body",
           responseType: "json",

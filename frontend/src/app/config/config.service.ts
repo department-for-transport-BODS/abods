@@ -1,49 +1,8 @@
-import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
-import { merge } from "lodash-es";
 import { SessionService } from "../authentication/session.service";
-
-export interface ConfigObject {
-  envName: string;
-  mapboxToken: string;
-  mapboxStyle: string;
-  mapboxSatelliteStyle: string;
-  vehicleJourneys: VehicleJourneysConfig;
-  otp: OtpConfig;
-  freshdesk: FreshdeskConfig;
-}
-
-export interface VehicleJourneysConfig {
-  validDateRange: {
-    /**
-     * Offset from current timestamp in ISO_8601 duration format
-     * https://en.wikipedia.org/wiki/ISO_8601#Durations
-     */
-    offsetISO: string;
-    /**
-     * Duration for vehicle journey search in ISO_8601 duration format
-     * https://en.wikipedia.org/wiki/ISO_8601#Durations
-     */
-    durationISO: string;
-  };
-}
-
-export interface OtpConfig {
-  early: number;
-  late: number;
-}
-
-export interface FreshdeskFolderConfig {
-  dashboard: string;
-  feedMonitoring: string;
-  otp: string;
-  vehicleJourneys: string;
-  corridors: string;
-  organisation: string;
-  [key: string]: string;
-}
+import { ConfigData, ConfigGQL } from "../../generated/graphql";
 
 const environments = ["local", "sandbox", "dev", "test", "uat"] as const;
 type Environment = (typeof environments)[number];
@@ -63,32 +22,18 @@ function flags(currentEnv: string) {
   return {} as const;
 }
 
-export interface FreshdeskConfig {
-  /**
-   * Endpoint to freshdesk proxy API
-   */
-  apiUrl: string;
-  /**
-   * Section to freshdesk folder id map
-   */
-  folders: FreshdeskFolderConfig;
-}
-
 @Injectable({
   providedIn: "root",
 })
 export class ConfigService {
-  private config: ConfigObject;
+  // Will be set in loadConfig at startup
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  private config: ConfigData = null!;
 
   constructor(
-    private http: HttpClient,
     private session: SessionService,
-  ) {
-    // Will be set in loadConfig at startup
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.config = null as ConfigObject;
-  }
+    private query: ConfigGQL,
+  ) {}
 
   loadConfig() {
     if (this.config) {
@@ -101,10 +46,9 @@ export class ConfigService {
     }
 
     return firstValueFrom(
-      this.http.get<ConfigObject>("./config.json").pipe(
-        map((config) => {
-          // TODO: validate that the shape of this response is correct
-          this.config = config;
+      this.query.fetch().pipe(
+        map((result) => {
+          this.config = result.data.config;
           console.log("Environment: " + this.config.envName);
         }),
       ),
@@ -115,48 +59,7 @@ export class ConfigService {
     return flags(this.config.envName || "unknown")[key];
   }
 
-  get mapboxToken(): string {
-    return this.config.mapboxToken || "";
-  }
-
-  get mapboxStyle() {
-    return this.config.mapboxStyle || "";
-  }
-
-  get mapboxSatelliteStyle() {
-    return this.config.mapboxSatelliteStyle || "";
-  }
-
-  get vehicleJourneys(): VehicleJourneysConfig {
-    const defaults: VehicleJourneysConfig = {
-      validDateRange: {
-        offsetISO: "PT0H",
-        durationISO: "P6M",
-      },
-    };
-    return merge(defaults, this.config.vehicleJourneys || {});
-  }
-
-  get otp(): OtpConfig {
-    const defaults: OtpConfig = {
-      late: 6,
-      early: 1,
-    };
-    return merge(defaults, this.config.otp || {});
-  }
-
-  get freshdeskConfig(): FreshdeskConfig {
-    const defaults: FreshdeskConfig = {
-      apiUrl: "",
-      folders: {
-        dashboard: "",
-        feedMonitoring: "",
-        otp: "",
-        vehicleJourneys: "",
-        corridors: "",
-        organisation: "",
-      },
-    };
-    return merge(defaults, this.config.freshdesk || {});
+  get data() {
+    return this.config;
   }
 }

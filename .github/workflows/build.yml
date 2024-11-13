@@ -194,20 +194,10 @@ jobs:
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value'`
-          freshdesk_api_url="https://${domain_name}/freshdesk/"
           graphql_api_url="https://${domain_name}/api/graphql"
-          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
-          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
-          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
 
-          jq --arg freshdesk_api_url "$freshdesk_api_url" \
-             --arg graphql_api_url "$graphql_api_url" \
-             --arg mapbox_token "$mapbox_token" \
-             --arg mapbox_style "$mapbox_style" \
-             --arg mapbox_satellite_style "$mapbox_satellite_style" \
-             --arg ENVIRONMENT "$ENVIRONMENT" \
-             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .envName = $ENVIRONMENT | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
-            mv tmp.json src/config.json
+          jq --arg graphql_api_url "$graphql_api_url" '.apiUrl = $graphql_api_url | .analyticsId = "1234"' src/environmentConfig.json > tmp.json && \
+            mv tmp.json src/environmentConfig.json
 
           npm install
           npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \

@@ -82,7 +82,7 @@ export class ServiceMapComponent implements OnInit, OnDestroy {
   }
 
   get mapboxStyle(): string {
-    return this.config.mapboxStyle;
+    return this.config.data.mapboxStyle;
   }
 
   private destroy$ = new Subject<void>();

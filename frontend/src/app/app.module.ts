@@ -53,7 +53,7 @@ import { EnvironmentConfig } from "../environmentConfig";
     },
     {
       provide: MAPBOX_API_KEY,
-      useFactory: async (config: ConfigService) => config.mapboxToken,
+      useFactory: async (config: ConfigService) => config.data.mapboxToken,
       deps: [ConfigService],
     },
     {

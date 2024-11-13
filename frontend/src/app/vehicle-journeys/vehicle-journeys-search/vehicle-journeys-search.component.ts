@@ -98,11 +98,11 @@ export class VehicleJourneysSearchComponent
   }
 
   get offsetISO(): string {
-    return this.configService.vehicleJourneys.validDateRange.offsetISO;
+    return this.configService.data.vehicleJourneys.validDateRange.offsetISO;
   }
 
   get durationISO(): string {
-    return this.configService.vehicleJourneys.validDateRange.durationISO;
+    return this.configService.data.vehicleJourneys.validDateRange.durationISO;
   }
 
   get noJourneysFound(): boolean {

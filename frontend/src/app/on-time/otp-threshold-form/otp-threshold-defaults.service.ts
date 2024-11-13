@@ -48,9 +48,9 @@ export class OtpThresholdDefaultsService {
 
   private returnDefaults(key: OtpThresholdKey) {
     if (key === OtpThresholdKey.Early) {
-      return this.configService.otp.early;
+      return this.configService.data.otp.early;
     } else {
-      return this.configService.otp.late;
+      return this.configService.data.otp.late;
     }
   }
 

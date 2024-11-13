@@ -108,7 +108,7 @@ export class AdminAreaMapComponent implements OnInit {
   ) {}
 
   get mapboxStyle(): string {
-    return this.config.mapboxStyle;
+    return this.config.data.mapboxStyle;
   }
 
   ngOnInit() {

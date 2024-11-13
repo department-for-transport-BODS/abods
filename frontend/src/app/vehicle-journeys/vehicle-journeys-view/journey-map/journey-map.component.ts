@@ -114,7 +114,7 @@ export class JourneyMapComponent implements OnChanges {
   lateColor = "#e5c700";
   noDataColor = "#b1b4b6";
 
-  private _mapboxStyle: string = this.config.mapboxStyle;
+  private _mapboxStyle: string = this.config.data.mapboxStyle;
 
   set mapboxStyle(style: string) {
     this._mapboxStyle = style;

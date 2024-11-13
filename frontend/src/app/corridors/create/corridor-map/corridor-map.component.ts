@@ -78,7 +78,7 @@ export class CorridorMapComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
-  private _mapboxStyle: string = this.config.mapboxStyle;
+  private _mapboxStyle: string = this.config.data.mapboxStyle;
   set mapboxStyle(style: string) {
     this._mapboxStyle = style;
   }

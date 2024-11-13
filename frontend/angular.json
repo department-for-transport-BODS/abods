@@ -29,7 +29,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
-            "assets": ["src/assets", "src/freshdesk", "src/favicon.ico", "src/config.json", "src/version.json"],
+            "assets": ["src/assets", "src/freshdesk", "src/favicon.ico", "src/version.json"],
             "styles": ["src/styles.scss"],
             "scripts": ["node_modules/govuk-frontend/govuk/all.js"],
             "allowedCommonJsDependencies": [
@@ -123,7 +123,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": ["src/favicon.ico", "src/assets", "src/config.json"],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.scss"],
             "scripts": []
           }
