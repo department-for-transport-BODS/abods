@@ -1538,15 +1538,11 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
         throw "No admin areas found";
       }
 
-      const ret = adminAreas.map((adminArea) => {
-        return {
-          adminAreaId: String(adminArea.id),
-          adminAreaName: adminArea.name,
-          shape: adminArea.st_asgeojson,
-        };
-      });
-
-      return ret;
+      return adminAreas.map((adminArea) => ({
+        id: adminArea.id.toString(),
+        name: adminArea.name,
+        shape: adminArea.st_asgeojson,
+      }));
     }
 
     return null;

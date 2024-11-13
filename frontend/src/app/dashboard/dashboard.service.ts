@@ -34,7 +34,7 @@ export class DashboardService {
 
   get listOperators(): Observable<OperatorDashboardFragment[]> {
     return this.operatorListQuery
-      .fetch()
+      .fetch({})
       .pipe(
         map(
           ({ data }) =>
@@ -49,7 +49,7 @@ export class DashboardService {
     OperatorDashboardVehicleCountsFragment[]
   > {
     return this.operatorVehicleCountsListQuery
-      .fetch()
+      .fetch({})
       .pipe(
         map(
           ({ data }) =>

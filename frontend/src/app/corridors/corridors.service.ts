@@ -262,18 +262,16 @@ export class CorridorsService {
   }
 
   fetchCorridors(): Observable<CorridorSummary[]> {
-    return this.corridorsListQuery
-      .fetch(undefined, { fetchPolicy: "no-cache" })
-      .pipe(
-        map((result) =>
-          nonNullishArray(result.data?.corridor?.corridorList).map(
-            ({ stops, ...corridor }) => ({
-              ...corridor,
-              numStops: nonNullishArray(stops).length,
-            }),
-          ),
+    return this.corridorsListQuery.fetch({}, { fetchPolicy: "no-cache" }).pipe(
+      map((result) =>
+        nonNullishArray(result.data?.corridor?.corridorList).map(
+          ({ stops, ...corridor }) => ({
+            ...corridor,
+            numStops: nonNullishArray(stops).length,
+          }),
         ),
-      );
+      ),
+    );
   }
 
   fetchCorridorById(corridorId: number): Observable<Corridor> {

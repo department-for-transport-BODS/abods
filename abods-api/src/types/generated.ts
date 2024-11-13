@@ -33,8 +33,8 @@ export type AdminAreaInfoType = {
 
 export type AdminAreasType = {
   __typename?: 'AdminAreasType';
-  adminAreaId: Scalars['String']['output'];
-  adminAreaName: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
   shape: Scalars['String']['output'];
 };
 
@@ -855,7 +855,7 @@ export type PunctualityTotalsType = {
 
 export type Query = {
   __typename?: 'Query';
-  adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
+  adminAreas?: Maybe<Array<AdminAreasType>>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
@@ -875,11 +875,6 @@ export type Query = {
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
   vehicleReplay?: Maybe<VehicleReplayNamespace>;
-};
-
-
-export type QueryAdminAreasArgs = {
-  adminAreaIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -1485,8 +1480,8 @@ export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType 
 }>;
 
 export type AdminAreasTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreasType'] = ResolversParentTypes['AdminAreasType']> = ResolversObject<{
-  adminAreaId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  adminAreaName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   shape?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1925,7 +1920,7 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
 }>;
 
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AdminAreasType']>>>, ParentType, ContextType, RequireFields<QueryAdminAreasArgs, 'adminAreaIds'>>;
+  adminAreas?: Resolver<Maybe<Array<ResolversTypes['AdminAreasType']>>, ParentType, ContextType>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;

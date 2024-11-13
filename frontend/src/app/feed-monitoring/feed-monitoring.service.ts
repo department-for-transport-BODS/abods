@@ -38,7 +38,7 @@ export class FeedMonitoringService {
   get listOperators(): Observable<
     { nocCode: string; operatorId: string; name?: string | null }[]
   > {
-    return this.operatorListQuery.fetch().pipe(
+    return this.operatorListQuery.fetch({}).pipe(
       map(
         ({ data }) =>
           data?.operators?.items?.map(
@@ -54,7 +54,7 @@ export class FeedMonitoringService {
   }
 
   fetchFeedMonitoringList(): Observable<BasicOperatorFragment[] | null> {
-    return this.feedMonitoringListQuery.fetch().pipe(
+    return this.feedMonitoringListQuery.fetch({}).pipe(
       map(({ data }) => {
         if (!data?.operators?.items?.length) {
           console.warn("No operators configured for user.");
