@@ -53,22 +53,18 @@ export const getFeedMonitoringVehicleStats = async (
     getAvlPoints(db, operatorId, statsDate, duration),
   ]);
 
-  const setExp = new Set(expectedJourneys.map((j) => j.group_id));
-  avl = avl.filter((j) => setExp.has(j.group_id ?? ""));
-
   if (duration) {
-    const results = await getVehicleStats(
-      avl,
-      expectedJourneys,
-      statsDate,
-      duration,
-    );
-
-    return results.sort(
-      (a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    return getVehicleStats(avl, expectedJourneys, statsDate, duration).then(
+      (data) =>
+        data.sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        ),
     );
   }
+
+  const setExp = new Set(expectedJourneys.map((j) => j.group_id));
+  avl = avl.filter((j) => setExp.has(j.group_id ?? ""));
 
   return [
     {

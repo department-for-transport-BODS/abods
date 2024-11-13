@@ -1,6 +1,6 @@
 import { VehicleStatsType } from "../types/generated.js";
 import { getDate, getFormattedDate } from "./dayjs.js";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, SiriVMPositions } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
 export type ExpectedJourneyType = {
@@ -25,7 +25,7 @@ export const getPerMinuteTimestamps = (
 };
 
 export const getVehicleStats = async (
-  avl: Awaited<ReturnType<typeof getAvlPoints>>,
+  avl: Partial<SiriVMPositions>[],
   expected: ExpectedJourneyType[],
   currentTime: Dayjs,
   duration: number,
@@ -75,6 +75,7 @@ export const getExpectedJourneys = async (
     date_of_journey: inputDate.toDate(),
   };
 
+  let select: Prisma.expected_journeysSelect = {};
   if (duration) {
     where.expected_journey_start = {
       lt: inputDate.toDate(),
@@ -83,6 +84,12 @@ export const getExpectedJourneys = async (
     where.expected_journey_end = {
       gte: inputDate.subtract(duration, "minute").toDate(),
     };
+
+    select = {
+      group_id: true,
+      expected_journey_start: true,
+      expected_journey_end: true,
+    };
   } else {
     where.expected_journey_start = {
       lte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
@@ -90,15 +97,14 @@ export const getExpectedJourneys = async (
     where.expected_journey_end = {
       gt: inputDate.startOf("minute").toDate(),
     };
+    select = {
+      group_id: true,
+    };
   }
 
   return db.expected_journeys.findMany({
-    where: where,
-    select: {
-      group_id: true,
-      expected_journey_start: true,
-      expected_journey_end: true,
-    },
+    where,
+    select,
     distinct: ["group_id"],
   });
 };
@@ -148,7 +154,7 @@ export const getAvlPoints = async (
 };
 
 export const getAvlPerMinute = async (
-  avl: Awaited<ReturnType<typeof getAvlPoints>>,
+  avl: Partial<SiriVMPositions>[],
   currentTime: Dayjs,
   duration: number,
 ) => {
@@ -157,11 +163,7 @@ export const getAvlPerMinute = async (
     duration,
   );
 
-  for (const a of avl as {
-    recorded_at_time: Date;
-    group_id: string;
-    vehicle_ref: string;
-  }[]) {
+  for (const a of avl) {
     if (!a.group_id) continue;
     const recordedAt = getDate(a.recorded_at_time)
       .startOf("minute")
