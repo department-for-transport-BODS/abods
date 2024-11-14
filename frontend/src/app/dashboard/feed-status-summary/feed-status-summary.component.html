@@ -9,8 +9,8 @@
         <th class="feed-status-summary__heading">
           <span class="govuk-visually-hidden">Operators</span>
         </th>
-        <th class="feed-status-summary__heading">Alerts</th>
-        <th class="feed-status-summary__heading">Errors</th>
+        <!-- <th class="feed-status-summary__heading">Alerts</th>
+        <th class="feed-status-summary__heading">Errors</th> -->
       </tr>
     </thead>
     <tbody>
@@ -27,7 +27,7 @@
             operator.name
           }}</app-tooltip>
         </td>
-        <td
+        <!-- <td
           class="feed-status-summary__count feed-status-summary__count--alerts"
         >
           {{ operator.feedMonitoring?.liveStats?.feedAlerts || 0 }}
@@ -36,7 +36,7 @@
           class="feed-status-summary__count feed-status-summary__count--errors"
         >
           {{ operator.feedMonitoring?.liveStats?.feedErrors || 0 }}
-        </td>
+        </td> -->
       </tr>
     </tbody>
   </table>
