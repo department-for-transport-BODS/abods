@@ -1,4 +1,4 @@
-import { getDate, getFormattedDate } from "./dayjs";
+import { getDate, getFormattedDate } from "./dayjs.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
