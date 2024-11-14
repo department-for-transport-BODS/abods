@@ -27,6 +27,7 @@ type Query {
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
   lines(operatorId: String!, inputDate: DateTime): [LineType!]!
+  servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 
   # Used by an external service, take care with changes
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
@@ -358,24 +359,9 @@ type HeadwayTimeSeriesType {
   scheduledWaitTime: Float!
 }
 
-type TransitModelType {
-  lines(filterBy: LineFilterType!): PaginatedLineType
-}
-
-type PaginatedLineType {
-  items: [TransitModelLineType]
-}
-
 input LineFilterType {
   lineIds: [String!]
   inputDate: DateTime
-}
-
-type TransitModelLineType {
-  lineId: String!
-  lineName: String!
-  lineNumber: String!
-  servicePatterns: [ServicePatternType]
 }
 
 type LineType {
@@ -386,9 +372,8 @@ type LineType {
 
 type ServicePatternType {
   servicePatternId: String!
-  name: String!
-  stops: [StopType!]
-  serviceLinks: [ServiceLinkType!]
+  stops: [StopType!]!
+  serviceLinks: [ServiceLinkType!]!
 }
 
 type StopType {
@@ -404,10 +389,10 @@ type StopType {
 }
 
 type ServiceLinkType {
-  fromStop: String
-  toStop: String
-  distance: Int!
-  routeValidity: String
+  fromStop: String!
+  toStop: String!
+  distance: Float!
+  routeValidity: String!
   linkRoute: String
 }
 
@@ -427,7 +412,6 @@ type OperatorType {
   nocCode: String
   operatorId: String!
   adminAreas: [AdminAreaInfoType]
-  transitModel: TransitModelType
   feedMonitoring: FeedMonitoringType
 }
 
