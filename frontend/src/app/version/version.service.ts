@@ -62,7 +62,7 @@ export class VersionService {
   }
 
   getApiVersion(): Observable<Version> {
-    return this.versionGQL.fetch().pipe(
+    return this.versionGQL.fetch({}).pipe(
       map(({ data }) =>
         data.apiInfo ? Version.create(data.apiInfo) : Version.createUnknown(),
       ),
