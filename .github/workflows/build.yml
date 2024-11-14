@@ -189,8 +189,8 @@ jobs:
           CI: ""
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="releases-dev/$VERSION/frontend/$ENVIRONMENT"
           ENVIRONMENT=$(cut -d '-' -f 1 <<< ${{ matrix.environment }})
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="releases-dev/$VERSION/frontend/$ENVIRONMENT"
 
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
