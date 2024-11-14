@@ -155,15 +155,15 @@ jobs:
         exclude:
           - isRelease: true
             environment: sandbox
-          - isRelease: true
+          - isRelease: false
             environment: dev
-          - isRelease: true
+          - isRelease: false
             environment: test-build
-          - isRelease: true
+          - isRelease: false
             environment: cavl-build
-          - isRelease: true
+          - isRelease: false
             environment: uat-build
-          - isRelease: true
+          - isRelease: false
             environment: prod-build
 
     steps:
