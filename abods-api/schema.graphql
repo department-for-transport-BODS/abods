@@ -27,6 +27,14 @@ type Query {
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
+
+  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+}
+
+type DashboardVehicles {
+  operatorId: String!
+  expected: Int!
+  actual: Int!
 }
 
 input OperatorFilterInput {
@@ -437,8 +445,8 @@ type HistoricalStatsType {
 }
 
 type VehicleStatsType {
-  actual: Int
-  expected: Int
+  actual: Int!
+  expected: Int!
   timestamp: DateTime!
 }
 

@@ -15,8 +15,8 @@ import {
   takeUntil,
 } from "rxjs/operators";
 import {
+  DashboardVehicles,
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
   PerformanceFiltersInputType,
 } from "../../generated/graphql";
 import { DashboardService } from "./dashboard.service";
@@ -43,29 +43,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   >({ nocCode: "all" });
 
   selectedOperatorsSubject = new Subject<OperatorDashboardFragment[]>();
-  selectedOperatorsVehicleCountsSubject = new Subject<
-    OperatorDashboardVehicleCountsFragment[]
-  >();
+  selectedOperatorsVehicleCountsSubject = new Subject<DashboardVehicles[]>();
 
   private currentVehicles$: Observable<number> =
     this.selectedOperatorsVehicleCountsSubject.pipe(
-      map((allOperators) =>
-        allOperators.reduce(
-          (v, op) => v + (op?.feedMonitoring?.liveStats?.currentVehicles ?? 0),
-          0,
-        ),
-      ),
+      map((allOperators) => allOperators.reduce((v, op) => v + op.actual, 0)),
     );
   currentVehicles = 0;
 
   private expectedVehicles$: Observable<number> =
     this.selectedOperatorsVehicleCountsSubject.pipe(
-      map((allOperators) =>
-        allOperators.reduce(
-          (v, op) => v + (op?.feedMonitoring?.liveStats?.expectedVehicles ?? 0),
-          0,
-        ),
-      ),
+      map((allOperators) => allOperators.reduce((v, op) => v + op.expected, 0)),
     );
   expectedVehicles = 0;
 
@@ -151,7 +139,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         map(([latestNocCode, ops]) => {
           if (latestNocCode) {
             const operator = ops.find(
-              ({ nocCode }) => nocCode === latestNocCode,
+              ({ operatorId }) => operatorId === latestNocCode,
             );
             if (operator) {
               return [operator];
