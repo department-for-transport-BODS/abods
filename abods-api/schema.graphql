@@ -11,7 +11,7 @@ type Query {
   userAlert(alertId: String!): AlertType
   operator(operatorId: String!): OperatorType
   operators(filterBy: OperatorFilterInput): OperatorsPage
-  adminAreas(adminAreaIds: [String!]!): [AdminAreasType]
+  adminAreas: [AdminAreasType!]
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
   serviceInfo(serviceId: String!): ServiceInfoType
@@ -395,8 +395,8 @@ type ServiceLinkType {
 }
 
 type AdminAreasType {
-  adminAreaId: String!
-  adminAreaName: String!
+  id: String!
+  name: String!
   shape: String!
 }
 

@@ -37,7 +37,7 @@ export class AuthenticationService {
         switchMap((isAuth) => {
           if (isAuth) {
             return this.userQuery
-              .fetch()
+              .fetch({})
               .pipe(map((u) => u.data?.user ?? null));
           } else {
             return of(null);

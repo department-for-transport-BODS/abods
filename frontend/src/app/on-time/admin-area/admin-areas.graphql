@@ -1,7 +1,7 @@
-query getAdminAreas($adminAreaIds: [String!]!) {
-  adminAreas(adminAreaIds: $adminAreaIds) {
-    id: adminAreaId
-    name: adminAreaName
+query getAdminAreas {
+  adminAreas {
+    id
+    name
     shape
   }
 }
