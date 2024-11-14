@@ -217,13 +217,15 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
     };
   };
 
-export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
+export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   parent,
   _,
   context,
   info,
 ): Promise<LiveStatsType> => {
   const queryName = info.operation.name?.value;
+
+  if (!parent.operatorId) throw "Invalid data";
 
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
@@ -239,6 +241,7 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
 
   return {
     ...parent.liveStats,
+    operatorId: parent.operatorId,
     currentVehicles:
       result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
     expectedVehicles:
