@@ -50,7 +50,7 @@ env:
   RC_VER:
     ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.release_version ||
     github.event_name == 'release' && github.event.release.tag_name || 'null' }}
-  RC_SRC_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
+  RC_SRC: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
 
 permissions:
   id-token: write
@@ -118,10 +118,9 @@ jobs:
 
       - name: validate release candidate version
         env:
-          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
           VERSION: ${{ steps.verify.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="$RC_SRC/releases/$VERSION" || rc_path="$RC_SRC/releases-dev/$VERSION"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="$RC_SRC/abods/releases/$VERSION" || rc_path="$RC_SRC/abods/releases-dev/$VERSION"
 
           rc_backend_path="$rc_path/backend"
           rc_frontend_path="$rc_path/frontend/$RC_ENV"
@@ -166,10 +165,9 @@ jobs:
 
       - name: retrieve backend
         env:
-          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/backend" || rc_path="releases-dev/$VERSION/backend"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/backend" || rc_path="abods/releases-dev/$VERSION/backend"
 
           aws s3 cp s3://$RC_SRC/$rc_path/packaged.yaml .
           aws s3 cp s3://$RC_SRC/$rc_path/samconfig.yaml .
@@ -192,7 +190,7 @@ jobs:
             --region $AWS_REGION \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --resolve-s3 \
+            --s3-bucket $RC_SRC --s3-prefix abods/deployments/$RC_ENV \
             --tags "BuiltFrom=${VERSION} ProjectName=${{ vars.PROJECT_NAME }} Environment=${RC_ENV}"
 
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
@@ -215,10 +213,9 @@ jobs:
 
       - name: retrieve frontend for ${{ env.RC_ENV }}
         env:
-          RC_SRC: ${{ env.RC_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$RC_ENV" || rc_path="releases-dev/$VERSION/frontend/$RC_ENV"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend/$RC_ENV" || rc_path="abods/releases-dev/$VERSION/frontend/$RC_ENV"
 
           mkdir dist/
           aws s3 cp s3://$RC_SRC/$rc_path/ dist/ --recursive
