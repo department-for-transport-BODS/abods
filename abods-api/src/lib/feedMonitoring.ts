@@ -56,8 +56,8 @@ const journeyBaseQuery = (
   where: {
     operator_noc: operatorId,
     date_of_journey: startTime,
-    expected_journey_start: { lt: startTime },
-    expected_journey_end: { gte: endTime },
+    expected_journey_start: { lt: endTime },
+    expected_journey_end: { gt: startTime },
   },
   distinct: ["group_id"],
 });
