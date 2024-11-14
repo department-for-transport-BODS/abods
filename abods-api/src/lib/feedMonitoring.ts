@@ -64,46 +64,45 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
   });
 };
 
+const journeyBaseQuery = (
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+): Prisma.expected_journeysFindManyArgs => ({
+  where: {
+    operator_noc: operatorId,
+    date_of_journey: startTime,
+    expected_journey_start: { lt: endTime },
+    expected_journey_end: { gt: startTime },
+  },
+  distinct: ["group_id"],
+});
+
+export const getExpectedGroupIds = async (
+  db: PrismaClient,
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.expected_journeys.findMany({
+    ...journeyBaseQuery(operatorId, startTime, endTime),
+    select: { group_id: true },
+  });
+
 export const getExpectedJourneys = async (
   db: PrismaClient,
   operatorId: string,
-  inputDate: Dayjs,
-  duration?: number,
-) => {
-  const where: Prisma.expected_journeysWhereInput = {
-    operator_noc: operatorId,
-    date_of_journey: inputDate.toDate(),
-  };
-
-  let select: Prisma.expected_journeysSelect = {
-    group_id: true,
-  };
-  if (duration) {
-    where.expected_journey_start = {
-      lt: inputDate.toDate(),
-    };
-
-    where.expected_journey_end = {
-      gte: inputDate.subtract(duration, "minute").toDate(),
-    };
-
-    select.expected_journey_start = true;
-    select.expected_journey_end = true;
-  } else {
-    where.expected_journey_start = {
-      lte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
-    };
-    where.expected_journey_end = {
-      gt: inputDate.startOf("minute").toDate(),
-    };
-  }
-
-  return db.expected_journeys.findMany({
-    where,
-    select,
-    distinct: ["group_id"],
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.expected_journeys.findMany({
+    ...journeyBaseQuery(operatorId, startTime, endTime),
+    select: {
+      group_id: true,
+      expected_journey_start: true,
+      expected_journey_end: true,
+    },
   });
-};
 
 export const getAvlPoints = async (
   db: PrismaClient,

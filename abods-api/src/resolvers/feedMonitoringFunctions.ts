@@ -16,6 +16,7 @@ import {
 import {
   ExpectedJourneyType,
   getAvlPoints,
+  getExpectedGroupIds,
   getExpectedJourneys,
   getOperatorWithFeed,
   getVehicleStats,
@@ -41,27 +42,22 @@ export const getEventStats: QueryResolvers["eventStats"] =
     return eventStats;
   };
 
-export const getFeedMonitoringVehicleStats = async (
+export const getDashboardFeedList = async (
   db: PrismaClient,
   operatorId: string,
-  duration?: number,
+  duration: number,
 ): Promise<VehicleStatsType[]> => {
   const statsDate = getDate();
 
   let [expectedJourneys, avl] = await Promise.all([
-    getExpectedJourneys(db, operatorId, statsDate, duration),
+    getExpectedGroupIds(
+      db,
+      operatorId,
+      statsDate.startOf("minute").subtract(duration, "minute").toDate(),
+      statsDate.startOf("minute").toDate(),
+    ),
     getAvlPoints(db, operatorId, statsDate, duration),
   ]);
-
-  if (duration) {
-    return getVehicleStats(avl, expectedJourneys, statsDate, duration).then(
-      (data) =>
-        data.sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        ),
-    );
-  }
 
   const setExp = new Set(expectedJourneys.map((j) => j.group_id));
   avl = avl.filter((j) => setExp.has(j.group_id ?? ""));
@@ -76,6 +72,32 @@ export const getFeedMonitoringVehicleStats = async (
       expected: expectedJourneys.length,
     },
   ];
+};
+
+export const getFeedMonitoringVehicleStats = async (
+  db: PrismaClient,
+  operatorId: string,
+  duration: number,
+): Promise<VehicleStatsType[]> => {
+  const statsDate = getDate();
+
+  let [expectedJourneys, avl] = await Promise.all([
+    getExpectedJourneys(
+      db,
+      operatorId,
+      statsDate.subtract(duration, "minute").toDate(),
+      statsDate.startOf("minute").toDate(),
+    ),
+    getAvlPoints(db, operatorId, statsDate, duration),
+  ]);
+
+  return getVehicleStats(avl, expectedJourneys, statsDate, duration).then(
+    (data) =>
+      data.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      ),
+  );
 };
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
@@ -210,9 +232,11 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
-      // 21 minutes of vehicle count is displayed in frontend. Undefined is set to return previous min vehicle counts
-      queryName === "dashboardOperatorVehicleCountsList" ? undefined : 21,
+      // 21 minutes of vehicle count is displayed in frontend
+      21,
     );
+  } else if (queryName === "dashboardOperatorVehicleCountsList") {
+    result = await getDashboardFeedList(context.db, parent.operatorId, 1);
   }
 
   return {
