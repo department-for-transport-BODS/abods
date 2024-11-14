@@ -15,6 +15,23 @@
       ></app-page-header>
       <div class="corridor__date-wrapper">
         <app-date-range [formControl]="dateRange"></app-date-range>
+        <app-segmented-toggle
+          [(ngModel)]="estimatedToggle"
+          (ngModelChange)="onEstimatedToggleChange()"
+        >
+          <app-segmented-toggle-item
+            name="estimated-toggle"
+            identifier="estimated"
+            value="estimated"
+            label="Estimated"
+          ></app-segmented-toggle-item>
+          <app-segmented-toggle-item
+            name="estimated-toggle"
+            identifier="evidenced"
+            value="evidenced"
+            label="Evidenced"
+          ></app-segmented-toggle-item>
+        </app-segmented-toggle>
         <gds-button
           [routerLink]="['/corridors/edit/', corridor?.id]"
           text="Edit corridor"

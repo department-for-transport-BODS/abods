@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { DateTime, Duration } from "luxon";
 import { DateRangeService } from "../../shared/services/date-range.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import {
   catchError,
   map,
@@ -46,6 +46,8 @@ import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { HideOutliersService } from "./hide-outliers.service";
 
+type EstimatedToggle = "estimated" | "evidenced";
+
 @Component({
   templateUrl: "view-corridor.component.html",
   styleUrls: ["./view-corridor.component.scss"],
@@ -65,6 +67,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   selectedStops$ = new Subject<Stop[]>();
   onDestroy$ = new Subject<void>();
   moveCounter = 0;
+  estimatedToggle: EstimatedToggle = "evidenced";
 
   speedStats?: SpeedStats;
   mode: "time" | "speed" = "time";
@@ -190,6 +193,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     private corridorsSpeedmetricService: CorridorsSpeedMetricService,
     private config: ConfigService,
     private hideOutliersService: HideOutliersService,
+    private router: Router,
   ) {}
 
   private selectedSegment: [Stop, Stop] | undefined;
@@ -231,6 +235,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       ? (this.errorView = view)
       : (this.corridor = view);
 
+    this.readToggle();
     if (this.corridor) {
       combineLatest([
         this.dateRange.valueChanges.pipe(
@@ -284,6 +289,35 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  readToggle() {
+    const estimatedToggle$ = this.route.queryParamMap.pipe(
+      map((params) => {
+        console.log("check---");
+        return (
+          params.get("evidenced") === "true" ||
+          params.get("estimated") !== "true"
+        );
+      }),
+      takeUntil(this.onDestroy$),
+    );
+
+    estimatedToggle$.subscribe((estimatedToggle) => {
+      console.log("estimatedToggle--", estimatedToggle);
+      console.log("this.estimatedToggle--", this.estimatedToggle);
+      this.estimatedToggle = estimatedToggle ? "evidenced" : "estimated";
+      console.log("after--", this.estimatedToggle);
+    });
+  }
+
+  onEstimatedToggleChange() {
+    const estimated = this.estimatedToggle === "estimated" ? true : null;
+    console.log("test---", estimated);
+    this.router.navigate([], {
+      queryParams: { estimated },
+      queryParamsHandling: "merge",
+    });
   }
 
   setCoordinates(segment: Stop[]): Position[] {
