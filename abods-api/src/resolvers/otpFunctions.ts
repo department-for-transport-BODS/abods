@@ -24,6 +24,8 @@ import {
   RankingOrder,
   Resolvers,
   ServiceInfoType,
+  ServiceLinkType,
+  ServicePatternType,
   ServicePerformanceType,
   ServicePunctualityType,
   StopPerformanceType,
@@ -245,6 +247,91 @@ export const getLines: QueryResolvers["lines"] = async (
     name: service.service_name,
     number: service.line_name,
   }));
+};
+
+const point = (x: number, y: number): [number, number] => [x, y];
+
+function temporaryInferredServiceLinks(
+  stops: { stopId: string; lon: number; stopName: string; lat: number }[],
+  stopIdList: string[],
+) {
+  stops = stops.sort(
+    (a, b) => stopIdList.indexOf(a.stopId) - stopIdList.indexOf(b.stopId),
+  );
+  const serviceLinks: ServiceLinkType[] = [];
+  for (let i = 1; i < stops.length; i++) {
+    const current = stops[i];
+    const previous = stops[i - 1];
+    const currentPoint = point(current.lon, current.lat);
+    const previousPoint = point(previous.lon, previous.lat);
+    serviceLinks.push({
+      fromStop: previous.stopId,
+      toStop: current.stopId,
+      distance: haversineDistance(previousPoint, currentPoint),
+      routeValidity: "INVALID_NO_ROUTE_POINTS",
+      linkRoute: JSON.stringify([previousPoint, currentPoint]),
+    });
+  }
+  return serviceLinks;
+}
+
+export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
+  _,
+  args,
+  context,
+): Promise<ServicePatternType[]> => {
+  await requireUserSession(context);
+  const routesQueryResults = await context.db.distinct_routes.findMany({
+    where: {
+      servicepattern_route: {
+        noc_and_line_and_servicecode: args.lineId,
+      },
+    },
+    select: {
+      id: true,
+      route: true,
+    },
+  });
+  const routes = routesQueryResults.map((n) => ({
+    ...n,
+    stopIds: n.route.split(","),
+  }));
+  const allStopIds = [...new Set(routes.flatMap((n) => n.stopIds))];
+  const stopQueryResults = await context.db.naptan_stoppoint_latlong.findMany({
+    where: {
+      atco_code: { in: allStopIds },
+      NOT: {
+        atco_code: null,
+        longitude: null,
+        latitude: null,
+      },
+    },
+    select: {
+      common_name: true,
+      atco_code: true,
+      longitude: true,
+      latitude: true,
+    },
+  });
+  const stopDetails = stopQueryResults.map((n) => ({
+    stopName: n.common_name,
+    // workaround for nullable db columns that can probably be not null, the where clause should exclude null for now
+    stopId: n.atco_code!,
+    lon: n.longitude!,
+    lat: n.latitude!,
+  }));
+
+  let result: ServicePatternType[] = [];
+  for (const route of routes) {
+    const stops = stopDetails.filter((s) => route.stopIds.includes(s.stopId));
+    result.push({
+      stops,
+      servicePatternId: route.id.toString(),
+      // to be replaced with a simple mapping once we have the data available
+      serviceLinks: temporaryInferredServiceLinks(stops, route.stopIds),
+    });
+  }
+  return result;
 };
 
 export const getOperator: QueryResolvers["operator"] = async (
@@ -1674,6 +1761,7 @@ const otpResolvers: Resolvers = {
     serviceInfo: getServiceInfo,
     adminAreas: getAdminAreas,
     lines: getLines,
+    servicePatterns: getServicePatterns,
   },
   OnTimePerformanceType: {
     delayFrequency: getDelayFrequency,
