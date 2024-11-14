@@ -16,6 +16,7 @@ import {
 import {
   ExpectedJourneyType,
   getAvlPoints,
+  getDashboardAvlPoint,
   getExpectedGroupIds,
   getExpectedJourneys,
   getOperatorWithFeed,
@@ -47,10 +48,10 @@ export const getDashboardFeedList = async (
   operatorId: string,
   duration: number,
 ): Promise<VehicleStatsType[]> => {
-  const statsDate = getDate().subtract(1, "day");
+  const statsDate = getDate();
 
   let [avl, expectedJourneys] = await Promise.all([
-    getAvlPoints(db, operatorId, statsDate, duration),
+    getDashboardAvlPoint(db, operatorId, statsDate, duration),
     getExpectedGroupIds(
       db,
       operatorId,

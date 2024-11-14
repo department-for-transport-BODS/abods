@@ -104,26 +104,45 @@ export const getExpectedJourneys = async (
     },
   });
 
-export const getAvlPoints = async (
+export const getDashboardAvlPoint = async (
   db: PrismaClient,
   operatorId: string,
   inputDate: Dayjs,
-  duration?: number,
-  groupIds?: string[],
-): Promise<
-  | { group_id: string | null }[]
-  | { recorded_at_time: Date; group_id: string; vehicle_ref: string }[]
-> => {
+  duration: number,
+) => {
   const where: Prisma.SiriVMPositionsWhereInput = {
     date_of_journey: inputDate.toDate(),
     operator_ref: operatorId,
   };
 
   where.recorded_at_time = {
-    gte: inputDate
-      .subtract(duration ?? 1, "minute")
-      .startOf("minute")
-      .toDate(),
+    gte: inputDate.subtract(duration, "minute").startOf("minute").toDate(),
+    lt: inputDate.startOf("minute").toDate(),
+  };
+
+  return db.siriVMPositions.findMany({
+    where: where,
+    select: {
+      group_id: true,
+    },
+    distinct: ["group_id"],
+  });
+};
+
+export const getAvlPoints = async (
+  db: PrismaClient,
+  operatorId: string,
+  inputDate: Dayjs,
+  duration: number,
+  groupIds?: string[],
+) => {
+  const where: Prisma.SiriVMPositionsWhereInput = {
+    date_of_journey: inputDate.toDate(),
+    operator_ref: operatorId,
+  };
+
+  where.recorded_at_time = {
+    gte: inputDate.subtract(duration, "minute").startOf("minute").toDate(),
     lt: inputDate.startOf("minute").toDate(),
   };
 
@@ -135,16 +154,11 @@ export const getAvlPoints = async (
 
   return db.siriVMPositions.findMany({
     where: where,
-    select: duration
-      ? {
-          recorded_at_time: true,
-          group_id: true,
-          vehicle_ref: true,
-        }
-      : {
-          group_id: true,
-        },
-    distinct: duration ? Prisma.skip : ["group_id"],
+    select: {
+      recorded_at_time: true,
+      group_id: true,
+      vehicle_ref: true,
+    },
   });
 };
 
