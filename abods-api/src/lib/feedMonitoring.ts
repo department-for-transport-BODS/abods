@@ -48,6 +48,20 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
   });
 };
 
+const journeyBaseQuery = (
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+): Prisma.expected_journeysFindManyArgs => ({
+  where: {
+    operator_noc: operatorId,
+    date_of_journey: startTime,
+    expected_journey_start: { lt: startTime },
+    expected_journey_end: { gte: endTime },
+  },
+  distinct: ["group_id"],
+});
+
 export const getExpectedGroupIds = async (
   db: PrismaClient,
   operatorId: string,
@@ -55,13 +69,7 @@ export const getExpectedGroupIds = async (
   endTime: Date,
 ) =>
   db.expected_journeys.findMany({
-    where: {
-      operator_noc: operatorId,
-      date_of_journey: startTime,
-      expected_journey_start: { lte: startTime },
-      expected_journey_end: { gt: endTime },
-    },
-    distinct: ["group_id"],
+    ...journeyBaseQuery(operatorId, startTime, endTime),
     select: { group_id: true },
   });
 
@@ -72,13 +80,7 @@ export const getExpectedJourneys = async (
   endTime: Date,
 ) =>
   db.expected_journeys.findMany({
-    where: {
-      operator_noc: operatorId,
-      date_of_journey: startTime,
-      expected_journey_start: { lt: startTime },
-      expected_journey_end: { gte: endTime },
-    },
-    distinct: ["group_id"],
+    ...journeyBaseQuery(operatorId, startTime, endTime),
     select: {
       group_id: true,
       expected_journey_start: true,
