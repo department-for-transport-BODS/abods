@@ -27,6 +27,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   RC_ENV: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   RC_DST: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
+  RC_DST_KMS_KEY_ID: ${{ vars.DEPLOYMENT_ARTEFACTS_KMS_KEY_ID }}
 
 jobs:
   validation:
@@ -67,7 +68,7 @@ jobs:
               new_version=$(yq e '.version' VERSION)
               echo "VERSION=${new_version}" >> "$GITHUB_OUTPUT"
 
-              rc_path="$RC_DST/releases/$new_version"
+              rc_path="$RC_DST/abods/releases/$new_version"
               if [[ `aws s3 ls s3://$rc_path|head` ]]; then
                 echo "[INFO] Release candidate version [${new_version}] already exists. Version number must be incremented to allow for a new build. Exiting"
                 exit 1
@@ -122,13 +123,14 @@ jobs:
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/backend" || rc_path="releases-dev/$VERSION/backend"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/backend" || rc_path="abods/releases-dev/$VERSION/backend"
 
           sam build && \
             sam package \
               --s3-bucket $RC_DST \
               --s3-prefix $rc_path \
-              --output-template-file packaged.yaml
+              --output-template-file packaged.yaml \
+              --kms-key-id $RC_DST_KMS_KEY_ID
 
           aws s3 cp packaged.yaml s3://$RC_DST/$rc_path/
           aws s3 cp samconfig.yaml s3://$RC_DST/$rc_path/
@@ -190,7 +192,7 @@ jobs:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           ENVIRONMENT=$(cut -d '-' -f 1 <<< ${{ matrix.environment }})
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="releases-dev/$VERSION/frontend/$ENVIRONMENT"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="abods/releases-dev/$VERSION/frontend/$ENVIRONMENT"
 
           # determine environment variables for build
           domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
