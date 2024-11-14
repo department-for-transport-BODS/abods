@@ -26,6 +26,9 @@ type Query {
   ): [EventStatsType]
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
+  lines(operatorId: String!, inputDate: DateTime): [LineType!]!
+
+  # Used by an external service, take care with changes
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
@@ -359,20 +362,26 @@ type TransitModelType {
   lines(filterBy: LineFilterType!): PaginatedLineType
 }
 
+type PaginatedLineType {
+  items: [TransitModelLineType]
+}
+
 input LineFilterType {
   lineIds: [String!]
   inputDate: DateTime
 }
 
-type PaginatedLineType {
-  items: [LineType]
-}
-
-type LineType {
+type TransitModelLineType {
   lineId: String!
   lineName: String!
   lineNumber: String!
   servicePatterns: [ServicePatternType]
+}
+
+type LineType {
+  id: String!
+  name: String!
+  number: String!
 }
 
 type ServicePatternType {

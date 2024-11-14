@@ -514,10 +514,9 @@ export type LineFilterType = {
 
 export type LineType = {
   __typename?: 'LineType';
-  lineId: Scalars['String']['output'];
-  lineName: Scalars['String']['output'];
-  lineNumber: Scalars['String']['output'];
-  servicePatterns?: Maybe<Array<Maybe<ServicePatternType>>>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  number: Scalars['String']['output'];
 };
 
 export type LiveStatsType = {
@@ -777,7 +776,7 @@ export type PageInfo = {
 
 export type PaginatedLineType = {
   __typename?: 'PaginatedLineType';
-  items?: Maybe<Array<Maybe<LineType>>>;
+  items?: Maybe<Array<Maybe<TransitModelLineType>>>;
 };
 
 export type PagingInputType = {
@@ -872,6 +871,7 @@ export type Query = {
   events?: Maybe<EventResponse>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
+  lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
@@ -917,6 +917,12 @@ export type QueryEventsArgs = {
 
 export type QueryInvitationArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryLinesArgs = {
+  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
+  operatorId: Scalars['String']['input'];
 };
 
 
@@ -1115,6 +1121,14 @@ export enum StopsSegment {
   First = 'First',
   Intermediate = 'Intermediate'
 }
+
+export type TransitModelLineType = {
+  __typename?: 'TransitModelLineType';
+  lineId: Scalars['String']['output'];
+  lineName: Scalars['String']['output'];
+  lineNumber: Scalars['String']['output'];
+  servicePatterns?: Maybe<Array<Maybe<ServicePatternType>>>;
+};
 
 export type TransitModelType = {
   __typename?: 'TransitModelType';
@@ -1449,7 +1463,7 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 }>;
 
 
-export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', transitModel?: { __typename?: 'TransitModelType', lines?: { __typename?: 'PaginatedLineType', items?: Array<{ __typename?: 'LineType', lineId: string, lineName: string, servicePatterns?: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, name: string, stops?: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null }> | null } | null> | null } | null> | null } | null } | null } | null };
+export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', transitModel?: { __typename?: 'TransitModelType', lines?: { __typename?: 'PaginatedLineType', items?: Array<{ __typename?: 'TransitModelLineType', lineId: string, lineName: string, servicePatterns?: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, name: string, stops?: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null }> | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: string }> | null };
 
@@ -1544,7 +1558,7 @@ export type OperatorLinesQueryVariables = Exact<{
 }>;
 
 
-export type OperatorLinesQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', transitModel?: { __typename?: 'TransitModelType', lines?: { __typename?: 'PaginatedLineType', items?: Array<{ __typename?: 'LineType', id: string, name: string, number: string } | null> | null } | null } | null } | null };
+export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -2878,16 +2892,10 @@ export const OperatorListDocument = gql`
   }
 export const OperatorLinesDocument = gql`
     query operatorLines($operatorId: String!, $inputDate: DateTime) {
-  operator(operatorId: $operatorId) {
-    transitModel {
-      lines(filterBy: {inputDate: $inputDate}) {
-        items {
-          id: lineId
-          name: lineName
-          number: lineNumber
-        }
-      }
-    }
+  lines(operatorId: $operatorId, inputDate: $inputDate) {
+    id
+    name
+    number
   }
 }
     `;
