@@ -47,16 +47,16 @@ export const getDashboardFeedList = async (
   operatorId: string,
   duration: number,
 ): Promise<VehicleStatsType[]> => {
-  const statsDate = getDate();
+  const statsDate = getDate().subtract(1, "day");
 
-  let [expectedJourneys, avl] = await Promise.all([
+  let [avl, expectedJourneys] = await Promise.all([
+    getAvlPoints(db, operatorId, statsDate, duration),
     getExpectedGroupIds(
       db,
       operatorId,
       statsDate.startOf("minute").subtract(duration, "minute").toDate(),
       statsDate.startOf("minute").toDate(),
     ),
-    getAvlPoints(db, operatorId, statsDate, duration),
   ]);
 
   const setExp = new Set(expectedJourneys.map((j) => j.group_id));
@@ -225,10 +225,7 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name?.value;
 
   let result: VehicleStatsType[] = [];
-  if (
-    queryName === "operatorLiveStatus" ||
-    queryName === "dashboardOperatorVehicleCountsList"
-  ) {
+  if (queryName === "operatorLiveStatus") {
     result = await getFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
