@@ -1,41 +1,25 @@
-import { VehicleStatsType } from "../types/generated.js";
-import { getDate, getFormattedDate } from "./dayjs.js";
-import { Prisma, PrismaClient, SiriVMPositions } from "@prisma/client";
+import { getDate, getFormattedDate } from "./dayjs";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Dayjs } from "dayjs";
 
-export type ExpectedJourneyType = {
-  group_id: string;
-  expected_journey_start: Date;
-  expected_journey_end: Date | null;
-};
-
-export const getPerMinuteTimestamps = (
-  currentTime: Dayjs,
-  duration: number,
-) => {
+export const getPerMinuteTimestamps = (startTime: Dayjs, endTime: Dayjs) => {
   const avlPerMinute: Record<string, Set<string>> = {};
-  let minute = currentTime.subtract(duration, "minute").startOf("minute");
-  while (minute.isBefore(currentTime.startOf("minute"))) {
+  let minute = startTime;
+  while (minute.isBefore(endTime)) {
     const key = minute.toISOString();
     avlPerMinute[key] = new Set<string>();
     minute = minute.add(1, "minute");
   }
-
   return avlPerMinute;
 };
 
-export const getVehicleStats = async (
-  avl: Partial<SiriVMPositions>[],
-  expected: ExpectedJourneyType[],
-  currentTime: Dayjs,
-  duration: number,
-): Promise<VehicleStatsType[]> => {
-  const avlPerMinute: Record<string, Set<string>> = await getAvlPerMinute(
-    avl ?? [],
-    currentTime,
-    duration,
-  );
-  const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
+export const getVehicleStats = (
+  avl: Awaited<ReturnType<typeof getAvlDetails>>,
+  expectedJourneys: Awaited<ReturnType<typeof getExpectedJourneys>>,
+  startTime: Dayjs,
+  endTime: Dayjs,
+) => {
+  const avlPerMinute = getAvlPerMinute(avl, startTime, endTime);
 
   return Object.entries(avlPerMinute).map(([timestamp, avlJourneys]) => {
     const minute = getDate(timestamp);
@@ -44,7 +28,7 @@ export const getVehicleStats = async (
       .filter((j) => minute.isBefore(j.expected_journey_end));
 
     return {
-      timestamp: getFormattedDate(getDate(timestamp).toDate()),
+      timestamp: getFormattedDate(minute.toDate()),
       expected: expected.length,
       actual: expected.filter((j) => avlJourneys.has(j.group_id)).length,
     };
@@ -64,100 +48,89 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
   });
 };
 
+export const getExpectedGroupIds = async (
+  db: PrismaClient,
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.expected_journeys.findMany({
+    where: {
+      operator_noc: operatorId,
+      date_of_journey: startTime,
+      expected_journey_start: { lte: startTime },
+      expected_journey_end: { gt: endTime },
+    },
+    distinct: ["group_id"],
+    select: { group_id: true },
+  });
+
 export const getExpectedJourneys = async (
   db: PrismaClient,
   operatorId: string,
-  inputDate: Dayjs,
-  duration?: number,
-) => {
-  const where: Prisma.expected_journeysWhereInput = {
-    operator_noc: operatorId,
-    date_of_journey: inputDate.toDate(),
-  };
-
-  let select: Prisma.expected_journeysSelect = {
-    group_id: true,
-  };
-  if (duration) {
-    where.expected_journey_start = {
-      lt: inputDate.toDate(),
-    };
-
-    where.expected_journey_end = {
-      gte: inputDate.subtract(duration, "minute").toDate(),
-    };
-
-    select.expected_journey_start = true;
-    select.expected_journey_end = true;
-  } else {
-    where.expected_journey_start = {
-      lte: inputDate.startOf("minute").subtract(1, "minute").toDate(),
-    };
-    where.expected_journey_end = {
-      gt: inputDate.startOf("minute").toDate(),
-    };
-  }
-
-  return db.expected_journeys.findMany({
-    where,
-    select,
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.expected_journeys.findMany({
+    where: {
+      operator_noc: operatorId,
+      date_of_journey: startTime,
+      expected_journey_start: { lt: startTime },
+      expected_journey_end: { gte: endTime },
+    },
     distinct: ["group_id"],
+    select: {
+      group_id: true,
+      expected_journey_start: true,
+      expected_journey_end: true,
+    },
   });
-};
 
-export const getAvlPoints = async (
+const avlBaseQuery = (
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+): Prisma.SiriVMPositionsFindManyArgs => ({
+  where: {
+    date_of_journey: startTime,
+    operator_ref: operatorId,
+    recorded_at_time: { gte: startTime, lt: endTime },
+  },
+});
+
+export const getActualGroupIds = async (
   db: PrismaClient,
   operatorId: string,
-  inputDate: Dayjs,
-  duration?: number,
-  groupIds?: string[],
-): Promise<
-  | { group_id: string | null }[]
-  | { recorded_at_time: Date; group_id: string; vehicle_ref: string }[]
-> => {
-  const where: Prisma.SiriVMPositionsWhereInput = {
-    date_of_journey: inputDate.toDate(),
-    operator_ref: operatorId,
-  };
-
-  where.recorded_at_time = {
-    gte: inputDate
-      .subtract(duration ?? 1, "minute")
-      .startOf("minute")
-      .toDate(),
-    lt: inputDate.startOf("minute").toDate(),
-  };
-
-  if (groupIds && groupIds.length > 0) {
-    where.group_id = {
-      in: groupIds,
-    };
-  }
-
-  return db.siriVMPositions.findMany({
-    where: where,
-    select: duration
-      ? {
-          recorded_at_time: true,
-          group_id: true,
-          vehicle_ref: true,
-        }
-      : {
-          group_id: true,
-        },
-    distinct: duration ? Prisma.skip : ["group_id"],
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.siriVMPositions.findMany({
+    ...avlBaseQuery(operatorId, startTime, endTime),
+    select: { group_id: true },
+    distinct: ["group_id"],
   });
-};
+
+export const getAvlDetails = async (
+  db: PrismaClient,
+  operatorId: string,
+  startTime: Date,
+  endTime: Date,
+) =>
+  db.siriVMPositions.findMany({
+    ...avlBaseQuery(operatorId, startTime, endTime),
+    select: {
+      recorded_at_time: true,
+      group_id: true,
+      vehicle_ref: true,
+    },
+  });
 
 export const getAvlPerMinute = async (
-  avl: Partial<SiriVMPositions>[],
-  currentTime: Dayjs,
-  duration: number,
+  avl: Awaited<ReturnType<typeof getAvlDetails>>,
+  startTime: Dayjs,
+  endTime: Dayjs,
 ) => {
-  const avlPerMinute: Record<string, Set<string>> = getPerMinuteTimestamps(
-    currentTime,
-    duration,
-  );
+  const avlPerMinute = getPerMinuteTimestamps(startTime, endTime);
 
   for (const a of avl) {
     if (!a.group_id) continue;

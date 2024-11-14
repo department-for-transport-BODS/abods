@@ -7,21 +7,22 @@ import {
   LiveStatsType,
   HistoricalStatsType,
   LiveStatsTypeResolvers,
-  Maybe,
   OperatorTypeResolvers,
   QueryResolvers,
   Resolvers,
   VehicleStatsType,
 } from "../types/generated.js";
 import {
-  ExpectedJourneyType,
-  getAvlPoints,
+  getAvlDetails,
+  getActualGroupIds,
   getExpectedJourneys,
+  getExpectedGroupIds,
   getOperatorWithFeed,
   getVehicleStats,
   VehicleCountType,
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
+import { Dayjs } from "dayjs";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -41,38 +42,44 @@ export const getEventStats: QueryResolvers["eventStats"] =
     return eventStats;
   };
 
+const getStartAndEndTimes = (durationInMinutes: number): [Dayjs, Dayjs] => {
+  const endTime = getDate().startOf("minute");
+  const startTime = endTime.subtract(durationInMinutes, "minute");
+  return [startTime, endTime];
+};
+
 export const getFeedMonitoringVehicleStats = async (
   db: PrismaClient,
   operatorId: string,
-  duration?: number,
 ): Promise<VehicleStatsType[]> => {
-  const statsDate = getDate();
+  // 20 minutes of data expected in frontend
+  const [startTime, endTime] = getStartAndEndTimes(20);
 
-  let [expectedJourneys, avl] = await Promise.all([
-    getExpectedJourneys(db, operatorId, statsDate, duration),
-    getAvlPoints(db, operatorId, statsDate, duration),
+  const [expectedJourneys, avl] = await Promise.all([
+    getExpectedJourneys(db, operatorId, startTime.toDate(), endTime.toDate()),
+    getAvlDetails(db, operatorId, startTime.toDate(), endTime.toDate()),
+  ]);
+  return getVehicleStats(avl, expectedJourneys, startTime, endTime).sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+};
+
+export const getPreviousMinuteFeedMonitoringVehicleStats = async (
+  db: PrismaClient,
+  operatorId: string,
+): Promise<VehicleStatsType[]> => {
+  const [startTime, endTime] = getStartAndEndTimes(1);
+
+  const [expectedJourneys, avl] = await Promise.all([
+    getExpectedGroupIds(db, operatorId, startTime.toDate(), endTime.toDate()),
+    getActualGroupIds(db, operatorId, startTime.toDate(), endTime.toDate()),
   ]);
 
-  if (duration) {
-    return getVehicleStats(avl, expectedJourneys, statsDate, duration).then(
-      (data) =>
-        data.sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        ),
-    );
-  }
-
   const setExp = new Set(expectedJourneys.map((j) => j.group_id));
-  avl = avl.filter((j) => setExp.has(j.group_id ?? ""));
-
   return [
     {
-      timestamp: statsDate
-        .startOf("minute")
-        .subtract(1, "minute")
-        .toISOString(),
-      actual: avl.length,
+      timestamp: startTime.toISOString(),
+      actual: avl.filter((j) => setExp.has(j.group_id ?? "")).length,
       expected: expectedJourneys.length,
     },
   ];
@@ -204,15 +211,13 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name?.value;
 
   let result: VehicleStatsType[] = [];
-  if (
-    queryName === "operatorLiveStatus" ||
-    queryName === "dashboardOperatorVehicleCountsList"
-  ) {
-    result = await getFeedMonitoringVehicleStats(
+  if (queryName === "dashboardOperatorVehicleCountsList") {
+    result = await getFeedMonitoringVehicleStats(context.db, parent.operatorId);
+  }
+  if (queryName === "operatorLiveStatus") {
+    result = await getPreviousMinuteFeedMonitoringVehicleStats(
       context.db,
       parent.operatorId,
-      // 21 minutes of vehicle count is displayed in frontend. Undefined is set to return previous min vehicle counts
-      queryName === "dashboardOperatorVehicleCountsList" ? undefined : 21,
     );
   }
 
