@@ -23,9 +23,8 @@ export const getUsers: QueryResolvers["users"] = async (
   __,
   context,
 ): Promise<Maybe<UserType[]>> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     const bodsUsers = await context.db.bods_user.findMany({
       where: {
         userOrganisations: {
@@ -76,9 +75,8 @@ export const getUser: QueryResolvers["user"] = async (
   __,
   context,
 ): Promise<Maybe<UserType>> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     return {
       id: user.id.toString(),
       username: user.username,
@@ -110,9 +108,8 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
   args,
   context,
 ): Promise<Maybe<AlertType[]>> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     // fetch alerts ONLY if user is creator or recipient
     const alerts = await context.db.alert.findMany({
       where: {
@@ -253,9 +250,8 @@ export const logoutUser: MutationResolvers["logout"] = async (
   __,
   context,
 ): Promise<boolean> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     await context.db.tokens.delete({
       where: {
         user_id: user.id,
@@ -274,9 +270,8 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
   args,
   context,
 ): Promise<Maybe<AlertType>> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     if (!args.alertId) {
       throw new Error("Alert id required");
     }
@@ -352,9 +347,8 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
   args,
   context,
 ): Promise<MutationResponseType> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
     // TODO: check if sendto user id is in one of the same organisations as created_by user
@@ -385,9 +379,8 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
   args,
   context,
 ): Promise<MutationResponseType> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
     if (!args.alertId) {
@@ -429,9 +422,8 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
   args,
   context,
 ): Promise<MutationResponseType> => {
+  const user = await requireUserSession(context);
   try {
-    const user = await requireUserSession(context);
-
     if (!args.alertId) {
       throw new Error("AlertId is required");
     }

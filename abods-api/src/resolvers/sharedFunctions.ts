@@ -14,11 +14,7 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (
   context,
 ): Promise<Maybe<ApiInfoType>> => {
   try {
-    const apiInfo = await context.db.apiInfo.findFirst({
-      include: {
-        feature_flag: true,
-      },
-    });
+    const apiInfo = await context.db.apiInfo.findFirst();
 
     if (!apiInfo) {
       throw "No api info found";
@@ -40,9 +36,8 @@ export const getRoles: QueryResolvers["roles"] = async (
   __,
   context,
 ): Promise<Maybe<RoleType[]>> => {
+  await requireUserSession(context);
   try {
-    await requireUserSession(context);
-
     return [
       {
         id: "1",
