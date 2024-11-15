@@ -1058,6 +1058,7 @@ export enum SortOrderEnum {
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
+  estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
   lineName: Scalars['String']['output'];
@@ -1065,6 +1066,7 @@ export type Stop = {
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   otp?: Maybe<OtpEnum>;
+  otpEstimate?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
   serviceId: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];

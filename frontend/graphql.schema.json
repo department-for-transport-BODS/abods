@@ -8165,6 +8165,18 @@
             "deprecationReason": null
           },
           {
+            "name": "estimatedDepartureUtc",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isTimingPoint",
             "description": null,
             "args": [],
@@ -8262,6 +8274,18 @@
           },
           {
             "name": "otp",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "OtpEnum",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "otpEstimate",
             "description": null,
             "args": [],
             "type": {

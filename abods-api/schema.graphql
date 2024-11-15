@@ -829,6 +829,7 @@ type AvlPoint {
 
 type Stop {
   actualDepartureUtc: String
+  estimatedDepartureUtc: String
   scheduledDepartureUtc: String!
   latitude: Float!
   longitude: Float!
@@ -843,6 +844,7 @@ type Stop {
   serviceName: String!
   startTime: String!
   otp: OtpEnum
+  otpEstimate: OtpEnum
 }
 
 enum OtpEnum {
