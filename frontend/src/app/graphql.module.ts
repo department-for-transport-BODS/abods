@@ -24,10 +24,9 @@ export function createApollo(
     }
 
     if (
-      graphQLErrors?.some(
-        ({ message }) => message === "Access denied for unauthenticated user",
-      ) ||
-      (networkError as ServerError)?.statusCode === 401
+      networkError &&
+      "status" in networkError &&
+      networkError.status === 401
     ) {
       // Clear session so they can re authenticate
       localStorage.removeItem("session");
