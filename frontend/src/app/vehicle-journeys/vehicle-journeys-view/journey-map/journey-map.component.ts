@@ -27,10 +27,11 @@ type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
 
 const segmentToLine = (
   segment: [VehiclePing, VehiclePing],
+  estimated: boolean,
 ): Feature<LineString, LineSegmentProps> => {
   return lineString([position(segment[0]), position(segment[1])], {
     id: segment[0].id + segment[1].id,
-    onTimePerformance: segment[0].onTimePerformance,
+    onTimePerformance: estimated ? segment[0].otpEstimate : segment[0].otp,
   });
 };
 
@@ -45,6 +46,7 @@ export class JourneyMapComponent implements OnChanges {
   @Input() selectedStop?: VehiclePingStop;
   @Input() hoveredStop?: StopHoverEvent;
   @Input() loading = false;
+  @Input() estimated = false;
 
   map!: Map;
   enableScaleControl = false;
@@ -129,7 +131,9 @@ export class JourneyMapComponent implements OnChanges {
         ),
     );
     this.line = featureCollection(
-      pairwise(view.gpsPingList).map((segment) => segmentToLine(segment)),
+      pairwise(view.gpsPingList).map((segment) =>
+        segmentToLine(segment, this.estimated),
+      ),
     );
     this.pings = featureCollection(
       view.gpsPingList.map((ping) => point(position(ping), ping)),

@@ -34,14 +34,22 @@ export const createVehicleJourneyView = (
 
   const stopList = route.map((stop) => createStopModel(stop));
   let otp: OtpEnum | null = null;
+  let otpEstimate: OtpEnum | null = null;
   const gpsPingList = journey.map((ping: AvlPoint) => {
-    const thisMatch = stopList.find(
+    const actualMatch = stopList.find(
       (s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc,
     );
-    if (thisMatch) {
-      otp = thisMatch.otp;
+    if (actualMatch) {
+      otp = actualMatch.otp;
+      otpEstimate = actualMatch.otp;
     }
-    return createVehiclePing(ping, otp);
+    const estimatedMatch = stopList.find(
+      (s) => s.estimatedDepartureTimestamp === ping.recordedAtTimeUtc,
+    );
+    if (estimatedMatch) {
+      otpEstimate = estimatedMatch.otpEstimate;
+    }
+    return createVehiclePing(ping, otp, otpEstimate);
   });
 
   let idx = -1;
