@@ -22,6 +22,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   view?: VehicleJourneyView;
   errorView?: VehicleJourneyNotFoundView;
   loading = false;
+  estimated: "true" | "false" = "false";
   timingPointsOption: TimingPointsOption = "timing-points";
   prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined] = [
     undefined,
@@ -73,27 +74,36 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       takeUntil(this.onDestroy$),
     );
 
-    const timingPointsOnly$ = this.route.queryParamMap.pipe(
-      map((params) => {
-        return (
-          params.get("timingPointsOnly") === "true" ||
-          params.get("allStops") !== "true"
-        );
-      }),
-      takeUntil(this.onDestroy$),
-    );
+    this.route.queryParamMap
+      .pipe(
+        map((params) => params.get("estimated") === "true"),
+        takeUntil(this.onDestroy$),
+      )
+      .subscribe((estimated) => {
+        this.estimated = estimated ? "true" : "false";
+      });
 
-    timingPointsOnly$.subscribe((timingPointsOnly) => {
-      this.timingPointsOption = timingPointsOnly
-        ? "timing-points"
-        : "all-stops";
-    });
+    this.route.queryParamMap
+      .pipe(
+        map((params) => {
+          return (
+            params.get("timingPointsOnly") === "true" ||
+            params.get("allStops") !== "true"
+          );
+        }),
+        takeUntil(this.onDestroy$),
+      )
+      .subscribe((timingPointsOnly) => {
+        this.timingPointsOption = timingPointsOnly
+          ? "timing-points"
+          : "all-stops";
+      });
 
-    combineLatest([journeyId$, startTime$, timingPointsOnly$])
+    combineLatest([journeyId$, startTime$])
       .pipe(
         tap(() => (this.loading = true)),
-        switchMap(([journeyId, startTime, timingPointsOnly]) =>
-          this.service.getJourney(journeyId, startTime, timingPointsOnly),
+        switchMap(([journeyId, startTime]) =>
+          this.service.getJourney(journeyId, startTime),
         ),
         takeUntil(this.onDestroy$),
       )
@@ -119,6 +129,13 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     const allStops = this.timingPointsOption === "all-stops" ? true : null;
     this.router.navigate([], {
       queryParams: { allStops },
+      queryParamsHandling: "merge",
+    });
+  }
+
+  onEstimatedToggleChange() {
+    this.router.navigate([], {
+      queryParams: { estimated: this.estimated === "true" ? true : null },
       queryParamsHandling: "merge",
     });
   }

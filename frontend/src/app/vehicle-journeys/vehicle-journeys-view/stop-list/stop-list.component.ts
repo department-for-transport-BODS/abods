@@ -11,6 +11,7 @@ import { StopHoverEvent } from "./stop-item/stop-item.component";
 export class StopListComponent {
   @Input() stopList?: VehiclePingStop[];
   @Input() timingPointsOnly = false;
+  @Input() estimated = false;
   @Input() loading?: boolean;
   @Output() stopSelected = new EventEmitter<VehiclePingStop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();

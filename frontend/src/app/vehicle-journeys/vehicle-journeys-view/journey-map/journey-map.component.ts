@@ -117,12 +117,16 @@ export class JourneyMapComponent implements OnChanges {
     this.stops = featureCollection(
       view.stopList
         .filter((stop) => !stop.isTimingPoint)
-        .map((stop) => point(position(stop), stop)),
+        .map((stop) =>
+          point(position({ lon: stop.longitude, lat: stop.latitude }), stop),
+        ),
     );
     this.timingPoints = featureCollection(
       view.stopList
         .filter((stop) => stop.isTimingPoint)
-        .map((stop) => point(position(stop), stop)),
+        .map((stop) =>
+          point(position({ lon: stop.longitude, lat: stop.latitude }), stop),
+        ),
     );
     this.line = featureCollection(
       pairwise(view.gpsPingList).map((segment) => segmentToLine(segment)),
@@ -138,11 +142,11 @@ export class JourneyMapComponent implements OnChanges {
     let selected: Feature<Point, VehiclePingStop> | undefined;
     if (selectedStop.isTimingPoint) {
       selected = this.timingPoints?.features.find(
-        (stop) => stop.properties.id === selectedStop.id,
+        (stop) => stop.properties.stopId === selectedStop.stopId,
       );
     } else {
       selected = this.stops?.features.find(
-        (stop) => stop.properties.id === selectedStop.id,
+        (stop) => stop.properties.stopId === selectedStop.stopId,
       );
     }
     if (selected) {
@@ -168,7 +172,7 @@ export class JourneyMapComponent implements OnChanges {
     }
     this.tooltipStop = stop as VehiclePingStop;
     this.map.setFeatureState(
-      { source: "journey-stops", id: this.tooltipStop.id },
+      { source: "journey-stops", id: this.tooltipStop.stopId },
       { hover: true },
     );
   }
@@ -179,7 +183,7 @@ export class JourneyMapComponent implements OnChanges {
       return;
     }
     this.map.removeFeatureState(
-      { source: "journey-stops", id: this.tooltipStop.id },
+      { source: "journey-stops", id: this.tooltipStop.stopId },
       "hover",
     );
     this.tooltipStop = undefined;

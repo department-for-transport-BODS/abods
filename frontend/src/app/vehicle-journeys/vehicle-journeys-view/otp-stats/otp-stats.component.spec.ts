@@ -30,7 +30,7 @@ describe("OtpStatsComponent", () => {
 
   beforeEach(() => {
     spectator = createComponent({
-      props: { otpStats: otpStats, loading: false },
+      props: { stopList: otpStats, loading: false },
     });
     component = spectator.component;
   });
@@ -43,12 +43,15 @@ describe("OtpStatsComponent", () => {
     expect(
       spectator.query(byTextContent("88.89%", { selector: ".stat__value" })),
     ).toBeVisible();
+
     expect(
       spectator.query(byTextContent("0%", { selector: ".stat__value" })),
     ).toBeVisible();
+
     expect(
       spectator.query(byTextContent("11.11%", { selector: ".stat__value" })),
     ).toBeVisible();
+
     expect(
       spectator.query(byTextContent("43.75%", { selector: ".stat__value" })),
     ).toBeVisible();

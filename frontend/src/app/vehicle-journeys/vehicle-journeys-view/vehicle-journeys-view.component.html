@@ -20,6 +20,23 @@
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle
+            [(ngModel)]="estimated"
+            (ngModelChange)="onEstimatedToggleChange()"
+          >
+            <app-segmented-toggle-item
+              name="estimated-filter"
+              identifier="estimated"
+              value="true"
+              label="Estimated"
+            ></app-segmented-toggle-item>
+            <app-segmented-toggle-item
+              name="estimated-filter"
+              identifier="evidenced"
+              value="false"
+              label="Evidenced"
+            ></app-segmented-toggle-item>
+          </app-segmented-toggle>
+          <app-segmented-toggle
             [(ngModel)]="timingPointsOption"
             (ngModelChange)="onTimingPointsToggleChange()"
           >
@@ -46,6 +63,7 @@
         <app-stop-list
           [stopList]="view?.stopList"
           [timingPointsOnly]="timingPointsOption === 'timing-points'"
+          [estimated]="estimated === 'true'"
           [loading]="loading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"
@@ -53,8 +71,10 @@
         <div>
           <div class="vehicle-journeys__sticky-container">
             <app-otp-stats
-              [otpStats]="view?.otpStats"
+              [stopList]="view?.stopList"
               [loading]="loading"
+              [timingPointsOnly]="timingPointsOption === 'timing-points'"
+              [estimated]="estimated === 'true'"
             ></app-otp-stats>
             <app-journey-map
               [view]="view"

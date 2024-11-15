@@ -9,6 +9,7 @@ query avls($groupId: String!) {
 
 query route($groupId: String!) {
   route(groupId: $groupId) {
+    estimatedDepartureUtc
     actualDepartureUtc
     scheduledDepartureUtc
     latitude
@@ -24,6 +25,7 @@ query route($groupId: String!) {
     serviceName
     startTime
     otp
+    otpEstimate
   }
 }
 

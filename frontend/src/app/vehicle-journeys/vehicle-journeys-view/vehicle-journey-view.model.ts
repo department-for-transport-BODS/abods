@@ -5,10 +5,6 @@ import {
   createJourneyInfo,
   VehicleJourneyInfo,
 } from "./vehicle-journey-info.model";
-import {
-  calculateOnTimePerformance,
-  OnTimePerformanceStats,
-} from "./on-time-performance-stats.model";
 import { VehicleJourney } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import { DateTime } from "luxon";
 
@@ -16,14 +12,12 @@ export interface VehicleJourneyView {
   stopList: VehiclePingStop[];
   journeyInfo: VehicleJourneyInfo;
   gpsPingList: VehiclePing[];
-  otpStats: OnTimePerformanceStats;
   prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined];
 }
 
 export const createVehicleJourneyView = (
   journey: AvlPoint[],
   route: Stop[],
-  timingPointsOnly: boolean,
   journeys: VehicleJourney[],
   startTime: DateTime,
   journeyId: string,
@@ -45,7 +39,7 @@ export const createVehicleJourneyView = (
       (s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc,
     );
     if (thisMatch) {
-      otp = thisMatch.onTimePerformance;
+      otp = thisMatch.otp;
     }
     return createVehiclePing(ping, otp);
   });
@@ -63,7 +57,6 @@ export const createVehicleJourneyView = (
     stopList: stopList,
     gpsPingList: gpsPingList,
     journeyInfo: createJourneyInfo(firstStop, journey[0]),
-    otpStats: calculateOnTimePerformance(stopList, timingPointsOnly),
     prevNextJourneys: [journeys[idx - 1], journeys[idx + 1]],
   };
 };

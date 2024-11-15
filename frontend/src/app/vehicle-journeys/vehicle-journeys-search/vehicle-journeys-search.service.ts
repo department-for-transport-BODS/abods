@@ -76,7 +76,6 @@ export class VehicleJourneysSearchService {
   getJourney(
     journeyId: string,
     startTime: DateTime,
-    timingPointsOnly: boolean,
   ): Observable<VehicleJourneyView> {
     return zip(
       this.avlsGQL.fetch({ groupId: journeyId }),
@@ -99,7 +98,6 @@ export class VehicleJourneysSearchService {
               createVehicleJourneyView(
                 avls,
                 route,
-                timingPointsOnly,
                 journeys,
                 startTime,
                 journeyId,

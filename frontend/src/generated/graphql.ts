@@ -1602,7 +1602,7 @@ export type RouteQueryVariables = Exact<{
 }>;
 
 
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, operatorName: string, operatorNoc: string, lineName: string, serviceId: string, serviceName: string, startTime: string, otp?: OtpEnum | null }> };
+export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, operatorName: string, operatorNoc: string, lineName: string, serviceId: string, serviceName: string, startTime: string, otp?: OtpEnum | null, otpEstimate?: OtpEnum | null }> };
 
 export type JourneysQueryVariables = Exact<{
   fromTimestamp: Scalars['DateTime']['input'];
@@ -3027,6 +3027,7 @@ export const AvlsDocument = gql`
 export const RouteDocument = gql`
     query route($groupId: String!) {
   route(groupId: $groupId) {
+    estimatedDepartureUtc
     actualDepartureUtc
     scheduledDepartureUtc
     latitude
@@ -3042,6 +3043,7 @@ export const RouteDocument = gql`
     serviceName
     startTime
     otp
+    otpEstimate
   }
 }
     `;
