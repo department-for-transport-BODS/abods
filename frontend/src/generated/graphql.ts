@@ -33,8 +33,8 @@ export type AdminAreaInfoType = {
 
 export type AdminAreasType = {
   __typename?: 'AdminAreasType';
-  adminAreaId: Scalars['String']['output'];
-  adminAreaName: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
   shape: Scalars['String']['output'];
 };
 
@@ -855,7 +855,7 @@ export type PunctualityTotalsType = {
 
 export type Query = {
   __typename?: 'Query';
-  adminAreas?: Maybe<Array<Maybe<AdminAreasType>>>;
+  adminAreas?: Maybe<Array<AdminAreasType>>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
@@ -875,11 +875,6 @@ export type Query = {
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
   vehicleReplay?: Maybe<VehicleReplayNamespace>;
-};
-
-
-export type QueryAdminAreasArgs = {
-  adminAreaIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -1337,12 +1332,10 @@ export type OperatorHistoricStatsQueryVariables = Exact<{
 
 export type OperatorHistoricStatsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual?: number | null, expected?: number | null, timestamp: string } | null> | null } | null } | null };
 
-export type GetAdminAreasQueryVariables = Exact<{
-  adminAreaIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
+export type GetAdminAreasQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAdminAreasQuery = { __typename?: 'Query', adminAreas?: Array<{ __typename?: 'AdminAreasType', shape: string, id: string, name: string } | null> | null };
+export type GetAdminAreasQuery = { __typename?: 'Query', adminAreas?: Array<{ __typename?: 'AdminAreasType', id: string, name: string, shape: string }> | null };
 
 export type HeadwayTimeSeriesQueryVariables = Exact<{
   params: HeadwayInputType;
@@ -2265,10 +2258,10 @@ export const OperatorHistoricStatsDocument = gql`
     }
   }
 export const GetAdminAreasDocument = gql`
-    query getAdminAreas($adminAreaIds: [String!]!) {
-  adminAreas(adminAreaIds: $adminAreaIds) {
-    id: adminAreaId
-    name: adminAreaName
+    query getAdminAreas {
+  adminAreas {
+    id
+    name
     shape
   }
 }

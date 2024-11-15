@@ -30,7 +30,7 @@ export class OperatorService {
   ) {}
 
   fetchOperators(): Observable<Operator[]> {
-    return this.operatorListQuery.fetch().pipe(
+    return this.operatorListQuery.fetch({}).pipe(
       map((result) =>
         nonNullishArray(result?.data?.operators?.items).map(
           ({ adminAreas, ...operator }) => ({

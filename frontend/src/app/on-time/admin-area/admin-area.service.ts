@@ -46,7 +46,7 @@ export class AdminAreaService {
   private _fetchAdminAreasByOperators(
     project: (operators: Operator[]) => string[],
   ) {
-    return this.getAdminAreasGQL.fetch().pipe(
+    return this.getAdminAreasGQL.fetch({}).pipe(
       map((result) => nonNullishArray(result.data?.adminAreas)),
       map((adminAreas) =>
         adminAreas.filter(

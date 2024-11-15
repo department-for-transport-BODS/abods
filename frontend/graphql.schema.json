@@ -99,7 +99,7 @@
         "isOneOf": null,
         "fields": [
           {
-            "name": "adminAreaId",
+            "name": "id",
             "description": null,
             "args": [],
             "type": {
@@ -115,7 +115,7 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreaName",
+            "name": "name",
             "description": null,
             "args": [],
             "type": {
@@ -6577,39 +6577,18 @@
           {
             "name": "adminAreas",
             "description": null,
-            "args": [
-              {
-                "name": "adminAreaIds",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "SCALAR",
-                        "name": "String",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
+            "args": [],
             "type": {
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "AdminAreasType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AdminAreasType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
