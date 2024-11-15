@@ -1,4 +1,6 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { Kysely, NotNull } from "kysely";
+import { DB } from "../kysely";
 
 export enum VehicleCountType {
   Actual = "actual",
@@ -14,43 +16,61 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
 };
 
 export const getVehicleCounts = (
-  db: PrismaClient,
+  db: Kysely<DB>,
   userOrgId: number,
   operatorId: string | null,
   startTime: Date,
   endTime: Date,
 ) => {
-  const start = Prisma.raw(startTime.toISOString());
-  const end = Prisma.raw(endTime.toISOString());
-  return db.$queryRaw<
-    {
-      operatorId: string;
-      expected: number;
-      actual: number;
-    }[]
-  >(Prisma.sql`
-      SELECT operator_noc                                    AS "operatorId",
-             CAST(COUNT(*) AS int)                           AS "expected",
-             CAST(COUNT(CASE WHEN sq.cur THEN 1 END) AS int) AS "actual"
-      FROM (SELECT DISTINCT j.operator_noc,
-                            j.group_id,
-                            EXISTS(SELECT 1
-                                   FROM public."SiriVMPositions" s
-                                   WHERE s.date_of_journey = '${start}'
-                                     AND s.group_id = j.group_id
-                                     AND s.operator_ref = j.operator_noc
-                                     AND s.recorded_at_time >= '${start}'
-                                     AND s.recorded_at_time < '${end}') AS cur
-            FROM public.expected_journeys j
-            WHERE j.date_of_journey = '${start}'
-              AND j.expected_journey_start < '${end}'
-              AND j.expected_journey_end > '${start}'
-              AND j.operator_noc IS NOT NULL
-              AND j.group_id IS NOT NULL
-              AND ((CAST(${operatorId} AS text) IS NULL OR j.operator_noc = ${operatorId}))
-              AND j.operator_noc IN (SELECT o.operatorref
-                                     FROM public.bods_organisationoperator o
-                                     WHERE o.organisation_id = ${userOrgId})) sq
-      GROUP BY operator_noc;
-  `);
+  const userOperatorQuery = db
+    .selectFrom("bods_organisationoperator")
+    .where("organisation_id", "=", userOrgId)
+    .select("operatorref");
+
+  let baseQuery = db
+    .selectFrom("expected_journeys")
+    .where("date_of_journey", "=", startTime)
+    .where("expected_journey_start", "<", endTime)
+    .where("expected_journey_end", ">", startTime)
+    .where("operator_noc", "is not", null)
+    .where("group_id", "is not", null)
+    .$if(!!operatorId, (qb) => qb.where("operator_noc", "=", operatorId))
+    .where("operator_noc", "in", userOperatorQuery)
+    .distinct()
+    .select("operator_noc")
+    .select("group_id")
+    .select(({ selectFrom, exists }) => [
+      exists(
+        selectFrom("SiriVMPositions")
+          .where("SiriVMPositions.date_of_journey", "=", startTime)
+          .whereRef(
+            "SiriVMPositions.group_id",
+            "=",
+            "expected_journeys.group_id",
+          )
+          .whereRef(
+            "SiriVMPositions.operator_ref",
+            "=",
+            "expected_journeys.operator_noc",
+          )
+          .where("SiriVMPositions.recorded_at_time", ">=", startTime)
+          .where("SiriVMPositions.recorded_at_time", "<", endTime),
+      ).as("cur"),
+    ]);
+
+  return db
+    .selectFrom(baseQuery.as("sq"))
+    .groupBy("sq.operator_noc")
+    .select(({ fn, eb }) => [
+      "sq.operator_noc as operatorId",
+      eb.eb.cast<number>(fn.countAll(), "integer").as("expected"),
+      eb
+        .cast<number>(
+          fn.count(eb.case().when("sq.cur", "=", true).then(1).end()),
+          "integer",
+        )
+        .as("actual"),
+    ])
+    .$narrowType<{ operatorId: NotNull }>() // null is filtered above
+    .execute();
 };

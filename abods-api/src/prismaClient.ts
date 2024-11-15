@@ -22,7 +22,7 @@ async function generateRdsIamToken(
   return signer.getAuthToken();
 }
 
-async function getDatabaseUrl(): Promise<string> {
+export async function getDatabaseUrl(): Promise<string> {
   const region = process.env.AWS_REGION || "eu-west-2";
   const hostname = process.env.DB_HOST || "localhost";
   const port = parseInt(process.env.DB_PORT || "5432", 10);
@@ -31,7 +31,7 @@ async function getDatabaseUrl(): Promise<string> {
 
   if (isLocal) {
     const password = process.env.DB_PASSWORD;
-    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true`;
+    return `postgresql://${username}:${password}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&gssencmode=disable&sslmode=disable&ssl=false`;
   } else {
     const token = await generateRdsIamToken(region, hostname, port, username);
     const encodedToken = encodeURIComponent(token);

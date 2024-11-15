@@ -16,6 +16,19 @@ import { getDate } from "./lib/dayjs.js";
 import { getAPITokenHash } from "./lib/apiauth.js";
 import { IncomingHttpHeaders } from "http";
 
+import { DB } from "./kysely.js";
+import pg from "pg";
+import { Kysely, PostgresDialect } from "kysely";
+import { getDatabaseUrl } from "./prismaClient.js";
+
+export const kysley = new Kysely<DB>({
+  dialect: new PostgresDialect({
+    pool: new pg.Pool({
+      connectionString: await getDatabaseUrl(),
+    }),
+  }),
+});
+
 let db = await createContext();
 let startTime = getDate();
 const apiKeyAuth = await getAPITokenHash();
@@ -52,7 +65,7 @@ app.use(
           logger.error("Failed to create database context");
         }
       }
-      return { req, res, headers, db, apiKeyAuth };
+      return { req, res, headers, db, apiKeyAuth, kysley };
     },
   }),
 );
