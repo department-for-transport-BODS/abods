@@ -297,8 +297,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   }
 
   onEstimatedToggleChange() {
-    const estimated = this.toggleValue;
-    this.estimatedToggle.next(estimated);
+    this.estimatedToggle.next(this.toggleValue);
   }
 
   setCoordinates(segment: CorridorStop[]): Position[] {
