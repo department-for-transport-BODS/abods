@@ -16,7 +16,7 @@
       <div class="corridor__date-wrapper">
         <app-date-range [formControl]="dateRange"></app-date-range>
         <app-segmented-toggle
-          [(ngModel)]="estimatedToggle"
+          [(ngModel)]="toggleValue"
           (ngModelChange)="onEstimatedToggleChange()"
         >
           <app-segmented-toggle-item

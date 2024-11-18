@@ -11,19 +11,16 @@ import {
   tap,
   takeUntil,
 } from "rxjs/operators";
-import { CorridorGranularity } from "../../../generated/graphql";
+import {
+  CorridorGranularity,
+  EstimatedToggle,
+} from "../../../generated/graphql";
 import {
   FromTo,
   Preset,
 } from "../../shared/components/date-range/date-range.types";
 import { combineLatest, of, Subject } from "rxjs";
-import {
-  Corridor,
-  CorridorsService,
-  CorridorStats,
-  CorridorStatsViewParams,
-  Stop,
-} from "../corridors.service";
+import { CorridorsService } from "../corridors.service";
 import { AgGridEvent, ColDef, GridOptions } from "ag-grid-community";
 import { BRITISH_ISLES_BBOX, position } from "../../shared/geo";
 import { featureCollection, lineString, point } from "@turf/helpers";
@@ -45,8 +42,12 @@ import { ConfigService } from "../../config/config.service";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { HideOutliersService } from "./hide-outliers.service";
-
-type EstimatedToggle = "estimated" | "evidenced";
+import {
+  Corridor,
+  CorridorStats,
+  CorridorStatsViewParams,
+  CorridorStop,
+} from "../../../generated/extra";
 
 @Component({
   templateUrl: "view-corridor.component.html",
@@ -64,10 +65,11 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   stats?: CorridorStats;
   loadingStats?: boolean;
   params?: CorridorStatsViewParams;
-  selectedStops$ = new Subject<Stop[]>();
+  selectedStops$ = new Subject<CorridorStop[]>();
   onDestroy$ = new Subject<void>();
   moveCounter = 0;
-  estimatedToggle: EstimatedToggle = "evidenced";
+  estimatedToggle = new Subject<EstimatedToggle>();
+  toggleValue: EstimatedToggle = EstimatedToggle.Evidenced;
 
   speedStats?: SpeedStats;
   mode: "time" | "speed" = "time";
@@ -78,8 +80,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
 
   bounds = BRITISH_ISLES_BBOX;
   corridorLine?: FeatureCollection<LineString, { segmentId: string }>;
-  corridorStops?: FeatureCollection<Point, Stop>;
-  popupStop?: Stop;
+  corridorStops?: FeatureCollection<Point, CorridorStop>;
+  popupStop?: CorridorStop;
   selectAll = true;
 
   set hideOutliersJourneyTime(value: boolean) {
@@ -196,7 +198,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {}
 
-  private selectedSegment: [Stop, Stop] | undefined;
+  private selectedSegment: [CorridorStop, CorridorStop] | undefined;
   private init = false;
 
   private _mapboxStyle: string = this.config.mapboxStyle;
@@ -235,21 +237,22 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       ? (this.errorView = view)
       : (this.corridor = view);
 
-    this.readToggle();
     if (this.corridor) {
       combineLatest([
         this.dateRange.valueChanges.pipe(
           startWith(this.dateRange.value as FromTo),
         ),
         this.selectedStops$.pipe(startWith([])),
+        this.estimatedToggle,
       ])
         .pipe(
-          map(([{ from, to }, stops]) =>
+          map(([{ from, to }, stops, toggle]) =>
             this.granularParams(
               from,
               to,
               this.corridor?.id?.toString() ?? "",
-              stops.length ? stops : (this.corridor?.stops as Stop[]),
+              stops.length ? stops : (this.corridor?.stops as CorridorStop[]),
+              toggle,
             ),
           ),
           tap(() => (this.loadingStats = true)),
@@ -288,39 +291,17 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             this.init = true;
           }
         });
+
+      this.estimatedToggle.next(this.toggleValue);
     }
   }
 
-  readToggle() {
-    const estimatedToggle$ = this.route.queryParamMap.pipe(
-      map((params) => {
-        console.log("check---");
-        return (
-          params.get("evidenced") === "true" ||
-          params.get("estimated") !== "true"
-        );
-      }),
-      takeUntil(this.onDestroy$),
-    );
-
-    estimatedToggle$.subscribe((estimatedToggle) => {
-      console.log("estimatedToggle--", estimatedToggle);
-      console.log("this.estimatedToggle--", this.estimatedToggle);
-      this.estimatedToggle = estimatedToggle ? "evidenced" : "estimated";
-      console.log("after--", this.estimatedToggle);
-    });
-  }
-
   onEstimatedToggleChange() {
-    const estimated = this.estimatedToggle === "estimated" ? true : null;
-    console.log("test---", estimated);
-    this.router.navigate([], {
-      queryParams: { estimated },
-      queryParamsHandling: "merge",
-    });
+    const estimated = this.toggleValue;
+    this.estimatedToggle.next(estimated);
   }
 
-  setCoordinates(segment: Stop[]): Position[] {
+  setCoordinates(segment: CorridorStop[]): Position[] {
     const serviceLink = this.stats?.serviceLinks.find(
       (serviceLink) =>
         serviceLink.fromStop === segment[0].stopId &&
@@ -337,7 +318,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     from: DateTime,
     to: DateTime,
     corridorId: string,
-    stops: Stop[],
+    stops: CorridorStop[],
+    estimated: EstimatedToggle,
   ): CorridorStatsViewParams {
     const granularity =
       Math.abs(to.diff(from, "days").days) < 5
@@ -349,10 +331,11 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       to,
       granularity,
       stops,
+      estimated,
     };
   }
 
-  onSelectSegment(segment: [Stop, Stop] | []) {
+  onSelectSegment(segment: [CorridorStop, CorridorStop] | []) {
     if (!segment?.length) {
       this.selectAll = true;
       this.setMapBoundsToCorridor();
@@ -360,10 +343,10 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     }
     this.selectedSegment = segment;
     this.setMapSelectedState(segment);
-    this.setMapBoundsToSegment(segment as [Stop, Stop]);
+    this.setMapBoundsToSegment(segment as [CorridorStop, CorridorStop]);
   }
 
-  setMapSelectedState(segment: [Stop, Stop]) {
+  setMapSelectedState(segment: [CorridorStop, CorridorStop]) {
     if (this.map?.mapInstance.getSource("corridor-line")) {
       this.map?.mapInstance.setFeatureState(
         { source: "corridor-line", id: segment[0].stopId + segment[1].stopId },
@@ -372,7 +355,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     }
   }
 
-  clearMapSelectedState(segment: [Stop, Stop] | []) {
+  clearMapSelectedState(segment: [CorridorStop, CorridorStop] | []) {
     if (!segment?.length) {
       this.selectAll = false;
       return;
@@ -384,7 +367,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     );
   }
 
-  setMapHoverState(stop?: Stop) {
+  setMapHoverState(stop?: CorridorStop) {
     if (!stop || this.loadingStats) {
       return;
     }
@@ -394,7 +377,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     );
   }
 
-  clearMapHoverState(stop?: Stop) {
+  clearMapHoverState(stop?: CorridorStop) {
     if (!stop || this.loadingStats) {
       return;
     }
@@ -408,8 +391,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     features,
   }: {
     features?: MapboxGeoJSONFeature[];
-  }): Stop | undefined {
-    return features?.[0].properties as Stop;
+  }): CorridorStop | undefined {
+    return features?.[0].properties as CorridorStop;
   }
 
   gridHeaderHeightSetter() {
@@ -447,7 +430,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     this.bounds = bbox(this.corridorLine) as BBox2d;
   }
 
-  setMapBoundsToSegment(segment: [Stop, Stop]) {
+  setMapBoundsToSegment(segment: [CorridorStop, CorridorStop]) {
     this.moveCounter = 0;
     this.bounds = bbox(
       lineString([

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { Corridor } from "../corridors.service";
+import { Corridor } from "../../../generated/extra";
 
 @Component({
   selector: "app-delete-corridor-modal",

@@ -5,14 +5,11 @@ import {
   ICellRendererParams,
 } from "ag-grid-community";
 import { RouterLinkCellRendererComponent } from "../../shared/components/ag-grid/router-link-cell/router-link-cell.component";
-import {
-  Corridor,
-  CorridorsService,
-  CorridorSummary,
-} from "../corridors.service";
+import { CorridorsService } from "../corridors.service";
 import { distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subject } from "rxjs";
+import { Corridor, CorridorSummary } from "../../../generated/extra";
 
 @Component({
   selector: "app-corridors-grid",

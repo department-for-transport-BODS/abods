@@ -7,12 +7,12 @@ import {
 } from "../../generated/graphql";
 
 import { CorridorsSpeedMetricService } from "./corridors-speed-metric.service";
+import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
 import {
   CorridorStats,
   CorridorStatsViewParams,
-  Stop,
-} from "./corridors.service";
-import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
+  CorridorStop,
+} from "../../generated/extra";
 
 describe("CorridorsSpeedMetricService", () => {
   let service: CorridorsSpeedMetricService;
@@ -226,10 +226,10 @@ describe("CorridorsSpeedMetricService", () => {
     it("should set average speed for corridor section if params passed", () => {
       const params = <CorridorStatsViewParams>{
         stops: [
-          <Stop>{
+          <CorridorStop>{
             stopId: "ST0100BRP90312",
           },
-          <Stop>{
+          <CorridorStop>{
             stopId: "ST0100BRA10796",
           },
         ],

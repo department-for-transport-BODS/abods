@@ -8,7 +8,7 @@ import {
   PrismaClient,
   Timetable,
 } from "@prisma/client";
-import { CorridorType } from "../types/generated.js";
+import { CorridorType, EstimatedToggle } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 
 export enum CorridorJourneyStatsOption {
@@ -215,4 +215,14 @@ export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
       adminarea_id: true,
     },
   });
+};
+
+export const getJourneyDeparture = (
+  journey: Timetable,
+  estimated?: EstimatedToggle | null,
+) => {
+  return estimated === EstimatedToggle.Estimated &&
+    !journey.actual_departure_time
+    ? journey.timestamp_after_estimate
+    : journey.actual_departure_time;
 };

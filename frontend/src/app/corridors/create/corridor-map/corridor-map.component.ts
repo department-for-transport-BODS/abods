@@ -17,7 +17,7 @@ import {
 import { Map } from "mapbox-gl";
 import { ConfigService } from "../../../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../../../shared/geo";
-import { Stop } from "../../corridors.service";
+import { CorridorStop } from "../../corridors.service";
 import { Subject, takeUntil } from "rxjs";
 
 type MGLMouseEvent = MapMouseEvent & {
@@ -47,21 +47,23 @@ function removeFeatureStateSafe(
   styleUrls: ["./corridor-map.component.scss"],
 })
 export class CorridorMapComponent implements OnInit, OnDestroy {
-  @Input() stopList: Stop[] = [];
-  @Input() matchingStops?: FeatureCollection<Point, Stop>;
+  @Input() stopList: CorridorStop[] = [];
+  @Input() matchingStops?: FeatureCollection<Point, CorridorStop>;
   @Input() matchingStopLines?: FeatureCollection<LineString>;
-  @Input() corridorStops?: FeatureCollection<Point, Stop>;
+  @Input() corridorStops?: FeatureCollection<Point, CorridorStop>;
   @Input() corridorLine?: Feature<LineString>;
-  @Input() otherStops?: FeatureCollection<Point, Stop>;
-  @Input() nonOrgStops?: FeatureCollection<Point, Stop>;
+  @Input() otherStops?: FeatureCollection<Point, CorridorStop>;
+  @Input() nonOrgStops?: FeatureCollection<Point, CorridorStop>;
   @Input() displayRecentreButton?: boolean;
   @Input() resetMoveCounter?: EventEmitter<void>;
 
-  @Output() selectStop = new EventEmitter<Feature<Point, Stop> | undefined>();
+  @Output() selectStop = new EventEmitter<
+    Feature<Point, CorridorStop> | undefined
+  >();
   @Output() boundsChanged = new EventEmitter<LngLatBounds>();
   @Output() recentreMap = new EventEmitter<void>();
 
-  hoveredStop?: Feature<Point, Stop>;
+  hoveredStop?: Feature<Point, CorridorStop>;
   stopTooltipMessage?: string;
   initialBounds = BRITISH_ISLES_BBOX;
   mapCursor?: "pointer" | "default";
@@ -101,8 +103,8 @@ export class CorridorMapComponent implements OnInit, OnDestroy {
     if (this.map) this.boundsChanged.emit(this.map.getBounds());
   }
 
-  stop(event: MGLMouseEvent): Feature<Point, Stop> | undefined {
-    return event.features?.[0] as unknown as Feature<Point, Stop>;
+  stop(event: MGLMouseEvent): Feature<Point, CorridorStop> | undefined {
+    return event.features?.[0] as unknown as Feature<Point, CorridorStop>;
   }
 
   setHoverState(stop: Feature) {
@@ -137,7 +139,7 @@ export class CorridorMapComponent implements OnInit, OnDestroy {
     }
   }
 
-  mapSetHover(stop?: Feature<Point, Stop>, highlight = false) {
+  mapSetHover(stop?: Feature<Point, CorridorStop>, highlight = false) {
     this.hoveredStop = stop;
     if (highlight && stop) {
       this.setHoverState(stop);
