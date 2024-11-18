@@ -152,12 +152,14 @@ export const getOperators = async (
       throw "No operators found";
     }
 
-    const userOperators = operators.map((operator): OperatorType => {
-      return mapOperatorToOperatorType(
-        operator,
-        operator.noc_adminarea,
-      ) as OperatorType;
-    });
+    const userOperators = operators.map((operator) => ({
+      operatorId: operator.operatorref,
+      nocCode: operator.operatorref,
+      name: operator.name,
+      adminAreas: operator.noc_adminarea.map((adminArea) => ({
+        adminAreaId: adminArea.adminarea_id,
+      })),
+    }));
     return userOperators.sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true }),
     );
@@ -165,21 +167,6 @@ export const getOperators = async (
     logger.error(error);
     return [];
   }
-};
-
-const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
-  const adminAreaIds = adminAreas.map((adminArea) => {
-    return {
-      adminAreaId: adminArea.adminarea_id,
-    };
-  });
-
-  return {
-    operatorId: operator.operatorref,
-    nocCode: operator.operatorref,
-    name: operator.name,
-    adminAreas: adminAreaIds,
-  };
 };
 
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
@@ -782,12 +769,14 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           }
 
           results.forEach((res) => {
-            hoursOfDay.push({
-              timeOfDay: dbUtcToBstHour(res.departure_hour_only),
-              early: res._sum.early_count,
-              onTime: res._sum.on_time_count,
-              late: res._sum.late_count,
-            });
+            if (res.departure_hour_only) {
+              hoursOfDay.push({
+                timeOfDay: dbUtcToBstHour(res.departure_hour_only),
+                early: res._sum.early_count ?? 0,
+                onTime: res._sum.on_time_count ?? 0,
+                late: res._sum.late_count ?? 0,
+              });
+            }
           });
         }
       }
@@ -865,9 +854,9 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
                 ts: isDayGranularity
                   ? getFormattedDate(result.date_of_journey)
                   : getFormattedDate(result.departure_hour),
-                early: result._sum.early_count,
-                late: result._sum.late_count,
-                onTime: result._sum.on_time_count,
+                early: result._sum.early_count ?? 0,
+                late: result._sum.late_count ?? 0,
+                onTime: result._sum.on_time_count ?? 0,
               });
             }
           });
