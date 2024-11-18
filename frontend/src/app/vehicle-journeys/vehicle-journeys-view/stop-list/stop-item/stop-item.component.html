@@ -48,12 +48,12 @@
     <div *ngIf="displayTimingDetails" class="stop-list-item__scheduled">
       <div class="stop-list-item__time-container">
         <span class="stop-list-item__time-container--minutes">{{
-          stop?.scheduledDeparture | dateTimeToFormat: "HH:mm"
+          scheduledDeparture | dateTimeToFormat: "HH:mm"
         }}</span>
         <span
           *ngIf="!timingPointsOnly"
           class="stop-list-item__time-container--seconds"
-          >:{{ stop?.scheduledDeparture | dateTimeToFormat: "ss" }}</span
+          >:{{ scheduledDeparture | dateTimeToFormat: "ss" }}</span
         >
       </div>
     </div>

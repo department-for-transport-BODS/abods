@@ -1,5 +1,4 @@
 import { AvlPoint, Stop } from "../../../generated/graphql";
-import { createStopModel, VehiclePingStop } from "./vehicle-ping-stop.model";
 import {
   createJourneyInfo,
   VehicleJourneyInfo,
@@ -8,7 +7,7 @@ import { VehicleJourney } from "../vehicle-journeys-search/vehicle-journeys-sear
 import { DateTime } from "luxon";
 
 export interface VehicleJourneyView {
-  stopList: VehiclePingStop[];
+  stopList: Stop[];
   journeyInfo: VehicleJourneyInfo;
   gpsPingList: AvlPoint[];
   prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined];
@@ -31,8 +30,6 @@ export const createVehicleJourneyView = (
     throw new Error("No data");
   }
 
-  const stopList = route.map(createStopModel);
-
   let idx = -1;
   journeys.forEach((v, i) => {
     if (
@@ -43,7 +40,7 @@ export const createVehicleJourneyView = (
     }
   });
   return {
-    stopList: stopList,
+    stopList: route,
     gpsPingList: journey,
     journeyInfo: createJourneyInfo(firstStop, journey[0]),
     prevNextJourneys: [journeys[idx - 1], journeys[idx + 1]],

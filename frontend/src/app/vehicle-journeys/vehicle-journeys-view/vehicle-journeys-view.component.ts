@@ -3,13 +3,13 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 import { combineLatest, map, Subject, switchMap, takeUntil, tap } from "rxjs";
 import { VehicleJourneyView } from "./vehicle-journey-view.model";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
-import { VehiclePingStop } from "./vehicle-ping-stop.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import {
   VehicleJourney,
   VehicleJourneysSearchService,
 } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import { DateTime } from "luxon";
+import { Stop } from "../../../generated/graphql";
 
 type TimingPointsOption = "timing-points" | "all-stops";
 
@@ -29,7 +29,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     undefined,
   ];
 
-  selectedStop?: VehiclePingStop;
+  selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
 
   returnRoute = "/vehicle-journeys";
@@ -140,7 +140,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  onStopSelected(stop: VehiclePingStop) {
+  onStopSelected(stop: Stop) {
     this.selectedStop = stop;
   }
 

@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { VehiclePingStop } from "../../vehicle-ping-stop.model";
+import { Stop } from "../../../../../generated/graphql";
+import { DateTime } from "luxon";
 
 export type StopHoverEvent = {
-  stop?: VehiclePingStop;
+  stop?: Stop;
   event: "enter" | "leave";
 };
 
@@ -12,11 +13,11 @@ export type StopHoverEvent = {
   styleUrls: ["../stop-list.component.scss", "./stop-item.component.scss"],
 })
 export class StopItemComponent {
-  @Input() stop?: VehiclePingStop;
+  @Input() stop?: Stop;
   @Input() timingPointsOnly = false;
   @Input() estimated = false;
   @Input() firstItem?: boolean;
-  @Output() stopSelected = new EventEmitter<VehiclePingStop>();
+  @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
 
   get displayTimingDetails() {
@@ -30,17 +31,24 @@ export class StopItemComponent {
     return this.stop.otpEstimate;
   }
 
+  get scheduledDeparture() {
+    if (!this.stop) return undefined;
+    return DateTime.fromISO(this.stop.scheduledDepartureUtc);
+  }
+
   get actualDeparture() {
     if (!this.stop) return undefined;
-    if (this.stop.actualDeparture) return this.stop.actualDeparture;
+    if (this.stop.actualDepartureUtc)
+      return DateTime.fromISO(this.stop.actualDepartureUtc);
     if (!this.estimated) return undefined;
-    return this.stop.estimatedDeparture;
+    if (this.stop.estimatedDepartureUtc)
+      return DateTime.fromISO(this.stop.estimatedDepartureUtc);
+    return undefined;
   }
 
   get delay() {
-    if (!this.stop) return undefined;
-    if (this.stop.delay) return this.stop.delay;
-    if (!this.estimated) return undefined;
-    return this.stop.delayEstimate;
+    const scheduled = this.scheduledDeparture;
+    if (!scheduled) return undefined;
+    return this.actualDeparture?.diff(scheduled);
   }
 }

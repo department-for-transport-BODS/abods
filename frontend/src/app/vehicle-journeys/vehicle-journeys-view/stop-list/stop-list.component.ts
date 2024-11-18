@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { isNotNullOrUndefined } from "../../../shared/rxjs-operators";
-import { VehiclePingStop } from "../vehicle-ping-stop.model";
 import { StopHoverEvent } from "./stop-item/stop-item.component";
+import { Stop } from "../../../../generated/graphql";
 
 @Component({
   selector: "app-stop-list",
@@ -9,11 +9,11 @@ import { StopHoverEvent } from "./stop-item/stop-item.component";
   styleUrls: ["./stop-list.component.scss"],
 })
 export class StopListComponent {
-  @Input() stopList?: VehiclePingStop[];
+  @Input() stopList?: Stop[];
   @Input() timingPointsOnly = false;
   @Input() estimated = false;
   @Input() loading?: boolean;
-  @Output() stopSelected = new EventEmitter<VehiclePingStop>();
+  @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
 
   get isStopList(): boolean {

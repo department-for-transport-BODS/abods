@@ -1,7 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { VehiclePingStop } from "../vehicle-ping-stop.model";
-import { OtpEnum } from "../../../../generated/graphql";
+import { OtpEnum, Stop } from "../../../../generated/graphql";
 
 @Component({
   selector: "app-otp-stats",
@@ -9,7 +8,7 @@ import { OtpEnum } from "../../../../generated/graphql";
   styleUrls: ["./otp-stats.component.scss"],
 })
 export class OtpStatsComponent {
-  @Input() stopList?: VehiclePingStop[];
+  @Input() stopList?: Stop[];
   @Input() loading?: boolean;
   @Input() estimated?: boolean;
   @Input() timingPointsOnly?: boolean;

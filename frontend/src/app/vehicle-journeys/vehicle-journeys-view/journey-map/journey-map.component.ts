@@ -17,9 +17,8 @@ import {
 } from "../../../shared/geo";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
 import { VehicleJourneyView } from "../vehicle-journey-view.model";
-import { VehiclePingStop } from "../vehicle-ping-stop.model";
 import { ConfigService } from "../../../config/config.service";
-import { AvlPoint, OtpEnum } from "../../../../generated/graphql";
+import { AvlPoint, OtpEnum, Stop } from "../../../../generated/graphql";
 import { DateTime } from "luxon";
 
 type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
@@ -35,15 +34,14 @@ export const createVehiclePing = (ping: AvlPoint, otp: OtpEnum | null) => ({
     ping.recordedAtTimeUtc,
 });
 
-const createStop = (n: VehiclePingStop, estimated: boolean) => ({
-  id: n.stopId,
+const createStop = (n: Stop, estimated: boolean) => ({
+  id: n.stopId.toString(),
   stopName: n.stopName,
   lon: n.longitude,
   lat: n.latitude,
   isTimingPoint: n.isTimingPoint,
   departureTime:
-    n.actualDepartureTimestamp ??
-    (estimated ? n.estimatedDepartureTimestamp : undefined),
+    n.actualDepartureUtc ?? (estimated ? n.actualDepartureUtc : undefined),
   onTimePerformance: n.otp ?? (estimated ? n.otpEstimate : null),
 });
 
@@ -67,7 +65,7 @@ const segmentToLine = (
 export class JourneyMapComponent implements OnChanges {
   protected readonly DateTime = DateTime;
   @Input() view?: VehicleJourneyView;
-  @Input() selectedStop?: VehiclePingStop;
+  @Input() selectedStop?: Stop;
   @Input() hoveredStop?: StopHoverEvent;
   @Input() loading = false;
   @Input() estimated = false;
@@ -172,15 +170,15 @@ export class JourneyMapComponent implements OnChanges {
     this.setJourneyBounds();
   }
 
-  private updateBoundsToSelectedStop(selectedStop: VehiclePingStop) {
+  private updateBoundsToSelectedStop(selectedStop: Stop) {
     let selected: Feature<Point, MapStop> | undefined;
     if (selectedStop.isTimingPoint) {
       selected = this.timingPoints?.features.find(
-        (stop) => stop.properties.id === selectedStop.stopId,
+        (stop) => stop.properties.id === selectedStop.stopId.toString(),
       );
     } else {
       selected = this.stops?.features.find(
-        (stop) => stop.properties.id === selectedStop.stopId,
+        (stop) => stop.properties.id === selectedStop.stopId.toString(),
       );
     }
     if (selected) {
