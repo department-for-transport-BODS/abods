@@ -26,7 +26,7 @@ export class OtpStatsComponent {
 
     const filtered = this.stopList
       .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
-      .map((n) => (this.estimated ? n.otp ?? n.otpEstimate : n.otp));
+      .map((n) => (!this.estimated && n.estimatedDepartureUtc ? null : n.otp));
 
     const total = filtered.length;
     const early = filtered.filter((n) => n === OtpEnum.Early).length;

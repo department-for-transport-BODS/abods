@@ -8285,18 +8285,6 @@
             "deprecationReason": null
           },
           {
-            "name": "otpEstimate",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "ENUM",
-              "name": "OtpEnum",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "scheduledDepartureUtc",
             "description": null,
             "args": [],

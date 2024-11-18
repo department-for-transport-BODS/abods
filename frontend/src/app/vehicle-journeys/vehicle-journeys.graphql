@@ -25,7 +25,6 @@ query route($groupId: String!) {
     serviceName
     startTime
     otp
-    otpEstimate
   }
 }
 

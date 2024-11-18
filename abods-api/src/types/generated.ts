@@ -1066,7 +1066,6 @@ export type Stop = {
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   otp?: Maybe<OtpEnum>;
-  otpEstimate?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
   serviceId: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -2034,7 +2033,6 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   otp?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
-  otpEstimate?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
   scheduledDepartureUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

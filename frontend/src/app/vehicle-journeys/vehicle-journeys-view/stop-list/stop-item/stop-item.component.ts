@@ -25,30 +25,29 @@ export class StopItemComponent {
   }
 
   get otp() {
-    if (!this.stop) return undefined;
-    if (this.stop.otp) return this.stop.otp;
-    if (!this.estimated) return undefined;
-    return this.stop.otpEstimate;
+    if (!this.stop) return null;
+    if (!this.estimated && this.stop.estimatedDepartureUtc) return null;
+    return this.stop.otp;
   }
 
   get scheduledDeparture() {
-    if (!this.stop) return undefined;
+    if (!this.stop) return null;
     return DateTime.fromISO(this.stop.scheduledDepartureUtc);
   }
 
   get actualDeparture() {
-    if (!this.stop) return undefined;
+    if (!this.stop) return null;
     if (this.stop.actualDepartureUtc)
       return DateTime.fromISO(this.stop.actualDepartureUtc);
-    if (!this.estimated) return undefined;
+    if (!this.estimated) return null;
     if (this.stop.estimatedDepartureUtc)
       return DateTime.fromISO(this.stop.estimatedDepartureUtc);
-    return undefined;
+    return null;
   }
 
   get delay() {
     const scheduled = this.scheduledDeparture;
-    if (!scheduled) return undefined;
+    if (!scheduled) return null;
     return this.actualDeparture?.diff(scheduled);
   }
 }

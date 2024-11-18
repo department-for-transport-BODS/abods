@@ -159,10 +159,7 @@ export const getRoute: QueryResolvers["route"] = async (
     startTime:
       s.expected_journeys?.expected_journey_start.toISOString() ??
       new Date(2000, 0, 1, 0, 0, 0, 0).toISOString(),
-    otp:
-      s.otp_state && !s.timestamp_after_estimate ? OtpEnum[s.otp_state as OtpEnum] : null,
-    otpEstimate:
-      s.otp_state && s.timestamp_after_estimate ? OtpEnum[s.otp_state as OtpEnum] : null,
+    otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
   }));
 };
 

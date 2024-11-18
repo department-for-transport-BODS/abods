@@ -41,8 +41,8 @@ const createStop = (n: Stop, estimated: boolean) => ({
   lat: n.latitude,
   isTimingPoint: n.isTimingPoint,
   departureTime:
-    n.actualDepartureUtc ?? (estimated ? n.actualDepartureUtc : undefined),
-  onTimePerformance: n.otp ?? (estimated ? n.otpEstimate : null),
+    n.actualDepartureUtc ?? (estimated ? n.estimatedDepartureUtc : undefined),
+  onTimePerformance: !estimated && n.estimatedDepartureUtc ? null : n.otp,
 });
 
 export type VehiclePing = ReturnType<typeof createVehiclePing>;

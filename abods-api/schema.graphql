@@ -844,7 +844,6 @@ type Stop {
   serviceName: String!
   startTime: String!
   otp: OtpEnum
-  otpEstimate: OtpEnum
 }
 
 enum OtpEnum {
