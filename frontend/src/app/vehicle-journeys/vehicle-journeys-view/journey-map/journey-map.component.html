@@ -195,7 +195,7 @@
     ></mgl-layer>
     <mgl-popup
       *ngIf="tooltipStop"
-      [lngLat]="{ lon: tooltipStop.longitude, lat: tooltipStop.latitude }"
+      [lngLat]="tooltipStop"
       [closeButton]="false"
       [closeOnClick]="false"
       maxWidth="200"

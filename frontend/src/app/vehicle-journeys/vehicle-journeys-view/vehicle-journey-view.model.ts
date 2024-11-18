@@ -1,5 +1,4 @@
-import { AvlPoint, OtpEnum, Stop } from "../../../generated/graphql";
-import { createVehiclePing, VehiclePing } from "./vehicle-ping.model";
+import { AvlPoint, Stop } from "../../../generated/graphql";
 import { createStopModel, VehiclePingStop } from "./vehicle-ping-stop.model";
 import {
   createJourneyInfo,
@@ -11,7 +10,7 @@ import { DateTime } from "luxon";
 export interface VehicleJourneyView {
   stopList: VehiclePingStop[];
   journeyInfo: VehicleJourneyInfo;
-  gpsPingList: VehiclePing[];
+  gpsPingList: AvlPoint[];
   prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined];
 }
 
@@ -32,25 +31,7 @@ export const createVehicleJourneyView = (
     throw new Error("No data");
   }
 
-  const stopList = route.map((stop) => createStopModel(stop));
-  let otp: OtpEnum | null = null;
-  let otpEstimate: OtpEnum | null = null;
-  const gpsPingList = journey.map((ping: AvlPoint) => {
-    const actualMatch = stopList.find(
-      (s) => s.actualDepartureTimestamp === ping.recordedAtTimeUtc,
-    );
-    if (actualMatch) {
-      otp = actualMatch.otp;
-      otpEstimate = actualMatch.otp;
-    }
-    const estimatedMatch = stopList.find(
-      (s) => s.estimatedDepartureTimestamp === ping.recordedAtTimeUtc,
-    );
-    if (estimatedMatch) {
-      otpEstimate = estimatedMatch.otpEstimate;
-    }
-    return createVehiclePing(ping, otp, otpEstimate);
-  });
+  const stopList = route.map(createStopModel);
 
   let idx = -1;
   journeys.forEach((v, i) => {
@@ -63,7 +44,7 @@ export const createVehicleJourneyView = (
   });
   return {
     stopList: stopList,
-    gpsPingList: gpsPingList,
+    gpsPingList: journey,
     journeyInfo: createJourneyInfo(firstStop, journey[0]),
     prevNextJourneys: [journeys[idx - 1], journeys[idx + 1]],
   };
