@@ -15,6 +15,9 @@
   }
   &__controls {
     justify-self: end;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   &__sticky-container {
     position: sticky;
