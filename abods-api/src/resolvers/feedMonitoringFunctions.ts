@@ -144,7 +144,7 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
 
     return {
       operatorId: parent.operatorId,
-      feedStatus: !!feed_summary?.last_outage,
+      feedStatus: !feed_summary?.unavailable_since,
       availability: Number(feed_summary?.availability ?? 0),
       lastOutage: feed_summary?.last_outage,
       unavailableSince: feed_summary?.unavailable_since,
