@@ -24,7 +24,7 @@
       ></app-map-view-toggle>
     </app-dropdown>
   </mgl-control>
-  <ng-container *ngIf="view && !loading">
+  <ng-container *ngIf="stopList && avls && !loading">
     <mgl-control position="bottom-left">
       <app-map-recentre-button
         *ngIf="moveCounter > 1"

@@ -262,7 +262,7 @@ export class VehicleJourneysSearchComponent
         switchMap(({ date, service }) => {
           if (date?.isValid && service) {
             return this.vehicleJourneysSearchService
-              .fetchDayJourneys(date, service)
+              .fetchDayJourneys(date.startOf("day"), service)
               .pipe(
                 take(1),
                 catchError(() => {

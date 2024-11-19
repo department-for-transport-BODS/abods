@@ -14,10 +14,10 @@
       <svg-icon
         class="stop-list-item__icon"
         [ngClass]="{
-          'stop-list-item__icon--on-time': otp?.toString() === 'OnTime',
-          'stop-list-item__icon--early': otp?.toString() === 'Early',
-          'stop-list-item__icon--late': otp?.toString() === 'Late',
-          'stop-list-item__icon--no-data': (otp ?? null) === null,
+          'stop-list-item__icon--on-time': otp === 'OnTime',
+          'stop-list-item__icon--early': otp === 'Early',
+          'stop-list-item__icon--late': otp === 'Late',
+          'stop-list-item__icon--no-data': otp === null,
           'stop-list-item__icon--stop': !stop?.isTimingPoint
         }"
         [applyClass]="true"

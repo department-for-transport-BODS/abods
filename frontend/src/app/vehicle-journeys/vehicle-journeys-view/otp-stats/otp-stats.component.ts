@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
-
-import { OtpEnum, Stop } from "../../../../generated/graphql";
+import { OtpEnum } from "../../../../generated/graphql";
+import { StopDetails } from "../vehicle-journeys-view.component";
 
 @Component({
   selector: "app-otp-stats",
@@ -8,9 +8,8 @@ import { OtpEnum, Stop } from "../../../../generated/graphql";
   styleUrls: ["./otp-stats.component.scss"],
 })
 export class OtpStatsComponent {
-  @Input() stopList?: Stop[];
+  @Input() stopList?: StopDetails[];
   @Input() loading?: boolean;
-  @Input() estimated?: boolean;
   @Input() timingPointsOnly?: boolean;
 
   get calculated() {
@@ -24,15 +23,15 @@ export class OtpStatsComponent {
         completed: NaN,
       };
 
-    const filtered = this.stopList
-      .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
-      .map((n) => (!this.estimated && n.estimatedDepartureUtc ? null : n.otp));
+    const filtered = this.stopList.filter(
+      (stop) => stop.isTimingPoint || !this.timingPointsOnly,
+    );
 
     const total = filtered.length;
-    const early = filtered.filter((n) => n === OtpEnum.Early).length;
-    const onTime = filtered.filter((n) => n === OtpEnum.OnTime).length;
-    const late = filtered.filter((n) => n === OtpEnum.Late).length;
-    const noData = filtered.filter((n) => n === null).length;
+    const early = filtered.filter((n) => n.otp === OtpEnum.Early).length;
+    const onTime = filtered.filter((n) => n.otp === OtpEnum.OnTime).length;
+    const late = filtered.filter((n) => n.otp === OtpEnum.Late).length;
+    const noData = filtered.filter((n) => n.otp === null).length;
     const completed = total - noData;
     return { total, early, onTime, late, noData, completed };
   }

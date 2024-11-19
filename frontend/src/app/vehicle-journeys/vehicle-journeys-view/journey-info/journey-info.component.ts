@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { DateTime } from "luxon";
-import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
+import { AvlPoint, Stop } from "../../../../generated/graphql";
 
 @Component({
   selector: "app-journey-info",
@@ -8,26 +8,29 @@ import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
   styleUrls: ["./journey-info.component.scss"],
 })
 export class JourneyInfoComponent {
-  @Input() journeyInfo?: VehicleJourneyInfo | null;
   @Input() loading?: boolean;
+  @Input() stops: Stop[] = [];
+  @Input() avls: AvlPoint[] = [];
 
   get operatorName(): string {
-    return this.journeyInfo?.operatorInfo?.operatorName ?? "";
+    return this.stops[0]?.operatorName ?? "";
   }
 
   get operatorNocCode(): string {
-    return this.journeyInfo?.operatorInfo?.nocCode ?? "";
+    return this.stops[0]?.operatorNoc ?? "";
   }
 
   get servicePatternName(): string {
-    return this.journeyInfo?.serviceInfo?.serviceName ?? "";
+    return this.stops[0]?.serviceName ?? "";
   }
 
   get startTime(): DateTime | undefined {
-    return this.journeyInfo?.startTime;
+    return this.stops[0]
+      ? DateTime.fromISO(this.stops[0].startTime)
+      : undefined;
   }
 
   get vehicleId(): string {
-    return this.journeyInfo?.vehicleId ?? "";
+    return this.avls[0]?.vehicleRef ?? "Unknown";
   }
 }
