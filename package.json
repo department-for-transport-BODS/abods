@@ -3,7 +3,7 @@
     "codegen": "graphql-codegen --config codegen.ts",
     "fmt": "prettier -w .",
     "fmt:check": "prettier --check .",
-    "postinstall": "(cd abods-api && npm install && npm run prisma:generate); (cd frontend && npm install)",
+    "postinstall": "(cd abods-api && npm install); (cd frontend && npm install)",
     "db": "./scripts/db_connect.sh",
     "start:api": "(cd abods-api && npm run start:local)",
     "start:app": "(cd frontend && npm start)",

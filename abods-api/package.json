@@ -18,7 +18,8 @@
     "start": "npm run build && node ./dist/localServer.js",
     "start:dev": "concurrently \"npm run watch\" \"node ./dist/localServer.js\"",
     "start:sam": "npm run sam:build && npm run sam:start",
-    "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts"
+    "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
+    "prepare": "(npm run prisma:generate);"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
