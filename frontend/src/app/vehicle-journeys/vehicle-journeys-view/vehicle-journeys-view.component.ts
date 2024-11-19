@@ -31,6 +31,10 @@ const createStopDetails = (stop: Stop, estimated: boolean) => {
     isTimingPoint: stop.isTimingPoint,
     lat: stop.latitude,
     lon: stop.longitude,
+    operatorName: stop.operatorName,
+    operatorNoc: stop.operatorNoc,
+    serviceName: stop.serviceName,
+    startTime: stop.startTime,
   };
   // If we're only looking at evidenced, then act as if no match was made
   if (!estimated && stop.estimatedDepartureUtc) {
@@ -70,7 +74,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
 
-  $serviceIdSubject = new Subject<string>();
+  serviceId$ = new Subject<string>();
 
   get journeyTitle(): string {
     const firstStop = this.routeDetails[0];
@@ -117,23 +121,23 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             : "all-stops";
       });
 
-    const $date = this.route.queryParamMap.pipe(
+    const startTime$ = this.route.queryParamMap.pipe(
       map((queryParamMap) =>
-        DateTime.fromISO(queryParamMap.get("startTime") as string)
-          .setZone("Europe/London")
-          .startOf("day"),
+        DateTime.fromISO(queryParamMap.get("startTime") as string).setZone(
+          "Europe/London",
+        ),
       ),
       distinctUntilChanged(),
       takeUntil(this.onDestroy$),
     );
 
-    const $groupId = this.route.paramMap.pipe(
+    const groupId$ = this.route.paramMap.pipe(
       takeUntil(this.onDestroy$),
       map((params) => params.get("journeyId") as string),
     );
-    $groupId.subscribe((groupId) => (this.groupId = groupId));
+    groupId$.subscribe((groupId) => (this.groupId = groupId));
 
-    combineLatest([$groupId])
+    combineLatest([groupId$])
       .pipe(
         tap(() => (this.routeLoading = true)),
         switchMap(([groupId]) => this.routeGQL.fetch({ groupId })),
@@ -145,7 +149,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             return (this.errorView = new VehicleJourneyNotFoundView());
           }
           this.routeDetails = result.data.route;
-          this.$serviceIdSubject.next(result.data.route[0].serviceId);
+          this.serviceId$.next(result.data.route[0].serviceId);
           this.routeLoading = false;
         },
         error: (err) => {
@@ -155,7 +159,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         },
       });
 
-    combineLatest([$groupId])
+    combineLatest([groupId$])
       .pipe(
         tap(() => (this.avlsLoading = true)),
         switchMap(([groupId]) => this.avlsGQL.fetch({ groupId })),
@@ -173,7 +177,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         },
       });
 
-    combineLatest([$date, this.$serviceIdSubject.pipe(distinctUntilChanged())])
+    combineLatest([startTime$, this.serviceId$.pipe(distinctUntilChanged())])
       .pipe(
         tap(() => (this.journeysLoading = true)),
         mergeMap(([date, serviceId]) =>

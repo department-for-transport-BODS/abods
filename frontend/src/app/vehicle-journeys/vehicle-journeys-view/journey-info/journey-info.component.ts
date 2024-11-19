@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { DateTime } from "luxon";
-import { AvlPoint, Stop } from "../../../../generated/graphql";
+import { AvlPoint } from "../../../../generated/graphql";
+import { StopDetails } from "../vehicle-journeys-view.component";
 
 @Component({
   selector: "app-journey-info",
@@ -9,7 +10,7 @@ import { AvlPoint, Stop } from "../../../../generated/graphql";
 })
 export class JourneyInfoComponent {
   @Input() loading?: boolean;
-  @Input() stops: Stop[] = [];
+  @Input() stops: StopDetails[] = [];
   @Input() avls: AvlPoint[] = [];
 
   get operatorName(): string {

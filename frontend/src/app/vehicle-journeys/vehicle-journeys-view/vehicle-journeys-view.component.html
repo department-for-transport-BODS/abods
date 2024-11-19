@@ -16,8 +16,8 @@
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [avls]="avls"
-          [stops]="routeDetails"
-          [loading]="routeLoading || journeysLoading"
+          [stops]="stops"
+          [loading]="routeLoading || avlsLoading"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle
