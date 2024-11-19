@@ -15,9 +15,6 @@ export class JourneyNavComponent {
   @Input() journeyId?: string;
 
   get currentIndex() {
-    console.log(this.journeys);
-    console.log(this.startTime);
-    console.log(this.journeyId);
     return this.journeys.findIndex(
       (v) =>
         v.startTime?.toMillis() === this.startTime?.toMillis() &&
