@@ -46,7 +46,7 @@ export class SparklineCellTemplateComponent
           ),
           concatMap(({ data, callback }) => {
             if (this.renderedCharts.has(data)) {
-              callback(this.renderedCharts.get(data) as string);
+              callback(this.renderedCharts.get(data)!);
               return of();
             }
             return from(

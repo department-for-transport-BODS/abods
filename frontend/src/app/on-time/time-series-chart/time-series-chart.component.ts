@@ -120,11 +120,11 @@ export class TimeSeriesChartComponent
 
           if (data?.length === 1) {
             // If we only have one data point we need to push another hour to fix x-axis bug (ABOD-865)
-            data.push(<TimeSeriesData>{
+            data.push({
               ts: DateTime.fromISO(data[0].ts)
                 .plus({ hour: 1 })
                 .toISO({ suppressMilliseconds: true }),
-            });
+            } as TimeSeriesData);
           }
 
           this.chart.data = data ?? [];

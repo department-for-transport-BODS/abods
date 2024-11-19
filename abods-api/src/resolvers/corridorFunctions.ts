@@ -145,10 +145,10 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
   async (_, args, context): Promise<StopType[]> => {
     const user = await requireUserSession(context);
 
-    let stopList = args.stopList || [];
+    const stopList = args.stopList || [];
 
     stopList.push(""); // Push blank to add comma at the end
-    let stopsPattern = stopList.join(",");
+    const stopsPattern = stopList.join(",");
     const [routes, adminAreas] = await Promise.all([
       distinctRoutes(context.db, stopsPattern),
       getOrgAdminAreas(context.db, user),
@@ -211,7 +211,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   context,
 ): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
-  if (!args.payload || !args.payload.name || !args.payload.stopIds)
+  if (!args.payload?.name || !args.payload.stopIds)
     throw "Bad Request";
   if (!user.orgIds[0]) throw "Invalid session data";
 
@@ -239,7 +239,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
 };
 
 const insertCorridorStops = async (
-  corridor_id: Number,
+  corridor_id: number,
   stopIds: string[],
   db: PrismaClient,
   sessionUser: SessionUser,
@@ -366,10 +366,10 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
   };
 };
 
-type StatsCache = {
+interface StatsCache {
   inputs: CorridorStatsInputType;
   journeys: Map<string, Timetable[]>;
-};
+}
 
 export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,
@@ -385,7 +385,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  let results: Timetable[] = await context.db.timetable.findMany({
+  const results: Timetable[] = await context.db.timetable.findMany({
     where: {
       stop_id: {
         in: stopList.map(Number),
@@ -397,7 +397,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     },
   });
 
-  const journeyMap: Map<string, Timetable[]> = new Map();
+  const journeyMap = new Map<string, Timetable[]>();
   let mapKey = "";
   let existingJourneys: Timetable[] = [];
   results.map((journey) => {
@@ -424,12 +424,12 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   const services = new Set();
   [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
-    let firstDeparture = getJourneyDeparture(
+    const firstDeparture = getJourneyDeparture(
       journeys[0],
       data.inputs.estimated,
     );
 
-    let lastDeparture = getJourneyDeparture(
+    const lastDeparture = getJourneyDeparture(
       journeys[journeys.length - 1],
       data.inputs.estimated,
     );
@@ -526,7 +526,7 @@ const getJourneyStats = (
     );
 
     if (firstStopDeparture && lastDeparture) {
-      let dateKey: string = "";
+      let dateKey = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
           dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
@@ -607,7 +607,7 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
       );
       // noc_line_and_servicecode
       const service = `${firstDeparture.operator_noc}-${firstDeparture.line_name}-${firstDeparture.service_code}`;
-      let journeyTime = journeyStats.get(service) || {
+      const journeyTime = journeyStats.get(service) || {
         totalJourneyTime: 0,
         recordedTransits: 0,
         scheduledTransits: 0,

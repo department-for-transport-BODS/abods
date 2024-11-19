@@ -32,11 +32,11 @@ import {
   nonNullOrUndefined,
 } from "../shared/rxjs-operators";
 
-export type IPunctualityType = {
+export interface IPunctualityType {
   early?: Maybe<Scalars["Int"]["output"]>;
   late?: Maybe<Scalars["Int"]["output"]>;
   onTime?: Maybe<Scalars["Int"]["output"]>;
-};
+}
 
 export type PerformanceParams = Omit<PerformanceInputType, "filters"> & {
   filters: PerformanceFiltersInputType;
@@ -295,7 +295,7 @@ export class OnTimeService {
         }));
         return [value, ...filler, ahead, ...acc];
       },
-      [init.pop() as DelayFrequencyType],
+      [init.pop()!],
     );
   }
 

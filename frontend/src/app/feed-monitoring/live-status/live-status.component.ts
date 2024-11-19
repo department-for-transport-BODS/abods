@@ -80,7 +80,7 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
           )?.operatorId;
         }),
         switchMap(() => {
-          return this.fmService.fetchOperator(this.operatorId as string);
+          return this.fmService.fetchOperator(this.operatorId!);
         }),
         catchError(() => {
           this.chartsErrored = true;

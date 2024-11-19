@@ -219,8 +219,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     const summary = this.stats?.summaryStats;
     return isNotNullOrUndefined(summary?.scheduledTransits) &&
       isNotNullOrUndefined(summary?.totalTransits)
-      ? (summary?.scheduledTransits as number) -
-          (summary?.totalTransits as number)
+      ? (summary?.scheduledTransits!) -
+          (summary?.totalTransits!)
       : undefined;
   }
 
@@ -232,7 +232,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const view: CorridorNotFoundView | Corridor =
-      this.route.snapshot.data["corridor"];
+      this.route.snapshot.data.corridor;
     view instanceof CorridorNotFoundView
       ? (this.errorView = view)
       : (this.corridor = view);
@@ -251,7 +251,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
               from,
               to,
               this.corridor?.id?.toString() ?? "",
-              stops.length ? stops : (this.corridor?.stops as CorridorStop[]),
+              stops.length ? stops : (this.corridor?.stops!),
               toggle,
             ),
           ),
@@ -273,7 +273,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             params,
           );
           this.corridorLine = featureCollection(
-            pairwise((this.corridor as Corridor).stops).map((segment) => {
+            pairwise((this.corridor!).stops).map((segment) => {
               const line = this.setCoordinates(segment);
               return lineString(line, {
                 segmentId: segment[0].stopId + segment[1].stopId,
@@ -282,7 +282,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             }),
           );
           this.corridorStops = featureCollection(
-            (this.corridor as Corridor).stops.map((stop) =>
+            (this.corridor!).stops.map((stop) =>
               point(position(stop), stop),
             ),
           );
@@ -342,7 +342,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     }
     this.selectedSegment = segment;
     this.setMapSelectedState(segment);
-    this.setMapBoundsToSegment(segment as [CorridorStop, CorridorStop]);
+    this.setMapBoundsToSegment(segment);
   }
 
   setMapSelectedState(segment: [CorridorStop, CorridorStop]) {

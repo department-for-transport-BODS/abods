@@ -21,7 +21,7 @@ export class StatComponent<T> implements AfterViewInit {
   @Input() statFormatter?: (t: T) => string;
 
   format(): string {
-    return this.statFormatter?.call(this, this.statValue ?? <T>{}) ?? "";
+    return this.statFormatter?.call(this, this.statValue ?? ({} as T)) ?? "";
   }
 
   ngAfterViewInit(): void {

@@ -91,10 +91,10 @@ export class ControlsComponent
 
     if (queryParams.get("from") && queryParams.get("to")) {
       from = DateTime.fromFormat(
-        queryParams.get("from") as string,
+        queryParams.get("from")!,
         "yyyy-MM-dd",
       ).toLocal();
-      to = DateTime.fromFormat(queryParams.get("to") as string, "yyyy-MM-dd")
+      to = DateTime.fromFormat(queryParams.get("to")!, "yyyy-MM-dd")
         .toLocal()
         .plus({ days: 1 }); // date range is exclusive on the to date
       preset = Preset.Custom;
@@ -157,11 +157,11 @@ export class ControlsComponent
     }
 
     if (queryParams.get("minDelay")) {
-      filters.minDelay = parseInt(queryParams.get("minDelay") as string);
+      filters.minDelay = parseInt(queryParams.get("minDelay")!);
     }
 
     if (queryParams.get("maxDelay")) {
-      filters.maxDelay = parseInt(queryParams.get("maxDelay") as string);
+      filters.maxDelay = parseInt(queryParams.get("maxDelay")!);
     }
 
     if (queryParams.has("timingPointsOnly")) {
@@ -221,10 +221,10 @@ export class ControlsComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes["operatorId"] && changes["operatorId"].currentValue) {
+    if (changes.operatorId?.currentValue) {
       this.filtersSubject.next({
         ...this.filtersSubject.value,
-        operatorIds: [changes["operatorId"].currentValue],
+        operatorIds: [changes.operatorId.currentValue],
       });
     }
   }

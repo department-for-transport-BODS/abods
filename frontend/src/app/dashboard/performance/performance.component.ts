@@ -55,11 +55,7 @@ export class PerformanceComponent implements OnInit, OnDestroy, AfterViewInit {
 
   servicesLoaded = false;
 
-  stats:
-    | {
-        [key in PerformanceCategories]: number;
-      }
-    | null = null;
+  stats: Record<PerformanceCategories, number> | null = null;
   loaded = false;
   errored = false;
 

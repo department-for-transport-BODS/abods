@@ -83,7 +83,7 @@ export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
         takeUntil(this.destroy$),
       )
       .subscribe((events) => {
-        this.events = (events as EventType[])
+        this.events = events!
           .map((event) => new AlertListViewModel(event, this.mode))
           .filter((x) => x.type)
           .sort((a, b) => a.compare(b));

@@ -16,10 +16,10 @@ export const hashApiKey = (key: string, hmacSecret: string): string => {
     .digest("base64");
 };
 
-type AuthResult = {
+interface AuthResult {
   isAuthenticated: boolean;
   message?: string;
-};
+}
 
 export const requireApiToken = (context: RequestContext): AuthResult => {
   if (!context.apiKeyAuth) {

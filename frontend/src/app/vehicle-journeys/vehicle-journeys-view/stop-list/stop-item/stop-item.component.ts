@@ -2,10 +2,10 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { DateTime } from "luxon";
 import { Stop } from "../../../../../generated/graphql";
 
-export type StopHoverEvent = {
+export interface StopHoverEvent {
   stop?: Stop;
   event: "enter" | "leave";
-};
+}
 
 @Component({
   selector: "app-stop-item",

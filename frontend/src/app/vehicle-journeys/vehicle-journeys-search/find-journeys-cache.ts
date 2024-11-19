@@ -5,10 +5,10 @@ const generateKey = (from: DateTime, to: DateTime, lineId: string) =>
   `${from.toISO()}-${to.toISO()}-${lineId}`;
 
 export class FindJourneysCache {
-  private findJourneysCache: Map<
+  private findJourneysCache = new Map<
     string,
     { journey: VehicleJourney[]; expires: DateTime }
-  > = new Map();
+  >();
 
   setItem(
     from: DateTime,

@@ -7,7 +7,7 @@ export const isDefined = <T>(value: Maybe<T>): value is T => {
 export const getDayOfWeekNumbers = (
   dayOfWeekFlags: DayOfWeekFlagsInputType,
 ): number[] => {
-  let dayOfWeekNumbers: number[] = [];
+  const dayOfWeekNumbers: number[] = [];
   if (dayOfWeekFlags.monday == true) dayOfWeekNumbers.push(1);
   if (dayOfWeekFlags.tuesday == true) dayOfWeekNumbers.push(2);
   if (dayOfWeekFlags.wednesday == true) dayOfWeekNumbers.push(3);

@@ -32,7 +32,7 @@ export interface AdminArea {
  * 9XX series area codes denote a national authority and not a geographical one
  */
 const isNonGeographicalAdminAreaId = (adminAreaId: string) =>
-  adminAreaId === "AA0" || adminAreaId.match(/AA9\d{2}/);
+  adminAreaId === "AA0" || /AA9\d{2}/.exec(adminAreaId);
 
 @Injectable({
   providedIn: "root",

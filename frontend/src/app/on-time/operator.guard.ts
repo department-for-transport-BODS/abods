@@ -20,7 +20,7 @@ export class OperatorGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> {
     return of(route.paramMap).pipe(
       filter((paramMap) => paramMap.has("nocCode")),
-      map((paramMap) => paramMap.get("nocCode") as string),
+      map((paramMap) => paramMap.get("nocCode")!),
       switchMap((nocCode) => this.operatorService.fetchOperator(nocCode)),
       map((operator) => {
         if (operator) {

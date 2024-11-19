@@ -28,11 +28,11 @@ export class AnalyticsService {
     return this.userService.authenticatedUser$.pipe(
       map(
         (user) =>
-          <AnalyticsUserProperties>{
+          ({
             abodUserId: user?.id,
             abodOrgId: user?.organisation?.id,
             abodOrgName: user?.organisation?.name,
-          },
+          }) as AnalyticsUserProperties,
       ),
     );
   }

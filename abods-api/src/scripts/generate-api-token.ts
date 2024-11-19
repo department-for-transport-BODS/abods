@@ -5,12 +5,12 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { hashApiKey } from "../lib/apiauth.js";
 
-const generateHmacSecret = (length: number = 64): string => {
+const generateHmacSecret = (length = 64): string => {
   const bytes = crypto.randomBytes(length);
   return bytes.toString("base64");
 };
 
-const generateApiKey = (length: number = 32): string => {
+const generateApiKey = (length = 32): string => {
   const bytes = crypto.randomBytes(length);
   return bytes.toString("base64");
 };

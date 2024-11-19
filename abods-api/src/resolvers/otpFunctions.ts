@@ -321,7 +321,7 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     lat: n.latitude!,
   }));
 
-  let result: ServicePatternType[] = [];
+  const result: ServicePatternType[] = [];
   for (const route of routes) {
     const stops = stopDetails.filter((s) => route.stopIds.includes(s.stopId));
     result.push({
@@ -355,7 +355,7 @@ export const getOperator: QueryResolvers["operator"] = async (
       throw "No operator found";
     }
 
-    let operatorPayload: OperatorType = {
+    const operatorPayload: OperatorType = {
       operatorId: operator.operatorref,
       name: operator.name,
       nocCode: operator.operatorref,
@@ -374,7 +374,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       const user = await requireUserSession(context);
 
       // start - performance timer
-      var startTimer = performance.now();
+      const startTimer = performance.now();
 
       const { filters } = args.inputs;
       const { lineIds, onTimeMaxMinutes, onTimeMinMinutes } = filters || {};
@@ -397,7 +397,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         .filter((o) => !!o);
 
       let results;
-      let prismaFilters = getPrismaFiltersForOTPQuery(
+      const prismaFilters = getPrismaFiltersForOTPQuery(
         args.inputs,
         userOperatorIds,
       );
@@ -428,7 +428,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       if (results?._sum) {
         //end - performance timer
-        var endTimer = performance.now();
+        const endTimer = performance.now();
 
         logger.debug(
           `Call to getPunctualityOverview took ${
@@ -459,9 +459,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       const user = await requireUserSession(context);
 
       // start - performance timer
-      var startTimer = performance.now();
+      const startTimer = performance.now();
 
-      let opPerformances: OperatorPerformanceType[] = [];
+      const opPerformances: OperatorPerformanceType[] = [];
 
       const { filters } = args.inputs;
       const { adminAreaIds } = filters || {};
@@ -502,7 +502,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           (o) => o.operator_noc == operators[i].nocCode,
         );
         if (operatorOtpStats && operatorOtpStats._sum) {
-          let totalOntime = operatorOtpStats._sum.on_time_count
+          const totalOntime = operatorOtpStats._sum.on_time_count
               ? operatorOtpStats._sum.on_time_count
               : 0,
             totalEarly = operatorOtpStats._sum.early_count
@@ -518,7 +518,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? operatorOtpStats._sum.completed
               : 0;
 
-          let opPerformance: OperatorPerformanceType = {
+          const opPerformance: OperatorPerformanceType = {
             nocCode: operators[i].nocCode,
             operatorId: operators[i].nocCode,
             name: operators[i].name,
@@ -533,7 +533,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         }
       }
 
-      var ret = {
+      const ret = {
         items: opPerformances,
         pageInfo: {
           next: opPerformances.length,
@@ -542,7 +542,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       };
 
       //end - performance timer
-      var endTimer = performance.now();
+      const endTimer = performance.now();
       logger.debug(
         `Call to getOperatorPerformance took ${
           endTimer - startTimer
@@ -1066,7 +1066,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
       operatorIds = operatorIds || [];
       lineIds = lineIds || [];
 
-      let stopPerformances: StopPerformanceType[] = [];
+      const stopPerformances: StopPerformanceType[] = [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -1181,7 +1181,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
     try {
       const user = await requireUserSession(context);
 
-      let servicePunctualities: ServicePerformanceType[] = [];
+      const servicePunctualities: ServicePerformanceType[] = [];
 
       const { filters } = args.inputs;
       let { operatorIds } = filters || {};
@@ -1463,14 +1463,15 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         },
       });
 
-      let headwayMap: {
-        [key: string]: {
+      const headwayMap: Record<
+        string,
+        {
           actual_headway: number;
           expected_headway: number;
           excess_wait_time: number;
           headway_stops_count: number;
-        };
-      } = {};
+        }
+      > = {};
 
       results.map((result) => {
         if (result.departure_hour) {
@@ -1622,22 +1623,22 @@ const getPrismaFiltersForOTPQuery = (
     nocListToFilter = userOperatorNocList;
   }
 
-  let dayOfWeekNumbers: Number[] = [];
+  let dayOfWeekNumbers: number[] = [];
   if (dayOfWeekFlags) {
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
   // parse startime and endtime minutes/hours
-  let start = new Date();
-  let end = new Date();
+  const start = new Date();
+  const end = new Date();
 
   // date_of_journey - add an hour to from timestamp to prevent single day condition issues
-  let fromMlSeconds = new Date(fromTimestamp).getTime();
-  var addMlSeconds = 60 * 60 * 1000;
-  var dateOfJourneyFromDateTime = getDate(
+  const fromMlSeconds = new Date(fromTimestamp).getTime();
+  const addMlSeconds = 60 * 60 * 1000;
+  let dateOfJourneyFromDateTime = getDate(
     new Date(fromMlSeconds + addMlSeconds),
   ).tz("Europe/London");
-  var dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
+  let dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
     "Europe/London",
   );
 
@@ -1674,9 +1675,7 @@ const getPrismaFiltersForOTPQuery = (
       lte: new Date(toTimestamp),
     },
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
-    ...(dayOfWeekFlags
-      ? { day_of_week: { in: dayOfWeekNumbers as number[] } }
-      : {}),
+    ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
     ...(startTime && endTime
       ? isThreshold
         ? {

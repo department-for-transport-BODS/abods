@@ -76,11 +76,10 @@ export class DynamicPanelComponentLoaderService implements OnDestroy {
       input.value
         .pipe(takeUntil(this.destroy$))
         .subscribe(
-          (value: any) =>
-            ((<any>this.componentRef.instance)[input.name] = value),
+          (value: any) => (this.componentRef.instance[input.name] = value),
         );
     } else {
-      (<any>this.componentRef.instance)[input.name] = input.value;
+      this.componentRef.instance[input.name] = input.value;
     }
   }
 
@@ -91,7 +90,7 @@ export class DynamicPanelComponentLoaderService implements OnDestroy {
   }
 
   private setOutput(output: ComponentOutput) {
-    (<any>this.componentRef.instance)[output.name]
+    this.componentRef.instance[output.name]
       .pipe(takeUntil(this.destroy$))
       .subscribe(($event: any) => output.outputEvent($event));
   }

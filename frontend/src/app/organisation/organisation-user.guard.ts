@@ -20,7 +20,7 @@ export class OrganisationUserGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> {
     return of(route.paramMap).pipe(
       filter((paramMap) => paramMap.has("email")),
-      map((paramMap) => paramMap.get("email") as string),
+      map((paramMap) => paramMap.get("email")!),
       switchMap((email) => this.organisationService.fetchUser(email)),
       map((user) => {
         if (user) {

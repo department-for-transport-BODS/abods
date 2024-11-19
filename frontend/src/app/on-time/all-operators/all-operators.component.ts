@@ -26,7 +26,7 @@ export class AllOperatorsComponent implements OnInit, OnDestroy {
       map((areas) =>
         areas.map(
           (area) =>
-            <MultiselectCheckboxOption>{ label: area.name, value: area.id },
+            ({ label: area.name, value: area.id }) as MultiselectCheckboxOption,
         ),
       ),
     );

@@ -236,9 +236,9 @@ export class FeedMonitoringComponent
     (c) => this.allColumns.find(({ colId }) => c === colId) as ColDef,
   );
 
-  rawActiveOperators: Array<BasicOperatorFragment> = [];
-  filteredActiveOperators: Array<BasicOperatorFragment> = [];
-  inactiveOperators: Array<BasicOperatorFragment> = [];
+  rawActiveOperators: BasicOperatorFragment[] = [];
+  filteredActiveOperators: BasicOperatorFragment[] = [];
+  inactiveOperators: BasicOperatorFragment[] = [];
 
   sparklineStats: {
     operatorId?: string | null;

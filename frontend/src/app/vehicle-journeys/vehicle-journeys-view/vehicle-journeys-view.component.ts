@@ -20,7 +20,7 @@ import { DateTime } from "luxon";
 import { AvlPoint, AvlsGQL, RouteGQL, Stop } from "../../../generated/graphql";
 import { distinctUntilChanged } from "rxjs/operators";
 
-export type JourneyInfo = { stops: Stop[]; avls: AvlPoint[] };
+export interface JourneyInfo { stops: Stop[]; avls: AvlPoint[] }
 
 @Component({
   selector: "app-vehicle-journeys-view",
@@ -62,14 +62,14 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const groupId$ = this.route.paramMap.pipe(
       takeUntil(this.onDestroy$),
-      map((params) => params.get("journeyId") as string),
+      map((params) => params.get("journeyId")!),
     );
     groupId$.subscribe((groupId) => (this.groupId = groupId));
 
     this.route.queryParamMap
       .pipe(takeUntil(this.onDestroy$))
       .subscribe((params) => {
-        this.startTime = DateTime.fromISO(params.get("startTime") as string);
+        this.startTime = DateTime.fromISO(params.get("startTime")!);
         this.returnQueryParams = {
           date: this.startTime
             .startOf("day")
@@ -88,7 +88,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
     const startTime$ = this.route.queryParamMap.pipe(
       map((params) =>
-        DateTime.fromISO(params.get("startTime") as string)
+        DateTime.fromISO(params.get("startTime")!)
           .setZone("Europe/London")
           .startOf("day"),
       ),

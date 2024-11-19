@@ -11,7 +11,7 @@ import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map } from "rxjs/operators";
 import { entries as _entries } from "lodash-es";
 
-export type DayOfWeekLabel = {
+export interface DayOfWeekLabel {
   monday: "Mon";
   tuesday: "Tue";
   wednesday: "Wed";
@@ -19,7 +19,7 @@ export type DayOfWeekLabel = {
   friday: "Fri";
   saturday: "Sat";
   sunday: "Sun";
-};
+}
 
 @Component({
   selector: "app-filter-chips",

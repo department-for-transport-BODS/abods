@@ -2,10 +2,10 @@ import express from "express";
 import { IncomingHttpHeaders } from "http";
 import { PrismaClient } from "@prisma/client";
 
-export type AuthContext = {
+export interface AuthContext {
   allowedTokenHash: string;
   Hmac: string;
-};
+}
 
 export interface RequestContext {
   req: express.Request;

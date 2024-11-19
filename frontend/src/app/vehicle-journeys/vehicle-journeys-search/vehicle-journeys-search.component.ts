@@ -197,19 +197,19 @@ export class VehicleJourneysSearchComponent
 
     const service$ = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get("service") as string),
+      map((queryParams) => queryParams.get("service")!),
       takeUntil(this.destroy$),
     );
 
     const date$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get("date") as string),
+      map((queryParams) => queryParams.get("date")!),
       takeUntil(this.destroy$),
     );
 
     const operator$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get("operator") as string),
+      map((queryParams) => queryParams.get("operator")!),
       takeUntil(this.destroy$),
     );
     operator$.subscribe((operator) => this.operator.setValue(operator));

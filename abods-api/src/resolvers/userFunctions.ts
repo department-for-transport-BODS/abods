@@ -394,7 +394,7 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    var alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
+    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if (!alert) {
       throw new Error("Alert not found");
@@ -436,7 +436,7 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    var alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
+    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if (alert) {
       await context.db.alert.delete({ where: { id: args.alertId } });

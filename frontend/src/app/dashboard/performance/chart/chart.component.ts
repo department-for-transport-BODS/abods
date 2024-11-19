@@ -24,23 +24,23 @@ export class PerformanceChartComponent
   implements AfterViewInit, OnDestroy, OnChanges
 {
   @Input() nocCode?: string | null;
-  @Input() sourceData: { [key in PerformanceCategories]: number } | null = null;
+  @Input() sourceData: Record<PerformanceCategories, number> | null = null;
 
   chartData?: { category: PerformanceCategories; value: string }[];
 
-  private legendLabels: { [key in PerformanceCategories]: string } = {
+  private legendLabels: Record<PerformanceCategories, string> = {
     [PerformanceCategories.OnTime]: "On-Time",
     [PerformanceCategories.Late]: "Late",
     [PerformanceCategories.Early]: "Early",
   };
 
-  private legendHints: { [key in PerformanceCategories]: string } = {
+  private legendHints: Record<PerformanceCategories, string> = {
     [PerformanceCategories.OnTime]: "",
     [PerformanceCategories.Late]: "(> 5:59 minutes)",
     [PerformanceCategories.Early]: "(> 1 minute)",
   };
 
-  categoryColours: { [key in PerformanceCategories]: am4core.Color } = {
+  categoryColours: Record<PerformanceCategories, am4core.Color> = {
     [PerformanceCategories.OnTime]: this.chartService.colorMap.purple,
     [PerformanceCategories.Late]: this.chartService.colorMap.ochre,
     [PerformanceCategories.Early]: this.chartService.colorMap.pink,
@@ -69,7 +69,7 @@ export class PerformanceChartComponent
     }
   }
 
-  transformData(source?: { [key in PerformanceCategories]: number }) {
+  transformData(source?: Record<PerformanceCategories, number>) {
     const total =
       (source?.early ?? 0) + (source?.onTime ?? 0) + (source?.late ?? 0);
     return this.columnOrdering.map((category) => {

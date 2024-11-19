@@ -8,7 +8,7 @@ export class PasswordValidator {
     "contain at least one special character",
   ];
 
-  static getErrorText(errors: { [key: string]: boolean }): string | undefined {
+  static getErrorText(errors: Record<string, boolean>): string | undefined {
     if (errors.minlength) {
       return "Password must be at least 8 characters long.";
     }

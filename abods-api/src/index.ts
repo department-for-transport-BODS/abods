@@ -17,7 +17,7 @@ import { getAPITokenHash } from "./lib/apiauth.js";
 
 let db = await createContext();
 let startTime = getDate();
-let apiKeyAuth = await getAPITokenHash();
+const apiKeyAuth = await getAPITokenHash();
 
 const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
@@ -28,7 +28,7 @@ const server = new ApolloServer<RequestContext>({
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
-const corsOrigin = process.env["CORS_ORIGIN"];
+const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
