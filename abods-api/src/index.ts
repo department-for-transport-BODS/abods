@@ -19,7 +19,7 @@ import { IncomingHttpHeaders } from "http";
 import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
-import { getDatabaseUrl } from "./prismaClient.js";
+import { getDatabaseUrl, isLocal } from "./prismaClient.js";
 
 export const kysley = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -27,6 +27,18 @@ export const kysley = new Kysely<DB>({
       connectionString: await getDatabaseUrl(),
     }),
   }),
+  log(event) {
+    if (event.level === "query") {
+      logger.debug(event.query.sql);
+      // Don't log query parameters for now in case there's anything sensitive. Local is fine though
+      if (isLocal()) {
+        logger.debug(event.query.parameters);
+      }
+    }
+    if (event.level === "error") {
+      logger.error(event.error);
+    }
+  },
 });
 
 let db = await createContext();
