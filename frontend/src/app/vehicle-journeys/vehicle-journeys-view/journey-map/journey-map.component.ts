@@ -104,7 +104,7 @@ export class JourneyMapComponent implements OnChanges {
       this.enableScaleControl = true;
     }
 
-    if (changes.stops?.currentValue && changes.avls?.currentValue) {
+    if (changes.stopList?.currentValue && changes.avls?.currentValue) {
       this.updateView(changes.stopList.currentValue, changes.avls.currentValue);
     }
     if (this.map && changes.selectedStop && changes.selectedStop.currentValue) {
