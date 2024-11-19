@@ -35,6 +35,9 @@ jobs:
         with:
           node-version: 18
 
+      - name: install and generate code
+        run: npm install && npm prune --production
+
       - name: setup sam
         uses: aws-actions/setup-sam@v2
         with:
