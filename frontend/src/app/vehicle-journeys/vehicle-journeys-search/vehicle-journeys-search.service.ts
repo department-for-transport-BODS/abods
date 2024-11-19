@@ -21,15 +21,16 @@ export class VehicleJourneysSearchService {
   constructor(private journeysGQL: JourneysGQL) {}
 
   fetchDayJourneys(
-    today: DateTime,
+    date: DateTime,
     lineId: string,
   ): Observable<VehicleJourney[]> {
     // filterOnStartTime is set to true so we filter on start times directly,
     // rather than on gps_time which is the default behaviour.
-    const tomorrow = today.plus({ day: 1 });
+    const from = date.startOf("day");
+    const to = from.plus({ day: 1 });
 
     // Return cached result if available
-    const cached = this.findJourneysCache.getItem(today, tomorrow, lineId);
+    const cached = this.findJourneysCache.getItem(from, to, lineId);
     if (cached) {
       return of(cached);
     }
@@ -37,8 +38,8 @@ export class VehicleJourneysSearchService {
     return this.journeysGQL
       .fetch(
         {
-          fromTimestamp: today.toISO(),
-          toTimestamp: tomorrow.toISO(),
+          fromTimestamp: from.toISO(),
+          toTimestamp: to.toISO(),
           lineId,
           filterOnStartTime: true,
         },
@@ -59,7 +60,7 @@ export class VehicleJourneysSearchService {
         ),
         tap((journeys) => {
           // Cache the result for use on vehicle journey view page
-          this.findJourneysCache.setItem(today, tomorrow, lineId, journeys);
+          this.findJourneysCache.setItem(from, to, lineId, journeys);
         }),
       );
   }
