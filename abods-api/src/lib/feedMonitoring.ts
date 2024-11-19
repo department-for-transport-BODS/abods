@@ -63,7 +63,7 @@ export const getVehicleCounts = (
     .groupBy("sq.operator_noc")
     .select(({ fn, eb }) => [
       "sq.operator_noc as operatorId",
-      eb.eb.cast<number>(fn.countAll(), "integer").as("expected"),
+      eb.cast<number>(fn.countAll(), "integer").as("expected"),
       eb
         .cast<number>(
           fn.count(eb.case().when("sq.cur", "=", true).then(1).end()),
