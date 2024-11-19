@@ -23,7 +23,6 @@ build-lambda-common: cmd-exists-npm
 	npm install --omit=dev
 	rm -rf dist
 	printf "{\"extends\": \"./tsconfig.json\", \"include\": [\"${HANDLER}\"] }" > tsconfig-only-handler.json
-	npm run prisma:generate
 	npm run build -- --build tsconfig-only-handler.json
 
 copy-build-artefacts:
