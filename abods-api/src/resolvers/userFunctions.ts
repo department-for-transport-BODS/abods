@@ -372,7 +372,7 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       error: error.message,
       success: false,
@@ -416,7 +416,7 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       error: error.message,
       success: false,
@@ -448,7 +448,7 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       error: null,
       success: true,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       error: error.message,
       success: false,

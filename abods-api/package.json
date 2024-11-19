@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.23",
+    "@types/cors": "^2.8.17",
     "@types/ioredis": "^5.0.0",
     "@types/node": "^20.12.5",
     "@types/uuid": "^10.0.0",
