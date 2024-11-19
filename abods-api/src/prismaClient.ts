@@ -4,8 +4,7 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import logger from "./logger.js";
 
 const isLocal = (process.env.PROJECT_ENV || "local") === "local";
-const allowDBQuery =
-  isLocal && (process.env.SUPPRESS_DB_QUERY || "false") === "true";
+const allowDBQuery = true;
 
 async function generateRdsIamToken(
   region: string,

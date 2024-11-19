@@ -255,6 +255,13 @@ export type CorridorUpdateInputType = {
   stopList: Array<Scalars['String']['input']>;
 };
 
+export type DashboardVehicles = {
+  __typename?: 'DashboardVehicles';
+  actual: Scalars['Int']['output'];
+  expected: Scalars['Int']['output'];
+  operatorId: Scalars['String']['output'];
+};
+
 export type DayOfWeekFlagsInputType = {
   friday: Scalars['Boolean']['input'];
   monday: Scalars['Boolean']['input'];
@@ -860,6 +867,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
+  dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
@@ -885,6 +893,11 @@ export type QueryAvlLineLevelStatusArgs = {
 
 export type QueryAvlsArgs = {
   groupId: Scalars['String']['input'];
+};
+
+
+export type QueryDashboardVehiclesArgs = {
+  operatorId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1167,8 +1180,8 @@ export type VehicleReplayNamespaceFindJourneysArgs = {
 
 export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
-  actual?: Maybe<Scalars['Int']['output']>;
-  expected?: Maybe<Scalars['Int']['output']>;
+  actual: Scalars['Int']['output'];
+  expected: Scalars['Int']['output'];
   timestamp: Scalars['DateTime']['output'];
 };
 
@@ -1271,6 +1284,7 @@ export type ResolversTypes = ResolversObject<{
   CorridorSummaryStatsType: ResolverTypeWrapper<Partial<CorridorSummaryStatsType>>;
   CorridorType: ResolverTypeWrapper<Partial<CorridorType>>;
   CorridorUpdateInputType: ResolverTypeWrapper<Partial<CorridorUpdateInputType>>;
+  DashboardVehicles: ResolverTypeWrapper<Partial<DashboardVehicles>>;
   Date: ResolverTypeWrapper<Partial<Scalars['Date']['output']>>;
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
@@ -1391,6 +1405,7 @@ export type ResolversParentTypes = ResolversObject<{
   CorridorSummaryStatsType: Partial<CorridorSummaryStatsType>;
   CorridorType: Partial<CorridorType>;
   CorridorUpdateInputType: Partial<CorridorUpdateInputType>;
+  DashboardVehicles: Partial<DashboardVehicles>;
   Date: Partial<Scalars['Date']['output']>;
   DateTime: Partial<Scalars['DateTime']['output']>;
   DayOfWeekFlagsInputType: Partial<DayOfWeekFlagsInputType>;
@@ -1613,6 +1628,13 @@ export type CorridorTypeResolvers<ContextType = RequestContext, ParentType exten
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   organisation?: Resolver<Maybe<ResolversTypes['OrganisationType']>, ParentType, ContextType>;
   stops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopInfoType']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type DashboardVehiclesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DashboardVehicles'] = ResolversParentTypes['DashboardVehicles']> = ResolversObject<{
+  actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1925,6 +1947,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
+  dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
@@ -2094,8 +2117,8 @@ export type VehicleReplayNamespaceResolvers<ContextType = RequestContext, Parent
 }>;
 
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
-  actual?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  expected?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -2117,6 +2140,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   CorridorStatsType?: CorridorStatsTypeResolvers<ContextType>;
   CorridorSummaryStatsType?: CorridorSummaryStatsTypeResolvers<ContextType>;
   CorridorType?: CorridorTypeResolvers<ContextType>;
+  DashboardVehicles?: DashboardVehiclesResolvers<ContextType>;
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DelayFrequencyType?: DelayFrequencyTypeResolvers<ContextType>;
