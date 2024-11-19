@@ -1,7 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { DateTime } from "luxon";
-import { AvlPoint } from "../../../../generated/graphql";
-import { StopDetails } from "../vehicle-journeys-view.component";
+import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 @Component({
   selector: "app-journey-info",
@@ -10,28 +9,27 @@ import { StopDetails } from "../vehicle-journeys-view.component";
 })
 export class JourneyInfoComponent {
   @Input() loading?: boolean;
-  @Input() stops: StopDetails[] = [];
-  @Input() avls: AvlPoint[] = [];
+  @Input() journeyInfo?: JourneyInfo | null;
 
   get operatorName(): string {
-    return this.stops[0]?.operatorName ?? "";
+    return this.journeyInfo?.stops[0]?.operatorName ?? "";
   }
 
   get operatorNocCode(): string {
-    return this.stops[0]?.operatorNoc ?? "";
+    return this.journeyInfo?.stops[0]?.operatorNoc ?? "";
   }
 
   get servicePatternName(): string {
-    return this.stops[0]?.serviceName ?? "";
+    return this.journeyInfo?.stops[0]?.serviceName ?? "";
   }
 
   get startTime(): DateTime | undefined {
-    return this.stops[0]
-      ? DateTime.fromISO(this.stops[0].startTime)
+    return this.journeyInfo?.stops[0]
+      ? DateTime.fromISO(this.journeyInfo?.stops[0].startTime)
       : undefined;
   }
 
   get vehicleId(): string {
-    return this.avls[0]?.vehicleRef ?? "Unknown";
+    return this.journeyInfo?.avls[0]?.vehicleRef ?? "Unknown";
   }
 }

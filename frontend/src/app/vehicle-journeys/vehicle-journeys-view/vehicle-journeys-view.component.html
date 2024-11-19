@@ -9,15 +9,18 @@
   <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
       <app-page-header
-        *ngIf="!routeLoading; else skeletonHeader"
+        *ngIf="!journeyInfoLoading; else skeletonHeader"
         caption="Vehicle journeys"
-        [heading]="journeyTitle"
+        [heading]="
+          (journeyInfo?.stops?.[0]?.lineName ?? '') +
+          ': ' +
+          (journeyInfo?.stops?.[0]?.serviceName ?? '')
+        "
       ></app-page-header>
       <div class="vehicle-journeys__header-container">
         <app-journey-info
-          [avls]="avls"
-          [stops]="stops"
-          [loading]="routeLoading || avlsLoading"
+          [journeyInfo]="journeyInfo"
+          [loading]="journeyInfoLoading"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle
@@ -56,7 +59,7 @@
           </app-segmented-toggle>
           <app-journey-nav
             [journeys]="journeys"
-            [loading]="journeysLoading"
+            [loading]="journeyInfoLoading || journeysLoading"
             [startTime]="startTime"
             [journeyId]="groupId"
           ></app-journey-nav>
@@ -64,25 +67,27 @@
       </div>
       <div class="vehicle-journeys__stop-map-grid">
         <app-stop-list
-          [stopList]="stops"
+          [view]="journeyInfo"
           [timingPointsOnly]="timingPointsOption === 'timing-points'"
-          [loading]="routeLoading"
+          [estimated]="estimated === 'true'"
+          [loading]="journeyInfoLoading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"
         ></app-stop-list>
         <div>
           <div class="vehicle-journeys__sticky-container">
             <app-otp-stats
-              [stopList]="stops"
-              [loading]="routeLoading"
+              [view]="journeyInfo"
+              [loading]="journeyInfoLoading"
+              [estimated]="estimated === 'true'"
               [timingPointsOnly]="timingPointsOption === 'timing-points'"
             ></app-otp-stats>
             <app-journey-map
-              [stopList]="stops"
-              [avls]="avls"
+              [view]="journeyInfo"
+              [estimated]="estimated === 'true'"
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
-              [loading]="avlsLoading"
+              [loading]="journeyInfoLoading"
             ></app-journey-map>
           </div>
         </div>

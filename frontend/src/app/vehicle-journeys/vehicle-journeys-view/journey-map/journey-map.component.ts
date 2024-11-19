@@ -17,13 +17,24 @@ import {
 } from "../../../shared/geo";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
 import { ConfigService } from "../../../config/config.service";
-import { AvlPoint, OtpEnum } from "../../../../generated/graphql";
+import { AvlPoint, OtpEnum, Stop } from "../../../../generated/graphql";
 import { DateTime } from "luxon";
-import { StopDetails } from "../vehicle-journeys-view.component";
+import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
 
-export const createVehiclePing = (ping: AvlPoint, otp: OtpEnum | null) => ({
+export const createStopModel = (stop: Stop, estimated: boolean) => ({
+  id: stop.stopId.toString(),
+  stopName: stop.stopName,
+  isTimingPoint: stop.isTimingPoint,
+  lat: stop.latitude,
+  lon: stop.longitude,
+  onTimePerformance:
+    !estimated && stop.estimatedDepartureUtc ? null : stop.otp ?? null,
+});
+export type VehiclePingStop = ReturnType<typeof createStopModel>;
+
+const createVehiclePing = (ping: AvlPoint, otp: OtpEnum | null) => ({
   lat: ping.latitude,
   lon: ping.longitude,
   ts: ping.recordedAtTimeUtc,
@@ -52,11 +63,11 @@ const segmentToLine = (
 })
 export class JourneyMapComponent implements OnChanges {
   protected readonly DateTime = DateTime;
-  @Input() stopList?: StopDetails[];
-  @Input() avls?: AvlPoint[];
-  @Input() selectedStop?: StopDetails;
+  @Input() view: JourneyInfo | null = null;
+  @Input() selectedStop?: Stop;
   @Input() hoveredStop?: StopHoverEvent;
   @Input() loading = false;
+  @Input() estimated = false;
 
   map!: Map;
   enableScaleControl = false;
@@ -65,12 +76,12 @@ export class JourneyMapComponent implements OnChanges {
   moveCounter = 0;
   cursorStyle = "";
 
-  stops?: FeatureCollection<Point, StopDetails>;
-  timingPoints?: FeatureCollection<Point, StopDetails>;
+  stops?: FeatureCollection<Point, VehiclePingStop>;
+  timingPoints?: FeatureCollection<Point, VehiclePingStop>;
   line?: FeatureCollection<LineString, LineSegmentProps>;
   pings?: FeatureCollection<Point, VehiclePing>;
 
-  tooltipStop?: StopDetails;
+  tooltipStop?: VehiclePingStop;
   tooltipPing?: VehiclePing;
 
   otp = ["get", "onTimePerformance"];
@@ -103,9 +114,9 @@ export class JourneyMapComponent implements OnChanges {
       );
       this.enableScaleControl = true;
     }
-
-    if (changes.stopList?.currentValue && changes.avls?.currentValue) {
-      this.updateView(changes.stopList.currentValue, changes.avls.currentValue);
+    const view = changes.view?.currentValue ?? this.view;
+    if (view && (changes.view || changes.estimated)) {
+      this.updateView(view, changes.estimated?.currentValue ?? this.estimated);
     }
     if (this.map && changes.selectedStop && changes.selectedStop.currentValue) {
       this.updateBoundsToSelectedStop(changes.selectedStop.currentValue);
@@ -125,23 +136,27 @@ export class JourneyMapComponent implements OnChanges {
     ]);
   }
 
-  private updateView(stopList: StopDetails[], avls: AvlPoint[]) {
+  private updateView(view: JourneyInfo, estimated: boolean) {
+    const models = view.stops.map((n) => createStopModel(n, estimated));
     this.stops = featureCollection(
-      stopList
+      models
         .filter((stop) => !stop.isTimingPoint)
         .map((stop) => point(position(stop), stop)),
     );
     this.timingPoints = featureCollection(
-      stopList
+      models
         .filter((stop) => stop.isTimingPoint)
         .map((stop) => point(position(stop), stop)),
     );
-    const pings = avls.map((ping) => {
-      const lastMatchedStop = stopList
+    const pings = view.avls.map((ping) => {
+      const lastMatchedStop = view.stops
         .filter(
           (s) =>
-            s.actualDepartureUtc &&
-            s.actualDepartureUtc <= ping.recordedAtTimeUtc,
+            (s.actualDepartureUtc &&
+              s.actualDepartureUtc <= ping.recordedAtTimeUtc) ||
+            (estimated &&
+              s.estimatedDepartureUtc &&
+              s.estimatedDepartureUtc <= ping.recordedAtTimeUtc),
         )
         .pop();
       return createVehiclePing(ping, lastMatchedStop?.otp ?? null);
@@ -156,15 +171,15 @@ export class JourneyMapComponent implements OnChanges {
     this.setJourneyBounds();
   }
 
-  private updateBoundsToSelectedStop(selectedStop: StopDetails) {
-    let selected: Feature<Point, StopDetails> | undefined;
+  private updateBoundsToSelectedStop(selectedStop: Stop) {
+    let selected: Feature<Point, VehiclePingStop> | undefined;
     if (selectedStop.isTimingPoint) {
       selected = this.timingPoints?.features.find(
-        (stop) => stop.properties.id === selectedStop.id,
+        (stop) => stop.properties.id === selectedStop.stopId.toString(),
       );
     } else {
       selected = this.stops?.features.find(
-        (stop) => stop.properties.id === selectedStop.id,
+        (stop) => stop.properties.id === selectedStop.stopId.toString(),
       );
     }
     if (selected) {
@@ -183,14 +198,14 @@ export class JourneyMapComponent implements OnChanges {
     }
   }
 
-  onStopMouseEnter(stop?: StopDetails | GeoJsonProperties) {
+  onStopMouseEnter(stop?: VehiclePingStop | GeoJsonProperties) {
     this.cursorStyle = "pointer";
     if (!stop) {
       return;
     }
-    this.tooltipStop = stop as StopDetails | undefined;
+    this.tooltipStop = stop as VehiclePingStop;
     this.map.setFeatureState(
-      { source: "journey-stops", id: this.tooltipStop?.id },
+      { source: "journey-stops", id: this.tooltipStop.id },
       { hover: true },
     );
   }
@@ -201,7 +216,7 @@ export class JourneyMapComponent implements OnChanges {
       return;
     }
     this.map.removeFeatureState(
-      { source: "journey-stops", id: this.tooltipStop?.id },
+      { source: "journey-stops", id: this.tooltipStop.id },
       "hover",
     );
     this.tooltipStop = undefined;
@@ -235,6 +250,4 @@ export class JourneyMapComponent implements OnChanges {
     this.moveCounter = 0;
     this.setJourneyBounds();
   }
-
-  protected readonly stop = stop;
 }

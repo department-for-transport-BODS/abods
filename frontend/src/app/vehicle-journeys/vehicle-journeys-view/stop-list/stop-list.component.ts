@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { isNotNullOrUndefined } from "../../../shared/rxjs-operators";
 import { StopHoverEvent } from "./stop-item/stop-item.component";
-import { StopDetails } from "../vehicle-journeys-view.component";
+import { Stop } from "../../../../generated/graphql";
+import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 @Component({
   selector: "app-stop-list",
@@ -9,13 +9,14 @@ import { StopDetails } from "../vehicle-journeys-view.component";
   styleUrls: ["./stop-list.component.scss"],
 })
 export class StopListComponent {
-  @Input() stopList?: StopDetails[];
+  @Input() view: JourneyInfo | null = null;
   @Input() timingPointsOnly = false;
   @Input() loading?: boolean;
-  @Output() stopSelected = new EventEmitter<StopDetails>();
+  @Input() estimated = false;
+  @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
 
   get isStopList(): boolean {
-    return isNotNullOrUndefined(this.stopList) && this.stopList.length > 0;
+    return (this.view?.stops.length ?? 0) > 0;
   }
 }
