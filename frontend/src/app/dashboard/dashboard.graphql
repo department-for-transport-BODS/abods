@@ -11,17 +11,6 @@ fragment OperatorDashboard on OperatorType {
   }
 }
 
-fragment OperatorDashboardVehicleCounts on OperatorType {
-  nocCode
-  operatorId
-  feedMonitoring {
-    liveStats {
-      currentVehicles
-      expectedVehicles
-    }
-  }
-}
-
 query dashboardOperatorList {
   operators {
     items {
@@ -30,11 +19,11 @@ query dashboardOperatorList {
   }
 }
 
-query dashboardOperatorVehicleCountsList {
-  operators {
-    items {
-      ...OperatorDashboardVehicleCounts
-    }
+query dashboardOperatorVehicleCountsList($operatorId: String) {
+  dashboardVehicles(operatorId: $operatorId) {
+    operatorId
+    expected
+    actual
   }
 }
 

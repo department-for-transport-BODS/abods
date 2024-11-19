@@ -155,41 +155,42 @@ model SiriVMPositions {
 }
 
 model Timetable {
-  timetable_id            BigInt                   @default(autoincrement())
-  operator_noc            String
-  operator_name           String
-  service_code            String
-  line_name               String?
-  xml_file_name           String?
-  journey_code            String?
-  date_of_journey         DateTime                 @db.Date
-  day_of_week             Int?
-  common_name             String?
-  atco_code               String?
-  stop_type               String?
-  stop_index              Int // TODO: fix - nullable int in db
-  stop_latitude           Float?                   @db.Real
-  stop_longitude          Float?                   @db.Real
-  locality_id             String?
-  expected_departure_time DateTime?                @db.Timestamptz(6)
-  actual_departure_time   DateTime?                @db.Timestamptz(6)
-  is_timing_point         Boolean?
-  group_id                String?
-  previous_group_id       String?
-  otp_state               String?
-  expected_headway        Int?
-  actual_headway          Int?
-  headway_time_difference Int?
-  siri_vm_position_id     BigInt?
-  time_difference         Int?
-  stop_id                 Int // TODO: fix - nullable bigint in db
-  load_time_stamp         DateTime?                @default(now()) @db.Timestamp(6)
-  off_set                 Int?
-  servicepattern_id       Int?
-  vehiclejourney_id       Int?
-  admin_area_id           Int?
-  expected_journeys       expected_journeys?       @relation(fields: [group_id], references: [group_id])
-  stops                   naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
+  timetable_id             BigInt                   @default(autoincrement())
+  operator_noc             String
+  operator_name            String
+  service_code             String
+  line_name                String?
+  xml_file_name            String?
+  journey_code             String?
+  date_of_journey          DateTime                 @db.Date
+  day_of_week              Int?
+  common_name              String?
+  atco_code                String?
+  stop_type                String?
+  stop_index               Int // TODO: fix - nullable int in db
+  stop_latitude            Float?                   @db.Real
+  stop_longitude           Float?                   @db.Real
+  locality_id              String?
+  expected_departure_time  DateTime?                @db.Timestamptz(6)
+  actual_departure_time    DateTime?                @db.Timestamptz(6)
+  is_timing_point          Boolean?
+  group_id                 String?
+  previous_group_id        String?
+  otp_state                String?
+  expected_headway         Int?
+  actual_headway           Int?
+  headway_time_difference  Int?
+  siri_vm_position_id      BigInt?
+  time_difference          Int?
+  stop_id                  Int // TODO: fix - nullable bigint in db
+  load_time_stamp          DateTime?                @default(now()) @db.Timestamp(6)
+  off_set                  Int?
+  servicepattern_id        Int?
+  vehiclejourney_id        Int?
+  admin_area_id            Int?
+  timestamp_after_estimate DateTime?                @db.Timestamptz(6)
+  expected_journeys        expected_journeys?       @relation(fields: [group_id], references: [group_id])
+  stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
   @@id([timetable_id, date_of_journey], map: "timetable_pk_240603")
   @@index([operator_noc, line_name, journey_code], map: "compound_index_on_operator_noc_line_name_journey_code")
