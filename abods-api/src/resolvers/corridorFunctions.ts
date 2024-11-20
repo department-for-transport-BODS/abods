@@ -429,15 +429,15 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
       data.inputs.estimated,
     );
 
-    let lastStopOfCorridor = getJourneyDeparture(
+    let lastDeparture = getJourneyDeparture(
       journeys[journeys.length - 1],
       data.inputs.estimated,
     );
 
-    if (firstDeparture && lastStopOfCorridor) {
+    if (firstDeparture && lastDeparture) {
       totalTransits += 1;
       totalJourneyTime +=
-        (lastStopOfCorridor.getTime() - firstDeparture.getTime()) / 1000; //In seconds
+        (lastDeparture.getTime() - firstDeparture.getTime()) / 1000; //In seconds
     }
 
     const serviceCode = `${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`;
