@@ -24,15 +24,15 @@ export class OtpStatsComponent {
         completed: NaN,
       };
 
-    const filtered = this.view.stops
+    const otpEnums = this.view.stops
       .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
       .map((n) => (!this.estimated && n.estimatedDepartureUtc ? null : n.otp));
 
-    const total = filtered.length;
-    const early = filtered.filter((n) => n === OtpEnum.Early).length;
-    const onTime = filtered.filter((n) => n === OtpEnum.OnTime).length;
-    const late = filtered.filter((n) => n === OtpEnum.Late).length;
-    const noData = filtered.filter((n) => n === null).length;
+    const total = otpEnums.length;
+    const early = otpEnums.filter((n) => n === OtpEnum.Early).length;
+    const onTime = otpEnums.filter((n) => n === OtpEnum.OnTime).length;
+    const late = otpEnums.filter((n) => n === OtpEnum.Late).length;
+    const noData = otpEnums.filter((n) => n === null).length;
     const completed = total - noData;
     return { total, early, onTime, late, noData, completed };
   }
