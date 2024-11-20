@@ -1,5 +1,5 @@
 import { NgModule } from "@angular/core";
-import { InMemoryCache, ServerError } from "@apollo/client/core";
+import { InMemoryCache } from "@apollo/client/core";
 import { HttpLink } from "apollo-angular/http";
 import { ConfigService } from "./config/config.service";
 import { ApolloLink } from "@apollo/client/link/core";

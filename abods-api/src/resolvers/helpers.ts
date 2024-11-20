@@ -4,8 +4,8 @@ import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
 
 export function throwUnauthenticatedError(
-  message?: string | undefined,
-  path?: string | number | undefined,
+  message?: string,
+  path?: string | number,
 ): never {
   throw new GraphQLError(message || "Unauthorized", {
     extensions: {
