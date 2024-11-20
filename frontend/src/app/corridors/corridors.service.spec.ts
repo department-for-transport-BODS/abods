@@ -27,8 +27,11 @@ import { fakeAsync, flush } from "@angular/core/testing";
 import objectContaining = jasmine.objectContaining;
 import { OperatorService } from "../shared/services/operator.service";
 import { of } from "rxjs";
-import { ICorridorJourneyTimeStats } from "../../generated/extra";
-import { CorridorStatsViewParams, CorridorStop } from "./types";
+import {
+  CorridorStatsViewParams,
+  CorridorStop,
+  ICorridorJourneyTimeStats,
+} from "./types";
 
 const journeyTime: ICorridorJourneyTimeStats = {
   avgTransitTime: 5,

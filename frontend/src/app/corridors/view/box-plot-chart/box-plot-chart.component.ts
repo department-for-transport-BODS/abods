@@ -31,8 +31,10 @@ import {
   TimeUnit,
 } from "@amcharts/amcharts4/core";
 import { BaseChartOptions } from "../corridor-chart/BaseChartOption";
-import { ICorridorJourneyTimeStats } from "../../../../generated/extra";
-import { CorridorStatsViewParams } from "../../types";
+import {
+  CorridorStatsViewParams,
+  ICorridorJourneyTimeStats,
+} from "../../types";
 
 export type YAxisMinValueType = "yAxisMinValue";
 export type YAxisMaxValueType = "yAxisMaxValue";

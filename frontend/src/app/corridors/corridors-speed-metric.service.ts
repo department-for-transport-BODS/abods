@@ -16,8 +16,11 @@ import { max as _max, min as _min, range as _range } from "lodash-es";
 import { HistogramChartDataItem } from "./view/histogram-chart/histogram-chart.component";
 import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
 import { isNotNullOrUndefined } from "../shared/rxjs-operators";
-import { ICorridorJourneyTimeStats } from "../../generated/extra";
-import { CorridorStats, CorridorStatsViewParams } from "./types";
+import {
+  CorridorStats,
+  CorridorStatsViewParams,
+  ICorridorJourneyTimeStats,
+} from "./types";
 
 export interface SpeedStats {
   averageSpeed: string;
