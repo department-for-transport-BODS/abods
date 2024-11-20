@@ -35,14 +35,6 @@
       ></app-controls>
       <app-box [padding]="['6', '5', '6', '5']" spaceAbove="4" spaceBelow="8">
         <app-tabs (tabChanged)="tabChanged($event)">
-          <app-tab tabTitle="Map" id="map">
-            <div class="on-time__wrapper" *appTabContent>
-              <app-service-map
-                [timingPointsOnly]="timingPointsOnly"
-                [params]="params$ | async"
-              ></app-service-map>
-            </div>
-          </app-tab>
           <app-tab #mapTab tabTitle="Timeline" id="timeline">
             <div *appTabContent class="on-time__wrapper">
               <app-spinner
@@ -159,6 +151,15 @@
               </app-chart-no-data-wrapper>
             </div>
           </app-tab>
+          <!--<app-tab tabTitle="Map" id="map">-->
+          <!--  <div class="on-time__wrapper" *appTabContent>-->
+          <!--    <p>Under Maintenance</p>-->
+          <!--    <app-service-map-->
+          <!--      [timingPointsOnly]="timingPointsOnly"-->
+          <!--      [params]="params$ | async"-->
+          <!--    ></app-service-map>-->
+          <!--  </div>-->
+          <!--</app-tab>-->
         </app-tabs>
       </app-box>
       <app-overview-stats
