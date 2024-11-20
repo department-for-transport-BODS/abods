@@ -20,15 +20,15 @@ const actual = DateTime.fromISO("2022-08-18T11:22:00.000+01:00", {
 
 export const mockVehicleStopPingFactory = (): VehiclePingStop => {
   return {
-    id: "ST01",
+    stopId: "ST01",
     stopName: "Stop 1",
     isTimingPoint: false,
-    onTimePerformance: OnTimePerformanceEnum.OnTime,
+    otp: OnTimePerformanceEnum.OnTime,
     ts: actual,
     actualDeparture: actual,
     scheduledDeparture: scheduled,
-    lat: 0,
-    lon: 0,
+    latitude: 0,
+    longitude: 0,
   };
 };
 

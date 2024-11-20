@@ -7,8 +7,8 @@ import {
   DashboardOperatorVehicleCountsListGQL,
   DashboardPerformanceStatsGQL,
   DashboardServiceRankingGQL,
+  DashboardVehicles,
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
   PerformanceFiltersInputType,
   RankingOrder,
   ServicePerformanceInputType,
@@ -45,19 +45,10 @@ export class DashboardService {
       );
   }
 
-  get listOperatorVehicleCounts(): Observable<
-    OperatorDashboardVehicleCountsFragment[]
-  > {
+  get listOperatorVehicleCounts(): Observable<DashboardVehicles[]> {
     return this.operatorVehicleCountsListQuery
       .fetch({})
-      .pipe(
-        map(
-          ({ data }) =>
-            data?.operators?.items?.map(
-              (x) => x as OperatorDashboardVehicleCountsFragment,
-            ) ?? [],
-        ),
-      );
+      .pipe(map(({ data }) => data.dashboardVehicles));
   }
 
   getPunctualityStats(

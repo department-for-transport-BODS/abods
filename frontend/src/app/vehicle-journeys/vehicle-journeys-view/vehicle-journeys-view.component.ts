@@ -1,17 +1,26 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
-import { combineLatest, map, Subject, switchMap, takeUntil, tap } from "rxjs";
-import { VehicleJourneyView } from "./vehicle-journey-view.model";
+import {
+  combineLatest,
+  map,
+  mergeMap,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+  zip,
+} from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
-import { VehiclePingStop } from "./vehicle-ping-stop.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import {
   VehicleJourney,
   VehicleJourneysSearchService,
 } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import { DateTime } from "luxon";
+import { AvlPoint, AvlsGQL, RouteGQL, Stop } from "../../../generated/graphql";
+import { distinctUntilChanged } from "rxjs/operators";
 
-type TimingPointsOption = "timing-points" | "all-stops";
+export type JourneyInfo = { stops: Stop[]; avls: AvlPoint[] };
 
 @Component({
   selector: "app-vehicle-journeys-view",
@@ -19,93 +28,125 @@ type TimingPointsOption = "timing-points" | "all-stops";
   styleUrls: ["./vehicle-journeys-view.component.scss"],
 })
 export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
-  view?: VehicleJourneyView;
-  errorView?: VehicleJourneyNotFoundView;
-  loading = false;
-  timingPointsOption: TimingPointsOption = "timing-points";
-  prevNextJourneys: [VehicleJourney | undefined, VehicleJourney | undefined] = [
-    undefined,
-    undefined,
-  ];
+  journeyInfo: JourneyInfo | null = null;
+  journeyInfoLoading = false;
 
-  selectedStop?: VehiclePingStop;
+  errorView?: VehicleJourneyNotFoundView;
+
+  journeys: VehicleJourney[] = [];
+  journeysLoading = false;
+
+  estimated: "true" | "false" = "true";
+  timingPointsOption: "timing-points" | "all-stops" = "timing-points";
+  groupId = "";
+  startTime = DateTime.fromSeconds(0);
+
+  selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
 
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
 
-  get journeyTitle(): string {
-    return `${this.view?.journeyInfo.serviceInfo?.serviceNumber}: ${this.view?.journeyInfo.serviceInfo?.serviceName}`;
-  }
+  serviceId$ = new Subject<string>();
 
   constructor(
     private route: ActivatedRoute,
     private service: VehicleJourneysSearchService,
+    private routeGQL: RouteGQL,
+    private avlsGQL: AvlsGQL,
     private router: Router,
   ) {}
 
   private onDestroy$ = new Subject<void>();
 
   ngOnInit(): void {
+    const groupId$ = this.route.paramMap.pipe(
+      takeUntil(this.onDestroy$),
+      map((params) => params.get("journeyId") as string),
+    );
+    groupId$.subscribe((groupId) => (this.groupId = groupId));
+
     this.route.queryParamMap
-      .pipe(
-        map((queryParams) => ({
-          date: DateTime.fromISO(queryParams.get("startTime") as string)
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe((params) => {
+        this.startTime = DateTime.fromISO(params.get("startTime") as string);
+        this.returnQueryParams = {
+          date: this.startTime
             .startOf("day")
             .toUTC()
             ?.toISO({ format: "basic", suppressSeconds: true }),
-          operator: queryParams.get("operator"),
-          service: queryParams.get("service"),
-        })),
-        takeUntil(this.onDestroy$),
-      )
-      .subscribe((params) => (this.returnQueryParams = params));
-
-    const journeyId$ = this.route.paramMap.pipe(
-      map((paramMap) => paramMap.get("journeyId") as string),
-      takeUntil(this.onDestroy$),
-    );
-
-    const startTime$ = this.route.queryParamMap.pipe(
-      map((queryParamMap) =>
-        DateTime.fromISO(queryParamMap.get("startTime") as string),
-      ),
-      takeUntil(this.onDestroy$),
-    );
-
-    const timingPointsOnly$ = this.route.queryParamMap.pipe(
-      map((params) => {
-        return (
+          operator: params.get("operator"),
+          service: params.get("service"),
+        };
+        this.estimated = params.get("evidenced") !== "true" ? "true" : "false";
+        this.timingPointsOption =
           params.get("timingPointsOnly") === "true" ||
           params.get("allStops") !== "true"
-        );
-      }),
+            ? "timing-points"
+            : "all-stops";
+      });
+
+    const startTime$ = this.route.queryParamMap.pipe(
+      map((params) =>
+        DateTime.fromISO(params.get("startTime") as string)
+          .setZone("Europe/London")
+          .startOf("day"),
+      ),
+      distinctUntilChanged(),
       takeUntil(this.onDestroy$),
     );
 
-    timingPointsOnly$.subscribe((timingPointsOnly) => {
-      this.timingPointsOption = timingPointsOnly
-        ? "timing-points"
-        : "all-stops";
-    });
-
-    combineLatest([journeyId$, startTime$, timingPointsOnly$])
+    combineLatest([groupId$])
       .pipe(
-        tap(() => (this.loading = true)),
-        switchMap(([journeyId, startTime, timingPointsOnly]) =>
-          this.service.getJourney(journeyId, startTime, timingPointsOnly),
+        tap(() => (this.journeyInfoLoading = true)),
+        switchMap(([groupId]) =>
+          zip(
+            this.routeGQL.fetch({ groupId }),
+            this.avlsGQL.fetch({ groupId }),
+          ),
         ),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: (view) => {
-          this.view = view;
-          this.prevNextJourneys = view.prevNextJourneys;
-          this.loading = false;
+        next: ([routeResult, avlsResult]) => {
+          if (!routeResult.data.route[0]) {
+            return (this.errorView = new VehicleJourneyNotFoundView());
+          }
+          this.journeyInfo = {
+            avls: [...avlsResult.data.avls].sort((a, b) =>
+              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+            ),
+            stops: [...routeResult.data.route].sort(
+              (a, b) => a.stopIndex - b.stopIndex,
+            ),
+          };
+          this.serviceId$.next(this.journeyInfo.stops[0].serviceId);
+          this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
-          return (this.errorView = new VehicleJourneyNotFoundView());
+          this.errorView = new VehicleJourneyNotFoundView();
+          this.journeyInfoLoading = false;
+        },
+      });
+
+    combineLatest([startTime$, this.serviceId$.pipe(distinctUntilChanged())])
+      .pipe(
+        tap(() => (this.journeysLoading = true)),
+        mergeMap(([date, serviceId]) =>
+          this.service.fetchDayJourneys(date, serviceId),
+        ),
+        takeUntil(this.onDestroy$),
+      )
+      .subscribe({
+        next: (journeys) => {
+          this.journeys = journeys;
+          this.journeysLoading = false;
+        },
+        error: (err) => {
+          console.log(err);
+          this.journeys = [];
+          this.journeysLoading = false;
         },
       });
   }
@@ -117,13 +158,21 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   onTimingPointsToggleChange() {
     const allStops = this.timingPointsOption === "all-stops" ? true : null;
-    this.router.navigate([], {
+    return this.router.navigate([], {
       queryParams: { allStops },
       queryParamsHandling: "merge",
     });
   }
 
-  onStopSelected(stop: VehiclePingStop) {
+  onEstimatedToggleChange() {
+    const evidenced = this.estimated !== "true" ? true : null;
+    return this.router.navigate([], {
+      queryParams: { evidenced },
+      queryParamsHandling: "merge",
+    });
+  }
+
+  onStopSelected(stop: Stop) {
     this.selectedStop = stop;
   }
 

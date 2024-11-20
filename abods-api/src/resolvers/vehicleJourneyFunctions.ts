@@ -111,6 +111,7 @@ export const getRoute: QueryResolvers["route"] = async (
       stop_index: true,
       common_name: true,
       otp_state: true,
+      timestamp_after_estimate: true,
       expected_journeys: {
         select: {
           expected_journey_start: true,
@@ -135,6 +136,7 @@ export const getRoute: QueryResolvers["route"] = async (
     latitude: s.stop_latitude ?? 0,
     longitude: s.stop_longitude ?? 0,
     actualDepartureUtc: s.actual_departure_time?.toISOString(),
+    estimatedDepartureUtc: s.timestamp_after_estimate?.toISOString(),
     scheduledDepartureUtc: (
       s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
     ).toISOString(),
@@ -157,7 +159,7 @@ export const getRoute: QueryResolvers["route"] = async (
     startTime:
       s.expected_journeys?.expected_journey_start.toISOString() ??
       new Date(2000, 0, 1, 0, 0, 0, 0).toISOString(),
-    otp: s.otp_state ? OtpEnum[s.otp_state] : null,
+    otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
   }));
 };
 

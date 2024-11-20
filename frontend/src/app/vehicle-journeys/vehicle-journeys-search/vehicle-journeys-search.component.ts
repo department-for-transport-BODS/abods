@@ -13,7 +13,6 @@ import {
 } from "@angular/forms";
 import { DateTime, Duration, Interval } from "luxon";
 import {
-  Line,
   Operator,
   OperatorService,
 } from "../../shared/services/operator.service";
@@ -38,6 +37,7 @@ import {
 import { ConfigService } from "../../config/config.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { isEqual as _isEqual } from "lodash-es";
+import { LineType } from "../../../generated/graphql";
 
 @Component({
   selector: "app-vehicle-journeys-search",
@@ -82,7 +82,7 @@ export class VehicleJourneysSearchComponent
   operatorInputTerm$ = new Subject<string>();
 
   operators$?: Observable<Operator[]>;
-  services$?: Observable<Line[]>;
+  services$?: Observable<LineType[]>;
 
   vehicleJourneys: VehicleJourney[] = [];
 

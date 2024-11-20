@@ -6,9 +6,10 @@
 </div>
 <ng-container *ngIf="!loading; else skeleton">
   <app-stop-item
-    *ngFor="let stop of stopList; let first = first"
+    *ngFor="let stop of view?.stops; let first = first"
     [firstItem]="first"
     [stop]="stop"
+    [estimated]="estimated"
     [timingPointsOnly]="timingPointsOnly"
     (stopSelected)="stopSelected.emit($event)"
     (stopHovered)="stopHovered.emit($event)"

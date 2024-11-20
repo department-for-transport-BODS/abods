@@ -395,9 +395,6 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
         lt: utcToBstDBInput(toTimestamp),
       },
     },
-    include: {
-      expected_journeys: true,
-    },
   });
 
   const journeyMap: Map<string, Timetable[]> = new Map();

@@ -20,11 +20,11 @@ build-RuntimeDependenciesLayer: cmd-exists-npm
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 build-lambda-common: cmd-exists-npm
-	npm install --omit=dev
-	rm -rf dist
+	npm install
 	printf "{\"extends\": \"./tsconfig.json\", \"include\": [\"${HANDLER}\"] }" > tsconfig-only-handler.json
-	npm run prisma:generate
+	rm -rf dist
 	npm run build -- --build tsconfig-only-handler.json
+	npm prune --production
 
 copy-build-artefacts:
 	cp -r dist "$(ARTIFACTS_DIR)/"

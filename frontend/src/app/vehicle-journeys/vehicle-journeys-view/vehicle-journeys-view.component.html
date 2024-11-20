@@ -9,16 +9,37 @@
   <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
       <app-page-header
-        *ngIf="!loading; else skeletonHeader"
+        *ngIf="!journeyInfoLoading; else skeletonHeader"
         caption="Vehicle journeys"
-        [heading]="journeyTitle"
+        [heading]="
+          (journeyInfo?.stops?.[0]?.lineName ?? '') +
+          ': ' +
+          (journeyInfo?.stops?.[0]?.serviceName ?? '')
+        "
       ></app-page-header>
       <div class="vehicle-journeys__header-container">
         <app-journey-info
-          [journeyInfo]="view?.journeyInfo"
-          [loading]="loading"
+          [journeyInfo]="journeyInfo"
+          [loading]="journeyInfoLoading"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
+          <app-segmented-toggle
+            [(ngModel)]="estimated"
+            (ngModelChange)="onEstimatedToggleChange()"
+          >
+            <app-segmented-toggle-item
+              name="estimated-filter"
+              identifier="estimated"
+              value="true"
+              label="Estimated"
+            ></app-segmented-toggle-item>
+            <app-segmented-toggle-item
+              name="estimated-filter"
+              identifier="evidenced"
+              value="false"
+              label="Evidenced"
+            ></app-segmented-toggle-item>
+          </app-segmented-toggle>
           <app-segmented-toggle
             [(ngModel)]="timingPointsOption"
             (ngModelChange)="onTimingPointsToggleChange()"
@@ -37,30 +58,36 @@
             ></app-segmented-toggle-item>
           </app-segmented-toggle>
           <app-journey-nav
-            [prevNext]="prevNextJourneys"
-            [loading]="loading"
+            [journeys]="journeys"
+            [loading]="journeyInfoLoading || journeysLoading"
+            [startTime]="startTime"
+            [journeyId]="groupId"
           ></app-journey-nav>
         </div>
       </div>
       <div class="vehicle-journeys__stop-map-grid">
         <app-stop-list
-          [stopList]="view?.stopList"
+          [view]="journeyInfo"
           [timingPointsOnly]="timingPointsOption === 'timing-points'"
-          [loading]="loading"
+          [estimated]="estimated === 'true'"
+          [loading]="journeyInfoLoading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"
         ></app-stop-list>
         <div>
           <div class="vehicle-journeys__sticky-container">
             <app-otp-stats
-              [otpStats]="view?.otpStats"
-              [loading]="loading"
+              [view]="journeyInfo"
+              [loading]="journeyInfoLoading"
+              [estimated]="estimated === 'true'"
+              [timingPointsOnly]="timingPointsOption === 'timing-points'"
             ></app-otp-stats>
             <app-journey-map
-              [view]="view"
+              [view]="journeyInfo"
+              [estimated]="estimated === 'true'"
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
-              [loading]="loading"
+              [loading]="journeyInfoLoading"
             ></app-journey-map>
           </div>
         </div>

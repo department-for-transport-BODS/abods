@@ -26,7 +26,19 @@ type Query {
   ): [EventStatsType]
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
+  lines(operatorId: String!, inputDate: DateTime): [LineType!]!
+  servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
+
+  # Used by an external service, take care with changes
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
+
+  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+}
+
+type DashboardVehicles {
+  operatorId: String!
+  expected: Int!
+  actual: Int!
 }
 
 input OperatorFilterInput {
@@ -353,31 +365,21 @@ type HeadwayTimeSeriesType {
   scheduledWaitTime: Float!
 }
 
-type TransitModelType {
-  lines(filterBy: LineFilterType!): PaginatedLineType
-}
-
 input LineFilterType {
   lineIds: [String!]
   inputDate: DateTime
 }
 
-type PaginatedLineType {
-  items: [LineType]
-}
-
 type LineType {
-  lineId: String!
-  lineName: String!
-  lineNumber: String!
-  servicePatterns: [ServicePatternType]
+  id: String!
+  name: String!
+  number: String!
 }
 
 type ServicePatternType {
   servicePatternId: String!
-  name: String!
-  stops: [StopType!]
-  serviceLinks: [ServiceLinkType!]
+  stops: [StopType!]!
+  serviceLinks: [ServiceLinkType!]!
 }
 
 type StopType {
@@ -393,10 +395,10 @@ type StopType {
 }
 
 type ServiceLinkType {
-  fromStop: String
-  toStop: String
-  distance: Int!
-  routeValidity: String
+  fromStop: String!
+  toStop: String!
+  distance: Float!
+  routeValidity: String!
   linkRoute: String
 }
 
@@ -416,7 +418,6 @@ type OperatorType {
   nocCode: String
   operatorId: String!
   adminAreas: [AdminAreaInfoType]
-  transitModel: TransitModelType
   feedMonitoring: FeedMonitoringType
 }
 
@@ -443,8 +444,8 @@ type HistoricalStatsType {
 }
 
 type VehicleStatsType {
-  actual: Int
-  expected: Int
+  actual: Int!
+  expected: Int!
   timestamp: DateTime!
 }
 
@@ -827,6 +828,7 @@ type AvlPoint {
 
 type Stop {
   actualDepartureUtc: String
+  estimatedDepartureUtc: String
   scheduledDepartureUtc: String!
   latitude: Float!
   longitude: Float!

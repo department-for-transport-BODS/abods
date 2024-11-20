@@ -1,29 +1,18 @@
 query transitModelServicePatternStops($operatorId: String!, $lineId: String!) {
-  operator(operatorId: $operatorId) {
-    transitModel {
-      lines(filterBy: { lineIds: [$lineId] }) {
-        items {
-          lineId
-          lineName
-          servicePatterns {
-            servicePatternId
-            name
-            stops {
-              stopId
-              stopName
-              lon
-              lat
-            }
-            serviceLinks {
-              fromStop
-              toStop
-              distance
-              routeValidity
-              linkRoute
-            }
-          }
-        }
-      }
+  servicePatterns(operatorId: $operatorId, lineId: $lineId) {
+    servicePatternId
+    stops {
+      stopId
+      stopName
+      lon
+      lat
+    }
+    serviceLinks {
+      fromStop
+      toStop
+      distance
+      routeValidity
+      linkRoute
     }
   }
 }

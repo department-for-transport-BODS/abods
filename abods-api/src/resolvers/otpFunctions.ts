@@ -15,7 +15,6 @@ import {
   OperatorPerformanceType,
   OperatorsPage,
   OperatorType,
-  PaginatedLineType,
   PerformanceInputType,
   PunctualityDayOfWeekType,
   PunctualityTimeOfDayType,
@@ -28,7 +27,6 @@ import {
   ServicePerformanceType,
   ServicePunctualityType,
   StopPerformanceType,
-  TransitModelTypeResolvers,
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
@@ -49,6 +47,7 @@ import {
 import { Prisma, PrismaClient } from "@prisma/client";
 import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
+import haversineDistance from "haversine-distance";
 
 interface DayCount {
   dayOfWeek: number;
@@ -152,12 +151,14 @@ export const getOperators = async (
       throw "No operators found";
     }
 
-    const userOperators = operators.map((operator): OperatorType => {
-      return mapOperatorToOperatorType(
-        operator,
-        operator.noc_adminarea,
-      ) as OperatorType;
-    });
+    const userOperators = operators.map((operator) => ({
+      operatorId: operator.operatorref,
+      nocCode: operator.operatorref,
+      name: operator.name,
+      adminAreas: operator.noc_adminarea.map((adminArea) => ({
+        adminAreaId: adminArea.adminarea_id,
+      })),
+    }));
     return userOperators.sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true }),
     );
@@ -165,21 +166,6 @@ export const getOperators = async (
     logger.error(error);
     return [];
   }
-};
-
-const mapOperatorToOperatorType = (operator, adminAreas): OperatorType => {
-  const adminAreaIds = adminAreas.map((adminArea) => {
-    return {
-      adminAreaId: adminArea.adminarea_id,
-    };
-  });
-
-  return {
-    operatorId: operator.operatorref,
-    nocCode: operator.operatorref,
-    name: operator.name,
-    adminAreas: adminAreaIds,
-  };
 };
 
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
@@ -222,83 +208,43 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
   }
 };
 
-const getOperatorLines = async (
-  operatorRef: string,
-  db: PrismaClient,
-  filterDate?: Date,
-) => {
-  const where: Prisma.expected_operatorsWhereInput = {
-    operator_noc: operatorRef,
-  };
-  if (filterDate) {
-    where.date_of_journey = filterDate;
-  }
-
-  const operator = await db.expected_operators.findMany({
-    where: where,
-    include: {
-      expected_services: {
-        select: {
-          noc_and_line_and_servicecode: true,
-          service_name: true,
-          line_name: true,
-        },
-      },
-    },
-  });
-
-  const services: LineType[] = [];
-  const distinctServices = new Set();
-  operator.map((op) => {
-    op.expected_services.map((service) => {
-      if (!distinctServices.has(service.noc_and_line_and_servicecode)) {
-        distinctServices.add(service.noc_and_line_and_servicecode);
-        services.push({
-          lineId: service.noc_and_line_and_servicecode,
-          lineName: service.service_name,
-          lineNumber: service.line_name,
-          servicePatterns: [],
-        });
-      }
-    });
-  });
-
-  const lines: PaginatedLineType = {
-    items: services,
-  };
-
-  return lines;
-};
-
-export const getLines: TransitModelTypeResolvers["lines"] = async (
+export const getLines: QueryResolvers["lines"] = async (
   _,
   args,
   context,
-  info,
-): Promise<PaginatedLineType> => {
+): Promise<LineType[]> => {
   const user = await requireUserSession(context);
-  const { operatorId } = info.variableValues as { operatorId: string };
-  const operationName: string = info.operation.name?.value ?? "";
+  const userOperators = await getOperators(user, context.db);
 
-  const operators = await getOperators(user, context.db);
-
-  if (!operators) {
+  if (!userOperators) {
     throw "No user operators";
   }
 
-  const userOperatorIds = operators.map((o) => o.nocCode);
+  const userOperatorIds = userOperators.map((o) => o.nocCode);
+  if (!userOperatorIds.includes(args.operatorId)) return [];
 
-  if (userOperatorIds.includes(operatorId)) {
-    const inputDate = args.filterBy?.inputDate
-      ? new Date(dbUtcToBstDate(args.filterBy?.inputDate))
-      : undefined;
-    if (operationName === "operatorLines") {
-      return getOperatorLines(operatorId, context.db, inputDate);
-    }
-  }
-  return {
-    items: [],
-  };
+  const inputDate = args.inputDate
+    ? new Date(dbUtcToBstDate(args.inputDate))
+    : undefined;
+
+  const services = await context.db.expected_services.findMany({
+    where: {
+      operator_noc: args.operatorId,
+      date_of_journey: inputDate,
+    },
+    select: {
+      noc_and_line_and_servicecode: true,
+      service_name: true,
+      line_name: true,
+    },
+    distinct: "noc_and_line_and_servicecode",
+  });
+
+  return services.map((service) => ({
+    id: service.noc_and_line_and_servicecode,
+    name: service.service_name,
+    number: service.line_name,
+  }));
 };
 
 export const getOperator: QueryResolvers["operator"] = async (
@@ -782,12 +728,14 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           }
 
           results.forEach((res) => {
-            hoursOfDay.push({
-              timeOfDay: dbUtcToBstHour(res.departure_hour_only),
-              early: res._sum.early_count,
-              onTime: res._sum.on_time_count,
-              late: res._sum.late_count,
-            });
+            if (res.departure_hour_only) {
+              hoursOfDay.push({
+                timeOfDay: dbUtcToBstHour(res.departure_hour_only),
+                early: res._sum.early_count ?? 0,
+                onTime: res._sum.on_time_count ?? 0,
+                late: res._sum.late_count ?? 0,
+              });
+            }
           });
         }
       }
@@ -865,9 +813,9 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
                 ts: isDayGranularity
                   ? getFormattedDate(result.date_of_journey)
                   : getFormattedDate(result.departure_hour),
-                early: result._sum.early_count,
-                late: result._sum.late_count,
-                onTime: result._sum.on_time_count,
+                early: result._sum.early_count ?? 0,
+                late: result._sum.late_count ?? 0,
+                onTime: result._sum.on_time_count ?? 0,
               });
             }
           });
@@ -1725,6 +1673,7 @@ const otpResolvers: Resolvers = {
     headwayMetrics: emptyResolver,
     serviceInfo: getServiceInfo,
     adminAreas: getAdminAreas,
+    lines: getLines,
   },
   OnTimePerformanceType: {
     delayFrequency: getDelayFrequency,
@@ -1742,12 +1691,6 @@ const otpResolvers: Resolvers = {
     frequentServiceInfo: getFrequentServiceInfo,
     headwayOverview: getHeadwayOverview,
     headwayTimeSeries: getHeadwayTimeSeries,
-  },
-  OperatorType: {
-    transitModel: emptyResolver,
-  },
-  TransitModelType: {
-    lines: getLines,
   },
 };
 

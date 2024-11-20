@@ -1,55 +1,4 @@
-import { VehicleStatsType } from "../types/generated.js";
-import { getDate, getFormattedDate } from "./dayjs.js";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Dayjs } from "dayjs";
-
-export type ExpectedJourneyType = {
-  group_id: string;
-  expected_journey_start: Date;
-  expected_journey_end: Date | null;
-};
-
-export const getPerMinuteTimestamps = (
-  currentTime: Dayjs,
-  duration: number,
-) => {
-  const avlPerMinute: Record<string, Set<string>> = {};
-  let minute = currentTime.subtract(duration, "minute").startOf("minute");
-  while (minute.isBefore(currentTime.startOf("minute"))) {
-    const key = minute.toISOString();
-    avlPerMinute[key] = new Set<string>();
-    minute = minute.add(1, "minute");
-  }
-
-  return avlPerMinute;
-};
-
-export const getVehicleStats = async (
-  avl: Awaited<ReturnType<typeof getAvlPoints>>,
-  expected: ExpectedJourneyType[],
-  currentTime: Dayjs,
-  duration: number,
-): Promise<VehicleStatsType[]> => {
-  const avlPerMinute: Record<string, Set<string>> = await getAvlPerMinute(
-    avl ?? [],
-    currentTime,
-    duration,
-  );
-  const expectedJourneys: ExpectedJourneyType[] = expected ?? [];
-
-  return Object.entries(avlPerMinute).map(([timestamp, avlJourneys]) => {
-    const minute = getDate(timestamp);
-    const expected = expectedJourneys
-      .filter((j) => minute.isSameOrAfter(j.expected_journey_start))
-      .filter((j) => minute.isBefore(j.expected_journey_end));
-
-    return {
-      timestamp: getFormattedDate(getDate(timestamp).toDate()),
-      expected: expected.length,
-      actual: expected.filter((j) => avlJourneys.has(j.group_id)).length,
-    };
-  });
-};
 
 export enum VehicleCountType {
   Actual = "actual",
@@ -64,91 +13,44 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
   });
 };
 
-export const getExpectedJourneys = async (
+export const getVehicleCounts = (
   db: PrismaClient,
-  operatorId: string,
-  inputDate: Dayjs,
-  duration?: number,
+  userOrgId: number,
+  operatorId: string | null,
+  startTime: Date,
+  endTime: Date,
 ) => {
-  const where: Prisma.expected_journeysWhereInput = {
-    operator_noc: operatorId,
-    date_of_journey: inputDate.toDate(),
-  };
-
-  if (duration) {
-    where.expected_journey_start = {
-      lt: inputDate.toDate(),
-    };
-
-    where.expected_journey_end = {
-      gte: inputDate.subtract(duration, "minute").toDate(),
-    };
-  }
-
-  return db.expected_journeys.findMany({
-    where: where,
-    select: {
-      group_id: true,
-      expected_journey_start: true,
-      expected_journey_end: true,
-    },
-    distinct: ["group_id"],
-  });
-};
-
-export const getAvlPoints = async (
-  db: PrismaClient,
-  operatorId: string,
-  inputDate: Dayjs,
-  duration?: number,
-  groupIds?: string[],
-) => {
-  const where: Prisma.SiriVMPositionsWhereInput = {
-    date_of_journey: inputDate.toDate(),
-    operator_ref: operatorId,
-  };
-
-  if (duration) {
-    where.recorded_at_time = {
-      gte: inputDate.subtract(duration, "minute").startOf("minute").toDate(),
-      lt: inputDate.startOf("minute").toDate(),
-    };
-  }
-
-  if (groupIds && groupIds.length > 0) {
-    where.group_id = {
-      in: groupIds,
-    };
-  }
-
-  return db.siriVMPositions.findMany({
-    where: where,
-    select: {
-      recorded_at_time: true,
-      group_id: true,
-      vehicle_ref: true,
-    },
-  });
-};
-
-export const getAvlPerMinute = async (
-  avl: Awaited<ReturnType<typeof getAvlPoints>>,
-  currentTime: Dayjs,
-  duration: number,
-) => {
-  const avlPerMinute: Record<string, Set<string>> = getPerMinuteTimestamps(
-    currentTime,
-    duration,
-  );
-
-  for (const a of avl) {
-    if (!a.group_id) continue;
-    const recordedAt = getDate(a.recorded_at_time)
-      .startOf("minute")
-      .toISOString();
-    avlPerMinute[recordedAt] = avlPerMinute[recordedAt] ?? new Set();
-    avlPerMinute[recordedAt].add(a.group_id);
-  }
-
-  return avlPerMinute;
+  const start = Prisma.raw(startTime.toISOString());
+  const end = Prisma.raw(endTime.toISOString());
+  return db.$queryRaw<
+    {
+      operatorId: string;
+      expected: number;
+      actual: number;
+    }[]
+  >(Prisma.sql`
+      SELECT operator_noc                                    AS "operatorId",
+             CAST(COUNT(*) AS int)                           AS "expected",
+             CAST(COUNT(CASE WHEN sq.cur THEN 1 END) AS int) AS "actual"
+      FROM (SELECT DISTINCT j.operator_noc,
+                            j.group_id,
+                            EXISTS(SELECT 1
+                                   FROM public."SiriVMPositions" s
+                                   WHERE s.date_of_journey = '${start}'
+                                     AND s.group_id = j.group_id
+                                     AND s.operator_ref = j.operator_noc
+                                     AND s.recorded_at_time >= '${start}'
+                                     AND s.recorded_at_time < '${end}') AS cur
+            FROM public.expected_journeys j
+            WHERE j.date_of_journey = '${start}'
+              AND j.expected_journey_start < '${end}'
+              AND j.expected_journey_end > '${start}'
+              AND j.operator_noc IS NOT NULL
+              AND j.group_id IS NOT NULL
+              AND ((CAST(${operatorId} AS text) IS NULL OR j.operator_noc = ${operatorId}))
+              AND j.operator_noc IN (SELECT o.operatorref
+                                     FROM public.bods_organisationoperator o
+                                     WHERE o.organisation_id = ${userOrgId})) sq
+      GROUP BY operator_noc;
+  `);
 };

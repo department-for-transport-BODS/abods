@@ -7,21 +7,19 @@ import {
   LiveStatsType,
   HistoricalStatsType,
   LiveStatsTypeResolvers,
-  Maybe,
   OperatorTypeResolvers,
   QueryResolvers,
   Resolvers,
   VehicleStatsType,
+  DashboardVehicles,
 } from "../types/generated.js";
 import {
-  ExpectedJourneyType,
-  getAvlPoints,
-  getExpectedJourneys,
   getOperatorWithFeed,
-  getVehicleStats,
+  getVehicleCounts,
   VehicleCountType,
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
+import { requireUserSession } from "./helpers.js";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -40,39 +38,6 @@ export const getEventStats: QueryResolvers["eventStats"] =
     }
     return eventStats;
   };
-
-export const getFeedMonitoringVehicleStats = async (
-  db: PrismaClient,
-  operatorId: string,
-  duration: number,
-) => {
-  const statsDate = getDate();
-  let expectedJourneys: ExpectedJourneyType[] = [];
-  expectedJourneys = await getExpectedJourneys(
-    db,
-    operatorId,
-    statsDate,
-    duration,
-  );
-
-  const avl: Awaited<ReturnType<typeof getAvlPoints>> = await getAvlPoints(
-    db,
-    operatorId,
-    statsDate,
-    duration,
-    expectedJourneys.map((journey) => journey.group_id),
-  );
-  const results = await getVehicleStats(
-    avl,
-    expectedJourneys,
-    statsDate,
-    duration,
-  );
-
-  return results.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
-};
 
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
   async (parent, args, context): Promise<HistoricalStatsType> => {
@@ -179,7 +144,7 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
 
     return {
       operatorId: parent.operatorId,
-      feedStatus: !!feed_summary?.last_outage,
+      feedStatus: !feed_summary?.unavailable_since,
       availability: Number(feed_summary?.availability ?? 0),
       lastOutage: feed_summary?.last_outage,
       unavailableSince: feed_summary?.unavailable_since,
@@ -190,25 +155,50 @@ export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
     };
   };
 
-export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
+export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   parent,
   _,
   context,
   info,
 ): Promise<LiveStatsType> => {
+  if (!parent.operatorId) throw "Invalid data";
   const queryName = info.operation.name?.value;
-
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
-    result = await getFeedMonitoringVehicleStats(
-      context.db,
-      parent.operatorId,
-      21, // 21 minutes of data is displayed in frontend
+    const user = await requireUserSession(context);
+    const finalEndTime = getDate().startOf("minute");
+    const promises: Promise<VehicleStatsType>[] = [];
+    for (let offset = 0; offset < 20; offset++) {
+      const endTime = finalEndTime.subtract(offset, "minute");
+      const startTime = endTime.subtract(1, "minute").toDate();
+      promises.push(
+        getVehicleCounts(
+          context.db,
+          user.orgIds[0],
+          parent.operatorId,
+          startTime,
+          endTime.toDate(),
+        ).then((n) => {
+          if (n.length !== 1) throw "Unexpected data returned";
+          return {
+            actual: n[0].actual,
+            expected: n[0].expected,
+            timestamp: startTime.toISOString(),
+          };
+        }),
+      );
+    }
+    result = await Promise.all(promises).then((n) =>
+      n.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      ),
     );
   }
 
   return {
     ...parent.liveStats,
+    operatorId: parent.operatorId,
     currentVehicles:
       result.length > 0 ? result[result.length - 1].actual ?? 0 : 0,
     expectedVehicles:
@@ -217,10 +207,27 @@ export const getLiveStats: OperatorTypeResolvers["liveStats"] = async (
   };
 };
 
+const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
+  _,
+  args,
+  context,
+): Promise<DashboardVehicles[]> => {
+  const user = await requireUserSession(context);
+  const endTime = getDate().startOf("minute");
+  return getVehicleCounts(
+    context.db,
+    user.orgIds[0],
+    args.operatorId ?? null,
+    endTime.subtract(1, "minute").toDate(),
+    endTime.toDate(),
+  );
+};
+
 const feedMonitoringResolvers: Resolvers = {
   Query: {
     events: getEvents,
     eventStats: getEventStats,
+    dashboardVehicles: getDashboardVehicles,
   },
   OperatorType: {
     feedMonitoring: getFeedMonitoringList,

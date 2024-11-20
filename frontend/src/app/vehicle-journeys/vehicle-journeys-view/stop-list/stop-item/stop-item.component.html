@@ -14,14 +14,10 @@
       <svg-icon
         class="stop-list-item__icon"
         [ngClass]="{
-          'stop-list-item__icon--on-time':
-            stop?.onTimePerformance?.toString() === 'OnTime',
-          'stop-list-item__icon--early':
-            stop?.onTimePerformance?.toString() === 'Early',
-          'stop-list-item__icon--late':
-            stop?.onTimePerformance?.toString() === 'Late',
-          'stop-list-item__icon--no-data':
-            (stop?.onTimePerformance ?? null) === null,
+          'stop-list-item__icon--on-time': otp === 'OnTime',
+          'stop-list-item__icon--early': otp === 'Early',
+          'stop-list-item__icon--late': otp === 'Late',
+          'stop-list-item__icon--no-data': otp === null,
           'stop-list-item__icon--stop': !stop?.isTimingPoint
         }"
         [applyClass]="true"
@@ -52,12 +48,12 @@
     <div *ngIf="displayTimingDetails" class="stop-list-item__scheduled">
       <div class="stop-list-item__time-container">
         <span class="stop-list-item__time-container--minutes">{{
-          stop?.scheduledDeparture | dateTimeToFormat: "HH:mm"
+          scheduledDeparture | dateTimeToFormat: "HH:mm"
         }}</span>
         <span
           *ngIf="!timingPointsOnly"
           class="stop-list-item__time-container--seconds"
-          >:{{ stop?.scheduledDeparture | dateTimeToFormat: "ss" }}</span
+          >:{{ scheduledDeparture | dateTimeToFormat: "ss" }}</span
         >
       </div>
     </div>
@@ -67,20 +63,20 @@
   >
     <span *ngIf="displayTimingDetails" class="stop-list-item__actual">
       <div
-        *ngIf="stop?.actualDeparture; else empty"
+        *ngIf="actualDeparture; else empty"
         [ngxTippy]="
-          'Calculated delay ' + (stop?.delay | formatDuration: 'mm:ss' : '+')
+          'Calculated delay ' + (delay | formatDuration: 'mm:ss' : '+')
         "
         [tippyProps]="{ theme: 'gds-tooltip' }"
         class="stop-list-item__time-container"
       >
         <span class="stop-list-item__time-container--minutes">{{
-          stop?.actualDeparture | dateTimeToFormat: "HH:mm"
+          actualDeparture | dateTimeToFormat: "HH:mm"
         }}</span>
         <span
           *ngIf="!timingPointsOnly"
           class="stop-list-item__time-container--seconds"
-          >:{{ stop?.actualDeparture | dateTimeToFormat: "ss" }}</span
+          >:{{ actualDeparture | dateTimeToFormat: "ss" }}</span
         >
       </div>
       <ng-template #empty>-</ng-template>

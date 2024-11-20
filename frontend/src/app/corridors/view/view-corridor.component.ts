@@ -306,8 +306,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
         serviceLink.fromStop === segment[0].stopId &&
         serviceLink.toStop === segment[1].stopId,
     );
-    if (serviceLink) {
-      return JSON.parse(serviceLink.linkRoute as string);
+    if (serviceLink?.linkRoute) {
+      return JSON.parse(serviceLink.linkRoute);
     } else {
       return [position(segment[0]), position(segment[1])];
     }
