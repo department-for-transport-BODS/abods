@@ -9,7 +9,7 @@ import { CorridorsService } from "../corridors.service";
 import { distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subject } from "rxjs";
-import { Corridor, CorridorSummary } from "../../../generated/extra";
+import { Corridor, CorridorSummary } from "../types";
 
 @Component({
   selector: "app-corridors-grid",

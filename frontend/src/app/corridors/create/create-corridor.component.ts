@@ -42,7 +42,7 @@ import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { TextInputComponent } from "../../shared/gds/text-input/text-input.component";
 import { Location } from "@angular/common";
-import { Corridor, CorridorStop } from "../../../generated/extra";
+import { Corridor, CorridorStop } from "../types";
 
 export const FIT_BOUNDS_OPTIONS = { padding: 50, maxZoom: 16, duration: 0 };
 
