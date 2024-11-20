@@ -31,7 +31,7 @@ export class AccordionComponent implements AfterContentChecked {
 
   toggleExpandAll() {
     this.expandedAll = !this.expandedAll;
-    if (this.sections && this.sections.length) {
+    if (this.sections?.length) {
       this.sections.forEach((section) => {
         section.expanded = this.expandedAll;
       });
@@ -39,7 +39,7 @@ export class AccordionComponent implements AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
-    if (this.sections && this.sections.length) {
+    if (this.sections?.length) {
       const sectionsExpanded = this.sections.map((section) => section.expanded);
       if (sectionsExpanded.includes(false)) {
         this.expandedAll = false;

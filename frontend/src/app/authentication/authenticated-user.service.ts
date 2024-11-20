@@ -18,7 +18,7 @@ export class AuthenticatedUserService {
   get authenticatedUser$(): Observable<UserFragment> {
     return this.userSubject.pipe(
       filter((u) => u !== null),
-      map((u) => u as UserFragment),
+      map((u) => u!),
     );
   }
 

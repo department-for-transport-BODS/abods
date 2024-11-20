@@ -5,7 +5,7 @@ import { AsyncStatus } from "../../../on-time/pending.model";
 import { ITheme } from "@amcharts/amcharts4/core";
 
 export class BaseChart {
-  protected screens: { [k: string]: am4core.Container } = {};
+  protected screens: Record<string, am4core.Container> = {};
 
   protected chart!: am4charts.XYChart;
 

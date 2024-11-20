@@ -39,7 +39,9 @@ import { OperatorService } from "../../shared/services/operator.service";
 const INITIAL_NO_ROWS_MESSAGE = "No operator data found";
 const WHITESPACE_BETWEEN_SINGLE_CHARACTER = /(?<= \w|&|^\w|^) (?=\w |&|\w$|$)/g;
 
-type AdminAreaParams = { adminAreaIds: string[] };
+interface AdminAreaParams {
+  adminAreaIds: string[];
+}
 
 @Component({
   selector: "app-operators-grid",
@@ -132,9 +134,9 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
     getQuickFilterText: () => "",
   };
   overlayComponent = NoRowsOverlayComponent;
-  overlayParams: NoRowsOverlayParams = <NoRowsOverlayParams>{
+  overlayParams: NoRowsOverlayParams = {
     message: INITIAL_NO_ROWS_MESSAGE,
-  };
+  } as NoRowsOverlayParams;
 
   @ViewChild(SparklineFactoryComponent)
   sparklineFactory!: SparklineFactoryComponent;
@@ -213,12 +215,11 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
         this.data = data.map((op) => {
           return {
             ...op,
-            adminAreaIds: operators
-              .find((a) => a?.operatorId === op.operatorId)
-              ?.adminAreaIds?.map((a) => a)
-              .filter((a) =>
-                params.filters.adminAreaIds?.includes(a),
-              ) as string[],
+            adminAreaIds:
+              operators
+                .find((a) => a?.operatorId === op.operatorId)
+                ?.adminAreaIds?.map((a) => a)
+                .filter((a) => params.filters.adminAreaIds?.includes(a)) ?? [],
           };
         });
       });

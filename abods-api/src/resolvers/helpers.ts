@@ -16,7 +16,7 @@ export const throwUnauthenticatedError = (
   });
 };
 
-export const emptyResolver = async () => ({});
+export const emptyResolver = () => ({});
 
 export const requireUserSession = async (context: RequestContext) => {
   const cookieHeader = getHeader(context.headers, "Cookie");
@@ -25,7 +25,7 @@ export const requireUserSession = async (context: RequestContext) => {
   }
   logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);
   const cookies = parseCookie(cookieHeader);
-  const sessionId = cookies["abods_sessionid"];
+  const sessionId = cookies.abods_sessionid;
 
   logger.debug(`Session id: ${sessionId}`);
   if (!sessionId) {
@@ -89,7 +89,7 @@ export function getHeader(
 const parseCookie = (str: string | string[]) =>
   (typeof str === "string" ? str.split(";") : str)
     .map((v) => v.split("="))
-    .reduce((acc: { [key: string]: string }, v) => {
+    .reduce((acc: Record<string, string>, v) => {
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
       return acc;
     }, {});

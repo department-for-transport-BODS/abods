@@ -207,9 +207,9 @@ export class OnTimeGridComponent {
     this._mode = "percent";
   }
 
-  overlayParams: NoRowsOverlayParams = <NoRowsOverlayParams>{
+  overlayParams: NoRowsOverlayParams = {
     message: `No data found`,
-  };
+  } as NoRowsOverlayParams;
 
   gridOptions: GridOptions = {
     rowSelection: "single",

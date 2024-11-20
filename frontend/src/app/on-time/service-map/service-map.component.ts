@@ -31,7 +31,11 @@ import { removeAdminAreaIds } from "../view-service/view-service.component";
 import { ConfigService } from "../../config/config.service";
 import { pairwise } from "src/app/shared/array-operators";
 
-export type Stop = { naptan: string; stopName: string; stopLocality?: string };
+export interface Stop {
+  naptan: string;
+  stopName: string;
+  stopLocality?: string;
+}
 
 export interface StopInfo {
   type: "stop";

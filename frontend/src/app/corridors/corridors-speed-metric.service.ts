@@ -42,13 +42,13 @@ export class CorridorsSpeedMetricService {
   private totalDistance = 0;
   private readonly MS_TO_MPH_FACTOR = 2.237;
   private readonly MIN_TO_SEC_FACTOR = 60;
-  private readonly EMPTY_STATS = <SpeedStats>{
+  private readonly EMPTY_STATS = {
     averageSpeed: "0mph",
     transitSpeedStats: [],
     transitSpeedHistogram: [],
     transitSpeedTimeOfDay: [],
     transitSpeedDayOfWeek: [],
-  };
+  } as SpeedStats;
 
   setTotalDistance(serviceLinks: ServiceLinkType[]) {
     this.totalDistance = this.calculateTotalServiceLinkDistance(serviceLinks);
@@ -116,8 +116,8 @@ export class CorridorsSpeedMetricService {
         this.totalDistance,
         item.maxTransitTime,
       );
-      item.minTransitTime = item.yAxisMinValue as number;
-      item.maxTransitTime = item.yAxisMaxValue as number;
+      item.minTransitTime = item.yAxisMinValue!;
+      item.maxTransitTime = item.yAxisMaxValue!;
       const per25 = item.percentile25;
       item.percentile25 = this.calculateAvergeSpeedInMph(
         this.totalDistance,

@@ -87,7 +87,7 @@ export class FiltersComponent implements OnDestroy {
   }
   excludeItoLineId = "";
 
-  validationErrors: { [k: string]: string | undefined } = {};
+  validationErrors: Record<string, string | undefined> = {};
 
   @Input() set filters(value: PerformanceFiltersInputType | null) {
     if (!value) {
@@ -116,25 +116,21 @@ export class FiltersComponent implements OnDestroy {
   }
 
   setAdminAreaDropdown(newFilters: PerformanceFiltersInputType): void {
-    const oldOpId =
-      this.oldFilters &&
-      this.oldFilters.operatorIds &&
-      this.oldFilters.operatorIds[0];
-    const newOpId =
-      newFilters && newFilters.operatorIds && newFilters.operatorIds[0];
+    const oldOpId = this.oldFilters?.operatorIds?.[0];
+    const newOpId = newFilters?.operatorIds?.[0];
     if (oldOpId !== newOpId) {
       this.adminAreaService
-        .fetchAdminAreasForOperator(newOpId as string)
+        .fetchAdminAreasForOperator(newOpId!)
         .pipe(
           takeUntil(this.destroy$),
           map((areas) =>
             areas
               .map(
                 (area) =>
-                  <MultiselectCheckboxOption>{
+                  ({
                     label: area.name,
                     value: area.id,
-                  },
+                  }) as MultiselectCheckboxOption,
               )
               .sort(
                 (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
@@ -168,7 +164,7 @@ export class FiltersComponent implements OnDestroy {
     this.minDelay = minDelay ?? null;
     this.maxDelay = maxDelay ?? null;
     this.excludeItoLineId = excludeItoLineId ?? "";
-    this.setSelectedAdminAreaIds(adminAreaIds as string[]);
+    this.setSelectedAdminAreaIds(adminAreaIds!);
   }
 
   private setSelectedAdminAreaIds(adminAreaIds: string[]) {
@@ -193,7 +189,7 @@ export class FiltersComponent implements OnDestroy {
   }
 
   validate() {
-    const errors: { [k: string]: string | undefined } = {};
+    const errors: Record<string, string | undefined> = {};
 
     errors.dayOfWeekFlags = Object.values(this.dayOfWeekFlags).some((v) => v)
       ? ""
@@ -270,7 +266,7 @@ export class FiltersComponent implements OnDestroy {
 
     if (!this.showAdminAreas) {
       // We preserve the admin areas for returning to All services page
-      newFilters.adminAreaIds = this.oldFilters?.adminAreaIds as string[];
+      newFilters.adminAreaIds = this.oldFilters?.adminAreaIds;
     }
 
     this.filtersChange.emit(newFilters);

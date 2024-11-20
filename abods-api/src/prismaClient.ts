@@ -62,21 +62,21 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
     prisma.$on("error" as never, (e) =>
       logger.error({
         message: "prisma error",
-        // @ts-ignore
+        // @ts-expect-error This is typed as never, but does contain properties
         ...e,
       }),
     );
     prisma.$on("warn" as never, (e) =>
       logger.warn({
         message: "prisma warning",
-        // @ts-ignore
+        // @ts-expect-error This is typed as never, but does contain properties
         ...e,
       }),
     );
     prisma.$on("info" as never, (e) =>
       logger.info({
         message: "prisma log",
-        // @ts-ignore
+        // @ts-expect-error This is typed as never, but does contain properties
         ...e,
       }),
     );
@@ -85,7 +85,7 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       prisma.$on("query" as never, (e) =>
         logger.info({
           message: "prisma query",
-          // @ts-ignore
+          // @ts-expect-error This is typed as never, but does contain properties
           ...e,
         }),
       );

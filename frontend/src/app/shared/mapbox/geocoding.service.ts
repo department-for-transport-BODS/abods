@@ -18,10 +18,10 @@ export class GeocodingService {
   ) {}
 
   private params(extras?: ForwardParams & ReverseParams) {
-    let params = <{ [param: string]: string }>{
+    let params = {
       access_token: this.mapboxToken,
       country: "GB",
-    };
+    } as Record<string, string>;
 
     if (extras?.types || extras?.excludeTypes) {
       params = {

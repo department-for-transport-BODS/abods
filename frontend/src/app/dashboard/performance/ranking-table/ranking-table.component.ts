@@ -32,9 +32,9 @@ class ServiceViewModel {
     trend,
   }: ServicePunctualityType) {
     const total = (onTime ?? 0) + (early ?? 0) + (late ?? 0);
-    this.nocCode = nocCode as string;
+    this.nocCode = nocCode!;
     this.name = `${lineInfo?.serviceNumber ?? "unknown"}: ${lineInfo?.serviceName ?? "unknown"}`;
-    this.route = ["/on-time/", nocCode as string, lineId ?? ""];
+    this.route = ["/on-time/", nocCode!, lineId ?? ""];
     this.onTime = total > 0 ? (onTime ?? 0) / total : 0;
     this.onTimePct = `${(this.onTime * 100).toFixed(2)}%`;
 

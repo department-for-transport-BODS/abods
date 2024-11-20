@@ -71,7 +71,7 @@ export class SignupComponent implements OnInit, OnDestroy {
         if (params.get("key")) {
           this.key.setValue(params.get("key"));
           this.signUpService
-            .invitation$(params.get("key") as string)
+            .invitation$(params.get("key")!)
             .subscribe((res) => {
               this.invitationFetched = true;
               this.invitation = res;
@@ -160,26 +160,26 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   get firstName() {
-    return this.signUpForm.get("firstName") as AbstractControl;
+    return this.signUpForm.get("firstName")!;
   }
 
   get lastName() {
-    return this.signUpForm.get("lastName") as AbstractControl;
+    return this.signUpForm.get("lastName")!;
   }
 
   get username() {
-    return this.signUpForm.get("username") as AbstractControl;
+    return this.signUpForm.get("username")!;
   }
 
   get password() {
-    return this.signUpForm.get("password") as AbstractControl;
+    return this.signUpForm.get("password")!;
   }
 
   get confirmPassword() {
-    return this.signUpForm.get("confirmPassword") as AbstractControl;
+    return this.signUpForm.get("confirmPassword")!;
   }
 
   get key() {
-    return this.signUpForm.get("key") as AbstractControl;
+    return this.signUpForm.get("key")!;
   }
 }

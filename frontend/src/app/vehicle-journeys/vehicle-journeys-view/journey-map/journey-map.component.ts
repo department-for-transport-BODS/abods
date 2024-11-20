@@ -21,7 +21,10 @@ import { AvlPoint, OtpEnum, Stop } from "../../../../generated/graphql";
 import { DateTime } from "luxon";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
 
-type LineSegmentProps = { id: string; onTimePerformance: OtpEnum | null };
+interface LineSegmentProps {
+  id: string;
+  onTimePerformance: OtpEnum | null;
+}
 
 export const createStopModel = (stop: Stop, estimated: boolean) => ({
   id: stop.stopId.toString(),
@@ -118,10 +121,10 @@ export class JourneyMapComponent implements OnChanges {
     if (view && (changes.view || changes.estimated)) {
       this.updateView(view, changes.estimated?.currentValue ?? this.estimated);
     }
-    if (this.map && changes.selectedStop && changes.selectedStop.currentValue) {
+    if (this.map && changes.selectedStop?.currentValue) {
       this.updateBoundsToSelectedStop(changes.selectedStop.currentValue);
     }
-    if (this.map && changes.hoveredStop && changes.hoveredStop.currentValue) {
+    if (this.map && changes.hoveredStop?.currentValue) {
       this.updateHoveredStopState(changes.hoveredStop.currentValue);
     }
     if (this.loading) {

@@ -16,13 +16,10 @@ export class VehicleJourneysGridComponent implements OnChanges {
   patterns: VehicleJourney[][] = [];
 
   ngOnChanges(simpleChanges: SimpleChanges): void {
-    if (
-      simpleChanges["data"] &&
-      simpleChanges["data"].currentValue.length > 0
-    ) {
+    if (simpleChanges.data && simpleChanges.data.currentValue.length > 0) {
       this.patterns = Array.from(
         Object.values(
-          _groupBy(simpleChanges["data"].currentValue, "servicePattern"),
+          _groupBy(simpleChanges.data.currentValue, "servicePattern"),
         ),
       );
     } else {

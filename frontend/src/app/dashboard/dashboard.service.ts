@@ -17,7 +17,7 @@ import { PerformanceCategories } from "./dashboard.types";
 import { PerformanceParams } from "../on-time/on-time.service";
 
 export interface PunctualityQueryResult {
-  result: { [key in PerformanceCategories]: number } | null;
+  result: Record<PerformanceCategories, number> | null;
   success: boolean;
 }
 

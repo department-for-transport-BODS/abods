@@ -79,11 +79,10 @@ export class OperatorService {
       map((operators) =>
         operators.filter(
           (op) =>
-            String(op.name).toLowerCase().indexOf(term.trim().toLowerCase()) >
-              -1 ||
+            String(op.name).toLowerCase().includes(term.trim().toLowerCase()) ||
             String(op.nocCode)
               .toLowerCase()
-              .indexOf(term.trim().toLowerCase()) > -1,
+              .includes(term.trim().toLowerCase()),
         ),
       ),
       catchError(() => of([])),

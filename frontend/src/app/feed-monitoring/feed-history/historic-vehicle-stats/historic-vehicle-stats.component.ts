@@ -8,11 +8,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import {
-  AlertTypeEnum,
-  Granularity,
-  VehicleStatsType,
-} from "src/generated/graphql";
+import { AlertTypeEnum, VehicleStatsType } from "src/generated/graphql";
 import { ChartService } from "src/app/shared/components/amcharts/chart.service";
 
 import * as am4core from "@amcharts/amcharts4/core";
@@ -52,17 +48,13 @@ export class HistoricVehicleStatsComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.dataSource && changes.dataSource.currentValue?.length) {
+    if (changes.dataSource?.currentValue?.length) {
       this.setData(changes.dataSource.currentValue);
       if (this.alertsDataSource) {
         this.setTimelineData(this.alertsDataSource);
       }
     }
-    if (
-      changes.alertsDataSource &&
-      changes.alertsDataSource.currentValue &&
-      this.timelineSeries
-    ) {
+    if (changes.alertsDataSource?.currentValue && this.timelineSeries) {
       this.setTimelineData(changes.alertsDataSource.currentValue);
     }
   }
@@ -102,7 +94,7 @@ export class HistoricVehicleStatsComponent
       ts = ts.plus({ minute: 1 })
     ) {
       const candidateStat = protoViewData[i];
-      if (!candidateStat || !candidateStat.dateTime.equals(ts)) {
+      if (!candidateStat?.dateTime.equals(ts)) {
         viewData.push({
           dateTime: ts,
           timestamp: ts.toJSDate(),
@@ -123,7 +115,7 @@ export class HistoricVehicleStatsComponent
     this.screens.loadingScreen?.hide();
   }
 
-  get bulletFills(): { [k in AlertTypeEnum]: am4core.Color } {
+  get bulletFills(): Record<AlertTypeEnum, am4core.Color> {
     return {
       [AlertTypeEnum.FeedAvailableEvent]: this.chartService.colorMap.green,
       [AlertTypeEnum.FeedUnavailableEvent]: this.chartService.colorMap.red,

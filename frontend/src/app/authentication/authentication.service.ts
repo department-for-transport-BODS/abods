@@ -113,9 +113,11 @@ export class AuthenticationService {
   }
 
   checkSession() {
-    this.isSessionAlive
-      ? this.userService.authenticateUser()
-      : this.userService.deauthenticateUser();
+    if (this.isSessionAlive) {
+      this.userService.authenticateUser();
+    } else {
+      this.userService.deauthenticateUser();
+    }
   }
 
   setSession(session: string) {

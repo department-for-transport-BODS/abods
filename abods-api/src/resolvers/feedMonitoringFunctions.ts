@@ -81,9 +81,8 @@ export const getVehicles = async (
 
 export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   parent,
-  args,
+  _,
   context,
-  info,
 ): Promise<VehicleStatsType[]> => {
   if (!parent.operatorId) throw "Invalid data";
   const result = await context.db.feed_monitor_hourly_summary.findMany({
@@ -108,7 +107,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
 };
 
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
-  async (parent, args, context, info): Promise<VehicleStatsType[]> => {
+  async (parent, args, context): Promise<VehicleStatsType[]> => {
     if (!parent.operatorId) throw "Invalid data";
     const result = await context.db.feed_monitor_minute_summary.findMany({
       where: {
@@ -127,12 +126,9 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
     }));
   };
 
-const getEvents: QueryResolvers["events"] =
-  async (): Promise<EventResponse> => {
-    return {
-      items: [],
-    };
-  };
+const getEvents: QueryResolvers["events"] = (): EventResponse => ({
+  items: [],
+});
 
 export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
   async (parent, _, context): Promise<FeedMonitoringType> => {

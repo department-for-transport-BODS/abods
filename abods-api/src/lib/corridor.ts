@@ -18,17 +18,17 @@ export enum CorridorJourneyStatsOption {
   hourAsNumber,
 }
 
-export type AdminArea = {
+export interface AdminArea {
   admin_area?: naptan_adminarea;
-};
+}
 
-export type NaptanLocality = {
+export interface NaptanLocality {
   locality?: naptan_locality & AdminArea;
-};
+}
 
-export type StopWithLocality = {
+export interface StopWithLocality {
   naptan_stop?: naptan_stoppoint_latlong & NaptanLocality;
-};
+}
 
 export type CorridorStopsWithNaptanStops = corridor_stops & StopWithLocality;
 
@@ -37,14 +37,14 @@ export type CorridorResultsType = corridor & {
   corridor_stops?: CorridorStopsWithNaptanStops[];
 };
 
-export type CorridorJourneyServiceStatsType = {
+export interface CorridorJourneyServiceStatsType {
   totalJourneyTime: number;
   recordedTransits: number;
   scheduledTransits: number;
   operatorNoc: string | null;
   serviceCode: string | null;
   lineName: string | null;
-};
+}
 
 export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
   return {
@@ -162,11 +162,9 @@ export const filteredJourneys = (
   stopCount: number,
   journeyMap: Map<string, Timetable[]>,
 ): Map<string, Timetable[]> => {
-  const filteredJourneyMap: Map<string, Timetable[]> = new Map(
-    [...journeyMap.entries()].filter(([key, arr]) => arr.length === stopCount),
+  return new Map<string, Timetable[]>(
+    [...journeyMap.entries()].filter(([_, arr]) => arr.length === stopCount),
   );
-
-  return filteredJourneyMap;
 };
 
 export const isCorridorMappedToUserOrg = async (

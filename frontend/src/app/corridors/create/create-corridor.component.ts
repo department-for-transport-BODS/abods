@@ -92,7 +92,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
   locations?: GeocodingResult;
 
   hasSelectedLocation = false;
-  resetMoveCounter: EventEmitter<void> = new EventEmitter();
+  resetMoveCounter = new EventEmitter<void>();
 
   private readonly canGoBack: boolean;
 
@@ -137,7 +137,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     );
 
     const resetLocationSearch$ = combineLatest([
-      this.stopList$.pipe(startWith(<CorridorStop[]>[])),
+      this.stopList$.pipe(startWith([] as CorridorStop[])),
       this.searchMode.valueChanges.pipe(startWith("location")),
     ]).pipe(share());
 
@@ -290,7 +290,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
 
     // Init edit mode after subscriptions have been initialised above
     const view: CorridorNotFoundView | Corridor =
-      this.route.snapshot.data["corridor"];
+      this.route.snapshot.data.corridor;
     if (view) {
       this.initEditMode(view);
     }
@@ -433,7 +433,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     this.currentBounds = value;
     this.resetMoveCounter.emit();
     if (value instanceof Array) {
-      this.corridorMap.map?.fitBounds(value as BBox2d, options);
+      this.corridorMap.map?.fitBounds(value, options);
     } else if (value instanceof Object) {
       this.corridorMap.map?.flyTo({ ...value, duration: 0, zoom: 15 });
     }

@@ -74,7 +74,7 @@ export class OtpThresholdModalComponent implements AfterViewInit, OnDestroy {
           data.defaultValues?.late,
           completed,
         );
-        this.params = data.params as PerformanceParams;
+        this.params = data.params!;
       });
 
     modal.onAnyCloseEvent.subscribe(() => {

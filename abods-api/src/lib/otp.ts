@@ -78,11 +78,11 @@ export const compareThresholds = async (
     .map((o) => o.nocCode ?? "")
     .filter((o) => !!o);
 
-  let opIds: string[] | undefined = operatorIds
+  const opIds: string[] | undefined = operatorIds
     ? operatorIds?.filter(isDefined)
     : undefined;
 
-  let adminIds: string[] | undefined = adminAreaIds
+  const adminIds: string[] | undefined = adminAreaIds
     ? adminAreaIds?.filter(isDefined)
     : undefined;
 
@@ -113,8 +113,8 @@ export const compareThresholds = async (
   }
 
   // parse startime and endtime minutes/hours
-  let start = new Date();
-  let end = new Date();
+  const start = new Date();
+  const end = new Date();
 
   const departure_hour: {
     gte?: Date;
@@ -122,14 +122,14 @@ export const compareThresholds = async (
   } = {};
 
   if (startTime) {
-    const [hours, minutes, seconds] = startTime.split(":").map(Number);
+    const [hours, minutes, _] = startTime.split(":").map(Number);
     start.setHours(hours);
     start.setMinutes(minutes);
     departure_hour.gte = start;
   }
 
   if (endTime) {
-    const [hours, minutes, seconds] = endTime.split(":").map(Number);
+    const [hours, minutes, _] = endTime.split(":").map(Number);
     end.setHours(hours);
     end.setMinutes(minutes);
     departure_hour.lte = end;

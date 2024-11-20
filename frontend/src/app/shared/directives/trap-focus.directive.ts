@@ -58,7 +58,7 @@ export class TrapFocusDirective implements OnChanges, OnDestroy {
         }
 
         return true;
-      } catch (e) {
+      } catch {
         return false;
       }
     }

@@ -13,7 +13,8 @@ export const asFormErrors: (err: unknown) => FormErrors[] = (err) =>
     ? []
     : Array.isArray(err)
       ? err.map((e) => ({ error: String(e) }))
-      : [{ error: String(err) }];
+      : // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        [{ error: String(err) }];
 
 export interface FormErrors {
   error: string;

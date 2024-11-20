@@ -2,7 +2,7 @@ import { isNotNullOrUndefined } from "./rxjs-operators";
 import { slice, tail, zip } from "lodash-es";
 
 export type Definitely<T> = {
-  [P in keyof T]-?: T[P] extends Array<infer I>
+  [P in keyof T]-?: T[P] extends (infer I)[]
     ? NonNullable<I>[]
     : NonNullable<T[P]>;
 };

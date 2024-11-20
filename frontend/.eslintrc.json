@@ -1,32 +1,41 @@
 {
   "root": true,
-  "ignorePatterns": ["projects/**/*", "**/generated/graphql.ts"],
-  "plugins": ["jasmine", "@angular-eslint", "@typescript-eslint", "unused-imports", "json"],
+  "ignorePatterns": [
+    "projects/**/*",
+    "src/test-support/*",
+    "**/*.spec.ts",
+    "**/generated/graphql.ts",
+    "src/polyfills.ts"
+  ],
+  "plugins": ["jasmine"],
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "parserOptions": {
-        "project": ["**/tsconfig.json"],
+        "project": [
+          "**/tsconfig.json"
+        ],
         "createDefaultProgram": true
-      },
-      "env": {
-        "jasmine": true
       },
       "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-type-checked",
+        "plugin:@typescript-eslint/stylistic-type-checked",
         "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates",
-        "plugin:jasmine/recommended",
-        "plugin:json/recommended"
+        "plugin:jasmine/recommended"
       ],
       "rules": {
         "@angular-eslint/directive-selector": [
           "error",
           {
             "type": "attribute",
-            "prefix": ["app", "gds"],
+            "prefix": [
+              "app",
+              "gds"
+            ],
             "style": "camelCase"
           }
         ],
@@ -34,19 +43,51 @@
           "error",
           {
             "type": "element",
-            "prefix": ["app", "gds"],
+            "prefix": [
+              "app",
+              "gds"
+            ],
             "style": "kebab-case"
           }
         ],
-        "@typescript-eslint/explicit-module-boundary-types": ["off"],
-        "@typescript-eslint/no-explicit-any": ["off"],
-        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }]
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_",
+            "destructuredArrayIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/ban-tslint-comment": "off",
+        "@typescript-eslint/no-unnecessary-type-assertion": "error",
+        "@typescript-eslint/unbound-method": [
+          "error",
+          {
+            "ignoreStatic": true
+          }
+        ],
+        "@typescript-eslint/no-unsafe-enum-comparison": "warn",
+        "@typescript-eslint/restrict-template-expressions": "warn",
+        "@typescript-eslint/prefer-nullish-coalescing": "warn",
+        "@typescript-eslint/only-throw-error": "warn",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unsafe-assignment": "warn",
+        "@typescript-eslint/no-unsafe-argument": "warn",
+        "@typescript-eslint/no-unsafe-call": "warn",
+        "@typescript-eslint/no-unsafe-member-access": "warn",
+        "@typescript-eslint/no-unsafe-return": "warn",
+        "@typescript-eslint/no-floating-promises": "warn",
+        "@typescript-eslint/no-misused-promises": "warn"
       }
     },
     {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
-      "rules": {}
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ]
     }
   ]
 }

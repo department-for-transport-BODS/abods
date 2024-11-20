@@ -39,7 +39,6 @@ import {
 } from "../corridors-speed-metric.service";
 import { chartColors } from "../../shared/components/amcharts/chart.service";
 import { ConfigService } from "../../config/config.service";
-import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { HideOutliersService } from "./hide-outliers.service";
 import {
@@ -217,10 +216,10 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
 
   get missingTransits(): number | undefined {
     const summary = this.stats?.summaryStats;
-    return isNotNullOrUndefined(summary?.scheduledTransits) &&
-      isNotNullOrUndefined(summary?.totalTransits)
-      ? (summary?.scheduledTransits as number) -
-          (summary?.totalTransits as number)
+    const scheduledTransits = summary?.scheduledTransits ?? null;
+    const totalTransits = summary?.totalTransits ?? null;
+    return scheduledTransits !== null && totalTransits !== null
+      ? scheduledTransits - totalTransits
       : undefined;
   }
 
@@ -232,10 +231,12 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const view: CorridorNotFoundView | Corridor =
-      this.route.snapshot.data["corridor"];
-    view instanceof CorridorNotFoundView
-      ? (this.errorView = view)
-      : (this.corridor = view);
+      this.route.snapshot.data.corridor;
+    if (view instanceof CorridorNotFoundView) {
+      this.errorView = view;
+    } else {
+      this.corridor = view;
+    }
 
     if (this.corridor) {
       combineLatest([
@@ -251,7 +252,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
               from,
               to,
               this.corridor?.id?.toString() ?? "",
-              stops.length ? stops : (this.corridor?.stops as CorridorStop[]),
+              stops.length ? stops : this.corridor?.stops ?? [],
               toggle,
             ),
           ),
@@ -273,7 +274,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             params,
           );
           this.corridorLine = featureCollection(
-            pairwise((this.corridor as Corridor).stops).map((segment) => {
+            pairwise(this.corridor!.stops).map((segment) => {
               const line = this.setCoordinates(segment);
               return lineString(line, {
                 segmentId: segment[0].stopId + segment[1].stopId,
@@ -282,9 +283,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
             }),
           );
           this.corridorStops = featureCollection(
-            (this.corridor as Corridor).stops.map((stop) =>
-              point(position(stop), stop),
-            ),
+            this.corridor!.stops.map((stop) => point(position(stop), stop)),
           );
           if (!this.init) {
             this.setMapBoundsToCorridor();
@@ -342,7 +341,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     }
     this.selectedSegment = segment;
     this.setMapSelectedState(segment);
-    this.setMapBoundsToSegment(segment as [CorridorStop, CorridorStop]);
+    this.setMapBoundsToSegment(segment);
   }
 
   setMapSelectedState(segment: [CorridorStop, CorridorStop]) {

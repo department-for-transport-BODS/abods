@@ -69,8 +69,8 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
             (params: ParamMap) => !(!params.get("uid") || !params.get("key")),
           ),
           map((params: ParamMap) => {
-            const uid = params.get("uid") as string;
-            const key = params.get("key") as string;
+            const uid = params.get("uid")!;
+            const key = params.get("key")!;
             this.uid?.setValue(uid);
             this.key?.setValue(key);
             return [uid, key];

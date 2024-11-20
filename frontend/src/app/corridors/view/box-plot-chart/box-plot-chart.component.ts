@@ -43,14 +43,14 @@ export type YAxisPercentile25Type = "percentile25";
 export type YAxisPercentile75Type = "percentile75";
 export type XAxisType = "category" | "date";
 export type YAxisType = "value" | "time";
-export type BoxPlotChartDataItem = {
+export interface BoxPlotChartDataItem {
   yAxisMinValue?: number;
   yAxisMaxValue?: number;
   yAxisMeanValue?: Maybe<number>;
   category?: any;
   binLabel?: any;
   isoDayOfWeek?: any;
-};
+}
 
 @Component({
   selector: "app-box-plot-chart",

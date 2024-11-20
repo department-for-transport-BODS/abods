@@ -122,7 +122,7 @@ describe("ServiceGridComponent", () => {
   it("should display some data", fakeAsync(() => {
     spectator.component.params = onTimeInputParams;
 
-    listSubj.next(services.map(onTimeService.calculateOnTimePcts));
+    listSubj.next(services.map(OnTimeService.calculateOnTimePcts));
     spectator.detectChanges();
     tick(100);
 

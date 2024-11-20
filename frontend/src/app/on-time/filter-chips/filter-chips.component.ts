@@ -11,7 +11,7 @@ import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map } from "rxjs/operators";
 import { entries as _entries } from "lodash-es";
 
-export type DayOfWeekLabel = {
+export interface DayOfWeekLabel {
   monday: "Mon";
   tuesday: "Tue";
   wednesday: "Wed";
@@ -19,7 +19,7 @@ export type DayOfWeekLabel = {
   friday: "Fri";
   saturday: "Sat";
   sunday: "Sun";
-};
+}
 
 @Component({
   selector: "app-filter-chips",
@@ -114,22 +114,22 @@ export class FilterChipsComponent implements OnChanges {
   }
 
   onClearDayOfWeekFilter() {
-    const { dayOfWeekFlags, ...filters } = this.filters;
+    const { dayOfWeekFlags: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearTimeRangeFilter() {
-    const { startTime, endTime, ...filters } = this.filters;
+    const { startTime: _, endTime: __, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearMinDelayFilter() {
-    const { minDelay, ...filters } = this.filters;
+    const { minDelay: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 
   onClearMaxDelayFilter() {
-    const { maxDelay, ...filters } = this.filters;
+    const { maxDelay: _, ...filters } = this.filters;
     this.updateFilters(filters);
   }
 

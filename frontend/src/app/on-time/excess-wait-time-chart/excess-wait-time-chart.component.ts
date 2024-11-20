@@ -100,11 +100,11 @@ export class ExcessWaitTimeChartComponent implements OnInit, AfterViewInit {
         }
         if (this.data?.length === 1) {
           // If we only have one data point we need to push another hour to fix x-axis bug (ABOD-865)
-          this.data.push(<HeadwayTimeSeries>{
+          this.data.push({
             ts: DateTime.fromISO(data[0].ts)
               .plus({ hour: 1 })
               .toISO({ suppressMilliseconds: true }),
-          });
+          } as HeadwayTimeSeries);
         }
       });
   }

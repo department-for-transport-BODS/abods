@@ -32,11 +32,11 @@ import {
   nonNullOrUndefined,
 } from "../shared/rxjs-operators";
 
-export type IPunctualityType = {
+export interface IPunctualityType {
   early?: Maybe<Scalars["Int"]["output"]>;
   late?: Maybe<Scalars["Int"]["output"]>;
   onTime?: Maybe<Scalars["Int"]["output"]>;
-};
+}
 
 export type PerformanceParams = Omit<PerformanceInputType, "filters"> & {
   filters: PerformanceFiltersInputType;
@@ -156,7 +156,7 @@ export class OnTimeService {
       .valueChanges.pipe(
         map(({ data }) =>
           assert(data?.onTimePerformance?.punctualityTimeSeries).map(
-            this.calculateOnTimePcts,
+            OnTimeService.calculateOnTimePcts,
           ),
         ),
       );
@@ -175,7 +175,7 @@ export class OnTimeService {
                 const time = DateTime.fromISO(value.timeOfDay, { zone: "utc" });
                 const timeOfDay = time.toFormat("HH:mm");
                 return {
-                  ...this.calculateOnTimePcts(value),
+                  ...OnTimeService.calculateOnTimePcts(value),
                   timeOfDay,
                   tooltipLabel: `${timeOfDay} - ${time.plus({ hours: 1 }).toFormat("HH:mm")}`,
                 };
@@ -197,7 +197,7 @@ export class OnTimeService {
             assert(data?.onTimePerformance?.punctualityDayOfWeek).map(
               (value) => {
                 return {
-                  ...this.calculateOnTimePcts(value),
+                  ...OnTimeService.calculateOnTimePcts(value),
                   dayOfWeek: formatDayOfWeek(value.dayOfWeek),
                   tooltipLabel: formatDayOfWeek(value.dayOfWeek, "cccc"),
                 };
@@ -216,7 +216,7 @@ export class OnTimeService {
       .pipe(
         map(({ data }) =>
           (data?.onTimePerformance?.servicePerformance ?? []).map(
-            this.calculateOnTimePcts,
+            OnTimeService.calculateOnTimePcts,
           ),
         ),
       );
@@ -230,7 +230,7 @@ export class OnTimeService {
       .valueChanges.pipe(
         map(({ data }) =>
           (data?.onTimePerformance?.stopPerformance ?? [])
-            .map(this.calculateOnTimePcts)
+            .map(OnTimeService.calculateOnTimePcts)
             .sort((a, b) =>
               a.stopInfo.stopName.localeCompare(b.stopInfo.stopName),
             ),
@@ -248,7 +248,7 @@ export class OnTimeService {
           ({ data }) =>
             data?.onTimePerformance?.operatorPerformance?.items
               ?.filter(isNotNullOrUndefined)
-              .map(this.calculateOnTimePcts) ?? [],
+              .map(OnTimeService.calculateOnTimePcts) ?? [],
         ),
       );
   }
@@ -262,7 +262,7 @@ export class OnTimeService {
       );
   }
 
-  calculateOnTimePcts<
+  static calculateOnTimePcts<
     T extends { onTime?: number; late?: number; early?: number },
   >(val: T): T & OnTimeRatios {
     const { onTime, late, early } = val;
@@ -295,7 +295,7 @@ export class OnTimeService {
         }));
         return [value, ...filler, ahead, ...acc];
       },
-      [init.pop() as DelayFrequencyType],
+      [init.pop()!],
     );
   }
 

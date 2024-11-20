@@ -70,7 +70,7 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
     this.route.paramMap
       .pipe(
         filter((paramMap) => paramMap.has("nocCode")),
-        map((paramMap) => paramMap.get("nocCode") as string),
+        map((paramMap) => paramMap.get("nocCode")!),
         switchMap((nocCode) => this.operatorService.fetchOperator(nocCode)),
         takeUntil(this.destroy$),
       )
@@ -86,7 +86,7 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
     this.route.queryParamMap
       .pipe(
         filter((paramMap) => paramMap.has("tab")),
-        map((paramMap) => paramMap.get("tab") as string),
+        map((paramMap) => paramMap.get("tab")!),
         // Add delay so that tabs is not undefined
         delay(0),
       )

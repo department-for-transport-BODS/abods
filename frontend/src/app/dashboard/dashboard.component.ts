@@ -123,13 +123,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.operatorSubject.next({ nocCode: "all" });
           this.selectedOperatorsSubject.next(ops);
         }
-      }),
-      this.service.listOperators.subscribe((ops) => {
-        this.allOperatorsSubject.next(ops);
-        if (ops.length === 1) {
-          this.nocCodeSubject.next(ops[0].nocCode as string);
-        }
       });
+    this.service.listOperators.subscribe((ops) => {
+      this.allOperatorsSubject.next(ops);
+      if (ops.length === 1) {
+        this.nocCodeSubject.next(ops[0].nocCode!);
+      }
+    });
 
     combineLatest([
       this.nocCodeSubject,
@@ -152,7 +152,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe(this.selectedOperatorsVehicleCountsSubject);
 
     const nocCode$ = this.route.queryParamMap.pipe(
-      map((pm) => pm.get("nocCode") as string),
+      map((pm) => pm.get("nocCode")!),
       distinctUntilChanged(),
     );
 

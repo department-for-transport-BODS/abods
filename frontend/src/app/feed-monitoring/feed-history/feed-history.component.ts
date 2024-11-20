@@ -68,7 +68,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const noc$ = this.route.paramMap.pipe(
       filter((pm) => pm.has("nocCode")),
-      map((pm) => pm.get("nocCode") as string),
+      map((pm) => pm.get("nocCode")!),
       distinctUntilChanged(),
     );
 
@@ -86,7 +86,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
         }
       }),
       filter((qpm) => qpm.has("date")),
-      map((qpm) => DateTime.fromISO(qpm.get("date") as string)),
+      map((qpm) => DateTime.fromISO(qpm.get("date")!)),
       distinctUntilChanged(),
     );
 
@@ -116,7 +116,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
         switchMap((opData) =>
           this.fmService
             .fetchAlertStats(
-              opData.operatorId as string,
+              opData.operatorId,
               DateTime.local().toUTC().minus({ day: 1 }),
             )
             .pipe(

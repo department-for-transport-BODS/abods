@@ -14,10 +14,11 @@ import { RequestContext } from "./types/extra.js";
 import logger from "./logger.js";
 import { getDate } from "./lib/dayjs.js";
 import { getAPITokenHash } from "./lib/apiauth.js";
+import { IncomingHttpHeaders } from "http";
 
 let db = await createContext();
 let startTime = getDate();
-let apiKeyAuth = await getAPITokenHash();
+const apiKeyAuth = await getAPITokenHash();
 
 const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
@@ -28,15 +29,18 @@ const server = new ApolloServer<RequestContext>({
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
-const corsOrigin = process.env["CORS_ORIGIN"];
+const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
 app.use(
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { event } = getCurrentInvoke();
-      const headers = event.headers;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = getDate().isAfter(startTime.add(10, "minute"));
       if (retry) {

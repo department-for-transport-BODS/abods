@@ -120,7 +120,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
     paramMap$
       .pipe(
         filter((paramMap) => paramMap.has("nocCode")),
-        map((paramMap) => paramMap.get("nocCode") as string),
+        map((paramMap) => paramMap.get("nocCode")!),
         switchMap((nocCode) => this.operatorService.fetchOperator(nocCode)),
         takeUntil(this.destroy$),
       )
@@ -203,7 +203,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
     queryParamMap$
       .pipe(
         filter((paramMap) => paramMap.has("tab")),
-        map((paramMap) => paramMap.get("tab") as string),
+        map((paramMap) => paramMap.get("tab")!),
       )
       .subscribe((tab) => {
         this.tabs?.openTab(tab, { emit: false });
