@@ -462,8 +462,9 @@ model corridor_stops {
 }
 
 model distinct_routes {
-  id    Int    @id @default(autoincrement())
-  route String @unique(map: "distinct_routes_unique")
+  id                   Int                   @id @default(autoincrement())
+  route                String                @unique(map: "distinct_routes_unique")
+  servicepattern_route servicepattern_route?
 }
 
 model avl_line_level_monitoring {
@@ -512,6 +513,15 @@ model feed_monitor_daily_summary {
   operator_noc     String
   update_frequency Int?
   availability     Decimal? @db.Decimal
+}
+
+model servicepattern_route {
+  distinct_route_id            Int             @unique
+  noc_and_line_and_servicecode String
+  distict_route                distinct_routes @relation(fields: [distinct_route_id], references: [id]) // TODO: fix - not found in db
+
+  @@id([distinct_route_id, noc_and_line_and_servicecode], map: "servicepattern_route_pkey_test")
+  @@index([noc_and_line_and_servicecode], map: "noc_and_line_and_servicecode_idx")
 }
 
 view bods_user {
