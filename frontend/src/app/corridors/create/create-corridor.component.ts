@@ -17,12 +17,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs/operators";
-import {
-  asGeoJsonPoints,
-  Corridor,
-  CorridorsService,
-  Stop,
-} from "../corridors.service";
+import { asGeoJsonPoints, CorridorsService } from "../corridors.service";
 import { featureCollection, lineString } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import { Feature, FeatureCollection, LineString, Point } from "geojson";
@@ -47,6 +42,7 @@ import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { TextInputComponent } from "../../shared/gds/text-input/text-input.component";
 import { Location } from "@angular/common";
+import { Corridor, CorridorStop } from "../types";
 
 export const FIT_BOUNDS_OPTIONS = { padding: 50, maxZoom: 16, duration: 0 };
 
@@ -72,14 +68,14 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
   errorView?: CorridorNotFoundView;
   corridor?: Corridor;
 
-  stopList$ = new Subject<Stop[]>();
-  stopList: Stop[] = [];
-  matchingStops?: FeatureCollection<Point, Stop>;
+  stopList$ = new Subject<CorridorStop[]>();
+  stopList: CorridorStop[] = [];
+  matchingStops?: FeatureCollection<Point, CorridorStop>;
   matchingStopLines?: FeatureCollection<LineString>;
-  corridorStops?: FeatureCollection<Point, Stop>;
+  corridorStops?: FeatureCollection<Point, CorridorStop>;
   corridorLine?: Feature<LineString>;
-  otherStops?: FeatureCollection<Point, Stop>;
-  nonOrgStops?: FeatureCollection<Point, Stop>;
+  otherStops?: FeatureCollection<Point, CorridorStop>;
+  nonOrgStops?: FeatureCollection<Point, CorridorStop>;
 
   loading = false;
   noData = false;
@@ -141,7 +137,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     );
 
     const resetLocationSearch$ = combineLatest([
-      this.stopList$.pipe(startWith(<Stop[]>[])),
+      this.stopList$.pipe(startWith(<CorridorStop[]>[])),
       this.searchMode.valueChanges.pipe(startWith("location")),
     ]).pipe(share());
 
@@ -319,7 +315,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     }
   }
 
-  setStopList(stops: Stop[]) {
+  setStopList(stops: CorridorStop[]) {
     this.stopList = stops;
     this.corridorStops = stops.length ? asGeoJsonPoints(stops) : undefined;
     this.corridorLine =
@@ -332,7 +328,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     this.stopList$.next(stops);
   }
 
-  addStop(nextStop?: Feature<Point, Stop>) {
+  addStop(nextStop?: Feature<Point, CorridorStop>) {
     if (this.loading || !nextStop) return;
     this.setStopList([...this.stopList, nextStop.properties]);
   }

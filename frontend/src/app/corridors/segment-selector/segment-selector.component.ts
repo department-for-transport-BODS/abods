@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 
 import { NgxTippyProps } from "ngx-tippy-wrapper";
-import { filterServiceLinksByStops, Stop } from "../corridors.service";
+import { CorridorStop, filterServiceLinksByStops } from "../corridors.service";
 import { ServiceLinkType } from "../../../generated/graphql";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { pairwise } from "../../shared/array-operators";
@@ -26,19 +26,23 @@ export const enum ServiceLinkValidity {
   styleUrls: ["./segment-selector.component.scss"],
 })
 export class SegmentSelectorComponent implements OnChanges, AfterViewInit {
-  @Input() stops?: Stop[];
+  @Input() stops?: CorridorStop[];
   @Input() serviceLinks?: ServiceLinkType[];
   @Input() isDisabled?: boolean;
-  @Output() selectSegment = new EventEmitter<[Stop, Stop] | []>();
-  @Output() deselectSegment = new EventEmitter<[Stop, Stop] | []>();
-  @Output() mouseEnterStop = new EventEmitter<Stop>();
-  @Output() mouseLeaveStop = new EventEmitter<Stop>();
+  @Output() selectSegment = new EventEmitter<
+    [CorridorStop, CorridorStop] | []
+  >();
+  @Output() deselectSegment = new EventEmitter<
+    [CorridorStop, CorridorStop] | []
+  >();
+  @Output() mouseEnterStop = new EventEmitter<CorridorStop>();
+  @Output() mouseLeaveStop = new EventEmitter<CorridorStop>();
 
   @ViewChild("scrollContent", { read: ElementRef })
   scrollContent?: ElementRef<any>;
 
-  selected?: [Stop, Stop];
-  segments?: [Stop, Stop][];
+  selected?: [CorridorStop, CorridorStop];
+  segments?: [CorridorStop, CorridorStop][];
 
   tippyProps: NgxTippyProps = {
     allowHTML: true,
@@ -89,20 +93,22 @@ export class SegmentSelectorComponent implements OnChanges, AfterViewInit {
     this.cd.detectChanges();
   }
 
-  onSelect(segment?: [Stop, Stop]) {
+  onSelect(segment?: [CorridorStop, CorridorStop]) {
     this.deselectSegment.next(this.selected ?? []);
     this.selected = segment;
     this.selectSegment.emit(segment ?? []);
   }
 
-  isSelected(segment: [Stop, Stop]): boolean {
+  isSelected(segment: [CorridorStop, CorridorStop]): boolean {
     return (
       this.selected?.[0].stopId === segment[0].stopId &&
       this.selected?.[1].stopId === segment[1].stopId
     );
   }
 
-  getSegmentDistance(segment: [Stop, Stop]): number | undefined {
+  getSegmentDistance(
+    segment: [CorridorStop, CorridorStop],
+  ): number | undefined {
     if (this.isServiceLinksLoaded) {
       return filterServiceLinksByStops(this.serviceLinks, segment).reduce(
         (acc, val) => acc + val.distance,
@@ -111,7 +117,7 @@ export class SegmentSelectorComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  isInvalidServiceLink(segment: [Stop, Stop]): boolean {
+  isInvalidServiceLink(segment: [CorridorStop, CorridorStop]): boolean {
     if (this.isServiceLinksLoaded) {
       const link: ServiceLinkType = filterServiceLinksByStops(
         this.serviceLinks,

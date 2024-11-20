@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import {
   DelayFrequencyType,
+  Maybe,
   OnTimeDelayFrequencyGQL,
   OnTimeOperatorPerformanceListGQL,
   OnTimePunctualityDayOfWeekGQL,
@@ -19,6 +20,7 @@ import {
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   PunctualityTotalsType,
+  Scalars,
   ServiceInfoGQL,
   ServiceInfoType,
   ServicePerformanceType,
@@ -29,7 +31,12 @@ import {
   isNotNullOrUndefined,
   nonNullOrUndefined,
 } from "../shared/rxjs-operators";
-import { IPunctualityType } from "../../generated/extra";
+
+export type IPunctualityType = {
+  early?: Maybe<Scalars["Int"]["output"]>;
+  late?: Maybe<Scalars["Int"]["output"]>;
+  onTime?: Maybe<Scalars["Int"]["output"]>;
+};
 
 export type PerformanceParams = Omit<PerformanceInputType, "filters"> & {
   filters: PerformanceFiltersInputType;

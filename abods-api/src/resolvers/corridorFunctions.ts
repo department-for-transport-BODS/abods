@@ -9,6 +9,7 @@ import {
   filteredJourneys,
   getCorridor,
   getCorridorList,
+  getJourneyDeparture,
   getOrgAdminAreas,
   isCorridorMappedToUserOrg,
   returnCorridor,
@@ -27,6 +28,7 @@ import {
   CorridorStatsTypeResolvers,
   CorridorSummaryStatsType,
   CorridorType,
+  EstimatedToggle,
   InputMaybe,
   Maybe,
   MutationResolvers,
@@ -422,13 +424,20 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   const services = new Set();
   [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
-    const firstStopOfCorridor = journeys[0].actual_departure_time;
-    const lastStopOfCorridor =
-      journeys[journeys.length - 1].actual_departure_time;
-    if (firstStopOfCorridor && lastStopOfCorridor) {
+    let firstDeparture = getJourneyDeparture(
+      journeys[0],
+      data.inputs.estimated,
+    );
+
+    let lastDeparture = getJourneyDeparture(
+      journeys[journeys.length - 1],
+      data.inputs.estimated,
+    );
+
+    if (firstDeparture && lastDeparture) {
       totalTransits += 1;
       totalJourneyTime +=
-        (lastStopOfCorridor.getTime() - firstStopOfCorridor.getTime()) / 1000; //In seconds
+        (lastDeparture.getTime() - firstDeparture.getTime()) / 1000; //In seconds
     }
 
     const serviceCode = `${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`;
@@ -437,13 +446,14 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
     }
   });
 
-  const averageJourneyTime = Math.ceil(totalJourneyTime / totalTransits);
+  const averageJourneyTime =
+    totalTransits > 0 ? Math.ceil(totalJourneyTime / totalTransits) : 0;
 
   return {
-    totalTransits: totalTransits,
+    scheduledTransits,
+    totalTransits,
+    averageJourneyTime: averageJourneyTime,
     numberOfServices: services.size,
-    averageJourneyTime: isNaN(averageJourneyTime) ? 0 : averageJourneyTime,
-    scheduledTransits: scheduledTransits,
   };
 };
 
@@ -458,6 +468,7 @@ export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTi
     return getJourneyStats(
       data.journeys,
       CorridorJourneyStatsOption.hourAsNumber,
+      data.inputs.estimated,
     );
   };
 
@@ -469,7 +480,11 @@ export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDa
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek);
+    return getJourneyStats(
+      data.journeys,
+      CorridorJourneyStatsOption.dayOfWeek,
+      data.inputs.estimated,
+    );
   };
 
 export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"] =
@@ -481,45 +496,54 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return (data.inputs || {}).granularity === "day"
-      ? getJourneyStats(data.journeys, CorridorJourneyStatsOption.day)
-      : getJourneyStats(data.journeys, CorridorJourneyStatsOption.hour);
+      ? getJourneyStats(
+          data.journeys,
+          CorridorJourneyStatsOption.day,
+          data.inputs.estimated,
+        )
+      : getJourneyStats(
+          data.journeys,
+          CorridorJourneyStatsOption.hour,
+          data.inputs.estimated,
+        );
   };
 
 const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
   inputType: CorridorJourneyStatsOption,
+  estimated: EstimatedToggle,
 ) => {
   const journeyStats = new Map<string, number[]>();
   [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
 
-    const firstStopOfCorridor = journeys[0];
-    const lastStopOfCorridor = journeys[journeys.length - 1];
+    const firstDeparture = journeys[0];
 
-    if (
-      firstStopOfCorridor.actual_departure_time &&
-      lastStopOfCorridor.actual_departure_time
-    ) {
+    const firstStopDeparture = getJourneyDeparture(journeys[0], estimated);
+    const lastDeparture = getJourneyDeparture(
+      journeys[journeys.length - 1],
+      estimated,
+    );
+
+    if (firstStopDeparture && lastDeparture) {
       let dateKey: string = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
-          dateKey = getDayFormattedDate(firstStopOfCorridor.date_of_journey);
+          dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
           break;
 
         case CorridorJourneyStatsOption.dayOfWeek:
-          dateKey = getDate(firstStopOfCorridor.date_of_journey)
-            .day()
-            .toString();
+          dateKey = getDate(firstDeparture.date_of_journey).day().toString();
           break;
 
         case CorridorJourneyStatsOption.hour:
           dateKey = getHourFormattedDate(
-            firstStopOfCorridor.expected_departure_time,
+            firstDeparture.expected_departure_time,
           );
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
-          dateKey = getDate(firstStopOfCorridor.expected_departure_time)
+          dateKey = getDate(firstDeparture.expected_departure_time)
             .tz("Europe/London")
             .hour()
             .toString();
@@ -531,9 +555,7 @@ const getJourneyStats = (
 
       const journeyTime = journeyStats.get(dateKey) || [];
       journeyTime.push(
-        (lastStopOfCorridor.actual_departure_time.getTime() -
-          firstStopOfCorridor.actual_departure_time.getTime()) /
-          1000,
+        (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000,
       );
       journeyStats.set(dateKey, journeyTime);
     }
@@ -573,27 +595,30 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
     const stats: CorridorStatsPerServiceType[] = [];
     [...data.journeys.values()].map((journeys) => {
       journeys.sort((a, b) => a.stop_index - b.stop_index);
-      const firstStopOfCorridor = journeys[0];
-      const lastStopOfCorridor = journeys[journeys.length - 1];
+      const firstDeparture = journeys[0];
+
+      const firstStopDeparture = getJourneyDeparture(
+        journeys[0],
+        data.inputs.estimated,
+      );
+      const lastDeparture = getJourneyDeparture(
+        journeys[journeys.length - 1],
+        data.inputs.estimated,
+      );
       // noc_line_and_servicecode
-      const service = `${firstStopOfCorridor.operator_noc}-${firstStopOfCorridor.line_name}-${firstStopOfCorridor.service_code}`;
+      const service = `${firstDeparture.operator_noc}-${firstDeparture.line_name}-${firstDeparture.service_code}`;
       let journeyTime = journeyStats.get(service) || {
         totalJourneyTime: 0,
         recordedTransits: 0,
         scheduledTransits: 0,
-        lineName: firstStopOfCorridor.line_name,
-        operatorNoc: firstStopOfCorridor.operator_noc,
-        serviceCode: firstStopOfCorridor.service_code,
+        lineName: firstDeparture.line_name,
+        operatorNoc: firstDeparture.operator_noc,
+        serviceCode: firstDeparture.service_code,
       };
       journeyTime.scheduledTransits += 1;
-      if (
-        firstStopOfCorridor.actual_departure_time &&
-        lastStopOfCorridor.actual_departure_time
-      ) {
+      if (firstStopDeparture && lastDeparture) {
         journeyTime.totalJourneyTime +=
-          (lastStopOfCorridor.actual_departure_time.getTime() -
-            firstStopOfCorridor.actual_departure_time.getTime()) /
-          1000;
+          (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000;
         journeyTime.recordedTransits += 1;
       }
       journeyStats.set(service, journeyTime);
@@ -639,15 +664,17 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
     [...data.journeys.values()].map((journeys) => {
       journeys.sort((a, b) => a.stop_index - b.stop_index);
 
-      const firstStopOfCorridor = journeys[0];
-      const lastStopOfCorridor = journeys[journeys.length - 1];
-      if (
-        firstStopOfCorridor.actual_departure_time &&
-        lastStopOfCorridor.actual_departure_time
-      ) {
+      const firstStopDeparture = getJourneyDeparture(
+        journeys[0],
+        data.inputs.estimated,
+      );
+      const lastDeparture = getJourneyDeparture(
+        journeys[journeys.length - 1],
+        data.inputs.estimated,
+      );
+      if (firstStopDeparture && lastDeparture) {
         const totalJourneyTime = Math.floor(
-          (lastStopOfCorridor.actual_departure_time.getTime() -
-            firstStopOfCorridor.actual_departure_time.getTime()) /
+          (lastDeparture.getTime() - firstStopDeparture.getTime()) /
             (1000 * 60),
         );
 

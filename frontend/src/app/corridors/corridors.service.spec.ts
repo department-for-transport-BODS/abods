@@ -13,22 +13,25 @@ import {
   CorridorStatsType,
   CreateCorridorDocument,
   DeleteCorridorDocument,
+  EstimatedToggle,
   GetCorridorDocument,
   ServiceLinkType,
   UpdateCorridorDocument,
 } from "../../generated/graphql";
 import {
   CorridorsService,
-  CorridorStatsViewParams,
   filterServiceLinksByStopsOrReturnServiceLinks,
-  Stop,
 } from "./corridors.service";
 import { DateTime, Settings } from "luxon";
 import { fakeAsync, flush } from "@angular/core/testing";
 import objectContaining = jasmine.objectContaining;
 import { OperatorService } from "../shared/services/operator.service";
 import { of } from "rxjs";
-import { ICorridorJourneyTimeStats } from "../../generated/extra";
+import {
+  CorridorStatsViewParams,
+  CorridorStop,
+  ICorridorJourneyTimeStats,
+} from "./types";
 
 const journeyTime: ICorridorJourneyTimeStats = {
   avgTransitTime: 5,
@@ -37,7 +40,6 @@ const journeyTime: ICorridorJourneyTimeStats = {
   percentile5: 2,
   percentile25: 3,
   percentile75: 7,
-  percentile95: 9,
 };
 
 const params: CorridorStatsViewParams = {
@@ -46,9 +48,10 @@ const params: CorridorStatsViewParams = {
   to: DateTime.fromISO("2023-03-30", { zone: "Europe/London" }),
   granularity: CorridorGranularity.Day,
   stops: [
-    { stopId: "ST0001", stopName: "A" } as Stop,
-    { stopId: "ST0002", stopName: "B" } as Stop,
+    { stopId: "ST0001", stopName: "A" } as CorridorStop,
+    { stopId: "ST0002", stopName: "B" } as CorridorStop,
   ],
+  estimated: EstimatedToggle.Evidenced,
 };
 
 const stats: CorridorStatsType = {
@@ -272,6 +275,7 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         CreateCorridorDocument.definitions,
       );
+
       expect(operation.variables.name).toEqual("my new corridor");
       expect(operation.variables.stopIds).toEqual(["ST012345"]);
       return true;
@@ -381,6 +385,7 @@ describe("CorridorsService", () => {
     expect(
       actual.journeyTimeStats[actual.journeyTimeStats.length - 1].ts,
     ).toEqual("2023-03-30T00:00:00+01:00");
+
     expect(actual.journeyTimeStats.length).toEqual(28);
     expect(actual.journeyTimeTimeOfDayStats.length).toEqual(25);
     expect(actual.journeyTimeDayOfWeekStats.length).toEqual(7);
@@ -395,8 +400,8 @@ describe("CorridorsService", () => {
     expect(actual.journeyTimeDayOfWeekStats[0].category).toEqual("Mon");
     expect(actual.journeyTimeDayOfWeekStats[6].category).toEqual("Sun");
 
-    expect(actual.journeyTimePerServiceStats[0].noc).toEqual("OP01");
-    expect(actual.journeyTimePerServiceStats[0].operatorName).toEqual(
+    expect(actual.journeyTimePerServiceStats[0]?.noc).toEqual("OP01");
+    expect(actual.journeyTimePerServiceStats[0]?.operatorName).toEqual(
       "Stagecoach East Midlands",
     );
   });
@@ -408,6 +413,7 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         DeleteCorridorDocument.definitions,
       );
+
       expect(operation.variables.corridorId).toEqual(1234);
       return true;
     });
@@ -459,8 +465,8 @@ describe("CorridorsService", () => {
 
     afterAll(() => {
       params.stops = [
-        { stopId: "ST0001", stopName: "A" } as Stop,
-        { stopId: "ST0002", stopName: "B" } as Stop,
+        { stopId: "ST0001", stopName: "A" } as CorridorStop,
+        { stopId: "ST0002", stopName: "B" } as CorridorStop,
       ];
     });
   });
@@ -478,8 +484,11 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         UpdateCorridorDocument.definitions,
       );
+
       expect(operation.variables.inputs.name).toEqual("my updated corridor");
+
       expect(operation.variables.inputs.id).toEqual(123);
+
       expect(operation.variables.inputs.stopList).toEqual([
         "ST012345",
         "ST67890",

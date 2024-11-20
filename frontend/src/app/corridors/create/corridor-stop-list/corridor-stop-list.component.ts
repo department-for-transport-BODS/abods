@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Feature, FeatureCollection, Point } from "geojson";
-import { Stop } from "../../corridors.service";
+import { CorridorStop } from "../../corridors.service";
 
 @Component({
   selector: "app-corridor-stop-list",
@@ -8,10 +8,10 @@ import { Stop } from "../../corridors.service";
   styleUrls: ["./corridor-stop-list.component.scss"],
 })
 export class CorridorStopListComponent {
-  @Input() corridorStops?: FeatureCollection<Point, Stop>;
+  @Input() corridorStops?: FeatureCollection<Point, CorridorStop>;
   @Input() loading = false;
   @Input() isEdit = false;
-  @Output() mouseOver = new EventEmitter<Feature<Point, Stop>>();
-  @Output() mouseLeave = new EventEmitter<Feature<Point, Stop>>();
-  @Output() removeLastStop = new EventEmitter<Feature<Point, Stop>>();
+  @Output() mouseOver = new EventEmitter<Feature<Point, CorridorStop>>();
+  @Output() mouseLeave = new EventEmitter<Feature<Point, CorridorStop>>();
+  @Output() removeLastStop = new EventEmitter<Feature<Point, CorridorStop>>();
 }

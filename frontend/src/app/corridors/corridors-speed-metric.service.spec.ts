@@ -7,12 +7,8 @@ import {
 } from "../../generated/graphql";
 
 import { CorridorsSpeedMetricService } from "./corridors-speed-metric.service";
-import {
-  CorridorStats,
-  CorridorStatsViewParams,
-  Stop,
-} from "./corridors.service";
 import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
+import { CorridorStats, CorridorStatsViewParams, CorridorStop } from "./types";
 
 describe("CorridorsSpeedMetricService", () => {
   let service: CorridorsSpeedMetricService;
@@ -226,10 +222,10 @@ describe("CorridorsSpeedMetricService", () => {
     it("should set average speed for corridor section if params passed", () => {
       const params = <CorridorStatsViewParams>{
         stops: [
-          <Stop>{
+          <CorridorStop>{
             stopId: "ST0100BRP90312",
           },
-          <Stop>{
+          <CorridorStop>{
             stopId: "ST0100BRA10796",
           },
         ],
@@ -365,12 +361,15 @@ describe("CorridorsSpeedMetricService", () => {
       expect(result.find((bins) => bins.bin === 12)?.xAxisCategory).toEqual(
         "12",
       );
+
       expect(result.find((bins) => bins.bin === 22)?.xAxisCategory).toEqual(
         "22",
       );
+
       expect(result.find((bins) => bins.bin === 37)?.xAxisCategory).toEqual(
         "37",
       );
+
       expect(result.find((bins) => bins.bin === 112)?.xAxisCategory).toEqual(
         "112",
       );
@@ -382,12 +381,15 @@ describe("CorridorsSpeedMetricService", () => {
       expect(result.find((bins) => bins.bin === 12)?.xAxisLabel).toEqual(
         "12 mph",
       );
+
       expect(result.find((bins) => bins.bin === 22)?.xAxisLabel).toEqual(
         "22 mph",
       );
+
       expect(result.find((bins) => bins.bin === 37)?.xAxisLabel).toEqual(
         "37 mph",
       );
+
       expect(result.find((bins) => bins.bin === 112)?.xAxisLabel).toEqual(
         "112 mph",
       );

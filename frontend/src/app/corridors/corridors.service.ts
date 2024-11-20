@@ -1,16 +1,11 @@
 import { Injectable } from "@angular/core";
 import {
   CorridorGranularity,
-  CorridorJourneyTimeStatsType,
   CorridorsListGQL,
   CorridorsStopSearchGQL,
   CorridorsSubsequentStopsGQL,
-  CorridorStatsDayOfWeekType,
   CorridorStatsGQL,
-  CorridorStatsInputType,
-  CorridorStatsTimeOfDayType,
   CorridorStatsType,
-  CorridorType,
   CorridorUpdateInputType,
   CreateCorridorGQL,
   DeleteCorridorGQL,
@@ -36,59 +31,18 @@ import {
   sortBy as _sortBy,
   values as _values,
 } from "lodash-es";
-import { HistogramChartDataItem } from "./view/histogram-chart/histogram-chart.component";
-import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
-import { Definitely, nonNullishArray } from "../shared/array-operators";
+import { nonNullishArray } from "../shared/array-operators";
 import { LngLatBounds } from "mapbox-gl";
 import { OperatorService } from "../shared/services/operator.service";
-import { ICorridorJourneyTimeStats } from "../../generated/extra";
-
-export type Stop = Pick<
-  StopType,
-  | "stopId"
-  | "stopName"
-  | "lon"
-  | "lat"
-  | "localityName"
-  | "adminAreaId"
-  | "sourceId"
-> & {
-  naptan: string;
-  intId: number;
-};
-
-export type CorridorSummary = Definitely<Pick<CorridorType, "id" | "name">> & {
-  numStops: number;
-};
-
-export type Corridor = Pick<CorridorType, "id" | "name"> & { stops: Stop[] };
-
-export type CorridorStats = Pick<
-  Definitely<CorridorStatsType>,
-  "summaryStats" | "journeyTimePerServiceStats"
-> & {
-  journeyTimeTimeOfDayStats: (CorridorStatsTimeOfDayType &
-    BoxPlotChartDataItem)[];
-  journeyTimeDayOfWeekStats: (CorridorStatsDayOfWeekType &
-    BoxPlotChartDataItem)[];
-  journeyTimeHistogram: HistogramChartDataItem[];
-  journeyTimeStats: (CorridorJourneyTimeStatsType & BoxPlotChartDataItem)[];
-  serviceLinks: ServiceLinkType[];
-};
-
-export type CorridorStatsParams = Pick<
-  CorridorStatsInputType,
-  "corridorId" | "fromTimestamp" | "toTimestamp" | "stopList"
-> &
-  Definitely<Pick<CorridorStatsInputType, "granularity">>;
-
-export interface CorridorStatsViewParams {
-  corridorId: string;
-  from: DateTime;
-  to: DateTime;
-  granularity: CorridorGranularity;
-  stops: Stop[];
-}
+import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
+import {
+  Corridor,
+  CorridorStats,
+  CorridorStatsViewParams,
+  CorridorStop,
+  CorridorSummary,
+  ICorridorJourneyTimeStats,
+} from "./types";
 
 let uniqueId = 0;
 
@@ -97,7 +51,7 @@ function isStopLocation(
 ): obj is Pick<StopInfoType, "stopLocation"> {
   return Object.prototype.hasOwnProperty.call(obj, "stopLocation");
 }
-const toStop: (stop: StopType | StopInfoType) => Stop = ({
+const toStop: (stop: StopType | StopInfoType) => CorridorStop = ({
   __typename,
   stopId,
   stopName,
@@ -113,8 +67,8 @@ const toStop: (stop: StopType | StopInfoType) => Stop = ({
 });
 
 export const asGeoJsonPoints: (
-  stops: Stop[],
-) => FeatureCollection<Point, Stop> = (stops) =>
+  stops: CorridorStop[],
+) => FeatureCollection<Point, CorridorStop> = (stops) =>
   featureCollection(
     stops.map((stop) => point(position(stop), stop, { id: stop.intId })),
   );
@@ -169,7 +123,7 @@ const addBoxPlotChartDataItems = (
 
 export const filterServiceLinksByStopsOrReturnServiceLinks = (
   serviceLinks: ServiceLinkType[] = [],
-  stops: Stop[] = [],
+  stops: CorridorStop[] = [],
 ): ServiceLinkType[] => {
   if (stops.length) {
     const filtered = filterServiceLinksByStops(serviceLinks, stops);
@@ -180,7 +134,7 @@ export const filterServiceLinksByStopsOrReturnServiceLinks = (
 
 export const filterServiceLinksByStops = (
   serviceLinks: ServiceLinkType[] = [],
-  stops: Stop[] = [],
+  stops: CorridorStop[] = [],
 ): ServiceLinkType[] =>
   serviceLinks.filter(
     (links) =>
@@ -189,8 +143,8 @@ export const filterServiceLinksByStops = (
   );
 
 export interface StopLists {
-  orgStops: Stop[];
-  nonOrgStops: Stop[];
+  orgStops: CorridorStop[];
+  nonOrgStops: CorridorStop[];
 }
 
 @Injectable({ providedIn: "root" })
@@ -249,7 +203,7 @@ export class CorridorsService {
     );
   }
 
-  fetchSubsequentStops(stopList: string[]): Observable<Stop[]> {
+  fetchSubsequentStops(stopList: string[]): Observable<CorridorStop[]> {
     return this.corridorsSubsequentStopsQuery
       .fetch({ stopList }, { fetchPolicy: "no-cache" })
       .pipe(
@@ -293,7 +247,7 @@ export class CorridorsService {
   }
 
   fetchStats(params: CorridorStatsViewParams): Observable<CorridorStats> {
-    const { corridorId, from, to, granularity, stops } = params;
+    const { corridorId, from, to, granularity, stops, estimated } = params;
     return this.corridorStatsQuery
       .fetch({
         params: {
@@ -302,6 +256,7 @@ export class CorridorsService {
           toTimestamp: to.toISO(),
           granularity,
           stopList: stops.map((stop) => stop.stopId),
+          estimated,
         },
       })
       .pipe(
@@ -433,3 +388,4 @@ export class CorridorsService {
     return stats;
   }
 }
+export { CorridorStop };

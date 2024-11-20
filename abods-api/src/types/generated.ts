@@ -189,6 +189,7 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
+  estimated: EstimatedToggle;
   fromTimestamp: Scalars['DateTime']['input'];
   granularity: CorridorGranularity;
   stopList: Array<Scalars['String']['input']>;
@@ -277,6 +278,11 @@ export type DelayFrequencyType = {
   bucket: Scalars['Int']['output'];
   frequency?: Maybe<Scalars['Int']['output']>;
 };
+
+export enum EstimatedToggle {
+  Estimated = 'estimated',
+  Evidenced = 'evidenced'
+}
 
 export type EventData = {
   __typename?: 'EventData';
@@ -1286,6 +1292,7 @@ export type ResolversTypes = ResolversObject<{
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
   DelayFrequencyType: ResolverTypeWrapper<Partial<DelayFrequencyType>>;
+  EstimatedToggle: ResolverTypeWrapper<Partial<EstimatedToggle>>;
   EventData: ResolverTypeWrapper<Partial<EventData>>;
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;

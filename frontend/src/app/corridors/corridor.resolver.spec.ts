@@ -3,10 +3,11 @@ import { ActivatedRouteSnapshot, ParamMap } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of, throwError } from "rxjs";
-import { Corridor, CorridorsService } from "./corridors.service";
+import { CorridorsService } from "./corridors.service";
 import { CorridorNotFoundView } from "./corridor-not-found-view.model";
 
 import { CorridorResolver } from "./corridor.resolver";
+import { Corridor } from "./types";
 
 describe("CorridorResolver", () => {
   let resolver: CorridorResolver;
