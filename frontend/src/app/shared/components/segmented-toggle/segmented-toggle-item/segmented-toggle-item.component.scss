@@ -5,11 +5,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  min-width: 140px;
   &__label {
     @include govuk-font(19);
     padding: govuk-spacing(1) govuk-spacing(2);
     background-color: govuk-colour("light-grey");
     cursor: pointer;
+    width: 100%;
     .segmented-toggle-item__input:checked + & {
       color: govuk-colour("white");
       background-color: govuk-colour("blue");

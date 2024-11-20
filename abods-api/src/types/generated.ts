@@ -1058,6 +1058,7 @@ export enum SortOrderEnum {
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
+  estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
   lineName: Scalars['String']['output'];
@@ -2024,6 +2025,7 @@ export type ServicePunctualityTypeResolvers<ContextType = RequestContext, Parent
 
 export type StopResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Stop'] = ResolversParentTypes['Stop']> = ResolversObject<{
   actualDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  estimatedDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isTimingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

@@ -1,15 +1,11 @@
 import { Injectable } from "@angular/core";
-import { AvlsGQL, JourneysGQL, RouteGQL } from "../../../generated/graphql";
+import { JourneysGQL } from "../../../generated/graphql";
 import { DateTime } from "luxon";
-import { mergeMap, Observable, of, zip } from "rxjs";
+import { Observable, of } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { nonNullishArray } from "../../shared/array-operators";
 import { sortBy, uniqBy } from "lodash-es";
 import { FindJourneysCache } from "./find-journeys-cache";
-import {
-  createVehicleJourneyView,
-  VehicleJourneyView,
-} from "../vehicle-journeys-view/vehicle-journey-view.model";
 
 export interface VehicleJourney {
   groupId?: string;
@@ -22,11 +18,7 @@ export interface VehicleJourney {
 export class VehicleJourneysSearchService {
   private findJourneysCache = new FindJourneysCache();
 
-  constructor(
-    private journeysGQL: JourneysGQL,
-    private avlsGQL: AvlsGQL,
-    private routeGQL: RouteGQL,
-  ) {}
+  constructor(private journeysGQL: JourneysGQL) {}
 
   fetchDayJourneys(
     date: DateTime,
@@ -71,42 +63,5 @@ export class VehicleJourneysSearchService {
           this.findJourneysCache.setItem(from, to, lineId, journeys);
         }),
       );
-  }
-
-  getJourney(
-    journeyId: string,
-    startTime: DateTime,
-    timingPointsOnly: boolean,
-  ): Observable<VehicleJourneyView> {
-    return zip(
-      this.avlsGQL.fetch({ groupId: journeyId }),
-      this.routeGQL.fetch({ groupId: journeyId }),
-    ).pipe(
-      mergeMap(
-        ([
-          {
-            data: { avls },
-          },
-          {
-            data: { route },
-          },
-        ]) =>
-          this.fetchDayJourneys(
-            startTime.setZone("Europe/London"),
-            route?.[0]?.serviceId ?? "",
-          ).pipe(
-            map((journeys) =>
-              createVehicleJourneyView(
-                avls,
-                route,
-                timingPointsOnly,
-                journeys,
-                startTime,
-                journeyId,
-              ),
-            ),
-          ),
-      ),
-    );
   }
 }

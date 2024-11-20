@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { DateTime } from "luxon";
-import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
+import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 @Component({
   selector: "app-journey-info",
@@ -8,26 +8,28 @@ import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
   styleUrls: ["./journey-info.component.scss"],
 })
 export class JourneyInfoComponent {
-  @Input() journeyInfo?: VehicleJourneyInfo | null;
   @Input() loading?: boolean;
+  @Input() journeyInfo?: JourneyInfo | null;
 
   get operatorName(): string {
-    return this.journeyInfo?.operatorInfo?.operatorName ?? "";
+    return this.journeyInfo?.stops[0]?.operatorName ?? "";
   }
 
   get operatorNocCode(): string {
-    return this.journeyInfo?.operatorInfo?.nocCode ?? "";
+    return this.journeyInfo?.stops[0]?.operatorNoc ?? "";
   }
 
   get servicePatternName(): string {
-    return this.journeyInfo?.serviceInfo?.serviceName ?? "";
+    return this.journeyInfo?.stops[0]?.serviceName ?? "";
   }
 
   get startTime(): DateTime | undefined {
-    return this.journeyInfo?.startTime;
+    return this.journeyInfo?.stops[0]
+      ? DateTime.fromISO(this.journeyInfo?.stops[0].startTime)
+      : undefined;
   }
 
   get vehicleId(): string {
-    return this.journeyInfo?.vehicleId ?? "";
+    return this.journeyInfo?.avls[0]?.vehicleRef ?? "Unknown";
   }
 }
