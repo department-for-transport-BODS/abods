@@ -123,8 +123,8 @@
       }"
       [minzoom]="14"
       source="journey-pings"
-      (layerMouseMove)="onPingMouseEnter($event.features?.[0]?.properties)"
-      (layerMouseLeave)="onPingMouseLeave()"
+      (layerMouseMove)="onPingMouseEnter($event)"
+      (layerMouseLeave)="onPingMouseLeave($event)"
     ></mgl-layer>
     <mgl-layer
       id="journey-stop-layer"
@@ -161,8 +161,8 @@
         ]
       }"
       source="journey-stops"
-      (layerMouseMove)="onStopMouseEnter($event.features?.[0]?.properties)"
-      (layerMouseLeave)="onStopMouseLeave()"
+      (layerMouseMove)="onStopMouseEnter($event)"
+      (layerMouseLeave)="onStopMouseLeave($event)"
     ></mgl-layer>
     <mgl-layer
       id="journey-timing-point-layer"
@@ -190,8 +190,8 @@
         'symbol-placement': 'point'
       }"
       source="journey-timing-points"
-      (layerMouseMove)="onStopMouseEnter($event.features?.[0]?.properties)"
-      (layerMouseLeave)="onStopMouseLeave()"
+      (layerMouseMove)="onStopMouseEnter($event)"
+      (layerMouseLeave)="onStopMouseLeave($event)"
     ></mgl-layer>
     <mgl-popup
       *ngIf="tooltipStop"

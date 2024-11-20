@@ -1,14 +1,14 @@
 <div
   class="stop-list-item"
   [ngClass]="{
-    'stop-list-item--timing-point': stop?.isTimingPoint,
-    'stop-list-item--timing-point--first': stop?.isTimingPoint && firstItem
+    'stop-list-item--timing-point': stop.isTimingPoint,
+    'stop-list-item--timing-point--first': stop.isTimingPoint && firstItem
   }"
 >
   <div class="stop-list-item__value-container">
     <span
       *ngIf="displayTimingDetails"
-      [ngxTippy]="stop?.isTimingPoint ? 'Timing point' : null"
+      [ngxTippy]="stop.isTimingPoint ? 'Timing point' : null"
       [tippyProps]="{ theme: 'gds-tooltip' }"
     >
       <svg-icon
@@ -18,11 +18,11 @@
           'stop-list-item__icon--early': otp === 'Early',
           'stop-list-item__icon--late': otp === 'Late',
           'stop-list-item__icon--no-data': otp === null,
-          'stop-list-item__icon--stop': !stop?.isTimingPoint
+          'stop-list-item__icon--stop': !stop.isTimingPoint
         }"
         [applyClass]="true"
         [src]="
-          stop?.isTimingPoint
+          stop.isTimingPoint
             ? 'assets/icons/timing.svg'
             : 'assets/icons/stop.svg'
         "
@@ -39,7 +39,7 @@
       (mouseenter)="stopHovered.emit({ stop: stop, event: 'enter' })"
       (mouseleave)="stopHovered.emit({ stop: stop, event: 'leave' })"
     >
-      <span>{{ stop?.stopName ? stop?.stopName : "-" }}</span>
+      <span>{{ stop.stopName ? stop.stopName : "-" }}</span>
     </button>
   </div>
   <div
