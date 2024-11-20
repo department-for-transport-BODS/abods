@@ -3,10 +3,10 @@ import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
 
-export const throwUnauthenticatedError = (
-  message: string | undefined,
-  path: string | number | undefined,
-): never => {
+export function throwUnauthenticatedError(
+  message?: string,
+  path?: string | number,
+): never {
   throw new GraphQLError(message || "Unauthorized", {
     extensions: {
       code: "UNAUTHENTICATED",
@@ -14,14 +14,14 @@ export const throwUnauthenticatedError = (
       path,
     },
   });
-};
+}
 
 export const emptyResolver = () => ({});
 
 export const requireUserSession = async (context: RequestContext) => {
   const cookieHeader = getHeader(context.headers, "Cookie");
   if (!cookieHeader) {
-    throw "Not Authorized";
+    throwUnauthenticatedError();
   }
   logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);
   const cookies = parseCookie(cookieHeader);
@@ -29,7 +29,7 @@ export const requireUserSession = async (context: RequestContext) => {
 
   logger.debug(`Session id: ${sessionId}`);
   if (!sessionId) {
-    throw "Not Authorized";
+    throwUnauthenticatedError();
   }
   logger.debug("Within get session function");
 
@@ -45,24 +45,33 @@ export const requireUserSession = async (context: RequestContext) => {
   );
   if (!sessionRecord) {
     logger.debug("No Session record found for user");
-    throw "Not Authorized";
+    throwUnauthenticatedError();
   }
   // fetch user from bods
   const bodsUser = await context.db.bods_user.findUnique({
     where: { id: sessionRecord.user_id },
-    include: {
-      userOrganisations: true,
+    select: {
+      userOrganisations: {
+        select: {
+          organisation_id: true,
+        },
+      },
+      id: true,
+      username: true,
+      email: true,
+      first_name: true,
+      last_name: true,
     },
   });
 
   logger.debug(`Retrieved bods user: ${JSON.stringify(bodsUser)}`);
   if (!bodsUser) {
     logger.debug("No bods user found");
-    throw "Not Authorized";
+    throwUnauthenticatedError();
   }
   if (!bodsUser.userOrganisations || bodsUser.userOrganisations.length === 0) {
     logger.error("User not mapped to an organisation");
-    throw "User not mapped to any organisation";
+    throwUnauthenticatedError("User not mapped to any organisation");
   }
   const sessionUser: SessionUser = {
     id: bodsUser.id,

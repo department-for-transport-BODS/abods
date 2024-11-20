@@ -1,5 +1,5 @@
 import { NgModule } from "@angular/core";
-import { InMemoryCache, ServerError } from "@apollo/client/core";
+import { InMemoryCache } from "@apollo/client/core";
 import { HttpLink } from "apollo-angular/http";
 import { ConfigService } from "./config/config.service";
 import { ApolloLink } from "@apollo/client/link/core";
@@ -24,10 +24,9 @@ export function createApollo(
     }
 
     if (
-      graphQLErrors?.some(
-        ({ message }) => message === "Access denied for unauthenticated user",
-      ) ||
-      (networkError as ServerError)?.statusCode === 401
+      networkError &&
+      "status" in networkError &&
+      networkError.status === 401
     ) {
       // Clear session so they can re authenticate
       localStorage.removeItem("session");
