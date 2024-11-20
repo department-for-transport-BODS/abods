@@ -13,6 +13,7 @@ import {
   CorridorStatsType,
   CreateCorridorDocument,
   DeleteCorridorDocument,
+  EstimatedToggle,
   GetCorridorDocument,
   ServiceLinkType,
   UpdateCorridorDocument,
@@ -26,11 +27,8 @@ import { fakeAsync, flush } from "@angular/core/testing";
 import objectContaining = jasmine.objectContaining;
 import { OperatorService } from "../shared/services/operator.service";
 import { of } from "rxjs";
-import {
-  CorridorStatsViewParams,
-  CorridorStop,
-  ICorridorJourneyTimeStats,
-} from "../../generated/extra";
+import { ICorridorJourneyTimeStats } from "../../generated/extra";
+import { CorridorStatsViewParams, CorridorStop } from "./types";
 
 const journeyTime: ICorridorJourneyTimeStats = {
   avgTransitTime: 5,
@@ -50,6 +48,7 @@ const params: CorridorStatsViewParams = {
     { stopId: "ST0001", stopName: "A" } as CorridorStop,
     { stopId: "ST0002", stopName: "B" } as CorridorStop,
   ],
+  estimated: EstimatedToggle.Evidenced,
 };
 
 const stats: CorridorStatsType = {
@@ -273,6 +272,7 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         CreateCorridorDocument.definitions,
       );
+
       expect(operation.variables.name).toEqual("my new corridor");
       expect(operation.variables.stopIds).toEqual(["ST012345"]);
       return true;
@@ -410,6 +410,7 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         DeleteCorridorDocument.definitions,
       );
+
       expect(operation.variables.corridorId).toEqual(1234);
       return true;
     });
@@ -480,8 +481,11 @@ describe("CorridorsService", () => {
       expect(operation.query.definitions).toEqual(
         UpdateCorridorDocument.definitions,
       );
+
       expect(operation.variables.inputs.name).toEqual("my updated corridor");
+
       expect(operation.variables.inputs.id).toEqual(123);
+
       expect(operation.variables.inputs.stopList).toEqual([
         "ST012345",
         "ST67890",

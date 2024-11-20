@@ -109,7 +109,7 @@ input CorridorStatsInputType {
   granularity: CorridorGranularity!
   stopList: [String!]!
   toTimestamp: DateTime!
-  estimated: EstimatedToggle
+  estimated: EstimatedToggle!
 }
 
 enum EstimatedToggle {

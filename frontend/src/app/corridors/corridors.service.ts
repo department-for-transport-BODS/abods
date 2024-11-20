@@ -34,15 +34,15 @@ import {
 import { nonNullishArray } from "../shared/array-operators";
 import { LngLatBounds } from "mapbox-gl";
 import { OperatorService } from "../shared/services/operator.service";
+import { ICorridorJourneyTimeStats } from "../../generated/extra";
+import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
 import {
   Corridor,
   CorridorStats,
   CorridorStatsViewParams,
   CorridorStop,
   CorridorSummary,
-  ICorridorJourneyTimeStats,
-} from "../../generated/extra";
-import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
+} from "./types";
 
 let uniqueId = 0;
 

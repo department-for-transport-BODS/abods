@@ -3,7 +3,7 @@ import { Resolve, ActivatedRouteSnapshot } from "@angular/router";
 import { catchError, Observable, of } from "rxjs";
 import { CorridorsService } from "./corridors.service";
 import { CorridorNotFoundView } from "./corridor-not-found-view.model";
-import { Corridor } from "../../generated/extra";
+import { Corridor } from "./types";
 
 @Injectable({
   providedIn: "root",

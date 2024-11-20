@@ -1272,9 +1272,13 @@
             "name": "estimated",
             "description": null,
             "type": {
-              "kind": "ENUM",
-              "name": "EstimatedToggle",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "EstimatedToggle",
+                "ofType": null
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,

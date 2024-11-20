@@ -189,7 +189,7 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  estimated?: InputMaybe<EstimatedToggle>;
+  estimated: EstimatedToggle;
   fromTimestamp: Scalars['DateTime']['input'];
   granularity: CorridorGranularity;
   stopList: Array<Scalars['String']['input']>;

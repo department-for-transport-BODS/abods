@@ -219,10 +219,12 @@ export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
 
 export const getJourneyDeparture = (
   journey: Timetable,
-  estimated?: EstimatedToggle | null,
+  estimated: EstimatedToggle,
 ) => {
-  return estimated === EstimatedToggle.Estimated &&
-    !journey.actual_departure_time
-    ? journey.timestamp_after_estimate
-    : journey.actual_departure_time;
+  return (
+    journey.actual_departure_time ??
+    (estimated === EstimatedToggle.Estimated
+      ? journey.timestamp_after_estimate
+      : null)
+  );
 };

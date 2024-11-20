@@ -421,12 +421,10 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   const scheduledTransits = data.journeys.size;
   let totalTransits = 0;
   let totalJourneyTime = 0;
-  let estimatedTotalTransits = 0;
-  let estimatedTotalJourneyTime = 0;
   const services = new Set();
   [...data.journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
-    let firstStopOfCorridor = getJourneyDeparture(
+    let firstDeparture = getJourneyDeparture(
       journeys[0],
       data.inputs.estimated,
     );
@@ -436,22 +434,10 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
       data.inputs.estimated,
     );
 
-    if (firstStopOfCorridor && lastStopOfCorridor) {
+    if (firstDeparture && lastStopOfCorridor) {
       totalTransits += 1;
       totalJourneyTime +=
-        (lastStopOfCorridor.getTime() - firstStopOfCorridor.getTime()) / 1000; //In seconds
-    }
-
-    firstStopOfCorridor =
-      firstStopOfCorridor ?? journeys[0].timestamp_after_estimate;
-    lastStopOfCorridor =
-      lastStopOfCorridor ??
-      journeys[journeys.length - 1].timestamp_after_estimate;
-
-    if (firstStopOfCorridor && lastStopOfCorridor) {
-      estimatedTotalTransits += 1;
-      estimatedTotalJourneyTime +=
-        (lastStopOfCorridor.getTime() - firstStopOfCorridor.getTime()) / 1000; //In seconds
+        (lastStopOfCorridor.getTime() - firstDeparture.getTime()) / 1000; //In seconds
     }
 
     const serviceCode = `${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`;
@@ -482,6 +468,7 @@ export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTi
     return getJourneyStats(
       data.journeys,
       CorridorJourneyStatsOption.hourAsNumber,
+      data.inputs.estimated,
     );
   };
 
@@ -493,7 +480,11 @@ export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDa
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    return getJourneyStats(data.journeys, CorridorJourneyStatsOption.dayOfWeek);
+    return getJourneyStats(
+      data.journeys,
+      CorridorJourneyStatsOption.dayOfWeek,
+      data.inputs.estimated,
+    );
   };
 
 export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"] =
@@ -505,46 +496,54 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return (data.inputs || {}).granularity === "day"
-      ? getJourneyStats(data.journeys, CorridorJourneyStatsOption.day)
-      : getJourneyStats(data.journeys, CorridorJourneyStatsOption.hour);
+      ? getJourneyStats(
+          data.journeys,
+          CorridorJourneyStatsOption.day,
+          data.inputs.estimated,
+        )
+      : getJourneyStats(
+          data.journeys,
+          CorridorJourneyStatsOption.hour,
+          data.inputs.estimated,
+        );
   };
 
 const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
   inputType: CorridorJourneyStatsOption,
+  estimated: EstimatedToggle,
 ) => {
   const journeyStats = new Map<string, number[]>();
   [...journeys.values()].map((journeys) => {
     journeys.sort((a, b) => a.stop_index - b.stop_index);
 
-    const firstStopOfCorridor = journeys[0];
+    const firstDeparture = journeys[0];
 
-    const firstStopDeparture = getJourneyDeparture(journeys[0]);
-    const lastStopDeparture = getJourneyDeparture(
+    const firstStopDeparture = getJourneyDeparture(journeys[0], estimated);
+    const lastDeparture = getJourneyDeparture(
       journeys[journeys.length - 1],
+      estimated,
     );
 
-    if (firstStopDeparture && lastStopDeparture) {
+    if (firstStopDeparture && lastDeparture) {
       let dateKey: string = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
-          dateKey = getDayFormattedDate(firstStopOfCorridor.date_of_journey);
+          dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
           break;
 
         case CorridorJourneyStatsOption.dayOfWeek:
-          dateKey = getDate(firstStopOfCorridor.date_of_journey)
-            .day()
-            .toString();
+          dateKey = getDate(firstDeparture.date_of_journey).day().toString();
           break;
 
         case CorridorJourneyStatsOption.hour:
           dateKey = getHourFormattedDate(
-            firstStopOfCorridor.expected_departure_time,
+            firstDeparture.expected_departure_time,
           );
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
-          dateKey = getDate(firstStopOfCorridor.expected_departure_time)
+          dateKey = getDate(firstDeparture.expected_departure_time)
             .tz("Europe/London")
             .hour()
             .toString();
@@ -556,7 +555,7 @@ const getJourneyStats = (
 
       const journeyTime = journeyStats.get(dateKey) || [];
       journeyTime.push(
-        (lastStopDeparture.getTime() - firstStopDeparture.getTime()) / 1000,
+        (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000,
       );
       journeyStats.set(dateKey, journeyTime);
     }
@@ -596,26 +595,30 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
     const stats: CorridorStatsPerServiceType[] = [];
     [...data.journeys.values()].map((journeys) => {
       journeys.sort((a, b) => a.stop_index - b.stop_index);
-      const firstStopOfCorridor = journeys[0];
+      const firstDeparture = journeys[0];
 
-      const firstStopDeparture = getJourneyDeparture(journeys[0]);
-      const lastStopDeparture = getJourneyDeparture(
+      const firstStopDeparture = getJourneyDeparture(
+        journeys[0],
+        data.inputs.estimated,
+      );
+      const lastDeparture = getJourneyDeparture(
         journeys[journeys.length - 1],
+        data.inputs.estimated,
       );
       // noc_line_and_servicecode
-      const service = `${firstStopOfCorridor.operator_noc}-${firstStopOfCorridor.line_name}-${firstStopOfCorridor.service_code}`;
+      const service = `${firstDeparture.operator_noc}-${firstDeparture.line_name}-${firstDeparture.service_code}`;
       let journeyTime = journeyStats.get(service) || {
         totalJourneyTime: 0,
         recordedTransits: 0,
         scheduledTransits: 0,
-        lineName: firstStopOfCorridor.line_name,
-        operatorNoc: firstStopOfCorridor.operator_noc,
-        serviceCode: firstStopOfCorridor.service_code,
+        lineName: firstDeparture.line_name,
+        operatorNoc: firstDeparture.operator_noc,
+        serviceCode: firstDeparture.service_code,
       };
       journeyTime.scheduledTransits += 1;
-      if (firstStopDeparture && lastStopDeparture) {
+      if (firstStopDeparture && lastDeparture) {
         journeyTime.totalJourneyTime +=
-          (lastStopDeparture.getTime() - firstStopDeparture.getTime()) / 1000;
+          (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000;
         journeyTime.recordedTransits += 1;
       }
       journeyStats.set(service, journeyTime);
@@ -661,13 +664,17 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
     [...data.journeys.values()].map((journeys) => {
       journeys.sort((a, b) => a.stop_index - b.stop_index);
 
-      const firstStopDeparture = getJourneyDeparture(journeys[0]);
-      const lastStopDeparture = getJourneyDeparture(
-        journeys[journeys.length - 1],
+      const firstStopDeparture = getJourneyDeparture(
+        journeys[0],
+        data.inputs.estimated,
       );
-      if (firstStopDeparture && lastStopDeparture) {
+      const lastDeparture = getJourneyDeparture(
+        journeys[journeys.length - 1],
+        data.inputs.estimated,
+      );
+      if (firstStopDeparture && lastDeparture) {
         const totalJourneyTime = Math.floor(
-          (lastStopDeparture.getTime() - firstStopDeparture.getTime()) /
+          (lastDeparture.getTime() - firstStopDeparture.getTime()) /
             (1000 * 60),
         );
 

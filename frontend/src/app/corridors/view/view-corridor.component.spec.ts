@@ -9,15 +9,15 @@ import {
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import { RouterTestingModule } from "@angular/router/testing";
-import {
-  CorridorsService,
-  CorridorStatsViewParams,
-} from "../corridors.service";
+import { CorridorsService } from "../corridors.service";
 import { of } from "rxjs";
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { ViewCorridorComponent } from "./view-corridor.component";
 import { DateTime, Settings } from "luxon";
-import { CorridorGranularity } from "../../../generated/graphql";
+import {
+  CorridorGranularity,
+  EstimatedToggle,
+} from "../../../generated/graphql";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { AgGridModule } from "ag-grid-angular";
 import { LuxonModule } from "luxon-angular";
@@ -27,13 +27,7 @@ import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { SegmentSelectorComponent } from "../segment-selector/segment-selector.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { Custom } from "src/app/shared/components/date-range/date-range.types";
-import {
-  FeatureIdentifier,
-  LngLatBounds,
-  LngLatBoundsLike,
-  LngLatLike,
-  Map,
-} from "mapbox-gl";
+import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
 import { MapComponent } from "ngx-mapbox-gl";
 import {
   EventEmitter,
@@ -47,6 +41,7 @@ import {
 import bbox from "@turf/bbox";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { lineString } from "@turf/helpers";
+import { CorridorStatsViewParams } from "../types";
 
 const corridor = {
   id: 123,
@@ -104,11 +99,8 @@ export class StubMapComponent implements OnInit {
     this.bounds = new LngLatBounds(sw, ne);
     this.moveEnd.emit();
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  setFeatureState = (
-    feature: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
-    state: { [key: string]: any },
-  ) => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setFeatureState = () => {};
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -191,6 +183,7 @@ describe("ViewCorridorComponent", () => {
         to: DateTime.fromISO("2021-09-01"),
         granularity: CorridorGranularity.Day,
         stops: [corridor.stops[0], corridor.stops[1], corridor.stops[2]],
+        estimated: EstimatedToggle.Evidenced,
       };
 
       expect(spy).toHaveBeenCalledWith(expectedParams);
@@ -199,14 +192,17 @@ describe("ViewCorridorComponent", () => {
           byTextContent("Total transits90", { selector: ".stat" }),
         ),
       ).toBeVisible();
+
       expect(
         spectator.query(byTextContent("Services5", { selector: ".stat" })),
       ).toBeVisible();
+
       expect(
         spectator.query(
           byTextContent("Average journey time01:30", { selector: ".stat" }),
         ),
       ).toBeVisible();
+
       expect(
         spectator.query(
           byTextContent("Missing transits10", { selector: ".stat" }),
@@ -250,6 +246,7 @@ describe("ViewCorridorComponent", () => {
         to: DateTime.fromISO("2021-09-01"),
         granularity: CorridorGranularity.Day,
         stops: [corridor.stops[1], corridor.stops[2]],
+        estimated: EstimatedToggle.Evidenced,
       };
 
       expect(spy).toHaveBeenCalledWith(expectedParams);
@@ -258,14 +255,17 @@ describe("ViewCorridorComponent", () => {
           byTextContent("Total transits90", { selector: ".stat" }),
         ),
       ).toBeVisible();
+
       expect(
         spectator.query(byTextContent("Services5", { selector: ".stat" })),
       ).toBeVisible();
+
       expect(
         spectator.query(
           byTextContent("Average journey time01:30", { selector: ".stat" }),
         ),
       ).toBeVisible();
+
       expect(
         spectator.query(
           byTextContent("Missing transits10", { selector: ".stat" }),

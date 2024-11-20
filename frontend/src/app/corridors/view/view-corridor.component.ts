@@ -47,7 +47,7 @@ import {
   CorridorStats,
   CorridorStatsViewParams,
   CorridorStop,
-} from "../../../generated/extra";
+} from "../types";
 
 @Component({
   templateUrl: "view-corridor.component.html",
