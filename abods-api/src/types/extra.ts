@@ -15,7 +15,7 @@ export interface RequestContext {
   headers: IncomingHttpHeaders;
   db: PrismaClient;
   apiKeyAuth?: AuthContext;
-  kysley: Kysely<DB>;
+  kysely: Kysely<DB>;
 }
 
 export interface SessionUser {

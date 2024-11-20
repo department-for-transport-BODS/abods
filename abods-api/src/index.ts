@@ -21,7 +21,7 @@ import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
 
-export const kysley = new Kysely<DB>({
+export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
     pool: new pg.Pool({
       connectionString: await getDatabaseUrl(),
@@ -57,7 +57,6 @@ server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
 app.use(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
   express.json(),
   expressMiddleware(server, {
@@ -77,7 +76,7 @@ app.use(
           logger.error("Failed to create database context");
         }
       }
-      return { req, res, headers, db, apiKeyAuth, kysley };
+      return { req, res, headers, db, apiKeyAuth, kysely };
     },
   }),
 );
