@@ -27,7 +27,7 @@ export const getVehicleCounts = (
     .where("organisation_id", "=", userOrgId)
     .select("operatorref");
 
-  let baseQuery = db
+  const baseQuery = db
     .selectFrom("expected_journeys")
     .where("date_of_journey", "=", startTime)
     .where("expected_journey_start", "<", endTime)
@@ -39,23 +39,26 @@ export const getVehicleCounts = (
     .distinct()
     .select("operator_noc")
     .select("group_id")
-    .select(({ selectFrom, exists }) => [
-      exists(
-        selectFrom("SiriVMPositions")
-          .where("SiriVMPositions.date_of_journey", "=", startTime)
-          .whereRef(
-            "SiriVMPositions.group_id",
-            "=",
-            "expected_journeys.group_id",
-          )
-          .whereRef(
-            "SiriVMPositions.operator_ref",
-            "=",
-            "expected_journeys.operator_noc",
-          )
-          .where("SiriVMPositions.recorded_at_time", ">=", startTime)
-          .where("SiriVMPositions.recorded_at_time", "<", endTime),
-      ).as("cur"),
+    .select((eb) => [
+      eb
+        .exists(
+          eb
+            .selectFrom("SiriVMPositions")
+            .where("SiriVMPositions.date_of_journey", "=", startTime)
+            .whereRef(
+              "SiriVMPositions.group_id",
+              "=",
+              "expected_journeys.group_id",
+            )
+            .whereRef(
+              "SiriVMPositions.operator_ref",
+              "=",
+              "expected_journeys.operator_noc",
+            )
+            .where("SiriVMPositions.recorded_at_time", ">=", startTime)
+            .where("SiriVMPositions.recorded_at_time", "<", endTime),
+        )
+        .as("cur"),
     ]);
 
   return db
