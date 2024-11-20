@@ -168,8 +168,8 @@ export class ServiceMapComponent implements OnInit, OnDestroy {
         serviceLink.fromStop === segment[0].stopId &&
         serviceLink.toStop === segment[1].stopId,
     );
-    if (serviceLink?.routeValidity === "VALID") {
-      return JSON.parse(serviceLink.linkRoute as string);
+    if (serviceLink?.routeValidity === "VALID" && serviceLink.linkRoute) {
+      return JSON.parse(serviceLink.linkRoute);
     } else if (
       !features.find(
         (feature) =>

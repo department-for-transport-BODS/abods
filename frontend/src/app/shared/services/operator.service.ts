@@ -1,5 +1,9 @@
 import { Injectable } from "@angular/core";
-import { OperatorLinesGQL, OperatorListGQL } from "../../../generated/graphql";
+import {
+  LineType,
+  OperatorLinesGQL,
+  OperatorListGQL,
+} from "../../../generated/graphql";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { map as _map, flatMap as _flatMap, uniq as _uniq } from "lodash-es";
@@ -11,15 +15,6 @@ export interface Operator {
   nocCode?: string | null;
   operatorId?: string | null;
   adminAreaIds: string[];
-}
-
-// FIXME Potentially confusing clash of nomenclature. The Angular app generally refers
-//  to 'services' but the backend refers to them as 'lines'. Maybe following that
-//  convention would be preferable?
-export interface Line {
-  id: string;
-  name: string;
-  number: string;
 }
 
 @Injectable({ providedIn: "root" })
@@ -50,7 +45,7 @@ export class OperatorService {
     );
   }
 
-  fetchLines(operatorId: string, inputDate?: DateTime): Observable<Line[]> {
+  fetchLines(operatorId: string, inputDate?: DateTime): Observable<LineType[]> {
     return this.operatorLinesGQL
       .fetch(
         { operatorId, inputDate: inputDate?.toISO() },
@@ -58,10 +53,7 @@ export class OperatorService {
       )
       .pipe(
         map((result) =>
-          nonNullishArray(result.data.operator?.transitModel?.lines?.items),
-        ),
-        map((lines) =>
-          lines.sort((a, b) =>
+          result.data.lines.sort((a, b) =>
             a.number.localeCompare(b.number, undefined, { numeric: true }),
           ),
         ),

@@ -514,10 +514,9 @@ export type LineFilterType = {
 
 export type LineType = {
   __typename?: 'LineType';
-  lineId: Scalars['String']['output'];
-  lineName: Scalars['String']['output'];
-  lineNumber: Scalars['String']['output'];
-  servicePatterns?: Maybe<Array<Maybe<ServicePatternType>>>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  number: Scalars['String']['output'];
 };
 
 export type LiveStatsType = {
@@ -744,7 +743,6 @@ export type OperatorType = {
   name?: Maybe<Scalars['String']['output']>;
   nocCode?: Maybe<Scalars['String']['output']>;
   operatorId: Scalars['String']['output'];
-  transitModel?: Maybe<TransitModelType>;
 };
 
 export type OperatorsPage = {
@@ -773,11 +771,6 @@ export type PageInfo = {
   __typename?: 'PageInfo';
   next?: Maybe<Scalars['Int']['output']>;
   totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type PaginatedLineType = {
-  __typename?: 'PaginatedLineType';
-  items?: Maybe<Array<Maybe<LineType>>>;
 };
 
 export type PagingInputType = {
@@ -872,12 +865,14 @@ export type Query = {
   events?: Maybe<EventResponse>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
+  lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   roles?: Maybe<Array<RoleType>>;
   route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
+  servicePatterns: Array<ServicePatternType>;
   user?: Maybe<UserType>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
@@ -920,6 +915,12 @@ export type QueryInvitationArgs = {
 };
 
 
+export type QueryLinesArgs = {
+  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
+  operatorId: Scalars['String']['input'];
+};
+
+
 export type QueryOperatorArgs = {
   operatorId: Scalars['String']['input'];
 };
@@ -937,6 +938,12 @@ export type QueryRouteArgs = {
 
 export type QueryServiceInfoArgs = {
   serviceId: Scalars['String']['input'];
+};
+
+
+export type QueryServicePatternsArgs = {
+  lineId: Scalars['String']['input'];
+  operatorId: Scalars['String']['input'];
 };
 
 
@@ -974,19 +981,18 @@ export type ServiceInfoType = {
 
 export type ServiceLinkType = {
   __typename?: 'ServiceLinkType';
-  distance: Scalars['Int']['output'];
-  fromStop?: Maybe<Scalars['String']['output']>;
+  distance: Scalars['Float']['output'];
+  fromStop: Scalars['String']['output'];
   linkRoute?: Maybe<Scalars['String']['output']>;
-  routeValidity?: Maybe<Scalars['String']['output']>;
-  toStop?: Maybe<Scalars['String']['output']>;
+  routeValidity: Scalars['String']['output'];
+  toStop: Scalars['String']['output'];
 };
 
 export type ServicePatternType = {
   __typename?: 'ServicePatternType';
-  name: Scalars['String']['output'];
-  serviceLinks?: Maybe<Array<ServiceLinkType>>;
+  serviceLinks: Array<ServiceLinkType>;
   servicePatternId: Scalars['String']['output'];
-  stops?: Maybe<Array<StopType>>;
+  stops: Array<StopType>;
 };
 
 export type ServicePerformanceFiltersInputType = {
@@ -1117,16 +1123,6 @@ export enum StopsSegment {
   Intermediate = 'Intermediate'
 }
 
-export type TransitModelType = {
-  __typename?: 'TransitModelType';
-  lines?: Maybe<PaginatedLineType>;
-};
-
-
-export type TransitModelTypeLinesArgs = {
-  filterBy: LineFilterType;
-};
-
 export type UniqueJourneyType = {
   __typename?: 'UniqueJourneyType';
   groupId?: Maybe<Scalars['String']['output']>;
@@ -1235,7 +1231,7 @@ export type CorridorStatsQueryVariables = Exact<{
 }>;
 
 
-export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageJourneyTime?: number | null, scheduledTransits?: number | null } | null, journeyTimeStats?: Array<{ __typename?: 'CorridorJourneyTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalJourneyTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, journeyTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null }> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null } | null> | null } | null } | null };
+export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageJourneyTime?: number | null, scheduledTransits?: number | null } | null, journeyTimeStats?: Array<{ __typename?: 'CorridorJourneyTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalJourneyTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, journeyTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null }> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: string, linkRoute?: string | null } | null> | null } | null } | null };
 
 export type CreateCorridorMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -1450,7 +1446,7 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 }>;
 
 
-export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', transitModel?: { __typename?: 'TransitModelType', lines?: { __typename?: 'PaginatedLineType', items?: Array<{ __typename?: 'LineType', lineId: string, lineName: string, servicePatterns?: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, name: string, stops?: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop?: string | null, toStop?: string | null, distance: number, routeValidity?: string | null, linkRoute?: string | null }> | null } | null> | null } | null> | null } | null } | null } | null };
+export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servicePatterns: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, stops: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }>, serviceLinks: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: string, linkRoute?: string | null }> }> };
 
 export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: string }> | null };
 
@@ -1545,7 +1541,7 @@ export type OperatorLinesQueryVariables = Exact<{
 }>;
 
 
-export type OperatorLinesQuery = { __typename?: 'Query', operator?: { __typename?: 'OperatorType', transitModel?: { __typename?: 'TransitModelType', lines?: { __typename?: 'PaginatedLineType', items?: Array<{ __typename?: 'LineType', id: string, name: string, number: string } | null> | null } | null } | null } | null };
+export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -2611,31 +2607,20 @@ export const ServiceInfoDocument = gql`
   }
 export const TransitModelServicePatternStopsDocument = gql`
     query transitModelServicePatternStops($operatorId: String!, $lineId: String!) {
-  operator(operatorId: $operatorId) {
-    transitModel {
-      lines(filterBy: {lineIds: [$lineId]}) {
-        items {
-          lineId
-          lineName
-          servicePatterns {
-            servicePatternId
-            name
-            stops {
-              stopId
-              stopName
-              lon
-              lat
-            }
-            serviceLinks {
-              fromStop
-              toStop
-              distance
-              routeValidity
-              linkRoute
-            }
-          }
-        }
-      }
+  servicePatterns(operatorId: $operatorId, lineId: $lineId) {
+    servicePatternId
+    stops {
+      stopId
+      stopName
+      lon
+      lat
+    }
+    serviceLinks {
+      fromStop
+      toStop
+      distance
+      routeValidity
+      linkRoute
     }
   }
 }
@@ -2879,16 +2864,10 @@ export const OperatorListDocument = gql`
   }
 export const OperatorLinesDocument = gql`
     query operatorLines($operatorId: String!, $inputDate: DateTime) {
-  operator(operatorId: $operatorId) {
-    transitModel {
-      lines(filterBy: {inputDate: $inputDate}) {
-        items {
-          id: lineId
-          name: lineName
-          number: lineNumber
-        }
-      }
-    }
+  lines(operatorId: $operatorId, inputDate: $inputDate) {
+    id
+    name
+    number
   }
 }
     `;
