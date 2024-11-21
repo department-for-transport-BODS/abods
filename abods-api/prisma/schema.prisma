@@ -4,6 +4,12 @@ generator client {
   binaryTargets   = ["native", "rhel-openssl-1.0.x"]
 }
 
+generator kysely {
+  provider = "prisma-kysely"
+  output       = "../src"
+  fileName     = "kysely.ts"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

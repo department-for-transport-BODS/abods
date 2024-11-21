@@ -1,6 +1,8 @@
 import express from "express";
 import { IncomingHttpHeaders } from "http";
 import { PrismaClient } from "@prisma/client";
+import { Kysely } from "kysely";
+import { DB } from "../kysely.js";
 
 export interface AuthContext {
   allowedTokenHash: string;
@@ -13,6 +15,7 @@ export interface RequestContext {
   headers: IncomingHttpHeaders;
   db: PrismaClient;
   apiKeyAuth?: AuthContext;
+  kysely: Kysely<DB>;
 }
 
 export interface SessionUser {

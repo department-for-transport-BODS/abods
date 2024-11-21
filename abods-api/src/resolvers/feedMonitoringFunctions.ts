@@ -169,7 +169,7 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
       const startTime = endTime.subtract(1, "minute").toDate();
       promises.push(
         getVehicleCounts(
-          context.db,
+          context.kysely,
           user.orgIds[0],
           parent.operatorId,
           startTime,
@@ -211,7 +211,7 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
   const user = await requireUserSession(context);
   const endTime = getDate().startOf("minute");
   return getVehicleCounts(
-    context.db,
+    context.kysely,
     user.orgIds[0],
     args.operatorId ?? null,
     endTime.subtract(1, "minute").toDate(),

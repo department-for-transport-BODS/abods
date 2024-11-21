@@ -21,3 +21,5 @@ Thumbs.db
 generated_api_secrets/
 
 .eslintcache
+
+/abods-api/src/kysely.ts
