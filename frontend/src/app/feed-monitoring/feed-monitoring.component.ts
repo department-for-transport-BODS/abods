@@ -45,7 +45,7 @@ export class FeedMonitoringComponent
   @ViewChild(SparklineCellTemplateComponent)
   sparklineTemplate?: SparklineCellTemplateComponent;
 
-  activeFilterSubject = new Subject<string>();
+  filterSubject = new Subject<string>();
 
   loaded = false;
 
@@ -261,10 +261,10 @@ export class FeedMonitoringComponent
               skipLocationChange: true,
             });
           } else if (operators.length > 0) {
-            this.rawActiveOperators = operators.filter((o) => {
+            this.rawActiveOperators = operators;
+            this.filteredActiveOperators = operators.filter((o) => {
               return o.feedMonitoring?.feedStatus;
             });
-            this.filteredActiveOperators = this.rawActiveOperators;
             this.inactiveOperators = operators.filter((o) => {
               return !o.feedMonitoring?.feedStatus;
             });
@@ -272,24 +272,34 @@ export class FeedMonitoringComponent
           }
         }
       }),
-      this.activeFilterSubject
+      this.filterSubject
         .pipe(debounceTime(300), distinctUntilChanged())
-        .subscribe((activeFilter) => {
-          if (!activeFilter) {
-            this.filteredActiveOperators = this.rawActiveOperators;
-          } else {
-            const normalise = (s: Maybe<string> | undefined) =>
-              s ? s.replace(/[^\w]+/g, "") : "";
-            const reg = new RegExp(normalise(activeFilter), "i");
-            this.filteredActiveOperators = this.rawActiveOperators.filter(
-              (operator) =>
-                normalise(operator.name).match(reg) ||
-                operator.nocCode?.match(reg),
-            );
+        .subscribe((filterText) => {
+          if (!filterText) {
+            return;
           }
-          this.activeGridApi?.paginationGoToFirstPage();
+          const normalise = (s: Maybe<string> | undefined) =>
+            s ? s.replace(/[^\w]+/g, "") : "";
+          const reg = new RegExp(normalise(filterText), "i");
+          const filteredOperators = this.rawActiveOperators.filter(
+            (operator) =>
+              normalise(operator.name).match(reg) ||
+              operator.nocCode?.match(reg),
+          );
+          this.filteredActiveOperators = filteredOperators.filter((o) => {
+            return o.feedMonitoring?.feedStatus;
+          });
+          this.inactiveOperators = filteredOperators.filter((o) => {
+            return !o.feedMonitoring?.feedStatus;
+          });
+          this.resetPagination();
         }),
     );
+  }
+
+  resetPagination(): void {
+    this.activeGridApi?.paginationGoToFirstPage();
+    this.inactiveGridApi?.paginationGoToFirstPage();
   }
 
   ngAfterViewInit(): void {
@@ -314,8 +324,8 @@ export class FeedMonitoringComponent
     this.activeGridReady.next(true);
   }
 
-  activeFilterChanged(event: Event) {
-    this.activeFilterSubject.next((event.target as HTMLInputElement).value);
+  filterChanged(event: Event) {
+    this.filterSubject.next((event.target as HTMLInputElement).value);
   }
 
   postSortRows() {
