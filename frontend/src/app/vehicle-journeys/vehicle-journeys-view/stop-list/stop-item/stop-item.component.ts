@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { Stop } from "../../../../../generated/graphql";
 
 export interface StopHoverEvent {
-  stop?: Stop;
+  stop: Stop;
   event: "enter" | "leave";
 }
 
@@ -13,7 +13,7 @@ export interface StopHoverEvent {
   styleUrls: ["../stop-list.component.scss", "./stop-item.component.scss"],
 })
 export class StopItemComponent {
-  @Input() stop?: Stop;
+  @Input() stop!: Stop;
   @Input() timingPointsOnly = false;
   @Input() estimated = false;
   @Input() firstItem?: boolean;

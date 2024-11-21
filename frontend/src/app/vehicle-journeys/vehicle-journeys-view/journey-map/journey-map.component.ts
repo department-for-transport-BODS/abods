@@ -1,17 +1,17 @@
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, Input, OnChanges } from "@angular/core";
 import { featureCollection, lineString, point } from "@turf/helpers";
+import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import {
-  Feature,
-  FeatureCollection,
-  GeoJsonProperties,
-  LineString,
-  Point,
-} from "geojson";
-import { Map, ScaleControl } from "mapbox-gl";
+  EventData,
+  Map,
+  MapboxGeoJSONFeature,
+  MapMouseEvent,
+  ScaleControl,
+} from "mapbox-gl";
 import { pairwise } from "../../../shared/array-operators";
 import {
-  BRITISH_ISLES_BBOX,
   bbox2d,
+  BRITISH_ISLES_BBOX,
   combineBounds,
   position,
 } from "../../../shared/geo";
@@ -25,6 +25,9 @@ interface LineSegmentProps {
   id: string;
   onTimePerformance: OtpEnum | null;
 }
+type MouseEvent = MapMouseEvent & {
+  features?: MapboxGeoJSONFeature[] | undefined;
+} & EventData;
 
 export const createStopModel = (stop: Stop, estimated: boolean) => ({
   id: stop.stopId.toString(),
@@ -57,6 +60,16 @@ const segmentToLine = (
     id: segment[0].id + segment[1].id,
     onTimePerformance: segment[0].onTimePerformance,
   });
+};
+
+export interface ComponentChange<T, P extends keyof T> {
+  previousValue: T[P];
+  currentValue: T[P];
+  firstChange: boolean;
+}
+
+export type ComponentChanges<T> = {
+  [P in keyof T]?: ComponentChange<T, P>;
 };
 
 @Component({
@@ -107,7 +120,7 @@ export class JourneyMapComponent implements OnChanges {
 
   constructor(private config: ConfigService) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: ComponentChanges<JourneyMapComponent>): void {
     if (this.map && !this.enableScaleControl) {
       this.map.addControl(
         new ScaleControl({
@@ -175,16 +188,12 @@ export class JourneyMapComponent implements OnChanges {
   }
 
   private updateBoundsToSelectedStop(selectedStop: Stop) {
-    let selected: Feature<Point, VehiclePingStop> | undefined;
-    if (selectedStop.isTimingPoint) {
-      selected = this.timingPoints?.features.find(
-        (stop) => stop.properties.id === selectedStop.stopId.toString(),
-      );
-    } else {
-      selected = this.stops?.features.find(
-        (stop) => stop.properties.id === selectedStop.stopId.toString(),
-      );
-    }
+    const collection = selectedStop.isTimingPoint
+      ? this.timingPoints
+      : this.stops;
+    const selected = collection?.features.find(
+      (stop) => stop.properties.id === selectedStop.stopId.toString(),
+    );
     if (selected) {
       this.bounds = bbox2d(selected);
     }
@@ -193,27 +202,23 @@ export class JourneyMapComponent implements OnChanges {
   private updateHoveredStopState(hoveredStop: StopHoverEvent) {
     switch (hoveredStop.event) {
       case "enter":
-        this.onStopMouseEnter(hoveredStop.stop);
+        this.stopSelected(createStopModel(hoveredStop.stop, this.estimated));
         break;
       case "leave":
-        this.onStopMouseLeave();
+        this.stopUnselected();
         break;
     }
   }
 
-  onStopMouseEnter(stop?: VehiclePingStop | GeoJsonProperties) {
-    this.cursorStyle = "pointer";
-    if (!stop) {
-      return;
-    }
-    this.tooltipStop = stop as VehiclePingStop;
+  private stopSelected(stop: VehiclePingStop) {
+    this.tooltipStop = stop;
     this.map.setFeatureState(
       { source: "journey-stops", id: this.tooltipStop.id },
       { hover: true },
     );
   }
 
-  onStopMouseLeave() {
+  private stopUnselected() {
     this.cursorStyle = "";
     if (!this.tooltipStop) {
       return;
@@ -225,19 +230,15 @@ export class JourneyMapComponent implements OnChanges {
     this.tooltipStop = undefined;
   }
 
-  onPingMouseEnter(ping?: VehiclePing | GeoJsonProperties) {
-    this.cursorStyle = "pointer";
-    if (!ping) {
-      return;
-    }
-    this.tooltipPing = ping as VehiclePing;
+  private pingSelected(ping: VehiclePing) {
+    this.tooltipPing = ping;
     this.map.setFeatureState(
       { source: "journey-pings", id: this.tooltipPing.id },
       { hover: true },
     );
   }
 
-  onPingMouseLeave() {
+  private pingUnselected() {
     this.cursorStyle = "";
     if (!this.tooltipPing) {
       return;
@@ -247,6 +248,32 @@ export class JourneyMapComponent implements OnChanges {
       "hover",
     );
     this.tooltipPing = undefined;
+  }
+
+  onStopMouseEnter(event: MouseEvent) {
+    this.cursorStyle = "pointer";
+    const stop = event.features?.[0]?.properties;
+    if (!stop) {
+      return;
+    }
+    this.stopSelected(stop as VehiclePingStop);
+  }
+
+  onStopMouseLeave(_: MouseEvent) {
+    this.stopUnselected();
+  }
+
+  onPingMouseEnter(event: MouseEvent) {
+    this.cursorStyle = "pointer";
+    const ping = event.features?.[0]?.properties;
+    if (!ping) {
+      return;
+    }
+    this.pingSelected(ping as VehiclePing);
+  }
+
+  onPingMouseLeave(_: MouseEvent) {
+    this.pingUnselected();
   }
 
   recentre() {
