@@ -275,26 +275,31 @@ export class FeedMonitoringComponent
       this.filterSubject
         .pipe(debounceTime(300), distinctUntilChanged())
         .subscribe((filterText) => {
-          if (filterText) {
-            const normalise = (s: Maybe<string> | undefined) =>
-              s ? s.replace(/[^\w]+/g, "") : "";
-            const reg = new RegExp(normalise(filterText), "i");
-            const filteredOperators = this.rawActiveOperators.filter(
-              (operator) =>
-                normalise(operator.name).match(reg) ||
-                operator.nocCode?.match(reg),
-            );
-            this.filteredActiveOperators = filteredOperators.filter((o) => {
-              return o.feedMonitoring?.feedStatus;
-            });
-            this.inactiveOperators = filteredOperators.filter((o) => {
-              return !o.feedMonitoring?.feedStatus;
-            });
+          if (!filterText) {
+            return;
           }
-          this.activeGridApi?.paginationGoToFirstPage();
-          this.inactiveGridApi?.paginationGoToFirstPage();
+          const normalise = (s: Maybe<string> | undefined) =>
+            s ? s.replace(/[^\w]+/g, "") : "";
+          const reg = new RegExp(normalise(filterText), "i");
+          const filteredOperators = this.rawActiveOperators.filter(
+            (operator) =>
+              normalise(operator.name).match(reg) ||
+              operator.nocCode?.match(reg),
+          );
+          this.filteredActiveOperators = filteredOperators.filter((o) => {
+            return o.feedMonitoring?.feedStatus;
+          });
+          this.inactiveOperators = filteredOperators.filter((o) => {
+            return !o.feedMonitoring?.feedStatus;
+          });
+          this.resetPagination();
         }),
     );
+  }
+
+  resetPagination(): void {
+    this.activeGridApi?.paginationGoToFirstPage();
+    this.inactiveGridApi?.paginationGoToFirstPage();
   }
 
   ngAfterViewInit(): void {
