@@ -292,6 +292,7 @@ export class FeedMonitoringComponent
             });
           }
           this.activeGridApi?.paginationGoToFirstPage();
+          this.inactiveGridApi?.paginationGoToFirstPage();
         }),
     );
   }
