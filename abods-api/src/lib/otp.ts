@@ -4,9 +4,9 @@ import {
   PunctualityTotalsType,
 } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
-import { getOperators } from "../resolvers/otpFunctions.js";
-import { getDayOfWeekNumbers, isDefined } from "./utils.js";
+import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
+import { getOperatorIds } from "./operators";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -68,23 +68,9 @@ export const compareThresholds = async (
     lineIds,
   } = filters ?? {};
 
-  const operators = await getOperators(sessionUser, db);
-
-  if (!operators) {
-    throw "No user operators";
-  }
-
-  const userOperatorIds = operators
-    .map((o) => o.nocCode ?? "")
-    .filter((o) => !!o);
-
-  const opIds: string[] | undefined = operatorIds
-    ? operatorIds?.filter(isDefined)
-    : undefined;
-
-  const adminIds: string[] | undefined = adminAreaIds
-    ? adminAreaIds?.filter(isDefined)
-    : undefined;
+  const userOperatorIds = await getOperatorIds(sessionUser, db);
+  const opIds = operatorIds ?? undefined;
+  const adminIds = adminAreaIds ?? undefined;
 
   const where: Prisma.timetable_threshold_summaryWhereInput = {
     operator_noc: {
