@@ -6,7 +6,7 @@ import {
 import { SessionUser } from "../types/extra.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
-import { getOperatorIds } from "./operators";
+import { getUserOperatorIds } from "./operators";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -49,7 +49,7 @@ const aggThresholds = async (
 
 export const compareThresholds = async (
   inputs: PerformanceInputType,
-  sessionUser: SessionUser,
+  userOperatorIds: string[],
   db: PrismaClient,
 ): Promise<PunctualityTotalsType | null> => {
   const { fromTimestamp, toTimestamp, filters } = inputs;
@@ -68,7 +68,6 @@ export const compareThresholds = async (
     lineIds,
   } = filters ?? {};
 
-  const userOperatorIds = await getOperatorIds(sessionUser, db);
   const opIds = operatorIds ?? undefined;
   const adminIds = adminAreaIds ?? undefined;
 

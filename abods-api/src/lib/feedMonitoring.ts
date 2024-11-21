@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { Kysely, NotNull } from "kysely";
 import { DB } from "../kysely";
+import { SessionUser } from "../types/extra";
+import { getUserOperatorIdsQuery } from "./operators";
 
 export enum VehicleCountType {
   Actual = "actual",
@@ -17,16 +19,11 @@ export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
 
 export const getVehicleCounts = (
   db: Kysely<DB>,
-  userOrgId: number,
+  user: SessionUser,
   operatorId: string | null,
   startTime: Date,
   endTime: Date,
 ) => {
-  const userOperatorQuery = db
-    .selectFrom("bods_organisationoperator")
-    .where("organisation_id", "=", userOrgId)
-    .select("operatorref");
-
   const baseQuery = db
     .selectFrom("expected_journeys")
     .where("date_of_journey", "=", startTime)
@@ -35,7 +32,7 @@ export const getVehicleCounts = (
     .where("operator_noc", "is not", null)
     .where("group_id", "is not", null)
     .$if(!!operatorId, (qb) => qb.where("operator_noc", "=", operatorId))
-    .where("operator_noc", "in", userOperatorQuery)
+    .where("operator_noc", "in", getUserOperatorIdsQuery(db, user))
     .distinct()
     .select("operator_noc")
     .select("group_id")

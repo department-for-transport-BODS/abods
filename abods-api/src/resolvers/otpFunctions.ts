@@ -50,7 +50,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import haversineDistance from "haversine-distance";
-import { getOperatorIds } from "../lib/operators";
+import { getUserOperatorIds } from "../lib/operators";
 
 interface DayCount {
   dayOfWeek: number;
@@ -125,7 +125,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
 ): Promise<Maybe<ServiceInfoType>> => {
   const user = await requireUserSession(context);
   try {
-    const userOperatorIds = await getOperatorIds(user, context.db);
+    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
     const service = await context.db.expected_services.findFirst({
       where: {
         noc_and_line_and_servicecode: args.serviceId,
@@ -155,7 +155,7 @@ export const getLines: QueryResolvers["lines"] = async (
   context,
 ): Promise<LineType[]> => {
   const user = await requireUserSession(context);
-  const userOperatorIds = await getOperatorIds(user, context.db);
+  const userOperatorIds = await getUserOperatorIds(user, context.kysely);
   if (!userOperatorIds.includes(args.operatorId)) return [];
 
   const inputDate = args.inputDate
@@ -312,11 +312,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
-        return compareThresholds(args.inputs, user, context.db);
+        return compareThresholds(args.inputs, userOperatorIds, context.db);
       }
 
-      const userOperatorIds = await getOperatorIds(user, context.db);
       let results;
       const prismaFilters = getPrismaFiltersForOTPQuery(
         args.inputs,
@@ -495,7 +495,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
         logger.debug(
           "getPunctualityDayOfWeek id: " + JSON.stringify(operatorIds),
         );
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -635,7 +635,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
         logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
         const operator_noc_to_filter = operatorIds[0];
 
@@ -671,7 +671,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
         logger.debug(
           "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds),
         );
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -740,7 +740,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
         const isDayGranularity = granularity === "day";
         //if (granularity == "day" && operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -815,7 +815,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
 
       const timingPointsOnly = filters.timingPointsOnly;
 
-      const userOperatorIds = await getOperatorIds(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const operatorNocs = userOperatorIds.filter(
         (n) => !filters.operatorIds || filters.operatorIds.includes(n),
       );
@@ -943,7 +943,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
         logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -1051,7 +1051,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       if (operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
-        const userOperatorIds = await getOperatorIds(user, context.db);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1127,7 +1127,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
   async (_, args, context): Promise<Maybe<FrequentServiceType[]>> => {
     const user = await requireUserSession(context);
     try {
-      const userOperatorIds = await getOperatorIds(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (userOperatorIds.includes(args.operatorId)) {
         const results = await context.db.timetable_summary_service_tz.findMany({
           where: {
@@ -1160,7 +1160,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
   async (_, args, context): Promise<Maybe<FrequentServiceInfoType>> => {
     const user = await requireUserSession(context);
     try {
-      const userOperatorIds = await getOperatorIds(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1200,7 +1200,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
   async (_, args, context): Promise<Maybe<HeadwayOverviewType>> => {
     const user = await requireUserSession(context);
     try {
-      const userOperatorIds = await getOperatorIds(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1261,7 +1261,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       const isDayGranularity = granularity === "day";
 
-      const userOperatorIds = await getOperatorIds(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1358,7 +1358,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 ): Promise<Maybe<AdminAreasType[]>> => {
   const user = await requireUserSession(context);
   try {
-    const userOperatorIds = await getOperatorIds(user, context.db);
+    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
     const adminAreaRecords = await context.db.noc_adminarea.findMany({
       where: {
         national_operator_code: {
