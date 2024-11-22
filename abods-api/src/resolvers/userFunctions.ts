@@ -29,9 +29,7 @@ export const getUsers: QueryResolvers["users"] = async (
       where: {
         userOrganisations: {
           every: {
-            organisation_id: {
-              in: user.orgIds,
-            },
+            organisation_id: user.orgId,
           },
         },
       },
@@ -47,12 +45,10 @@ export const getUsers: QueryResolvers["users"] = async (
         email: thisUser.email,
         firstName: thisUser.first_name,
         lastName: thisUser.last_name,
-        organisation: user.orgIds
-          ? {
-              id: String(user.orgIds[0]),
-              name: String(user.orgIds[0]),
-            }
-          : null,
+        organisation: {
+          id: String(user.orgId),
+          name: String(user.orgId),
+        },
         roles: [
           {
             id: "1",

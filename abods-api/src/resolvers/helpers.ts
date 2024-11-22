@@ -69,9 +69,18 @@ export const requireUserSession = async (context: RequestContext) => {
     logger.debug("No bods user found");
     throwUnauthenticatedError();
   }
-  if (!bodsUser.userOrganisations || bodsUser.userOrganisations.length === 0) {
+  const organisation = bodsUser.userOrganisations?.find(
+    (o) => o.organisation_id,
+  );
+  if (!organisation) {
     logger.error("User not mapped to an organisation");
     throwUnauthenticatedError("User not mapped to any organisation");
+  }
+  if (bodsUser.userOrganisations.length > 1) {
+    logger.error("API does not support multiple organisations per user");
+    throwUnauthenticatedError(
+      "API does not support multiple organisations per user",
+    );
   }
   const sessionUser: SessionUser = {
     id: bodsUser.id,
@@ -79,7 +88,7 @@ export const requireUserSession = async (context: RequestContext) => {
     email: bodsUser.email,
     first_name: bodsUser.first_name,
     last_name: bodsUser.last_name,
-    orgIds: bodsUser.userOrganisations.map((o) => o.organisation_id),
+    orgId: organisation.organisation_id,
   };
 
   logger.debug(`Session user returned: ${JSON.stringify(sessionUser)}`);
