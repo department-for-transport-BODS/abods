@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Kysely, NotNull } from "kysely";
 import { DB } from "../kysely";
 import { SessionUser } from "../types/extra";
-import { getUserOperatorIdsQuery } from "./operators";
+import { getUserOperatorIdsQuery } from "./operators.js";
 
 export enum VehicleCountType {
   Actual = "actual",

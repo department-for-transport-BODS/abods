@@ -3,10 +3,8 @@ import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
-import { getUserOperatorIds } from "./operators";
 
 const getThresholds = async (
   db: PrismaClient,

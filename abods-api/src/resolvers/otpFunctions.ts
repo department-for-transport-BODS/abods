@@ -50,7 +50,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import haversineDistance from "haversine-distance";
-import { getUserOperatorIds } from "../lib/operators";
+import { getUserOperatorIds } from "../lib/operators.js";
 
 interface DayCount {
   dayOfWeek: number;
