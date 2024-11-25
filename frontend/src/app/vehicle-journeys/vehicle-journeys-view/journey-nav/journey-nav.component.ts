@@ -11,16 +11,7 @@ import { NgxTippyProps } from "ngx-tippy-wrapper";
 export class JourneyNavComponent {
   @Input() loading = false;
   @Input() journeys: VehicleJourney[] = [];
-  @Input() startTime?: DateTime;
-  @Input() journeyId?: string;
-
-  get currentIndex() {
-    return this.journeys.findIndex(
-      (v) =>
-        v.startTime?.toMillis() === this.startTime?.toMillis() &&
-        v.groupId === this.journeyId,
-    );
-  }
+  @Input() currentIndex = -1;
 
   get next(): VehicleJourney | undefined {
     return this.journeys[this.currentIndex + 1] ?? undefined;

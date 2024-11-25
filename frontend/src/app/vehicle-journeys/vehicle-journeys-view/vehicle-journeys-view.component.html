@@ -9,12 +9,14 @@
   <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
       <app-page-header
-        *ngIf="!journeyInfoLoading; else skeletonHeader"
+        *ngIf="!journeyInfoLoading || journeysLoading; else skeletonHeader"
         caption="Vehicle journeys"
         [heading]="
-          (journeyInfo?.stops?.[0]?.lineName ?? '') +
-          ': ' +
-          (journeyInfo?.stops?.[0]?.serviceName ?? '')
+          journeys[currentJourneyIndex]
+            ? journeys[currentJourneyIndex].lineNumber +
+              ': ' +
+              journeys[currentJourneyIndex].servicePattern
+            : 'Journey not found'
         "
       ></app-page-header>
       <div class="vehicle-journeys__header-container">
@@ -60,8 +62,7 @@
           <app-journey-nav
             [journeys]="journeys"
             [loading]="journeyInfoLoading || journeysLoading"
-            [startTime]="startTime"
-            [journeyId]="groupId"
+            [currentIndex]="currentJourneyIndex"
           ></app-journey-nav>
         </div>
       </div>

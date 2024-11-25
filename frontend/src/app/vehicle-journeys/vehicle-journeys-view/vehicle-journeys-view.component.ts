@@ -3,7 +3,7 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 import {
   combineLatest,
   map,
-  mergeMap,
+  of,
   Subject,
   switchMap,
   takeUntil,
@@ -41,8 +41,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   estimated: "true" | "false" = "true";
   timingPointsOption: "timing-points" | "all-stops" = "timing-points";
-  groupId = "";
-  startTime = DateTime.fromSeconds(0);
 
   selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
@@ -51,6 +49,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnQueryParams: Params | null = null;
 
   serviceId$ = new Subject<string>();
+  currentJourneyIndex = -1;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,18 +62,11 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   private onDestroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    const groupId$ = this.route.paramMap.pipe(
-      takeUntil(this.onDestroy$),
-      map((params) => params.get("journeyId")!),
-    );
-    groupId$.subscribe((groupId) => (this.groupId = groupId));
-
     this.route.queryParamMap
       .pipe(takeUntil(this.onDestroy$))
       .subscribe((params) => {
-        this.startTime = DateTime.fromISO(params.get("startTime")!);
         this.returnQueryParams = {
-          date: this.startTime
+          date: DateTime.fromISO(params.get("startTime")!)
             .startOf("day")
             .toUTC()
             ?.toISO({ format: "basic", suppressSeconds: true }),
@@ -90,13 +82,13 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       });
 
     const startTime$ = this.route.queryParamMap.pipe(
-      map((params) =>
-        DateTime.fromISO(params.get("startTime")!)
-          .setZone("Europe/London")
-          .startOf("day"),
-      ),
+      map((params) => params.get("startTime")!),
       distinctUntilChanged(),
       takeUntil(this.onDestroy$),
+    );
+    const groupId$ = this.route.paramMap.pipe(
+      takeUntil(this.onDestroy$),
+      map((params) => params.get("journeyId")!),
     );
 
     combineLatest([groupId$])
@@ -133,22 +125,42 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         },
       });
 
-    combineLatest([startTime$, this.serviceId$.pipe(distinctUntilChanged())])
+    combineLatest([
+      startTime$,
+      groupId$,
+      this.serviceId$.pipe(distinctUntilChanged()),
+    ])
       .pipe(
         tap(() => (this.journeysLoading = true)),
-        mergeMap(([date, serviceId]) =>
-          this.service.fetchDayJourneys(date, serviceId),
-        ),
+        switchMap(([startTime, groupId, serviceId]) => {
+          return zip(
+            this.service.fetchDayJourneys(
+              DateTime.fromISO(startTime)
+                .setZone("Europe/London")
+                .startOf("day"),
+              serviceId,
+            ),
+            of(startTime),
+            of(groupId),
+          );
+        }),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: (journeys) => {
+        next: ([journeys, startTime, groupId]) => {
           this.journeys = journeys;
+          this.currentJourneyIndex = journeys.findIndex((v) => {
+            return (
+              v.startTime?.toMillis() ===
+                DateTime.fromISO(startTime).toMillis() && v.groupId === groupId
+            );
+          });
           this.journeysLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.journeys = [];
+          this.currentJourneyIndex = -1;
           this.journeysLoading = false;
         },
       });
