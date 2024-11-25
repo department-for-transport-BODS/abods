@@ -13,16 +13,17 @@
         caption="Vehicle journeys"
         [heading]="
           journeys[currentJourneyIndex]
-            ? journeys[currentJourneyIndex].lineNumber +
+            ? journeys[currentJourneyIndex].serviceNumber +
               ': ' +
-              journeys[currentJourneyIndex].servicePattern
+              journeys[currentJourneyIndex].serviceName
             : 'Journey not found'
         "
       ></app-page-header>
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [journeyInfo]="journeyInfo"
-          [loading]="journeyInfoLoading"
+          [loading]="journeyInfoLoading || journeysLoading"
+          [journey]="journeys[currentJourneyIndex]"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle

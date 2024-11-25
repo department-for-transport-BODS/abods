@@ -30,14 +30,11 @@ import {
   takeUntil,
   tap,
 } from "rxjs/operators";
-import {
-  VehicleJourney,
-  VehicleJourneysSearchService,
-} from "./vehicle-journeys-search.service";
+import { VehicleJourneysSearchService } from "./vehicle-journeys-search.service";
 import { ConfigService } from "../../config/config.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { isEqual as _isEqual } from "lodash-es";
-import { LineType } from "../../../generated/graphql";
+import { Journey, LineType } from "../../../generated/graphql";
 
 @Component({
   selector: "app-vehicle-journeys-search",
@@ -84,7 +81,7 @@ export class VehicleJourneysSearchComponent
   operators$?: Observable<Operator[]>;
   services$?: Observable<LineType[]>;
 
-  vehicleJourneys: VehicleJourney[] = [];
+  vehicleJourneys: Journey[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -260,19 +257,18 @@ export class VehicleJourneysSearchComponent
         }),
         debounceTime(200),
         switchMap(({ date, service }) => {
-          if (date?.isValid && service) {
-            return this.vehicleJourneysSearchService
-              .fetchDayJourneys(date, service)
-              .pipe(
-                take(1),
-                catchError(() => {
-                  this.errored = true;
-                  return of([]);
-                }),
-              );
-          } else {
+          if (!date?.isValid || !service) {
             return of([]);
           }
+          return this.vehicleJourneysSearchService
+            .fetchDayJourneys(date.toISO(), service)
+            .pipe(
+              take(1),
+              catchError(() => {
+                this.errored = true;
+                return of([]);
+              }),
+            );
         }),
         takeUntil(this.destroy$),
       )

@@ -1,7 +1,11 @@
 import { Component, Input } from "@angular/core";
-import { VehicleJourney } from "../../vehicle-journeys-search/vehicle-journeys-search.service";
 import { DateTime } from "luxon";
 import { NgxTippyProps } from "ngx-tippy-wrapper";
+import { Journey } from "../../../../generated/graphql";
+
+export interface VehicleJourney extends Omit<Journey, "startTime"> {
+  startTime: DateTime;
+}
 
 @Component({
   selector: "app-journey-nav",
@@ -10,15 +14,24 @@ import { NgxTippyProps } from "ngx-tippy-wrapper";
 })
 export class JourneyNavComponent {
   @Input() loading = false;
-  @Input() journeys: VehicleJourney[] = [];
+  @Input() journeys: Journey[] = [];
   @Input() currentIndex = -1;
 
-  get next(): VehicleJourney | undefined {
-    return this.journeys[this.currentIndex + 1] ?? undefined;
+  toViewModel(journeyIndex: number): VehicleJourney | undefined {
+    const journey = this.journeys[journeyIndex];
+    if (!journey) return undefined;
+    return {
+      ...journey,
+      startTime: DateTime.fromISO(journey.startTime),
+    };
   }
 
-  get previous(): VehicleJourney | undefined {
-    return this.journeys[this.currentIndex - 1];
+  get next() {
+    return this.toViewModel(this.currentIndex + 1);
+  }
+
+  get previous() {
+    return this.toViewModel(this.currentIndex - 1);
   }
 
   // I would use a pipe, but luxon-angular doesn't support ToISOTimeOptions.

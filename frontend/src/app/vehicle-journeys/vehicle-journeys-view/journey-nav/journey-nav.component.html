@@ -16,7 +16,7 @@
         [applyClass]="true"
       ></svg-icon>
       <div #prevTooltip>
-        {{ previous?.lineNumber }}: {{ previous?.servicePattern }}
+        {{ previous?.serviceNumber }}: {{ previous?.serviceName }}
       </div>
       <span *ngIf="previous">{{
         previous.startTime | dateTimeToFormat: "HH:mm"
@@ -32,7 +32,7 @@
       [ngxTippy]="nextTooltip"
       [tippyProps]="tippyProps"
     >
-      <div #nextTooltip>{{ next?.lineNumber }}: {{ next?.servicePattern }}</div>
+      <div #nextTooltip>{{ next?.serviceNumber }}: {{ next?.serviceName }}</div>
       <span *ngIf="next">{{ next.startTime | dateTimeToFormat: "HH:mm" }}</span>
       <svg-icon
         class="journey-nav__icon"

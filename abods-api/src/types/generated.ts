@@ -499,6 +499,16 @@ export type InvitationType = {
   role?: Maybe<RoleType>;
 };
 
+export type Journey = {
+  __typename?: 'Journey';
+  groupId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+  operatorNoc: Scalars['String']['output'];
+  serviceName: Scalars['String']['output'];
+  serviceNumber: Scalars['String']['output'];
+  startTime: Scalars['String']['output'];
+};
+
 export type JourneyScheduledStartTimes = {
   __typename?: 'JourneyScheduledStartTimes';
   days?: Maybe<Array<Maybe<ShortCodeDayOfWeek>>>;
@@ -869,6 +879,7 @@ export type Query = {
   dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
+  findJourneys: Array<Journey>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   lines: Array<LineType>;
@@ -883,7 +894,6 @@ export type Query = {
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
-  vehicleReplay?: Maybe<VehicleReplayNamespace>;
 };
 
 
@@ -913,6 +923,12 @@ export type QueryEventsArgs = {
   end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
   start: Scalars['DateTime']['input'];
+};
+
+
+export type QueryFindJourneysArgs = {
+  dateOfJourney: Scalars['DateTime']['input'];
+  lineId: Scalars['String']['input'];
 };
 
 
@@ -1073,15 +1089,10 @@ export type Stop = {
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
-  lineName: Scalars['String']['output'];
+  lineId: Scalars['String']['output'];
   longitude: Scalars['Float']['output'];
-  operatorName: Scalars['String']['output'];
-  operatorNoc: Scalars['String']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
-  serviceId: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
-  startTime: Scalars['String']['output'];
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
@@ -1129,13 +1140,6 @@ export enum StopsSegment {
   Intermediate = 'Intermediate'
 }
 
-export type UniqueJourneyType = {
-  __typename?: 'UniqueJourneyType';
-  groupId?: Maybe<Scalars['String']['output']>;
-  serviceInfo: ServiceInfoType;
-  startTime: Scalars['String']['output'];
-};
-
 export type UserType = {
   __typename?: 'UserType';
   email: Scalars['String']['output'];
@@ -1157,28 +1161,6 @@ export type UserUpdateResponseType = {
   __typename?: 'UserUpdateResponseType';
   error?: Maybe<Scalars['String']['output']>;
   user?: Maybe<UserType>;
-};
-
-export type VehicleReplayFilterInputType = {
-  filterOnStartTime?: InputMaybe<Scalars['Boolean']['input']>;
-  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  stopIds?: InputMaybe<Array<Scalars['String']['input']>>;
-};
-
-export type VehicleReplayInputType = {
-  filters: VehicleReplayFilterInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type VehicleReplayNamespace = {
-  __typename?: 'VehicleReplayNamespace';
-  findJourneys?: Maybe<Array<Maybe<UniqueJourneyType>>>;
-};
-
-
-export type VehicleReplayNamespaceFindJourneysArgs = {
-  inputs: VehicleReplayInputType;
 };
 
 export type VehicleStatsType = {
@@ -1319,6 +1301,7 @@ export type ResolversTypes = ResolversObject<{
   InvitationInput: ResolverTypeWrapper<Partial<InvitationInput>>;
   InvitationResponseType: ResolverTypeWrapper<Partial<InvitationResponseType>>;
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
+  Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyScheduledStartTimes: ResolverTypeWrapper<Partial<JourneyScheduledStartTimes>>;
   LineDirection: ResolverTypeWrapper<Partial<LineDirection>>;
   LineFilterType: ResolverTypeWrapper<Partial<LineFilterType>>;
@@ -1370,13 +1353,9 @@ export type ResolversTypes = ResolversObject<{
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
   Time: ResolverTypeWrapper<Partial<Scalars['Time']['output']>>;
-  UniqueJourneyType: ResolverTypeWrapper<Partial<UniqueJourneyType>>;
   UserType: ResolverTypeWrapper<Partial<UserType>>;
   UserUpdateInput: ResolverTypeWrapper<Partial<UserUpdateInput>>;
   UserUpdateResponseType: ResolverTypeWrapper<Partial<UserUpdateResponseType>>;
-  VehicleReplayFilterInputType: ResolverTypeWrapper<Partial<VehicleReplayFilterInputType>>;
-  VehicleReplayInputType: ResolverTypeWrapper<Partial<VehicleReplayInputType>>;
-  VehicleReplayNamespace: ResolverTypeWrapper<Partial<VehicleReplayNamespace>>;
   VehicleStatsType: ResolverTypeWrapper<Partial<VehicleStatsType>>;
 }>;
 
@@ -1436,6 +1415,7 @@ export type ResolversParentTypes = ResolversObject<{
   InvitationInput: Partial<InvitationInput>;
   InvitationResponseType: Partial<InvitationResponseType>;
   InvitationType: Partial<InvitationType>;
+  Journey: Partial<Journey>;
   JourneyScheduledStartTimes: Partial<JourneyScheduledStartTimes>;
   LineFilterType: Partial<LineFilterType>;
   LineType: Partial<LineType>;
@@ -1479,13 +1459,9 @@ export type ResolversParentTypes = ResolversObject<{
   StopType: Partial<StopType>;
   String: Partial<Scalars['String']['output']>;
   Time: Partial<Scalars['Time']['output']>;
-  UniqueJourneyType: Partial<UniqueJourneyType>;
   UserType: Partial<UserType>;
   UserUpdateInput: Partial<UserUpdateInput>;
   UserUpdateResponseType: Partial<UserUpdateResponseType>;
-  VehicleReplayFilterInputType: Partial<VehicleReplayFilterInputType>;
-  VehicleReplayInputType: Partial<VehicleReplayInputType>;
-  VehicleReplayNamespace: Partial<VehicleReplayNamespace>;
   VehicleStatsType: Partial<VehicleStatsType>;
 }>;
 
@@ -1768,6 +1744,16 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
+  groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type JourneyScheduledStartTimesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyScheduledStartTimes'] = ResolversParentTypes['JourneyScheduledStartTimes']> = ResolversObject<{
   days?: Resolver<Maybe<Array<Maybe<ResolversTypes['ShortCodeDayOfWeek']>>>, ParentType, ContextType>;
   fromDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -1943,6 +1929,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
+  findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'operatorId'>>;
@@ -1957,7 +1944,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
-  vehicleReplay?: Resolver<Maybe<ResolversTypes['VehicleReplayNamespace']>, ParentType, ContextType>;
 }>;
 
 export type RoleTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['RoleType'] = ResolversParentTypes['RoleType']> = ResolversObject<{
@@ -2021,15 +2007,10 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   estimatedDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isTimingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  lineId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   otp?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
   scheduledDepartureUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -2077,13 +2058,6 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Time';
 }
 
-export type UniqueJourneyTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UniqueJourneyType'] = ResolversParentTypes['UniqueJourneyType']> = ResolversObject<{
-  groupId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  serviceInfo?: Resolver<ResolversTypes['ServiceInfoType'], ParentType, ContextType>;
-  startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type UserTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserType'] = ResolversParentTypes['UserType']> = ResolversObject<{
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2098,11 +2072,6 @@ export type UserTypeResolvers<ContextType = RequestContext, ParentType extends R
 export type UserUpdateResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserUpdateResponseType'] = ResolversParentTypes['UserUpdateResponseType']> = ResolversObject<{
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type VehicleReplayNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleReplayNamespace'] = ResolversParentTypes['VehicleReplayNamespace']> = ResolversObject<{
-  findJourneys?: Resolver<Maybe<Array<Maybe<ResolversTypes['UniqueJourneyType']>>>, ParentType, ContextType, RequireFields<VehicleReplayNamespaceFindJourneysArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2150,6 +2119,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
   InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
   InvitationType?: InvitationTypeResolvers<ContextType>;
+  Journey?: JourneyResolvers<ContextType>;
   JourneyScheduledStartTimes?: JourneyScheduledStartTimesResolvers<ContextType>;
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
@@ -2181,10 +2151,8 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   StopPerformanceType?: StopPerformanceTypeResolvers<ContextType>;
   StopType?: StopTypeResolvers<ContextType>;
   Time?: GraphQLScalarType;
-  UniqueJourneyType?: UniqueJourneyTypeResolvers<ContextType>;
   UserType?: UserTypeResolvers<ContextType>;
   UserUpdateResponseType?: UserUpdateResponseTypeResolvers<ContextType>;
-  VehicleReplayNamespace?: VehicleReplayNamespaceResolvers<ContextType>;
   VehicleStatsType?: VehicleStatsTypeResolvers<ContextType>;
 }>;
 

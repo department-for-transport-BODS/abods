@@ -18,36 +18,18 @@ query route($groupId: String!) {
     stopName
     stopId
     isTimingPoint
-    operatorName
-    operatorNoc
-    lineName
-    serviceId
-    serviceName
-    startTime
+    lineId
     otp
   }
 }
 
-query journeys(
-  $fromTimestamp: DateTime!
-  $toTimestamp: DateTime!
-  $lineId: String!
-  $filterOnStartTime: Boolean!
-) {
-  vehicleReplay {
-    findJourneys(
-      inputs: {
-        fromTimestamp: $fromTimestamp
-        toTimestamp: $toTimestamp
-        filters: { lineIds: [$lineId], filterOnStartTime: $filterOnStartTime }
-      }
-    ) {
-      groupId
-      startTime
-      serviceInfo {
-        serviceName
-        serviceNumber
-      }
-    }
+query journeys($dateOfJourney: DateTime!, $lineId: String!) {
+  findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
+    groupId
+    startTime
+    serviceName
+    serviceNumber
+    operatorName
+    operatorNoc
   }
 }

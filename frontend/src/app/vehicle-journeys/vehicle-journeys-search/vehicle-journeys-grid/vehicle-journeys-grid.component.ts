@@ -1,29 +1,35 @@
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { VehicleJourney } from "../vehicle-journeys-search.service";
-import { groupBy as _groupBy } from "lodash-es";
+import { Component, Input } from "@angular/core";
+import { Journey } from "../../../../generated/graphql";
+import { DateTime } from "luxon";
+
+export interface VehicleJourney extends Omit<Journey, "startTime"> {
+  startTime: DateTime;
+}
 
 @Component({
   selector: "app-vehicle-journeys-grid",
   templateUrl: "./vehicle-journeys-grid.component.html",
   styleUrls: ["./vehicle-journeys-grid.component.scss"],
 })
-export class VehicleJourneysGridComponent implements OnChanges {
-  @Input() data: VehicleJourney[] = [];
+export class VehicleJourneysGridComponent {
+  @Input() set data(data: Journey[]) {
+    const grouped = data
+      .map((j) => ({
+        ...j,
+        startTime: DateTime.fromISO(j.startTime),
+      }))
+      .reduce(
+        (groups, item) => {
+          const key = item.serviceName;
+          return { ...groups, [key]: [...(groups[key] ?? []), item] };
+        },
+        {} as Record<string, VehicleJourney[]>,
+      );
+    this.patterns = Array.from(Object.values(grouped));
+  }
+
   @Input() operatorId?: string;
   @Input() serviceId?: string;
   @Input() loading = false;
-
   patterns: VehicleJourney[][] = [];
-
-  ngOnChanges(simpleChanges: SimpleChanges): void {
-    if (simpleChanges.data && simpleChanges.data.currentValue.length > 0) {
-      this.patterns = Array.from(
-        Object.values(
-          _groupBy(simpleChanges.data.currentValue, "servicePattern"),
-        ),
-      );
-    } else {
-      this.patterns = [];
-    }
-  }
 }

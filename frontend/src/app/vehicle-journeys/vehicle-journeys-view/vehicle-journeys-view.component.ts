@@ -12,13 +12,15 @@ import {
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
-import {
-  VehicleJourney,
-  VehicleJourneysSearchService,
-} from "../vehicle-journeys-search/vehicle-journeys-search.service";
+import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import { DateTime } from "luxon";
-import { AvlPoint, AvlsGQL, RouteGQL, Stop } from "../../../generated/graphql";
-import { distinctUntilChanged } from "rxjs/operators";
+import {
+  AvlPoint,
+  AvlsGQL,
+  Journey,
+  RouteGQL,
+  Stop,
+} from "../../../generated/graphql";
 
 export interface JourneyInfo {
   stops: Stop[];
@@ -36,7 +38,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   errorView?: VehicleJourneyNotFoundView;
 
-  journeys: VehicleJourney[] = [];
+  journeys: Journey[] = [];
   journeysLoading = false;
 
   estimated: "true" | "false" = "true";
@@ -48,7 +50,11 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
 
-  serviceId$ = new Subject<string>();
+  routeDetails$ = new Subject<{
+    groupId: string;
+    journeyStart: string;
+    lineId: string;
+  }>();
   currentJourneyIndex = -1;
 
   constructor(
@@ -81,11 +87,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             : "all-stops";
       });
 
-    const startTime$ = this.route.queryParamMap.pipe(
-      map((params) => params.get("startTime")!),
-      distinctUntilChanged(),
-      takeUntil(this.onDestroy$),
-    );
     const groupId$ = this.route.paramMap.pipe(
       takeUntil(this.onDestroy$),
       map((params) => params.get("journeyId")!),
@@ -98,24 +99,33 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           zip(
             this.routeGQL.fetch({ groupId }),
             this.avlsGQL.fetch({ groupId }),
+            of(groupId),
           ),
         ),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([routeResult, avlsResult]) => {
+        next: ([routeResult, avlsResult, groupId]) => {
           if (!routeResult.data.route[0]) {
             return (this.errorView = new VehicleJourneyNotFoundView());
           }
+          const sortedAvls = [...avlsResult.data.avls].sort((a, b) =>
+            a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+          );
           this.journeyInfo = {
-            avls: [...avlsResult.data.avls].sort((a, b) =>
-              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+            // Temporary workaround for two concurrent journeys having the same group id
+            avls: sortedAvls.filter(
+              (n) => n.vehicleRef === sortedAvls[0]?.vehicleRef,
             ),
             stops: [...routeResult.data.route].sort(
               (a, b) => a.stopIndex - b.stopIndex,
             ),
           };
-          this.serviceId$.next(this.journeyInfo.stops[0].serviceId);
+          this.routeDetails$.next({
+            journeyStart: this.journeyInfo.stops[0].scheduledDepartureUtc,
+            groupId: groupId,
+            lineId: this.journeyInfo.stops[0].lineId,
+          });
           this.journeyInfoLoading = false;
         },
         error: (err) => {
@@ -125,36 +135,26 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         },
       });
 
-    combineLatest([
-      startTime$,
-      groupId$,
-      this.serviceId$.pipe(distinctUntilChanged()),
-    ])
+    this.routeDetails$
       .pipe(
         tap(() => (this.journeysLoading = true)),
-        switchMap(([startTime, groupId, serviceId]) => {
+        switchMap((routeDetails) => {
           return zip(
             this.service.fetchDayJourneys(
-              DateTime.fromISO(startTime)
-                .setZone("Europe/London")
-                .startOf("day"),
-              serviceId,
+              routeDetails.journeyStart,
+              routeDetails.lineId,
             ),
-            of(startTime),
-            of(groupId),
+            of(routeDetails),
           );
         }),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([journeys, startTime, groupId]) => {
+        next: ([journeys, routeDetails]) => {
           this.journeys = journeys;
-          this.currentJourneyIndex = journeys.findIndex((v) => {
-            return (
-              v.startTime?.toMillis() ===
-                DateTime.fromISO(startTime).toMillis() && v.groupId === groupId
-            );
-          });
+          this.currentJourneyIndex = journeys.findIndex(
+            (v) => v.groupId === routeDetails.groupId,
+          );
           this.journeysLoading = false;
         },
         error: (err) => {
