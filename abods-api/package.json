@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@graphql-eslint/eslint-plugin": "^4.0.0",
     "@types/connect-redis": "^0.0.23",
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",

@@ -31,9 +31,12 @@ type Query {
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
+  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+
+  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
 }
 
@@ -364,7 +367,7 @@ type OperatorType {
 }
 
 type FeedMonitoringType {
-  operatorId: String!
+  operatorId: String! # eslint-disable-line @graphql-eslint/no-unused-fields
   availability: Float
   feedStatus: Boolean
   historicalStats(date: Date!): HistoricalStatsType
@@ -390,7 +393,7 @@ type VehicleStatsType {
 }
 
 type LiveStatsType {
-  operatorId: String!
+  operatorId: String! # eslint-disable-line @graphql-eslint/no-unused-fields
   currentVehicles: Int
   expectedVehicles: Int
   feedAlerts: Int
@@ -744,26 +747,7 @@ enum RouteType {
   INVALID_NO_ROUTE_POINTS
 }
 
-"""
-Filters for AvlLineLevelStatus
-
-[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
-"""
-input AvlFiltersInput {
-  operatorNoc: String
-  lineName: String
-}
-
-"""
-Last Received AVL for on a Line basis
-
-[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
-"""
-type AvlLineLevelStatus {
-  operatorNoc: String!
-  lineName: String!
-  lastRecordedAtTime: DateTime!
-}
+# eslint-disable @graphql-eslint/no-unused-fields
 
 input StopAnalysisFiltersInput {
   adminAreaIds: [String!]
@@ -789,3 +773,25 @@ type StopAnalysisType {
   latitude: Float!
   longitude: Float!
 }
+"""
+Filters for AvlLineLevelStatus
+
+[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
+"""
+input AvlFiltersInput {
+  operatorNoc: String
+  lineName: String
+}
+
+"""
+Last Received AVL for on a Line basis
+
+[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
+"""
+type AvlLineLevelStatus {
+  operatorNoc: String!
+  lineName: String!
+  lastRecordedAtTime: DateTime!
+}
+
+# eslint-enable @graphql-eslint/no-unused-fields
