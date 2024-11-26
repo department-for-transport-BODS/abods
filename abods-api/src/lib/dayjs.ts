@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { ConfigType, Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
@@ -35,7 +35,7 @@ export const parseTimetz = (timetz: Dayjs): Dayjs => {
     .set("second", timetz.second());
 };
 
-export const getDateLocale = (utcString: string): Dayjs => {
+export const getDateLocale = (utcString: ConfigType): Dayjs => {
   return dayjs.tz(utcString, "Europe/London");
 };
 

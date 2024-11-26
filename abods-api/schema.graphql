@@ -823,7 +823,6 @@ type Stop {
   stopId: Int!
   stopName: String!
   isTimingPoint: Boolean!
-  lineId: String!
   otp: OtpEnum
 }
 

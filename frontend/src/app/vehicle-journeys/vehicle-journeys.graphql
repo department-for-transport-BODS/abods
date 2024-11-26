@@ -18,7 +18,6 @@ query route($groupId: String!) {
     stopName
     stopId
     isTimingPoint
-    lineId
     otp
   }
 }

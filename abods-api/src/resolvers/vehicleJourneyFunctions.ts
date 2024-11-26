@@ -1,11 +1,11 @@
-import { getDate, getFormattedDate } from "../lib/dayjs.js";
+import { getDate, getDateLocale, getFormattedDate } from "../lib/dayjs.js";
 import {
   AvlPoint,
+  Journey,
   OtpEnum,
   QueryResolvers,
   Resolvers,
   Stop,
-  Journey,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 
@@ -16,11 +16,14 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
 ): Promise<Journey[]> => {
   await requireUserSession(context);
   const currentTime = getDate();
+
   return context.db.expected_journeys
     .findMany({
       where: {
         noc_and_line_and_servicecode: args.lineId,
-        date_of_journey: getDate(args.dateOfJourney).startOf("day").toDate(),
+        date_of_journey: getDateLocale(args.dateOfJourney)
+          .startOf("day")
+          .toDate(),
       },
       select: {
         expected_journey_start: true,
@@ -120,11 +123,6 @@ export const getRoute: QueryResolvers["route"] = async (
         common_name: true,
         otp_state: true,
         timestamp_after_estimate: true,
-        expected_journeys: {
-          select: {
-            noc_and_line_and_servicecode: true,
-          },
-        },
       },
     })
     .then((r) =>
@@ -139,7 +137,6 @@ export const getRoute: QueryResolvers["route"] = async (
         stopIndex: s.stop_index,
         stopId: s.stop_id,
         stopName: s.common_name ?? "Unknown",
-        lineId: s.expected_journeys?.noc_and_line_and_servicecode ?? "Unknown",
         isTimingPoint: s.is_timing_point ?? false,
         otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
       })),

@@ -1089,7 +1089,6 @@ export type Stop = {
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
-  lineId: Scalars['String']['output'];
   longitude: Scalars['Float']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
@@ -1585,7 +1584,7 @@ export type RouteQueryVariables = Exact<{
 }>;
 
 
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, lineId: string, otp?: OtpEnum | null }> };
+export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null }> };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['DateTime']['input'];
@@ -3000,7 +2999,6 @@ export const RouteDocument = gql`
     stopName
     stopId
     isTimingPoint
-    lineId
     otp
   }
 }

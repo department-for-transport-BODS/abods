@@ -2,8 +2,7 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 import {
   combineLatest,
-  map,
-  of,
+  distinctUntilKeyChanged,
   Subject,
   switchMap,
   takeUntil,
@@ -13,7 +12,6 @@ import {
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
-import { DateTime } from "luxon";
 import {
   AvlPoint,
   AvlsGQL,
@@ -21,6 +19,8 @@ import {
   RouteGQL,
   Stop,
 } from "../../../generated/graphql";
+import { distinctUntilChanged, map } from "rxjs/operators";
+import { DateTime } from "luxon";
 
 export interface JourneyInfo {
   stops: Stop[];
@@ -49,13 +49,11 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
+  groupId = "";
 
-  routeDetails$ = new Subject<{
-    groupId: string;
-    journeyStart: string;
-    lineId: string;
-  }>();
-  currentJourneyIndex = -1;
+  get currentJourneyIndex() {
+    return this.journeys.findIndex((v) => v.groupId === this.groupId);
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -68,46 +66,53 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   private onDestroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    this.route.queryParamMap
-      .pipe(takeUntil(this.onDestroy$))
-      .subscribe((params) => {
-        this.returnQueryParams = {
-          date: DateTime.fromISO(params.get("startTime")!)
-            .startOf("day")
-            .toUTC()
-            ?.toISO({ format: "basic", suppressSeconds: true }),
-          operator: params.get("operator"),
-          service: params.get("service"),
+    const urlData$ = combineLatest([
+      this.route.paramMap,
+      this.route.queryParamMap,
+    ]).pipe(
+      map(([params, queryParams]) => {
+        const urlData = {
+          groupId: params.get("journeyId")!,
+          journeyStart: queryParams.get("startTime")!,
+          lineId: queryParams.get("service")!,
+          operator: queryParams.get("operator"),
+          evidenced: queryParams.get("evidenced"),
+          timingPointsOnly: queryParams.get("timingPointsOnly"),
+          allStops: queryParams.get("allStops"),
         };
-        this.estimated = params.get("evidenced") !== "true" ? "true" : "false";
+
+        this.returnQueryParams = {
+          date: urlData.journeyStart,
+          operator: urlData.operator,
+          service: urlData.lineId,
+        };
+        this.estimated = urlData.evidenced !== "true" ? "true" : "false";
         this.timingPointsOption =
-          params.get("timingPointsOnly") === "true" ||
-          params.get("allStops") !== "true"
+          urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
             ? "timing-points"
             : "all-stops";
-      });
-
-    const groupId$ = this.route.paramMap.pipe(
-      takeUntil(this.onDestroy$),
-      map((params) => params.get("journeyId")!),
+        this.groupId = urlData.groupId;
+        return urlData;
+      }),
     );
-
-    combineLatest([groupId$])
+    urlData$
       .pipe(
+        distinctUntilKeyChanged("groupId"),
         tap(() => (this.journeyInfoLoading = true)),
-        switchMap(([groupId]) =>
-          zip(
+        switchMap(({ groupId }) => {
+          // fetch more data
+          return zip(
             this.routeGQL.fetch({ groupId }),
             this.avlsGQL.fetch({ groupId }),
-            of(groupId),
-          ),
-        ),
+          );
+        }),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([routeResult, avlsResult, groupId]) => {
+        next: ([routeResult, avlsResult]) => {
           if (!routeResult.data.route[0]) {
-            return (this.errorView = new VehicleJourneyNotFoundView());
+            this.errorView = new VehicleJourneyNotFoundView();
+            return;
           }
           const sortedAvls = [...avlsResult.data.avls].sort((a, b) =>
             a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
@@ -121,46 +126,39 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
               (a, b) => a.stopIndex - b.stopIndex,
             ),
           };
-          this.routeDetails$.next({
-            journeyStart: this.journeyInfo.stops[0].scheduledDepartureUtc,
-            groupId: groupId,
-            lineId: this.journeyInfo.stops[0].lineId,
-          });
           this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.errorView = new VehicleJourneyNotFoundView();
+          this.journeyInfo = null;
           this.journeyInfoLoading = false;
         },
       });
-
-    this.routeDetails$
+    urlData$
       .pipe(
+        distinctUntilChanged(
+          (prev, curr) =>
+            DateTime.fromISO(prev.journeyStart).startOf("day").toISO() ===
+              DateTime.fromISO(curr.journeyStart).startOf("day").toISO() &&
+            prev.lineId === curr.lineId,
+        ),
         tap(() => (this.journeysLoading = true)),
-        switchMap((routeDetails) => {
-          return zip(
-            this.service.fetchDayJourneys(
-              routeDetails.journeyStart,
-              routeDetails.lineId,
-            ),
-            of(routeDetails),
-          );
+        switchMap(({ journeyStart, lineId }) => {
+          // fetch more data
+          return this.service.fetchDayJourneys(journeyStart, lineId);
         }),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([journeys, routeDetails]) => {
+        next: (journeys) => {
           this.journeys = journeys;
-          this.currentJourneyIndex = journeys.findIndex(
-            (v) => v.groupId === routeDetails.groupId,
-          );
           this.journeysLoading = false;
         },
         error: (err) => {
           console.log(err);
+          this.errorView = new VehicleJourneyNotFoundView();
           this.journeys = [];
-          this.currentJourneyIndex = -1;
           this.journeysLoading = false;
         },
       });

@@ -9,7 +9,7 @@
   <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
       <app-page-header
-        *ngIf="!journeyInfoLoading || journeysLoading; else skeletonHeader"
+        *ngIf="!journeysLoading; else skeletonHeader"
         caption="Vehicle journeys"
         [heading]="
           journeys[currentJourneyIndex]
@@ -22,7 +22,7 @@
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [journeyInfo]="journeyInfo"
-          [loading]="journeyInfoLoading || journeysLoading"
+          [loading]="journeysLoading"
           [journey]="journeys[currentJourneyIndex]"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
@@ -62,7 +62,7 @@
           </app-segmented-toggle>
           <app-journey-nav
             [journeys]="journeys"
-            [loading]="journeyInfoLoading || journeysLoading"
+            [loading]="journeysLoading"
             [currentIndex]="currentJourneyIndex"
           ></app-journey-nav>
         </div>

@@ -5,7 +5,7 @@
       class="journey-nav__link"
       [class.journey-nav__link--disabled]="!previous"
       [routerLink]="previous ? ['/vehicle-journeys', previous.groupId] : null"
-      [queryParams]="{ startTime: formatStartTime(previous?.startTime) }"
+      [queryParams]="{ startTime: previous?.startTime }"
       queryParamsHandling="merge"
       [ngxTippy]="prevTooltip"
       [tippyProps]="tippyProps"
@@ -18,22 +18,20 @@
       <div #prevTooltip>
         {{ previous?.serviceNumber }}: {{ previous?.serviceName }}
       </div>
-      <span *ngIf="previous">{{
-        previous.startTime | dateTimeToFormat: "HH:mm"
-      }}</span>
+      <span *ngIf="previous">{{ formatStartTime(previous.startTime) }}</span>
     </a>
 
     <a
       class="journey-nav__link"
       [class.journey-nav__link--disabled]="!next"
       [routerLink]="next ? ['/vehicle-journeys', next.groupId] : null"
-      [queryParams]="{ startTime: formatStartTime(next?.startTime) }"
+      [queryParams]="{ startTime: next?.startTime }"
       queryParamsHandling="merge"
       [ngxTippy]="nextTooltip"
       [tippyProps]="tippyProps"
     >
       <div #nextTooltip>{{ next?.serviceNumber }}: {{ next?.serviceName }}</div>
-      <span *ngIf="next">{{ next.startTime | dateTimeToFormat: "HH:mm" }}</span>
+      <span *ngIf="next">{{ formatStartTime(next.startTime) }}</span>
       <svg-icon
         class="journey-nav__icon"
         src="assets/icons/caret-right.svg"
