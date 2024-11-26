@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Journey, JourneysGQL } from "../../../generated/graphql";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { sortBy } from "lodash-es";
+import { DateTime } from "luxon";
 
 @Injectable({ providedIn: "root" })
 export class VehicleJourneysSearchService {
@@ -14,6 +14,13 @@ export class VehicleJourneysSearchService {
   ): Observable<Journey[]> {
     return this.journeysGQL
       .fetch({ dateOfJourney, lineId }, { fetchPolicy: "no-cache" })
-      .pipe(map((journeys) => sortBy(journeys.data.findJourneys, "startTime")));
+      .pipe(
+        map((journeys) => {
+          const now = DateTime.now();
+          return journeys.data.findJourneys
+            .filter((n) => DateTime.fromISO(n.startTime) <= now)
+            .sort((a, b) => a.startTime.localeCompare(b.startTime));
+        }),
+      );
   }
 }

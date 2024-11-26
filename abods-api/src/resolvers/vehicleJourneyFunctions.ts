@@ -1,4 +1,4 @@
-import { getDate, getDateLocale, getFormattedDate } from "../lib/dayjs.js";
+import { getDateLocale, getFormattedDate } from "../lib/dayjs.js";
 import {
   AvlPoint,
   Journey,
@@ -15,7 +15,6 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
   context,
 ): Promise<Journey[]> => {
   await requireUserSession(context);
-  const currentTime = getDate();
 
   return context.db.expected_journeys
     .findMany({
@@ -43,25 +42,18 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
       },
     })
     .then((j) =>
-      j
-        .filter((journey) =>
-          getDate(journey.expected_journey_start).isBefore(
-            currentTime,
-            "second",
-          ),
-        )
-        .map((journey) => ({
-          groupId: journey.group_id,
-          startTime: getFormattedDate(journey.expected_journey_start),
-          serviceName: journey.journey_pattern_description,
-          serviceNumber: journey.expected_services?.line_name ?? "unknown",
-          operatorNoc:
-            journey.expected_services?.expected_operator.operator_noc ??
-            "unknown",
-          operatorName:
-            journey.expected_services?.expected_operator.operator_name ??
-            "unknown",
-        })),
+      j.map((journey) => ({
+        groupId: journey.group_id,
+        startTime: getFormattedDate(journey.expected_journey_start),
+        serviceName: journey.journey_pattern_description,
+        serviceNumber: journey.expected_services?.line_name ?? "unknown",
+        operatorNoc:
+          journey.expected_services?.expected_operator.operator_noc ??
+          "unknown",
+        operatorName:
+          journey.expected_services?.expected_operator.operator_name ??
+          "unknown",
+      })),
     );
 };
 
