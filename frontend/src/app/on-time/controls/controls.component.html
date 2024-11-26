@@ -23,7 +23,25 @@
         ><span>Refine results</span>
       </button>
     </div>
-    <div class="on-time__timing-toggle">
+  </div>
+  <div class="on-time__timing-toggle">
+    <div class="on-time__timing-toggle-row">
+      <app-segmented-toggle [(ngModel)]="estimated">
+        <app-segmented-toggle-item
+          name="estimated-toggle"
+          identifier="estimated"
+          value="estimated"
+          label="Estimated"
+        ></app-segmented-toggle-item>
+        <app-segmented-toggle-item
+          name="estimated-toggle"
+          identifier="evidenced"
+          value="evidenced"
+          label="Evidenced"
+        ></app-segmented-toggle-item>
+      </app-segmented-toggle>
+    </div>
+    <div class="on-time__timing-toggle-row">
       <app-segmented-toggle
         legend="Show performance using data from"
         [(ngModel)]="timingPointsOption"

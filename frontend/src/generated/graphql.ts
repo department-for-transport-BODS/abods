@@ -382,6 +382,7 @@ export type HeadwayDayOfWeekType = {
 export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
+  estimated?: InputMaybe<EstimatedToggle>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -789,6 +790,7 @@ export type PerformanceFiltersInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
+  estimated?: InputMaybe<EstimatedToggle>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;

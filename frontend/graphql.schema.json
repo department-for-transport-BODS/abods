@@ -2972,6 +2972,18 @@
             "deprecationReason": null
           },
           {
+            "name": "estimated",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "EstimatedToggle",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "granularity",
             "description": null,
             "type": {
@@ -5883,6 +5895,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "estimated",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "EstimatedToggle",
               "ofType": null
             },
             "defaultValue": null,

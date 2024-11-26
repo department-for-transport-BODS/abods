@@ -16,6 +16,7 @@ import { BehaviorSubject, combineLatest, Subject } from "rxjs";
 import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
 import {
   DayOfWeekFlagsInputType,
+  EstimatedToggle,
   PerformanceFiltersInputType,
 } from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
@@ -73,6 +74,18 @@ export class ControlsComponent
     });
   }
 
+  get estimated(): EstimatedToggle {
+    return this.filtersSubject.value.estimated ?? EstimatedToggle.Evidenced;
+  }
+
+  set estimated(estimatedInput: EstimatedToggle) {
+    const estimated = estimatedInput;
+    this.router.navigate([], {
+      queryParams: { estimated },
+      queryParamsHandling: "merge",
+    });
+  }
+
   /** @deprecated this will be removed in ABOD-350 */
   get filters(): PerformanceFiltersInputType {
     return this.filtersSubject.value;
@@ -115,7 +128,10 @@ export class ControlsComponent
     paramMap: ParamMap,
     queryParams: ParamMap,
   ): PerformanceFiltersInputType {
-    const filters: PerformanceFiltersInputType = { timingPointsOnly: true };
+    const filters: PerformanceFiltersInputType = {
+      timingPointsOnly: true,
+      estimated: EstimatedToggle.Evidenced,
+    };
 
     if (paramMap.get("nocCode")) {
       const operatorId = ifNullOrUndefinedReturnEmptyString(this.operatorId);
@@ -167,6 +183,12 @@ export class ControlsComponent
     if (queryParams.has("timingPointsOnly")) {
       filters.timingPointsOnly =
         queryParams.get("timingPointsOnly") === "true" || undefined;
+    }
+
+    if (queryParams.has("estimated")) {
+      filters.estimated =
+        (queryParams.get("estimated") as EstimatedToggle) ||
+        EstimatedToggle.Evidenced;
     }
 
     if (queryParams.has("allStops")) {

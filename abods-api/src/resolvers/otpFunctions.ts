@@ -1,9 +1,11 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
+  EstimatedToggle,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
+  Granularity,
   HeadwayInputType,
   HeadwayMetricsTypeResolvers,
   HeadwayOverviewType,
@@ -72,7 +74,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       : await getOperatorsDropDown(user, context.db);
 
     if (!userOperators) {
-      throw "No operators for user";
+      throw Error("No operators for user");
     }
 
     return {
@@ -137,7 +139,7 @@ export const getOperators = async (
     });
 
     if (!operators) {
-      throw "No operators found";
+      throw Error("No operators found");
     }
 
     const userOperators = operators.map((operator) => ({
@@ -168,7 +170,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
     const operators = await getOperators(user, context.db);
 
     if (!operators) {
-      throw "No user operators";
+      throw Error("No user operators");
     }
 
     const userOperatorIds = operators.map((o) => o.nocCode);
@@ -180,7 +182,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
     });
 
     if (!service) {
-      throw "No service found";
+      throw Error("No service found");
     }
 
     if (userOperatorIds.includes(service.operator_noc)) {
@@ -189,7 +191,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
         serviceNumber: service.line_name,
         serviceName: service.service_name,
       };
-    } else throw "User does not have access to service";
+    } else throw Error("User does not have access to service");
   } catch (error) {
     console.error(error);
     return null;
@@ -205,7 +207,7 @@ export const getLines: QueryResolvers["lines"] = async (
   const userOperators = await getOperators(user, context.db);
 
   if (!userOperators) {
-    throw "No user operators";
+    throw Error("No user operators");
   }
 
   const userOperatorIds = userOperators.map((o) => o.nocCode);
@@ -337,7 +339,7 @@ export const getOperator: QueryResolvers["operator"] = async (
     });
 
     if (!operator) {
-      throw "No operator found";
+      throw Error("No operator found");
     }
 
     const operatorPayload: OperatorType = {
@@ -373,7 +375,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       const operators = await getOperators(user, context.db);
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators
@@ -455,11 +457,11 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       const operators = await getOperators(
         user,
         context.db,
-        adminAreaIds || [],
+        adminAreaIds ?? [],
       );
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators
@@ -544,7 +546,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     const user = await requireUserSession(context);
     try {
       const lineIds = args.inputs.filters.lineIds;
-      const operatorIds = args.inputs.filters.operatorIds || [];
+      const operatorIds = args.inputs.filters.operatorIds ?? [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -554,7 +556,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
         const operators = await getOperators(user, context.db);
 
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -668,7 +670,7 @@ const getStopsDistribution = async (
   });
 
   const filteredResults = results.filter(
-    (result) => result.time_diff_minutes || result.time_diff_minutes === 0,
+    (result) => result.time_diff_minutes ?? result.time_diff_minutes === 0,
   );
 
   filteredResults.sort((a, b) => {
@@ -695,7 +697,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
 
       const { filters } = args.inputs;
       let { operatorIds } = filters || {};
-      operatorIds = operatorIds || [];
+      operatorIds = operatorIds ?? [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -703,7 +705,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
         const operators = await getOperators(user, context.db);
 
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -716,7 +718,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
           return getStopsDistribution(args.inputs, userOperatorIds, context.db);
         } else {
           if (!operators) {
-            throw "No user operators";
+            throw Error("No user operators");
           }
         }
       }
@@ -740,7 +742,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
       // bucket is the number difference in the OTP table
       // freq is the count of that difference
 
-      const operatorIds = args.inputs.filters?.operatorIds || [];
+      const operatorIds = args.inputs.filters?.operatorIds ?? [];
       const lineIds = args.inputs.filters?.lineIds;
 
       // fetch all otp records group by time difference
@@ -751,7 +753,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
         const operators = await getOperators(user, context.db);
 
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -820,15 +822,15 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
 
       const { filters } = args.inputs;
       const { granularity, lineIds } = filters || {};
-      const operatorIds = filters?.operatorIds || [];
+      const operatorIds = filters?.operatorIds ?? [];
 
       if (operatorIds.length == 1) {
         //if (granularity == "day" && operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
         const operators = await getOperators(user, context.db);
-        const isDayGranularity = granularity === "day";
+        const isDayGranularity = granularity === Granularity.Day;
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -1039,8 +1041,8 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       const { filters } = args.inputs;
       let { operatorIds, lineIds } = filters || {};
-      operatorIds = operatorIds || [];
-      lineIds = lineIds || [];
+      operatorIds = operatorIds ?? [];
+      lineIds = lineIds ?? [];
 
       const stopPerformances: StopPerformanceType[] = [];
 
@@ -1050,7 +1052,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
         const operators = await getOperators(user, context.db);
 
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -1160,14 +1162,14 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       const { filters } = args.inputs;
       let { operatorIds } = filters || {};
-      operatorIds = operatorIds || [];
+      operatorIds = operatorIds ?? [];
 
       if (operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
         const operators = await getOperators(user, context.db);
 
         if (!operators) {
-          throw "No user operators";
+          throw Error("No user operators");
         }
 
         const userOperatorIds = operators
@@ -1252,7 +1254,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
       const operators = await getOperators(user, context.db);
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators.map((o) => o.nocCode);
@@ -1292,7 +1294,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
       const operators = await getOperators(user, context.db);
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators
@@ -1341,7 +1343,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       const operators = await getOperators(user, context.db);
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators
@@ -1406,12 +1408,12 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       const { filters } = args.inputs;
       const { granularity } = filters || {};
 
-      const isDayGranularity = granularity === "day";
+      const isDayGranularity = granularity === Granularity.Day;
 
       const operators = await getOperators(user, context.db);
 
       if (!operators) {
-        throw "No user operators";
+        throw Error("No user operators");
       }
 
       const userOperatorIds = operators
@@ -1581,6 +1583,7 @@ const getPrismaFiltersForOTPQuery = (
     lineIds,
     lineId,
     dayOfWeekFlags,
+    estimated,
   } = filters || {};
   const operatorIds = filters?.operatorIds || [];
 
@@ -1644,6 +1647,9 @@ const getPrismaFiltersForOTPQuery = (
       lte: new Date(toTimestamp),
     },
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
+    ...(estimated && estimated === EstimatedToggle.Evidenced
+      ? { estimated: false }
+      : {}),
     ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
     ...(startTime && endTime
       ? isThreshold

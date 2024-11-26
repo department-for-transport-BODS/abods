@@ -301,6 +301,7 @@ input HeadwayFiltersInputType {
   nocCodes: [String!]
   operatorIds: [String!]
   startTime: String
+  estimated: EstimatedToggle
 }
 
 input DayOfWeekFlagsInputType {
@@ -761,6 +762,7 @@ input PerformanceFiltersInputType {
   stopsSegment: StopsSegment
   tagIds: [Int!]
   timingPointsOnly: Boolean
+  estimated: EstimatedToggle
 }
 
 enum Granularity {
