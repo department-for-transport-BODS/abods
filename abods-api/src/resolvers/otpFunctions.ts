@@ -449,12 +449,6 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               : 0,
             totalLate = operatorOtpStats._sum.late_count
               ? operatorOtpStats._sum.late_count
-              : 0,
-            totalscheduled = operatorOtpStats._sum.scheduled
-              ? operatorOtpStats._sum.scheduled
-              : 0,
-            totalCompleted = operatorOtpStats._sum.completed
-              ? operatorOtpStats._sum.completed
               : 0;
 
           const opPerformance: OperatorPerformanceType = {
@@ -464,9 +458,6 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
             early: totalEarly,
             late: totalLate,
             onTime: totalOntime,
-            averageDelay: 0, // TODO
-            scheduledDepartures: totalscheduled,
-            actualDepartures: totalCompleted,
           };
           opPerformances.push(opPerformance);
         }
