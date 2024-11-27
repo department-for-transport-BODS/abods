@@ -19,7 +19,7 @@ import {
   RouteGQL,
   Stop,
 } from "../../../generated/graphql";
-import { distinctUntilChanged, map } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { DateTime } from "luxon";
 
 export interface JourneyInfo {
@@ -134,17 +134,13 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       });
     urlData$
       .pipe(
-        distinctUntilChanged(
-          (prev, curr) =>
-            DateTime.fromISO(prev.journeyStart).startOf("day").toISO() ===
-              DateTime.fromISO(curr.journeyStart).startOf("day").toISO() &&
-            prev.lineId === curr.lineId,
-        ),
         tap(() => (this.journeysLoading = true)),
-        switchMap(({ journeyStart, lineId }) => {
-          // fetch more data
-          return this.service.fetchDayJourneys(journeyStart, lineId);
-        }),
+        switchMap(({ journeyStart, lineId }) =>
+          this.service.fetchDayJourneys(
+            DateTime.fromISO(journeyStart).startOf("day").toISO(),
+            lineId,
+          ),
+        ),
         takeUntil(this.onDestroy$),
       )
       .subscribe({

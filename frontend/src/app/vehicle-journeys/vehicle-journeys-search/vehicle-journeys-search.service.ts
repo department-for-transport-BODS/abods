@@ -12,15 +12,13 @@ export class VehicleJourneysSearchService {
     dateOfJourney: string,
     lineId: string,
   ): Observable<Journey[]> {
-    return this.journeysGQL
-      .fetch({ dateOfJourney, lineId }, { fetchPolicy: "no-cache" })
-      .pipe(
-        map((journeys) => {
-          const now = DateTime.now();
-          return journeys.data.findJourneys
-            .filter((n) => DateTime.fromISO(n.startTime) <= now)
-            .sort((a, b) => a.startTime.localeCompare(b.startTime));
-        }),
-      );
+    return this.journeysGQL.fetch({ dateOfJourney, lineId }).pipe(
+      map((journeys) => {
+        const now = DateTime.now();
+        return journeys.data.findJourneys
+          .filter((n) => DateTime.fromISO(n.startTime) <= now)
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      }),
+    );
   }
 }
