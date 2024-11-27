@@ -1003,10 +1003,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             const stop = stops.find((dbStop) => dbStop.id === res.stop_id);
             stopPerformances.push({
               lineId: lineIds[0],
-              stopId: `ST${stop?.atco_code}`,
+              stopId: stop?.atco_code ?? "",
               stopInfo: {
                 //stopId: res.stop_id? res.stop_id : 0,
-                stopId: `ST${stop?.atco_code}`,
+                stopId: stop?.atco_code ?? "",
                 stopName: res.common_name ? res.common_name : "",
                 stopLocality: {
                   localityId: "",

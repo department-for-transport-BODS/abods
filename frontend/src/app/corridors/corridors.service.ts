@@ -62,7 +62,7 @@ const toStop: (stop: StopType | StopInfoType) => CorridorStop = ({
   ...(isStopLocation(stop)
     ? { lon: stop.stopLocation.longitude, lat: stop.stopLocation.latitude }
     : stop),
-  naptan: stop.sourceId ? stop.sourceId : stopId.substring(2),
+  naptan: stop.sourceId ? stop.sourceId : stopId,
   intId: ++uniqueId,
 });
 

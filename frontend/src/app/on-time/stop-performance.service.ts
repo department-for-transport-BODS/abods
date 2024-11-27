@@ -56,7 +56,7 @@ export class StopPerformanceService {
     // TODO strip redundant properties maybe?
     return mergedStops.map((stop) => ({
       ...stop,
-      naptan: stop.stopId.substring(2),
+      naptan: stop.stopId,
       stopLocality:
         stop.stopInfo !== undefined
           ? `${stop.stopInfo.stopLocality.localityName}, ${stop.stopInfo.stopLocality.localityAreaName}`
