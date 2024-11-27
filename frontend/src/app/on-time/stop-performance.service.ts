@@ -50,7 +50,10 @@ export class StopPerformanceService {
 
     // Theres no guarantee that the transit model and OTP model have the same stops, so use both and merge by stopId
     const mergedStops = values(
-      merge(keyBy(mutable(tmStops), "stopId"), keyBy(otpStops, "stopId")),
+      merge(
+        keyBy(mutable(tmStops), "stopId"),
+        keyBy(otpStops, "stopInfo.sourceId"),
+      ),
     );
 
     // TODO strip redundant properties maybe?
