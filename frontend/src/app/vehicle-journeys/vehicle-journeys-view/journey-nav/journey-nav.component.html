@@ -18,7 +18,7 @@
       <div #prevTooltip>
         {{ previous?.serviceNumber }}: {{ previous?.serviceName }}
       </div>
-      <span *ngIf="previous">{{ formatStartTime(previous.startTime) }}</span>
+      <span *ngIf="previous">{{ formatStartTime(previous) }}</span>
     </a>
 
     <a
@@ -31,7 +31,7 @@
       [tippyProps]="tippyProps"
     >
       <div #nextTooltip>{{ next?.serviceNumber }}: {{ next?.serviceName }}</div>
-      <span *ngIf="next">{{ formatStartTime(next.startTime) }}</span>
+      <span *ngIf="next">{{ formatStartTime(next) }}</span>
       <svg-icon
         class="journey-nav__icon"
         src="assets/icons/caret-right.svg"

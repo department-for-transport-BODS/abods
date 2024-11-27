@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { Journey } from "../../../../generated/graphql";
-import { DateTime } from "luxon";
+import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
 
 @Component({
   selector: "app-vehicle-journeys-grid",
@@ -24,7 +24,5 @@ export class VehicleJourneysGridComponent {
   @Input() loading = false;
   patterns: Journey[][] = [];
 
-  formatStartTime(startTime: string) {
-    return DateTime.fromISO(startTime).toFormat("HH:mm");
-  }
+  formatStartTime = formatJourneyStartTime;
 }

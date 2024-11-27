@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
-import { DateTime } from "luxon";
 import { NgxTippyProps } from "ngx-tippy-wrapper";
 import { Journey } from "../../../../generated/graphql";
+import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
 
 @Component({
   selector: "app-journey-nav",
@@ -21,9 +21,7 @@ export class JourneyNavComponent {
     return this.journeys[this.currentIndex - 1];
   }
 
-  formatStartTime(startTime: string) {
-    return DateTime.fromISO(startTime).toFormat("HH:mm");
-  }
+  formatStartTime = formatJourneyStartTime;
 
   tippyProps: NgxTippyProps = {
     allowHTML: true,
