@@ -499,6 +499,16 @@ export type InvitationType = {
   role?: Maybe<RoleType>;
 };
 
+export type Journey = {
+  __typename?: 'Journey';
+  groupId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+  operatorNoc: Scalars['String']['output'];
+  serviceName: Scalars['String']['output'];
+  serviceNumber: Scalars['String']['output'];
+  startTime: Scalars['String']['output'];
+};
+
 export type JourneyScheduledStartTimes = {
   __typename?: 'JourneyScheduledStartTimes';
   days?: Maybe<Array<Maybe<ShortCodeDayOfWeek>>>;
@@ -869,6 +879,7 @@ export type Query = {
   dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
+  findJourneys: Array<Journey>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   lines: Array<LineType>;
@@ -883,7 +894,6 @@ export type Query = {
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
-  vehicleReplay?: Maybe<VehicleReplayNamespace>;
 };
 
 
@@ -913,6 +923,12 @@ export type QueryEventsArgs = {
   end: Scalars['DateTime']['input'];
   operatorId: Scalars['String']['input'];
   start: Scalars['DateTime']['input'];
+};
+
+
+export type QueryFindJourneysArgs = {
+  dateOfJourney: Scalars['DateTime']['input'];
+  lineId: Scalars['String']['input'];
 };
 
 
@@ -1073,15 +1089,9 @@ export type Stop = {
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
-  lineName: Scalars['String']['output'];
   longitude: Scalars['Float']['output'];
-  operatorName: Scalars['String']['output'];
-  operatorNoc: Scalars['String']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
-  serviceId: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
-  startTime: Scalars['String']['output'];
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
@@ -1129,13 +1139,6 @@ export enum StopsSegment {
   Intermediate = 'Intermediate'
 }
 
-export type UniqueJourneyType = {
-  __typename?: 'UniqueJourneyType';
-  groupId?: Maybe<Scalars['String']['output']>;
-  serviceInfo: ServiceInfoType;
-  startTime: Scalars['String']['output'];
-};
-
 export type UserType = {
   __typename?: 'UserType';
   email: Scalars['String']['output'];
@@ -1157,28 +1160,6 @@ export type UserUpdateResponseType = {
   __typename?: 'UserUpdateResponseType';
   error?: Maybe<Scalars['String']['output']>;
   user?: Maybe<UserType>;
-};
-
-export type VehicleReplayFilterInputType = {
-  filterOnStartTime?: InputMaybe<Scalars['Boolean']['input']>;
-  lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  stopIds?: InputMaybe<Array<Scalars['String']['input']>>;
-};
-
-export type VehicleReplayInputType = {
-  filters: VehicleReplayFilterInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type VehicleReplayNamespace = {
-  __typename?: 'VehicleReplayNamespace';
-  findJourneys?: Maybe<Array<Maybe<UniqueJourneyType>>>;
-};
-
-
-export type VehicleReplayNamespaceFindJourneysArgs = {
-  inputs: VehicleReplayInputType;
 };
 
 export type VehicleStatsType = {
@@ -1603,17 +1584,15 @@ export type RouteQueryVariables = Exact<{
 }>;
 
 
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, operatorName: string, operatorNoc: string, lineName: string, serviceId: string, serviceName: string, startTime: string, otp?: OtpEnum | null }> };
+export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null }> };
 
 export type JourneysQueryVariables = Exact<{
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  dateOfJourney: Scalars['DateTime']['input'];
   lineId: Scalars['String']['input'];
-  filterOnStartTime: Scalars['Boolean']['input'];
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', vehicleReplay?: { __typename?: 'VehicleReplayNamespace', findJourneys?: Array<{ __typename?: 'UniqueJourneyType', groupId?: string | null, startTime: string, serviceInfo: { __typename?: 'ServiceInfoType', serviceName: string, serviceNumber: string } } | null> | null } | null };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string }> };
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3020,12 +2999,6 @@ export const RouteDocument = gql`
     stopName
     stopId
     isTimingPoint
-    operatorName
-    operatorNoc
-    lineName
-    serviceId
-    serviceName
-    startTime
     otp
   }
 }
@@ -3042,18 +3015,14 @@ export const RouteDocument = gql`
     }
   }
 export const JourneysDocument = gql`
-    query journeys($fromTimestamp: DateTime!, $toTimestamp: DateTime!, $lineId: String!, $filterOnStartTime: Boolean!) {
-  vehicleReplay {
-    findJourneys(
-      inputs: {fromTimestamp: $fromTimestamp, toTimestamp: $toTimestamp, filters: {lineIds: [$lineId], filterOnStartTime: $filterOnStartTime}}
-    ) {
-      groupId
-      startTime
-      serviceInfo {
-        serviceName
-        serviceNumber
-      }
-    }
+    query journeys($dateOfJourney: DateTime!, $lineId: String!) {
+  findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
+    groupId
+    startTime
+    serviceName
+    serviceNumber
+    operatorName
+    operatorNoc
   }
 }
     `;

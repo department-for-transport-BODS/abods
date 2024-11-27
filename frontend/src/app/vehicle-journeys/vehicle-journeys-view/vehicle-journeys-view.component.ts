@@ -2,8 +2,7 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 import {
   combineLatest,
-  map,
-  mergeMap,
+  distinctUntilKeyChanged,
   Subject,
   switchMap,
   takeUntil,
@@ -12,13 +11,16 @@ import {
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
+import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import {
-  VehicleJourney,
-  VehicleJourneysSearchService,
-} from "../vehicle-journeys-search/vehicle-journeys-search.service";
+  AvlPoint,
+  AvlsGQL,
+  Journey,
+  RouteGQL,
+  Stop,
+} from "../../../generated/graphql";
+import { map } from "rxjs/operators";
 import { DateTime } from "luxon";
-import { AvlPoint, AvlsGQL, RouteGQL, Stop } from "../../../generated/graphql";
-import { distinctUntilChanged } from "rxjs/operators";
 
 export interface JourneyInfo {
   stops: Stop[];
@@ -36,21 +38,22 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   errorView?: VehicleJourneyNotFoundView;
 
-  journeys: VehicleJourney[] = [];
+  journeys: Journey[] = [];
   journeysLoading = false;
 
   estimated: "true" | "false" = "true";
   timingPointsOption: "timing-points" | "all-stops" = "timing-points";
-  groupId = "";
-  startTime = DateTime.fromSeconds(0);
 
   selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
 
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
+  groupId = "";
 
-  serviceId$ = new Subject<string>();
+  get currentJourneyIndex() {
+    return this.journeys.findIndex((v) => v.groupId === this.groupId);
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -63,81 +66,80 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   private onDestroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    const groupId$ = this.route.paramMap.pipe(
-      takeUntil(this.onDestroy$),
-      map((params) => params.get("journeyId")!),
-    );
-    groupId$.subscribe((groupId) => (this.groupId = groupId));
-
-    this.route.queryParamMap
-      .pipe(takeUntil(this.onDestroy$))
-      .subscribe((params) => {
-        this.startTime = DateTime.fromISO(params.get("startTime")!);
+    const urlData$ = combineLatest([
+      this.route.paramMap,
+      this.route.queryParamMap,
+    ]).pipe(
+      map(([params, queryParams]) => ({
+        groupId: params.get("journeyId")!,
+        journeyStart: queryParams.get("startTime")!,
+        lineId: queryParams.get("service")!,
+        operator: queryParams.get("operator"),
+        evidenced: queryParams.get("evidenced"),
+        timingPointsOnly: queryParams.get("timingPointsOnly"),
+        allStops: queryParams.get("allStops"),
+      })),
+      tap((urlData) => {
         this.returnQueryParams = {
-          date: this.startTime
-            .startOf("day")
-            .toUTC()
-            ?.toISO({ format: "basic", suppressSeconds: true }),
-          operator: params.get("operator"),
-          service: params.get("service"),
+          date: urlData.journeyStart,
+          operator: urlData.operator,
+          service: urlData.lineId,
         };
-        this.estimated = params.get("evidenced") !== "true" ? "true" : "false";
+        this.estimated = urlData.evidenced !== "true" ? "true" : "false";
         this.timingPointsOption =
-          params.get("timingPointsOnly") === "true" ||
-          params.get("allStops") !== "true"
+          urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
             ? "timing-points"
             : "all-stops";
-      });
-
-    const startTime$ = this.route.queryParamMap.pipe(
-      map((params) =>
-        DateTime.fromISO(params.get("startTime")!)
-          .setZone("Europe/London")
-          .startOf("day"),
-      ),
-      distinctUntilChanged(),
-      takeUntil(this.onDestroy$),
+        this.groupId = urlData.groupId;
+      }),
     );
-
-    combineLatest([groupId$])
+    urlData$
       .pipe(
+        distinctUntilKeyChanged("groupId"),
         tap(() => (this.journeyInfoLoading = true)),
-        switchMap(([groupId]) =>
-          zip(
+        switchMap(({ groupId }) => {
+          return zip(
             this.routeGQL.fetch({ groupId }),
             this.avlsGQL.fetch({ groupId }),
-          ),
-        ),
+          );
+        }),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
         next: ([routeResult, avlsResult]) => {
           if (!routeResult.data.route[0]) {
-            return (this.errorView = new VehicleJourneyNotFoundView());
+            this.errorView = new VehicleJourneyNotFoundView();
+            return;
           }
+          const sortedAvls = [...avlsResult.data.avls].sort((a, b) =>
+            a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+          );
           this.journeyInfo = {
-            avls: [...avlsResult.data.avls].sort((a, b) =>
-              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+            // Temporary workaround for two concurrent journeys having the same group id
+            avls: sortedAvls.filter(
+              (n) => n.vehicleRef === sortedAvls[0]?.vehicleRef,
             ),
             stops: [...routeResult.data.route].sort(
               (a, b) => a.stopIndex - b.stopIndex,
             ),
           };
-          this.serviceId$.next(this.journeyInfo.stops[0].serviceId);
           this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.errorView = new VehicleJourneyNotFoundView();
+          this.journeyInfo = null;
           this.journeyInfoLoading = false;
         },
       });
-
-    combineLatest([startTime$, this.serviceId$.pipe(distinctUntilChanged())])
+    urlData$
       .pipe(
         tap(() => (this.journeysLoading = true)),
-        mergeMap(([date, serviceId]) =>
-          this.service.fetchDayJourneys(date, serviceId),
+        switchMap(({ journeyStart, lineId }) =>
+          this.service.fetchDayJourneys(
+            DateTime.fromISO(journeyStart).startOf("day").toISO(),
+            lineId,
+          ),
         ),
         takeUntil(this.onDestroy$),
       )
@@ -148,6 +150,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.log(err);
+          this.errorView = new VehicleJourneyNotFoundView();
           this.journeys = [];
           this.journeysLoading = false;
         },
