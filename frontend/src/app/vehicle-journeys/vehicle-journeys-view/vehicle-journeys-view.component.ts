@@ -70,17 +70,16 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       this.route.paramMap,
       this.route.queryParamMap,
     ]).pipe(
-      map(([params, queryParams]) => {
-        const urlData = {
-          groupId: params.get("journeyId")!,
-          journeyStart: queryParams.get("startTime")!,
-          lineId: queryParams.get("service")!,
-          operator: queryParams.get("operator"),
-          evidenced: queryParams.get("evidenced"),
-          timingPointsOnly: queryParams.get("timingPointsOnly"),
-          allStops: queryParams.get("allStops"),
-        };
-
+      map(([params, queryParams]) => ({
+        groupId: params.get("journeyId")!,
+        journeyStart: queryParams.get("startTime")!,
+        lineId: queryParams.get("service")!,
+        operator: queryParams.get("operator"),
+        evidenced: queryParams.get("evidenced"),
+        timingPointsOnly: queryParams.get("timingPointsOnly"),
+        allStops: queryParams.get("allStops"),
+      })),
+      tap((urlData) => {
         this.returnQueryParams = {
           date: urlData.journeyStart,
           operator: urlData.operator,
@@ -92,7 +91,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             ? "timing-points"
             : "all-stops";
         this.groupId = urlData.groupId;
-        return urlData;
       }),
     );
     urlData$
@@ -100,7 +98,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         distinctUntilKeyChanged("groupId"),
         tap(() => (this.journeyInfoLoading = true)),
         switchMap(({ groupId }) => {
-          // fetch more data
           return zip(
             this.routeGQL.fetch({ groupId }),
             this.avlsGQL.fetch({ groupId }),
