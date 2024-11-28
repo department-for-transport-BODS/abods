@@ -5,7 +5,6 @@ run-name:
   contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
   startsWith(github.ref, 'refs/tags/v') && 'prod' ||
   github.ref_name == 'main' && 'uat' ||
-  github.ref_name == 'cavl' && 'cavl' ||
   github.ref_name == 'test' && 'test' ||
   github.ref_name == 'dev' && 'dev'
   ) || 'sandbox' }}
@@ -15,7 +14,6 @@ on:
   push:
     branches:
       - "test"
-      - "cavl"
       - "main"
     paths:
       - "VERSION"
@@ -30,7 +28,6 @@ concurrency:
     github.event_name == 'release' && 'prod' ||
     startsWith(github.ref, 'refs/tags/v') && 'prod' ||
     github.ref_name == 'main' && 'uat' ||
-    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'test' && 'test' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
@@ -43,7 +40,6 @@ env:
     contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
     startsWith(github.ref, 'refs/tags/v') && 'prod' ||
     github.ref_name == 'main' && 'uat' ||
-    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'test' && 'test' ||
     github.ref_name == 'dev' && 'dev'
     ) || 'sandbox' }}
@@ -64,7 +60,6 @@ jobs:
       contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
       startsWith(github.ref, 'refs/tags/v') && 'prod' ||
       github.ref_name == 'main' && 'uat' ||
-      github.ref_name == 'cavl' && 'cavl' ||
       github.ref_name == 'test' && 'test' ||
       github.ref_name == 'dev' && 'dev'
       ) || 'sandbox' }}

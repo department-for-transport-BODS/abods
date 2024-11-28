@@ -79,18 +79,6 @@ uat:
         VpcSubnets='/abods/uat/vpc/subnets/private'
         BodsVpcEndpoint='/abods/uat/external/bods-apigw-vpc-endpoint-ids'
 
-cavl:
-  deploy:
-    parameters:
-      stack_name: "abods-cavl-app-stack"
-      s3_prefix: cavl
-      capabilities: "CAPABILITY_NAMED_IAM"
-      parameter_overrides: ProjectName='abods'
-        Environment='cavl'
-        VpcId='/abods/cavl/vpc/id'
-        VpcSubnets='/abods/cavl/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/cavl/external/bods-apigw-vpc-endpoint-ids'
-
 prod:
   sync:
     parameters:

@@ -67,7 +67,6 @@ const environments = [
   "sandbox",
   "dev",
   "test",
-  "cavl",
   "uat",
 ] as const;
 type Environment = (typeof environments)[number];
