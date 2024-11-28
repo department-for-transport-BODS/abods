@@ -64,6 +64,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnQueryParams: Params | null = null;
   groupId = "";
   vehicleRef: string | null = null;
+  directionRef: string | null = null;
 
   get currentJourneyIndex() {
     return this.journeys.findIndex((v) => v.groupId === this.groupId);
@@ -92,6 +93,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         evidenced: queryParams.get("evidenced"),
         timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
+        direction: queryParams.get("direction"),
       })),
       tap((urlData) => {
         this.returnQueryParams = {
@@ -105,6 +107,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             ? "timing-points"
             : "all-stops";
         this.groupId = urlData.groupId;
+        this.directionRef = urlData.direction;
       }),
     );
     urlData$
@@ -125,12 +128,18 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             this.errorView = new VehicleJourneyNotFoundView();
             return;
           }
-          const avls = [...avlsResult.data.avls].sort((a, b) =>
-            a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
-          );
-          const stops = [...routeResult.data.route].sort(
-            (a, b) => a.stopIndex - b.stopIndex,
-          );
+          const stops = [...routeResult.data.route]
+            .filter(
+              (n) => !this.directionRef || n.directionRef === this.directionRef,
+            )
+            .sort((a, b) => a.stopIndex - b.stopIndex);
+          const avls = [...avlsResult.data.avls]
+            .filter(
+              (n) => !this.directionRef || n.directionRef === this.directionRef,
+            )
+            .sort((a, b) =>
+              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+            );
           this.vehicleRef = getVehicleRefForJourney(avls, stops);
           this.journeyInfo = {
             // Temporary workaround for two concurrent journeys having the same group id
