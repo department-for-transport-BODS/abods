@@ -187,6 +187,7 @@ enum CorridorGranularity {
 }
 
 type Journey {
+  directionRef: String
   startTime: String!
   groupId: String!
   serviceName: String!
@@ -813,6 +814,7 @@ type AvlPoint {
   latitude: Float!
   longitude: Float!
   vehicleRef: String!
+  directionRef: String!
 }
 
 type Stop {
@@ -826,6 +828,7 @@ type Stop {
   stopName: String!
   isTimingPoint: Boolean!
   otp: OtpEnum
+  directionRef: String!
 }
 
 enum OtpEnum {
