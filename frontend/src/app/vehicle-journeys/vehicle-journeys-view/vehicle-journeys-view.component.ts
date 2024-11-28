@@ -27,6 +27,19 @@ export interface JourneyInfo {
   avls: AvlPoint[];
 }
 
+const getVehicleRefForJourney = (avls: AvlPoint[], stops: Stop[]) => {
+  const firstEvidencedMatch = stops.find((n) => n.actualDepartureUtc);
+  if (firstEvidencedMatch) {
+    const matchAvl = avls.find(
+      (n) => n.recordedAtTimeUtc == firstEvidencedMatch.actualDepartureUtc,
+    );
+    if (matchAvl) {
+      return matchAvl.vehicleRef;
+    }
+  }
+  return avls[0]?.vehicleRef;
+};
+
 @Component({
   selector: "app-vehicle-journeys-view",
   templateUrl: "./vehicle-journeys-view.component.html",
@@ -50,6 +63,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
   groupId = "";
+  vehicleRef: string | null = null;
 
   get currentJourneyIndex() {
     return this.journeys.findIndex((v) => v.groupId === this.groupId);
@@ -111,23 +125,24 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             this.errorView = new VehicleJourneyNotFoundView();
             return;
           }
-          const sortedAvls = [...avlsResult.data.avls].sort((a, b) =>
+          const avls = [...avlsResult.data.avls].sort((a, b) =>
             a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
           );
+          const stops = [...routeResult.data.route].sort(
+            (a, b) => a.stopIndex - b.stopIndex,
+          );
+          this.vehicleRef = getVehicleRefForJourney(avls, stops);
           this.journeyInfo = {
             // Temporary workaround for two concurrent journeys having the same group id
-            avls: sortedAvls.filter(
-              (n) => n.vehicleRef === sortedAvls[0]?.vehicleRef,
-            ),
-            stops: [...routeResult.data.route].sort(
-              (a, b) => a.stopIndex - b.stopIndex,
-            ),
+            avls: avls.filter((n) => n.vehicleRef === this.vehicleRef),
+            stops: stops,
           };
           this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.errorView = new VehicleJourneyNotFoundView();
+          this.vehicleRef = null;
           this.journeyInfo = null;
           this.journeyInfoLoading = false;
         },
