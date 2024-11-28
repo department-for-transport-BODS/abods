@@ -6,8 +6,8 @@ generator client {
 
 generator kysely {
   provider = "prisma-kysely"
-  output       = "../src"
-  fileName     = "kysely.ts"
+  output   = "../src"
+  fileName = "kysely.ts"
 }
 
 datasource db {
@@ -131,6 +131,8 @@ model Timetable {
   vehiclejourney_id        Int?
   admin_area_id            Int?
   timestamp_after_estimate DateTime?                @db.Timestamptz(6)
+  direction                String?
+  departure_day_shift      Boolean?
   expected_journeys        expected_journeys?       @relation(fields: [group_id], references: [group_id])
   stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
@@ -167,6 +169,7 @@ model expected_journeys {
   day_of_week                  Int?
   admin_area_id                Int[]
   expected_journey_end         DateTime?          @db.Timestamptz(6)
+  direction                    String?            @db.VarChar(20)
   expected_services            expected_services? @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey]) // TODO: fix - not in db
   timetable                    Timetable[]                           // TODO: fix - not found in db
 
