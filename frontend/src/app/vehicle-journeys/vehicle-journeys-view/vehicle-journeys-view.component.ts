@@ -130,12 +130,18 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           }
           const stops = [...routeResult.data.route]
             .filter(
-              (n) => !this.directionRef || n.directionRef === this.directionRef,
+              (n) =>
+                !this.directionRef ||
+                n.directionRef.toLowerCase() ===
+                  this.directionRef.toLowerCase(),
             )
             .sort((a, b) => a.stopIndex - b.stopIndex);
           const avls = [...avlsResult.data.avls]
             .filter(
-              (n) => !this.directionRef || n.directionRef === this.directionRef,
+              (n) =>
+                !this.directionRef ||
+                n.directionRef.toLowerCase() ===
+                  this.directionRef.toLowerCase(),
             )
             .sort((a, b) =>
               a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
