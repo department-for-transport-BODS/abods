@@ -212,12 +212,11 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
 ): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
   if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
-  if (!user.orgIds[0]) throw "Invalid session data";
 
   const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
-      organisation_id: user.orgIds[0],
+      organisation_id: user.orgId,
       user_id: user.id,
     },
     select: {

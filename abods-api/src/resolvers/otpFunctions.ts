@@ -50,9 +50,10 @@ import {
   getOperatorsFroServiceDetails,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { checkSubArray, getDayOfWeekNumbers, isDefined } from "../lib/utils.js";
+import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import haversineDistance from "haversine-distance";
+import { getUserOperatorIds } from "../lib/operators.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -93,7 +94,7 @@ const getOperatorsDropDown = async (
   userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
   const orgOperators = await getOperatorsFromOrgId(
-    user.orgIds,
+    user.orgId,
     db,
     userOperatorIds,
   );
@@ -120,46 +121,6 @@ const getOperatorsDropDown = async (
     );
 };
 
-export const getOperators = async (
-  user: SessionUser,
-  db: PrismaClient,
-  adminAreaIds?: string[],
-) => {
-  try {
-    const operators = await db.all_operators.findMany({
-      where: {
-        noc_adminarea:
-          adminAreaIds && adminAreaIds.length > 0
-            ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
-            : Prisma.skip,
-        operatorOrganisations: {
-          some: { organisation_id: { in: user.orgIds } },
-        },
-      },
-      include: { noc_adminarea: true },
-    });
-
-    if (!operators) {
-      throw Error("No operators found");
-    }
-
-    const userOperators = operators.map((operator) => ({
-      operatorId: operator.operatorref,
-      nocCode: operator.operatorref,
-      name: operator.name,
-      adminAreas: operator.noc_adminarea.map((adminArea) => ({
-        adminAreaId: adminArea.adminarea_id,
-      })),
-    }));
-    return userOperators.sort((a, b) =>
-      (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true }),
-    );
-  } catch (error) {
-    logger.error(error);
-    return [];
-  }
-};
-
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
   _,
   args,
@@ -167,15 +128,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
 ): Promise<Maybe<ServiceInfoType>> => {
   const user = await requireUserSession(context);
   try {
-    // get user's operator ids
-    const operators = await getOperators(user, context.db);
-
-    if (!operators) {
-      throw Error("No user operators");
-    }
-
-    const userOperatorIds = operators.map((o) => o.nocCode);
-
+    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
     const service = await context.db.expected_services.findFirst({
       where: {
         noc_and_line_and_servicecode: args.serviceId,
@@ -205,13 +158,7 @@ export const getLines: QueryResolvers["lines"] = async (
   context,
 ): Promise<LineType[]> => {
   const user = await requireUserSession(context);
-  const userOperators = await getOperators(user, context.db);
-
-  if (!userOperators) {
-    throw Error("No user operators");
-  }
-
-  const userOperatorIds = userOperators.map((o) => o.nocCode);
+  const userOperatorIds = await getUserOperatorIds(user, context.kysely);
   if (!userOperatorIds.includes(args.operatorId)) return [];
 
   const inputDate = args.inputDate
@@ -368,20 +315,10 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
-        return compareThresholds(args.inputs, user, context.db);
+        return compareThresholds(args.inputs, userOperatorIds, context.db);
       }
-
-      // get an array of user's org's operator nocs.
-      const operators = await getOperators(user, context.db);
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators
-        .map((o) => o.nocCode ?? "")
-        .filter((o) => !!o);
 
       let results;
       const prismaFilters = getPrismaFiltersForOTPQuery(
@@ -455,21 +392,24 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
       // get an array of user's org's operator nocs.
-      const operators = await getOperators(
-        user,
-        context.db,
-        adminAreaIds ?? [],
+      const operators = await context.db.all_operators.findMany({
+        where: {
+          noc_adminarea:
+            adminAreaIds && adminAreaIds.length > 0
+              ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
+              : Prisma.skip,
+          operatorOrganisations: { some: { organisation_id: user.orgId } },
+        },
+        select: {
+          operatorref: true,
+          name: true,
+        },
+      });
+
+      const where = getPrismaFiltersForOTPQuery(
+        args.inputs,
+        operators.map((o) => o.operatorref),
       );
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators
-        .map((o) => o.nocCode ?? "")
-        .filter((o) => !!o);
-
-      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       const results = await context.db.timetable_summary_operator_t.groupBy({
         by: ["operator_noc"],
@@ -483,9 +423,13 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         },
       });
 
-      for (const item of operators) {
+      for (const item of operators.sort((a, b) =>
+        (a.name ?? "").localeCompare(b.name ?? "", undefined, {
+          numeric: true,
+        }),
+      )) {
         const operatorOtpStats = results.find(
-          (o) => o.operator_noc == item.nocCode,
+          (o) => o.operator_noc == item.operatorref,
         );
         if (operatorOtpStats && operatorOtpStats._sum) {
           const totalOntime = operatorOtpStats._sum.on_time_count
@@ -505,8 +449,8 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               : 0;
 
           const opPerformance: OperatorPerformanceType = {
-            nocCode: item.nocCode,
-            operatorId: item.nocCode,
+            nocCode: item.operatorref,
+            operatorId: item.operatorref,
             name: item.name,
             early: totalEarly,
             late: totalLate,
@@ -554,16 +498,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
         logger.debug(
           "getPunctualityDayOfWeek id: " + JSON.stringify(operatorIds),
         );
-        const operators = await getOperators(user, context.db);
-
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
-
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -704,24 +639,12 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
         logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
-        const operators = await getOperators(user, context.db);
-
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           return getStopsDistribution(args.inputs, userOperatorIds, context.db);
-        } else {
-          if (!operators) {
-            throw Error("No user operators");
-          }
         }
       }
       return null;
@@ -752,16 +675,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
         logger.debug(
           "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds),
         );
-        const operators = await getOperators(user, context.db);
-
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
-
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -827,18 +741,10 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
       const operatorIds = filters?.operatorIds ?? [];
 
       if (operatorIds.length == 1) {
+        const isDayGranularity = granularity === Granularity.Day;
         //if (granularity == "day" && operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
-        const operators = await getOperators(user, context.db);
-        const isDayGranularity = granularity === Granularity.Day;
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
-
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -911,124 +817,114 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
     try {
       const { filters, fromTimestamp, order } = args.inputs;
 
-      const timingPointsOnly = filters?.timingPointsOnly;
-      const operatorIds = filters?.operatorIds?.filter(isDefined);
+      const timingPointsOnly = filters.timingPointsOnly;
 
-      const operators = await getOperators(user, context.db);
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+      const operatorNocs = userOperatorIds.filter(
+        (n) => !filters.operatorIds || filters.operatorIds.includes(n),
+      );
 
-      const operatorNocs =
-        operators?.map((o) => o.nocCode ?? "").filter((o) => !!o) ?? [];
+      const where: Prisma.performance_statisticsWhereInput = {
+        operator_noc: {
+          in: operatorNocs,
+        },
+        date_period_start: new Date(
+          getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD"),
+        ),
+        AND: [
+          {
+            OR: [
+              {
+                on_time_count: {
+                  gt: 0,
+                },
+                late_count: {
+                  gt: 0,
+                },
+                early_count: {
+                  gt: 0,
+                },
+              },
+            ],
+          },
+          {
+            OR: [
+              {
+                trend_on_time_count: {
+                  gt: 0,
+                },
+                trend_late_count: {
+                  gt: 0,
+                },
+                trend_early_count: {
+                  gt: 0,
+                },
+              },
+            ],
+          },
+        ],
+      };
 
-      let displayData = true;
-      if (operatorIds) {
-        displayData = checkSubArray(operatorNocs, operatorIds);
+      if (timingPointsOnly) {
+        where.is_timing_point = timingPointsOnly;
       }
 
-      if (displayData) {
-        const where: Prisma.performance_statisticsWhereInput = {
-          operator_noc: {
-            in: operatorIds ?? operatorNocs,
-          },
-          date_period_start: new Date(
-            getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD"),
-          ),
-          AND: [
+      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
+      const performanceMetrics =
+        await context.db.performance_statistics.findMany({
+          where,
+          take: 3,
+          distinct: [
+            "date_period_start",
+            "date_period_end",
+            "date_period_end",
+            "on_time_percentage",
+            "early_count",
+            "late_count",
+            "on_time_count",
+          ],
+          orderBy: [
             {
-              OR: [
-                {
-                  on_time_count: {
-                    gt: 0,
-                  },
-                  late_count: {
-                    gt: 0,
-                  },
-                  early_count: {
-                    gt: 0,
-                  },
-                },
-              ],
+              on_time_percentage: orderFilter,
             },
             {
-              OR: [
-                {
-                  trend_on_time_count: {
-                    gt: 0,
-                  },
-                  trend_late_count: {
-                    gt: 0,
-                  },
-                  trend_early_count: {
-                    gt: 0,
-                  },
-                },
-              ],
+              trend_percentage: orderFilter,
             },
           ],
-        };
-
-        if (timingPointsOnly) {
-          where.is_timing_point = timingPointsOnly;
-        }
-
-        const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
-        const performanceMetrics =
-          await context.db.performance_statistics.findMany({
-            where,
-            take: 3,
-            distinct: [
-              "date_period_start",
-              "date_period_end",
-              "date_period_end",
-              "on_time_percentage",
-              "early_count",
-              "late_count",
-              "on_time_count",
-            ],
-            orderBy: [
-              {
-                on_time_percentage: orderFilter,
-              },
-              {
-                trend_percentage: orderFilter,
-              },
-            ],
-          });
-
-        const services = await context.db.expected_services.findMany({
-          where: {
-            noc_and_line_and_servicecode: {
-              in: performanceMetrics.map(
-                (stat) => stat.noc_and_line_and_servicecode,
-              ),
-            },
-          },
         });
 
-        return performanceMetrics.map((stats) => ({
-          nocCode: stats.operator_noc,
-          lineId: stats.noc_and_line_and_servicecode,
-          lineInfo: {
-            serviceId: stats.noc_and_line_and_servicecode,
-            serviceName:
-              services.find(
-                (service) =>
-                  service.noc_and_line_and_servicecode ===
-                  stats.noc_and_line_and_servicecode,
-              )?.service_name ?? "",
-            serviceNumber: stats.line_name,
+      const services = await context.db.expected_services.findMany({
+        where: {
+          noc_and_line_and_servicecode: {
+            in: performanceMetrics.map(
+              (stat) => stat.noc_and_line_and_servicecode,
+            ),
           },
-          onTime: stats.on_time_count,
-          early: stats.early_count,
-          late: stats.late_count,
-          trend: {
-            onTime: stats.trend_on_time_count ?? 0,
-            late: stats.trend_late_count ?? 0,
-            early: stats.trend_early_count ?? 0,
-          },
-        }));
-      }
+        },
+      });
 
-      return [];
+      return performanceMetrics.map((stats) => ({
+        nocCode: stats.operator_noc,
+        lineId: stats.noc_and_line_and_servicecode,
+        lineInfo: {
+          serviceId: stats.noc_and_line_and_servicecode,
+          serviceName:
+            services.find(
+              (service) =>
+                service.noc_and_line_and_servicecode ===
+                stats.noc_and_line_and_servicecode,
+            )?.service_name ?? "",
+          serviceNumber: stats.line_name,
+        },
+        onTime: stats.on_time_count,
+        early: stats.early_count,
+        late: stats.late_count,
+        trend: {
+          onTime: stats.trend_on_time_count ?? 0,
+          late: stats.trend_late_count ?? 0,
+          early: stats.trend_early_count ?? 0,
+        },
+      }));
     } catch (error) {
       logger.error(error);
       return [];
@@ -1051,16 +947,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
         logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
-        const operators = await getOperators(user, context.db);
-
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
-
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -1120,10 +1007,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             const stop = stops.find((dbStop) => dbStop.id === res.stop_id);
             stopPerformances.push({
               lineId: lineIds[0],
-              stopId: `ST${stop?.atco_code}`,
+              stopId: stop?.atco_code ?? "",
               stopInfo: {
                 //stopId: res.stop_id? res.stop_id : 0,
-                stopId: `ST${stop?.atco_code}`,
+                stopId: stop?.atco_code ?? "",
                 stopName: res.common_name ? res.common_name : "",
                 stopLocality: {
                   localityId: "",
@@ -1168,16 +1055,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       if (operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
-        const operators = await getOperators(user, context.db);
-
-        if (!operators) {
-          throw Error("No user operators");
-        }
-
-        const userOperatorIds = operators
-          .map((o) => o.nocCode ?? "")
-          .filter((o) => !!o);
-
+        const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
         const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1253,14 +1131,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
   async (_, args, context): Promise<Maybe<FrequentServiceType[]>> => {
     const user = await requireUserSession(context);
     try {
-      const operators = await getOperators(user, context.db);
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators.map((o) => o.nocCode);
-
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (userOperatorIds.includes(args.operatorId)) {
         const results = await context.db.timetable_summary_service_tz.findMany({
           where: {
@@ -1293,16 +1164,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
   async (_, args, context): Promise<Maybe<FrequentServiceInfoType>> => {
     const user = await requireUserSession(context);
     try {
-      const operators = await getOperators(user, context.db);
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators
-        .map((o) => o.nocCode ?? "")
-        .filter((o) => !!o);
-
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1342,16 +1204,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
   async (_, args, context): Promise<Maybe<HeadwayOverviewType>> => {
     const user = await requireUserSession(context);
     try {
-      const operators = await getOperators(user, context.db);
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators
-        .map((o) => o.nocCode ?? "")
-        .filter((o) => !!o);
-
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1412,16 +1265,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       const isDayGranularity = granularity === Granularity.Day;
 
-      const operators = await getOperators(user, context.db);
-
-      if (!operators) {
-        throw Error("No user operators");
-      }
-
-      const userOperatorIds = operators
-        .map((o) => o.nocCode ?? "")
-        .filter((o) => !!o);
-
+      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1518,15 +1362,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 ): Promise<Maybe<AdminAreasType[]>> => {
   const user = await requireUserSession(context);
   try {
-    const operators = await getOperators(user, context.db);
-
-    if (!operators) {
-      throw "No operators";
-    }
-    const userOperatorIds = operators
-      .map((o) => o.nocCode ?? "")
-      .filter((o) => !!o);
-
+    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
     const adminAreaRecords = await context.db.noc_adminarea.findMany({
       where: {
         national_operator_code: {
@@ -1549,7 +1385,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
       });
 
       if (!adminAreas) {
-        throw "No admin areas found";
+        throw Error("No admin areas found");
       }
 
       return adminAreas.map((adminArea) => ({
@@ -1587,7 +1423,7 @@ const getPrismaFiltersForOTPQuery = (
     dayOfWeekFlags,
     estimated,
   } = filters || {};
-  const operatorIds = filters?.operatorIds || [];
+  const operatorIds = filters?.operatorIds ?? [];
 
   // filter list of users' nocs to either operator nocs from filter OR full list
   let nocListToFilter: string[] = [];

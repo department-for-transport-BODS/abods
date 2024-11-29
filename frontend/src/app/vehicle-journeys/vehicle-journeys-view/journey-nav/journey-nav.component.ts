@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
-import { VehicleJourney } from "../../vehicle-journeys-search/vehicle-journeys-search.service";
-import { DateTime } from "luxon";
 import { NgxTippyProps } from "ngx-tippy-wrapper";
+import { Journey } from "../../../../generated/graphql";
+import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
 
 @Component({
   selector: "app-journey-nav",
@@ -10,30 +10,18 @@ import { NgxTippyProps } from "ngx-tippy-wrapper";
 })
 export class JourneyNavComponent {
   @Input() loading = false;
-  @Input() journeys: VehicleJourney[] = [];
-  @Input() startTime?: DateTime;
-  @Input() journeyId?: string;
+  @Input() journeys: Journey[] = [];
+  @Input() currentIndex = -1;
 
-  get currentIndex() {
-    return this.journeys.findIndex(
-      (v) =>
-        v.startTime?.toMillis() === this.startTime?.toMillis() &&
-        v.groupId === this.journeyId,
-    );
+  get next(): Journey | undefined {
+    return this.journeys[this.currentIndex + 1];
   }
 
-  get next(): VehicleJourney | undefined {
-    return this.journeys[this.currentIndex + 1] ?? undefined;
-  }
-
-  get previous(): VehicleJourney | undefined {
+  get previous(): Journey | undefined {
     return this.journeys[this.currentIndex - 1];
   }
 
-  // I would use a pipe, but luxon-angular doesn't support ToISOTimeOptions.
-  formatStartTime(startTime?: DateTime) {
-    return startTime?.toUTC().toISO({ format: "basic", suppressSeconds: true });
-  }
+  formatStartTime = formatJourneyStartTime;
 
   tippyProps: NgxTippyProps = {
     allowHTML: true,

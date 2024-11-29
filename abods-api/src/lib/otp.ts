@@ -4,9 +4,7 @@ import {
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
-import { getOperators } from "../resolvers/otpFunctions.js";
-import { getDayOfWeekNumbers, isDefined } from "./utils.js";
+import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
 
 const getThresholds = async (
@@ -50,7 +48,7 @@ const aggThresholds = async (
 
 export const compareThresholds = async (
   inputs: PerformanceInputType,
-  sessionUser: SessionUser,
+  userOperatorIds: string[],
   db: PrismaClient,
 ): Promise<PunctualityTotalsType | null> => {
   const { fromTimestamp, toTimestamp, filters } = inputs;
@@ -70,23 +68,8 @@ export const compareThresholds = async (
     estimated,
   } = filters ?? {};
 
-  const operators = await getOperators(sessionUser, db);
-
-  if (!operators) {
-    throw "No user operators";
-  }
-
-  const userOperatorIds = operators
-    .map((o) => o.nocCode ?? "")
-    .filter((o) => !!o);
-
-  const opIds: string[] | undefined = operatorIds
-    ? operatorIds?.filter(isDefined)
-    : undefined;
-
-  const adminIds: string[] | undefined = adminAreaIds
-    ? adminAreaIds?.filter(isDefined)
-    : undefined;
+  const opIds = operatorIds ?? undefined;
+  const adminIds = adminAreaIds ?? undefined;
 
   const where: Prisma.timetable_threshold_summaryWhereInput = {
     operator_noc: {
@@ -231,14 +214,12 @@ export const compareThresholds = async (
 };
 
 export const getOperatorsFromOrgId = async (
-  orgId: number[],
+  orgId: number,
   db: PrismaClient,
   userOperatorIds?: string[],
 ) => {
   const where: Prisma.bods_organisationoperatorWhereInput = {
-    organisation_id: {
-      in: orgId,
-    },
+    organisation_id: orgId,
   };
 
   if (userOperatorIds && userOperatorIds.length > 0) {

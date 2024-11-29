@@ -15,7 +15,6 @@ type Query {
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
   serviceInfo(serviceId: String!): ServiceInfoType
-  vehicleReplay: VehicleReplayNamespace
   corridor: CorridorNamespace
   invitation(key: String!): InvitationType
   events(operatorId: String!, start: DateTime!, end: DateTime!): EventResponse
@@ -26,6 +25,7 @@ type Query {
   ): [EventStatsType]
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
+  findJourneys(lineId: String!, dateOfJourney: DateTime!): [Journey!]!
   lines(operatorId: String!, inputDate: DateTime): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 
@@ -186,26 +186,13 @@ enum CorridorGranularity {
   minute
 }
 
-input VehicleReplayFilterInputType {
-  filterOnStartTime: Boolean
-  lineIds: [String!]
-  stopIds: [String!]
-}
-
-input VehicleReplayInputType {
-  filters: VehicleReplayFilterInputType!
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
-}
-
-type VehicleReplayNamespace {
-  findJourneys(inputs: VehicleReplayInputType!): [UniqueJourneyType]
-}
-
-type UniqueJourneyType {
-  serviceInfo: ServiceInfoType!
+type Journey {
   startTime: String!
-  groupId: String
+  groupId: String!
+  serviceName: String!
+  serviceNumber: String!
+  operatorName: String!
+  operatorNoc: String!
 }
 
 type ServiceInfoType {
@@ -838,12 +825,6 @@ type Stop {
   stopId: Int!
   stopName: String!
   isTimingPoint: Boolean!
-  lineName: String!
-  operatorNoc: String!
-  operatorName: String!
-  serviceId: String!
-  serviceName: String!
-  startTime: String!
   otp: OtpEnum
 }
 

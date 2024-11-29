@@ -38,7 +38,7 @@ export class StopsGridComponent implements OnInit, OnDestroy {
       isDefaultShown: true,
       colId: "naptan",
       headerName: "NAPTAN",
-      valueGetter: ({ data }) => data.stopId?.substring(2),
+      valueGetter: ({ data }) => data.stopId,
       cellRenderer: SelectableTextCellRendererComponent,
       cellRendererParams: { noWrap: true, textOverflow: "visible" },
       minWidth: 150,

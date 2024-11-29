@@ -62,14 +62,7 @@ export interface FreshdeskFolderConfig {
   [key: string]: string;
 }
 
-const environments = [
-  "local",
-  "sandbox",
-  "dev",
-  "test",
-  "cavl",
-  "uat",
-] as const;
+const environments = ["local", "sandbox", "dev", "test", "uat"] as const;
 type Environment = (typeof environments)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
