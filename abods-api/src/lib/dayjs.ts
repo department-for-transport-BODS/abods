@@ -144,8 +144,12 @@ export const getDayFormattedDate = (
         .format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
-export const dbUtcToBstHour = (inputDate: Date): string => {
-  return getUTCDate(inputDate).tz("Europe/London").format("HH:mm:ss");
+export const dbUtcToBstHour = (inputDate: Date | string): string => {
+  let utcDate = getUTCDate(inputDate);
+  if (utcDate.get("year") < 2000) {
+    utcDate = utcDate.set("year", 2000);
+  }
+  return utcDate.tz("Europe/London").format("HH:mm:ss");
 };
 
 export const dbUtcToBstDate = (inputDate: Date | string): string => {

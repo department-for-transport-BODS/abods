@@ -72,70 +72,6 @@ model Tokens {
   token   String? @db.VarChar(150)
 }
 
-model timetable_summary_service {
-  timetable_id                 BigInt   @default(autoincrement())
-  operator_noc                 String
-  line_name                    String
-  noc_and_line_and_servicecode String
-  service_name                 String
-  date_of_journey              DateTime @db.Date
-  departure_hour               DateTime @db.Time(6)
-  day_of_week                  Int
-  on_time_count                Int?
-  early_count                  Int?
-  late_count                   Int?
-  completed                    Int?
-  scheduled                    Int?
-  is_timing_point              Boolean
-  max_early                    Int
-  max_late                     Int
-  avg_time_difference          Float?
-
-  @@id([line_name, noc_and_line_and_servicecode, service_name, operator_noc, date_of_journey, day_of_week, departure_hour, is_timing_point, max_early, max_late], map: "timetable_summary_service_pkey1")
-  @@index([departure_hour], map: "dpt")
-  @@index([day_of_week], map: "dwt")
-  @@index([is_timing_point], map: "istt")
-  @@index([line_name], map: "lnt")
-  @@index([max_late], map: "mltt")
-  @@index([max_early], map: "mxet")
-  @@index([noc_and_line_and_servicecode], map: "nolt")
-  @@index([operator_noc], map: "opt")
-}
-
-model timetable_summary_stops {
-  timetable_id                 BigInt   @default(autoincrement())
-  operator_noc                 String
-  service_code                 String
-  noc_and_line_and_servicecode String
-  stop_id                      BigInt
-  locality_id                  String
-  line_name                    String?
-  stop_latitude                Float    @db.Real
-  stop_longitude               Float    @db.Real
-  date_of_journey              DateTime @db.Date
-  departure_hour               DateTime @db.Time(6)
-  day_of_week                  Int
-  on_time_count                Int?
-  early_count                  Int?
-  late_count                   Int?
-  completed                    Int?
-  scheduled                    Int?
-  common_name                  String
-  is_timing_point              Boolean
-  max_early                    Int
-  max_late                     Int
-  avg_time_difference          Decimal? @db.Decimal
-  admin_area_id                Int
-
-  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude, admin_area_id])
-  @@index([date_of_journey], map: "idx_soc__date_of_journey_in_stops2")
-  @@index([day_of_week], map: "idx_soc__day_of_week_in_stops2")
-  @@index([departure_hour], map: "idx_soc__departure_hour_in_stops2")
-  @@index([stop_id], map: "idx_soc__stop_id_in_stops2")
-  @@index([is_timing_point], map: "idx_soc__timing_point_in_stops2")
-  @@index([operator_noc], map: "idx_soc_operator_noc_in_stops2")
-  @@index([service_code], map: "idx_soc_service_code_in_stops2")
-}
 
 model SiriVMPositions {
   siri_vm_positions_id BigInt    @default(autoincrement())
@@ -311,6 +247,7 @@ model timetable_threshold_summary {
   admin_areas                  Int[]
   otp_count                    Int? // TODO: fix - nullable bigint in db
   day_of_week                  Int?
+  estimated                    Boolean
 
   @@index([date_of_journey, operator_noc], map: "noc_index_timetable_threshold_summary")
   @@index([date_of_journey, time_diff_minutes], map: "timediff_index_timetable_threshold_summary")
@@ -333,6 +270,7 @@ model timetable_summary_operator_t {
   max_late            Int?
   avg_time_difference Decimal?  @db.Decimal
   admin_areas         Int[]
+  estimated           Boolean
 
   @@index([day_of_week], map: "day_of_week_operatort")
   @@index([departure_hour_only], map: "departure_hour_only_operatort")
@@ -389,6 +327,7 @@ model timetable_summary_service_tz {
   avg_time_difference          Decimal? @db.Decimal
   admin_areas                  Int[]
   headway_valid                Boolean
+  estimated                    Boolean
 
   @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode], map: "timetable_summary_sevice_tz_pkey")
   @@index([date_of_journey], map: "date_of_journey_servicetz")
@@ -430,6 +369,7 @@ model timetable_summary_stops_tz {
   expected_headway             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
   actual_headway               Decimal  @db.Decimal // TODO: fix - nullable decimal in db
   excess_wait_time             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
+  estimated                    Boolean
 
   @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude])
   @@index([date_of_journey], map: "date_of_journey_stopstz")

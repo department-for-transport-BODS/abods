@@ -40,6 +40,7 @@ import {
   getBSTDate,
   getDate,
   getFormattedDate,
+  getUTCDate,
   utcToBstDBInput,
 } from "../lib/dayjs.js";
 import {
@@ -572,6 +573,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
             args.inputs,
             userOperatorIds,
           );
+
           if (lineIds) {
             results = await context.db.timetable_summary_service_tz.groupBy({
               by: ["day_of_week"],
@@ -646,6 +648,10 @@ const getStopsDistribution = async (
   const where: Prisma.timetable_threshold_summaryWhereInput =
     getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
 
+  where.time_diff_minutes = {
+    not: null,
+  };
+
   if (maxDelay && minDelay) {
     where.time_diff_minutes = {
       lte: maxDelay,
@@ -669,21 +675,17 @@ const getStopsDistribution = async (
     },
   });
 
-  const filteredResults = results.filter(
-    (result) => result.time_diff_minutes ?? result.time_diff_minutes === 0,
-  );
+  return results
+    .sort((a, b) => {
+      if (a.time_diff_minutes && b.time_diff_minutes)
+        return a.time_diff_minutes - b.time_diff_minutes;
 
-  filteredResults.sort((a, b) => {
-    if (a.time_diff_minutes && b.time_diff_minutes)
-      return a.time_diff_minutes - b.time_diff_minutes;
-
-    return 0;
-  });
-
-  return filteredResults.map((result) => ({
-    bucket: Number(result.time_diff_minutes),
-    frequency: result._sum.otp_count,
-  }));
+      return 0;
+    })
+    .map((result) => ({
+      bucket: Number(result.time_diff_minutes),
+      frequency: result._sum.otp_count,
+    }));
 };
 
 export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"] =
@@ -1604,33 +1606,27 @@ const getPrismaFiltersForOTPQuery = (
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
-  // date_of_journey - add an hour to from timestamp to prevent single day condition issues
-  const fromMlSeconds = new Date(fromTimestamp).getTime();
-  const addMlSeconds = 60 * 60 * 1000;
-  let dateOfJourneyFromDateTime = getDate(
-    new Date(fromMlSeconds + addMlSeconds),
-  ).tz("Europe/London");
-  let dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
+  let dateOfJourneyFromDateTime = getUTCDate(new Date(fromTimestamp)).tz(
+    "Europe/London",
+  );
+  let dateOfJourneyToDateTime = getUTCDate(new Date(toTimestamp)).tz(
     "Europe/London",
   );
 
   if (startTime && startTime !== "00:00") {
     const [hours, minutes, _] = startTime.split(":").map(Number);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("hour", hours);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
-      "minute",
-      minutes,
-    );
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("second", 0);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("millisecond", 0);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime
+      .set("minute", minutes)
+      .startOf("minute");
   }
 
   if (endTime) {
     const [hours, minutes, _] = endTime.split(":").map(Number);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("hour", hours);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("minute", minutes);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("second", 0);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("millisecond", 0);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime
+      .set("minute", minutes)
+      .startOf("minute");
   }
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
@@ -1644,7 +1640,7 @@ const getPrismaFiltersForOTPQuery = (
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
       gte: dateOfJourneyFromDateTime.toDate(),
-      lte: new Date(toTimestamp),
+      lt: dateOfJourneyToDateTime.toDate(),
     },
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(estimated && estimated === EstimatedToggle.Evidenced
