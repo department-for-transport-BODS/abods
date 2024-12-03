@@ -27,19 +27,6 @@ export interface JourneyInfo {
   avls: AvlPoint[];
 }
 
-const getVehicleRefForJourney = (avls: AvlPoint[], stops: Stop[]) => {
-  const firstEvidencedMatch = stops.find((n) => n.actualDepartureUtc);
-  if (firstEvidencedMatch) {
-    const matchAvl = avls.find(
-      (n) => n.recordedAtTimeUtc == firstEvidencedMatch.actualDepartureUtc,
-    );
-    if (matchAvl) {
-      return matchAvl.vehicleRef;
-    }
-  }
-  return avls[0]?.vehicleRef;
-};
-
 @Component({
   selector: "app-vehicle-journeys-view",
   templateUrl: "./vehicle-journeys-view.component.html",
@@ -128,28 +115,34 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             this.errorView = new VehicleJourneyNotFoundView();
             return;
           }
+          // Multiple journeys can use the same group id. Use the direction query param to disambiguate
+          const directionRefLower = this.directionRef?.toLowerCase();
           const stops = [...routeResult.data.route]
             .filter(
               (n) =>
-                !this.directionRef ||
-                n.directionRef.toLowerCase() ===
-                  this.directionRef.toLowerCase(),
+                !directionRefLower ||
+                n.directionRef.toLowerCase() === directionRefLower,
             )
             .sort((a, b) => a.stopIndex - b.stopIndex);
-          const avls = [...avlsResult.data.avls]
-            .filter(
-              (n) =>
-                !this.directionRef ||
-                n.directionRef.toLowerCase() ===
-                  this.directionRef.toLowerCase(),
-            )
-            .sort((a, b) =>
-              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
-            );
-          this.vehicleRef = getVehicleRefForJourney(avls, stops);
+          const avls = [...avlsResult.data.avls].sort((a, b) =>
+            a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+          );
+
+          const firstEvidencedMatch = stops.find((n) => n.actualDepartureUtc);
+          const firstMatchedAvl = avls.find(
+            (n) =>
+              n.recordedAtTimeUtc === firstEvidencedMatch?.actualDepartureUtc,
+          );
+          this.vehicleRef = (firstMatchedAvl ?? avls[0])?.vehicleRef;
           this.journeyInfo = {
-            // Temporary workaround for two concurrent journeys having the same group id
-            avls: avls.filter((n) => n.vehicleRef === this.vehicleRef),
+            // Direction ref on the avls is subject to human error, so we can't rely on the data quality.
+            // We use the vehicle ref of the first match to filter if possible, and fall back to direction if there isn't one.
+            avls: avls.filter((n) =>
+              firstMatchedAvl
+                ? n.vehicleRef === firstMatchedAvl.vehicleRef
+                : !directionRefLower ||
+                  n.directionRef.toLowerCase() === directionRefLower,
+            ),
             stops: stops,
           };
           this.journeyInfoLoading = false;
@@ -177,6 +170,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (journeys) => {
           this.journeys = journeys;
+          // Multiple journeys can use the same group id. Use the direction query param to disambiguate
           this.currentJourneyIndex = journeys.findIndex(
             (v) =>
               v.groupId === this.groupId && v.directionRef == this.directionRef,
