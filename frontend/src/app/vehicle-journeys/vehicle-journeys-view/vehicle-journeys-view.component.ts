@@ -2,12 +2,13 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 import {
   combineLatest,
-  distinctUntilKeyChanged,
   Subject,
   switchMap,
   takeUntil,
   tap,
   zip,
+  distinctUntilChanged,
+  map,
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
@@ -19,7 +20,6 @@ import {
   RouteGQL,
   Stop,
 } from "../../../generated/graphql";
-import { map } from "rxjs/operators";
 import { DateTime } from "luxon";
 
 export interface JourneyInfo {
@@ -114,7 +114,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     );
     urlData$
       .pipe(
-        distinctUntilKeyChanged("groupId"),
+        distinctUntilChanged(
+          (prev, cur) =>
+            prev.groupId == cur.groupId && prev.direction == cur.direction,
+        ),
         tap(() => (this.journeyInfoLoading = true)),
         switchMap(({ groupId }) => {
           return zip(
