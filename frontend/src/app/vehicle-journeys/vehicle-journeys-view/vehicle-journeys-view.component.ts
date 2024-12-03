@@ -65,12 +65,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   groupId = "";
   vehicleRef: string | null = null;
   directionRef: string | null = null;
-
-  get currentJourneyIndex() {
-    return this.journeys.findIndex(
-      (v) => v.groupId === this.groupId && v.directionRef == this.directionRef,
-    );
-  }
+  currentJourneyIndex = -1;
 
   constructor(
     private route: ActivatedRoute,
@@ -167,6 +162,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           this.journeyInfoLoading = false;
         },
       });
+
     urlData$
       .pipe(
         tap(() => (this.journeysLoading = true)),
@@ -181,12 +177,17 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (journeys) => {
           this.journeys = journeys;
+          this.currentJourneyIndex = journeys.findIndex(
+            (v) =>
+              v.groupId === this.groupId && v.directionRef == this.directionRef,
+          );
           this.journeysLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.errorView = new VehicleJourneyNotFoundView();
           this.journeys = [];
+          this.currentJourneyIndex = -1;
           this.journeysLoading = false;
         },
       });
