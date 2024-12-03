@@ -67,7 +67,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   directionRef: string | null = null;
 
   get currentJourneyIndex() {
-    return this.journeys.findIndex((v) => v.groupId === this.groupId);
+    return this.journeys.findIndex(
+      (v) => v.groupId === this.groupId && v.directionRef == this.directionRef,
+    );
   }
 
   constructor(
