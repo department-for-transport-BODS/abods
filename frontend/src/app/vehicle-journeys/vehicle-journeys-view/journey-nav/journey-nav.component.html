@@ -7,7 +7,7 @@
       [routerLink]="previous ? ['/vehicle-journeys', previous.groupId] : null"
       [queryParams]="{
         startTime: previous?.startTime,
-        direction: next?.directionRef
+        direction: previous?.directionRef
       }"
       queryParamsHandling="merge"
       [ngxTippy]="prevTooltip"
