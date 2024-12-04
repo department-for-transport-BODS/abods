@@ -1451,16 +1451,16 @@ const getPrismaFiltersForOTPQuery = (
 
   if (startTime && startTime !== "00:00") {
     const [hours, minutes, _] = startTime.split(":").map(Number);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("hour", hours);
     dateOfJourneyFromDateTime = dateOfJourneyFromDateTime
+      .set("hour", hours)
       .set("minute", minutes)
       .startOf("minute");
   }
 
   if (endTime) {
     const [hours, minutes, _] = endTime.split(":").map(Number);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("hour", hours);
     dateOfJourneyToDateTime = dateOfJourneyToDateTime
+      .set("hour", hours)
       .set("minute", minutes)
       .startOf("minute");
   }

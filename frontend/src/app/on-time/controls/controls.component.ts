@@ -130,7 +130,7 @@ export class ControlsComponent
   ): PerformanceFiltersInputType {
     const filters: PerformanceFiltersInputType = {
       timingPointsOnly: true,
-      estimated: EstimatedToggle.Evidenced,
+      estimated: EstimatedToggle.Estimated,
     };
 
     if (paramMap.get("nocCode")) {
@@ -188,7 +188,7 @@ export class ControlsComponent
     if (queryParams.has("estimated")) {
       filters.estimated =
         (queryParams.get("estimated") as EstimatedToggle) ||
-        EstimatedToggle.Evidenced;
+        EstimatedToggle.Estimated;
     }
 
     if (queryParams.has("allStops")) {
