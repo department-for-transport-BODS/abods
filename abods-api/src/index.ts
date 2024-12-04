@@ -20,6 +20,7 @@ import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import datadogMetricsPlugin from "./lib/datadog.js";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -51,6 +52,7 @@ const typeDefs = gql`
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
+  plugins: [datadogMetricsPlugin],
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
