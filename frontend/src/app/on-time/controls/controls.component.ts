@@ -75,13 +75,12 @@ export class ControlsComponent
   }
 
   get estimated(): EstimatedToggle {
-    return this.filtersSubject.value.estimated ?? EstimatedToggle.Evidenced;
+    return this.filtersSubject.value.estimated ?? EstimatedToggle.Estimated;
   }
 
-  set estimated(estimatedInput: EstimatedToggle) {
-    const estimated = estimatedInput;
+  set estimated(match_type: EstimatedToggle) {
     this.router.navigate([], {
-      queryParams: { estimated },
+      queryParams: { match_type },
       queryParamsHandling: "merge",
     });
   }
@@ -185,9 +184,9 @@ export class ControlsComponent
         queryParams.get("timingPointsOnly") === "true" || undefined;
     }
 
-    if (queryParams.has("estimated")) {
+    if (queryParams.has("match_type")) {
       filters.estimated =
-        (queryParams.get("estimated") as EstimatedToggle) ||
+        (queryParams.get("match_type") as EstimatedToggle) ||
         EstimatedToggle.Estimated;
     }
 
