@@ -2972,6 +2972,18 @@
             "deprecationReason": null
           },
           {
+            "name": "estimated",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "EstimatedToggle",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "granularity",
             "description": null,
             "type": {
@@ -5998,6 +6010,18 @@
             "deprecationReason": null
           },
           {
+            "name": "estimated",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "EstimatedToggle",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "excludeItoLineId",
             "description": null,
             "type": {
@@ -6527,7 +6551,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "Time",
                 "ofType": null
               }
             },

@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  EstimatedToggle,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
@@ -64,6 +65,7 @@ export const compareThresholds = async (
     maxDelay,
     minDelay,
     lineIds,
+    estimated,
   } = filters ?? {};
 
   const opIds = operatorIds ?? undefined;
@@ -78,6 +80,10 @@ export const compareThresholds = async (
       lt: utcToBstDBInput(toTimestamp),
     },
   };
+
+  if (estimated === EstimatedToggle.Evidenced) {
+    where.estimated = false;
+  }
 
   if (timingPointsOnly) {
     where.is_timing_point = timingPointsOnly;

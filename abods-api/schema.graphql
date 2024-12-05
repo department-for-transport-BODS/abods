@@ -288,6 +288,7 @@ input HeadwayFiltersInputType {
   nocCodes: [String!]
   operatorIds: [String!]
   startTime: String
+  estimated: EstimatedToggle
 }
 
 input DayOfWeekFlagsInputType {
@@ -633,7 +634,7 @@ type PunctualityTimeOfDayType {
   early: Int!
   late: Int!
   onTime: Int!
-  timeOfDay: String!
+  timeOfDay: Time!
 }
 
 type PunctualityTimeSeriesType {
@@ -748,6 +749,7 @@ input PerformanceFiltersInputType {
   stopsSegment: StopsSegment
   tagIds: [Int!]
   timingPointsOnly: Boolean
+  estimated: EstimatedToggle
 }
 
 enum Granularity {
