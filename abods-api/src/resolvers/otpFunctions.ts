@@ -1477,10 +1477,8 @@ const getPrismaFiltersForOTPQuery = (
       gte: dateOfJourneyFromDateTime.toDate(),
       lt: dateOfJourneyToDateTime.toDate(),
     },
+    estimated: estimated === EstimatedToggle.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
-    ...(estimated && estimated === EstimatedToggle.Evidenced
-      ? { estimated: false }
-      : {}),
     ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
     ...(startTime && endTime
       ? isThreshold

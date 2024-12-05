@@ -81,7 +81,7 @@ export const compareThresholds = async (
     },
   };
 
-  if (!estimated || estimated === EstimatedToggle.Evidenced) {
+  if (estimated === EstimatedToggle.Evidenced) {
     where.estimated = false;
   }
 
