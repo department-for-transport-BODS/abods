@@ -36,7 +36,6 @@ import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
   dbUtcToBstDate,
-  dbUtcToBstHour,
   getBSTDate,
   getDate,
   getFormattedDate,
@@ -713,7 +712,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           results.forEach((res) => {
             if (res.departure_hour_only) {
               hoursOfDay.push({
-                timeOfDay: dbUtcToBstHour(res.departure_hour_only),
+                timeOfDay: res.departure_hour_only,
                 early: res._sum.early_count ?? 0,
                 onTime: res._sum.on_time_count ?? 0,
                 late: res._sum.late_count ?? 0,

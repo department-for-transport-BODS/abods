@@ -850,7 +850,7 @@ export type PunctualityTimeOfDayType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  timeOfDay: Scalars['String']['output'];
+  timeOfDay: Scalars['Time']['output'];
 };
 
 export type PunctualityTimeSeriesType = {

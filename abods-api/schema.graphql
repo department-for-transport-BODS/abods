@@ -634,7 +634,7 @@ type PunctualityTimeOfDayType {
   early: Int!
   late: Int!
   onTime: Int!
-  timeOfDay: String!
+  timeOfDay: Time!
 }
 
 type PunctualityTimeSeriesType {

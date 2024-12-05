@@ -850,7 +850,7 @@ export type PunctualityTimeOfDayType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  timeOfDay: Scalars['String']['output'];
+  timeOfDay: Scalars['Time']['output'];
 };
 
 export type PunctualityTimeSeriesType = {
@@ -1899,7 +1899,7 @@ export type PunctualityTimeOfDayTypeResolvers<ContextType = RequestContext, Pare
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  timeOfDay?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timeOfDay?: Resolver<ResolversTypes['Time'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
