@@ -262,12 +262,7 @@ export class FeedMonitoringComponent
             });
           } else if (operators.length > 0) {
             this.rawActiveOperators = operators;
-            this.filteredActiveOperators = operators.filter((o) => {
-              return o.feedMonitoring?.feedStatus;
-            });
-            this.inactiveOperators = operators.filter((o) => {
-              return !o.feedMonitoring?.feedStatus;
-            });
+            this.setOperators(this.rawActiveOperators);
             this.loaded = true;
           }
         }
@@ -276,6 +271,7 @@ export class FeedMonitoringComponent
         .pipe(debounceTime(300), distinctUntilChanged())
         .subscribe((filterText) => {
           if (!filterText) {
+            this.setOperators(this.rawActiveOperators);
             return;
           }
           const normalise = (s: Maybe<string> | undefined) =>
@@ -286,15 +282,19 @@ export class FeedMonitoringComponent
               normalise(operator.name).match(reg) ||
               operator.nocCode?.match(reg),
           );
-          this.filteredActiveOperators = filteredOperators.filter((o) => {
-            return o.feedMonitoring?.feedStatus;
-          });
-          this.inactiveOperators = filteredOperators.filter((o) => {
-            return !o.feedMonitoring?.feedStatus;
-          });
+          this.setOperators(filteredOperators);
           this.resetPagination();
         }),
     );
+  }
+
+  setOperators(operators: BasicOperatorFragment[]): void {
+    this.filteredActiveOperators = operators.filter((o) => {
+      return o.feedMonitoring?.feedStatus;
+    });
+    this.inactiveOperators = operators.filter((o) => {
+      return !o.feedMonitoring?.feedStatus;
+    });
   }
 
   resetPagination(): void {
