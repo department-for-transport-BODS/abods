@@ -20,7 +20,9 @@ import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
-import datadogMetricsPlugin from "./lib/datadog.js";
+import datadogMetricsPlugin, { sendErrorMetric } from "./lib/datadog.js";
+import { datadog } from "datadog-lambda-js";
+import { GraphQLFormattedError } from "graphql";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -49,11 +51,22 @@ const apiKeyAuth = await getAPITokenHash();
 const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
 `;
+
+const formatError = (
+  formattedError: GraphQLFormattedError,
+  error: unknown,
+): GraphQLFormattedError => {
+  sendErrorMetric(error);
+  return formattedError;
+};
+
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
+  formatError,
   plugins: [datadogMetricsPlugin],
 });
+
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
@@ -74,6 +87,7 @@ app.use(
           db = await createContext(true);
           startTime = getDate();
         } catch (error) {
+          sendErrorMetric(error);
           logger.error(error);
           logger.error("Failed to create database context");
         }
@@ -85,4 +99,4 @@ app.use(
 
 const handler = serverlessExpress({ app });
 
-export { handler as default };
+export default datadog(handler);

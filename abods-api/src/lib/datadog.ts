@@ -1,100 +1,105 @@
+/* eslint-disable @typescript-eslint/require-await */
 import {
   ApolloServerPlugin,
   GraphQLRequestContext,
+  GraphQLRequestContextExecutionDidStart,
   GraphQLRequestContextWillSendResponse,
+  GraphQLRequestExecutionListener,
   GraphQLRequestListener,
+  GraphQLRequestListenerDidResolveField,
 } from "@apollo/server";
 import { RequestContext } from "../types/extra";
-import axios from "axios";
 import { sendDistributionMetric } from "datadog-lambda-js";
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 
-const DATADOG_API_KEY = process.env.DD_API_KEY;
-const DATADOG_API_URL = "https://api.datadoghq.eu/api/v1/series";
-
-// Helper function to send custom metrics
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sendCustomMetricsToDatadog = async (metrics: any): Promise<void> => {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    console.log("key---", process.env.DD_API_KEY);
-    const response = await axios.post(
-      DATADOG_API_URL,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      { series: metrics },
-      {
-        headers: {
-          "DD-API-KEY": DATADOG_API_KEY,
-          "Content-Type": "application/json",
-        },
-      },
+export const sendErrorMetric = (error: unknown) => {
+  if (error instanceof PrismaClientInitializationError) {
+    sendDistributionMetric(
+      "abods.graphql.prisma.error",
+      1,
+      "function:GraphQlFunction",
+      `env:${process.env.PROJECT_ENV}`,
     );
-    console.log("Custom metrics sent to Datadog:", response.status);
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      // Specific error type for Axios
-      console.error("Error sending custom metrics to Datadog:", error.message);
-      console.error("Axios error details:", error.response?.data);
-    } else if (error instanceof Error) {
-      // Generic error type
-      console.error("Error sending custom metrics to Datadog:", error.message);
-    } else {
-      // Fallback for unknown error type
-      console.error("Unknown error occurred:", error);
-    }
   }
+  sendDistributionMetric(
+    "abods.graphql.request.status",
+    1,
+    "function:GraphQlFunction",
+    `env:${process.env.PROJECT_ENV}`,
+    `status:error`,
+  );
 };
 
 const datadogMetricsPlugin: ApolloServerPlugin = {
-  // eslint-disable-next-line @typescript-eslint/require-await
   requestDidStart: async (
-    req: GraphQLRequestContext<RequestContext>,
+    context: GraphQLRequestContext<RequestContext>,
   ): Promise<GraphQLRequestListener<RequestContext>> => {
     const startTime = Date.now();
-    console.log("Request::::::", req.request.operationName);
 
     return {
-      // eslint-disable-next-line @typescript-eslint/require-await
+      executionDidStart: async (
+        _: GraphQLRequestContextExecutionDidStart<RequestContext>,
+      ): Promise<GraphQLRequestExecutionListener<RequestContext>> => {
+        const executionStartTime = Date.now();
+
+        return {
+          willResolveField: ({
+            info,
+          }): GraphQLRequestListenerDidResolveField => {
+            const fieldStartTime = Date.now();
+
+            return () => {
+              const fieldEndTime = Date.now();
+              const fieldDuration = fieldEndTime - fieldStartTime;
+
+              sendDistributionMetric(
+                "abods.graphql.field.duration",
+                fieldDuration,
+                "function:GraphQlFunction",
+                `env:${process.env.PROJECT_ENV}`,
+                `field:${info.fieldName}`,
+                `parentType:${info.parentType.name}`,
+              );
+            };
+          },
+          executionDidEnd: async () => {
+            const executionEndTime = Date.now();
+            const executionDuration = executionEndTime - executionStartTime;
+
+            sendDistributionMetric(
+              "abods.graphql.execution.duration",
+              executionDuration,
+              "function:GraphQlFunction",
+              `env:${process.env.PROJECT_ENV}`,
+              `operation:${context.request.operationName}`,
+            );
+          },
+        };
+      },
       willSendResponse: async (
         _: GraphQLRequestContextWillSendResponse<RequestContext>,
       ) => {
         const requestEndTime = Date.now();
         const requestDuration = requestEndTime - startTime;
 
-        console.log("requestDuration::::::", requestDuration);
-        // Publish request metrics
-        // const metrics = [
-        //   {
-        //     metric: 'graphql.execution.duration',
-        //     points: [[Math.floor(Date.now() / 1000), requestDuration]],
-        //     tags: ['function:GraphQlFunction', 'env:local', `operation:${req.request.operationName}`], // Add relevant tags
-        //     type: 'gauge',
-        //   },
-        //   {
-        //     metric: 'graphql.execution.success',
-        //     points: [[Math.floor(Date.now() / 1000), 1]],
-        //     tags: ['function:GraphQlFunction', 'env:local', `operation:${req.request.operationName}`],
-        //     type: 'count',
-        //   },
-        // ];
+        const status =
+          context.errors && context.errors.length > 0 ? "error" : "success";
 
-        // Send custom metrics to Datadog
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        //await sendCustomMetricsToDatadog(metrics);
         sendDistributionMetric(
-          "lib.graphql.execution.duration",
+          "abods.graphql.request.duration",
           requestDuration,
           "function:GraphQlFunction",
-          "env:local",
-          `operation:${req.request.operationName}`,
+          `env:${process.env.PROJECT_ENV}`,
+          `operation:${context.request.operationName}`,
         );
         sendDistributionMetric(
-          "lib.graphql.execution.success",
-          requestDuration,
+          "abods.graphql.request.status",
+          1,
           "function:GraphQlFunction",
-          "env:local",
-          `operation:${req.request.operationName}`,
+          `env:${process.env.PROJECT_ENV}`,
+          `operation:${context.request.operationName}`,
+          `status:${status}`,
         );
-        console.log("after::::::");
       },
     };
   },
