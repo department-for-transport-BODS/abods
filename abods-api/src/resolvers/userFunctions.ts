@@ -14,8 +14,9 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2";
 import logger from "../logger.js";
-import { requireUserSession } from "./helpers.js";
+import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
+import { sendDistributionMetric } from "datadog-lambda-js";
 
 // Summary: fetch all users
 export const getUsers: QueryResolvers["users"] = async (
@@ -225,6 +226,29 @@ export const loginUser: MutationResolvers["login"] = async (
         "Set-Cookie",
         `abods_sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`,
       );
+
+      const organisation = bodsUser.userOrganisations?.find(
+        (o) => o.organisation_id,
+      );
+      if (!organisation) {
+        logger.error("User not mapped to an organisation");
+        throwUnauthenticatedError("User not mapped to any organisation");
+      }
+      if (bodsUser.userOrganisations.length > 1) {
+        logger.error("API does not support multiple organisations per user");
+        throwUnauthenticatedError(
+          "API does not support multiple organisations per user",
+        );
+      }
+
+      sendDistributionMetric(
+        "abods.graphql.login.count",
+        1,
+        "function:GraphQlFunction",
+        `env:${process.env.PROJECT_ENV}`,
+        `org:${organisation.organisation_id}`,
+      );
+
       return {
         success: true,
         expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toUTCString(),
