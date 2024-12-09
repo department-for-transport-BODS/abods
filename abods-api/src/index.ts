@@ -75,8 +75,7 @@ app.use(
           db = await createContext(true);
           startTime = getDate();
         } catch (error) {
-          logger.error(error);
-          logger.error("Failed to create database context");
+          logger.error(error, "Failed to create database context");
         }
       }
       return { req, res, headers, db, apiKeyAuth, kysely };

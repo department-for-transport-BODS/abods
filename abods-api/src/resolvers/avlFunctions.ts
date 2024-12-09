@@ -25,15 +25,13 @@ export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
         },
       });
       if (!avlData || avlData.length === 0) {
-        logger.debug(
-          "No AVL data found. Filters: " + JSON.stringify(args.filters),
-        );
+        logger.debug({ filters: args.filters }, "No AVL data found");
         return [];
       }
 
       return avlData;
     } catch (error) {
-      console.error("Error in getAVLLineLevelStatus: " + JSON.stringify(error));
+      logger.error(error, "An error occurred in the avlLineLevelStatus query");
       return [];
     }
   };
