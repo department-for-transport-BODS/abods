@@ -23,6 +23,7 @@ import { getDatabaseUrl, isLocal } from "./prismaClient.js";
 import datadogMetricsPlugin, { sendErrorMetric } from "./lib/datadog.js";
 import { datadog } from "datadog-lambda-js";
 import { GraphQLFormattedError } from "graphql";
+import { apolloLogger } from "./apolloLogger.js";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -64,7 +65,7 @@ const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
   formatError,
-  plugins: [datadogMetricsPlugin],
+  plugins: [datadogMetricsPlugin, apolloLogger],
 });
 
 logger.info("Starting server in the background");
@@ -88,7 +89,6 @@ app.use(
           startTime = getDate();
         } catch (error) {
           sendErrorMetric(error);
-          logger.error(error);
           logger.error("Failed to create database context");
         }
       }

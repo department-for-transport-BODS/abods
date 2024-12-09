@@ -4,7 +4,7 @@
     "fmt": "prettier -w .",
     "fmt:check": "prettier --check .",
     "postinstall": "(cd abods-api && npm install); (cd frontend && npm install)",
-    "db": "./scripts/db_connect.sh",
+    "db": "./scripts/db_connect.sh sandbox",
     "start:api": "(cd abods-api && npm run start:local)",
     "start:app": "(cd frontend && npm start)",
     "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",

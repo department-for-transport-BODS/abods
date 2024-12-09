@@ -62,7 +62,7 @@ export const getUsers: QueryResolvers["users"] = async (
 
     return userResponse;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting users");
     return null;
   }
 };
@@ -94,7 +94,7 @@ export const getUser: QueryResolvers["user"] = async (
       ],
     };
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting user info");
     return null;
   }
 };
@@ -161,7 +161,8 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
           : null,
       };
     });
-  } catch {
+  } catch (error) {
+    logger.error(error, "An error occurred when getting user alerts");
     return null;
   }
 };
@@ -172,7 +173,7 @@ export const loginUser: MutationResolvers["login"] = async (
   args,
   context,
 ): Promise<LoginResponse> => {
-  logger.debug(`Logging in user: ${args.username}`);
+  logger.debug({ username: args.username }, "Logging in user");
   try {
     if (!args.username || !args.password) {
       throw "Invalid username or password";
@@ -209,9 +210,7 @@ export const loginUser: MutationResolvers["login"] = async (
           },
         });
       } else {
-        logger.debug(
-          `Session found in tokends table: ${JSON.stringify(session)}`,
-        );
+        logger.debug({ session }, "Session found in tokens table");
         await context.db.tokens.update({
           where: {
             user_id: bodsUser.id,
@@ -258,7 +257,7 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(error, "An error occurred on user login");
     return {
       success: false,
     };
@@ -280,7 +279,7 @@ export const logoutUser: MutationResolvers["logout"] = async (
 
     return true;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred on user log out");
     return false;
   }
 };
@@ -297,7 +296,8 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
     }
 
     return getUserAlertFromDb(args.alertId, user.id, context.db);
-  } catch {
+  } catch (error) {
+    logger.error(error, "An error occurred when getting user alert info");
     return null;
   }
 };
@@ -387,6 +387,7 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
       success: true,
     };
   } catch (error) {
+    logger.error(error, "An error occurred when adding user alert");
     return {
       error: error instanceof Error ? error.message : String(error),
       success: false,
@@ -430,6 +431,7 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       success: true,
     };
   } catch (error) {
+    logger.error(error, "An error occurred when updating user alert");
     return {
       error: error instanceof Error ? error.message : String(error),
       success: false,
@@ -461,6 +463,7 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       success: true,
     };
   } catch (error) {
+    logger.error(error, "An error occurred when deleting user alert");
     return {
       error: error instanceof Error ? error.message : String(error),
       success: false,

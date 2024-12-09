@@ -77,7 +77,7 @@ export type ApiInfoType = {
 /**
  * Filters for AvlLineLevelStatus
  *
- * BODS integration uses this so ensure all changes are backwards compatible
+ * [BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
  */
 export type AvlFiltersInput = {
   lineName?: InputMaybe<Scalars['String']['input']>;
@@ -87,7 +87,7 @@ export type AvlFiltersInput = {
 /**
  * Last Received AVL for on a Line basis
  *
- * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ * [BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
  */
 export type AvlLineLevelStatus = {
   __typename?: 'AvlLineLevelStatus';
@@ -382,6 +382,7 @@ export type HeadwayDayOfWeekType = {
 export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
+  estimated?: InputMaybe<EstimatedToggle>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -799,6 +800,7 @@ export type PerformanceFiltersInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
+  estimated?: InputMaybe<EstimatedToggle>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
@@ -848,7 +850,7 @@ export type PunctualityTimeOfDayType = {
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
-  timeOfDay: Scalars['String']['output'];
+  timeOfDay: Scalars['Time']['output'];
 };
 
 export type PunctualityTimeSeriesType = {
@@ -1897,7 +1899,7 @@ export type PunctualityTimeOfDayTypeResolvers<ContextType = RequestContext, Pare
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  timeOfDay?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timeOfDay?: Resolver<ResolversTypes['Time'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

@@ -1,9 +1,11 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
+  EstimatedToggle,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
+  Granularity,
   HeadwayInputType,
   HeadwayMetricsTypeResolvers,
   HeadwayOverviewType,
@@ -34,10 +36,10 @@ import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
   dbUtcToBstDate,
-  dbUtcToBstHour,
   getBSTDate,
   getDate,
   getFormattedDate,
+  getUTCDate,
   utcToBstDBInput,
 } from "../lib/dayjs.js";
 import {
@@ -66,21 +68,19 @@ export const getOperatorList: QueryResolvers["operators"] = async (
 ): Promise<OperatorsPage> => {
   const user = await requireUserSession(context);
   try {
-    logger.debug(new Date().toLocaleString() + " getOperatorList");
-
     const userOperators = args.filterBy?.operatorIds
       ? await getOperatorsDropDown(user, context.db, args.filterBy.operatorIds)
       : await getOperatorsDropDown(user, context.db);
 
     if (!userOperators) {
-      throw "No operators for user";
+      throw Error("No operators for user");
     }
 
     return {
       items: userOperators,
     };
   } catch (error) {
-    logger.error(error);
+    logger.error(error, "An error occurred when getting operators");
     return {};
   }
 };
@@ -133,7 +133,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
     });
 
     if (!service) {
-      throw "No service found";
+      throw Error("No service found");
     }
 
     if (userOperatorIds.includes(service.operator_noc)) {
@@ -142,9 +142,9 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
         serviceNumber: service.line_name,
         serviceName: service.service_name,
       };
-    } else throw "User does not have access to service";
+    } else throw Error("User does not have access to service");
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting service info");
     return null;
   }
 };
@@ -275,7 +275,7 @@ export const getOperator: QueryResolvers["operator"] = async (
   await requireUserSession(context);
   try {
     // TODO: is operator id in users' operator id array
-    logger.debug("getOperator op: {0} ", args.operatorId);
+    logger.debug({ operatorId: args.operatorId }, "getOperator");
 
     const operator = await context.db.all_operators.findUnique({
       where: {
@@ -284,7 +284,7 @@ export const getOperator: QueryResolvers["operator"] = async (
     });
 
     if (!operator) {
-      throw "No operator found";
+      throw Error("No operator found");
     }
 
     const operatorPayload: OperatorType = {
@@ -295,7 +295,7 @@ export const getOperator: QueryResolvers["operator"] = async (
 
     return operatorPayload;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting operator info");
     return null;
   }
 };
@@ -309,8 +309,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       const { filters } = args.inputs;
       const { lineIds, onTimeMaxMinutes, onTimeMinMinutes } = filters || {};
-
-      logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
@@ -352,9 +350,8 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         const endTimer = performance.now();
 
         logger.debug(
-          `Call to getPunctualityOverview took ${
-            endTimer - startTimer
-          } milliseconds`,
+          { totalTimeMs: endTimer - startTimer },
+          "Call to getPunctualityOverview Finished",
         );
 
         return {
@@ -369,7 +366,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting punctuality stats");
       return null;
     }
   };
@@ -385,8 +382,6 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
 
       const { filters } = args.inputs;
       const { adminAreaIds } = filters || {};
-
-      logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
       // get an array of user's org's operator nocs.
       const operators = await context.db.all_operators.findMany({
@@ -471,14 +466,13 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       //end - performance timer
       const endTimer = performance.now();
       logger.debug(
-        `Call to getOperatorPerformance took ${
-          endTimer - startTimer
-        } milliseconds`,
+        { totalTimeMs: endTimer - startTimer },
+        "Call to getOperatorPerformance finished",
       );
 
       return ret;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting performance stats");
       return null;
     }
   };
@@ -488,13 +482,11 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     const user = await requireUserSession(context);
     try {
       const lineIds = args.inputs.filters.lineIds;
-      const operatorIds = args.inputs.filters.operatorIds || [];
+      const operatorIds = args.inputs.filters.operatorIds ?? [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug(
-          "getPunctualityDayOfWeek id: " + JSON.stringify(operatorIds),
-        );
+        logger.debug({ operatorIds }, "getPunctualityDayOfWeek");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -505,6 +497,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
             args.inputs,
             userOperatorIds,
           );
+
           if (lineIds) {
             results = await context.db.timetable_summary_service_tz.groupBy({
               by: ["day_of_week"],
@@ -563,7 +556,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
 
       return [];
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting day of week stats");
       return null;
     }
   };
@@ -578,6 +571,10 @@ const getStopsDistribution = async (
 
   const where: Prisma.timetable_threshold_summaryWhereInput =
     getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
+
+  where.time_diff_minutes = {
+    not: null,
+  };
 
   if (maxDelay && minDelay) {
     where.time_diff_minutes = {
@@ -602,39 +599,33 @@ const getStopsDistribution = async (
     },
   });
 
-  const filteredResults = results.filter(
-    (result) => result.time_diff_minutes || result.time_diff_minutes === 0,
-  );
+  return results
+    .sort((a, b) => {
+      if (a.time_diff_minutes && b.time_diff_minutes)
+        return a.time_diff_minutes - b.time_diff_minutes;
 
-  filteredResults.sort((a, b) => {
-    if (a.time_diff_minutes && b.time_diff_minutes)
-      return a.time_diff_minutes - b.time_diff_minutes;
-
-    return 0;
-  });
-
-  return filteredResults.map((result) => ({
-    bucket: Number(result.time_diff_minutes),
-    frequency: result._sum.otp_count,
-  }));
+      return 0;
+    })
+    .map((result) => ({
+      bucket: Number(result.time_diff_minutes),
+      frequency: result._sum.otp_count,
+    }));
 };
 
 export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"] =
   async (_, args, context): Promise<Maybe<DelayFrequencyType[]>> => {
     const user = await requireUserSession(context);
     try {
-      logger.debug("getDelayFrequency");
-
       // bucket is the number difference in the OTP table
       // freq is the count of that difference
 
       const { filters } = args.inputs;
       let { operatorIds } = filters || {};
-      operatorIds = operatorIds || [];
+      operatorIds = operatorIds ?? [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
+        logger.debug({ operatorIds }, "getDelayFrequency");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
         const operator_noc_to_filter = operatorIds[0];
@@ -645,7 +636,10 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
       }
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting delay frequency stats",
+      );
       return null;
     }
   };
@@ -663,14 +657,12 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
       // bucket is the number difference in the OTP table
       // freq is the count of that difference
 
-      const operatorIds = args.inputs.filters?.operatorIds || [];
+      const operatorIds = args.inputs.filters?.operatorIds ?? [];
       const lineIds = args.inputs.filters?.lineIds;
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug(
-          "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds),
-        );
+        logger.debug({ operatorIds }, "getPunctualityTimeOfDay");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -709,7 +701,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           results.forEach((res) => {
             if (res.departure_hour_only) {
               hoursOfDay.push({
-                timeOfDay: dbUtcToBstHour(res.departure_hour_only),
+                timeOfDay: res.departure_hour_only,
                 early: res._sum.early_count ?? 0,
                 onTime: res._sum.on_time_count ?? 0,
                 late: res._sum.late_count ?? 0,
@@ -721,7 +713,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
 
       return hoursOfDay;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting time of day stats");
       return null;
     }
   };
@@ -730,14 +722,12 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
   async (_, args, context): Promise<Maybe<PunctualityTimeSeriesType[]>> => {
     const user = await requireUserSession(context);
     try {
-      logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
-
       const { filters } = args.inputs;
       const { granularity, lineIds } = filters || {};
-      const operatorIds = filters?.operatorIds || [];
+      const operatorIds = filters?.operatorIds ?? [];
 
       if (operatorIds.length == 1) {
-        const isDayGranularity = granularity === "day";
+        const isDayGranularity = granularity === Granularity.Day;
         //if (granularity == "day" && operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
@@ -802,7 +792,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
 
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting time series stats");
       return null;
     }
   };
@@ -922,7 +912,10 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         },
       }));
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting service punctuality stats",
+      );
       return [];
     }
   };
@@ -935,14 +928,14 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       const { filters } = args.inputs;
       let { operatorIds, lineIds } = filters || {};
-      operatorIds = operatorIds || [];
-      lineIds = lineIds || [];
+      operatorIds = operatorIds ?? [];
+      lineIds = lineIds ?? [];
 
       const stopPerformances: StopPerformanceType[] = [];
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
+        logger.debug({ operatorIds }, "getStopPerformance");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -1034,7 +1027,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       return stopPerformances;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting stop performance stats",
+      );
       return null;
     }
   };
@@ -1047,7 +1043,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       const { filters } = args.inputs;
       let { operatorIds } = filters || {};
-      operatorIds = operatorIds || [];
+      operatorIds = operatorIds ?? [];
 
       if (operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
@@ -1117,7 +1113,10 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       return servicePunctualities;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting service performance stats",
+      );
       return null;
     }
   };
@@ -1151,7 +1150,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
 
       return [];
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting frequent services");
       return null;
     }
   };
@@ -1191,7 +1190,10 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
         totalHours: totalHours,
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting frequent service info",
+      );
       return null;
     }
   };
@@ -1247,7 +1249,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting headway overview");
       return null;
     }
   };
@@ -1259,7 +1261,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       const { filters } = args.inputs;
       const { granularity } = filters || {};
 
-      const isDayGranularity = granularity === "day";
+      const isDayGranularity = granularity === Granularity.Day;
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where: Prisma.timetable_summary_stops_tzWhereInput =
@@ -1346,7 +1348,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         return 1;
       });
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting headway time series");
       return null;
     }
   };
@@ -1381,7 +1383,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
       });
 
       if (!adminAreas) {
-        throw "No admin areas found";
+        throw Error("No admin areas found");
       }
 
       return adminAreas.map((adminArea) => ({
@@ -1393,7 +1395,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 
     return null;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting admin areas");
     return null;
   }
 };
@@ -1417,8 +1419,9 @@ const getPrismaFiltersForOTPQuery = (
     lineIds,
     lineId,
     dayOfWeekFlags,
+    estimated,
   } = filters || {};
-  const operatorIds = filters?.operatorIds || [];
+  const operatorIds = filters?.operatorIds ?? [];
 
   // filter list of users' nocs to either operator nocs from filter OR full list
   let nocListToFilter: string[] = [];
@@ -1437,33 +1440,27 @@ const getPrismaFiltersForOTPQuery = (
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
-  // date_of_journey - add an hour to from timestamp to prevent single day condition issues
-  const fromMlSeconds = new Date(fromTimestamp).getTime();
-  const addMlSeconds = 60 * 60 * 1000;
-  let dateOfJourneyFromDateTime = getDate(
-    new Date(fromMlSeconds + addMlSeconds),
-  ).tz("Europe/London");
-  let dateOfJourneyToDateTime = getDate(new Date(toTimestamp)).tz(
+  let dateOfJourneyFromDateTime = getUTCDate(new Date(fromTimestamp)).tz(
+    "Europe/London",
+  );
+  let dateOfJourneyToDateTime = getUTCDate(new Date(toTimestamp)).tz(
     "Europe/London",
   );
 
   if (startTime && startTime !== "00:00") {
     const [hours, minutes, _] = startTime.split(":").map(Number);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("hour", hours);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set(
-      "minute",
-      minutes,
-    );
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("second", 0);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime.set("millisecond", 0);
+    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime
+      .set("hour", hours)
+      .set("minute", minutes)
+      .startOf("minute");
   }
 
   if (endTime) {
     const [hours, minutes, _] = endTime.split(":").map(Number);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("hour", hours);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("minute", minutes);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("second", 0);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime.set("millisecond", 0);
+    dateOfJourneyToDateTime = dateOfJourneyToDateTime
+      .set("hour", hours)
+      .set("minute", minutes)
+      .startOf("minute");
   }
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
@@ -1477,8 +1474,9 @@ const getPrismaFiltersForOTPQuery = (
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
       gte: dateOfJourneyFromDateTime.toDate(),
-      lte: new Date(toTimestamp),
+      lt: dateOfJourneyToDateTime.toDate(),
     },
+    estimated: estimated === EstimatedToggle.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
     ...(startTime && endTime

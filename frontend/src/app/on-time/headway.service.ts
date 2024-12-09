@@ -55,6 +55,7 @@ const pickHeadwayFilters = ({
     "lineIds",
     "operatorIds",
     "startTime",
+    "estimated",
   ]),
 });
 

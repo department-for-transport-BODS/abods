@@ -21,7 +21,19 @@ run = "npm install"
 [tasks.db]
 description = "Run a proxy to the sandbox DB using AWS SSM. You will be prompted for an AWS profile with access"
 dir = "scripts"
-run = "assume --exec -- ./db_connect.sh"
+run = "assume --exec -- ./db_connect.sh sandbox"
+
+[tasks."db:dev"]
+dir = "scripts"
+run = "assume --exec -- ./db_connect.sh dev"
+
+[tasks."db:test"]
+dir = "scripts"
+run = "assume --exec -- ./db_connect.sh test"
+
+[tasks."db:uat"]
+dir = "scripts"
+run = "assume --exec -- ./db_connect.sh uat"
 
 [tasks.db-creds]
 description = "Print read only connection info for the sandbox db"
