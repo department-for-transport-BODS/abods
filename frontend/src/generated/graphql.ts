@@ -189,9 +189,9 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  estimated: EstimatedToggle;
   fromTimestamp: Scalars['DateTime']['input'];
   granularity: CorridorGranularity;
+  matchType: MatchType;
   stopList: Array<Scalars['String']['input']>;
   toTimestamp: Scalars['DateTime']['input'];
 };
@@ -278,11 +278,6 @@ export type DelayFrequencyType = {
   bucket: Scalars['Int']['output'];
   frequency?: Maybe<Scalars['Int']['output']>;
 };
-
-export enum EstimatedToggle {
-  Estimated = 'estimated',
-  Evidenced = 'evidenced'
-}
 
 export type EventData = {
   __typename?: 'EventData';
@@ -382,9 +377,9 @@ export type HeadwayDayOfWeekType = {
 export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
-  estimated?: InputMaybe<EstimatedToggle>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  matchType?: InputMaybe<MatchType>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
@@ -561,6 +556,11 @@ export type LoginResponse = {
   expiresAt?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
+
+export enum MatchType {
+  Estimated = 'estimated',
+  Evidenced = 'evidenced'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -800,12 +800,12 @@ export type PerformanceFiltersInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
-  estimated?: InputMaybe<EstimatedToggle>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
   lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
   minDelay?: InputMaybe<Scalars['Int']['input']>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;

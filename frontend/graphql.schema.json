@@ -1269,22 +1269,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "EstimatedToggle",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "fromTimestamp",
             "description": null,
             "type": {
@@ -1309,6 +1293,22 @@
               "ofType": {
                 "kind": "ENUM",
                 "name": "CorridorGranularity",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "MatchType",
                 "ofType": null
               }
             },
@@ -2200,30 +2200,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "ENUM",
-        "name": "EstimatedToggle",
-        "description": null,
-        "isOneOf": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "estimated",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "evidenced",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "EventData",
         "description": null,
@@ -2972,18 +2948,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "EstimatedToggle",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "granularity",
             "description": null,
             "type": {
@@ -3010,6 +2974,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "MatchType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -4403,6 +4379,30 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "MatchType",
+        "description": null,
+        "isOneOf": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "estimated",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "evidenced",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -6010,18 +6010,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "EstimatedToggle",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "excludeItoLineId",
             "description": null,
             "type": {
@@ -6092,6 +6080,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "MatchType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,

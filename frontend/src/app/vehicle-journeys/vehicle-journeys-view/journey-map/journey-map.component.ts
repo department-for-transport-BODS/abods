@@ -17,7 +17,12 @@ import {
 } from "../../../shared/geo";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
 import { ConfigService } from "../../../config/config.service";
-import { AvlPoint, OtpEnum, Stop } from "../../../../generated/graphql";
+import {
+  AvlPoint,
+  MatchType,
+  OtpEnum,
+  Stop,
+} from "../../../../generated/graphql";
 import { DateTime } from "luxon";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
 
@@ -83,7 +88,7 @@ export class JourneyMapComponent implements OnChanges {
   @Input() selectedStop?: Stop;
   @Input() hoveredStop?: StopHoverEvent;
   @Input() loading = false;
-  @Input() estimated = false;
+  @Input() matchType = MatchType.Evidenced;
 
   map!: Map;
   enableScaleControl = false;
@@ -131,8 +136,11 @@ export class JourneyMapComponent implements OnChanges {
       this.enableScaleControl = true;
     }
     const view = changes.view?.currentValue ?? this.view;
-    if (view && (changes.view || changes.estimated)) {
-      this.updateView(view, changes.estimated?.currentValue ?? this.estimated);
+    if (view && (changes.view || changes.matchType)) {
+      this.updateView(
+        view,
+        changes.matchType?.currentValue === MatchType.Estimated,
+      );
     }
     if (this.map && changes.selectedStop?.currentValue) {
       this.updateBoundsToSelectedStop(changes.selectedStop.currentValue);
@@ -202,7 +210,12 @@ export class JourneyMapComponent implements OnChanges {
   private updateHoveredStopState(hoveredStop: StopHoverEvent) {
     switch (hoveredStop.event) {
       case "enter":
-        this.stopSelected(createStopModel(hoveredStop.stop, this.estimated));
+        this.stopSelected(
+          createStopModel(
+            hoveredStop.stop,
+            this.matchType === MatchType.Estimated,
+          ),
+        );
         break;
       case "leave":
         this.stopUnselected();

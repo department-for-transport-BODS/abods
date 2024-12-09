@@ -16,7 +16,7 @@ import { BehaviorSubject, combineLatest, Subject } from "rxjs";
 import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
 import {
   DayOfWeekFlagsInputType,
-  EstimatedToggle,
+  MatchType,
   PerformanceFiltersInputType,
 } from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
@@ -74,11 +74,11 @@ export class ControlsComponent
     });
   }
 
-  get estimated(): EstimatedToggle {
-    return this.filtersSubject.value.estimated ?? EstimatedToggle.Estimated;
+  get matchType(): MatchType {
+    return this.filtersSubject.value.matchType ?? MatchType.Evidenced;
   }
 
-  set estimated(match_type: EstimatedToggle) {
+  set matchType(match_type: MatchType) {
     this.router.navigate([], {
       queryParams: { match_type },
       queryParamsHandling: "merge",
@@ -129,7 +129,7 @@ export class ControlsComponent
   ): PerformanceFiltersInputType {
     const filters: PerformanceFiltersInputType = {
       timingPointsOnly: true,
-      estimated: EstimatedToggle.Estimated,
+      matchType: MatchType.Evidenced,
     };
 
     if (paramMap.get("nocCode")) {
@@ -185,9 +185,8 @@ export class ControlsComponent
     }
 
     if (queryParams.has("match_type")) {
-      filters.estimated =
-        (queryParams.get("match_type") as EstimatedToggle) ||
-        EstimatedToggle.Estimated;
+      filters.matchType =
+        (queryParams.get("match_type") as MatchType) || MatchType.Evidenced;
     }
 
     if (queryParams.has("allStops")) {

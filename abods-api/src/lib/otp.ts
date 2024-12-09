@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
-  EstimatedToggle,
+  MatchType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
@@ -65,7 +65,7 @@ export const compareThresholds = async (
     maxDelay,
     minDelay,
     lineIds,
-    estimated,
+    matchType,
   } = filters ?? {};
 
   const opIds = operatorIds ?? undefined;
@@ -81,7 +81,7 @@ export const compareThresholds = async (
     },
   };
 
-  if (estimated === EstimatedToggle.Evidenced) {
+  if (matchType === MatchType.Evidenced) {
     where.estimated = false;
   }
 

@@ -9,7 +9,7 @@
     *ngFor="let stop of view?.stops; let first = first"
     [firstItem]="first"
     [stop]="stop"
-    [estimated]="estimated"
+    [matchType]="matchType"
     [timingPointsOnly]="timingPointsOnly"
     (stopSelected)="stopSelected.emit($event)"
     (stopHovered)="stopHovered.emit($event)"

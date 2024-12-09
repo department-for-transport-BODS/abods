@@ -27,19 +27,19 @@
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle
-            [(ngModel)]="estimated"
-            (ngModelChange)="onEstimatedToggleChange()"
+            [(ngModel)]="matchType"
+            (ngModelChange)="onMatchTypeChange()"
           >
             <app-segmented-toggle-item
-              name="estimated-filter"
+              name="match-type"
               identifier="estimated"
-              value="true"
+              value="estimated"
               label="Estimated"
             ></app-segmented-toggle-item>
             <app-segmented-toggle-item
-              name="estimated-filter"
+              name="match-type"
               identifier="evidenced"
-              value="false"
+              value="evidenced"
               label="Evidenced"
             ></app-segmented-toggle-item>
           </app-segmented-toggle>
@@ -71,7 +71,7 @@
         <app-stop-list
           [view]="journeyInfo"
           [timingPointsOnly]="timingPointsOption === 'timing-points'"
-          [estimated]="estimated === 'true'"
+          [matchType]="matchType"
           [loading]="journeyInfoLoading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"
@@ -81,12 +81,12 @@
             <app-otp-stats
               [view]="journeyInfo"
               [loading]="journeyInfoLoading"
-              [estimated]="estimated === 'true'"
+              [matchType]="matchType"
               [timingPointsOnly]="timingPointsOption === 'timing-points'"
             ></app-otp-stats>
             <app-journey-map
               [view]="journeyInfo"
-              [estimated]="estimated === 'true'"
+              [matchType]="matchType"
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
               [loading]="journeyInfoLoading"

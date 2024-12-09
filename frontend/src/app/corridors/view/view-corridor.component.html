@@ -16,17 +16,17 @@
       <div class="corridor__date-wrapper">
         <app-date-range [formControl]="dateRange"></app-date-range>
         <app-segmented-toggle
-          [(ngModel)]="toggleValue"
-          (ngModelChange)="onEstimatedToggleChange()"
+          [(ngModel)]="matchTypeToggle"
+          (ngModelChange)="onMatchTypeToggleChange()"
         >
           <app-segmented-toggle-item
-            name="estimated-toggle"
+            name="match-type"
             identifier="estimated"
             value="estimated"
             label="Estimated"
           ></app-segmented-toggle-item>
           <app-segmented-toggle-item
-            name="estimated-toggle"
+            name="match-type"
             identifier="evidenced"
             value="evidenced"
             label="Evidenced"
