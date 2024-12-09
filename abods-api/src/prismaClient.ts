@@ -86,10 +86,6 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
         ...(isLocal() ? {} : { params: undefined }),
       }),
     );
-    // await prisma.$disconnect()
-    // prisma.$connect().catch(() => {
-    //      throw Error("DB Connectivity Issue");
-    //    });
     await Promise.all([prisma.$disconnect(), prisma.$connect()]);
     logger.debug("Prisma has connected to the database");
   }
