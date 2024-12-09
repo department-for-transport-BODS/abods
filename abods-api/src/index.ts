@@ -20,6 +20,8 @@ import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library.js";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -41,7 +43,9 @@ export const kysely = new Kysely<DB>({
   },
 });
 
-let db = await createContext();
+let db:
+  | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
+  | undefined = undefined;
 let startTime = getDate();
 const apiKeyAuth = await getAPITokenHash();
 
@@ -56,6 +60,17 @@ logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
+
+app.get("/health", (_, res) => async () => {
+  if (!db) {
+    db = await createContext(true);
+    startTime = getDate();
+  } else {
+    await db.$executeRaw`Select 1`;
+  }
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
   express.json(),
@@ -67,13 +82,11 @@ app.use(
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = getDate().isAfter(startTime.add(10, "minute"));
-      if (retry) {
-        try {
-          db = await createContext(true);
-          startTime = getDate();
-        } catch (error) {
-          logger.error(error);
-          logger.error("Failed to create database context");
+      if (!db || retry) {
+        db = await createContext(true);
+        startTime = getDate();
+        if (!db) {
+          throw Error("DB not connected");
         }
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
