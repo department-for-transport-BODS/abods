@@ -20,6 +20,7 @@ import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import { apolloLogger } from "./apolloLogger.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 
@@ -55,21 +56,13 @@ const typeDefs = gql`
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
+  logger,
+  plugins: [apolloLogger],
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
-
-app.get("/health", (_, res) => async () => {
-  if (!db) {
-    db = await createContext(true);
-    startTime = getDate();
-  } else {
-    await db.$executeRaw`Select 1`;
-  }
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
 
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
@@ -85,9 +78,6 @@ app.use(
       if (!db || retry) {
         db = await createContext(true);
         startTime = getDate();
-        if (!db) {
-          throw Error("DB not connected");
-        }
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
     },

@@ -23,11 +23,11 @@ export const requireUserSession = async (context: RequestContext) => {
   if (!cookieHeader) {
     throwUnauthenticatedError();
   }
-  logger.debug(`parsing cookie from header: ${JSON.stringify(cookieHeader)}`);
+  logger.debug({ cookieHeader }, "parsing cookie from header");
   const cookies = parseCookie(cookieHeader);
   const sessionId = cookies.abods_sessionid;
 
-  logger.debug(`Session id: ${sessionId}`);
+  logger.debug({ sessionId });
   if (!sessionId) {
     throwUnauthenticatedError();
   }
@@ -41,7 +41,8 @@ export const requireUserSession = async (context: RequestContext) => {
   });
 
   logger.debug(
-    `session record obtained for session id ${sessionId}: ${JSON.stringify(sessionRecord)}`,
+    { sessionRecord, sessionId },
+    "session record obtained for session id",
   );
   if (!sessionRecord) {
     logger.debug("No Session record found for user");
@@ -64,7 +65,7 @@ export const requireUserSession = async (context: RequestContext) => {
     },
   });
 
-  logger.debug(`Retrieved bods user: ${JSON.stringify(bodsUser)}`);
+  logger.debug({ bodsUser }, "Retrieved bods user");
   if (!bodsUser) {
     logger.debug("No bods user found");
     throwUnauthenticatedError();
@@ -73,11 +74,14 @@ export const requireUserSession = async (context: RequestContext) => {
     (o) => o.organisation_id,
   );
   if (!organisation) {
-    logger.error("User not mapped to an organisation");
+    logger.error({ userId: bodsUser.id }, "User not mapped to an organisation");
     throwUnauthenticatedError("User not mapped to any organisation");
   }
   if (bodsUser.userOrganisations.length > 1) {
-    logger.error("API does not support multiple organisations per user");
+    logger.error(
+      { userId: bodsUser.id },
+      "API does not support multiple organisations per user",
+    );
     throwUnauthenticatedError(
       "API does not support multiple organisations per user",
     );
@@ -91,7 +95,7 @@ export const requireUserSession = async (context: RequestContext) => {
     orgId: organisation.organisation_id,
   };
 
-  logger.debug(`Session user returned: ${JSON.stringify(sessionUser)}`);
+  logger.debug({ sessionUser }, "Session user returned");
   return sessionUser;
 };
 

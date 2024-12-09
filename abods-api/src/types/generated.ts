@@ -77,7 +77,7 @@ export type ApiInfoType = {
 /**
  * Filters for AvlLineLevelStatus
  *
- * BODS integration uses this so ensure all changes are backwards compatible
+ * [BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
  */
 export type AvlFiltersInput = {
   lineName?: InputMaybe<Scalars['String']['input']>;
@@ -87,7 +87,7 @@ export type AvlFiltersInput = {
 /**
  * Last Received AVL for on a Line basis
  *
- * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ * [BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
  */
 export type AvlLineLevelStatus = {
   __typename?: 'AvlLineLevelStatus';

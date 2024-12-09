@@ -68,8 +68,6 @@ export const getOperatorList: QueryResolvers["operators"] = async (
 ): Promise<OperatorsPage> => {
   const user = await requireUserSession(context);
   try {
-    logger.debug(new Date().toLocaleString() + " getOperatorList");
-
     const userOperators = args.filterBy?.operatorIds
       ? await getOperatorsDropDown(user, context.db, args.filterBy.operatorIds)
       : await getOperatorsDropDown(user, context.db);
@@ -82,7 +80,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       items: userOperators,
     };
   } catch (error) {
-    logger.error(error);
+    logger.error(error, "An error occurred when getting operators");
     return {};
   }
 };
@@ -146,7 +144,7 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
       };
     } else throw Error("User does not have access to service");
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting service info");
     return null;
   }
 };
@@ -277,7 +275,7 @@ export const getOperator: QueryResolvers["operator"] = async (
   await requireUserSession(context);
   try {
     // TODO: is operator id in users' operator id array
-    logger.debug("getOperator op: {0} ", args.operatorId);
+    logger.debug({ operatorId: args.operatorId }, "getOperator");
 
     const operator = await context.db.all_operators.findUnique({
       where: {
@@ -297,7 +295,7 @@ export const getOperator: QueryResolvers["operator"] = async (
 
     return operatorPayload;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting operator info");
     return null;
   }
 };
@@ -311,8 +309,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       const { filters } = args.inputs;
       const { lineIds, onTimeMaxMinutes, onTimeMinMinutes } = filters || {};
-
-      logger.debug(new Date().toLocaleString() + " getPunctualityOverview");
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
@@ -354,9 +350,8 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         const endTimer = performance.now();
 
         logger.debug(
-          `Call to getPunctualityOverview took ${
-            endTimer - startTimer
-          } milliseconds`,
+          { totalTimeMs: endTimer - startTimer },
+          "Call to getPunctualityOverview Finished",
         );
 
         return {
@@ -371,7 +366,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting punctuality stats");
       return null;
     }
   };
@@ -387,8 +382,6 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
 
       const { filters } = args.inputs;
       const { adminAreaIds } = filters || {};
-
-      logger.debug(new Date().toLocaleString() + " getOperatorPerformance");
 
       // get an array of user's org's operator nocs.
       const operators = await context.db.all_operators.findMany({
@@ -473,14 +466,13 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       //end - performance timer
       const endTimer = performance.now();
       logger.debug(
-        `Call to getOperatorPerformance took ${
-          endTimer - startTimer
-        } milliseconds`,
+        { totalTimeMs: endTimer - startTimer },
+        "Call to getOperatorPerformance finished",
       );
 
       return ret;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting performance stats");
       return null;
     }
   };
@@ -494,9 +486,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug(
-          "getPunctualityDayOfWeek id: " + JSON.stringify(operatorIds),
-        );
+        logger.debug({ operatorIds }, "getPunctualityDayOfWeek");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -566,7 +556,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
 
       return [];
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting day of week stats");
       return null;
     }
   };
@@ -626,8 +616,6 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
   async (_, args, context): Promise<Maybe<DelayFrequencyType[]>> => {
     const user = await requireUserSession(context);
     try {
-      logger.debug("getDelayFrequency");
-
       // bucket is the number difference in the OTP table
       // freq is the count of that difference
 
@@ -637,7 +625,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug("getDelayFrequency id: " + JSON.stringify(operatorIds));
+        logger.debug({ operatorIds }, "getDelayFrequency");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
         const operator_noc_to_filter = operatorIds[0];
@@ -648,7 +636,10 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
       }
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting delay frequency stats",
+      );
       return null;
     }
   };
@@ -671,9 +662,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug(
-          "getPunctualityTimeOfDay id: " + JSON.stringify(operatorIds),
-        );
+        logger.debug({ operatorIds }, "getPunctualityTimeOfDay");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -724,7 +713,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
 
       return hoursOfDay;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting time of day stats");
       return null;
     }
   };
@@ -733,8 +722,6 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
   async (_, args, context): Promise<Maybe<PunctualityTimeSeriesType[]>> => {
     const user = await requireUserSession(context);
     try {
-      logger.debug(new Date().toLocaleString() + " getPunctualityTimeSeries");
-
       const { filters } = args.inputs;
       const { granularity, lineIds } = filters || {};
       const operatorIds = filters?.operatorIds ?? [];
@@ -805,7 +792,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
 
       return null;
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting time series stats");
       return null;
     }
   };
@@ -925,7 +912,10 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         },
       }));
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting service punctuality stats",
+      );
       return [];
     }
   };
@@ -945,7 +935,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
-        logger.debug("getStopPerformance id: " + JSON.stringify(operatorIds));
+        logger.debug({ operatorIds }, "getStopPerformance");
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
@@ -1037,7 +1027,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       return stopPerformances;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting stop performance stats",
+      );
       return null;
     }
   };
@@ -1120,7 +1113,10 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
       return servicePunctualities;
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting service performance stats",
+      );
       return null;
     }
   };
@@ -1154,7 +1150,7 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
 
       return [];
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting frequent services");
       return null;
     }
   };
@@ -1194,7 +1190,10 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
         totalHours: totalHours,
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(
+        error,
+        "An error occurred when getting frequent service info",
+      );
       return null;
     }
   };
@@ -1250,7 +1249,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting headway overview");
       return null;
     }
   };
@@ -1349,7 +1348,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         return 1;
       });
     } catch (error) {
-      logger.error(error);
+      logger.error(error, "An error occurred when getting headway time series");
       return null;
     }
   };
@@ -1396,7 +1395,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 
     return null;
   } catch (error) {
-    console.error(error);
+    logger.error(error, "An error occurred when getting admin areas");
     return null;
   }
 };
