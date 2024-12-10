@@ -20,6 +20,7 @@ import { DB } from "./kysely.js";
 import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import { apolloLogger } from "./apolloLogger.js";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -51,6 +52,8 @@ const typeDefs = gql`
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
+  logger,
+  plugins: [apolloLogger],
 });
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
@@ -72,8 +75,7 @@ app.use(
           db = await createContext(true);
           startTime = getDate();
         } catch (error) {
-          logger.error(error);
-          logger.error("Failed to create database context");
+          logger.error(error, "Failed to create database context");
         }
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
