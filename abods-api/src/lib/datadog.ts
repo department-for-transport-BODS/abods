@@ -53,6 +53,15 @@ const datadogMetricsPlugin: ApolloServerPlugin = {
               const fieldDuration = fieldEndTime - fieldStartTime;
 
               sendDistributionMetric(
+                "abods.graphql.field.count",
+                1,
+                "function:GraphQlFunction",
+                `env:${process.env.PROJECT_ENV}`,
+                `field:${info.fieldName}`,
+                `parentType:${info.parentType.name}`,
+              );
+
+              sendDistributionMetric(
                 "abods.graphql.field.duration",
                 fieldDuration,
                 "function:GraphQlFunction",

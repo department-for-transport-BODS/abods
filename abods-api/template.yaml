@@ -133,6 +133,7 @@ Resources:
             - !Ref ProjectName
           DB_USER: !Sub "${ProjectName}_proxy_rw"
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
+          DD_TAGS: app:graphql,project:abods
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
