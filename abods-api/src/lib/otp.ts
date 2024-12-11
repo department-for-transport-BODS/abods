@@ -6,6 +6,7 @@ import {
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
+import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -262,5 +263,27 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
     include: {
       admin_area: true,
     },
+  });
+};
+
+export const getServiceSummaryOverview = (
+  db: PrismaClient,
+  prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+  sum: Prisma.Timetable_summary_service_tzSumAggregateInputType,
+) => {
+  return db.timetable_summary_service_tz.aggregate({
+    where: prismaFilters,
+    _sum: sum,
+  });
+};
+
+export const getOperatorSummaryOverview = (
+  db: PrismaClient,
+  prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+  sum: Prisma.Timetable_summary_operator_tSumAggregateInputType,
+) => {
+  return db.timetable_summary_operator_t.aggregate({
+    where: prismaFilters,
+    _sum: sum,
   });
 };
