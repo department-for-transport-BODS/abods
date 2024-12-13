@@ -1,6 +1,5 @@
 import { Component, Input } from "@angular/core";
 import { DateTime } from "luxon";
-import { JourneyInfo } from "../vehicle-journeys-view.component";
 import { Journey } from "../../../../generated/graphql";
 
 @Component({
@@ -9,9 +8,9 @@ import { Journey } from "../../../../generated/graphql";
   styleUrls: ["./journey-info.component.scss"],
 })
 export class JourneyInfoComponent {
-  @Input() loading?: boolean;
-  @Input() journeyInfo?: JourneyInfo | null;
-  @Input() journey?: Journey = undefined;
+  @Input() loading = false;
+  @Input() vehicleRef: string | null = null;
+  @Input() journey: Journey | null = null;
 
   get operatorName(): string {
     return this.journey?.operatorName ?? "";
@@ -30,6 +29,6 @@ export class JourneyInfoComponent {
   }
 
   get vehicleId(): string {
-    return this.journeyInfo?.avls[0]?.vehicleRef ?? "Unknown";
+    return this.vehicleRef ?? "Unknown";
   }
 }

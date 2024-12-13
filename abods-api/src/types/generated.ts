@@ -98,6 +98,7 @@ export type AvlLineLevelStatus = {
 
 export type AvlPoint = {
   __typename?: 'AvlPoint';
+  directionRef: Scalars['String']['output'];
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
   recordedAtTimeUtc: Scalars['String']['output'];
@@ -502,6 +503,7 @@ export type InvitationType = {
 
 export type Journey = {
   __typename?: 'Journey';
+  directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
@@ -1088,6 +1090,7 @@ export enum SortOrderEnum {
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
+  directionRef: Scalars['String']['output'];
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
@@ -1502,6 +1505,7 @@ export type AvlLineLevelStatusResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type AvlPointResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AvlPoint'] = ResolversParentTypes['AvlPoint']> = ResolversObject<{
+  directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   recordedAtTimeUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1746,6 +1750,7 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
 }>;
 
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
+  directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -2005,6 +2010,7 @@ export type ServicePunctualityTypeResolvers<ContextType = RequestContext, Parent
 
 export type StopResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Stop'] = ResolversParentTypes['Stop']> = ResolversObject<{
   actualDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   estimatedDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isTimingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
