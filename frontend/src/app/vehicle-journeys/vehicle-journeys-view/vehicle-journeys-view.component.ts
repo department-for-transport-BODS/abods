@@ -75,7 +75,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         journeyStart: queryParams.get("startTime")!,
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
-        evidenced: queryParams.get("match_type") as MatchType,
+        matchType: queryParams.get("match_type") as MatchType,
         timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
         direction: queryParams.get("direction"),
@@ -86,7 +86,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           operator: urlData.operator,
           service: urlData.lineId,
         };
-        this.matchType = urlData.evidenced ?? MatchType.Evidenced;
+        this.matchType = urlData.matchType ?? MatchType.Evidenced;
         this.timingPointsOption =
           urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
             ? "timing-points"

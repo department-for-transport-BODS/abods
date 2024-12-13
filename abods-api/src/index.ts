@@ -21,8 +21,6 @@ import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 import { getDatabaseUrl, isLocal } from "./prismaClient.js";
 import { apolloLogger } from "./apolloLogger.js";
-import { Prisma, PrismaClient } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library.js";
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -44,9 +42,7 @@ export const kysely = new Kysely<DB>({
   },
 });
 
-let db:
-  | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
-  | undefined = undefined;
+let db = await createContext();
 let startTime = getDate();
 const apiKeyAuth = await getAPITokenHash();
 
@@ -75,9 +71,13 @@ app.use(
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = getDate().isAfter(startTime.add(10, "minute"));
-      if (!db || retry) {
-        db = await createContext(true);
-        startTime = getDate();
+      if (retry) {
+        try {
+          db = await createContext(true);
+          startTime = getDate();
+        } catch (error) {
+          logger.error(error, "Failed to create database context");
+        }
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
     },
