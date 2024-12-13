@@ -5,7 +5,10 @@
       class="journey-nav__link"
       [class.journey-nav__link--disabled]="!previous"
       [routerLink]="previous ? ['/vehicle-journeys', previous.groupId] : null"
-      [queryParams]="{ startTime: previous?.startTime }"
+      [queryParams]="{
+        startTime: previous?.startTime,
+        direction: previous?.directionRef
+      }"
       queryParamsHandling="merge"
       [ngxTippy]="prevTooltip"
       [tippyProps]="tippyProps"
@@ -25,7 +28,10 @@
       class="journey-nav__link"
       [class.journey-nav__link--disabled]="!next"
       [routerLink]="next ? ['/vehicle-journeys', next.groupId] : null"
-      [queryParams]="{ startTime: next?.startTime }"
+      [queryParams]="{
+        startTime: next?.startTime,
+        direction: next?.directionRef
+      }"
       queryParamsHandling="merge"
       [ngxTippy]="nextTooltip"
       [tippyProps]="tippyProps"

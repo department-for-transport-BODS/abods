@@ -30,6 +30,7 @@ type Query {
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 
   # Used by an external service, take care with changes
+  # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
@@ -187,6 +188,7 @@ enum CorridorGranularity {
 }
 
 type Journey {
+  directionRef: String
   startTime: String!
   groupId: String!
   serviceName: String!
@@ -813,6 +815,7 @@ type AvlPoint {
   latitude: Float!
   longitude: Float!
   vehicleRef: String!
+  directionRef: String!
 }
 
 type Stop {
@@ -826,6 +829,7 @@ type Stop {
   stopName: String!
   isTimingPoint: Boolean!
   otp: OtpEnum
+  directionRef: String!
 }
 
 enum OtpEnum {
@@ -837,7 +841,7 @@ enum OtpEnum {
 """
 Filters for AvlLineLevelStatus
 
-BODS integration uses this so ensure all changes are backwards compatible
+[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
 """
 input AvlFiltersInput {
   operatorNoc: String
@@ -847,7 +851,7 @@ input AvlFiltersInput {
 """
 Last Received AVL for on a Line basis
 
-BODS integrates with this endpoint so ensure all changes are backwards compatible
+[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
 """
 type AvlLineLevelStatus {
   operatorNoc: String!

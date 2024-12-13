@@ -431,7 +431,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "AvlFiltersInput",
-        "description": "Filters for AvlLineLevelStatus\n\nBODS integration uses this so ensure all changes are backwards compatible",
+        "description": "Filters for AvlLineLevelStatus\n\n[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible",
         "isOneOf": false,
         "fields": null,
         "inputFields": [
@@ -467,7 +467,7 @@
       {
         "kind": "OBJECT",
         "name": "AvlLineLevelStatus",
-        "description": "Last Received AVL for on a Line basis\n\nBODS integrates with this endpoint so ensure all changes are backwards compatible",
+        "description": "Last Received AVL for on a Line basis\n\n[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible",
         "isOneOf": null,
         "fields": [
           {
@@ -530,6 +530,22 @@
         "description": null,
         "isOneOf": null,
         "fields": [
+          {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "latitude",
             "description": null,
@@ -3881,6 +3897,18 @@
         "description": null,
         "isOneOf": null,
         "fields": [
+          {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "groupId",
             "description": null,
@@ -8435,6 +8463,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

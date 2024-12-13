@@ -77,7 +77,7 @@ export type ApiInfoType = {
 /**
  * Filters for AvlLineLevelStatus
  *
- * BODS integration uses this so ensure all changes are backwards compatible
+ * [BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
  */
 export type AvlFiltersInput = {
   lineName?: InputMaybe<Scalars['String']['input']>;
@@ -87,7 +87,7 @@ export type AvlFiltersInput = {
 /**
  * Last Received AVL for on a Line basis
  *
- * BODS integrates with this endpoint so ensure all changes are backwards compatible
+ * [BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
  */
 export type AvlLineLevelStatus = {
   __typename?: 'AvlLineLevelStatus';
@@ -98,6 +98,7 @@ export type AvlLineLevelStatus = {
 
 export type AvlPoint = {
   __typename?: 'AvlPoint';
+  directionRef: Scalars['String']['output'];
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
   recordedAtTimeUtc: Scalars['String']['output'];
@@ -502,6 +503,7 @@ export type InvitationType = {
 
 export type Journey = {
   __typename?: 'Journey';
+  directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
@@ -1088,6 +1090,7 @@ export enum SortOrderEnum {
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
+  directionRef: Scalars['String']['output'];
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
@@ -1579,14 +1582,14 @@ export type AvlsQueryVariables = Exact<{
 }>;
 
 
-export type AvlsQuery = { __typename?: 'Query', avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string }> };
+export type AvlsQuery = { __typename?: 'Query', avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> };
 
 export type RouteQueryVariables = Exact<{
   groupId: Scalars['String']['input'];
 }>;
 
 
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null }> };
+export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string }> };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['DateTime']['input'];
@@ -1594,7 +1597,7 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string }> };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null }> };
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2975,6 +2978,7 @@ export const AvlsDocument = gql`
     latitude
     longitude
     vehicleRef
+    directionRef
   }
 }
     `;
@@ -3002,6 +3006,7 @@ export const RouteDocument = gql`
     stopId
     isTimingPoint
     otp
+    directionRef
   }
 }
     `;
@@ -3025,6 +3030,7 @@ export const JourneysDocument = gql`
     serviceNumber
     operatorName
     operatorNoc
+    directionRef
   }
 }
     `;

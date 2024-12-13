@@ -6,6 +6,7 @@ import {
   RoleType,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
+import logger from "../logger.js";
 
 // Summary: fetch api info
 export const getApiInfo: QueryResolvers["apiInfo"] = async (
@@ -13,21 +14,17 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (
   __,
   context,
 ): Promise<Maybe<ApiInfoType>> => {
-  try {
-    const apiInfo = await context.db.apiInfo.findFirst();
+  const apiInfo = await context.db.apiInfo.findFirst();
 
-    if (!apiInfo) {
-      throw "No api info found";
-    }
-
-    return {
-      buildNumber: apiInfo.build_number,
-      version: apiInfo.version,
-    };
-  } catch (error) {
-    console.error(error);
+  if (!apiInfo) {
+    logger.error("No api info found in database");
     return null;
   }
+
+  return {
+    buildNumber: apiInfo.build_number,
+    version: apiInfo.version,
+  };
 };
 
 // Summary: fetch roles
@@ -37,23 +34,18 @@ export const getRoles: QueryResolvers["roles"] = async (
   context,
 ): Promise<Maybe<RoleType[]>> => {
   await requireUserSession(context);
-  try {
-    return [
-      {
-        id: "1",
-        name: "Staff",
-        scope: "organisation",
-      },
-      {
-        id: "2",
-        name: "Administrator",
-        scope: "organisation",
-      },
-    ];
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+  return [
+    {
+      id: "1",
+      name: "Staff",
+      scope: "organisation",
+    },
+    {
+      id: "2",
+      name: "Administrator",
+      scope: "organisation",
+    },
+  ];
 };
 
 const sharedResolvers: Resolvers = {
