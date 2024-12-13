@@ -75,7 +75,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         journeyStart: queryParams.get("startTime")!,
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
-        matchType: queryParams.get("match_type") as MatchType,
+        matchType: queryParams.get("match_type") as MatchType | undefined,
         timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
         direction: queryParams.get("direction"),

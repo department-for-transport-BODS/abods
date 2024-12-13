@@ -139,7 +139,9 @@ export class JourneyMapComponent implements OnChanges {
     if (view && (changes.view || changes.matchType)) {
       this.updateView(
         view,
-        changes.matchType?.currentValue === MatchType.Estimated,
+        changes.matchType
+          ? changes.matchType.currentValue === MatchType.Estimated
+          : this.matchType === MatchType.Estimated,
       );
     }
     if (this.map && changes.selectedStop?.currentValue) {
