@@ -265,25 +265,3 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
     },
   });
 };
-
-export const getServiceSummaryOverview = (
-  db: PrismaClient,
-  prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
-  sum: Prisma.Timetable_summary_service_tzSumAggregateInputType,
-) => {
-  return db.timetable_summary_service_tz.aggregate({
-    where: prismaFilters,
-    _sum: sum,
-  });
-};
-
-export const getOperatorSummaryOverview = (
-  db: PrismaClient,
-  prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
-  sum: Prisma.Timetable_summary_operator_tSumAggregateInputType,
-) => {
-  return db.timetable_summary_operator_t.aggregate({
-    where: prismaFilters,
-    _sum: sum,
-  });
-};

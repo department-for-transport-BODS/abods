@@ -47,8 +47,6 @@ import {
   getNocAdminAreas,
   getOperatorsFromOrgId,
   getOperatorsFroServiceDetails,
-  getOperatorSummaryOverview,
-  getServiceSummaryOverview,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
@@ -324,8 +322,10 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
-      const filterWithoutEstimate = prismaFilters;
-      filterWithoutEstimate.estimated = Prisma.skip;
+      const filterWithoutEstimate = {
+        ...prismaFilters,
+        estimated: Prisma.skip,
+      };
 
       const aggregationFields:
         | Prisma.Timetable_summary_service_tzSumAggregateInputType
@@ -336,25 +336,37 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         completed: true,
       };
 
+      const getServiceSummaryOverview = (
+        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+        sum: Prisma.Timetable_summary_service_tzSumAggregateInputType,
+      ) => {
+        return context.db.timetable_summary_service_tz.aggregate({
+          where: prismaFilters,
+          _sum: sum,
+        });
+      };
+
+      const getOperatorSummaryOverview = (
+        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+        sum: Prisma.Timetable_summary_operator_tSumAggregateInputType,
+      ) => {
+        return context.db.timetable_summary_operator_t.aggregate({
+          where: prismaFilters,
+          _sum: sum,
+        });
+      };
+
       if (lineIds) {
         [results, scheduled] = await Promise.all([
-          getServiceSummaryOverview(
-            context.db,
-            prismaFilters,
-            aggregationFields,
-          ),
-          getServiceSummaryOverview(context.db, filterWithoutEstimate, {
+          getServiceSummaryOverview(prismaFilters, aggregationFields),
+          getServiceSummaryOverview(filterWithoutEstimate, {
             scheduled: true,
           }),
         ]);
       } else {
         [results, scheduled] = await Promise.all([
-          getOperatorSummaryOverview(
-            context.db,
-            prismaFilters,
-            aggregationFields,
-          ),
-          getOperatorSummaryOverview(context.db, filterWithoutEstimate, {
+          getOperatorSummaryOverview(prismaFilters, aggregationFields),
+          getOperatorSummaryOverview(filterWithoutEstimate, {
             scheduled: true,
           }),
         ]);
