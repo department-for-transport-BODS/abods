@@ -14,6 +14,12 @@ import { PrismaClientInitializationError } from "@prisma/client/runtime/library"
 import { GraphQLError } from "graphql";
 
 export const sendErrorMetric = (error: unknown) => {
+  if (
+    error instanceof GraphQLError &&
+    error?.extensions?.code === "UNAUTHENTICATED"
+  ) {
+    return;
+  }
   if (error instanceof PrismaClientInitializationError) {
     sendDistributionMetric(
       "abods.graphql.prisma.error",
@@ -23,18 +29,13 @@ export const sendErrorMetric = (error: unknown) => {
     );
   }
 
-  if (
-    error instanceof GraphQLError &&
-    error?.extensions?.code !== "UNAUTHENTICATED"
-  ) {
-    sendDistributionMetric(
-      "abods.graphql.request.status",
-      1,
-      "function:GraphQlFunction",
-      `env:${process.env.PROJECT_ENV}`,
-      `status:error`,
-    );
-  }
+  sendDistributionMetric(
+    "abods.graphql.request.status",
+    1,
+    "function:GraphQlFunction",
+    `env:${process.env.PROJECT_ENV}`,
+    `status:error`,
+  );
 };
 
 const datadogMetricsPlugin: ApolloServerPlugin = {
