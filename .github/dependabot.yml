@@ -5,7 +5,10 @@
 
 version: 2
 updates:
-  - package-ecosystem: "terraform"
-    directory: "."
+  - package-ecosystem: "npm"
+    directories:
+      - .
+      - ./abods-api
+      - ./frontend
     schedule:
       interval: "weekly"
