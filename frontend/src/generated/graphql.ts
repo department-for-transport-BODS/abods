@@ -931,7 +931,7 @@ export type QueryEventsArgs = {
 
 
 export type QueryFindJourneysArgs = {
-  dateOfJourney: Scalars['DateTime']['input'];
+  dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
 };
 
@@ -1592,7 +1592,7 @@ export type RouteQueryVariables = Exact<{
 export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string }> };
 
 export type JourneysQueryVariables = Exact<{
-  dateOfJourney: Scalars['DateTime']['input'];
+  dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
 }>;
 
@@ -3022,7 +3022,7 @@ export const RouteDocument = gql`
     }
   }
 export const JourneysDocument = gql`
-    query journeys($dateOfJourney: DateTime!, $lineId: String!) {
+    query journeys($dateOfJourney: String!, $lineId: String!) {
   findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
     groupId
     startTime
