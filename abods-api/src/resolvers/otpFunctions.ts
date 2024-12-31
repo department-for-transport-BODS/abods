@@ -316,36 +316,63 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       }
 
       let results;
+      let scheduled;
       const prismaFilters = getPrismaFiltersForOTPQuery(
         args.inputs,
         userOperatorIds,
       );
 
+      const filterWithoutEstimate = {
+        ...prismaFilters,
+        estimated: Prisma.skip,
+      };
+
+      const aggregationFields:
+        | Prisma.Timetable_summary_service_tzSumAggregateInputType
+        | Prisma.Timetable_summary_operator_tSumAggregateInputType = {
+        early_count: true,
+        late_count: true,
+        on_time_count: true,
+        completed: true,
+      };
+
+      const getServiceSummaryOverview = (
+        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+        sum: Prisma.Timetable_summary_service_tzSumAggregateInputType,
+      ) => {
+        return context.db.timetable_summary_service_tz.aggregate({
+          where: prismaFilters,
+          _sum: sum,
+        });
+      };
+
+      const getOperatorSummaryOverview = (
+        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
+        sum: Prisma.Timetable_summary_operator_tSumAggregateInputType,
+      ) => {
+        return context.db.timetable_summary_operator_t.aggregate({
+          where: prismaFilters,
+          _sum: sum,
+        });
+      };
+
       if (lineIds) {
-        results = await context.db.timetable_summary_service_tz.aggregate({
-          where: prismaFilters,
-          _sum: {
-            early_count: true,
-            late_count: true,
-            on_time_count: true,
-            completed: true,
+        [results, scheduled] = await Promise.all([
+          getServiceSummaryOverview(prismaFilters, aggregationFields),
+          getServiceSummaryOverview(filterWithoutEstimate, {
             scheduled: true,
-          },
-        });
+          }),
+        ]);
       } else {
-        results = await context.db.timetable_summary_operator_t.aggregate({
-          where: prismaFilters,
-          _sum: {
-            early_count: true,
-            late_count: true,
-            on_time_count: true,
-            completed: true,
+        [results, scheduled] = await Promise.all([
+          getOperatorSummaryOverview(prismaFilters, aggregationFields),
+          getOperatorSummaryOverview(filterWithoutEstimate, {
             scheduled: true,
-          },
-        });
+          }),
+        ]);
       }
 
-      if (results?._sum) {
+      if (results?._sum && scheduled?._sum) {
         //end - performance timer
         const endTimer = performance.now();
 
@@ -358,7 +385,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           early: results._sum.early_count ?? 0,
           late: results._sum.late_count ?? 0,
           onTime: results._sum.on_time_count ?? 0,
-          scheduled: results._sum.scheduled ?? 0,
+          scheduled: scheduled._sum.scheduled ?? 0,
           completed: results._sum.completed ?? 0,
           averageDeviation: 0,
         };
@@ -1400,7 +1427,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
   }
 };
 
-const getPrismaFiltersForOTPQuery = (
+export const getPrismaFiltersForOTPQuery = (
   inputs: PerformanceInputType &
     HeadwayInputType &
     FrequentServiceInfoInputType,
