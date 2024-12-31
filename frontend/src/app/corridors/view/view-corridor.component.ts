@@ -11,10 +11,7 @@ import {
   tap,
   takeUntil,
 } from "rxjs/operators";
-import {
-  CorridorGranularity,
-  EstimatedToggle,
-} from "../../../generated/graphql";
+import { CorridorGranularity, MatchType } from "../../../generated/graphql";
 import {
   FromTo,
   Preset,
@@ -67,8 +64,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   selectedStops$ = new Subject<CorridorStop[]>();
   onDestroy$ = new Subject<void>();
   moveCounter = 0;
-  estimatedToggle = new Subject<EstimatedToggle>();
-  toggleValue: EstimatedToggle = EstimatedToggle.Evidenced;
+  matchType = new Subject<MatchType>();
+  matchTypeToggle: MatchType = MatchType.Evidenced;
 
   speedStats?: SpeedStats;
   mode: "time" | "speed" = "time";
@@ -244,7 +241,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
           startWith(this.dateRange.value as FromTo),
         ),
         this.selectedStops$.pipe(startWith([])),
-        this.estimatedToggle,
+        this.matchType,
       ])
         .pipe(
           map(([{ from, to }, stops, toggle]) =>
@@ -291,12 +288,12 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
           }
         });
 
-      this.estimatedToggle.next(this.toggleValue);
+      this.matchType.next(this.matchTypeToggle);
     }
   }
 
-  onEstimatedToggleChange() {
-    this.estimatedToggle.next(this.toggleValue);
+  onMatchTypeToggleChange() {
+    this.matchType.next(this.matchTypeToggle);
   }
 
   setCoordinates(segment: CorridorStop[]): Position[] {
@@ -317,7 +314,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     to: DateTime,
     corridorId: string,
     stops: CorridorStop[],
-    estimated: EstimatedToggle,
+    matchType: MatchType,
   ): CorridorStatsViewParams {
     const granularity =
       Math.abs(to.diff(from, "days").days) < 5
@@ -329,7 +326,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       to,
       granularity,
       stops,
-      estimated,
+      matchType,
     };
   }
 

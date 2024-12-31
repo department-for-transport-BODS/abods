@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { OtpEnum } from "../../../../generated/graphql";
+import { MatchType, OtpEnum } from "../../../../generated/graphql";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 @Component({
@@ -11,7 +11,7 @@ export class OtpStatsComponent {
   @Input() view: JourneyInfo | null = null;
   @Input() loading?: boolean;
   @Input() timingPointsOnly?: boolean;
-  @Input() estimated = false;
+  @Input() matchType = MatchType.Evidenced;
 
   get calculated() {
     if (!this.view?.stops)
@@ -26,7 +26,11 @@ export class OtpStatsComponent {
 
     const otpEnums = this.view.stops
       .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
-      .map((n) => (!this.estimated && n.estimatedDepartureUtc ? null : n.otp));
+      .map((n) =>
+        this.matchType === MatchType.Evidenced && n.estimatedDepartureUtc
+          ? null
+          : n.otp,
+      );
 
     const total = otpEnums.length;
     const early = otpEnums.filter((n) => n === OtpEnum.Early).length;

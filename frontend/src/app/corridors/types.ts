@@ -7,7 +7,7 @@ import {
   CorridorStatsTimeOfDayType,
   CorridorStatsType,
   CorridorType,
-  EstimatedToggle,
+  MatchType,
   Maybe,
   Scalars,
   ServiceLinkType,
@@ -64,7 +64,7 @@ export interface CorridorStatsViewParams {
   to: DateTime;
   granularity: CorridorGranularity;
   stops: CorridorStop[];
-  estimated: EstimatedToggle;
+  matchType: MatchType;
 }
 
 export interface ICorridorJourneyTimeStats {

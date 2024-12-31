@@ -59,6 +59,7 @@ logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
+
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
   express.json(),

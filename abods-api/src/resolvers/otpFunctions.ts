@@ -1,7 +1,7 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
-  EstimatedToggle,
+  MatchType,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
@@ -1419,7 +1419,7 @@ const getPrismaFiltersForOTPQuery = (
     lineIds,
     lineId,
     dayOfWeekFlags,
-    estimated,
+    matchType,
   } = filters || {};
   const operatorIds = filters?.operatorIds ?? [];
 
@@ -1476,7 +1476,7 @@ const getPrismaFiltersForOTPQuery = (
       gte: dateOfJourneyFromDateTime.toDate(),
       lt: dateOfJourneyToDateTime.toDate(),
     },
-    estimated: estimated === EstimatedToggle.Evidenced ? false : Prisma.skip,
+    estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
     ...(startTime && endTime
