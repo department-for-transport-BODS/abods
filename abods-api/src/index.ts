@@ -75,6 +75,7 @@ app.use(
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = getDate().isAfter(startTime.add(10, "minute"));
+      logger.info(`retry------------${retry}`);
       if (!db || retry) {
         db = await createContext(true);
         startTime = getDate();
