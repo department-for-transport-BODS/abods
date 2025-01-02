@@ -110,10 +110,10 @@ input CorridorStatsInputType {
   granularity: CorridorGranularity!
   stopList: [String!]!
   toTimestamp: DateTime!
-  estimated: EstimatedToggle!
+  matchType: MatchType!
 }
 
-enum EstimatedToggle {
+enum MatchType {
   estimated
   evidenced
 }
@@ -290,7 +290,7 @@ input HeadwayFiltersInputType {
   nocCodes: [String!]
   operatorIds: [String!]
   startTime: String
-  estimated: EstimatedToggle
+  matchType: MatchType
 }
 
 input DayOfWeekFlagsInputType {
@@ -751,7 +751,7 @@ input PerformanceFiltersInputType {
   stopsSegment: StopsSegment
   tagIds: [Int!]
   timingPointsOnly: Boolean
-  estimated: EstimatedToggle
+  matchType: MatchType
 }
 
 enum Granularity {

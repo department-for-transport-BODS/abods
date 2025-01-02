@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { DateTime } from "luxon";
-import { Stop } from "../../../../../generated/graphql";
+import { MatchType, Stop } from "../../../../../generated/graphql";
 
 export interface StopHoverEvent {
   stop: Stop;
@@ -15,7 +15,7 @@ export interface StopHoverEvent {
 export class StopItemComponent {
   @Input() stop!: Stop;
   @Input() timingPointsOnly = false;
-  @Input() estimated = false;
+  @Input() matchType = MatchType.Evidenced;
   @Input() firstItem?: boolean;
   @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
@@ -26,7 +26,11 @@ export class StopItemComponent {
 
   get otp() {
     if (!this.stop) return null;
-    if (!this.estimated && this.stop.estimatedDepartureUtc) return null;
+    if (
+      this.matchType === MatchType.Evidenced &&
+      this.stop.estimatedDepartureUtc
+    )
+      return null;
     return this.stop.otp?.toString() ?? null;
   }
 
@@ -39,7 +43,10 @@ export class StopItemComponent {
     if (!this.stop) return null;
     if (this.stop.actualDepartureUtc)
       return DateTime.fromISO(this.stop.actualDepartureUtc);
-    if (this.estimated && this.stop.estimatedDepartureUtc)
+    if (
+      this.matchType === MatchType.Estimated &&
+      this.stop.estimatedDepartureUtc
+    )
       return DateTime.fromISO(this.stop.estimatedDepartureUtc);
     return null;
   }

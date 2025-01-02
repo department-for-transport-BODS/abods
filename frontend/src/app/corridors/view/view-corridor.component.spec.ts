@@ -14,10 +14,7 @@ import { of } from "rxjs";
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { ViewCorridorComponent } from "./view-corridor.component";
 import { DateTime, Settings } from "luxon";
-import {
-  CorridorGranularity,
-  EstimatedToggle,
-} from "../../../generated/graphql";
+import { CorridorGranularity, MatchType } from "../../../generated/graphql";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { AgGridModule } from "ag-grid-angular";
 import { LuxonModule } from "luxon-angular";
@@ -183,7 +180,7 @@ describe("ViewCorridorComponent", () => {
         to: DateTime.fromISO("2021-09-01"),
         granularity: CorridorGranularity.Day,
         stops: [corridor.stops[0], corridor.stops[1], corridor.stops[2]],
-        estimated: EstimatedToggle.Evidenced,
+        matchType: MatchType.Evidenced,
       };
 
       expect(spy).toHaveBeenCalledWith(expectedParams);
@@ -246,7 +243,7 @@ describe("ViewCorridorComponent", () => {
         to: DateTime.fromISO("2021-09-01"),
         granularity: CorridorGranularity.Day,
         stops: [corridor.stops[1], corridor.stops[2]],
-        estimated: EstimatedToggle.Evidenced,
+        matchType: MatchType.Evidenced,
       };
 
       expect(spy).toHaveBeenCalledWith(expectedParams);

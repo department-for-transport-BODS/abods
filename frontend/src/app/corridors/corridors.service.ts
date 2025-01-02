@@ -247,7 +247,7 @@ export class CorridorsService {
   }
 
   fetchStats(params: CorridorStatsViewParams): Observable<CorridorStats> {
-    const { corridorId, from, to, granularity, stops, estimated } = params;
+    const { corridorId, from, to, granularity, stops, matchType } = params;
     return this.corridorStatsQuery
       .fetch({
         params: {
@@ -256,7 +256,7 @@ export class CorridorsService {
           toTimestamp: to.toISO(),
           granularity,
           stopList: stops.map((stop) => stop.stopId),
-          estimated,
+          matchType,
         },
       })
       .pipe(

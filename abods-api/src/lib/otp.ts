@@ -1,11 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
-  EstimatedToggle,
+  MatchType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
+import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -65,7 +66,7 @@ export const compareThresholds = async (
     maxDelay,
     minDelay,
     lineIds,
-    estimated,
+    matchType,
   } = filters ?? {};
 
   const opIds = operatorIds ?? undefined;
@@ -81,7 +82,7 @@ export const compareThresholds = async (
     },
   };
 
-  if (estimated === EstimatedToggle.Evidenced) {
+  if (matchType === MatchType.Evidenced) {
     where.estimated = false;
   }
 
@@ -112,15 +113,13 @@ export const compareThresholds = async (
 
   if (startTime) {
     const [hours, minutes, _] = startTime.split(":").map(Number);
-    start.setHours(hours);
-    start.setMinutes(minutes);
+    start.setHours(hours, minutes, 0, 0);
     departure_hour.gte = start;
   }
 
   if (endTime) {
     const [hours, minutes, _] = endTime.split(":").map(Number);
-    end.setHours(hours);
-    end.setMinutes(minutes);
+    end.setHours(hours, minutes, 0, 0);
     departure_hour.lte = end;
   }
 

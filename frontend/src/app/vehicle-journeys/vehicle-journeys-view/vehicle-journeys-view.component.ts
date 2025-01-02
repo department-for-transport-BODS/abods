@@ -17,6 +17,7 @@ import {
   AvlPoint,
   AvlsGQL,
   Journey,
+  MatchType,
   RouteGQL,
   Stop,
 } from "../../../generated/graphql";
@@ -41,7 +42,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeys: Journey[] = [];
   journeysLoading = false;
 
-  estimated: "true" | "false" = "true";
+  matchType: MatchType = MatchType.Evidenced;
   timingPointsOption: "timing-points" | "all-stops" = "timing-points";
 
   selectedStop?: Stop;
@@ -74,7 +75,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         journeyStart: queryParams.get("startTime")!,
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
-        evidenced: queryParams.get("evidenced"),
+        matchType: queryParams.get("match_type") as MatchType | undefined,
         timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
         direction: queryParams.get("direction"),
@@ -85,7 +86,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           operator: urlData.operator,
           service: urlData.lineId,
         };
-        this.estimated = urlData.evidenced !== "true" ? "true" : "false";
+        this.matchType = urlData.matchType ?? MatchType.Evidenced;
         this.timingPointsOption =
           urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
             ? "timing-points"
@@ -200,10 +201,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  onEstimatedToggleChange() {
-    const evidenced = this.estimated !== "true" ? true : null;
+  onMatchTypeChange() {
+    const matchType = this.matchType;
     return this.router.navigate([], {
-      queryParams: { evidenced },
+      queryParams: { match_type: matchType },
       queryParamsHandling: "merge",
     });
   }

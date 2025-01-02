@@ -13,7 +13,7 @@ import {
   CorridorStatsType,
   CreateCorridorDocument,
   DeleteCorridorDocument,
-  EstimatedToggle,
+  MatchType,
   GetCorridorDocument,
   ServiceLinkType,
   UpdateCorridorDocument,
@@ -51,7 +51,7 @@ const params: CorridorStatsViewParams = {
     { stopId: "ST0001", stopName: "A" } as CorridorStop,
     { stopId: "ST0002", stopName: "B" } as CorridorStop,
   ],
-  estimated: EstimatedToggle.Evidenced,
+  matchType: MatchType.Evidenced,
 };
 
 const stats: CorridorStatsType = {
