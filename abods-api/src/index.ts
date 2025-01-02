@@ -17,32 +17,13 @@ import { getAPITokenHash } from "./lib/apiauth.js";
 import { IncomingHttpHeaders } from "http";
 
 import { DB } from "./kysely.js";
-import pg from "pg";
-import { Kysely, PostgresDialect } from "kysely";
-import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import { Kysely } from "kysely";
 import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { getKyselyClient } from "./kyselyClient.js";
 
-export const kysely = new Kysely<DB>({
-  dialect: new PostgresDialect({
-    pool: new pg.Pool({
-      connectionString: await getDatabaseUrl(),
-    }),
-  }),
-  log(event) {
-    if (event.level === "query") {
-      logger.debug(event.query.sql);
-      // Don't log query parameters for now in case there's anything sensitive. Local is fine though
-      if (isLocal()) {
-        logger.debug(event.query.parameters);
-      }
-    }
-    if (event.level === "error") {
-      logger.error(event.error);
-    }
-  },
-});
+export let kysely: Kysely<DB> | undefined = undefined;
 
 let db:
   | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
@@ -77,8 +58,11 @@ app.use(
       const retry = getDate().isAfter(startTime.add(10, "minute"));
       logger.info(`startTime------------${startTime.toISOString()}`);
       logger.info(`retry------------${retry}`);
-      if (!db || retry) {
-        db = await createContext(true);
+      if (!db || !kysely || retry) {
+        [db, kysely] = await Promise.all([
+          createContext(true),
+          getKyselyClient(),
+        ]);
         startTime = getDate();
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
