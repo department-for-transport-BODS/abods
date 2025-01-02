@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect } from "kysely";
 import { DB } from "./kysely";
-import { getDatabaseUrl, isLocal } from "./prismaClient";
-import logger from "./logger";
+import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import logger from "./logger.js";
 import pg from "pg";
 
 export const getKyselyClient = async () => {
