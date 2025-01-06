@@ -32,7 +32,7 @@ import {
   ServicePunctualityType,
   StopPerformanceType,
 } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
+import { GeoJSONLineString, RouteType, SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
   dbUtcToBstDate,
@@ -53,6 +53,9 @@ import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import haversineDistance from "haversine-distance";
 import { getUserOperatorIds } from "../lib/operators.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely.js";
+import { getTracksData } from "../lib/common.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -184,27 +187,59 @@ export const getLines: QueryResolvers["lines"] = async (
 
 const point = (x: number, y: number): [number, number] => [x, y];
 
-function temporaryInferredServiceLinks(
+async function getOtpServiceLinks(
   stops: { stopId: string; lon: number; stopName: string; lat: number }[],
   stopIdList: string[],
+  db: Kysely<DB>,
 ) {
   stops = stops.sort(
     (a, b) => stopIdList.indexOf(a.stopId) - stopIdList.indexOf(b.stopId),
   );
   const serviceLinks: ServiceLinkType[] = [];
+  const atco_codes_filter: {
+    from_atco_code: string;
+    to_atco_code: string;
+  }[] = [];
   for (let i = 1; i < stops.length; i++) {
-    const current = stops[i];
-    const previous = stops[i - 1];
-    const currentPoint = point(current.lon, current.lat);
-    const previousPoint = point(previous.lon, previous.lat);
-    serviceLinks.push({
-      fromStop: previous.stopId,
-      toStop: current.stopId,
-      distance: haversineDistance(previousPoint, currentPoint),
-      routeValidity: "INVALID_NO_ROUTE_POINTS",
-      linkRoute: JSON.stringify([previousPoint, currentPoint]),
+    atco_codes_filter.push({
+      from_atco_code: stops[i - 1].stopId,
+      to_atco_code: stops[i].stopId,
     });
   }
+
+  const tracks = await getTracksData(atco_codes_filter, db);
+
+  for (let i = 1; i < stops.length; i++) {
+    const link = tracks.find(
+      (track) => track.from_atco_code === stops[i].stopId,
+    );
+
+    if (link) {
+      const linestring = JSON.parse(
+        link.geometry as string,
+      ) as GeoJSONLineString;
+      serviceLinks.push({
+        fromStop: link.from_atco_code,
+        toStop: link.to_atco_code,
+        distance: link.distance,
+        routeValidity: RouteType.valid,
+        linkRoute: JSON.stringify(linestring.coordinates),
+      });
+    } else {
+      const current = stops[i];
+      const previous = stops[i - 1];
+      const currentPoint = point(current.lon, current.lat);
+      const previousPoint = point(previous.lon, previous.lat);
+      serviceLinks.push({
+        fromStop: previous.stopId,
+        toStop: current.stopId,
+        distance: haversineDistance(previousPoint, currentPoint),
+        routeValidity: RouteType.invalid_no_route_points,
+        linkRoute: JSON.stringify([previousPoint, currentPoint]),
+      });
+    }
+  }
+
   return serviceLinks;
 }
 
@@ -257,11 +292,16 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
   const result: ServicePatternType[] = [];
   for (const route of routes) {
     const stops = stopDetails.filter((s) => route.stopIds.includes(s.stopId));
+    const serviceLinks = await getOtpServiceLinks(
+      stops,
+      route.stopIds,
+      context.kysely,
+    );
     result.push({
       stops,
       servicePatternId: route.id.toString(),
       // to be replaced with a simple mapping once we have the data available
-      serviceLinks: temporaryInferredServiceLinks(stops, route.stopIds),
+      serviceLinks,
     });
   }
   return result;

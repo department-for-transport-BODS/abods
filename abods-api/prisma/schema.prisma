@@ -399,7 +399,7 @@ model corridor {
 }
 
 model corridor_stops {
-  corridor_index        BigInt                                                                               // TODO: fix - nullable bigint in db
+  corridor_index        Int                                                                               // TODO: fix - nullable bigint in db
   corridor_id           Int                                                                                  // TODO: fix - nullable bigint in db
   stop_id               Int                                                                                  // TODO: fix - nullable bigint in db
   route_to_next_stop    String?
@@ -471,6 +471,14 @@ model servicepattern_route {
 
   @@id([distinct_route_id, noc_and_line_and_servicecode], map: "servicepattern_route_pkey_test")
   @@index([noc_and_line_and_servicecode], map: "noc_and_line_and_servicecode_idx")
+}
+
+model transmodel_tracks {
+  id                Int @id
+  from_atco_code    String
+  to_atco_code      String
+  geometry          String    
+  distance          Int
 }
 
 view bods_user {

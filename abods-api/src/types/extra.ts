@@ -26,3 +26,13 @@ export interface SessionUser {
   last_name: string | null;
   orgId: number;
 }
+
+export enum RouteType {
+  valid = "VALID",
+  invalid_no_route_points = "INVALID_NO_ROUTE_POINTS",
+}
+
+export interface GeoJSONLineString {
+  type: "LineString";
+  coordinates: number[][];
+}

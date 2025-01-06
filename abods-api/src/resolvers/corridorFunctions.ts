@@ -46,7 +46,8 @@ import {
 import { getPercentile } from "../lib/utils.js";
 import haversineDistance from "haversine-distance";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import { SessionUser } from "../types/extra.js";
+import { GeoJSONLineString, RouteType, SessionUser } from "../types/extra.js";
+import { getTracksData } from "../lib/common.js";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -275,26 +276,8 @@ const insertCorridorStops = async (
       corridor_id: Number(corridor_id),
       corridor_index: index,
       stop_id: stop.id,
-      route_to_next_stop:
-        index < stops.length - 1
-          ? JSON.stringify([
-              [Number(stop.longitude), Number(stop.latitude)],
-              [
-                Number(stops[index + 1].longitude),
-                Number(stops[index + 1].latitude),
-              ],
-            ])
-          : "",
-      distance_to_next_stop:
-        index < stops.length - 1
-          ? haversineDistance(
-              [Number(stop.longitude), Number(stop.latitude)],
-              [
-                Number(stops[index + 1].longitude),
-                Number(stops[index + 1].latitude),
-              ],
-            )
-          : 0,
+      route_to_next_stop: "",
+      distance_to_next_stop: 0,
     });
   });
 
@@ -699,25 +682,77 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
 
-    const results = await context.db.corridor_stops.findMany({
-      where: {
-        corridor_id: Number(data.inputs.corridorId),
-      },
-    });
+    const results = await context.kysely
+      .selectFrom("corridor_stops")
+      .innerJoin(
+        "naptan_stoppoint_latlong",
+        "corridor_stops.stop_id",
+        "naptan_stoppoint_latlong.id",
+      )
+      .select([
+        "corridor_stops.stop_id as stop_id",
+        "corridor_stops.corridor_index as corridor_index",
+        "naptan_stoppoint_latlong.atco_code as atco_code",
+        "naptan_stoppoint_latlong.latitude as latitude",
+        "naptan_stoppoint_latlong.longitude as longitude",
+      ])
+      .where("corridor_stops.corridor_id", "=", Number(data.inputs.corridorId))
+      .execute();
+
+    results.sort((a, b) => a.corridor_index - b.corridor_index);
+
+    const atco_codes_filter: {
+      from_atco_code: string;
+      to_atco_code: string;
+    }[] = [];
+    for (let i = 1; i < results.length; i++) {
+      atco_codes_filter.push({
+        from_atco_code: results[i - 1].atco_code ?? "",
+        to_atco_code: results[i].atco_code ?? "",
+      });
+    }
+
+    const tracks = await getTracksData(atco_codes_filter, context.kysely);
 
     const serviceLinks: ServiceLinkType[] = [];
 
-    results.forEach((stop, index) => {
-      if (index < results.length - 1) {
-        serviceLinks.push({
-          fromStop: stop.stop_id.toString(),
-          toStop: results[index + 1].stop_id.toString(),
-          distance: stop.distance_to_next_stop,
-          routeValidity: "INVALID",
-          linkRoute: stop.route_to_next_stop,
-        });
+    for (let i = 0; i < results.length - 1; i++) {
+      const link = tracks.find(
+        (track) => track.from_atco_code === results[i].atco_code,
+      );
+
+      let coordinates: number[][];
+      if (link) {
+        const linestring = JSON.parse(
+          link.geometry as string,
+        ) as GeoJSONLineString;
+
+        coordinates = linestring.coordinates;
+      } else {
+        coordinates = [
+          [Number(results[i].longitude), Number(results[i].latitude)],
+          [Number(results[i + 1].longitude), Number(results[i + 1].latitude)],
+        ];
       }
-    });
+
+      const distance = link
+        ? link.distance
+        : haversineDistance(
+            [Number(results[i].longitude), Number(results[i].latitude)],
+            [Number(results[i + 1].longitude), Number(results[i + 1].latitude)],
+          );
+
+      const routeValidity = link
+        ? RouteType.valid
+        : RouteType.invalid_no_route_points;
+      serviceLinks.push({
+        fromStop: results[i].stop_id.toString(),
+        toStop: results[i + 1].stop_id.toString(),
+        distance,
+        routeValidity,
+        linkRoute: JSON.stringify(coordinates),
+      });
+    }
 
     return serviceLinks.reverse();
   };
