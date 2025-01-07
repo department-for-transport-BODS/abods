@@ -746,8 +746,8 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
         ? RouteType.valid
         : RouteType.invalid_no_route_points;
       serviceLinks.push({
-        fromStop: results[i].stop_id.toString(),
-        toStop: results[i + 1].stop_id.toString(),
+        fromStop: results[i].atco_code ?? "",
+        toStop: results[i + 1].atco_code ?? "",
         distance,
         routeValidity,
         linkRoute: JSON.stringify(coordinates),
