@@ -44,10 +44,9 @@ import {
   utcToBstDBInput,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
-import haversineDistance from "haversine-distance";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import { GeoJSONLineString, RouteType, SessionUser } from "../types/extra.js";
-import { getTracksData } from "../lib/common.js";
+import { SessionUser } from "../types/extra.js";
+import { listServiceLinks } from "../lib/common.js";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -689,73 +688,31 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
         "corridor_stops.stop_id",
         "naptan_stoppoint_latlong.id",
       )
-      .select([
-        "corridor_stops.stop_id as stop_id",
-        "corridor_stops.corridor_index as corridor_index",
-        "naptan_stoppoint_latlong.atco_code as atco_code",
-        "naptan_stoppoint_latlong.latitude as latitude",
-        "naptan_stoppoint_latlong.longitude as longitude",
+      .select(["corridor_stops.corridor_index as corridorIndex"])
+      .select((eb) => [
+        eb.fn
+          .coalesce(eb.ref("naptan_stoppoint_latlong.atco_code"), eb.val(""))
+          .as("stopId"),
+        eb.fn
+          .coalesce(eb.ref("naptan_stoppoint_latlong.latitude"), eb.val(0))
+          .as("lat"),
+        eb.fn
+          .coalesce(eb.ref("naptan_stoppoint_latlong.longitude"), eb.val(0))
+          .as("lon"),
       ])
       .where("corridor_stops.corridor_id", "=", Number(data.inputs.corridorId))
       .execute();
 
-    results.sort((a, b) => a.corridor_index - b.corridor_index);
+    results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    const atco_codes_filter: {
-      from_atco_code: string;
-      to_atco_code: string;
-    }[] = [];
-    for (let i = 1; i < results.length; i++) {
-      atco_codes_filter.push({
-        from_atco_code: results[i - 1].atco_code ?? "",
-        to_atco_code: results[i].atco_code ?? "",
-      });
-    }
-
-    const tracks = await getTracksData(atco_codes_filter, context.kysely);
-
-    const serviceLinks: ServiceLinkType[] = [];
-
-    for (let i = 0; i < results.length - 1; i++) {
-      const link = tracks.find(
-        (track) => track.from_atco_code === results[i].atco_code,
-      );
-
-      let coordinates: number[][];
-      if (link) {
-        const linestring = JSON.parse(
-          link.geometry as string,
-        ) as GeoJSONLineString;
-
-        coordinates = linestring.coordinates;
-      } else {
-        coordinates = [
-          [Number(results[i].longitude), Number(results[i].latitude)],
-          [Number(results[i + 1].longitude), Number(results[i + 1].latitude)],
-        ];
-      }
-
-      const distance = link
-        ? link.distance
-        : haversineDistance(
-            [Number(results[i].longitude), Number(results[i].latitude)],
-            [Number(results[i + 1].longitude), Number(results[i + 1].latitude)],
-          );
-
-      const routeValidity = link
-        ? RouteType.valid
-        : RouteType.invalid_no_route_points;
-      serviceLinks.push({
-        fromStop: results[i].atco_code ?? "",
-        toStop: results[i + 1].atco_code ?? "",
-        distance,
-        routeValidity,
-        linkRoute: JSON.stringify(coordinates),
-      });
-    }
+    const serviceLinks: ServiceLinkType[] = await listServiceLinks(
+      results,
+      context.kysely,
+    );
 
     return serviceLinks.reverse();
   };
+
 const corridorResovlers: Resolvers = {
   Query: {
     corridor: emptyResolver,

@@ -26,13 +26,12 @@ import {
   RankingOrder,
   Resolvers,
   ServiceInfoType,
-  ServiceLinkType,
   ServicePatternType,
   ServicePerformanceType,
   ServicePunctualityType,
   StopPerformanceType,
 } from "../types/generated.js";
-import { GeoJSONLineString, RouteType, SessionUser } from "../types/extra.js";
+import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
   dbUtcToBstDate,
@@ -51,11 +50,10 @@ import {
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import haversineDistance from "haversine-distance";
 import { getUserOperatorIds } from "../lib/operators.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
-import { getTracksData } from "../lib/common.js";
+import { listServiceLinks } from "../lib/common.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -185,8 +183,6 @@ export const getLines: QueryResolvers["lines"] = async (
   }));
 };
 
-const point = (x: number, y: number): [number, number] => [x, y];
-
 async function getOtpServiceLinks(
   stops: { stopId: string; lon: number; stopName: string; lat: number }[],
   stopIdList: string[],
@@ -195,52 +191,7 @@ async function getOtpServiceLinks(
   stops = stops.sort(
     (a, b) => stopIdList.indexOf(a.stopId) - stopIdList.indexOf(b.stopId),
   );
-  const serviceLinks: ServiceLinkType[] = [];
-  const atco_codes_filter: {
-    from_atco_code: string;
-    to_atco_code: string;
-  }[] = [];
-  for (let i = 1; i < stops.length; i++) {
-    atco_codes_filter.push({
-      from_atco_code: stops[i - 1].stopId,
-      to_atco_code: stops[i].stopId,
-    });
-  }
-
-  const tracks = await getTracksData(atco_codes_filter, db);
-
-  for (let i = 1; i < stops.length; i++) {
-    const link = tracks.find(
-      (track) => track.from_atco_code === stops[i].stopId,
-    );
-
-    if (link) {
-      const linestring = JSON.parse(
-        link.geometry as string,
-      ) as GeoJSONLineString;
-      serviceLinks.push({
-        fromStop: link.from_atco_code,
-        toStop: link.to_atco_code,
-        distance: link.distance,
-        routeValidity: RouteType.valid,
-        linkRoute: JSON.stringify(linestring.coordinates),
-      });
-    } else {
-      const current = stops[i];
-      const previous = stops[i - 1];
-      const currentPoint = point(current.lon, current.lat);
-      const previousPoint = point(previous.lon, previous.lat);
-      serviceLinks.push({
-        fromStop: previous.stopId,
-        toStop: current.stopId,
-        distance: haversineDistance(previousPoint, currentPoint),
-        routeValidity: RouteType.invalid_no_route_points,
-        linkRoute: JSON.stringify([previousPoint, currentPoint]),
-      });
-    }
-  }
-
-  return serviceLinks;
+  return listServiceLinks(stops, db);
 }
 
 export const getServicePatterns: QueryResolvers["servicePatterns"] = async (

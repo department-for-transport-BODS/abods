@@ -36,3 +36,17 @@ export interface GeoJSONLineString {
   type: "LineString";
   coordinates: number[][];
 }
+
+export interface AtcoStopType {
+  stopId: string;
+  lon: number;
+  lat: number;
+}
+
+export type OTPAtcoStopType = AtcoStopType & {
+  stopName: string;
+};
+
+export type CorridorAtcoStopType = AtcoStopType & {
+  corridorIndex: number;
+};
