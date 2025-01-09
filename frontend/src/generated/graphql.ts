@@ -894,6 +894,7 @@ export type Query = {
   route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
+  stopAnalysis: Array<Maybe<StopAnalysisType>>;
   user?: Maybe<UserType>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
@@ -970,6 +971,11 @@ export type QueryServiceInfoArgs = {
 export type QueryServicePatternsArgs = {
   lineId: Scalars['String']['input'];
   operatorId: Scalars['String']['input'];
+};
+
+
+export type QueryStopAnalysisArgs = {
+  inputs: StopAnalysisFiltersInput;
 };
 
 
@@ -1100,6 +1106,32 @@ export type Stop = {
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
+};
+
+export type StopAnalysisFiltersInput = {
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  boundingBox: BoundingBoxInputType;
+  fromTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
+  lineId?: InputMaybe<Scalars['String']['input']>;
+  operatorId?: InputMaybe<Scalars['String']['input']>;
+  toTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type StopAnalysisType = {
+  __typename?: 'StopAnalysisType';
+  averageDelay: Scalars['Float']['output'];
+  completedDepartures: Scalars['Int']['output'];
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+  latitude: Scalars['Float']['output'];
+  lineId?: Maybe<Scalars['String']['output']>;
+  longitude: Scalars['Float']['output'];
+  onTime: Scalars['Int']['output'];
+  operatorId?: Maybe<Scalars['String']['output']>;
+  scheduledDepartures: Scalars['Int']['output'];
+  stopId: Scalars['Int']['output'];
+  stopName: Scalars['String']['output'];
+  timingPoint?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type StopInfoType = {
