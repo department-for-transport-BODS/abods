@@ -14,4 +14,5 @@ echo 'DB_PORT=15432' >> .env
 echo 'DB_USER=abods_proxy_rw' >> .env
 echo "DB_PASSWORD=$DB_PASSWORD" >> .env
 echo 'DB_NAME=abods' >> .env
+echo 'TZ=UTC' >> .env
 echo "DATABASE_URL=postgresql://abods_proxy_rw:${DB_PASSWORD//@/%40}@localhost:15432/abods?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true" >> .env

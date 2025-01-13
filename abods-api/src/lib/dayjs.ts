@@ -28,14 +28,14 @@ export const getUTCDate = (date?: string | Date): Dayjs => {
   return dayjs.utc(date);
 };
 
-export const getDBDayValue = (datetime: string | Date) => {
+export const getDBDayValue = (datetime: string) => {
   // Workaround for timezone, daylight savings issues
   // Any iso datetime can be passed in, and we determine the right 'day' value to use
   // When the time passed is a different day in utc to the local time given the offset, this will return the start of that day in utc
   // To be used when a date value needs to be used in a query.
   // Example: 2024-10-25T00:00:00+01:00 is 2024-10-24T23:00:00Z in UTC.
   // This adds the offset to that value, so that when used in a query, our ORM will serialise 2024-10-25 00:00:00 UTC, and return the expected results
-  const dateOfJourney = getDate(datetime);
+  const dateOfJourney = dayjs(datetime).utcOffset(datetime.slice(-6));
   return dateOfJourney
     .utc()
     .add(dateOfJourney.utcOffset(), "minute")

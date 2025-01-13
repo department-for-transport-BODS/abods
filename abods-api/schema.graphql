@@ -25,7 +25,7 @@ type Query {
   ): [EventStatsType]
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
-  findJourneys(lineId: String!, dateOfJourney: DateTime!): [Journey!]!
+  findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: DateTime): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 

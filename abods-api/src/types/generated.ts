@@ -931,7 +931,7 @@ export type QueryEventsArgs = {
 
 
 export type QueryFindJourneysArgs = {
-  dateOfJourney: Scalars['DateTime']['input'];
+  dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
 };
 
