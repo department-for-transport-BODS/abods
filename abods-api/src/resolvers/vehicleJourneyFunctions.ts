@@ -1,4 +1,4 @@
-import { getDBDayValue, getFormattedDate } from "../lib/dayjs.js";
+import { getFormattedDate, utcToBstDBInput } from "../lib/dayjs.js";
 import {
   AvlPoint,
   Journey,
@@ -15,7 +15,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
   context,
 ): Promise<Journey[]> => {
   await requireUserSession(context);
-  const day = getDBDayValue(args.dateOfJourney);
+  const day = utcToBstDBInput(args.dateOfJourney);
 
   return context.db.expected_journeys
     .findMany({
