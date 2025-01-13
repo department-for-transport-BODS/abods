@@ -53,13 +53,15 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     }
     dbQuery = dbQuery
       .select("operator_noc as operatorId")
-      .groupBy("operator_noc");
+      .groupBy("operator_noc")
+      .where("operator_noc", "=", operatorId);
   }
 
   if (lineId) {
     dbQuery = dbQuery
       .select("noc_and_line_and_servicecode as lineId")
-      .groupBy("noc_and_line_and_servicecode");
+      .groupBy("noc_and_line_and_servicecode")
+      .where("noc_and_line_and_servicecode", "=", lineId);
   }
 
   const gqlFieldType = {
