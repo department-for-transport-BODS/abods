@@ -6,7 +6,6 @@ import {
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { utcToBstDBInput } from "./dayjs.js";
-import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
