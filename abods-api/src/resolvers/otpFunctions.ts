@@ -1500,8 +1500,8 @@ export const getPrismaFiltersForOTPQuery = (
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
-      gte: dateOfJourneyFromDateTime.toDate(),
-      lt: dateOfJourneyToDateTime.toDate(),
+      gte: new Date(dateOfJourneyFromDateTime.format("YYYY-MM-DD")),
+      lt: new Date(dateOfJourneyToDateTime.format("YYYY-MM-DD")),
     },
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),

@@ -87,7 +87,5 @@ export const dbUtcToBstDate = (inputDate: Date | string): string => {
 export const utcToBstDBInput = (
   inputDate: Date | string | undefined,
 ): Date | undefined => {
-  return inputDate
-    ? getUTCDate(inputDate).tz("Europe/London").toDate()
-    : undefined;
+  return inputDate ? new Date(dbUtcToBstDate(inputDate)) : undefined;
 };
