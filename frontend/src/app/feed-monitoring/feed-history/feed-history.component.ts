@@ -75,14 +75,16 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
     const date$ = this.route.queryParamMap.pipe(
       tap((qpm) => {
         if (!qpm.has("date")) {
-          this.router.navigate(["."], {
-            relativeTo: this.route,
-            queryParams: {
-              date: DateTime.local().minus({ day: 1 }).toFormat("yyyy-MM-dd"),
-            },
-            replaceUrl: true,
-            queryParamsHandling: "merge",
-          });
+          this.router
+            .navigate(["."], {
+              relativeTo: this.route,
+              queryParams: {
+                date: DateTime.local().minus({ day: 1 }).toFormat("yyyy-MM-dd"),
+              },
+              replaceUrl: true,
+              queryParamsHandling: "merge",
+            })
+            .catch(console.log);
         }
       }),
       filter((qpm) => qpm.has("date")),
@@ -194,15 +196,19 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   }
 
   changeOperator({ nocCode }: { nocCode: string }) {
-    this.router.navigate(["/", "feed-monitoring", nocCode, "feed-history"]);
+    this.router
+      .navigate(["/", "feed-monitoring", nocCode, "feed-history"])
+      .catch(console.log);
   }
 
   changeDate(date: DateTime) {
-    this.router.navigate(["."], {
-      relativeTo: this.route,
-      queryParams: { date: date.toISODate() },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate(["."], {
+        relativeTo: this.route,
+        queryParams: { date: date.toISODate() },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   formatUpdateFrequency(f?: number) {
