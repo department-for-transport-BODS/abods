@@ -52,6 +52,15 @@
             >Corridors
           </a>
         </li>
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/stop-analysis']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Stop analysis
+          </a>
+        </li>
       </ul>
     </nav>
   </div>
