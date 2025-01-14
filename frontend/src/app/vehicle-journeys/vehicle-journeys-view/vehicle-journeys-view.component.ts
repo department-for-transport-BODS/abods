@@ -2,13 +2,13 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 import {
   combineLatest,
+  distinctUntilChanged,
+  map,
   Subject,
   switchMap,
   takeUntil,
   tap,
   zip,
-  distinctUntilChanged,
-  map,
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
@@ -27,6 +27,19 @@ export interface JourneyInfo {
   stops: Stop[];
   avls: AvlPoint[];
 }
+const getDistinct = <T, U>(container: T[], accessor: (item: T) => U): U[] =>
+  container
+    .map(accessor)
+    .filter((value, index, array) => array.indexOf(value) === index);
+
+const getInitialVehicleRef = (stops: Stop[], avl_list: AvlPoint[]) => {
+  const firstEvidencedMatch = stops.find((n) => n.actualDepartureUtc);
+  const matchedAvl = avl_list.find(
+    (n) => n.recordedAtTimeUtc === firstEvidencedMatch?.actualDepartureUtc,
+  );
+  if (matchedAvl) return matchedAvl.vehicleRef;
+  return avl_list[0]?.vehicleRef;
+};
 
 @Component({
   selector: "app-vehicle-journeys-view",
@@ -51,6 +64,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   returnRoute = "/vehicle-journeys";
   returnQueryParams: Params | null = null;
   groupId = "";
+  vehicles: string[] = [];
+  rawAvls: AvlPoint[] = [];
   vehicleRef: string | null = null;
   directionRef: string | null = null;
   currentJourneyIndex = -1;
@@ -116,42 +131,48 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             this.errorView = new VehicleJourneyNotFoundView();
             return;
           }
-          // Multiple journeys can use the same group id. Use the direction query param to disambiguate
-          const directionRefLower = this.directionRef?.toLowerCase();
-          const stops = [...routeResult.data.route]
+          const direction = this.directionRef?.toLowerCase();
+          const stopData = [...routeResult.data.route];
+          const stops = stopData
             .filter(
-              (n) =>
-                !directionRefLower ||
-                n.directionRef.toLowerCase() === directionRefLower,
+              (n) => !direction || n.directionRef.toLowerCase() === direction,
             )
             .sort((a, b) => a.stopIndex - b.stopIndex);
-          const avls = [...avlsResult.data.avls].sort((a, b) =>
-            a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+
+          // If there are multiple directions in the timetable, then filter to just avls for the direction query param.
+          // The other direction's data will be on another screen.
+          // If there's only one in the timetable, then we can display all
+          const directions = getDistinct(stopData, (n) => n.directionRef);
+          this.rawAvls = [...avlsResult.data.avls]
+            .filter(
+              (n) =>
+                directions.length <= 1 ||
+                n.directionRef.toLowerCase() === direction,
+            )
+            .sort((a, b) =>
+              a.recordedAtTimeUtc.localeCompare(b.recordedAtTimeUtc),
+            );
+
+          // Sometimes we can have multiple vehicles matching the same group id,
+          // so we filter to the most interesting one first and then let them toggle
+          this.vehicles = getDistinct(this.rawAvls, (n) => n.vehicleRef);
+          this.vehicleRef =
+            this.vehicles.length > 1
+              ? getInitialVehicleRef(stops, this.rawAvls)
+              : this.vehicles[0];
+          const vehicleAvls = this.rawAvls.filter(
+            (n) => n.vehicleRef === this.vehicleRef,
           );
 
-          const firstEvidencedMatch = stops.find((n) => n.actualDepartureUtc);
-          const firstMatchedAvl = avls.find(
-            (n) =>
-              n.recordedAtTimeUtc === firstEvidencedMatch?.actualDepartureUtc,
-          );
-          this.vehicleRef = (firstMatchedAvl ?? avls[0])?.vehicleRef;
-          this.journeyInfo = {
-            // Direction ref on the avls is subject to human error, so we can't rely on the data quality.
-            // We use the vehicle ref of the first match to filter if possible, and fall back to direction if there isn't one.
-            avls: avls.filter((n) =>
-              firstMatchedAvl
-                ? n.vehicleRef === firstMatchedAvl.vehicleRef
-                : !directionRefLower ||
-                  n.directionRef.toLowerCase() === directionRefLower,
-            ),
-            stops: stops,
-          };
+          this.journeyInfo = { avls: vehicleAvls, stops: stops };
           this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
           this.errorView = new VehicleJourneyNotFoundView();
           this.vehicleRef = null;
+          this.rawAvls = [];
+          this.vehicles = [];
           this.journeyInfo = null;
           this.journeyInfoLoading = false;
         },
@@ -210,6 +231,16 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       queryParams: { match_type: matchType },
       queryParamsHandling: "merge",
     });
+  }
+
+  onVehicleChange() {
+    const vehicleRef = this.vehicleRef;
+    if (this.journeyInfo) {
+      this.journeyInfo = {
+        ...this.journeyInfo,
+        avls: this.rawAvls.filter((n) => n.vehicleRef === vehicleRef),
+      };
+    }
   }
 
   onStopSelected(stop: Stop) {
