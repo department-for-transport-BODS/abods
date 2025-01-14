@@ -55,6 +55,14 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       .select("operator_noc as operatorId")
       .groupBy("operator_noc")
       .where("operator_noc", "=", operatorId);
+  } else {
+    dbQuery = dbQuery
+      .innerJoin(
+        "bods_organisationoperator",
+        "bods_organisationoperator.operatorref",
+        "timetable_summary_stops_tz.operator_noc",
+      )
+      .where("bods_organisationoperator.organisation_id", "=", user.orgId);
   }
 
   if (lineId) {
