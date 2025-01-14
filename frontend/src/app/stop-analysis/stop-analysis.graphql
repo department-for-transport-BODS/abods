@@ -1,0 +1,21 @@
+fragment StopData on StopAnalysisType {
+  averageDelay
+  early
+  late
+  lineId
+  onTime
+  scheduledDepartures
+  completedDepartures
+  stopId
+  stopName
+  timingPoint
+  operatorId
+  latitude
+  longitude
+}
+
+query stopAnalysisList($inputs: StopAnalysisFiltersInput!) {
+  stopAnalysis(inputs: $inputs) {
+    ...StopData
+  }
+}
