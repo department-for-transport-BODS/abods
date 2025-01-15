@@ -74,3 +74,6 @@ export const utcToBstDBInput = (
 ): Date | undefined => {
   return inputDate ? new Date(dbUtcToBstDate(inputDate)) : undefined;
 };
+
+export const userLocalDate = (timestamp: string) =>
+  new Date(timestamp.substring(0, 10));
