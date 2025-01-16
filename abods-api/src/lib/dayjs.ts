@@ -24,14 +24,6 @@ export const getDate = (
   }
 };
 
-export const getUTCDate = (date?: string | Date): Dayjs => {
-  return dayjs.utc(date);
-};
-
-export const getBSTDate = (date: Date | Dayjs, format: string): string => {
-  return dayjs(date).tz("Europe/London").format(format);
-};
-
 export const getFormattedDate = (
   inputDate: Date | null | undefined,
   format?: string,
@@ -65,15 +57,22 @@ export const getDayFormattedDate = (
         .format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
-export const dbUtcToBstDate = (inputDate: Date | string): string => {
-  return getUTCDate(inputDate).tz("Europe/London").format("YYYY-MM-DD");
-};
+export const userSelectedDateAsUtc = (isoTimestamp: string) =>
+  // Assumption is that the timestamp will be for the date they want in their local time zone
+  // Avoid converting that to another timezone, and just grab the date part, ignoring time and offset
+  dayjs(isoTimestamp.substring(0, 10));
 
-export const utcToBstDBInput = (
-  inputDate: Date | string | undefined,
-): Date | undefined => {
-  return inputDate ? new Date(dbUtcToBstDate(inputDate)) : undefined;
+export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
+  const timestamp = date;
+  if (!time) {
+    return date.utc().toDate();
+  }
+  const [hours, minutes, _] = time.split(":").map(Number);
+  return timestamp
+    .tz("Europe/London")
+    .set("hour", hours)
+    .set("minute", minutes)
+    .startOf("minute")
+    .utc()
+    .toDate();
 };
-
-export const userLocalDate = (timestamp: string) =>
-  new Date(timestamp.substring(0, 10));

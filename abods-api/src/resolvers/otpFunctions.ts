@@ -35,12 +35,10 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  dbUtcToBstDate,
-  getBSTDate,
   getDate,
   getFormattedDate,
-  getUTCDate,
-  utcToBstDBInput,
+  userSelectedDateAsUtc,
+  addUkTime,
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
@@ -159,7 +157,7 @@ export const getLines: QueryResolvers["lines"] = async (
   if (!userOperatorIds.includes(args.operatorId)) return [];
 
   const inputDate = args.inputDate
-    ? new Date(dbUtcToBstDate(args.inputDate))
+    ? userSelectedDateAsUtc(args.inputDate).toDate()
     : undefined;
 
   const services = await context.db.expected_services.findMany({
@@ -841,9 +839,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         operator_noc: {
           in: operatorNocs,
         },
-        date_period_start: new Date(
-          getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD"),
-        ),
+        date_period_start: userSelectedDateAsUtc(fromTimestamp).toDate(),
         AND: [
           {
             OR: [
@@ -1159,8 +1155,8 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
           where: {
             operator_noc: args.operatorId,
             date_of_journey: {
-              gte: utcToBstDBInput(args.fromTimestamp),
-              lt: utcToBstDBInput(args.toTimestamp),
+              gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
+              lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
             },
             headway_valid: true,
           },
@@ -1467,28 +1463,14 @@ export const getPrismaFiltersForOTPQuery = (
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
-  let dateOfJourneyFromDateTime = getUTCDate(new Date(fromTimestamp)).tz(
-    "Europe/London",
-  );
-  let dateOfJourneyToDateTime = getUTCDate(new Date(toTimestamp)).tz(
-    "Europe/London",
-  );
+  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
+  const endDateUtc = userSelectedDateAsUtc(toTimestamp);
 
-  if (startTime && startTime !== "00:00") {
-    const [hours, minutes, _] = startTime.split(":").map(Number);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime
-      .set("hour", hours)
-      .set("minute", minutes)
-      .startOf("minute");
-  }
-
-  if (endTime) {
-    const [hours, minutes, _] = endTime.split(":").map(Number);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime
-      .set("hour", hours)
-      .set("minute", minutes)
-      .startOf("minute");
-  }
+  const startDateTimeUtc = addUkTime(startDateUtc, startTime);
+  const endDateTimeUtc = addUkTime(
+    endDateUtc.subtract(1, "day"), // end date is the start of the next day
+    endTime,
+  );
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
   const maxLateNumber = maxDelay ? maxDelay : 0;
@@ -1500,8 +1482,8 @@ export const getPrismaFiltersForOTPQuery = (
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: {
-      gte: new Date(dateOfJourneyFromDateTime.format("YYYY-MM-DD")),
-      lt: new Date(dateOfJourneyToDateTime.format("YYYY-MM-DD")),
+      gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
+      lt: userSelectedDateAsUtc(toTimestamp).toDate(),
     },
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
@@ -1510,23 +1492,23 @@ export const getPrismaFiltersForOTPQuery = (
       ? isThreshold
         ? {
             departure_hour: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
+              gte: startDateTimeUtc,
+              lte: endDateTimeUtc,
             },
           }
         : {
             departure_hour_only: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
+              gte: startDateTimeUtc,
+              lte: endDateTimeUtc,
             },
           }
       : {
           ...(startTime
             ? isThreshold
-              ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
+              ? { departure_hour: { gte: startDateTimeUtc } }
               : {
                   departure_hour_only: {
-                    gte: dateOfJourneyFromDateTime.toDate(),
+                    gte: startDateTimeUtc,
                   },
                 }
             : {
@@ -1534,12 +1516,12 @@ export const getPrismaFiltersForOTPQuery = (
                   ? isThreshold
                     ? {
                         departure_hour: {
-                          lte: dateOfJourneyToDateTime.toDate(),
+                          lte: endDateTimeUtc,
                         },
                       }
                     : {
                         departure_hour_only: {
-                          lte: dateOfJourneyToDateTime.toDate(),
+                          lte: endDateTimeUtc,
                         },
                       }
                   : {}),

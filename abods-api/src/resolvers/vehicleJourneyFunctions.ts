@@ -1,4 +1,4 @@
-import { getFormattedDate, userLocalDate } from "../lib/dayjs.js";
+import { getFormattedDate, userSelectedDateAsUtc } from "../lib/dayjs.js";
 import {
   AvlPoint,
   Journey,
@@ -20,7 +20,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     .findMany({
       where: {
         noc_and_line_and_servicecode: args.lineId,
-        date_of_journey: userLocalDate(args.dateOfJourney),
+        date_of_journey: userSelectedDateAsUtc(args.dateOfJourney).toDate(),
       },
       select: {
         expected_journey_start: true,
