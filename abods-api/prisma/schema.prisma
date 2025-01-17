@@ -326,7 +326,6 @@ model timetable_summary_service_tz {
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
   admin_areas                  Int[]
-  headway_valid                Boolean // TODO: fix - not in db
   estimated                    Boolean  @default(false)
 
   @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode]) // TODO: fix - not in db
@@ -365,10 +364,6 @@ model timetable_summary_stops_tz {
   max_early                    Int
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
-  headway_stops_count          Int // TODO: fix - not in db
-  expected_headway             Decimal  @db.Decimal // TODO: fix - not in db
-  actual_headway               Decimal  @db.Decimal // TODO: fix - not in db
-  excess_wait_time             Decimal  @db.Decimal // TODO: not in db
   estimated                    Boolean  @default(false)
 
   @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude]) // TODO: fix - not in db
@@ -470,6 +465,28 @@ model servicepattern_route {
 
   @@id([distinct_route_id, noc_and_line_and_servicecode], map: "servicepattern_route_pkey_test")
   @@index([noc_and_line_and_servicecode], map: "noc_and_line_and_servicecode_idx")
+}
+
+model timetable_frequent_summary_services {
+  timetable_id                 BigInt   @default(autoincrement())
+  operator_noc                 String
+  service_code                 String
+  noc_and_line_and_servicecode String
+  line_name                    String
+  date_of_journey              DateTime @db.Date
+  departure_hour               DateTime @db.Timestamptz(6)
+  departure_hour_only          DateTime @db.Timetz(6)
+  day_of_week                  Int
+  max_early                    Int
+  max_late                     Int
+  avg_time_difference          Decimal? @db.Decimal
+  expected_headway             Decimal? @db.Decimal
+  actual_headway               Decimal? @db.Decimal
+  excess_wait_time             Decimal? @db.Decimal
+  estimated                    Boolean  @default(false)
+  headway_stops_count          Decimal? @db.Decimal
+
+  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, max_early, max_late, noc_and_line_and_servicecode, estimated])
 }
 
 view bods_user {
