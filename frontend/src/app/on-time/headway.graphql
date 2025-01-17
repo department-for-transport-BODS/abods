@@ -19,8 +19,8 @@ query headwayOverview($params: HeadwayInputType!) {
 
 query headwayFrequentServices(
   $operatorId: String!
-  $fromTimestamp: String!
-  $toTimestamp: String!
+  $fromTimestamp: Date!
+  $toTimestamp: Date!
 ) {
   headwayMetrics {
     frequentServices(

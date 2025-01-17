@@ -190,11 +190,11 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   granularity: CorridorGranularity;
   matchType: MatchType;
   stopList: Array<Scalars['String']['input']>;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type CorridorStatsPerServiceType = {
@@ -338,8 +338,8 @@ export type FrequentServiceInfoFilterType = {
 
 export type FrequentServiceInfoInputType = {
   filters: FrequentServiceInfoFilterType;
-  fromTimestamp: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type FrequentServiceInfoType = {
@@ -388,8 +388,8 @@ export type HeadwayFiltersInputType = {
 
 export type HeadwayInputType = {
   filters: HeadwayFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type HeadwayMetricsType = {
@@ -409,9 +409,9 @@ export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
 
 
 export type HeadwayMetricsTypeFrequentServicesArgs = {
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   operatorId: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 
@@ -502,7 +502,7 @@ export type Journey = {
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
-  startTime: Scalars['String']['output'];
+  startTime: Scalars['DateTime']['output'];
 };
 
 export type JourneyScheduledStartTimes = {
@@ -821,9 +821,9 @@ export type PerformanceFiltersInputType = {
 
 export type PerformanceInputType = {
   filters: PerformanceFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   paging?: InputMaybe<PagingInputType>;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type PunctualityDayOfWeekType = {
@@ -929,7 +929,7 @@ export type QueryEventsArgs = {
 
 
 export type QueryFindJourneysArgs = {
-  dateOfJourney: Scalars['String']['input'];
+  dateOfJourney: Scalars['Date']['input'];
   lineId: Scalars['String']['input'];
 };
 
@@ -940,7 +940,7 @@ export type QueryInvitationArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate?: InputMaybe<Scalars['Date']['input']>;
   operatorId: Scalars['String']['input'];
 };
 
@@ -1026,9 +1026,9 @@ export type ServicePerformanceFiltersInputType = {
 
 export type ServicePerformanceInputType = {
   filters: ServicePerformanceFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   order: RankingOrder;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type ServicePerformanceType = {
@@ -1353,8 +1353,8 @@ export type HeadwayOverviewQuery = { __typename?: 'Query', headwayMetrics?: { __
 
 export type HeadwayFrequentServicesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  fromTimestamp: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
+  toTimestamp: Scalars['Date']['input'];
 }>;
 
 
@@ -1527,7 +1527,7 @@ export type OperatorListQuery = { __typename?: 'Query', operators?: { __typename
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  inputDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate?: InputMaybe<Scalars['Date']['input']>;
 }>;
 
 
@@ -1590,7 +1590,7 @@ export type RouteQueryVariables = Exact<{
 export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string }> };
 
 export type JourneysQueryVariables = Exact<{
-  dateOfJourney: Scalars['String']['input'];
+  dateOfJourney: Scalars['Date']['input'];
   lineId: Scalars['String']['input'];
 }>;
 
@@ -2307,7 +2307,7 @@ export const HeadwayOverviewDocument = gql`
     }
   }
 export const HeadwayFrequentServicesDocument = gql`
-    query headwayFrequentServices($operatorId: String!, $fromTimestamp: String!, $toTimestamp: String!) {
+    query headwayFrequentServices($operatorId: String!, $fromTimestamp: Date!, $toTimestamp: Date!) {
   headwayMetrics {
     frequentServices(
       operatorId: $operatorId
@@ -2849,7 +2849,7 @@ export const OperatorListDocument = gql`
     }
   }
 export const OperatorLinesDocument = gql`
-    query operatorLines($operatorId: String!, $inputDate: String) {
+    query operatorLines($operatorId: String!, $inputDate: Date) {
   lines(operatorId: $operatorId, inputDate: $inputDate) {
     id
     name
@@ -3018,7 +3018,7 @@ export const RouteDocument = gql`
     }
   }
 export const JourneysDocument = gql`
-    query journeys($dateOfJourney: String!, $lineId: String!) {
+    query journeys($dateOfJourney: Date!, $lineId: String!) {
   findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
     groupId
     startTime

@@ -1,4 +1,3 @@
-import { getDate, getFormattedDate } from "../lib/dayjs.js";
 import {
   EventResponse,
   EventStatsType,
@@ -20,18 +19,19 @@ import {
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
+import dayjs, { Dayjs } from "dayjs";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
     const eventStats: EventStatsType[] = [];
     // Get data for the previous 90 days before today
-    const currentTime = getDate();
+    const currentTime = dayjs();
     let startdate = currentTime.subtract(90, "day");
 
     while (startdate.isBefore(currentTime)) {
       eventStats.push({
         count: 0,
-        day: startdate.format("YYYY-MM-DD"),
+        day: startdate,
       });
 
       startdate = startdate.add(1, "day");
@@ -45,7 +45,7 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] 
     const result = await context.db.feed_monitor_daily_summary.findFirst({
       where: {
         operator_noc: parent.operatorId,
-        date_of_journey: args.date,
+        date_of_journey: args.date.toDate(),
       },
     });
 
@@ -100,7 +100,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   });
 
   return result.map((summary) => ({
-    timestamp: getFormattedDate(summary.received_interval),
+    timestamp: dayjs(summary.received_interval),
     actual: summary.actual,
     expected: summary.expected,
   }));
@@ -113,14 +113,14 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
       where: {
         operator_noc: parent.operatorId,
         received_interval: {
-          gte: args.start,
-          lte: args.end,
+          gte: args.start.toDate(),
+          lte: args.end.toDate(),
         },
       },
     });
 
     return result.map((summary) => ({
-      timestamp: getFormattedDate(summary.received_interval),
+      timestamp: dayjs(summary.received_interval),
       expected: summary.expected,
       actual: summary.actual,
     }));
@@ -162,32 +162,33 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
     const user = await requireUserSession(context);
-    const finalEndTime = getDate().startOf("minute");
-    const promises: Promise<VehicleStatsType>[] = [];
+    const finalEndTime = dayjs().startOf("minute");
+    const promises: Promise<{
+      actual: number;
+      expected: number;
+      timestamp: Dayjs;
+    }>[] = [];
     for (let offset = 0; offset < 20; offset++) {
       const endTime = finalEndTime.subtract(offset, "minute");
-      const startTime = endTime.subtract(1, "minute").toDate();
+      const startTime = endTime.subtract(1, "minute");
       promises.push(
         getVehicleCounts(
           context.kysely,
           user,
           parent.operatorId,
-          startTime,
+          startTime.toDate(),
           endTime.toDate(),
         ).then((n) => {
           return {
             actual: n.length > 0 ? n[0].actual : 0,
             expected: n.length > 0 ? n[0].expected : 0,
-            timestamp: startTime.toISOString(),
+            timestamp: startTime,
           };
         }),
       );
     }
     result = await Promise.all(promises).then((n) =>
-      n.sort(
-        (a, b) =>
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-      ),
+      n.sort((a, b) => a.timestamp.unix() - b.timestamp.unix()),
     );
   }
 
@@ -208,7 +209,7 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
   context,
 ): Promise<DashboardVehicles[]> => {
   const user = await requireUserSession(context);
-  const endTime = getDate().startOf("minute");
+  const endTime = dayjs().startOf("minute");
   return getVehicleCounts(
     context.kysely,
     user,

@@ -1,3 +1,7 @@
+import { DateServerType } from '../resolvers/dateScalar';
+import { DateTimeServerType } from '../resolvers/dateTimeScalar';
+import { DateTimeServerOutputType } from '../resolvers/dateTimeScalar';
+import { TimeServerType } from '../resolvers/timeScalar';
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { RequestContext } from './extra';
 export type Maybe<T> = T | null;
@@ -15,9 +19,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Date: { input: Date | string; output: Date | string; }
-  DateTime: { input: Date | string; output: Date | string; }
-  Time: { input: Date | string; output: Date | string; }
+  Date: { input: DateServerType; output: DateServerType; }
+  DateTime: { input: DateTimeServerType; output: DateTimeServerOutputType; }
+  Time: { input: TimeServerType; output: TimeServerType; }
 };
 
 export type AddFirstStopInputType = {
@@ -190,11 +194,11 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   granularity: CorridorGranularity;
   matchType: MatchType;
   stopList: Array<Scalars['String']['input']>;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type CorridorStatsPerServiceType = {
@@ -338,8 +342,8 @@ export type FrequentServiceInfoFilterType = {
 
 export type FrequentServiceInfoInputType = {
   filters: FrequentServiceInfoFilterType;
-  fromTimestamp: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type FrequentServiceInfoType = {
@@ -388,8 +392,8 @@ export type HeadwayFiltersInputType = {
 
 export type HeadwayInputType = {
   filters: HeadwayFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type HeadwayMetricsType = {
@@ -409,9 +413,9 @@ export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
 
 
 export type HeadwayMetricsTypeFrequentServicesArgs = {
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   operatorId: Scalars['String']['input'];
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 
@@ -502,7 +506,7 @@ export type Journey = {
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
-  startTime: Scalars['String']['output'];
+  startTime: Scalars['DateTime']['output'];
 };
 
 export type JourneyScheduledStartTimes = {
@@ -821,9 +825,9 @@ export type PerformanceFiltersInputType = {
 
 export type PerformanceInputType = {
   filters: PerformanceFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   paging?: InputMaybe<PagingInputType>;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type PunctualityDayOfWeekType = {
@@ -929,7 +933,7 @@ export type QueryEventsArgs = {
 
 
 export type QueryFindJourneysArgs = {
-  dateOfJourney: Scalars['String']['input'];
+  dateOfJourney: Scalars['Date']['input'];
   lineId: Scalars['String']['input'];
 };
 
@@ -940,7 +944,7 @@ export type QueryInvitationArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate?: InputMaybe<Scalars['Date']['input']>;
   operatorId: Scalars['String']['input'];
 };
 
@@ -1026,9 +1030,9 @@ export type ServicePerformanceFiltersInputType = {
 
 export type ServicePerformanceInputType = {
   filters: ServicePerformanceFiltersInputType;
-  fromTimestamp: Scalars['String']['input'];
+  fromTimestamp: Scalars['Date']['input'];
   order: RankingOrder;
-  toTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['Date']['input'];
 };
 
 export type ServicePerformanceType = {
@@ -1752,7 +1756,7 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  startTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

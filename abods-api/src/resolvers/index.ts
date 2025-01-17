@@ -7,12 +7,14 @@ import corridorResolvers from "./corridorFunctions.js";
 import feedMonitoringResolvers from "./feedMonitoringFunctions.js";
 import avlResolvers from "./avlFunctions.js";
 import { Resolvers } from "../types/generated.js";
-import { DateResolver, DateTimeResolver, TimeResolver } from "graphql-scalars";
+import { DayjsDateResolver } from "./dateScalar.js";
+import { DayjsDateTimeResolver } from "./dateTimeScalar.js";
+import { DayjsTimeResolver } from "./timeScalar";
 
 export const customScalarResolvers: Resolvers = {
-  Date: DateResolver,
-  DateTime: DateTimeResolver,
-  Time: TimeResolver,
+  Date: DayjsDateResolver,
+  DateTime: DayjsDateTimeResolver,
+  Time: DayjsTimeResolver,
 };
 
 const resolversArray = [

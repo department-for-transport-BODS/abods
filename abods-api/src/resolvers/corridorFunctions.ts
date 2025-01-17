@@ -37,16 +37,11 @@ import {
   ServiceLinkType,
   StopType,
 } from "../types/generated.js";
-import {
-  getDate,
-  getDayFormattedDate,
-  getHourFormattedDate,
-  userSelectedDateAsUtc,
-} from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import haversineDistance from "haversine-distance";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
+import dayjs from "dayjs";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -389,8 +384,8 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
         in: stopList.map(Number),
       },
       date_of_journey: {
-        gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
-        lt: userSelectedDateAsUtc(toTimestamp).toDate(),
+        gte: fromTimestamp.toDate(),
+        lt: toTimestamp.toDate(),
       },
     },
   });
@@ -525,26 +520,30 @@ const getJourneyStats = (
 
     if (firstStopDeparture && lastDeparture) {
       let dateKey = "";
+      const dateOfJourney = dayjs(firstDeparture.date_of_journey);
+      const expectedDepartureTime = dayjs(
+        firstDeparture.expected_departure_time,
+      );
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
-          dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
+          dateKey = dateOfJourney
+            .tz("Europe/London")
+            .startOf("hour")
+            .format("YYYY-MM-DDTHH:mm:ssZ");
           break;
 
         case CorridorJourneyStatsOption.dayOfWeek:
-          dateKey = getDate(firstDeparture.date_of_journey).day().toString();
+          dateKey = dateOfJourney.day().toString();
           break;
 
         case CorridorJourneyStatsOption.hour:
-          dateKey = getHourFormattedDate(
-            firstDeparture.expected_departure_time,
-          );
+          dateKey = expectedDepartureTime
+            .startOf("hour")
+            .format("YYYY-MM-DDTHH:mm:ssZ");
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
-          dateKey = getDate(firstDeparture.expected_departure_time)
-            .tz("Europe/London")
-            .hour()
-            .toString();
+          dateKey = expectedDepartureTime.hour().toString();
           break;
 
         default:

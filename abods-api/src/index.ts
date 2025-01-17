@@ -12,7 +12,6 @@ import fs from "fs";
 import { createContext } from "./context.js";
 import { RequestContext } from "./types/extra.js";
 import logger from "./logger.js";
-import { getDate } from "./lib/dayjs.js";
 import { getAPITokenHash } from "./lib/apiauth.js";
 import { IncomingHttpHeaders } from "http";
 
@@ -23,6 +22,17 @@ import { getDatabaseUrl, isLocal } from "./prismaClient.js";
 import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+dayjs.locale("en");
 
 export const kysely = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -47,7 +57,7 @@ export const kysely = new Kysely<DB>({
 let db:
   | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
   | undefined = undefined;
-let startTime = getDate();
+let startTime = dayjs();
 const apiKeyAuth = await getAPITokenHash();
 
 const typeDefs = gql`
@@ -74,10 +84,10 @@ app.use(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
-      const retry = getDate().isAfter(startTime.add(10, "minute"));
+      const retry = dayjs().isAfter(startTime.add(10, "minute"));
       if (!db || retry) {
         db = await createContext(true);
-        startTime = getDate();
+        startTime = dayjs();
       }
       return { req, res, headers, db, apiKeyAuth, kysely };
     },

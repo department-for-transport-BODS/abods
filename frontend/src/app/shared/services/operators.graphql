@@ -11,7 +11,7 @@ query operatorList {
   }
 }
 
-query operatorLines($operatorId: String!, $inputDate: String) {
+query operatorLines($operatorId: String!, $inputDate: Date) {
   lines(operatorId: $operatorId, inputDate: $inputDate) {
     id
     name

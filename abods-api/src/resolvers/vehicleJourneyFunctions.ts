@@ -1,4 +1,3 @@
-import { getFormattedDate, userSelectedDateAsUtc } from "../lib/dayjs.js";
 import {
   AvlPoint,
   Journey,
@@ -8,6 +7,7 @@ import {
   Stop,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
+import dayjs from "dayjs";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -20,7 +20,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     .findMany({
       where: {
         noc_and_line_and_servicecode: args.lineId,
-        date_of_journey: userSelectedDateAsUtc(args.dateOfJourney).toDate(),
+        date_of_journey: args.dateOfJourney.toDate(),
       },
       select: {
         expected_journey_start: true,
@@ -44,7 +44,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
       j.map((journey) => ({
         groupId: journey.group_id,
         directionRef: journey.direction,
-        startTime: getFormattedDate(journey.expected_journey_start),
+        startTime: dayjs(journey.expected_journey_start).tz("Europe/London"),
         serviceName: journey.journey_pattern_description,
         serviceNumber: journey.expected_services?.line_name ?? "unknown",
         operatorNoc:

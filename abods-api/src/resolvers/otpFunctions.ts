@@ -35,12 +35,6 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  addUkTime,
-  getDate,
-  getFormattedDate,
-  userSelectedDateAsUtc,
-} from "../lib/dayjs.js";
-import {
   compareThresholds,
   getFrequentServiceActualHours,
   getNocAdminAreas,
@@ -53,6 +47,7 @@ import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import haversineDistance from "haversine-distance";
 import { getUserOperatorIds } from "../lib/operators.js";
+import dayjs, { Dayjs } from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
@@ -158,14 +153,10 @@ export const getLines: QueryResolvers["lines"] = async (
   const userOperatorIds = await getUserOperatorIds(user, context.kysely);
   if (!userOperatorIds.includes(args.operatorId)) return [];
 
-  const inputDate = args.inputDate
-    ? userSelectedDateAsUtc(args.inputDate).toDate()
-    : undefined;
-
   const services = await context.db.expected_services.findMany({
     where: {
       operator_noc: args.operatorId,
-      date_of_journey: inputDate,
+      date_of_journey: args.inputDate?.toDate() ?? Prisma.skip,
     },
     select: {
       noc_and_line_and_servicecode: true,
@@ -717,7 +708,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           results.forEach((res) => {
             if (res.departure_hour_only) {
               hoursOfDay.push({
-                timeOfDay: res.departure_hour_only,
+                timeOfDay: dayjs(res.departure_hour_only),
                 early: res._sum.early_count ?? 0,
                 onTime: res._sum.on_time_count ?? 0,
                 late: res._sum.late_count ?? 0,
@@ -750,8 +741,6 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
-          let summary: PunctualityTimeSeriesType[] = [];
-
           let results;
           const where = getPrismaFiltersForOTPQuery(
             args.inputs,
@@ -782,13 +771,18 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
                 },
               })) ?? [];
           }
-
+          const summary: {
+            ts: Dayjs;
+            early: number;
+            late: number;
+            onTime: number;
+          }[] = [];
           results.forEach((result) => {
             if (result._sum) {
               summary.push({
                 ts: isDayGranularity
-                  ? getFormattedDate(result.date_of_journey)
-                  : getFormattedDate(result.departure_hour),
+                  ? dayjs(result.date_of_journey)
+                  : dayjs(result.departure_hour),
                 early: result._sum.early_count ?? 0,
                 late: result._sum.late_count ?? 0,
                 onTime: result._sum.on_time_count ?? 0,
@@ -796,13 +790,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
             }
           });
 
-          summary = summary.sort((a, b) => {
-            const firstTS = getDate(a.ts);
-            const secondTS = getDate(b.ts);
-            return firstTS.isAfter(secondTS) ? 1 : -1;
-          });
-
-          return summary;
+          return summary.sort((a, b) => (a.ts.isAfter(b.ts) ? 1 : -1));
         }
       }
 
@@ -830,7 +818,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         operator_noc: {
           in: operatorNocs,
         },
-        date_period_start: userSelectedDateAsUtc(fromTimestamp).toDate(),
+        date_period_start: fromTimestamp.toDate(),
         AND: [
           {
             OR: [
@@ -1148,8 +1136,8 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
             where: {
               operator_noc: args.operatorId,
               date_of_journey: {
-                gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
-                lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
+                gte: args.fromTimestamp.toDate(),
+                lt: args.toTimestamp.toDate(),
               },
             },
             select: {
@@ -1278,9 +1266,10 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       results.map((result) => {
         if (result.departure_hour) {
+          const ukTime = dayjs(result.departure_hour).tz("Europe/London");
           const formatterdeparture = isDayGranularity
-            ? getFormattedDate(result.departure_hour, "YYYY-MM-DD")
-            : getFormattedDate(result.departure_hour);
+            ? ukTime.format("YYYY-MM-DD")
+            : ukTime.format("YYYY-MM-DDTHH:mm:ssZ");
           const headwayData = headwayMap[formatterdeparture];
 
           if (headwayData) {
@@ -1315,11 +1304,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         }
       });
 
-      const returnHeadways: HeadwayTimeSeriesType[] = [];
+      const returnHeadways: {
+        ts: Dayjs;
+        actualWaitTime: number;
+        scheduledWaitTime: number;
+        excessWaitTime: number;
+      }[] = [];
 
       for (const [departure_hour, headway] of Object.entries(headwayMap)) {
         returnHeadways.push({
-          ts: departure_hour,
+          ts: dayjs(departure_hour),
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
           actualWaitTime: headway.actual_headway / headway.headway_stops_count,
           scheduledWaitTime:
@@ -1329,10 +1323,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         });
       }
 
-      return returnHeadways.sort((a, b) => {
-        if (getDate(a.ts).isBefore(getDate(b.ts))) return -1;
-        return 1;
-      });
+      return returnHeadways.sort((a, b) => (a.ts.isBefore(b.ts) ? -1 : 1));
     } catch (error) {
       logger.error(error, "An error occurred when getting headway time series");
       return null;
@@ -1386,6 +1377,20 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
   }
 };
 
+export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
+  const timestamp = date;
+  if (!time) {
+    return date.utc();
+  }
+  const [hours, minutes, _] = time.split(":").map(Number);
+  return timestamp
+    .tz("Europe/London")
+    .set("hour", hours)
+    .set("minute", minutes)
+    .startOf("minute")
+    .utc();
+};
+
 export const getPrismaFiltersForOTPQuery = (
   inputs: PerformanceInputType &
     HeadwayInputType &
@@ -1396,7 +1401,7 @@ export const getPrismaFiltersForOTPQuery = (
   Prisma.timetable_summary_stops_tzWhereInput &
   Prisma.timetable_threshold_summaryWhereInput &
   Prisma.timetable_frequent_summary_servicesWhereInput => {
-  const { fromTimestamp, toTimestamp, filters } = inputs || {};
+  const { fromTimestamp: startDateUtc, toTimestamp: endDateUtc, filters } = inputs || {};
   const {
     timingPointsOnly,
     adminAreaIds,
@@ -1428,9 +1433,6 @@ export const getPrismaFiltersForOTPQuery = (
   if (dayOfWeekFlags) {
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
-
-  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
-  const endDateUtc = userSelectedDateAsUtc(toTimestamp);
 
   // If start or end time aren't set, use the start and end of the day as default values,
   // so that we can still use the result in the filters

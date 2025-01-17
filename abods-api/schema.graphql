@@ -25,8 +25,8 @@ type Query {
   ): [EventStatsType]
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
-  findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
-  lines(operatorId: String!, inputDate: String): [LineType!]!
+  findJourneys(lineId: String!, dateOfJourney: Date!): [Journey!]!
+  lines(operatorId: String!, inputDate: Date): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 
   # Used by an external service, take care with changes
@@ -106,10 +106,10 @@ type CorridorStatsType {
 
 input CorridorStatsInputType {
   corridorId: String!
-  fromTimestamp: String!
+  fromTimestamp: Date!
   granularity: CorridorGranularity!
   stopList: [String!]!
-  toTimestamp: String!
+  toTimestamp: Date!
   matchType: MatchType!
 }
 
@@ -189,7 +189,7 @@ enum CorridorGranularity {
 
 type Journey {
   directionRef: String
-  startTime: String!
+  startTime: DateTime!
   groupId: String!
   serviceName: String!
   serviceNumber: String!
@@ -242,8 +242,8 @@ input SignupPayloadType {
 type HeadwayMetricsType {
   frequentServices(
     operatorId: String!
-    fromTimestamp: String!
-    toTimestamp: String!
+    fromTimestamp: Date!
+    toTimestamp: Date!
   ): [FrequentServiceType]
   frequentServiceInfo(
     inputs: FrequentServiceInfoInputType!
@@ -267,8 +267,8 @@ input CorridorUpdateInputType {
 
 input HeadwayInputType {
   filters: HeadwayFiltersInputType!
-  fromTimestamp: String!
-  toTimestamp: String!
+  fromTimestamp: Date!
+  toTimestamp: Date!
 }
 
 enum HeadwaySortEnum {
@@ -305,8 +305,8 @@ input DayOfWeekFlagsInputType {
 
 input FrequentServiceInfoInputType {
   filters: FrequentServiceInfoFilterType!
-  fromTimestamp: String!
-  toTimestamp: String!
+  fromTimestamp: Date!
+  toTimestamp: Date!
 }
 
 input FrequentServiceInfoFilterType {
@@ -723,9 +723,9 @@ enum ShortCodeDayOfWeek {
 
 input PerformanceInputType {
   filters: PerformanceFiltersInputType!
-  fromTimestamp: String!
+  fromTimestamp: Date!
   paging: PagingInputType
-  toTimestamp: String!
+  toTimestamp: Date!
 }
 
 input PerformanceFiltersInputType {
@@ -803,8 +803,8 @@ input ServicePerformanceFiltersInputType {
 
 input ServicePerformanceInputType {
   filters: ServicePerformanceFiltersInputType!
-  fromTimestamp: String!
-  toTimestamp: String!
+  fromTimestamp: Date!
+  toTimestamp: Date!
   order: RankingOrder!
 }
 

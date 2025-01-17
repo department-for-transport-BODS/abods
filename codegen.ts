@@ -1,5 +1,7 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
-import { DateResolver, DateTimeResolver, TimeResolver } from "graphql-scalars";
+import { DayjsDateResolver } from "./abods-api/src/resolvers/dateScalar";
+import { DayjsDateTimeResolver } from "./abods-api/src/resolvers/dateTimeScalar";
+import { DayjsTimeResolver } from "./abods-api/src/resolvers/timeScalar";
 
 const config: CodegenConfig = {
   overwrite: true,
@@ -23,9 +25,9 @@ const config: CodegenConfig = {
         contextType: "./extra#RequestContext",
         defaultMapper: "Partial<{T}>",
         scalars: {
-          Date: DateResolver.extensions.codegenScalarType,
-          DateTime: DateTimeResolver.extensions.codegenScalarType,
-          Time: TimeResolver.extensions.codegenScalarType,
+          Date: DayjsDateResolver.extensions.codegenScalarType,
+          DateTime: DayjsDateTimeResolver.extensions.codegenScalarType,
+          Time: DayjsTimeResolver.extensions.codegenScalarType,
         },
       },
     },
