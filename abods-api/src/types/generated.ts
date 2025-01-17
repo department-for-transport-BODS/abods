@@ -436,9 +436,7 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
 };
 
 export enum HeadwaySortEnum {
@@ -465,7 +463,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['DateTime']['output'];
+  ts: Scalars['String']['output'];
 };
 
 export type HistoricalStatsType = {
@@ -1705,9 +1703,7 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
-  actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1723,7 +1719,7 @@ export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentT
   actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

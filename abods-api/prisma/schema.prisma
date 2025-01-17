@@ -344,6 +344,26 @@ model timetable_summary_service_tz {
   @@index([operator_noc], map: "operator_noc_servicetz")
 }
 
+model timetable_frequent_summary_services1 {
+  timetable_id                 BigInt   @id @default(autoincrement())
+  operator_noc                 String
+  service_code                 String
+  noc_and_line_and_servicecode String
+  line_name                    String
+  date_of_journey              DateTime @db.Date
+  departure_hour               DateTime @db.Timestamptz(6)
+  departure_hour_only          DateTime @db.Timetz(6)
+  day_of_week                  Int
+  max_early                    Int
+  max_late                     Int
+  avg_time_difference          Decimal? @db.Decimal
+  expected_headway             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
+  actual_headway               Decimal  @db.Decimal // TODO: fix - nullable decimal in db
+  excess_wait_time             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
+  estimated                    Boolean
+  headway_stops_count          Int
+}
+
 model timetable_summary_stops_tz {
   timetable_id                 BigInt   @default(autoincrement())
   operator_noc                 String

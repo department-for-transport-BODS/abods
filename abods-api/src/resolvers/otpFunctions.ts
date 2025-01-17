@@ -44,9 +44,11 @@ import {
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
+  getFrequentServiceActualHours,
   getNocAdminAreas,
   getOperatorsFromOrgId,
   getOperatorsFroServiceDetails,
+  getSummaryStopsTotalHours,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
@@ -968,10 +970,9 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           // get a sum per day
-          const where = getPrismaFiltersForOTPQuery(
-            args.inputs,
-            userOperatorIds,
-          );
+          const where: Prisma.timetable_summary_stops_tzWhereInput =
+            getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+
           const results = await context.db.timetable_summary_stops_tz.groupBy({
             by: ["stop_id", "common_name", "is_timing_point"],
             where: where,
@@ -1187,30 +1188,11 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
-      const results = await context.db.timetable_summary_stops_tz.groupBy({
-        by: ["departure_hour"],
-        where: where,
-        _sum: {
-          scheduled: true,
-          actual_headway: true,
-        },
-      });
-
-      let totalHours = 0;
-      let actualHours = 0;
-
-      results.map((result) => {
-        if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
-
-        if (
-          result._sum.actual_headway &&
-          result._sum.actual_headway.toNumber() > 0
-        )
-          actualHours += 1;
-      });
+      const [totalHours, actualHours] = await Promise.all([
+        getSummaryStopsTotalHours(context.db, args.inputs, userOperatorIds),
+        getFrequentServiceActualHours(context.db, args.inputs, userOperatorIds),
+      ]);
 
       return {
         numHours: actualHours,
@@ -1230,37 +1212,24 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
+      const where: Prisma.timetable_frequent_summary_services1WhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
-      where.headway_stops_count = {
-        gt: 0,
-      };
-
-      const results = await context.db.timetable_summary_stops_tz.findMany({
-        where: where,
-        select: {
-          headway_stops_count: true,
-          actual_headway: true,
-          expected_headway: true,
-          excess_wait_time: true,
-        },
-      });
+      const results =
+        await context.db.timetable_frequent_summary_services1.findMany({
+          where: where,
+          select: {
+            headway_stops_count: true,
+            excess_wait_time: true,
+          },
+        });
 
       let headway = {
-        actualWaitTime: 0,
-        scheduledWaitTime: 0,
         excessWaitTime: 0,
         headwayCount: 0,
       };
 
       headway = results.reduce((acc, currentHeadway) => {
-        acc.actualWaitTime +=
-          currentHeadway.actual_headway.toNumber() *
-          currentHeadway.headway_stops_count;
-        acc.scheduledWaitTime +=
-          currentHeadway.expected_headway.toNumber() *
-          currentHeadway.headway_stops_count;
         acc.excessWaitTime +=
           currentHeadway.excess_wait_time.toNumber() *
           currentHeadway.headway_stops_count;
@@ -1270,10 +1239,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       }, headway);
 
       return {
-        actualWaitTime: headway.actualWaitTime / (headway.headwayCount * 60),
-        scheduledWaitTime:
-          headway.scheduledWaitTime / (headway.headwayCount * 60),
-        excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
+        excessWaitTime: headway.excessWaitTime / headway.headwayCount,
       };
     } catch (error) {
       logger.error(error, "An error occurred when getting headway overview");
@@ -1291,24 +1257,25 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       const isDayGranularity = granularity === Granularity.Day;
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
+      const where: Prisma.timetable_frequent_summary_services1WhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       where.headway_stops_count = {
         gt: 0,
       };
 
-      const results = await context.db.timetable_summary_stops_tz.findMany({
-        where: where,
-        select: {
-          date_of_journey: true,
-          departure_hour: true,
-          headway_stops_count: true,
-          actual_headway: true,
-          expected_headway: true,
-          excess_wait_time: true,
-        },
-      });
+      const results =
+        await context.db.timetable_frequent_summary_services1.findMany({
+          where: where,
+          select: {
+            date_of_journey: true,
+            departure_hour: true,
+            headway_stops_count: true,
+            actual_headway: true,
+            expected_headway: true,
+            excess_wait_time: true,
+          },
+        });
 
       const headwayMap: Record<
         string,
@@ -1358,15 +1325,15 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         returnHeadways.push({
           ts: departure_hour,
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
-          actualWaitTime:
-            Math.round(headway.actual_headway / headway.headway_stops_count) /
-            60,
-          scheduledWaitTime:
-            Math.round(headway.expected_headway / headway.headway_stops_count) /
-            60,
-          excessWaitTime:
-            Math.round(headway.excess_wait_time / headway.headway_stops_count) /
-            60,
+          actualWaitTime: Math.round(
+            headway.actual_headway / headway.headway_stops_count,
+          ),
+          scheduledWaitTime: Math.round(
+            headway.expected_headway / headway.headway_stops_count,
+          ),
+          excessWaitTime: Math.round(
+            headway.excess_wait_time / headway.headway_stops_count,
+          ),
         });
       }
 

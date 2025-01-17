@@ -12,8 +12,6 @@ query headwayTimeSeries($params: HeadwayInputType!) {
 query headwayOverview($params: HeadwayInputType!) {
   headwayMetrics {
     headwayOverview(inputs: $params) {
-      actual: actualWaitTime
-      scheduled: scheduledWaitTime
       excess: excessWaitTime
     }
   }

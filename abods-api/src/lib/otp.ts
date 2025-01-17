@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  FrequentServiceInfoInputType,
   MatchType,
   PerformanceInputType,
   PunctualityTotalsType,
@@ -264,4 +265,49 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
       admin_area: true,
     },
   });
+};
+
+export const getSummaryStopsTotalHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const where: Prisma.timetable_summary_stops_tzWhereInput =
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+  const results = await db.timetable_summary_stops_tz.groupBy({
+    by: ["departure_hour"],
+    where: where,
+    _count: {
+      scheduled: true,
+    },
+  });
+
+  return results.reduce(
+    (totalCount, currentIndex) => (totalCount += currentIndex._count.scheduled),
+    0,
+  );
+};
+
+export const getFrequentServiceActualHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const where: Prisma.timetable_frequent_summary_services1WhereInput =
+    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+
+  const results = await db.timetable_frequent_summary_services1.groupBy({
+    by: ["departure_hour"],
+    where: where,
+    _count: {
+      actual_headway: true,
+    },
+  });
+
+  return results.reduce(
+    (totalCount, currentIndex) =>
+      (totalCount += currentIndex._count.actual_headway),
+    0,
+  );
 };
