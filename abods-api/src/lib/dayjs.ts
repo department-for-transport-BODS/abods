@@ -65,7 +65,7 @@ export const userSelectedDateAsUtc = (isoTimestamp: string) =>
 export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
   const timestamp = date;
   if (!time) {
-    return date.utc().toDate();
+    return date.utc();
   }
   const [hours, minutes, _] = time.split(":").map(Number);
   return timestamp
@@ -73,6 +73,5 @@ export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
     .set("hour", hours)
     .set("minute", minutes)
     .startOf("minute")
-    .utc()
-    .toDate();
+    .utc();
 };
