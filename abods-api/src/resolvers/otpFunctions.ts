@@ -1,7 +1,6 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
-  MatchType,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
@@ -11,6 +10,7 @@ import {
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
   LineType,
+  MatchType,
   Maybe,
   OnTimePerformanceTypeResolvers,
   OperatorPerformancePage,
@@ -35,10 +35,10 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
+  addUkTime,
   getDate,
   getFormattedDate,
   userSelectedDateAsUtc,
-  addUkTime,
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
@@ -594,8 +594,7 @@ const getStopsDistribution = async (
   const { filters } = inputs;
   const { maxDelay, minDelay } = filters || {};
 
-  const where: Prisma.timetable_threshold_summaryWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
+  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
 
   where.time_diff_minutes = {
     not: null,
@@ -1183,8 +1182,7 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       const results = await context.db.timetable_summary_stops_tz.groupBy({
         by: ["departure_hour"],
@@ -1226,8 +1224,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       where.headway_stops_count = {
         gt: 0,
@@ -1287,8 +1284,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       const isDayGranularity = granularity === Granularity.Day;
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       where.headway_stops_count = {
         gt: 0,
@@ -1480,18 +1476,20 @@ export const getPrismaFiltersForOTPQuery = (
   );
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
-  const maxLateNumber = maxDelay ? maxDelay : 0;
+  const maxLateNumber = maxDelay ?? 0;
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
   const allOperators = operatorIds?.length > 0 || !!operatorId;
 
+  const lines = lineId ? [lineId] : lineIds;
+
   return {
     operator_noc: { in: nocListToFilter },
     date_of_journey: { gte: startDateUtc.toDate(), lt: endDateUtc.toDate() },
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
-    ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
-    ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
+    is_timing_point: timingPointsOnly ? true : Prisma.skip,
+    day_of_week: dayOfWeekFlags ? { in: dayOfWeekNumbers } : Prisma.skip,
     departure_hour: isThreshold
       ? {
           gte: startTime ? startDateTimeUtc.toDate() : Prisma.skip,
@@ -1531,39 +1529,21 @@ export const getPrismaFiltersForOTPQuery = (
             },
           }
       : {}),
-    ...(maxEarlyNumber > 0 && !isServiceGranularity && !isThreshold
-      ? {
-          max_early: { lte: maxEarlyNumber },
-        }
-      : {}),
-    ...(maxLateNumber > 0 && !isServiceGranularity && !isThreshold
-      ? {
-          max_late: { lte: maxLateNumber },
-        }
-      : {}),
-    ...(lineIds
-      ? {
-          noc_and_line_and_servicecode: {
-            in: lineIds,
-          },
-        }
-      : {}),
-    ...(lineId
-      ? {
-          noc_and_line_and_servicecode: lineId,
-        }
-      : {}),
-    ...(adminAreaIds && adminAreaIds.length > 0
-      ? {
-          admin_areas: !allOperators
-            ? {
-                hasSome: adminAreaIds.map(Number),
-              }
-            : {
-                hasEvery: adminAreaIds.map(Number),
-              },
-        }
-      : {}),
+    max_early:
+      maxEarlyNumber > 0 && !isServiceGranularity && !isThreshold
+        ? { lte: maxEarlyNumber }
+        : Prisma.skip,
+    max_late:
+      maxLateNumber > 0 && !isServiceGranularity && !isThreshold
+        ? { lte: maxLateNumber }
+        : Prisma.skip,
+    noc_and_line_and_servicecode: lines ? { in: lines } : Prisma.skip,
+    admin_areas:
+      adminAreaIds && adminAreaIds.length > 0
+        ? !allOperators
+          ? { hasSome: adminAreaIds.map(Number) }
+          : { hasEvery: adminAreaIds.map(Number) }
+        : Prisma.skip,
   };
 };
 
