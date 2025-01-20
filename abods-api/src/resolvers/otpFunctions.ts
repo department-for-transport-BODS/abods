@@ -35,12 +35,10 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  dbUtcToBstDate,
-  getBSTDate,
   getDate,
   getFormattedDate,
-  getUTCDate,
-  utcToBstDBInput,
+  userSelectedDateAsUtc,
+  addUkTime,
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
@@ -161,7 +159,7 @@ export const getLines: QueryResolvers["lines"] = async (
   if (!userOperatorIds.includes(args.operatorId)) return [];
 
   const inputDate = args.inputDate
-    ? new Date(dbUtcToBstDate(args.inputDate))
+    ? userSelectedDateAsUtc(args.inputDate).toDate()
     : undefined;
 
   const services = await context.db.expected_services.findMany({
@@ -843,9 +841,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         operator_noc: {
           in: operatorNocs,
         },
-        date_period_start: new Date(
-          getBSTDate(new Date(fromTimestamp), "YYYY-MM-DD"),
-        ),
+        date_period_start: userSelectedDateAsUtc(fromTimestamp).toDate(),
         AND: [
           {
             OR: [
@@ -1161,8 +1157,8 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
             where: {
               operator_noc: args.operatorId,
               date_of_journey: {
-                gte: utcToBstDBInput(args.fromTimestamp),
-                lt: utcToBstDBInput(args.toTimestamp),
+                gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
+                lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
               },
             },
             select: {
@@ -1400,7 +1396,10 @@ export const getPrismaFiltersForOTPQuery = (
     FrequentServiceInfoInputType,
   userOperatorNocList: string[],
   isThreshold?: boolean,
-) => {
+): Prisma.timetable_summary_service_tzWhereInput &
+  Prisma.timetable_summary_operator_tWhereInput &
+  Prisma.timetable_summary_stops_tzWhereInput &
+  Prisma.timetable_threshold_summaryWhereInput => {
   const { fromTimestamp, toTimestamp, filters } = inputs || {};
   const {
     timingPointsOnly,
@@ -1434,28 +1433,18 @@ export const getPrismaFiltersForOTPQuery = (
     dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
   }
 
-  let dateOfJourneyFromDateTime = getUTCDate(new Date(fromTimestamp)).tz(
-    "Europe/London",
-  );
-  let dateOfJourneyToDateTime = getUTCDate(new Date(toTimestamp)).tz(
-    "Europe/London",
-  );
+  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
+  const endDateUtc = userSelectedDateAsUtc(toTimestamp);
 
-  if (startTime && startTime !== "00:00") {
-    const [hours, minutes, _] = startTime.split(":").map(Number);
-    dateOfJourneyFromDateTime = dateOfJourneyFromDateTime
-      .set("hour", hours)
-      .set("minute", minutes)
-      .startOf("minute");
-  }
-
-  if (endTime) {
-    const [hours, minutes, _] = endTime.split(":").map(Number);
-    dateOfJourneyToDateTime = dateOfJourneyToDateTime
-      .set("hour", hours)
-      .set("minute", minutes)
-      .startOf("minute");
-  }
+  // If start or end time aren't set, use the start and end of the day as default values,
+  // so that we can still use the result in the filters
+  const startDateTimeUtc = addUkTime(startDateUtc, startTime ?? "00:00");
+  const endDateTimeUtc = addUkTime(
+    // end date is the start of the next day, so go back a day for the end time
+    // not clear how to handle this when we have data with a departure day shift
+    endDateUtc.subtract(1, "day"),
+    endTime ?? "23:59",
+  );
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
   const maxLateNumber = maxDelay ? maxDelay : 0;
@@ -1466,52 +1455,49 @@ export const getPrismaFiltersForOTPQuery = (
 
   return {
     operator_noc: { in: nocListToFilter },
-    date_of_journey: {
-      gte: dateOfJourneyFromDateTime.toDate(),
-      lt: dateOfJourneyToDateTime.toDate(),
-    },
+    date_of_journey: { gte: startDateUtc.toDate(), lt: endDateUtc.toDate() },
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     ...(timingPointsOnly ? { is_timing_point: timingPointsOnly } : {}),
     ...(dayOfWeekFlags ? { day_of_week: { in: dayOfWeekNumbers } } : {}),
-    ...(startTime && endTime
-      ? isThreshold
+    departure_hour: isThreshold
+      ? {
+          gte: startTime ? startDateTimeUtc.toDate() : Prisma.skip,
+          lte: endTime ? endDateTimeUtc.toDate() : Prisma.skip,
+        }
+      : Prisma.skip,
+    ...(!isThreshold
+      ? startDateTimeUtc.hour() > endDateTimeUtc.hour()
         ? {
-            departure_hour: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
-            },
+            // Prisma prevents us from sending the UTC offset in our query, otherwise UK time values would just work as below
+            // Somewhat related: https://github.com/prisma/prisma/issues/7915
+            // (In general prisma will always convert a datetime value to UTC before sending to the database, even manually constructing an ISO-8601 string with offset doesn't work)
+            // However, when converted to UTC, the start time can come after the end time
+            // The result of such a query, comparing to a timetz field (e.g. x >= 23:00:00 && x <= 22:59:00) is an empty set
+            // so in the event that the start time is after the end time, we should use two clauses
+            OR: [
+              {
+                departure_hour_only: {
+                  // get everything from the start time up to the end of the day
+                  gte: startDateTimeUtc.toDate(),
+                  lte: startDateTimeUtc.endOf("day").toDate(),
+                },
+              },
+              {
+                departure_hour_only: {
+                  // get everything from the start of the day up to the end time
+                  gte: endDateTimeUtc.startOf("day").toDate(),
+                  lte: endDateTimeUtc.toDate(),
+                },
+              },
+            ],
           }
         : {
             departure_hour_only: {
-              gte: dateOfJourneyFromDateTime.toDate(),
-              lte: dateOfJourneyToDateTime.toDate(),
+              gte: startDateTimeUtc.toDate(),
+              lte: endDateTimeUtc.toDate(),
             },
           }
-      : {
-          ...(startTime
-            ? isThreshold
-              ? { departure_hour: { gte: dateOfJourneyFromDateTime.toDate() } }
-              : {
-                  departure_hour_only: {
-                    gte: dateOfJourneyFromDateTime.toDate(),
-                  },
-                }
-            : {
-                ...(endTime
-                  ? isThreshold
-                    ? {
-                        departure_hour: {
-                          lte: dateOfJourneyToDateTime.toDate(),
-                        },
-                      }
-                    : {
-                        departure_hour_only: {
-                          lte: dateOfJourneyToDateTime.toDate(),
-                        },
-                      }
-                  : {}),
-              }),
-        }),
+      : {}),
     ...(maxEarlyNumber > 0 && !isServiceGranularity && !isThreshold
       ? {
           max_early: { lte: maxEarlyNumber },

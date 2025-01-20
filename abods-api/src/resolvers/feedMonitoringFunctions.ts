@@ -175,10 +175,9 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
           startTime,
           endTime.toDate(),
         ).then((n) => {
-          if (n.length !== 1) throw "Unexpected data returned";
           return {
-            actual: n[0].actual,
-            expected: n[0].expected,
+            actual: n.length > 0 ? n[0].actual : 0,
+            expected: n.length > 0 ? n[0].expected : 0,
             timestamp: startTime.toISOString(),
           };
         }),
