@@ -294,10 +294,10 @@ export const getFrequentServiceActualHours = async (
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const where: Prisma.timetable_frequent_summary_services1WhereInput =
+  const where: Prisma.timetable_frequent_summary_servicesWhereInput =
     getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
-  const results = await db.timetable_frequent_summary_services1.groupBy({
+  const results = await db.timetable_frequent_summary_services.groupBy({
     by: ["departure_hour"],
     where: where,
     _count: {

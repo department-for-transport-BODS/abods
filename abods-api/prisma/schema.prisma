@@ -344,7 +344,7 @@ model timetable_summary_service_tz {
   @@index([operator_noc], map: "operator_noc_servicetz")
 }
 
-model timetable_frequent_summary_services1 {
+model timetable_frequent_summary_services {
   timetable_id                 BigInt   @id @default(autoincrement())
   operator_noc                 String
   service_code                 String
