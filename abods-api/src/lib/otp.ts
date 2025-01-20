@@ -272,21 +272,15 @@ export const getSummaryStopsTotalHours = async (
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const where: Prisma.timetable_summary_stops_tzWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
-
-  const results = await db.timetable_summary_stops_tz.groupBy({
-    by: ["departure_hour"],
-    where: where,
-    _count: {
-      scheduled: true,
+  const results = await db.timetable_summary_stops_tz.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      scheduled: { gt: 0 },
     },
+    select: { departure_hour: true },
   });
-
-  return results.reduce(
-    (totalCount, currentIndex) => (totalCount += currentIndex._count.scheduled),
-    0,
-  );
+  return results.length;
 };
 
 export const getFrequentServiceActualHours = async (
@@ -294,20 +288,13 @@ export const getFrequentServiceActualHours = async (
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const where: Prisma.timetable_frequent_summary_servicesWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
-
-  const results = await db.timetable_frequent_summary_services.groupBy({
-    by: ["departure_hour"],
-    where: where,
-    _count: {
-      actual_headway: true,
+  const results = await db.timetable_frequent_summary_services.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      actual_headway: { gt: 0 },
     },
+    select: { departure_hour: true },
   });
-
-  return results.reduce(
-    (totalCount, currentIndex) =>
-      (totalCount += currentIndex._count.actual_headway),
-    0,
-  );
+  return results.length;
 };
