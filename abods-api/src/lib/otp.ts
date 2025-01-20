@@ -5,8 +5,7 @@ import {
   PunctualityTotalsType,
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
-import { utcToBstDBInput } from "./dayjs.js";
-import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
+import { userSelectedDateAsUtc } from "./dayjs.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -77,8 +76,8 @@ export const compareThresholds = async (
       in: opIds ? opIds : userOperatorIds,
     },
     date_of_journey: {
-      gte: utcToBstDBInput(fromTimestamp),
-      lt: utcToBstDBInput(toTimestamp),
+      gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
+      lt: userSelectedDateAsUtc(toTimestamp).toDate(),
     },
   };
 

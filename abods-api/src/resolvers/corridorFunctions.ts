@@ -41,7 +41,7 @@ import {
   getDate,
   getDayFormattedDate,
   getHourFormattedDate,
-  utcToBstDBInput,
+  userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import haversineDistance from "haversine-distance";
@@ -389,8 +389,8 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
         in: stopList.map(Number),
       },
       date_of_journey: {
-        gte: utcToBstDBInput(fromTimestamp),
-        lt: utcToBstDBInput(toTimestamp),
+        gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
+        lt: userSelectedDateAsUtc(toTimestamp).toDate(),
       },
     },
   });
