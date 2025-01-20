@@ -26,7 +26,7 @@ type Query {
   avls(groupId: String!): [AvlPoint!]!
   route(groupId: String!): [Stop!]!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
-  lines(operatorId: String!, inputDate: DateTime): [LineType!]!
+  lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
 
   # Used by an external service, take care with changes
@@ -106,10 +106,10 @@ type CorridorStatsType {
 
 input CorridorStatsInputType {
   corridorId: String!
-  fromTimestamp: DateTime!
+  fromTimestamp: String!
   granularity: CorridorGranularity!
   stopList: [String!]!
-  toTimestamp: DateTime!
+  toTimestamp: String!
   matchType: MatchType!
 }
 
@@ -242,8 +242,8 @@ input SignupPayloadType {
 type HeadwayMetricsType {
   frequentServices(
     operatorId: String!
-    fromTimestamp: DateTime!
-    toTimestamp: DateTime!
+    fromTimestamp: String!
+    toTimestamp: String!
   ): [FrequentServiceType]
   frequentServiceInfo(
     inputs: FrequentServiceInfoInputType!
@@ -267,8 +267,8 @@ input CorridorUpdateInputType {
 
 input HeadwayInputType {
   filters: HeadwayFiltersInputType!
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
+  fromTimestamp: String!
+  toTimestamp: String!
 }
 
 enum HeadwaySortEnum {
@@ -305,8 +305,8 @@ input DayOfWeekFlagsInputType {
 
 input FrequentServiceInfoInputType {
   filters: FrequentServiceInfoFilterType!
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
+  fromTimestamp: String!
+  toTimestamp: String!
 }
 
 input FrequentServiceInfoFilterType {
@@ -725,9 +725,9 @@ enum ShortCodeDayOfWeek {
 
 input PerformanceInputType {
   filters: PerformanceFiltersInputType!
-  fromTimestamp: DateTime!
+  fromTimestamp: String!
   paging: PagingInputType
-  toTimestamp: DateTime!
+  toTimestamp: String!
 }
 
 input PerformanceFiltersInputType {
@@ -805,8 +805,8 @@ input ServicePerformanceFiltersInputType {
 
 input ServicePerformanceInputType {
   filters: ServicePerformanceFiltersInputType!
-  fromTimestamp: DateTime!
-  toTimestamp: DateTime!
+  fromTimestamp: String!
+  toTimestamp: String!
   order: RankingOrder!
 }
 
