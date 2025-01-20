@@ -1233,8 +1233,8 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       headway = results.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
           currentHeadway.excess_wait_time.toNumber() *
-          currentHeadway.headway_stops_count;
-        acc.headwayCount += currentHeadway.headway_stops_count;
+          currentHeadway.headway_stops_count.toNumber();
+        acc.headwayCount += currentHeadway.headway_stops_count.toNumber();
 
         return acc;
       }, headway);
@@ -1297,23 +1297,30 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
           if (headwayData) {
             headwayData.actual_headway =
               headwayData.actual_headway +
-              result.actual_headway.toNumber() * result.headway_stops_count;
+              result.actual_headway.toNumber() *
+                result.headway_stops_count.toNumber();
             headwayData.expected_headway =
               headwayData.expected_headway +
-              result.expected_headway.toNumber() * result.headway_stops_count;
+              result.expected_headway.toNumber() *
+                result.headway_stops_count.toNumber();
             headwayData.excess_wait_time =
               headwayData.excess_wait_time +
-              result.excess_wait_time.toNumber() * result.headway_stops_count;
-            headwayData.headway_stops_count += result.headway_stops_count;
+              result.excess_wait_time.toNumber() *
+                result.headway_stops_count.toNumber();
+            headwayData.headway_stops_count +=
+              result.headway_stops_count.toNumber();
           } else {
             headwayMap[formatterdeparture] = {
               actual_headway:
-                result.actual_headway.toNumber() * result.headway_stops_count,
+                result.actual_headway.toNumber() *
+                result.headway_stops_count.toNumber(),
               expected_headway:
-                result.expected_headway.toNumber() * result.headway_stops_count,
+                result.expected_headway.toNumber() *
+                result.headway_stops_count.toNumber(),
               excess_wait_time:
-                result.excess_wait_time.toNumber() * result.headway_stops_count,
-              headway_stops_count: result.headway_stops_count,
+                result.excess_wait_time.toNumber() *
+                result.headway_stops_count.toNumber(),
+              headway_stops_count: result.headway_stops_count.toNumber(),
             };
           }
         }
