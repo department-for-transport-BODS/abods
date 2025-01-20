@@ -336,9 +336,7 @@ type HeadwayDayOfWeekType {
 }
 
 type HeadwayOverviewType {
-  actualWaitTime: Float!
   excessWaitTime: Float!
-  scheduledWaitTime: Float!
 }
 
 type HeadwayTimeOfDayType {

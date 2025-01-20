@@ -1,11 +1,13 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  FrequentServiceInfoInputType,
   MatchType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { userSelectedDateAsUtc } from "./dayjs.js";
+import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -263,4 +265,36 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
       admin_area: true,
     },
   });
+};
+
+export const getSummaryStopsTotalHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const results = await db.timetable_summary_stops_tz.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      scheduled: { gt: 0 },
+    },
+    select: { departure_hour: true },
+  });
+  return results.length;
+};
+
+export const getFrequentServiceActualHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const results = await db.timetable_frequent_summary_services.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      actual_headway: { gt: 0 },
+    },
+    select: { departure_hour: true },
+  });
+  return results.length;
 };

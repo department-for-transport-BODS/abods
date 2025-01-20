@@ -42,9 +42,11 @@ import {
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
+  getFrequentServiceActualHours,
   getNocAdminAreas,
   getOperatorsFromOrgId,
   getOperatorsFroServiceDetails,
+  getSummaryStopsTotalHours,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
@@ -968,6 +970,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             args.inputs,
             userOperatorIds,
           );
+
           const results = await context.db.timetable_summary_stops_tz.groupBy({
             by: ["stop_id", "common_name", "is_timing_point"],
             where: where,
@@ -1151,20 +1154,20 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (userOperatorIds.includes(args.operatorId)) {
-        const results = await context.db.timetable_summary_service_tz.findMany({
-          where: {
-            operator_noc: args.operatorId,
-            date_of_journey: {
-              gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
-              lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
+        const results =
+          await context.db.timetable_frequent_summary_services.findMany({
+            where: {
+              operator_noc: args.operatorId,
+              date_of_journey: {
+                gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
+                lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
+              },
             },
-            headway_valid: true,
-          },
-          select: {
-            noc_and_line_and_servicecode: true,
-          },
-          distinct: ["noc_and_line_and_servicecode"],
-        });
+            select: {
+              noc_and_line_and_servicecode: true,
+            },
+            distinct: ["noc_and_line_and_servicecode"],
+          });
 
         return results.map((result) => ({
           serviceId: result.noc_and_line_and_servicecode,
@@ -1183,30 +1186,11 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
-      const results = await context.db.timetable_summary_stops_tz.groupBy({
-        by: ["departure_hour"],
-        where: where,
-        _sum: {
-          scheduled: true,
-          actual_headway: true,
-        },
-      });
-
-      let totalHours = 0;
-      let actualHours = 0;
-
-      results.map((result) => {
-        if (result._sum.scheduled && result._sum.scheduled > 0) totalHours += 1;
-
-        if (
-          result._sum.actual_headway &&
-          result._sum.actual_headway.toNumber() > 0
-        )
-          actualHours += 1;
-      });
+      const [totalHours, actualHours] = await Promise.all([
+        getSummaryStopsTotalHours(context.db, args.inputs, userOperatorIds),
+        getFrequentServiceActualHours(context.db, args.inputs, userOperatorIds),
+      ]);
 
       return {
         numHours: actualHours,
@@ -1226,50 +1210,37 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       where.headway_stops_count = {
         gt: 0,
       };
 
-      const results = await context.db.timetable_summary_stops_tz.findMany({
-        where: where,
-        select: {
-          headway_stops_count: true,
-          actual_headway: true,
-          expected_headway: true,
-          excess_wait_time: true,
-        },
-      });
+      const results =
+        await context.db.timetable_frequent_summary_services.findMany({
+          where: where,
+          select: {
+            headway_stops_count: true,
+            excess_wait_time: true,
+          },
+        });
 
       let headway = {
-        actualWaitTime: 0,
-        scheduledWaitTime: 0,
         excessWaitTime: 0,
         headwayCount: 0,
       };
 
       headway = results.reduce((acc, currentHeadway) => {
-        acc.actualWaitTime +=
-          currentHeadway.actual_headway.toNumber() *
-          currentHeadway.headway_stops_count;
-        acc.scheduledWaitTime +=
-          currentHeadway.expected_headway.toNumber() *
-          currentHeadway.headway_stops_count;
         acc.excessWaitTime +=
           currentHeadway.excess_wait_time.toNumber() *
-          currentHeadway.headway_stops_count;
-        acc.headwayCount += currentHeadway.headway_stops_count;
+          currentHeadway.headway_stops_count.toNumber();
+        acc.headwayCount += currentHeadway.headway_stops_count.toNumber();
 
         return acc;
       }, headway);
 
       return {
-        actualWaitTime: headway.actualWaitTime / (headway.headwayCount * 60),
-        scheduledWaitTime:
-          headway.scheduledWaitTime / (headway.headwayCount * 60),
-        excessWaitTime: headway.excessWaitTime / (headway.headwayCount * 60),
+        excessWaitTime: headway.excessWaitTime / headway.headwayCount,
       };
     } catch (error) {
       logger.error(error, "An error occurred when getting headway overview");
@@ -1287,24 +1258,24 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       const isDayGranularity = granularity === Granularity.Day;
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where: Prisma.timetable_summary_stops_tzWhereInput =
-        getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
       where.headway_stops_count = {
         gt: 0,
       };
 
-      const results = await context.db.timetable_summary_stops_tz.findMany({
-        where: where,
-        select: {
-          date_of_journey: true,
-          departure_hour: true,
-          headway_stops_count: true,
-          actual_headway: true,
-          expected_headway: true,
-          excess_wait_time: true,
-        },
-      });
+      const results =
+        await context.db.timetable_frequent_summary_services.findMany({
+          where: where,
+          select: {
+            date_of_journey: true,
+            departure_hour: true,
+            headway_stops_count: true,
+            actual_headway: true,
+            expected_headway: true,
+            excess_wait_time: true,
+          },
+        });
 
       const headwayMap: Record<
         string,
@@ -1326,23 +1297,30 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
           if (headwayData) {
             headwayData.actual_headway =
               headwayData.actual_headway +
-              result.actual_headway.toNumber() * result.headway_stops_count;
+              result.actual_headway.toNumber() *
+                result.headway_stops_count.toNumber();
             headwayData.expected_headway =
               headwayData.expected_headway +
-              result.expected_headway.toNumber() * result.headway_stops_count;
+              result.expected_headway.toNumber() *
+                result.headway_stops_count.toNumber();
             headwayData.excess_wait_time =
               headwayData.excess_wait_time +
-              result.excess_wait_time.toNumber() * result.headway_stops_count;
-            headwayData.headway_stops_count += result.headway_stops_count;
+              result.excess_wait_time.toNumber() *
+                result.headway_stops_count.toNumber();
+            headwayData.headway_stops_count +=
+              result.headway_stops_count.toNumber();
           } else {
             headwayMap[formatterdeparture] = {
               actual_headway:
-                result.actual_headway.toNumber() * result.headway_stops_count,
+                result.actual_headway.toNumber() *
+                result.headway_stops_count.toNumber(),
               expected_headway:
-                result.expected_headway.toNumber() * result.headway_stops_count,
+                result.expected_headway.toNumber() *
+                result.headway_stops_count.toNumber(),
               excess_wait_time:
-                result.excess_wait_time.toNumber() * result.headway_stops_count,
-              headway_stops_count: result.headway_stops_count,
+                result.excess_wait_time.toNumber() *
+                result.headway_stops_count.toNumber(),
+              headway_stops_count: result.headway_stops_count.toNumber(),
             };
           }
         }
@@ -1354,15 +1332,11 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         returnHeadways.push({
           ts: departure_hour,
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
-          actualWaitTime:
-            Math.round(headway.actual_headway / headway.headway_stops_count) /
-            60,
+          actualWaitTime: headway.actual_headway / headway.headway_stops_count,
           scheduledWaitTime:
-            Math.round(headway.expected_headway / headway.headway_stops_count) /
-            60,
+            headway.expected_headway / headway.headway_stops_count,
           excessWaitTime:
-            Math.round(headway.excess_wait_time / headway.headway_stops_count) /
-            60,
+            headway.excess_wait_time / headway.headway_stops_count,
         });
       }
 
@@ -1432,7 +1406,8 @@ export const getPrismaFiltersForOTPQuery = (
 ): Prisma.timetable_summary_service_tzWhereInput &
   Prisma.timetable_summary_operator_tWhereInput &
   Prisma.timetable_summary_stops_tzWhereInput &
-  Prisma.timetable_threshold_summaryWhereInput => {
+  Prisma.timetable_threshold_summaryWhereInput &
+  Prisma.timetable_frequent_summary_servicesWhereInput => {
   const { fromTimestamp, toTimestamp, filters } = inputs || {};
   const {
     timingPointsOnly,
