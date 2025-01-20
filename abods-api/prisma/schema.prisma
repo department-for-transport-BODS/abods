@@ -355,7 +355,7 @@ model timetable_frequent_summary_services {
   day_of_week                  Int
   max_early                    Int
   max_late                     Int
-  avg_time_difference          Decimal? @db.Decimal
+  avg_time_difference          Decimal  @db.Decimal
   expected_headway             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
   actual_headway               Decimal  @db.Decimal // TODO: fix - nullable decimal in db
   excess_wait_time             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
