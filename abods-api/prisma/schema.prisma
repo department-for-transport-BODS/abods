@@ -329,7 +329,6 @@ model timetable_summary_service_tz {
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
   admin_areas                  Int[]
-  headway_valid                Boolean
   estimated                    Boolean
 
   @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode], map: "timetable_summary_sevice_tz_pkey")
@@ -388,10 +387,6 @@ model timetable_summary_stops_tz {
   max_early                    Int
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
-  headway_stops_count          Int // TODO: fix - nullable int in db
-  expected_headway             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
-  actual_headway               Decimal  @db.Decimal // TODO: fix - nullable decimal in db
-  excess_wait_time             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
   estimated                    Boolean
 
   @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude])

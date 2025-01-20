@@ -1215,6 +1215,10 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       const where: Prisma.timetable_frequent_summary_servicesWhereInput =
         getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
+      where.headway_stops_count = {
+        gt: 0,
+      };
+
       const results =
         await context.db.timetable_frequent_summary_services.findMany({
           where: where,
