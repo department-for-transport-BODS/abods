@@ -7,6 +7,7 @@ import {
 } from "../types/generated.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { userSelectedDateAsUtc } from "./dayjs.js";
+import { getPrismaFiltersForOTPQuery } from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
@@ -271,8 +272,7 @@ export const getSummaryStopsTotalHours = async (
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const where: Prisma.timetable_summary_stops_tzWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
   const results = await db.timetable_summary_stops_tz.groupBy({
     by: ["departure_hour"],
@@ -293,8 +293,7 @@ export const getFrequentServiceActualHours = async (
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const where: Prisma.timetable_frequent_summary_servicesWhereInput =
-    getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
+  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds);
 
   const results = await db.timetable_frequent_summary_services.groupBy({
     by: ["departure_hour"],

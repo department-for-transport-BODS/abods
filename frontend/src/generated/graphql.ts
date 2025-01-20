@@ -463,7 +463,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['String']['output'];
+  ts: Scalars['DateTime']['output'];
 };
 
 export type HistoricalStatsType = {
