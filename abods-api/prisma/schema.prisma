@@ -248,6 +248,7 @@ model timetable_threshold_summary {
   otp_count                    Int? // TODO: fix - bigint in db
   day_of_week                  Int?
   estimated                    Boolean?  @default(false)
+  departure_hour_only          DateTime  @db.Timetz(6)
 
   @@index([date_of_journey, operator_noc], map: "noc_index_timetable_threshold_summary")
   @@index([date_of_journey, time_diff_minutes], map: "timediff_index_timetable_threshold_summary")
