@@ -6,11 +6,13 @@ import { ApolloLink } from "@apollo/client/link/core";
 import { onError } from "@apollo/client/link/error";
 import { APOLLO_OPTIONS } from "apollo-angular";
 import { Router } from "@angular/router";
+import { AuthenticatedUserService } from "./authentication/authenticated-user.service";
 
 export function createApollo(
   httpLink: HttpLink,
   config: ConfigService,
   router: Router,
+  user: AuthenticatedUserService,
 ) {
   const error = onError(({ networkError, graphQLErrors }) => {
     if (graphQLErrors) {
@@ -30,6 +32,7 @@ export function createApollo(
     ) {
       // Clear session so they can re authenticate
       localStorage.removeItem("session");
+      user.deauthenticateUser();
       // Navigate to login
       const { url } = router.routerState.snapshot;
       if (!url.startsWith("/login")) {
@@ -79,7 +82,7 @@ export function createApollo(
     {
       provide: APOLLO_OPTIONS,
       useFactory: createApollo,
-      deps: [HttpLink, ConfigService, Router],
+      deps: [HttpLink, ConfigService, Router, AuthenticatedUserService],
     },
   ],
 })
