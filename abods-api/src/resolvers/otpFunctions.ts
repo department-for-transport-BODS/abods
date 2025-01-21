@@ -1457,37 +1457,39 @@ export const getPrismaFiltersForOTPQuery = (
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     is_timing_point: timingPointsOnly ? true : Prisma.skip,
     day_of_week: dayOfWeekFlags ? { in: dayOfWeekNumbers } : Prisma.skip,
-    ...(startDateTimeUtc.hour() > endDateTimeUtc.hour()
-      ? {
-          // Prisma prevents us from sending the UTC offset in our query, otherwise UK time values would just work as below
-          // Somewhat related: https://github.com/prisma/prisma/issues/7915
-          // (In general prisma will always convert a datetime value to UTC before sending to the database, even manually constructing an ISO-8601 string with offset doesn't work)
-          // However, when converted to UTC, the start time can come after the end time
-          // The result of such a query, comparing to a timetz field (e.g. x >= 23:00:00 && x <= 22:59:00) is an empty set
-          // so in the event that the start time is after the end time, we should use two clauses
-          OR: [
-            {
-              departure_hour_only: {
-                // get everything from the start time up to the end of the day
-                gte: startDateTimeUtc.toDate(),
-                lte: startDateTimeUtc.endOf("day").toDate(),
+    ...(!startTime && !endTime
+      ? {}
+      : startDateTimeUtc.hour() > endDateTimeUtc.hour()
+        ? {
+            // Prisma prevents us from sending the UTC offset in our query, otherwise UK time values would just work as below
+            // Somewhat related: https://github.com/prisma/prisma/issues/7915
+            // (In general prisma will always convert a datetime value to UTC before sending to the database, even manually constructing an ISO-8601 string with offset doesn't work)
+            // However, when converted to UTC, the start time can come after the end time
+            // The result of such a query, comparing to a timetz field (e.g. x >= 23:00:00 && x <= 22:59:00) is an empty set
+            // so in the event that the start time is after the end time, we should use two clauses
+            OR: [
+              {
+                departure_hour_only: {
+                  // get everything from the start time up to the end of the day
+                  gte: startDateTimeUtc.toDate(),
+                  lte: startDateTimeUtc.endOf("day").toDate(),
+                },
               },
-            },
-            {
-              departure_hour_only: {
-                // get everything from the start of the day up to the end time
-                gte: endDateTimeUtc.startOf("day").toDate(),
-                lte: endDateTimeUtc.toDate(),
+              {
+                departure_hour_only: {
+                  // get everything from the start of the day up to the end time
+                  gte: endDateTimeUtc.startOf("day").toDate(),
+                  lte: endDateTimeUtc.toDate(),
+                },
               },
+            ],
+          }
+        : {
+            departure_hour_only: {
+              gte: startDateTimeUtc.toDate(),
+              lte: endDateTimeUtc.toDate(),
             },
-          ],
-        }
-      : {
-          departure_hour_only: {
-            gte: startDateTimeUtc.toDate(),
-            lte: endDateTimeUtc.toDate(),
-          },
-        }),
+          }),
     max_early:
       maxEarlyNumber > 0 && !isServiceGranularity
         ? { lte: maxEarlyNumber }
