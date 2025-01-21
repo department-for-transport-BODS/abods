@@ -588,38 +588,26 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     }
   };
 
+export const timeDiffFilters = (
+  inputs: PerformanceInputType,
+  userOperatorIds: string[],
+) => ({
+  ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true),
+  time_diff_minutes: {
+    not: null,
+    lte: inputs.filters.maxDelay ? inputs.filters.maxDelay : Prisma.skip,
+    gte: inputs.filters.minDelay ? inputs.filters.minDelay : Prisma.skip,
+  },
+});
+
 const getStopsDistribution = async (
   inputs: PerformanceInputType,
   userOperatorIds: string[],
   db: PrismaClient,
 ) => {
-  const { filters } = inputs;
-  const { maxDelay, minDelay } = filters || {};
-
-  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
-
-  where.time_diff_minutes = {
-    not: null,
-  };
-
-  if (maxDelay && minDelay) {
-    where.time_diff_minutes = {
-      lte: maxDelay,
-      gte: minDelay,
-    };
-  } else if (maxDelay) {
-    where.time_diff_minutes = {
-      lte: maxDelay,
-    };
-  } else if (minDelay) {
-    where.time_diff_minutes = {
-      gte: minDelay,
-    };
-  }
-
   const results = await db.timetable_threshold_summary.groupBy({
     by: ["time_diff_minutes"],
-    where: where,
+    where: timeDiffFilters(inputs, userOperatorIds),
     _sum: {
       otp_count: true,
     },
