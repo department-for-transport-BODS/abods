@@ -190,11 +190,11 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   granularity: CorridorGranularity;
   matchType: MatchType;
   stopList: Array<Scalars['String']['input']>;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type CorridorStatsPerServiceType = {
@@ -338,8 +338,8 @@ export type FrequentServiceInfoFilterType = {
 
 export type FrequentServiceInfoInputType = {
   filters: FrequentServiceInfoFilterType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type FrequentServiceInfoType = {
@@ -388,8 +388,8 @@ export type HeadwayFiltersInputType = {
 
 export type HeadwayInputType = {
   filters: HeadwayFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type HeadwayMetricsType = {
@@ -409,9 +409,9 @@ export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
 
 
 export type HeadwayMetricsTypeFrequentServicesArgs = {
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   operatorId: Scalars['String']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 
@@ -436,9 +436,7 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
 };
 
 export enum HeadwaySortEnum {
@@ -823,9 +821,9 @@ export type PerformanceFiltersInputType = {
 
 export type PerformanceInputType = {
   filters: PerformanceFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   paging?: InputMaybe<PagingInputType>;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type PunctualityDayOfWeekType = {
@@ -943,7 +941,7 @@ export type QueryInvitationArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
+  inputDate?: InputMaybe<Scalars['String']['input']>;
   operatorId: Scalars['String']['input'];
 };
 
@@ -1034,9 +1032,9 @@ export type ServicePerformanceFiltersInputType = {
 
 export type ServicePerformanceInputType = {
   filters: ServicePerformanceFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   order: RankingOrder;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type ServicePerformanceType = {
@@ -1383,12 +1381,12 @@ export type HeadwayOverviewQueryVariables = Exact<{
 }>;
 
 
-export type HeadwayOverviewQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayOverview?: { __typename?: 'HeadwayOverviewType', actual: number, scheduled: number, excess: number } | null } | null };
+export type HeadwayOverviewQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayOverview?: { __typename?: 'HeadwayOverviewType', excess: number } | null } | null };
 
 export type HeadwayFrequentServicesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
 }>;
 
 
@@ -1561,7 +1559,7 @@ export type OperatorListQuery = { __typename?: 'Query', operators?: { __typename
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
-  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
+  inputDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2350,8 +2348,6 @@ export const HeadwayOverviewDocument = gql`
     query headwayOverview($params: HeadwayInputType!) {
   headwayMetrics {
     headwayOverview(inputs: $params) {
-      actual: actualWaitTime
-      scheduled: scheduledWaitTime
       excess: excessWaitTime
     }
   }
@@ -2369,7 +2365,7 @@ export const HeadwayOverviewDocument = gql`
     }
   }
 export const HeadwayFrequentServicesDocument = gql`
-    query headwayFrequentServices($operatorId: String!, $fromTimestamp: DateTime!, $toTimestamp: DateTime!) {
+    query headwayFrequentServices($operatorId: String!, $fromTimestamp: String!, $toTimestamp: String!) {
   headwayMetrics {
     frequentServices(
       operatorId: $operatorId
@@ -2911,7 +2907,7 @@ export const OperatorListDocument = gql`
     }
   }
 export const OperatorLinesDocument = gql`
-    query operatorLines($operatorId: String!, $inputDate: DateTime) {
+    query operatorLines($operatorId: String!, $inputDate: String) {
   lines(operatorId: $operatorId, inputDate: $inputDate) {
     id
     name
