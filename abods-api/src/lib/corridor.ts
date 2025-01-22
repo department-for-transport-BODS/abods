@@ -62,7 +62,7 @@ export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
         sourceId: stop.naptan_stop?.atco_code ?? "",
         stopLocality: {
           localityAreaId:
-            stop.naptan_stop?.locality?.admin_area_id.toString() ?? "",
+            stop.naptan_stop?.locality?.admin_area_id?.toString() ?? "",
           localityAreaName: stop.naptan_stop?.locality?.admin_area?.name ?? "",
           localityId: stop.naptan_stop?.locality_id.toString() ?? "",
           localityName: stop.naptan_stop?.locality?.name ?? "",

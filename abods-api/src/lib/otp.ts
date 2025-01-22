@@ -1,49 +1,22 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
-  MatchType,
+  FrequentServiceInfoInputType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
-import { getDayOfWeekNumbers } from "./utils.js";
-import { userSelectedDateAsUtc } from "./dayjs.js";
+import {
+  getPrismaFiltersForOTPQuery,
+  timeDiffFilters,
+} from "../resolvers/otpFunctions.js";
 
 const getThresholds = async (
   db: PrismaClient,
   where: Prisma.timetable_threshold_summaryWhereInput,
 ) => {
-  const whereCopy = { ...where };
-
-  const result = db.timetable_threshold_summary.aggregate({
-    _sum: {
-      otp_count: true,
-    },
-    where: whereCopy,
+  return db.timetable_threshold_summary.aggregate({
+    _sum: { otp_count: true },
+    where: { ...where },
   });
-
-  return result;
-};
-
-const aggThresholds = async (
-  db: PrismaClient,
-  whereEarly: Prisma.timetable_threshold_summaryWhereInput,
-  whereLate: Prisma.timetable_threshold_summaryWhereInput,
-  whereOnTime: Prisma.timetable_threshold_summaryWhereInput,
-) => {
-  const earlyCall = getThresholds(db, whereEarly);
-  const lateCall = getThresholds(db, whereLate);
-  const onTimeCall = getThresholds(db, whereOnTime);
-
-  const [early, late, onTime] = await Promise.all([
-    earlyCall,
-    lateCall,
-    onTimeCall,
-  ]);
-
-  return {
-    early: early._sum.otp_count ?? 0,
-    late: late._sum.otp_count ?? 0,
-    onTime: onTime._sum.otp_count ?? 0,
-  };
 };
 
 export const compareThresholds = async (
@@ -51,164 +24,44 @@ export const compareThresholds = async (
   userOperatorIds: string[],
   db: PrismaClient,
 ): Promise<PunctualityTotalsType | null> => {
-  const { fromTimestamp, toTimestamp, filters } = inputs;
+  if (!inputs.filters.onTimeMinMinutes || !inputs.filters.onTimeMaxMinutes) {
+    return null;
+  }
+  const where = timeDiffFilters(inputs, userOperatorIds);
 
-  const {
-    timingPointsOnly,
-    onTimeMaxMinutes,
-    onTimeMinMinutes,
-    adminAreaIds,
-    operatorIds,
-    dayOfWeekFlags,
-    startTime,
-    endTime,
-    maxDelay,
-    minDelay,
-    lineIds,
-    matchType,
-  } = filters ?? {};
+  const [early, late, onTime] = await Promise.all([
+    getThresholds(db, {
+      ...where,
+      time_diff_minutes: {
+        ...where.time_diff_minutes,
+        lt: inputs.filters.onTimeMinMinutes,
+      },
+    }),
+    getThresholds(db, {
+      ...where,
+      time_diff_minutes: {
+        ...where.time_diff_minutes,
+        gte: inputs.filters.onTimeMaxMinutes,
+      },
+    }),
+    getThresholds(db, {
+      ...where,
+      time_diff_minutes: {
+        ...where.time_diff_minutes,
+        gte: inputs.filters.onTimeMinMinutes,
+        lt: inputs.filters.onTimeMaxMinutes,
+      },
+    }),
+  ]);
 
-  const opIds = operatorIds ?? undefined;
-  const adminIds = adminAreaIds ?? undefined;
-
-  const where: Prisma.timetable_threshold_summaryWhereInput = {
-    operator_noc: {
-      in: opIds ? opIds : userOperatorIds,
-    },
-    date_of_journey: {
-      gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
-      lt: userSelectedDateAsUtc(toTimestamp).toDate(),
-    },
+  return {
+    early: early._sum.otp_count ?? 0,
+    late: late._sum.otp_count ?? 0,
+    onTime: onTime._sum.otp_count ?? 0,
+    scheduled: 0,
+    completed: 0,
+    averageDeviation: 0,
   };
-
-  if (matchType === MatchType.Evidenced) {
-    where.estimated = false;
-  }
-
-  if (timingPointsOnly) {
-    where.is_timing_point = timingPointsOnly;
-  }
-
-  if (lineIds && lineIds.length > 0) {
-    where.noc_and_line_and_servicecode = {
-      in: lineIds,
-    };
-  }
-
-  if (adminIds && adminIds.length > 0) {
-    where.admin_areas = {
-      hasEvery: adminIds.map(Number),
-    };
-  }
-
-  // parse startime and endtime minutes/hours
-  const start = new Date();
-  const end = new Date();
-
-  const departure_hour: {
-    gte?: Date;
-    lte?: Date;
-  } = {};
-
-  if (startTime) {
-    const [hours, minutes, _] = startTime.split(":").map(Number);
-    start.setHours(hours, minutes, 0, 0);
-    departure_hour.gte = start;
-  }
-
-  if (endTime) {
-    const [hours, minutes, _] = endTime.split(":").map(Number);
-    end.setHours(hours, minutes, 0, 0);
-    departure_hour.lte = end;
-  }
-
-  if (departure_hour.gte || departure_hour.lte) {
-    where.departure_hour = departure_hour;
-  }
-
-  const timeDifference: {
-    time_diff_minutes: {
-      lt?: number;
-      gt?: number;
-      lte?: number;
-      gte?: number;
-    };
-  }[] = [];
-
-  if (minDelay) {
-    timeDifference.push({
-      time_diff_minutes: {
-        gte: minDelay,
-      },
-    });
-  }
-
-  if (maxDelay) {
-    timeDifference.push({
-      time_diff_minutes: {
-        lte: maxDelay,
-      },
-    });
-  }
-
-  let dayOfWeekNumbers: number[] = [];
-  if (dayOfWeekFlags) {
-    dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
-    where.day_of_week = { in: dayOfWeekNumbers };
-  }
-
-  if (onTimeMinMinutes && onTimeMaxMinutes) {
-    const earlyTimeDifference = [
-      ...timeDifference,
-      {
-        time_diff_minutes: {
-          lt: onTimeMinMinutes,
-        },
-      },
-    ];
-    const whereEarly: Prisma.timetable_threshold_summaryWhereInput = {
-      ...where,
-      AND: earlyTimeDifference,
-    };
-
-    const lateTimeDifference = [
-      ...timeDifference,
-      {
-        time_diff_minutes: {
-          gte: onTimeMaxMinutes,
-        },
-      },
-    ];
-    const whereLate: Prisma.timetable_threshold_summaryWhereInput = {
-      ...where,
-      AND: lateTimeDifference,
-    };
-
-    const ontimeDifference = [
-      ...timeDifference,
-      {
-        time_diff_minutes: {
-          gte: onTimeMinMinutes,
-          lt: onTimeMaxMinutes,
-        },
-      },
-    ];
-    const whereOntime: Prisma.timetable_threshold_summaryWhereInput = {
-      ...where,
-      AND: ontimeDifference,
-    };
-
-    const results = await aggThresholds(db, whereEarly, whereLate, whereOntime);
-
-    return {
-      ...results,
-      scheduled: 0,
-      completed: 0,
-      averageDeviation: 0,
-    };
-  }
-
-  return null;
 };
 
 export const getOperatorsFromOrgId = async (
@@ -263,4 +116,36 @@ export const getNocAdminAreas = async (db: PrismaClient) => {
       admin_area: true,
     },
   });
+};
+
+export const getSummaryStopsTotalHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const results = await db.timetable_summary_stops_tz.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      scheduled: { gt: 0 },
+    },
+    select: { departure_hour: true },
+  });
+  return results.length;
+};
+
+export const getFrequentServiceActualHours = async (
+  db: PrismaClient,
+  inputs: FrequentServiceInfoInputType,
+  userOperatorIds: string[],
+) => {
+  const results = await db.timetable_frequent_summary_services.findMany({
+    distinct: ["departure_hour"],
+    where: {
+      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+      actual_headway: { gt: 0 },
+    },
+    select: { departure_hour: true },
+  });
+  return results.length;
 };
