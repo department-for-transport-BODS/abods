@@ -162,7 +162,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         tap(() => (this.journeysLoading = true)),
         switchMap(({ journeyStart, lineId }) =>
           this.service.fetchDayJourneys(
-            DateTime.fromISO(journeyStart).startOf("day").toISO(),
+            DateTime.fromISO(journeyStart)
+              .setZone("Europe/London")
+              .startOf("day")
+              .toISO(),
             lineId,
           ),
         ),

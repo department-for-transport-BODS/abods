@@ -13,3 +13,4 @@ VERSION
 *.prisma
 Makefile
 *.sh
+*.toml

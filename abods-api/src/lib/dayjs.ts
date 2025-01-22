@@ -24,29 +24,6 @@ export const getDate = (
   }
 };
 
-export const getUTCDate = (date?: string | Date): Dayjs => {
-  return dayjs.utc(date);
-};
-
-export const getDBDayValue = (datetime: string | Date) => {
-  // Workaround for timezone, daylight savings issues
-  // Any iso datetime can be passed in, and we determine the right 'day' value to use
-  // When the time passed is a different day in utc to the local time given the offset, this will return the start of that day in utc
-  // To be used when a date value needs to be used in a query.
-  // Example: 2024-10-25T00:00:00+01:00 is 2024-10-24T23:00:00Z in UTC.
-  // This adds the offset to that value, so that when used in a query, our ORM will serialise 2024-10-25 00:00:00 UTC, and return the expected results
-  const dateOfJourney = getDate(datetime);
-  return dateOfJourney
-    .utc()
-    .add(dateOfJourney.utcOffset(), "minute")
-    .startOf("day")
-    .toDate();
-};
-
-export const getBSTDate = (date: Date | Dayjs, format: string): string => {
-  return dayjs(date).tz("Europe/London").format(format);
-};
-
 export const getFormattedDate = (
   inputDate: Date | null | undefined,
   format?: string,
@@ -80,14 +57,21 @@ export const getDayFormattedDate = (
         .format("YYYY-MM-DDTHH:mm:ssZ");
 };
 
-export const dbUtcToBstDate = (inputDate: Date | string): string => {
-  return getUTCDate(inputDate).tz("Europe/London").format("YYYY-MM-DD");
-};
+export const userSelectedDateAsUtc = (isoTimestamp: string) =>
+  // Assumption is that the timestamp will be for the date they want in their local time zone
+  // Avoid converting that to another timezone, and just grab the date part, ignoring time and offset
+  dayjs(isoTimestamp.substring(0, 10));
 
-export const utcToBstDBInput = (
-  inputDate: Date | string | undefined,
-): Date | undefined => {
-  return inputDate
-    ? getUTCDate(inputDate).tz("Europe/London").toDate()
-    : undefined;
+export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
+  const timestamp = date;
+  if (!time) {
+    return date.utc();
+  }
+  const [hours, minutes, _] = time.split(":").map(Number);
+  return timestamp
+    .tz("Europe/London")
+    .set("hour", hours)
+    .set("minute", minutes)
+    .startOf("minute")
+    .utc();
 };

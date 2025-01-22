@@ -15,8 +15,6 @@ import { pick } from "lodash-es";
 import { PerformanceParams } from "./on-time.service";
 
 export interface Headway {
-  actual: number;
-  scheduled: number;
   excess: number;
 }
 

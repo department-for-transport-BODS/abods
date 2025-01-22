@@ -24,7 +24,7 @@ query route($groupId: String!) {
   }
 }
 
-query journeys($dateOfJourney: DateTime!, $lineId: String!) {
+query journeys($dateOfJourney: String!, $lineId: String!) {
   findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
     groupId
     startTime
