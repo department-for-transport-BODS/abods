@@ -588,38 +588,28 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     }
   };
 
+export const timeDiffFilters = (
+  inputs: PerformanceInputType,
+  userOperatorIds: string[],
+) => ({
+  ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
+  max_early: Prisma.skip,
+  max_late: Prisma.skip,
+  time_diff_minutes: {
+    not: null,
+    lte: inputs.filters.maxDelay ? inputs.filters.maxDelay : Prisma.skip,
+    gte: inputs.filters.minDelay ? inputs.filters.minDelay : Prisma.skip,
+  },
+});
+
 const getStopsDistribution = async (
   inputs: PerformanceInputType,
   userOperatorIds: string[],
   db: PrismaClient,
 ) => {
-  const { filters } = inputs;
-  const { maxDelay, minDelay } = filters || {};
-
-  const where = getPrismaFiltersForOTPQuery(inputs, userOperatorIds, true);
-
-  where.time_diff_minutes = {
-    not: null,
-  };
-
-  if (maxDelay && minDelay) {
-    where.time_diff_minutes = {
-      lte: maxDelay,
-      gte: minDelay,
-    };
-  } else if (maxDelay) {
-    where.time_diff_minutes = {
-      lte: maxDelay,
-    };
-  } else if (minDelay) {
-    where.time_diff_minutes = {
-      gte: minDelay,
-    };
-  }
-
   const results = await db.timetable_threshold_summary.groupBy({
     by: ["time_diff_minutes"],
-    where: where,
+    where: timeDiffFilters(inputs, userOperatorIds),
     _sum: {
       otp_count: true,
     },
@@ -1401,7 +1391,6 @@ export const getPrismaFiltersForOTPQuery = (
     HeadwayInputType &
     FrequentServiceInfoInputType,
   userOperatorNocList: string[],
-  isThreshold?: boolean,
 ): Prisma.timetable_summary_service_tzWhereInput &
   Prisma.timetable_summary_operator_tWhereInput &
   Prisma.timetable_summary_stops_tzWhereInput &
@@ -1468,14 +1457,9 @@ export const getPrismaFiltersForOTPQuery = (
     estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
     is_timing_point: timingPointsOnly ? true : Prisma.skip,
     day_of_week: dayOfWeekFlags ? { in: dayOfWeekNumbers } : Prisma.skip,
-    departure_hour: isThreshold
-      ? {
-          gte: startTime ? startDateTimeUtc.toDate() : Prisma.skip,
-          lte: endTime ? endDateTimeUtc.toDate() : Prisma.skip,
-        }
-      : Prisma.skip,
-    ...(!isThreshold
-      ? startDateTimeUtc.hour() > endDateTimeUtc.hour()
+    ...(!startTime && !endTime
+      ? {}
+      : startDateTimeUtc.hour() > endDateTimeUtc.hour()
         ? {
             // Prisma prevents us from sending the UTC offset in our query, otherwise UK time values would just work as below
             // Somewhat related: https://github.com/prisma/prisma/issues/7915
@@ -1505,14 +1489,13 @@ export const getPrismaFiltersForOTPQuery = (
               gte: startDateTimeUtc.toDate(),
               lte: endDateTimeUtc.toDate(),
             },
-          }
-      : {}),
+          }),
     max_early:
-      maxEarlyNumber > 0 && !isServiceGranularity && !isThreshold
+      maxEarlyNumber > 0 && !isServiceGranularity
         ? { lte: maxEarlyNumber }
         : Prisma.skip,
     max_late:
-      maxLateNumber > 0 && !isServiceGranularity && !isThreshold
+      maxLateNumber > 0 && !isServiceGranularity
         ? { lte: maxLateNumber }
         : Prisma.skip,
     noc_and_line_and_servicecode: lines ? { in: lines } : Prisma.skip,
