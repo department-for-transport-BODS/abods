@@ -592,3 +592,11 @@ view naptan_stoppoint_latlong {
   locality       naptan_locality                 @relation(fields: [locality_id], references: [gazetteer_id])
   timetable      Timetable[]
 }
+
+model transmodel_tracks {
+  id                Int @id
+  from_atco_code    String
+  to_atco_code      String
+  geometry          String    
+  distance          Int
+}
