@@ -179,7 +179,10 @@ export const loginUser: MutationResolvers["login"] = async (
     }
 
     const bodsUser = await context.db.bods_user.findFirst({
-      where: { email: { equals: args.username, mode: "insensitive" } },
+      where: {
+        email: { equals: args.username, mode: "insensitive" },
+        is_active: true,
+      },
       include: {
         userOrganisations: true,
       },
