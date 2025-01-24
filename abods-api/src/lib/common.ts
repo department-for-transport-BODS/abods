@@ -13,13 +13,7 @@ export const getTracksData = async (
 ) => {
   return db
     .selectFrom("transmodel_tracks")
-    .select([
-      "id",
-      "from_atco_code",
-      "to_atco_code",
-      sql`ST_AsGeoJSON(geometry)`.as("geometry"),
-      "distance",
-    ])
+    .select(["id", "from_atco_code", "to_atco_code", "geometry", "distance"])
     .where((eb) =>
       eb.or(
         stop_atcos.map((condition) =>
@@ -67,9 +61,7 @@ export const listServiceLinks = async (
     const previousStopPoint = point(previousStop.lon, previousStop.lat);
 
     if (link) {
-      const linestring = JSON.parse(
-        link.geometry as string,
-      ) as GeoJSONLineString;
+      const linestring = JSON.parse(link.geometry) as GeoJSONLineString;
 
       coordinates = linestring.coordinates;
     } else {
