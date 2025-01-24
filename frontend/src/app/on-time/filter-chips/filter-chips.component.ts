@@ -10,6 +10,7 @@ import { AdminArea, AdminAreaService } from "../admin-area/admin-area.service";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map } from "rxjs/operators";
 import { entries as _entries } from "lodash-es";
+import { FilterChipsComponent } from "../../shared/components/filter-chips/filter-chips.component";
 
 export interface DayOfWeekLabel {
   monday: "Mon";
@@ -22,78 +23,24 @@ export interface DayOfWeekLabel {
 }
 
 @Component({
-  selector: "app-filter-chips",
+  selector: "app-on-time-filter-chips",
   templateUrl: "./filter-chips.component.html",
   styleUrls: ["./filter-chips.component.scss"],
 })
-export class FilterChipsComponent implements OnChanges {
+export class OnTimeFilterChipsComponent
+  extends FilterChipsComponent
+  implements OnChanges
+{
   @Input() showAdminAreas = true;
   @Input() filters: PerformanceFiltersInputType = {};
   @Output() filterChange = new EventEmitter<PerformanceFiltersInputType>();
 
-  get isDayOfWeek(): boolean {
-    return !!this.filters.dayOfWeekFlags;
-  }
-
-  get isTimeRange(): boolean {
-    return !!this.filters.startTime || !!this.filters.endTime;
-  }
-
-  get isMinDelay(): boolean {
-    return !!this.filters.minDelay;
-  }
-
-  get isMaxDelay(): boolean {
-    return !!this.filters.maxDelay;
-  }
-
-  dayOfWeekValueMap: DayOfWeekLabel = {
-    monday: "Mon",
-    tuesday: "Tue",
-    wednesday: "Wed",
-    thursday: "Thur",
-    friday: "Fri",
-    saturday: "Sat",
-    sunday: "Sun",
-  };
-
-  private readonly weekends = "Sat, Sun";
-  private readonly weekdays = "Mon, Tue, Wed, Thur, Fri";
-
-  get dayOfWeekValues(): string {
-    const value = _entries(this.filters.dayOfWeekFlags ?? {})
-      .filter(([, value]) => value)
-      .map(([day]) => this.dayOfWeekValueMap[day as keyof DayOfWeekLabel])
-      .join(", ");
-
-    if (value === this.weekdays) {
-      return "Weekdays";
-    }
-    if (value === this.weekends) {
-      return "Weekends";
-    }
-
-    return value;
-  }
-
-  get timeRange(): string {
-    return this.filters.startTime + " - " + this.filters.endTime;
-  }
-
-  get minDelay(): string {
-    if (this.filters.minDelay) {
-      return this.filters.minDelay * -1 + " minutes";
-    }
-    return "";
-  }
-
-  get maxDelay(): string {
-    return this.filters.maxDelay + " minutes";
-  }
-
   adminAreas: AdminArea[] = [];
 
-  constructor(private adminAreaService: AdminAreaService) {}
+  constructor(private adminAreaService: AdminAreaService) {
+    super();
+    this.adminAreaService = adminAreaService;
+  }
 
   ngOnChanges() {
     const nocCode = this.filters.nocCodes?.[0];
@@ -111,26 +58,6 @@ export class FilterChipsComponent implements OnChanges {
         ),
       )
       .subscribe((adminAreas) => (this.adminAreas = adminAreas));
-  }
-
-  onClearDayOfWeekFilter() {
-    const { dayOfWeekFlags: _, ...filters } = this.filters;
-    this.updateFilters(filters);
-  }
-
-  onClearTimeRangeFilter() {
-    const { startTime: _, endTime: __, ...filters } = this.filters;
-    this.updateFilters(filters);
-  }
-
-  onClearMinDelayFilter() {
-    const { minDelay: _, ...filters } = this.filters;
-    this.updateFilters(filters);
-  }
-
-  onClearMaxDelayFilter() {
-    const { maxDelay: _, ...filters } = this.filters;
-    this.updateFilters(filters);
   }
 
   clearAdminAreaFilter(adminAreaId: string) {

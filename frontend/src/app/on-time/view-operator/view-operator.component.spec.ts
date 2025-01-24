@@ -38,7 +38,6 @@ describe("ViewOperatorComponent", () => {
   const createComponent = createRoutingFactory({
     component: ViewOperatorComponent,
     declarations: [
-      FiltersComponent,
       ChartNoDataWrapperComponent,
       ControlsComponent,
       TabsComponent,

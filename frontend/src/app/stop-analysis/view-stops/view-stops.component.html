@@ -2,5 +2,9 @@
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis"></app-page-header>
     <p>view-stops works!</p>
+    <app-controls
+      (params)="params$.next($event)"
+      [showAdminAreas]="false"
+    ></app-controls>
   </ng-container>
 </app-page>
