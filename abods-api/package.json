@@ -39,6 +39,7 @@
     "connect-redis": "^7.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "datadog": "^1.0.1",
     "datadog-lambda-js": "^9.117.0",
     "dayjs": "^1.11.11",
     "dayjs-plugin-utc": "^0.1.2",
