@@ -6,8 +6,8 @@ generator client {
 
 generator kysely {
   provider = "prisma-kysely"
-  output       = "../src"
-  fileName     = "kysely.ts"
+  output   = "../src"
+  fileName = "kysely.ts"
 }
 
 datasource db {
@@ -72,7 +72,6 @@ model Tokens {
   token   String? @db.VarChar(150)
 }
 
-
 model SiriVMPositions {
   siri_vm_positions_id BigInt    @default(autoincrement())
   operator_ref         String
@@ -109,7 +108,7 @@ model Timetable {
   common_name              String?
   atco_code                String?
   stop_type                String?
-  stop_index               Int // TODO: fix - nullable int in db
+  stop_index               Int // TODO: fix - nullable in db
   stop_latitude            Float?                   @db.Real
   stop_longitude           Float?                   @db.Real
   locality_id              String?
@@ -131,7 +130,8 @@ model Timetable {
   vehiclejourney_id        Int?
   admin_area_id            Int?
   timestamp_after_estimate DateTime?                @db.Timestamptz(6)
-  expected_journeys        expected_journeys?       @relation(fields: [group_id], references: [group_id])
+  direction                String?
+  departure_day_shift      Boolean?
   stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
   @@id([timetable_id, date_of_journey], map: "timetable_pk_240603")
@@ -143,34 +143,34 @@ model Timetable {
 }
 
 model expected_operators {
-  date_of_journey   DateTime            @db.Date // TODO: fix - nullable date in db
-  operator_noc      String                       // TODO: fix - nullable string in db
+  date_of_journey   DateTime            @db.Date // TODO: fix - nullable in db
+  operator_noc      String // TODO: fix - nullable in db
   operator_name     String?
   expected_services expected_services[]
 
-  @@id([operator_noc, date_of_journey]) // TODO: fix - ID not in db, only exists here to pass model validation
+  @@id([operator_noc, date_of_journey]) // TODO: fix - not in db
   @@index([date_of_journey], map: "expected_operators_v2_date_of_journey_idx")
   @@index([operator_noc], map: "expected_operators_v2_operator_noc_idx")
 }
 
 model expected_journeys {
-  date_of_journey              DateTime           @db.Date           // TODO: fix - nullable date in db
+  date_of_journey              DateTime           @db.Date // TODO: fix - nullable in db
   operator_noc                 String?
   line_name                    String?
-  noc_and_line_and_servicecode String                                // TODO: fix - nullable string in db
-  journey_code                 String                                // TODO: fix - nullable string in db
-  group_id                     String             @unique            // TODO: fix - nullable string in db, not unique
+  noc_and_line_and_servicecode String // TODO: fix - nullable in db
+  journey_code                 String // TODO: fix - nullable in db
+  group_id                     String // TODO: fix - nullable in db
   stop_count                   Int?
-  expected_journey_start       DateTime           @db.Timestamptz(6) // TODO: fix - nullable timestamptz in db
-  journey_pattern_description  String                                // TODO: fix - nullable string in db
+  expected_journey_start       DateTime?          @db.Timestamptz(6)
+  journey_pattern_description  String // TODO: fix - nullable in db
   vehicle_journey_id           Int?
   day_of_week                  Int?
   admin_area_id                Int[]
   expected_journey_end         DateTime?          @db.Timestamptz(6)
-  expected_services            expected_services? @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey]) // TODO: fix - not in db
-  timetable                    Timetable[]                           // TODO: fix - not found in db
+  direction                    String?            @db.VarChar(20)
+  expected_services            expected_services? @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
 
-  @@id([noc_and_line_and_servicecode, journey_code, date_of_journey]) // TODO: fix - not ID in db, only exists here to pass model validation
+  @@id([noc_and_line_and_servicecode, journey_code, date_of_journey]) // TODO: fix - not in db
   @@index([date_of_journey], map: "expected_journeys_v2_date_of_journey_idx")
   @@index([group_id], map: "expected_journeys_v2_group_id_idx")
   @@index([noc_and_line_and_servicecode], map: "expected_journeys_v2_noc_and_line_idx")
@@ -194,7 +194,7 @@ model transmodel_servicepatternstop {
   id                 BigInt                   @id
   sequence_number    Int
   atco_code          String
-  naptan_stop_id     Int // TODO: fix - nullable int in db
+  naptan_stop_id     Int // TODO: fix - nullable in db
   service_pattern_id Int
   departure_time     DateTime?                @db.Time(6)
   is_timing_point    Boolean
@@ -213,7 +213,7 @@ model naptan_locality {
   name          String
   easting       Int
   northing      Int
-  admin_area_id BigInt                                                                          // TODO: fix - nullable int in db
+  admin_area_id BigInt // TODO: fix - nullable int in db
   district_id   Int?
   admin_area    naptan_adminarea           @relation(fields: [admin_area_id], references: [id]) // TODO: fix - not in db
   stops         naptan_stoppoint_latlong[]
@@ -229,13 +229,13 @@ model naptan_adminarea {
   traveline_region_id String
   atco_code           String
   ui_lta_id           Int?
-  naptan_locality     naptan_locality[]
+  naptan_locality     naptan_locality[] // TODO: fix - not in db
 
   @@index([atco_code])
 }
 
 model timetable_threshold_summary {
-  threshold_id                 BigInt    @id @default(autoincrement()) // TODO: fix - not primary key in db
+  threshold_id                 BigInt    @id @default(autoincrement()) // TODO: fix - not id in db
   operator_noc                 String?
   line_name                    String?
   noc_and_line_and_servicecode String?
@@ -245,32 +245,33 @@ model timetable_threshold_summary {
   time_diff_minutes            Float?
   departure_hour               DateTime? @db.Time(6)
   admin_areas                  Int[]
-  otp_count                    Int? // TODO: fix - nullable bigint in db
+  otp_count                    Int? // TODO: fix - bigint in db
   day_of_week                  Int?
-  estimated                    Boolean
+  estimated                    Boolean?  @default(false)
+  departure_hour_only          DateTime  @db.Timetz(6)
 
   @@index([date_of_journey, operator_noc], map: "noc_index_timetable_threshold_summary")
   @@index([date_of_journey, time_diff_minutes], map: "timediff_index_timetable_threshold_summary")
 }
 
 model timetable_summary_operator_t {
-  timetable_id        BigInt    @id @default(autoincrement()) // TODO: fix - not primary key in db
-  operator_noc        String?
-  date_of_journey     DateTime? @db.Date
-  departure_hour      DateTime? @db.Timestamptz(6)
-  departure_hour_only DateTime? @db.Timetz(6)
-  day_of_week         Int?
+  timetable_id        BigInt   @id @default(autoincrement()) // TODO: fix - not id in db
+  operator_noc        String
+  date_of_journey     DateTime @db.Date
+  departure_hour      DateTime @db.Timestamptz(6)
+  departure_hour_only DateTime @db.Timetz(6)
+  day_of_week         Int
   on_time_count       Int?
   early_count         Int?
   late_count          Int?
   completed           Int?
   scheduled           Int?
-  is_timing_point     Boolean?
-  max_early           Int?
-  max_late            Int?
-  avg_time_difference Decimal?  @db.Decimal
+  is_timing_point     Boolean
+  max_early           Int
+  max_late            Int
+  avg_time_difference Decimal  @db.Decimal
   admin_areas         Int[]
-  estimated           Boolean
+  estimated           Boolean  @default(false)
 
   @@index([day_of_week], map: "day_of_week_operatort")
   @@index([departure_hour_only], map: "departure_hour_only_operatort")
@@ -282,14 +283,14 @@ model timetable_summary_operator_t {
 }
 
 model performance_statistics {
-  operator_noc                 String // TODO: fix - nullable string in db
-  line_name                    String // TODO: fix - nullable string in db
-  noc_and_line_and_servicecode String // TODO: fix - nullable string in db
+  operator_noc                 String // TODO: fix - nullable in db
+  line_name                    String // TODO: fix - nullable in db
+  noc_and_line_and_servicecode String // TODO: fix - nullable in db
   service_name                 String?
   is_timing_point              Boolean?
-  date_period_start            DateTime  @db.Date // TODO: fix - nullable date in db
+  date_period_start            DateTime  @db.Date // TODO: fix - nullable in db
   date_period_end              DateTime? @db.Date
-  period_type                  String    @db.VarChar(50) // TODO: fix - nullable string in db
+  period_type                  String    @db.VarChar(50) // TODO: fix - nullable in db
   on_time_count                Int?
   early_count                  Int?
   late_count                   Int?
@@ -304,7 +305,7 @@ model performance_statistics {
   trend_percentage             Decimal?  @db.Decimal
   percentage_change            Decimal?  @db.Decimal
 
-  @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type]) // TODO: fix - not unique in db, only exists here to pass model validation
+  @@unique([operator_noc, noc_and_line_and_servicecode, date_period_start, period_type]) // TODO: fix - not in db
 }
 
 model timetable_summary_service_tz {
@@ -326,10 +327,9 @@ model timetable_summary_service_tz {
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
   admin_areas                  Int[]
-  headway_valid                Boolean
-  estimated                    Boolean
+  estimated                    Boolean  @default(false)
 
-  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode], map: "timetable_summary_sevice_tz_pkey")
+  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_servicetz")
   @@index([day_of_week], map: "day_of_week_servicetz")
   @@index([departure_hour_only], map: "departure_hour_only_servicetz")
@@ -346,9 +346,9 @@ model timetable_summary_stops_tz {
   operator_noc                 String
   service_code                 String
   noc_and_line_and_servicecode String
-  stop_id                      Int // TODO: fix - non null bigint in db
+  stop_id                      Int // TODO: fix - bigint in db
   locality_id                  String
-  line_name                    String?
+  line_name                    String
   stop_latitude                Float    @db.Real
   stop_longitude               Float    @db.Real
   date_of_journey              DateTime @db.Date
@@ -365,13 +365,9 @@ model timetable_summary_stops_tz {
   max_early                    Int
   max_late                     Int
   avg_time_difference          Decimal? @db.Decimal
-  headway_stops_count          Int // TODO: fix - nullable int in db
-  expected_headway             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
-  actual_headway               Decimal  @db.Decimal // TODO: fix - nullable decimal in db
-  excess_wait_time             Decimal  @db.Decimal // TODO: fix - nullable decimal in db
-  estimated                    Boolean
+  estimated                    Boolean  @default(false)
 
-  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude])
+  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_stopstz")
   @@index([day_of_week], map: "day_of_week_stopstz")
   @@index([departure_hour_only], map: "departure_hour_only_stopstz")
@@ -383,26 +379,28 @@ model timetable_summary_stops_tz {
   @@index([operator_noc], map: "operator_noc_stopstz")
   @@index([service_code], map: "service_code_stopstz")
   @@index([stop_id], map: "stop_id_stopstz")
+  @@index([stop_latitude], map: "timetable_summary_stops_tz_latitude_idx")
+  @@index([stop_longitude], map: "timetable_summary_stops_tz_longitude_idx")
 }
 
 model corridor {
-  corridor_id     Int                   @id @default(autoincrement()) // TODO: fix - non null bigint and not id in database
-  corridor_name   String                                              // TODO: fix - nullable string in db
-  organisation_id Int                                                 // TODO: fix - nullable bigint in db
-  user_id         Int                                                 // TODO: fix - nullable bigint in db
+  corridor_id     Int                   @id @default(autoincrement()) // TODO: fix - bigint and not id in database
+  corridor_name   String // TODO: fix - nullable in db
+  organisation_id Int // TODO: fix - nullable in db
+  user_id         Int // TODO: fix - nullable in db
   bods_user       bods_user             @relation(fields: [user_id], references: [id])
   bods_userorg    bods_userorganisation @relation(fields: [user_id, organisation_id], references: [user_id, organisation_id])
-  corridor_stops  corridor_stops[]                                    // TODO: fix - not in db
+  corridor_stops  corridor_stops[] // TODO: fix - not in db
 }
 
 model corridor_stops {
-  corridor_index        BigInt                                                                               // TODO: fix - nullable bigint in db
-  corridor_id           Int                                                                                  // TODO: fix - nullable bigint in db
-  stop_id               Int                                                                                  // TODO: fix - nullable bigint in db
+  corridor_index        BigInt // TODO: fix - nullable in db
+  corridor_id           Int // TODO: fix - nullable bigint in db
+  stop_id               Int // TODO: fix - nullable bigint in db
   route_to_next_stop    String?
-  distance_to_next_stop Int                                                                                  // TODO: fix - nullable int in db
+  distance_to_next_stop Int // TODO: fix - nullable in db
   naptan_stop           naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
-  corridor              corridor                 @relation(fields: [corridor_id], references: [corridor_id]) // TODO: fix - not in db
+  corridor              corridor?                @relation(fields: [corridor_id], references: [corridor_id])
 
   @@unique([corridor_index, corridor_id]) // TODO: fix - not unique in db, only exists here to pass model validation
 }
@@ -462,12 +460,32 @@ model feed_monitor_daily_summary {
 }
 
 model servicepattern_route {
-  distinct_route_id            Int             @unique
+  distinct_route_id            Int             @unique // TODO: fix - not unique in db
   noc_and_line_and_servicecode String
   distict_route                distinct_routes @relation(fields: [distinct_route_id], references: [id]) // TODO: fix - not found in db
 
   @@id([distinct_route_id, noc_and_line_and_servicecode], map: "servicepattern_route_pkey_test")
   @@index([noc_and_line_and_servicecode], map: "noc_and_line_and_servicecode_idx")
+}
+
+model timetable_frequent_summary_services {
+  timetable_id                 BigInt   @id @default(autoincrement())
+  operator_noc                 String
+  service_code                 String
+  noc_and_line_and_servicecode String
+  line_name                    String
+  date_of_journey              DateTime @db.Date
+  departure_hour               DateTime @db.Timestamptz(6)
+  departure_hour_only          DateTime @db.Timetz(6)
+  day_of_week                  Int
+  max_early                    Int
+  max_late                     Int
+  avg_time_difference          Decimal  @db.Decimal
+  expected_headway             Decimal  @db.Decimal
+  actual_headway               Decimal  @db.Decimal
+  excess_wait_time             Decimal  @db.Decimal
+  headway_stops_count          Decimal  @db.Decimal
+  estimated                    Boolean
 }
 
 view bods_user {
@@ -525,11 +543,11 @@ view bods_organisationoperator {
 }
 
 view naptan_adminarea_with_shape {
-  id            Int             @id // TODO: fix - non null bigint in db
+  id            Int             @id // TODO: fix - bigint in db
   name          String
   atco_code     String?
   st_asgeojson  String
-  noc_adminarea noc_adminarea[]     // TODO: fix - not found in db
+  noc_adminarea noc_adminarea[] // TODO: fix - not found in db
 }
 
 // TODO: fix - not visible on prisma db pull
@@ -556,17 +574,17 @@ view expected_services {
 }
 
 view naptan_stoppoint_latlong {
-  id             Int                             @id
-  atco_code      String?                         @db.VarChar(255)
-  naptan_code    String?                         @db.VarChar(12)
-  common_name    String                          @db.VarChar(255)
-  street         String?                         @db.VarChar(255)
-  indicator      String?                         @db.VarChar(255)
+  id             Int                             @id // TODO: fix - Bigint in db
+  atco_code      String?
+  naptan_code    String?
+  common_name    String
+  street         String?
+  indicator      String?
   admin_area_id  Int
-  locality_id    String                          @db.VarChar(8)
-  stop_areas     String[]                        @db.VarChar(255)
-  bus_stop_type  String?                         @db.VarChar(255)
-  stop_type      String?                         @db.VarChar(255)
+  locality_id    String
+  stop_areas     String[]
+  bus_stop_type  String?
+  stop_type      String?
   longitude      Float?
   latitude       Float?
   sp_stops       transmodel_servicepatternstop[]

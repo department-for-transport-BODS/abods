@@ -132,6 +132,7 @@ Resources:
             - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}"
             - !Ref ProjectName
           DB_USER: !Sub "${ProjectName}_proxy_rw"
+          DD_API_KEY: !Sub "{{resolve:secretsmanager:${ProjectName}/${Environment}/datadog/apikey:SecretString}}"
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
           DD_TAGS: app:graphql,project:abods
       LoggingConfig:
@@ -187,7 +188,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
-                Resource: !Ref GraphQLAPITokenSecret
+                Resource:
+                  - !Ref GraphQLAPITokenSecret
+                  - !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/apikey
               - Effect: Allow
                 Action:
                   - kms:Decrypt

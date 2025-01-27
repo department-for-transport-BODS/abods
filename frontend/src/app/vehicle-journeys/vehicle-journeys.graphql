@@ -4,6 +4,7 @@ query avls($groupId: String!) {
     latitude
     longitude
     vehicleRef
+    directionRef
   }
 }
 
@@ -19,10 +20,11 @@ query route($groupId: String!) {
     stopId
     isTimingPoint
     otp
+    directionRef
   }
 }
 
-query journeys($dateOfJourney: DateTime!, $lineId: String!) {
+query journeys($dateOfJourney: String!, $lineId: String!) {
   findJourneys(dateOfJourney: $dateOfJourney, lineId: $lineId) {
     groupId
     startTime
@@ -30,5 +32,6 @@ query journeys($dateOfJourney: DateTime!, $lineId: String!) {
     serviceNumber
     operatorName
     operatorNoc
+    directionRef
   }
 }

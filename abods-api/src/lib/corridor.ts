@@ -8,7 +8,7 @@ import {
   PrismaClient,
   Timetable,
 } from "@prisma/client";
-import { CorridorType, EstimatedToggle } from "../types/generated.js";
+import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 
 export enum CorridorJourneyStatsOption {
@@ -62,7 +62,7 @@ export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
         sourceId: stop.naptan_stop?.atco_code ?? "",
         stopLocality: {
           localityAreaId:
-            stop.naptan_stop?.locality?.admin_area_id.toString() ?? "",
+            stop.naptan_stop?.locality?.admin_area_id?.toString() ?? "",
           localityAreaName: stop.naptan_stop?.locality?.admin_area?.name ?? "",
           localityId: stop.naptan_stop?.locality_id.toString() ?? "",
           localityName: stop.naptan_stop?.locality?.name ?? "",
@@ -211,11 +211,11 @@ export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
 
 export const getJourneyDeparture = (
   journey: Timetable,
-  estimated: EstimatedToggle,
+  matchType: MatchType,
 ) => {
   return (
     journey.actual_departure_time ??
-    (estimated === EstimatedToggle.Estimated
+    (matchType === MatchType.Estimated
       ? journey.timestamp_after_estimate
       : null)
   );

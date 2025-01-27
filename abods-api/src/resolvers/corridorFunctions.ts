@@ -29,7 +29,7 @@ import {
   CorridorStatsTypeResolvers,
   CorridorSummaryStatsType,
   CorridorType,
-  EstimatedToggle,
+  MatchType,
   Maybe,
   MutationResolvers,
   MutationResponseType,
@@ -41,7 +41,7 @@ import {
   getDate,
   getDayFormattedDate,
   getHourFormattedDate,
-  utcToBstDBInput,
+  userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import haversineDistance from "haversine-distance";
@@ -389,8 +389,8 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
         in: stopList.map(Number),
       },
       date_of_journey: {
-        gte: utcToBstDBInput(fromTimestamp),
-        lt: utcToBstDBInput(toTimestamp),
+        gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
+        lt: userSelectedDateAsUtc(toTimestamp).toDate(),
       },
     },
   });
@@ -424,12 +424,12 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
     journeys.sort((a, b) => a.stop_index - b.stop_index);
     const firstDeparture = getJourneyDeparture(
       journeys[0],
-      data.inputs.estimated,
+      data.inputs.matchType,
     );
 
     const lastDeparture = getJourneyDeparture(
       journeys[journeys.length - 1],
-      data.inputs.estimated,
+      data.inputs.matchType,
     );
 
     if (firstDeparture && lastDeparture) {
@@ -466,7 +466,7 @@ export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTi
     return getJourneyStats(
       data.journeys,
       CorridorJourneyStatsOption.hourAsNumber,
-      data.inputs.estimated,
+      data.inputs.matchType,
     );
   };
 
@@ -481,7 +481,7 @@ export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDa
     return getJourneyStats(
       data.journeys,
       CorridorJourneyStatsOption.dayOfWeek,
-      data.inputs.estimated,
+      data.inputs.matchType,
     );
   };
 
@@ -497,19 +497,19 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
       ? getJourneyStats(
           data.journeys,
           CorridorJourneyStatsOption.day,
-          data.inputs.estimated,
+          data.inputs.matchType,
         )
       : getJourneyStats(
           data.journeys,
           CorridorJourneyStatsOption.hour,
-          data.inputs.estimated,
+          data.inputs.matchType,
         );
   };
 
 const getJourneyStats = (
   journeys: Map<string, Timetable[]>,
   inputType: CorridorJourneyStatsOption,
-  estimated: EstimatedToggle,
+  matchType: MatchType,
 ) => {
   const journeyStats = new Map<string, number[]>();
   [...journeys.values()].map((journeys) => {
@@ -517,10 +517,10 @@ const getJourneyStats = (
 
     const firstDeparture = journeys[0];
 
-    const firstStopDeparture = getJourneyDeparture(journeys[0], estimated);
+    const firstStopDeparture = getJourneyDeparture(journeys[0], matchType);
     const lastDeparture = getJourneyDeparture(
       journeys[journeys.length - 1],
-      estimated,
+      matchType,
     );
 
     if (firstStopDeparture && lastDeparture) {
@@ -597,11 +597,11 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
 
       const firstStopDeparture = getJourneyDeparture(
         journeys[0],
-        data.inputs.estimated,
+        data.inputs.matchType,
       );
       const lastDeparture = getJourneyDeparture(
         journeys[journeys.length - 1],
-        data.inputs.estimated,
+        data.inputs.matchType,
       );
       // noc_line_and_servicecode
       const service = `${firstDeparture.operator_noc}-${firstDeparture.line_name}-${firstDeparture.service_code}`;
@@ -664,11 +664,11 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
 
       const firstStopDeparture = getJourneyDeparture(
         journeys[0],
-        data.inputs.estimated,
+        data.inputs.matchType,
       );
       const lastDeparture = getJourneyDeparture(
         journeys[journeys.length - 1],
-        data.inputs.estimated,
+        data.inputs.matchType,
       );
       if (firstStopDeparture && lastDeparture) {
         const totalJourneyTime = Math.floor(

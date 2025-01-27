@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { StopHoverEvent } from "./stop-item/stop-item.component";
-import { Stop } from "../../../../generated/graphql";
+import { MatchType, Stop } from "../../../../generated/graphql";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
 
 @Component({
@@ -12,7 +12,7 @@ export class StopListComponent {
   @Input() view: JourneyInfo | null = null;
   @Input() timingPointsOnly = false;
   @Input() loading?: boolean;
-  @Input() estimated = false;
+  @Input() matchType = MatchType.Evidenced;
   @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();
 

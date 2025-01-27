@@ -531,6 +531,22 @@
         "isOneOf": null,
         "fields": [
           {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "latitude",
             "description": null,
             "args": [],
@@ -1269,22 +1285,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "EstimatedToggle",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "fromTimestamp",
             "description": null,
             "type": {
@@ -1292,7 +1292,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -1309,6 +1309,22 @@
               "ofType": {
                 "kind": "ENUM",
                 "name": "CorridorGranularity",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "MatchType",
                 "ofType": null
               }
             },
@@ -1348,7 +1364,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -2200,30 +2216,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "ENUM",
-        "name": "EstimatedToggle",
-        "description": null,
-        "isOneOf": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "estimated",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "evidenced",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "EventData",
         "description": null,
@@ -2695,7 +2687,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -2711,7 +2703,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -2972,18 +2964,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "EstimatedToggle",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "granularity",
             "description": null,
             "type": {
@@ -3010,6 +2990,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "MatchType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -3103,7 +3095,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -3119,7 +3111,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -3179,7 +3171,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "DateTime",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -3211,7 +3203,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "DateTime",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -3373,39 +3365,7 @@
         "isOneOf": null,
         "fields": [
           {
-            "name": "actualWaitTime",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "excessWaitTime",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "scheduledWaitTime",
             "description": null,
             "args": [],
             "type": {
@@ -3881,6 +3841,18 @@
         "description": null,
         "isOneOf": null,
         "fields": [
+          {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "groupId",
             "description": null,
@@ -4403,6 +4375,30 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "MatchType",
+        "description": null,
+        "isOneOf": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "estimated",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "evidenced",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -6010,18 +6006,6 @@
             "deprecationReason": null
           },
           {
-            "name": "estimated",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "EstimatedToggle",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "excludeItoLineId",
             "description": null,
             "type": {
@@ -6092,6 +6076,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "matchType",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "MatchType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -6297,7 +6293,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -6325,7 +6321,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -7047,7 +7043,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "DateTime",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -7142,7 +7138,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null,
@@ -7921,7 +7917,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -7953,7 +7949,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -8435,6 +8431,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "directionRef",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

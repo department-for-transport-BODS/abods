@@ -98,6 +98,7 @@ export type AvlLineLevelStatus = {
 
 export type AvlPoint = {
   __typename?: 'AvlPoint';
+  directionRef: Scalars['String']['output'];
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
   recordedAtTimeUtc: Scalars['String']['output'];
@@ -189,11 +190,11 @@ export type CorridorStatsHistogramType = {
 
 export type CorridorStatsInputType = {
   corridorId: Scalars['String']['input'];
-  estimated: EstimatedToggle;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   granularity: CorridorGranularity;
+  matchType: MatchType;
   stopList: Array<Scalars['String']['input']>;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type CorridorStatsPerServiceType = {
@@ -279,11 +280,6 @@ export type DelayFrequencyType = {
   frequency?: Maybe<Scalars['Int']['output']>;
 };
 
-export enum EstimatedToggle {
-  Estimated = 'estimated',
-  Evidenced = 'evidenced'
-}
-
 export type EventData = {
   __typename?: 'EventData';
   message: Scalars['String']['output'];
@@ -342,8 +338,8 @@ export type FrequentServiceInfoFilterType = {
 
 export type FrequentServiceInfoInputType = {
   filters: FrequentServiceInfoFilterType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type FrequentServiceInfoType = {
@@ -382,9 +378,9 @@ export type HeadwayDayOfWeekType = {
 export type HeadwayFiltersInputType = {
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
-  estimated?: InputMaybe<EstimatedToggle>;
   granularity?: InputMaybe<Granularity>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  matchType?: InputMaybe<MatchType>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
   startTime?: InputMaybe<Scalars['String']['input']>;
@@ -392,8 +388,8 @@ export type HeadwayFiltersInputType = {
 
 export type HeadwayInputType = {
   filters: HeadwayFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type HeadwayMetricsType = {
@@ -413,9 +409,9 @@ export type HeadwayMetricsTypeFrequentServiceInfoArgs = {
 
 
 export type HeadwayMetricsTypeFrequentServicesArgs = {
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   operatorId: Scalars['String']['input'];
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 
@@ -440,9 +436,7 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
 };
 
 export enum HeadwaySortEnum {
@@ -502,6 +496,7 @@ export type InvitationType = {
 
 export type Journey = {
   __typename?: 'Journey';
+  directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
@@ -561,6 +556,11 @@ export type LoginResponse = {
   expiresAt?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
+
+export enum MatchType {
+  Estimated = 'estimated',
+  Evidenced = 'evidenced'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -800,12 +800,12 @@ export type PerformanceFiltersInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
   endTime?: InputMaybe<Scalars['String']['input']>;
-  estimated?: InputMaybe<EstimatedToggle>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
   lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
   minDelay?: InputMaybe<Scalars['Int']['input']>;
   nocCodes?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -821,9 +821,9 @@ export type PerformanceFiltersInputType = {
 
 export type PerformanceInputType = {
   filters: PerformanceFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   paging?: InputMaybe<PagingInputType>;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type PunctualityDayOfWeekType = {
@@ -929,7 +929,7 @@ export type QueryEventsArgs = {
 
 
 export type QueryFindJourneysArgs = {
-  dateOfJourney: Scalars['DateTime']['input'];
+  dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
 };
 
@@ -940,7 +940,7 @@ export type QueryInvitationArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['DateTime']['input']>;
+  inputDate?: InputMaybe<Scalars['String']['input']>;
   operatorId: Scalars['String']['input'];
 };
 
@@ -1026,9 +1026,9 @@ export type ServicePerformanceFiltersInputType = {
 
 export type ServicePerformanceInputType = {
   filters: ServicePerformanceFiltersInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   order: RankingOrder;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type ServicePerformanceType = {
@@ -1088,6 +1088,7 @@ export enum SortOrderEnum {
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
+  directionRef: Scalars['String']['output'];
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
@@ -1275,7 +1276,6 @@ export type ResolversTypes = ResolversObject<{
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
   DelayFrequencyType: ResolverTypeWrapper<Partial<DelayFrequencyType>>;
-  EstimatedToggle: ResolverTypeWrapper<Partial<EstimatedToggle>>;
   EventData: ResolverTypeWrapper<Partial<EventData>>;
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
@@ -1310,6 +1310,7 @@ export type ResolversTypes = ResolversObject<{
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;
   LoginResponse: ResolverTypeWrapper<Partial<LoginResponse>>;
+  MatchType: ResolverTypeWrapper<Partial<MatchType>>;
   Mutation: ResolverTypeWrapper<{}>;
   MutationResponseType: ResolverTypeWrapper<Partial<MutationResponseType>>;
   OnTimePerformanceType: ResolverTypeWrapper<Partial<OnTimePerformanceType>>;
@@ -1502,6 +1503,7 @@ export type AvlLineLevelStatusResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type AvlPointResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AvlPoint'] = ResolversParentTypes['AvlPoint']> = ResolversObject<{
+  directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   recordedAtTimeUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1701,9 +1703,7 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
-  actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1746,6 +1746,7 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
 }>;
 
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
+  directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -2005,6 +2006,7 @@ export type ServicePunctualityTypeResolvers<ContextType = RequestContext, Parent
 
 export type StopResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Stop'] = ResolversParentTypes['Stop']> = ResolversObject<{
   actualDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   estimatedDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isTimingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
