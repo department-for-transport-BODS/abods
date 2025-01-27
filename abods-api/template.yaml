@@ -133,6 +133,7 @@ Resources:
             - !Ref ProjectName
           DB_USER: !Sub "${ProjectName}_proxy_rw"
           DD_API_KEY: !Sub "{{resolve:secretsmanager:${ProjectName}/${Environment}/datadog/apikey:SecretString}}"
+          DD_SITE: datadoghq.eu
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
           DD_TAGS: app:graphql,project:abods
       LoggingConfig:
