@@ -154,7 +154,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
       getOrgAdminAreas(context.db, user),
     ]);
 
-    const newStopList: number[] = [];
+    const newStopList: string[] = [];
     routes.map((data) => {
       const stopIndex = data.route.indexOf(stopsPattern);
       let matchStopPattern = stopsPattern;
@@ -164,9 +164,8 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
       const matches = data.route.match(matchStopPattern.concat("(.*)"));
       if (matches?.[1]) {
         const commaIndex = matches[1].indexOf(",");
-        const nextStop = Number(
-          commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1],
-        );
+        const nextStop =
+          commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
 
         if (!newStopList.includes(nextStop)) {
           newStopList.push(nextStop);
@@ -177,7 +176,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     if (newStopList.length > 0) {
       const stops = await context.db.naptan_stoppoint_latlong.findMany({
         where: {
-          id: {
+          atco_code: {
             in: newStopList,
           },
           admin_area_id: {
