@@ -70,9 +70,9 @@ import { WholeNumberFormControlDirective } from "./directives/form-control/whole
 import { HelpdeskPanelComponent } from "./components/helpdesk-panel/helpdesk-panel.component";
 import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive";
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
-import { ControlsComponent } from "./components/controls/controls.component";
 import { FilterChipsComponent } from "./components/filter-chips/filter-chips.component";
 import { FiltersComponent } from "./components/filters/filters.component";
+import { ControlsComponent } from "./components/controls/controls.component";
 @NgModule({
   declarations: [
     NoInfinityPipe,
@@ -135,9 +135,9 @@ import { FiltersComponent } from "./components/filters/filters.component";
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
     FreshdeskHtmlFormatterPipe,
-    ControlsComponent,
     FiltersComponent,
     FilterChipsComponent,
+    ControlsComponent,
   ],
   providers: [PercentPipe],
   imports: [
