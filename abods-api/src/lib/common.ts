@@ -4,26 +4,11 @@ import { AtcoStopType, GeoJSONLineString, RouteType } from "../types/extra.js";
 import { ServiceLinkType } from "../types/generated";
 import haversineDistance from "haversine-distance";
 
-export const getTracksData = async (
-  stop_atcos: {
-    from_atco_code: string;
-    to_atco_code: string;
-  }[],
-  db: Kysely<DB>,
-) => {
+export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
   return db
     .selectFrom("transmodel_tracks")
     .select(["id", "from_atco_code", "to_atco_code", "geometry", "distance"])
-    .where((eb) =>
-      eb.or(
-        stop_atcos.map((condition) =>
-          eb.and({
-            "transmodel_tracks.from_atco_code": condition.from_atco_code,
-            "transmodel_tracks.to_atco_code": condition.to_atco_code,
-          }),
-        ),
-      ),
-    )
+    .where("from_atco_code", "in", stop_atcos)
     .execute();
 };
 
@@ -35,23 +20,16 @@ export const listServiceLinks = async (
 ) => {
   const serviceLinks: ServiceLinkType[] = [];
 
-  const atco_codes_filter: {
-    from_atco_code: string;
-    to_atco_code: string;
-  }[] = [];
-
-  for (let i = 1; i < stops.length; i++) {
-    atco_codes_filter.push({
-      from_atco_code: stops[i - 1].stopId,
-      to_atco_code: stops[i].stopId,
-    });
-  }
-
-  const tracks = await getTracksData(atco_codes_filter, db);
+  const tracks = await getTracksData(
+    stops.map((stop) => stop.stopId),
+    db,
+  );
 
   for (let i = 1; i < stops.length; i++) {
     const link = tracks.find(
-      (track) => track.from_atco_code === stops[i - 1].stopId,
+      (track) =>
+        track.from_atco_code === stops[i - 1].stopId &&
+        track.to_atco_code === stops[i].stopId,
     );
 
     let coordinates: number[][] | [number, number][];
