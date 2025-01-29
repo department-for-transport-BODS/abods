@@ -163,6 +163,21 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           const vehicleAvls = this.rawAvls.filter(
             (n) => n.vehicleRef === this.vehicleRef,
           );
+          if (this.vehicles.length > 1) {
+            // TODO: remove in BODS-7974. No need to do this once we have solved that problem
+            const journeyStartTime = DateTime.fromISO(
+              this.rawAvls[0].recordedAtTimeUtc,
+            );
+            const journeyEndTime = DateTime.fromISO(
+              this.rawAvls.slice(-1)[0].recordedAtTimeUtc,
+            );
+            const hoursDifference = journeyEndTime
+              .diff(journeyStartTime)
+              .as("hours");
+            if (hoursDifference > 23.75) {
+              this.vehicles = [this.vehicleRef];
+            }
+          }
 
           this.journeyInfo = { avls: vehicleAvls, stops: stops };
           this.journeyInfoLoading = false;
