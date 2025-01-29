@@ -18,14 +18,13 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 
   const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
-  type CustomCol = Extract<
-    keyof DB["timetable_summary_stops_tz"],
-    "operator_noc" | "noc_and_line_and_servicecode"
-  >;
-  const groupIds: CustomCol[] = [];
-
   let dbQuery = context.kysely
     .selectFrom("timetable_summary_stops_tz")
+    .innerJoin(
+      "naptan_stoppoint_latlong",
+      "naptan_stoppoint_latlong.id",
+      "timetable_summary_stops_tz.stop_id",
+    )
     .select([
       "stop_id as stopId",
       "stop_latitude as latitude",
@@ -40,11 +39,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("completed").as("completedDepartures"),
       eb.fn.avg<number>("avg_time_difference").as("averageDelay"),
     ])
-    .innerJoin(
-      "naptan_stoppoint_latlong",
-      "naptan_stoppoint_latlong.id",
-      "timetable_summary_stops_tz.stop_id",
-    )
     .select("naptan_stoppoint_latlong.common_name as stopName");
 
   if (operatorId) {
@@ -72,15 +66,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       .where("noc_and_line_and_servicecode", "=", lineId);
   }
 
-  const gqlFieldType = {
-    operator_noc: "operatorId",
-    noc_and_line_and_servicecode: "lineId",
-  };
-
-  groupIds.map((col: CustomCol) => {
-    dbQuery = dbQuery.select(`${col} as ${gqlFieldType[col]}`);
-  });
-
   if (fromTimestamp && toTimestamp) {
     dbQuery = dbQuery
       .where(
@@ -95,29 +80,27 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       );
   }
 
-  if (boundingBox) {
-    dbQuery = dbQuery
-      .where(
-        "timetable_summary_stops_tz.stop_latitude",
-        ">=",
-        boundingBox.minLatitude,
-      )
-      .where(
-        "timetable_summary_stops_tz.stop_latitude",
-        "<=",
-        boundingBox.maxLatitude,
-      )
-      .where(
-        "timetable_summary_stops_tz.stop_longitude",
-        ">=",
-        boundingBox.minLongitude,
-      )
-      .where(
-        "timetable_summary_stops_tz.stop_longitude",
-        "<=",
-        boundingBox.maxLongitude,
-      );
-  }
+  dbQuery = dbQuery
+    .where(
+      "timetable_summary_stops_tz.stop_latitude",
+      ">=",
+      boundingBox.minLatitude,
+    )
+    .where(
+      "timetable_summary_stops_tz.stop_latitude",
+      "<=",
+      boundingBox.maxLatitude,
+    )
+    .where(
+      "timetable_summary_stops_tz.stop_longitude",
+      ">=",
+      boundingBox.minLongitude,
+    )
+    .where(
+      "timetable_summary_stops_tz.stop_longitude",
+      "<=",
+      boundingBox.maxLongitude,
+    );
 
   dbQuery = dbQuery.groupBy([
     "stop_id",
@@ -125,7 +108,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     "stop_longitude",
     "is_timing_point",
     "naptan_stoppoint_latlong.common_name",
-    ...groupIds,
   ]);
 
   return dbQuery.execute();
