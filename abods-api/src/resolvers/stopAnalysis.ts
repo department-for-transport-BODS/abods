@@ -34,39 +34,15 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 
   if (fromTimestamp && toTimestamp) {
     dbQuery = dbQuery
-      .where(
-        "timetable_summary_stops_tz.date_of_journey",
-        ">=",
-        new Date(fromTimestamp),
-      )
-      .where(
-        "timetable_summary_stops_tz.date_of_journey",
-        "<",
-        new Date(toTimestamp),
-      );
+      .where("date_of_journey", ">=", new Date(fromTimestamp))
+      .where("date_of_journey", "<", new Date(toTimestamp));
   }
 
   return dbQuery
-    .where(
-      "timetable_summary_stops_tz.stop_latitude",
-      ">=",
-      boundingBox.minLatitude,
-    )
-    .where(
-      "timetable_summary_stops_tz.stop_latitude",
-      "<=",
-      boundingBox.maxLatitude,
-    )
-    .where(
-      "timetable_summary_stops_tz.stop_longitude",
-      ">=",
-      boundingBox.minLongitude,
-    )
-    .where(
-      "timetable_summary_stops_tz.stop_longitude",
-      "<=",
-      boundingBox.maxLongitude,
-    )
+    .where("stop_latitude", ">=", boundingBox.minLatitude)
+    .where("stop_latitude", "<=", boundingBox.maxLatitude)
+    .where("stop_longitude", ">=", boundingBox.minLongitude)
+    .where("stop_longitude", "<=", boundingBox.maxLongitude)
     .groupBy([
       "stop_id",
       "stop_latitude",
@@ -88,7 +64,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("completed").as("completedDepartures"),
       eb.fn.avg<number>("avg_time_difference").as("averageDelay"),
     ])
-    .select("naptan_stoppoint_latlong.common_name as stopName")
+    .select("common_name as stopName")
     .execute();
 };
 
