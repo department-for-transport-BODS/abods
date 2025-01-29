@@ -22,8 +22,7 @@ import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
-import { GraphQLFormattedError } from "graphql";
-import datadogMetricsPlugin, { sendErrorMetric } from "./lib/datadog.js";
+import datadogMetricsPlugin from "./lib/datadog.js";
 import { datadog } from "datadog-lambda-js";
 
 export let kysely: Kysely<DB> | undefined = undefined;
@@ -38,18 +37,10 @@ const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
 `;
 
-const formatError = (
-  formattedError: GraphQLFormattedError,
-  error: unknown,
-): GraphQLFormattedError => {
-  sendErrorMetric(error);
-  return formattedError;
-};
-
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
-  formatError,
+  logger,
   plugins: [datadogMetricsPlugin, apolloLogger],
 });
 
