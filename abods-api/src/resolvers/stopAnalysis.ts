@@ -46,7 +46,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       );
   }
 
-  dbQuery = dbQuery
+  return dbQuery
     .where(
       "timetable_summary_stops_tz.stop_latitude",
       ">=",
@@ -66,17 +66,14 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "timetable_summary_stops_tz.stop_longitude",
       "<=",
       boundingBox.maxLongitude,
-    );
-
-  dbQuery = dbQuery.groupBy([
-    "stop_id",
-    "stop_latitude",
-    "stop_longitude",
-    "is_timing_point",
-    "naptan_stoppoint_latlong.common_name",
-  ]);
-
-  return dbQuery
+    )
+    .groupBy([
+      "stop_id",
+      "stop_latitude",
+      "stop_longitude",
+      "is_timing_point",
+      "naptan_stoppoint_latlong.common_name",
+    ])
     .select([
       "stop_id as stopId",
       "stop_latitude as latitude",
