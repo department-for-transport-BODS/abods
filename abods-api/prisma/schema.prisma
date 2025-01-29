@@ -397,8 +397,6 @@ model corridor_stops {
   corridor_index        Int // TODO: fix - nullable in db
   corridor_id           Int // TODO: fix - nullable bigint in db
   stop_id               Int // TODO: fix - nullable bigint in db
-  route_to_next_stop    String?
-  distance_to_next_stop Int // TODO: fix - nullable in db
   naptan_stop           naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
   corridor              corridor?                @relation(fields: [corridor_id], references: [corridor_id])
 

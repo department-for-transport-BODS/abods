@@ -1,4 +1,4 @@
-import { Kysely, sql } from "kysely";
+import { Kysely } from "kysely";
 import { DB } from "../kysely";
 import { AtcoStopType, GeoJSONLineString, RouteType } from "../types/extra.js";
 import { ServiceLinkType } from "../types/generated";

@@ -248,8 +248,6 @@ const insertCorridorStops = async (
     corridor_id: number;
     corridor_index: number;
     stop_id: number;
-    route_to_next_stop: string;
-    distance_to_next_stop: number;
   }[] = [];
 
   const adminAreas = await getOrgAdminAreas(db, sessionUser);
@@ -275,8 +273,6 @@ const insertCorridorStops = async (
       corridor_id: Number(corridor_id),
       corridor_index: index,
       stop_id: stop.id,
-      route_to_next_stop: "",
-      distance_to_next_stop: 0,
     });
   });
 
@@ -688,20 +684,22 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
         "corridor_stops.stop_id",
         "naptan_stoppoint_latlong.id",
       )
-      .select(["corridor_stops.corridor_index as corridorIndex"])
-      .select((eb) => [
-        eb.fn
-          .coalesce(eb.ref("naptan_stoppoint_latlong.atco_code"), eb.val(""))
-          .as("stopId"),
-        eb.fn
-          .coalesce(eb.ref("naptan_stoppoint_latlong.latitude"), eb.val(0))
-          .as("lat"),
-        eb.fn
-          .coalesce(eb.ref("naptan_stoppoint_latlong.longitude"), eb.val(0))
-          .as("lon"),
-      ])
       .where("corridor_stops.corridor_id", "=", Number(data.inputs.corridorId))
-      .execute();
+      .select([
+        "corridor_stops.corridor_index",
+        "naptan_stoppoint_latlong.atco_code",
+        "naptan_stoppoint_latlong.latitude",
+        "naptan_stoppoint_latlong.longitude",
+      ])
+      .execute()
+      .then((result) =>
+        result.map((x) => ({
+          corridorIndex: x.corridor_index,
+          stopId: x.atco_code ?? "",
+          lat: x.latitude ?? 0,
+          lon: x.longitude ?? 0,
+        })),
+      );
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 

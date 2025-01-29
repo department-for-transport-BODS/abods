@@ -251,7 +251,6 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     result.push({
       stops,
       servicePatternId: route.id.toString(),
-      // to be replaced with a simple mapping once we have the data available
       serviceLinks,
     });
   }
