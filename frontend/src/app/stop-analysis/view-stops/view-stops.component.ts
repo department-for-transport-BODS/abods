@@ -1,11 +1,7 @@
 import { Component } from "@angular/core";
-import {
-  StopAnalysisListGQL,
-  StopAnalysisType,
-} from "../../../generated/graphql";
-import { map, ReplaySubject } from "rxjs";
-import { Observable } from "@apollo/client";
+import { StopAnalysisListGQL } from "../../../generated/graphql";
 import { PerformanceParams } from "../../on-time/on-time.service";
+import { ReplaySubject } from "rxjs";
 
 @Component({
   selector: "app-view-stops",
