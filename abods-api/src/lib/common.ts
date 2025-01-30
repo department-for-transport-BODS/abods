@@ -1,6 +1,6 @@
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
-import { ServiceLinkType } from "../types/generated";
+import { RouteType, ServiceLinkType } from "../types/generated.js";
 import haversineDistance from "haversine-distance";
 
 export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
@@ -12,11 +12,6 @@ export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
 };
 
 const point = (x: number, y: number): [number, number] => [x, y];
-
-export enum RouteType {
-  valid = "VALID",
-  invalid_no_route_points = "INVALID_NO_ROUTE_POINTS",
-}
 
 export interface AtcoStopType {
   stopId: string;
@@ -54,7 +49,7 @@ export const listServiceLinks = async (
         fromStop: stops[i - 1].stopId,
         toStop: stops[i].stopId,
         distance: link.distance,
-        routeValidity: RouteType.valid,
+        routeValidity: RouteType.Valid,
         linkRoute: JSON.stringify(linestring.coordinates),
       });
       continue;
@@ -69,7 +64,7 @@ export const listServiceLinks = async (
       fromStop: previousStop.stopId,
       toStop: currentStop.stopId,
       distance: haversineDistance(previousStopPoint, currentStopPoint),
-      routeValidity: RouteType.invalid_no_route_points,
+      routeValidity: RouteType.InvalidNoRoutePoints,
       linkRoute: JSON.stringify([currentStopPoint, previousStopPoint]),
     });
   }

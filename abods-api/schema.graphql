@@ -386,7 +386,7 @@ type ServiceLinkType {
   fromStop: String!
   toStop: String!
   distance: Float!
-  routeValidity: String!
+  routeValidity: RouteType!
   linkRoute: String
 }
 
@@ -834,6 +834,11 @@ enum OtpEnum {
   Early
   Late
   OnTime
+}
+
+enum RouteType {
+  VALID
+  INVALID_NO_ROUTE_POINTS
 }
 
 """

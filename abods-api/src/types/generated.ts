@@ -991,6 +991,11 @@ export type RoleType = {
   scope: Scalars['String']['output'];
 };
 
+export enum RouteType {
+  InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
+  Valid = 'VALID'
+}
+
 export enum ScopeEnum {
   Organisation = 'organisation',
   System = 'system'
@@ -1008,7 +1013,7 @@ export type ServiceLinkType = {
   distance: Scalars['Float']['output'];
   fromStop: Scalars['String']['output'];
   linkRoute?: Maybe<Scalars['String']['output']>;
-  routeValidity: Scalars['String']['output'];
+  routeValidity: RouteType;
   toStop: Scalars['String']['output'];
 };
 
@@ -1337,6 +1342,7 @@ export type ResolversTypes = ResolversObject<{
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
   RoleReferenceInput: ResolverTypeWrapper<Partial<RoleReferenceInput>>;
   RoleType: ResolverTypeWrapper<Partial<RoleType>>;
+  RouteType: ResolverTypeWrapper<Partial<RouteType>>;
   ScopeEnum: ResolverTypeWrapper<Partial<ScopeEnum>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
@@ -1966,7 +1972,7 @@ export type ServiceLinkTypeResolvers<ContextType = RequestContext, ParentType ex
   distance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   fromStop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   linkRoute?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  routeValidity?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  routeValidity?: Resolver<ResolversTypes['RouteType'], ParentType, ContextType>;
   toStop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
