@@ -1,6 +1,5 @@
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
-import { AtcoStopType, GeoJSONLineString, RouteType } from "../types/extra.js";
 import { ServiceLinkType } from "../types/generated";
 import haversineDistance from "haversine-distance";
 
@@ -13,6 +12,22 @@ export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
 };
 
 const point = (x: number, y: number): [number, number] => [x, y];
+
+export enum RouteType {
+  valid = "VALID",
+  invalid_no_route_points = "INVALID_NO_ROUTE_POINTS",
+}
+
+export interface AtcoStopType {
+  stopId: string;
+  lon: number;
+  lat: number;
+}
+
+export interface GeoJSONLineString {
+  type: "LineString";
+  coordinates: number[][];
+}
 
 export const listServiceLinks = async (
   stops: AtcoStopType[],
@@ -32,34 +47,30 @@ export const listServiceLinks = async (
         track.to_atco_code === stops[i].stopId,
     );
 
-    let coordinates: number[][] | [number, number][];
+    if (link) {
+      const linestring = JSON.parse(link.geometry) as GeoJSONLineString;
+
+      serviceLinks.push({
+        fromStop: stops[i - 1].stopId,
+        toStop: stops[i].stopId,
+        distance: link.distance,
+        routeValidity: RouteType.valid,
+        linkRoute: JSON.stringify(linestring.coordinates),
+      });
+      continue;
+    }
+
     const currentStop = stops[i];
     const previousStop = stops[i - 1];
     const currentStopPoint = point(currentStop.lon, currentStop.lat);
     const previousStopPoint = point(previousStop.lon, previousStop.lat);
 
-    if (link) {
-      const linestring = JSON.parse(link.geometry) as GeoJSONLineString;
-
-      coordinates = linestring.coordinates;
-    } else {
-      coordinates = [currentStopPoint, previousStopPoint];
-    }
-
-    const distance = link
-      ? link.distance
-      : haversineDistance(previousStopPoint, currentStopPoint);
-
-    const routeValidity = link
-      ? RouteType.valid
-      : RouteType.invalid_no_route_points;
-
     serviceLinks.push({
       fromStop: previousStop.stopId,
       toStop: currentStop.stopId,
-      distance,
-      routeValidity,
-      linkRoute: JSON.stringify(coordinates),
+      distance: haversineDistance(previousStopPoint, currentStopPoint),
+      routeValidity: RouteType.invalid_no_route_points,
+      linkRoute: JSON.stringify([currentStopPoint, previousStopPoint]),
     });
   }
 

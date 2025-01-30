@@ -26,27 +26,3 @@ export interface SessionUser {
   last_name: string | null;
   orgId: number;
 }
-
-export enum RouteType {
-  valid = "VALID",
-  invalid_no_route_points = "INVALID_NO_ROUTE_POINTS",
-}
-
-export interface GeoJSONLineString {
-  type: "LineString";
-  coordinates: number[][];
-}
-
-export interface AtcoStopType {
-  stopId: string;
-  lon: number;
-  lat: number;
-}
-
-export type OTPAtcoStopType = AtcoStopType & {
-  stopName: string;
-};
-
-export type CorridorAtcoStopType = AtcoStopType & {
-  corridorIndex: number;
-};
