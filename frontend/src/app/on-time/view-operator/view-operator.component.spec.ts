@@ -13,7 +13,7 @@ import { ViewOperatorComponent } from "./view-operator.component";
 import { OnTimeService, PunctualityOverview } from "../on-time.service";
 import { FiltersComponent } from "../filters/filters.component";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { ControlsComponent } from "../controls/controls.component";
+import { ControlsComponent } from "../on-time-controls/on-time-controls.component";
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import {
@@ -38,6 +38,7 @@ describe("ViewOperatorComponent", () => {
   const createComponent = createRoutingFactory({
     component: ViewOperatorComponent,
     declarations: [
+      FiltersComponent,
       ChartNoDataWrapperComponent,
       ControlsComponent,
       TabsComponent,

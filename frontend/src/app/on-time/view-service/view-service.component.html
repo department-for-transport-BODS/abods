@@ -28,11 +28,11 @@
           >{{ operator.name }} ({{ operator.nocCode }})</span
         >
       </div>
-      <app-controls
+      <app-on-time-controls
         [operatorId]="operator.operatorId"
         (params)="params$.next($event)"
         [showAdminAreas]="false"
-      ></app-controls>
+      ></app-on-time-controls>
       <app-box [padding]="['6', '5', '6', '5']" spaceAbove="4" spaceBelow="8">
         <app-tabs (tabChanged)="tabChanged($event)">
           <app-tab tabTitle="Map" id="map">

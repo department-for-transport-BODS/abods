@@ -25,7 +25,7 @@ import { ExcessWaitTimeChartComponent } from "./excess-wait-time-chart/excess-wa
 import { ServiceGridComponent } from "./service-grid/service-grid.component";
 import { LuxonModule } from "luxon-angular";
 import { OnTimeFilterChipsComponent } from "./filter-chips/filter-chips.component";
-import { ControlsComponent } from "./controls/controls.component";
+import { OnTimeControlsComponent } from "./on-time-controls/on-time-controls.component";
 import { AllOperatorsComponent } from "./all-operators/all-operators.component";
 import { ViewOperatorComponent } from "./view-operator/view-operator.component";
 import { ViewServiceComponent } from "./view-service/view-service.component";
@@ -58,7 +58,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     ExcessWaitTimeChartComponent,
     ServiceGridComponent,
     OnTimeFilterChipsComponent,
-    ControlsComponent,
+    OnTimeControlsComponent,
     AllOperatorsComponent,
     ViewOperatorComponent,
     ViewServiceComponent,
@@ -88,7 +88,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     ServiceGridComponent,
     StopsGridComponent,
     OperatorGridComponent,
-    ControlsComponent,
+    OnTimeControlsComponent,
   ],
 })
 export class OnTimeModule {}

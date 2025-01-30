@@ -213,6 +213,7 @@ import { ControlsComponent } from "./components/controls/controls.component";
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
     FilterChipsComponent,
+    ControlsComponent,
   ],
 })
 export class SharedModule {}

@@ -5,7 +5,7 @@ import { dateTimeEqualityMatcher } from "src/test-support/equality";
 import { AllOperatorsComponent } from "./all-operators.component";
 import { FiltersComponent } from "../filters/filters.component";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { ControlsComponent } from "../controls/controls.component";
+import { ControlsComponent } from "../on-time-controls/on-time-controls.component";
 import { MockProvider } from "ng-mocks";
 import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
