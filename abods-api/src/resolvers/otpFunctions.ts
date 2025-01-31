@@ -26,7 +26,6 @@ import {
   RankingOrder,
   Resolvers,
   ServiceInfoType,
-  ServiceLinkType,
   ServicePatternType,
   ServicePerformanceType,
   ServicePunctualityType,
@@ -51,8 +50,10 @@ import {
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import haversineDistance from "haversine-distance";
 import { getUserOperatorIds } from "../lib/operators.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely.js";
+import { listServiceLinks } from "../lib/common.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -182,30 +183,15 @@ export const getLines: QueryResolvers["lines"] = async (
   }));
 };
 
-const point = (x: number, y: number): [number, number] => [x, y];
-
-function temporaryInferredServiceLinks(
+async function getOtpServiceLinks(
   stops: { stopId: string; lon: number; stopName: string; lat: number }[],
   stopIdList: string[],
+  db: Kysely<DB>,
 ) {
   stops = stops.sort(
     (a, b) => stopIdList.indexOf(a.stopId) - stopIdList.indexOf(b.stopId),
   );
-  const serviceLinks: ServiceLinkType[] = [];
-  for (let i = 1; i < stops.length; i++) {
-    const current = stops[i];
-    const previous = stops[i - 1];
-    const currentPoint = point(current.lon, current.lat);
-    const previousPoint = point(previous.lon, previous.lat);
-    serviceLinks.push({
-      fromStop: previous.stopId,
-      toStop: current.stopId,
-      distance: haversineDistance(previousPoint, currentPoint),
-      routeValidity: "INVALID_NO_ROUTE_POINTS",
-      linkRoute: JSON.stringify([previousPoint, currentPoint]),
-    });
-  }
-  return serviceLinks;
+  return listServiceLinks(stops, db);
 }
 
 export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
@@ -257,11 +243,15 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
   const result: ServicePatternType[] = [];
   for (const route of routes) {
     const stops = stopDetails.filter((s) => route.stopIds.includes(s.stopId));
+    const serviceLinks = await getOtpServiceLinks(
+      stops,
+      route.stopIds,
+      context.kysely,
+    );
     result.push({
       stops,
       servicePatternId: route.id.toString(),
-      // to be replaced with a simple mapping once we have the data available
-      serviceLinks: temporaryInferredServiceLinks(stops, route.stopIds),
+      serviceLinks,
     });
   }
   return result;

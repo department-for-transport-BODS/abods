@@ -44,9 +44,9 @@ import {
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
-import haversineDistance from "haversine-distance";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
+import { listServiceLinks } from "../lib/common.js";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -248,8 +248,6 @@ const insertCorridorStops = async (
     corridor_id: number;
     corridor_index: number;
     stop_id: number;
-    route_to_next_stop: string;
-    distance_to_next_stop: number;
   }[] = [];
 
   const adminAreas = await getOrgAdminAreas(db, sessionUser);
@@ -275,26 +273,6 @@ const insertCorridorStops = async (
       corridor_id: Number(corridor_id),
       corridor_index: index,
       stop_id: stop.id,
-      route_to_next_stop:
-        index < stops.length - 1
-          ? JSON.stringify([
-              [Number(stop.longitude), Number(stop.latitude)],
-              [
-                Number(stops[index + 1].longitude),
-                Number(stops[index + 1].latitude),
-              ],
-            ])
-          : "",
-      distance_to_next_stop:
-        index < stops.length - 1
-          ? haversineDistance(
-              [Number(stop.longitude), Number(stop.latitude)],
-              [
-                Number(stops[index + 1].longitude),
-                Number(stops[index + 1].latitude),
-              ],
-            )
-          : 0,
     });
   });
 
@@ -699,28 +677,40 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
 
-    const results = await context.db.corridor_stops.findMany({
-      where: {
-        corridor_id: Number(data.inputs.corridorId),
-      },
-    });
+    const results = await context.kysely
+      .selectFrom("corridor_stops")
+      .innerJoin(
+        "naptan_stoppoint_latlong",
+        "corridor_stops.stop_id",
+        "naptan_stoppoint_latlong.id",
+      )
+      .where("corridor_stops.corridor_id", "=", Number(data.inputs.corridorId))
+      .select([
+        "corridor_stops.corridor_index",
+        "naptan_stoppoint_latlong.atco_code",
+        "naptan_stoppoint_latlong.latitude",
+        "naptan_stoppoint_latlong.longitude",
+      ])
+      .execute()
+      .then((result) =>
+        result.map((x) => ({
+          corridorIndex: x.corridor_index,
+          stopId: x.atco_code ?? "",
+          lat: x.latitude ?? 0,
+          lon: x.longitude ?? 0,
+        })),
+      );
 
-    const serviceLinks: ServiceLinkType[] = [];
+    results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    results.forEach((stop, index) => {
-      if (index < results.length - 1) {
-        serviceLinks.push({
-          fromStop: stop.stop_id.toString(),
-          toStop: results[index + 1].stop_id.toString(),
-          distance: stop.distance_to_next_stop,
-          routeValidity: "INVALID",
-          linkRoute: stop.route_to_next_stop,
-        });
-      }
-    });
+    const serviceLinks: ServiceLinkType[] = await listServiceLinks(
+      results,
+      context.kysely,
+    );
 
     return serviceLinks.reverse();
   };
+
 const corridorResovlers: Resolvers = {
   Query: {
     corridor: emptyResolver,

@@ -12,7 +12,7 @@ import {
 
 import { NgxTippyProps } from "ngx-tippy-wrapper";
 import { CorridorStop, filterServiceLinksByStops } from "../corridors.service";
-import { ServiceLinkType } from "../../../generated/graphql";
+import { RouteType, ServiceLinkType } from "../../../generated/graphql";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { pairwise } from "../../shared/array-operators";
 
@@ -123,7 +123,7 @@ export class SegmentSelectorComponent implements OnChanges, AfterViewInit {
         this.serviceLinks,
         segment,
       )[0];
-      return link ? link.routeValidity !== ServiceLinkValidity.VALID : false;
+      return link ? link.routeValidity !== RouteType.Valid : false;
     }
     return false;
   }
