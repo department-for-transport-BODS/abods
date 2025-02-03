@@ -1,0 +1,22 @@
+<app-filters
+  [filters]="inputFilters"
+  (filtersChange)="apply($event)"
+  (closeFilters)="cancel()"
+  (resetFilters)="resetToDefault()"
+>
+  <fieldset *ngIf="showAdminAreas" class="govuk-fieldset">
+    <div class="govuk-form-group">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+        Area
+      </legend>
+      <gds-multiselect-checkbox
+        [options]="adminAreas$ | async"
+        [(selected)]="adminAreaIds"
+        showAllLabel="Area"
+        [showAll]="true"
+        placeholderText="All areas"
+        ariaLabel="Admin area"
+      ></gds-multiselect-checkbox>
+    </div>
+  </fieldset>
+</app-filters>

@@ -24,8 +24,8 @@ export interface DayOfWeekLabel {
 
 @Component({
   selector: "app-on-time-filter-chips",
-  templateUrl: "./filter-chips.component.html",
-  styleUrls: ["./filter-chips.component.scss"],
+  templateUrl: "./on-time-filter-chips.component.html",
+  styleUrls: ["./on-time-filter-chips.component.scss"],
 })
 export class OnTimeFilterChipsComponent
   extends FilterChipsComponent
@@ -43,7 +43,7 @@ export class OnTimeFilterChipsComponent
   }
 
   ngOnChanges() {
-    const nocCode = this.filters.nocCodes?.[0];
+    const nocCode = this.filters.operatorIds?.[0];
     const adminAreaIds =
       this.filters.adminAreaIds?.filter(isNotNullOrUndefined) ?? [];
 

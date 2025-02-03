@@ -6,7 +6,7 @@ import { LayoutModule } from "../layout/layout.module";
 import { DelayFrequencyChartComponent } from "./delay-frequency-chart/delay-frequency-chart.component";
 import { TimeSeriesChartComponent } from "./time-series-chart/time-series-chart.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { FiltersComponent } from "./filters/filters.component";
+import { OnTimeFiltersComponent } from "./on-time-filters/on-time-filters.component";
 import { OverviewStatsComponent } from "./overview-stats/overview-stats.component";
 import { StackedHistogramChartComponent } from "./stacked-histogram-chart/stacked-histogram-chart.component";
 import { OnTimeGridComponent } from "./on-time-grid/on-time-grid.component";
@@ -24,7 +24,7 @@ import { ChartNoDataWrapperComponent } from "./chart-no-data-wrapper/chart-no-da
 import { ExcessWaitTimeChartComponent } from "./excess-wait-time-chart/excess-wait-time-chart.component";
 import { ServiceGridComponent } from "./service-grid/service-grid.component";
 import { LuxonModule } from "luxon-angular";
-import { OnTimeFilterChipsComponent } from "./filter-chips/filter-chips.component";
+import { OnTimeFilterChipsComponent } from "./on-time-filter-chips/on-time-filter-chips.component";
 import { OnTimeControlsComponent } from "./on-time-controls/on-time-controls.component";
 import { AllOperatorsComponent } from "./all-operators/all-operators.component";
 import { ViewOperatorComponent } from "./view-operator/view-operator.component";
@@ -41,7 +41,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     DelayFrequencyChartComponent,
     TimeSeriesChartComponent,
     OverviewStatsComponent,
-    FiltersComponent,
+    OnTimeFiltersComponent,
     DayOfWeekChartComponent,
     TimeOfDayChartComponent,
     StackedHistogramChartComponent,

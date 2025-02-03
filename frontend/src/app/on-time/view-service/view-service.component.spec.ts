@@ -18,9 +18,9 @@ import {
   PunctualityOverview,
 } from "../on-time.service";
 import { HeadwayService } from "../headway.service";
-import { FiltersComponent } from "../filters/filters.component";
+import { OnTimeFiltersComponent } from "../on-time-filters/on-time-filters.component";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { ControlsComponent } from "../on-time-controls/on-time-controls.component";
+import { OnTimeControlsComponent } from "../on-time-controls/on-time-controls.component";
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import { OperatorService } from "../../shared/services/operator.service";

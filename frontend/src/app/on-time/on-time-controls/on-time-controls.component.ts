@@ -1,22 +1,19 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from "@angular/core";
-import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { BehaviorSubject } from "rxjs";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { PerformanceFiltersInputType } from "src/generated/graphql";
 import { isEqual as _isEqual } from "lodash-es";
 import { PerformanceParams } from "../on-time.service";
 import { DateRangeService } from "../../shared/services/date-range.service";
-import { ifNullOrUndefinedReturnEmptyString } from "../../shared/rxjs-operators";
 import { OnTimePanelService } from "./on-time-panel.service";
 import { PanelService } from "../../shared/components/panel/panel.service";
 import { ControlsComponent } from "../../shared/components/controls/controls.component";
+import {
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  startWith,
+  Subject,
+} from "rxjs";
 
 export type TimingPoints = "all-stops" | "timing-points";
 
@@ -27,19 +24,23 @@ export type TimingPoints = "all-stops" | "timing-points";
 })
 export class OnTimeControlsComponent
   extends ControlsComponent
-  implements OnInit, OnChanges
+  implements OnInit
 {
   @Input() showAdminAreas = true;
   @Input() operatorId: string | null | undefined = "";
   @Output() params = new EventEmitter<PerformanceParams>();
+
+  additionalFilters: PerformanceFiltersInputType = {};
+
+  chipFilter: PerformanceFiltersInputType = {};
+
+  performanceParams$ = new Subject<PerformanceParams>();
 
   previousParams: PerformanceParams = {
     fromTimestamp: "",
     toTimestamp: "",
     filters: {},
   };
-
-  filtersSubject = new BehaviorSubject<PerformanceFiltersInputType>({});
 
   constructor(
     protected router: Router,
@@ -51,39 +52,53 @@ export class OnTimeControlsComponent
     super(router, route, dateRangeService, panelService, onTimePanel);
   }
 
+  ngOnInit(): void {
+    const operator$ = this.route.paramMap.pipe(
+      map((params) => params.get("nocCode")),
+      distinctUntilChanged(),
+    );
+
+    const adminAreaId$ = this.route.queryParamMap.pipe(
+      map((params) => params.getAll("adminAreaId")), // Extract key3 from query params
+      distinctUntilChanged(
+        (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
+      ),
+      startWith(undefined),
+    );
+
+    combineLatest([operator$, adminAreaId$, this.performanceParams$]).subscribe(
+      ([operatorId, adminAreaIds, performanceParams]) => {
+        this.chipFilter = {
+          ...performanceParams.filters,
+          operatorIds: operatorId ? [operatorId] : undefined,
+          adminAreaIds:
+            adminAreaIds && adminAreaIds?.length > 0 ? adminAreaIds : undefined,
+        };
+        this.params.emit({
+          ...performanceParams,
+          filters: {
+            ...performanceParams.filters,
+            operatorIds: operatorId ? [operatorId] : undefined,
+            adminAreaIds:
+              adminAreaIds && adminAreaIds?.length > 0
+                ? adminAreaIds
+                : undefined,
+          },
+        });
+      },
+    );
+  }
+
   handleParamsUpdate(value: PerformanceParams): void {
-    this.previousParams = value;
-    this.params.emit(this.previousParams);
-  }
+    const params: PerformanceParams = {
+      ...value,
+      filters: {
+        ...value.filters,
+        ...this.additionalFilters,
+      },
+    };
 
-  getPerformanceFilters(
-    paramMap: ParamMap,
-    queryParams: ParamMap,
-  ): PerformanceFiltersInputType {
-    const filters: PerformanceFiltersInputType = {};
-
-    if (paramMap.get("nocCode")) {
-      const operatorId = ifNullOrUndefinedReturnEmptyString(this.operatorId);
-      filters.operatorIds = [operatorId];
-    }
-
-    if (queryParams.has("adminAreaId")) {
-      filters.adminAreaIds = queryParams.getAll("adminAreaId");
-    }
-
-    return filters;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.operatorId?.currentValue) {
-      this.handleParamsUpdate({
-        ...this.previousParams,
-        filters: {
-          ...this.previousParams.filters,
-          operatorIds: [changes.operatorId.currentValue],
-        },
-      });
-    }
+    this.performanceParams$.next(params);
   }
 
   changeAdminAreaIds(adminAreaId: string[]) {

@@ -1,20 +1,16 @@
 import { Injectable, Type, ViewChild } from "@angular/core";
-import { FiltersComponent } from "../filters/filters.component";
+import { OnTimeFiltersComponent } from "../on-time-filters/on-time-filters.component";
 
 export interface PanelInterface {
   getComponent(): Type<unknown>;
-  resetFilters(): void;
 }
 
 @Injectable({
   providedIn: "root",
 })
 export class OnTimePanelService implements PanelInterface {
-  resetFilters(): void {
-    this.filtersComponent?.resetFilters();
-  }
   getComponent(): Type<unknown> {
-    return FiltersComponent;
+    return OnTimeFiltersComponent;
   }
-  @ViewChild(FiltersComponent) filtersComponent?: FiltersComponent;
+  @ViewChild(OnTimeFiltersComponent) filtersComponent?: OnTimeFiltersComponent;
 }

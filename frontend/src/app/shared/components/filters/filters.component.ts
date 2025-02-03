@@ -5,15 +5,12 @@ import {
   OnDestroy,
   Output,
 } from "@angular/core";
-import { map, switchMap, take, takeUntil } from "rxjs/operators";
-import { BehaviorSubject, of, Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import {
   DayOfWeekFlagsInputType,
   PerformanceFiltersInputType,
 } from "../../../../generated/graphql";
 import { MultiselectCheckboxOption } from "../../gds/multiselect-checkbox/multiselect-checkbox.component";
-import { AdminAreaService } from "../../../on-time/admin-area/admin-area.service";
-import { isNotNullOrUndefined } from "../../rxjs-operators";
 
 const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
   monday: true,
@@ -31,7 +28,6 @@ const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
   styleUrls: ["./filters.component.scss"],
 })
 export class FiltersComponent implements OnDestroy {
-  oldFilters?: PerformanceFiltersInputType;
   dayOfWeekFlags: DayOfWeekFlagsInputType = defaultDayOfWeekFlags;
   _startTime = "00:00";
   get startTime() {
@@ -94,8 +90,6 @@ export class FiltersComponent implements OnDestroy {
       value = {};
     }
 
-    this.setAdminAreaDropdown(value);
-    this.oldFilters = value;
     this.setFilters(value);
   }
   @Input() showAdminAreas = true;
@@ -105,43 +99,13 @@ export class FiltersComponent implements OnDestroy {
 
   @Output() filtersChange = new EventEmitter<PerformanceFiltersInputType>();
   @Output() closeFilters = new EventEmitter();
+  @Output() resetFilters = new EventEmitter();
 
   private destroy$ = new Subject<void>();
-
-  constructor(private adminAreaService: AdminAreaService) {}
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setAdminAreaDropdown(newFilters: PerformanceFiltersInputType): void {
-    const oldOpId = this.oldFilters?.operatorIds?.[0];
-    const newOpId = newFilters?.operatorIds?.[0];
-    if (oldOpId !== newOpId) {
-      this.adminAreaService
-        .fetchAdminAreasForOperator(newOpId!)
-        .pipe(
-          takeUntil(this.destroy$),
-          map((areas) =>
-            areas
-              .map(
-                (area) =>
-                  ({
-                    label: area.name,
-                    value: area.id,
-                  }) as MultiselectCheckboxOption,
-              )
-              .sort(
-                (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
-                  a.label.localeCompare(b.label),
-              ),
-          ),
-        )
-        .subscribe((data) => {
-          this.adminAreas$.next(data);
-        });
-    }
   }
 
   private setFilters(value: PerformanceFiltersInputType) {
@@ -153,7 +117,6 @@ export class FiltersComponent implements OnDestroy {
       minDelay,
       maxDelay,
       excludeItoLineId,
-      adminAreaIds,
     } = value;
 
     this.dayOfWeekFlags = dayOfWeekFlags
@@ -164,23 +127,6 @@ export class FiltersComponent implements OnDestroy {
     this.minDelay = minDelay ?? null;
     this.maxDelay = maxDelay ?? null;
     this.excludeItoLineId = excludeItoLineId ?? "";
-    this.setSelectedAdminAreaIds(adminAreaIds!);
-  }
-
-  private setSelectedAdminAreaIds(adminAreaIds: string[]) {
-    of(adminAreaIds)
-      .pipe(
-        take(1),
-        switchMap(() => this.adminAreas$),
-      )
-      .subscribe((adminAreas) => {
-        const adminAreasIds: string[] =
-          adminAreaIds?.filter(isNotNullOrUndefined) ?? [];
-        // We only want to show admin areas that this operator operates in for the admin area dropdown
-        this.adminAreaIds = adminAreasIds.filter((id) =>
-          adminAreas.map((area) => area.value).includes(id),
-        );
-      });
   }
 
   toggleDayOfTheWeek(k: keyof DayOfWeekFlagsInputType) {
@@ -260,15 +206,6 @@ export class FiltersComponent implements OnDestroy {
       newFilters.excludeItoLineId = this.excludeItoLineId;
     }
 
-    if (this.adminAreaIds.length) {
-      newFilters.adminAreaIds = this.adminAreaIds;
-    }
-
-    if (!this.showAdminAreas) {
-      // We preserve the admin areas for returning to All services page
-      newFilters.adminAreaIds = this.oldFilters?.adminAreaIds;
-    }
-
     this.filtersChange.emit(newFilters);
   }
 
@@ -276,13 +213,7 @@ export class FiltersComponent implements OnDestroy {
     this.closeFilters.emit();
   }
 
-  resetFilters() {
-    if (this.oldFilters) {
-      this.setFilters(this.oldFilters);
-    }
-  }
-
   resetToDefault() {
-    this.setFilters({});
+    this.resetFilters.emit({});
   }
 }

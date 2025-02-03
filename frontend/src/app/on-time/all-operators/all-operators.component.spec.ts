@@ -3,9 +3,9 @@ import { createRoutingFactory, SpectatorRouting } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { dateTimeEqualityMatcher } from "src/test-support/equality";
 import { AllOperatorsComponent } from "./all-operators.component";
-import { FiltersComponent } from "../filters/filters.component";
+import { OnTimeFiltersComponent } from "../on-time-filters/on-time-filters.component";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { ControlsComponent } from "../on-time-controls/on-time-controls.component";
+import { OnTimeControlsComponent } from "../on-time-controls/on-time-controls.component";
 import { MockProvider } from "ng-mocks";
 import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
@@ -21,9 +21,9 @@ describe("AllOperatorsComponent", () => {
   const createComponent = createRoutingFactory({
     component: AllOperatorsComponent,
     declarations: [
-      FiltersComponent,
+      OnTimeFiltersComponent,
       ChartNoDataWrapperComponent,
-      ControlsComponent,
+      OnTimeControlsComponent,
     ],
     imports: [
       LayoutModule,

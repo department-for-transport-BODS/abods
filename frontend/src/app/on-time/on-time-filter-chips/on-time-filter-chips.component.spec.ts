@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 
-import { FilterChipsComponent } from "./filter-chips.component";
+import { OnTimeFilterChipsComponent } from "./on-time-filter-chips.component";
 import { mockProvider } from "@ngneat/spectator";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { of } from "rxjs";
 import { polygon } from "@turf/helpers";
 
 describe("FilterChipsComponent", () => {
-  let component: FilterChipsComponent;
-  let fixture: ComponentFixture<FilterChipsComponent>;
+  let component: OnTimeFilterChipsComponent;
+  let fixture: ComponentFixture<OnTimeFilterChipsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ApolloTestingModule],
-      declarations: [FilterChipsComponent],
+      declarations: [OnTimeFilterChipsComponent],
       providers: [
         mockProvider(AdminAreaService, {
           fetchAdminAreas: () =>
@@ -44,7 +44,7 @@ describe("FilterChipsComponent", () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FilterChipsComponent);
+    fixture = TestBed.createComponent(OnTimeFilterChipsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

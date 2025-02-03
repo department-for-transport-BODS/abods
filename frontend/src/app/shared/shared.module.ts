@@ -214,6 +214,7 @@ import { ControlsComponent } from "./components/controls/controls.component";
     MouseupOutsideDirective,
     FilterChipsComponent,
     ControlsComponent,
+    FiltersComponent,
   ],
 })
 export class SharedModule {}
