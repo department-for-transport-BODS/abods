@@ -12,6 +12,7 @@ import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { TransitModelService } from "../transit-model.service";
 import {
   PerformanceInputType,
+  RouteType,
   ServiceLinkType,
   StopType,
 } from "../../../generated/graphql";
@@ -172,7 +173,10 @@ export class ServiceMapComponent implements OnInit, OnDestroy {
         serviceLink.fromStop === segment[0].stopId &&
         serviceLink.toStop === segment[1].stopId,
     );
-    if (serviceLink?.routeValidity === "VALID" && serviceLink.linkRoute) {
+    if (
+      serviceLink?.routeValidity === RouteType.Valid &&
+      serviceLink.linkRoute
+    ) {
       return JSON.parse(serviceLink.linkRoute);
     } else if (
       !features.find(

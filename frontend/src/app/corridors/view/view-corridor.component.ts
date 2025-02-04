@@ -299,8 +299,8 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   setCoordinates(segment: CorridorStop[]): Position[] {
     const serviceLink = this.stats?.serviceLinks.find(
       (serviceLink) =>
-        serviceLink.fromStop === segment[0].stopId &&
-        serviceLink.toStop === segment[1].stopId,
+        serviceLink.fromStop === segment[0].naptan &&
+        serviceLink.toStop === segment[1].naptan,
     );
     if (serviceLink?.linkRoute) {
       return JSON.parse(serviceLink.linkRoute);
