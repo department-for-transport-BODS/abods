@@ -18,7 +18,6 @@ import { IncomingHttpHeaders } from "http";
 
 import { DB } from "./kysely.js";
 import { Kysely } from "kysely";
-import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
@@ -41,7 +40,7 @@ const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
   logger,
-  plugins: [datadogMetricsPlugin, apolloLogger],
+  plugins: [datadogMetricsPlugin],
 });
 
 logger.info("Starting server in the background");

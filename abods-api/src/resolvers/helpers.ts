@@ -2,6 +2,7 @@ import { RequestContext, SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
+import { checkOrgMapping } from "../lib/utils.js";
 
 export function throwUnauthenticatedError(
   message?: string,
@@ -70,22 +71,9 @@ export const requireUserSession = async (context: RequestContext) => {
     logger.debug("No bods user found");
     throwUnauthenticatedError();
   }
-  const organisation = bodsUser.userOrganisations?.find(
-    (o) => o.organisation_id,
-  );
-  if (!organisation) {
-    logger.error({ userId: bodsUser.id }, "User not mapped to an organisation");
-    throwUnauthenticatedError("User not mapped to any organisation");
-  }
-  if (bodsUser.userOrganisations.length > 1) {
-    logger.error(
-      { userId: bodsUser.id },
-      "API does not support multiple organisations per user",
-    );
-    throwUnauthenticatedError(
-      "API does not support multiple organisations per user",
-    );
-  }
+
+  const organisation = checkOrgMapping(bodsUser.userOrganisations, bodsUser.id);
+
   const sessionUser: SessionUser = {
     id: bodsUser.id,
     username: bodsUser.username,

@@ -7,11 +7,13 @@ import {
   GraphQLRequestExecutionListener,
   GraphQLRequestListener,
   GraphQLRequestListenerDidResolveField,
+  GraphQLServerListener,
 } from "@apollo/server";
 import { RequestContext } from "../types/extra";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { GraphQLError } from "graphql";
+import logger from "../logger.js";
 
 export const sendErrorMetric = (error: unknown) => {
   if (
@@ -38,13 +40,81 @@ export const sendErrorMetric = (error: unknown) => {
   );
 };
 
+const serverListener: GraphQLServerListener = {
+  drainServer: () => {
+    logger.info("Draining server");
+    return Promise.resolve();
+  },
+  serverWillStop: () => {
+    logger.info("Stopping server");
+    return Promise.resolve();
+  },
+  schemaDidLoadOrUpdate: () => logger.info("Schema loaded"),
+};
+
 const datadogMetricsPlugin: ApolloServerPlugin = {
+  invalidRequestWasReceived({ error }) {
+    sendErrorMetric(error);
+    logger.error({ error }, "Received invalid request");
+    return Promise.resolve();
+  },
+  startupDidFail({ error }) {
+    sendErrorMetric(error);
+    logger.error({ error }, "Startup failed");
+    return Promise.resolve();
+  },
+  contextCreationDidFail({ error }) {
+    logger.error({ error }, "Failed to create context");
+    sendErrorMetric(error);
+    return Promise.resolve();
+  },
+  unexpectedErrorProcessingRequest({
+    error,
+    requestContext: {
+      request: { query, operationName },
+    },
+  }) {
+    sendErrorMetric(error);
+    logger.error({ error, query, operationName }, "Failed to process request");
+    return Promise.resolve();
+  },
+  serverWillStart() {
+    logger.info("Started server");
+    return Promise.resolve(serverListener);
+  },
+
   requestDidStart: async (
     context: GraphQLRequestContext<RequestContext>,
   ): Promise<GraphQLRequestListener<RequestContext>> => {
     const startTime = Date.now();
 
     return {
+      didEncounterErrors: ({ errors, request: { query, operationName } }) => {
+        for (const error of errors) {
+          logger.error(
+            { error, query, operationName },
+            "Encountered error when processing request",
+          );
+          sendErrorMetric(error);
+        }
+        return Promise.resolve();
+      },
+
+      didEncounterSubsequentErrors: ({
+        errors,
+        request: { query, operationName },
+      }) => {
+        if (!errors) return Promise.resolve();
+        for (const error of errors) {
+          logger.error(
+            { error, query, operationName },
+            "Encountered error when processing request",
+          );
+          sendErrorMetric(error);
+        }
+        return Promise.resolve();
+      },
+
       executionDidStart: async (
         _: GraphQLRequestContextExecutionDidStart<RequestContext>,
       ): Promise<GraphQLRequestExecutionListener<RequestContext>> => {
