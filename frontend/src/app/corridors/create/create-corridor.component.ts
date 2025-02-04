@@ -216,7 +216,11 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
         }),
         switchMap((stopList) =>
           this.corridorsService
-            .fetchSubsequentStops(stopList.map((stop) => stop.stopId))
+            .fetchSubsequentStops(
+              stopList
+                .map((stop) => stop.sourceId ?? "")
+                .filter((stop) => stop),
+            )
             .pipe(finalize(() => (this.loading = false))),
         ),
       )
