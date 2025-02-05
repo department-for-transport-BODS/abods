@@ -101,24 +101,30 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
   }
 
   changeOperator(operator: { name?: string | null; nocCode: string }) {
-    this.router.navigate(["/on-time", operator.nocCode], {
-      // Clear admin area filter on operator change
-      queryParams: { adminAreaId: null },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate(["/on-time", operator.nocCode], {
+        // Clear admin area filter on operator change
+        queryParams: { adminAreaId: null },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   tabChanged(tab: TabComponent) {
-    this.router.navigate([], {
-      queryParams: { tab: tab.id },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { tab: tab.id },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   overviewModeChanged(overview: string) {
-    this.router.navigate([], {
-      queryParams: { overview },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

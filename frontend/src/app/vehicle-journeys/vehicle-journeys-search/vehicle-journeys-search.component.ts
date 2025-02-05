@@ -146,12 +146,14 @@ export class VehicleJourneysSearchComponent
         }),
         takeUntil(this.destroy$),
       )
-      .subscribe((date) =>
-        this.router.navigate([], {
-          queryParams: { date: date },
-          queryParamsHandling: "merge",
-        }),
-      );
+      .subscribe((date) => {
+        this.router
+          .navigate([], {
+            queryParams: { date: date },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
+      });
 
     this.operator.valueChanges
       .pipe(
@@ -167,21 +169,25 @@ export class VehicleJourneysSearchComponent
         }),
         takeUntil(this.destroy$),
       )
-      .subscribe((operator) =>
-        this.router.navigate([], {
-          queryParams: { operator: operator, service: null },
-          queryParamsHandling: "merge",
-        }),
-      );
+      .subscribe((operator) => {
+        this.router
+          .navigate([], {
+            queryParams: { operator: operator, service: null },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
+      });
 
     this.service.valueChanges
       .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((service) =>
-        this.router.navigate([], {
-          queryParams: { service: service },
-          queryParamsHandling: "merge",
-        }),
-      );
+      .subscribe((service) => {
+        this.router
+          .navigate([], {
+            queryParams: { service: service },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
+      });
 
     this.route.queryParamMap
       .pipe(

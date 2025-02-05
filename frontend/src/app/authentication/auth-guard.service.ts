@@ -37,9 +37,11 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
                     requiredRole === user.roles?.[0].name,
                 )
               ) {
-                this.router.navigate(["/not-authorised"], {
-                  queryParams: { url: state.url },
-                });
+                this.router
+                  .navigate(["/not-authorised"], {
+                    queryParams: { url: state.url },
+                  })
+                  .catch(console.log);
                 return false;
               }
 
@@ -48,9 +50,11 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
           );
         } else {
           // not logged in so redirect to login page with the return url
-          this.router.navigate(["/login"], {
-            queryParams: { returnUrl: state.url },
-          });
+          this.router
+            .navigate(["/login"], {
+              queryParams: { returnUrl: state.url },
+            })
+            .catch(console.log);
           return of(false);
         }
       }),
@@ -70,7 +74,9 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
-    this.router.navigate(["/login"], { queryParams: { returnUrl: state.url } });
+    this.router
+      .navigate(["/login"], { queryParams: { returnUrl: state.url } })
+      .catch(console.log);
     return of(false);
   }
 }

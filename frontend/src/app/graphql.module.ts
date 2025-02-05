@@ -36,7 +36,9 @@ export function createApollo(
       // Navigate to login
       const { url } = router.routerState.snapshot;
       if (!url.startsWith("/login")) {
-        router.navigate(["/login"], { queryParams: { returnUrl: url } });
+        router
+          .navigate(["/login"], { queryParams: { returnUrl: url } })
+          .catch(console.log);
       }
     }
   });
