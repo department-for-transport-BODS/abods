@@ -3,13 +3,14 @@ import { IncomingHttpHeaders } from "http";
 import { PrismaClient } from "@prisma/client";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
+import { BaseContext } from "@apollo/server";
 
 export interface AuthContext {
   allowedTokenHash: string;
   Hmac: string;
 }
 
-export interface RequestContext {
+export interface RequestContext extends BaseContext {
   req: express.Request;
   res: express.Response;
   headers: IncomingHttpHeaders;

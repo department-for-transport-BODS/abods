@@ -16,6 +16,8 @@ import argon2 from "argon2";
 import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
+import { sendDistributionMetric } from "datadog-lambda-js";
+import { checkOrgMapping } from "../lib/utils.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 
@@ -212,6 +214,19 @@ export const loginUser: MutationResolvers["login"] = async (
       context.res.setHeader(
         "Set-Cookie",
         `abods_sessionid=${token}; expires=${expiryTimestamp}; HttpOnly; Max-Age=${SESSION_EXPIRY_TIME_IN_SECONDS}; Path=/; SameSite=None; Secure`,
+      );
+
+      const organisation = checkOrgMapping(
+        bodsUser.userOrganisations,
+        bodsUser.id,
+      );
+
+      sendDistributionMetric(
+        "abods.graphql.login.count",
+        1,
+        "function:GraphQlFunction",
+        `env:${process.env.PROJECT_ENV}`,
+        `org:${organisation.organisation_id}`,
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {

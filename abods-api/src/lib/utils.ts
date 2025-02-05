@@ -1,4 +1,6 @@
 import { DayOfWeekFlagsInputType } from "../types/generated.js";
+import logger from "../logger.js";
+import { throwUnauthenticatedError } from "../resolvers/helpers.js";
 
 export const getDayOfWeekNumbers = (
   dayOfWeekFlags: DayOfWeekFlagsInputType,
@@ -35,4 +37,30 @@ export const getPercentile = (percentile: number, sortedArray: number[]) => {
 
   // Perform linear interpolation between the two closest values
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
+};
+
+export const checkOrgMapping = (
+  userOrganisations: {
+    organisation_id: number;
+    user_id?: number;
+  }[],
+  user_id: number,
+) => {
+  const organisation = userOrganisations?.find((o) => o.organisation_id);
+
+  if (!organisation) {
+    logger.error({ userId: user_id }, "User not mapped to an organisation");
+    throwUnauthenticatedError("User not mapped to any organisation");
+  }
+  if (userOrganisations.length > 1) {
+    logger.error(
+      { userId: user_id },
+      "API does not support multiple organisations per user",
+    );
+    throwUnauthenticatedError(
+      "API does not support multiple organisations per user",
+    );
+  }
+
+  return organisation;
 };
