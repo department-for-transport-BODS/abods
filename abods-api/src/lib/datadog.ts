@@ -51,7 +51,7 @@ const datadogMetricsPlugin: ApolloServerPlugin = {
     sendErrorMetric(error);
     return Promise.resolve();
   },
-  unexpectedErrorProcessingRequest({ error, requestContext: _ }) {
+  unexpectedErrorProcessingRequest({ error }) {
     sendErrorMetric(error);
     return Promise.resolve();
   },
@@ -62,14 +62,14 @@ const datadogMetricsPlugin: ApolloServerPlugin = {
     const startTime = Date.now();
 
     return {
-      didEncounterErrors: ({ errors, request: _ }) => {
+      didEncounterErrors: ({ errors }) => {
         for (const error of errors) {
           sendErrorMetric(error);
         }
         return Promise.resolve();
       },
 
-      didEncounterSubsequentErrors: ({ errors, request: _ }) => {
+      didEncounterSubsequentErrors: ({ errors }) => {
         if (!errors) return Promise.resolve();
         for (const error of errors) {
           sendErrorMetric(error);
