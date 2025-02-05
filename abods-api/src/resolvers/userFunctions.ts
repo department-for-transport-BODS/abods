@@ -17,6 +17,8 @@ import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 
+const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
+
 // Summary: fetch all users
 export const getUsers: QueryResolvers["users"] = async (
   _,
@@ -195,51 +197,29 @@ export const loginUser: MutationResolvers["login"] = async (
 
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
-      const sessionId = uuidv4();
-      const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
-      const session = await context.db.tokens.findUnique({
-        where: {
-          user_id: bodsUser.id,
-        },
+      const token = uuidv4();
+      const expires = new Date(Date.now() + SESSION_EXPIRY_TIME_IN_SECONDS);
+      const user_id = bodsUser.id;
+      const tokenRecord = { user_id, token, expires };
+      await context.db.tokens.upsert({
+        where: { user_id },
+        create: tokenRecord,
+        update: tokenRecord,
       });
-
-      if (!session) {
-        logger.debug("Session in tokens table not found");
-        await context.db.tokens.create({
-          data: {
-            user_id: bodsUser.id,
-            token: sessionId,
-          },
-        });
-      } else {
-        logger.debug({ session }, "Session found in tokens table");
-        await context.db.tokens.update({
-          where: {
-            user_id: bodsUser.id,
-          },
-          data: {
-            token: sessionId,
-          },
-        });
-      }
+      const expiryTimestamp = expires.toUTCString();
 
       context.res.setHeader(
         "Set-Cookie",
-        `abods_sessionid=${sessionId}; expires=${expires}; HttpOnly; Max-Age=1209600; Path=/; SameSite=None; Secure`,
+        `abods_sessionid=${token}; expires=${expiryTimestamp}; HttpOnly; Max-Age=${SESSION_EXPIRY_TIME_IN_SECONDS}; Path=/; SameSite=None; Secure`,
       );
-      return {
-        success: true,
-        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toUTCString(),
-      };
+      return { success: true, expiresAt: expiryTimestamp };
     } else {
       logger.debug("Invalid password entered");
       throw "Invalid username or password";
     }
   } catch (error) {
-    logger.error(error, "An error occurred on user login");
-    return {
-      success: false,
-    };
+    logger.error(error);
+    return { success: false };
   }
 };
 
