@@ -23,6 +23,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
 import datadogMetricsPlugin from "./lib/datadog.js";
 import { datadog } from "datadog-lambda-js";
+import { apolloLogger } from "./apolloLogger.js";
 
 export let kysely: Kysely<DB> | undefined = undefined;
 
@@ -40,7 +41,7 @@ const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
   logger,
-  plugins: [datadogMetricsPlugin],
+  plugins: [apolloLogger, datadogMetricsPlugin],
 });
 
 logger.info("Starting server in the background");
