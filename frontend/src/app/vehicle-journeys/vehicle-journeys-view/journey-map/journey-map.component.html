@@ -221,7 +221,10 @@
         class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
       >
         Received at:
-        {{ DateTime.fromISO(tooltipPing.ts) | dateTimeToFormat: "HH:mm:ss" }}
+        {{
+          DateTime.fromISO(tooltipPing.ts).setZone("Europe/London")
+            | dateTimeToFormat: "HH:mm:ss"
+        }}
       </div>
     </mgl-popup>
   </ng-container>
