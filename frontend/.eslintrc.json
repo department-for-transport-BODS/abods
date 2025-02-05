@@ -13,6 +13,7 @@
       "files": [
         "*.ts"
       ],
+      "plugins": ["jasmine"],
       "parserOptions": {
         "project": [
           "**/tsconfig.json"
@@ -86,6 +87,17 @@
       "extends": [
         "plugin:@angular-eslint/template/recommended"
       ]
+    },
+    {
+      "files": ["*.graphql"],
+      "extends": "plugin:@graphql-eslint/operations-recommended",
+      "parserOptions": {
+        "schema": "../abods-api/schema.graphql",
+        "operations": "./**/*.graphql"
+      },
+      "rules": {
+        "@graphql-eslint/naming-convention": "off"
+      }
     }
   ]
 }

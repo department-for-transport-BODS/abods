@@ -85,12 +85,12 @@ export const getUser: QueryResolvers["user"] = async (
         {
           id: "1",
           name: "Staff",
-          scope: "organisation",
+          scope: ScopeEnum.Organisation,
         },
         {
           id: "2",
           name: "Administrator",
-          scope: "organisation",
+          scope: ScopeEnum.Organisation,
         },
       ],
     };
