@@ -394,11 +394,9 @@ model corridor {
 }
 
 model corridor_stops {
-  corridor_index        BigInt // TODO: fix - nullable in db
+  corridor_index        Int // TODO: fix - nullable in db
   corridor_id           Int // TODO: fix - nullable bigint in db
   stop_id               Int // TODO: fix - nullable bigint in db
-  route_to_next_stop    String?
-  distance_to_next_stop Int // TODO: fix - nullable in db
   naptan_stop           naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
   corridor              corridor?                @relation(fields: [corridor_id], references: [corridor_id])
 
@@ -591,4 +589,12 @@ view naptan_stoppoint_latlong {
   corridor_stops corridor_stops[]
   locality       naptan_locality                 @relation(fields: [locality_id], references: [gazetteer_id])
   timetable      Timetable[]
+}
+
+model transmodel_tracks {
+  id                Int @id
+  from_atco_code    String
+  to_atco_code      String
+  geometry          String    
+  distance          Int
 }

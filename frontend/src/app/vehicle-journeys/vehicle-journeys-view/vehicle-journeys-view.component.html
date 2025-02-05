@@ -19,6 +19,40 @@
             : 'Journey not found'
         "
       ></app-page-header>
+      <div
+        class="govuk-error-summary"
+        data-module="govuk-error-summary"
+        *ngIf="vehicles.length > 1"
+      >
+        <div role="alert">
+          <h2 class="govuk-error-summary__title">
+            Data from multiple vehicles found for the selected start time
+            (journey code)
+          </h2>
+          <div class="govuk-error-summary__body">
+            <p>
+              This data quality issue is likely to have resulted in poor quality
+              performance data for the journey
+            </p>
+            <p>
+              Location data for the different vehicles can be viewed on the map.
+              This will not change performance data.
+            </p>
+            <app-segmented-toggle
+              [(ngModel)]="vehicleRef"
+              (ngModelChange)="onVehicleChange()"
+            >
+              <app-segmented-toggle-item
+                *ngFor="let vehicle of vehicles"
+                name="vehicle-ref"
+                [identifier]="vehicle"
+                [value]="vehicle"
+                [label]="vehicle"
+              ></app-segmented-toggle-item>
+            </app-segmented-toggle>
+          </div>
+        </div>
+      </div>
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [vehicleRef]="vehicleRef"
