@@ -198,6 +198,13 @@ Resources:
                   - kms:DescribeKey
                 Resource:
                   Fn::Sub: "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
+        - PolicyName: AnotherPolicyToTest
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/apikey"
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
     Condition: IsNotLocal
