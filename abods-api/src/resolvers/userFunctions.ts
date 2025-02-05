@@ -198,7 +198,8 @@ export const loginUser: MutationResolvers["login"] = async (
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
       const token = uuidv4();
-      const expires = new Date(Date.now() + SESSION_EXPIRY_TIME_IN_SECONDS);
+      const expiryTimeMilliseconds = SESSION_EXPIRY_TIME_IN_SECONDS * 1000;
+      const expires = new Date(Date.now() + expiryTimeMilliseconds);
       const user_id = bodsUser.id;
       const tokenRecord = { user_id, token, expires };
       await context.db.tokens.upsert({
