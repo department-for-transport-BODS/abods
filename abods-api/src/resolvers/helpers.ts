@@ -35,9 +35,7 @@ export const requireUserSession = async (context: RequestContext) => {
 
   // temporary session token storage
   const sessionRecord = await context.db.tokens.findFirst({
-    where: {
-      token: sessionId,
-    },
+    where: { token: sessionId, user: { is_active: true } },
   });
 
   logger.debug(
