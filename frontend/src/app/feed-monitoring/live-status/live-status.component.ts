@@ -118,6 +118,8 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
   }
 
   changeOperator({ nocCode }: { nocCode: string }) {
-    this.router.navigate([nocCode], { relativeTo: this.route.parent });
+    this.router
+      .navigate([nocCode], { relativeTo: this.route.parent })
+      .catch(console.log);
   }
 }

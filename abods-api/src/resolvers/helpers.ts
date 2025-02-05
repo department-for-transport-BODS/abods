@@ -38,6 +38,8 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionRecord = await context.db.tokens.findFirst({
     where: {
       token: sessionId,
+      expires: { gt: new Date() },
+      user: { is_active: true },
     },
   });
 
