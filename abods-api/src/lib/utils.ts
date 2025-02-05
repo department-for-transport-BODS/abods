@@ -39,22 +39,17 @@ export const getPercentile = (percentile: number, sortedArray: number[]) => {
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
 };
 
-export const checkOrgMapping = (
-  userOrganisations: {
-    organisation_id: number;
-    user_id?: number;
-  }[],
-  user_id: number,
-) => {
-  const organisation = userOrganisations?.find((o) => o.organisation_id);
-
-  if (!organisation) {
-    logger.error({ userId: user_id }, "User not mapped to an organisation");
+export const getUserOrgId = (user: {
+  id: number;
+  userOrganisations: { organisation_id: number }[];
+}) => {
+  if (user.userOrganisations.length < 1) {
+    logger.error({ userId: user.id }, "User not mapped to an organisation");
     throwUnauthenticatedError("User not mapped to any organisation");
   }
-  if (userOrganisations.length > 1) {
+  if (user.userOrganisations.length > 1) {
     logger.error(
-      { userId: user_id },
+      { userId: user.id },
       "API does not support multiple organisations per user",
     );
     throwUnauthenticatedError(
@@ -62,5 +57,5 @@ export const checkOrgMapping = (
     );
   }
 
-  return organisation;
+  return user.userOrganisations[0].organisation_id;
 };
