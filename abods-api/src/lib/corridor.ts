@@ -50,12 +50,6 @@ export const returnCorridor = (corridor: CorridorResultsType): CorridorType => {
   return {
     id: corridor.corridor_id,
     name: corridor.corridor_name,
-    createdBy: {
-      email: corridor.bods_user?.email ?? "",
-      id: corridor.bods_user?.id.toString() ?? "",
-      roles: [],
-      username: corridor.bods_user?.username ?? "",
-    },
     stops:
       corridor.corridor_stops?.map((stop) => ({
         stopId: stop.stop_id.toString(),

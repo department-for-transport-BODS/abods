@@ -68,10 +68,12 @@ export class ControlsComponent
 
   set timingPointsOption(timingPointsOption: TimingPoints) {
     const allStops = timingPointsOption === "all-stops" || null;
-    this.router.navigate([], {
-      queryParams: { allStops, timingPointsOnly: null },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { allStops, timingPointsOnly: null },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   get matchType(): MatchType {
@@ -79,10 +81,12 @@ export class ControlsComponent
   }
 
   set matchType(match_type: MatchType) {
-    this.router.navigate([], {
-      queryParams: { match_type },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { match_type },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   /** @deprecated this will be removed in ABOD-350 */
@@ -252,23 +256,27 @@ export class ControlsComponent
   ngAfterViewInit(): void {
     this.dateRange.valueChanges.subscribe(({ from, to, preset }) => {
       if (preset === Preset.Custom) {
-        this.router.navigate([], {
-          queryParams: {
-            from: from.toFormat("yyyy-MM-dd"),
-            to: to.minus({ days: 1 }).toFormat("yyyy-MM-dd"),
-            preset: undefined,
-          },
-          queryParamsHandling: "merge",
-        });
+        this.router
+          .navigate([], {
+            queryParams: {
+              from: from.toFormat("yyyy-MM-dd"),
+              to: to.minus({ days: 1 }).toFormat("yyyy-MM-dd"),
+              preset: undefined,
+            },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
       } else {
-        this.router.navigate([], {
-          queryParams: {
-            from: undefined,
-            to: undefined,
-            preset: preset,
-          },
-          queryParamsHandling: "merge",
-        });
+        this.router
+          .navigate([], {
+            queryParams: {
+              from: undefined,
+              to: undefined,
+              preset: preset,
+            },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
       }
     });
   }
@@ -280,35 +288,41 @@ export class ControlsComponent
   }
 
   changeAdminAreaIds(adminAreaId: string[]) {
-    this.router.navigate([], {
-      queryParams: { adminAreaId },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { adminAreaId },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   changeOperator(operator: { name?: string | null; nocCode: string }) {
-    this.router.navigate(["/on-time", operator.nocCode], {
-      queryParamsHandling: "preserve",
-    });
+    this.router
+      .navigate(["/on-time", operator.nocCode], {
+        queryParamsHandling: "preserve",
+      })
+      .catch(console.log);
   }
 
   updateFilters(value: PerformanceFiltersInputType) {
-    this.router.navigate([], {
-      queryParams: {
-        dayOfWeek: value.dayOfWeekFlags
-          ? Object.entries(value.dayOfWeekFlags)
-              .filter(([_s, v]) => v)
-              .map(([s, _v]) => s)
-              .join()
-          : undefined,
-        startTime: value.startTime,
-        endTime: value.endTime,
-        minDelay: value.minDelay,
-        maxDelay: value.maxDelay,
-        adminAreaId: value.adminAreaIds,
-      },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: {
+          dayOfWeek: value.dayOfWeekFlags
+            ? Object.entries(value.dayOfWeekFlags)
+                .filter(([_s, v]) => v)
+                .map(([s, _v]) => s)
+                .join()
+            : undefined,
+          startTime: value.startTime,
+          endTime: value.endTime,
+          minDelay: value.minDelay,
+          maxDelay: value.maxDelay,
+          adminAreaId: value.adminAreaIds,
+        },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   resetFilters() {
@@ -316,10 +330,12 @@ export class ControlsComponent
   }
 
   overviewModeChanged(overview: string) {
-    this.router.navigate([], {
-      queryParams: { overview },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onMoreFiltersClick() {

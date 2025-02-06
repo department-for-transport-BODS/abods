@@ -112,7 +112,7 @@ export class EditUserComponent implements OnInit {
         )
         .subscribe((mures) => {
           if (mures.success) {
-            this.router.navigate(["/organisation/users/"]);
+            this.router.navigate(["/organisation/users/"]).catch(console.log);
           } else {
             console.warn("Edit user failed", mures.error);
             this.errors = [
@@ -127,7 +127,7 @@ export class EditUserComponent implements OnInit {
   }
 
   onClose() {
-    this.router.navigate(["/organisation/users/"]);
+    this.router.navigate(["/organisation/users/"]).catch(console.log);
   }
 
   removeUser() {
@@ -146,7 +146,7 @@ export class EditUserComponent implements OnInit {
     this.subs.push(
       this.service.removeUser$(this.username.value).subscribe((mures) => {
         if (mures.success) {
-          this.router.navigate(["/organisation/users/"]);
+          this.router.navigate(["/organisation/users/"]).catch(console.log);
         } else {
           console.warn("Remove user failed", mures.error);
           this.errors = [

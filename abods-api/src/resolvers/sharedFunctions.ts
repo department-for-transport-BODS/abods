@@ -4,6 +4,7 @@ import {
   QueryResolvers,
   Resolvers,
   RoleType,
+  ScopeEnum,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 import logger from "../logger.js";
@@ -38,12 +39,12 @@ export const getRoles: QueryResolvers["roles"] = async (
     {
       id: "1",
       name: "Staff",
-      scope: "organisation",
+      scope: ScopeEnum.Organisation,
     },
     {
       id: "2",
       name: "Administrator",
-      scope: "organisation",
+      scope: ScopeEnum.Organisation,
     },
   ];
 };

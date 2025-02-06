@@ -135,8 +135,8 @@ export class AuthenticationService {
   private onDeauthentication() {
     this.hideOutliersService.resetAll();
     this.otpThresholdDefaultsService.resetAll();
-    this.apollo.client.resetStore();
+    this.apollo.client.resetStore().catch(console.log);
     this.clearSession();
-    this.router.navigate(["/login"]);
+    this.router.navigate(["/login"]).catch(console.log);
   }
 }

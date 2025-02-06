@@ -79,12 +79,15 @@ export class SparklineCellTemplateComponent
           return;
         }
         try {
-          this.chart.exporting.getSVG("svg", {}, false).then((svg) => {
-            const svgson = parseSync(svg);
-            svgson.attributes.width = "100%";
-            svgson.attributes.preserveAspectRatio = "none";
-            callback(stringify(svgson));
-          });
+          this.chart.exporting
+            .getSVG("svg", {}, false)
+            .then((svg) => {
+              const svgson = parseSync(svg);
+              svgson.attributes.width = "100%";
+              svgson.attributes.preserveAspectRatio = "none";
+              callback(stringify(svgson));
+            })
+            .catch(console.log);
         } catch {
           console.warn(
             "Failed to export the SVG; this is likely due to the template being disposed of early",

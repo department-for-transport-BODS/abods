@@ -2,7 +2,7 @@ import { RequestContext, SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
-import { checkOrgMapping } from "../lib/utils.js";
+import { getUserOrgId } from "../lib/utils.js";
 
 export function throwUnauthenticatedError(
   message?: string,
@@ -38,6 +38,7 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionRecord = await context.db.tokens.findFirst({
     where: {
       token: sessionId,
+      expires: { gt: new Date() },
     },
   });
 
@@ -53,16 +54,8 @@ export const requireUserSession = async (context: RequestContext) => {
   const bodsUser = await context.db.bods_user.findUnique({
     where: { id: sessionRecord.user_id },
     select: {
-      userOrganisations: {
-        select: {
-          organisation_id: true,
-        },
-      },
-      id: true,
-      username: true,
-      email: true,
-      first_name: true,
-      last_name: true,
+      userOrganisations: { select: { organisation_id: true } },
+      is_active: true,
     },
   });
 
@@ -71,16 +64,16 @@ export const requireUserSession = async (context: RequestContext) => {
     logger.debug("No bods user found");
     throwUnauthenticatedError();
   }
+  if (!bodsUser.is_active) {
+    logger.debug("User exists but is not active");
+    throwUnauthenticatedError();
+  }
 
-  const organisation = checkOrgMapping(bodsUser.userOrganisations, bodsUser.id);
+  const orgId = getUserOrgId({ ...bodsUser, id: sessionRecord.user_id });
 
   const sessionUser: SessionUser = {
-    id: bodsUser.id,
-    username: bodsUser.username,
-    email: bodsUser.email,
-    first_name: bodsUser.first_name,
-    last_name: bodsUser.last_name,
-    orgId: organisation.organisation_id,
+    id: sessionRecord.user_id,
+    orgId: orgId,
   };
 
   logger.debug({ sessionUser }, "Session user returned");
