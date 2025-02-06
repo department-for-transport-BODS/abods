@@ -138,6 +138,8 @@ Resources:
           DD_TAGS: app:graphql,project:abods
           DD_TRACE_ENABLED: false
           DD_ENHANCED_METRICS: false
+          DD_FORWARD_LOG: False
+          DD_FLUSH_TO_LOG: True
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
