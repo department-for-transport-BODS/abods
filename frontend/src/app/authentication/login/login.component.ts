@@ -18,7 +18,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   loading = true;
   submitted = false;
-  returnUrl?: string;
   errors: FormErrors[] = [];
 
   private destroy$ = new Subject<void>();
@@ -39,21 +38,22 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.resetForm();
     });
-    this.returnUrl = this.route.snapshot.queryParams.returnUrl;
+    const postLoginLink = this.route.snapshot.queryParams.returnUrl ?? "/";
     this.authenticationService.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((isAuth) => {
-        if (isAuth) {
-          this.loading = false;
-          this.router.navigateByUrl(this.returnUrl ?? "/");
-        } else {
-          if (this.submitted) {
-            this.errors.push({
-              error: "Sign in failed, check username and password.",
-              label: "login-username",
-            });
+        if (!isAuth) {
+          if (!this.submitted) {
+            return;
           }
+          this.errors.push({
+            error: "Sign in failed, check username and password.",
+            label: "login-username",
+          });
+          return;
         }
+        this.loading = false;
+        this.router.navigateByUrl(postLoginLink).catch(console.log);
       });
   }
 
@@ -107,6 +107,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onEmailBlur() {
-    this.router.navigate(["./"], { skipLocationChange: true });
+    this.router
+      .navigate(["./"], { skipLocationChange: true })
+      .catch(console.log);
   }
 }

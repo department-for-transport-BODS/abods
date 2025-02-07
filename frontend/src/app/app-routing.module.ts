@@ -73,6 +73,13 @@ const routes: Routes = [
         (mod) => mod.VehicleJourneysModule,
       ),
   },
+  {
+    path: "data-monitoring",
+    loadChildren: () =>
+      import("./data-monitoring/data-monitoring.module").then(
+        (mod) => mod.DataMonitoringModule,
+      ),
+  },
   { path: "not-authorised", component: NotAuthorisedComponent },
   { path: "**", component: NotFoundComponent },
 ];

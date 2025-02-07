@@ -2,6 +2,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { Signer } from "@aws-sdk/rds-signer";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import logger from "./logger.js";
+import { sendErrorMetric } from "./lib/datadog.js";
 
 export const isLocal = () => (process.env.PROJECT_ENV || "local") === "local";
 
@@ -86,7 +87,12 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
         ...(isLocal() ? {} : { params: undefined }),
       }),
     );
-    await Promise.all([prisma.$disconnect(), prisma.$connect()]);
+    try {
+      await Promise.all([prisma.$disconnect(), prisma.$connect()]);
+    } catch (error) {
+      sendErrorMetric(error);
+      throw new Error("Failed to connect to database using prisma");
+    }
     logger.debug("Prisma has connected to the database");
   }
   return prisma;

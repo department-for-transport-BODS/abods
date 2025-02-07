@@ -39,7 +39,8 @@
     "connect-redis": "^7.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "datadog-lambda-js": "^9.117.0",
+    "datadog": "^1.0.1",
+    "datadog-lambda-js": "^9.119.0",
     "dayjs": "^1.11.11",
     "dayjs-plugin-utc": "^0.1.2",
     "express-session": "^1.18.0",
@@ -61,6 +62,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@graphql-eslint/eslint-plugin": "^4.0.0",
     "@types/connect-redis": "^0.0.23",
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",

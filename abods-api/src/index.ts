@@ -18,10 +18,12 @@ import { IncomingHttpHeaders } from "http";
 
 import { DB } from "./kysely.js";
 import { Kysely } from "kysely";
-import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
+import datadogMetricsPlugin from "./lib/datadog.js";
+import { datadog } from "datadog-lambda-js";
+import { apolloLogger } from "./apolloLogger.js";
 
 export let kysely: Kysely<DB> | undefined = undefined;
 
@@ -34,12 +36,14 @@ const apiKeyAuth = await getAPITokenHash();
 const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
 `;
+
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
   logger,
-  plugins: [apolloLogger],
+  plugins: [apolloLogger, datadogMetricsPlugin],
 });
+
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
@@ -50,6 +54,10 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; frame-ancestors 'self' https://*.quicksight.aws.amazon.com; connect-src 'self' https://*.quicksight.aws.amazon.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;",
+      );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { event } = getCurrentInvoke();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -70,4 +78,4 @@ app.use(
 
 const handler = serverlessExpress({ app });
 
-export { handler as default };
+export default datadog(handler);

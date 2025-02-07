@@ -52,6 +52,15 @@
             >Corridors
           </a>
         </li>
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/data-monitoring']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Data monitoring
+          </a>
+        </li>
       </ul>
     </nav>
   </div>

@@ -53,12 +53,14 @@ export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onChange() {
     this.pageHeaderBannerService.clearBanner();
-    this.router.navigate([], {
-      queryParams: {
-        saved: false,
-      },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: {
+          saved: false,
+        },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onSave() {
@@ -75,7 +77,8 @@ export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         queryParamsHandling: "merge",
       })
-      .then(() => this.reloadPage());
+      .then(() => this.reloadPage())
+      .catch(console.log);
   }
 
   reloadPage() {

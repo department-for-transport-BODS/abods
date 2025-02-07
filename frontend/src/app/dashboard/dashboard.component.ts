@@ -114,10 +114,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.operatorSubject.next(operator);
             this.selectedOperatorsSubject.next([operator]);
           } else {
-            this.router.navigate(["."], {
-              queryParams: { nocCode: null },
-              queryParamsHandling: "merge",
-            });
+            this.router
+              .navigate(["."], {
+                queryParams: { nocCode: null },
+                queryParamsHandling: "merge",
+              })
+              .catch(console.log);
           }
         } else {
           this.operatorSubject.next({ nocCode: "all" });
@@ -185,17 +187,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   changeOperator({ nocCode }: { nocCode: string; name?: string }) {
-    this.router.navigate(["."], {
-      queryParams: { nocCode: nocCode === "all" ? null : nocCode },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate(["."], {
+        queryParams: { nocCode: nocCode === "all" ? null : nocCode },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onTimingPointsToggleChange() {
     const allStops = this.timingPointsOption === "all-stops" ? true : null;
-    this.router.navigate([], {
-      queryParams: { allStops },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { allStops },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

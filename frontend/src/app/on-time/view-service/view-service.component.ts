@@ -218,12 +218,14 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
             paramMap.get("overview") !== "excess-wait-time",
         ),
       )
-      .subscribe(() =>
-        this.router.navigate([], {
-          queryParams: { overview: undefined },
-          queryParamsHandling: "merge",
-        }),
-      );
+      .subscribe(() => {
+        this.router
+          .navigate([], {
+            queryParams: { overview: undefined },
+            queryParamsHandling: "merge",
+          })
+          .catch(console.log);
+      });
   }
 
   ngOnDestroy(): void {
@@ -232,23 +234,29 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
   }
 
   changeOperator(operator: { name?: string | null; nocCode: string }) {
-    this.router.navigate(["/on-time", operator.nocCode], {
-      queryParamsHandling: "preserve",
-    });
+    this.router
+      .navigate(["/on-time", operator.nocCode], {
+        queryParamsHandling: "preserve",
+      })
+      .catch(console.log);
   }
 
   tabChanged(tab: TabComponent) {
-    this.router.navigate([], {
-      queryParams: { tab: tab.id },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { tab: tab.id },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   overviewModeChanged(overview: string) {
-    this.router.navigate([], {
-      queryParams: { overview },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   get allServicesQueryParams() {
