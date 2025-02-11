@@ -138,8 +138,8 @@ export const filterServiceLinksByStops = (
 ): ServiceLinkType[] =>
   serviceLinks.filter(
     (links) =>
-      stops.find((stop) => stop.stopId === links.fromStop) &&
-      stops.find((stop) => stop.stopId === links.toStop),
+      stops.find((stop) => stop.naptan === links.fromStop) &&
+      stops.find((stop) => stop.naptan === links.toStop),
   );
 
 export interface StopLists {

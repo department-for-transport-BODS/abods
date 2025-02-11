@@ -68,8 +68,10 @@ model FeatureFlag {
 }
 
 model Tokens {
-  user_id Int     @id
-  token   String? @db.VarChar(150)
+  user_id Int      @id
+  token   String?  @db.VarChar(150)
+  expires DateTime @db.Timestamp(6)
+  user    bods_user @relation(fields: [user_id], references: [id])
 }
 
 model SiriVMPositions {
@@ -501,6 +503,7 @@ view bods_user {
   corridor          corridor[]
   created_by_alerts Alert[]                 @relation("created_by_user")
   send_to_alerts    Alert[]                 @relation("send_to_user")
+  Tokens            Tokens[]
 }
 
 view bods_userorganisation {

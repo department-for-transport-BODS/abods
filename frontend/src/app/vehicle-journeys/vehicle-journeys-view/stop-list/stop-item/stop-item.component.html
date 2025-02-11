@@ -48,12 +48,16 @@
     <div *ngIf="displayTimingDetails" class="stop-list-item__scheduled">
       <div class="stop-list-item__time-container">
         <span class="stop-list-item__time-container--minutes">{{
-          scheduledDeparture | dateTimeToFormat: "HH:mm"
+          scheduledDeparture?.setZone("Europe/London")
+            | dateTimeToFormat: "HH:mm"
         }}</span>
         <span
           *ngIf="!timingPointsOnly"
           class="stop-list-item__time-container--seconds"
-          >:{{ scheduledDeparture | dateTimeToFormat: "ss" }}</span
+          >:{{
+            scheduledDeparture?.setZone("Europe/London")
+              | dateTimeToFormat: "ss"
+          }}</span
         >
       </div>
     </div>
@@ -71,12 +75,14 @@
         class="stop-list-item__time-container"
       >
         <span class="stop-list-item__time-container--minutes">{{
-          actualDeparture | dateTimeToFormat: "HH:mm"
+          actualDeparture.setZone("Europe/London") | dateTimeToFormat: "HH:mm"
         }}</span>
         <span
           *ngIf="!timingPointsOnly"
           class="stop-list-item__time-container--seconds"
-          >:{{ actualDeparture | dateTimeToFormat: "ss" }}</span
+          >:{{
+            actualDeparture.setZone("Europe/London") | dateTimeToFormat: "ss"
+          }}</span
         >
       </div>
       <ng-template #empty>-</ng-template>

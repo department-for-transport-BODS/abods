@@ -110,11 +110,13 @@ export class CorridorsGridComponent implements OnInit, OnDestroy {
   }
 
   onFilterChanged() {
-    this.router.navigate([], {
-      queryParams: {
-        search: encodeURIComponent(this.gridFilter),
-      },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: {
+          search: encodeURIComponent(this.gridFilter),
+        },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

@@ -256,10 +256,12 @@ export class FeedMonitoringComponent
           console.error("Error loading operators");
         } else {
           if (operators.length === 1) {
-            this.router.navigate([operators[0].nocCode], {
-              relativeTo: this.route,
-              skipLocationChange: true,
-            });
+            this.router
+              .navigate([operators[0].nocCode], {
+                relativeTo: this.route,
+                skipLocationChange: true,
+              })
+              .catch(console.log);
           } else if (operators.length > 0) {
             this.rawActiveOperators = operators;
             this.setOperators(this.rawActiveOperators);

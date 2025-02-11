@@ -234,18 +234,22 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   onTimingPointsToggleChange() {
     const allStops = this.timingPointsOption === "all-stops" ? true : null;
-    return this.router.navigate([], {
-      queryParams: { allStops },
-      queryParamsHandling: "merge",
-    });
+    return this.router
+      .navigate([], {
+        queryParams: { allStops },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onMatchTypeChange() {
     const matchType = this.matchType;
-    return this.router.navigate([], {
-      queryParams: { match_type: matchType },
-      queryParamsHandling: "merge",
-    });
+    return this.router
+      .navigate([], {
+        queryParams: { match_type: matchType },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onVehicleChange() {
