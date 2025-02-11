@@ -11,9 +11,9 @@ import { dateTimeEqualityMatcher } from "src/test-support/equality";
 import { of } from "rxjs";
 import { ViewOperatorComponent } from "./view-operator.component";
 import { OnTimeService, PunctualityOverview } from "../on-time.service";
-import { OnTimeFiltersComponent } from "../on-time-filters/on-time-filters.component";
+import { FiltersComponent } from "../filters/filters.component";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { OnTimeControlsComponent } from "../on-time-controls/on-time-controls.component";
+import { ControlsComponent } from "../controls/controls.component";
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import {

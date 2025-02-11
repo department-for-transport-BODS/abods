@@ -6,7 +6,7 @@ import { LayoutModule } from "../layout/layout.module";
 import { DelayFrequencyChartComponent } from "./delay-frequency-chart/delay-frequency-chart.component";
 import { TimeSeriesChartComponent } from "./time-series-chart/time-series-chart.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { OnTimeFiltersComponent } from "./on-time-filters/on-time-filters.component";
+import { FiltersComponent } from "./filters/filters.component";
 import { OverviewStatsComponent } from "./overview-stats/overview-stats.component";
 import { StackedHistogramChartComponent } from "./stacked-histogram-chart/stacked-histogram-chart.component";
 import { OnTimeGridComponent } from "./on-time-grid/on-time-grid.component";
@@ -24,8 +24,8 @@ import { ChartNoDataWrapperComponent } from "./chart-no-data-wrapper/chart-no-da
 import { ExcessWaitTimeChartComponent } from "./excess-wait-time-chart/excess-wait-time-chart.component";
 import { ServiceGridComponent } from "./service-grid/service-grid.component";
 import { LuxonModule } from "luxon-angular";
-import { OnTimeFilterChipsComponent } from "./on-time-filter-chips/on-time-filter-chips.component";
-import { OnTimeControlsComponent } from "./on-time-controls/on-time-controls.component";
+import { FilterChipsComponent } from "./filter-chips/filter-chips.component";
+import { ControlsComponent } from "./controls/controls.component";
 import { AllOperatorsComponent } from "./all-operators/all-operators.component";
 import { ViewOperatorComponent } from "./view-operator/view-operator.component";
 import { ViewServiceComponent } from "./view-service/view-service.component";
@@ -41,7 +41,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     DelayFrequencyChartComponent,
     TimeSeriesChartComponent,
     OverviewStatsComponent,
-    OnTimeFiltersComponent,
+    FiltersComponent,
     DayOfWeekChartComponent,
     TimeOfDayChartComponent,
     StackedHistogramChartComponent,
@@ -57,8 +57,8 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     ChartNoDataWrapperComponent,
     ExcessWaitTimeChartComponent,
     ServiceGridComponent,
-    OnTimeFilterChipsComponent,
-    OnTimeControlsComponent,
+    FilterChipsComponent,
+    ControlsComponent,
     AllOperatorsComponent,
     ViewOperatorComponent,
     ViewServiceComponent,
@@ -88,7 +88,6 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     ServiceGridComponent,
     StopsGridComponent,
     OperatorGridComponent,
-    OnTimeControlsComponent,
   ],
 })
 export class OnTimeModule {}

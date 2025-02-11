@@ -1,8 +1,18 @@
 <ul
-  *ngIf="enableChip || isDayOfWeek || isTimeRange || isMinDelay || isMaxDelay"
+  *ngIf="
+    adminAreas.length || isDayOfWeek || isTimeRange || isMinDelay || isMaxDelay
+  "
   class="filter-chips"
 >
-  <ng-content></ng-content>
+  <ng-container *ngIf="showAdminAreas">
+    <li *ngFor="let adminArea of adminAreas" class="filter-chips__item">
+      <app-chip
+        label="Area"
+        [value]="adminArea.name"
+        (closeChip)="clearAdminAreaFilter(adminArea.id)"
+      ></app-chip>
+    </li>
+  </ng-container>
   <li *ngIf="isDayOfWeek" class="filter-chips__item">
     <app-chip
       [label]="'Day of the week'"

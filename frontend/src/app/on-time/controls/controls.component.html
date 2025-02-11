@@ -62,4 +62,10 @@
     </div>
   </div>
 </div>
-<ng-content />
+<div class="on-time__filter-chips">
+  <app-filter-chips
+    [filters]="filtersSubject.value"
+    (filterChange)="updateFilters($event)"
+    [showAdminAreas]="showAdminAreas"
+  ></app-filter-chips>
+</div>

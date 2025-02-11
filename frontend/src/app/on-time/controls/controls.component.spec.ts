@@ -7,8 +7,8 @@ import {
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { PerformanceFiltersInputType } from "src/generated/graphql";
 import { dateTimeEqualityMatcher } from "src/test-support/equality";
-import { OnTimeControlsComponent } from "./on-time-controls.component";
-import { OnTimeFiltersComponent } from "../on-time-filters/on-time-filters.component";
+import { ControlsComponent } from "./controls.component";
+import { FiltersComponent } from "../filters/filters.component";
 import { PanelService } from "../../shared/components/panel/panel.service";
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
@@ -17,13 +17,13 @@ import { DateTime } from "luxon";
 import objectContaining = jasmine.objectContaining;
 
 describe("ControlsComponent", () => {
-  let spectator: SpectatorRouting<OnTimeControlsComponent>;
-  let component: OnTimeControlsComponent;
+  let spectator: SpectatorRouting<ControlsComponent>;
+  let component: ControlsComponent;
   let panelService: PanelService;
 
   const createComponent = createRoutingFactory({
-    component: OnTimeControlsComponent,
-    declarations: [OnTimeFiltersComponent, ChartNoDataWrapperComponent],
+    component: ControlsComponent,
+    declarations: [FiltersComponent, ChartNoDataWrapperComponent],
     imports: [
       LayoutModule,
       SharedModule,

@@ -70,9 +70,6 @@ import { WholeNumberFormControlDirective } from "./directives/form-control/whole
 import { HelpdeskPanelComponent } from "./components/helpdesk-panel/helpdesk-panel.component";
 import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive";
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
-import { FilterChipsComponent } from "./components/filter-chips/filter-chips.component";
-import { FiltersComponent } from "./components/filters/filters.component";
-import { ControlsComponent } from "./components/controls/controls.component";
 @NgModule({
   declarations: [
     NoInfinityPipe,
@@ -135,9 +132,6 @@ import { ControlsComponent } from "./components/controls/controls.component";
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
     FreshdeskHtmlFormatterPipe,
-    FiltersComponent,
-    FilterChipsComponent,
-    ControlsComponent,
   ],
   providers: [PercentPipe],
   imports: [
@@ -212,9 +206,6 @@ import { ControlsComponent } from "./components/controls/controls.component";
     WholeNumberFormControlDirective,
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
-    FilterChipsComponent,
-    ControlsComponent,
-    FiltersComponent,
   ],
 })
 export class SharedModule {}

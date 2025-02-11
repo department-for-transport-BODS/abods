@@ -1,48 +1,53 @@
 import {
+  AfterViewInit,
   Component,
   EventEmitter,
+  Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
+  SimpleChanges,
+  ViewChild,
 } from "@angular/core";
+import { ActivatedRoute, ParamMap, Router } from "@angular/router";
+import { DateTime } from "luxon";
+import { BehaviorSubject, combineLatest, Subject } from "rxjs";
+import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
 import {
   DayOfWeekFlagsInputType,
   MatchType,
   PerformanceFiltersInputType,
-} from "../../../../generated/graphql";
-import { PerformanceParams } from "../../../on-time/on-time.service";
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  Observable,
-  Subject,
-  takeUntil,
-  tap,
-} from "rxjs";
+} from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
-import { TimingPoints } from "../../../on-time/on-time-controls/on-time-controls.component";
-import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { DateRangeService } from "../../services/date-range.service";
-import { PanelService } from "../panel/panel.service";
-import { OnTimePanelService } from "../../../on-time/on-time-controls/on-time-panel.service";
-import { FromToPreset, Period, Preset } from "../date-range/date-range.types";
-import { DateTime } from "luxon";
 import { isEqual as _isEqual } from "lodash-es";
+import { PerformanceParams } from "../on-time.service";
+import { FiltersComponent } from "../filters/filters.component";
+import { DateRangeService } from "../../shared/services/date-range.service";
+import {
+  FromToPreset,
+  Period,
+  Preset,
+} from "../../shared/components/date-range/date-range.types";
+import { PanelService } from "../../shared/components/panel/panel.service";
+import { ifNullOrUndefinedReturnEmptyString } from "../../shared/rxjs-operators";
+
+export type TimingPoints = "all-stops" | "timing-points";
 
 @Component({
   selector: "app-controls",
-  templateUrl: "./controls.component.html",
+  templateUrl: "controls.component.html",
   styleUrls: ["./controls.component.scss"],
 })
-export class ControlsComponent implements OnInit, OnDestroy {
+export class ControlsComponent
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
+  @Input() showAdminAreas = true;
+  @Input() operatorId: string | null | undefined = "";
   @Output() params = new EventEmitter<PerformanceParams>();
-  @Output() filtersChange = new EventEmitter<PerformanceFiltersInputType>();
 
   filtersSubject = new BehaviorSubject<PerformanceFiltersInputType>({});
 
-  showAdminAreas = true;
   dateRange = new FormControl(
     this.getDateTimeParams(this.route.snapshot.queryParamMap),
     {
@@ -52,6 +57,9 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   onDestroy$ = new Subject<void>();
 
+  @ViewChild(FiltersComponent) filtersComponent?: FiltersComponent;
+
+  // TODO ABOD-350 prefer a form to custom binding
   get timingPointsOption(): TimingPoints {
     return this.filtersSubject.value.timingPointsOnly
       ? "timing-points"
@@ -87,11 +95,10 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    protected router: Router,
-    protected route: ActivatedRoute,
-    protected dateRangeService: DateRangeService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private dateRangeService: DateRangeService,
     public panelService: PanelService,
-    public onTimePanel: OnTimePanelService,
   ) {}
 
   getDateTimeParams(queryParams: ParamMap): FromToPreset {
@@ -129,6 +136,10 @@ export class ControlsComponent implements OnInit, OnDestroy {
       matchType: MatchType.Evidenced,
     };
 
+    if (paramMap.get("nocCode")) {
+      const operatorId = ifNullOrUndefinedReturnEmptyString(this.operatorId);
+      filters.operatorIds = [operatorId];
+    }
     const lineId = paramMap.get("lineId");
     if (lineId) {
       filters.lineIds = [lineId];
@@ -187,10 +198,16 @@ export class ControlsComponent implements OnInit, OnDestroy {
         queryParams.get("allStops") !== "true" || undefined;
     }
 
+    if (queryParams.has("adminAreaId")) {
+      filters.adminAreaIds = queryParams.getAll("adminAreaId");
+    }
+
     return filters;
   }
 
   ngOnInit(): void {
+    this.setFilterPanelComponent();
+
     const paramMap$ = this.route.paramMap;
     const queryParamMap$ = this.route.queryParamMap;
 
@@ -223,12 +240,20 @@ export class ControlsComponent implements OnInit, OnDestroy {
           toTimestamp: to.toISO(),
           filters,
         })),
-        tap(() => this.setFilterPanelComponent(paramMap$, queryParamMap$)),
       )
-      .subscribe((params) => {
-        this.params.emit(params);
-      });
+      .subscribe((params) => this.params.emit(params));
+  }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.operatorId?.currentValue) {
+      this.filtersSubject.next({
+        ...this.filtersSubject.value,
+        operatorIds: [changes.operatorId.currentValue],
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
     this.dateRange.valueChanges.subscribe(({ from, to, preset }) => {
       if (preset === Preset.Custom) {
         this.router
@@ -262,32 +287,72 @@ export class ControlsComponent implements OnInit, OnDestroy {
     this.onDestroy$.complete();
   }
 
+  changeAdminAreaIds(adminAreaId: string[]) {
+    this.router
+      .navigate([], {
+        queryParams: { adminAreaId },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
+  }
+
+  changeOperator(operator: { name?: string | null; nocCode: string }) {
+    this.router
+      .navigate(["/on-time", operator.nocCode], {
+        queryParamsHandling: "preserve",
+      })
+      .catch(console.log);
+  }
+
   updateFilters(value: PerformanceFiltersInputType) {
-    this.filtersChange.emit(value);
+    this.router
+      .navigate([], {
+        queryParams: {
+          dayOfWeek: value.dayOfWeekFlags
+            ? Object.entries(value.dayOfWeekFlags)
+                .filter(([_s, v]) => v)
+                .map(([s, _v]) => s)
+                .join()
+            : undefined,
+          startTime: value.startTime,
+          endTime: value.endTime,
+          minDelay: value.minDelay,
+          maxDelay: value.maxDelay,
+          adminAreaId: value.adminAreaIds,
+        },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
+  }
+
+  resetFilters() {
+    this.filtersComponent?.resetFilters();
+  }
+
+  overviewModeChanged(overview: string) {
+    this.router
+      .navigate([], {
+        queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   onMoreFiltersClick() {
     this.panelService.toggle();
   }
 
-  setFilterPanelComponent(
-    paramMap$: Observable<ParamMap>,
-    queryParamMap$: Observable<ParamMap>,
-  ) {
+  setFilterPanelComponent() {
     this.panelService.setComponent({
-      component: this.onTimePanel.getComponent(),
+      component: FiltersComponent,
       inputs: [
         {
           name: "filters",
           value: this.filtersSubject,
         },
         {
-          name: "paramMap",
-          value: paramMap$,
-        },
-        {
-          name: "queryParamMap",
-          value: queryParamMap$,
+          name: "showAdminAreas",
+          value: this.showAdminAreas,
         },
       ],
       outputs: [

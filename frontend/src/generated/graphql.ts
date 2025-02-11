@@ -1458,15 +1458,6 @@ export type OperatorLinesQueryVariables = Exact<{
 
 export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
-export type StopDataFragment = { __typename?: 'StopAnalysisType', averageDelay: number, early: number, late: number, lineId?: string | null, onTime: number, scheduledDepartures: number, completedDepartures: number, stopId: number, stopName: string, timingPoint?: boolean | null, operatorId?: string | null, latitude: number, longitude: number };
-
-export type StopAnalysisListQueryVariables = Exact<{
-  inputs: StopAnalysisFiltersInput;
-}>;
-
-
-export type StopAnalysisListQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopAnalysisType', averageDelay: number, early: number, late: number, lineId?: string | null, onTime: number, scheduledDepartures: number, completedDepartures: number, stopId: number, stopName: string, timingPoint?: boolean | null, operatorId?: string | null, latitude: number, longitude: number } | null> };
-
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
@@ -1662,23 +1653,6 @@ export const AlertFragmentDoc = gql`
   }
   eventHysterisis
   eventThreshold
-}
-    `;
-export const StopDataFragmentDoc = gql`
-    fragment StopData on StopAnalysisType {
-  averageDelay
-  early
-  late
-  lineId
-  onTime
-  scheduledDepartures
-  completedDepartures
-  stopId
-  stopName
-  timingPoint
-  operatorId
-  latitude
-  longitude
 }
     `;
 export const LoginDocument = gql`
@@ -2814,24 +2788,6 @@ export const OperatorLinesDocument = gql`
   })
   export class OperatorLinesGQL extends Apollo.Query<OperatorLinesQuery, OperatorLinesQueryVariables> {
     document = OperatorLinesDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const StopAnalysisListDocument = gql`
-    query stopAnalysisList($inputs: StopAnalysisFiltersInput!) {
-  stopAnalysis(inputs: $inputs) {
-    ...StopData
-  }
-}
-    ${StopDataFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class StopAnalysisListGQL extends Apollo.Query<StopAnalysisListQuery, StopAnalysisListQueryVariables> {
-    document = StopAnalysisListDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

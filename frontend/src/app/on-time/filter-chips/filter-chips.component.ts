@@ -1,6 +1,15 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from "@angular/core";
+import { PerformanceFiltersInputType } from "../../../generated/graphql";
+import { AdminArea, AdminAreaService } from "../admin-area/admin-area.service";
+import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
+import { map } from "rxjs/operators";
 import { entries as _entries } from "lodash-es";
-import { PerformanceFiltersInputType } from "../../../../generated/graphql";
 
 export interface DayOfWeekLabel {
   monday: "Mon";
@@ -17,8 +26,8 @@ export interface DayOfWeekLabel {
   templateUrl: "./filter-chips.component.html",
   styleUrls: ["./filter-chips.component.scss"],
 })
-export class FilterChipsComponent {
-  @Input() enableChip = false;
+export class FilterChipsComponent implements OnChanges {
+  @Input() showAdminAreas = true;
   @Input() filters: PerformanceFiltersInputType = {};
   @Output() filterChange = new EventEmitter<PerformanceFiltersInputType>();
 
@@ -82,6 +91,28 @@ export class FilterChipsComponent {
     return this.filters.maxDelay + " minutes";
   }
 
+  adminAreas: AdminArea[] = [];
+
+  constructor(private adminAreaService: AdminAreaService) {}
+
+  ngOnChanges() {
+    const nocCode = this.filters.nocCodes?.[0];
+    const adminAreaIds =
+      this.filters.adminAreaIds?.filter(isNotNullOrUndefined) ?? [];
+
+    // This ought to happen synchronously, since admin area data should be cached and never change
+    (nocCode
+      ? this.adminAreaService.fetchAdminAreasForOperator(nocCode)
+      : this.adminAreaService.fetchAdminAreas()
+    )
+      .pipe(
+        map((adminAreas) =>
+          adminAreas.filter((adminArea) => adminAreaIds.includes(adminArea.id)),
+        ),
+      )
+      .subscribe((adminAreas) => (this.adminAreas = adminAreas));
+  }
+
   onClearDayOfWeekFilter() {
     const { dayOfWeekFlags: _, ...filters } = this.filters;
     this.updateFilters(filters);
@@ -100,6 +131,15 @@ export class FilterChipsComponent {
   onClearMaxDelayFilter() {
     const { maxDelay: _, ...filters } = this.filters;
     this.updateFilters(filters);
+  }
+
+  clearAdminAreaFilter(adminAreaId: string) {
+    this.updateFilters({
+      ...this.filters,
+      adminAreaIds: this.filters.adminAreaIds?.filter(
+        (id) => id !== adminAreaId,
+      ),
+    });
   }
 
   updateFilters(filters: PerformanceFiltersInputType) {

@@ -9,18 +9,18 @@ import {
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 
-import { OnTimeFiltersComponent } from "./on-time-filters.component";
+import { FiltersComponent } from "./filters.component";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { of } from "rxjs";
 
-describe("OnTimeFiltersComponent", () => {
-  let spectator: Spectator<OnTimeFiltersComponent>;
-  let component: OnTimeFiltersComponent;
+describe("FiltersComponent", () => {
+  let spectator: Spectator<FiltersComponent>;
+  let component: FiltersComponent;
   let adminAreaService: SpyObject<AdminAreaService>;
   const mockAdminAreas = [{ id: "AA110", name: "Derbyshire" }];
 
   const createComponent = createComponentFactory({
-    component: OnTimeFiltersComponent,
+    component: FiltersComponent,
     imports: [LayoutModule, SharedModule, FormsModule],
     mocks: [AdminAreaService],
     detectChanges: false,
@@ -37,6 +37,10 @@ describe("OnTimeFiltersComponent", () => {
 
   it("should create", () => {
     expect(component).toBeTruthy();
+  });
+
+  it("should load with defaults", () => {
+    expect(component.startTime).toEqual("00:00");
   });
 
   it("it should reset to default filters", () => {
@@ -91,6 +95,9 @@ describe("OnTimeFiltersComponent", () => {
       spectator.query(byLabel("End time")) as Element,
     );
 
+    component.minDelayStr = "-20";
+    component.maxDelayStr = "30";
+
     spectator.detectChanges();
 
     expect(spy).not.toHaveBeenCalled();
@@ -121,10 +128,14 @@ describe("OnTimeFiltersComponent", () => {
   it('it should allow the delay filters to be set back to "no delay"', () => {
     const spy = spyOn(component.filtersChange, "emit");
 
+    component.minDelayStr = "-20";
+    component.maxDelayStr = "30";
     spectator.detectChanges();
 
     spectator.click(byText("Apply"));
 
+    component.minDelayStr = "none";
+    component.maxDelayStr = "none";
     spectator.detectChanges();
 
     spy.calls.reset();
@@ -136,5 +147,43 @@ describe("OnTimeFiltersComponent", () => {
     // Want to be able to say was called with an object the didn't contain - this is the best I came up with,
     expect(spy.calls.mostRecent().args[0]?.minDelay).toBeUndefined();
     expect(spy.calls.mostRecent().args[0]?.maxDelay).toBeUndefined();
+  });
+
+  describe("setAdminAreaDropdown", () => {
+    it("should not call fetchAdminAreasForOperator if new operatorId is the same as operatorId", () => {
+      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
+        of(mockAdminAreas),
+      );
+      component.oldFilters = { operatorIds: ["AAA"] };
+      component.setAdminAreaDropdown({ operatorIds: ["AAA"] });
+
+      expect(
+        adminAreaService.fetchAdminAreasForOperator,
+      ).not.toHaveBeenCalledWith("AAA");
+    });
+
+    it("should call fetchAdminAreasForOperator with new operatorId if new operatorId is not the same as operatorId", () => {
+      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
+        of(mockAdminAreas),
+      );
+      component.oldFilters = { operatorIds: ["AAA"] };
+      component.setAdminAreaDropdown({ operatorIds: ["BBB"] });
+
+      expect(adminAreaService.fetchAdminAreasForOperator).toHaveBeenCalledWith(
+        "BBB",
+      );
+    });
+
+    it("should set label to name and value to id", () => {
+      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
+        of(mockAdminAreas),
+      );
+      component.oldFilters = { operatorIds: ["AAA"] };
+      component.setAdminAreaDropdown({ operatorIds: ["AA110"] });
+      component.adminAreas$.subscribe((data) => {
+        expect(data[0].label).toEqual(mockAdminAreas[0].name);
+        expect(data[0].value).toEqual(mockAdminAreas[0].id);
+      });
+    });
   });
 });
