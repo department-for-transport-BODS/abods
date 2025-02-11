@@ -8,9 +8,9 @@
     "category_id": 43000371971,
     "folder_id": 43000590096,
     "title": "Feed Status",
-    "updated_at": "2023-06-02T13:55:11Z",
-    "description": "<p data-pm-slice=\"1 1 []\"> This is a feed of matched data. &nbsp;A cross indicates there is an issue with the feed, which may be related to there not being an up to date timetable or a lack of AVL data.&nbsp;</p><p>For BODS a feed is a subscription to a SIRI VM server that publishes Vehicle Monitoring updates. This may include vehicles from several different NOCs (they’ll generally belong to the same parent operator).</p><p>In ABOD a feed is just the updates from all the Vehicles belonging to a single NOC.</p>",
-    "description_text": " This is a feed of matched data.  A cross indicates there is an issue with the feed, which may be related to there not being an up to date timetable or a lack of AVL data.   For BODS a feed is a subscription to a SIRI VM server that publishes Vehicle Monitoring updates. This may include vehicles from several different NOCs (they’ll generally belong to the same parent operator).  In ABOD a feed is just the updates from all the Vehicles belonging to a single NOC. ",
+    "updated_at": "2025-02-10T15:20:00Z",
+    "description": "<p data-pm-slice=\"1 1 []\">Active: A green checkmark indicates that we have recieved AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable.&nbsp;</p><p>Inactive: A cross indicates that we did not recieve AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable. An inactive feed can be attributed to one of the following:</p><ul><li>Incorrect Schedules: The expected arrival times in your schedules might be wrong, leading to incorrect data expectations.</li><li>No Data Recieved: There might be a problem with the data connection, and we're not getting any location updates.",
+    "description_text": " Active: A green checkmark indicates that we have received AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable.  Inactive: A cross indicates that we did not receive AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable. An inactive feed can be attributed to one of the following: •Incorrect Schedules: The expected arrival times in your schedules might be wrong, leading to incorrect data expectations. •No Data Received: There might be a problem with the data connection, and we're not getting any location updates.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -25,6 +25,56 @@
     "feedback_count": 0
   },
   {
+    "id": 43000700843,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2025-02-10T11:36:00Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590096,
+    "title": "What is Feed?",
+    "updated_at": "2025-02-10T11:37:26Z",
+    "description": "<p> BODS: A feed is a subcription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator.</p><p> ABODS: A feed is a collection of location updates for the all buses belonging to a NOC.",
+    "description_text": " BODS: A feed is a subscription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator. ABODS: A feed is a collection of location updates for all the buses belonging to a NOC. ",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 1,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {    "id": 43000700844,
+  "type": 1,
+  "status": 2,
+  "agent_id": 43185124930,
+  "created_at": "2025-02-10T12:33:00Z",
+  "category_id": 43000371971,
+  "folder_id": 43000590096,
+  "title": "Feed Statistics",
+  "updated_at": "2025-02-10T11:37:26Z",
+  "description": "<p> Feed availaility: Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active as a percentage</p><p> Update Frequency: Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active. This gives you an idea of how frequently the data is being updated.</p><p> Unavailable since: Shows the last time we recieved location data foryour bus, even though your schedules indicate we should have recieved more recent location data. </p><p> Last outage: Shows the last time we stopped recieving location data for your buses unexpectedly, based on your schedules.",
+  "description_text": " Feed availability: Shows how often we've received location updates for your buses over the last 24 hours of the feed being active as a percentage. Update Frequency: Shows how often we've received location updates for your buses over the last 24 hours of the feed being active. This gives you an idea of how frequently the data is being updated. Unavailable since: Shows the last time we received location data for your buses, even though your schedules indicate we should have received more recent location data. Last outage: Shows the last time we stopped receiving location data for your buses unexpectedly, based on your schedules.",
+  "seo_data": {
+    "meta_title": "",
+    "meta_description": ""
+  },
+  "tags": [],
+  "attachments": [],
+  "cloud_files": [],
+  "thumbs_up": 0,
+  "thumbs_down": 0,
+  "hits": 1,
+  "suggested": 0,
+  "feedback_count": 0
+
+  },
+  {
     "id": 43000700828,
     "type": 1,
     "status": 2,
@@ -33,9 +83,9 @@
     "category_id": 43000371971,
     "folder_id": 43000590096,
     "title": "Vehicle Count",
-    "updated_at": "2023-06-02T13:55:26Z",
-    "description": "<p>The number of vehicles on active (scheduled) journeys we're seeing in the data feed (Automatic Vehicle Location data (AVL) from BODS) vs how many we expect to see based on the schedule provided to BODS. In short, we are matching AVL to schedule data. </p>",
-    "description_text": " The number of vehicles on active (scheduled) journeys we're seeing in the data feed (Automatic Vehicle Location data (AVL) from BODS) vs how many we expect to see based on the schedule provided to BODS. In short, we are matching AVL to schedule data.  ",
+    "updated_at": "2025-02-10T12:43:00Z",
+    "description": "<p> Expected Vechicles: The number of vechiles currently running according to the schedules.</p><p> Current Vehicles: Out of the expected vechicles, the number currently running according to AVL data ",
+    "description_text": " Expected Vehicles: The number of vehicles currently running according to the schedules. Current Vehicles: Out of the expected vehicles, the number currently running according to AVL data ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -73,30 +123,5 @@
     "hits": 1,
     "suggested": 0,
     "feedback_count": 0
-  },
-  {
-    "id": 43000700921,
-    "type": 1,
-    "status": 2,
-    "agent_id": 43185124930,
-    "created_at": "2023-04-28T08:46:02Z",
-    "category_id": 43000371971,
-    "folder_id": 43000590096,
-    "title": "Alerts",
-    "updated_at": "2023-06-02T13:55:43Z",
-    "description": "<p dir=\"ltr\">You can change the parameters for when you receive email notifications regarding your feed in the 'My Account' section under 'Notifications'.</p>",
-    "description_text": " You can change the parameters for when you receive email notifications regarding your feed in the 'My Account' section under 'Notifications'. ",
-    "seo_data": {
-      "meta_title": "",
-      "meta_description": ""
-    },
-    "tags": [],
-    "attachments": [],
-    "cloud_files": [],
-    "thumbs_up": 0,
-    "thumbs_down": 0,
-    "hits": 0,
-    "suggested": 0,
-    "feedback_count": 0
-  }
+  } 
 ]
