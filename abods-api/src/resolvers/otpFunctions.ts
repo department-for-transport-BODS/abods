@@ -598,7 +598,7 @@ const getStopsDistribution = async (
 
   return results
     .sort((a, b) => {
-      if (a.time_diff_minutes && b.time_diff_minutes)
+      if (a.time_diff_minutes !== null && b.time_diff_minutes !== null)
         return a.time_diff_minutes - b.time_diff_minutes;
 
       return 0;
