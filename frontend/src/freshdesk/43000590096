@@ -9,7 +9,7 @@
     "folder_id": 43000590096,
     "title": "Feed Status",
     "updated_at": "2025-02-10T15:20:00Z",
-    "description": "<p data-pm-slice=\"1 1 []\">Active: A green checkmark indicates that we have recieved AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable.&nbsp;</p><p>Inactive: A cross indicates that we did not recieve AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable. An inactive feed can be attributed to one of the following:</p><ul><li>Incorrect Schedules: The expected arrival times in your schedules might be wrong, leading to incorrect data expectations.</li><li>No Data Recieved: There might be a problem with the data connection, and we're not getting any location updates.",
+    "description": "<p data-pm-slice=\"1 1 []\"><strong>Active:</strong> A green checkmark indicates that we have recieved AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable.&nbsp;</p><p><strong>Inactive:</strong> A cross indicates that we did not recieve AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable. An inactive feed can be attributed to one of the following:</p><ul><li>Incorrect Schedules: The expected arrival times in your schedules might be wrong, leading to incorrect data expectations.</li><li>No Data Recieved: There might be a problem with the data connection, and we're not getting any location updates.",
     "description_text": " Active: A green checkmark indicates that we have received AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable.  Inactive: A cross indicates that we did not receive AVL data for the most recent 15-minute interval for which we were expecting data, based on the scheduled timetable. An inactive feed can be attributed to one of the following: •Incorrect Schedules: The expected arrival times in your schedules might be wrong, leading to incorrect data expectations. •No Data Received: There might be a problem with the data connection, and we're not getting any location updates.",
     "seo_data": {
       "meta_title": "",
@@ -34,7 +34,7 @@
     "folder_id": 43000590096,
     "title": "What is Feed?",
     "updated_at": "2025-02-10T11:37:26Z",
-    "description": "<p> BODS: A feed is a subcription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator.</p><p> ABODS: A feed is a collection of location updates for the all buses belonging to a NOC.",
+    "description": "<p><strong> BODS</strong>: A feed is a subcription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator.</p><p><strong> ABODS</strong>: A feed is a collection of location updates for the all buses belonging to a NOC.",
     "description_text": " BODS: A feed is a subscription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator. ABODS: A feed is a collection of location updates for all the buses belonging to a NOC. ",
     "seo_data": {
       "meta_title": "",
@@ -58,7 +58,7 @@
   "folder_id": 43000590096,
   "title": "Feed Statistics",
   "updated_at": "2025-02-10T11:37:26Z",
-  "description": "<p> Feed availaility: Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active as a percentage</p><p> Update Frequency: Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active. This gives you an idea of how frequently the data is being updated.</p><p> Unavailable since: Shows the last time we recieved location data foryour bus, even though your schedules indicate we should have recieved more recent location data. </p><p> Last outage: Shows the last time we stopped recieving location data for your buses unexpectedly, based on your schedules.",
+  "description": "<p><strong> Feed availaility:</strong> Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active as a percentage</p><p><strong> Update Frequency:</strong> Shows how often we've recieved location updates for your buses over the last 24 hours of the feed being active. This gives you an idea of how frequently the data is being updated.</p><p><strong> Unavailable since:</strong> Shows the last time we recieved location data for your buses, even though your schedules indicate we should have recieved more recent location data. </p><p><strong> Last outage:</strong> Shows the last time we stopped recieving location data for your buses unexpectedly, based on your schedules.",
   "description_text": " Feed availability: Shows how often we've received location updates for your buses over the last 24 hours of the feed being active as a percentage. Update Frequency: Shows how often we've received location updates for your buses over the last 24 hours of the feed being active. This gives you an idea of how frequently the data is being updated. Unavailable since: Shows the last time we received location data for your buses, even though your schedules indicate we should have received more recent location data. Last outage: Shows the last time we stopped receiving location data for your buses unexpectedly, based on your schedules.",
   "seo_data": {
     "meta_title": "",
@@ -84,7 +84,7 @@
     "folder_id": 43000590096,
     "title": "Vehicle Count",
     "updated_at": "2025-02-10T12:43:00Z",
-    "description": "<p> Expected Vechicles: The number of vechiles currently running according to the schedules.</p><p> Current Vehicles: Out of the expected vechicles, the number currently running according to AVL data ",
+    "description": "<p><strong> Expected Vechicles:</strong> The number of vechiles currently running according to the schedules.</p><p><strong> Current Vehicles:</strong> Out of the expected vechicles, the number currently running according to AVL data ",
     "description_text": " Expected Vehicles: The number of vehicles currently running according to the schedules. Current Vehicles: Out of the expected vehicles, the number currently running according to AVL data ",
     "seo_data": {
       "meta_title": "",
