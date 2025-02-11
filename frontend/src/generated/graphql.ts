@@ -788,6 +788,7 @@ export type Query = {
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  embeddedUrl: Scalars['String']['output'];
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -1199,6 +1200,11 @@ export type DashboardServiceRankingQueryVariables = Exact<{
 
 
 export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePunctuality?: Array<{ __typename?: 'ServicePunctualityType', nocCode?: string | null, lineId?: string | null, onTime?: number | null, early?: number | null, late?: number | null, lineInfo?: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } | null, trend?: { __typename?: 'ServicePunctualityType', onTime?: number | null, early?: number | null, late?: number | null } | null } | null> | null } | null };
+
+export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: string };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -2040,6 +2046,22 @@ export const DashboardServiceRankingDocument = gql`
   })
   export class DashboardServiceRankingGQL extends Apollo.Query<DashboardServiceRankingQuery, DashboardServiceRankingQueryVariables> {
     document = DashboardServiceRankingDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DashboadEmbeddedUrlDocument = gql`
+    query dashboadEmbeddedUrl {
+  embeddedUrl
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
+    document = DashboadEmbeddedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

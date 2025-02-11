@@ -38,6 +38,8 @@ type Query {
 
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
+
+  embeddedUrl: String!
 }
 
 type DashboardVehicles {
