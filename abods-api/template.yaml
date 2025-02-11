@@ -136,6 +136,8 @@ Resources:
           DD_SITE: datadoghq.eu
           M2M_API_SECRET_NAME: !Ref GraphQLAPITokenSecret
           DD_TAGS: app:graphql,project:abods
+          DD_TRACE_ENABLED: false
+          DD_ENHANCED_METRICS: false
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
