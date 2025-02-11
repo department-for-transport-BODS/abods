@@ -362,7 +362,9 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
         this.stopList.map((stop) => stop.stopId),
       )
       .subscribe({
-        next: () => this.router.navigate(["/corridors"]),
+        next: () => {
+          this.router.navigate(["/corridors"]).catch(console.log);
+        },
         error: (error) => {
           console.error(error);
           this.creating = false;
@@ -390,7 +392,9 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
         stopList: this.stopList.map((stop) => stop.stopId),
       })
       .subscribe({
-        next: () => this.navigateToPreviousView(),
+        next: () => {
+          this.navigateToPreviousView();
+        },
         error: (error) => {
           console.error(error);
           this.updating = false;
@@ -422,7 +426,9 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
       .deleteCorridor(this.corridor.id)
       .pipe(finalize(() => this.modalService.close("deleteCorridor")))
       .subscribe({
-        next: () => this.router.navigate(["/corridors"]),
+        next: () => {
+          this.router.navigate(["/corridors"]).catch(console.log);
+        },
         error: () =>
           (this.createError = genericErrorMessage(
             `We're having trouble deleting your corridor. Please try again later.`,
@@ -450,9 +456,11 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
   }
 
   navigateToPreviousView() {
-    return this.canGoBack
-      ? this.location.back()
-      : this.router.navigate(["/corridors"]);
+    if (this.canGoBack) {
+      this.location.back();
+    } else {
+      this.router.navigate(["/corridors"]).catch(console.log);
+    }
   }
 
   displayRecentreButton(): boolean {

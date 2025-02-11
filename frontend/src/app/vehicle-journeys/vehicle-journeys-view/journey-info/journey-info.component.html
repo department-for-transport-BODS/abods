@@ -14,7 +14,7 @@
   <span>Scheduled start time: </span>
   <span>
     <strong *ngIf="!loading; else skeletonInfo">{{
-      startTime | dateTimeToFormat: "d MMM y, HH:mm"
+      startTime?.setZone("Europe/London") | dateTimeToFormat: "d MMM y, HH:mm"
     }}</strong>
   </span>
   <span>Vehicle ID: </span>

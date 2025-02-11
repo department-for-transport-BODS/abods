@@ -102,34 +102,40 @@ export class OnTimeControlsComponent
   }
 
   changeAdminAreaIds(adminAreaId: string[]) {
-    this.router.navigate([], {
-      queryParams: { adminAreaId },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: { adminAreaId },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 
   changeOperator(operator: { name?: string | null; nocCode: string }) {
-    this.router.navigate(["/on-time", operator.nocCode], {
-      queryParamsHandling: "preserve",
-    });
+    this.router
+      .navigate(["/on-time", operator.nocCode], {
+        queryParamsHandling: "preserve",
+      })
+      .catch(console.log);
   }
 
   updateFilters(value: PerformanceFiltersInputType) {
-    this.router.navigate([], {
-      queryParams: {
-        dayOfWeek: value.dayOfWeekFlags
-          ? Object.entries(value.dayOfWeekFlags)
-              .filter(([_s, v]) => v)
-              .map(([s, _v]) => s)
-              .join()
-          : undefined,
-        startTime: value.startTime,
-        endTime: value.endTime,
-        minDelay: value.minDelay,
-        maxDelay: value.maxDelay,
-        adminAreaId: value.adminAreaIds,
-      },
-      queryParamsHandling: "merge",
-    });
+    this.router
+      .navigate([], {
+        queryParams: {
+          dayOfWeek: value.dayOfWeekFlags
+            ? Object.entries(value.dayOfWeekFlags)
+                .filter(([_s, v]) => v)
+                .map(([s, _v]) => s)
+                .join()
+            : undefined,
+          startTime: value.startTime,
+          endTime: value.endTime,
+          minDelay: value.minDelay,
+          maxDelay: value.maxDelay,
+          adminAreaId: value.adminAreaIds,
+        },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

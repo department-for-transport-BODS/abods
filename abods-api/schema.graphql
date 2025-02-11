@@ -31,9 +31,12 @@ type Query {
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
+  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+
+  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
 }
 
@@ -88,10 +91,8 @@ input BoundingBoxInputType {
 }
 
 type CorridorType {
-  createdBy: UserType
   id: Int!
   name: String!
-  organisation: OrganisationType
   stops: [StopInfoType]
 }
 
@@ -122,9 +123,6 @@ enum MatchType {
 type CorridorSummaryStatsType {
   averageJourneyTime: Int
   numberOfServices: Int
-  operatorName: Int
-  percentile95: Float
-  scheduledJourneyTime: Int
   scheduledTransits: Int
   totalTransits: Int
 }
@@ -134,9 +132,7 @@ type CorridorJourneyTimeStatsType {
   maxTransitTime: Int!
   minTransitTime: Int!
   percentile25: Float
-  percentile5: Float
   percentile75: Float
-  percentile95: Float
   ts: String
 }
 
@@ -146,9 +142,7 @@ type CorridorStatsTimeOfDayType {
   maxTransitTime: Int!
   minTransitTime: Int!
   percentile25: Float
-  percentile5: Float
   percentile75: Float
-  percentile95: Float
 }
 
 type CorridorStatsDayOfWeekType {
@@ -156,9 +150,7 @@ type CorridorStatsDayOfWeekType {
   maxTransitTime: Int!
   minTransitTime: Int!
   percentile25: Float
-  percentile5: Float
   percentile75: Float
-  percentile95: Float
   dow: Int!
 }
 
@@ -249,9 +241,7 @@ type HeadwayMetricsType {
   frequentServiceInfo(
     inputs: FrequentServiceInfoInputType!
   ): FrequentServiceInfoType
-  headwayDayOfWeek(lineId: String!): [HeadwayDayOfWeekType]
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
-  headwayTimeOfDay(lineId: String!): [HeadwayTimeOfDayType]
   headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
 }
 
@@ -270,17 +260,6 @@ input HeadwayInputType {
   filters: HeadwayFiltersInputType!
   fromTimestamp: String!
   toTimestamp: String!
-}
-
-enum HeadwaySortEnum {
-  ActualWaitTime
-  ExcessWaitTime
-  ScheduledWaitTime
-}
-
-input HeadwaySortType {
-  field: HeadwaySortEnum!
-  order: SortOrderEnum!
 }
 
 input HeadwayFiltersInputType {
@@ -321,7 +300,6 @@ input FrequentServiceInfoFilterType {
 
 type FrequentServiceType {
   serviceId: String!
-  serviceInfo: ServiceInfoType
 }
 
 type FrequentServiceInfoType {
@@ -329,22 +307,8 @@ type FrequentServiceInfoType {
   totalHours: Int
 }
 
-type HeadwayDayOfWeekType {
-  dayOfWeek: Int
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
-}
-
 type HeadwayOverviewType {
   excessWaitTime: Float!
-}
-
-type HeadwayTimeOfDayType {
-  timeOfDay: Time
-  actualWaitTime: Float
-  excessWaitTime: Float
-  scheduledWaitTime: Float
 }
 
 type HeadwayTimeSeriesType {
@@ -352,11 +316,6 @@ type HeadwayTimeSeriesType {
   actualWaitTime: Float!
   excessWaitTime: Float!
   scheduledWaitTime: Float!
-}
-
-input LineFilterType {
-  lineIds: [String!]
-  inputDate: DateTime
 }
 
 type LineType {
@@ -377,8 +336,6 @@ type StopType {
   lon: Float!
   lat: Float!
   adminAreaId: String
-  adminAreaName: String
-  localityId: String
   localityName: String
   sourceId: String
 }
@@ -398,7 +355,6 @@ type AdminAreasType {
 }
 
 type OperatorsPage {
-  pageInfo: PageInfo
   items: [OperatorType]
 }
 
@@ -411,7 +367,7 @@ type OperatorType {
 }
 
 type FeedMonitoringType {
-  operatorId: String!
+  operatorId: String! # eslint-disable-line @graphql-eslint/no-unused-fields
   availability: Float
   feedStatus: Boolean
   historicalStats(date: Date!): HistoricalStatsType
@@ -427,9 +383,7 @@ type FeedMonitoringType {
 
 type HistoricalStatsType {
   availability: Float
-  compliance: Float
   updateFrequency: Int
-  vehicleStats: [VehicleStatsType]
 }
 
 type VehicleStatsType {
@@ -439,7 +393,7 @@ type VehicleStatsType {
 }
 
 type LiveStatsType {
-  operatorId: String!
+  operatorId: String! # eslint-disable-line @graphql-eslint/no-unused-fields
   currentVehicles: Int
   expectedVehicles: Int
   feedAlerts: Int
@@ -477,8 +431,6 @@ type InvitationResponseType {
 type InvitationType {
   accepted: Boolean!
   email: String!
-  organisation: OrganisationType
-  role: RoleType
 }
 
 input InvitationInput {
@@ -552,7 +504,7 @@ type OrganisationType {
 type RoleType {
   id: String!
   name: String!
-  scope: String!
+  scope: ScopeEnum!
 }
 
 enum ScopeEnum {
@@ -562,7 +514,6 @@ enum ScopeEnum {
 
 type OnTimePerformanceType {
   delayFrequency(inputs: PerformanceInputType!): [DelayFrequencyType!]
-  journeyScheduledStartTimes: [JourneyScheduledStartTimes]
   operatorPerformance(inputs: PerformanceInputType!): OperatorPerformancePage
   punctualityDayOfWeek(
     inputs: PerformanceInputType!
@@ -586,28 +537,18 @@ type DelayFrequencyType {
   frequency: Int
 }
 
-type JourneyScheduledStartTimes {
-  days: [ShortCodeDayOfWeek]
-  fromDate: DateTime
-  startTimes: [Time]
-  toDate: DateTime
-}
-
 type OperatorPerformancePage {
   pageInfo: PageInfo
   items: [OperatorPerformanceType!]
 }
 
 type OperatorPerformanceType {
-  actualDepartures: Int
-  averageDelay: Float
   early: Int!
   late: Int!
   name: String
   nocCode: String
   onTime: Int!
   operatorId: String
-  scheduledDepartures: Int
 }
 
 type PageInfo {
@@ -654,13 +595,6 @@ type ServicePerformanceType {
   onTime: Int!
   scheduledDepartures: Int!
   lineInfo: ServiceInfoType!
-  operatorInfo: OperatorInfoType
-}
-
-type OperatorInfoType {
-  nocCode: String
-  operatorId: String
-  operatorName: String
 }
 
 type ServicePunctualityType {
@@ -670,8 +604,6 @@ type ServicePunctualityType {
   lineInfo: ServiceInfoType
   nocCode: String
   onTime: Int
-  operatorId: String
-  rank: Float
   trend(
     fromTimestamp: DateTime!
     toTimestamp: DateTime!
@@ -687,7 +619,6 @@ type StopPerformanceType {
   onTime: Int!
   scheduledDepartures: Int!
   stopId: String!
-  stopIndex: Int
   stopInfo: StopInfoType!
   timingPoint: Boolean
 }
@@ -710,16 +641,6 @@ type LocalityType {
 type GpsPointType {
   latitude: Float!
   longitude: Float!
-}
-
-enum ShortCodeDayOfWeek {
-  Fri
-  Mon
-  Sat
-  Sun
-  Thu
-  Tue
-  Wed
 }
 
 input PerformanceInputType {
@@ -776,22 +697,6 @@ input PagingInputType {
   first: Int!
 }
 
-input PunctualitySortType {
-  field: PunctualitySortEnum!
-  order: SortOrderEnum!
-}
-
-enum PunctualitySortEnum {
-  Early
-  Late
-  OnTime
-}
-
-enum SortOrderEnum {
-  ASC
-  DESC
-}
-
 enum RankingOrder {
   ascending
   descending
@@ -842,26 +747,7 @@ enum RouteType {
   INVALID_NO_ROUTE_POINTS
 }
 
-"""
-Filters for AvlLineLevelStatus
-
-[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
-"""
-input AvlFiltersInput {
-  operatorNoc: String
-  lineName: String
-}
-
-"""
-Last Received AVL for on a Line basis
-
-[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
-"""
-type AvlLineLevelStatus {
-  operatorNoc: String!
-  lineName: String!
-  lastRecordedAtTime: DateTime!
-}
+# eslint-disable @graphql-eslint/no-unused-fields
 
 input StopAnalysisFiltersInput {
   adminAreaIds: [String!]
@@ -887,3 +773,25 @@ type StopAnalysisType {
   latitude: Float!
   longitude: Float!
 }
+"""
+Filters for AvlLineLevelStatus
+
+[BODS integration](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) uses this so ensure all changes are backwards compatible
+"""
+input AvlFiltersInput {
+  operatorNoc: String
+  lineName: String
+}
+
+"""
+Last Received AVL for on a Line basis
+
+[BODS integrates](https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52) with this endpoint so ensure all changes are backwards compatible
+"""
+type AvlLineLevelStatus {
+  operatorNoc: String!
+  lineName: String!
+  lastRecordedAtTime: DateTime!
+}
+
+# eslint-enable @graphql-eslint/no-unused-fields
