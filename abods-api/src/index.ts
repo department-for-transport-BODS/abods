@@ -48,6 +48,7 @@ logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
+const env = process.env.PROJECT_ENV ?? "local";
 
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
@@ -74,4 +75,4 @@ app.use(
 
 const handler = serverlessExpress({ app });
 
-export default datadog(handler);
+export default env !== "local" ? datadog(handler) : handler;
