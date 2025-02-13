@@ -46,8 +46,20 @@
       'Unavailable'
     "
     [statLoaded]="!loading"
-    tooltip="{{ calculated.noData }} of {{
-      calculated.total
-    }} stop departures have limited or missing real-time data so we are unable to calculate an accurate on-time performance figure."
+    [tooltip]="noDataTooltip"
   ></app-stat>
+  <ng-template #noDataTooltip>
+    {{ calculated.noData | number }} of {{ calculated.total | number }} stop
+    departures have limited or missing real-time data so we are unable to
+    calculate an accurate on-time performance figure.<br /><br />
+    Of these, there are:
+    <ul>
+      <li *ngFor="let item of incompleteSummary">
+        <strong>{{ item.count | number }}</strong> stop{{
+          item.count > 1 ? "s" : ""
+        }}
+        with {{ item.reason }}
+      </li>
+    </ul>
+  </ng-template>
 </div>

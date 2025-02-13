@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { DateTime } from "luxon";
 import { MatchType, Stop } from "../../../../../generated/graphql";
+import { incompleteIdToString } from "../../../incompleteReasonUtils";
 
 export interface StopHoverEvent {
   stop: Stop;
@@ -55,5 +56,10 @@ export class StopItemComponent {
     const scheduled = this.scheduledDeparture;
     if (!scheduled) return null;
     return this.actualDeparture?.diff(scheduled);
+  }
+
+  get incompleteReason() {
+    if (!this.stop) return null;
+    return incompleteIdToString(this.stop.incompleteReason) ?? null;
   }
 }

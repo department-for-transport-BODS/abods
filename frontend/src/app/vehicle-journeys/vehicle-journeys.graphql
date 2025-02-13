@@ -21,6 +21,7 @@ query route($groupId: String!) {
     isTimingPoint
     otp
     directionRef
+    incompleteReason
   }
 }
 
