@@ -28,7 +28,7 @@ export const FeedMonitoringRoutes: Routes = [
     ],
     data: {
       helpdeskFolder: "feedMonitoring",
-      helpdeskTitle: "Feed monitoring",
+      helpdeskTitle: "NOC feed monitoring",
     },
     resolve: { helpdesk: HelpdeskResolver },
   },
