@@ -142,7 +142,7 @@ export const getRoute: QueryResolvers["route"] = async (
         isTimingPoint: s.is_timing_point ?? false,
         otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
         directionRef: s.direction ?? "unknown",
-        incompleteReason: s.incomplete_reason,
+        incompleteReason: s.incomplete_reason ?? 0,
       })),
     );
 };

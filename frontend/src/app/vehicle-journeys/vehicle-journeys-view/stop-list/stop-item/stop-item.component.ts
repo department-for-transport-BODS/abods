@@ -60,6 +60,6 @@ export class StopItemComponent {
 
   get incompleteReason() {
     if (!this.stop) return null;
-    return incompleteIdToString(this.stop.incompleteReason) ?? null;
+    return incompleteIdToString(this.stop.incompleteReason);
   }
 }

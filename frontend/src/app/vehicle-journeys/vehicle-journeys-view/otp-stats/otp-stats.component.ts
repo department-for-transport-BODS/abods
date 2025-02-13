@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { MatchType, OtpEnum } from "../../../../generated/graphql";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
-import { incompleteTally } from "../../../shared/incompleteReasonUtils";
+import { incompleteConversion } from "../../../shared/incompleteReasonUtils";
 
 @Component({
   selector: "app-otp-stats",
@@ -23,7 +23,7 @@ export class OtpStatsComponent {
         late: NaN,
         noData: NaN,
         completed: NaN,
-        incomplete: incompleteTally([]),
+        incomplete: {},
       };
 
     const otpEnums = this.view.stops
@@ -33,7 +33,7 @@ export class OtpStatsComponent {
           this.matchType === MatchType.Evidenced && n.estimatedDepartureUtc
             ? null
             : n.otp,
-        incompleteReason: n.incompleteReason,
+        incompleteReason: n.incompleteReason ?? 0,
       }));
 
     const total = otpEnums.length;
@@ -42,9 +42,12 @@ export class OtpStatsComponent {
     const late = otpEnums.filter((n) => n.otp === OtpEnum.Late).length;
     const noMatchStops = otpEnums.filter((n) => n.otp === null);
 
-    const incomplete = incompleteTally(
-      noMatchStops.map((n) => n.incompleteReason ?? null),
-    );
+    const reasonCounts: Record<number, number> = {};
+    for (const { incompleteReason } of noMatchStops) {
+      reasonCounts[incompleteReason] ??= 0;
+      reasonCounts[incompleteReason] += 1;
+    }
+    const incomplete = incompleteConversion(reasonCounts);
     const noData = noMatchStops.length;
     const completed = total - noData;
     return { total, early, onTime, late, noData, completed, incomplete };

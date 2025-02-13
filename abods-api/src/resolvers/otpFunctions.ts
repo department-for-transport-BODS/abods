@@ -367,9 +367,9 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         returnVal.scheduled += result._sum.scheduled ?? 0;
         if (args.inputs.filters.matchType == MatchType.Evidenced) {
           if (result.estimated) {
-            incompleteReasons[-1] ??= 0;
+            incompleteReasons[0] ??= 0;
           }
-          incompleteReasons[-1] = result._sum.completed ?? 0;
+          incompleteReasons[0] = result._sum.completed ?? 0;
         }
       }
       for (const result of results) {
@@ -377,8 +377,8 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         returnVal.late += result._sum.late_count ?? 0;
         returnVal.onTime += result._sum.on_time_count ?? 0;
         returnVal.completed += result._sum.completed ?? 0;
-        incompleteReasons[result.incomplete_reason ?? -1] ??= 0;
-        incompleteReasons[result.incomplete_reason ?? -1] +=
+        incompleteReasons[result.incomplete_reason ?? 0] ??= 0;
+        incompleteReasons[result.incomplete_reason ?? 0] +=
           (result._sum.scheduled ?? 0) - (result._sum.completed ?? 0);
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);

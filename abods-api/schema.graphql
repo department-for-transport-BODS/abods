@@ -735,7 +735,7 @@ type Stop {
   isTimingPoint: Boolean!
   otp: OtpEnum
   directionRef: String!
-  incompleteReason: Int
+  incompleteReason: Int!
 }
 
 enum OtpEnum {
