@@ -102,7 +102,16 @@
   <ng-template #noDataTooltip>
     {{ noData | number }} of {{ scheduled | number }} stop departures have
     limited or missing real-time data so we are unable to calculate an accurate
-    on-time performance figure.
+    on-time performance figure.<br /><br />
+    Of these, there are:
+    <ul>
+      <li *ngFor="let item of incompleteSummary">
+        <strong>{{ item.count | number }}</strong> stop{{
+          item.count > 1 ? "s" : ""
+        }}
+        with {{ item.reason }}
+      </li>
+    </ul>
   </ng-template>
   <ng-template #noTimetableDataTooltip>
     No scheduled stop departures found for the selected date range and filters.

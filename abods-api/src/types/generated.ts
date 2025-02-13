@@ -775,6 +775,7 @@ export type PunctualityTotalsType = {
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
+  incomplete: Scalars['String']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
   scheduled: Scalars['Int']['output'];
@@ -1775,6 +1776,7 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
   averageDeviation?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  incomplete?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   scheduled?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

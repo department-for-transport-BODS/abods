@@ -570,6 +570,7 @@ type PunctualityTotalsType {
   late: Int!
   onTime: Int!
   scheduled: Int!
+  incomplete: String! # Needs to be a JSON serialised mapping of number -> number
 }
 
 type PunctualityTimeOfDayType {

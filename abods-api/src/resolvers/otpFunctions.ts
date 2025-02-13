@@ -317,71 +317,80 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         estimated: Prisma.skip,
       };
 
-      const aggregationFields:
-        | Prisma.Timetable_summary_service_tzSumAggregateInputType
-        | Prisma.Timetable_summary_operator_tSumAggregateInputType = {
+      const aggregationFields = {
         early_count: true,
         late_count: true,
         on_time_count: true,
         completed: true,
-      };
-
-      const getServiceSummaryOverview = (
-        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
-        sum: Prisma.Timetable_summary_service_tzSumAggregateInputType,
-      ) => {
-        return context.db.timetable_summary_service_tz.aggregate({
-          where: prismaFilters,
-          _sum: sum,
-        });
-      };
-
-      const getOperatorSummaryOverview = (
-        prismaFilters: ReturnType<typeof getPrismaFiltersForOTPQuery>,
-        sum: Prisma.Timetable_summary_operator_tSumAggregateInputType,
-      ) => {
-        return context.db.timetable_summary_operator_t.aggregate({
-          where: prismaFilters,
-          _sum: sum,
-        });
-      };
+        scheduled: true,
+      } as const;
 
       if (lineIds) {
         [results, scheduled] = await Promise.all([
-          getServiceSummaryOverview(prismaFilters, aggregationFields),
-          getServiceSummaryOverview(filterWithoutEstimate, {
-            scheduled: true,
+          context.db.timetable_summary_service_tz.groupBy({
+            by: ["incomplete_reason"],
+            where: prismaFilters,
+            _sum: aggregationFields,
+          }),
+          context.db.timetable_summary_service_tz.groupBy({
+            by: ["estimated"],
+            where: filterWithoutEstimate,
+            _sum: { scheduled: true, completed: true },
           }),
         ]);
       } else {
         [results, scheduled] = await Promise.all([
-          getOperatorSummaryOverview(prismaFilters, aggregationFields),
-          getOperatorSummaryOverview(filterWithoutEstimate, {
-            scheduled: true,
+          context.db.timetable_summary_operator_t.groupBy({
+            by: ["incomplete_reason"],
+            where: prismaFilters,
+            _sum: aggregationFields,
+          }),
+          context.db.timetable_summary_operator_t.groupBy({
+            by: ["estimated"],
+            where: filterWithoutEstimate,
+            _sum: { scheduled: true, completed: true },
           }),
         ]);
       }
 
-      if (results?._sum && scheduled?._sum) {
-        //end - performance timer
-        const endTimer = performance.now();
-
-        logger.debug(
-          { totalTimeMs: endTimer - startTimer },
-          "Call to getPunctualityOverview Finished",
-        );
-
-        return {
-          early: results._sum.early_count ?? 0,
-          late: results._sum.late_count ?? 0,
-          onTime: results._sum.on_time_count ?? 0,
-          scheduled: scheduled._sum.scheduled ?? 0,
-          completed: results._sum.completed ?? 0,
-          averageDeviation: 0,
-        };
+      const returnVal: PunctualityTotalsType = {
+        scheduled: 0,
+        early: 0,
+        late: 0,
+        onTime: 0,
+        completed: 0,
+        averageDeviation: 0,
+        incomplete: "{}", // To be replaced
+      };
+      const incompleteReasons: Record<number, number> = {};
+      for (const result of scheduled) {
+        returnVal.scheduled += result._sum.scheduled ?? 0;
+        if (args.inputs.filters.matchType == MatchType.Evidenced) {
+          if (result.estimated) {
+            incompleteReasons[-1] ??= 0;
+          }
+          incompleteReasons[-1] = result._sum.completed ?? 0;
+        }
       }
+      for (const result of results) {
+        returnVal.early += result._sum.early_count ?? 0;
+        returnVal.late += result._sum.late_count ?? 0;
+        returnVal.onTime += result._sum.on_time_count ?? 0;
+        returnVal.completed += result._sum.completed ?? 0;
+        incompleteReasons[result.incomplete_reason ?? -1] ??= 0;
+        incompleteReasons[result.incomplete_reason ?? -1] +=
+          (result._sum.scheduled ?? 0) - (result._sum.completed ?? 0);
+      }
+      returnVal.incomplete = JSON.stringify(incompleteReasons);
+      //end - performance timer
+      const endTimer = performance.now();
 
-      return null;
+      logger.debug(
+        { totalTimeMs: endTimer - startTimer },
+        "Call to getPunctualityOverview Finished",
+      );
+
+      return returnVal;
     } catch (error) {
       logger.error(error, "An error occurred when getting punctuality stats");
       return null;

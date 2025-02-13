@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { DateTime } from "luxon";
 import { MatchType, Stop } from "../../../../../generated/graphql";
-import { incompleteIdToString } from "../../../incompleteReasonUtils";
+import { incompleteIdToString } from "../../../../shared/incompleteReasonUtils";
 
 export interface StopHoverEvent {
   stop: Stop;

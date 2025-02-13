@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { MatchType, OtpEnum } from "../../../../generated/graphql";
 import { JourneyInfo } from "../vehicle-journeys-view.component";
-import { incompleteTally } from "../../incompleteReasonUtils";
+import { incompleteTally } from "../../../shared/incompleteReasonUtils";
 
 @Component({
   selector: "app-otp-stats",

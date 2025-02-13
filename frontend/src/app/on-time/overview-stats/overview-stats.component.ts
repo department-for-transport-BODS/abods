@@ -3,6 +3,7 @@ import { PerformanceParams, PunctualityOverview } from "../on-time.service";
 import { Headway } from "../headway.service";
 import { Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
+import { incompleteConversion } from "../../shared/incompleteReasonUtils";
 
 @Component({
   selector: "app-overview-stats",
@@ -46,6 +47,19 @@ export class OverviewStatsComponent {
 
   get excess(): number {
     return (this.headwayOverview?.excess || 0) * 60000;
+  }
+
+  get incompleteSummary() {
+    if (!this.overview) return [];
+    const incomplete = JSON.parse(this.overview.incomplete) as Record<
+      number,
+      number
+    >;
+
+    const tally = incompleteConversion(incomplete);
+    return Object.entries(tally)
+      .filter((n) => n[1])
+      .map(([reason, count]) => ({ reason, count }));
   }
 
   constructor(private helpdeskPanelService: HelpdeskPanelService) {}
