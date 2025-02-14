@@ -4,7 +4,7 @@ import {
   getDashboardUrl,
   getQuicksighClient,
   registerUser,
-} from "../lib/aws";
+} from "../lib/aws.js";
 import {
   AwsQuicksightUser,
   QueryResolvers,
