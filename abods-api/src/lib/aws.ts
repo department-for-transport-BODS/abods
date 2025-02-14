@@ -5,7 +5,7 @@ import {
   GenerateEmbedUrlForRegisteredUserCommand,
   RegisterUserCommand,
 } from "@aws-sdk/client-quicksight";
-import logger from "../logger";
+import logger from "../logger.js";
 import { SessionUser } from "../types/extra";
 
 const region = "eu-west-2";
