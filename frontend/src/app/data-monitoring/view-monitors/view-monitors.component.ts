@@ -35,6 +35,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
 
   onButtonClick(): void {
     this.loading = true;
+    this.errors = [];
     this.service.embeddedUrl.subscribe((user) => {
       if (user.enabled) {
         this.embedDashboard(user.url);

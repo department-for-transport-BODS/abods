@@ -36,7 +36,7 @@ export const assumeRole = async (): Promise<Credentials> => {
 
     return response.Credentials;
   } catch (error) {
-    logger.error("Error assuming role:", error);
+    logger.error({ error }, "Error assuming role:");
     throw error;
   }
 };
@@ -67,7 +67,7 @@ export const describeUser = async (
     const response = await quickSightClient.send(command);
     return response.User?.Arn;
   } catch (error) {
-    logger.error(`Error checking for user ${username}:`, error);
+    logger.error({ error }, `Error checking for user ${username}:`);
     return undefined;
   }
 };
@@ -82,14 +82,17 @@ export const registerUser = async (
       Namespace: "default",
       IdentityType: "QUICKSIGHT",
       UserName: user.username!,
-      Email: user.email!,
+      Email: `1${user.email!}`,
       UserRole: "READER",
     });
 
     const response = await quickSightClient.send(command);
     return response.User;
   } catch (error) {
-    logger.error(`Error registering quicksight user ${user.username}:`, error);
+    logger.error(
+      { error },
+      `Error registering quicksight user ${user.username}:`,
+    );
     return undefined;
   }
 };
@@ -113,7 +116,7 @@ export const getDashboardUrl = async (
     const response = await quickSightClient.send(command);
     return response.EmbedUrl;
   } catch (error) {
-    logger.error("Error getting embedded url:", error);
+    logger.error({ error }, "Error getting embedded url:");
     return undefined;
   }
 };
