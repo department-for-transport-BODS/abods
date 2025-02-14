@@ -76,17 +76,22 @@ export const registerUser = async (
   user: SessionUser,
   quickSightClient: QuickSightClient,
 ) => {
-  const command = new RegisterUserCommand({
-    AwsAccountId: quickSightAccountId,
-    Namespace: "default",
-    IdentityType: "QUICKSIGHT",
-    UserName: user.username!,
-    Email: user.email!,
-    UserRole: "READER",
-  });
+  try {
+    const command = new RegisterUserCommand({
+      AwsAccountId: quickSightAccountId,
+      Namespace: "default",
+      IdentityType: "QUICKSIGHT",
+      UserName: user.username!,
+      Email: user.email!,
+      UserRole: "READER",
+    });
 
-  const response = await quickSightClient.send(command);
-  return response.User;
+    const response = await quickSightClient.send(command);
+    return response.User;
+  } catch (error) {
+    logger.error(`Error registering quicksight user ${user.username}:`, error);
+    return undefined;
+  }
 };
 
 export const getDashboardUrl = async (

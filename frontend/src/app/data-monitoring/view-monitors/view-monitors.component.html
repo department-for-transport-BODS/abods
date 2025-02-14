@@ -6,6 +6,11 @@
       spaceBelow="2"
     ></app-page-header>
     <br />
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
+        <gds-error-summary [errors]="errors"></gds-error-summary>
+      </div>
+    </div>
     <gds-button
       text="Enable dashboard"
       appearance="secondary"

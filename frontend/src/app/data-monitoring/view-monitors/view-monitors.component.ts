@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from "@angular/core";
 import { createEmbeddingContext } from "amazon-quicksight-embedding-sdk";
 import { DataMonitoringService } from "../data-monitoring.service";
+import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
 
 @Component({
   selector: "app-view-monitors",
@@ -10,6 +11,8 @@ import { DataMonitoringService } from "../data-monitoring.service";
 export class ViewMonitorsComponent implements AfterViewInit {
   @ViewChild("dashboardContainer", { static: false })
   dashboardContainer!: ElementRef;
+
+  errors: FormErrors[] = [];
 
   embedUrl = "";
   loading = false;
@@ -22,13 +25,23 @@ export class ViewMonitorsComponent implements AfterViewInit {
         this.embedDashboard(user.url);
       } else {
         this.showButton = true;
+        this.errors.push({
+          error: "Unable to load dashboad. Please contact admin",
+          label: "enable-dashboard-button",
+        });
       }
     });
   }
 
   onButtonClick(): void {
     this.loading = true;
-    this.service.embeddedUrl.subscribe((user) => this.embedDashboard(user.url));
+    this.service.embeddedUrl.subscribe((user) => {
+      if (user.enabled) {
+        this.embedDashboard(user.url);
+      } else {
+        this.loading = false;
+      }
+    });
   }
 
   embedDashboard(embedUrl: string | undefined | null): void {

@@ -109,7 +109,6 @@ export class ConfigService {
   constructor(private http: HttpClient) {}
 
   flag(key: keyof ReturnType<typeof flags>, maxEnv: Environment): boolean {
-    console.log("nav-------", maxEnvironment(key, maxEnv));
     return flags(this.envName, maxEnv)[key];
   }
 
