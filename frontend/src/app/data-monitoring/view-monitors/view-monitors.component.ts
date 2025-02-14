@@ -26,12 +26,6 @@ export class ViewMonitorsComponent implements AfterViewInit {
         this.embedDashboard(user.url);
       } else {
         this.showButton = true;
-        if (this.errors.length === 0) {
-          this.errors.push({
-            error: "Unable to load dashboad. Please contact admin",
-            label: "enable-dashboard-button",
-          });
-        }
       }
     });
   }
@@ -43,6 +37,12 @@ export class ViewMonitorsComponent implements AfterViewInit {
         this.embedDashboard(user.url);
       } else {
         this.loading = false;
+        if (this.errors.length === 0) {
+          this.errors.push({
+            error: "Unable to load dashboad. Please contact admin",
+            label: "enable-dashboard-button",
+          });
+        }
       }
     });
   }
@@ -65,7 +65,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
         .then((context) => {
           context
             .embedDashboard(options)
-            .then(() => (this.loading = false))
+            .then(() => (this.showButton = true))
             .catch(() => {
               console.log("Error embedding dashboard.");
             });
