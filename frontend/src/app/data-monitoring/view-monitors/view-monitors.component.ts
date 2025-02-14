@@ -22,20 +22,22 @@ export class ViewMonitorsComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.service.dashboardUser.subscribe((user) => {
       if (user.enabled && user.url) {
+        this.errors = [];
         this.embedDashboard(user.url);
       } else {
         this.showButton = true;
-        this.errors.push({
-          error: "Unable to load dashboad. Please contact admin",
-          label: "enable-dashboard-button",
-        });
+        if (this.errors.length === 0) {
+          this.errors.push({
+            error: "Unable to load dashboad. Please contact admin",
+            label: "enable-dashboard-button",
+          });
+        }
       }
     });
   }
 
   onButtonClick(): void {
     this.loading = true;
-    this.errors = [];
     this.service.embeddedUrl.subscribe((user) => {
       if (user.enabled) {
         this.embedDashboard(user.url);
