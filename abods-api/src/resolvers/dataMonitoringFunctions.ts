@@ -65,7 +65,7 @@ export const getQuicksightUser: QueryResolvers["quicksightUser"] = async (
 const dataMonitoringResolvers: Resolvers = {
   Query: {
     embeddedUrl: getEmbeddedUrl,
-    quicksightUserArn: getQuicksightUser,
+    quicksightUser: getQuicksightUser,
   },
 };
 
