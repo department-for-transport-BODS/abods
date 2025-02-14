@@ -26,7 +26,7 @@ export class OtpStatsComponent {
         incomplete: {},
       };
 
-    const otpEnums = this.view.stops
+    const stopDetails = this.view.stops
       .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
       .map((n) => ({
         otp:
@@ -36,11 +36,11 @@ export class OtpStatsComponent {
         incompleteReason: n.incompleteReason ?? 0,
       }));
 
-    const total = otpEnums.length;
-    const early = otpEnums.filter((n) => n.otp === OtpEnum.Early).length;
-    const onTime = otpEnums.filter((n) => n.otp === OtpEnum.OnTime).length;
-    const late = otpEnums.filter((n) => n.otp === OtpEnum.Late).length;
-    const noMatchStops = otpEnums.filter((n) => n.otp === null);
+    const total = stopDetails.length;
+    const early = stopDetails.filter((n) => n.otp === OtpEnum.Early).length;
+    const onTime = stopDetails.filter((n) => n.otp === OtpEnum.OnTime).length;
+    const late = stopDetails.filter((n) => n.otp === OtpEnum.Late).length;
+    const noMatchStops = stopDetails.filter((n) => n.otp === null);
 
     const reasonCounts: Record<number, number> = {};
     for (const { incompleteReason } of noMatchStops) {
