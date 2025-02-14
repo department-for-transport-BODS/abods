@@ -200,6 +200,10 @@ Resources:
                   - kms:DescribeKey
                 Resource:
                   Fn::Sub: "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: "arn:aws:iam::228266753808:role/*"
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
     Condition: IsNotLocal
