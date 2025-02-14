@@ -12,7 +12,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
   dashboardContainer!: ElementRef;
 
   embedUrl = "";
-  loading = true;
+  loading = false;
   showButton = false;
 
   constructor(private service: DataMonitoringService) {}
@@ -27,6 +27,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
   }
 
   onButtonClick(): void {
+    this.loading = true;
     this.service.embeddedUrl.subscribe((user) => this.embedDashboard(user.url));
   }
 

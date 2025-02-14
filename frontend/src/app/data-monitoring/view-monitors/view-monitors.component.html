@@ -5,6 +5,13 @@
       spaceAbove="2"
       spaceBelow="2"
     ></app-page-header>
+    <br />
+    <gds-button
+      text="Enable dashboard"
+      appearance="secondary"
+      (click)="onButtonClick()"
+      [attr.tabindex]="null"
+    ></gds-button>
     <app-spinner
       *ngIf="loading"
       [vCentre]="true"
