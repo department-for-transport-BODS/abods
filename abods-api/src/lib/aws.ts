@@ -111,6 +111,7 @@ export const getDashboardUrl = async (
         },
       },
       SessionLifetimeInMinutes: 600,
+      AllowedDomains: ["http://localhost:4200"],
     });
 
     const response = await quickSightClient.send(command);

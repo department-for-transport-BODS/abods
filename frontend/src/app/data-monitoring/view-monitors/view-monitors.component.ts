@@ -65,7 +65,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
         .then((context) => {
           context
             .embedDashboard(options)
-            .then(() => (this.showButton = true))
+            .then(() => (this.showButton = false))
             .catch(() => {
               console.log("Error embedding dashboard.");
             });
