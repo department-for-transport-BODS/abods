@@ -22,4 +22,6 @@ export interface RequestContext extends BaseContext {
 export interface SessionUser {
   id: number;
   orgId: number;
+  username?: string;
+  email?: string;
 }

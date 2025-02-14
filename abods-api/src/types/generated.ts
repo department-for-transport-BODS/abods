@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: Date | string; output: Date | string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -788,7 +794,7 @@ export type Query = {
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: Scalars['String']['output'];
+  embeddedUrl: AwsQuicksightUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -798,6 +804,7 @@ export type Query = {
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
+  quicksightUser: AwsQuicksightUser;
   roles?: Maybe<Array<RoleType>>;
   route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
@@ -1170,6 +1177,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
   AdminAreaInfoType: ResolverTypeWrapper<Partial<AdminAreaInfoType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
@@ -1281,6 +1289,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
   AdminAreaInfoType: Partial<AdminAreaInfoType>;
   AdminAreasType: Partial<AdminAreasType>;
@@ -1378,6 +1387,12 @@ export type ResolversParentTypes = ResolversObject<{
   UserUpdateInput: Partial<UserUpdateInput>;
   UserUpdateResponseType: Partial<UserUpdateResponseType>;
   VehicleStatsType: Partial<VehicleStatsType>;
+}>;
+
+export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreaInfoType'] = ResolversParentTypes['AdminAreaInfoType']> = ResolversObject<{
@@ -1788,7 +1803,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
-  embeddedUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
@@ -1798,6 +1813,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
+  quicksightUser?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   route?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType, RequireFields<QueryRouteArgs, 'groupId'>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
@@ -1957,6 +1973,7 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 }>;
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
+  AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
   AdminAreaInfoType?: AdminAreaInfoTypeResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;

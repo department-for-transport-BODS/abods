@@ -1,3 +1,13 @@
 query dashboadEmbeddedUrl {
-  embeddedUrl
+  embeddedUrl {
+    enabled
+    url
+  }
+}
+
+query dashboardUser {
+  quicksightUser {
+    enabled
+    url
+  }
 }

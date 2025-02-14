@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: string; output: string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -788,7 +794,7 @@ export type Query = {
   avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: Scalars['String']['output'];
+  embeddedUrl: AwsQuicksightUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -798,6 +804,7 @@ export type Query = {
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
+  quicksightUser: AwsQuicksightUser;
   roles?: Maybe<Array<RoleType>>;
   route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
@@ -1204,7 +1211,12 @@ export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerform
 export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: string };
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+
+export type DashboardUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DashboardUserQuery = { __typename?: 'Query', quicksightUser: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -2053,7 +2065,10 @@ export const DashboardServiceRankingDocument = gql`
   }
 export const DashboadEmbeddedUrlDocument = gql`
     query dashboadEmbeddedUrl {
-  embeddedUrl
+  embeddedUrl {
+    enabled
+    url
+  }
 }
     `;
 
@@ -2062,6 +2077,25 @@ export const DashboadEmbeddedUrlDocument = gql`
   })
   export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
     document = DashboadEmbeddedUrlDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DashboardUserDocument = gql`
+    query dashboardUser {
+  quicksightUser {
+    enabled
+    url
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DashboardUserGQL extends Apollo.Query<DashboardUserQuery, DashboardUserQueryVariables> {
+    document = DashboardUserDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

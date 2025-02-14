@@ -13,37 +13,51 @@ export class ViewMonitorsComponent implements AfterViewInit {
 
   embedUrl = "";
   loading = true;
+  showButton = false;
 
   constructor(private service: DataMonitoringService) {}
   ngAfterViewInit(): void {
-    this.service.embeddedUrl.subscribe((url) => this.embedDashboard(url));
+    this.service.dashboardUser.subscribe((user) => {
+      if (user.enabled && user.url) {
+        this.embedDashboard(user.url);
+      } else {
+        this.showButton = true;
+      }
+    });
   }
 
-  embedDashboard(embedUrl: string): void {
-    const containerDiv = document.getElementById("dashboardContainer") ?? "";
-    const options = {
-      url: embedUrl,
-      container: containerDiv,
-      scrolling: "no",
-      height: "700px",
-      width: "100%",
-      locale: "en-US",
-      footerPaddingEnabled: true,
-      printEnabled: true,
-    };
+  onButtonClick(): void {
+    this.service.embeddedUrl.subscribe((user) => this.embedDashboard(user.url));
+  }
 
-    createEmbeddingContext()
-      .then((context) => {
-        context
-          .embedDashboard(options)
-          .then(() => (this.loading = false))
-          .catch(() => {
-            console.log("test2----");
-          });
-      })
-      .catch(() => {
-        console.log("test----");
-      });
+  embedDashboard(embedUrl: string | undefined | null): void {
+    const containerDiv = document.getElementById("dashboardContainer") ?? "";
+    if (embedUrl) {
+      const options = {
+        url: embedUrl,
+        container: containerDiv,
+        scrolling: "no",
+        height: "700px",
+        width: "100%",
+        locale: "en-US",
+        footerPaddingEnabled: true,
+        printEnabled: true,
+      };
+
+      createEmbeddingContext()
+        .then((context) => {
+          context
+            .embedDashboard(options)
+            .then(() => (this.loading = false))
+            .catch(() => {
+              console.log("Error embedding dashboard.");
+            });
+        })
+        .catch(() => {
+          console.log("Error creating embedding context");
+        });
+    }
+
     //this.dashboard = embeddingContext.embedDashboard(options);
   }
 }

@@ -56,6 +56,8 @@ export const requireUserSession = async (context: RequestContext) => {
     select: {
       userOrganisations: { select: { organisation_id: true } },
       is_active: true,
+      username: true,
+      email: true,
     },
   });
 
@@ -69,11 +71,15 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
 
-  const orgId = getUserOrgId({ ...bodsUser, id: sessionRecord.user_id });
+  const orgId = getUserOrgId({
+    userOrganisations: bodsUser.userOrganisations,
+    id: sessionRecord.user_id,
+  });
 
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
     orgId: orgId,
+    username: bodsUser.username,
   };
 
   logger.debug({ sessionUser }, "Session user returned");
