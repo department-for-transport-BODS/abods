@@ -80,6 +80,7 @@ export const requireUserSession = async (context: RequestContext) => {
     id: sessionRecord.user_id,
     orgId: orgId,
     username: bodsUser.username,
+    email: bodsUser.email,
   };
 
   logger.debug({ sessionUser }, "Session user returned");
