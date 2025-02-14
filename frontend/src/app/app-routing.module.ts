@@ -6,6 +6,7 @@ import { NotAuthorisedComponent } from "./not-authorised/not-authorised.componen
 import { NotFoundComponent } from "./not-found/not-found.component";
 import { PrivacyPolicyComponent } from "./privacy-policy/privacy-policy.component";
 import { HelpdeskResolver } from "./shared/resolvers/helpdesk.resolver";
+import { AccessibilityComponent } from "./accessibility/accessibility.component";
 
 const routerOptions: ExtraOptions = {
   anchorScrolling: "enabled",
@@ -30,6 +31,15 @@ const routes: Routes = [
     data: {
       helpdeskFolder: "",
       helpdeskTitle: "Cookies",
+    },
+    resolve: { helpdesk: HelpdeskResolver },
+  },
+  {
+    path: "accessibility",
+    component: AccessibilityComponent,
+    data: {
+      helpdeskFolder: "",
+      helpdeskTitle: "Accessibility",
     },
     resolve: { helpdesk: HelpdeskResolver },
   },
