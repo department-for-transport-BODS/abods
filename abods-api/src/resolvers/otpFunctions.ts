@@ -305,19 +305,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         return compareThresholds(args.inputs, userOperatorIds, context.db);
       }
 
-      let results;
-      let scheduled;
-      const prismaFilters = getPrismaFiltersForOTPQuery(
-        args.inputs,
-        userOperatorIds,
-      );
-
-      const filterWithoutEstimate = {
-        ...prismaFilters,
+      const where = {
+        ...getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds),
         estimated: Prisma.skip,
       };
-
-      const aggregationFields = {
+      const _sum = {
         early_count: true,
         late_count: true,
         on_time_count: true,
@@ -325,33 +317,17 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         scheduled: true,
       } as const;
 
-      if (lineIds) {
-        [results, scheduled] = await Promise.all([
-          context.db.timetable_summary_service_tz.groupBy({
-            by: ["incomplete_reason"],
-            where: prismaFilters,
-            _sum: aggregationFields,
-          }),
-          context.db.timetable_summary_service_tz.groupBy({
-            by: ["estimated"],
-            where: filterWithoutEstimate,
-            _sum: { scheduled: true, completed: true },
-          }),
-        ]);
-      } else {
-        [results, scheduled] = await Promise.all([
-          context.db.timetable_summary_operator_t.groupBy({
-            by: ["incomplete_reason"],
-            where: prismaFilters,
-            _sum: aggregationFields,
-          }),
-          context.db.timetable_summary_operator_t.groupBy({
-            by: ["estimated"],
-            where: filterWithoutEstimate,
-            _sum: { scheduled: true, completed: true },
-          }),
-        ]);
-      }
+      const results = lineIds
+        ? await context.db.timetable_summary_service_tz.groupBy({
+            by: ["incomplete_reason", "estimated"],
+            where,
+            _sum,
+          })
+        : await context.db.timetable_summary_operator_t.groupBy({
+            by: ["incomplete_reason", "estimated"],
+            where,
+            _sum,
+          });
 
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
@@ -363,23 +339,29 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         incomplete: "{}", // To be replaced
       };
       const incompleteReasons: Record<number, number> = {};
-      for (const result of scheduled) {
-        returnVal.scheduled += result._sum.scheduled ?? 0;
-        if (args.inputs.filters.matchType == MatchType.Evidenced) {
-          if (result.estimated) {
-            incompleteReasons[0] ??= 0;
-          }
-          incompleteReasons[0] = result._sum.completed ?? 0;
-        }
-      }
       for (const result of results) {
-        returnVal.early += result._sum.early_count ?? 0;
-        returnVal.late += result._sum.late_count ?? 0;
-        returnVal.onTime += result._sum.on_time_count ?? 0;
-        returnVal.completed += result._sum.completed ?? 0;
-        incompleteReasons[result.incomplete_reason ?? 0] ??= 0;
-        incompleteReasons[result.incomplete_reason ?? 0] +=
-          (result._sum.scheduled ?? 0) - (result._sum.completed ?? 0);
+        const scheduled = result._sum.scheduled ?? 0;
+        const reasonId = result.incomplete_reason ?? 0;
+
+        // if the current row is estimated, and the request is to filter estimated,
+        // then we should act as if they were all incomplete
+        const ignoreEstimated =
+          result.estimated &&
+          args.inputs.filters.matchType === MatchType.Evidenced;
+
+        const completed = ignoreEstimated ? 0 : result._sum.completed ?? 0;
+        const early = ignoreEstimated ? 0 : result._sum.early_count ?? 0;
+        const late = ignoreEstimated ? 0 : result._sum.late_count ?? 0;
+        const onTime = ignoreEstimated ? 0 : result._sum.on_time_count ?? 0;
+
+        returnVal.scheduled += scheduled;
+        returnVal.early += early;
+        returnVal.late += late;
+        returnVal.onTime += onTime;
+        returnVal.completed += completed;
+
+        incompleteReasons[reasonId] ??= 0;
+        incompleteReasons[reasonId] += scheduled - completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
       //end - performance timer
