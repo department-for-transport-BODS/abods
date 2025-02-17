@@ -8,7 +8,7 @@
     "category_id": 43000371971,
     "folder_id": 43000590098,
     "title": "Vehicle Journeys",
-    "updated_at": "2023-05-02T14:44:34Z",
+    "updated_at": "2025-02-17T13:07:00Z",
     "description": "<p data-renderer-start-pos=\"6398\" dir=\"ltr\">The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022).</p>",
     "description_text": "The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022).",
     "seo_data": {
@@ -33,7 +33,7 @@
     "category_id": 43000371971,
     "folder_id": 43000590098,
     "title": "Journey Map",
-    "updated_at": "2023-06-02T14:06:56Z",
+    "updated_at": "2025-02-17T13:07:00Z",
     "description": "<p>The scheduled stops are visible on the map with a circular icon. When hovering over a stop, a tooltip appears with the stop's common name.</p><p>When available, the AVL data is plotted on the map with small dots and connected based on the direction of travel. When hovering over the AVL points, a tooltip appears with the time the GPS point was received.</p>",
     "description_text": "The scheduled stops are visible on the map with a circular icon. When hovering over a stop, a tooltip appears with the stop's common name. When available, the AVL data is plotted on the map with small dots and connected based on the direction of travel. When hovering over the AVL points, a tooltip appears with the time the GPS point was received.",
     "seo_data": {
@@ -59,7 +59,7 @@
     "category_id": 43000371971,
     "folder_id": 43000590098,
     "title": "Actual times in vehicle journeys",
-    "updated_at": "2023-06-02T14:06:56Z",
+    "updated_at": "2025-02-17T13:07:00Z",
     "description": "<p>When viewing timing stops only, these times are truncated to minutes only. For example, if the bus departed the stop at 5:45 and 56 seconds, the time will show 5:45. Toggling to show all stop departure times will also reveal the estimated time of departure accurate to one second.</p>",
     "description_text": "When viewing timing stops only, these times are truncated to minutes only. For example, if the bus departed the stop at 5:45 and 56 seconds, the time will show 5:45. Toggling to show all stop departure times will also reveal the estimated time of departure accurate to one second.",
     "seo_data": {
