@@ -4,6 +4,7 @@ import {
   DescribeUserCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
   RegisterUserCommand,
+  GenerateEmbedUrlForAnonymousUserCommand,
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
 import { SessionUser } from "../types/extra";
@@ -102,6 +103,20 @@ export const getDashboardUrl = async (
   quickSightClient: QuickSightClient,
 ) => {
   try {
+    //   const command = new GenerateEmbedUrlForAnonymousUserCommand({
+    //     AwsAccountId: quickSightAccountId,
+    //     Namespace: "default",
+    //     ExperienceConfiguration: {
+    //         Dashboard: {
+    //             InitialDashboardId: dashboardId
+    //         }
+    //     },
+    //     SessionLifetimeInMinutes: 600,
+    //     AuthorizedResourceArns: [
+    //         `arn:aws:quicksight:${region}:${quickSightAccountId}:dashboard/${dashboardId}`
+    //     ]
+    // });
+
     const command = new GenerateEmbedUrlForRegisteredUserCommand({
       AwsAccountId: quickSightAccountId,
       UserArn: userArn,
