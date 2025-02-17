@@ -9,8 +9,8 @@
     "folder_id": 43000590099,
     "title": "Corridors",
     "updated_at": "2023-06-02T14:07:37Z",
-    "description": "<p dir=\"ltr\">The corridor feature allows you to create your own route, along which you can analyse bus speeds and performance across various times, days and services.</p><p>The travel times are calculated using the recorded departure time of the first stop and last stop in the corridor.",
-    "description_text": " The corridor feature allows you to create your own route, along which you can analyse bus speeds and performance across various times, days and services.  The travel times are calculated using the recorded departure time of the first stop and last stop in the corridor",
+    "description": "<p dir=\"ltr\">The corridor feature allows you to create a custom route along which you can analyse bus speeds and performance across different times, days, and services.</p><p>Travel times are calculated based on the recorded departure times at the first and last stops in the corridor.</p>",
+    "description_text": "The corridor feature allows you to create a custom route along which you can analyse bus speeds and performance across different times, days, and services. Travel times are calculated based on the recorded departure times at the first and last stops in the corridor.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -34,8 +34,8 @@
     "folder_id": 43000590099,
     "title": "Length of Time",
     "updated_at": "2023-05-02T14:45:30Z",
-    "description": "<p>We can only display corridor data prior to 24 hours ago.</p>",
-    "description_text": " We can only display corridor data prior to 24 hours ago. ",
+    "description": "<p>Corridor data is only available for periods older than 24 hours.</p>",
+    "description_text": "Corridor data is only available for periods older than 24 hours.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -59,8 +59,8 @@
     "folder_id": 43000590099,
     "title": "Speed",
     "updated_at": "2023-06-02T14:07:52Z",
-    "description": "<p>We calculate speed metrics based on the tracks data we receive in timetable data and the journey time. If tracks data is not uploaded to BODS, we calculate distance based on a straight line between two stops.</p>",
-    "description_text": " We calculate speed metrics based on the tracks data we receive in timetable data and the journey time. If tracks data is not uploaded to BODS, we calculate distance based on a straight line between two stops. ",
+    "description": "<p>Speed metrics are calculated using tracks data from the timetable, and journey time. If tracks data is not uploaded to BODS, distance is estimated using a straight-line measurement between subsequent stops.</p>",
+    "description_text": "Speed metrics are calculated using tracks data from the timetable, and journey time. If tracks data is not uploaded to BODS, distance is estimated using a straight-line measurement between subsequent stops.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -84,8 +84,8 @@
     "folder_id": 43000590099,
     "title": "Missing Transits",
     "updated_at": "2023-06-02T14:07:58Z",
-    "description": "<p dir=\"ltr\"> These are journeys that we have in the schedules provided but we have not recorded a departure at the first or last stop in the corridor.</p>",
-    "description_text": " These are journeys that we have in the schedules provided but we have not recorded a departure at the first or last stop in the corridor.",
+    "description": "<p dir=\"ltr\">These are journeys included in the provided schedules but for which no departure was recorded at the first or last stop in the corridor.</p>",
+    "description_text": "These are journeys included in the provided schedules but for which no departure was recorded at the first or last stop in the corridor.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""

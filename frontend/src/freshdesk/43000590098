@@ -9,8 +9,8 @@
     "folder_id": 43000590098,
     "title": "Vehicle Journeys",
     "updated_at": "2023-05-02T14:44:34Z",
-    "description": "<h2 data-renderer-start-pos=\"6378\" style=\"margin-bottom: 0px; margin-left: 0px; padding: 0px; font-size: 1.43em; line-height: 1.2; color: rgb(23, 43, 77); font-weight: 500; scroll-margin-top: 56px; font-family: -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif; text-align: start; text-indent: 0px;\"></h2><p data-renderer-start-pos=\"6398\" dir=\"ltr\">The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022). </p>",
-    "description_text": "  The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022).  ",
+    "description": "<p data-renderer-start-pos=\"6398\" dir=\"ltr\">The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022).</p>",
+    "description_text": "The vehicle journeys feature allows you to investigate individual journeys (prior to December 2022).",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -34,8 +34,8 @@
     "folder_id": 43000590098,
     "title": "Journey Map",
     "updated_at": "2023-06-02T14:06:56Z",
-    "description": "<p>The scheduled stops are visible on the map with a circular icon, when hovering a tooltip appears with the stop common name.</p><p>When available, the avl data is plotted on the map with small dots and joined based on the direction of travel. When hovering on the avl points a tooltip appears with the time the gps point was received. ",
-    "description_text": " The scheduled stops are visible on the map with a circular icon, when hovering a tooltip appears with the stop common name. When available, the avl data is plotted on the map with small dots and joined based on the direction of travel. When hovering on the avl points a tooltip appears with the time the gps point was received.  ",
+    "description": "<p>The scheduled stops are visible on the map with a circular icon. When hovering over a stop, a tooltip appears with the stop's common name.</p><p>When available, the AVL data is plotted on the map with small dots and connected based on the direction of travel. When hovering over the AVL points, a tooltip appears with the time the GPS point was received.</p>",
+    "description_text": "The scheduled stops are visible on the map with a circular icon. When hovering over a stop, a tooltip appears with the stop's common name. When available, the AVL data is plotted on the map with small dots and connected based on the direction of travel. When hovering over the AVL points, a tooltip appears with the time the GPS point was received.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -60,8 +60,8 @@
     "folder_id": 43000590098,
     "title": "Actual times in vehicle journeys",
     "updated_at": "2023-06-02T14:06:56Z",
-    "description": "<p>When viewing timing stops only, these times are truncated to minutes only, ie. If the bus departed the stop at 5.45 and 56 seconds, the time will show 5.45. Toggling to show all stop departure times, will also reveal the estimated time of departure accurate to one second.</p>",
-    "description_text": "When viewing timing stops only, these times are truncated to minutes only, ie. If the bus departed the stop at 5.45 and 56 seconds, the time will show 5.45. Toggling to show all stop departure times, will also reveal the estimated time of departure accurate to one second.",
+    "description": "<p>When viewing timing stops only, these times are truncated to minutes only. For example, if the bus departed the stop at 5:45 and 56 seconds, the time will show 5:45. Toggling to show all stop departure times will also reveal the estimated time of departure accurate to one second.</p>",
+    "description_text": "When viewing timing stops only, these times are truncated to minutes only. For example, if the bus departed the stop at 5:45 and 56 seconds, the time will show 5:45. Toggling to show all stop departure times will also reveal the estimated time of departure accurate to one second.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
