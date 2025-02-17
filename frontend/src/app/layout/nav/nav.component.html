@@ -22,7 +22,7 @@
             [routerLink]="['/feed-monitoring']"
             routerLinkActive="nav__link--current"
             (click)="navService.closeMenu()"
-            >Feed monitoring
+            >NOC feed monitoring
           </a>
         </li>
         <li class="nav__item">
@@ -50,6 +50,15 @@
             routerLinkActive="nav__link--current"
             (click)="navService.closeMenu()"
             >Corridors
+          </a>
+        </li>
+        <li class="nav__item" style="display: none">
+          <a
+            class="nav__link"
+            [routerLink]="['/stop-analysis']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Stop analysis
           </a>
         </li>
       </ul>

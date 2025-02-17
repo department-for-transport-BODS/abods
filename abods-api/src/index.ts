@@ -18,10 +18,12 @@ import { IncomingHttpHeaders } from "http";
 
 import { DB } from "./kysely.js";
 import { Kysely } from "kysely";
-import { apolloLogger } from "./apolloLogger.js";
 import { DefaultArgs } from "@prisma/client/runtime/library.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
+import datadogMetricsPlugin from "./lib/datadog.js";
+import { datadog } from "datadog-lambda-js";
+import { apolloLogger } from "./apolloLogger.js";
 
 export let kysely: Kysely<DB> | undefined = undefined;
 
@@ -34,16 +36,19 @@ const apiKeyAuth = await getAPITokenHash();
 const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
 `;
+
 const server = new ApolloServer<RequestContext>({
   typeDefs,
   resolvers,
   logger,
-  plugins: [apolloLogger],
+  plugins: [apolloLogger, datadogMetricsPlugin],
 });
+
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
 const corsOrigin = process.env.CORS_ORIGIN;
 const app = express();
+const env = process.env.PROJECT_ENV ?? "local";
 
 app.use(
   cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
@@ -70,4 +75,4 @@ app.use(
 
 const handler = serverlessExpress({ app });
 
-export { handler as default };
+export default env !== "local" ? datadog(handler) : handler;

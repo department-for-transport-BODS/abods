@@ -7,7 +7,7 @@
   </ng-container>
   <ng-container ngProjectAs="content">
     <app-page-header
-      caption="Feed monitoring"
+      caption="NOC feed monitoring"
       heading="Live status"
       spaceBelow="2"
     ></app-page-header>
@@ -128,6 +128,7 @@
       [operatorId]="operatorId"
       title="Recent alerts"
       [mode]="alertMode.LiveStatus"
+      style="display: none"
     >
     </app-alert-list>
   </ng-container>
@@ -138,17 +139,17 @@
     <ng-container ngProjectAs="back-link">
       <gds-back-link
         [route]="['/feed-monitoring']"
-        label="Feed monitoring"
+        label="NOC feed monitoring"
       ></gds-back-link>
     </ng-container>
     <ng-container ngProjectAs="content">
       <app-page-header
-        caption="Feed monitoring"
+        caption="NOC feed monitoring"
         heading="Not found"
       ></app-page-header>
       <p class="govuk-body">
         Operator not found, or you do not have permission to view. Go back to
-        <a [routerLink]="['/feed-monitoring']">Feed monitoring</a>?
+        <a [routerLink]="['/feed-monitoring']">NOC feed monitoring</a>?
       </p>
     </ng-container>
   </app-page>

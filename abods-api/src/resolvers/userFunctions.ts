@@ -16,6 +16,8 @@ import argon2 from "argon2";
 import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
+import { sendDistributionMetric } from "datadog-lambda-js";
+import { getUserOrgId } from "../lib/utils.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 
@@ -27,41 +29,43 @@ export const getUsers: QueryResolvers["users"] = async (
 ): Promise<Maybe<UserType[]>> => {
   const user = await requireUserSession(context);
   try {
-    const bodsUsers = await context.db.bods_user.findMany({
-      where: {
-        userOrganisations: {
-          every: {
-            organisation_id: user.orgId,
+    return await context.db.bods_user
+      .findMany({
+        where: {
+          userOrganisations: {
+            every: {
+              organisation_id: user.orgId,
+            },
           },
         },
-      },
-      include: {
-        userOrganisations: true,
-      },
-    });
-
-    const userResponse = bodsUsers.map((thisUser) => {
-      return {
-        id: String(thisUser.id),
-        username: thisUser.username,
-        email: thisUser.email,
-        firstName: thisUser.first_name,
-        lastName: thisUser.last_name,
-        organisation: {
-          id: String(user.orgId),
-          name: String(user.orgId),
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          first_name: true,
+          last_name: true,
         },
-        roles: [
-          {
-            id: "1",
-            name: "Staff",
-            scope: ScopeEnum.Organisation,
+      })
+      .then((x) =>
+        x.map((thisUser) => ({
+          id: String(thisUser.id),
+          username: thisUser.username,
+          email: thisUser.email,
+          firstName: thisUser.first_name,
+          lastName: thisUser.last_name,
+          organisation: {
+            id: String(user.orgId),
+            name: String(user.orgId),
           },
-        ],
-      };
-    });
-
-    return userResponse;
+          roles: [
+            {
+              id: "1",
+              name: "Staff",
+              scope: ScopeEnum.Organisation,
+            },
+          ],
+        })),
+      );
   } catch (error) {
     logger.error(error, "An error occurred when getting users");
     return null;
@@ -75,25 +79,35 @@ export const getUser: QueryResolvers["user"] = async (
 ): Promise<Maybe<UserType>> => {
   const user = await requireUserSession(context);
   try {
-    return {
-      id: user.id.toString(),
-      username: user.username,
-      email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      roles: [
-        {
-          id: "1",
-          name: "Staff",
-          scope: ScopeEnum.Organisation,
+    return await context.db.bods_user
+      .findUniqueOrThrow({
+        where: { id: user.id },
+        select: {
+          username: true,
+          email: true,
+          first_name: true,
+          last_name: true,
         },
-        {
-          id: "2",
-          name: "Administrator",
-          scope: ScopeEnum.Organisation,
-        },
-      ],
-    };
+      })
+      .then((x) => ({
+        id: user.id.toString(),
+        username: x.username,
+        email: x.email,
+        firstName: x.first_name,
+        lastName: x.last_name,
+        roles: [
+          {
+            id: "1",
+            name: "Staff",
+            scope: ScopeEnum.Organisation,
+          },
+          {
+            id: "2",
+            name: "Administrator",
+            scope: ScopeEnum.Organisation,
+          },
+        ],
+      }));
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
     return null;
@@ -185,8 +199,10 @@ export const loginUser: MutationResolvers["login"] = async (
         email: { equals: args.username, mode: "insensitive" },
         is_active: true,
       },
-      include: {
-        userOrganisations: true,
+      select: {
+        id: true,
+        password: true,
+        userOrganisations: { select: { organisation_id: true } },
       },
     });
 
@@ -194,6 +210,8 @@ export const loginUser: MutationResolvers["login"] = async (
       logger.debug("User not found in bods user table");
       throw "Invalid username or password";
     }
+
+    const orgId = getUserOrgId(bodsUser);
 
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
@@ -212,6 +230,14 @@ export const loginUser: MutationResolvers["login"] = async (
       context.res.setHeader(
         "Set-Cookie",
         `abods_sessionid=${token}; expires=${expiryTimestamp}; HttpOnly; Max-Age=${SESSION_EXPIRY_TIME_IN_SECONDS}; Path=/; SameSite=None; Secure`,
+      );
+
+      sendDistributionMetric(
+        "abods.graphql.login.count",
+        1,
+        "function:GraphQlFunction",
+        `env:${process.env.PROJECT_ENV}`,
+        `org:${orgId}`,
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {
