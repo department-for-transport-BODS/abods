@@ -84,8 +84,8 @@
     "folder_id": 43000590096,
     "title": "Vehicle Count",
     "updated_at": "2025-02-10T12:43:00Z",
-    "description": "<p><strong> Expected Vehicles:</strong> The number of vehicles that should currently be running according to the schedules.</p><p><strong> Current Vehicles:</strong>Of the expected vehicles, the number currently running according to AVL data ",
-    "description_text": " Expected Vehicles: The number of vehicles that should currently be running according to the schedules. Current Vehicles: Of the expected vehicles, the number currently running according to AVL data ",
+    "description": "<p><strong> Expected Vehicles:</strong> The number of vehicles that should currently be running according to the static schedule data uploaded to BODS.</p><p><strong> Current Vehicles:</strong>Of the expected vehicles, the number currently running according to AVL data ",
+    "description_text": " Expected Vehicles: The number of vehicles that should currently be running according to the static schedule data uploaded to BODS. Current Vehicles: Of the expected vehicles, the number currently running according to AVL data ",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
@@ -98,30 +98,5 @@
     "hits": 1,
     "suggested": 0,
     "feedback_count": 0
-  },
-  {
-    "id": 43000700829,
-    "type": 1,
-    "status": 2,
-    "agent_id": 43185124930,
-    "created_at": "2023-04-27T09:42:53Z",
-    "category_id": 43000371971,
-    "folder_id": 43000590096,
-    "title": "Current vehicles/expected vehicles",
-    "updated_at": "2023-06-02T13:55:35Z",
-    "description": "<p data-renderer-start-pos=\"6168\">The number of expected vehicles is based on the static data uploaded to BODS</p><p data-renderer-start-pos=\"6246\">The number of current vehicles is based on AVL data</p>",
-    "description_text": " The number of expected vehicles is based on the static data uploaded to BODS  The number of current vehicles is based on AVL data ",
-    "seo_data": {
-      "meta_title": "",
-      "meta_description": ""
-    },
-    "tags": [],
-    "attachments": [],
-    "cloud_files": [],
-    "thumbs_up": 0,
-    "thumbs_down": 0,
-    "hits": 1,
-    "suggested": 0,
-    "feedback_count": 0
-  } 
+  }
 ]
