@@ -82,7 +82,7 @@ export const registerUser = async (
       AwsAccountId: quickSightAccountId,
       Namespace: "default",
       IdentityType: "QUICKSIGHT",
-      UserName: user.username!,
+      UserName: `1${user.email!}`,
       Email: `1${user.email!}`,
       UserRole: "READER",
     });
