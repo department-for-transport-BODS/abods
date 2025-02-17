@@ -23,6 +23,7 @@ import { GoogleTagManagerModule } from "angular-google-tag-manager";
 import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
 import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
 import { CookieService } from "ngx-cookie-service";
+import { AccessibilityModule } from "./accessibility/accessibility.module";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
@@ -42,6 +43,7 @@ import { CookieService } from "ngx-cookie-service";
     GoogleTagManagerModule,
     PrivacyPolicyModule,
     CookiePolicyModule,
+    AccessibilityModule,
   ],
   providers: [
     {
