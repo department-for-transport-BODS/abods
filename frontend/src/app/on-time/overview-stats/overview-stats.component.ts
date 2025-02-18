@@ -56,10 +56,7 @@ export class OverviewStatsComponent {
       number
     >;
 
-    const tally = incompleteConversion(incomplete);
-    return Object.entries(tally)
-      .filter((n) => n[1])
-      .map(([reason, count]) => ({ reason, count }));
+    return incompleteConversion(incomplete);
   }
 
   constructor(private helpdeskPanelService: HelpdeskPanelService) {}

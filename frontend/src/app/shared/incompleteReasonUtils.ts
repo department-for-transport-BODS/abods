@@ -17,5 +17,7 @@ export const incompleteConversion = (reasons: Record<number, number>) => {
     const properKey = Number(incompleteId) as keyof typeof incompleteReasonText;
     reasonCounts[incompleteIdToString(properKey)] = reasons[properKey];
   }
-  return reasonCounts;
+  return Object.entries(reasonCounts)
+    .filter((n) => n[1])
+    .map(([reason, count]) => ({ reason, count }));
 };

@@ -51,15 +51,18 @@
   <ng-template #noDataTooltip>
     {{ calculated.noData | number }} of {{ calculated.total | number }} stop
     departures have limited or missing real-time data so we are unable to
-    calculate an accurate on-time performance figure.<br /><br />
-    Of these, there are:
-    <ul>
-      <li *ngFor="let item of incompleteSummary">
-        <strong>{{ item.count | number }}</strong> stop{{
-          item.count > 1 ? "s" : ""
-        }}
-        with {{ item.reason }}
-      </li>
-    </ul>
+    calculate an accurate on-time performance figure.
+    <div *ngIf="calculated.incomplete.length > 0">
+      <br />
+      Of these, there are:
+      <ul>
+        <li *ngFor="let item of calculated.incomplete">
+          <strong>{{ item.count | number }}</strong> stop{{
+            item.count > 1 ? "s" : ""
+          }}
+          with {{ item.reason }}
+        </li>
+      </ul>
+    </div>
   </ng-template>
 </div>

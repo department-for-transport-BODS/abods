@@ -23,7 +23,7 @@ export class OtpStatsComponent {
         late: NaN,
         noData: NaN,
         completed: NaN,
-        incomplete: {},
+        incomplete: [],
       };
 
     const stopDetails = this.view.stops
@@ -51,11 +51,5 @@ export class OtpStatsComponent {
     const noData = noMatchStops.length;
     const completed = total - noData;
     return { total, early, onTime, late, noData, completed, incomplete };
-  }
-
-  get incompleteSummary() {
-    return Object.entries(this.calculated.incomplete)
-      .filter((n) => n[1])
-      .map(([reason, count]) => ({ reason, count }));
   }
 }
