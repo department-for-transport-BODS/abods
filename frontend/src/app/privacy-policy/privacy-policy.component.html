@@ -197,6 +197,9 @@
           Commissioner's Office (ICO). The ICO is an independent regulator set
           up to uphold information rights.
         </p>
+        <a *ngIf="!loggedInService.authenticated" routerLink="/login"
+          >Back to login</a
+        >
       </div>
     </div>
   </ng-container>

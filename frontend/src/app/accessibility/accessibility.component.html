@@ -189,6 +189,9 @@
             This website was last tested on 6 February 2025.
           </p>
         </section>
+        <a *ngIf="!loggedInService.authenticated" routerLink="/login"
+          >Back to login</a
+        >
       </div>
     </div>
   </ng-container>
