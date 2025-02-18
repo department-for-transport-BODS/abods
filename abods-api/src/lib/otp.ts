@@ -61,6 +61,7 @@ export const compareThresholds = async (
     scheduled: 0,
     completed: 0,
     averageDeviation: 0,
+    incomplete: "{}",
   };
 };
 

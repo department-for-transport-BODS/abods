@@ -27,6 +27,7 @@ query onTimeStats($params: PerformanceInputType!) {
       scheduled
       completed
       averageDeviation
+      incomplete
     }
   }
 }
