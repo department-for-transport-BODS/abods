@@ -6,7 +6,6 @@ import {
   deleteCorridorDb,
   deleteCorridorStops,
   distinctRoutes,
-  filteredJourneys,
   getCorridor,
   getCorridorList,
   getJourneyDeparture,
@@ -47,6 +46,7 @@ import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
+import { Selectable, sql } from "kysely";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -343,9 +343,23 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
 
 interface StatsCache {
   inputs: CorridorStatsInputType;
-  journeys: Map<string, Timetable[]>;
+  journeys: Map<string, TimetableType[]>;
 }
 
+export type TimetableType = Pick<
+  Selectable<Timetable>,
+  | "stop_id"
+  | "stop_index"
+  | "actual_departure_time"
+  | "timestamp_after_estimate"
+  | "expected_departure_time"
+  | "operator_noc"
+  | "service_code"
+  | "line_name"
+  | "date_of_journey"
+  | "vehiclejourney_id"
+  | "group_id"
+>;
 export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,
   args,
@@ -360,21 +374,67 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const results: Timetable[] = await context.db.timetable.findMany({
-    where: {
-      stop_id: {
-        in: stopList.map(Number),
-      },
-      date_of_journey: {
-        gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
-        lt: userSelectedDateAsUtc(toTimestamp).toDate(),
-      },
-    },
-  });
+  // const results: Timetable[] = await context.db.timetable.findMany({
+  //   where: {
+  //     stop_id: {
+  //       in: stopList.map(Number),
+  //     },
+  //     date_of_journey: {
+  //       gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
+  //       lt: userSelectedDateAsUtc(toTimestamp).toDate(),
+  //     },
+  //   },
+  // });
 
-  const journeyMap = new Map<string, Timetable[]>();
+  const stopsArray = stopList.map(Number);
+
+  const results: TimetableType[] = await context.kysely
+    .selectFrom("Timetable")
+    .select([
+      "stop_id",
+      "stop_index",
+      "actual_departure_time",
+      "timestamp_after_estimate",
+      "expected_departure_time",
+      "operator_noc",
+      "service_code",
+      "line_name",
+      "vehiclejourney_id",
+      "group_id",
+      "date_of_journey",
+    ])
+    .where("stop_id", "in", stopsArray)
+    .where(
+      "date_of_journey",
+      ">=",
+      userSelectedDateAsUtc(fromTimestamp).toDate(),
+    )
+    .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
+    .where(
+      "group_id",
+      "in",
+      context.kysely
+        .selectFrom("Timetable")
+        .select("group_id")
+        .where("stop_id", "in", stopsArray)
+        .where(
+          "date_of_journey",
+          ">=",
+          userSelectedDateAsUtc(fromTimestamp).toDate(),
+        )
+        .where(
+          "date_of_journey",
+          "<",
+          userSelectedDateAsUtc(toTimestamp).toDate(),
+        )
+        .groupBy(["group_id"])
+        .having(context.kysely.fn.count("stop_id"), "=", stopsArray.length),
+    )
+    .execute();
+
+  const journeyMap = new Map<string, TimetableType[]>();
   let mapKey = "";
-  let existingJourneys: Timetable[] = [];
+  let existingJourneys: TimetableType[] = [];
   results.map((journey) => {
     mapKey = `${journey.group_id}${journey.vehiclejourney_id}`;
     existingJourneys = journeyMap.get(mapKey) || [];
@@ -382,10 +442,8 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     journeyMap.set(mapKey, existingJourneys);
   });
 
-  const journeys = filteredJourneys(stopList?.length ?? 0, journeyMap);
-
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
-  return { inputs: args.inputs, journeys } as CorridorStatsType;
+  return { inputs: args.inputs, journeys: journeyMap } as CorridorStatsType;
 };
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
@@ -484,7 +542,7 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
   };
 
 const getJourneyStats = (
-  journeys: Map<string, Timetable[]>,
+  journeys: Map<string, TimetableType[]>,
   inputType: CorridorJourneyStatsOption,
   matchType: MatchType,
 ) => {
