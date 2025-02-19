@@ -46,7 +46,7 @@ import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
-import { Selectable, sql } from "kysely";
+import { Selectable } from "kysely";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -373,18 +373,6 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   ) {
     throw "Not Authorized";
   }
-
-  // const results: Timetable[] = await context.db.timetable.findMany({
-  //   where: {
-  //     stop_id: {
-  //       in: stopList.map(Number),
-  //     },
-  //     date_of_journey: {
-  //       gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
-  //       lt: userSelectedDateAsUtc(toTimestamp).toDate(),
-  //     },
-  //   },
-  // });
 
   const stopsArray = stopList.map(Number);
 
