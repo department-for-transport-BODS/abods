@@ -85,7 +85,15 @@
           }}</span
         >
       </div>
-      <ng-template #empty>-</ng-template>
+      <ng-template #empty>
+        <div
+          [ngxTippy]="'Incomplete Reason: ' + incompleteReason"
+          [tippyProps]="{ theme: 'gds-tooltip' }"
+          class="stop-list-item__time-container"
+        >
+          —
+        </div></ng-template
+      >
     </span>
   </div>
 </div>

@@ -14,3 +14,4 @@ VERSION
 Makefile
 *.sh
 *.toml
+frontend/src/freshdesk/*

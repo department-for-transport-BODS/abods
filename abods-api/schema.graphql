@@ -570,6 +570,7 @@ type PunctualityTotalsType {
   late: Int!
   onTime: Int!
   scheduled: Int!
+  incomplete: String! # Needs to be a JSON serialised mapping of number -> number
 }
 
 type PunctualityTimeOfDayType {
@@ -734,6 +735,7 @@ type Stop {
   isTimingPoint: Boolean!
   otp: OtpEnum
   directionRef: String!
+  incompleteReason: Int!
 }
 
 enum OtpEnum {

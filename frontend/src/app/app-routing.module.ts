@@ -83,6 +83,13 @@ const routes: Routes = [
         (mod) => mod.VehicleJourneysModule,
       ),
   },
+  {
+    path: "stop-analysis",
+    loadChildren: () =>
+      import("./stop-analysis/stop-analysis.module").then(
+        (mod) => mod.StopAnalysisModule,
+      ),
+  },
   { path: "not-authorised", component: NotAuthorisedComponent },
   { path: "**", component: NotFoundComponent },
 ];

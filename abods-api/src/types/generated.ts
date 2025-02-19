@@ -775,6 +775,7 @@ export type PunctualityTotalsType = {
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
+  incomplete: Scalars['String']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
   scheduled: Scalars['Int']['output'];
@@ -992,6 +993,7 @@ export type Stop = {
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
   directionRef: Scalars['String']['output'];
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
+  incompleteReason: Scalars['Int']['output'];
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
@@ -1774,6 +1776,7 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
   averageDeviation?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  incomplete?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   scheduled?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1864,6 +1867,7 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   actualDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   estimatedDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  incompleteReason?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   isTimingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
