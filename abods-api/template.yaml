@@ -8,7 +8,7 @@ Globals:
     Architectures:
       - x86_64
     Runtime: nodejs16.x
-    MemorySize: 512
+    MemorySize: 1024
     Timeout: 60
 
 Parameters:
