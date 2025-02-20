@@ -86,33 +86,38 @@
             </tr>
           </tbody>
         </table>
-        <gds-radios
-          legend="Do you want to accept analytics cookies?"
-          legendSize="small"
+        <div>
+          <gds-radios
+            legend="Do you want to accept analytics cookies?"
+            legendSize="small"
+          >
+            <gds-radio-item
+              label="Yes"
+              name="accept-cookies"
+              inputId="radio-item-accept-cookies"
+              [(ngModel)]="acceptCookies"
+              (ngModelChange)="onChange()"
+              [value]="'yes'"
+            ></gds-radio-item>
+            <gds-radio-item
+              label="No"
+              name="reject-cookies"
+              inputId="radio-item-reject-cookies"
+              [(ngModel)]="acceptCookies"
+              (ngModelChange)="onChange()"
+              [value]="'no'"
+            ></gds-radio-item>
+          </gds-radios>
+          <gds-button
+            text="Save cookie settings"
+            type="button"
+            buttonId="save-cookie-settings"
+            (click)="onSave()"
+          ></gds-button>
+        </div>
+        <a *ngIf="!loggedInService.authenticated" routerLink="/login"
+          >Back to login</a
         >
-          <gds-radio-item
-            label="Yes"
-            name="accept-cookies"
-            inputId="radio-item-accept-cookies"
-            [(ngModel)]="acceptCookies"
-            (ngModelChange)="onChange()"
-            [value]="'yes'"
-          ></gds-radio-item>
-          <gds-radio-item
-            label="No"
-            name="reject-cookies"
-            inputId="radio-item-reject-cookies"
-            [(ngModel)]="acceptCookies"
-            (ngModelChange)="onChange()"
-            [value]="'no'"
-          ></gds-radio-item>
-        </gds-radios>
-        <gds-button
-          text="Save cookie settings"
-          type="button"
-          buttonId="save-cookie-settings"
-          (click)="onSave()"
-        ></gds-button>
       </div>
     </div>
   </ng-container>

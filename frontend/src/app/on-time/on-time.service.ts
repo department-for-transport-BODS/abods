@@ -67,7 +67,7 @@ export type AbstractPerformance = IPunctualityType &
 
 export type PunctualityOverview = Pick<
   PunctualityTotalsType,
-  "early" | "onTime" | "late" | "completed" | "scheduled"
+  "early" | "onTime" | "late" | "completed" | "scheduled" | "incomplete"
 > & {
   noData: number;
 };

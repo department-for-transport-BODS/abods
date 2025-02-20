@@ -775,6 +775,7 @@ export type PunctualityTotalsType = {
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
+  incomplete: Scalars['String']['output'];
   late: Scalars['Int']['output'];
   onTime: Scalars['Int']['output'];
   scheduled: Scalars['Int']['output'];
@@ -992,6 +993,7 @@ export type Stop = {
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
   directionRef: Scalars['String']['output'];
   estimatedDepartureUtc?: Maybe<Scalars['String']['output']>;
+  incompleteReason: Scalars['Int']['output'];
   isTimingPoint: Scalars['Boolean']['output'];
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
@@ -1311,7 +1313,7 @@ export type OnTimeStatsQueryVariables = Exact<{
 }>;
 
 
-export type OnTimeStatsQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', punctualityOverview?: { __typename?: 'PunctualityTotalsType', early: number, late: number, onTime: number, scheduled: number, completed: number, averageDeviation?: number | null } | null } | null };
+export type OnTimeStatsQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', punctualityOverview?: { __typename?: 'PunctualityTotalsType', early: number, late: number, onTime: number, scheduled: number, completed: number, averageDeviation?: number | null, incomplete: string } | null } | null };
 
 export type OnTimePunctualityTimeOfDayQueryVariables = Exact<{
   params: PerformanceInputType;
@@ -1512,7 +1514,7 @@ export type RouteQueryVariables = Exact<{
 }>;
 
 
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string }> };
+export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }> };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['String']['input'];
@@ -2330,6 +2332,7 @@ export const OnTimeStatsDocument = gql`
       scheduled
       completed
       averageDeviation
+      incomplete
     }
   }
 }
@@ -2928,6 +2931,7 @@ export const RouteDocument = gql`
     isTimingPoint
     otp
     directionRef
+    incompleteReason
   }
 }
     `;

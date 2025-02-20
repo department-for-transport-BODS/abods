@@ -98,7 +98,9 @@
           example, by court order, or to prevent fraud or other crime.
         </p>
         <h2>How long we keep your data for</h2>
-        <p>We will retain your data for as long as you have an ABOD account.</p>
+        <p>
+          We will retain your data for as long as you have an ABODS account.
+        </p>
         <h2>Where your data is processed and stored</h2>
         <p>
           We design, build and run our systems to make sure that your data is as
@@ -195,6 +197,9 @@
           Commissioner's Office (ICO). The ICO is an independent regulator set
           up to uphold information rights.
         </p>
+        <a *ngIf="!loggedInService.authenticated" routerLink="/login"
+          >Back to login</a
+        >
       </div>
     </div>
   </ng-container>
