@@ -238,6 +238,14 @@ jobs:
           aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}
           echo "[INFO] S3 Bucket for application component (FRONTEND) successfully cleared for ${RC_ENV^^}"
 
+      - name: deploy frontend for ${{ env.RC_ENV }}
+        env:
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
+          aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
+          echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"
+
       - name: invalidate cloudfront cache for ${{ env.RC_ENV }}
         run: |
           echo "[INFO] Executing invalidation against CloudFront Distribution Id ${{ steps.get-values.outputs.cloudfront-distribution-id }}"
@@ -252,12 +260,3 @@ jobs:
           elif [ $? -eq 255 ]; then
             echo "[WARN] CloudFront cache for application in ${RC_ENV^^} could not be invalidated"
           fi
-        continue-on-error: true
-
-      - name: deploy frontend for ${{ env.RC_ENV }}
-        env:
-          VERSION: ${{ needs.validation.outputs.VERSION }}
-        run: |
-          aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
-          aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
-          echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"
