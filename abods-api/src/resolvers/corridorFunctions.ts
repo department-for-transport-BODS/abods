@@ -46,7 +46,6 @@ import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
-import { Selectable } from "kysely";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -347,8 +346,7 @@ interface StatsCache {
 }
 
 export type TimetableType = Pick<
-  Selectable<Timetable>,
-  | "stop_id"
+  Timetable,
   | "stop_index"
   | "actual_departure_time"
   | "timestamp_after_estimate"
@@ -376,10 +374,24 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
   const stopsArray = stopList.map(Number);
 
-  const results: TimetableType[] = await context.kysely
+  const timetables = context.kysely
     .selectFrom("Timetable")
+    .where(
+      "date_of_journey",
+      ">=",
+      userSelectedDateAsUtc(fromTimestamp).toDate(),
+    )
+    .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
+    .where("stop_id", "in", stopsArray);
+
+  const groupIdsWithCorrectStopCount = timetables
+    .groupBy(["group_id"])
+    .having(context.kysely.fn.count("stop_id"), "=", stopsArray.length)
+    .select("group_id");
+
+  const results: TimetableType[] = await timetables
+    .where("group_id", "in", groupIdsWithCorrectStopCount)
     .select([
-      "stop_id",
       "stop_index",
       "actual_departure_time",
       "timestamp_after_estimate",
@@ -391,33 +403,6 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       "group_id",
       "date_of_journey",
     ])
-    .where("stop_id", "in", stopsArray)
-    .where(
-      "date_of_journey",
-      ">=",
-      userSelectedDateAsUtc(fromTimestamp).toDate(),
-    )
-    .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
-    .where(
-      "group_id",
-      "in",
-      context.kysely
-        .selectFrom("Timetable")
-        .select("group_id")
-        .where("stop_id", "in", stopsArray)
-        .where(
-          "date_of_journey",
-          ">=",
-          userSelectedDateAsUtc(fromTimestamp).toDate(),
-        )
-        .where(
-          "date_of_journey",
-          "<",
-          userSelectedDateAsUtc(toTimestamp).toDate(),
-        )
-        .groupBy(["group_id"])
-        .having(context.kysely.fn.count("stop_id"), "=", stopsArray.length),
-    )
     .execute();
 
   const journeyMap = new Map<string, TimetableType[]>();
