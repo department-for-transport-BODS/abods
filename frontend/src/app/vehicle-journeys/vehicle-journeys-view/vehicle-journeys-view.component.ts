@@ -8,17 +8,15 @@ import {
   switchMap,
   takeUntil,
   tap,
-  zip,
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import {
   AvlPoint,
-  AvlsGQL,
   Journey,
   MatchType,
-  RouteGQL,
+  JourneyGQL,
   Stop,
 } from "../../../generated/graphql";
 import { DateTime } from "luxon";
@@ -73,8 +71,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private service: VehicleJourneysSearchService,
-    private routeGQL: RouteGQL,
-    private avlsGQL: AvlsGQL,
+    private journeyGQL: JourneyGQL,
     private router: Router,
   ) {}
 
@@ -117,22 +114,17 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             prev.groupId == cur.groupId && prev.direction == cur.direction,
         ),
         tap(() => (this.journeyInfoLoading = true)),
-        switchMap(({ groupId }) => {
-          return zip(
-            this.routeGQL.fetch({ groupId }),
-            this.avlsGQL.fetch({ groupId }),
-          );
-        }),
+        switchMap(({ groupId }) => this.journeyGQL.fetch({ groupId })),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([routeResult, avlsResult]) => {
-          if (!routeResult.data.route[0]) {
+        next: (journeyResult) => {
+          if (!journeyResult.data.journey.stops[0]) {
             this.errorView = new VehicleJourneyNotFoundView();
             return;
           }
           const direction = this.directionRef?.toLowerCase();
-          const stopData = [...routeResult.data.route];
+          const stopData = [...journeyResult.data.journey.stops];
           const stops = stopData
             .filter(
               (n) => !direction || n.directionRef.toLowerCase() === direction,
@@ -143,7 +135,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           // The other direction's data will be on another screen.
           // If there's only one in the timetable, then we can display all
           const directions = getDistinct(stopData, (n) => n.directionRef);
-          this.rawAvls = [...avlsResult.data.avls]
+          this.rawAvls = [...journeyResult.data.journey.avls]
             .filter(
               (n) =>
                 directions.length <= 1 ||

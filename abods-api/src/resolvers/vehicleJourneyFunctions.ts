@@ -5,9 +5,11 @@ import {
   OtpEnum,
   QueryResolvers,
   Resolvers,
-  Stop,
+  JourneyResult,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
+import { PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -57,59 +59,50 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     );
 };
 
-export const getAvls: QueryResolvers["avls"] = async (
-  _,
-  args,
-  context,
-): Promise<AvlPoint[]> => {
-  await requireUserSession(context);
-
-  const getAvlsForGroupId = (groupId: string) =>
-    context.db.siriVMPositions
-      .findMany({
-        where: { group_id: groupId },
-        select: {
-          latitude: true,
-          longitude: true,
-          recorded_at_time: true,
-          vehicle_ref: true,
-          direction_ref: true,
+const getAvls = (
+  db: PrismaClient,
+  groupId: string,
+  minRange: Date,
+  maxRange: Date,
+) =>
+  db.siriVMPositions
+    .findMany({
+      where: {
+        group_id: groupId,
+        recorded_at_time: {
+          gte: minRange,
+          lte: maxRange,
         },
-      })
-      .then((j) =>
-        j.map((s) => ({
-          latitude: s.latitude ?? 0,
-          longitude: s.longitude ?? 0,
-          recordedAtTimeUtc: s.recorded_at_time.toISOString(),
-          vehicleRef: s.vehicle_ref,
-          directionRef: s.direction_ref ?? "unknown",
-        })),
-      );
+      },
+      select: {
+        latitude: true,
+        longitude: true,
+        recorded_at_time: true,
+        vehicle_ref: true,
+        direction_ref: true,
+      },
+    })
+    .then((j) =>
+      j.map((s) => ({
+        latitude: s.latitude ?? 0,
+        longitude: s.longitude ?? 0,
+        recordedAtTimeUtc: s.recorded_at_time.toISOString(),
+        vehicleRef: s.vehicle_ref,
+        directionRef: s.direction_ref ?? "unknown",
+      })),
+    );
 
-  // If we have re-run timetable generation after changing the group id format, we will get no results just querying with the group id from the timetable, so check for old formats too
-  const groupIds = [
-    ...new Set([
-      args.groupId,
-      args.groupId.toUpperCase(),
-      args.groupId.toUpperCase().replace("|", ""),
-    ]),
-  ];
-
-  for (const groupId of groupIds) {
-    const avls = await getAvlsForGroupId(groupId);
-    if (avls.length > 0) return avls;
-  }
-  return [];
-};
-
-export const getRoute: QueryResolvers["route"] = async (
+export const getJourney: QueryResolvers["journey"] = async (
   _,
   args,
   context,
-): Promise<Stop[]> => {
+): Promise<JourneyResult> => {
   await requireUserSession(context);
 
-  return context.db.timetable
+  const parts = args.groupId.split("|");
+  if (parts.length < 4) throw new Error("Invalid group id");
+
+  const stops = await context.db.timetable
     .findMany({
       where: { group_id: args.groupId },
       select: {
@@ -128,29 +121,62 @@ export const getRoute: QueryResolvers["route"] = async (
       },
     })
     .then((r) =>
-      r.map((s) => ({
-        latitude: s.stop_latitude ?? 0,
-        longitude: s.stop_longitude ?? 0,
-        actualDepartureUtc: s.actual_departure_time?.toISOString(),
-        estimatedDepartureUtc: s.timestamp_after_estimate?.toISOString(),
-        scheduledDepartureUtc: (
-          s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
-        ).toISOString(),
-        stopIndex: s.stop_index,
-        stopId: s.stop_id,
-        stopName: s.common_name ?? "Unknown",
-        isTimingPoint: s.is_timing_point ?? false,
-        otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
-        directionRef: s.direction ?? "unknown",
-        incompleteReason: s.incomplete_reason ?? 0,
-      })),
+      r
+        .map((s) => ({
+          latitude: s.stop_latitude ?? 0,
+          longitude: s.stop_longitude ?? 0,
+          actualDepartureUtc: s.actual_departure_time?.toISOString(),
+          estimatedDepartureUtc: s.timestamp_after_estimate?.toISOString(),
+          scheduledDepartureUtc: (
+            s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
+          ).toISOString(),
+          stopIndex: s.stop_index,
+          stopId: s.stop_id,
+          stopName: s.common_name ?? "Unknown",
+          isTimingPoint: s.is_timing_point ?? false,
+          otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
+          directionRef: s.direction ?? "unknown",
+          incompleteReason: s.incomplete_reason ?? 0,
+        }))
+        .sort((a, b) => {
+          return a.scheduledDepartureUtc < b.scheduledDepartureUtc
+            ? -1
+            : a.scheduledDepartureUtc > b.scheduledDepartureUtc
+              ? 1
+              : 0;
+        }),
     );
+  if (stops.length < 1) throw new Error("Journey not found");
+
+  const minRange = dayjs(stops[0].scheduledDepartureUtc).subtract(2, "hours");
+  const maxRange = dayjs(stops.at(-1)!.scheduledDepartureUtc).add(2, "hours");
+  const startDay = minRange.startOf("day").toDate();
+  const endDay = maxRange.startOf("day").toDate();
+
+  const avls: AvlPoint[] = [];
+
+  const groupIdStart = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
+  await getAvls(
+    context.db,
+    groupIdStart + "|" + startDay.toISOString().substring(0, 10),
+    minRange.toDate(),
+    maxRange.toDate(),
+  ).then((r) => r.forEach((x) => avls.push(x)));
+  if (startDay.getDay() != endDay.getDay()) {
+    await getAvls(
+      context.db,
+      groupIdStart + "|" + endDay.toISOString().substring(0, 10),
+      minRange.toDate(),
+      maxRange.toDate(),
+    ).then((r) => r.forEach((x) => avls.push(x)));
+  }
+
+  return { stops, avls };
 };
 
 const vehicleJourneyResolvers: Resolvers = {
   Query: {
-    avls: getAvls,
-    route: getRoute,
+    journey: getJourney,
     findJourneys: findJourneys,
   },
 };

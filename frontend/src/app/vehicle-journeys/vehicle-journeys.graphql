@@ -1,27 +1,26 @@
-query avls($groupId: String!) {
-  avls(groupId: $groupId) {
-    recordedAtTimeUtc
-    latitude
-    longitude
-    vehicleRef
-    directionRef
-  }
-}
-
-query route($groupId: String!) {
-  route(groupId: $groupId) {
-    estimatedDepartureUtc
-    actualDepartureUtc
-    scheduledDepartureUtc
-    latitude
-    longitude
-    stopIndex
-    stopName
-    stopId
-    isTimingPoint
-    otp
-    directionRef
-    incompleteReason
+query journey($groupId: String!) {
+  journey(groupId: $groupId) {
+    stops {
+      estimatedDepartureUtc
+      actualDepartureUtc
+      scheduledDepartureUtc
+      latitude
+      longitude
+      stopIndex
+      stopName
+      stopId
+      isTimingPoint
+      otp
+      directionRef
+      incompleteReason
+    }
+    avls {
+      recordedAtTimeUtc
+      latitude
+      longitude
+      vehicleRef
+      directionRef
+    }
   }
 }
 
