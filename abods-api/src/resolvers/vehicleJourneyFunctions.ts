@@ -61,14 +61,17 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
 
 const getAvls = (
   db: PrismaClient,
-  groupId: string,
+  groupIdPrefix: string,
+  dateOfJourney: Date,
   minRange: Date,
   maxRange: Date,
 ) =>
   db.siriVMPositions
     .findMany({
       where: {
-        group_id: groupId,
+        date_of_journey: dateOfJourney,
+        group_id:
+          groupIdPrefix + "|" + dateOfJourney.toISOString().substring(0, 10),
         recorded_at_time: {
           gte: minRange,
           lte: maxRange,
@@ -99,12 +102,14 @@ export const getJourney: QueryResolvers["journey"] = async (
 ): Promise<JourneyResult> => {
   await requireUserSession(context);
 
-  const parts = args.groupId.split("|");
-  if (parts.length < 4) throw new Error("Invalid group id");
+  const groupIdPrefix = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
+  const dateOfJourney = new Date(
+    args.groupId.slice(args.groupId.lastIndexOf("|") + 1),
+  );
 
   const stops = await context.db.timetable
     .findMany({
-      where: { group_id: args.groupId },
+      where: { date_of_journey: dateOfJourney, group_id: args.groupId },
       select: {
         stop_latitude: true,
         stop_longitude: true,
@@ -154,18 +159,18 @@ export const getJourney: QueryResolvers["journey"] = async (
   const endDay = maxRange.startOf("day").toDate();
 
   const avls: AvlPoint[] = [];
-
-  const groupIdStart = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
   await getAvls(
     context.db,
-    groupIdStart + "|" + startDay.toISOString().substring(0, 10),
+    groupIdPrefix,
+    startDay,
     minRange.toDate(),
     maxRange.toDate(),
   ).then((r) => r.forEach((x) => avls.push(x)));
   if (startDay.getDay() != endDay.getDay()) {
     await getAvls(
       context.db,
-      groupIdStart + "|" + endDay.toISOString().substring(0, 10),
+      groupIdPrefix,
+      endDay,
       minRange.toDate(),
       maxRange.toDate(),
     ).then((r) => r.forEach((x) => avls.push(x)));
