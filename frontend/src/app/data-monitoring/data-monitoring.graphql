@@ -4,10 +4,3 @@ query dashboadEmbeddedUrl {
     url
   }
 }
-
-query dashboardUser {
-  quicksightUser {
-    enabled
-    url
-  }
-}

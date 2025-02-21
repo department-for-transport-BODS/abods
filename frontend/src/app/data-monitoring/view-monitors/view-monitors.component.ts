@@ -16,21 +16,9 @@ export class ViewMonitorsComponent implements AfterViewInit {
 
   embedUrl = "";
   loading = false;
-  showButton = false;
 
   constructor(private service: DataMonitoringService) {}
   ngAfterViewInit(): void {
-    this.service.dashboardUser.subscribe((user) => {
-      if (user.enabled && user.url) {
-        this.errors = [];
-        this.embedDashboard(user.url);
-      } else {
-        this.showButton = true;
-      }
-    });
-  }
-
-  onButtonClick(): void {
     this.loading = true;
     this.service.embeddedUrl.subscribe((user) => {
       if (user.enabled) {
@@ -65,7 +53,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
         .then((context) => {
           context
             .embedDashboard(options)
-            .then(() => (this.showButton = false))
+            .then(() => (this.loading = true))
             .catch(() => {
               console.log("Error embedding dashboard.");
             });
@@ -74,7 +62,5 @@ export class ViewMonitorsComponent implements AfterViewInit {
           console.log("Error creating embedding context");
         });
     }
-
-    //this.dashboard = embeddingContext.embedDashboard(options);
   }
 }

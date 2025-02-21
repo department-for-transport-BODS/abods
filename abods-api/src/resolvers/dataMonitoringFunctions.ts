@@ -1,10 +1,6 @@
-import {
-  assumeRole,
-  describeUser,
-  getDashboardUrl,
-  getQuicksighClient,
-  registerUser,
-} from "../lib/aws.js";
+import { sendDistributionMetric } from "datadog-lambda-js";
+import { assumeRole, getDashboardUrl, getQuicksighClient } from "../lib/aws.js";
+import { getOperatorsFromOrgId } from "../lib/otp.js";
 import {
   AwsQuicksightUser,
   QueryResolvers,
@@ -18,43 +14,22 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   context,
 ): Promise<AwsQuicksightUser> => {
   const user = await requireUserSession(context);
+  sendDistributionMetric(
+    "abods.graphql.quicksight.request",
+    1,
+    "function:GraphQlFunction",
+    `env:${process.env.PROJECT_ENV}`,
+    `user:${user.id}`,
+  );
 
   const awsCreds = await assumeRole();
   const quickSightClient = getQuicksighClient(awsCreds);
-  const quickSightUser = await registerUser(user, quickSightClient);
+  const orgOperators = await getOperatorsFromOrgId(user.orgId, context.db);
 
-  if (!quickSightUser?.Arn) {
-    return {
-      enabled: false,
-    };
-  }
-  const url = await getDashboardUrl(quickSightUser?.Arn, quickSightClient);
-
-  return {
-    enabled: true,
-    url: url,
-  };
-};
-
-export const getQuicksightUser: QueryResolvers["quicksightUser"] = async (
-  _,
-  __,
-  context,
-): Promise<AwsQuicksightUser> => {
-  const user = await requireUserSession(context);
-
-  const awsCreds = await assumeRole();
-  const quickSightClient = getQuicksighClient(awsCreds);
-
-  const userArn = await describeUser(user.username, quickSightClient);
-
-  if (!userArn) {
-    return {
-      enabled: false,
-    };
-  }
-
-  const url = await getDashboardUrl(userArn, quickSightClient);
+  const url = await getDashboardUrl(
+    orgOperators.map((op) => op.operatorref),
+    quickSightClient,
+  );
 
   return {
     enabled: true,
@@ -65,7 +40,6 @@ export const getQuicksightUser: QueryResolvers["quicksightUser"] = async (
 const dataMonitoringResolvers: Resolvers = {
   Query: {
     embeddedUrl: getEmbeddedUrl,
-    quicksightUser: getQuicksightUser,
   },
 };
 

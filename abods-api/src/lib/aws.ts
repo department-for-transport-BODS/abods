@@ -1,19 +1,15 @@
 import { STSClient, AssumeRoleCommand, Credentials } from "@aws-sdk/client-sts";
 import {
   QuickSightClient,
-  DescribeUserCommand,
-  GenerateEmbedUrlForRegisteredUserCommand,
-  RegisterUserCommand,
   GenerateEmbedUrlForAnonymousUserCommand,
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
-import { SessionUser } from "../types/extra";
 
 const region = "eu-west-2";
 const targetRoleArn =
   "arn:aws:iam::228266753808:role/abods-quicksight-assume-role";
 const quickSightAccountId = "228266753808";
-const dashboardId = "949f55f3-7ae0-4386-9303-f14bdd54ee45";
+const dashboardId = "21cd0310-6194-4afe-b5e4-62b3843fe363";
 
 export const assumeRole = async (): Promise<Credentials> => {
   try {
@@ -53,79 +49,29 @@ export const getQuicksighClient = (credentials: Credentials) => {
   });
 };
 
-export const describeUser = async (
-  username: string | undefined,
-  quickSightClient: QuickSightClient,
-) => {
-  if (!username) return undefined;
-  try {
-    const command = new DescribeUserCommand({
-      AwsAccountId: quickSightAccountId,
-      Namespace: "default",
-      UserName: username,
-    });
-
-    const response = await quickSightClient.send(command);
-    return response.User?.Arn;
-  } catch (error) {
-    logger.error({ error }, `Error checking for user ${username}:`);
-    return undefined;
-  }
-};
-
-export const registerUser = async (
-  user: SessionUser,
-  quickSightClient: QuickSightClient,
-) => {
-  try {
-    const command = new RegisterUserCommand({
-      AwsAccountId: quickSightAccountId,
-      Namespace: "default",
-      IdentityType: "QUICKSIGHT",
-      UserName: `1${user.email!}`,
-      Email: `1${user.email!}`,
-      UserRole: "READER",
-    });
-
-    const response = await quickSightClient.send(command);
-    return response.User;
-  } catch (error) {
-    logger.error(
-      { error },
-      `Error registering quicksight user ${user.username}:`,
-    );
-    return undefined;
-  }
-};
-
 export const getDashboardUrl = async (
-  userArn: string,
+  operatorRefs: string[],
   quickSightClient: QuickSightClient,
 ) => {
   try {
-    //   const command = new GenerateEmbedUrlForAnonymousUserCommand({
-    //     AwsAccountId: quickSightAccountId,
-    //     Namespace: "default",
-    //     ExperienceConfiguration: {
-    //         Dashboard: {
-    //             InitialDashboardId: dashboardId
-    //         }
-    //     },
-    //     SessionLifetimeInMinutes: 600,
-    //     AuthorizedResourceArns: [
-    //         `arn:aws:quicksight:${region}:${quickSightAccountId}:dashboard/${dashboardId}`
-    //     ]
-    // });
-
-    const command = new GenerateEmbedUrlForRegisteredUserCommand({
+    const command = new GenerateEmbedUrlForAnonymousUserCommand({
       AwsAccountId: quickSightAccountId,
-      UserArn: userArn,
+      Namespace: "default",
       ExperienceConfiguration: {
         Dashboard: {
           InitialDashboardId: dashboardId,
         },
       },
       SessionLifetimeInMinutes: 600,
+      AuthorizedResourceArns: [
+        `arn:aws:quicksight:${region}:${quickSightAccountId}:dashboard/${dashboardId}`,
+      ],
+      SessionTags: [
+        {
+          Key: "TXC:NOC",
+          Value: operatorRefs.join(","),
+        },
+      ],
     });
 
     const response = await quickSightClient.send(command);

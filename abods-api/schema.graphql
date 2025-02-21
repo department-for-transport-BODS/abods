@@ -40,7 +40,6 @@ type Query {
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
 
   embeddedUrl: AWSQuicksightUser!
-  quicksightUser: AWSQuicksightUser!
 }
 
 type AWSQuicksightUser {

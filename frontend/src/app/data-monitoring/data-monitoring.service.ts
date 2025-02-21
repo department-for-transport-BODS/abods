@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import {
   AwsQuicksightUser,
   DashboadEmbeddedUrlGQL,
-  DashboardUserGQL,
 } from "../../generated/graphql";
 import { map, Observable } from "rxjs";
 
@@ -10,20 +9,11 @@ import { map, Observable } from "rxjs";
   providedIn: "root",
 })
 export class DataMonitoringService {
-  constructor(
-    private embeddedUrlQuery: DashboadEmbeddedUrlGQL,
-    private dashboardUserQuery: DashboardUserGQL,
-  ) {}
+  constructor(private embeddedUrlQuery: DashboadEmbeddedUrlGQL) {}
 
   get embeddedUrl(): Observable<AwsQuicksightUser> {
     return this.embeddedUrlQuery
       .fetch({})
       .pipe(map(({ data }) => data.embeddedUrl));
-  }
-
-  get dashboardUser(): Observable<AwsQuicksightUser> {
-    return this.dashboardUserQuery
-      .fetch({})
-      .pipe(map(({ data }) => data.quicksightUser));
   }
 }
