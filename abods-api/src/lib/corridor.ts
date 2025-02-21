@@ -10,6 +10,7 @@ import {
 } from "@prisma/client";
 import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
+import { TimetableType } from "../resolvers/corridorFunctions.js";
 
 export enum CorridorJourneyStatsOption {
   day,
@@ -204,7 +205,7 @@ export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
 };
 
 export const getJourneyDeparture = (
-  journey: Timetable,
+  journey: TimetableType,
   matchType: MatchType,
 ) => {
   return (
