@@ -20,6 +20,7 @@ import {
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
+import { getUserOperatorIdsQuery } from "../lib/operators.js";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -208,14 +209,30 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
   context,
 ): Promise<DashboardVehicles[]> => {
   const user = await requireUserSession(context);
-  const endTime = getDate().startOf("minute");
-  return getVehicleCounts(
-    context.kysely,
-    user,
-    args.operatorId ?? null,
-    endTime.subtract(1, "minute").toDate(),
-    endTime.toDate(),
-  );
+
+  const summary = context.kysely
+    .selectFrom("feed_monitor_minute_summary")
+    .where("date_of_journey", "=", new Date());
+
+  const operatorId = args.operatorId ?? null;
+
+  return summary
+    .groupBy("operator_noc")
+    .$if(!!operatorId, (qb) => qb.where("operator_noc", "=", operatorId))
+    .where("operator_noc", "in", getUserOperatorIdsQuery(context.kysely, user))
+    .where(
+      "received_interval",
+      "=",
+      summary.select(({ fn }) =>
+        fn.max("received_interval").as("latest_timestamp"),
+      ),
+    )
+    .select(({ fn, eb }) => [
+      "operator_noc as operatorId",
+      eb.cast<number>(fn.sum("expected"), "integer").as("expected"),
+      eb.cast<number>(fn.sum("actual"), "integer").as("actual"),
+    ])
+    .execute();
 };
 
 const feedMonitoringResolvers: Resolvers = {
