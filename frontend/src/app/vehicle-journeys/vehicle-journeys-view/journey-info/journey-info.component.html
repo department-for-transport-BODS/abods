@@ -1,33 +1,20 @@
 <div class="journey-info govuk-body-m">
   <span>Operator: </span>
   <span>
-    <strong *ngIf="!loading; else skeletonInfo"
-      >{{ operatorName }} ({{ operatorNocCode }})</strong
-    >
+    <strong>{{ operatorName }} ({{ operatorNocCode }})</strong>
   </span>
   <span> Service pattern: </span>
   <span>
-    <strong *ngIf="!loading; else skeletonInfo">{{
-      servicePatternName
-    }}</strong>
+    <strong>{{ servicePatternName }}</strong>
   </span>
   <span>Scheduled start time: </span>
   <span>
-    <strong *ngIf="!loading; else skeletonInfo">{{
+    <strong>{{
       startTime?.setZone("Europe/London") | dateTimeToFormat: "d MMM y, HH:mm"
     }}</strong>
   </span>
   <span>Vehicle ID: </span>
   <span>
-    <strong *ngIf="!loading; else skeletonInfo">{{ vehicleId }}</strong>
+    <strong>{{ vehicleId }}</strong>
   </span>
 </div>
-
-<ng-template #skeletonInfo>
-  <app-skeleton
-    appearance="body"
-    width="150px"
-    spaceBelow="0"
-    spaceAbove="0"
-  ></app-skeleton>
-</ng-template>

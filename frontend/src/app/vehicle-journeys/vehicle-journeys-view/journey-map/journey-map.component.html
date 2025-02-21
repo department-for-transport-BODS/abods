@@ -1,6 +1,3 @@
-<div *ngIf="loading" class="vehicle-journey__map-loading">
-  <app-spinner></app-spinner>
-</div>
 <mgl-map
   [style]="mapboxStyle"
   [fitBounds]="bounds"
@@ -24,7 +21,7 @@
       ></app-map-view-toggle>
     </app-dropdown>
   </mgl-control>
-  <ng-container *ngIf="!loading">
+  <ng-container>
     <mgl-control position="bottom-left">
       <app-map-recentre-button
         *ngIf="moveCounter > 1"

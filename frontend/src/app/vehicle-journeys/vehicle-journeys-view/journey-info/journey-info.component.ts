@@ -8,7 +8,6 @@ import { Journey } from "../../../../generated/graphql";
   styleUrls: ["./journey-info.component.scss"],
 })
 export class JourneyInfoComponent {
-  @Input() loading = false;
   @Input() vehicleRef: string | null = null;
   @Input() journey: Journey | null = null;
 

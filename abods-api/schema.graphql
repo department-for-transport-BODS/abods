@@ -23,7 +23,7 @@ type Query {
     start: DateTime!
     end: DateTime!
   ): [EventStatsType]
-  journey(groupId: String!): JourneyResult!
+  journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
@@ -717,6 +717,7 @@ input ServicePerformanceInputType {
 type JourneyResult {
   stops: [Stop!]!
   avls: [AvlPoint!]!
+  serviceJourneys: [Journey!]!
 }
 
 type AvlPoint {

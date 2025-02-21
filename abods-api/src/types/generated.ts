@@ -453,6 +453,7 @@ export type Journey = {
 export type JourneyResult = {
   __typename?: 'JourneyResult';
   avls: Array<AvlPoint>;
+  serviceJourneys: Array<Journey>;
   stops: Array<Stop>;
 };
 
@@ -852,6 +853,7 @@ export type QueryInvitationArgs = {
 
 export type QueryJourneyArgs = {
   groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
 };
 
 
@@ -1640,6 +1642,7 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
 
 export type JourneyResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyResult'] = ResolversParentTypes['JourneyResult']> = ResolversObject<{
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType>;
+  serviceJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1802,7 +1805,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
-  journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId'>>;
+  journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'operatorId'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;

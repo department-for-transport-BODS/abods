@@ -7,7 +7,6 @@
         | noInfinity
         | percent: '1.0-2') || 'Unavailable'
     "
-    [statLoaded]="!loading"
     tooltip="{{ calculated.onTime }} of {{
       calculated.completed
     }} recorded stop departures were between 1 minute early and 5 minutes 59 seconds late."
@@ -20,7 +19,6 @@
         | noInfinity
         | percent: '1.0-2') || 'Unavailable'
     "
-    [statLoaded]="!loading"
     tooltip="{{ calculated.late }} of {{
       calculated.completed
     }} recorded stop departures were more than 5 minutes 59 seconds late."
@@ -33,7 +31,6 @@
         | noInfinity
         | percent: '1.0-2') || 'Unavailable'
     "
-    [statLoaded]="!loading"
     tooltip="{{ calculated.early }} of {{
       calculated.completed
     }} recorded stop departures were more than 1 minute early."
@@ -45,7 +42,6 @@
       (calculated.noData / calculated.total | noInfinity | percent: '1.0-2') ||
       'Unavailable'
     "
-    [statLoaded]="!loading"
     [tooltip]="noDataTooltip"
   ></app-stat>
   <ng-template #noDataTooltip>

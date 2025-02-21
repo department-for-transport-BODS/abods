@@ -453,6 +453,7 @@ export type Journey = {
 export type JourneyResult = {
   __typename?: 'JourneyResult';
   avls: Array<AvlPoint>;
+  serviceJourneys: Array<Journey>;
   stops: Array<Stop>;
 };
 
@@ -852,6 +853,7 @@ export type QueryInvitationArgs = {
 
 export type QueryJourneyArgs = {
   groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
 };
 
 
@@ -1504,10 +1506,11 @@ export type InvitationQuery = { __typename?: 'Query', invitation?: { __typename?
 
 export type JourneyQueryVariables = Exact<{
   groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
 }>;
 
 
-export type JourneyQuery = { __typename?: 'Query', journey: { __typename?: 'JourneyResult', stops: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }>, avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> } };
+export type JourneyQuery = { __typename?: 'Query', journey: { __typename?: 'JourneyResult', stops: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }>, avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }>, serviceJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null }> } };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['String']['input'];
@@ -2889,8 +2892,8 @@ export const InvitationDocument = gql`
     }
   }
 export const JourneyDocument = gql`
-    query journey($groupId: String!) {
-  journey(groupId: $groupId) {
+    query journey($groupId: String!, $lineId: String!) {
+  journey(groupId: $groupId, lineId: $lineId) {
     stops {
       estimatedDepartureUtc
       actualDepartureUtc
@@ -2910,6 +2913,15 @@ export const JourneyDocument = gql`
       latitude
       longitude
       vehicleRef
+      directionRef
+    }
+    serviceJourneys {
+      groupId
+      startTime
+      serviceName
+      serviceNumber
+      operatorName
+      operatorNoc
       directionRef
     }
   }

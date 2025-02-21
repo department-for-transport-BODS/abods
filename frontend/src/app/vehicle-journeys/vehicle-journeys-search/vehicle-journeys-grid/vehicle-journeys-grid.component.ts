@@ -19,6 +19,7 @@ export class VehicleJourneysGridComponent {
     this.patterns = Array.from(Object.values(grouped));
   }
 
+  @Input() date?: string;
   @Input() operatorId?: string;
   @Input() serviceId?: string;
   @Input() loading = false;

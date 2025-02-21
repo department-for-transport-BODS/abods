@@ -9,7 +9,6 @@ import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
   styleUrls: ["./journey-nav.component.scss"],
 })
 export class JourneyNavComponent {
-  @Input() loading = false;
   @Input() journeys: Journey[] = [];
   @Input() currentIndex = -1;
 

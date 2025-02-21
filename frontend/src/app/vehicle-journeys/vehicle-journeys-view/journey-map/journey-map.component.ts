@@ -87,7 +87,6 @@ export class JourneyMapComponent implements OnChanges {
   @Input() view: JourneyInfo | null = null;
   @Input() selectedStop?: Stop;
   @Input() hoveredStop?: StopHoverEvent;
-  @Input() loading = false;
   @Input() matchType = MatchType.Evidenced;
 
   map!: Map;
@@ -149,9 +148,6 @@ export class JourneyMapComponent implements OnChanges {
     }
     if (this.map && changes.hoveredStop?.currentValue) {
       this.updateHoveredStopState(changes.hoveredStop.currentValue);
-    }
-    if (this.loading) {
-      this.moveCounter = 0;
     }
   }
 
