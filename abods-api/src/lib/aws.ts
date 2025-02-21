@@ -9,7 +9,7 @@ const region = "eu-west-2";
 const targetRoleArn =
   "arn:aws:iam::228266753808:role/abods-quicksight-assume-role";
 const quickSightAccountId = "228266753808";
-const dashboardId = "21cd0310-6194-4afe-b5e4-62b3843fe363";
+const dashboardId = "afcf9f5e-ae09-4fda-87dd-7e9dec7943e8";
 
 export const assumeRole = async (): Promise<Credentials> => {
   try {
