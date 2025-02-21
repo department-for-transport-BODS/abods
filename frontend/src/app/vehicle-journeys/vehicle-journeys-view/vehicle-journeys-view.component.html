@@ -6,12 +6,10 @@
       [queryParams]="returnQueryParams"
     ></gds-back-link>
   </ng-container>
-  <div *ngIf="loading" class="vehicle-journey__map-loading">
-    <app-spinner></app-spinner>
-  </div>
-  <ng-container ngProjectAs="content" *ngIf="!loading">
+  <ng-container ngProjectAs="content">
     <ng-container *ngIf="!errorView; else error">
       <app-page-header
+        *ngIf="!journeysLoading; else skeletonHeader"
         caption="Vehicle journeys"
         [heading]="
           journeys[currentJourneyIndex]
@@ -58,6 +56,7 @@
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [vehicleRef]="vehicleRef"
+          [loading]="journeysLoading"
           [journey]="journeys[currentJourneyIndex]"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
@@ -97,6 +96,7 @@
           </app-segmented-toggle>
           <app-journey-nav
             [journeys]="journeys"
+            [loading]="journeysLoading"
             [currentIndex]="currentJourneyIndex"
           ></app-journey-nav>
         </div>
@@ -106,6 +106,7 @@
           [view]="journeyInfo"
           [timingPointsOnly]="timingPointsOption === 'timing-points'"
           [matchType]="matchType"
+          [loading]="journeyInfoLoading"
           (stopSelected)="onStopSelected($event)"
           (stopHovered)="onStopHovered($event)"
         ></app-stop-list>
@@ -113,6 +114,7 @@
           <div class="vehicle-journeys__sticky-container">
             <app-otp-stats
               [view]="journeyInfo"
+              [loading]="journeyInfoLoading"
               [matchType]="matchType"
               [timingPointsOnly]="timingPointsOption === 'timing-points'"
             ></app-otp-stats>
@@ -121,6 +123,7 @@
               [matchType]="matchType"
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
+              [loading]="journeyInfoLoading"
             ></app-journey-map>
           </div>
         </div>
@@ -128,6 +131,15 @@
     </ng-container>
   </ng-container>
 </app-page>
+
+<ng-template #skeletonHeader>
+  <div>
+    <span class="govuk-caption-xl govuk-!-margin-bottom-0"
+      >Vehicle journeys</span
+    >
+  </div>
+  <app-skeleton appearance="heading-xl" width="300px"></app-skeleton>
+</ng-template>
 
 <ng-template #error>
   <app-page-header

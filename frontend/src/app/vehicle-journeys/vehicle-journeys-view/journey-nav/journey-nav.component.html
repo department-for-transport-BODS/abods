@@ -1,6 +1,6 @@
 <div class="journey-nav">
   <span>Journey</span>
-  <ng-container>
+  <ng-container *ngIf="!loading; else skeleton">
     <a
       class="journey-nav__link"
       [class.journey-nav__link--disabled]="!previous"
@@ -45,4 +45,11 @@
       ></svg-icon>
     </a>
   </ng-container>
+  <ng-template #skeleton
+    ><app-skeleton
+      class="govuk-!-margin-left-2"
+      appearance="body"
+      width="150px"
+    ></app-skeleton
+  ></ng-template>
 </div>

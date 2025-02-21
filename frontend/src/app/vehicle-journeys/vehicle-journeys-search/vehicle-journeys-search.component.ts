@@ -30,10 +30,11 @@ import {
   takeUntil,
   tap,
 } from "rxjs/operators";
+import { VehicleJourneysSearchService } from "./vehicle-journeys-search.service";
 import { ConfigService } from "../../config/config.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { isEqual as _isEqual } from "lodash-es";
-import { Journey, JourneysGQL, LineType } from "../../../generated/graphql";
+import { Journey, LineType } from "../../../generated/graphql";
 
 @Component({
   selector: "app-vehicle-journeys-search",
@@ -123,7 +124,7 @@ export class VehicleJourneysSearchComponent
   constructor(
     private formBuilder: FormBuilder,
     private operatorService: OperatorService,
-    private journeysGQL: JourneysGQL,
+    private vehicleJourneysSearchService: VehicleJourneysSearchService,
     private configService: ConfigService,
     private router: Router,
     private route: ActivatedRoute,
@@ -265,15 +266,9 @@ export class VehicleJourneysSearchComponent
           if (!date?.isValid || !service) {
             return of([]);
           }
-          return this.journeysGQL
-            .fetch({ dateOfJourney: date.toISO(), lineId: service })
+          return this.vehicleJourneysSearchService
+            .fetchDayJourneys(date.toISO(), service)
             .pipe(
-              map((journeys) => {
-                const now = DateTime.now();
-                return journeys.data.findJourneys.filter(
-                  (n) => DateTime.fromISO(n.startTime) <= now,
-                );
-              }),
               take(1),
               catchError(() => {
                 this.errored = true;

@@ -11,6 +11,7 @@ import { JourneyInfo } from "../vehicle-journeys-view.component";
 export class StopListComponent {
   @Input() view: JourneyInfo | null = null;
   @Input() timingPointsOnly = false;
+  @Input() loading?: boolean;
   @Input() matchType = MatchType.Evidenced;
   @Output() stopSelected = new EventEmitter<Stop>();
   @Output() stopHovered = new EventEmitter<StopHoverEvent>();

@@ -11,6 +11,7 @@ import {
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
+import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import {
   AvlPoint,
   Journey,
@@ -45,11 +46,12 @@ const getInitialVehicleRef = (stops: Stop[], avl_list: AvlPoint[]) => {
 })
 export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeyInfo: JourneyInfo | null = null;
-  loading = false;
+  journeyInfoLoading = false;
 
   errorView?: VehicleJourneyNotFoundView;
 
   journeys: Journey[] = [];
+  journeysLoading = false;
 
   matchType: MatchType = MatchType.Evidenced;
   timingPointsOption: "timing-points" | "all-stops" = "timing-points";
@@ -68,6 +70,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private service: VehicleJourneysSearchService,
     private journeyGQL: JourneyGQL,
     private router: Router,
   ) {}
@@ -81,8 +84,15 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([params, queryParams]) => ({
         groupId: params.get("journeyId")!,
-        startTime: queryParams.get("startTime"),
-        dateOfJourney: queryParams.get("date"),
+        // dateOfJourney is a new param, old links don't have it, but do have startDate, which can provide the
+        // wrong date if the journey starts after midnight.
+        // Eventually we may want to assume the new param is present
+        dateOfJourney:
+          queryParams.get("date") ??
+          DateTime.fromISO(queryParams.get("startTime")!)
+            .setZone("Europe/London")
+            .startOf("day")
+            .toISODate(),
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
         matchType: queryParams.get("match_type") as MatchType | undefined,
@@ -92,11 +102,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       })),
       tap((urlData) => {
         this.returnQueryParams = {
-          // dateOfJourney is a new param, old links might not have it yet.
-          // Eventually we may want to assume it's present, and we can send it to the API too
-          date:
-            urlData.dateOfJourney ??
-            DateTime.fromISO(urlData.startTime!).toISODate(),
+          date: urlData.dateOfJourney,
           operator: urlData.operator,
           service: urlData.lineId,
         };
@@ -115,7 +121,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           (prev, cur) =>
             prev.groupId == cur.groupId && prev.direction == cur.direction,
         ),
-        tap(() => (this.loading = true)),
+        tap(() => (this.journeyInfoLoading = true)),
         switchMap((urlData) =>
           this.journeyGQL.fetch({
             groupId: urlData.groupId,
@@ -125,20 +131,11 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: (journeyResult) => {
+        next: (result) => {
           // We probably want to move a lot of this filtering and sorting to the API later,
           // but for now it's quicker to iterate here in local dev
-          const now = DateTime.now();
-          this.journeys = journeyResult.data.journey.serviceJourneys.filter(
-            (n) => DateTime.fromISO(n.startTime) <= now,
-          );
-          // Multiple journeys can use the same group id. Use the direction query param to disambiguate
-          this.currentJourneyIndex = this.journeys.findIndex(
-            (v) =>
-              v.groupId === this.groupId && v.directionRef == this.directionRef,
-          );
           const direction = this.directionRef?.toLowerCase();
-          const stopData = [...journeyResult.data.journey.stops];
+          const stopData = [...result.data.journey.stops];
           const stops = stopData
             .filter(
               (n) => !direction || n.directionRef.toLowerCase() === direction,
@@ -149,7 +146,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           // The other direction's data will be on another screen.
           // If there's only one in the timetable, then we can display all
           const directions = getDistinct(stopData, (n) => n.directionRef);
-          this.rawAvls = [...journeyResult.data.journey.avls]
+          this.rawAvls = [...result.data.journey.avls]
             .filter(
               (n) =>
                 directions.length <= 1 ||
@@ -171,7 +168,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           );
 
           this.journeyInfo = { avls: vehicleAvls, stops: stops };
-          this.loading = false;
+          this.journeyInfoLoading = false;
         },
         error: (err) => {
           console.log(err);
@@ -180,9 +177,34 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           this.rawAvls = [];
           this.vehicles = [];
           this.journeyInfo = null;
+          this.journeyInfoLoading = false;
+        },
+      });
+
+    urlData$
+      .pipe(
+        tap(() => (this.journeysLoading = true)),
+        switchMap(({ dateOfJourney, lineId }) =>
+          this.service.fetchDayJourneys(dateOfJourney, lineId),
+        ),
+        takeUntil(this.onDestroy$),
+      )
+      .subscribe({
+        next: (journeys) => {
+          this.journeys = journeys;
+          // Multiple journeys can use the same group id. Use the direction query param to disambiguate
+          this.currentJourneyIndex = journeys.findIndex(
+            (v) =>
+              v.groupId === this.groupId && v.directionRef == this.directionRef,
+          );
+          this.journeysLoading = false;
+        },
+        error: (err) => {
+          console.log(err);
+          this.errorView = new VehicleJourneyNotFoundView();
           this.journeys = [];
           this.currentJourneyIndex = -1;
-          this.loading = false;
+          this.journeysLoading = false;
         },
       });
   }

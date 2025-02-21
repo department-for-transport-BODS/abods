@@ -10,6 +10,7 @@ import { incompleteConversion } from "../../../shared/incompleteReasonUtils";
 })
 export class OtpStatsComponent {
   @Input() view: JourneyInfo | null = null;
+  @Input() loading?: boolean;
   @Input() timingPointsOnly?: boolean;
   @Input() matchType = MatchType.Evidenced;
 

@@ -717,7 +717,6 @@ input ServicePerformanceInputType {
 type JourneyResult {
   stops: [Stop!]!
   avls: [AvlPoint!]!
-  serviceJourneys: [Journey!]!
 }
 
 type AvlPoint {

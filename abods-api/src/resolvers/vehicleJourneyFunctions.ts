@@ -1,27 +1,28 @@
 import { getFormattedDate, userSelectedDateAsUtc } from "../lib/dayjs.js";
 import {
-  AvlPoint,
   Journey,
+  JourneyResult,
   OtpEnum,
   QueryResolvers,
   Resolvers,
-  JourneyResult,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
-import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 import { GraphQLError } from "graphql";
+import { PrismaClient } from "@prisma/client";
 
-export const getJourneys = (
-  db: PrismaClient,
-  lineId: string,
-  dateOfJourney: string,
-): Promise<Journey[]> =>
-  db.expected_journeys
+export const findJourneys: QueryResolvers["findJourneys"] = async (
+  _,
+  args,
+  context,
+): Promise<Journey[]> => {
+  await requireUserSession(context);
+
+  return context.db.expected_journeys
     .findMany({
       where: {
-        noc_and_line_and_servicecode: lineId,
-        date_of_journey: userSelectedDateAsUtc(dateOfJourney).toDate(),
+        noc_and_line_and_servicecode: args.lineId,
+        date_of_journey: userSelectedDateAsUtc(args.dateOfJourney).toDate(),
       },
       select: {
         expected_journey_start: true,
@@ -42,47 +43,37 @@ export const getJourneys = (
       },
     })
     .then((j) =>
-      j
-        .map((journey) => ({
-          groupId: journey.group_id,
-          directionRef: journey.direction,
-          startTime: getFormattedDate(journey.expected_journey_start),
-          serviceName: journey.journey_pattern_description,
-          serviceNumber: journey.expected_services?.line_name ?? "unknown",
-          operatorNoc:
-            journey.expected_services?.expected_operator.operator_noc ??
-            "unknown",
-          operatorName:
-            journey.expected_services?.expected_operator.operator_name ??
-            "unknown",
-        }))
-        .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+      j.map((journey) => ({
+        groupId: journey.group_id,
+        directionRef: journey.direction,
+        startTime: getFormattedDate(journey.expected_journey_start),
+        serviceName: journey.journey_pattern_description,
+        serviceNumber: journey.expected_services?.line_name ?? "unknown",
+        operatorNoc:
+          journey.expected_services?.expected_operator.operator_noc ??
+          "unknown",
+        operatorName:
+          journey.expected_services?.expected_operator.operator_name ??
+          "unknown",
+      })),
     );
-
-export const findJourneys: QueryResolvers["findJourneys"] = async (
-  _,
-  args,
-  context,
-): Promise<Journey[]> => {
-  await requireUserSession(context);
-  return await getJourneys(context.db, args.lineId, args.dateOfJourney);
 };
 
-const getAvls = (
+const getAvlData = (
   db: PrismaClient,
-  groupId: string,
-  dateOfJourney: string,
-  minRange: Date,
-  maxRange: Date,
+  dateString: string,
+  newGroupId: string,
+  minRange: dayjs.Dayjs,
+  maxRange: dayjs.Dayjs,
 ) =>
   db.siriVMPositions
     .findMany({
       where: {
-        date_of_journey: new Date(dateOfJourney),
-        group_id: groupId,
+        date_of_journey: new Date(dateString),
+        group_id: newGroupId,
         recorded_at_time: {
-          gte: minRange,
-          lte: maxRange,
+          gte: minRange.toDate(),
+          lte: maxRange.toDate(),
         },
       },
       select: {
@@ -103,11 +94,29 @@ const getAvls = (
       })),
     );
 
-const getJourneyDetails = async (db: PrismaClient, groupId: string) => {
-  const dateOfJourney = getDateOfJourneyFromGroupId(groupId);
-  const stops = await db.timetable
+export const getJourney: QueryResolvers["journey"] = async (
+  _,
+  args,
+  context,
+): Promise<JourneyResult> => {
+  await requireUserSession(context);
+
+  if (!args.groupId.includes("|")) {
+    throw new GraphQLError("Wrong group id format", {
+      extensions: { code: "BAD_USER_INPUT", http: { status: 400 } },
+    });
+  }
+  const dateOfJourneyString = args.groupId.slice(
+    args.groupId.lastIndexOf("|") + 1,
+  );
+  const groupIdPrefix = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
+
+  const stops = await context.db.timetable
     .findMany({
-      where: { date_of_journey: new Date(dateOfJourney), group_id: groupId },
+      where: {
+        date_of_journey: new Date(dateOfJourneyString),
+        group_id: args.groupId,
+      },
       select: {
         stop_latitude: true,
         stop_longitude: true,
@@ -169,61 +178,19 @@ const getJourneyDetails = async (db: PrismaClient, groupId: string) => {
     "hours",
   );
 
-  // Assuming that the range never spans more than two dates, this should never happen
-  if (minRange.diff(maxRange, "hour") > 23) {
-    throw new GraphQLError("AVL range spans more than a full day", {
-      extensions: { code: "INTERNAL_SERVER_ERROR", http: { status: 500 } },
-    });
+  const avlPromises = [];
+  let currentDay = minRange.startOf("day");
+  while (currentDay.isSameOrBefore(maxRange.startOf("day"))) {
+    const dateString = currentDay.toISOString().substring(0, 10);
+    // Some of the avl data has the wrong group id when running overnight, so we construct a new one
+    const newGroupId = groupIdPrefix + "|" + dateString;
+    avlPromises.push(
+      getAvlData(context.db, dateString, newGroupId, minRange, maxRange),
+    );
+    currentDay = currentDay.add(1, "day");
   }
-
-  const startDay = minRange.startOf("day").toISOString().substring(0, 10);
-  const endDay = maxRange.startOf("day").toISOString().substring(0, 10);
-
-  const groupIdPrefix = groupId.slice(0, groupId.lastIndexOf("|"));
-  const avls: AvlPoint[] = [];
-
-  // Some of the avl data has the wrong group id when running overnight, so we construct a new one
-  await getAvls(
-    db,
-    groupIdPrefix + "|" + startDay,
-    startDay,
-    minRange.toDate(),
-    maxRange.toDate(),
-  ).then((r) => r.forEach((x) => avls.push(x)));
-  if (startDay != endDay) {
-    await getAvls(
-      db,
-      groupIdPrefix + "|" + endDay,
-      endDay,
-      minRange.toDate(),
-      maxRange.toDate(),
-    ).then((r) => r.forEach((x) => avls.push(x)));
-  }
-  return { stops, avls };
-};
-
-const getDateOfJourneyFromGroupId = (groupId: string) =>
-  groupId.slice(groupId.lastIndexOf("|") + 1);
-
-export const getJourney: QueryResolvers["journey"] = async (
-  _,
-  args,
-  context,
-): Promise<JourneyResult> => {
-  await requireUserSession(context);
-
-  if (!args.groupId.includes("|")) {
-    throw new GraphQLError("Wrong group id format", {
-      extensions: { code: "BAD_USER_INPUT", http: { status: 400 } },
-    });
-  }
-
-  const dateOfJourney = getDateOfJourneyFromGroupId(args.groupId);
-  const [serviceJourneys, journey] = await Promise.all([
-    getJourneys(context.db, args.lineId, dateOfJourney),
-    getJourneyDetails(context.db, args.groupId),
-  ]);
-  return { ...journey, serviceJourneys };
+  const avlLists = await Promise.all(avlPromises);
+  return { stops, avls: avlLists.flat() };
 };
 
 const vehicleJourneyResolvers: Resolvers = {

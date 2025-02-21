@@ -453,7 +453,6 @@ export type Journey = {
 export type JourneyResult = {
   __typename?: 'JourneyResult';
   avls: Array<AvlPoint>;
-  serviceJourneys: Array<Journey>;
   stops: Array<Stop>;
 };
 
@@ -1642,7 +1641,6 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
 
 export type JourneyResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyResult'] = ResolversParentTypes['JourneyResult']> = ResolversObject<{
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType>;
-  serviceJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

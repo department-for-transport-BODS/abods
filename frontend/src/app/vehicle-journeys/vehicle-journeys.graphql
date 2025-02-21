@@ -21,15 +21,6 @@ query journey($groupId: String!, $lineId: String!) {
       vehicleRef
       directionRef
     }
-    serviceJourneys {
-      groupId
-      startTime
-      serviceName
-      serviceNumber
-      operatorName
-      operatorNoc
-      directionRef
-    }
   }
 }
 
