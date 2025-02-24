@@ -733,12 +733,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    const serviceLinks: ServiceLinkType[] = await listServiceLinks(
-      results,
-      context.kysely,
-    );
-
-    return serviceLinks.reverse();
+    return listServiceLinks(results, context.kysely);
   };
 
 const corridorResovlers: Resolvers = {
