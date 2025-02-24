@@ -65,7 +65,7 @@ export const listServiceLinks = async (
       toStop: currentStop.stopId,
       distance: haversineDistance(previousStopPoint, currentStopPoint),
       routeValidity: RouteType.InvalidNoRoutePoints,
-      linkRoute: JSON.stringify([currentStopPoint, previousStopPoint]),
+      linkRoute: JSON.stringify([previousStopPoint, currentStopPoint]),
     });
   }
 
