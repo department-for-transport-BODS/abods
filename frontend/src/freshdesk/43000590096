@@ -32,7 +32,7 @@
     "created_at": "2025-02-10T11:36:00Z",
     "category_id": 43000371971,
     "folder_id": 43000590096,
-    "title": "What is Feed?",
+    "title": "What is a Feed?",
     "updated_at": "2025-02-17T13:07:00Z",
     "description": "<p><strong>BODS:</strong> A feed is a subscription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator.</p><p><strong>ABODS:</strong> A feed is a collection of location updates for all buses belonging to a NOC.",
     "description_text": "BODS: A feed is a subscription to a server that sends location updates for your buses. This server might include buses from different national operator codes (NOCs) that belong to the same parent operator. ABODS: A feed is a collection of location updates for all buses belonging to a NOC.",
