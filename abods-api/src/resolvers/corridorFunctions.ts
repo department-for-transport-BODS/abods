@@ -146,6 +146,9 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
 
     const stopList = args.stopList || [];
 
+    if (stopList.length === 0) {
+      throw Error("No stops passed to obtain distinct routes");
+    }
     stopList.push(""); // Push blank to add comma at the end
     const stopsPattern = stopList.join(",");
     const [routes, adminAreas] = await Promise.all([
