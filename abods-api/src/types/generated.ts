@@ -450,6 +450,12 @@ export type Journey = {
   startTime: Scalars['String']['output'];
 };
 
+export type JourneyResult = {
+  __typename?: 'JourneyResult';
+  avls: Array<AvlPoint>;
+  stops: Array<Stop>;
+};
+
 export enum LineDirection {
   All = 'All',
   Inbound = 'Inbound',
@@ -786,7 +792,6 @@ export type Query = {
   adminAreas?: Maybe<Array<AdminAreasType>>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
-  avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
@@ -794,12 +799,12 @@ export type Query = {
   findJourneys: Array<Journey>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
+  journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   roles?: Maybe<Array<RoleType>>;
-  route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
@@ -812,11 +817,6 @@ export type Query = {
 
 export type QueryAvlLineLevelStatusArgs = {
   filters?: InputMaybe<AvlFiltersInput>;
-};
-
-
-export type QueryAvlsArgs = {
-  groupId: Scalars['String']['input'];
 };
 
 
@@ -850,6 +850,12 @@ export type QueryInvitationArgs = {
 };
 
 
+export type QueryJourneyArgs = {
+  groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
+};
+
+
 export type QueryLinesArgs = {
   inputDate?: InputMaybe<Scalars['String']['input']>;
   operatorId: Scalars['String']['input'];
@@ -863,11 +869,6 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: InputMaybe<OperatorFilterInput>;
-};
-
-
-export type QueryRouteArgs = {
-  groupId: Scalars['String']['input'];
 };
 
 
@@ -1226,6 +1227,7 @@ export type ResolversTypes = ResolversObject<{
   InvitationResponseType: ResolverTypeWrapper<Partial<InvitationResponseType>>;
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
+  JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
   LineDirection: ResolverTypeWrapper<Partial<LineDirection>>;
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
@@ -1334,6 +1336,7 @@ export type ResolversParentTypes = ResolversObject<{
   InvitationResponseType: Partial<InvitationResponseType>;
   InvitationType: Partial<InvitationType>;
   Journey: Partial<Journey>;
+  JourneyResult: Partial<JourneyResult>;
   LineType: Partial<LineType>;
   LiveStatsType: Partial<LiveStatsType>;
   LocalityType: Partial<LocalityType>;
@@ -1636,6 +1639,12 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type JourneyResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyResult'] = ResolversParentTypes['JourneyResult']> = ResolversObject<{
+  avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType>;
+  stops?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LineTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LineType'] = ResolversParentTypes['LineType']> = ResolversObject<{
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1787,7 +1796,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   adminAreas?: Resolver<Maybe<Array<ResolversTypes['AdminAreasType']>>, ParentType, ContextType>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
-  avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType, RequireFields<QueryAvlsArgs, 'groupId'>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
@@ -1795,12 +1803,12 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
+  journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'operatorId'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
   roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
-  route?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType, RequireFields<QueryRouteArgs, 'groupId'>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<Maybe<ResolversTypes['StopAnalysisType']>>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
@@ -1994,6 +2002,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
   InvitationType?: InvitationTypeResolvers<ContextType>;
   Journey?: JourneyResolvers<ContextType>;
+  JourneyResult?: JourneyResultResolvers<ContextType>;
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
   LocalityType?: LocalityTypeResolvers<ContextType>;

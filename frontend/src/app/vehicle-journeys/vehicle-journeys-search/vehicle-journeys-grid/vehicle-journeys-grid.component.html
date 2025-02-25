@@ -24,7 +24,7 @@
           class="govuk-link govuk-body journey-search-grid__time"
           [routerLink]="['/vehicle-journeys', journey.groupId]"
           [queryParams]="{
-            startTime: journey.startTime,
+            date: date,
             operator: operatorId,
             service: serviceId,
             direction: journey.directionRef
