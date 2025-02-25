@@ -1,12 +1,17 @@
 import { sendDistributionMetric } from "datadog-lambda-js";
-import { assumeRole, getDashboardUrl, getQuicksighClient } from "../lib/aws.js";
-import { getOperatorsFromOrgId } from "../lib/otp.js";
+import {
+  assumeRole,
+  getDashboardUrl,
+  getQuicksighClient,
+  getSessionTags,
+} from "../lib/aws.js";
 import {
   AwsQuicksightUser,
   QueryResolvers,
   Resolvers,
 } from "../types/generated";
 import { requireUserSession } from "./helpers.js";
+import { getUserTypeDetails } from "../lib/operators.js";
 
 export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   _,
@@ -24,12 +29,21 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const awsCreds = await assumeRole();
   const quickSightClient = getQuicksighClient(awsCreds);
-  const orgOperators = await getOperatorsFromOrgId(user.orgId, context.db);
+  const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
-  const url = await getDashboardUrl(
-    orgOperators.map((op) => op.operatorref),
-    quickSightClient,
-  );
+  const ltaUsers = userDetails
+    .map((user) => user.lta_name)
+    .filter((lta_name) => lta_name !== null);
+
+  const orgUsers = userDetails
+    .map((user) => user.org_name)
+    .filter((org_name) => org_name !== null);
+
+  const isAdmin =
+    user.email?.includes("dft.co.uk") ||
+    userDetails.some((user) => user.is_superuser);
+  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
+  const url = await getDashboardUrl(quickSightClient, sessionTags);
 
   return {
     enabled: true,

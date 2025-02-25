@@ -2,6 +2,7 @@ import { STSClient, AssumeRoleCommand, Credentials } from "@aws-sdk/client-sts";
 import {
   QuickSightClient,
   GenerateEmbedUrlForAnonymousUserCommand,
+  SessionTag,
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
 
@@ -50,8 +51,8 @@ export const getQuicksighClient = (credentials: Credentials) => {
 };
 
 export const getDashboardUrl = async (
-  operatorRefs: string[],
   quickSightClient: QuickSightClient,
+  session_tags: SessionTag[],
 ) => {
   try {
     const command = new GenerateEmbedUrlForAnonymousUserCommand({
@@ -66,12 +67,7 @@ export const getDashboardUrl = async (
       AuthorizedResourceArns: [
         `arn:aws:quicksight:${region}:${quickSightAccountId}:dashboard/${dashboardId}`,
       ],
-      SessionTags: [
-        {
-          Key: "TXC:NOC",
-          Value: operatorRefs.join(","),
-        },
-      ],
+      SessionTags: session_tags,
     });
 
     const response = await quickSightClient.send(command);
@@ -80,4 +76,58 @@ export const getDashboardUrl = async (
     logger.error({ error }, "Error getting embedded url:");
     return undefined;
   }
+};
+
+export const getSessionTags = (
+  isAdmin: boolean,
+  ltaUsers: string[],
+  orgUsers: string[],
+) => {
+  if (isAdmin) {
+    return [
+      {
+        Key: "lta",
+        Value: "*",
+      },
+      {
+        Key: "org",
+        Value: "*",
+      },
+    ];
+  }
+
+  const sessionTags: SessionTag[] = [];
+  let ltaUsersString = "";
+  let ltaIndexCount = 0;
+  ltaUsers.map((lta) => {
+    const lta_name = lta + "," + ltaUsersString;
+    if (lta_name.length > 256) {
+      sessionTags.push({
+        Key: `lta${ltaIndexCount}`,
+        Value: ltaUsersString,
+      });
+      ltaUsersString = lta;
+      ltaIndexCount = ltaIndexCount + 1;
+    } else {
+      ltaUsersString = lta_name;
+    }
+  });
+
+  let orgUsersString = "";
+  let orgIndexCount = 0;
+  orgUsers.map((org) => {
+    const org_name = org + "," + orgUsersString;
+    if (org_name.length > 256) {
+      sessionTags.push({
+        Key: `org${orgIndexCount}`,
+        Value: orgUsersString,
+      });
+      orgUsersString = org;
+      orgIndexCount = orgIndexCount + 1;
+    } else {
+      orgUsersString = org_name;
+    }
+  });
+
+  return sessionTags;
 };

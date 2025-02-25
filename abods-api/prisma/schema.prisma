@@ -601,3 +601,14 @@ model transmodel_tracks {
   geometry          String    
   distance          Int
 }
+
+model organisation_organisation_admin_areas {
+  id                Int @id
+  organisation_id   Int
+  adminarea_id      Int
+}
+
+model ui_lta {
+  id                Int @id
+  name              String
+}
