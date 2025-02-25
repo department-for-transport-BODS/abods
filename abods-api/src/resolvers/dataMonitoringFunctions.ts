@@ -32,7 +32,8 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   const quickSightClient = getQuicksighClient(awsCreds);
   const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
-  logger.info("userDetails---", userDetails);
+  console.log("userDetails---", userDetails);
+  logger.info(`userDetails---${JSON.stringify(userDetails)}`);
   const ltaUsers = userDetails
     .map((user) => user.lta_name)
     .filter((lta_name) => lta_name !== null);
@@ -43,10 +44,11 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const isAdmin =
     user.email?.includes("dft.co.uk") ||
-    user.email?.includes("kpmg.co.uk") ||
-    userDetails.some((user) => user.is_superuser);
+    userDetails.some((user) => user.is_superuser === true);
+  console.log("isAdmin---", isAdmin);
   const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
-  logger.info("sessionTags---", sessionTags);
+  logger.info(`sessionTags--- ${JSON.stringify(sessionTags)}`);
+  console.log("sessionTags---", sessionTags);
   const url = await getDashboardUrl(quickSightClient, sessionTags);
 
   return {

@@ -51,9 +51,12 @@ export class ViewMonitorsComponent implements AfterViewInit {
 
       createEmbeddingContext()
         .then((context) => {
+          this.loading = true;
           context
             .embedDashboard(options)
-            .then(() => (this.loading = true))
+            .then(() => {
+              console.log("in then-----");
+            })
             .catch(() => {
               console.log("Error embedding dashboard.");
             });

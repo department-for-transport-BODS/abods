@@ -112,6 +112,12 @@ export const getSessionTags = (
       ltaUsersString = lta_name;
     }
   });
+  if (ltaUsersString) {
+    sessionTags.push({
+      Key: `lta${ltaIndexCount}`,
+      Value: ltaUsersString,
+    });
+  }
 
   let orgUsersString = "";
   let orgIndexCount = 0;
@@ -128,6 +134,12 @@ export const getSessionTags = (
       orgUsersString = org_name;
     }
   });
+  if (orgUsersString) {
+    sessionTags.push({
+      Key: `org${orgIndexCount}`,
+      Value: orgUsersString,
+    });
+  }
 
   return sessionTags;
 };
