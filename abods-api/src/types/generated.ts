@@ -412,7 +412,7 @@ export type HeadwayTimeSeriesType = {
   actualWaitTime: Scalars['Float']['output'];
   excessWaitTime: Scalars['Float']['output'];
   scheduledWaitTime: Scalars['Float']['output'];
-  ts: Scalars['Date']['output'];
+  ts: Scalars['String']['output'];
 };
 
 export type HistoricalStatsType = {
@@ -1606,7 +1606,7 @@ export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentT
   actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  ts?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  ts?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

@@ -3179,7 +3179,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Date",
+                "name": "String",
                 "ofType": null
               }
             },
