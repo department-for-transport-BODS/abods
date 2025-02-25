@@ -86,11 +86,7 @@ export const getSessionTags = (
   if (isAdmin) {
     return [
       {
-        Key: "lta",
-        Value: "*",
-      },
-      {
-        Key: "org",
+        Key: "org0",
         Value: "*",
       },
     ];
