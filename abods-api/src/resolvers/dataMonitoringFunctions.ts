@@ -44,6 +44,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const isAdmin =
     user.email?.includes("dft.co.uk") ||
+    user.email?.includes("kpmg.co.uk") ||
     userDetails.some((user) => user.is_superuser === true);
   console.log("isAdmin---", isAdmin);
   const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
