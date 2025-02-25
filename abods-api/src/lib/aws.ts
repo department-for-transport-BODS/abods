@@ -100,7 +100,7 @@ export const getSessionTags = (
   let ltaUsersString = "";
   let ltaIndexCount = 0;
   ltaUsers.map((lta) => {
-    const lta_name = lta + "," + ltaUsersString;
+    const lta_name = ltaUsersString ? lta : lta + "," + ltaUsersString;
     if (lta_name.length > 256) {
       sessionTags.push({
         Key: `lta${ltaIndexCount}`,
@@ -122,7 +122,7 @@ export const getSessionTags = (
   let orgUsersString = "";
   let orgIndexCount = 0;
   orgUsers.map((org) => {
-    const org_name = org + "," + orgUsersString;
+    const org_name = orgUsersString ? org : org + "," + orgUsersString;
     if (org_name.length > 256) {
       sessionTags.push({
         Key: `org${orgIndexCount}`,

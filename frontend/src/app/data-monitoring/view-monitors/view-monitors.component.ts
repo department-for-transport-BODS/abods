@@ -51,10 +51,10 @@ export class ViewMonitorsComponent implements AfterViewInit {
 
       createEmbeddingContext()
         .then((context) => {
-          this.loading = true;
           context
             .embedDashboard(options)
             .then(() => {
+              this.loading = false;
               console.log("in then-----");
             })
             .catch(() => {
