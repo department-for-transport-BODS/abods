@@ -53,11 +53,10 @@ export class ViewMonitorsComponent implements AfterViewInit {
   }
 
   async embedDashboard(embedUrl: string): Promise<void> {
-    const containerDiv = document.getElementById("dashboardContainer") ?? "";
     const context = await createEmbeddingContext();
     await context.embedDashboard({
       url: embedUrl,
-      container: containerDiv,
+      container: this.dashboardContainer.nativeElement,
       height: "700px",
       width: "100%",
     });
