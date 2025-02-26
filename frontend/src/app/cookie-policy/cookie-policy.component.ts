@@ -10,6 +10,7 @@ import { filter, map, Subject, takeUntil } from "rxjs";
 import { PageHeaderBannerService } from "../layout/page-header/page-header-banner.service";
 import { AnalyticsService } from "../shared/services/analytics.service";
 import { CookiePolicyService } from "../shared/services/cookie-policy.service";
+import { LoggedInService } from "../authentication/loggedIn.service";
 
 @Component({
   selector: "app-cookie-policy",
@@ -26,6 +27,7 @@ export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef,
+    public loggedInService: LoggedInService,
   ) {}
 
   private destroy$ = new Subject<void>();

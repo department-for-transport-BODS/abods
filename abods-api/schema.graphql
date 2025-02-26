@@ -23,8 +23,7 @@ type Query {
     start: DateTime!
     end: DateTime!
   ): [EventStatsType]
-  avls(groupId: String!): [AvlPoint!]!
-  route(groupId: String!): [Stop!]!
+  journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
@@ -577,6 +576,7 @@ type PunctualityTotalsType {
   late: Int!
   onTime: Int!
   scheduled: Int!
+  incomplete: String! # Needs to be a JSON serialised mapping of number -> number
 }
 
 type PunctualityTimeOfDayType {
@@ -721,6 +721,11 @@ input ServicePerformanceInputType {
   order: RankingOrder!
 }
 
+type JourneyResult {
+  stops: [Stop!]!
+  avls: [AvlPoint!]!
+}
+
 type AvlPoint {
   recordedAtTimeUtc: String!
   latitude: Float!
@@ -741,6 +746,7 @@ type Stop {
   isTimingPoint: Boolean!
   otp: OtpEnum
   directionRef: String!
+  incompleteReason: Int!
 }
 
 enum OtpEnum {

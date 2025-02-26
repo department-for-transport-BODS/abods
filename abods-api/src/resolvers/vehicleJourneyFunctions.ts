@@ -1,13 +1,15 @@
 import { getFormattedDate, userSelectedDateAsUtc } from "../lib/dayjs.js";
 import {
-  AvlPoint,
   Journey,
+  JourneyResult,
   OtpEnum,
   QueryResolvers,
   Resolvers,
-  Stop,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
+import dayjs from "dayjs";
+import { GraphQLError } from "graphql";
+import { PrismaClient } from "@prisma/client";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -57,61 +59,64 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     );
 };
 
-export const getAvls: QueryResolvers["avls"] = async (
-  _,
-  args,
-  context,
-): Promise<AvlPoint[]> => {
-  await requireUserSession(context);
-
-  const getAvlsForGroupId = (groupId: string) =>
-    context.db.siriVMPositions
-      .findMany({
-        where: { group_id: groupId },
-        select: {
-          latitude: true,
-          longitude: true,
-          recorded_at_time: true,
-          vehicle_ref: true,
-          direction_ref: true,
-        },
-      })
-      .then((j) =>
-        j.map((s) => ({
-          latitude: s.latitude ?? 0,
-          longitude: s.longitude ?? 0,
-          recordedAtTimeUtc: s.recorded_at_time.toISOString(),
-          vehicleRef: s.vehicle_ref,
-          directionRef: s.direction_ref ?? "unknown",
-        })),
-      );
-
-  // If we have re-run timetable generation after changing the group id format, we will get no results just querying with the group id from the timetable, so check for old formats too
-  const groupIds = [
-    ...new Set([
-      args.groupId,
-      args.groupId.toUpperCase(),
-      args.groupId.toUpperCase().replace("|", ""),
-    ]),
-  ];
-
-  for (const groupId of groupIds) {
-    const avls = await getAvlsForGroupId(groupId);
-    if (avls.length > 0) return avls;
-  }
-  return [];
-};
-
-export const getRoute: QueryResolvers["route"] = async (
-  _,
-  args,
-  context,
-): Promise<Stop[]> => {
-  await requireUserSession(context);
-
-  return context.db.timetable
+const getAvlData = (
+  db: PrismaClient,
+  dateString: string,
+  newGroupId: string,
+  minRange: dayjs.Dayjs,
+  maxRange: dayjs.Dayjs,
+) =>
+  db.siriVMPositions
     .findMany({
-      where: { group_id: args.groupId },
+      where: {
+        date_of_journey: new Date(dateString),
+        group_id: newGroupId,
+        recorded_at_time: {
+          gte: minRange.toDate(),
+          lte: maxRange.toDate(),
+        },
+      },
+      select: {
+        latitude: true,
+        longitude: true,
+        recorded_at_time: true,
+        vehicle_ref: true,
+        direction_ref: true,
+      },
+    })
+    .then((j) =>
+      j.map((s) => ({
+        latitude: s.latitude ?? 0,
+        longitude: s.longitude ?? 0,
+        recordedAtTimeUtc: s.recorded_at_time.toISOString(),
+        vehicleRef: s.vehicle_ref,
+        directionRef: s.direction_ref ?? "unknown",
+      })),
+    );
+
+export const getJourney: QueryResolvers["journey"] = async (
+  _,
+  args,
+  context,
+): Promise<JourneyResult> => {
+  await requireUserSession(context);
+
+  if (!args.groupId.includes("|")) {
+    throw new GraphQLError("Wrong group id format", {
+      extensions: { code: "BAD_USER_INPUT", http: { status: 400 } },
+    });
+  }
+  const dateOfJourneyString = args.groupId.slice(
+    args.groupId.lastIndexOf("|") + 1,
+  );
+  const groupIdPrefix = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
+
+  const stops = await context.db.timetable
+    .findMany({
+      where: {
+        date_of_journey: new Date(dateOfJourneyString),
+        group_id: args.groupId,
+      },
       select: {
         stop_latitude: true,
         stop_longitude: true,
@@ -124,31 +129,73 @@ export const getRoute: QueryResolvers["route"] = async (
         otp_state: true,
         timestamp_after_estimate: true,
         direction: true,
+        incomplete_reason: true,
       },
     })
     .then((r) =>
-      r.map((s) => ({
-        latitude: s.stop_latitude ?? 0,
-        longitude: s.stop_longitude ?? 0,
-        actualDepartureUtc: s.actual_departure_time?.toISOString(),
-        estimatedDepartureUtc: s.timestamp_after_estimate?.toISOString(),
-        scheduledDepartureUtc: (
-          s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
-        ).toISOString(),
-        stopIndex: s.stop_index,
-        stopId: s.stop_id,
-        stopName: s.common_name ?? "Unknown",
-        isTimingPoint: s.is_timing_point ?? false,
-        otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
-        directionRef: s.direction ?? "unknown",
-      })),
+      r
+        .map((s) => ({
+          latitude: s.stop_latitude ?? 0,
+          longitude: s.stop_longitude ?? 0,
+          actualDepartureUtc: s.actual_departure_time?.toISOString(),
+          estimatedDepartureUtc: s.timestamp_after_estimate?.toISOString(),
+          scheduledDepartureUtc: (
+            s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
+          ).toISOString(),
+          stopIndex: s.stop_index,
+          stopId: s.stop_id,
+          stopName: s.common_name ?? "Unknown",
+          isTimingPoint: s.is_timing_point ?? false,
+          otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
+          directionRef: s.direction ?? "unknown",
+          incompleteReason: s.incomplete_reason ?? 0,
+        }))
+        .sort((a, b) => {
+          return a.scheduledDepartureUtc < b.scheduledDepartureUtc
+            ? -1
+            : a.scheduledDepartureUtc > b.scheduledDepartureUtc
+              ? 1
+              : 0;
+        }),
     );
+
+  if (stops.length < 1) {
+    throw new GraphQLError("Journey not found", {
+      extensions: { code: "NOT_FOUND", http: { status: 404 } },
+    });
+  }
+
+  // Even though we can only match avl data within 2 hours of the timetable start/end,
+  // occasionally there is some data outside that range, so it's useful to display that as well,
+  // but avoid fetching data for the same journey a day before/after
+  const avlRangeBufferInHours = 4;
+  const minRange = dayjs(stops[0].scheduledDepartureUtc).subtract(
+    avlRangeBufferInHours,
+    "hours",
+  );
+  const maxRange = dayjs(stops.at(-1)!.scheduledDepartureUtc).add(
+    avlRangeBufferInHours,
+    "hours",
+  );
+
+  const avlPromises = [];
+  let currentDay = minRange.startOf("day");
+  while (currentDay.isSameOrBefore(maxRange.startOf("day"))) {
+    const dateString = currentDay.toISOString().substring(0, 10);
+    // Some of the avl data has the wrong group id when running overnight, so we construct a new one
+    const newGroupId = groupIdPrefix + "|" + dateString;
+    avlPromises.push(
+      getAvlData(context.db, dateString, newGroupId, minRange, maxRange),
+    );
+    currentDay = currentDay.add(1, "day");
+  }
+  const avlLists = await Promise.all(avlPromises);
+  return { stops, avls: avlLists.flat() };
 };
 
 const vehicleJourneyResolvers: Resolvers = {
   Query: {
-    avls: getAvls,
-    route: getRoute,
+    journey: getJourney,
     findJourneys: findJourneys,
   },
 };

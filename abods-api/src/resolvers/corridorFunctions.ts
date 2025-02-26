@@ -6,7 +6,6 @@ import {
   deleteCorridorDb,
   deleteCorridorStops,
   distinctRoutes,
-  filteredJourneys,
   getCorridor,
   getCorridorList,
   getJourneyDeparture,
@@ -147,6 +146,9 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
 
     const stopList = args.stopList || [];
 
+    if (stopList.length === 0) {
+      throw Error("No stops passed to obtain distinct routes");
+    }
     stopList.push(""); // Push blank to add comma at the end
     const stopsPattern = stopList.join(",");
     const [routes, adminAreas] = await Promise.all([
@@ -343,9 +345,22 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
 
 interface StatsCache {
   inputs: CorridorStatsInputType;
-  journeys: Map<string, Timetable[]>;
+  journeys: Map<string, TimetableType[]>;
 }
 
+export type TimetableType = Pick<
+  Timetable,
+  | "stop_index"
+  | "actual_departure_time"
+  | "timestamp_after_estimate"
+  | "expected_departure_time"
+  | "operator_noc"
+  | "service_code"
+  | "line_name"
+  | "date_of_journey"
+  | "vehiclejourney_id"
+  | "group_id"
+>;
 export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,
   args,
@@ -360,21 +375,42 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const results: Timetable[] = await context.db.timetable.findMany({
-    where: {
-      stop_id: {
-        in: stopList.map(Number),
-      },
-      date_of_journey: {
-        gte: userSelectedDateAsUtc(fromTimestamp).toDate(),
-        lt: userSelectedDateAsUtc(toTimestamp).toDate(),
-      },
-    },
-  });
+  const stopsArray = stopList.map(Number);
 
-  const journeyMap = new Map<string, Timetable[]>();
+  const timetables = context.kysely
+    .selectFrom("Timetable")
+    .where(
+      "date_of_journey",
+      ">=",
+      userSelectedDateAsUtc(fromTimestamp).toDate(),
+    )
+    .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
+    .where("stop_id", "in", stopsArray);
+
+  const groupIdsWithCorrectStopCount = timetables
+    .groupBy(["group_id"])
+    .having(context.kysely.fn.count("stop_id"), "=", stopsArray.length)
+    .select("group_id");
+
+  const results: TimetableType[] = await timetables
+    .where("group_id", "in", groupIdsWithCorrectStopCount)
+    .select([
+      "stop_index",
+      "actual_departure_time",
+      "timestamp_after_estimate",
+      "expected_departure_time",
+      "operator_noc",
+      "service_code",
+      "line_name",
+      "vehiclejourney_id",
+      "group_id",
+      "date_of_journey",
+    ])
+    .execute();
+
+  const journeyMap = new Map<string, TimetableType[]>();
   let mapKey = "";
-  let existingJourneys: Timetable[] = [];
+  let existingJourneys: TimetableType[] = [];
   results.map((journey) => {
     mapKey = `${journey.group_id}${journey.vehiclejourney_id}`;
     existingJourneys = journeyMap.get(mapKey) || [];
@@ -382,10 +418,8 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     journeyMap.set(mapKey, existingJourneys);
   });
 
-  const journeys = filteredJourneys(stopList?.length ?? 0, journeyMap);
-
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
-  return { inputs: args.inputs, journeys } as CorridorStatsType;
+  return { inputs: args.inputs, journeys: journeyMap } as CorridorStatsType;
 };
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
@@ -484,7 +518,7 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
   };
 
 const getJourneyStats = (
-  journeys: Map<string, Timetable[]>,
+  journeys: Map<string, TimetableType[]>,
   inputType: CorridorJourneyStatsOption,
   matchType: MatchType,
 ) => {
@@ -702,12 +736,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    const serviceLinks: ServiceLinkType[] = await listServiceLinks(
-      results,
-      context.kysely,
-    );
-
-    return serviceLinks.reverse();
+    return listServiceLinks(results, context.kysely);
   };
 
 const corridorResovlers: Resolvers = {
