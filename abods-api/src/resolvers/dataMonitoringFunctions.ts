@@ -1,6 +1,7 @@
 import { sendDistributionMetric } from "datadog-lambda-js";
 import {
   assumeRole,
+  getDashboardId,
   getDashboardUrl,
   getQuicksighClient,
   getSessionTags,
@@ -32,8 +33,6 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   const quickSightClient = getQuicksighClient(awsCreds);
   const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
-  console.log("userDetails---", userDetails);
-  logger.info(`userDetails---${JSON.stringify(userDetails)}`);
   const ltaUsers = userDetails
     .map((user) => user.lta_name)
     .filter((lta_name) => lta_name !== null);
@@ -43,15 +42,18 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .filter((org_name) => org_name !== null);
 
   const isAdmin =
-    user.email?.includes("dft.co.uk") ||
-    user.email?.includes("kpmg.co.uk") ||
+    user.email?.includes("@dft.co.uk") ||
     userDetails.some((user) => user.is_superuser === true);
-  console.log("isAdmin---", isAdmin);
-  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
-  logger.info(`sessionTags--- ${JSON.stringify(sessionTags)}`);
-  console.log("sessionTags---", sessionTags);
-  const url = await getDashboardUrl(quickSightClient, sessionTags);
 
+  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
+  const dashboardId = getDashboardId(isAdmin, ltaUsers);
+
+  if (!dashboardId) {
+    throw Error("No quicksight dashboard id set in environment variables");
+  }
+  const url = await getDashboardUrl(quickSightClient, sessionTags, dashboardId);
+
+  logger.info("Dashboard enabled for user");
   return {
     enabled: true,
     url: url,

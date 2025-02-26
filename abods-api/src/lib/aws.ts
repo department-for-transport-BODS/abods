@@ -6,11 +6,12 @@ import {
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
 
-const region = "eu-west-2";
-const targetRoleArn =
-  "arn:aws:iam::228266753808:role/abods-quicksight-assume-role";
-const quickSightAccountId = "228266753808";
-const dashboardId = "afcf9f5e-ae09-4fda-87dd-7e9dec7943e8";
+const region = process.env.AWS_REGION;
+const targetRoleArn = process.env.QUICKSIGHT_ASSUME_ROLE_ARN;
+const quickSightAccountId = process.env.QUICKSIGHT_AWS_ACCOUNT_ID;
+const adminDashboardId = process.env.QUICKSIGHT_ADMIN_DASHBOARD_ID;
+const ltaDashboardId = process.env.QUICKSIGHT_LTA_DASHBOARD_ID;
+const operatorDashboardId = process.env.QUICKSIGHT_OPERATOR_DASHBOARD_ID;
 
 export const assumeRole = async (): Promise<Credentials> => {
   try {
@@ -53,6 +54,7 @@ export const getQuicksighClient = (credentials: Credentials) => {
 export const getDashboardUrl = async (
   quickSightClient: QuickSightClient,
   session_tags: SessionTag[],
+  dashboardId: string,
 ) => {
   try {
     const command = new GenerateEmbedUrlForAnonymousUserCommand({
@@ -96,7 +98,7 @@ export const getSessionTags = (
   let ltaUsersString = "";
   let ltaIndexCount = 0;
   ltaUsers.map((lta) => {
-    const lta_name = ltaUsersString ? lta : lta + "," + ltaUsersString;
+    const lta_name = ltaUsersString ? lta + "," + ltaUsersString : lta;
     if (lta_name.length > 256) {
       sessionTags.push({
         Key: `lta${ltaIndexCount}`,
@@ -115,10 +117,14 @@ export const getSessionTags = (
     });
   }
 
+  if (ltaIndexCount > 6) {
+    throw Error("Too many LTAs mapped to the user");
+  }
+
   let orgUsersString = "";
   let orgIndexCount = 0;
   orgUsers.map((org) => {
-    const org_name = orgUsersString ? org : org + "," + orgUsersString;
+    const org_name = orgUsersString ? org + "," + orgUsersString : org;
     if (org_name.length > 256) {
       sessionTags.push({
         Key: `org${orgIndexCount}`,
@@ -137,5 +143,21 @@ export const getSessionTags = (
     });
   }
 
+  if (orgIndexCount > 6) {
+    throw Error("Too many orgs mapped to the user");
+  }
+
   return sessionTags;
+};
+
+export const getDashboardId = (isAdmin: boolean, ltaUsers: string[]) => {
+  if (isAdmin) {
+    return adminDashboardId;
+  }
+
+  if (ltaUsers.length > 0) {
+    return ltaDashboardId;
+  }
+
+  return operatorDashboardId;
 };
