@@ -29,7 +29,7 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
     )
     .where("buo.user_id", "=", user_id)
     .select((eb) => [
-      eb.ref("bu.is_superuser").as("is_superuser"),
+      eb.ref("bo.is_abods_global_viewer").as("is_superuser"),
       eb.ref("ul.name").as("lta_name"),
       eb.ref("bo.name").as("org_name"),
     ])
