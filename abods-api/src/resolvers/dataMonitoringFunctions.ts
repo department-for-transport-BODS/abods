@@ -41,9 +41,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .map((user) => user.org_name)
     .filter((org_name) => org_name !== null);
 
-  const isAdmin =
-    user.email?.includes("@dft.co.uk") ||
-    userDetails.some((user) => user.is_superuser === true);
+  const isAdmin = userDetails.some((user) => user.is_superuser === true);
 
   const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
   const dashboardId = getDashboardId(isAdmin, ltaUsers);
