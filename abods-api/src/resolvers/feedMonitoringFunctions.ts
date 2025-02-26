@@ -1,4 +1,4 @@
-import { getDate, getFormattedDate } from "../lib/dayjs.js";
+import { getFormattedDate } from "../lib/dayjs.js";
 import {
   EventResponse,
   EventStatsType,
@@ -20,12 +20,13 @@ import {
 } from "../lib/feedMonitoring.js";
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
+import dayjs from "dayjs";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
     const eventStats: EventStatsType[] = [];
     // Get data for the previous 90 days before today
-    const currentTime = getDate();
+    const currentTime = dayjs();
     let startdate = currentTime.subtract(90, "day");
 
     while (startdate.isBefore(currentTime)) {
@@ -162,7 +163,7 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
     const user = await requireUserSession(context);
-    const finalEndTime = getDate().startOf("minute");
+    const finalEndTime = dayjs().startOf("minute");
     const promises: Promise<VehicleStatsType>[] = [];
     for (let offset = 0; offset < 20; offset++) {
       const endTime = finalEndTime.subtract(offset, "minute");
@@ -208,7 +209,7 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
   context,
 ): Promise<DashboardVehicles[]> => {
   const user = await requireUserSession(context);
-  const endTime = getDate().startOf("minute");
+  const endTime = dayjs().startOf("minute");
   return getVehicleCounts(
     context.kysely,
     user,
