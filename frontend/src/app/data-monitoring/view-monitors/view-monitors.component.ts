@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from "@angular/core";
 import { createEmbeddingContext } from "amazon-quicksight-embedding-sdk";
-import { DataMonitoringService } from "../data-monitoring.service";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
+import { DashboadEmbeddedUrlGQL } from "../../../generated/graphql";
+import { mergeMap } from "rxjs";
 
 @Component({
   selector: "app-view-monitors",
@@ -11,58 +12,54 @@ import { FormErrors } from "../../shared/gds/error-summary/error-summary.compone
 export class ViewMonitorsComponent implements AfterViewInit {
   @ViewChild("dashboardContainer", { static: false })
   dashboardContainer!: ElementRef;
-
   errors: FormErrors[] = [];
-
-  embedUrl = "";
   loading = false;
 
-  constructor(private service: DataMonitoringService) {}
+  constructor(private embeddedUrlQuery: DashboadEmbeddedUrlGQL) {}
   ngAfterViewInit(): void {
     this.loading = true;
-    this.service.embeddedUrl().subscribe((user) => {
-      if (user.enabled) {
-        this.embedDashboard(user.url);
-      } else {
+    this.embeddedUrlQuery
+      .fetch({})
+      .pipe(
+        mergeMap(async (response) => {
+          if (!response.data.embeddedUrl.enabled) {
+            return false;
+          }
+          if (!response.data.embeddedUrl.url) {
+            return false;
+          }
+          try {
+            await this.embedDashboard(response.data.embeddedUrl.url);
+            return true;
+          } catch {
+            return false;
+          }
+        }),
+      )
+      .subscribe((success) => {
         this.loading = false;
-        if (this.errors.length === 0) {
-          this.errors.push({
-            error: "Unable to load dashboad. Please contact admin",
-            label: "enable-dashboard-button",
-          });
+        if (!success) {
+          console.log("Error embedding dashboard");
+          this.errors = [
+            {
+              error: "Unable to load dashboad. Please contact admin",
+              label: "enable-dashboard-button",
+            },
+          ];
+          return;
         }
-      }
-    });
+        this.errors = [];
+      });
   }
 
-  embedDashboard(embedUrl: string | undefined | null): void {
+  async embedDashboard(embedUrl: string): Promise<void> {
     const containerDiv = document.getElementById("dashboardContainer") ?? "";
-    if (embedUrl) {
-      const options = {
-        url: embedUrl,
-        container: containerDiv,
-        scrolling: "no",
-        height: "700px",
-        width: "100%",
-        locale: "en-US",
-        footerPaddingEnabled: true,
-        printEnabled: true,
-      };
-
-      createEmbeddingContext()
-        .then((context) => {
-          context
-            .embedDashboard(options)
-            .then(() => {
-              this.loading = false;
-            })
-            .catch(() => {
-              console.log("Error embedding dashboard.");
-            });
-        })
-        .catch(() => {
-          console.log("Error creating embedding context");
-        });
-    }
+    const context = await createEmbeddingContext();
+    await context.embedDashboard({
+      url: embedUrl,
+      container: containerDiv,
+      height: "700px",
+      width: "100%",
+    });
   }
 }
