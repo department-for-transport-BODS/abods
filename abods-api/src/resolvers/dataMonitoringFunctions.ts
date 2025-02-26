@@ -1,11 +1,5 @@
 import { sendDistributionMetric } from "datadog-lambda-js";
-import {
-  assumeRole,
-  getDashboardId,
-  getDashboardUrl,
-  getQuicksighClient,
-  getSessionTags,
-} from "../lib/aws.js";
+import { getDashboardId, getDashboardUrl, getSessionTags } from "../lib/aws.js";
 import {
   AwsQuicksightUser,
   QueryResolvers,
@@ -29,8 +23,6 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     `user:${user.id}`,
   );
 
-  const awsCreds = await assumeRole();
-  const quickSightClient = getQuicksighClient(awsCreds);
   const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
   const ltaUsers = userDetails
@@ -42,14 +34,14 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .filter((org_name) => org_name !== null);
 
   const isAdmin = userDetails.some((user) => user.is_superuser === true);
-
-  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
   const dashboardId = getDashboardId(isAdmin, ltaUsers);
 
   if (!dashboardId) {
     throw Error("No quicksight dashboard id set in environment variables");
   }
-  const url = await getDashboardUrl(quickSightClient, sessionTags, dashboardId);
+
+  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
+  const url = await getDashboardUrl(sessionTags, dashboardId);
 
   logger.info("Dashboard enabled for user");
   return {

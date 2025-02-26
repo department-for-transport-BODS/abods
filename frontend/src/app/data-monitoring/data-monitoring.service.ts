@@ -11,7 +11,7 @@ import { map, Observable } from "rxjs";
 export class DataMonitoringService {
   constructor(private embeddedUrlQuery: DashboadEmbeddedUrlGQL) {}
 
-  get embeddedUrl(): Observable<AwsQuicksightUser> {
+  embeddedUrl(): Observable<AwsQuicksightUser> {
     return this.embeddedUrlQuery
       .fetch({})
       .pipe(map(({ data }) => data.embeddedUrl));

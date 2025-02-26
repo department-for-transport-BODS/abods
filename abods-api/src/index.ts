@@ -55,10 +55,6 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
-      res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; frame-ancestors 'self' https://*.quicksight.aws.amazon.com; connect-src 'self' https://*.quicksight.aws.amazon.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;",
-      );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { event } = getCurrentInvoke();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access

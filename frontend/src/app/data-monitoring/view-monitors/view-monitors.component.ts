@@ -20,7 +20,7 @@ export class ViewMonitorsComponent implements AfterViewInit {
   constructor(private service: DataMonitoringService) {}
   ngAfterViewInit(): void {
     this.loading = true;
-    this.service.embeddedUrl.subscribe((user) => {
+    this.service.embeddedUrl().subscribe((user) => {
       if (user.enabled) {
         this.embedDashboard(user.url);
       } else {

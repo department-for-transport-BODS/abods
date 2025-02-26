@@ -82,10 +82,10 @@ function maxEnvironment(current: string, max: Environment): boolean {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function flags(currentEnv: string, maxEnv: Environment) {
+function flags(currentEnv: string) {
   // TODO: get from API
   return {
-    dataMonitoring: maxEnvironment(currentEnv, maxEnv),
+    dataMonitoring: maxEnvironment(currentEnv, "test"),
   } as const;
 }
 
@@ -108,8 +108,8 @@ export class ConfigService {
 
   constructor(private http: HttpClient) {}
 
-  flag(key: keyof ReturnType<typeof flags>, maxEnv: Environment): boolean {
-    return flags(this.envName, maxEnv)[key];
+  flag(key: keyof ReturnType<typeof flags>): boolean {
+    return flags(this.envName)[key];
   }
 
   get apiUrl(): string {

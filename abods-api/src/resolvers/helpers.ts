@@ -56,8 +56,6 @@ export const requireUserSession = async (context: RequestContext) => {
     select: {
       userOrganisations: { select: { organisation_id: true } },
       is_active: true,
-      username: true,
-      email: true,
     },
   });
 
@@ -79,8 +77,6 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
     orgId: orgId,
-    username: bodsUser.username,
-    email: bodsUser.email,
   };
 
   logger.debug({ sessionUser }, "Session user returned");

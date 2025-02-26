@@ -52,10 +52,7 @@
             >Corridors
           </a>
         </li>
-        <li
-          class="nav__item"
-          *ngIf="configService.flag('dataMonitoring', 'test')"
-        >
+        <li class="nav__item" *ngIf="configService.flag('dataMonitoring')">
           <a
             class="nav__link"
             [routerLink]="['/data-monitoring']"

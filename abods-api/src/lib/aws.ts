@@ -52,11 +52,13 @@ export const getQuicksighClient = (credentials: Credentials) => {
 };
 
 export const getDashboardUrl = async (
-  quickSightClient: QuickSightClient,
   session_tags: SessionTag[],
   dashboardId: string,
 ) => {
   try {
+    const awsCreds = await assumeRole();
+    const quickSightClient = getQuicksighClient(awsCreds);
+
     const command = new GenerateEmbedUrlForAnonymousUserCommand({
       AwsAccountId: quickSightAccountId,
       Namespace: "default",
