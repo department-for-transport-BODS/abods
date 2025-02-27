@@ -60,7 +60,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
       }),
       this.authService.authenticatedUser$.subscribe((user) => {
         this.authenticatedUser = user;
-        if (user?.roles?.some(({ name }) => name === "Administrator")) {
+        if (user?.isAdmin) {
           this.alertForm.get("sendToId")?.enable();
         }
       }),

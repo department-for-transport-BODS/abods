@@ -424,7 +424,6 @@ export type HistoricalStatsType = {
 export type InvitationInput = {
   email: Scalars['String']['input'];
   organisation: OrganisationReferenceInput;
-  role: RoleReferenceInput;
 };
 
 export type InvitationResponseType = {
@@ -804,7 +803,6 @@ export type Query = {
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
-  roles?: Maybe<Array<RoleType>>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
@@ -897,25 +895,9 @@ export enum RankingOrder {
   Descending = 'descending'
 }
 
-export type RoleReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type RoleType = {
-  __typename?: 'RoleType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  scope: ScopeEnum;
-};
-
 export enum RouteType {
   InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
   Valid = 'VALID'
-}
-
-export enum ScopeEnum {
-  Organisation = 'organisation',
-  System = 'system'
 }
 
 export type ServiceInfoType = {
@@ -1075,16 +1057,15 @@ export type UserType = {
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
+  isAdmin: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   organisation?: Maybe<OrganisationType>;
-  roles?: Maybe<Array<RoleType>>;
   username: Scalars['String']['output'];
 };
 
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1255,10 +1236,7 @@ export type ResolversTypes = ResolversObject<{
   PunctualityTotalsType: ResolverTypeWrapper<Partial<PunctualityTotalsType>>;
   Query: ResolverTypeWrapper<{}>;
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
-  RoleReferenceInput: ResolverTypeWrapper<Partial<RoleReferenceInput>>;
-  RoleType: ResolverTypeWrapper<Partial<RoleType>>;
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
-  ScopeEnum: ResolverTypeWrapper<Partial<ScopeEnum>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
   ServicePatternType: ResolverTypeWrapper<Partial<ServicePatternType>>;
@@ -1360,8 +1338,6 @@ export type ResolversParentTypes = ResolversObject<{
   PunctualityTimeSeriesType: Partial<PunctualityTimeSeriesType>;
   PunctualityTotalsType: Partial<PunctualityTotalsType>;
   Query: {};
-  RoleReferenceInput: Partial<RoleReferenceInput>;
-  RoleType: Partial<RoleType>;
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
   ServicePatternType: Partial<ServicePatternType>;
@@ -1808,7 +1784,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<Maybe<ResolversTypes['StopAnalysisType']>>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
@@ -1816,13 +1791,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
-}>;
-
-export type RoleTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['RoleType'] = ResolversParentTypes['RoleType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  scope?: Resolver<ResolversTypes['ScopeEnum'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceInfoType'] = ResolversParentTypes['ServiceInfoType']> = ResolversObject<{
@@ -1946,9 +1914,9 @@ export type UserTypeResolvers<ContextType = RequestContext, ParentType extends R
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isAdmin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   organisation?: Resolver<Maybe<ResolversTypes['OrganisationType']>, ParentType, ContextType>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -2021,7 +1989,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   PunctualityTimeSeriesType?: PunctualityTimeSeriesTypeResolvers<ContextType>;
   PunctualityTotalsType?: PunctualityTotalsTypeResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  RoleType?: RoleTypeResolvers<ContextType>;
   ServiceInfoType?: ServiceInfoTypeResolvers<ContextType>;
   ServiceLinkType?: ServiceLinkTypeResolvers<ContextType>;
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;

@@ -19,9 +19,6 @@ export class UserAccountComponent {
   get authenticatedUserIsAdmin(): boolean {
     return this.authUserService.authenticatedUserIsAdmin;
   }
-  get authenticatedUserIsOrgUser(): boolean {
-    return this.authUserService.authenticatedUserIsOrgUser;
-  }
 
   logout(event: Event) {
     event.preventDefault();

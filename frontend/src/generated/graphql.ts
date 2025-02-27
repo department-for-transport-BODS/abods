@@ -424,7 +424,6 @@ export type HistoricalStatsType = {
 export type InvitationInput = {
   email: Scalars['String']['input'];
   organisation: OrganisationReferenceInput;
-  role: RoleReferenceInput;
 };
 
 export type InvitationResponseType = {
@@ -804,7 +803,6 @@ export type Query = {
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
-  roles?: Maybe<Array<RoleType>>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
@@ -897,25 +895,9 @@ export enum RankingOrder {
   Descending = 'descending'
 }
 
-export type RoleReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type RoleType = {
-  __typename?: 'RoleType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  scope: ScopeEnum;
-};
-
 export enum RouteType {
   InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
   Valid = 'VALID'
-}
-
-export enum ScopeEnum {
-  Organisation = 'organisation',
-  System = 'system'
 }
 
 export type ServiceInfoType = {
@@ -1075,16 +1057,15 @@ export type UserType = {
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
+  isAdmin: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   organisation?: Maybe<OrganisationType>;
-  roles?: Maybe<Array<RoleType>>;
   username: Scalars['String']['output'];
 };
 
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1116,7 +1097,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1366,21 +1347,14 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 
 export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servicePatterns: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, stops: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }>, serviceLinks: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null }> }> };
 
-export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null };
-
-export type RoleFragment = { __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum };
+export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null };
 
 export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
 
 export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null }> | null };
-
-export type ListRolesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListRolesQuery = { __typename?: 'Query', roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null };
+export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null }> | null };
 
 export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1398,11 +1372,10 @@ export type EditUserMutationVariables = Exact<{
   username: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role: Scalars['String']['input'];
 }>;
 
 
-export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null, roles?: Array<{ __typename?: 'RoleType', id: string, name: string, scope: ScopeEnum }> | null } | null } };
+export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null } };
 
 export type RemoveUserMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -1414,7 +1387,6 @@ export type RemoveUserMutation = { __typename?: 'Mutation', deleteUser: { __type
 export type InviteUserMutationVariables = Exact<{
   email: Scalars['String']['input'];
   organisationId: Scalars['String']['input'];
-  roleId: Scalars['String']['input'];
 }>;
 
 
@@ -1610,13 +1582,6 @@ export const OperatorFeedHistoryFragmentDoc = gql`
   }
 }
     ${VehicleStatFragmentDoc}`;
-export const RoleFragmentDoc = gql`
-    fragment Role on RoleType {
-  id
-  name
-  scope
-}
-    `;
 export const UserFragmentDoc = gql`
     fragment User on UserType {
   id
@@ -1624,15 +1589,13 @@ export const UserFragmentDoc = gql`
   username
   firstName
   lastName
+  isAdmin
   organisation {
     id
     name
   }
-  roles {
-    ...Role
-  }
 }
-    ${RoleFragmentDoc}`;
+    `;
 export const AlertFragmentDoc = gql`
     fragment Alert on AlertType {
   alertId
@@ -2563,24 +2526,6 @@ export const ListUsersDocument = gql`
       super(apollo);
     }
   }
-export const ListRolesDocument = gql`
-    query listRoles {
-  roles {
-    ...Role
-  }
-}
-    ${RoleFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ListRolesGQL extends Apollo.Query<ListRolesQuery, ListRolesQueryVariables> {
-    document = ListRolesDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
 export const ListUserAlertsDocument = gql`
     query listUserAlerts {
   userAlerts {
@@ -2618,10 +2563,10 @@ export const FetchUserAlertDocument = gql`
     }
   }
 export const EditUserDocument = gql`
-    mutation editUser($username: String!, $firstName: String!, $lastName: String!, $role: String!) {
+    mutation editUser($username: String!, $firstName: String!, $lastName: String!) {
   updateUser(
     username: $username
-    payload: {firstName: $firstName, lastName: $lastName, role: {id: $role}}
+    payload: {firstName: $firstName, lastName: $lastName}
   ) {
     error
     user {
@@ -2661,10 +2606,8 @@ export const RemoveUserDocument = gql`
     }
   }
 export const InviteUserDocument = gql`
-    mutation inviteUser($email: String!, $organisationId: String!, $roleId: String!) {
-  inviteUser(
-    payload: {email: $email, organisation: {id: $organisationId}, role: {id: $roleId}}
-  ) {
+    mutation inviteUser($email: String!, $organisationId: String!) {
+  inviteUser(payload: {email: $email, organisation: {id: $organisationId}}) {
     invitation {
       email
       accepted

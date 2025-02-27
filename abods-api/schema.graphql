@@ -6,7 +6,6 @@ type Query {
   user: UserType
   users: [UserType!]
   apiInfo: ApiInfoType
-  roles: [RoleType!]
   userAlerts: [AlertType!]
   userAlert(alertId: String!): AlertType
   operator(operatorId: String!): OperatorType
@@ -409,7 +408,6 @@ type AdminAreaInfoType {
 input UserUpdateInput {
   firstName: String!
   lastName: String!
-  role: RoleReferenceInput!
 }
 
 type UserUpdateResponseType {
@@ -435,14 +433,9 @@ type InvitationType {
 input InvitationInput {
   email: String!
   organisation: OrganisationReferenceInput!
-  role: RoleReferenceInput!
 }
 
 input OrganisationReferenceInput {
-  id: String!
-}
-
-input RoleReferenceInput {
   id: String!
 }
 
@@ -492,23 +485,12 @@ type UserType {
   firstName: String
   lastName: String
   organisation: OrganisationType
-  roles: [RoleType!]
+  isAdmin: Boolean!
 }
 
 type OrganisationType {
   id: String!
   name: String!
-}
-
-type RoleType {
-  id: String!
-  name: String!
-  scope: ScopeEnum!
-}
-
-enum ScopeEnum {
-  organisation
-  system
 }
 
 type OnTimePerformanceType {

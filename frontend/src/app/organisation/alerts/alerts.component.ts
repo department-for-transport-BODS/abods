@@ -74,10 +74,6 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get authUserIsAdmin() {
-    return (
-      this.authenticatedUser?.roles?.some(
-        ({ name }) => name === "Administrator",
-      ) ?? false
-    );
+    return this.authenticatedUser?.isAdmin ?? false;
   }
 }

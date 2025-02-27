@@ -9,7 +9,7 @@ import { Subject, takeUntil } from "rxjs";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { OrganisationService } from "src/app/organisation/organisation.service";
-import { RoleFragment, UserFragment } from "src/generated/graphql";
+import { UserFragment } from "src/generated/graphql";
 import { FormErrors } from "../../gds/error-summary/error-summary.component";
 import { PageHeaderBannerService } from "src/app/layout/page-header/page-header-banner.service";
 
@@ -25,7 +25,6 @@ export class InviteUserModalComponent implements OnInit, OnDestroy {
   authenticatedUser: UserFragment | null = null;
   inviteSent = false;
   submitted = false;
-  roles: RoleFragment[] = [];
   destroy$ = new Subject<void>();
 
   constructor(
@@ -57,10 +56,6 @@ export class InviteUserModalComponent implements OnInit, OnDestroy {
           organisationId: this.authenticatedUser.organisation?.id ?? "",
         });
       });
-    this.organisationService
-      .listOrgRoles$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((rs) => (this.roles = rs));
   }
 
   ngOnDestroy(): void {

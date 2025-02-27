@@ -11,7 +11,6 @@ import { NgxSmartModalModule } from "ngx-smart-modal";
 import { of } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { ScopeEnum } from "src/generated/graphql";
 import { EditUserComponent } from "../edit-user/edit-user.component";
 import { OrganisationModule } from "../organisation.module";
 import { OrganisationService } from "../organisation.service";
@@ -21,13 +20,11 @@ import { HelpdeskResolver } from "../../shared/resolvers/helpdesk.resolver";
 const orgRoles = [
   {
     id: "2",
-    scope: ScopeEnum.Organisation,
     name: "Admin",
   },
 
   {
     id: "4",
-    scope: ScopeEnum.Organisation,
     name: "Staff",
   },
 ];
@@ -42,7 +39,6 @@ const users = [
     roles: [
       {
         id: "4",
-        scope: ScopeEnum.Organisation,
         name: "Staff",
       },
     ],
@@ -56,7 +52,6 @@ const users = [
     roles: [
       {
         id: "2",
-        scope: ScopeEnum.Organisation,
         name: "Admin",
       },
     ],
@@ -70,7 +65,6 @@ const users = [
     roles: [
       {
         id: "4",
-        scope: ScopeEnum.Organisation,
         name: "Staff",
       },
     ],
@@ -106,9 +100,6 @@ describe("EditUserComponent", () => {
     spectator = createSpectator();
     service = spectator.inject(OrganisationService);
     router = spectator.inject(Router);
-
-    spyOn(service, "listOrgRoles$").and.returnValue(of(orgRoles));
-    spyOn(service, "listUsers$").and.returnValue(of(users));
   });
 
   it("should create", () => {

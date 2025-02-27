@@ -7,7 +7,7 @@ import {
   RouterStateSnapshot,
 } from "@angular/router";
 import { Observable, of } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, switchMap, tap } from "rxjs/operators";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 import { AuthenticationService } from "./authentication.service";
 
@@ -22,42 +22,18 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
   ) {}
 
   canActivate(
-    route: ActivatedRouteSnapshot,
+    _: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
     return this.userService.isAuthenticated$.pipe(
-      switchMap((isAuthenticated) => {
-        if (isAuthenticated) {
-          return this.userService.authenticatedUser$.pipe(
-            map((user) => {
-              if (
-                route.data.roles &&
-                !route.data.roles.some(
-                  (requiredRole: string) =>
-                    requiredRole === user.roles?.[0].name,
-                )
-              ) {
-                this.router
-                  .navigate(["/not-authorised"], {
-                    queryParams: { url: state.url },
-                  })
-                  .catch(console.log);
-                return false;
-              }
-
-              return true;
-            }),
-          );
-        } else {
-          // not logged in so redirect to login page with the return url
+      tap((isAuthenticated) => {
+        if (!isAuthenticated) {
           this.router
-            .navigate(["/login"], {
-              queryParams: { returnUrl: state.url },
-            })
+            .navigate(["/login"], { queryParams: { returnUrl: state.url } })
             .catch(console.log);
-          return of(false);
         }
       }),
+      map((isAuthenticated) => isAuthenticated),
     );
   }
 

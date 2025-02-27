@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { Subscription } from "rxjs";
-import { RoleFragment, UserFragment } from "src/generated/graphql";
+import { UserFragment } from "src/generated/graphql";
 import { OrganisationService } from "../organisation.service";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 @Component({
@@ -24,13 +24,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   get authenticatedUserIsAdmin(): boolean {
     return this.authService.authenticatedUserIsAdmin;
   }
-  get authenticatedUserIsOrgUser(): boolean {
-    return this.authService.authenticatedUserIsOrgUser;
-  }
 
   users: UserFragment[] = [];
-
-  roles: RoleFragment[] = [];
 
   constructor(
     private service: OrganisationService,
@@ -51,7 +46,6 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.authService.authenticatedUser$.subscribe(
         (u) => (this.authenticatedUser = u),
       ),
-      this.service.listOrgRoles$().subscribe((rs) => (this.roles = rs)),
     );
   }
 

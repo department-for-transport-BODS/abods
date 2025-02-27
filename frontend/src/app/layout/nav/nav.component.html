@@ -52,6 +52,15 @@
             >Corridors
           </a>
         </li>
+        <li *ngIf="isUserAdmin" class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/service-monitoring']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Service monitoring
+          </a>
+        </li>
         <li class="nav__item" style="display: none">
           <a
             class="nav__link"

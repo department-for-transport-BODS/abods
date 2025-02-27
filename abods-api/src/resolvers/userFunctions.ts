@@ -7,8 +7,6 @@ import {
   MutationResponseType,
   QueryResolvers,
   Resolvers,
-  RoleType,
-  ScopeEnum,
   UserType,
 } from "../types/generated.js";
 import { v4 as uuidv4 } from "uuid";
@@ -44,6 +42,15 @@ export const getUsers: QueryResolvers["users"] = async (
           email: true,
           first_name: true,
           last_name: true,
+          userOrganisations: {
+            select: {
+              organisation: {
+                select: {
+                  is_abods_global_viewer: true,
+                },
+              },
+            },
+          },
         },
       })
       .then((x) =>
@@ -57,13 +64,9 @@ export const getUsers: QueryResolvers["users"] = async (
             id: String(user.orgId),
             name: String(user.orgId),
           },
-          roles: [
-            {
-              id: "1",
-              name: "Staff",
-              scope: ScopeEnum.Organisation,
-            },
-          ],
+          isAdmin: thisUser.userOrganisations.some(
+            (org) => org.organisation.is_abods_global_viewer === true,
+          ),
         })),
       );
   } catch (error) {
@@ -87,6 +90,15 @@ export const getUser: QueryResolvers["user"] = async (
           email: true,
           first_name: true,
           last_name: true,
+          userOrganisations: {
+            select: {
+              organisation: {
+                select: {
+                  is_abods_global_viewer: true,
+                },
+              },
+            },
+          },
         },
       })
       .then((x) => ({
@@ -95,18 +107,9 @@ export const getUser: QueryResolvers["user"] = async (
         email: x.email,
         firstName: x.first_name,
         lastName: x.last_name,
-        roles: [
-          {
-            id: "1",
-            name: "Staff",
-            scope: ScopeEnum.Organisation,
-          },
-          {
-            id: "2",
-            name: "Administrator",
-            scope: ScopeEnum.Organisation,
-          },
-        ],
+        isAdmin: x.userOrganisations.some(
+          (org) => org.organisation.is_abods_global_viewer === true,
+        ),
       }));
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
@@ -161,7 +164,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
               email: alert.created_by_user.email,
               firstName: alert.created_by_user.first_name,
               lastName: alert.created_by_user.last_name,
-              roles: new Array<RoleType>(),
+              isAdmin: false,
             }
           : null,
         sendTo: alert.send_to_user
@@ -171,7 +174,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
               email: alert.send_to_user.email,
               firstName: alert.send_to_user.first_name,
               lastName: alert.send_to_user.last_name,
-              roles: new Array<RoleType>(),
+              isAdmin: false,
             }
           : null,
       };
@@ -334,6 +337,7 @@ async function getUserAlertFromDb(
           email: alert.created_by_user.email,
           firstName: alert.created_by_user.first_name,
           lastName: alert.created_by_user.last_name,
+          isAdmin: false,
         }
       : null,
     sendTo: alert.send_to_user
@@ -343,6 +347,7 @@ async function getUserAlertFromDb(
           email: alert.send_to_user.email,
           firstName: alert.send_to_user.first_name,
           lastName: alert.send_to_user.last_name,
+          isAdmin: false,
         }
       : null,
   };
