@@ -43,12 +43,12 @@ export const listServiceLinks = async (
     );
 
     if (link) {
-      const linestring = JSON.parse(link.geometry) as GeoJSONLineString;
+      const linestring = JSON.parse(link.geometry ?? "") as GeoJSONLineString;
 
       serviceLinks.push({
         fromStop: stops[i - 1].stopId,
         toStop: stops[i].stopId,
-        distance: link.distance,
+        distance: link.distance ?? 0,
         routeValidity: RouteType.Valid,
         linkRoute: JSON.stringify(linestring.coordinates),
       });

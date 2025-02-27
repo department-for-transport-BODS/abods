@@ -603,17 +603,17 @@ model transmodel_tracks {
   id             Int    @id
   from_atco_code String
   to_atco_code   String
-  geometry       String
-  distance       Int
+  geometry       String?
+  distance       Int?
 }
 
 model organisation_organisation_admin_areas {
-  id                Int @id
-  organisation_id   Int
-  adminarea_id      Int
+  id                Int @id @default(1)
+  organisation_id   Int @default(1)
+  adminarea_id      Int @default(1)
 }
 
 model ui_lta {
-  id                Int @id
-  name              String
+  id                Int @id @default(1)
+  name              String  @default("")
 }
