@@ -1,5 +1,10 @@
 import { sendDistributionMetric } from "datadog-lambda-js";
-import { getDashboardId, getDashboardUrl, getSessionTags } from "../lib/aws.js";
+import {
+  checkRequiredQuicksightVars,
+  getDashboardId,
+  getDashboardUrl,
+  getSessionTags,
+} from "../lib/aws.js";
 import {
   AwsQuicksightUser,
   QueryResolvers,
@@ -14,6 +19,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   __,
   context,
 ): Promise<AwsQuicksightUser> => {
+  checkRequiredQuicksightVars();
   const user = await requireUserSession(context);
   sendDistributionMetric(
     "abods.graphql.quicksight.request",

@@ -163,3 +163,15 @@ export const getDashboardId = (isAdmin: boolean, ltaUsers: string[]) => {
 
   return operatorDashboardId;
 };
+
+export const checkRequiredQuicksightVars = () => {
+  if (
+    !targetRoleArn ||
+    !quickSightAccountId ||
+    !adminDashboardId ||
+    !ltaDashboardId ||
+    !operatorDashboardId
+  ) {
+    throw Error("Required quicksight environment variables not found");
+  }
+};
