@@ -82,74 +82,64 @@ export const getDashboardUrl = async (
   }
 };
 
+const groupStrings = (
+  values: string[],
+  maxStringLength = 256,
+  delimiter = ",",
+) => {
+  if (values.some((str) => str.length > maxStringLength)) {
+    throw new Error(
+      "A single string length is greater than the max group length",
+    );
+  }
+  const result: string[][] = [];
+  let currentGroup: string[] = [];
+  let currentLength = 0;
+  for (const str of values) {
+    if (currentGroup.length === 0) {
+      currentGroup = [str];
+      currentLength = str.length;
+      continue;
+    }
+    const newLength = currentLength + delimiter.length + str.length;
+    if (newLength > maxStringLength) {
+      result.push(currentGroup);
+      currentGroup = [str];
+      currentLength = str.length;
+      continue;
+    }
+    currentGroup.push(str);
+    currentLength = newLength;
+  }
+  if (currentGroup.length > 0) {
+    result.push(currentGroup);
+  }
+  return result.map((n) => n.join(delimiter));
+};
+
 export const getSessionTags = (
   isAdmin: boolean,
-  ltaUsers: string[],
-  orgUsers: string[],
+  ltaNames: string[],
+  orgNames: string[],
 ) => {
   if (isAdmin) {
-    return [
-      {
-        Key: "org0",
-        Value: "*",
-      },
-    ];
+    return [{ Key: "org0", Value: "*" }];
   }
-
-  const sessionTags: SessionTag[] = [];
-  let ltaUsersString = "";
-  let ltaIndexCount = 0;
-  ltaUsers.map((lta) => {
-    const lta_name = ltaUsersString ? lta + "," + ltaUsersString : lta;
-    if (lta_name.length > 256) {
-      sessionTags.push({
-        Key: `lta${ltaIndexCount}`,
-        Value: ltaUsersString,
-      });
-      ltaUsersString = lta;
-      ltaIndexCount = ltaIndexCount + 1;
-    } else {
-      ltaUsersString = lta_name;
-    }
-  });
-  if (ltaUsersString) {
-    sessionTags.push({
-      Key: `lta${ltaIndexCount}`,
-      Value: ltaUsersString,
-    });
-  }
-
-  if (ltaIndexCount > 6) {
+  const ltaTags = groupStrings(ltaNames).map((str, index) => ({
+    Key: "lta" + index,
+    Value: str,
+  }));
+  if (ltaTags.length > 7) {
     throw Error("Too many LTAs mapped to the user");
   }
-
-  let orgUsersString = "";
-  let orgIndexCount = 0;
-  orgUsers.map((org) => {
-    const org_name = orgUsersString ? org + "," + orgUsersString : org;
-    if (org_name.length > 256) {
-      sessionTags.push({
-        Key: `org${orgIndexCount}`,
-        Value: orgUsersString,
-      });
-      orgUsersString = org;
-      orgIndexCount = orgIndexCount + 1;
-    } else {
-      orgUsersString = org_name;
-    }
-  });
-  if (orgUsersString) {
-    sessionTags.push({
-      Key: `org${orgIndexCount}`,
-      Value: orgUsersString,
-    });
-  }
-
-  if (orgIndexCount > 6) {
+  const orgTags = groupStrings(orgNames).map((str, index) => ({
+    Key: "org" + index,
+    Value: str,
+  }));
+  if (orgTags.length > 7) {
     throw Error("Too many orgs mapped to the user");
   }
-
-  return sessionTags;
+  return [...ltaTags, ...orgTags];
 };
 
 export const getDashboardId = (isAdmin: boolean, ltaUsers: string[]) => {

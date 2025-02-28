@@ -51,7 +51,8 @@
               "rgbcolor",
               "mapbox-gl",
               "svgson",
-              "govuk-frontend"
+              "govuk-frontend",
+              "amazon-quicksight-embedding-sdk"
             ],
             "verbose": false
           },

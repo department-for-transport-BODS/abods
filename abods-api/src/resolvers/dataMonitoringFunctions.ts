@@ -31,22 +31,26 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
-  const ltaUsers = userDetails
-    .map((user) => user.lta_name)
-    .filter((lta_name) => lta_name !== null);
+  const localTransportAuthorityNames = userDetails
+    .filter((user) => user.lta_name !== null)
+    .map((user) => user.lta_name!);
 
-  const orgUsers = userDetails
-    .map((user) => user.org_name)
-    .filter((org_name) => org_name !== null);
+  const organisationNames = userDetails
+    .filter((user) => user.org_name !== null)
+    .map((user) => user.org_name!);
 
   const isAdmin = userDetails.some((user) => user.is_superuser === true);
-  const dashboardId = getDashboardId(isAdmin, ltaUsers);
+  const dashboardId = getDashboardId(isAdmin, localTransportAuthorityNames);
 
   if (!dashboardId) {
     throw Error("No quicksight dashboard id set in environment variables");
   }
 
-  const sessionTags = getSessionTags(isAdmin, ltaUsers, orgUsers);
+  const sessionTags = getSessionTags(
+    isAdmin,
+    localTransportAuthorityNames,
+    organisationNames,
+  );
   const url = await getDashboardUrl(sessionTags, dashboardId);
 
   logger.info("Dashboard enabled for user");
