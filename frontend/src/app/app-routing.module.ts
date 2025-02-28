@@ -84,6 +84,13 @@ const routes: Routes = [
       ),
   },
   {
+    path: "data-monitoring",
+    loadChildren: () =>
+      import("./data-monitoring/data-monitoring.module").then(
+        (mod) => mod.DataMonitoringModule,
+      ),
+  },
+  {
     path: "stop-analysis",
     loadChildren: () =>
       import("./stop-analysis/stop-analysis.module").then(

@@ -34,6 +34,9 @@ Parameters:
   BodsVpcEndpoint:
     Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
     Default: ""
+  BodsAccountId:
+    Type: String
+    Default: "228266753808"
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, "local"]]
   IsNotProd: !Not [!Equals [!Ref Environment, "prod"]]
@@ -138,6 +141,11 @@ Resources:
           DD_TAGS: app:graphql,project:abods
           DD_TRACE_ENABLED: false
           DD_ENHANCED_METRICS: false
+          QUICKSIGHT_ASSUME_ROLE_ARN: !Sub "arn:aws:iam::${BodsAccountId}:role/abods-quicksight-assume-role"
+          QUICKSIGHT_AWS_ACCOUNT_ID: !Sub "${BodsAccountId}"
+          QUICKSIGHT_ADMIN_DASHBOARD_ID: "72fd7c01-f654-449b-92e2-bdb142d85e1d"
+          QUICKSIGHT_LTA_DASHBOARD_ID: "b716338e-2416-4c29-95f8-1c21e27c1ecf"
+          QUICKSIGHT_OPERATOR_DASHBOARD_ID: "5fce6742-935f-4a78-851b-c3f730dca44e"
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
@@ -200,6 +208,10 @@ Resources:
                   - kms:DescribeKey
                 Resource:
                   Fn::Sub: "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: !Sub "arn:aws:iam::${BodsAccountId}:role/*"
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
     Condition: IsNotLocal

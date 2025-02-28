@@ -53,7 +53,7 @@
           </a>
         </li>
         <li
-          *ngIf="isUserAdmin() && configService.flag('dataMonitoring')"
+          *ngIf="isUserAdmin() && configService.flag('serviceMonitoring')"
           class="nav__item"
         >
           <a
@@ -62,6 +62,15 @@
             routerLinkActive="nav__link--current"
             (click)="navService.closeMenu()"
             >Service monitoring
+          </a>
+        </li>
+        <li class="nav__item" *ngIf="configService.flag('dataMonitoring')">
+          <a
+            class="nav__link"
+            [routerLink]="['/data-monitoring']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Data monitoring
           </a>
         </li>
         <li class="nav__item" style="display: none">

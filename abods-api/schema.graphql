@@ -36,6 +36,13 @@ type Query {
 
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
+
+  embeddedUrl: AWSQuicksightUser!
+}
+
+type AWSQuicksightUser {
+  enabled: Boolean!
+  url: String
 }
 
 type DashboardVehicles {
