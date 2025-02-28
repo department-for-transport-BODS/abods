@@ -62,8 +62,15 @@ export interface FreshdeskFolderConfig {
   [key: string]: string;
 }
 
-const environments = ["local", "sandbox", "dev", "test", "uat"] as const;
-type Environment = (typeof environments)[number];
+const environments = [
+  "local",
+  "sandbox",
+  "dev",
+  "test",
+  "uat",
+  "prod",
+] as const;
+export type Environment = (typeof environments)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function maxEnvironment(current: string, max: Environment): boolean {
@@ -77,7 +84,10 @@ function maxEnvironment(current: string, max: Environment): boolean {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function flags(currentEnv: string) {
   // TODO: get from API
-  return {} as const;
+  return {
+    dataMonitoring: maxEnvironment(currentEnv, "test"),
+    serviceMonitoring: maxEnvironment(currentEnv, "test"),
+  } as const;
 }
 
 export interface FreshdeskConfig {

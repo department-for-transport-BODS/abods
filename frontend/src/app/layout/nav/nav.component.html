@@ -52,7 +52,10 @@
             >Corridors
           </a>
         </li>
-        <li *ngIf="isUserAdmin" class="nav__item">
+        <li
+          *ngIf="isUserAdmin() && configService.flag('dataMonitoring')"
+          class="nav__item"
+        >
           <a
             class="nav__link"
             [routerLink]="['/service-monitoring']"
