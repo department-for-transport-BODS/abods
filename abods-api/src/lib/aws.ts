@@ -40,7 +40,7 @@ export const assumeRole = async (): Promise<Credentials> => {
   }
 };
 
-export const getQuicksighClient = (credentials: Credentials) => {
+export const getQuicksightClient = (credentials: Credentials) => {
   return new QuickSightClient({
     region,
     credentials: {
@@ -57,7 +57,7 @@ export const getDashboardUrl = async (
 ) => {
   try {
     const awsCreds = await assumeRole();
-    const quickSightClient = getQuicksighClient(awsCreds);
+    const quickSightClient = getQuicksightClient(awsCreds);
 
     const command = new GenerateEmbedUrlForAnonymousUserCommand({
       AwsAccountId: quickSightAccountId,

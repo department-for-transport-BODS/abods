@@ -600,20 +600,26 @@ view naptan_stoppoint_latlong {
 }
 
 model transmodel_tracks {
-  id             Int    @id
-  from_atco_code String
-  to_atco_code   String
-  geometry       String?
-  distance       Int?
+  id             BigInt @id
+  from_atco_code String @db.VarChar(255)
+  to_atco_code   String @db.VarChar(255)
+  geometry       String // TODO: fix - nullable in db
+  distance       Int // TODO: fix - nullable in db
+
+  @@unique([from_atco_code, to_atco_code], map: "unique_from_to_atco_code")
+  @@index([from_atco_code, to_atco_code], map: "transmodel_tracks_geometry_idx")
 }
 
-model organisation_organisation_admin_areas {
-  id                Int @id @default(1)
-  organisation_id   Int @default(1)
-  adminarea_id      Int @default(1)
+view organisation_organisation_admin_areas {
+  id              Int  @unique // TODO: fix - nullable in db, not unique
+  organisation_id Int?
+  adminarea_id    Int?
 }
 
 model ui_lta {
-  id                Int @id @default(1)
-  name              String  @default("")
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  @@unique([id, name], map: "ui_lta_id_name_uniq")
+  @@index([name])
 }
