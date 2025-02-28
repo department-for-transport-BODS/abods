@@ -211,7 +211,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
-                Resource: "arn:aws:iam::228266753808:role/*"
+                Resource: !Sub "arn:aws:iam::${BodsAccountId}:role/*"
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
     Condition: IsNotLocal
