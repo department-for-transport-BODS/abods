@@ -37,15 +37,15 @@ import {
   StopType,
 } from "../types/generated.js";
 import {
-  getDate,
-  getDayFormattedDate,
-  getHourFormattedDate,
+  standardFormat,
+  toUkTime,
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
+import dayjs from "dayjs";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -538,22 +538,21 @@ const getJourneyStats = (
       let dateKey = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
-          dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
+          dateKey = standardFormat(toUkTime(firstDeparture.date_of_journey));
           break;
 
         case CorridorJourneyStatsOption.dayOfWeek:
-          dateKey = getDate(firstDeparture.date_of_journey).day().toString();
+          dateKey = dayjs(firstDeparture.date_of_journey).day().toString();
           break;
 
         case CorridorJourneyStatsOption.hour:
-          dateKey = getHourFormattedDate(
-            firstDeparture.expected_departure_time,
+          dateKey = standardFormat(
+            toUkTime(firstDeparture.expected_departure_time).startOf("hour"),
           );
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
-          dateKey = getDate(firstDeparture.expected_departure_time)
-            .tz("Europe/London")
+          dateKey = toUkTime(firstDeparture.expected_departure_time)
             .hour()
             .toString();
           break;
