@@ -80,7 +80,7 @@ export const returnCorridorType = (
 export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
   return db.corridor.findMany({
     where: {
-      organisation_id: sessionUser.orgId,
+      organisation_id: { in: sessionUser.orgIds },
     },
     include: {
       corridor_stops: true,
@@ -97,7 +97,7 @@ export const getCorridor = (
   return db.corridor.findUnique({
     where: {
       corridor_id: corridorId,
-      organisation_id: sessionUser.orgId,
+      organisation_id: { in: sessionUser.orgIds },
     },
     include: {
       bods_user: true,
@@ -166,7 +166,7 @@ export const isCorridorMappedToUserOrg = async (
   const result = await db.corridor.findFirst({
     where: {
       corridor_id: corridorId,
-      organisation_id: user.orgId,
+      organisation_id: { in: user.orgIds },
     },
   });
 
@@ -186,7 +186,7 @@ export const distinctRoutes = (db: PrismaClient, stopsPattern: string) => {
 export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
   const orgOperators = await db.bods_organisationoperator.findMany({
     where: {
-      organisation_id: user.orgId,
+      organisation_id: { in: user.orgIds },
     },
     select: {
       operatorref: true,

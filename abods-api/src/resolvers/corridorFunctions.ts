@@ -217,7 +217,10 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
-      organisation_id: user.orgId,
+      // Not good. Should be changed later
+      // This won't be visible to any other orgs they are assigned to.
+      // Visibility will be somewhat random, though consistent because we sort the org numbers
+      organisation_id: user.orgIds[0],
       user_id: user.id,
     },
     select: {
