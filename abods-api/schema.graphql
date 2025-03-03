@@ -23,8 +23,7 @@ type Query {
     start: DateTime!
     end: DateTime!
   ): [EventStatsType]
-  avls(groupId: String!): [AvlPoint!]!
-  route(groupId: String!): [Stop!]!
+  journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
@@ -38,6 +37,13 @@ type Query {
 
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
+
+  embeddedUrl: AWSQuicksightUser!
+}
+
+type AWSQuicksightUser {
+  enabled: Boolean!
+  url: String
 }
 
 type DashboardVehicles {
@@ -713,6 +719,11 @@ input ServicePerformanceInputType {
   fromTimestamp: String!
   toTimestamp: String!
   order: RankingOrder!
+}
+
+type JourneyResult {
+  stops: [Stop!]!
+  avls: [AvlPoint!]!
 }
 
 type AvlPoint {

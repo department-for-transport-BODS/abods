@@ -9,6 +9,7 @@ import avlResolvers from "./avlFunctions.js";
 import { Resolvers } from "../types/generated.js";
 import { DateResolver, DateTimeResolver, TimeResolver } from "graphql-scalars";
 import stopAnalysisResolvers from "./stopAnalysis.js";
+import dataMonitoringResolvers from "./dataMonitoringFunctions.js";
 
 export const customScalarResolvers: Resolvers = {
   Date: DateResolver,
@@ -26,6 +27,7 @@ const resolversArray = [
   avlResolvers,
   feedMonitoringResolvers,
   stopAnalysisResolvers,
+  dataMonitoringResolvers,
 ];
 const resolvers = mergeResolvers(resolversArray);
 
