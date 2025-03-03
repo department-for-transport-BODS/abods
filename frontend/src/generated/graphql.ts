@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: string; output: string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -450,6 +456,12 @@ export type Journey = {
   startTime: Scalars['String']['output'];
 };
 
+export type JourneyResult = {
+  __typename?: 'JourneyResult';
+  avls: Array<AvlPoint>;
+  stops: Array<Stop>;
+};
+
 export enum LineDirection {
   All = 'All',
   Inbound = 'Inbound',
@@ -786,20 +798,20 @@ export type Query = {
   adminAreas?: Maybe<Array<AdminAreasType>>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
-  avls: Array<AvlPoint>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  embeddedUrl: AwsQuicksightUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
+  journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   roles?: Maybe<Array<RoleType>>;
-  route: Array<Stop>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
@@ -812,11 +824,6 @@ export type Query = {
 
 export type QueryAvlLineLevelStatusArgs = {
   filters?: InputMaybe<AvlFiltersInput>;
-};
-
-
-export type QueryAvlsArgs = {
-  groupId: Scalars['String']['input'];
 };
 
 
@@ -850,6 +857,12 @@ export type QueryInvitationArgs = {
 };
 
 
+export type QueryJourneyArgs = {
+  groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
+};
+
+
 export type QueryLinesArgs = {
   inputDate?: InputMaybe<Scalars['String']['input']>;
   operatorId: Scalars['String']['input'];
@@ -863,11 +876,6 @@ export type QueryOperatorArgs = {
 
 export type QueryOperatorsArgs = {
   filterBy?: InputMaybe<OperatorFilterInput>;
-};
-
-
-export type QueryRouteArgs = {
-  groupId: Scalars['String']['input'];
 };
 
 
@@ -1202,6 +1210,11 @@ export type DashboardServiceRankingQueryVariables = Exact<{
 
 export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePunctuality?: Array<{ __typename?: 'ServicePunctualityType', nocCode?: string | null, lineId?: string | null, onTime?: number | null, early?: number | null, late?: number | null, lineInfo?: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } | null, trend?: { __typename?: 'ServicePunctualityType', onTime?: number | null, early?: number | null, late?: number | null } | null } | null> | null } | null };
 
+export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
 export type EventsQueryVariables = Exact<{
@@ -1502,19 +1515,13 @@ export type InvitationQueryVariables = Exact<{
 
 export type InvitationQuery = { __typename?: 'Query', invitation?: { __typename?: 'InvitationType', email: string, accepted: boolean } | null };
 
-export type AvlsQueryVariables = Exact<{
+export type JourneyQueryVariables = Exact<{
   groupId: Scalars['String']['input'];
+  lineId: Scalars['String']['input'];
 }>;
 
 
-export type AvlsQuery = { __typename?: 'Query', avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> };
-
-export type RouteQueryVariables = Exact<{
-  groupId: Scalars['String']['input'];
-}>;
-
-
-export type RouteQuery = { __typename?: 'Query', route: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }> };
+export type JourneyQuery = { __typename?: 'Query', journey: { __typename?: 'JourneyResult', stops: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }>, avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> } };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['String']['input'];
@@ -2042,6 +2049,25 @@ export const DashboardServiceRankingDocument = gql`
   })
   export class DashboardServiceRankingGQL extends Apollo.Query<DashboardServiceRankingQuery, DashboardServiceRankingQueryVariables> {
     document = DashboardServiceRankingDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DashboadEmbeddedUrlDocument = gql`
+    query dashboadEmbeddedUrl {
+  embeddedUrl {
+    enabled
+    url
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
+    document = DashboadEmbeddedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
@@ -2895,52 +2921,39 @@ export const InvitationDocument = gql`
       super(apollo);
     }
   }
-export const AvlsDocument = gql`
-    query avls($groupId: String!) {
-  avls(groupId: $groupId) {
-    recordedAtTimeUtc
-    latitude
-    longitude
-    vehicleRef
-    directionRef
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class AvlsGQL extends Apollo.Query<AvlsQuery, AvlsQueryVariables> {
-    document = AvlsDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
+export const JourneyDocument = gql`
+    query journey($groupId: String!, $lineId: String!) {
+  journey(groupId: $groupId, lineId: $lineId) {
+    stops {
+      estimatedDepartureUtc
+      actualDepartureUtc
+      scheduledDepartureUtc
+      latitude
+      longitude
+      stopIndex
+      stopName
+      stopId
+      isTimingPoint
+      otp
+      directionRef
+      incompleteReason
+    }
+    avls {
+      recordedAtTimeUtc
+      latitude
+      longitude
+      vehicleRef
+      directionRef
     }
   }
-export const RouteDocument = gql`
-    query route($groupId: String!) {
-  route(groupId: $groupId) {
-    estimatedDepartureUtc
-    actualDepartureUtc
-    scheduledDepartureUtc
-    latitude
-    longitude
-    stopIndex
-    stopName
-    stopId
-    isTimingPoint
-    otp
-    directionRef
-    incompleteReason
-  }
 }
     `;
 
   @Injectable({
     providedIn: 'root'
   })
-  export class RouteGQL extends Apollo.Query<RouteQuery, RouteQueryVariables> {
-    document = RouteDocument;
+  export class JourneyGQL extends Apollo.Query<JourneyQuery, JourneyQueryVariables> {
+    document = JourneyDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

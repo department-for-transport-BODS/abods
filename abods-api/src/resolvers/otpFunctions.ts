@@ -34,8 +34,7 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  addUkTime,
-  getDate,
+  toUkTime,
   getFormattedDate,
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
@@ -54,6 +53,7 @@ import { getUserOperatorIds } from "../lib/operators.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
+import dayjs, { Dayjs } from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
@@ -92,7 +92,7 @@ const getOperatorsDropDown = async (
   userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
   const orgOperators = await getOperatorsFromOrgId(
-    user.orgId,
+    user.orgIds,
     db,
     userOperatorIds,
   );
@@ -398,7 +398,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
             adminAreaIds && adminAreaIds.length > 0
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
-          operatorOrganisations: { some: { organisation_id: user.orgId } },
+          operatorOrganisations: {
+            some: { organisation_id: { in: user.orgIds } },
+          },
         },
         select: {
           operatorref: true,
@@ -769,8 +771,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
           });
 
           summary = summary.sort((a, b) => {
-            const firstTS = getDate(a.ts);
-            const secondTS = getDate(b.ts);
+            const firstTS = dayjs(a.ts);
+            const secondTS = dayjs(b.ts);
             return firstTS.isAfter(secondTS) ? 1 : -1;
           });
 
@@ -912,10 +914,8 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
     try {
       // for this operator & for this service, get all stops and their OTP stats
 
-      const { filters } = args.inputs;
-      let { operatorIds, lineIds } = filters || {};
-      operatorIds = operatorIds ?? [];
-      lineIds = lineIds ?? [];
+      const operatorIds = args.inputs.filters.operatorIds ?? [];
+      const lineIds = args.inputs.filters.lineIds ?? [];
 
       const stopPerformances: StopPerformanceType[] = [];
 
@@ -1213,11 +1213,6 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
   async (_, args, context): Promise<Maybe<HeadwayTimeSeriesType[]>> => {
     const user = await requireUserSession(context);
     try {
-      const { filters } = args.inputs;
-      const { granularity } = filters || {};
-
-      const isDayGranularity = granularity === Granularity.Day;
-
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
@@ -1250,40 +1245,29 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       results.map((result) => {
         if (result.departure_hour) {
-          const formatterdeparture = isDayGranularity
-            ? getFormattedDate(result.departure_hour, "YYYY-MM-DD")
-            : getFormattedDate(result.departure_hour);
-          const headwayData = headwayMap[formatterdeparture];
-
-          if (headwayData) {
-            headwayData.actual_headway =
-              headwayData.actual_headway +
-              result.actual_headway.toNumber() *
-                result.headway_stops_count.toNumber();
-            headwayData.expected_headway =
-              headwayData.expected_headway +
-              result.expected_headway.toNumber() *
-                result.headway_stops_count.toNumber();
-            headwayData.excess_wait_time =
-              headwayData.excess_wait_time +
-              result.excess_wait_time.toNumber() *
-                result.headway_stops_count.toNumber();
-            headwayData.headway_stops_count +=
-              result.headway_stops_count.toNumber();
-          } else {
-            headwayMap[formatterdeparture] = {
-              actual_headway:
-                result.actual_headway.toNumber() *
-                result.headway_stops_count.toNumber(),
-              expected_headway:
-                result.expected_headway.toNumber() *
-                result.headway_stops_count.toNumber(),
-              excess_wait_time:
-                result.excess_wait_time.toNumber() *
-                result.headway_stops_count.toNumber(),
-              headway_stops_count: result.headway_stops_count.toNumber(),
-            };
-          }
+          const time = toUkTime(result.departure_hour);
+          const timeIndex =
+            args.inputs.filters.granularity === Granularity.Day
+              ? time.startOf("day")
+              : time;
+          const index = timeIndex.toISOString();
+          const headwayData = (headwayMap[index] ??= {
+            actual_headway: 0,
+            expected_headway: 0,
+            excess_wait_time: 0,
+            headway_stops_count: 0,
+          });
+          headwayData.actual_headway +=
+            result.actual_headway.toNumber() *
+            result.headway_stops_count.toNumber();
+          headwayData.expected_headway +=
+            result.expected_headway.toNumber() *
+            result.headway_stops_count.toNumber();
+          headwayData.excess_wait_time +=
+            result.excess_wait_time.toNumber() *
+            result.headway_stops_count.toNumber();
+          headwayData.headway_stops_count +=
+            result.headway_stops_count.toNumber();
         }
       });
 
@@ -1291,7 +1275,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       for (const [departure_hour, headway] of Object.entries(headwayMap)) {
         returnHeadways.push({
-          ts: departure_hour,
+          ts: new Date(departure_hour),
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
           actualWaitTime: headway.actual_headway / headway.headway_stops_count,
           scheduledWaitTime:
@@ -1302,7 +1286,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       }
 
       return returnHeadways.sort((a, b) => {
-        if (getDate(a.ts).isBefore(getDate(b.ts))) return -1;
+        if (dayjs(a.ts).isBefore(dayjs(b.ts))) return -1;
         return 1;
       });
     } catch (error) {
@@ -1356,6 +1340,19 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
     logger.error(error, "An error occurred when getting admin areas");
     return null;
   }
+};
+
+export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
+  const timestamp = date;
+  if (!time) {
+    return date.utc();
+  }
+  const [hours, minutes, _] = time.split(":").map(Number);
+  return toUkTime(timestamp)
+    .set("hour", hours)
+    .set("minute", minutes)
+    .startOf("minute")
+    .utc();
 };
 
 export const getPrismaFiltersForOTPQuery = (

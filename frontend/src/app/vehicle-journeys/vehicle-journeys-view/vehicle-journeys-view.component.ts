@@ -8,17 +8,15 @@ import {
   switchMap,
   takeUntil,
   tap,
-  zip,
 } from "rxjs";
 import { VehicleJourneyNotFoundView } from "./vehicle-journey-not-found-view.model";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import {
   AvlPoint,
-  AvlsGQL,
   Journey,
   MatchType,
-  RouteGQL,
+  JourneyGQL,
   Stop,
 } from "../../../generated/graphql";
 import { DateTime } from "luxon";
@@ -73,8 +71,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private service: VehicleJourneysSearchService,
-    private routeGQL: RouteGQL,
-    private avlsGQL: AvlsGQL,
+    private journeyGQL: JourneyGQL,
     private router: Router,
   ) {}
 
@@ -87,7 +84,15 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([params, queryParams]) => ({
         groupId: params.get("journeyId")!,
-        journeyStart: queryParams.get("startTime")!,
+        // dateOfJourney is a new param, old links don't have it, but do have startDate, which can provide the
+        // wrong date if the journey starts after midnight.
+        // Eventually we may want to assume the new param is present
+        dateOfJourney:
+          queryParams.get("date") ??
+          DateTime.fromISO(queryParams.get("startTime")!)
+            .setZone("Europe/London")
+            .startOf("day")
+            .toISODate(),
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
         matchType: queryParams.get("match_type") as MatchType | undefined,
@@ -97,7 +102,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       })),
       tap((urlData) => {
         this.returnQueryParams = {
-          date: urlData.journeyStart,
+          date: urlData.dateOfJourney,
           operator: urlData.operator,
           service: urlData.lineId,
         };
@@ -117,22 +122,20 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
             prev.groupId == cur.groupId && prev.direction == cur.direction,
         ),
         tap(() => (this.journeyInfoLoading = true)),
-        switchMap(({ groupId }) => {
-          return zip(
-            this.routeGQL.fetch({ groupId }),
-            this.avlsGQL.fetch({ groupId }),
-          );
-        }),
+        switchMap((urlData) =>
+          this.journeyGQL.fetch({
+            groupId: urlData.groupId,
+            lineId: urlData.lineId,
+          }),
+        ),
         takeUntil(this.onDestroy$),
       )
       .subscribe({
-        next: ([routeResult, avlsResult]) => {
-          if (!routeResult.data.route[0]) {
-            this.errorView = new VehicleJourneyNotFoundView();
-            return;
-          }
+        next: (result) => {
+          // We probably want to move a lot of this filtering and sorting to the API later,
+          // but for now it's quicker to iterate here in local dev
           const direction = this.directionRef?.toLowerCase();
-          const stopData = [...routeResult.data.route];
+          const stopData = [...result.data.journey.stops];
           const stops = stopData
             .filter(
               (n) => !direction || n.directionRef.toLowerCase() === direction,
@@ -143,7 +146,7 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           // The other direction's data will be on another screen.
           // If there's only one in the timetable, then we can display all
           const directions = getDistinct(stopData, (n) => n.directionRef);
-          this.rawAvls = [...avlsResult.data.avls]
+          this.rawAvls = [...result.data.journey.avls]
             .filter(
               (n) =>
                 directions.length <= 1 ||
@@ -163,21 +166,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           const vehicleAvls = this.rawAvls.filter(
             (n) => n.vehicleRef === this.vehicleRef,
           );
-          if (this.vehicles.length > 1) {
-            // TODO: remove in BODS-7974. No need to do this once we have solved that problem
-            const journeyStartTime = DateTime.fromISO(
-              this.rawAvls[0].recordedAtTimeUtc,
-            );
-            const journeyEndTime = DateTime.fromISO(
-              this.rawAvls.slice(-1)[0].recordedAtTimeUtc,
-            );
-            const hoursDifference = journeyEndTime
-              .diff(journeyStartTime)
-              .as("hours");
-            if (hoursDifference > 23.75) {
-              this.vehicles = [this.vehicleRef];
-            }
-          }
 
           this.journeyInfo = { avls: vehicleAvls, stops: stops };
           this.journeyInfoLoading = false;
@@ -196,14 +184,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     urlData$
       .pipe(
         tap(() => (this.journeysLoading = true)),
-        switchMap(({ journeyStart, lineId }) =>
-          this.service.fetchDayJourneys(
-            DateTime.fromISO(journeyStart)
-              .setZone("Europe/London")
-              .startOf("day")
-              .toISO(),
-            lineId,
-          ),
+        switchMap(({ dateOfJourney, lineId }) =>
+          this.service.fetchDayJourneys(dateOfJourney, lineId),
         ),
         takeUntil(this.onDestroy$),
       )

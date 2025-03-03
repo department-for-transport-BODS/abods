@@ -17,7 +17,7 @@ import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
-import { getUserOrgId } from "../lib/utils.js";
+import { getUserOrgIds } from "../lib/utils.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 
@@ -34,7 +34,7 @@ export const getUsers: QueryResolvers["users"] = async (
         where: {
           userOrganisations: {
             every: {
-              organisation_id: user.orgId,
+              organisation_id: { in: user.orgIds },
             },
           },
         },
@@ -54,8 +54,8 @@ export const getUsers: QueryResolvers["users"] = async (
           firstName: thisUser.first_name,
           lastName: thisUser.last_name,
           organisation: {
-            id: String(user.orgId),
-            name: String(user.orgId),
+            id: String(user.orgIds),
+            name: String(user.orgIds),
           },
           roles: [
             {
@@ -211,7 +211,7 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const orgId = getUserOrgId(bodsUser);
+    const orgIds = getUserOrgIds(bodsUser);
 
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
@@ -237,7 +237,9 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
-        `org:${orgId}`,
+        // Not good. Should be changed later
+        // Do we need to do this multiple times for each of their orgs?
+        `org:${orgIds[0]}`,
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {
