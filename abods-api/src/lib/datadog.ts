@@ -6,7 +6,6 @@ import {
   GraphQLRequestContextWillSendResponse,
   GraphQLRequestExecutionListener,
   GraphQLRequestListener,
-  GraphQLRequestListenerDidResolveField,
 } from "@apollo/server";
 import { RequestContext } from "../types/extra";
 import { sendDistributionMetric } from "datadog-lambda-js";

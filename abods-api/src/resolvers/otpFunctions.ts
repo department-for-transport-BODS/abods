@@ -92,7 +92,7 @@ const getOperatorsDropDown = async (
   userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
   const orgOperators = await getOperatorsFromOrgId(
-    user.orgId,
+    user.orgIds,
     db,
     userOperatorIds,
   );
@@ -398,7 +398,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
             adminAreaIds && adminAreaIds.length > 0
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
-          operatorOrganisations: { some: { organisation_id: user.orgId } },
+          operatorOrganisations: {
+            some: { organisation_id: { in: user.orgIds } },
+          },
         },
         select: {
           operatorref: true,
