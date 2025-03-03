@@ -1,6 +1,16 @@
 <app-page>
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis"></app-page-header>
-    <p>view-stops works!</p>
+    <div class="map-container">
+      <div id="map" class="map"></div>
+      <div class="legend">
+        <h4>Delay Severity</h4>
+        <div><span class="color-box low"></span> Low (0-15 min)</div>
+        <div><span class="color-box medium"></span> Medium (16-30 min)</div>
+        <div><span class="color-box high"></span> High (31-60 min)</div>
+        <div><span class="color-box severe"></span> Severe (>60 min)</div>
+      </div>
+      <div *ngIf="isLoading" class="loading-indicator">Loading data...</div>
+    </div>
   </ng-container>
 </app-page>

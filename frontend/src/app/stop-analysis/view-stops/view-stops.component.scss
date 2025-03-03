@@ -1,0 +1,56 @@
+.map-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.color-box {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.low {
+  background-color: #4caf50;
+}
+.medium {
+  background-color: #ffeb3b;
+}
+.high {
+  background-color: #ff9800;
+}
+.severe {
+  background-color: #f44336;
+}
+
+.loading-indicator {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
