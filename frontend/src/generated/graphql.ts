@@ -1446,6 +1446,18 @@ export type OperatorLinesQueryVariables = Exact<{
 
 export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
+export type StopAnalysisQueryVariables = Exact<{
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  boundingBox: BoundingBoxInputType;
+  fromTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['DateTime']['input'];
+  operatorId?: InputMaybe<Scalars['String']['input']>;
+  lineId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', stopId: number, atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number }> };
+
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
@@ -2758,6 +2770,39 @@ export const OperatorLinesDocument = gql`
   })
   export class OperatorLinesGQL extends Apollo.Query<OperatorLinesQuery, OperatorLinesQueryVariables> {
     document = OperatorLinesDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const StopAnalysisDocument = gql`
+    query stopAnalysis($adminAreaIds: [String!], $boundingBox: BoundingBoxInputType!, $fromTimestamp: DateTime!, $toTimestamp: DateTime!, $operatorId: String, $lineId: String) {
+  stopAnalysis(
+    inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, toTimestamp: $toTimestamp, operatorId: $operatorId, lineId: $lineId}
+  ) {
+    stopId
+    atcoCode
+    stopName
+    localityName
+    adminAreaName
+    timingPoint
+    latitude
+    longitude
+    early
+    late
+    onTime
+    scheduledDepartures
+    completedDepartures
+    totalDelay
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class StopAnalysisGQL extends Apollo.Query<StopAnalysisQuery, StopAnalysisQueryVariables> {
+    document = StopAnalysisDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
