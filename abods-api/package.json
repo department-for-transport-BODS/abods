@@ -60,7 +60,7 @@
     "redis": "^4.6.13",
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.20",
-    "uuid": "^10.0.0"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
