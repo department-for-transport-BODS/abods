@@ -2,7 +2,7 @@ import { RequestContext, SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
-import { getUserOrgId } from "../lib/utils.js";
+import { getUserOrgIds } from "../lib/utils.js";
 
 export function throwUnauthenticatedError(
   message?: string,
@@ -69,14 +69,14 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
 
-  const orgId = getUserOrgId({
+  const orgIds = getUserOrgIds({
     userOrganisations: bodsUser.userOrganisations,
     id: sessionRecord.user_id,
   });
 
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
-    orgId: orgId,
+    orgIds: orgIds,
   };
 
   logger.debug({ sessionUser }, "Session user returned");

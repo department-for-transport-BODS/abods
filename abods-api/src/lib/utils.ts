@@ -39,7 +39,7 @@ export const getPercentile = (percentile: number, sortedArray: number[]) => {
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
 };
 
-export const getUserOrgId = (user: {
+export const getUserOrgIds = (user: {
   id: number;
   userOrganisations: { organisation_id: number }[];
 }) => {
@@ -47,15 +47,6 @@ export const getUserOrgId = (user: {
     logger.error({ userId: user.id }, "User not mapped to an organisation");
     throwUnauthenticatedError("User not mapped to any organisation");
   }
-  if (user.userOrganisations.length > 1) {
-    logger.error(
-      { userId: user.id },
-      "API does not support multiple organisations per user",
-    );
-    throwUnauthenticatedError(
-      "API does not support multiple organisations per user",
-    );
-  }
-
-  return user.userOrganisations[0].organisation_id;
+  // Make sure to sort org ids so that in the few places where we pick the first, at least it's consistent
+  return user.userOrganisations.map((n) => n.organisation_id).sort();
 };
