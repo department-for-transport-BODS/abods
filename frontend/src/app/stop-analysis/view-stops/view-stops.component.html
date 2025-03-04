@@ -2,7 +2,107 @@
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis"></app-page-header>
     <div class="map-container">
-      <div id="map" class="map"></div>
+      <mgl-map
+        [style]="'mapbox://styles/mapbox/light-v10'"
+        [zoom]="[initialZoom]"
+        [center]="initialCenter"
+        (moveend)="onMapMoveEnd($event)"
+        (load)="onMapLoad($event)"
+      >
+        <!-- GeoJSON Source with clustering -->
+        <mgl-geojson-source
+          id="delay-points"
+          [data]="geojsonData"
+          [cluster]="true"
+          [clusterRadius]="50"
+          [clusterProperties]="clusterProperties"
+        >
+        </mgl-geojson-source>
+
+        <!-- Clustered Points Layer -->
+        <mgl-layer
+          id="clusters"
+          type="circle"
+          source="delay-points"
+          [filter]="['has', 'point_count']"
+          [paint]="{
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20,
+              5,
+              30,
+              20,
+              40
+            ],
+            'circle-color': [
+              'step',
+              ['get', 'avg_delay'],
+              '#4caf50',
+              15,
+              '#ffeb3b',
+              30,
+              '#ff9800',
+              60,
+              '#f44336'
+            ],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#fff'
+          }"
+          (click)="onClusterClick($event)"
+          (mouseenter)="onLayerMouseEnter()"
+          (mouseleave)="onLayerMouseLeave()"
+        >
+        </mgl-layer>
+
+        <!-- Cluster Count Layer -->
+        <mgl-layer
+          id="cluster-count"
+          type="symbol"
+          source="delay-points"
+          [filter]="['has', 'point_count']"
+          [layout]="{
+            'text-field': [
+              'concat',
+              ['to-string', ['round', ['get', 'avg_delay']]],
+              'm'
+            ],
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          }"
+          [paint]="{
+            'text-color': '#ffffff'
+          }"
+        >
+        </mgl-layer>
+
+        <!-- Unclustered Points Layer -->
+        <mgl-layer
+          id="unclustered-point"
+          type="circle"
+          source="delay-points"
+          [filter]="['!', ['has', 'point_count']]"
+          [paint]="{
+            'circle-radius': 10,
+            'circle-color': [
+              'step',
+              ['get', 'averageDelay'],
+              '#4caf50',
+              15,
+              '#ffeb3b',
+              30,
+              '#ff9800',
+              60,
+              '#f44336'
+            ],
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+          }"
+        >
+        </mgl-layer>
+      </mgl-map>
+
+      <!-- Legend -->
       <div class="legend">
         <h4>Delay Severity</h4>
         <div><span class="color-box low"></span> Low (0-15 min)</div>
@@ -10,6 +110,8 @@
         <div><span class="color-box high"></span> High (31-60 min)</div>
         <div><span class="color-box severe"></span> Severe (>60 min)</div>
       </div>
+
+      <!-- Loading Indicator -->
       <div *ngIf="isLoading" class="loading-indicator">Loading data...</div>
     </div>
   </ng-container>
