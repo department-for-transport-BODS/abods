@@ -20,12 +20,6 @@ export type Scalars = {
   Time: { input: string; output: string; }
 };
 
-export type AwsQuicksightUser = {
-  __typename?: 'AWSQuicksightUser';
-  enabled: Scalars['Boolean']['output'];
-  url?: Maybe<Scalars['String']['output']>;
-};
-
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -257,6 +251,12 @@ export type DashboardVehicles = {
   actual: Scalars['Int']['output'];
   expected: Scalars['Int']['output'];
   operatorId: Scalars['String']['output'];
+};
+
+export type DataAndServiceMonitoringUser = {
+  __typename?: 'DataAndServiceMonitoringUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -799,7 +799,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: AwsQuicksightUser;
+  embeddedUrl: DataAndServiceMonitoringUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -811,6 +811,7 @@ export type Query = {
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   serviceInfo?: Maybe<ServiceInfoType>;
+  serviceMonitorUrl: DataAndServiceMonitoringUser;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
   user?: Maybe<UserType>;
@@ -1194,7 +1195,7 @@ export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerform
 export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'DataAndServiceMonitoringUser', enabled: boolean, url?: string | null } };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -1431,6 +1432,11 @@ export type DeleteUserAlertMutationVariables = Exact<{
 
 
 export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
+
+export type ServiceMonitoringEmbedUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServiceMonitoringEmbedUrlQuery = { __typename?: 'Query', serviceMonitorUrl: { __typename?: 'DataAndServiceMonitoringUser', enabled: boolean, url?: string | null } };
 
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2715,6 +2721,25 @@ export const DeleteUserAlertDocument = gql`
   })
   export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
     document = DeleteUserAlertDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ServiceMonitoringEmbedUrlDocument = gql`
+    query serviceMonitoringEmbedUrl {
+  serviceMonitorUrl {
+    enabled
+    url
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ServiceMonitoringEmbedUrlGQL extends Apollo.Query<ServiceMonitoringEmbedUrlQuery, ServiceMonitoringEmbedUrlQueryVariables> {
+    document = ServiceMonitoringEmbedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

@@ -37,10 +37,11 @@ type Query {
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
 
-  embeddedUrl: AWSQuicksightUser!
+  embeddedUrl: DataAndServiceMonitoringUser!
+  serviceMonitorUrl: DataAndServiceMonitoringUser!
 }
 
-type AWSQuicksightUser {
+type DataAndServiceMonitoringUser {
   enabled: Boolean!
   url: String
 }

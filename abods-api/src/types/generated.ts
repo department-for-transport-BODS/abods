@@ -20,12 +20,6 @@ export type Scalars = {
   Time: { input: Date | string; output: Date | string; }
 };
 
-export type AwsQuicksightUser = {
-  __typename?: 'AWSQuicksightUser';
-  enabled: Scalars['Boolean']['output'];
-  url?: Maybe<Scalars['String']['output']>;
-};
-
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -257,6 +251,12 @@ export type DashboardVehicles = {
   actual: Scalars['Int']['output'];
   expected: Scalars['Int']['output'];
   operatorId: Scalars['String']['output'];
+};
+
+export type DataAndServiceMonitoringUser = {
+  __typename?: 'DataAndServiceMonitoringUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -799,7 +799,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: AwsQuicksightUser;
+  embeddedUrl: DataAndServiceMonitoringUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -811,6 +811,7 @@ export type Query = {
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   serviceInfo?: Maybe<ServiceInfoType>;
+  serviceMonitorUrl: DataAndServiceMonitoringUser;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
   user?: Maybe<UserType>;
@@ -1160,7 +1161,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
   AdminAreaInfoType: ResolverTypeWrapper<Partial<AdminAreaInfoType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
@@ -1189,6 +1189,7 @@ export type ResolversTypes = ResolversObject<{
   CorridorType: ResolverTypeWrapper<Partial<CorridorType>>;
   CorridorUpdateInputType: ResolverTypeWrapper<Partial<CorridorUpdateInputType>>;
   DashboardVehicles: ResolverTypeWrapper<Partial<DashboardVehicles>>;
+  DataAndServiceMonitoringUser: ResolverTypeWrapper<Partial<DataAndServiceMonitoringUser>>;
   Date: ResolverTypeWrapper<Partial<Scalars['Date']['output']>>;
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
@@ -1270,7 +1271,6 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
   AdminAreaInfoType: Partial<AdminAreaInfoType>;
   AdminAreasType: Partial<AdminAreasType>;
@@ -1297,6 +1297,7 @@ export type ResolversParentTypes = ResolversObject<{
   CorridorType: Partial<CorridorType>;
   CorridorUpdateInputType: Partial<CorridorUpdateInputType>;
   DashboardVehicles: Partial<DashboardVehicles>;
+  DataAndServiceMonitoringUser: Partial<DataAndServiceMonitoringUser>;
   Date: Partial<Scalars['Date']['output']>;
   DateTime: Partial<Scalars['DateTime']['output']>;
   DayOfWeekFlagsInputType: Partial<DayOfWeekFlagsInputType>;
@@ -1367,12 +1368,6 @@ export type ResolversParentTypes = ResolversObject<{
   UserUpdateInput: Partial<UserUpdateInput>;
   UserUpdateResponseType: Partial<UserUpdateResponseType>;
   VehicleStatsType: Partial<VehicleStatsType>;
-}>;
-
-export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
-  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreaInfoType'] = ResolversParentTypes['AdminAreaInfoType']> = ResolversObject<{
@@ -1511,6 +1506,12 @@ export type DashboardVehiclesResolvers<ContextType = RequestContext, ParentType 
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type DataAndServiceMonitoringUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DataAndServiceMonitoringUser'] = ResolversParentTypes['DataAndServiceMonitoringUser']> = ResolversObject<{
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1789,7 +1790,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
-  embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
+  embeddedUrl?: Resolver<ResolversTypes['DataAndServiceMonitoringUser'], ParentType, ContextType>;
   eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
@@ -1801,6 +1802,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
+  serviceMonitorUrl?: Resolver<ResolversTypes['DataAndServiceMonitoringUser'], ParentType, ContextType>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<Maybe<ResolversTypes['StopAnalysisType']>>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
   user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
@@ -1951,7 +1953,6 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 }>;
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
-  AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
   AdminAreaInfoType?: AdminAreaInfoTypeResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
@@ -1969,6 +1970,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   CorridorSummaryStatsType?: CorridorSummaryStatsTypeResolvers<ContextType>;
   CorridorType?: CorridorTypeResolvers<ContextType>;
   DashboardVehicles?: DashboardVehiclesResolvers<ContextType>;
+  DataAndServiceMonitoringUser?: DataAndServiceMonitoringUserResolvers<ContextType>;
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DelayFrequencyType?: DelayFrequencyTypeResolvers<ContextType>;

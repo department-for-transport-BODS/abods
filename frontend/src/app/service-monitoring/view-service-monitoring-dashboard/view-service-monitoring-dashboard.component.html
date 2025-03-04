@@ -6,6 +6,17 @@
       spaceBelow="2"
     ></app-page-header>
     <br />
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
+        <gds-error-summary [errors]="errors"></gds-error-summary>
+      </div>
+    </div>
+    <app-spinner
+      *ngIf="loading"
+      [vCentre]="true"
+      message="Loading..."
+      size="default"
+    ></app-spinner>
     <div #iframeContainer class="service-monitoring__header-container"></div>
   </ng-container>
 </app-page>

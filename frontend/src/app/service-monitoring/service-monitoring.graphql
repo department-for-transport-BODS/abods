@@ -1,0 +1,6 @@
+query serviceMonitoringEmbedUrl {
+  serviceMonitorUrl {
+    enabled
+    url
+  }
+}
