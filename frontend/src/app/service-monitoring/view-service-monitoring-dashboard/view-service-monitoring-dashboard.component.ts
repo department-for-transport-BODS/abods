@@ -5,8 +5,8 @@ import {
   Renderer2,
   ViewChild,
 } from "@angular/core";
-import { ServiceMonitoringEmbedUrlGQL } from "../../../generated/graphql";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 
 @Component({
   selector: "app-view-service-monitoring-dashboard",
@@ -18,7 +18,7 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
 
   constructor(
     private renderer: Renderer2,
-    private serviceMonitorQuery: ServiceMonitoringEmbedUrlGQL,
+    private userService: AuthenticatedUserService,
   ) {}
 
   serviceMonitoringUrl = "";
@@ -27,17 +27,21 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
   ngAfterViewInit() {
     const iframe = this.renderer.createElement("iframe");
 
-    this.serviceMonitorQuery.fetch({}).subscribe((response) => {
+    this.userService.authenticatedUser$.subscribe((loginInfo) => {
       this.loading = false;
-      if (!response.data.serviceMonitorUrl.enabled) {
+      if (
+        !loginInfo.canViewServiceMonitoring ||
+        !loginInfo.serviceMonitoringEmbedUrl
+      ) {
         this.errors = [
           {
             error: "Unable to load dashboad. Please contact admin",
             label: "enable-service-monitoring",
           },
         ];
+        return;
       }
-      this.serviceMonitoringUrl = response.data.serviceMonitorUrl.url ?? "";
+      this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
       this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
       this.renderer.setAttribute(iframe, "width", "100%");
       this.renderer.setAttribute(iframe, "height", "550");

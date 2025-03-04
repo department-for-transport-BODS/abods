@@ -1,14 +1,8 @@
 fragment User on UserType {
   id
-  email
   username
   firstName
   lastName
-  canViewServiceMonitoring
-  organisation {
-    id
-    name
-  }
 }
 
 fragment Alert on AlertType {

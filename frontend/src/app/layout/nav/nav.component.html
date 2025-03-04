@@ -54,7 +54,8 @@
         </li>
         <li
           *ngIf="
-            canViewServiceMonitoring() &&
+            loginInfo &&
+            loginInfo.canViewServiceMonitoring &&
             configService.flag('serviceMonitoring')
           "
           class="nav__item"

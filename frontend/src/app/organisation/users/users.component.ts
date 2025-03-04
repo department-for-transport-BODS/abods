@@ -3,7 +3,7 @@ import { NgxSmartModalService } from "ngx-smart-modal";
 import { Subscription } from "rxjs";
 import { UserFragment } from "src/generated/graphql";
 import { OrganisationService } from "../organisation.service";
-import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
+
 @Component({
   selector: "app-users",
   templateUrl: "./users.component.html",
@@ -12,24 +12,15 @@ import { AuthenticatedUserService } from "src/app/authentication/authenticated-u
 export class UsersComponent implements OnInit, OnDestroy {
   submitted = false;
 
-  inviteSent = false;
-
   subs: Subscription[] = [];
 
   loaded = false;
   errored = false;
 
-  authenticatedUser: UserFragment | null = null;
-
-  get canViewServiceMonitoring(): boolean {
-    return this.authService.canViewServiceMonitoring;
-  }
-
   users: UserFragment[] = [];
 
   constructor(
     private service: OrganisationService,
-    private authService: AuthenticatedUserService,
     public ngxSmartModalService: NgxSmartModalService,
   ) {}
 
@@ -43,9 +34,6 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.errored = true;
         }
       }),
-      this.authService.authenticatedUser$.subscribe(
-        (u) => (this.authenticatedUser = u),
-      ),
     );
   }
 

@@ -1,33 +1,27 @@
 import { Injectable } from "@angular/core";
 import { Observable, ReplaySubject } from "rxjs";
 import { filter, map } from "rxjs/operators";
-import { UserFragment } from "src/generated/graphql";
+import { LoginInfo } from "../../generated/graphql";
 
 @Injectable({
   providedIn: "root",
 })
 export class AuthenticatedUserService {
   private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
-  private userSubject = new ReplaySubject<UserFragment | null>(1);
-  private user: UserFragment | null = null;
+  private userSubject = new ReplaySubject<LoginInfo | null>(1);
 
   get isAuthenticated$(): Observable<boolean> {
     return this.isAuthenticatedSubject.asObservable();
   }
 
-  get authenticatedUser$(): Observable<UserFragment> {
+  get authenticatedUser$(): Observable<LoginInfo> {
     return this.userSubject.pipe(
       filter((u) => u !== null),
       map((u) => u!),
     );
   }
 
-  get canViewServiceMonitoring(): boolean {
-    return this.user?.canViewServiceMonitoring ?? false;
-  }
-
-  setUser(user: UserFragment | null) {
-    this.user = user;
+  setUser(user: LoginInfo | null) {
     this.userSubject.next(user);
   }
 

@@ -4,6 +4,7 @@ import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/hel
 import { NavService } from "./nav.service";
 import { ConfigService } from "../../config/config.service";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { LoginInfo } from "../../../generated/graphql";
 
 @Component({
   selector: "app-nav",
@@ -11,6 +12,8 @@ import { AuthenticatedUserService } from "../../authentication/authenticated-use
   styleUrls: ["./nav.component.scss"],
 })
 export class NavComponent implements OnInit {
+  loginInfo: LoginInfo | null = null;
+
   constructor(
     public navService: NavService,
     private helpdeskPanelService: HelpdeskPanelService,
@@ -20,10 +23,9 @@ export class NavComponent implements OnInit {
 
   ngOnInit(): void {
     initAll();
-  }
-
-  canViewServiceMonitoring() {
-    return this.authUserService.canViewServiceMonitoring;
+    this.authUserService.authenticatedUser$.subscribe((loginInfo) => {
+      this.loginInfo = loginInfo;
+    });
   }
 
   openHelpdesk() {

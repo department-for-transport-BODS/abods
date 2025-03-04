@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: string; output: string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -251,12 +257,6 @@ export type DashboardVehicles = {
   actual: Scalars['Int']['output'];
   expected: Scalars['Int']['output'];
   operatorId: Scalars['String']['output'];
-};
-
-export type DataAndServiceMonitoringUser = {
-  __typename?: 'DataAndServiceMonitoringUser';
-  enabled: Scalars['Boolean']['output'];
-  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -492,6 +492,14 @@ export type LocalityType = {
   localityAreaName?: Maybe<Scalars['String']['output']>;
   localityId?: Maybe<Scalars['String']['output']>;
   localityName?: Maybe<Scalars['String']['output']>;
+};
+
+export type LoginInfo = {
+  __typename?: 'LoginInfo';
+  canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewServiceMonitoring: Scalars['Boolean']['output'];
+  currentUserId: Scalars['String']['output'];
+  serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoginResponse = {
@@ -799,7 +807,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: DataAndServiceMonitoringUser;
+  embeddedUrl: AwsQuicksightUser;
   eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -811,10 +819,9 @@ export type Query = {
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
   serviceInfo?: Maybe<ServiceInfoType>;
-  serviceMonitorUrl: DataAndServiceMonitoringUser;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
-  user?: Maybe<UserType>;
+  user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
@@ -1062,12 +1069,9 @@ export enum StopsSegment {
 
 export type UserType = {
   __typename?: 'UserType';
-  canViewServiceMonitoring: Scalars['Boolean']['output'];
-  email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
-  organisation?: Maybe<OrganisationType>;
   username: Scalars['String']['output'];
 };
 
@@ -1105,7 +1109,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1195,7 +1199,7 @@ export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerform
 export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'DataAndServiceMonitoringUser', enabled: boolean, url?: string | null } };
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -1360,14 +1364,14 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 
 export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servicePatterns: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, stops: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }>, serviceLinks: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null }> }> };
 
-export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null };
+export type UserFragment = { __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null };
 
 export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
 
 export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null }> | null };
+export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null }> | null };
 
 export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1388,7 +1392,7 @@ export type EditUserMutationVariables = Exact<{
 }>;
 
 
-export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null } };
+export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null } | null } };
 
 export type RemoveUserMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -1432,11 +1436,6 @@ export type DeleteUserAlertMutationVariables = Exact<{
 
 
 export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
-
-export type ServiceMonitoringEmbedUrlQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ServiceMonitoringEmbedUrlQuery = { __typename?: 'Query', serviceMonitorUrl: { __typename?: 'DataAndServiceMonitoringUser', enabled: boolean, url?: string | null } };
 
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1603,15 +1602,9 @@ export const OperatorFeedHistoryFragmentDoc = gql`
 export const UserFragmentDoc = gql`
     fragment User on UserType {
   id
-  email
   username
   firstName
   lastName
-  canViewServiceMonitoring
-  organisation {
-    id
-    name
-  }
 }
     `;
 export const AlertFragmentDoc = gql`
@@ -1671,10 +1664,13 @@ export const LogoutDocument = gql`
 export const UserDocument = gql`
     query user {
   user {
-    ...User
+    currentUserId
+    canViewServiceMonitoring
+    canEditAllAlerts
+    serviceMonitoringEmbedUrl
   }
 }
-    ${UserFragmentDoc}`;
+    `;
 
   @Injectable({
     providedIn: 'root'
@@ -2721,25 +2717,6 @@ export const DeleteUserAlertDocument = gql`
   })
   export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
     document = DeleteUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const ServiceMonitoringEmbedUrlDocument = gql`
-    query serviceMonitoringEmbedUrl {
-  serviceMonitorUrl {
-    enabled
-    url
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ServiceMonitoringEmbedUrlGQL extends Apollo.Query<ServiceMonitoringEmbedUrlQuery, ServiceMonitoringEmbedUrlQueryVariables> {
-    document = ServiceMonitoringEmbedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

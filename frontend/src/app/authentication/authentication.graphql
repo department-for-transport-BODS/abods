@@ -11,6 +11,9 @@ mutation logout {
 
 query user {
   user {
-    ...User
+    currentUserId
+    canViewServiceMonitoring
+    canEditAllAlerts
+    serviceMonitoringEmbedUrl
   }
 }
