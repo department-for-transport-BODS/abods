@@ -74,6 +74,6 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get authUserIsAdmin() {
-    return this.authenticatedUser?.isAdmin ?? false;
+    return this.authenticatedUser?.canViewServiceMonitoring ?? false;
   }
 }

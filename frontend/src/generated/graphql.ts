@@ -1062,10 +1062,10 @@ export enum StopsSegment {
 
 export type UserType = {
   __typename?: 'UserType';
+  canViewServiceMonitoring: Scalars['Boolean']['output'];
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
-  isAdmin: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   organisation?: Maybe<OrganisationType>;
   username: Scalars['String']['output'];
@@ -1105,7 +1105,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1360,14 +1360,14 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 
 export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servicePatterns: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, stops: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }>, serviceLinks: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null }> }> };
 
-export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null };
+export type UserFragment = { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null };
 
 export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
 
 export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null }> | null };
+export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null }> | null };
 
 export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1388,7 +1388,7 @@ export type EditUserMutationVariables = Exact<{
 }>;
 
 
-export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, isAdmin: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null } };
+export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, email: string, username: string, firstName?: string | null, lastName?: string | null, canViewServiceMonitoring: boolean, organisation?: { __typename?: 'OrganisationType', id: string, name: string } | null } | null } };
 
 export type RemoveUserMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -1607,7 +1607,7 @@ export const UserFragmentDoc = gql`
   username
   firstName
   lastName
-  isAdmin
+  canViewServiceMonitoring
   organisation {
     id
     name

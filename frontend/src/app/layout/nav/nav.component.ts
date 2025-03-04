@@ -22,8 +22,8 @@ export class NavComponent implements OnInit {
     initAll();
   }
 
-  isUserAdmin() {
-    return this.authUserService.authenticatedUserIsAdmin;
+  canViewServiceMonitoring() {
+    return this.authUserService.canViewServiceMonitoring;
   }
 
   openHelpdesk() {

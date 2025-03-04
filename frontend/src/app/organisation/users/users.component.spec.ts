@@ -89,7 +89,7 @@ describe("UsersComponent", () => {
         username: "dennis@iwbaotn.uk",
         firstName: "Dennis",
         lastName: "Nordon",
-        isAdmin: false,
+        canViewServiceMonitoring: false,
         roles: [
           {
             id: "4",
@@ -103,7 +103,7 @@ describe("UsersComponent", () => {
         username: "Kenneth@Horne.uk",
         firstName: "Kenneth",
         lastName: "Horne",
-        isAdmin: false,
+        canViewServiceMonitoring: false,
         roles: [
           {
             id: "2",
@@ -117,7 +117,7 @@ describe("UsersComponent", () => {
         username: "betty.marsden@mail.co.uk",
         firstName: "Betty",
         lastName: "Marsden",
-        isAdmin: false,
+        canViewServiceMonitoring: false,
         roles: [
           {
             id: "4",
@@ -169,7 +169,7 @@ describe("UsersComponent", () => {
       username: "dennis@iwbaotn.uk",
       firstName: "Dennis",
       lastName: "Nordon",
-      isAdmin: false,
+      canViewServiceMonitoring: false,
       roles: [
         {
           id: "4",
@@ -183,7 +183,7 @@ describe("UsersComponent", () => {
         roles: [{ name: "Administrator" }],
       }),
     );
-    spyOnProperty(authService, "authenticatedUserIsAdmin").and.returnValue(
+    spyOnProperty(authService, "canViewServiceMonitoring").and.returnValue(
       true,
     );
     spyOn(service, "listUsers$").and.returnValue(of([person]));
@@ -220,7 +220,7 @@ describe("UsersComponent", () => {
       username: "dennis@iwbaotn.uk",
       firstName: "Dennis",
       lastName: "Nordon",
-      isAdmin: false,
+      canViewServiceMonitoring: false,
       roles: [
         {
           id: "4",

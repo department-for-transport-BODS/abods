@@ -493,7 +493,7 @@ type UserType {
   firstName: String
   lastName: String
   organisation: OrganisationType
-  isAdmin: Boolean!
+  canViewServiceMonitoring: Boolean!
 }
 
 type OrganisationType {

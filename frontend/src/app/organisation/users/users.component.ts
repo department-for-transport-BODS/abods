@@ -21,8 +21,8 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   authenticatedUser: UserFragment | null = null;
 
-  get authenticatedUserIsAdmin(): boolean {
-    return this.authService.authenticatedUserIsAdmin;
+  get canViewServiceMonitoring(): boolean {
+    return this.authService.canViewServiceMonitoring;
   }
 
   users: UserFragment[] = [];

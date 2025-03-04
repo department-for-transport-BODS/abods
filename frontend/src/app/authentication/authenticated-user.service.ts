@@ -22,8 +22,8 @@ export class AuthenticatedUserService {
     );
   }
 
-  get authenticatedUserIsAdmin(): boolean {
-    return this.user?.isAdmin ?? false;
+  get canViewServiceMonitoring(): boolean {
+    return this.user?.canViewServiceMonitoring ?? false;
   }
 
   setUser(user: UserFragment | null) {

@@ -64,7 +64,7 @@ export const getUsers: QueryResolvers["users"] = async (
             id: String(user.orgIds),
             name: String(user.orgIds),
           },
-          isAdmin: thisUser.userOrganisations.some(
+          canViewServiceMonitoring: thisUser.userOrganisations.some(
             (org) => org.organisation.is_abods_global_viewer === true,
           ),
         })),
@@ -107,7 +107,7 @@ export const getUser: QueryResolvers["user"] = async (
         email: x.email,
         firstName: x.first_name,
         lastName: x.last_name,
-        isAdmin: x.userOrganisations.some(
+        canViewServiceMonitoring: x.userOrganisations.some(
           (org) => org.organisation.is_abods_global_viewer === true,
         ),
       }));
@@ -164,7 +164,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
               email: alert.created_by_user.email,
               firstName: alert.created_by_user.first_name,
               lastName: alert.created_by_user.last_name,
-              isAdmin: false,
+              canViewServiceMonitoring: false,
             }
           : null,
         sendTo: alert.send_to_user
@@ -174,7 +174,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
               email: alert.send_to_user.email,
               firstName: alert.send_to_user.first_name,
               lastName: alert.send_to_user.last_name,
-              isAdmin: false,
+              canViewServiceMonitoring: false,
             }
           : null,
       };
@@ -339,7 +339,7 @@ async function getUserAlertFromDb(
           email: alert.created_by_user.email,
           firstName: alert.created_by_user.first_name,
           lastName: alert.created_by_user.last_name,
-          isAdmin: false,
+          canViewServiceMonitoring: false,
         }
       : null,
     sendTo: alert.send_to_user
@@ -349,7 +349,7 @@ async function getUserAlertFromDb(
           email: alert.send_to_user.email,
           firstName: alert.send_to_user.first_name,
           lastName: alert.send_to_user.last_name,
-          isAdmin: false,
+          canViewServiceMonitoring: false,
         }
       : null,
   };

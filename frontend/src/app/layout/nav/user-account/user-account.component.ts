@@ -16,8 +16,8 @@ export class UserAccountComponent {
     private ngxSmartModalService: NgxSmartModalService,
   ) {}
 
-  get authenticatedUserIsAdmin(): boolean {
-    return this.authUserService.authenticatedUserIsAdmin;
+  get canViewServiceMonitoring(): boolean {
+    return this.authUserService.canViewServiceMonitoring;
   }
 
   logout(event: Event) {
