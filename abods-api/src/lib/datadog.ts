@@ -6,7 +6,6 @@ import {
   GraphQLRequestContextWillSendResponse,
   GraphQLRequestExecutionListener,
   GraphQLRequestListener,
-  GraphQLRequestListenerDidResolveField,
 } from "@apollo/server";
 import { RequestContext } from "../types/extra";
 import { sendDistributionMetric } from "datadog-lambda-js";
@@ -83,34 +82,6 @@ const datadogMetricsPlugin: ApolloServerPlugin = {
         const executionStartTime = Date.now();
 
         return {
-          willResolveField: ({
-            info,
-          }): GraphQLRequestListenerDidResolveField => {
-            const fieldStartTime = Date.now();
-
-            return () => {
-              const fieldEndTime = Date.now();
-              const fieldDuration = fieldEndTime - fieldStartTime;
-
-              sendDistributionMetric(
-                "abods.graphql.field.count",
-                1,
-                "function:GraphQlFunction",
-                `env:${process.env.PROJECT_ENV}`,
-                `field:${info.fieldName}`,
-                `parentType:${info.parentType.name}`,
-              );
-
-              sendDistributionMetric(
-                "abods.graphql.field.duration",
-                fieldDuration,
-                "function:GraphQlFunction",
-                `env:${process.env.PROJECT_ENV}`,
-                `field:${info.fieldName}`,
-                `parentType:${info.parentType.name}`,
-              );
-            };
-          },
           executionDidEnd: async () => {
             const executionEndTime = Date.now();
             const executionDuration = executionEndTime - executionStartTime;

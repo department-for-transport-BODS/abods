@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://uat.analyse-tmp.bus-data.dft.gov.uk/api/graphql/",
+    "target": "https://uat.analyse.bus-data.dft.gov.uk/api/graphql/",
     "changeOrigin": true,
     "secure": false,
     "pathRewrite": {
