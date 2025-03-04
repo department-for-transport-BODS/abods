@@ -162,7 +162,6 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name?.value;
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
-    const user = await requireUserSession(context);
     const finalEndTime = getDate().startOf("minute");
     const promises: Promise<VehicleStatsType>[] = [];
     for (let offset = 0; offset < 20; offset++) {
@@ -171,7 +170,6 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
       promises.push(
         getVehicleCounts(
           context.kysely,
-          user,
           parent.operatorId,
           startTime,
           endTime.toDate(),
