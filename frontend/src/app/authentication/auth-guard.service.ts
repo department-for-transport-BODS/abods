@@ -7,7 +7,7 @@ import {
   RouterStateSnapshot,
 } from "@angular/router";
 import { Observable, of } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { tap } from "rxjs/operators";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 import { AuthenticationService } from "./authentication.service";
 
@@ -33,7 +33,6 @@ export class AuthGuardService implements CanActivateChild, CanActivate {
             .catch(console.log);
         }
       }),
-      map((isAuthenticated) => isAuthenticated),
     );
   }
 
