@@ -118,6 +118,9 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
           lte: args.end,
         },
       },
+      orderBy: {
+        received_interval: "asc",
+      },
     });
 
     return result.map((summary) => ({
