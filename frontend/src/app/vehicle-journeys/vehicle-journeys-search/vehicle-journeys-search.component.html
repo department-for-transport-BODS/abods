@@ -117,6 +117,7 @@
     <app-vehicle-journeys-grid
       [data]="vehicleJourneys"
       [loading]="journeysLoading"
+      [date]="date.value.toISODate()"
       [operatorId]="operator.value"
       [serviceId]="service.value"
     ></app-vehicle-journeys-grid>

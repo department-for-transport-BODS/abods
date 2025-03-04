@@ -1,4 +1,4 @@
-import { getDate, getFormattedDate } from "../lib/dayjs.js";
+import { getFormattedDate } from "../lib/dayjs.js";
 import {
   EventResponse,
   EventStatsType,
@@ -21,12 +21,13 @@ import {
 import { feed_monitor_summary, PrismaClient } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
+import dayjs from "dayjs";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
     const eventStats: EventStatsType[] = [];
     // Get data for the previous 90 days before today
-    const currentTime = getDate();
+    const currentTime = dayjs();
     let startdate = currentTime.subtract(90, "day");
 
     while (startdate.isBefore(currentTime)) {
@@ -118,6 +119,9 @@ export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
           lte: args.end,
         },
       },
+      orderBy: {
+        received_interval: "asc",
+      },
     });
 
     return result.map((summary) => ({
@@ -162,7 +166,7 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   const queryName = info.operation.name?.value;
   let result: VehicleStatsType[] = [];
   if (queryName === "operatorLiveStatus") {
-    const finalEndTime = getDate().startOf("minute");
+    const finalEndTime = dayjs().startOf("minute");
     const promises: Promise<VehicleStatsType>[] = [];
     for (let offset = 0; offset < 20; offset++) {
       const endTime = finalEndTime.subtract(offset, "minute");

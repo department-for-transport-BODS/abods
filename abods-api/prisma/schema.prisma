@@ -38,12 +38,6 @@ model Alert {
   send_to_user     bods_user? @relation("send_to_user", fields: [send_to], references: [id])
 }
 
-model Role {
-  id    Int    @id(map: "Role_pkey01")
-  name  String @db.VarChar(100)
-  scope String @db.VarChar(100)
-}
-
 model ApiInfo {
   id              String      @id @db.VarChar(100)
   version         String
@@ -95,7 +89,6 @@ model SiriVMPositions {
 
   @@id([operator_ref, line_name, journey_ref, date_of_journey, vehicle_ref, recorded_at_time], map: "siri_positions_vehicleref_recordedattime_30052024")
   @@index([group_id], map: "siri_index_in_group_id")
-  @@index([date_of_journey, operator_ref, line_name], map: "siri_index_on_date_of_journey_operator_ref_line_name")
 }
 
 model Timetable {
@@ -134,7 +127,7 @@ model Timetable {
   timestamp_after_estimate DateTime?                @db.Timestamptz(6)
   direction                String?
   departure_day_shift      Boolean?
-  siri_vm_position_id      Int?
+  siri_vm_position_id      BigInt?
   incomplete_reason        Int?
   stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
@@ -153,8 +146,8 @@ model expected_operators {
   expected_services expected_services[]
 
   @@id([operator_noc, date_of_journey]) // TODO: fix - not in db
-  @@index([date_of_journey], map: "expected_operators_v2_date_of_journey_idx")
-  @@index([operator_noc], map: "expected_operators_v2_operator_noc_idx")
+  @@index([operator_noc])
+  @@index([date_of_journey], map: "expected_operatorss_date_of_journey_idx")
 }
 
 model expected_journeys {
@@ -171,14 +164,14 @@ model expected_journeys {
   day_of_week                  Int?
   admin_area_id                Int[]
   expected_journey_end         DateTime?          @db.Timestamptz(6)
-  direction                    String?            @db.VarChar(20)
+  direction                    String?
   expected_services            expected_services? @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
 
   @@id([noc_and_line_and_servicecode, journey_code, date_of_journey]) // TODO: fix - not in db
-  @@index([date_of_journey], map: "expected_journeys_v2_date_of_journey_idx")
-  @@index([group_id], map: "expected_journeys_v2_group_id_idx")
-  @@index([noc_and_line_and_servicecode], map: "expected_journeys_v2_noc_and_line_idx")
-  @@index([operator_noc, line_name, journey_code], map: "expected_journeys_v2_operator_noc_line_name_journey_code_idx")
+  @@index([date_of_journey])
+  @@index([group_id])
+  @@index([noc_and_line_and_servicecode], map: "expected_journeys_noc_and_line_idx")
+  @@index([operator_noc, line_name, journey_code])
 }
 
 model transmodel_vehiclejourney {
@@ -275,7 +268,7 @@ model timetable_summary_operator_t {
   max_late            Int
   avg_time_difference Decimal  @db.Decimal
   admin_areas         Int[]
-  estimated           Boolean  @default(false)
+  estimated           Boolean? @default(false)
   incomplete_reason   Int?
 
   @@index([day_of_week], map: "day_of_week_operatort")
@@ -426,7 +419,7 @@ model avl_line_level_monitoring {
 
 model feed_monitor_summary {
   id                BigInt        @default(autoincrement())
-  operator_noc      String        @unique(map: "feed_monitor_summary_unique")
+  operator_noc      String        @unique
   last_outage       DateTime?     @db.Timestamptz(6)
   unavailable_since DateTime?     @db.Timestamptz(6)
   update_frequency  Int?
@@ -491,6 +484,7 @@ model timetable_frequent_summary_services {
   excess_wait_time             Decimal  @db.Decimal
   headway_stops_count          Decimal  @db.Decimal
   estimated                    Boolean
+  is_timing_point              Boolean?
 }
 
 view bods_user {
@@ -600,9 +594,26 @@ view naptan_stoppoint_latlong {
 }
 
 model transmodel_tracks {
-  id             Int    @id
-  from_atco_code String
-  to_atco_code   String
-  geometry       String
-  distance       Int
+  id             BigInt  @id
+  from_atco_code String  @db.VarChar(255)
+  to_atco_code   String  @db.VarChar(255)
+  geometry       String?
+  distance       Int?
+
+  @@unique([from_atco_code, to_atco_code], map: "unique_from_to_atco_code")
+  @@index([from_atco_code, to_atco_code], map: "transmodel_tracks_geometry_idx")
+}
+
+view organisation_organisation_admin_areas {
+  id              Int  @unique // TODO: fix - nullable in db, not unique
+  organisation_id Int?
+  adminarea_id    Int?
+}
+
+model ui_lta {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  @@unique([id, name], map: "ui_lta_id_name_uniq")
+  @@index([name])
 }

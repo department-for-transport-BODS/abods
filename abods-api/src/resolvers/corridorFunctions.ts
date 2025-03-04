@@ -37,15 +37,15 @@ import {
   StopType,
 } from "../types/generated.js";
 import {
-  getDate,
-  getDayFormattedDate,
-  getHourFormattedDate,
+  standardFormat,
+  toUkTime,
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
+import dayjs from "dayjs";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -146,6 +146,9 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
 
     const stopList = args.stopList || [];
 
+    if (stopList.length === 0) {
+      throw Error("No stops passed to obtain distinct routes");
+    }
     stopList.push(""); // Push blank to add comma at the end
     const stopsPattern = stopList.join(",");
     const [routes, adminAreas] = await Promise.all([
@@ -214,7 +217,10 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
-      organisation_id: user.orgId,
+      // Not good. Should be changed later
+      // This won't be visible to any other orgs they are assigned to.
+      // Visibility will be somewhat random, though consistent because we sort the org numbers
+      organisation_id: user.orgIds[0],
       user_id: user.id,
     },
     select: {
@@ -535,22 +541,21 @@ const getJourneyStats = (
       let dateKey = "";
       switch (inputType) {
         case CorridorJourneyStatsOption.day:
-          dateKey = getDayFormattedDate(firstDeparture.date_of_journey);
+          dateKey = standardFormat(toUkTime(firstDeparture.date_of_journey));
           break;
 
         case CorridorJourneyStatsOption.dayOfWeek:
-          dateKey = getDate(firstDeparture.date_of_journey).day().toString();
+          dateKey = dayjs(firstDeparture.date_of_journey).day().toString();
           break;
 
         case CorridorJourneyStatsOption.hour:
-          dateKey = getHourFormattedDate(
-            firstDeparture.expected_departure_time,
+          dateKey = standardFormat(
+            toUkTime(firstDeparture.expected_departure_time).startOf("hour"),
           );
           break;
 
         case CorridorJourneyStatsOption.hourAsNumber:
-          dateKey = getDate(firstDeparture.expected_departure_time)
-            .tz("Europe/London")
+          dateKey = toUkTime(firstDeparture.expected_departure_time)
             .hour()
             .toString();
           break;
@@ -733,12 +738,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    const serviceLinks: ServiceLinkType[] = await listServiceLinks(
-      results,
-      context.kysely,
-    );
-
-    return serviceLinks.reverse();
+    return listServiceLinks(results, context.kysely);
   };
 
 const corridorResovlers: Resolvers = {
