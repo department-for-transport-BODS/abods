@@ -149,7 +149,7 @@ Resources:
           QUICKSIGHT_ADMIN_DASHBOARD_ID: "72fd7c01-f654-449b-92e2-bdb142d85e1d"
           QUICKSIGHT_LTA_DASHBOARD_ID: "b716338e-2416-4c29-95f8-1c21e27c1ecf"
           QUICKSIGHT_OPERATOR_DASHBOARD_ID: "5fce6742-935f-4a78-851b-c3f730dca44e"
-          DATADOG_SERVICE_MONITORING_DASHBOARD: !Sub "{ServiceMonitoringDashboardUrl}"
+          DATADOG_SERVICE_MONITORING_DASHBOARD: !Sub "${ServiceMonitoringDashboardUrl}"
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 

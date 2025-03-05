@@ -19,6 +19,13 @@ import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
+const accountTypes = {
+  admin: 1,
+  orgAdmin: 2,
+  orgStaff: 3,
+  developer: 4,
+  agentUser: 5,
+};
 
 // Summary: fetch all users
 export const getUsers: QueryResolvers["users"] = async (
@@ -74,15 +81,17 @@ export const getUser: QueryResolvers["user"] = async (
           },
         },
         email: true,
+        account_type: true,
       },
     });
 
     const allowedEmailDomains = ["@dft.gov.uk", "@kpmg.co.uk"];
     const email = userDetails.email.toLowerCase();
 
-    const canViewServiceMonitoring = allowedEmailDomains.some((domain) =>
-      email.endsWith(domain),
-    );
+    // Allow access to users with dft.gov.uk and site admins (account_type = 1)
+    const canViewServiceMonitoring =
+      allowedEmailDomains.some((domain) => email.endsWith(domain)) &&
+      userDetails.account_type === accountTypes.admin;
 
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
