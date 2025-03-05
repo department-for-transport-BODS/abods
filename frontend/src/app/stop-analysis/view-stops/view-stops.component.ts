@@ -1,14 +1,45 @@
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { Subject } from "rxjs";
-import { debounceTime, takeUntil } from "rxjs/operators";
-import { GeoJSONSource, Map, MapboxGeoJSONFeature } from "mapbox-gl";
-import { MapComponent } from "ngx-mapbox-gl";
 import {
-  BoundingBoxInputType,
-  StopAnalysisGQL,
-  StopAnalysisType,
-} from "../../../generated/graphql";
-import { FeatureCollection, Point } from "geojson";
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnDestroy,
+} from "@angular/core";
+import { Feature, FeatureCollection, LineString, Point } from "geojson";
+import {
+  EventData,
+  FeatureIdentifier,
+  LngLatBounds,
+  MapboxGeoJSONFeature,
+  MapMouseEvent,
+} from "mapbox-gl";
+import { Map } from "mapbox-gl";
+import { ConfigService } from "../../config/config.service";
+import { BRITISH_ISLES_BBOX } from "../../shared/geo";
+import { Subject, takeUntil } from "rxjs";
+import { CorridorStop } from "../../corridors/types";
+
+type MGLMouseEvent = MapMouseEvent & {
+  features?: MapboxGeoJSONFeature[];
+} & EventData;
+
+/**
+ * @see https://github.com/mapbox/mapbox-gl-js/issues/9461
+ */
+function removeFeatureStateSafe(
+  map: Map | undefined,
+  identifier: FeatureIdentifier,
+  key: string,
+) {
+  if (!map) {
+    return;
+  }
+  const featureState = map.getFeatureState(identifier);
+  if (Object.prototype.hasOwnProperty.call(featureState, key)) {
+    map.removeFeatureState(identifier, key);
+  }
+}
 
 @Component({
   selector: "app-view-stops",
@@ -16,29 +47,51 @@ import { FeatureCollection, Point } from "geojson";
   styleUrls: ["./view-stops.component.scss"],
 })
 export class ViewStopsComponent implements OnInit, OnDestroy {
-  @ViewChild(MapComponent) mapComponent!: MapComponent;
+  @Input() stopList: CorridorStop[] = [];
+  @Input() matchingStops?: FeatureCollection<Point, CorridorStop>;
+  @Input() matchingStopLines?: FeatureCollection<LineString>;
+  @Input() corridorStops?: FeatureCollection<Point, CorridorStop>;
+  @Input() corridorLine?: Feature<LineString>;
+  @Input() otherStops?: FeatureCollection<Point, CorridorStop>;
+  @Input() nonOrgStops?: FeatureCollection<Point, CorridorStop>;
+  @Input() displayRecentreButton?: boolean;
+  @Input() resetMoveCounter?: EventEmitter<void>;
 
-  initialZoom = 9;
-  initialCenter = [-74.5, 40];
+  @Output() selectStop = new EventEmitter<
+    Feature<Point, CorridorStop> | undefined
+  >();
+  @Output() boundsChanged = new EventEmitter<LngLatBounds>();
+  @Output() recentreMap = new EventEmitter<void>();
 
-  geojsonData: FeatureCollection<Point> = {
-    type: "FeatureCollection",
-    features: [],
-  };
+  hoveredStop?: Feature<Point, CorridorStop>;
+  stopTooltipMessage?: string;
+  initialBounds = BRITISH_ISLES_BBOX;
+  mapCursor?: "pointer" | "default";
+  map?: Map;
+  moveCounter = 0;
+  destroy$ = new Subject<void>();
 
-  isLoading = false;
-  private mapInstance!: Map;
-  private boundsChanged = new Subject<BoundingBoxInputType>();
-  private destroy$ = new Subject<void>();
+  get nonOrgStopLayerBeforeId(): string | undefined {
+    if (this.otherStops) return "other-stop-markers";
+    if (this.corridorStops) return "corridor-markers";
+    if (this.matchingStops) return "matching-stop-markers";
+    return undefined;
+  }
 
-  clusterProperties = {
-    avg_delay: ["+", ["/", ["get", "averageDelay"], ["get", "point_count"]]],
-  };
+  private _mapboxStyle: string = this.config.mapboxStyle;
+  set mapboxStyle(style: string) {
+    this._mapboxStyle = style;
+  }
+  get mapboxStyle(): string {
+    return this._mapboxStyle;
+  }
 
-  constructor(private query: StopAnalysisGQL) {}
+  constructor(private config: ConfigService) {}
 
   ngOnInit(): void {
-    this.setupBoundsChangeListener();
+    this.resetMoveCounter?.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.moveCounter = 0;
+    });
   }
 
   ngOnDestroy(): void {
@@ -46,89 +99,63 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onMapLoad(map: Map): void {
-    this.mapInstance = map;
-    this.onMapMoveEnd();
+  updateBounds() {
+    if (this.map) this.boundsChanged.emit(this.map.getBounds());
   }
 
-  onMapMoveEnd(): void {
-    if (!this.mapInstance) return;
-
-    const bounds = this.mapInstance.getBounds();
-    this.boundsChanged.next({
-      maxLatitude: bounds.getNorth(),
-      minLatitude: bounds.getSouth(),
-      maxLongitude: bounds.getEast(),
-      minLongitude: bounds.getWest(),
-    });
+  stop(event: MGLMouseEvent): Feature<Point, CorridorStop> | undefined {
+    return event.features?.[0] as unknown as Feature<Point, CorridorStop>;
   }
 
-  onClusterClick(event: { features: MapboxGeoJSONFeature[] }): void {
-    if (!event.features.length || !this.mapInstance) return;
-
-    const feature = event.features[0];
-    console.log(feature);
-    if (!feature.properties) return;
-    const clusterId = feature.properties.cluster_id;
-
-    if (!clusterId) return;
-
-    const source = this.mapInstance.getSource("delay-points") as GeoJSONSource;
-
-    source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-      if (err) return;
-      if (feature.geometry.type !== "Point") return;
-      if (feature.geometry.coordinates.length < 2) return;
-      const [lat, long] = feature.geometry.coordinates;
-      this.mapInstance.easeTo({ center: [lat, long], zoom: zoom });
-    });
+  setHoverState(stop: Feature) {
+    if (this.matchingStops) {
+      this.map?.setFeatureState(
+        { source: "matching-stops", id: stop.id },
+        { hover: true },
+      );
+    }
+    if (this.matchingStopLines) {
+      this.map?.setFeatureState(
+        { source: "matching-stop-lines", id: stop.id },
+        { hover: true },
+      );
+    }
   }
 
-  onLayerMouseEnter(): void {
-    if (!this.mapInstance) return;
-    this.mapInstance.getCanvas().style.cursor = "pointer";
+  clearHoverState(stop: Feature) {
+    if (this.matchingStops) {
+      removeFeatureStateSafe(
+        this.map,
+        { source: "matching-stops", id: stop.id },
+        "hover",
+      );
+    }
+    if (this.matchingStopLines) {
+      removeFeatureStateSafe(
+        this.map,
+        { source: "matching-stop-lines", id: stop.id },
+        "hover",
+      );
+    }
   }
 
-  onLayerMouseLeave(): void {
-    if (!this.mapInstance) return;
-    this.mapInstance.getCanvas().style.cursor = "";
+  mapSetHover(stop?: Feature<Point, CorridorStop>, highlight = false) {
+    this.hoveredStop = stop;
+    if (highlight && stop) {
+      this.setHoverState(stop);
+    }
+    this.mapCursor = highlight ? "pointer" : "default";
   }
 
-  private setupBoundsChangeListener(): void {
-    this.boundsChanged
-      .pipe(
-        debounceTime(500), // 500ms debounce time
-        takeUntil(this.destroy$),
-      )
-      .subscribe((bounds) => {
-        this.fetchDelayPoints(bounds);
-      });
+  mapClearHover() {
+    if (this.hoveredStop) {
+      this.clearHoverState(this.hoveredStop);
+    }
+    this.hoveredStop = undefined;
+    this.mapCursor = undefined;
   }
 
-  private fetchDelayPoints(bounds: BoundingBoxInputType): void {
-    this.isLoading = true;
-
-    //TODO: add more params
-    this.query.fetch({ boundingBox: bounds }).subscribe((response) => {
-      this.updateMapData(response.data.stopAnalysis);
-      this.isLoading = false;
-    });
-  }
-
-  private updateMapData(points: StopAnalysisType[]): void {
-    this.geojsonData = {
-      type: "FeatureCollection",
-      features: points.map((point) => ({
-        type: "Feature",
-        properties: {
-          id: point.stopId,
-          delay: point.averageDelay,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [point.longitude, point.latitude],
-        },
-      })),
-    };
+  onRecentreMap() {
+    this.recentreMap.emit();
   }
 }
