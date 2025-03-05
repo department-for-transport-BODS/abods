@@ -73,16 +73,25 @@ export const getUser: QueryResolvers["user"] = async (
             organisation: { select: { is_abods_global_viewer: true } },
           },
         },
+        email: true,
       },
     });
+
+    const allowedEmailDomains = ["@dft.gov.uk", "@kpmg.co.uk"];
+    const email = userDetails.email.toLowerCase();
+
+    const canViewServiceMonitoring = allowedEmailDomains.some((domain) =>
+      email.endsWith(domain),
+    );
+
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
     );
     return {
       currentUserId: user.id.toString(),
-      canViewServiceMonitoring: isAdmin,
+      canViewServiceMonitoring: canViewServiceMonitoring,
       canEditAllAlerts: isAdmin,
-      serviceMonitoringEmbedUrl: isAdmin
+      serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
     };
