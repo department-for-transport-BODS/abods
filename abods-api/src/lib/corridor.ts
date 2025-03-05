@@ -6,7 +6,6 @@ import {
   naptan_locality,
   naptan_stoppoint_latlong,
   PrismaClient,
-  Timetable,
 } from "@prisma/client";
 import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
