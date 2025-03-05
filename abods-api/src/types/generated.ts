@@ -711,12 +711,6 @@ export type OrganisationReferenceInput = {
   id: Scalars['String']['input'];
 };
 
-export type OrganisationType = {
-  __typename?: 'OrganisationType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -1238,7 +1232,6 @@ export type ResolversTypes = ResolversObject<{
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
   OperatorsPage: ResolverTypeWrapper<Partial<OperatorsPage>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
-  OrganisationType: ResolverTypeWrapper<Partial<OrganisationType>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
   PagingInputType: ResolverTypeWrapper<Partial<PagingInputType>>;
@@ -1344,7 +1337,6 @@ export type ResolversParentTypes = ResolversObject<{
   OperatorType: Partial<OperatorType>;
   OperatorsPage: Partial<OperatorsPage>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
-  OrganisationType: Partial<OrganisationType>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
   PerformanceFiltersInputType: Partial<PerformanceFiltersInputType>;
@@ -1751,12 +1743,6 @@ export type OperatorsPageResolvers<ContextType = RequestContext, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type OrganisationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OrganisationType'] = ResolversParentTypes['OrganisationType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type PageInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   next?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -2012,7 +1998,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
   OperatorsPage?: OperatorsPageResolvers<ContextType>;
-  OrganisationType?: OrganisationTypeResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;

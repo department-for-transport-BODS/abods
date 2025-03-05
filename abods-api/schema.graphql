@@ -499,11 +499,6 @@ type UserType {
   lastName: String
 }
 
-type OrganisationType {
-  id: String!
-  name: String!
-}
-
 type OnTimePerformanceType {
   delayFrequency(inputs: PerformanceInputType!): [DelayFrequencyType!]
   operatorPerformance(inputs: PerformanceInputType!): OperatorPerformancePage

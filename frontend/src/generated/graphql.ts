@@ -711,12 +711,6 @@ export type OrganisationReferenceInput = {
   id: Scalars['String']['input'];
 };
 
-export type OrganisationType = {
-  __typename?: 'OrganisationType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
