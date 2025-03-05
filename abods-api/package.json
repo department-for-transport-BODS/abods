@@ -19,9 +19,9 @@
     "start:dev": "concurrently \"npm run watch\" \"node ./dist/localServer.js\"",
     "start:sam": "npm run sam:build && npm run sam:start",
     "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
-    "prepare": "(npm run prisma:generate);",
-    "lint": "eslint --fix --cache --quiet .",
-    "lint:check": "eslint ."
+    "prepare": "(npm run prisma:generate)",
+    "lint": "eslint --ignore-pattern src/kysely.ts --fix --cache --quiet .",
+    "lint:check": "eslint --ignore-pattern src/kysely.ts ."
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
