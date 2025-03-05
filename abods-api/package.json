@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
+    "@as-integrations/aws-lambda": "^3.1.0",
     "@aws-sdk/client-quicksight": "^3.744.0",
     "@aws-sdk/client-secrets-manager": "^3.682.0",
     "@aws-sdk/client-sts": "^3.744.0",
