@@ -81,7 +81,7 @@
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
     "angular-eslint": "^18.4.0",
-    "eslint": "^8.33.0",
+    "eslint": "^9.21.0",
     "eslint-plugin-jasmine": "^4.2.2",
     "faker": "^5.1.0",
     "jasmine-core": "^4.1.1",
