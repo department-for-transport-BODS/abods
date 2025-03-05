@@ -222,9 +222,7 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
-        // Not good. Should be changed later
-        // Do we need to do this multiple times for each of their orgs?
-        `org:${orgIds[0]}`,
+        ...orgIds.map((orgId) => `org:${orgId}`),
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {
