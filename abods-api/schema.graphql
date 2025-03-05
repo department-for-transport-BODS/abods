@@ -3,10 +3,9 @@ scalar Time
 scalar Date
 
 type Query {
-  user: UserType
+  user: LoginInfo
   users: [UserType!]
   apiInfo: ApiInfoType
-  roles: [RoleType!]
   userAlerts: [AlertType!]
   userAlert(alertId: String!): AlertType
   operator(operatorId: String!): OperatorType
@@ -416,7 +415,6 @@ type AdminAreaInfoType {
 input UserUpdateInput {
   firstName: String!
   lastName: String!
-  role: RoleReferenceInput!
 }
 
 type UserUpdateResponseType {
@@ -442,14 +440,9 @@ type InvitationType {
 input InvitationInput {
   email: String!
   organisation: OrganisationReferenceInput!
-  role: RoleReferenceInput!
 }
 
 input OrganisationReferenceInput {
-  id: String!
-}
-
-input RoleReferenceInput {
   id: String!
 }
 
@@ -492,30 +485,18 @@ type LoginResponse {
   expiresAt: String
 }
 
+type LoginInfo {
+  currentUserId: String!
+  canViewServiceMonitoring: Boolean!
+  canEditAllAlerts: Boolean!
+  serviceMonitoringEmbedUrl: String
+}
+
 type UserType {
   id: String!
-  email: String!
   username: String!
   firstName: String
   lastName: String
-  organisation: OrganisationType
-  roles: [RoleType!]
-}
-
-type OrganisationType {
-  id: String!
-  name: String!
-}
-
-type RoleType {
-  id: String!
-  name: String!
-  scope: ScopeEnum!
-}
-
-enum ScopeEnum {
-  organisation
-  system
 }
 
 type OnTimePerformanceType {

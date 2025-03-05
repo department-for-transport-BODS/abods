@@ -10,10 +10,8 @@ import {
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { NgxSmartModalModule } from "ngx-smart-modal";
 import { of } from "rxjs";
-import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { ScopeEnum } from "src/generated/graphql";
 import { EditUserComponent } from "../edit-user/edit-user.component";
 import { OrganisationModule } from "../organisation.module";
 import { OrganisationService } from "../organisation.service";
@@ -23,13 +21,11 @@ import { UsersComponent } from "./users.component";
 const orgRoles = [
   {
     id: "2",
-    scope: ScopeEnum.Organisation,
     name: "Administrator",
   },
 
   {
     id: "4",
-    scope: ScopeEnum.Organisation,
     name: "Staff",
   },
 ];
@@ -61,15 +57,11 @@ describe("UsersComponent", () => {
 
   let service: OrganisationService;
   let router: Router;
-  let authService: AuthenticatedUserService;
 
   beforeEach(() => {
     spectator = createHost(`<app-users> </app-users>`);
     service = spectator.inject(OrganisationService);
     router = spectator.inject(Router);
-    authService = spectator.inject(AuthenticatedUserService);
-
-    spyOn(service, "listOrgRoles$").and.returnValue(of(orgRoles));
   });
 
   it("should create", () => {
@@ -97,7 +89,6 @@ describe("UsersComponent", () => {
         roles: [
           {
             id: "4",
-            scope: ScopeEnum.Organisation,
             name: "Staff",
           },
         ],
@@ -111,7 +102,6 @@ describe("UsersComponent", () => {
         roles: [
           {
             id: "2",
-            scope: ScopeEnum.Organisation,
             name: "Admin",
           },
         ],
@@ -125,7 +115,6 @@ describe("UsersComponent", () => {
         roles: [
           {
             id: "4",
-            scope: ScopeEnum.Organisation,
             name: "Staff",
           },
         ],
@@ -177,23 +166,10 @@ describe("UsersComponent", () => {
       roles: [
         {
           id: "4",
-          scope: ScopeEnum.Organisation,
           name: "Staff",
         },
       ],
     };
-
-    spyOnProperty(authService, "authenticatedUser$").and.returnValue(
-      of({
-        roles: [{ name: "Administrator" }],
-      }),
-    );
-    spyOnProperty(authService, "authenticatedUserIsAdmin").and.returnValue(
-      true,
-    );
-    spyOnProperty(authService, "authenticatedUserIsOrgUser").and.returnValue(
-      true,
-    );
     spyOn(service, "listUsers$").and.returnValue(of([person]));
 
     spectator.detectChanges();
@@ -231,17 +207,10 @@ describe("UsersComponent", () => {
       roles: [
         {
           id: "4",
-          scope: ScopeEnum.Organisation,
           name: "Staff",
         },
       ],
     };
-
-    spyOnProperty(authService, "authenticatedUser$").and.returnValue(
-      of({
-        roles: [{ name: "Staff" }],
-      }),
-    );
     spyOn(service, "listUsers$").and.returnValue(of([person]));
 
     spectator.detectChanges();

@@ -43,7 +43,7 @@ export class ViewMonitorsComponent implements OnInit {
           this.errors = [
             {
               error: "Unable to load dashboad. Please contact admin",
-              label: "enable-dashboard-button",
+              label: "enable-dashboard",
             },
           ];
           return;

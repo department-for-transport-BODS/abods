@@ -430,7 +430,6 @@ export type HistoricalStatsType = {
 export type InvitationInput = {
   email: Scalars['String']['input'];
   organisation: OrganisationReferenceInput;
-  role: RoleReferenceInput;
 };
 
 export type InvitationResponseType = {
@@ -493,6 +492,14 @@ export type LocalityType = {
   localityAreaName?: Maybe<Scalars['String']['output']>;
   localityId?: Maybe<Scalars['String']['output']>;
   localityName?: Maybe<Scalars['String']['output']>;
+};
+
+export type LoginInfo = {
+  __typename?: 'LoginInfo';
+  canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewServiceMonitoring: Scalars['Boolean']['output'];
+  currentUserId: Scalars['String']['output'];
+  serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoginResponse = {
@@ -704,12 +711,6 @@ export type OrganisationReferenceInput = {
   id: Scalars['String']['input'];
 };
 
-export type OrganisationType = {
-  __typename?: 'OrganisationType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -811,11 +812,10 @@ export type Query = {
   onTimePerformance?: Maybe<OnTimePerformanceType>;
   operator?: Maybe<OperatorType>;
   operators?: Maybe<OperatorsPage>;
-  roles?: Maybe<Array<RoleType>>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<Maybe<StopAnalysisType>>;
-  user?: Maybe<UserType>;
+  user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
@@ -904,25 +904,9 @@ export enum RankingOrder {
   Descending = 'descending'
 }
 
-export type RoleReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type RoleType = {
-  __typename?: 'RoleType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  scope: ScopeEnum;
-};
-
 export enum RouteType {
   InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
   Valid = 'VALID'
-}
-
-export enum ScopeEnum {
-  Organisation = 'organisation',
-  System = 'system'
 }
 
 export type ServiceInfoType = {
@@ -1079,19 +1063,15 @@ export enum StopsSegment {
 
 export type UserType = {
   __typename?: 'UserType';
-  email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
-  organisation?: Maybe<OrganisationType>;
-  roles?: Maybe<Array<RoleType>>;
   username: Scalars['String']['output'];
 };
 
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1240,6 +1220,7 @@ export type ResolversTypes = ResolversObject<{
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;
+  LoginInfo: ResolverTypeWrapper<Partial<LoginInfo>>;
   LoginResponse: ResolverTypeWrapper<Partial<LoginResponse>>;
   MatchType: ResolverTypeWrapper<Partial<MatchType>>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -1251,7 +1232,6 @@ export type ResolversTypes = ResolversObject<{
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
   OperatorsPage: ResolverTypeWrapper<Partial<OperatorsPage>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
-  OrganisationType: ResolverTypeWrapper<Partial<OrganisationType>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
   PagingInputType: ResolverTypeWrapper<Partial<PagingInputType>>;
@@ -1263,10 +1243,7 @@ export type ResolversTypes = ResolversObject<{
   PunctualityTotalsType: ResolverTypeWrapper<Partial<PunctualityTotalsType>>;
   Query: ResolverTypeWrapper<{}>;
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
-  RoleReferenceInput: ResolverTypeWrapper<Partial<RoleReferenceInput>>;
-  RoleType: ResolverTypeWrapper<Partial<RoleType>>;
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
-  ScopeEnum: ResolverTypeWrapper<Partial<ScopeEnum>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
   ServicePatternType: ResolverTypeWrapper<Partial<ServicePatternType>>;
@@ -1349,6 +1326,7 @@ export type ResolversParentTypes = ResolversObject<{
   LineType: Partial<LineType>;
   LiveStatsType: Partial<LiveStatsType>;
   LocalityType: Partial<LocalityType>;
+  LoginInfo: Partial<LoginInfo>;
   LoginResponse: Partial<LoginResponse>;
   Mutation: {};
   MutationResponseType: Partial<MutationResponseType>;
@@ -1359,7 +1337,6 @@ export type ResolversParentTypes = ResolversObject<{
   OperatorType: Partial<OperatorType>;
   OperatorsPage: Partial<OperatorsPage>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
-  OrganisationType: Partial<OrganisationType>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
   PerformanceFiltersInputType: Partial<PerformanceFiltersInputType>;
@@ -1369,8 +1346,6 @@ export type ResolversParentTypes = ResolversObject<{
   PunctualityTimeSeriesType: Partial<PunctualityTimeSeriesType>;
   PunctualityTotalsType: Partial<PunctualityTotalsType>;
   Query: {};
-  RoleReferenceInput: Partial<RoleReferenceInput>;
-  RoleType: Partial<RoleType>;
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
   ServicePatternType: Partial<ServicePatternType>;
@@ -1687,6 +1662,14 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
+  canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LoginResponseResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
   expiresAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -1760,12 +1743,6 @@ export type OperatorsPageResolvers<ContextType = RequestContext, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type OrganisationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OrganisationType'] = ResolversParentTypes['OrganisationType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type PageInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   next?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1824,21 +1801,13 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<Maybe<ResolversTypes['StopAnalysisType']>>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
-  user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
-}>;
-
-export type RoleTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['RoleType'] = ResolversParentTypes['RoleType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  scope?: Resolver<ResolversTypes['ScopeEnum'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceInfoType'] = ResolversParentTypes['ServiceInfoType']> = ResolversObject<{
@@ -1959,12 +1928,9 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type UserTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserType'] = ResolversParentTypes['UserType']> = ResolversObject<{
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  organisation?: Resolver<Maybe<ResolversTypes['OrganisationType']>, ParentType, ContextType>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -2023,6 +1989,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
   LocalityType?: LocalityTypeResolvers<ContextType>;
+  LoginInfo?: LoginInfoResolvers<ContextType>;
   LoginResponse?: LoginResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   MutationResponseType?: MutationResponseTypeResolvers<ContextType>;
@@ -2031,14 +1998,12 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
   OperatorsPage?: OperatorsPageResolvers<ContextType>;
-  OrganisationType?: OrganisationTypeResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;
   PunctualityTimeSeriesType?: PunctualityTimeSeriesTypeResolvers<ContextType>;
   PunctualityTotalsType?: PunctualityTotalsTypeResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  RoleType?: RoleTypeResolvers<ContextType>;
   ServiceInfoType?: ServiceInfoTypeResolvers<ContextType>;
   ServiceLinkType?: ServiceLinkTypeResolvers<ContextType>;
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;

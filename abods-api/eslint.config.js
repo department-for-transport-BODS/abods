@@ -41,7 +41,6 @@ export default tseslint.config(
       "@typescript-eslint/ban-tslint-comment": "off",
       "@typescript-eslint/only-throw-error": "warn",
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
-      "@typescript-eslint/no-unsafe-enum-comparison": "warn",
     },
   },
   {

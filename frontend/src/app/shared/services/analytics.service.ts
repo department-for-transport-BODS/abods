@@ -13,12 +13,6 @@ import { GoogleTagManagerService } from "angular-google-tag-manager";
 import { BehaviorSubject, combineLatest } from "rxjs";
 import { CookiePolicyService } from "./cookie-policy.service";
 
-export interface AnalyticsUserProperties {
-  abodUserId: string;
-  abodOrgId: string;
-  abodOrgName: string;
-}
-
 /**
  * Provides additional tags to populate user properties.
  */
@@ -26,14 +20,11 @@ export interface AnalyticsUserProperties {
 export class AnalyticsService {
   get userProperties$() {
     return this.userService.authenticatedUser$.pipe(
-      map(
-        (user) =>
-          ({
-            abodUserId: user?.id,
-            abodOrgId: user?.organisation?.id,
-            abodOrgName: user?.organisation?.name,
-          }) as AnalyticsUserProperties,
-      ),
+      map((user) => ({
+        abodUserId: user?.currentUserId,
+        abodOrgId: undefined,
+        abodOrgName: undefined,
+      })),
     );
   }
 

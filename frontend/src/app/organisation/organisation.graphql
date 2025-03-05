@@ -1,22 +1,8 @@
 fragment User on UserType {
   id
-  email
   username
   firstName
   lastName
-  organisation {
-    id
-    name
-  }
-  roles {
-    ...Role
-  }
-}
-
-fragment Role on RoleType {
-  id
-  name
-  scope
 }
 
 fragment Alert on AlertType {
@@ -43,12 +29,6 @@ query listUsers {
   }
 }
 
-query listRoles {
-  roles {
-    ...Role
-  }
-}
-
 query listUserAlerts {
   userAlerts {
     ...Alert
@@ -61,15 +41,10 @@ query fetchUserAlert($alertId: String!) {
   }
 }
 
-mutation editUser(
-  $username: String!
-  $firstName: String!
-  $lastName: String!
-  $role: String!
-) {
+mutation editUser($username: String!, $firstName: String!, $lastName: String!) {
   updateUser(
     username: $username
-    payload: { firstName: $firstName, lastName: $lastName, role: { id: $role } }
+    payload: { firstName: $firstName, lastName: $lastName }
   ) {
     error
     user {
@@ -85,17 +60,9 @@ mutation removeUser($username: String!) {
   }
 }
 
-mutation inviteUser(
-  $email: String!
-  $organisationId: String!
-  $roleId: String!
-) {
+mutation inviteUser($email: String!, $organisationId: String!) {
   inviteUser(
-    payload: {
-      email: $email
-      organisation: { id: $organisationId }
-      role: { id: $roleId }
-    }
+    payload: { email: $email, organisation: { id: $organisationId } }
   ) {
     invitation {
       email
