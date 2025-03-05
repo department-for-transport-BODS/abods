@@ -85,13 +85,13 @@ export const getUser: QueryResolvers["user"] = async (
       },
     });
 
-    const allowedEmailDomains = ["@dft.gov.uk", "@kpmg.co.uk"];
     const email = userDetails.email.toLowerCase();
 
     // Allow access to users with dft.gov.uk and site admins (account_type = 1)
     const canViewServiceMonitoring =
-      allowedEmailDomains.some((domain) => email.endsWith(domain)) &&
-      userDetails.account_type === accountTypes.admin;
+      email.endsWith("@kpmg.co.uk") ||
+      (userDetails.account_type === accountTypes.admin &&
+        email.endsWith("@dft.gov.uk"));
 
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
