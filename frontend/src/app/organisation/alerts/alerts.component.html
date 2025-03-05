@@ -46,10 +46,7 @@
           <span class="govuk-!-font-weight-bold">{{ alert.sendToName }}</span>
         </div>
         <a
-          *ngIf="
-            alert.alertId &&
-            (authUserIsAdmin || alert.sendToId === authenticatedUser?.id)
-          "
+          *ngIf="alert.alertId && canEditAlert(alert)"
           [routerLink]="[]"
           (click)="editAlert(alert.alertId)"
           class="govuk-link alerts__edit-link"

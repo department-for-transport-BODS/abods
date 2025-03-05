@@ -1,6 +1,7 @@
 import {
   AlertType,
   AlertTypeEnum,
+  LoginInfo,
   LoginResponse,
   Maybe,
   MutationResolvers,
@@ -39,34 +40,16 @@ export const getUsers: QueryResolvers["users"] = async (
         select: {
           id: true,
           username: true,
-          email: true,
           first_name: true,
           last_name: true,
-          userOrganisations: {
-            select: {
-              organisation: {
-                select: {
-                  is_abods_global_viewer: true,
-                },
-              },
-            },
-          },
         },
       })
       .then((x) =>
         x.map((thisUser) => ({
           id: String(thisUser.id),
           username: thisUser.username,
-          email: thisUser.email,
           firstName: thisUser.first_name,
           lastName: thisUser.last_name,
-          organisation: {
-            id: String(user.orgIds),
-            name: String(user.orgIds),
-          },
-          canViewServiceMonitoring: thisUser.userOrganisations.some(
-            (org) => org.organisation.is_abods_global_viewer === true,
-          ),
         })),
       );
   } catch (error) {
@@ -79,38 +62,30 @@ export const getUser: QueryResolvers["user"] = async (
   _,
   __,
   context,
-): Promise<Maybe<UserType>> => {
+): Promise<Maybe<LoginInfo>> => {
   const user = await requireUserSession(context);
   try {
-    return await context.db.bods_user
-      .findUniqueOrThrow({
-        where: { id: user.id },
-        select: {
-          username: true,
-          email: true,
-          first_name: true,
-          last_name: true,
-          userOrganisations: {
-            select: {
-              organisation: {
-                select: {
-                  is_abods_global_viewer: true,
-                },
-              },
-            },
+    const userDetails = await context.db.bods_user.findUniqueOrThrow({
+      where: { id: user.id },
+      select: {
+        userOrganisations: {
+          select: {
+            organisation: { select: { is_abods_global_viewer: true } },
           },
         },
-      })
-      .then((x) => ({
-        id: user.id.toString(),
-        username: x.username,
-        email: x.email,
-        firstName: x.first_name,
-        lastName: x.last_name,
-        canViewServiceMonitoring: x.userOrganisations.some(
-          (org) => org.organisation.is_abods_global_viewer === true,
-        ),
-      }));
+      },
+    });
+    const isAdmin = userDetails.userOrganisations.some(
+      (org) => org.organisation.is_abods_global_viewer === true,
+    );
+    return {
+      currentUserId: user.id.toString(),
+      canViewServiceMonitoring: isAdmin,
+      canEditAllAlerts: isAdmin,
+      serviceMonitoringEmbedUrl: isAdmin
+        ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
+        : null,
+    };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
     return null;
@@ -161,20 +136,16 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
           ? {
               id: String(alert.created_by_user.id),
               username: alert.created_by_user.username,
-              email: alert.created_by_user.email,
               firstName: alert.created_by_user.first_name,
               lastName: alert.created_by_user.last_name,
-              canViewServiceMonitoring: false,
             }
           : null,
         sendTo: alert.send_to_user
           ? {
               id: String(alert.send_to_user.id),
               username: alert.send_to_user.username,
-              email: alert.send_to_user.email,
               firstName: alert.send_to_user.first_name,
               lastName: alert.send_to_user.last_name,
-              canViewServiceMonitoring: false,
             }
           : null,
       };
@@ -336,20 +307,16 @@ async function getUserAlertFromDb(
       ? {
           id: alert.created_by_user.id.toString(),
           username: alert.created_by_user.username,
-          email: alert.created_by_user.email,
           firstName: alert.created_by_user.first_name,
           lastName: alert.created_by_user.last_name,
-          canViewServiceMonitoring: false,
         }
       : null,
     sendTo: alert.send_to_user
       ? {
           id: alert.send_to_user.id.toString(),
           username: alert.send_to_user.username,
-          email: alert.send_to_user.email,
           firstName: alert.send_to_user.first_name,
           lastName: alert.send_to_user.last_name,
-          canViewServiceMonitoring: false,
         }
       : null,
   };

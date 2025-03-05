@@ -9,9 +9,9 @@ import { Subject, takeUntil } from "rxjs";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { OrganisationService } from "src/app/organisation/organisation.service";
-import { UserFragment } from "src/generated/graphql";
 import { FormErrors } from "../../gds/error-summary/error-summary.component";
 import { PageHeaderBannerService } from "src/app/layout/page-header/page-header-banner.service";
+import { LoginInfo } from "../../../../generated/graphql";
 
 @Component({
   selector: "app-invite-user-modal",
@@ -22,8 +22,7 @@ export class InviteUserModalComponent implements OnInit, OnDestroy {
   @Input() identifier!: string;
   inviteForm: FormGroup;
   errors: FormErrors[] = [];
-  authenticatedUser: UserFragment | null = null;
-  inviteSent = false;
+  authenticatedUser: LoginInfo | null = null;
   submitted = false;
   destroy$ = new Subject<void>();
 
@@ -53,7 +52,7 @@ export class InviteUserModalComponent implements OnInit, OnDestroy {
       .subscribe((u) => {
         this.authenticatedUser = u;
         this.inviteForm.patchValue({
-          organisationId: this.authenticatedUser.organisation?.id ?? "",
+          organisationId: "",
         });
       });
   }

@@ -10,7 +10,6 @@ import {
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { NgxSmartModalModule } from "ngx-smart-modal";
 import { of } from "rxjs";
-import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { EditUserComponent } from "../edit-user/edit-user.component";
@@ -58,13 +57,11 @@ describe("UsersComponent", () => {
 
   let service: OrganisationService;
   let router: Router;
-  let authService: AuthenticatedUserService;
 
   beforeEach(() => {
     spectator = createHost(`<app-users> </app-users>`);
     service = spectator.inject(OrganisationService);
     router = spectator.inject(Router);
-    authService = spectator.inject(AuthenticatedUserService);
   });
 
   it("should create", () => {
@@ -89,7 +86,6 @@ describe("UsersComponent", () => {
         username: "dennis@iwbaotn.uk",
         firstName: "Dennis",
         lastName: "Nordon",
-        canViewServiceMonitoring: false,
         roles: [
           {
             id: "4",
@@ -103,7 +99,6 @@ describe("UsersComponent", () => {
         username: "Kenneth@Horne.uk",
         firstName: "Kenneth",
         lastName: "Horne",
-        canViewServiceMonitoring: false,
         roles: [
           {
             id: "2",
@@ -117,7 +112,6 @@ describe("UsersComponent", () => {
         username: "betty.marsden@mail.co.uk",
         firstName: "Betty",
         lastName: "Marsden",
-        canViewServiceMonitoring: false,
         roles: [
           {
             id: "4",
@@ -169,7 +163,6 @@ describe("UsersComponent", () => {
       username: "dennis@iwbaotn.uk",
       firstName: "Dennis",
       lastName: "Nordon",
-      canViewServiceMonitoring: false,
       roles: [
         {
           id: "4",
@@ -177,15 +170,6 @@ describe("UsersComponent", () => {
         },
       ],
     };
-
-    spyOnProperty(authService, "authenticatedUser$").and.returnValue(
-      of({
-        roles: [{ name: "Administrator" }],
-      }),
-    );
-    spyOnProperty(authService, "canViewServiceMonitoring").and.returnValue(
-      true,
-    );
     spyOn(service, "listUsers$").and.returnValue(of([person]));
 
     spectator.detectChanges();
@@ -220,7 +204,6 @@ describe("UsersComponent", () => {
       username: "dennis@iwbaotn.uk",
       firstName: "Dennis",
       lastName: "Nordon",
-      canViewServiceMonitoring: false,
       roles: [
         {
           id: "4",
@@ -228,12 +211,6 @@ describe("UsersComponent", () => {
         },
       ],
     };
-
-    spyOnProperty(authService, "authenticatedUser$").and.returnValue(
-      of({
-        roles: [{ name: "Staff" }],
-      }),
-    );
     spyOn(service, "listUsers$").and.returnValue(of([person]));
 
     spectator.detectChanges();

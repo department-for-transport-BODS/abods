@@ -3,7 +3,7 @@ scalar Time
 scalar Date
 
 type Query {
-  user: UserType
+  user: LoginInfo
   users: [UserType!]
   apiInfo: ApiInfoType
   userAlerts: [AlertType!]
@@ -37,11 +37,10 @@ type Query {
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
 
-  embeddedUrl: DataAndServiceMonitoringUser!
-  serviceMonitorUrl: DataAndServiceMonitoringUser!
+  embeddedUrl: AWSQuicksightUser!
 }
 
-type DataAndServiceMonitoringUser {
+type AWSQuicksightUser {
   enabled: Boolean!
   url: String
 }
@@ -486,14 +485,18 @@ type LoginResponse {
   expiresAt: String
 }
 
+type LoginInfo {
+  currentUserId: String!
+  canViewServiceMonitoring: Boolean!
+  canEditAllAlerts: Boolean!
+  serviceMonitoringEmbedUrl: String
+}
+
 type UserType {
   id: String!
-  email: String!
   username: String!
   firstName: String
   lastName: String
-  organisation: OrganisationType
-  canViewServiceMonitoring: Boolean!
 }
 
 type OrganisationType {
