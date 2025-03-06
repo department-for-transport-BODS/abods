@@ -1,54 +1,24 @@
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
+
 .map-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-}
-
-mgl-map {
-  height: 100%;
-  width: 100%;
-}
-
-.legend {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
-}
-
-.color-box {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.low {
-  background-color: #4caf50;
-}
-.medium {
-  background-color: #ffeb3b;
-}
-.high {
-  background-color: #ff9800;
-}
-.severe {
-  background-color: #f44336;
-}
-
-.loading-indicator {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  display: grid;
+  .map-overlay {
+    grid-area: 1 / 1;
+    z-index: 10000;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0px 0px 10px black;
+    font-size: 48px;
+    pointer-events: none;
+    background: none !important;
+  }
+  mgl-map {
+    grid-area: 1 / 1;
+    height: 1px;
+    min-height: 80vh;
+    width: 100%;
+    border: solid 1px $govuk-border-colour;
+  }
 }

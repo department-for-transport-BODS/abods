@@ -1,45 +1,16 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnInit,
-  OnDestroy,
-} from "@angular/core";
-import { Feature, FeatureCollection, LineString, Point } from "geojson";
-import {
-  EventData,
-  FeatureIdentifier,
-  LngLatBounds,
-  MapboxGeoJSONFeature,
-  MapMouseEvent,
-} from "mapbox-gl";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { FeatureCollection, Point } from "geojson";
 import { Map } from "mapbox-gl";
 import { ConfigService } from "../../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../../shared/geo";
+import {
+  BoundingBoxInputType,
+  StopAnalysisGQL,
+  StopAnalysisType,
+} from "../../../generated/graphql";
 import { Subject, takeUntil } from "rxjs";
-import { CorridorStop } from "../../corridors/types";
-
-type MGLMouseEvent = MapMouseEvent & {
-  features?: MapboxGeoJSONFeature[];
-} & EventData;
-
-/**
- * @see https://github.com/mapbox/mapbox-gl-js/issues/9461
- */
-function removeFeatureStateSafe(
-  map: Map | undefined,
-  identifier: FeatureIdentifier,
-  key: string,
-) {
-  if (!map) {
-    return;
-  }
-  const featureState = map.getFeatureState(identifier);
-  if (Object.prototype.hasOwnProperty.call(featureState, key)) {
-    map.removeFeatureState(identifier, key);
-  }
-}
+import { debounceTime } from "rxjs/operators";
+import { DateTime } from "luxon";
 
 @Component({
   selector: "app-view-stops",
@@ -47,51 +18,70 @@ function removeFeatureStateSafe(
   styleUrls: ["./view-stops.component.scss"],
 })
 export class ViewStopsComponent implements OnInit, OnDestroy {
-  @Input() stopList: CorridorStop[] = [];
-  @Input() matchingStops?: FeatureCollection<Point, CorridorStop>;
-  @Input() matchingStopLines?: FeatureCollection<LineString>;
-  @Input() corridorStops?: FeatureCollection<Point, CorridorStop>;
-  @Input() corridorLine?: Feature<LineString>;
-  @Input() otherStops?: FeatureCollection<Point, CorridorStop>;
-  @Input() nonOrgStops?: FeatureCollection<Point, CorridorStop>;
-  @Input() displayRecentreButton?: boolean;
-  @Input() resetMoveCounter?: EventEmitter<void>;
+  points: FeatureCollection<Point, StopAnalysisType> = {
+    type: "FeatureCollection",
+    features: [],
+  };
 
-  @Output() selectStop = new EventEmitter<
-    Feature<Point, CorridorStop> | undefined
-  >();
-  @Output() boundsChanged = new EventEmitter<LngLatBounds>();
-  @Output() recentreMap = new EventEmitter<void>();
-
-  hoveredStop?: Feature<Point, CorridorStop>;
-  stopTooltipMessage?: string;
+  isLoading = false;
+  private map: Map | undefined = undefined;
+  mapboxStyle = this.config.mapboxStyle;
   initialBounds = BRITISH_ISLES_BBOX;
-  mapCursor?: "pointer" | "default";
-  map?: Map;
-  moveCounter = 0;
-  destroy$ = new Subject<void>();
+  private boundsChanged = new Subject();
+  private lastBounds: BoundingBoxInputType | undefined = undefined;
+  private destroy$ = new Subject<void>();
 
-  get nonOrgStopLayerBeforeId(): string | undefined {
-    if (this.otherStops) return "other-stop-markers";
-    if (this.corridorStops) return "corridor-markers";
-    if (this.matchingStops) return "matching-stop-markers";
-    return undefined;
+  clusterProperties = {
+    totalDelay: [
+      "+",
+      ["*", ["get", "averageDelay"], ["get", "completedDepartures"]],
+    ],
+    totalDepartures: ["+", ["get", "completedDepartures"]],
+  };
+
+  zoomLevel = 0;
+  get boundingBoxTooBig() {
+    return this.zoomLevel < 12;
   }
 
-  private _mapboxStyle: string = this.config.mapboxStyle;
-  set mapboxStyle(style: string) {
-    this._mapboxStyle = style;
-  }
-  get mapboxStyle(): string {
-    return this._mapboxStyle;
-  }
-
-  constructor(private config: ConfigService) {}
+  constructor(
+    private config: ConfigService,
+    private query: StopAnalysisGQL,
+  ) {}
 
   ngOnInit(): void {
-    this.resetMoveCounter?.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.moveCounter = 0;
-    });
+    this.boundsChanged
+      .pipe(debounceTime(500), takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.map) return;
+        if (this.boundingBoxTooBig) return;
+        const bounds = this.getNewBounds(this.map);
+
+        if (this.withinLastBounds(bounds)) {
+          console.log("Within last fetched bounds. Skipping");
+          return;
+        }
+
+        const yesterday = DateTime.now().minus({ day: 1 }).startOf("day");
+        const oneWeekAgo = yesterday.minus({ day: 6 }).startOf("day");
+
+        this.isLoading = true;
+        this.query
+          .fetch({
+            //TODO: add more params
+            boundingBox: bounds,
+            adminAreaIds: null,
+            fromTimestamp: oneWeekAgo.toISO(),
+            toTimestamp: yesterday.toISO(),
+            operatorId: null,
+            lineId: null,
+          })
+          .subscribe((response) => {
+            this.lastBounds = bounds;
+            this.processPointData(response.data.stopAnalysis);
+            this.isLoading = false;
+          });
+      });
   }
 
   ngOnDestroy(): void {
@@ -99,63 +89,77 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  updateBounds() {
-    if (this.map) this.boundsChanged.emit(this.map.getBounds());
+  onMapLoad(map: Map): void {
+    this.map = map;
+    this.onMapZoomEnd();
+    this.onMapMoveEnd();
   }
 
-  stop(event: MGLMouseEvent): Feature<Point, CorridorStop> | undefined {
-    return event.features?.[0] as unknown as Feature<Point, CorridorStop>;
+  onMapMoveEnd() {
+    if (!this.map) return;
+    this.boundsChanged.next(undefined);
   }
 
-  setHoverState(stop: Feature) {
-    if (this.matchingStops) {
-      this.map?.setFeatureState(
-        { source: "matching-stops", id: stop.id },
-        { hover: true },
-      );
-    }
-    if (this.matchingStopLines) {
-      this.map?.setFeatureState(
-        { source: "matching-stop-lines", id: stop.id },
-        { hover: true },
-      );
-    }
+  onMapStyleChanged(style: string) {
+    this.mapboxStyle = style;
   }
 
-  clearHoverState(stop: Feature) {
-    if (this.matchingStops) {
-      removeFeatureStateSafe(
-        this.map,
-        { source: "matching-stops", id: stop.id },
-        "hover",
-      );
-    }
-    if (this.matchingStopLines) {
-      removeFeatureStateSafe(
-        this.map,
-        { source: "matching-stop-lines", id: stop.id },
-        "hover",
-      );
-    }
+  onMapZoomEnd() {
+    if (!this.map) return;
+    this.zoomLevel = this.map.getZoom();
   }
 
-  mapSetHover(stop?: Feature<Point, CorridorStop>, highlight = false) {
-    this.hoveredStop = stop;
-    if (highlight && stop) {
-      this.setHoverState(stop);
-    }
-    this.mapCursor = highlight ? "pointer" : "default";
+  onLayerMouseEnter(): void {
+    if (!this.map) return;
+    this.map.getCanvas().style.cursor = "pointer";
   }
 
-  mapClearHover() {
-    if (this.hoveredStop) {
-      this.clearHoverState(this.hoveredStop);
-    }
-    this.hoveredStop = undefined;
-    this.mapCursor = undefined;
+  onLayerMouseLeave(): void {
+    if (!this.map) return;
+    this.map.getCanvas().style.cursor = "";
   }
 
-  onRecentreMap() {
-    this.recentreMap.emit();
+  onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
+    console.log(event);
+    if (!this.map) return;
+    const center: [number, number] = [event.lngLat.lng, event.lngLat.lat];
+    this.map.easeTo({
+      center,
+      zoom: this.map.getZoom() + 1,
+    });
+  }
+
+  processPointData(points: StopAnalysisType[]): void {
+    this.points = {
+      type: "FeatureCollection",
+      features: points.map((point) => ({
+        type: "Feature",
+        properties: point,
+        geometry: {
+          type: "Point",
+          coordinates: [point.longitude, point.latitude],
+        },
+      })),
+    };
+  }
+
+  getNewBounds(map: Map): BoundingBoxInputType {
+    const bounds = map.getBounds();
+    return {
+      maxLatitude: bounds.getNorth(),
+      minLatitude: bounds.getSouth(),
+      maxLongitude: bounds.getEast(),
+      minLongitude: bounds.getWest(),
+    };
+  }
+
+  withinLastBounds(bounds: BoundingBoxInputType): boolean {
+    if (!this.lastBounds) return false;
+    return (
+      bounds.minLongitude >= this.lastBounds.minLongitude &&
+      bounds.minLatitude >= this.lastBounds.minLatitude &&
+      bounds.maxLongitude <= this.lastBounds.maxLongitude &&
+      bounds.maxLatitude <= this.lastBounds.maxLatitude
+    );
   }
 }
