@@ -10,7 +10,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
 import { OrganisationService } from "../organisation.service";
 import { BehaviorSubject, combineLatest, Subject, Subscription } from "rxjs";
-import { RoleFragment, UserFragment } from "src/generated/graphql";
+import { UserFragment } from "src/generated/graphql";
 import { distinctUntilChanged, filter, map } from "rxjs/operators";
 @Component({
   selector: "app-edit-user",
@@ -25,8 +25,6 @@ export class EditUserComponent implements OnInit {
 
   username = new BehaviorSubject<string | null>(null);
   userList = new BehaviorSubject<UserFragment[]>([]);
-
-  orgRoles: RoleFragment[] = [];
 
   subs: Subscription[] = [];
 
@@ -57,17 +55,13 @@ export class EditUserComponent implements OnInit {
         )
         .subscribe((e) => this.username.next(e)),
       this.service.listUsers$().subscribe((users) => this.userList.next(users)),
-      this.service
-        .listOrgRoles$()
-        .subscribe((orgRoles) => (this.orgRoles = orgRoles)),
       this.user.subscribe((user) => {
         if (user) {
-          const { firstName, lastName, username, roles } = user;
+          const { firstName, lastName, username } = user;
           this.userForm.setValue({
             firstName,
             lastName,
             username,
-            role: roles?.[0]?.id,
           });
         }
       }),
@@ -104,12 +98,7 @@ export class EditUserComponent implements OnInit {
 
     this.subs.push(
       this.service
-        .editUser$(
-          this.username.value,
-          this.firstName,
-          this.lastName,
-          this.role,
-        )
+        .editUser$(this.username.value, this.firstName, this.lastName)
         .subscribe((mures) => {
           if (mures.success) {
             this.router.navigate(["/organisation/users/"]).catch(console.log);

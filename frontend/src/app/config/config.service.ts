@@ -86,6 +86,7 @@ function flags(currentEnv: string) {
   // TODO: get from API
   return {
     dataMonitoring: maxEnvironment(currentEnv, "test"),
+    serviceMonitoring: maxEnvironment(currentEnv, "test"),
   } as const;
 }
 

@@ -6,7 +6,6 @@ import {
   naptan_locality,
   naptan_stoppoint_latlong,
   PrismaClient,
-  Timetable,
 } from "@prisma/client";
 import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
@@ -147,15 +146,6 @@ export const updateCorridorDb = (
       corridor_name: corridorName,
     },
   });
-};
-
-export const filteredJourneys = (
-  stopCount: number,
-  journeyMap: Map<string, Timetable[]>,
-): Map<string, Timetable[]> => {
-  return new Map<string, Timetable[]>(
-    [...journeyMap.entries()].filter(([_, arr]) => arr.length === stopCount),
-  );
 };
 
 export const isCorridorMappedToUserOrg = async (
