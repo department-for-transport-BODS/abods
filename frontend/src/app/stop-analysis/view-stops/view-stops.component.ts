@@ -6,7 +6,7 @@ import { BRITISH_ISLES_BBOX } from "../../shared/geo";
 import {
   BoundingBoxInputType,
   StopAnalysisGQL,
-  StopAnalysisType,
+  StopStatistics,
 } from "../../../generated/graphql";
 import { Subject, takeUntil } from "rxjs";
 import { debounceTime } from "rxjs/operators";
@@ -18,7 +18,7 @@ import { DateTime } from "luxon";
   styleUrls: ["./view-stops.component.scss"],
 })
 export class ViewStopsComponent implements OnInit, OnDestroy {
-  points: FeatureCollection<Point, StopAnalysisType> = {
+  points: FeatureCollection<Point, StopStatistics> = {
     type: "FeatureCollection",
     features: [],
   };
@@ -32,11 +32,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   clusterProperties = {
-    totalDelay: [
-      "+",
-      ["*", ["get", "averageDelay"], ["get", "completedDepartures"]],
-    ],
-    totalDepartures: ["+", ["get", "completedDepartures"]],
+    totalDelay: ["+", ["get", "totalDelay"]],
+    completedDepartures: ["+", ["get", "completedDepartures"]],
   };
 
   zoomLevel = 0;
@@ -51,7 +48,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.boundsChanged
-      .pipe(debounceTime(500), takeUntil(this.destroy$))
+      .pipe(debounceTime(200), takeUntil(this.destroy$))
       .subscribe(() => {
         if (!this.map) return;
         if (this.boundingBoxTooBig) return;
@@ -129,7 +126,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     });
   }
 
-  processPointData(points: StopAnalysisType[]): void {
+  processPointData(points: StopStatistics[]): void {
     this.points = {
       type: "FeatureCollection",
       features: points.map((point) => ({

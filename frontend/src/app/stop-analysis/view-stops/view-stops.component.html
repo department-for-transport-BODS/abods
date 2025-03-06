@@ -48,7 +48,7 @@
               ],
               'circle-color': [
                 'step',
-                ['/', ['get', 'totalDelay'], ['get', 'totalDepartures']],
+                ['/', ['get', 'totalDelay'], ['get', 'completedDepartures']],
                 '#ffeb3b',
                 -1,
                 '#4caf50',
@@ -69,7 +69,7 @@
             [layout]="{
               'text-field': [
                 'number-format',
-                ['/', ['get', 'totalDelay'], ['get', 'totalDepartures']],
+                ['/', ['get', 'totalDelay'], ['get', 'completedDepartures']],
                 { 'min-fraction-digits': 0, 'max-fraction-digits': 1 }
               ],
               'text-size': 12
@@ -88,7 +88,7 @@
               'circle-radius': 20,
               'circle-color': [
                 'step',
-                ['get', 'averageDelay'],
+                ['/', ['get', 'totalDelay'], ['get', 'completedDepartures']],
                 '#ffeb3b',
                 -1,
                 '#4caf50',
@@ -106,7 +106,7 @@
             [layout]="{
               'text-field': [
                 'number-format',
-                ['get', 'averageDelay'],
+                ['/', ['get', 'totalDelay'], ['get', 'completedDepartures']],
                 { 'min-fraction-digits': 0, 'max-fraction-digits': 1 }
               ],
               'text-size': 12
@@ -118,8 +118,9 @@
           <mgl-control mglNavigation />
           <mgl-control mglGeolocate />
         </mgl-map>
-        <div class="map-overlay" *ngIf="boundingBoxTooBig">
-          <p>Zoom in to show stops</p>
+        <div class="map-overlay">
+          <p *ngIf="boundingBoxTooBig">Zoom in to show stops</p>
+          <app-spinner *ngIf="isLoading" />
         </div>
       </div>
     </ng-container>
