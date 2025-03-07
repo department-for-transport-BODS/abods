@@ -11,6 +11,7 @@ import {
 import { Subject, takeUntil } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { DateTime } from "luxon";
+import { StopPerformance } from "../../on-time/on-time.service";
 
 @Component({
   selector: "app-view-stops",
@@ -24,6 +25,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   };
 
   isLoading = false;
+  errored = false;
   /**
    * TODO: When hovering on the stop show:
    *     Common name
@@ -65,10 +67,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     minLongitude: this.initialBounds[0],
   };
   private rawPointData: StopStatistics[] = [];
-  /**
-   * TODO: Below the map, as per OTP, a list of the stop breakdown is shown with summary stats
-   * **/
-  filteredPointData: StopStatistics[] = [];
+  filteredPointData: StopPerformance[] = [];
 
   get boundingBoxTooBig() {
     return this.zoomLevel < 12;
@@ -175,7 +174,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   }
 
   processPointData(): void {
-    const filteredPoints = this.rawPointData.filter(
+    const filtered = this.rawPointData.filter(
       (n) =>
         (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
         n.latitude >= this.visibleBounds.minLatitude &&
@@ -183,12 +182,42 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         n.longitude >= this.visibleBounds.minLongitude &&
         n.longitude <= this.visibleBounds.maxLongitude,
     );
-    this.filteredPointData = filteredPoints;
+    // TODO: Fix hover state on stop list
+    // TODO: Fix percentages on stop list
+    // TODO: Zoom in on stop when clicked
+    this.filteredPointData = filtered
+      .map((x) => ({
+        stopId: x.stopId.toString(),
+        stopInfo: {
+          stopId: x.stopId.toString(),
+          stopName: x.stopName,
+          stopLocality: {},
+          stopLocation: {
+            latitude: x.latitude,
+            longitude: x.longitude,
+          },
+          sourceId: x.atcoCode,
+        },
+        timingPoint: x.timingPoint,
+        scheduledDepartures: x.scheduledDepartures,
+        late: x.late,
+        actualDepartures: x.completedDepartures,
+        early: x.early,
+        onTime: x.onTime,
+        averageDelay: x.totalDelay / x.completedDepartures || 0,
+        total: 0, // ?
+        onTimeRatio: x.onTime / x.completedDepartures || 0,
+        earlyRatio: x.early / x.completedDepartures || 0,
+        lateRatio: x.late / x.completedDepartures || 0,
+        completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
+      }))
+      .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
+
     this.points = {
       type: "FeatureCollection",
       features: Object.values(
         // Combine points where the stop is used as a timing point and a non timing point
-        this.filteredPointData.reduce(
+        filtered.reduce(
           (acc, cur) => {
             if (!acc[cur.stopId]) {
               acc[cur.stopId] = cur;
