@@ -418,24 +418,23 @@ export const filterStopSequence = (
   journeyMap.forEach((journeys) => {
     let journeySequence: TimetableType[] = [];
     let stopListIndex = 0;
+    journeys.sort((a, b) => a.stop_index - b.stop_index);
     if (journeys.length === stopList.length) {
       filteredJourneys.push(journeys);
       return;
     }
 
-    journeys
-      .sort((a, b) => a.stop_index - b.stop_index)
-      .map((journey) => {
-        if (Number(journey.stop_id) === stopList[stopListIndex]) {
-          journeySequence.push(journey);
-          stopListIndex = stopListIndex + 1;
-        }
-        if (stopListIndex === stopList.length) {
-          filteredJourneys.push(journeySequence);
-          journeySequence = [];
-          stopListIndex = 0;
-        }
-      });
+    journeys.map((journey) => {
+      if (Number(journey.stop_id) === stopList[stopListIndex]) {
+        journeySequence.push(journey);
+        stopListIndex = stopListIndex + 1;
+      }
+      if (stopListIndex === stopList.length) {
+        filteredJourneys.push(journeySequence);
+        journeySequence = [];
+        stopListIndex = 0;
+      }
+    });
   });
 
   return filteredJourneys;
