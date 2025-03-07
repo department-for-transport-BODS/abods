@@ -43,7 +43,6 @@ import {
 } from "../lib/dayjs.js";
 import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import { SessionUser } from "../types/extra.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs from "dayjs";
 
@@ -232,7 +231,6 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
     corridor.corridor_id,
     args.payload.stopIds.map(String),
     context.db,
-    user,
   );
 
   return {
@@ -244,7 +242,6 @@ const insertCorridorStops = async (
   corridor_id: number,
   stopIds: string[],
   db: PrismaClient,
-  sessionUser: SessionUser,
 ) => {
   const numberStopsList = stopIds.map(Number);
 
@@ -254,29 +251,11 @@ const insertCorridorStops = async (
     stop_id: number;
   }[] = [];
 
-  const adminAreas = await getOrgAdminAreas(db, sessionUser);
-  const stops = await db.naptan_stoppoint_latlong.findMany({
-    where: {
-      id: {
-        in: numberStopsList,
-      },
-      admin_area_id: {
-        in: adminAreas.map((admin) => admin.adminarea_id),
-      },
-    },
-  });
-
-  stops.sort(
-    (a, b) =>
-      numberStopsList.findIndex((stop) => stop === a.id) -
-      numberStopsList.findIndex((stop) => stop === b.id),
-  );
-
-  stops.map((stop, index) => {
+  numberStopsList.map((stop, index) => {
     records.push({
       corridor_id: Number(corridor_id),
       corridor_index: index,
-      stop_id: stop.id,
+      stop_id: stop,
     });
   });
 
@@ -338,7 +317,6 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
     args.inputs.id,
     args.inputs.stopList.map(String),
     context.db,
-    user,
   );
 
   return {
@@ -348,11 +326,12 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
 
 interface StatsCache {
   inputs: CorridorStatsInputType;
-  journeys: Map<string, TimetableType[]>;
+  journeys: TimetableType[][];
 }
 
 export type TimetableType = Pick<
   Timetable,
+  | "stop_id"
   | "stop_index"
   | "actual_departure_time"
   | "timestamp_after_estimate"
@@ -371,6 +350,10 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 ): Promise<CorridorStatsType> => {
   const { corridorId, fromTimestamp, stopList, toTimestamp } = args.inputs;
   const user = await requireUserSession(context);
+
+  if (stopList.length < 1) {
+    throw "No stop array passed for corridor stats";
+  }
 
   if (
     !(await isCorridorMappedToUserOrg(Number(corridorId), user, context.db))
@@ -392,12 +375,13 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
   const groupIdsWithCorrectStopCount = timetables
     .groupBy(["group_id"])
-    .having(context.kysely.fn.count("stop_id"), "=", stopsArray.length)
+    .having(context.kysely.fn.count("stop_id"), ">=", stopsArray.length)
     .select("group_id");
 
   const results: TimetableType[] = await timetables
     .where("group_id", "in", groupIdsWithCorrectStopCount)
     .select([
+      "stop_id",
       "stop_index",
       "actual_departure_time",
       "timestamp_after_estimate",
@@ -421,8 +405,40 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     journeyMap.set(mapKey, existingJourneys);
   });
 
+  const journeys = filterStopSequence(journeyMap, stopsArray);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
-  return { inputs: args.inputs, journeys: journeyMap } as CorridorStatsType;
+  return { inputs: args.inputs, journeys } as CorridorStatsType;
+};
+
+export const filterStopSequence = (
+  journeyMap: Map<string, TimetableType[]>,
+  stopList: number[],
+) => {
+  const filteredJourneys: TimetableType[][] = [];
+  journeyMap.forEach((journeys) => {
+    let journeySequence: TimetableType[] = [];
+    let stopListIndex = 0;
+    if (journeys.length === stopList.length) {
+      filteredJourneys.push(journeys);
+      return;
+    }
+
+    journeys
+      .sort((a, b) => a.stop_index - b.stop_index)
+      .map((journey) => {
+        if (Number(journey.stop_id) === stopList[stopListIndex]) {
+          journeySequence.push(journey);
+          stopListIndex = stopListIndex + 1;
+        }
+        if (stopListIndex === stopList.length) {
+          filteredJourneys.push(journeySequence);
+          journeySequence = [];
+          stopListIndex = 0;
+        }
+      });
+  });
+
+  return filteredJourneys;
 };
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
@@ -430,19 +446,18 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
 ): CorridorSummaryStatsType => {
   // Data was cached in the output of getStats, and will be removed later
   const data = parent as StatsCache;
-  const scheduledTransits = data.journeys.size;
+  const scheduledTransits = data.journeys.length;
   let totalTransits = 0;
   let totalJourneyTime = 0;
   const services = new Set();
-  [...data.journeys.values()].map((journeys) => {
-    journeys.sort((a, b) => a.stop_index - b.stop_index);
+  data.journeys.map((journey) => {
     const firstDeparture = getJourneyDeparture(
-      journeys[0],
+      journey[0],
       data.inputs.matchType,
     );
 
     const lastDeparture = getJourneyDeparture(
-      journeys[journeys.length - 1],
+      journey[journey.length - 1],
       data.inputs.matchType,
     );
 
@@ -452,7 +467,7 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
         (lastDeparture.getTime() - firstDeparture.getTime()) / 1000; //In seconds
     }
 
-    const serviceCode = `${journeys[0].operator_noc}${journeys[0].service_code}${journeys[0].line_name}`;
+    const serviceCode = `${journey[0].operator_noc}${journey[0].service_code}${journey[0].line_name}`;
     if (!services.has(serviceCode)) {
       services.add(serviceCode);
     }
@@ -460,7 +475,6 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
 
   const averageJourneyTime =
     totalTransits > 0 ? Math.ceil(totalJourneyTime / totalTransits) : 0;
-
   return {
     scheduledTransits,
     totalTransits,
@@ -521,19 +535,17 @@ export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"]
   };
 
 const getJourneyStats = (
-  journeys: Map<string, TimetableType[]>,
+  journeys: TimetableType[][],
   inputType: CorridorJourneyStatsOption,
   matchType: MatchType,
 ) => {
   const journeyStats = new Map<string, number[]>();
-  [...journeys.values()].map((journeys) => {
-    journeys.sort((a, b) => a.stop_index - b.stop_index);
+  journeys.map((journey) => {
+    const firstDeparture = journey[0];
 
-    const firstDeparture = journeys[0];
-
-    const firstStopDeparture = getJourneyDeparture(journeys[0], matchType);
+    const firstStopDeparture = getJourneyDeparture(journey[0], matchType);
     const lastDeparture = getJourneyDeparture(
-      journeys[journeys.length - 1],
+      journey[journey.length - 1],
       matchType,
     );
 
@@ -604,16 +616,15 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
     const data = parent as StatsCache;
     const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
     const stats: CorridorStatsPerServiceType[] = [];
-    [...data.journeys.values()].map((journeys) => {
-      journeys.sort((a, b) => a.stop_index - b.stop_index);
-      const firstDeparture = journeys[0];
+    data.journeys.map((journey) => {
+      const firstDeparture = journey[0];
 
       const firstStopDeparture = getJourneyDeparture(
-        journeys[0],
+        journey[0],
         data.inputs.matchType,
       );
       const lastDeparture = getJourneyDeparture(
-        journeys[journeys.length - 1],
+        journey[journey.length - 1],
         data.inputs.matchType,
       );
       // noc_line_and_servicecode
@@ -672,15 +683,13 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
     const data = parent as StatsCache;
     const journeyStats = new Map<string, number>();
 
-    [...data.journeys.values()].map((journeys) => {
-      journeys.sort((a, b) => a.stop_index - b.stop_index);
-
+    data.journeys.map((journey) => {
       const firstStopDeparture = getJourneyDeparture(
-        journeys[0],
+        journey[0],
         data.inputs.matchType,
       );
       const lastDeparture = getJourneyDeparture(
-        journeys[journeys.length - 1],
+        journey[journey.length - 1],
         data.inputs.matchType,
       );
       if (firstStopDeparture && lastDeparture) {
