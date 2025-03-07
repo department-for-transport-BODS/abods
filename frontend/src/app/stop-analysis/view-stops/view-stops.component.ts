@@ -184,35 +184,39 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         n.longitude >= this.visibleBounds.minLongitude &&
         n.longitude <= this.visibleBounds.maxLongitude,
     );
-    // TODO: Fix hover state on stop list
     // TODO: Fix percentages on stop list
     // TODO: Zoom in on stop when clicked
     this.filteredStopData = filtered
-      .map((x) => ({
-        stopId: x.stopId.toString(),
-        stopInfo: {
+      .map(
+        (x): StopPerformance => ({
           stopId: x.stopId.toString(),
-          stopName: x.stopName,
-          stopLocality: {},
-          stopLocation: {
-            latitude: x.latitude,
-            longitude: x.longitude,
+          stopInfo: {
+            stopId: x.stopId.toString(),
+            stopName: x.stopName,
+            stopLocality: {
+              localityName: x.localityName,
+              localityAreaName: x.adminAreaName,
+            },
+            stopLocation: {
+              latitude: x.latitude,
+              longitude: x.longitude,
+            },
+            sourceId: x.atcoCode,
           },
-          sourceId: x.atcoCode,
-        },
-        timingPoint: x.timingPoint,
-        scheduledDepartures: x.scheduledDepartures,
-        late: x.late,
-        actualDepartures: x.completedDepartures,
-        early: x.early,
-        onTime: x.onTime,
-        averageDelay: x.totalDelay / x.completedDepartures || 0,
-        total: 0, // ?
-        onTimeRatio: x.onTime / x.completedDepartures || 0,
-        earlyRatio: x.early / x.completedDepartures || 0,
-        lateRatio: x.late / x.completedDepartures || 0,
-        completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
-      }))
+          timingPoint: x.timingPoint,
+          scheduledDepartures: x.scheduledDepartures,
+          late: x.late,
+          actualDepartures: x.completedDepartures,
+          early: x.early,
+          onTime: x.onTime,
+          averageDelay: x.totalDelay / x.completedDepartures || 0,
+          total: 0, // ?
+          onTimeRatio: x.onTime / x.completedDepartures || 0,
+          earlyRatio: x.early / x.completedDepartures || 0,
+          lateRatio: x.late / x.completedDepartures || 0,
+          completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
+        }),
+      )
       .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
 
     this.stopPoints = {
@@ -231,6 +235,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
               atcoCode: cur.atcoCode,
               latitude: cur.latitude,
               longitude: cur.longitude,
+              localityName: cur.localityName,
+              adminAreaName: cur.adminAreaName,
               timingPoint: cur.timingPoint || acc[cur.stopId].timingPoint,
               totalDelay: cur.totalDelay || acc[cur.stopId].totalDelay,
               onTime: cur.onTime || acc[cur.stopId].onTime,
