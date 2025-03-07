@@ -50,8 +50,11 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
    *  Incomplete: 12%
    * **/
   clusterProperties = {
+    early: ["+", ["get", "early"]],
     onTime: ["+", ["get", "onTime"]],
+    late: ["+", ["get", "late"]],
     completedDepartures: ["+", ["get", "completedDepartures"]],
+    scheduledDepartures: ["+", ["get", "scheduledDepartures"]],
   };
 
   zoomLevel = 0;
@@ -172,7 +175,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   }
 
   processPointData(): void {
-    this.filteredPointData = this.rawPointData.filter(
+    const filteredPoints = this.rawPointData.filter(
       (n) =>
         (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
         n.latitude >= this.visibleBounds.minLatitude &&
@@ -180,10 +183,38 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         n.longitude >= this.visibleBounds.minLongitude &&
         n.longitude <= this.visibleBounds.maxLongitude,
     );
-
+    this.filteredPointData = filteredPoints;
     this.points = {
       type: "FeatureCollection",
-      features: this.filteredPointData.map((point) => ({
+      features: Object.values(
+        // Combine points where the stop is used as a timing point and a non timing point
+        this.filteredPointData.reduce(
+          (acc, cur) => {
+            if (!acc[cur.stopId]) {
+              acc[cur.stopId] = cur;
+              return acc;
+            }
+            acc[cur.stopId] = {
+              stopId: cur.stopId,
+              stopName: cur.stopName,
+              atcoCode: cur.atcoCode,
+              latitude: cur.latitude,
+              longitude: cur.longitude,
+              timingPoint: cur.timingPoint || acc[cur.stopId].timingPoint,
+              totalDelay: cur.totalDelay || acc[cur.stopId].totalDelay,
+              onTime: cur.onTime || acc[cur.stopId].onTime,
+              completedDepartures:
+                cur.completedDepartures || acc[cur.stopId].completedDepartures,
+              scheduledDepartures:
+                cur.scheduledDepartures || acc[cur.stopId].scheduledDepartures,
+              late: cur.late || acc[cur.stopId].late,
+              early: cur.early || acc[cur.stopId].early,
+            };
+            return acc;
+          },
+          {} as Record<string, StopStatistics>,
+        ),
+      ).map((point) => ({
         type: "Feature",
         properties: point,
         geometry: {
