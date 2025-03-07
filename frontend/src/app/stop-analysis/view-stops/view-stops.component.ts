@@ -19,7 +19,7 @@ import { StopPerformance } from "../../on-time/on-time.service";
   styleUrls: ["./view-stops.component.scss"],
 })
 export class ViewStopsComponent implements OnInit, OnDestroy {
-  points: FeatureCollection<Point, StopStatistics> = {
+  stopPoints: FeatureCollection<Point, StopStatistics> = {
     type: "FeatureCollection",
     features: [],
   };
@@ -66,8 +66,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     maxLongitude: this.initialBounds[2],
     minLongitude: this.initialBounds[0],
   };
-  private rawPointData: StopStatistics[] = [];
-  filteredPointData: StopPerformance[] = [];
+  private rawStopData: StopStatistics[] = [];
+  filteredStopData: StopPerformance[] = [];
 
   get boundingBoxTooBig() {
     return this.zoomLevel < 12;
@@ -88,7 +88,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         this.visibleBounds = bounds;
 
         if (this.withinLastBounds(bounds)) {
-          this.processPointData();
+          this.processStopData();
           return;
         }
 
@@ -99,7 +99,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         /**
          *     TODO: Add filters:
          *      Postcode/area as per corridors
-         *      Timing Points
          *      Estimated
          *      NOC (select multiple)
          *      Service (select multiple) (only show services in selected NOCs if selected)
@@ -121,8 +120,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
           })
           .subscribe((response) => {
             this.lastBounds = bounds;
-            this.rawPointData = response.data.stopAnalysis;
-            this.processPointData();
+            this.rawStopData = response.data.stopAnalysis;
+            this.processStopData();
             this.isLoading = false;
           });
       });
@@ -173,8 +172,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     });
   }
 
-  processPointData(): void {
-    const filtered = this.rawPointData.filter(
+  processStopData(): void {
+    const filtered = this.rawStopData.filter(
       (n) =>
         (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
         n.latitude >= this.visibleBounds.minLatitude &&
@@ -185,7 +184,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     // TODO: Fix hover state on stop list
     // TODO: Fix percentages on stop list
     // TODO: Zoom in on stop when clicked
-    this.filteredPointData = filtered
+    this.filteredStopData = filtered
       .map((x) => ({
         stopId: x.stopId.toString(),
         stopInfo: {
@@ -213,7 +212,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
       }))
       .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
 
-    this.points = {
+    this.stopPoints = {
       type: "FeatureCollection",
       features: Object.values(
         // Combine points where the stop is used as a timing point and a non timing point

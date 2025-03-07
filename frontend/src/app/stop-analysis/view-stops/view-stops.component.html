@@ -3,7 +3,7 @@
     <app-page-header heading="Stop Analysis" />
     <app-segmented-toggle
       [(ngModel)]="timingPointsOption"
-      (ngModelChange)="processPointData()"
+      (ngModelChange)="processStopData()"
     >
       <app-segmented-toggle-item
         name="stops-filter"
@@ -40,8 +40,8 @@
         </mgl-control>
         <mgl-geojson-source
           *ngIf="!boundingBoxTooBig"
-          id="points"
-          [data]="points"
+          id="stops"
+          [data]="stopPoints"
           [cluster]="true"
           [clusterRadius]="100"
           [clusterProperties]="clusterProperties"
@@ -50,7 +50,7 @@
           *ngIf="!boundingBoxTooBig"
           id="clusters"
           type="circle"
-          source="points"
+          source="stops"
           [filter]="['has', 'point_count']"
           [paint]="{
             'circle-radius': [
@@ -95,7 +95,7 @@
           *ngIf="!boundingBoxTooBig"
           id="cluster-count"
           type="symbol"
-          source="points"
+          source="stops"
           [filter]="['has', 'point_count']"
           [layout]="{
             'text-field': [
@@ -113,7 +113,7 @@
           *ngIf="!boundingBoxTooBig"
           id="unclustered-stop"
           type="circle"
-          source="points"
+          source="stops"
           [filter]="[
             'all',
             ['!', ['has', 'point_count']],
@@ -151,7 +151,7 @@
           *ngIf="!boundingBoxTooBig"
           id="unclustered-timing-stop"
           type="symbol"
-          source="points"
+          source="stops"
           [filter]="[
             'all',
             ['!', ['has', 'point_count']],
@@ -207,7 +207,7 @@
     <app-stops-grid-display
       [errored]="errored"
       [loading]="isLoading"
-      [data]="filteredPointData"
+      [data]="filteredStopData"
       [paginate]="true"
     />
   </ng-container>
