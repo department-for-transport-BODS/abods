@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
 import { Map } from "mapbox-gl";
 import { ConfigService } from "../../config/config.service";
@@ -26,15 +26,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
   isLoading = false;
   errored = false;
-  /**
-   * TODO: When hovering on the stop show:
-   *     Common name
-   *     atco code
-   *     On time
-   *     Early
-   *     Late
-   *     Incomplete
-   * **/
   timingPointsOption = "timing-points";
   private map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -68,6 +59,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   };
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
+  selectedStop: StopStatistics | undefined;
 
   get boundingBoxTooBig() {
     return this.zoomLevel < 12;
@@ -76,6 +68,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -103,7 +96,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
          *      NOC (select multiple)
          *      Service (select multiple) (only show services in selected NOCs if selected)
          *      Start date
-         *      End date
+         *      End date, limit date range
          *      Refine Results
          *          Day e.g. Monday (select multiple)
          *          Time range
@@ -136,6 +129,27 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.map = map;
     this.onMapZoomEnd();
     this.onMapMoveEnd();
+
+    // For some reason this doesn't work passing a method to the map layer props
+    map.on("mouseenter", "clusters", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    map.on("mouseleave", "clusters", () => {
+      map.getCanvas().style.cursor = "";
+    });
+
+    this.map.on("mouseenter", ["timing-stops", "other-stops"], (e) => {
+      if (!e.features || e.features.length <= 0 || !e.features[0].properties)
+        return;
+      this.selectedStop = e.features[0].properties as StopStatistics;
+      this.cdr.detectChanges();
+    });
+
+    this.map.on("mouseleave", ["timing-stops", "other-stops"], () => {
+      this.selectedStop = undefined;
+      this.cdr.detectChanges();
+    });
   }
 
   onMapMoveEnd() {
@@ -152,18 +166,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.zoomLevel = this.map.getZoom();
   }
 
-  onLayerMouseEnter(): void {
-    if (!this.map) return;
-    this.map.getCanvas().style.cursor = "pointer";
-  }
-
-  onLayerMouseLeave(): void {
-    if (!this.map) return;
-    this.map.getCanvas().style.cursor = "";
-  }
-
   onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
-    console.log(event);
     if (!this.map) return;
     const center: [number, number] = [event.lngLat.lng, event.lngLat.lat];
     this.map.easeTo({

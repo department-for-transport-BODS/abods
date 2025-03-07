@@ -87,9 +87,7 @@
             ],
             'circle-stroke-color': '#ffffff'
           }"
-          (click)="onClusterClick($event)"
-          (mouseenter)="onLayerMouseEnter()"
-          (mouseleave)="onLayerMouseLeave()"
+          (layerClick)="onClusterClick($event)"
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
@@ -111,7 +109,7 @@
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
-          id="unclustered-stop"
+          id="other-stops"
           type="circle"
           source="stops"
           [filter]="[
@@ -149,7 +147,7 @@
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
-          id="unclustered-timing-stop"
+          id="timing-stops"
           type="symbol"
           source="stops"
           [filter]="[
@@ -183,6 +181,55 @@
             ]
           }"
         />
+        <mgl-popup
+          *ngIf="selectedStop"
+          [lngLat]="[selectedStop.longitude, selectedStop.latitude]"
+          [closeButton]="false"
+          [closeOnClick]="false"
+        >
+          <div>
+            <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+              {{ selectedStop.stopName }}
+            </h3>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>ATCO:</strong> {{ selectedStop.atcoCode }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>On time:</strong>
+              {{
+                selectedStop.onTime / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Early:</strong>
+              {{
+                selectedStop.early / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Late:</strong>
+              {{
+                selectedStop.late / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Incomplete:</strong>
+              {{
+                (selectedStop.scheduledDepartures -
+                  selectedStop.completedDepartures) /
+                  selectedStop.scheduledDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+          </div>
+        </mgl-popup>
         <mgl-control position="bottom-left">
           <div class="map__legend map__legend">
             <span class="map__dot map__dot--high"></span>
