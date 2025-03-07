@@ -22,3 +22,40 @@
     border: solid 1px $govuk-border-colour;
   }
 }
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+
+.map {
+  &__legend {
+    @include govuk-font(14);
+    background-color: #ffffff;
+    padding: govuk-spacing(1);
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: repeat(8, auto);
+    grid-template-rows: auto;
+  }
+
+  &__dot {
+    border-radius: 100%;
+    margin: govuk-spacing(1);
+    @include square(16px);
+
+    &--high {
+      background-color: govuk-colour("turquoise");
+    }
+    &--med {
+      background-color: govuk-colour("yellow");
+    }
+    &--low {
+      background-color: govuk-colour("red");
+    }
+    &--no-data {
+      background-color: govuk-colour("mid-grey");
+    }
+  }
+}

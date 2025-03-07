@@ -24,6 +24,16 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   };
 
   isLoading = false;
+  /**
+   * TODO: When hovering on the stop show:
+   *     Common name
+   *     atco code
+   *     On time
+   *     Early
+   *     Late
+   *     Incomplete
+   * **/
+  timingPointsOption = "timing-points";
   private map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
   initialBounds = BRITISH_ISLES_BBOX;
@@ -31,12 +41,32 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   private lastBounds: BoundingBoxInputType | undefined = undefined;
   private destroy$ = new Subject<void>();
 
+  /**
+   * TODO: Here when hovering over the stop show:
+   *  Count: 32
+   *  On-time: 78%
+   *  Early: 2%
+   *  Late: 20%
+   *  Incomplete: 12%
+   * **/
   clusterProperties = {
-    totalDelay: ["+", ["get", "totalDelay"]],
+    onTime: ["+", ["get", "onTime"]],
     completedDepartures: ["+", ["get", "completedDepartures"]],
   };
 
   zoomLevel = 0;
+  private visibleBounds: BoundingBoxInputType = {
+    maxLatitude: this.initialBounds[3],
+    minLatitude: this.initialBounds[1],
+    maxLongitude: this.initialBounds[2],
+    minLongitude: this.initialBounds[0],
+  };
+  private rawPointData: StopStatistics[] = [];
+  /**
+   * TODO: Below the map, as per OTP, a list of the stop breakdown is shown with summary stats
+   * **/
+  filteredPointData: StopStatistics[] = [];
+
   get boundingBoxTooBig() {
     return this.zoomLevel < 12;
   }
@@ -53,19 +83,33 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         if (!this.map) return;
         if (this.boundingBoxTooBig) return;
         const bounds = this.getNewBounds(this.map);
+        this.visibleBounds = bounds;
 
         if (this.withinLastBounds(bounds)) {
-          console.log("Within last fetched bounds. Skipping");
+          this.processPointData();
           return;
         }
 
+        // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+
         const yesterday = DateTime.now().minus({ day: 1 }).startOf("day");
         const oneWeekAgo = yesterday.minus({ day: 6 }).startOf("day");
-
+        /**
+         *     TODO: Add filters:
+         *      Postcode/area as per corridors
+         *      Timing Points
+         *      Estimated
+         *      NOC (select multiple)
+         *      Service (select multiple) (only show services in selected NOCs if selected)
+         *      Start date
+         *      End date
+         *      Refine Results
+         *          Day e.g. Monday (select multiple)
+         *          Time range
+         * **/
         this.isLoading = true;
         this.query
           .fetch({
-            //TODO: add more params
             boundingBox: bounds,
             adminAreaIds: null,
             fromTimestamp: oneWeekAgo.toISO(),
@@ -75,7 +119,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
           })
           .subscribe((response) => {
             this.lastBounds = bounds;
-            this.processPointData(response.data.stopAnalysis);
+            this.rawPointData = response.data.stopAnalysis;
+            this.processPointData();
             this.isLoading = false;
           });
       });
@@ -126,10 +171,19 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     });
   }
 
-  processPointData(points: StopStatistics[]): void {
+  processPointData(): void {
+    this.filteredPointData = this.rawPointData.filter(
+      (n) =>
+        (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
+        n.latitude >= this.visibleBounds.minLatitude &&
+        n.latitude <= this.visibleBounds.maxLatitude &&
+        n.longitude >= this.visibleBounds.minLongitude &&
+        n.longitude <= this.visibleBounds.maxLongitude,
+    );
+
     this.points = {
       type: "FeatureCollection",
-      features: points.map((point) => ({
+      features: this.filteredPointData.map((point) => ({
         type: "Feature",
         properties: point,
         geometry: {
