@@ -135,16 +135,6 @@ export type CorridorInputType = {
   stopIds: Array<Scalars['String']['input']>;
 };
 
-export type CorridorJourneyTimeStatsType = {
-  __typename?: 'CorridorJourneyTimeStatsType';
-  avgTransitTime?: Maybe<Scalars['Float']['output']>;
-  maxTransitTime: Scalars['Int']['output'];
-  minTransitTime: Scalars['Int']['output'];
-  percentile25?: Maybe<Scalars['Float']['output']>;
-  percentile75?: Maybe<Scalars['Float']['output']>;
-  ts?: Maybe<Scalars['String']['output']>;
-};
-
 export type CorridorNamespace = {
   __typename?: 'CorridorNamespace';
   addFirstStop?: Maybe<Array<Maybe<StopType>>>;
@@ -207,7 +197,7 @@ export type CorridorStatsPerServiceType = {
   recordedTransits?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   servicePatternName: Scalars['String']['output'];
-  totalJourneyTime?: Maybe<Scalars['Int']['output']>;
+  totalTransitTime?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CorridorStatsTimeOfDayType = {
@@ -222,21 +212,31 @@ export type CorridorStatsTimeOfDayType = {
 
 export type CorridorStatsType = {
   __typename?: 'CorridorStatsType';
-  journeyTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
-  journeyTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
-  journeyTimePerServiceStats?: Maybe<Array<Maybe<CorridorStatsPerServiceType>>>;
-  journeyTimeStats?: Maybe<Array<Maybe<CorridorJourneyTimeStatsType>>>;
-  journeyTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
   serviceLinks?: Maybe<Array<Maybe<ServiceLinkType>>>;
   summaryStats?: Maybe<CorridorSummaryStatsType>;
+  transitTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
+  transitTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
+  transitTimePerServiceStats?: Maybe<Array<Maybe<CorridorStatsPerServiceType>>>;
+  transitTimeStats?: Maybe<Array<Maybe<CorridorTransitTimeStatsType>>>;
+  transitTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
 };
 
 export type CorridorSummaryStatsType = {
   __typename?: 'CorridorSummaryStatsType';
-  averageJourneyTime?: Maybe<Scalars['Int']['output']>;
+  averageTransitTime?: Maybe<Scalars['Int']['output']>;
   numberOfServices?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   totalTransits?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CorridorTransitTimeStatsType = {
+  __typename?: 'CorridorTransitTimeStatsType';
+  avgTransitTime?: Maybe<Scalars['Float']['output']>;
+  maxTransitTime: Scalars['Int']['output'];
+  minTransitTime: Scalars['Int']['output'];
+  percentile25?: Maybe<Scalars['Float']['output']>;
+  percentile75?: Maybe<Scalars['Float']['output']>;
+  ts?: Maybe<Scalars['String']['output']>;
 };
 
 export type CorridorType = {
@@ -1136,7 +1136,7 @@ export type CorridorStatsQueryVariables = Exact<{
 }>;
 
 
-export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageJourneyTime?: number | null, scheduledTransits?: number | null } | null, journeyTimeStats?: Array<{ __typename?: 'CorridorJourneyTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, journeyTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalJourneyTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, journeyTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null }> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null } | null> | null } | null } | null };
+export type CorridorStatsQuery = { __typename?: 'Query', corridor?: { __typename?: 'CorridorNamespace', stats?: { __typename?: 'CorridorStatsType', summaryStats?: { __typename?: 'CorridorSummaryStatsType', totalTransits?: number | null, numberOfServices?: number | null, averageTransitTime?: number | null, scheduledTransits?: number | null } | null, transitTimeStats?: Array<{ __typename?: 'CorridorTransitTimeStatsType', ts?: string | null, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, transitTimeTimeOfDayStats?: Array<{ __typename?: 'CorridorStatsTimeOfDayType', hour: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, transitTimeDayOfWeekStats?: Array<{ __typename?: 'CorridorStatsDayOfWeekType', dow: number, minTransitTime: number, maxTransitTime: number, avgTransitTime?: number | null, percentile25?: number | null, percentile75?: number | null } | null> | null, transitTimePerServiceStats?: Array<{ __typename?: 'CorridorStatsPerServiceType', lineName: string, servicePatternName: string, noc?: string | null, operatorName?: string | null, totalTransitTime?: number | null, recordedTransits?: number | null, scheduledTransits?: number | null } | null> | null, transitTimeHistogram?: Array<{ __typename?: 'CorridorStatsHistogramType', ts?: string | null, hist?: Array<{ __typename?: 'CorridorHistogramType', bin?: number | null, freq?: number | null }> | null } | null> | null, serviceLinks?: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null } | null> | null } | null } | null };
 
 export type CreateCorridorMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -1795,10 +1795,10 @@ export const CorridorStatsDocument = gql`
       summaryStats {
         totalTransits
         numberOfServices
-        averageJourneyTime
+        averageTransitTime
         scheduledTransits
       }
-      journeyTimeStats {
+      transitTimeStats {
         ts
         minTransitTime
         maxTransitTime
@@ -1806,7 +1806,7 @@ export const CorridorStatsDocument = gql`
         percentile25
         percentile75
       }
-      journeyTimeTimeOfDayStats {
+      transitTimeTimeOfDayStats {
         hour
         minTransitTime
         maxTransitTime
@@ -1814,7 +1814,7 @@ export const CorridorStatsDocument = gql`
         percentile25
         percentile75
       }
-      journeyTimeDayOfWeekStats {
+      transitTimeDayOfWeekStats {
         dow
         minTransitTime
         maxTransitTime
@@ -1822,16 +1822,16 @@ export const CorridorStatsDocument = gql`
         percentile25
         percentile75
       }
-      journeyTimePerServiceStats {
+      transitTimePerServiceStats {
         lineName
         servicePatternName
         noc
         operatorName
-        totalJourneyTime
+        totalTransitTime
         recordedTransits
         scheduledTransits
       }
-      journeyTimeHistogram {
+      transitTimeHistogram {
         ts
         hist {
           bin

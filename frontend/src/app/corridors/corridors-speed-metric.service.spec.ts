@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import {
-  CorridorJourneyTimeStatsType,
+  CorridorTransitTimeStatsType,
   CorridorStatsDayOfWeekType,
   CorridorStatsTimeOfDayType,
   ServiceLinkType,
@@ -45,7 +45,7 @@ describe("CorridorsSpeedMetricService", () => {
     },
   ];
   const totalDistance = 1500;
-  const journeyTimeStats: (CorridorJourneyTimeStatsType &
+  const transitTimeStats: (CorridorTransitTimeStatsType &
     BoxPlotChartDataItem)[] = [
     {
       ts: "2022-04-26T00:00:00",
@@ -144,13 +144,13 @@ describe("CorridorsSpeedMetricService", () => {
     },
   ];
   const stats = <CorridorStats>{
-    journeyTimeTimeOfDayStats: journeyTimeTimeOfDay,
-    journeyTimeDayOfWeekStats: journeyTimeDayOfWeek,
-    journeyTimeHistogram: journeyTimeHist,
-    journeyTimeStats: journeyTimeStats,
+    transitTimeTimeOfDayStats: journeyTimeTimeOfDay,
+    transitTimeDayOfWeekStats: journeyTimeDayOfWeek,
+    transitTimeHistogram: journeyTimeHist,
+    transitTimeStats: transitTimeStats,
     serviceLinks: serviceLinks,
     summaryStats: {
-      averageJourneyTime: 240,
+      averageTransitTime: 240,
     },
   };
 
@@ -275,9 +275,9 @@ describe("CorridorsSpeedMetricService", () => {
       service.setTotalDistance(serviceLinks);
     });
 
-    [journeyTimeStats, journeyTimeTimeOfDay, journeyTimeDayOfWeek].forEach(
+    [transitTimeStats, journeyTimeTimeOfDay, journeyTimeDayOfWeek].forEach(
       (stats) => {
-        it("should return array of same length as journeyTimeStats array", () => {
+        it("should return array of same length as transitTimeStats array", () => {
           const result = service.calculateTransitSpeedBoxPlotStats(stats);
 
           expect(result.length).toEqual(stats.length);
@@ -328,7 +328,7 @@ describe("CorridorsSpeedMetricService", () => {
           expect(result[1].percentile75).toEqual(expectedMph2);
         });
 
-        it("should not update values in journeyTimeStats", () => {
+        it("should not update values in transitTimeStats", () => {
           service.calculateTransitSpeedBoxPlotStats(stats);
 
           expect(stats[0].minTransitTime).toEqual(10);
