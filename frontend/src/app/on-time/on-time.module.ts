@@ -35,6 +35,7 @@ import { OtpThresholdFormComponent } from "./otp-threshold-form/otp-threshold-fo
 import { OtpThresholdModalComponent } from "./otp-threshold-modal/otp-threshold-modal.component";
 import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link/otp-threshold-modal-link.component";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { StopsGridComponentDisplayComponent } from "./stops-grid/stops-grid-display.component";
 
 @NgModule({
   declarations: [
@@ -67,6 +68,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     OtpThresholdFormComponent,
     OtpThresholdModalComponent,
     OtpThresholdModalLinkComponent,
+    StopsGridComponentDisplayComponent,
   ],
   providers: [PercentPipe, DecimalPipe],
   imports: [
@@ -88,6 +90,8 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
     ServiceGridComponent,
     StopsGridComponent,
     OperatorGridComponent,
+    OnTimeGridComponent,
+    StopsGridComponentDisplayComponent,
   ],
 })
 export class OnTimeModule {}

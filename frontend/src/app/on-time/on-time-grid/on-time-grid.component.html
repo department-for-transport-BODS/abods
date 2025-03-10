@@ -63,6 +63,7 @@
     </ag-grid-angular>
     <div class="on-time-grid__footer">
       <gds-button
+        *ngIf="csvFilename"
         type="button"
         (click)="export()"
         text="Export data"

@@ -6,11 +6,7 @@ import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
 import { IconCellRendererComponent } from "src/app/shared/components/ag-grid/icon-cell/icon-cell-renderer.component";
 import { RouterLinkCellRendererComponent } from "src/app/shared/components/ag-grid/router-link-cell/router-link-cell.component";
 import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
-import {
-  OnTimeService,
-  PerformanceParams,
-  ServicePerformance,
-} from "../on-time.service";
+import { PerformanceParams, ServicePerformance } from "../on-time.service";
 import { IconHeaderComponent } from "../../shared/components/ag-grid/icon-header/icon-header.component";
 import { PerformanceService } from "../performance.service";
 import { EmptyCellComponent } from "../../shared/components/ag-grid/empty-cell/empty-cell.component";
@@ -24,8 +20,9 @@ import { ActivatedRoute } from "@angular/router";
     [errored]="errored"
     [loading]="loading"
     [data]="data"
-    [totalData]="totalData"
     [csvFilename]="csvFilename"
+    [paginate]="true"
+    [showFilter]="true"
   ></app-on-time-grid>`,
 })
 export class ServiceGridComponent implements OnInit, OnDestroy {
@@ -183,7 +180,6 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
   csvFilename = "Service_Performance";
 
   data: ServicePerformance[] = [];
-  totalData: ServicePerformance[] = [];
 
   @Input()
   set params(params: PerformanceParams | null) {
@@ -195,7 +191,6 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
 
   constructor(
     private performanceService: PerformanceService,
-    private onTimeService: OnTimeService,
     private route: ActivatedRoute,
   ) {}
 
@@ -227,7 +222,6 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
             { numeric: true },
           ),
         );
-        this.totalData = this.onTimeService.calculateTotals(this.data);
         this.loading = false;
       });
   }

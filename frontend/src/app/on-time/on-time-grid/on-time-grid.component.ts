@@ -22,10 +22,18 @@ import {
   flatMap as _flatMap,
   map as _map,
   forEach as _forEach,
-  find as _find,
+  sumBy,
+  sum,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
+import {
+  Maybe,
+  Scalars,
+  ServicePerformanceType,
+  StopPerformanceType,
+} from "../../../generated/graphql";
+import { OnTimeRatios } from "../on-time.service";
 
 type ColumnBase = {
   title: string;
@@ -61,6 +69,19 @@ export type ColumnDescription =
   | PermanentColumn
   | WithPctColumn
   | AvDelayColumn;
+
+export interface IPunctualityType {
+  early?: Maybe<Scalars["Int"]["output"]>;
+  late?: Maybe<Scalars["Int"]["output"]>;
+  onTime?: Maybe<Scalars["Int"]["output"]>;
+}
+
+export type AbstractPerformance = IPunctualityType &
+  OnTimeRatios &
+  Pick<
+    ServicePerformanceType & StopPerformanceType,
+    "scheduledDepartures" | "actualDepartures" | "averageDelay"
+  >;
 
 const column: (
   formatter: AgGridFormatterService,
@@ -112,7 +133,7 @@ const column: (
   templateUrl: "./on-time-grid.component.html",
   styleUrls: ["./on-time-grid.component.scss"],
 })
-export class OnTimeGridComponent {
+export class OnTimeGridComponent<TData extends AbstractPerformance> {
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
@@ -167,12 +188,49 @@ export class OnTimeGridComponent {
 
   @Input() csvFilename?: string | null;
 
-  @Input() data: any;
-  @Input() totalData: any;
+  private _data: TData[] | undefined;
+  totalData: AbstractPerformance[] | undefined;
+  @Input() set data(value: TData[] | undefined) {
+    this._data = value;
 
-  @Input() paginate = true;
+    if (!value) {
+      this.totalData = undefined;
+      return;
+    }
 
-  @Input() showFilter = true;
+    const early = sumBy(value, "early");
+    const late = sumBy(value, "late");
+    const onTime = sumBy(value, "onTime");
+    const total = sumBy(value, "total");
+    const scheduled = sumBy(value, "scheduledDepartures");
+    const actual = sumBy(value, "actualDepartures");
+    const totalDelay = sum(
+      value.map((stop) => stop.actualDepartures * stop.averageDelay),
+    );
+    this.totalData = [
+      {
+        early: early,
+        late: late,
+        onTime: onTime,
+        earlyRatio: early / total || 0,
+        lateRatio: late / total || 0,
+        onTimeRatio: onTime / total || 0,
+        scheduledDepartures: scheduled,
+        actualDepartures: actual,
+        averageDelay: totalDelay / actual || 0,
+        noData: actual - scheduled,
+        completedRatio: actual / total || 0,
+        total: total,
+      },
+    ];
+  }
+  get data() {
+    return this._data;
+  }
+
+  @Input() paginate = false;
+
+  @Input() showFilter = false;
 
   @Output() gridReady = new EventEmitter();
 
@@ -270,7 +328,7 @@ export class OnTimeGridComponent {
 
   filterChanged({ api }: FilterChangedEvent) {
     const rowCount = api.paginationGetRowCount() ?? 0;
-    if (this.data.length > 0 && this.paginate && rowCount === 0) {
+    if (this.data && this.data.length > 0 && this.paginate && rowCount === 0) {
       this.overlayParams.message = `No ${this.noun}s matched the search query`;
       api.showNoRowsOverlay();
     } else if (rowCount > 0) {
@@ -336,9 +394,5 @@ export class OnTimeGridComponent {
     _forEach(this.displayOptionsForm.controls, (control) =>
       control.setValue(true),
     );
-  }
-
-  labelForColId(colId: string) {
-    return _find(this._columnDescriptions, { colId })?.title;
   }
 }
