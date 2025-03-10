@@ -33,7 +33,7 @@
     "@aws-sdk/rds-signer": "^3.577.0",
     "@codegenie/serverless-express": "^4.14.1",
     "@graphql-tools/graphql-file-loader": "^8.0.1",
-    "@graphql-tools/load": "^8.0.2",
+    "@graphql-tools/load": "^8.0.17",
     "@prisma/client": "^5.22.0",
     "@types/jest": "^29.5.12",
     "apollo-server-plugin-http-headers": "^0.1.4",
