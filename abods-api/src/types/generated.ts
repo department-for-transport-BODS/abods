@@ -997,11 +997,12 @@ export type Stop = {
 };
 
 export type StopAnalysisFiltersInput = {
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
   fromTimestamp: Scalars['DateTime']['input'];
-  lineId?: InputMaybe<Scalars['String']['input']>;
-  operatorId?: InputMaybe<Scalars['String']['input']>;
+  lineIds: Array<Scalars['String']['input']>;
+  matchType: MatchType;
+  operatorIds: Array<Scalars['String']['input']>;
   toTimestamp: Scalars['DateTime']['input'];
 };
 

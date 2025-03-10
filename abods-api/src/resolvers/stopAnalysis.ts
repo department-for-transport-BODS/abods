@@ -1,5 +1,10 @@
 import { getUserOperatorIds } from "../lib/operators.js";
-import { QueryResolvers, Resolvers, StopStatistics } from "../types/generated";
+import {
+  MatchType,
+  QueryResolvers,
+  Resolvers,
+  StopStatistics,
+} from "../types/generated";
 import { requireUserSession } from "./helpers.js";
 import { sql } from "kysely";
 
@@ -10,15 +15,20 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 ): Promise<StopStatistics[]> => {
   const user = await requireUserSession(context);
   const {
+    adminAreaIds,
     boundingBox,
     fromTimestamp,
+    lineIds,
+    matchType,
+    operatorIds: selectedOperatorIds,
     toTimestamp,
-    operatorId,
-    lineId,
-    adminAreaIds,
   } = args.inputs;
 
-  const operatorIds = await getUserOperatorIds(user, context.kysely);
+  let operatorIds = await getUserOperatorIds(user, context.kysely);
+
+  if (selectedOperatorIds.length > 0) {
+    operatorIds = selectedOperatorIds.filter((n) => operatorIds.includes(n));
+  }
 
   let dbQuery = context.kysely
     .selectFrom("timetable_summary_stops_tz as t")
@@ -26,19 +36,20 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .innerJoin("naptan_locality as l", "n.locality_id", "l.gazetteer_id")
     .innerJoin("naptan_adminarea as a", "n.admin_area_id", "a.id");
 
-  if (operatorId) {
-    dbQuery = dbQuery.where("t.operator_noc", "=", operatorId);
+  if (lineIds.length > 0) {
+    dbQuery = dbQuery.where("t.noc_and_line_and_servicecode", "in", lineIds);
   }
 
-  if (lineId) {
-    dbQuery = dbQuery.where("t.noc_and_line_and_servicecode", "=", lineId);
-  }
-
-  if (adminAreaIds && adminAreaIds.length > 0) {
+  if (adminAreaIds.length > 0) {
     dbQuery = dbQuery.where("n.admin_area_id", "in", adminAreaIds.map(Number));
   }
 
+  if (matchType === MatchType.Evidenced) {
+    dbQuery = dbQuery.where("t.estimated", "is", false);
+  }
+
   // todo: throw if the bounding box is too big
+  // todo: throw if date range too big
 
   return dbQuery
     .where("t.date_of_journey", ">=", new Date(fromTimestamp))

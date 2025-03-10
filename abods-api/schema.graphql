@@ -26,18 +26,14 @@ type Query {
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
+  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
+  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+  embeddedUrl: AWSQuicksightUser!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
-
-  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
-
-  # eslint-disable-next-line @graphql-eslint/no-unused-fields
-  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
-
-  embeddedUrl: AWSQuicksightUser!
 }
 
 type AWSQuicksightUser {
@@ -744,12 +740,13 @@ enum RouteType {
 # eslint-disable @graphql-eslint/no-unused-fields
 
 input StopAnalysisFiltersInput {
-  adminAreaIds: [String!]
+  adminAreaIds: [String!]!
   boundingBox: BoundingBoxInputType!
   fromTimestamp: DateTime!
+  lineIds: [String!]!
+  matchType: MatchType!
+  operatorIds: [String!]!
   toTimestamp: DateTime!
-  operatorId: String
-  lineId: String
 }
 
 type StopStatistics {
