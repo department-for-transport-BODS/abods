@@ -182,8 +182,18 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   }
 
   onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
+    this.zoomToPoint([event.lngLat.lng, event.lngLat.lat]);
+  }
+
+  onTableStopNameClicked($event: StopPerformance) {
+    this.zoomToPoint([
+      $event.stopInfo.stopLocation.longitude,
+      $event.stopInfo.stopLocation.latitude,
+    ]);
+  }
+
+  zoomToPoint(center: [number, number]) {
     if (!this.map) return;
-    const center: [number, number] = [event.lngLat.lng, event.lngLat.lat];
     this.map.easeTo({
       center,
       zoom: this.map.getZoom() + 1,
@@ -200,7 +210,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         n.longitude <= this.visibleBounds.maxLongitude,
     );
     // TODO: Fix percentages on stop list
-    // TODO: Zoom in on stop when clicked
     this.filteredStopData = filtered
       .map(
         (x): StopPerformance => ({

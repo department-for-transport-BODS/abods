@@ -302,6 +302,7 @@
       [loading]="isLoading"
       [data]="filteredStopData"
       [paginate]="true"
+      (stopNameClicked)="onTableStopNameClicked($event)"
     />
   </ng-container>
 </app-page>
