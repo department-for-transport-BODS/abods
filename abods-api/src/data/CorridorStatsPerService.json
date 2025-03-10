@@ -6,7 +6,7 @@
     "recordedTransits": 120,
     "scheduledTransits": 130,
     "servicePatternName": "Main Route",
-    "totalJourneyTime": 7200
+    "totalTransitTime": 7200
   }
   
 ]

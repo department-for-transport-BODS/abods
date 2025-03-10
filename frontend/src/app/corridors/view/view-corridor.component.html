@@ -71,7 +71,7 @@
           label="Average journey time"
           class="corridor__summary-stat"
           [statValue]="
-            (averageJourneyTime | durationToFormat: 'mm:ss') || 'Unavailable'
+            (averageTransitTime | formatDuration: 'mm:ss') || 'Unavailable'
           "
           [statLoaded]="!loadingStats"
           tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
@@ -251,7 +251,7 @@
       </div>
 
       <app-box
-        *ngIf="stats?.journeyTimePerServiceStats?.length"
+        *ngIf="stats?.transitTimePerServiceStats?.length"
         spaceBelow="7"
         minHeight="600px"
       >
@@ -262,14 +262,14 @@
                 *appTabContent
                 [data]="
                   isTime
-                    ? stats?.journeyTimeStats
+                    ? stats?.transitTimeStats
                     : speedStats?.transitSpeedStats
                 "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
                   (isTime
-                    ? !stats?.journeyTimeStats?.length
+                    ? !stats?.transitTimeStats?.length
                     : !speedStats?.transitSpeedStats?.length)
                 "
                 [params]="params"
@@ -302,14 +302,14 @@
                 *appTabContent
                 [data]="
                   isTime
-                    ? stats?.journeyTimeTimeOfDayStats
+                    ? stats?.transitTimeTimeOfDayStats
                     : speedStats?.transitSpeedTimeOfDay
                 "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
                   (isTime
-                    ? !stats?.journeyTimeStats?.length
+                    ? !stats?.transitTimeStats?.length
                     : !speedStats?.transitSpeedTimeOfDay?.length)
                 "
                 [whiskerFillColor]="
@@ -341,14 +341,14 @@
                 *appTabContent
                 [data]="
                   isTime
-                    ? stats?.journeyTimeDayOfWeekStats
+                    ? stats?.transitTimeDayOfWeekStats
                     : speedStats?.transitSpeedDayOfWeek
                 "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
                   (isTime
-                    ? !stats?.journeyTimeStats?.length
+                    ? !stats?.transitTimeStats?.length
                     : !speedStats?.transitSpeedDayOfWeek?.length)
                 "
                 [whiskerFillColor]="
@@ -381,14 +381,14 @@
                 *appTabContent
                 [data]="
                   isTime
-                    ? stats?.journeyTimeHistogram
+                    ? stats?.transitTimeHistogram
                     : speedStats?.transitSpeedHistogram
                 "
                 [loading]="loadingStats"
                 [noData]="
                   !loadingStats &&
                   (isTime
-                    ? !stats?.journeyTimeStats?.length
+                    ? !stats?.transitTimeStats?.length
                     : !speedStats?.transitSpeedHistogram?.length)
                 "
                 [chartFillcolor]="
@@ -403,7 +403,7 @@
         </div>
       </app-box>
       <app-box
-        *ngIf="!stats?.journeyTimePerServiceStats?.length"
+        *ngIf="!stats?.transitTimePerServiceStats?.length"
         spaceBelow="7"
         minHeight="549px"
       >
@@ -429,7 +429,7 @@
         <ag-grid-angular
           appAgGrid
           class="ag-theme-compact ag-theme-wrapped-header"
-          [rowData]="stats?.journeyTimePerServiceStats"
+          [rowData]="stats?.transitTimePerServiceStats"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColumnDef"
           [gridOptions]="gridOptions"
@@ -444,7 +444,7 @@
           size="default"
         ></app-spinner>
         <div
-          *ngIf="!loadingStats && !stats?.journeyTimePerServiceStats?.length"
+          *ngIf="!loadingStats && !stats?.transitTimePerServiceStats?.length"
           class="corridor__services--message"
           role="alert"
         >

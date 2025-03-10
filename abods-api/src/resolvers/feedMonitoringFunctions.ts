@@ -16,9 +16,8 @@ import {
 import {
   getOperatorWithFeed,
   getVehicleCounts,
-  VehicleCountType,
 } from "../lib/feedMonitoring.js";
-import { feed_monitor_summary, PrismaClient } from "@prisma/client";
+import { feed_monitor_summary } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
 import dayjs from "dayjs";
@@ -56,30 +55,6 @@ export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] 
       availability: Number(result?.availability ?? 0),
     };
   };
-
-export const getVehicles = async (
-  operatorId: string,
-  db: PrismaClient,
-  type: VehicleCountType,
-) => {
-  const result = await db.feed_monitor_minute_summary.findFirst({
-    where: {
-      operator_noc: operatorId,
-    },
-    orderBy: {
-      received_interval: "desc",
-    },
-    select: {
-      actual: type === VehicleCountType.Actual,
-      expected: type === VehicleCountType.Expected,
-    },
-  });
-
-  if (type === VehicleCountType.Actual) {
-    return result?.actual ?? 0;
-  }
-  return result?.expected ?? 0;
-};
 
 export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   parent,

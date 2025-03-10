@@ -153,7 +153,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       type: "numericColumn",
       valueGetter: ({ data }) =>
         data.recordedTransits > 0
-          ? data.totalJourneyTime / data.recordedTransits
+          ? data.totalTransitTime / data.recordedTransits
           : 0,
       valueFormatter: ({ value }) =>
         Duration.fromObject({ seconds: value }).toFormat("mm:ss"),
@@ -166,7 +166,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
         this.corridorsSpeedmetricService.calculateAvergeSpeedInMph(
           this.corridorsSpeedmetricService.getTotalDistance(),
           data.recordedTransits > 0
-            ? data.totalJourneyTime / data.recordedTransits
+            ? data.totalTransitTime / data.recordedTransits
             : 0,
         ),
       valueFormatter: ({ value }) => (value ?? 0) + "mph",
@@ -205,9 +205,9 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     return this._mapboxStyle;
   }
 
-  get averageJourneyTime(): Duration {
+  get averageTransitTime(): Duration {
     return Duration.fromObject({
-      seconds: this.stats?.summaryStats?.averageJourneyTime ?? undefined,
+      seconds: this.stats?.summaryStats?.averageTransitTime ?? undefined,
     });
   }
 
