@@ -361,7 +361,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const stopsArray = stopList.map(Number);
+  const corridor = stopList.map(Number);
 
   const timetables = context.kysely
     .selectFrom("Timetable")
@@ -371,15 +371,15 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       userSelectedDateAsUtc(fromTimestamp).toDate(),
     )
     .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
-    .where("stop_id", "in", stopsArray);
+    .where("stop_id", "in", corridor);
 
-  const groupIdsWithCorrectStopCount = timetables
-    .groupBy(["group_id"])
-    .having(context.kysely.fn.count("stop_id"), ">=", stopsArray.length)
+  const journeysWithAtLeastAsManyStops = timetables
+    .groupBy(["group_id", "vehiclejourney_id"])
+    .having(context.kysely.fn.count("stop_id"), ">=", corridor.length)
     .select("group_id");
 
   const results: TimetableType[] = await timetables
-    .where("group_id", "in", groupIdsWithCorrectStopCount)
+    .where("group_id", "in", journeysWithAtLeastAsManyStops)
     .select([
       "stop_id",
       "stop_index",
@@ -394,50 +394,49 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       "date_of_journey",
     ])
     .execute();
+  const corridorTransits = extractCorridorTransits(results, corridor);
 
-  const journeyMap = new Map<string, TimetableType[]>();
-  let mapKey = "";
-  let existingJourneys: TimetableType[] = [];
-  results.map((journey) => {
-    mapKey = `${journey.group_id}${journey.vehiclejourney_id}`;
-    existingJourneys = journeyMap.get(mapKey) || [];
-    existingJourneys.push(journey);
-    journeyMap.set(mapKey, existingJourneys);
-  });
-
-  const journeys = filterStopSequence(journeyMap, stopsArray);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
-  return { inputs: args.inputs, journeys } as CorridorStatsType;
+  return {
+    inputs: args.inputs,
+    journeys: corridorTransits,
+  } as CorridorStatsType;
 };
 
-export const filterStopSequence = (
-  journeyMap: Map<string, TimetableType[]>,
-  stopList: number[],
+const extractCorridorTransits = (
+  stops: TimetableType[],
+  corridor: number[],
 ) => {
-  const filteredJourneys: TimetableType[][] = [];
-  journeyMap.forEach((journeys) => {
-    let journeySequence: TimetableType[] = [];
-    let stopListIndex = 0;
-    journeys.sort((a, b) => a.stop_index - b.stop_index);
-    if (journeys.length === stopList.length) {
-      filteredJourneys.push(journeys);
-      return;
+  // Group stops into journeys
+  const journeyMap: Record<string, TimetableType[]> = {};
+  for (const stop of stops) {
+    (journeyMap[`${stop.group_id}${stop.vehiclejourney_id}`] ??= []).push(stop);
+  }
+
+  const corridorTransits: TimetableType[][] = [];
+  Object.values(journeyMap).forEach((journey) => {
+    const sortedJourney = journey.sort((a, b) => a.stop_index - b.stop_index);
+    let currentTransit: TimetableType[] = [];
+    let corridorIndex = 0;
+    for (const stop of sortedJourney) {
+      // Ignore stops that aren't along the corridor
+      if (Number(stop.stop_id) !== corridor[corridorIndex]) continue;
+
+      currentTransit.push(stop);
+      corridorIndex += 1;
+
+      if (corridorIndex === corridor.length) {
+        // We're at the end of the corridor, so produce a match.
+        corridorTransits.push(currentTransit);
+
+        // The journey could transit the corridor multiple times,
+        // so go back to the start of the corridor and look for another
+        currentTransit = [];
+        corridorIndex = 0;
+      }
     }
-
-    journeys.map((journey) => {
-      if (Number(journey.stop_id) === stopList[stopListIndex]) {
-        journeySequence.push(journey);
-        stopListIndex = stopListIndex + 1;
-      }
-      if (stopListIndex === stopList.length) {
-        filteredJourneys.push(journeySequence);
-        journeySequence = [];
-        stopListIndex = 0;
-      }
-    });
   });
-
-  return filteredJourneys;
+  return corridorTransits;
 };
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
