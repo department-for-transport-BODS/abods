@@ -8,6 +8,7 @@ import {
 import { requireUserSession } from "./helpers.js";
 import { sql } from "kysely";
 import { GraphQLError } from "graphql/index";
+import dayjs from "dayjs";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -24,6 +25,19 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     operatorIds: selectedOperatorIds,
     toTimestamp,
   } = args.inputs;
+
+  const from = dayjs(fromTimestamp);
+  const to = dayjs(toTimestamp);
+  if (from.diff(to, "days") > 90) {
+    throw new GraphQLError("Date range is too large to fullfill the request", {
+      extensions: { code: "BAD_REQUEST", http: { status: 422 } },
+    });
+  }
+  if (from.isAfter(to)) {
+    throw new GraphQLError("To date must on or before from date", {
+      extensions: { code: "BAD_REQUEST", http: { status: 422 } },
+    });
+  }
 
   let operatorIds = await getUserOperatorIds(user, context.kysely);
 
@@ -59,7 +73,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   }
 
   // todo: throw if the bounding box is too big
-  // todo: throw if date range too big
 
   return dbQuery
     .where("t.date_of_journey", ">=", new Date(fromTimestamp))
