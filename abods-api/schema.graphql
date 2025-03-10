@@ -26,6 +26,7 @@ type Query {
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
   lines(operatorId: String!, inputDate: String): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
+  # eslint-disable-next-line @graphql-eslint/no-unused-fields To be removed soon
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
   embeddedUrl: AWSQuicksightUser!
