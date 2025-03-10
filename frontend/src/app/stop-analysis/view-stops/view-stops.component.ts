@@ -209,7 +209,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         n.longitude >= this.visibleBounds.minLongitude &&
         n.longitude <= this.visibleBounds.maxLongitude,
     );
-    // TODO: Fix percentages on stop list
     this.filteredStopData = filtered
       .map(
         (x): StopPerformance => ({
@@ -234,7 +233,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
           early: x.early,
           onTime: x.onTime,
           averageDelay: x.totalDelay / x.completedDepartures || 0,
-          total: 0, // ?
+          total: x.completedDepartures,
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,
           lateRatio: x.late / x.completedDepartures || 0,
