@@ -7,6 +7,7 @@ import {
 } from "../types/generated";
 import { requireUserSession } from "./helpers.js";
 import { sql } from "kysely";
+import { GraphQLError } from "graphql/index";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -28,6 +29,15 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 
   if (selectedOperatorIds.length > 0) {
     operatorIds = selectedOperatorIds.filter((n) => operatorIds.includes(n));
+  }
+
+  if (operatorIds.length === 0) {
+    throw new GraphQLError(
+      "User does not have access to any of the selected operator data",
+      {
+        extensions: { code: "FORBIDDEN", http: { status: 403 } },
+      },
+    );
   }
 
   let dbQuery = context.kysely
