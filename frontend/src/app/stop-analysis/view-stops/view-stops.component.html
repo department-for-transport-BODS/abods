@@ -2,8 +2,25 @@
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis" />
     <app-segmented-toggle
+      [(ngModel)]="matchType"
+      (ngModelChange)="onFilterChanged()"
+    >
+      <app-segmented-toggle-item
+        name="match-type"
+        identifier="estimated"
+        value="estimated"
+        label="Estimated"
+      />
+      <app-segmented-toggle-item
+        name="match-type"
+        identifier="evidenced"
+        value="evidenced"
+        label="Evidenced"
+      />
+    </app-segmented-toggle>
+    <app-segmented-toggle
       [(ngModel)]="timingPointsOption"
-      (ngModelChange)="processStopData()"
+      (ngModelChange)="processStopData(visibleBounds)"
     >
       <app-segmented-toggle-item
         name="stops-filter"

@@ -9,8 +9,8 @@ import {
   StopAnalysisGQL,
   StopStatistics,
 } from "../../../generated/graphql";
-import { Subject, takeUntil } from "rxjs";
-import { debounceTime } from "rxjs/operators";
+import { combineLatest, Subject, takeUntil } from "rxjs";
+import { debounceTime, map, tap, filter } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../../on-time/on-time.service";
 
@@ -27,7 +27,11 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
   isLoading = false;
   errored = false;
+
+  matchType: MatchType = MatchType.Evidenced;
   timingPointsOption = "timing-points";
+  private apiFiltersChanged = new Subject();
+
   private map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
   initialBounds = BRITISH_ISLES_BBOX;
@@ -44,7 +48,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   };
 
   zoomLevel = 0;
-  private visibleBounds: BoundingBoxInputType = {
+  visibleBounds: BoundingBoxInputType = {
     maxLatitude: this.initialBounds[3],
     minLatitude: this.initialBounds[1],
     maxLongitude: this.initialBounds[2],
@@ -69,53 +73,70 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.boundsChanged
-      .pipe(debounceTime(200), takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (!this.map) return;
-        if (this.boundingBoxTooBig) return;
-        const bounds = this.getNewBounds(this.map);
+    // TODO: parse query params
+    const boundsChanged = this.boundsChanged.pipe(
+      takeUntil(this.destroy$),
+      map(() => {
+        if (!this.map) return undefined;
+        if (this.boundingBoxTooBig) return undefined;
+        return this.getNewBounds(this.map);
+      }),
+      tap((bounds) => {
+        if (!bounds) return;
+
         this.visibleBounds = bounds;
 
-        if (this.withinLastBounds(bounds)) {
-          this.processStopData();
-          return;
-        }
+        if (!this.lastBounds) return;
+        if (!this.withinBounds(bounds, this.lastBounds)) return;
 
-        // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+        // Update map points whenever the user moves the map, if we have the data already
+        this.processStopData(bounds);
+      }),
+      filter((bounds) => {
+        if (!bounds) return false;
+        return !this.lastBounds || !this.withinBounds(bounds, this.lastBounds);
+      }),
+    );
 
-        const yesterday = DateTime.now().minus({ day: 1 }).startOf("day");
-        const oneWeekAgo = yesterday.minus({ day: 6 }).startOf("day");
-        /**
-         *     TODO: Add filters:
-         *      Postcode/area as per corridors
-         *      Estimated
-         *      NOC (select multiple)
-         *      Service (select multiple) (only show services in selected NOCs if selected)
-         *      Start date
-         *      End date, limit date range
-         *      Refine Results
-         *          Day e.g. Monday (select multiple)
-         *          Time range
-         * **/
-        this.isLoading = true;
-        this.query
-          .fetch({
-            boundingBox: bounds,
-            adminAreaIds: [],
-            fromTimestamp: oneWeekAgo.toISO(),
-            toTimestamp: yesterday.toISO(),
-            operatorIds: [],
-            lineIds: [],
-            matchType: MatchType.Evidenced,
-          })
-          .subscribe((response) => {
-            this.lastBounds = bounds;
-            this.rawStopData = response.data.stopAnalysis;
-            this.processStopData();
-            this.isLoading = false;
-          });
-      });
+    combineLatest([
+      boundsChanged.pipe(debounceTime(200)),
+      this.apiFiltersChanged,
+    ]).subscribe(([bounds]) => {
+      if (!bounds) return;
+      // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+
+      const from = DateTime.now().minus({ day: 1 }).startOf("day");
+      const to = from.minus({ day: 6 }).startOf("day");
+      /**
+       *     TODO: Add filters:
+       *      Postcode/area as per corridors
+       *      NOC (select multiple)
+       *      Service (select multiple) (only show services in selected NOCs if selected)
+       *      Start date
+       *      End date, limit date range
+       *      Refine Results
+       *          Day e.g. Monday (select multiple)
+       *          Time range
+       * **/
+      this.isLoading = true;
+      this.query
+        .fetch({
+          boundingBox: bounds,
+          adminAreaIds: [],
+          fromTimestamp: to.toISO(),
+          toTimestamp: from.toISO(),
+          operatorIds: [],
+          lineIds: [],
+          matchType: this.matchType,
+        })
+        .subscribe((response) => {
+          this.lastBounds = bounds;
+          this.rawStopData = response.data.stopAnalysis;
+          this.processStopData(this.visibleBounds);
+          this.isLoading = false;
+        });
+    });
+    this.onFilterChanged();
   }
 
   ngOnDestroy(): void {
@@ -194,22 +215,25 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     ]);
   }
 
-  zoomToPoint(center: [number, number]) {
-    if (!this.map) return;
-    this.map.easeTo({
-      center,
-      zoom: this.map.getZoom() + 1,
-    });
+  onFilterChanged() {
+    // TODO: update query params
+    this.apiFiltersChanged.next(undefined);
   }
 
-  processStopData(): void {
+  zoomToPoint(center: [number, number]) {
+    if (!this.map) return;
+    const zoom = this.map.getZoom() + 1;
+    this.map.easeTo({ center, zoom });
+  }
+
+  processStopData(bounds: BoundingBoxInputType): void {
     const filtered = this.rawStopData.filter(
       (n) =>
         (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
-        n.latitude >= this.visibleBounds.minLatitude &&
-        n.latitude <= this.visibleBounds.maxLatitude &&
-        n.longitude >= this.visibleBounds.minLongitude &&
-        n.longitude <= this.visibleBounds.maxLongitude,
+        n.latitude >= bounds.minLatitude &&
+        n.latitude <= bounds.maxLatitude &&
+        n.longitude >= bounds.minLongitude &&
+        n.longitude <= bounds.maxLongitude,
     );
     this.filteredStopData = filtered
       .map(
@@ -297,13 +321,15 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     };
   }
 
-  withinLastBounds(bounds: BoundingBoxInputType): boolean {
-    if (!this.lastBounds) return false;
+  withinBounds(
+    newBounds: BoundingBoxInputType,
+    bounds: BoundingBoxInputType,
+  ): boolean {
     return (
-      bounds.minLongitude >= this.lastBounds.minLongitude &&
-      bounds.minLatitude >= this.lastBounds.minLatitude &&
-      bounds.maxLongitude <= this.lastBounds.maxLongitude &&
-      bounds.maxLatitude <= this.lastBounds.maxLatitude
+      newBounds.minLongitude >= bounds.minLongitude &&
+      newBounds.minLatitude >= bounds.minLatitude &&
+      newBounds.maxLongitude <= bounds.maxLongitude &&
+      newBounds.maxLatitude <= bounds.maxLatitude
     );
   }
 }
