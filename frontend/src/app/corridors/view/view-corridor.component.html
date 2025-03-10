@@ -71,7 +71,7 @@
           label="Average journey time"
           class="corridor__summary-stat"
           [statValue]="
-            (averageJourneyTime | durationToFormat: 'mm:ss') || 'Unavailable'
+            (averageJourneyTime | formatDuration: 'mm:ss') || 'Unavailable'
           "
           [statLoaded]="!loadingStats"
           tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
