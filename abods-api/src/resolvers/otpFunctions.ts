@@ -811,20 +811,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
           "=",
           userSelectedDateAsUtc(fromTimestamp).toDate(),
         )
-        .where((eb) =>
-          eb.or([
-            eb("on_time_count", ">", 0),
-            eb("late_count", ">", 0),
-            eb("early_count", ">", 0),
-          ]),
-        )
-        .where((eb) =>
-          eb.or([
-            eb("trend_on_time_count", ">", 0),
-            eb("trend_late_count", ">", 0),
-            eb("trend_early_count", ">", 0),
-          ]),
-        )
+        .where("percentage_change", "is not", null)
         .orderBy("on_time_percentage", orderFilter)
         .orderBy("percentage_change", orderFilter)
         .limit(3);
