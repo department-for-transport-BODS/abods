@@ -388,4 +388,3 @@ export class CorridorsService {
     return stats;
   }
 }
-export { CorridorStop };
