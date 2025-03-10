@@ -17,8 +17,8 @@ import {
 import { Map } from "mapbox-gl";
 import { ConfigService } from "../../../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../../../shared/geo";
-import { CorridorStop } from "../../corridors.service";
 import { Subject, takeUntil } from "rxjs";
+import { CorridorStop } from "../../types";
 
 type MGLMouseEvent = MapMouseEvent & {
   features?: MapboxGeoJSONFeature[];
