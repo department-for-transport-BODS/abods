@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import {
   CorridorGranularity,
-  CorridorJourneyTimeStatsType,
+  CorridorTransitTimeStatsType,
   CorridorStatsDayOfWeekType,
   CorridorStatsInputType,
   CorridorStatsTimeOfDayType,
@@ -41,14 +41,14 @@ export type Corridor = Pick<CorridorType, "id" | "name"> & {
 
 export type CorridorStats = Pick<
   Definitely<CorridorStatsType>,
-  "summaryStats" | "journeyTimePerServiceStats"
+  "summaryStats" | "transitTimePerServiceStats"
 > & {
-  journeyTimeTimeOfDayStats: (CorridorStatsTimeOfDayType &
+  transitTimeTimeOfDayStats: (CorridorStatsTimeOfDayType &
     BoxPlotChartDataItem)[];
-  journeyTimeDayOfWeekStats: (CorridorStatsDayOfWeekType &
+  transitTimeDayOfWeekStats: (CorridorStatsDayOfWeekType &
     BoxPlotChartDataItem)[];
-  journeyTimeHistogram: HistogramChartDataItem[];
-  journeyTimeStats: (CorridorJourneyTimeStatsType & BoxPlotChartDataItem)[];
+  transitTimeHistogram: HistogramChartDataItem[];
+  transitTimeStats: (CorridorTransitTimeStatsType & BoxPlotChartDataItem)[];
   serviceLinks: ServiceLinkType[];
 };
 
@@ -67,7 +67,7 @@ export interface CorridorStatsViewParams {
   matchType: MatchType;
 }
 
-export interface ICorridorJourneyTimeStats {
+export interface ICorridortransitTimeStats {
   avgTransitTime?: Maybe<Scalars["Float"]["output"]>;
   maxTransitTime: Scalars["Int"]["output"];
   minTransitTime: Scalars["Int"]["output"];

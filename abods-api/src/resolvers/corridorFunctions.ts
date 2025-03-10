@@ -1,14 +1,14 @@
 import { Prisma, PrismaClient, Timetable } from "@prisma/client";
 import {
-  CorridorJourneyServiceStatsType,
-  CorridorJourneyStatsOption,
+  CorridorTransitServiceStatsType,
+  CorridorTransitStatsOption,
   CorridorResultsType,
   deleteCorridorDb,
   deleteCorridorStops,
   distinctRoutes,
   getCorridor,
   getCorridorList,
-  getJourneyDeparture,
+  getStopDepartureTime,
   getOrgAdminAreas,
   isCorridorMappedToUserOrg,
   returnCorridor,
@@ -17,7 +17,7 @@ import {
 } from "../lib/corridor.js";
 import {
   CorridorGranularity,
-  CorridorJourneyTimeStatsType,
+  CorridorTransitTimeStatsType,
   CorridorNamespaceResolvers,
   CorridorStatsDayOfWeekType,
   CorridorStatsHistogramType,
@@ -326,7 +326,7 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
 
 interface StatsCache {
   inputs: CorridorStatsInputType;
-  journeys: TimetableType[][];
+  corridorTransits: TimetableType[][];
 }
 
 export type TimetableType = Pick<
@@ -343,6 +343,7 @@ export type TimetableType = Pick<
   | "vehiclejourney_id"
   | "group_id"
 >;
+
 export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,
   args,
@@ -399,7 +400,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
   return {
     inputs: args.inputs,
-    journeys: corridorTransits,
+    corridorTransits,
   } as CorridorStatsType;
 };
 
@@ -420,20 +421,20 @@ const extractCorridorTransits = (
     let corridorIndex = 0;
     for (const stop of sortedJourney) {
       // Ignore stops that aren't along the corridor
-      if (Number(stop.stop_id) !== corridor[corridorIndex]) continue;
+      if (stop.stop_id !== corridor[corridorIndex]) continue;
 
       currentTransit.push(stop);
       corridorIndex += 1;
 
-      if (corridorIndex === corridor.length) {
-        // We're at the end of the corridor, so produce a match.
-        corridorTransits.push(currentTransit);
+      if (corridorIndex !== corridor.length) continue;
 
-        // The journey could transit the corridor multiple times,
-        // so go back to the start of the corridor and look for another
-        currentTransit = [];
-        corridorIndex = 0;
-      }
+      // We're at the end of the corridor, so produce a match.
+      corridorTransits.push(currentTransit);
+
+      // The journey could transit the corridor multiple times,
+      // so go back to the start of the corridor and look for another
+      currentTransit = [];
+      corridorIndex = 0;
     }
   });
   return corridorTransits;
@@ -444,211 +445,211 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
 ): CorridorSummaryStatsType => {
   // Data was cached in the output of getStats, and will be removed later
   const data = parent as StatsCache;
-  const scheduledTransits = data.journeys.length;
+  const scheduledTransits = data.corridorTransits.length;
   let totalTransits = 0;
-  let totalJourneyTime = 0;
+  let totalTransitTime = 0;
   const services = new Set();
-  data.journeys.map((journey) => {
-    const firstDeparture = getJourneyDeparture(
-      journey[0],
+  data.corridorTransits.map((transit) => {
+    const firstDeparture = getStopDepartureTime(
+      transit[0],
       data.inputs.matchType,
     );
 
-    const lastDeparture = getJourneyDeparture(
-      journey[journey.length - 1],
+    const lastDeparture = getStopDepartureTime(
+      transit[transit.length - 1],
       data.inputs.matchType,
     );
 
     if (firstDeparture && lastDeparture) {
       totalTransits += 1;
-      totalJourneyTime +=
+      totalTransitTime +=
         (lastDeparture.getTime() - firstDeparture.getTime()) / 1000; //In seconds
     }
 
-    const serviceCode = `${journey[0].operator_noc}${journey[0].service_code}${journey[0].line_name}`;
+    const serviceCode = `${transit[0].operator_noc}${transit[0].service_code}${transit[0].line_name}`;
     if (!services.has(serviceCode)) {
       services.add(serviceCode);
     }
   });
 
-  const averageJourneyTime =
-    totalTransits > 0 ? Math.ceil(totalJourneyTime / totalTransits) : 0;
+  const averageTransitTime =
+    totalTransits > 0 ? Math.ceil(totalTransitTime / totalTransits) : 0;
   return {
     scheduledTransits,
     totalTransits,
-    averageJourneyTime: averageJourneyTime,
+    averageTransitTime: averageTransitTime,
     numberOfServices: services.size,
   };
 };
 
-export const getJourneyTimeOfDayStats: CorridorStatsTypeResolvers["journeyTimeTimeOfDayStats"] =
+export const getTransitTimeOfDayStats: CorridorStatsTypeResolvers["transitTimeTimeOfDayStats"] =
   (
     parent,
-  ): (CorridorJourneyTimeStatsType &
+  ): (CorridorTransitTimeStatsType &
     CorridorStatsTimeOfDayType &
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    return getJourneyStats(
-      data.journeys,
-      CorridorJourneyStatsOption.hourAsNumber,
+    return getTransitStats(
+      data.corridorTransits,
+      CorridorTransitStatsOption.hourAsNumber,
       data.inputs.matchType,
     );
   };
 
-export const getJourneyDayOfWeekStats: CorridorStatsTypeResolvers["journeyTimeDayOfWeekStats"] =
+export const getTransitDayOfWeekStats: CorridorStatsTypeResolvers["transitTimeDayOfWeekStats"] =
   (
     parent,
-  ): (CorridorJourneyTimeStatsType &
+  ): (CorridorTransitTimeStatsType &
     CorridorStatsTimeOfDayType &
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    return getJourneyStats(
-      data.journeys,
-      CorridorJourneyStatsOption.dayOfWeek,
+    return getTransitStats(
+      data.corridorTransits,
+      CorridorTransitStatsOption.dayOfWeek,
       data.inputs.matchType,
     );
   };
 
-export const getJourneyTimeStats: CorridorStatsTypeResolvers["journeyTimeStats"] =
+export const getTransitTimeStats: CorridorStatsTypeResolvers["transitTimeStats"] =
   (
     parent,
-  ): (CorridorJourneyTimeStatsType &
+  ): (CorridorTransitTimeStatsType &
     CorridorStatsTimeOfDayType &
     CorridorStatsDayOfWeekType)[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     return data.inputs?.granularity === CorridorGranularity.Day
-      ? getJourneyStats(
-          data.journeys,
-          CorridorJourneyStatsOption.day,
+      ? getTransitStats(
+          data.corridorTransits,
+          CorridorTransitStatsOption.day,
           data.inputs.matchType,
         )
-      : getJourneyStats(
-          data.journeys,
-          CorridorJourneyStatsOption.hour,
+      : getTransitStats(
+          data.corridorTransits,
+          CorridorTransitStatsOption.hour,
           data.inputs.matchType,
         );
   };
 
-const getJourneyStats = (
-  journeys: TimetableType[][],
-  inputType: CorridorJourneyStatsOption,
+const getTransitStats = (
+  corridorTransits: TimetableType[][],
+  inputType: CorridorTransitStatsOption,
   matchType: MatchType,
 ) => {
-  const journeyStats = new Map<string, number[]>();
-  journeys.map((journey) => {
-    const firstDeparture = journey[0];
+  const transitStats = new Map<string, number[]>();
+  corridorTransits.map((transit) => {
+    const firstDeparture = transit[0];
 
-    const firstStopDeparture = getJourneyDeparture(journey[0], matchType);
-    const lastDeparture = getJourneyDeparture(
-      journey[journey.length - 1],
+    const firstStopDeparture = getStopDepartureTime(transit[0], matchType);
+    const lastDeparture = getStopDepartureTime(
+      transit[transit.length - 1],
       matchType,
     );
 
     if (firstStopDeparture && lastDeparture) {
       let dateKey = "";
       switch (inputType) {
-        case CorridorJourneyStatsOption.day:
+        case CorridorTransitStatsOption.day:
           dateKey = standardFormat(toUkTime(firstDeparture.date_of_journey));
           break;
 
-        case CorridorJourneyStatsOption.dayOfWeek:
+        case CorridorTransitStatsOption.dayOfWeek:
           dateKey = dayjs(firstDeparture.date_of_journey).day().toString();
           break;
 
-        case CorridorJourneyStatsOption.hour:
+        case CorridorTransitStatsOption.hour:
           dateKey = standardFormat(
             toUkTime(firstDeparture.expected_departure_time).startOf("hour"),
           );
           break;
 
-        case CorridorJourneyStatsOption.hourAsNumber:
+        case CorridorTransitStatsOption.hourAsNumber:
           dateKey = toUkTime(firstDeparture.expected_departure_time)
             .hour()
             .toString();
           break;
 
         default:
-          throw new Error("Invalid journey indicator type provided");
+          throw new Error("Invalid transit indicator type provided");
       }
 
-      const journeyTime = journeyStats.get(dateKey) || [];
-      journeyTime.push(
+      const transitTime = transitStats.get(dateKey) || [];
+      transitTime.push(
         (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000,
       );
-      journeyStats.set(dateKey, journeyTime);
+      transitStats.set(dateKey, transitTime);
     }
   });
 
-  const stats: (CorridorJourneyTimeStatsType &
+  const stats: (CorridorTransitTimeStatsType &
     CorridorStatsTimeOfDayType &
     CorridorStatsDayOfWeekType)[] = [];
-  journeyStats.forEach((journeyTimes: number[], key: string) => {
-    journeyTimes.sort((a, b) => a - b);
+  transitStats.forEach((transitTimes: number[], key: string) => {
+    transitTimes.sort((a, b) => a - b);
 
     stats.push({
       ts: key,
       hour: Number(key),
       dow: Number(key),
       avgTransitTime: Math.ceil(
-        journeyTimes.reduce(
+        transitTimes.reduce(
           (accumulator, currentValue) => accumulator + currentValue,
           0,
-        ) / journeyTimes.length,
+        ) / transitTimes.length,
       ),
-      minTransitTime: journeyTimes[0],
-      maxTransitTime: journeyTimes[journeyTimes.length - 1],
-      percentile25: getPercentile(25, journeyTimes),
-      percentile75: getPercentile(75, journeyTimes),
+      minTransitTime: transitTimes[0],
+      maxTransitTime: transitTimes[transitTimes.length - 1],
+      percentile25: getPercentile(25, transitTimes),
+      percentile75: getPercentile(75, transitTimes),
     });
   });
 
   return stats;
 };
 
-export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimePerServiceStats"] =
+export const getTransitStatsPerService: CorridorStatsTypeResolvers["transitTimePerServiceStats"] =
   async (parent, _, context): Promise<CorridorStatsPerServiceType[]> => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    const journeyStats = new Map<string, CorridorJourneyServiceStatsType>();
+    const transitStats = new Map<string, CorridorTransitServiceStatsType>();
     const stats: CorridorStatsPerServiceType[] = [];
-    data.journeys.map((journey) => {
-      const firstDeparture = journey[0];
+    data.corridorTransits.map((transit) => {
+      const firstDeparture = transit[0];
 
-      const firstStopDeparture = getJourneyDeparture(
-        journey[0],
+      const firstStopDeparture = getStopDepartureTime(
+        transit[0],
         data.inputs.matchType,
       );
-      const lastDeparture = getJourneyDeparture(
-        journey[journey.length - 1],
+      const lastDeparture = getStopDepartureTime(
+        transit[transit.length - 1],
         data.inputs.matchType,
       );
       // noc_line_and_servicecode
       const service = `${firstDeparture.operator_noc}-${firstDeparture.line_name}-${firstDeparture.service_code}`;
-      const journeyTime = journeyStats.get(service) || {
-        totalJourneyTime: 0,
+      const transitTime = transitStats.get(service) || {
+        totalTransitTime: 0,
         recordedTransits: 0,
         scheduledTransits: 0,
         lineName: firstDeparture.line_name,
         operatorNoc: firstDeparture.operator_noc,
         serviceCode: firstDeparture.service_code,
       };
-      journeyTime.scheduledTransits += 1;
+      transitTime.scheduledTransits += 1;
       if (firstStopDeparture && lastDeparture) {
-        journeyTime.totalJourneyTime +=
+        transitTime.totalTransitTime +=
           (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000;
-        journeyTime.recordedTransits += 1;
+        transitTime.recordedTransits += 1;
       }
-      journeyStats.set(service, journeyTime);
+      transitStats.set(service, transitTime);
     });
 
-    if (journeyStats.size > 0) {
+    if (transitStats.size > 0) {
       const services = await context.db.service_details.findMany({
         where: {
           noc_and_line_and_servicecode: {
-            in: [...journeyStats.keys()],
+            in: [...transitStats.keys()],
           },
         },
         include: {
@@ -656,7 +657,7 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
         },
       });
 
-      journeyStats.forEach((journey, key) => {
+      transitStats.forEach((transits, key) => {
         const serviceDetails = services.find(
           (service) => service.noc_and_line_and_servicecode === key,
         );
@@ -665,9 +666,9 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
           operatorName: serviceDetails?.operator?.name ?? "NA",
           noc: serviceDetails?.operator_noc,
           servicePatternName: serviceDetails?.service_name ?? "",
-          recordedTransits: journey.recordedTransits,
-          totalJourneyTime: journey.totalJourneyTime,
-          scheduledTransits: journey.scheduledTransits,
+          recordedTransits: transits.recordedTransits,
+          totalTransitTime: transits.totalTransitTime,
+          scheduledTransits: transits.scheduledTransits,
         });
       });
     }
@@ -675,30 +676,30 @@ export const getJourneyStatsPerService: CorridorStatsTypeResolvers["journeyTimeP
     return stats;
   };
 
-export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHistogram"] =
+export const getTransitStatsHistogram: CorridorStatsTypeResolvers["transitTimeHistogram"] =
   (parent): CorridorStatsHistogramType[] => {
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
-    const journeyStats = new Map<string, number>();
+    const transitStats = new Map<string, number>();
 
-    data.journeys.map((journey) => {
-      const firstStopDeparture = getJourneyDeparture(
-        journey[0],
+    data.corridorTransits.map((transit) => {
+      const firstStopDeparture = getStopDepartureTime(
+        transit[0],
         data.inputs.matchType,
       );
-      const lastDeparture = getJourneyDeparture(
-        journey[journey.length - 1],
+      const lastDeparture = getStopDepartureTime(
+        transit[transit.length - 1],
         data.inputs.matchType,
       );
       if (firstStopDeparture && lastDeparture) {
-        const totalJourneyTime = Math.floor(
+        const totalTransitTime = Math.floor(
           (lastDeparture.getTime() - firstStopDeparture.getTime()) /
             (1000 * 60),
         );
 
-        journeyStats.set(
-          totalJourneyTime.toString(),
-          (journeyStats.get(totalJourneyTime.toString()) || 0) + 1,
+        transitStats.set(
+          totalTransitTime.toString(),
+          (transitStats.get(totalTransitTime.toString()) || 0) + 1,
         );
       }
     });
@@ -706,7 +707,7 @@ export const getJourneyStatsHistogram: CorridorStatsTypeResolvers["journeyTimeHi
     return [
       {
         ts: null,
-        hist: Array.from(journeyStats, ([key, value]) => ({
+        hist: Array.from(transitStats, ([key, value]) => ({
           bin: Number(key),
           freq: value,
         })),
@@ -761,11 +762,11 @@ const corridorResovlers: Resolvers = {
   },
   CorridorStatsType: {
     summaryStats: getSummaryStats,
-    journeyTimeStats: getJourneyTimeStats,
-    journeyTimeTimeOfDayStats: getJourneyTimeOfDayStats,
-    journeyTimeDayOfWeekStats: getJourneyDayOfWeekStats,
-    journeyTimeHistogram: getJourneyStatsHistogram,
-    journeyTimePerServiceStats: getJourneyStatsPerService,
+    transitTimeStats: getTransitTimeStats,
+    transitTimeTimeOfDayStats: getTransitTimeOfDayStats,
+    transitTimeDayOfWeekStats: getTransitDayOfWeekStats,
+    transitTimeHistogram: getTransitStatsHistogram,
+    transitTimePerServiceStats: getTransitStatsPerService,
     serviceLinks: getServiceLinks,
   },
   Mutation: {

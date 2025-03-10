@@ -103,11 +103,11 @@ type CorridorType {
 
 type CorridorStatsType {
   summaryStats: CorridorSummaryStatsType
-  journeyTimeStats: [CorridorJourneyTimeStatsType]
-  journeyTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
-  journeyTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
-  journeyTimeHistogram: [CorridorStatsHistogramType]
-  journeyTimePerServiceStats: [CorridorStatsPerServiceType]
+  transitTimeStats: [CorridorTransitTimeStatsType]
+  transitTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
+  transitTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
+  transitTimeHistogram: [CorridorStatsHistogramType]
+  transitTimePerServiceStats: [CorridorStatsPerServiceType]
   serviceLinks: [ServiceLinkType]
 }
 
@@ -126,13 +126,13 @@ enum MatchType {
 }
 
 type CorridorSummaryStatsType {
-  averageJourneyTime: Int
+  averageTransitTime: Int
   numberOfServices: Int
   scheduledTransits: Int
   totalTransits: Int
 }
 
-type CorridorJourneyTimeStatsType {
+type CorridorTransitTimeStatsType {
   avgTransitTime: Float
   maxTransitTime: Int!
   minTransitTime: Int!
@@ -166,7 +166,7 @@ type CorridorStatsPerServiceType {
   recordedTransits: Int
   scheduledTransits: Int
   servicePatternName: String!
-  totalJourneyTime: Int
+  totalTransitTime: Int
 }
 
 type CorridorStatsHistogramType {

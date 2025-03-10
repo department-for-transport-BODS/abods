@@ -68,11 +68,11 @@ query corridorStats($params: CorridorStatsInputType!) {
       summaryStats {
         totalTransits
         numberOfServices
-        averageJourneyTime
+        averageTransitTime
         scheduledTransits
       }
 
-      journeyTimeStats {
+      transitTimeStats {
         ts
         minTransitTime
         maxTransitTime
@@ -81,7 +81,7 @@ query corridorStats($params: CorridorStatsInputType!) {
         percentile75
       }
 
-      journeyTimeTimeOfDayStats {
+      transitTimeTimeOfDayStats {
         hour
         minTransitTime
         maxTransitTime
@@ -90,7 +90,7 @@ query corridorStats($params: CorridorStatsInputType!) {
         percentile75
       }
 
-      journeyTimeDayOfWeekStats {
+      transitTimeDayOfWeekStats {
         dow
         minTransitTime
         maxTransitTime
@@ -99,17 +99,17 @@ query corridorStats($params: CorridorStatsInputType!) {
         percentile75
       }
 
-      journeyTimePerServiceStats {
+      transitTimePerServiceStats {
         lineName
         servicePatternName
         noc
         operatorName
-        totalJourneyTime
+        totalTransitTime
         recordedTransits
         scheduledTransits
       }
 
-      journeyTimeHistogram {
+      transitTimeHistogram {
         ts
         hist {
           bin

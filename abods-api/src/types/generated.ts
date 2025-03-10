@@ -135,16 +135,6 @@ export type CorridorInputType = {
   stopIds: Array<Scalars['String']['input']>;
 };
 
-export type CorridorJourneyTimeStatsType = {
-  __typename?: 'CorridorJourneyTimeStatsType';
-  avgTransitTime?: Maybe<Scalars['Float']['output']>;
-  maxTransitTime: Scalars['Int']['output'];
-  minTransitTime: Scalars['Int']['output'];
-  percentile25?: Maybe<Scalars['Float']['output']>;
-  percentile75?: Maybe<Scalars['Float']['output']>;
-  ts?: Maybe<Scalars['String']['output']>;
-};
-
 export type CorridorNamespace = {
   __typename?: 'CorridorNamespace';
   addFirstStop?: Maybe<Array<Maybe<StopType>>>;
@@ -207,7 +197,7 @@ export type CorridorStatsPerServiceType = {
   recordedTransits?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   servicePatternName: Scalars['String']['output'];
-  totalJourneyTime?: Maybe<Scalars['Int']['output']>;
+  totalTransitTime?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CorridorStatsTimeOfDayType = {
@@ -222,21 +212,31 @@ export type CorridorStatsTimeOfDayType = {
 
 export type CorridorStatsType = {
   __typename?: 'CorridorStatsType';
-  journeyTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
-  journeyTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
-  journeyTimePerServiceStats?: Maybe<Array<Maybe<CorridorStatsPerServiceType>>>;
-  journeyTimeStats?: Maybe<Array<Maybe<CorridorJourneyTimeStatsType>>>;
-  journeyTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
   serviceLinks?: Maybe<Array<Maybe<ServiceLinkType>>>;
   summaryStats?: Maybe<CorridorSummaryStatsType>;
+  transitTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
+  transitTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
+  transitTimePerServiceStats?: Maybe<Array<Maybe<CorridorStatsPerServiceType>>>;
+  transitTimeStats?: Maybe<Array<Maybe<CorridorTransitTimeStatsType>>>;
+  transitTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
 };
 
 export type CorridorSummaryStatsType = {
   __typename?: 'CorridorSummaryStatsType';
-  averageJourneyTime?: Maybe<Scalars['Int']['output']>;
+  averageTransitTime?: Maybe<Scalars['Int']['output']>;
   numberOfServices?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   totalTransits?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CorridorTransitTimeStatsType = {
+  __typename?: 'CorridorTransitTimeStatsType';
+  avgTransitTime?: Maybe<Scalars['Float']['output']>;
+  maxTransitTime: Scalars['Int']['output'];
+  minTransitTime: Scalars['Int']['output'];
+  percentile25?: Maybe<Scalars['Float']['output']>;
+  percentile75?: Maybe<Scalars['Float']['output']>;
+  ts?: Maybe<Scalars['String']['output']>;
 };
 
 export type CorridorType = {
@@ -1176,7 +1176,6 @@ export type ResolversTypes = ResolversObject<{
   CorridorGranularity: ResolverTypeWrapper<Partial<CorridorGranularity>>;
   CorridorHistogramType: ResolverTypeWrapper<Partial<CorridorHistogramType>>;
   CorridorInputType: ResolverTypeWrapper<Partial<CorridorInputType>>;
-  CorridorJourneyTimeStatsType: ResolverTypeWrapper<Partial<CorridorJourneyTimeStatsType>>;
   CorridorNamespace: ResolverTypeWrapper<Partial<CorridorNamespace>>;
   CorridorStatsDayOfWeekType: ResolverTypeWrapper<Partial<CorridorStatsDayOfWeekType>>;
   CorridorStatsHistogramType: ResolverTypeWrapper<Partial<CorridorStatsHistogramType>>;
@@ -1185,6 +1184,7 @@ export type ResolversTypes = ResolversObject<{
   CorridorStatsTimeOfDayType: ResolverTypeWrapper<Partial<CorridorStatsTimeOfDayType>>;
   CorridorStatsType: ResolverTypeWrapper<Partial<CorridorStatsType>>;
   CorridorSummaryStatsType: ResolverTypeWrapper<Partial<CorridorSummaryStatsType>>;
+  CorridorTransitTimeStatsType: ResolverTypeWrapper<Partial<CorridorTransitTimeStatsType>>;
   CorridorType: ResolverTypeWrapper<Partial<CorridorType>>;
   CorridorUpdateInputType: ResolverTypeWrapper<Partial<CorridorUpdateInputType>>;
   DashboardVehicles: ResolverTypeWrapper<Partial<DashboardVehicles>>;
@@ -1284,7 +1284,6 @@ export type ResolversParentTypes = ResolversObject<{
   BoundingBoxInputType: Partial<BoundingBoxInputType>;
   CorridorHistogramType: Partial<CorridorHistogramType>;
   CorridorInputType: Partial<CorridorInputType>;
-  CorridorJourneyTimeStatsType: Partial<CorridorJourneyTimeStatsType>;
   CorridorNamespace: Partial<CorridorNamespace>;
   CorridorStatsDayOfWeekType: Partial<CorridorStatsDayOfWeekType>;
   CorridorStatsHistogramType: Partial<CorridorStatsHistogramType>;
@@ -1293,6 +1292,7 @@ export type ResolversParentTypes = ResolversObject<{
   CorridorStatsTimeOfDayType: Partial<CorridorStatsTimeOfDayType>;
   CorridorStatsType: Partial<CorridorStatsType>;
   CorridorSummaryStatsType: Partial<CorridorSummaryStatsType>;
+  CorridorTransitTimeStatsType: Partial<CorridorTransitTimeStatsType>;
   CorridorType: Partial<CorridorType>;
   CorridorUpdateInputType: Partial<CorridorUpdateInputType>;
   DashboardVehicles: Partial<DashboardVehicles>;
@@ -1424,16 +1424,6 @@ export type CorridorHistogramTypeResolvers<ContextType = RequestContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CorridorJourneyTimeStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorJourneyTimeStatsType'] = ResolversParentTypes['CorridorJourneyTimeStatsType']> = ResolversObject<{
-  avgTransitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  maxTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorNamespace'] = ResolversParentTypes['CorridorNamespace']> = ResolversObject<{
   addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddFirstStopArgs, 'inputs'>>;
   addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddSubsequentStopsArgs, 'stopList'>>;
@@ -1466,7 +1456,7 @@ export type CorridorStatsPerServiceTypeResolvers<ContextType = RequestContext, P
   recordedTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   servicePatternName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  totalJourneyTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalTransitTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1481,21 +1471,31 @@ export type CorridorStatsTimeOfDayTypeResolvers<ContextType = RequestContext, Pa
 }>;
 
 export type CorridorStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsType'] = ResolversParentTypes['CorridorStatsType']> = ResolversObject<{
-  journeyTimeDayOfWeekStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsDayOfWeekType']>>>, ParentType, ContextType>;
-  journeyTimeHistogram?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsHistogramType']>>>, ParentType, ContextType>;
-  journeyTimePerServiceStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsPerServiceType']>>>, ParentType, ContextType>;
-  journeyTimeStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorJourneyTimeStatsType']>>>, ParentType, ContextType>;
-  journeyTimeTimeOfDayStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsTimeOfDayType']>>>, ParentType, ContextType>;
   serviceLinks?: Resolver<Maybe<Array<Maybe<ResolversTypes['ServiceLinkType']>>>, ParentType, ContextType>;
   summaryStats?: Resolver<Maybe<ResolversTypes['CorridorSummaryStatsType']>, ParentType, ContextType>;
+  transitTimeDayOfWeekStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsDayOfWeekType']>>>, ParentType, ContextType>;
+  transitTimeHistogram?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsHistogramType']>>>, ParentType, ContextType>;
+  transitTimePerServiceStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsPerServiceType']>>>, ParentType, ContextType>;
+  transitTimeStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorTransitTimeStatsType']>>>, ParentType, ContextType>;
+  transitTimeTimeOfDayStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsTimeOfDayType']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorSummaryStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorSummaryStatsType'] = ResolversParentTypes['CorridorSummaryStatsType']> = ResolversObject<{
-  averageJourneyTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  averageTransitTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   numberOfServices?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type CorridorTransitTimeStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorTransitTimeStatsType'] = ResolversParentTypes['CorridorTransitTimeStatsType']> = ResolversObject<{
+  avgTransitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  maxTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1957,7 +1957,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
   AvlPoint?: AvlPointResolvers<ContextType>;
   CorridorHistogramType?: CorridorHistogramTypeResolvers<ContextType>;
-  CorridorJourneyTimeStatsType?: CorridorJourneyTimeStatsTypeResolvers<ContextType>;
   CorridorNamespace?: CorridorNamespaceResolvers<ContextType>;
   CorridorStatsDayOfWeekType?: CorridorStatsDayOfWeekTypeResolvers<ContextType>;
   CorridorStatsHistogramType?: CorridorStatsHistogramTypeResolvers<ContextType>;
@@ -1965,6 +1964,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   CorridorStatsTimeOfDayType?: CorridorStatsTimeOfDayTypeResolvers<ContextType>;
   CorridorStatsType?: CorridorStatsTypeResolvers<ContextType>;
   CorridorSummaryStatsType?: CorridorSummaryStatsTypeResolvers<ContextType>;
+  CorridorTransitTimeStatsType?: CorridorTransitTimeStatsTypeResolvers<ContextType>;
   CorridorType?: CorridorTypeResolvers<ContextType>;
   DashboardVehicles?: DashboardVehiclesResolvers<ContextType>;
   Date?: GraphQLScalarType;
