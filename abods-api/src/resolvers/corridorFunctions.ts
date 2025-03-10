@@ -401,7 +401,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   return {
     inputs: args.inputs,
     corridorTransits,
-  } as CorridorStatsType;
+  } as unknown as CorridorStatsType;
 };
 
 const extractCorridorTransits = (

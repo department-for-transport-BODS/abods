@@ -889,12 +889,20 @@
               }
             ],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "StopType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StopType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -930,12 +938,20 @@
               }
             ],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "StopType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StopType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -946,12 +962,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1128,15 +1152,19 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "CorridorHistogramType",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorHistogramType",
+                    "ofType": null
+                  }
                 }
               }
             },
@@ -1488,12 +1516,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "ServiceLinkType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ServiceLinkType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1516,12 +1552,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorStatsDayOfWeekType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorStatsDayOfWeekType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1532,12 +1576,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorStatsHistogramType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorStatsHistogramType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1548,12 +1600,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorStatsPerServiceType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorStatsPerServiceType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1564,12 +1624,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorTransitTimeStatsType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorTransitTimeStatsType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1580,12 +1648,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "CorridorStatsTimeOfDayType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CorridorStatsTimeOfDayType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -1792,12 +1868,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "StopInfoType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StopInfoType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -2162,15 +2246,19 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "EventType",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "EventType",
+                    "ofType": null
+                  }
                 }
               }
             },
@@ -2455,9 +2543,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "VehicleStatsType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VehicleStatsType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -3052,9 +3144,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "FrequentServiceType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "FrequentServiceType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -3114,9 +3210,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "HeadwayTimeSeriesType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "HeadwayTimeSeriesType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -3735,9 +3835,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "VehicleStatsType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VehicleStatsType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -3751,9 +3855,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "VehicleStatsType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VehicleStatsType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -4898,12 +5006,20 @@
               }
             ],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "ServicePunctualityType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ServicePunctualityType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -4999,15 +5115,19 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "OperatorPerformanceType",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "OperatorPerformanceType",
+                    "ofType": null
+                  }
                 }
               }
             },
@@ -5142,9 +5262,13 @@
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "AdminAreaInfoType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AdminAreaInfoType",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -5219,12 +5343,20 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "OperatorType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "OperatorType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -6308,12 +6440,20 @@
               }
             ],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "EventStatsType",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "EventStatsType",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -6760,9 +6900,13 @@
                 "kind": "LIST",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "StopAnalysisType",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StopAnalysisType",
+                    "ofType": null
+                  }
                 }
               }
             },
