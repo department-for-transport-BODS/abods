@@ -230,6 +230,52 @@
             </p>
           </div>
         </mgl-popup>
+        <mgl-popup
+          *ngIf="selectedCluster"
+          [lngLat]="selectedClusterCoordinates"
+          [closeButton]="false"
+          [closeOnClick]="false"
+        >
+          <div>
+            <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+              Cluster of {{ selectedCluster.point_count }} stops
+            </h3>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>On time:</strong>
+              {{
+                selectedCluster.onTime / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Early:</strong>
+              {{
+                selectedCluster.early / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Late:</strong>
+              {{
+                selectedCluster.late / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Incomplete:</strong>
+              {{
+                (selectedCluster.scheduledDepartures -
+                  selectedCluster.completedDepartures) /
+                  selectedCluster.scheduledDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+          </div>
+        </mgl-popup>
         <mgl-control position="bottom-left">
           <div class="map__legend map__legend">
             <span class="map__dot map__dot--high"></span>

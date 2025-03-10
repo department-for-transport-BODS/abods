@@ -34,14 +34,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   private lastBounds: BoundingBoxInputType | undefined = undefined;
   private destroy$ = new Subject<void>();
 
-  /**
-   * TODO: Here when hovering over the stop show:
-   *  Count: 32
-   *  On-time: 78%
-   *  Early: 2%
-   *  Late: 20%
-   *  Incomplete: 12%
-   * **/
   clusterProperties = {
     early: ["+", ["get", "early"]],
     onTime: ["+", ["get", "onTime"]],
@@ -60,6 +52,10 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
   selectedStop: StopStatistics | undefined;
+  selectedCluster:
+    | Record<keyof typeof this.clusterProperties | "point_count", number>
+    | undefined = undefined;
+  selectedClusterCoordinates: [number, number] = [0, 0];
 
   get boundingBoxTooBig() {
     return this.zoomLevel < 12;
@@ -131,23 +127,42 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.onMapMoveEnd();
 
     // For some reason this doesn't work passing a method to the map layer props
-    map.on("mouseenter", "clusters", () => {
+    map.on("mouseenter", "clusters", (e) => {
       map.getCanvas().style.cursor = "pointer";
+      if (!e.features || e.features.length <= 0 || !e.features[0].properties)
+        return;
+
+      const feature = e.features[0];
+      if (feature.geometry.type !== "Point") return;
+
+      this.selectedStop = undefined;
+      this.selectedCluster = feature.properties as Record<
+        keyof typeof this.clusterProperties | "point_count",
+        number
+      >;
+      this.selectedClusterCoordinates =
+        feature.geometry.coordinates.slice() as [number, number];
+
+      this.cdr.detectChanges();
     });
 
     map.on("mouseleave", "clusters", () => {
       map.getCanvas().style.cursor = "";
-    });
-
-    this.map.on("mouseenter", ["timing-stops", "other-stops"], (e) => {
-      if (!e.features || e.features.length <= 0 || !e.features[0].properties)
-        return;
-      this.selectedStop = e.features[0].properties as StopStatistics;
+      this.selectedCluster = undefined;
       this.cdr.detectChanges();
     });
 
-    this.map.on("mouseleave", ["timing-stops", "other-stops"], () => {
+    map.on("mouseenter", ["timing-stops", "other-stops"], (e) => {
+      if (!e.features || e.features.length <= 0 || !e.features[0].properties)
+        return;
+      this.selectedStop = e.features[0].properties as StopStatistics;
+      this.selectedCluster = undefined;
+      this.cdr.detectChanges();
+    });
+
+    map.on("mouseleave", ["timing-stops", "other-stops"], () => {
       this.selectedStop = undefined;
+      this.selectedCluster = undefined;
       this.cdr.detectChanges();
     });
   }
