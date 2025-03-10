@@ -814,7 +814,7 @@ export type Query = {
   operators?: Maybe<OperatorsPage>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
-  stopAnalysis: Array<StopAnalysisType>;
+  stopAnalysis: Array<StopStatistics>;
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
@@ -999,27 +999,10 @@ export type Stop = {
 export type StopAnalysisFiltersInput = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox: BoundingBoxInputType;
-  fromTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
+  fromTimestamp: Scalars['DateTime']['input'];
   lineId?: InputMaybe<Scalars['String']['input']>;
   operatorId?: InputMaybe<Scalars['String']['input']>;
-  toTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type StopAnalysisType = {
-  __typename?: 'StopAnalysisType';
-  averageDelay: Scalars['Float']['output'];
-  completedDepartures: Scalars['Int']['output'];
-  early: Scalars['Int']['output'];
-  late: Scalars['Int']['output'];
-  latitude: Scalars['Float']['output'];
-  lineId?: Maybe<Scalars['String']['output']>;
-  longitude: Scalars['Float']['output'];
-  onTime: Scalars['Int']['output'];
-  operatorId?: Maybe<Scalars['String']['output']>;
-  scheduledDepartures: Scalars['Int']['output'];
-  stopId: Scalars['Int']['output'];
-  stopName: Scalars['String']['output'];
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  toTimestamp: Scalars['DateTime']['input'];
 };
 
 export type StopInfoType = {
@@ -1042,7 +1025,25 @@ export type StopPerformanceType = {
   scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopInfo: StopInfoType;
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  timingPoint: Scalars['Boolean']['output'];
+};
+
+export type StopStatistics = {
+  __typename?: 'StopStatistics';
+  adminAreaName: Scalars['String']['output'];
+  atcoCode: Scalars['String']['output'];
+  completedDepartures: Scalars['Int']['output'];
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+  latitude: Scalars['Float']['output'];
+  localityName: Scalars['String']['output'];
+  longitude: Scalars['Float']['output'];
+  onTime: Scalars['Int']['output'];
+  scheduledDepartures: Scalars['Int']['output'];
+  stopId: Scalars['Int']['output'];
+  stopName: Scalars['String']['output'];
+  timingPoint: Scalars['Boolean']['output'];
+  totalDelay: Scalars['Float']['output'];
 };
 
 export type StopType = {
@@ -1334,7 +1335,7 @@ export type OnTimeStopPerformanceListQueryVariables = Exact<{
 }>;
 
 
-export type OnTimeStopPerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', stopPerformance?: Array<{ __typename?: 'StopPerformanceType', lineId?: string | null, stopId: string, early: number, onTime: number, late: number, averageDelay: number, scheduledDepartures: number, actualDepartures: number, timingPoint?: boolean | null, stopInfo: { __typename?: 'StopInfoType', stopId: string, sourceId?: string | null, stopName: string, stopLocation: { __typename?: 'GpsPointType', latitude: number, longitude: number }, stopLocality: { __typename?: 'LocalityType', localityId?: string | null, localityName?: string | null, localityAreaId?: string | null, localityAreaName?: string | null } } }> | null } | null };
+export type OnTimeStopPerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', stopPerformance?: Array<{ __typename?: 'StopPerformanceType', lineId?: string | null, stopId: string, early: number, onTime: number, late: number, averageDelay: number, scheduledDepartures: number, actualDepartures: number, timingPoint: boolean, stopInfo: { __typename?: 'StopInfoType', stopId: string, sourceId?: string | null, stopName: string, stopLocation: { __typename?: 'GpsPointType', latitude: number, longitude: number }, stopLocality: { __typename?: 'LocalityType', localityId?: string | null, localityName?: string | null, localityAreaId?: string | null, localityAreaName?: string | null } } }> | null } | null };
 
 export type OnTimeOperatorPerformanceListQueryVariables = Exact<{
   params: PerformanceInputType;

@@ -35,7 +35,7 @@ type Query {
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
 
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
-  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType!]!
+  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
 
   embeddedUrl: AWSQuicksightUser!
 }
@@ -608,7 +608,7 @@ type StopPerformanceType {
   scheduledDepartures: Int!
   stopId: String!
   stopInfo: StopInfoType!
-  timingPoint: Boolean
+  timingPoint: Boolean!
 }
 
 type StopInfoType {
@@ -746,26 +746,27 @@ enum RouteType {
 input StopAnalysisFiltersInput {
   adminAreaIds: [String!]
   boundingBox: BoundingBoxInputType!
-  fromTimestamp: DateTime
-  toTimestamp: DateTime
+  fromTimestamp: DateTime!
+  toTimestamp: DateTime!
   operatorId: String
   lineId: String
 }
 
-type StopAnalysisType {
-  averageDelay: Float!
+type StopStatistics {
+  stopId: Int!
+  atcoCode: String!
+  stopName: String!
+  localityName: String!
+  adminAreaName: String!
+  timingPoint: Boolean!
+  latitude: Float!
+  longitude: Float!
   early: Int!
   late: Int!
-  lineId: String
   onTime: Int!
   scheduledDepartures: Int!
   completedDepartures: Int!
-  stopId: Int!
-  stopName: String!
-  timingPoint: Boolean
-  operatorId: String
-  latitude: Float!
-  longitude: Float!
+  totalDelay: Float!
 }
 """
 Filters for AvlLineLevelStatus
