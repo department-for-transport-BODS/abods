@@ -34,8 +34,8 @@ import {
 import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  toUkTime,
   getFormattedDate,
+  toUkTime,
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import {
@@ -66,7 +66,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   _,
   args,
   context,
-): Promise<OperatorsPage> => {
+): Promise<OperatorsPage | null> => {
   const user = await requireUserSession(context);
   try {
     const userOperators = args.filterBy?.operatorIds
@@ -82,7 +82,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting operators");
-    return {};
+    return null;
   }
 };
 

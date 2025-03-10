@@ -329,7 +329,7 @@ export class CorridorsService {
         xAxisCategory: formatMinuteSeconds(Number(bin)),
         xAxisLabel: formatDuration(Number(bin)),
       })),
-      serviceLinks: (stats.serviceLinks as ServiceLinkType[]) ?? [],
+      serviceLinks: stats.serviceLinks ?? [],
     };
   }
 
