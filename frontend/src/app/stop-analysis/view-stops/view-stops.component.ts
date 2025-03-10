@@ -5,6 +5,7 @@ import { ConfigService } from "../../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../../shared/geo";
 import {
   BoundingBoxInputType,
+  MatchType,
   StopAnalysisGQL,
   StopStatistics,
 } from "../../../generated/graphql";
@@ -101,11 +102,12 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         this.query
           .fetch({
             boundingBox: bounds,
-            adminAreaIds: null,
+            adminAreaIds: [],
             fromTimestamp: oneWeekAgo.toISO(),
             toTimestamp: yesterday.toISO(),
-            operatorId: null,
-            lineId: null,
+            operatorIds: [],
+            lineIds: [],
+            matchType: MatchType.Evidenced,
           })
           .subscribe((response) => {
             this.lastBounds = bounds;

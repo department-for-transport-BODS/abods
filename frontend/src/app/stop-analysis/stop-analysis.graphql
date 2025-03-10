@@ -1,19 +1,21 @@
 query stopAnalysis(
-  $adminAreaIds: [String!]
+  $adminAreaIds: [String!]!
   $boundingBox: BoundingBoxInputType!
   $fromTimestamp: DateTime!
+  $lineIds: [String!]!
+  $matchType: MatchType!
+  $operatorIds: [String!]!
   $toTimestamp: DateTime!
-  $operatorId: String
-  $lineId: String
 ) {
   stopAnalysis(
     inputs: {
       adminAreaIds: $adminAreaIds
       boundingBox: $boundingBox
       fromTimestamp: $fromTimestamp
+      lineIds: $lineIds
+      matchType: $matchType
+      operatorIds: $operatorIds
       toTimestamp: $toTimestamp
-      operatorId: $operatorId
-      lineId: $lineId
     }
   ) {
     stopId

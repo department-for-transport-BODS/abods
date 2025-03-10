@@ -1447,12 +1447,13 @@ export type OperatorLinesQueryVariables = Exact<{
 export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
 export type StopAnalysisQueryVariables = Exact<{
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  adminAreaIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
   boundingBox: BoundingBoxInputType;
   fromTimestamp: Scalars['DateTime']['input'];
+  lineIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  matchType: MatchType;
+  operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
   toTimestamp: Scalars['DateTime']['input'];
-  operatorId?: InputMaybe<Scalars['String']['input']>;
-  lineId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2776,9 +2777,9 @@ export const OperatorLinesDocument = gql`
     }
   }
 export const StopAnalysisDocument = gql`
-    query stopAnalysis($adminAreaIds: [String!], $boundingBox: BoundingBoxInputType!, $fromTimestamp: DateTime!, $toTimestamp: DateTime!, $operatorId: String, $lineId: String) {
+    query stopAnalysis($adminAreaIds: [String!]!, $boundingBox: BoundingBoxInputType!, $fromTimestamp: DateTime!, $lineIds: [String!]!, $matchType: MatchType!, $operatorIds: [String!]!, $toTimestamp: DateTime!) {
   stopAnalysis(
-    inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, toTimestamp: $toTimestamp, operatorId: $operatorId, lineId: $lineId}
+    inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, lineIds: $lineIds, matchType: $matchType, operatorIds: $operatorIds, toTimestamp: $toTimestamp}
   ) {
     stopId
     atcoCode
