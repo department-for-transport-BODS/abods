@@ -800,72 +800,31 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         (n) => !filters.operatorIds || filters.operatorIds.includes(n),
       );
 
-      const where: Prisma.performance_statisticsWhereInput = {
-        operator_noc: {
-          in: operatorNocs,
-        },
-        date_period_start: userSelectedDateAsUtc(fromTimestamp).toDate(),
-        AND: [
-          {
-            OR: [
-              {
-                on_time_count: {
-                  gt: 0,
-                },
-                late_count: {
-                  gt: 0,
-                },
-                early_count: {
-                  gt: 0,
-                },
-              },
-            ],
-          },
-          {
-            OR: [
-              {
-                trend_on_time_count: {
-                  gt: 0,
-                },
-                trend_late_count: {
-                  gt: 0,
-                },
-                trend_early_count: {
-                  gt: 0,
-                },
-              },
-            ],
-          },
-        ],
-      };
+      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
+
+      let performanceMetricsQuery = context.kysely
+        .selectFrom("performance_statistics")
+        .selectAll()
+        .where("operator_noc", "in", operatorNocs)
+        .where(
+          "date_period_start",
+          "=",
+          userSelectedDateAsUtc(fromTimestamp).toDate(),
+        )
+        .where("percentage_change", "is not", null)
+        .orderBy("on_time_percentage", orderFilter)
+        .orderBy("percentage_change", orderFilter)
+        .limit(3);
 
       if (timingPointsOnly) {
-        where.is_timing_point = timingPointsOnly;
+        performanceMetricsQuery = performanceMetricsQuery.where(
+          "is_timing_point",
+          "=",
+          timingPointsOnly,
+        );
       }
 
-      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
-      const performanceMetrics =
-        await context.db.performance_statistics.findMany({
-          where,
-          take: 3,
-          distinct: [
-            "date_period_start",
-            "date_period_end",
-            "date_period_end",
-            "on_time_percentage",
-            "early_count",
-            "late_count",
-            "on_time_count",
-          ],
-          orderBy: [
-            {
-              on_time_percentage: orderFilter,
-            },
-            {
-              trend_percentage: orderFilter,
-            },
-          ],
-        });
+      const performanceMetrics = await performanceMetricsQuery.execute();
 
       const services = await context.db.expected_services.findMany({
         where: {
