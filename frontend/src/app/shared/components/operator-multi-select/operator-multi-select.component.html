@@ -1,0 +1,9 @@
+<gds-multiselect-checkbox
+  [options]="operators | async"
+  [ngModel]="value"
+  (selectedChange)="onSelect($event)"
+  [showAll]="true"
+  showAllLabel="All Operators"
+  placeholderText="Operators"
+  ariaLabel="Operators"
+/>

@@ -35,10 +35,10 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
   matchType: MatchType = MatchType.Evidenced;
   timingPointsOption = "timing-points";
-  private apiFiltersChanged = new Subject();
-
+  operatorIds: string[] = [];
   to: DateTime;
   from: DateTime;
+  private apiFiltersChanged = new Subject();
 
   private map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -125,7 +125,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
       /**
        *     TODO: Add filters:
-       *      NOC (select multiple)
        *      Service (select multiple) (only show services in selected NOCs if selected)
        *      Refine Results
        *          Day e.g. Monday (select multiple)
@@ -138,7 +137,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
           adminAreaIds: [],
           fromTimestamp: this.from.toISO(),
           toTimestamp: this.to.toISO(),
-          operatorIds: [],
+          operatorIds: this.operatorIds,
           lineIds: [],
           matchType: this.matchType,
         })
@@ -357,5 +356,10 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
       newBounds.maxLongitude <= bounds.maxLongitude &&
       newBounds.maxLatitude <= bounds.maxLatitude
     );
+  }
+
+  onOperatorsChanged($event: string[]) {
+    this.operatorIds = $event;
+    this.onFilterChanged();
   }
 }

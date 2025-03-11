@@ -11,6 +11,10 @@
       [searchCenter]="center"
       (locationSelected)="onLocationSearchSelection($event)"
     />
+    <app-operator-multi-select
+      [value]="operatorIds"
+      (selectedChange)="onOperatorsChanged($event)"
+    />
     <app-segmented-toggle
       [(ngModel)]="matchType"
       (ngModelChange)="onFilterChanged()"
