@@ -6,6 +6,11 @@
       [to]="to"
       (valueChanged)="onDatePickerChanged($event)"
     />
+    <app-location-search
+      class="govuk-input--width-20"
+      [searchCenter]="center"
+      (locationSelected)="onLocationSearchSelection($event)"
+    />
     <app-segmented-toggle
       [(ngModel)]="matchType"
       (ngModelChange)="onFilterChanged()"

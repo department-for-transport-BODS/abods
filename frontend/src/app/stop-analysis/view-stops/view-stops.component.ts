@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
-import { Map } from "mapbox-gl";
+import { LngLat, Map } from "mapbox-gl";
 import { ConfigService } from "../../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../../shared/geo";
 import {
@@ -15,6 +15,9 @@ import { DateTime } from "luxon";
 import { StopPerformance } from "../../on-time/on-time.service";
 import { Preset } from "../../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../../shared/services/date-range.service";
+import { GeocodingFeature } from "../../shared/mapbox/geocoding.types";
+
+const MAX_ZOOM_LEVEL = 12;
 
 @Component({
   selector: "app-view-stops",
@@ -66,9 +69,10 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     | Record<keyof typeof this.clusterProperties | "point_count", number>
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
+  center: LngLat | undefined;
 
   get boundingBoxTooBig() {
-    return this.zoomLevel < 12;
+    return this.zoomLevel < MAX_ZOOM_LEVEL;
   }
 
   constructor(
@@ -121,7 +125,6 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
       /**
        *     TODO: Add filters:
-       *      Postcode/area as per corridors
        *      NOC (select multiple)
        *      Service (select multiple) (only show services in selected NOCs if selected)
        *      Refine Results
@@ -235,6 +238,12 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     this.from = $event.from;
     this.to = $event.to;
     this.onFilterChanged();
+  }
+
+  onLocationSearchSelection(location?: GeocodingFeature) {
+    if (!this.map) return;
+    if (!location) return;
+    this.map.flyTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
   }
 
   zoomToPoint(center: [number, number]) {
