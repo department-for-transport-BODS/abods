@@ -14,5 +14,6 @@ query user {
     currentUserId
     canViewServiceMonitoring
     canEditAllAlerts
+    serviceMonitoringEmbedUrl
   }
 }

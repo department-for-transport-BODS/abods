@@ -17,10 +17,18 @@ import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
-import { canUserViewServiceMonitoring } from "../lib/common.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
+const accountTypes = {
+  admin: 1,
+  orgAdmin: 2,
+  orgStaff: 3,
+  developer: 4,
+  agentUser: 5,
+};
 
+const supportUserEmailDomain = "@kpmg.co.uk";
+const dftUserEmailDomain = "@dft.gov.uk";
 // Summary: fetch all users
 export const getUsers: QueryResolvers["users"] = async (
   _,
@@ -82,10 +90,10 @@ export const getUser: QueryResolvers["user"] = async (
     const email = userDetails.email.toLowerCase();
 
     // Allow access to users with dft.gov.uk and site admins (account_type = 1)
-    const canViewServiceMonitoring = canUserViewServiceMonitoring(
-      email,
-      userDetails.account_type,
-    );
+    const canViewServiceMonitoring =
+      email.endsWith(supportUserEmailDomain) ||
+      (userDetails.account_type === accountTypes.admin &&
+        email.endsWith(dftUserEmailDomain));
 
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
@@ -94,6 +102,9 @@ export const getUser: QueryResolvers["user"] = async (
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
       canEditAllAlerts: isAdmin,
+      serviceMonitoringEmbedUrl: canViewServiceMonitoring
+        ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
+        : null,
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");

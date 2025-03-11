@@ -1,4 +1,4 @@
-query dashboadEmbeddedUrl {
+mutation dashboadEmbeddedUrl {
   embeddedUrl {
     enabled
     url

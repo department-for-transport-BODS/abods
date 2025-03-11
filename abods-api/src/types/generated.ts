@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: Date | string; output: Date | string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -251,12 +257,6 @@ export type DashboardVehicles = {
   actual: Scalars['Int']['output'];
   expected: Scalars['Int']['output'];
   operatorId: Scalars['String']['output'];
-};
-
-export type DataAndServiceMonitoringAccess = {
-  __typename?: 'DataAndServiceMonitoringAccess';
-  enabled: Scalars['Boolean']['output'];
-  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -499,6 +499,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoginResponse = {
@@ -514,12 +515,12 @@ export enum MatchType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  accessServiceMonitoring: DataAndServiceMonitoringAccess;
   addUserAlert: MutationResponseType;
   createCorridor: MutationResponseType;
   deleteCorridor: MutationResponseType;
   deleteUser: MutationResponseType;
   deleteUserAlert: MutationResponseType;
+  embeddedUrl: AwsQuicksightUser;
   inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
@@ -801,7 +802,6 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: DataAndServiceMonitoringAccess;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -1159,6 +1159,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
   AdminAreaInfoType: ResolverTypeWrapper<Partial<AdminAreaInfoType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
@@ -1187,7 +1188,6 @@ export type ResolversTypes = ResolversObject<{
   CorridorType: ResolverTypeWrapper<Partial<CorridorType>>;
   CorridorUpdateInputType: ResolverTypeWrapper<Partial<CorridorUpdateInputType>>;
   DashboardVehicles: ResolverTypeWrapper<Partial<DashboardVehicles>>;
-  DataAndServiceMonitoringAccess: ResolverTypeWrapper<Partial<DataAndServiceMonitoringAccess>>;
   Date: ResolverTypeWrapper<Partial<Scalars['Date']['output']>>;
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
@@ -1269,6 +1269,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
   AdminAreaInfoType: Partial<AdminAreaInfoType>;
   AdminAreasType: Partial<AdminAreasType>;
@@ -1295,7 +1296,6 @@ export type ResolversParentTypes = ResolversObject<{
   CorridorType: Partial<CorridorType>;
   CorridorUpdateInputType: Partial<CorridorUpdateInputType>;
   DashboardVehicles: Partial<DashboardVehicles>;
-  DataAndServiceMonitoringAccess: Partial<DataAndServiceMonitoringAccess>;
   Date: Partial<Scalars['Date']['output']>;
   DateTime: Partial<Scalars['DateTime']['output']>;
   DayOfWeekFlagsInputType: Partial<DayOfWeekFlagsInputType>;
@@ -1366,6 +1366,12 @@ export type ResolversParentTypes = ResolversObject<{
   UserUpdateInput: Partial<UserUpdateInput>;
   UserUpdateResponseType: Partial<UserUpdateResponseType>;
   VehicleStatsType: Partial<VehicleStatsType>;
+}>;
+
+export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreaInfoType'] = ResolversParentTypes['AdminAreaInfoType']> = ResolversObject<{
@@ -1504,12 +1510,6 @@ export type DashboardVehiclesResolvers<ContextType = RequestContext, ParentType 
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type DataAndServiceMonitoringAccessResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DataAndServiceMonitoringAccess'] = ResolversParentTypes['DataAndServiceMonitoringAccess']> = ResolversObject<{
-  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1666,6 +1666,7 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1676,12 +1677,12 @@ export type LoginResponseResolvers<ContextType = RequestContext, ParentType exte
 }>;
 
 export type MutationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  accessServiceMonitoring?: Resolver<ResolversTypes['DataAndServiceMonitoringAccess'], ParentType, ContextType>;
   addUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationAddUserAlertArgs, 'payload'>>;
   createCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationCreateCorridorArgs, 'payload'>>;
   deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteCorridorArgs, 'corridorId'>>;
   deleteUser?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'username'>>;
   deleteUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserAlertArgs, 'alertId'>>;
+  embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   inviteUser?: Resolver<ResolversTypes['InvitationResponseType'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'payload'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginResponse']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'password' | 'username'>>;
   logout?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -1790,7 +1791,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
-  embeddedUrl?: Resolver<ResolversTypes['DataAndServiceMonitoringAccess'], ParentType, ContextType>;
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
@@ -1949,6 +1949,7 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 }>;
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
+  AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
   AdminAreaInfoType?: AdminAreaInfoTypeResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
@@ -1966,7 +1967,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   CorridorTransitTimeStatsType?: CorridorTransitTimeStatsTypeResolvers<ContextType>;
   CorridorType?: CorridorTypeResolvers<ContextType>;
   DashboardVehicles?: DashboardVehiclesResolvers<ContextType>;
-  DataAndServiceMonitoringAccess?: DataAndServiceMonitoringAccessResolvers<ContextType>;
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DelayFrequencyType?: DelayFrequencyTypeResolvers<ContextType>;

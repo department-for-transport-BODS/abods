@@ -36,11 +36,9 @@ type Query {
 
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType!]!
-
-  embeddedUrl: DataAndServiceMonitoringAccess!
 }
 
-type DataAndServiceMonitoringAccess {
+type AWSQuicksightUser {
   enabled: Boolean!
   url: String
 }
@@ -229,7 +227,7 @@ type Mutation {
   deleteUser(username: String!): MutationResponseType!
   inviteUser(payload: InvitationInput!): InvitationResponseType!
 
-  accessServiceMonitoring: DataAndServiceMonitoringAccess!
+  embeddedUrl: AWSQuicksightUser!
 }
 
 input SignupPayloadType {
@@ -491,6 +489,7 @@ type LoginInfo {
   currentUserId: String!
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
+  serviceMonitoringEmbedUrl: String
 }
 
 type UserType {
