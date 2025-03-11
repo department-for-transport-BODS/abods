@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Feature, FeatureCollection, Point } from "geojson";
 import { isNotNullOrUndefined } from "../../../shared/rxjs-operators";
-import { CorridorStop } from "../../corridors.service";
+import { CorridorStop } from "../../types";
 
 export const LIST_LEN = 100;
 

@@ -3,7 +3,7 @@ import { Maybe } from "graphql/jsutils/Maybe";
 import { cloneDeep } from "lodash-es";
 import {
   CorridorHistogramType,
-  CorridorJourneyTimeStatsType,
+  CorridorTransitTimeStatsType,
   CorridorStatsDayOfWeekType,
   CorridorStatsTimeOfDayType,
   ServiceLinkType,
@@ -19,19 +19,19 @@ import { isNotNullOrUndefined } from "../shared/rxjs-operators";
 import {
   CorridorStats,
   CorridorStatsViewParams,
-  ICorridorJourneyTimeStats,
+  ICorridortransitTimeStats,
 } from "./types";
 
 export interface SpeedStats {
   averageSpeed: string;
-  transitSpeedStats: (ICorridorJourneyTimeStats & BoxPlotChartDataItem)[];
+  transitSpeedStats: (ICorridortransitTimeStats & BoxPlotChartDataItem)[];
   transitSpeedHistogram: HistogramChartDataItem[];
-  transitSpeedTimeOfDay: (ICorridorJourneyTimeStats & BoxPlotChartDataItem)[];
-  transitSpeedDayOfWeek: (ICorridorJourneyTimeStats & BoxPlotChartDataItem)[];
+  transitSpeedTimeOfDay: (ICorridortransitTimeStats & BoxPlotChartDataItem)[];
+  transitSpeedDayOfWeek: (ICorridortransitTimeStats & BoxPlotChartDataItem)[];
 }
 
 export type CorridorStatsType =
-  | CorridorJourneyTimeStatsType
+  | CorridorTransitTimeStatsType
   | CorridorStatsTimeOfDayType
   | CorridorStatsDayOfWeekType;
 
@@ -71,19 +71,19 @@ export class CorridorsSpeedMetricService {
         ),
       );
       speedStats.averageSpeed = this.calculateAverageCorridorSpeedMph(
-        stats.summaryStats.averageJourneyTime,
+        stats.summaryStats.averageTransitTime,
       );
       speedStats.transitSpeedStats = this.calculateTransitSpeedBoxPlotStats(
-        stats.journeyTimeStats,
+        stats.transitTimeStats,
       );
       speedStats.transitSpeedHistogram = this.calculateTransitSpeedHistogram(
-        stats.journeyTimeHistogram,
+        stats.transitTimeHistogram,
       );
       speedStats.transitSpeedTimeOfDay = this.calculateTransitSpeedBoxPlotStats(
-        stats.journeyTimeTimeOfDayStats,
+        stats.transitTimeTimeOfDayStats,
       );
       speedStats.transitSpeedDayOfWeek = this.calculateTransitSpeedBoxPlotStats(
-        stats.journeyTimeDayOfWeekStats,
+        stats.transitTimeDayOfWeekStats,
       );
     }
     return speedStats;
@@ -99,10 +99,10 @@ export class CorridorsSpeedMetricService {
   }
 
   calculateTransitSpeedBoxPlotStats(
-    journeyTimeStats: (CorridorStatsType & BoxPlotChartDataItem)[],
+    transitTimeStats: (CorridorStatsType & BoxPlotChartDataItem)[],
   ): (CorridorStatsType & BoxPlotChartDataItem)[] {
     const transitSpeeds: (CorridorStatsType & BoxPlotChartDataItem)[] =
-      cloneDeep(journeyTimeStats);
+      cloneDeep(transitTimeStats);
     transitSpeeds.forEach((item) => {
       item.yAxisMeanValue = this.calculateAvergeSpeedInMph(
         this.totalDistance,

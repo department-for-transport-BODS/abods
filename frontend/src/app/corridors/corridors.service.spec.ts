@@ -30,10 +30,10 @@ import { of } from "rxjs";
 import {
   CorridorStatsViewParams,
   CorridorStop,
-  ICorridorJourneyTimeStats,
+  ICorridortransitTimeStats,
 } from "./types";
 
-const journeyTime: ICorridorJourneyTimeStats = {
+const journeyTime: ICorridortransitTimeStats = {
   avgTransitTime: 5,
   minTransitTime: 1,
   maxTransitTime: 10,
@@ -57,19 +57,19 @@ const params: CorridorStatsViewParams = {
 const stats: CorridorStatsType = {
   summaryStats: {
     scheduledTransits: 100,
-    averageJourneyTime: 90,
+    averageTransitTime: 90,
     totalTransits: 95,
     numberOfServices: 5,
   },
-  journeyTimeStats: [
+  transitTimeStats: [
     {
       ts: DateTime.fromISO("2023-03-03").toISO({ suppressMilliseconds: true }),
       ...journeyTime,
     },
   ],
-  journeyTimeTimeOfDayStats: [{ hour: 9, ...journeyTime }],
-  journeyTimeDayOfWeekStats: [{ dow: 1, ...journeyTime }],
-  journeyTimeHistogram: [
+  transitTimeTimeOfDayStats: [{ hour: 9, ...journeyTime }],
+  transitTimeDayOfWeekStats: [{ dow: 1, ...journeyTime }],
+  transitTimeHistogram: [
     {
       hist: [
         { bin: 89, freq: 3 },
@@ -78,12 +78,12 @@ const stats: CorridorStatsType = {
       ],
     },
   ],
-  journeyTimePerServiceStats: [
+  transitTimePerServiceStats: [
     {
       lineName: "Sheffield to Mansfield",
       noc: "OP01",
       operatorName: "Stagecoach East Midlands",
-      totalJourneyTime: 810,
+      totalTransitTime: 810,
       scheduledTransits: 10,
       recordedTransits: 9,
       servicePatternName: "",
@@ -381,27 +381,27 @@ describe("CorridorsService", () => {
   it("should convert corridor stats", () => {
     const actual = spectator.service.convertStats(stats, params);
 
-    expect(actual.journeyTimeStats[0].ts).toEqual("2023-03-03T00:00:00+00:00");
+    expect(actual.transitTimeStats[0].ts).toEqual("2023-03-03T00:00:00+00:00");
     expect(
-      actual.journeyTimeStats[actual.journeyTimeStats.length - 1].ts,
+      actual.transitTimeStats[actual.transitTimeStats.length - 1].ts,
     ).toEqual("2023-03-30T00:00:00+01:00");
 
-    expect(actual.journeyTimeStats.length).toEqual(28);
-    expect(actual.journeyTimeTimeOfDayStats.length).toEqual(25);
-    expect(actual.journeyTimeDayOfWeekStats.length).toEqual(7);
-    expect(actual.journeyTimeHistogram.length).toEqual(5);
-    expect(actual.journeyTimePerServiceStats.length).toEqual(1);
+    expect(actual.transitTimeStats.length).toEqual(28);
+    expect(actual.transitTimeTimeOfDayStats.length).toEqual(25);
+    expect(actual.transitTimeDayOfWeekStats.length).toEqual(7);
+    expect(actual.transitTimeHistogram.length).toEqual(5);
+    expect(actual.transitTimePerServiceStats.length).toEqual(1);
 
     // from midnight to midnight, inclusive
-    expect(actual.journeyTimeTimeOfDayStats[0].hour).toEqual(0);
-    expect(actual.journeyTimeTimeOfDayStats[24].hour).toEqual(24);
+    expect(actual.transitTimeTimeOfDayStats[0].hour).toEqual(0);
+    expect(actual.transitTimeTimeOfDayStats[24].hour).toEqual(24);
 
     // Monday to Sunday
-    expect(actual.journeyTimeDayOfWeekStats[0].category).toEqual("Mon");
-    expect(actual.journeyTimeDayOfWeekStats[6].category).toEqual("Sun");
+    expect(actual.transitTimeDayOfWeekStats[0].category).toEqual("Mon");
+    expect(actual.transitTimeDayOfWeekStats[6].category).toEqual("Sun");
 
-    expect(actual.journeyTimePerServiceStats[0]?.noc).toEqual("OP01");
-    expect(actual.journeyTimePerServiceStats[0]?.operatorName).toEqual(
+    expect(actual.transitTimePerServiceStats[0]?.noc).toEqual("OP01");
+    expect(actual.transitTimePerServiceStats[0]?.operatorName).toEqual(
       "Stagecoach East Midlands",
     );
   });
