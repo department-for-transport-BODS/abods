@@ -9,9 +9,10 @@ import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { SharedModule } from "../shared/shared.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { DateRangePickerComponent } from "../shared/components/date-range/date-range-picker.component";
 
 @NgModule({
-  declarations: [ViewStopsComponent],
+  declarations: [ViewStopsComponent, DateRangePickerComponent],
   imports: [
     CommonModule,
     LayoutModule,

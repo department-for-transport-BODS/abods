@@ -1,6 +1,11 @@
 <app-page>
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis" />
+    <app-date-range-picker
+      [from]="from"
+      [to]="to"
+      (valueChanged)="onDatePickerChanged($event)"
+    />
     <app-segmented-toggle
       [(ngModel)]="matchType"
       (ngModelChange)="onFilterChanged()"

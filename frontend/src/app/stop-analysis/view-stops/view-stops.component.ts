@@ -13,6 +13,8 @@ import { combineLatest, Subject, takeUntil } from "rxjs";
 import { debounceTime, map, tap, filter } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../../on-time/on-time.service";
+import { Preset } from "../../shared/components/date-range/date-range.types";
+import { DateRangeService } from "../../shared/services/date-range.service";
 
 @Component({
   selector: "app-view-stops",
@@ -31,6 +33,9 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   matchType: MatchType = MatchType.Evidenced;
   timingPointsOption = "timing-points";
   private apiFiltersChanged = new Subject();
+
+  to: DateTime;
+  from: DateTime;
 
   private map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -70,7 +75,15 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     private config: ConfigService,
     private query: StopAnalysisGQL,
     private cdr: ChangeDetectorRef,
-  ) {}
+    dateRangeService: DateRangeService,
+  ) {
+    const { from, to } = dateRangeService.calculatePresetPeriod(
+      Preset.Last7,
+      DateTime.local(),
+    );
+    this.from = from;
+    this.to = to;
+  }
 
   ngOnInit(): void {
     // TODO: parse query params
@@ -104,16 +117,13 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
     ]).subscribe(([bounds]) => {
       if (!bounds) return;
       // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+      // TODO: limit date range
 
-      const from = DateTime.now().minus({ day: 1 }).startOf("day");
-      const to = from.minus({ day: 6 }).startOf("day");
       /**
        *     TODO: Add filters:
        *      Postcode/area as per corridors
        *      NOC (select multiple)
        *      Service (select multiple) (only show services in selected NOCs if selected)
-       *      Start date
-       *      End date, limit date range
        *      Refine Results
        *          Day e.g. Monday (select multiple)
        *          Time range
@@ -123,8 +133,8 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
         .fetch({
           boundingBox: bounds,
           adminAreaIds: [],
-          fromTimestamp: to.toISO(),
-          toTimestamp: from.toISO(),
+          fromTimestamp: this.from.toISO(),
+          toTimestamp: this.to.toISO(),
           operatorIds: [],
           lineIds: [],
           matchType: this.matchType,
@@ -217,7 +227,14 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
 
   onFilterChanged() {
     // TODO: update query params
+    console.log("Filters changed");
     this.apiFiltersChanged.next(undefined);
+  }
+
+  onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
+    this.from = $event.from;
+    this.to = $event.to;
+    this.onFilterChanged();
   }
 
   zoomToPoint(center: [number, number]) {

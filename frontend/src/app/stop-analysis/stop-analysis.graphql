@@ -1,11 +1,11 @@
 query stopAnalysis(
   $adminAreaIds: [String!]!
   $boundingBox: BoundingBoxInputType!
-  $fromTimestamp: DateTime!
+  $fromTimestamp: String!
   $lineIds: [String!]!
   $matchType: MatchType!
   $operatorIds: [String!]!
-  $toTimestamp: DateTime!
+  $toTimestamp: String!
 ) {
   stopAnalysis(
     inputs: {
