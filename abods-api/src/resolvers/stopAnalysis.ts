@@ -4,10 +4,10 @@ import {
   QueryResolvers,
   Resolvers,
   StopStatistics,
-} from "../types/generated";
+} from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 import { sql } from "kysely";
-import { GraphQLError } from "graphql/index";
+import { GraphQLError } from "graphql/index.js";
 import dayjs from "dayjs";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
