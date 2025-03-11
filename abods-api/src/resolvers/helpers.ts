@@ -3,6 +3,7 @@ import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
 import { getUserOrgIds } from "../lib/utils.js";
+import { canUserViewServiceMonitoring } from "../lib/common.js";
 
 export function throwUnauthenticatedError(
   message?: string,
@@ -54,7 +55,13 @@ export const requireUserSession = async (context: RequestContext) => {
   const bodsUser = await context.db.bods_user.findUnique({
     where: { id: sessionRecord.user_id },
     select: {
-      userOrganisations: { select: { organisation_id: true } },
+      userOrganisations: {
+        select: {
+          organisation_id: true,
+        },
+      },
+      email: true,
+      account_type: true,
       is_active: true,
     },
   });
@@ -69,6 +76,12 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
 
+  const email = bodsUser.email.toLowerCase();
+  const canViewServiceMonitoring = canUserViewServiceMonitoring(
+    email,
+    bodsUser.account_type,
+  );
+
   const orgIds = getUserOrgIds({
     userOrganisations: bodsUser.userOrganisations,
     id: sessionRecord.user_id,
@@ -77,6 +90,11 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
     orgIds: orgIds,
+    canViewServiceMonitoring: canViewServiceMonitoring,
+    serviceMonitoringAccessCount:
+      sessionRecord.service_monitoring_access_count ?? 0,
+    serviceMonitoringLastAccessed:
+      sessionRecord.service_monitoring_last_accessed,
   };
 
   logger.debug({ sessionUser }, "Session user returned");

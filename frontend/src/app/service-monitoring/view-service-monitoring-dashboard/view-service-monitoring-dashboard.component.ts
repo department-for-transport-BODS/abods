@@ -6,7 +6,8 @@ import {
   ViewChild,
 } from "@angular/core";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
-import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { CheckServiceMonitoringGQL } from "../../../generated/graphql";
+import { map } from "rxjs";
 
 @Component({
   selector: "app-view-service-monitoring-dashboard",
@@ -18,35 +19,53 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
 
   constructor(
     private renderer: Renderer2,
-    private userService: AuthenticatedUserService,
+    private serviceMonitorGql: CheckServiceMonitoringGQL,
   ) {}
 
   serviceMonitoringUrl = "";
   errors: FormErrors[] = [];
   loading = true;
   ngAfterViewInit() {
-    const iframe = this.renderer.createElement("iframe");
+    this.serviceMonitorGql
+      .mutate({})
+      .pipe(
+        map((response) => {
+          if (!response.data?.accessServiceMonitoring.enabled) {
+            return false;
+          }
+          if (!response.data.accessServiceMonitoring.url) {
+            return false;
+          }
+          try {
+            this.loadFrame(response.data.accessServiceMonitoring.url);
+            return true;
+          } catch {
+            return false;
+          }
+        }),
+      )
+      .subscribe((success) => {
+        this.loading = false;
+        if (!success) {
+          console.log("Error embedding dashboard");
+          this.errors = [
+            {
+              error: "Unable to load dashboad. Please try again later",
+              label: "enable-dashboard",
+            },
+          ];
+          return;
+        }
+        this.errors = [];
+      });
+  }
 
-    this.userService.authenticatedUser$.subscribe((loginInfo) => {
-      this.loading = false;
-      if (
-        !loginInfo.canViewServiceMonitoring ||
-        !loginInfo.serviceMonitoringEmbedUrl
-      ) {
-        this.errors = [
-          {
-            error: "Unable to load dashboad. Please contact admin",
-            label: "enable-service-monitoring",
-          },
-        ];
-        return;
-      }
-      this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
-      this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
-      this.renderer.setAttribute(iframe, "width", "100%");
-      this.renderer.setAttribute(iframe, "height", "550");
-      this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
-      this.errors = [];
-    });
+  loadFrame(embedurl: string): void {
+    const iframe = this.renderer.createElement("iframe");
+    this.serviceMonitoringUrl = embedurl;
+    this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
+    this.renderer.setAttribute(iframe, "width", "100%");
+    this.renderer.setAttribute(iframe, "height", "550");
+    this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
   }
 }

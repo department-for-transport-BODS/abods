@@ -6,7 +6,7 @@ import {
   getSessionTags,
 } from "../lib/aws.js";
 import {
-  AwsQuicksightUser,
+  DataAndServiceMonitoringAccess,
   QueryResolvers,
   Resolvers,
 } from "../types/generated";
@@ -18,7 +18,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   _,
   __,
   context,
-): Promise<AwsQuicksightUser> => {
+): Promise<DataAndServiceMonitoringAccess> => {
   checkRequiredQuicksightVars();
   const user = await requireUserSession(context);
   sendDistributionMetric(

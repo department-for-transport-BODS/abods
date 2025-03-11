@@ -22,4 +22,7 @@ export interface RequestContext extends BaseContext {
 export interface SessionUser {
   id: number;
   orgIds: number[];
+  canViewServiceMonitoring: boolean;
+  serviceMonitoringAccessCount: number;
+  serviceMonitoringLastAccessed: Date | null;
 }
