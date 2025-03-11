@@ -19,10 +19,10 @@ export class ViewMonitorsComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.embeddedUrlQuery
-      .fetch({}, { fetchPolicy: "no-cache" })
+      .mutate({}, { fetchPolicy: "no-cache" })
       .pipe(
         mergeMap(async (response) => {
-          if (!response.data.embeddedUrl.enabled) {
+          if (!response.data?.embeddedUrl.enabled) {
             return false;
           }
           if (!response.data.embeddedUrl.url) {

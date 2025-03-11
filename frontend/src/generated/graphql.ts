@@ -20,6 +20,12 @@ export type Scalars = {
   Time: { input: string; output: string; }
 };
 
+export type AwsQuicksightUser = {
+  __typename?: 'AWSQuicksightUser';
+  enabled: Scalars['Boolean']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddFirstStopInputType = {
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   boundingBox?: InputMaybe<BoundingBoxInputType>;
@@ -251,12 +257,6 @@ export type DashboardVehicles = {
   actual: Scalars['Int']['output'];
   expected: Scalars['Int']['output'];
   operatorId: Scalars['String']['output'];
-};
-
-export type DataAndServiceMonitoringAccess = {
-  __typename?: 'DataAndServiceMonitoringAccess';
-  enabled: Scalars['Boolean']['output'];
-  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type DayOfWeekFlagsInputType = {
@@ -499,6 +499,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoginResponse = {
@@ -514,12 +515,12 @@ export enum MatchType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  accessServiceMonitoring: DataAndServiceMonitoringAccess;
   addUserAlert: MutationResponseType;
   createCorridor: MutationResponseType;
   deleteCorridor: MutationResponseType;
   deleteUser: MutationResponseType;
   deleteUserAlert: MutationResponseType;
+  embeddedUrl: AwsQuicksightUser;
   inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
@@ -801,7 +802,6 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
-  embeddedUrl: DataAndServiceMonitoringAccess;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -1103,7 +1103,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1190,10 +1190,10 @@ export type DashboardServiceRankingQueryVariables = Exact<{
 
 export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePunctuality: Array<{ __typename?: 'ServicePunctualityType', nocCode?: string | null, lineId?: string | null, onTime?: number | null, early?: number | null, late?: number | null, lineInfo?: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } | null, trend?: { __typename?: 'ServicePunctualityType', onTime?: number | null, early?: number | null, late?: number | null } | null }> } | null };
 
-export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
+export type DashboadEmbeddedUrlMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'DataAndServiceMonitoringAccess', enabled: boolean, url?: string | null } };
+export type DashboadEmbeddedUrlMutation = { __typename?: 'Mutation', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -1431,11 +1431,6 @@ export type DeleteUserAlertMutationVariables = Exact<{
 
 export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
 
-export type CheckServiceMonitoringMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type CheckServiceMonitoringMutation = { __typename?: 'Mutation', accessServiceMonitoring: { __typename?: 'DataAndServiceMonitoringAccess', enabled: boolean, url?: string | null } };
-
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1666,6 +1661,7 @@ export const UserDocument = gql`
     currentUserId
     canViewServiceMonitoring
     canEditAllAlerts
+    serviceMonitoringEmbedUrl
   }
 }
     `;
@@ -2018,7 +2014,7 @@ export const DashboardServiceRankingDocument = gql`
     }
   }
 export const DashboadEmbeddedUrlDocument = gql`
-    query dashboadEmbeddedUrl {
+    mutation dashboadEmbeddedUrl {
   embeddedUrl {
     enabled
     url
@@ -2029,7 +2025,7 @@ export const DashboadEmbeddedUrlDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
+  export class DashboadEmbeddedUrlGQL extends Apollo.Mutation<DashboadEmbeddedUrlMutation, DashboadEmbeddedUrlMutationVariables> {
     document = DashboadEmbeddedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {
@@ -2715,25 +2711,6 @@ export const DeleteUserAlertDocument = gql`
   })
   export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
     document = DeleteUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const CheckServiceMonitoringDocument = gql`
-    mutation checkServiceMonitoring {
-  accessServiceMonitoring {
-    enabled
-    url
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class CheckServiceMonitoringGQL extends Apollo.Mutation<CheckServiceMonitoringMutation, CheckServiceMonitoringMutationVariables> {
-    document = CheckServiceMonitoringDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
