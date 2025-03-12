@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { StopPerformance } from "../on-time.service";
 import { TimingRendererComponent } from "./timing-renderer/timing-renderer.component";
 import { SelectableTextCellRendererComponent } from "src/app/shared/components/ag-grid/selectable-text-cell/selectable-text-cell.component";
@@ -14,6 +14,7 @@ import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
     [data]="data"
     [csvFilename]="csvFilename"
     [paginate]="paginate"
+    (cellClicked)="handleCellClicked($event)"
   />`,
 })
 export class StopsGridComponentDisplayComponent {
@@ -31,7 +32,7 @@ export class StopsGridComponentDisplayComponent {
       isDefaultShown: true,
       colId: "naptan",
       headerName: "NAPTAN",
-      valueGetter: ({ data }) => data.stopId,
+      valueGetter: ({ data }: { data: StopPerformance }) => data.stopId,
       cellRenderer: SelectableTextCellRendererComponent,
       cellRendererParams: { noWrap: true, textOverflow: "visible" },
       minWidth: 150,
@@ -61,12 +62,13 @@ export class StopsGridComponentDisplayComponent {
       colId: "stopName",
       field: "stopName",
       headerName: "Name",
-      valueGetter: ({ data }) => data.stopInfo?.stopName,
+      valueGetter: ({ data }: { data: StopPerformance }) =>
+        data.stopInfo?.stopName,
       cellRenderer: SelectableTextCellRendererComponent,
       cellRendererParams: {
         noWrap: true,
         textOverflow: "visible",
-        tooltipValueGetter: ({ data }: any) => {
+        tooltipValueGetter: ({ data }: { data: StopPerformance }) => {
           if (data.stopInfo?.stopLocality) {
             const { localityName, localityAreaName } =
               data.stopInfo.stopLocality;
@@ -101,7 +103,7 @@ export class StopsGridComponentDisplayComponent {
       isHideable: true,
       isDefaultShown: true,
       headerName: "Recorded departures",
-      pctValueGetter: ({ data }) =>
+      pctValueGetter: ({ data }: { data: StopPerformance }) =>
         data.actualDepartures / data.scheduledDepartures || 0,
       sortable: true,
       unSortIcon: true,
@@ -173,4 +175,11 @@ export class StopsGridComponentDisplayComponent {
       cellClass: "ag-cell-last ag-right-aligned-cell", // adding ag-cell-last removes ag-right-aligned-cell so add it manually also
     },
   ];
+  @Output() stopNameClicked = new EventEmitter<StopPerformance>();
+
+  handleCellClicked($event: { column: string; data: StopPerformance }) {
+    if ($event.column === "stopName") {
+      this.stopNameClicked.emit($event.data);
+    }
+  }
 }
