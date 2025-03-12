@@ -999,11 +999,11 @@ export type Stop = {
 export type StopAnalysisFiltersInput = {
   adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
-  fromTimestamp: Scalars['DateTime']['input'];
+  fromTimestamp: Scalars['String']['input'];
   lineIds: Array<Scalars['String']['input']>;
   matchType: MatchType;
   operatorIds: Array<Scalars['String']['input']>;
-  toTimestamp: Scalars['DateTime']['input'];
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type StopInfoType = {

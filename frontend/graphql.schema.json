@@ -7980,7 +7980,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -8060,7 +8060,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "String",
                 "ofType": null
               }
             },
