@@ -1,54 +1,67 @@
 <app-page>
   <ng-container ngProjectAs="content">
     <app-page-header heading="Stop Analysis" />
-    <app-date-range-picker
-      [from]="from"
-      [to]="to"
-      (valueChanged)="onDatePickerChanged($event)"
-    />
-    <app-location-search
-      class="govuk-input--width-20"
-      [searchCenter]="center"
-      (locationSelected)="onLocationSearchSelection($event)"
-    />
-    <app-operator-multi-select
-      [value]="operatorIds"
-      (selectedChange)="onOperatorsChanged($event)"
-    />
-    <app-segmented-toggle
-      [(ngModel)]="matchType"
-      (ngModelChange)="onFilterChanged()"
-    >
-      <app-segmented-toggle-item
-        name="match-type"
-        identifier="estimated"
-        value="estimated"
-        label="Estimated"
+    <div class="filters govuk-!-margin-bottom-2">
+      <app-date-range-picker
+        [from]="from"
+        [to]="to"
+        (valueChanged)="onDatePickerChanged($event)"
       />
-      <app-segmented-toggle-item
-        name="match-type"
-        identifier="evidenced"
-        value="evidenced"
-        label="Evidenced"
-      />
-    </app-segmented-toggle>
-    <app-segmented-toggle
-      [(ngModel)]="timingPointsOption"
-      (ngModelChange)="processStopData(visibleBounds)"
-    >
-      <app-segmented-toggle-item
-        name="stops-filter"
-        identifier="all-stops"
-        value="all-stops"
-        label="All stops"
-      ></app-segmented-toggle-item>
-      <app-segmented-toggle-item
-        name="stops-filter"
-        identifier="timing-points"
-        value="timing-points"
-        label="Timing points"
-      ></app-segmented-toggle-item>
-    </app-segmented-toggle>
+      <div class="toggles">
+        <app-segmented-toggle
+          [(ngModel)]="matchType"
+          (ngModelChange)="onFilterChanged()"
+        >
+          <app-segmented-toggle-item
+            name="match-type"
+            identifier="estimated"
+            value="estimated"
+            label="Estimated"
+          />
+          <app-segmented-toggle-item
+            name="match-type"
+            identifier="evidenced"
+            value="evidenced"
+            label="Evidenced"
+          />
+        </app-segmented-toggle>
+        <app-segmented-toggle
+          [(ngModel)]="timingPointsOption"
+          (ngModelChange)="processStopData(visibleBounds)"
+        >
+          <app-segmented-toggle-item
+            name="stops-filter"
+            identifier="all-stops"
+            value="all-stops"
+            label="All stops"
+          />
+          <app-segmented-toggle-item
+            name="stops-filter"
+            identifier="timing-points"
+            value="timing-points"
+            label="Timing points"
+          />
+        </app-segmented-toggle>
+      </div>
+      <div>
+        <label class="govuk-label" for="location"
+          >Location name or postcode</label
+        >
+        <app-location-search
+          [searchCenter]="center"
+          fieldId="location"
+          (locationSelected)="onLocationSearchSelection($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="operators">Operators</label>
+        <app-operator-multi-select
+          [value]="operatorIds"
+          fieldId="operators"
+          (selectedChange)="onOperatorsChanged($event)"
+        />
+      </div>
+    </div>
     <div class="map-container">
       <mgl-map
         [style]="mapboxStyle"

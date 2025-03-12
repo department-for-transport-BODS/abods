@@ -1,6 +1,20 @@
 @import "src/assets/styles/settings/settings";
 @import "src/assets/styles/helpers/helpers";
 
+.filters {
+  display: grid;
+  grid-template-columns: repeat(2, min-content);
+  grid-column-gap: govuk-spacing(6);
+  grid-row-gap: govuk-spacing(2);
+}
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: govuk-spacing(1);
+}
+
 .map-container {
   display: grid;
   .map-overlay {

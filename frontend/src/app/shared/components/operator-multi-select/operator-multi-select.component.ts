@@ -10,6 +10,7 @@ import { MultiselectCheckboxOption } from "../../gds/multiselect-checkbox/multis
 })
 export class OperatorMultiSelectComponent implements OnInit {
   @Input() value: string[] = [];
+  @Input() fieldId = "operators";
   @Output() selectedChange = new EventEmitter<string[]>();
   constructor(private operatorListQuery: DashboardOperatorListGQL) {}
 
