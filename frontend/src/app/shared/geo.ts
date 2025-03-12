@@ -4,10 +4,7 @@ import { Position } from "geojson";
 import { LngLatBounds } from "mapbox-gl";
 
 export const BRITISH_ISLES_BBOX: BBox2d = [
-  -5.8, // west
-  49.9, // south
-  1.8, // east
-  56, // north
+  -7.57216793459, 49.959999905, 1.68153079591, 58.6350001085,
 ];
 
 export const asBbox = (bounds: LngLatBounds): BBox2d => [
