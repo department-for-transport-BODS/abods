@@ -233,6 +233,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   @Input() showFilter = false;
 
   @Output() gridReady = new EventEmitter();
+  @Output() cellClicked = new EventEmitter<{ column: string; data: TData }>();
 
   get mode() {
     return this._mode;
@@ -277,6 +278,12 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     noRowsOverlayComponent: NoRowsOverlayComponent,
     noRowsOverlayComponentParams: () => this.overlayParams,
     suppressPropertyNamesCheck: true,
+    onCellClicked: (params: any) => {
+      this.cellClicked.emit({
+        column: params.column.getColId() as string,
+        data: params.data as TData,
+      });
+    },
   };
   // autoHeight: true,
 

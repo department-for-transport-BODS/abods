@@ -814,7 +814,7 @@ export type Query = {
   operators?: Maybe<OperatorsPage>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
-  stopAnalysis: Array<StopAnalysisType>;
+  stopAnalysis: Array<StopStatistics>;
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
@@ -997,29 +997,13 @@ export type Stop = {
 };
 
 export type StopAnalysisFiltersInput = {
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
-  fromTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-  lineId?: InputMaybe<Scalars['String']['input']>;
-  operatorId?: InputMaybe<Scalars['String']['input']>;
-  toTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type StopAnalysisType = {
-  __typename?: 'StopAnalysisType';
-  averageDelay: Scalars['Float']['output'];
-  completedDepartures: Scalars['Int']['output'];
-  early: Scalars['Int']['output'];
-  late: Scalars['Int']['output'];
-  latitude: Scalars['Float']['output'];
-  lineId?: Maybe<Scalars['String']['output']>;
-  longitude: Scalars['Float']['output'];
-  onTime: Scalars['Int']['output'];
-  operatorId?: Maybe<Scalars['String']['output']>;
-  scheduledDepartures: Scalars['Int']['output'];
-  stopId: Scalars['Int']['output'];
-  stopName: Scalars['String']['output'];
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  fromTimestamp: Scalars['String']['input'];
+  lineIds: Array<Scalars['String']['input']>;
+  matchType: MatchType;
+  operatorIds: Array<Scalars['String']['input']>;
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type StopInfoType = {
@@ -1042,7 +1026,25 @@ export type StopPerformanceType = {
   scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopInfo: StopInfoType;
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  timingPoint: Scalars['Boolean']['output'];
+};
+
+export type StopStatistics = {
+  __typename?: 'StopStatistics';
+  adminAreaName: Scalars['String']['output'];
+  atcoCode: Scalars['String']['output'];
+  completedDepartures: Scalars['Int']['output'];
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+  latitude: Scalars['Float']['output'];
+  localityName: Scalars['String']['output'];
+  longitude: Scalars['Float']['output'];
+  onTime: Scalars['Int']['output'];
+  scheduledDepartures: Scalars['Int']['output'];
+  stopId: Scalars['Int']['output'];
+  stopName: Scalars['String']['output'];
+  timingPoint: Scalars['Boolean']['output'];
+  totalDelay: Scalars['Float']['output'];
 };
 
 export type StopType = {
@@ -1254,9 +1256,9 @@ export type ResolversTypes = ResolversObject<{
   SignupPayloadType: ResolverTypeWrapper<Partial<SignupPayloadType>>;
   Stop: ResolverTypeWrapper<Partial<Stop>>;
   StopAnalysisFiltersInput: ResolverTypeWrapper<Partial<StopAnalysisFiltersInput>>;
-  StopAnalysisType: ResolverTypeWrapper<Partial<StopAnalysisType>>;
   StopInfoType: ResolverTypeWrapper<Partial<StopInfoType>>;
   StopPerformanceType: ResolverTypeWrapper<Partial<StopPerformanceType>>;
+  StopStatistics: ResolverTypeWrapper<Partial<StopStatistics>>;
   StopType: ResolverTypeWrapper<Partial<StopType>>;
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
@@ -1356,9 +1358,9 @@ export type ResolversParentTypes = ResolversObject<{
   SignupPayloadType: Partial<SignupPayloadType>;
   Stop: Partial<Stop>;
   StopAnalysisFiltersInput: Partial<StopAnalysisFiltersInput>;
-  StopAnalysisType: Partial<StopAnalysisType>;
   StopInfoType: Partial<StopInfoType>;
   StopPerformanceType: Partial<StopPerformanceType>;
+  StopStatistics: Partial<StopStatistics>;
   StopType: Partial<StopType>;
   String: Partial<Scalars['String']['output']>;
   Time: Partial<Scalars['Time']['output']>;
@@ -1803,7 +1805,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
-  stopAnalysis?: Resolver<Array<ResolversTypes['StopAnalysisType']>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
+  stopAnalysis?: Resolver<Array<ResolversTypes['StopStatistics']>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
   user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
@@ -1872,23 +1874,6 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type StopAnalysisTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopAnalysisType'] = ResolversParentTypes['StopAnalysisType']> = ResolversObject<{
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  operatorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  timingPoint?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopInfoType'] = ResolversParentTypes['StopInfoType']> = ResolversObject<{
   sourceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1908,7 +1893,25 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
-  timingPoint?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type StopStatisticsResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopStatistics'] = ResolversParentTypes['StopStatistics']> = ResolversObject<{
+  adminAreaName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  atcoCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  localityName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  totalDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2010,9 +2013,9 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   ServicePerformanceType?: ServicePerformanceTypeResolvers<ContextType>;
   ServicePunctualityType?: ServicePunctualityTypeResolvers<ContextType>;
   Stop?: StopResolvers<ContextType>;
-  StopAnalysisType?: StopAnalysisTypeResolvers<ContextType>;
   StopInfoType?: StopInfoTypeResolvers<ContextType>;
   StopPerformanceType?: StopPerformanceTypeResolvers<ContextType>;
+  StopStatistics?: StopStatisticsResolvers<ContextType>;
   StopType?: StopTypeResolvers<ContextType>;
   Time?: GraphQLScalarType;
   UserType?: UserTypeResolvers<ContextType>;

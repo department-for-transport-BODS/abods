@@ -70,6 +70,8 @@ import { WholeNumberFormControlDirective } from "./directives/form-control/whole
 import { HelpdeskPanelComponent } from "./components/helpdesk-panel/helpdesk-panel.component";
 import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive";
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
+import { LocationSearchComponent } from "./components/location-search/location-search.component";
+
 @NgModule({
   declarations: [
     NoInfinityPipe,
@@ -132,6 +134,7 @@ import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdes
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
     FreshdeskHtmlFormatterPipe,
+    LocationSearchComponent,
   ],
   providers: [PercentPipe],
   imports: [
@@ -206,6 +209,7 @@ import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdes
     WholeNumberFormControlDirective,
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
+    LocationSearchComponent,
   ],
 })
 export class SharedModule {}

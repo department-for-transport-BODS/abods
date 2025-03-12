@@ -24,18 +24,14 @@ import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { BRITISH_ISLES_BBOX, position } from "../../shared/geo";
 import { combineLatest, EMPTY, ReplaySubject, Subject } from "rxjs";
-import { FitBoundsOptions, LngLatBounds } from "mapbox-gl";
+import { FitBoundsOptions, LngLat, LngLatBounds } from "mapbox-gl";
 import { ActivatedRoute, Router } from "@angular/router";
 import {
   FormErrors,
   genericErrorMessage,
 } from "../../shared/gds/error-summary/error-summary.component";
 import { CustomValidators } from "../../shared/validators/custom-validators";
-import { GeocodingService } from "../../shared/mapbox/geocoding.service";
-import {
-  GeocodingFeature,
-  GeocodingResult,
-} from "../../shared/mapbox/geocoding.types";
+import { GeocodingFeature } from "../../shared/mapbox/geocoding.types";
 import { combine } from "../../shared/rxjs-operators";
 import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
@@ -86,10 +82,8 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   boundsChange$ = new ReplaySubject<LngLatBounds>(1);
-  locationSearch$ = new Subject<string>();
-  locationsLoading = false;
   currentBounds?: BBox2d | GeocodingFeature;
-  locations?: GeocodingResult;
+  center?: LngLat;
 
   hasSelectedLocation = false;
   resetMoveCounter = new EventEmitter<void>();
@@ -103,7 +97,6 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private corridorsService: CorridorsService,
     private router: Router,
-    private geocodingService: GeocodingService,
     private route: ActivatedRoute,
     private modalService: NgxSmartModalService,
     private location: Location,
@@ -163,7 +156,6 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     this.searchMode.valueChanges.subscribe(() => {
       this.stopQuery.reset();
       this.matchingStops = undefined;
-      this.locations = undefined;
       this.hasSelectedLocation = false;
       this.setMapBounds(BRITISH_ISLES_BBOX, { maxDuration: 1 });
       this.corridorMap.nonOrgStops = undefined;
@@ -272,23 +264,6 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
         this.otherStops = asGeoJsonPoints(otherStops.orgStops);
         this.nonOrgStops = asGeoJsonPoints(otherStops.nonOrgStops);
       });
-
-    // TODO factor out separate child components for the two search modes
-    this.locationSearch$
-      .pipe(
-        filter((str) => !!str),
-        debounceTime(200),
-        tap(() => (this.locationsLoading = true)),
-        switchMap((searchText) =>
-          this.geocodingService
-            .forward(searchText, {
-              excludeTypes: ["poi", "region", "country"],
-              proximity: this.corridorMap.map?.getCenter(), // TODO make this conditional?
-            })
-            .pipe(finalize(() => (this.locationsLoading = false))),
-        ),
-      )
-      .subscribe((locations) => (this.locations = locations));
 
     // Init edit mode after subscriptions have been initialised above
     const view: CorridorNotFoundView | Corridor =
@@ -445,6 +420,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
     } else if (value instanceof Object) {
       this.corridorMap.map?.flyTo({ ...value, duration: 0, zoom: 15 });
     }
+    this.center = this.corridorMap.map?.getCenter();
   }
 
   centreMapBounds() {
