@@ -87,6 +87,7 @@ function flags(currentEnv: string) {
   return {
     dataMonitoring: maxEnvironment(currentEnv, "test"),
     serviceMonitoring: maxEnvironment(currentEnv, "test"),
+    stopAnalysis: maxEnvironment(currentEnv, "test"),
   } as const;
 }
 

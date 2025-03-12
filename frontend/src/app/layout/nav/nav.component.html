@@ -77,7 +77,7 @@
             >Data monitoring
           </a>
         </li>
-        <li class="nav__item" style="display: none">
+        <li class="nav__item" *ngIf="configService.flag('stopAnalysis')">
           <a
             class="nav__link"
             [routerLink]="['/stop-analysis']"
