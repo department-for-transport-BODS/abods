@@ -520,7 +520,6 @@ export type Mutation = {
   deleteCorridor: MutationResponseType;
   deleteUser: MutationResponseType;
   deleteUserAlert: MutationResponseType;
-  embeddedUrl: AwsQuicksightUser;
   inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
@@ -802,6 +801,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -1192,10 +1192,10 @@ export type DashboardServiceRankingQueryVariables = Exact<{
 
 export type DashboardServiceRankingQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePunctuality: Array<{ __typename?: 'ServicePunctualityType', nocCode?: string | null, lineId?: string | null, onTime?: number | null, early?: number | null, late?: number | null, lineInfo?: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } | null, trend?: { __typename?: 'ServicePunctualityType', onTime?: number | null, early?: number | null, late?: number | null } | null }> } | null };
 
-export type DashboadEmbeddedUrlMutationVariables = Exact<{ [key: string]: never; }>;
+export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboadEmbeddedUrlMutation = { __typename?: 'Mutation', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -2016,7 +2016,7 @@ export const DashboardServiceRankingDocument = gql`
     }
   }
 export const DashboadEmbeddedUrlDocument = gql`
-    mutation dashboadEmbeddedUrl {
+    query dashboadEmbeddedUrl {
   embeddedUrl {
     enabled
     url
@@ -2027,7 +2027,7 @@ export const DashboadEmbeddedUrlDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class DashboadEmbeddedUrlGQL extends Apollo.Mutation<DashboadEmbeddedUrlMutation, DashboadEmbeddedUrlMutationVariables> {
+  export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
     document = DashboadEmbeddedUrlDocument;
     
     constructor(apollo: Apollo.Apollo) {

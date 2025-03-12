@@ -7,13 +7,12 @@ import {
 } from "../lib/aws.js";
 import {
   AwsQuicksightUser,
-  MutationResolvers,
+  QueryResolvers,
   Resolvers,
 } from "../types/generated";
 import { requireUserSession } from "./helpers.js";
 import { getUserTypeDetails } from "../lib/operators.js";
 import logger from "../logger.js";
-import { SessionUser } from "../types/extra.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
 import dayjs from "dayjs";
@@ -23,7 +22,7 @@ const accessAllowedWithinAnHour = 20;
 const accessAllowedWithinADay = 50;
 
 const isUserAllowedAccess = (
-  lastAccessed: Date | null,
+  lastAccessed: Date | null | undefined,
   accessedCount: number,
 ) => {
   const currentTimestamp = dayjs();
@@ -42,14 +41,19 @@ const isUserAllowedAccess = (
   return true;
 };
 
-const updateAccess = async (user: SessionUser, db: Kysely<DB>) => {
+const updateAccess = async (
+  user_id: number,
+  dataMonitoringAccessCount: number,
+  dataMonitoringLastAccessed: Date | null | undefined,
+  db: Kysely<DB>,
+) => {
   const currentTimestamp = dayjs();
-  let accessCount = user.dataMonitoringAccessCount + 1;
-  let updateQuery = db.updateTable("Tokens").where("user_id", "=", user.id);
+  let accessCount = dataMonitoringAccessCount + 1;
+  let updateQuery = db.updateTable("Tokens").where("user_id", "=", user_id);
 
   if (
-    !user.dataMonitoringLastAccessed ||
-    currentTimestamp.diff(dayjs(user.dataMonitoringLastAccessed), "hour") > 24
+    !dataMonitoringLastAccessed ||
+    currentTimestamp.diff(dayjs(dataMonitoringLastAccessed), "hour") > 24
   ) {
     accessCount = 0;
     updateQuery = updateQuery.set({
@@ -64,7 +68,15 @@ const updateAccess = async (user: SessionUser, db: Kysely<DB>) => {
     .execute();
 };
 
-export const getEmbeddedUrl: MutationResolvers["embeddedUrl"] = async (
+const getDashboardAccessDetails = (user_id: number, db: Kysely<DB>) => {
+  return db
+    .selectFrom("Tokens")
+    .select(["data_monitoring_access_count", "data_monitoring_last_accessed"])
+    .where("user_id", "=", user_id)
+    .executeTakeFirst();
+};
+
+export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   _,
   __,
   context,
@@ -94,11 +106,15 @@ export const getEmbeddedUrl: MutationResolvers["embeddedUrl"] = async (
     localTransportAuthorityNames,
     organisationNames,
   );
-  const url = await getDashboardUrl(sessionTags, dashboardId);
+
+  const [url, dashboardAccessDetails] = await Promise.all([
+    getDashboardUrl(sessionTags, dashboardId),
+    getDashboardAccessDetails(user.id, context.kysely),
+  ]);
 
   const allowAccess = isUserAllowedAccess(
-    user.dataMonitoringLastAccessed,
-    user.dataMonitoringAccessCount,
+    dashboardAccessDetails?.data_monitoring_last_accessed,
+    dashboardAccessDetails?.data_monitoring_access_count ?? 0,
   );
 
   if (!allowAccess) {
@@ -109,7 +125,12 @@ export const getEmbeddedUrl: MutationResolvers["embeddedUrl"] = async (
 
   if (url) {
     await Promise.all([
-      updateAccess(user, context.kysely),
+      updateAccess(
+        user.id,
+        dashboardAccessDetails?.data_monitoring_access_count ?? 0,
+        dashboardAccessDetails?.data_monitoring_last_accessed,
+        context.kysely,
+      ),
       sendDistributionMetric(
         "abods.graphql.quicksight.request",
         1,

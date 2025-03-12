@@ -35,6 +35,8 @@ type Query {
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
+
+  embeddedUrl: AWSQuicksightUser!
 }
 
 type AWSQuicksightUser {
@@ -225,8 +227,6 @@ type Mutation {
   ): UserUpdateResponseType!
   deleteUser(username: String!): MutationResponseType!
   inviteUser(payload: InvitationInput!): InvitationResponseType!
-
-  embeddedUrl: AWSQuicksightUser!
 }
 
 input SignupPayloadType {

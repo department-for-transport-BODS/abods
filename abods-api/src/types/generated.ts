@@ -520,7 +520,6 @@ export type Mutation = {
   deleteCorridor: MutationResponseType;
   deleteUser: MutationResponseType;
   deleteUserAlert: MutationResponseType;
-  embeddedUrl: AwsQuicksightUser;
   inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
@@ -802,6 +801,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
@@ -1684,7 +1684,6 @@ export type MutationResolvers<ContextType = RequestContext, ParentType extends R
   deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteCorridorArgs, 'corridorId'>>;
   deleteUser?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'username'>>;
   deleteUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserAlertArgs, 'alertId'>>;
-  embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   inviteUser?: Resolver<ResolversTypes['InvitationResponseType'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'payload'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginResponse']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'password' | 'username'>>;
   logout?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -1793,6 +1792,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
+  embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;

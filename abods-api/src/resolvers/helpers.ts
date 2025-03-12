@@ -77,8 +77,6 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
     orgIds: orgIds,
-    dataMonitoringAccessCount: sessionRecord.data_monitoring_access_count ?? 0,
-    dataMonitoringLastAccessed: sessionRecord.data_monitoring_last_accessed,
   };
 
   logger.debug({ sessionUser }, "Session user returned");
