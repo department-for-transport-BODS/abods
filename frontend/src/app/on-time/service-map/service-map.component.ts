@@ -27,7 +27,7 @@ import {
 } from "mapbox-gl";
 import { OnTimeService, PerformanceParams } from "../on-time.service";
 import { StopPerformanceService } from "../stop-performance.service";
-import { BRITISH_ISLES_BBOX, position } from "../../shared/geo";
+import { EnglandAndWalesBoundingBox, position } from "../../shared/geo";
 import { removeAdminAreaIds } from "../view-service/view-service.component";
 import { ConfigService } from "../../config/config.service";
 import { pairwise } from "src/app/shared/array-operators";
@@ -70,7 +70,7 @@ export class ServiceMapComponent implements OnInit, OnDestroy {
 
   servicePatterns?: FeatureCollection<LineString>;
   stops?: FeatureCollection<Point>;
-  bounds: BBox2d = BRITISH_ISLES_BBOX;
+  bounds: BBox2d = EnglandAndWalesBoundingBox;
   popupInfo?: PopupInfo;
   map!: Map;
   isLoading = false;

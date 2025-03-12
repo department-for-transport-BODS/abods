@@ -13,7 +13,7 @@ import {
   SymbolLayout,
 } from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
-import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
+import { asBbox, EnglandAndWalesBoundingBox } from "../shared/geo";
 import {
   BoundingBoxInputType,
   MatchType,
@@ -76,7 +76,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
-  initialBounds = BRITISH_ISLES_BBOX;
+  initialBounds = EnglandAndWalesBoundingBox;
   private boundsChanged = new Subject();
   private lastBounds: BoundingBoxInputType | undefined = undefined;
   private destroy$ = new Subject<void>();

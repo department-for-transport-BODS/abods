@@ -16,7 +16,7 @@ import {
 } from "mapbox-gl";
 import { Map } from "mapbox-gl";
 import { ConfigService } from "../../../config/config.service";
-import { BRITISH_ISLES_BBOX } from "../../../shared/geo";
+import { EnglandAndWalesBoundingBox } from "../../../shared/geo";
 import { Subject, takeUntil } from "rxjs";
 import { CorridorStop } from "../../types";
 
@@ -65,7 +65,7 @@ export class CorridorMapComponent implements OnInit, OnDestroy {
 
   hoveredStop?: Feature<Point, CorridorStop>;
   stopTooltipMessage?: string;
-  initialBounds = BRITISH_ISLES_BBOX;
+  initialBounds = EnglandAndWalesBoundingBox;
   mapCursor?: "pointer" | "default";
   map?: Map;
   moveCounter = 0;

@@ -11,7 +11,7 @@ import {
 import { pairwise } from "../../../shared/array-operators";
 import {
   bbox2d,
-  BRITISH_ISLES_BBOX,
+  EnglandAndWalesBoundingBox,
   combineBounds,
   position,
 } from "../../../shared/geo";
@@ -93,7 +93,7 @@ export class JourneyMapComponent implements OnChanges {
   map!: Map;
   enableScaleControl = false;
 
-  bounds = BRITISH_ISLES_BBOX;
+  bounds = EnglandAndWalesBoundingBox;
   moveCounter = 0;
   cursorStyle = "";
 
