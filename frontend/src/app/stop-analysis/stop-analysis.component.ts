@@ -1,30 +1,30 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
 import { LngLat, Map } from "mapbox-gl";
-import { ConfigService } from "../../config/config.service";
-import { BRITISH_ISLES_BBOX } from "../../shared/geo";
+import { ConfigService } from "../config/config.service";
+import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   MatchType,
   StopAnalysisGQL,
   StopStatistics,
-} from "../../../generated/graphql";
+} from "../../generated/graphql";
 import { combineLatest, Subject, takeUntil } from "rxjs";
 import { debounceTime, map, tap, filter } from "rxjs/operators";
 import { DateTime } from "luxon";
-import { StopPerformance } from "../../on-time/on-time.service";
-import { Preset } from "../../shared/components/date-range/date-range.types";
-import { DateRangeService } from "../../shared/services/date-range.service";
-import { GeocodingFeature } from "../../shared/mapbox/geocoding.types";
+import { StopPerformance } from "../on-time/on-time.service";
+import { Preset } from "../shared/components/date-range/date-range.types";
+import { DateRangeService } from "../shared/services/date-range.service";
+import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
 
 const MAX_ZOOM_LEVEL = 12;
 
 @Component({
-  selector: "app-view-stops",
-  templateUrl: "./view-stops.component.html",
-  styleUrls: ["./view-stops.component.scss"],
+  selector: "app-stop-analysis",
+  templateUrl: "./stop-analysis.component.html",
+  styleUrls: ["./stop-analysis.component.scss"],
 })
-export class ViewStopsComponent implements OnInit, OnDestroy {
+export class StopAnalysisComponent implements OnInit, OnDestroy {
   stopPoints: FeatureCollection<Point, StopStatistics> = {
     type: "FeatureCollection",
     features: [],

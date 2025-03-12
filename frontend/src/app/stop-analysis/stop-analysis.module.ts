@@ -2,7 +2,7 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 import { StopAnalysisRoutingModule } from "./stop-analysis-routing.module";
-import { ViewStopsComponent } from "./view-stops/view-stops.component";
+import { StopAnalysisComponent } from "./stop-analysis.component";
 import { LayoutModule } from "../layout/layout.module";
 import { OnTimeModule } from "../on-time/on-time.module";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
@@ -12,7 +12,7 @@ import { NgSelectModule } from "@ng-select/ng-select";
 import { DateRangePickerComponent } from "../shared/components/date-range/date-range-picker.component";
 
 @NgModule({
-  declarations: [ViewStopsComponent, DateRangePickerComponent],
+  declarations: [StopAnalysisComponent, DateRangePickerComponent],
   imports: [
     CommonModule,
     LayoutModule,
