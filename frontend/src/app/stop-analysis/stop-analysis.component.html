@@ -106,20 +106,7 @@
               20,
               40
             ],
-            'circle-color': [
-              'case',
-              ['==', ['get', 'completedDepartures'], 0],
-              '#b1b4b6',
-              [
-                'step',
-                ['/', ['get', 'onTime'], ['get', 'completedDepartures']],
-                '#d4351c',
-                0.6,
-                '#ffdd00',
-                0.8,
-                '#28a197'
-              ]
-            ],
+            'circle-color': pointColours,
             'circle-stroke-width': [
               'interpolate',
               ['exponential', 0.5],
@@ -163,20 +150,7 @@
           ]"
           [paint]="{
             'circle-radius': 14,
-            'circle-color': [
-              'case',
-              ['==', ['get', 'completedDepartures'], 0],
-              '#b1b4b6',
-              [
-                'step',
-                ['/', ['get', 'onTime'], ['get', 'completedDepartures']],
-                '#d4351c',
-                0.6,
-                '#ffdd00',
-                0.8,
-                '#28a197'
-              ]
-            ],
+            'circle-color': pointColours,
             'circle-stroke-width': [
               'interpolate',
               ['exponential', 0.5],
@@ -209,20 +183,7 @@
               14,
               1
             ],
-            'icon-image': [
-              'case',
-              ['==', ['get', 'completedDepartures'], 0],
-              'timing-no-data-map',
-              [
-                'step',
-                ['/', ['get', 'onTime'], ['get', 'completedDepartures']],
-                'otp-timing-map-red',
-                0.6,
-                'otp-timing-map-yellow',
-                0.8,
-                'otp-timing-map-turquoise'
-              ]
-            ]
+            'icon-image': timingPointIcons
           }"
         />
         <mgl-popup
@@ -323,11 +284,14 @@
         <mgl-control position="bottom-left">
           <div class="map__legend map__legend">
             <span class="map__dot map__dot--high"></span>
-            <span>> 80% on-time</span>
+            <span>> {{ greenThreshold | percent }} on-time</span>
             <span class="map__dot map__dot--med"></span>
-            <span>60 - 80% on-time</span>
+            <span
+              >{{ redThreshold | percent }} -
+              {{ greenThreshold | percent }} on-time</span
+            >
             <span class="map__dot map__dot--low"></span>
-            <span>< 60% on-time</span>
+            <span>< {{ redThreshold | percent }} on-time</span>
             <span class="map__dot map__dot--no-data"></span>
             <span>No data</span>
           </div>

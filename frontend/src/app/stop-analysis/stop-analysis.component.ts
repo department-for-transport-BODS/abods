@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
-import { LngLat, Map } from "mapbox-gl";
+import { CirclePaint, LngLat, Map, SymbolLayout } from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
@@ -54,7 +54,36 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     completedDepartures: ["+", ["get", "completedDepartures"]],
     scheduledDepartures: ["+", ["get", "scheduledDepartures"]],
   };
-
+  redThreshold = 0.6;
+  greenThreshold = 0.8;
+  pointColours: CirclePaint["circle-color"] = [
+    "case",
+    ["==", ["get", "completedDepartures"], 0],
+    "#b1b4b6",
+    [
+      "step",
+      ["/", ["get", "onTime"], ["get", "completedDepartures"]],
+      "#d4351c",
+      this.redThreshold,
+      "#ffdd00",
+      this.greenThreshold,
+      "#28a197",
+    ],
+  ];
+  timingPointIcons: SymbolLayout["icon-image"] = [
+    "case",
+    ["==", ["get", "completedDepartures"], 0],
+    "timing-no-data-map",
+    [
+      "step",
+      ["/", ["get", "onTime"], ["get", "completedDepartures"]],
+      "otp-timing-map-red",
+      this.redThreshold,
+      "otp-timing-map-yellow",
+      this.greenThreshold,
+      "otp-timing-map-turquoise",
+    ],
+  ];
   zoomLevel = 0;
   visibleBounds: BoundingBoxInputType = {
     maxLatitude: this.initialBounds[3],
