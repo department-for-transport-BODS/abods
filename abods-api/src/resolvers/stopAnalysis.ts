@@ -7,8 +7,9 @@ import {
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 import { sql } from "kysely";
-import { GraphQLError } from "graphql/index.js";
+import { GraphQLError } from "graphql";
 import dayjs from "dayjs";
+import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -73,10 +74,12 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   }
 
   // todo: throw if the bounding box is too big
+  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
+  const endDateUtc = userSelectedDateAsUtc(toTimestamp); // the front end uploads an exclusive end date
 
   return dbQuery
-    .where("t.date_of_journey", ">=", new Date(fromTimestamp))
-    .where("t.date_of_journey", "<", new Date(toTimestamp))
+    .where("t.date_of_journey", ">=", startDateUtc.toDate())
+    .where("t.date_of_journey", "<", endDateUtc.toDate())
     .where("t.stop_latitude", ">=", boundingBox.minLatitude)
     .where("t.stop_latitude", "<=", boundingBox.maxLatitude)
     .where("t.stop_longitude", ">=", boundingBox.minLongitude)
