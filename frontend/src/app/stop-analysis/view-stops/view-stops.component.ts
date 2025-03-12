@@ -242,7 +242,7 @@ export class ViewStopsComponent implements OnInit, OnDestroy {
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.map.flyTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
+    this.map.easeTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
   }
 
   zoomToPoint(center: [number, number]) {
