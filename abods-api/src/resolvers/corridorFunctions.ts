@@ -421,7 +421,8 @@ const extractCorridorTransits = (
     let corridorIndex = 0;
     for (const stop of sortedJourney) {
       // Ignore stops that aren't along the corridor
-      if (stop.stop_id !== corridor[corridorIndex]) continue;
+      // The stop_id value is actually a BigInt, while it is set as int in prisma
+      if (Number(stop.stop_id) !== corridor[corridorIndex]) continue;
 
       currentTransit.push(stop);
       corridorIndex += 1;
