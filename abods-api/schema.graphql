@@ -750,6 +750,8 @@ input StopAnalysisFiltersInput {
   operatorIds: [String!]!
   toTimestamp: String!
   dayOfWeekFlags: DayOfWeekFlagsInputType!
+  startTime: String!
+  endTime: String!
 }
 
 type StopStatistics {

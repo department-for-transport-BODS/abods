@@ -103,6 +103,23 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   center: LngLat | undefined;
   dayOfWeekFlags = getDefaultDayOfWeekFlags();
 
+  _startTime = "00:00";
+  get startTime() {
+    return this._startTime;
+  }
+  set startTime(val: string) {
+    this._startTime = val;
+    this.onFilterChanged();
+  }
+  _endTime = "23:59";
+  get endTime() {
+    return this._endTime;
+  }
+  set endTime(val: string) {
+    this._endTime = val;
+    this.onFilterChanged();
+  }
+
   get boundingBoxTooBig() {
     return this.zoomLevel < MAX_ZOOM_LEVEL;
   }
@@ -173,6 +190,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           lineIds: [],
           matchType: this.matchType,
           dayOfWeekFlags: this.dayOfWeekFlags,
+          startTime: this.startTime,
+          endTime: this.endTime,
         })
         .subscribe((response) => {
           this.lastBounds = bounds;

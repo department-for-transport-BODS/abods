@@ -11,6 +11,7 @@ import { GraphQLError } from "graphql";
 import dayjs from "dayjs";
 import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
+import { addUkTime } from "./otpFunctions.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -18,19 +19,15 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   context,
 ): Promise<StopStatistics[]> => {
   const user = await requireUserSession(context);
-  const {
-    adminAreaIds,
-    boundingBox,
-    fromTimestamp,
-    lineIds,
-    matchType,
-    operatorIds: selectedOperatorIds,
-    toTimestamp,
-    dayOfWeekFlags,
-  } = args.inputs;
 
-  const from = dayjs(fromTimestamp);
-  const to = dayjs(toTimestamp);
+  let dbQuery = context.kysely
+    .selectFrom("timetable_summary_stops_tz as t")
+    .innerJoin("naptan_stoppoint_latlong as n", "n.id", "t.stop_id")
+    .innerJoin("naptan_locality as l", "n.locality_id", "l.gazetteer_id")
+    .innerJoin("naptan_adminarea as a", "n.admin_area_id", "a.id");
+
+  const from = dayjs(args.inputs.fromTimestamp);
+  const to = dayjs(args.inputs.toTimestamp);
   if (from.diff(to, "days") > 90) {
     throw new GraphQLError("Date range is too large to fullfill the request", {
       extensions: { code: "BAD_REQUEST", http: { status: 422 } },
@@ -41,11 +38,21 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       extensions: { code: "BAD_REQUEST", http: { status: 422 } },
     });
   }
+  const startDateUtc = userSelectedDateAsUtc(args.inputs.fromTimestamp);
+  const endDateUtc = userSelectedDateAsUtc(args.inputs.toTimestamp); // the front end uploads an exclusive end date
+  dbQuery = dbQuery
+    .where("t.date_of_journey", ">=", startDateUtc.toDate())
+    .where("t.date_of_journey", "<", endDateUtc.toDate());
+
+  const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
+  dbQuery = dbQuery.where("t.day_of_week", "in", days);
 
   let operatorIds = await getUserOperatorIds(user, context.kysely);
 
-  if (selectedOperatorIds.length > 0) {
-    operatorIds = selectedOperatorIds.filter((n) => operatorIds.includes(n));
+  if (args.inputs.operatorIds.length > 0) {
+    operatorIds = args.inputs.operatorIds.filter((n) =>
+      operatorIds.includes(n),
+    );
   }
 
   if (operatorIds.length === 0) {
@@ -57,39 +64,52 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     );
   }
 
-  let dbQuery = context.kysely
-    .selectFrom("timetable_summary_stops_tz as t")
-    .innerJoin("naptan_stoppoint_latlong as n", "n.id", "t.stop_id")
-    .innerJoin("naptan_locality as l", "n.locality_id", "l.gazetteer_id")
-    .innerJoin("naptan_adminarea as a", "n.admin_area_id", "a.id");
-
-  if (lineIds.length > 0) {
-    dbQuery = dbQuery.where("t.noc_and_line_and_servicecode", "in", lineIds);
+  if (args.inputs.lineIds.length > 0) {
+    dbQuery = dbQuery.where(
+      "t.noc_and_line_and_servicecode",
+      "in",
+      args.inputs.lineIds,
+    );
   }
 
-  if (adminAreaIds.length > 0) {
-    dbQuery = dbQuery.where("n.admin_area_id", "in", adminAreaIds.map(Number));
+  if (args.inputs.adminAreaIds.length > 0) {
+    dbQuery = dbQuery.where(
+      "n.admin_area_id",
+      "in",
+      args.inputs.adminAreaIds.map(Number),
+    );
   }
 
-  if (matchType === MatchType.Evidenced) {
+  if (args.inputs.matchType === MatchType.Evidenced) {
     dbQuery = dbQuery.where("t.estimated", "is", false);
   }
 
+  // If start or end time aren't set, use the start and end of the day as default values,
+  // so that we can still use the result in the filters
+  const startDateTimeUtc = addUkTime(
+    startDateUtc,
+    args.inputs.startTime ?? "00:00",
+  );
+  const endDateTimeUtc = addUkTime(endDateUtc, args.inputs.endTime ?? "23:59");
+  // Specifying date as the type param just to satisfy our generated kysely types
+  dbQuery = dbQuery.where(
+    "t.departure_hour_only",
+    ">=",
+    sql<Date>`${startDateTimeUtc.format("HH:mm:ss Z")}`,
+  );
+  dbQuery = dbQuery.where(
+    "t.departure_hour_only",
+    "<=",
+    sql<Date>`${endDateTimeUtc.format("HH:mm:ss Z")}`,
+  );
+
   // todo: throw if the bounding box is too big
-  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
-  const endDateUtc = userSelectedDateAsUtc(toTimestamp); // the front end uploads an exclusive end date
-
-  const days = getDayOfWeekNumbers(dayOfWeekFlags);
-
   return dbQuery
-    .where("t.date_of_journey", ">=", startDateUtc.toDate())
-    .where("t.date_of_journey", "<", endDateUtc.toDate())
-    .where("t.stop_latitude", ">=", boundingBox.minLatitude)
-    .where("t.stop_latitude", "<=", boundingBox.maxLatitude)
-    .where("t.stop_longitude", ">=", boundingBox.minLongitude)
-    .where("t.stop_longitude", "<=", boundingBox.maxLongitude)
+    .where("t.stop_latitude", ">=", args.inputs.boundingBox.minLatitude)
+    .where("t.stop_latitude", "<=", args.inputs.boundingBox.maxLatitude)
+    .where("t.stop_longitude", ">=", args.inputs.boundingBox.minLongitude)
+    .where("t.stop_longitude", "<=", args.inputs.boundingBox.maxLongitude)
     .where("t.operator_noc", "in", operatorIds)
-    .where("t.day_of_week", "in", days)
     .groupBy([
       "t.stop_id",
       "t.stop_latitude",
