@@ -153,10 +153,7 @@ describe("DateRangeService", () => {
 
       const from = DateTime.fromISO("2021-07-06T00:00:00Z");
 
-      const actual = spectator.service.inverseLookup(
-        { from, to: testNow },
-        testNow,
-      );
+      const actual = spectator.service.inverseLookup(from, testNow, testNow);
 
       expect(actual).toEqual("last7");
     });
@@ -166,10 +163,7 @@ describe("DateRangeService", () => {
 
       const from = DateTime.fromISO("1997-07-01T00:00:00Z");
 
-      const actual = spectator.service.inverseLookup(
-        { from, to: testNow },
-        testNow,
-      );
+      const actual = spectator.service.inverseLookup(from, testNow, testNow);
 
       expect(actual).toEqual("custom");
     });

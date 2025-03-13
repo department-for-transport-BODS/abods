@@ -12,33 +12,27 @@ export class DateRangePickerComponent implements OnInit {
   _from = DateTime.now();
   @Input()
   get from(): DateTime {
-    return this._from || this._from;
+    return this._from;
   }
   set from(value: DateTime) {
     this._from = value;
     this.dateRange.setValue({
       from: value,
       to: this.to,
-      preset: this.dateRangeService.inverseLookup(
-        { from: value, to: this.to },
-        DateTime.local(),
-      ),
+      preset: this.getPreset(value, this.to),
     });
   }
   _to = DateTime.now();
   @Input()
   get to(): DateTime {
-    return this._to || this._to;
+    return this._to;
   }
   set to(value: DateTime) {
     this._to = value;
     this.dateRange.setValue({
       from: this.from,
       to: value,
-      preset: this.dateRangeService.inverseLookup(
-        { from: this.from, to: value },
-        DateTime.local(),
-      ),
+      preset: this.getPreset(this.from, value),
     });
   }
   @Output() valueChanged = new EventEmitter<{ from: DateTime; to: DateTime }>();
@@ -47,10 +41,7 @@ export class DateRangePickerComponent implements OnInit {
     {
       from: this.from,
       to: this.to,
-      preset: this.dateRangeService.inverseLookup(
-        { from: this.from, to: this.to },
-        DateTime.local(),
-      ),
+      preset: this.getPreset(this.from, this.to),
     },
     { nonNullable: true },
   );
@@ -61,13 +52,9 @@ export class DateRangePickerComponent implements OnInit {
       this._to = to;
       this.valueChanged.emit({ from, to });
     });
-    this.dateRange.setValue({
-      from: this.from,
-      to: this.to,
-      preset: this.dateRangeService.inverseLookup(
-        { from: this.from, to: this.to },
-        DateTime.local(),
-      ),
-    });
+  }
+
+  getPreset(from: DateTime, to: DateTime) {
+    return this.dateRangeService.inverseLookup(from, to, DateTime.local());
   }
 }
