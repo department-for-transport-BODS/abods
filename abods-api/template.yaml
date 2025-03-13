@@ -230,19 +230,6 @@ Resources:
                   - kms:Decrypt
                 Resource:
                   - !Sub "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
-        # - PolicyName: SSMParameterStoreAccess
-        #   PolicyDocument:
-        #     Version: "2012-10-17"
-        #     Statement:
-        #       - Effect: Allow
-        #         Action:
-        #           - ssm:GetParameter
-        #           - ssm:GetParameters
-        #           - ssm:DescribeParameters
-        #         Resource:
-        #           - !Ref QuickSightAdminDashboardId
-        #           - !Ref QuickSightLtaDashboardId
-        #           - !Ref QuickSightOperatorDashboardId
 
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
