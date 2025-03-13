@@ -160,7 +160,7 @@ export class ControlsComponent
         .get("dayOfWeek")
         ?.split(",")
         .map((day) => {
-          if (day as keyof DayOfWeekFlagsInputType)
+          if (day in dayOfWeekFlags)
             dayOfWeekFlags[day as keyof DayOfWeekFlagsInputType] = true;
         });
 

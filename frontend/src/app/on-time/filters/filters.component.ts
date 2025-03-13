@@ -14,16 +14,7 @@ import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map, switchMap, take, takeUntil } from "rxjs/operators";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
 import { BehaviorSubject, of, Subject } from "rxjs";
-
-const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
-  monday: true,
-  tuesday: true,
-  wednesday: true,
-  thursday: true,
-  friday: true,
-  saturday: true,
-  sunday: true,
-};
+import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
 @Component({
   selector: "app-filters",
@@ -32,7 +23,7 @@ const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
 })
 export class FiltersComponent implements OnDestroy {
   oldFilters?: PerformanceFiltersInputType;
-  dayOfWeekFlags: DayOfWeekFlagsInputType = defaultDayOfWeekFlags;
+  dayOfWeekFlags = getDefaultDayOfWeekFlags();
   _startTime = "00:00";
   get startTime() {
     return this._startTime;
@@ -158,7 +149,7 @@ export class FiltersComponent implements OnDestroy {
 
     this.dayOfWeekFlags = dayOfWeekFlags
       ? { ...dayOfWeekFlags }
-      : { ...defaultDayOfWeekFlags };
+      : { ...getDefaultDayOfWeekFlags() };
     this.startTime = startTime ?? "00:00";
     this.endTime = endTime ?? "23:59";
     this.minDelay = minDelay ?? null;
@@ -183,8 +174,8 @@ export class FiltersComponent implements OnDestroy {
       });
   }
 
-  toggleDayOfTheWeek(k: keyof DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags[k] = !this.dayOfWeekFlags[k];
+  dayOfWeekFlagsChanged(value: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = value;
     this.validationErrors = { ...this.validationErrors, dayOfWeekFlags: "" };
   }
 

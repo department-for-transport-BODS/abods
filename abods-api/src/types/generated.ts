@@ -999,6 +999,7 @@ export type Stop = {
 export type StopAnalysisFiltersInput = {
   adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
+  dayOfWeekFlags: DayOfWeekFlagsInputType;
   fromTimestamp: Scalars['String']['input'];
   lineIds: Array<Scalars['String']['input']>;
   matchType: MatchType;

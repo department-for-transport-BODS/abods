@@ -999,6 +999,7 @@ export type Stop = {
 export type StopAnalysisFiltersInput = {
   adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
+  dayOfWeekFlags: DayOfWeekFlagsInputType;
   fromTimestamp: Scalars['String']['input'];
   lineIds: Array<Scalars['String']['input']>;
   matchType: MatchType;
@@ -1454,6 +1455,7 @@ export type StopAnalysisQueryVariables = Exact<{
   matchType: MatchType;
   operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
   toTimestamp: Scalars['String']['input'];
+  dayOfWeekFlags: DayOfWeekFlagsInputType;
 }>;
 
 
@@ -2777,9 +2779,9 @@ export const OperatorLinesDocument = gql`
     }
   }
 export const StopAnalysisDocument = gql`
-    query stopAnalysis($adminAreaIds: [String!]!, $boundingBox: BoundingBoxInputType!, $fromTimestamp: String!, $lineIds: [String!]!, $matchType: MatchType!, $operatorIds: [String!]!, $toTimestamp: String!) {
+    query stopAnalysis($adminAreaIds: [String!]!, $boundingBox: BoundingBoxInputType!, $fromTimestamp: String!, $lineIds: [String!]!, $matchType: MatchType!, $operatorIds: [String!]!, $toTimestamp: String!, $dayOfWeekFlags: DayOfWeekFlagsInputType!) {
   stopAnalysis(
-    inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, lineIds: $lineIds, matchType: $matchType, operatorIds: $operatorIds, toTimestamp: $toTimestamp}
+    inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, lineIds: $lineIds, matchType: $matchType, operatorIds: $operatorIds, toTimestamp: $toTimestamp, dayOfWeekFlags: $dayOfWeekFlags}
   ) {
     stopId
     atcoCode

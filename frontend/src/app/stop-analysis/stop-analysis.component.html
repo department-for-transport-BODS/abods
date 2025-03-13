@@ -61,6 +61,10 @@
           (selectedChange)="onOperatorsChanged($event)"
         />
       </div>
+      <app-day-of-week-select
+        [value]="dayOfWeekFlags"
+        (selectedChange)="onDayOfWeekFlagsChanged($event)"
+      />
     </div>
     <div class="map-container">
       <mgl-map

@@ -10,6 +10,7 @@ import { sql } from "kysely";
 import { GraphQLError } from "graphql";
 import dayjs from "dayjs";
 import { userSelectedDateAsUtc } from "../lib/dayjs.js";
+import { getDayOfWeekNumbers } from "../lib/utils.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -25,6 +26,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     matchType,
     operatorIds: selectedOperatorIds,
     toTimestamp,
+    dayOfWeekFlags,
   } = args.inputs;
 
   const from = dayjs(fromTimestamp);
@@ -77,6 +79,8 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
   const endDateUtc = userSelectedDateAsUtc(toTimestamp); // the front end uploads an exclusive end date
 
+  const days = getDayOfWeekNumbers(dayOfWeekFlags);
+
   return dbQuery
     .where("t.date_of_journey", ">=", startDateUtc.toDate())
     .where("t.date_of_journey", "<", endDateUtc.toDate())
@@ -85,6 +89,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .where("t.stop_longitude", ">=", boundingBox.minLongitude)
     .where("t.stop_longitude", "<=", boundingBox.maxLongitude)
     .where("t.operator_noc", "in", operatorIds)
+    .where("t.day_of_week", "in", days)
     .groupBy([
       "t.stop_id",
       "t.stop_latitude",
