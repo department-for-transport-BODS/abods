@@ -71,6 +71,7 @@ import { HelpdeskPanelComponent } from "./components/helpdesk-panel/helpdesk-pan
 import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive";
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
 import { LocationSearchComponent } from "./components/location-search/location-search.component";
+import { OperatorMultiSelectComponent } from "./components/operator-multi-select/operator-multi-select.component";
 
 @NgModule({
   declarations: [
@@ -135,6 +136,7 @@ import { LocationSearchComponent } from "./components/location-search/location-s
     MouseupOutsideDirective,
     FreshdeskHtmlFormatterPipe,
     LocationSearchComponent,
+    OperatorMultiSelectComponent,
   ],
   providers: [PercentPipe],
   imports: [
@@ -210,6 +212,7 @@ import { LocationSearchComponent } from "./components/location-search/location-s
     HelpdeskPanelComponent,
     MouseupOutsideDirective,
     LocationSearchComponent,
+    OperatorMultiSelectComponent,
   ],
 })
 export class SharedModule {}

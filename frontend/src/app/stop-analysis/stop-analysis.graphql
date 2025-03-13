@@ -1,0 +1,36 @@
+query stopAnalysis(
+  $adminAreaIds: [String!]!
+  $boundingBox: BoundingBoxInputType!
+  $fromTimestamp: String!
+  $lineIds: [String!]!
+  $matchType: MatchType!
+  $operatorIds: [String!]!
+  $toTimestamp: String!
+) {
+  stopAnalysis(
+    inputs: {
+      adminAreaIds: $adminAreaIds
+      boundingBox: $boundingBox
+      fromTimestamp: $fromTimestamp
+      lineIds: $lineIds
+      matchType: $matchType
+      operatorIds: $operatorIds
+      toTimestamp: $toTimestamp
+    }
+  ) {
+    stopId
+    atcoCode
+    stopName
+    localityName
+    adminAreaName
+    timingPoint
+    latitude
+    longitude
+    early
+    late
+    onTime
+    scheduledDepartures
+    completedDepartures
+    totalDelay
+  }
+}
