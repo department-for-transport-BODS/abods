@@ -19,7 +19,7 @@
   display: grid;
   .map-overlay {
     grid-area: 1 / 1;
-    z-index: 10000;
+    z-index: 1;
     display: grid;
     align-items: center;
     justify-content: center;
