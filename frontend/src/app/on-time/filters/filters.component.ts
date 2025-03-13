@@ -183,8 +183,8 @@ export class FiltersComponent implements OnDestroy {
       });
   }
 
-  toggleDayOfTheWeek(k: keyof DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags[k] = !this.dayOfWeekFlags[k];
+  dayOfWeekFlagsChanged(value: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = value;
     this.validationErrors = { ...this.validationErrors, dayOfWeekFlags: "" };
   }
 

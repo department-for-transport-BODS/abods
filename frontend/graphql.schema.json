@@ -7973,6 +7973,22 @@
             "deprecationReason": null
           },
           {
+            "name": "dayOfWeekFlags",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "INPUT_OBJECT",
+                "name": "DayOfWeekFlagsInputType",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fromTimestamp",
             "description": null,
             "type": {

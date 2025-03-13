@@ -5,6 +5,7 @@ import { ConfigService } from "../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
+  DayOfWeekFlagsInputType,
   MatchType,
   StopAnalysisGQL,
   StopStatistics,
@@ -18,6 +19,16 @@ import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
 
 const MAX_ZOOM_LEVEL = 12;
+
+const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
+  monday: true,
+  tuesday: true,
+  wednesday: true,
+  thursday: true,
+  friday: true,
+  saturday: true,
+  sunday: true,
+};
 
 @Component({
   selector: "app-stop-analysis",
@@ -99,6 +110,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
+  dayOfWeekFlags: DayOfWeekFlagsInputType = defaultDayOfWeekFlags;
 
   get boundingBoxTooBig() {
     return this.zoomLevel < MAX_ZOOM_LEVEL;
@@ -169,6 +181,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           operatorIds: this.operatorIds,
           lineIds: [],
           matchType: this.matchType,
+          dayOfWeekFlags: this.dayOfWeekFlags,
         })
         .subscribe((response) => {
           this.lastBounds = bounds;
@@ -389,6 +402,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onOperatorsChanged($event: string[]) {
     this.operatorIds = $event;
+    this.onFilterChanged();
+  }
+
+  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = $event;
     this.onFilterChanged();
   }
 }

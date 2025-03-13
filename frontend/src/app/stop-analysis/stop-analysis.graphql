@@ -6,6 +6,7 @@ query stopAnalysis(
   $matchType: MatchType!
   $operatorIds: [String!]!
   $toTimestamp: String!
+  $dayOfWeekFlags: DayOfWeekFlagsInputType!
 ) {
   stopAnalysis(
     inputs: {
@@ -16,6 +17,7 @@ query stopAnalysis(
       matchType: $matchType
       operatorIds: $operatorIds
       toTimestamp: $toTimestamp
+      dayOfWeekFlags: $dayOfWeekFlags
     }
   ) {
     stopId
