@@ -17,18 +17,9 @@ import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
+import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
 
 const MAX_ZOOM_LEVEL = 12;
-
-const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
-  monday: true,
-  tuesday: true,
-  wednesday: true,
-  thursday: true,
-  friday: true,
-  saturday: true,
-  sunday: true,
-};
 
 @Component({
   selector: "app-stop-analysis",
@@ -110,7 +101,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  dayOfWeekFlags: DayOfWeekFlagsInputType = defaultDayOfWeekFlags;
+  dayOfWeekFlags = getDefaultDayOfWeekFlags();
 
   get boundingBoxTooBig() {
     return this.zoomLevel < MAX_ZOOM_LEVEL;
