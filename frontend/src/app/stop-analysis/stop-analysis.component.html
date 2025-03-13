@@ -65,6 +65,14 @@
         [value]="dayOfWeekFlags"
         (selectedChange)="onDayOfWeekFlagsChanged($event)"
       />
+      <app-time-range-slider
+        labelMin="Start time"
+        labelMax="End time"
+        legend="Time range"
+        legendSize="s"
+        [(startTime)]="startTime"
+        [(endTime)]="endTime"
+      />
     </div>
     <div class="map-container">
       <mgl-map

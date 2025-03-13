@@ -7,6 +7,8 @@ query stopAnalysis(
   $operatorIds: [String!]!
   $toTimestamp: String!
   $dayOfWeekFlags: DayOfWeekFlagsInputType!
+  $startTime: String!
+  $endTime: String!
 ) {
   stopAnalysis(
     inputs: {
@@ -18,6 +20,8 @@ query stopAnalysis(
       operatorIds: $operatorIds
       toTimestamp: $toTimestamp
       dayOfWeekFlags: $dayOfWeekFlags
+      startTime: $startTime
+      endTime: $endTime
     }
   ) {
     stopId

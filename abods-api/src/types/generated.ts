@@ -1000,10 +1000,12 @@ export type StopAnalysisFiltersInput = {
   adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
   dayOfWeekFlags: DayOfWeekFlagsInputType;
+  endTime: Scalars['String']['input'];
   fromTimestamp: Scalars['String']['input'];
   lineIds: Array<Scalars['String']['input']>;
   matchType: MatchType;
   operatorIds: Array<Scalars['String']['input']>;
+  startTime: Scalars['String']['input'];
   toTimestamp: Scalars['String']['input'];
 };
 
