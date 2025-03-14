@@ -1,13 +1,13 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuardService } from "../authentication/auth-guard.service";
-import { StopAnalysisComponent } from "./stop-analysis.component";
+import { ViewStopsComponent } from "./view-stops/view-stops.component";
 
 const routes: Routes = [
   {
     path: "",
     canActivateChild: [AuthGuardService],
-    children: [{ path: "", component: StopAnalysisComponent }],
+    children: [{ path: "", component: ViewStopsComponent }],
   },
 ];
 

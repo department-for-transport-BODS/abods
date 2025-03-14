@@ -1,6 +1,10 @@
 import { Injectable } from "@angular/core";
 import { DateTime } from "luxon";
-import { Period, Preset } from "../components/date-range/date-range.types";
+import {
+  FromTo,
+  Period,
+  Preset,
+} from "../components/date-range/date-range.types";
 
 export interface WindowDatetimes {
   from: DateTime;
@@ -49,29 +53,22 @@ export class DateRangeService {
     return { preset, from, to, trendFrom, trendTo };
   }
 
-  inverseLookup(from: DateTime, to: DateTime, now: DateTime): Preset {
-    if (!from?.isValid || !to?.isValid) {
-      return Preset.Custom;
-    }
-
-    if (now.hasSame(to, "day")) {
-      if (now.minus({ days: 28 }).hasSame(from, "day")) {
-        return Preset.Last28;
+  inverseLookup({ from, to }: FromTo, now: DateTime): Preset {
+    if (from?.isValid && to?.isValid) {
+      if (now.hasSame(to, "day")) {
+        if (now.minus({ days: 28 }).hasSame(from, "day")) {
+          return Preset.Last28;
+        } else if (now.minus({ days: 7 }).hasSame(from, "day")) {
+          return Preset.Last7;
+        } else if (now.startOf("month").hasSame(from, "day")) {
+          return Preset.MonthToDate;
+        }
+      } else if (
+        from.plus({ months: 1 }).hasSame(to, "day") &&
+        now.minus({ months: 1 }).startOf("month").hasSame(from, "day")
+      ) {
+        return Preset.LastMonth;
       }
-      if (now.minus({ days: 7 }).hasSame(from, "day")) {
-        return Preset.Last7;
-      }
-      if (now.startOf("month").hasSame(from, "day")) {
-        return Preset.MonthToDate;
-      }
-      return Preset.Custom;
-    }
-
-    if (
-      from.plus({ months: 1 }).hasSame(to, "day") &&
-      now.minus({ months: 1 }).startOf("month").hasSame(from, "day")
-    ) {
-      return Preset.LastMonth;
     }
     return Preset.Custom;
   }

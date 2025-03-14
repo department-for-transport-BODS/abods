@@ -749,9 +749,6 @@ input StopAnalysisFiltersInput {
   matchType: MatchType!
   operatorIds: [String!]!
   toTimestamp: String!
-  dayOfWeekFlags: DayOfWeekFlagsInputType!
-  startTime: String!
-  endTime: String!
 }
 
 type StopStatistics {
