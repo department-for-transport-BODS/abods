@@ -11,7 +11,7 @@ import {
   StopStatistics,
 } from "../../generated/graphql";
 import { combineLatest, Subject, takeUntil } from "rxjs";
-import { debounceTime, map, tap, filter } from "rxjs/operators";
+import { debounceTime, map, tap, filter, mergeMap } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
@@ -164,42 +164,44 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       }),
     );
 
-    combineLatest([
-      boundsChanged.pipe(debounceTime(200)),
-      this.apiFiltersChanged,
-    ]).subscribe(([bounds]) => {
-      if (!bounds) return;
-      // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
-      // TODO: limit date range
+    combineLatest([boundsChanged, this.apiFiltersChanged])
+      .pipe(
+        // Don't fetch too quickly if there's a lot of map movement happening
+        debounceTime(500),
+        // Don't run requests concurrently, and only run the latest when completed again
+        mergeMap(([bounds]) => {
+          // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+          // TODO: limit date range
 
-      /**
-       *     TODO: Add filters:
-       *      Service (select multiple) (only show services in selected NOCs if selected)
-       *      Refine Results
-       *          Day e.g. Monday (select multiple)
-       *          Time range
-       * **/
-      this.isLoading = true;
-      this.query
-        .fetch({
-          boundingBox: bounds,
-          adminAreaIds: [],
-          fromTimestamp: this.from.toISO(),
-          toTimestamp: this.to.toISO(),
-          operatorIds: this.operatorIds,
-          lineIds: [],
-          matchType: this.matchType,
-          dayOfWeekFlags: this.dayOfWeekFlags,
-          startTime: this.startTime,
-          endTime: this.endTime,
-        })
-        .subscribe((response) => {
-          this.lastBounds = bounds;
-          this.rawStopData = response.data.stopAnalysis;
-          this.processStopData(this.visibleBounds);
-          this.isLoading = false;
-        });
-    });
+          /**
+           *     TODO: Add filters:
+           *      Service (select multiple) (only show services in selected NOCs if selected)
+           * **/
+          const query = {
+            boundingBox: bounds!,
+            adminAreaIds: [],
+            fromTimestamp: this.from.toISO(),
+            toTimestamp: this.to.toISO(),
+            operatorIds: this.operatorIds,
+            lineIds: [],
+            matchType: this.matchType,
+            dayOfWeekFlags: this.dayOfWeekFlags,
+            startTime: this.startTime,
+            endTime: this.endTime,
+          };
+          this.isLoading = true;
+          return this.query
+            .fetch(query)
+            .pipe(map((response) => [query, response] as const));
+        }, 1),
+      )
+      .subscribe(([query, response]) => {
+        this.isLoading = true;
+        this.lastBounds = query.boundingBox;
+        this.rawStopData = response.data.stopAnalysis;
+        this.processStopData(this.visibleBounds);
+        this.isLoading = false;
+      });
     this.onFilterChanged();
   }
 
