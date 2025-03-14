@@ -24,10 +24,6 @@ import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
 import dayjs from "dayjs";
 import logger from "../logger.js";
-import {
-  getOperatorsFromOrgId,
-  getOperatorsFroServiceDetails,
-} from "../lib/otp.js";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -252,26 +248,29 @@ export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
 export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
   async (_, args, context): Promise<OperatorFeedMonitoring[]> => {
     const user = await requireUserSession(context);
-    const orgOperators = await getOperatorsFromOrgId(
-      user.orgIds,
-      context.db,
-      args.filterBy?.operatorIds,
-    );
 
-    const userOperators = await getOperatorsFroServiceDetails(
-      orgOperators,
-      context.db,
-    );
-
-    return userOperators
-      .map((op) => ({
-        name: op.operator?.name ?? "unknown",
-        operatorId: op.operator_noc ?? "unknown",
-      }))
-      .sort((a, b) =>
-        (a.name ?? "").localeCompare(b.name ?? "", undefined, {
-          numeric: true,
-        }),
+    let query = context.kysely
+      .selectFrom("service_details as s")
+      .where(
+        "s.operator_noc",
+        "in",
+        getUserOperatorIdsQuery(context.kysely, user),
+      )
+      .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc");
+    if (args.filterBy && (args.filterBy.operatorIds.length ?? 0) > 0) {
+      query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+    }
+    return await query
+      .groupBy(["a.name", "s.operator_noc"])
+      .select("name")
+      .select("operator_noc")
+      .orderBy("name")
+      .execute()
+      .then((x) =>
+        x.map((o) => ({
+          name: o.name ?? "",
+          operatorId: o.operator_noc ?? "",
+        })),
       );
   };
 

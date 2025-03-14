@@ -39,16 +39,16 @@ import {
 import {
   compareThresholds,
   getFrequentServiceActualHours,
-  getNocAdminAreas,
-  getOperatorsFromOrgId,
-  getOperatorsFroServiceDetails,
   getSummaryStopsTotalHours,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import { getUserOperatorIds } from "../lib/operators.js";
-import { Kysely } from "kysely";
+import {
+  getUserOperatorIds,
+  getUserOperatorIdsQuery,
+} from "../lib/operators.js";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs, { Dayjs } from "dayjs";
@@ -66,26 +66,39 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   context,
 ): Promise<OperatorType[]> => {
   const user = await requireUserSession(context);
-  const orgOperators = await getOperatorsFromOrgId(
-    user.orgIds,
-    context.db,
-    args.filterBy?.operatorIds,
-  );
 
-  const [userOperators, adminAreas] = await Promise.all([
-    getOperatorsFroServiceDetails(orgOperators, context.db),
-    getNocAdminAreas(context.db),
-  ]);
-
-  return userOperators
-    .map((op) => ({
-      name: op.operator?.name ?? "unknown",
-      operatorId: op.operator_noc ?? "unknown",
-      adminAreaIds: adminAreas
-        .filter((area) => area.national_operator_code === op.operator_noc)
-        .map((area) => area.adminarea_id.toString()),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  let query = context.kysely
+    .selectFrom("service_details as s")
+    .where(
+      "s.operator_noc",
+      "in",
+      getUserOperatorIdsQuery(context.kysely, user),
+    )
+    .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc")
+    .innerJoin(
+      "noc_adminarea as n",
+      "n.national_operator_code",
+      "s.operator_noc",
+    );
+  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+    query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+  return await query
+    .groupBy(["a.name", "s.operator_noc"])
+    .select("name")
+    .select("operator_noc")
+    .select(
+      sql<string>`string_agg(n.adminarea_id::text, ',')`.as("adminAreaIds"),
+    )
+    .orderBy("name")
+    .execute()
+    .then((x) =>
+      x.map((o) => ({
+        name: o.name ?? "",
+        operatorId: o.operator_noc ?? "",
+        adminAreaIds: o.adminAreaIds.split(","),
+      })),
+    );
 };
 
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
@@ -124,36 +137,31 @@ export const getLines: QueryResolvers["lines"] = async (
   args,
   context,
 ): Promise<LineType[]> => {
-  if (args.operatorIds.length === 0) return [];
   const user = await requireUserSession(context);
-  const operatorIds = (await getUserOperatorIds(user, context.kysely)).filter(
-    (n) => args.operatorIds.includes(n),
-  );
-  if (operatorIds.length === 0) return [];
+
+  if (args.operatorIds.length === 0) return [];
+
+  let query = context.kysely
+    .selectFrom("expected_services")
+    .where("operator_noc", "in", getUserOperatorIdsQuery(context.kysely, user))
+    .where("operator_noc", "in", args.operatorIds);
 
   const inputDate = userSelectedDateAsUtc(args.inputDate).toDate();
-  const endDate = args.endDate
-    ? userSelectedDateAsUtc(args.endDate).toDate()
-    : null;
+  if (args.endDate) {
+    const endDate = userSelectedDateAsUtc(args.endDate).toDate();
+    query = query
+      .where("date_of_journey", ">=", inputDate)
+      .where("date_of_journey", "<", endDate);
+  } else {
+    query = query.where("date_of_journey", "=", inputDate);
+  }
 
-  const services = await context.db.expected_services.findMany({
-    where: {
-      operator_noc: { in: operatorIds },
-      date_of_journey: endDate ? { gte: inputDate, lt: endDate } : inputDate,
-    },
-    select: {
-      noc_and_line_and_servicecode: true,
-      service_name: true,
-      line_name: true,
-    },
-    distinct: "noc_and_line_and_servicecode",
-  });
-
-  return services.map((service) => ({
-    id: service.noc_and_line_and_servicecode,
-    name: service.service_name,
-    number: service.line_name,
-  }));
+  return query
+    .select("noc_and_line_and_servicecode as id")
+    .select("service_name as name")
+    .select("line_name as number")
+    .distinctOn("noc_and_line_and_servicecode")
+    .execute();
 };
 
 async function getOtpServiceLinks(
