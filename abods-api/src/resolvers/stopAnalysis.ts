@@ -121,7 +121,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "a.name",
     ])
     .select([
-      "t.stop_id as stopId",
       "t.stop_latitude as latitude",
       "t.stop_longitude as longitude",
       "t.is_timing_point as timingPoint",

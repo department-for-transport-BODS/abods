@@ -24,7 +24,6 @@ query stopAnalysis(
       endTime: $endTime
     }
   ) {
-    stopId
     atcoCode
     stopName
     localityName

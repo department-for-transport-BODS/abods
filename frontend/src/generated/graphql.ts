@@ -1044,7 +1044,6 @@ export type StopStatistics = {
   longitude: Scalars['Float']['output'];
   onTime: Scalars['Int']['output'];
   scheduledDepartures: Scalars['Int']['output'];
-  stopId: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
   timingPoint: Scalars['Boolean']['output'];
   totalDelay: Scalars['Float']['output'];
@@ -1463,7 +1462,7 @@ export type StopAnalysisQueryVariables = Exact<{
 }>;
 
 
-export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', stopId: number, atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number }> };
+export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number }> };
 
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -2787,7 +2786,6 @@ export const StopAnalysisDocument = gql`
   stopAnalysis(
     inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, lineIds: $lineIds, matchType: $matchType, operatorIds: $operatorIds, toTimestamp: $toTimestamp, dayOfWeekFlags: $dayOfWeekFlags, startTime: $startTime, endTime: $endTime}
   ) {
-    stopId
     atcoCode
     stopName
     localityName

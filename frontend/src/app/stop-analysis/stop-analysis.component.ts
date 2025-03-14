@@ -315,9 +315,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.filteredStopData = filtered
       .map(
         (x): StopPerformance => ({
-          stopId: x.stopId.toString(),
+          stopId: x.atcoCode,
           stopInfo: {
-            stopId: x.stopId.toString(),
+            stopId: x.atcoCode,
             stopName: x.stopName,
             stopLocality: {
               localityName: x.localityName,
@@ -351,27 +351,28 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         // Combine points where the stop is used as a timing point and a non timing point
         filtered.reduce(
           (acc, cur) => {
-            if (!acc[cur.stopId]) {
-              acc[cur.stopId] = cur;
+            if (!acc[cur.atcoCode]) {
+              acc[cur.atcoCode] = cur;
               return acc;
             }
-            acc[cur.stopId] = {
-              stopId: cur.stopId,
+            acc[cur.atcoCode] = {
               stopName: cur.stopName,
               atcoCode: cur.atcoCode,
               latitude: cur.latitude,
               longitude: cur.longitude,
               localityName: cur.localityName,
               adminAreaName: cur.adminAreaName,
-              timingPoint: cur.timingPoint || acc[cur.stopId].timingPoint,
-              totalDelay: cur.totalDelay || acc[cur.stopId].totalDelay,
-              onTime: cur.onTime || acc[cur.stopId].onTime,
+              timingPoint: cur.timingPoint || acc[cur.atcoCode].timingPoint,
+              totalDelay: cur.totalDelay || acc[cur.atcoCode].totalDelay,
+              onTime: cur.onTime || acc[cur.atcoCode].onTime,
               completedDepartures:
-                cur.completedDepartures || acc[cur.stopId].completedDepartures,
+                cur.completedDepartures ||
+                acc[cur.atcoCode].completedDepartures,
               scheduledDepartures:
-                cur.scheduledDepartures || acc[cur.stopId].scheduledDepartures,
-              late: cur.late || acc[cur.stopId].late,
-              early: cur.early || acc[cur.stopId].early,
+                cur.scheduledDepartures ||
+                acc[cur.atcoCode].scheduledDepartures,
+              late: cur.late || acc[cur.atcoCode].late,
+              early: cur.early || acc[cur.atcoCode].early,
             };
             return acc;
           },

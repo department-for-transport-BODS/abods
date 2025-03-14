@@ -1044,7 +1044,6 @@ export type StopStatistics = {
   longitude: Scalars['Float']['output'];
   onTime: Scalars['Int']['output'];
   scheduledDepartures: Scalars['Int']['output'];
-  stopId: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
   timingPoint: Scalars['Boolean']['output'];
   totalDelay: Scalars['Float']['output'];
@@ -1911,7 +1910,6 @@ export type StopStatisticsResolvers<ContextType = RequestContext, ParentType ext
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   totalDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;

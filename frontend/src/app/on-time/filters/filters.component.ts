@@ -179,35 +179,6 @@ export class FiltersComponent implements OnDestroy {
     this.validationErrors = { ...this.validationErrors, dayOfWeekFlags: "" };
   }
 
-  validate() {
-    const errors: Record<string, string | undefined> = {};
-
-    errors.dayOfWeekFlags = Object.values(this.dayOfWeekFlags).some((v) => v)
-      ? ""
-      : "Please select at least one day.";
-
-    const startHour = parseInt(this.startTime, 10);
-    const endHour = parseInt(this.endTime, 10);
-
-    if (
-      !/^\d\d:\d\d$/.test(this.startTime) ||
-      isNaN(startHour) ||
-      startHour < 0 ||
-      startHour > 23
-    )
-      errors.startTime = "Start time must be between '00:00' and '23:00'";
-    if (
-      !/^\d\d:\d\d$/.test(this.endTime) ||
-      isNaN(endHour) ||
-      endHour < 0 ||
-      endHour > 23
-    )
-      errors.endTime = "End time must be between '00:59' and '23:59'";
-    if (!errors.startTime && !errors.endTime && startHour > endHour)
-      errors.startEndTime = "Start time must be before end time.";
-    return errors;
-  }
-
   getErrors(...ks: string[]) {
     return ks.reduce((e, k) => {
       const ek = this.getError(k);
@@ -222,12 +193,6 @@ export class FiltersComponent implements OnDestroy {
   }
 
   apply() {
-    this.validationErrors = this.validate();
-
-    if (Object.values(this.validationErrors).some((v) => !!v)) {
-      return;
-    }
-
     const newFilters: PerformanceFiltersInputType = {};
 
     if (!Object.values(this.dayOfWeekFlags).every((v) => v)) {
