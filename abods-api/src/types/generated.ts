@@ -32,11 +32,6 @@ export type AddFirstStopInputType = {
   searchString?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type AdminAreaInfoType = {
-  __typename?: 'AdminAreaInfoType';
-  adminAreaId: Scalars['String']['output'];
-};
-
 export type AdminAreasType = {
   __typename?: 'AdminAreasType';
   id: Scalars['String']['output'];
@@ -673,6 +668,13 @@ export type OnTimePerformanceTypeStopPerformanceArgs = {
   inputs: PerformanceInputType;
 };
 
+export type OperatorFeedMonitoring = {
+  __typename?: 'OperatorFeedMonitoring';
+  feedMonitoring?: Maybe<FeedMonitoringType>;
+  name: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+};
+
 export type OperatorFilterInput = {
   operatorIds: Array<Scalars['String']['input']>;
 };
@@ -695,16 +697,9 @@ export type OperatorPerformanceType = {
 
 export type OperatorType = {
   __typename?: 'OperatorType';
-  adminAreas?: Maybe<Array<AdminAreaInfoType>>;
-  feedMonitoring?: Maybe<FeedMonitoringType>;
-  name?: Maybe<Scalars['String']['output']>;
-  nocCode?: Maybe<Scalars['String']['output']>;
+  adminAreaIds: Array<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
-};
-
-export type OperatorsPage = {
-  __typename?: 'OperatorsPage';
-  items: Array<OperatorType>;
 };
 
 export type OrganisationReferenceInput = {
@@ -810,8 +805,9 @@ export type Query = {
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
-  operator?: Maybe<OperatorType>;
-  operators?: Maybe<OperatorsPage>;
+  operatorFeedMonitoring?: Maybe<OperatorFeedMonitoring>;
+  operators: Array<OperatorType>;
+  operatorsFeedMonitoring: Array<OperatorFeedMonitoring>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<StopStatistics>;
@@ -870,12 +866,17 @@ export type QueryLinesArgs = {
 };
 
 
-export type QueryOperatorArgs = {
+export type QueryOperatorFeedMonitoringArgs = {
   operatorId: Scalars['String']['input'];
 };
 
 
 export type QueryOperatorsArgs = {
+  filterBy?: InputMaybe<OperatorFilterInput>;
+};
+
+
+export type QueryOperatorsFeedMonitoringArgs = {
   filterBy?: InputMaybe<OperatorFilterInput>;
 };
 
@@ -1166,7 +1167,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
-  AdminAreaInfoType: ResolverTypeWrapper<Partial<AdminAreaInfoType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
   AlertInputType: ResolverTypeWrapper<Partial<AlertInputType>>;
   AlertReferenceInput: ResolverTypeWrapper<Partial<AlertReferenceInput>>;
@@ -1231,11 +1231,11 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   MutationResponseType: ResolverTypeWrapper<Partial<MutationResponseType>>;
   OnTimePerformanceType: ResolverTypeWrapper<Partial<OnTimePerformanceType>>;
+  OperatorFeedMonitoring: ResolverTypeWrapper<Partial<OperatorFeedMonitoring>>;
   OperatorFilterInput: ResolverTypeWrapper<Partial<OperatorFilterInput>>;
   OperatorPerformancePage: ResolverTypeWrapper<Partial<OperatorPerformancePage>>;
   OperatorPerformanceType: ResolverTypeWrapper<Partial<OperatorPerformanceType>>;
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
-  OperatorsPage: ResolverTypeWrapper<Partial<OperatorsPage>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
@@ -1276,7 +1276,6 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
-  AdminAreaInfoType: Partial<AdminAreaInfoType>;
   AdminAreasType: Partial<AdminAreasType>;
   AlertInputType: Partial<AlertInputType>;
   AlertReferenceInput: Partial<AlertReferenceInput>;
@@ -1336,11 +1335,11 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   MutationResponseType: Partial<MutationResponseType>;
   OnTimePerformanceType: Partial<OnTimePerformanceType>;
+  OperatorFeedMonitoring: Partial<OperatorFeedMonitoring>;
   OperatorFilterInput: Partial<OperatorFilterInput>;
   OperatorPerformancePage: Partial<OperatorPerformancePage>;
   OperatorPerformanceType: Partial<OperatorPerformanceType>;
   OperatorType: Partial<OperatorType>;
-  OperatorsPage: Partial<OperatorsPage>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
@@ -1376,11 +1375,6 @@ export type ResolversParentTypes = ResolversObject<{
 export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreaInfoType'] = ResolversParentTypes['AdminAreaInfoType']> = ResolversObject<{
-  adminAreaId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1718,6 +1712,13 @@ export type OnTimePerformanceTypeResolvers<ContextType = RequestContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorFeedMonitoring'] = ResolversParentTypes['OperatorFeedMonitoring']> = ResolversObject<{
+  feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type OperatorPerformancePageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformancePage'] = ResolversParentTypes['OperatorPerformancePage']> = ResolversObject<{
   items?: Resolver<Array<ResolversTypes['OperatorPerformanceType']>, ParentType, ContextType>;
   pageInfo?: Resolver<Maybe<ResolversTypes['PageInfo']>, ParentType, ContextType>;
@@ -1735,16 +1736,9 @@ export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, Paren
 }>;
 
 export type OperatorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorType'] = ResolversParentTypes['OperatorType']> = ResolversObject<{
-  adminAreas?: Resolver<Maybe<Array<ResolversTypes['AdminAreaInfoType']>>, ParentType, ContextType>;
-  feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  adminAreaIds?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type OperatorsPageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorsPage'] = ResolversParentTypes['OperatorsPage']> = ResolversObject<{
-  items?: Resolver<Array<ResolversTypes['OperatorType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1804,8 +1798,9 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'inputDate' | 'operatorIds'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
-  operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
-  operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
+  operatorFeedMonitoring?: Resolver<Maybe<ResolversTypes['OperatorFeedMonitoring']>, ParentType, ContextType, RequireFields<QueryOperatorFeedMonitoringArgs, 'operatorId'>>;
+  operators?: Resolver<Array<ResolversTypes['OperatorType']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
+  operatorsFeedMonitoring?: Resolver<Array<ResolversTypes['OperatorFeedMonitoring']>, ParentType, ContextType, Partial<QueryOperatorsFeedMonitoringArgs>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<ResolversTypes['StopStatistics']>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
@@ -1955,7 +1950,6 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
-  AdminAreaInfoType?: AdminAreaInfoTypeResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
@@ -1999,10 +1993,10 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   Mutation?: MutationResolvers<ContextType>;
   MutationResponseType?: MutationResponseTypeResolvers<ContextType>;
   OnTimePerformanceType?: OnTimePerformanceTypeResolvers<ContextType>;
+  OperatorFeedMonitoring?: OperatorFeedMonitoringResolvers<ContextType>;
   OperatorPerformancePage?: OperatorPerformancePageResolvers<ContextType>;
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
-  OperatorsPage?: OperatorsPageResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;

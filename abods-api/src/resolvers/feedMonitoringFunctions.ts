@@ -7,11 +7,13 @@ import {
   LiveStatsType,
   HistoricalStatsType,
   LiveStatsTypeResolvers,
-  OperatorTypeResolvers,
   QueryResolvers,
   Resolvers,
   VehicleStatsType,
   DashboardVehicles,
+  Maybe,
+  OperatorFeedMonitoring,
+  OperatorFeedMonitoringResolvers,
 } from "../types/generated.js";
 import {
   getOperatorWithFeed,
@@ -21,6 +23,11 @@ import { feed_monitor_summary } from "@prisma/client";
 import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
 import dayjs from "dayjs";
+import logger from "../logger.js";
+import {
+  getOperatorsFromOrgId,
+  getOperatorsFroServiceDetails,
+} from "../lib/otp.js";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -110,7 +117,7 @@ const getEvents: QueryResolvers["events"] = (): EventResponse => ({
   items: [],
 });
 
-export const getFeedMonitoringList: OperatorTypeResolvers["feedMonitoring"] =
+export const getFeedMonitoringList: OperatorFeedMonitoringResolvers["feedMonitoring"] =
   async (parent, _, context): Promise<FeedMonitoringType> => {
     if (!parent.operatorId) throw "Parent data not set";
     const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
@@ -212,13 +219,71 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
     .execute();
 };
 
+export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
+  _,
+  args,
+  context,
+): Promise<Maybe<OperatorFeedMonitoring>> => {
+  await requireUserSession(context);
+  try {
+    // TODO: is operator id in users' operator id array
+    logger.debug({ operatorId: args.operatorId }, "getOperator");
+
+    const operator = await context.db.all_operators.findUnique({
+      where: {
+        operatorref: args.operatorId,
+      },
+    });
+
+    if (!operator) {
+      throw Error("No operator found");
+    }
+
+    return {
+      operatorId: operator.operatorref,
+      name: operator.name ?? "Unknown",
+    };
+  } catch (error) {
+    logger.error(error, "An error occurred when getting operator info");
+    return null;
+  }
+};
+
+export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
+  async (_, args, context): Promise<OperatorFeedMonitoring[]> => {
+    const user = await requireUserSession(context);
+    const orgOperators = await getOperatorsFromOrgId(
+      user.orgIds,
+      context.db,
+      args.filterBy?.operatorIds,
+    );
+
+    const userOperators = await getOperatorsFroServiceDetails(
+      orgOperators,
+      context.db,
+    );
+
+    return userOperators
+      .map((op) => ({
+        name: op.operator?.name ?? "unknown",
+        operatorId: op.operator_noc ?? "unknown",
+      }))
+      .sort((a, b) =>
+        (a.name ?? "").localeCompare(b.name ?? "", undefined, {
+          numeric: true,
+        }),
+      );
+  };
+
 const feedMonitoringResolvers: Resolvers = {
   Query: {
     events: getEvents,
     eventStats: getEventStats,
     dashboardVehicles: getDashboardVehicles,
+    operatorFeedMonitoring: getOperator,
+    operatorsFeedMonitoring: getOperatorList,
   },
-  OperatorType: {
+  OperatorFeedMonitoring: {
     feedMonitoring: getFeedMonitoringList,
   },
   FeedMonitoringType: {

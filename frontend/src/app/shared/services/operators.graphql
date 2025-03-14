@@ -1,13 +1,8 @@
 query operatorList {
   operators {
-    items {
-      name
-      nocCode
-      operatorId
-      adminAreas {
-        adminAreaId
-      }
-    }
+    name
+    operatorId
+    adminAreaIds
   }
 }
 

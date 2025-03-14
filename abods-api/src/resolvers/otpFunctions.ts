@@ -15,7 +15,6 @@ import {
   OnTimePerformanceTypeResolvers,
   OperatorPerformancePage,
   OperatorPerformanceType,
-  OperatorsPage,
   OperatorType,
   PerformanceInputType,
   PunctualityDayOfWeekType,
@@ -31,7 +30,6 @@ import {
   ServicePunctualityType,
   StopPerformanceType,
 } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
   getFormattedDate,
@@ -66,57 +64,28 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   _,
   args,
   context,
-): Promise<OperatorsPage | null> => {
-  const user = await requireUserSession(context);
-  try {
-    const userOperators = args.filterBy?.operatorIds
-      ? await getOperatorsDropDown(user, context.db, args.filterBy.operatorIds)
-      : await getOperatorsDropDown(user, context.db);
-
-    if (!userOperators) {
-      throw Error("No operators for user");
-    }
-
-    return {
-      items: userOperators,
-    };
-  } catch (error) {
-    logger.error(error, "An error occurred when getting operators");
-    return null;
-  }
-};
-
-const getOperatorsDropDown = async (
-  user: SessionUser,
-  db: PrismaClient,
-  userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
+  const user = await requireUserSession(context);
   const orgOperators = await getOperatorsFromOrgId(
     user.orgIds,
-    db,
-    userOperatorIds,
+    context.db,
+    args.filterBy?.operatorIds,
   );
 
   const [userOperators, adminAreas] = await Promise.all([
-    getOperatorsFroServiceDetails(orgOperators, db),
-    getNocAdminAreas(db),
+    getOperatorsFroServiceDetails(orgOperators, context.db),
+    getNocAdminAreas(context.db),
   ]);
 
   return userOperators
     .map((op) => ({
       name: op.operator?.name ?? "unknown",
-      nocCode: op.operator_noc,
       operatorId: op.operator_noc ?? "unknown",
-      adminAreas: adminAreas
+      adminAreaIds: adminAreas
         .filter((area) => area.national_operator_code === op.operator_noc)
-        .map((area) => ({
-          adminAreaId: area.adminarea_id.toString(),
-          adminAreaName: area.admin_area.name,
-        })),
+        .map((area) => area.adminarea_id.toString()),
     }))
-    .sort((a, b) =>
-      (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true }),
-    );
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 };
 
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
@@ -259,39 +228,6 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     });
   }
   return result;
-};
-
-export const getOperator: QueryResolvers["operator"] = async (
-  _,
-  args,
-  context,
-): Promise<Maybe<OperatorType>> => {
-  await requireUserSession(context);
-  try {
-    // TODO: is operator id in users' operator id array
-    logger.debug({ operatorId: args.operatorId }, "getOperator");
-
-    const operator = await context.db.all_operators.findUnique({
-      where: {
-        operatorref: args.operatorId,
-      },
-    });
-
-    if (!operator) {
-      throw Error("No operator found");
-    }
-
-    const operatorPayload: OperatorType = {
-      operatorId: operator.operatorref,
-      name: operator.name,
-      nocCode: operator.operatorref,
-    };
-
-    return operatorPayload;
-  } catch (error) {
-    logger.error(error, "An error occurred when getting operator info");
-    return null;
-  }
 };
 
 export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctualityOverview"] =
@@ -1443,7 +1379,6 @@ export const getPrismaFiltersForOTPQuery = (
 const otpResolvers: Resolvers = {
   Query: {
     operators: getOperatorList,
-    operator: getOperator,
     onTimePerformance: emptyResolver,
     headwayMetrics: emptyResolver,
     serviceInfo: getServiceInfo,

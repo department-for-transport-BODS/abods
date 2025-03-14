@@ -257,7 +257,7 @@ export class FeedMonitoringComponent
         } else {
           if (operators.length === 1) {
             this.router
-              .navigate([operators[0].nocCode], {
+              .navigate([operators[0].operatorId], {
                 relativeTo: this.route,
                 skipLocationChange: true,
               })
@@ -282,7 +282,7 @@ export class FeedMonitoringComponent
           const filteredOperators = this.rawActiveOperators.filter(
             (operator) =>
               normalise(operator.name).match(reg) ||
-              operator.nocCode?.match(reg),
+              operator.operatorId?.match(reg),
           );
           this.setOperators(filteredOperators);
           this.resetPagination();

@@ -8,8 +8,11 @@ type Query {
   apiInfo: ApiInfoType
   userAlerts: [AlertType!]
   userAlert(alertId: String!): AlertType
-  operator(operatorId: String!): OperatorType
-  operators(filterBy: OperatorFilterInput): OperatorsPage
+  operatorFeedMonitoring(operatorId: String!): OperatorFeedMonitoring
+  operatorsFeedMonitoring(
+    filterBy: OperatorFilterInput
+  ): [OperatorFeedMonitoring!]!
+  operators(filterBy: OperatorFilterInput): [OperatorType!]!
   adminAreas: [AdminAreasType!]
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
@@ -361,15 +364,15 @@ type AdminAreasType {
   shape: String!
 }
 
-type OperatorsPage {
-  items: [OperatorType!]!
+type OperatorType {
+  name: String!
+  operatorId: String!
+  adminAreaIds: [String!]!
 }
 
-type OperatorType {
-  name: String
-  nocCode: String
+type OperatorFeedMonitoring {
+  name: String!
   operatorId: String!
-  adminAreas: [AdminAreaInfoType!]
   feedMonitoring: FeedMonitoringType
 }
 
@@ -408,10 +411,6 @@ type LiveStatsType {
   last20Minutes: [VehicleStatsType!]
   last24Hours: [VehicleStatsType!]
   updateFrequency: Int
-}
-
-type AdminAreaInfoType {
-  adminAreaId: String!
 }
 
 input UserUpdateInput {
