@@ -196,7 +196,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         }, 1),
       )
       .subscribe(([query, response]) => {
-        this.isLoading = true;
         this.lastBounds = query.boundingBox;
         this.rawStopData = response.data.stopAnalysis;
         this.processStopData(this.visibleBounds);
