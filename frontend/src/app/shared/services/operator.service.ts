@@ -45,10 +45,13 @@ export class OperatorService {
     );
   }
 
-  fetchLines(operatorId: string, inputDate?: DateTime): Observable<LineType[]> {
+  fetchLines(operatorId: string, inputDate: DateTime): Observable<LineType[]> {
     return this.operatorLinesGQL
       .fetch(
-        { operatorId, inputDate: inputDate?.toISO() },
+        {
+          operatorIds: [operatorId],
+          inputDate: inputDate.toISO(),
+        },
         { fetchPolicy: "no-cache" },
       )
       .pipe(

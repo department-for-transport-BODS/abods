@@ -11,8 +11,12 @@ query operatorList {
   }
 }
 
-query operatorLines($operatorId: String!, $inputDate: String) {
-  lines(operatorId: $operatorId, inputDate: $inputDate) {
+query operatorLines(
+  $operatorIds: [String!]!
+  $inputDate: String!
+  $endDate: String
+) {
+  lines(operatorIds: $operatorIds, inputDate: $inputDate, endDate: $endDate) {
     id
     name
     number

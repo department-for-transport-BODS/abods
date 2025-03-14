@@ -864,8 +864,9 @@ export type QueryJourneyArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['String']['input']>;
-  operatorId: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate: Scalars['String']['input'];
+  operatorIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -1801,7 +1802,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
-  lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'operatorId'>>;
+  lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'inputDate' | 'operatorIds'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
   operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
   operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;

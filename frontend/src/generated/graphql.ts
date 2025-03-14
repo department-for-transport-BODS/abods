@@ -864,8 +864,9 @@ export type QueryJourneyArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['String']['input']>;
-  operatorId: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate: Scalars['String']['input'];
+  operatorIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -1441,8 +1442,9 @@ export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 export type OperatorListQuery = { __typename?: 'Query', operators?: { __typename?: 'OperatorsPage', items: Array<{ __typename?: 'OperatorType', name?: string | null, nocCode?: string | null, operatorId: string, adminAreas?: Array<{ __typename?: 'AdminAreaInfoType', adminAreaId: string }> | null }> } | null };
 
 export type OperatorLinesQueryVariables = Exact<{
-  operatorId: Scalars['String']['input'];
-  inputDate?: InputMaybe<Scalars['String']['input']>;
+  operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  inputDate: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2762,8 +2764,8 @@ export const OperatorListDocument = gql`
     }
   }
 export const OperatorLinesDocument = gql`
-    query operatorLines($operatorId: String!, $inputDate: String) {
-  lines(operatorId: $operatorId, inputDate: $inputDate) {
+    query operatorLines($operatorIds: [String!]!, $inputDate: String!, $endDate: String) {
+  lines(operatorIds: $operatorIds, inputDate: $inputDate, endDate: $endDate) {
     id
     name
     number

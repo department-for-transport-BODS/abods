@@ -38,6 +38,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   matchType: MatchType = MatchType.Evidenced;
   timingPointsOption = "timing-points";
   operatorIds: string[] = [];
+  serviceIds: string[] = [];
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
@@ -173,17 +174,13 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
           // TODO: limit date range
 
-          /**
-           *     TODO: Add filters:
-           *      Service (select multiple) (only show services in selected NOCs if selected)
-           * **/
           const query = {
             boundingBox: bounds!,
-            adminAreaIds: [],
+            adminAreaIds: [], // nice to have, but not an AC yet
             fromTimestamp: this.from.toISO(),
             toTimestamp: this.to.toISO(),
             operatorIds: this.operatorIds,
-            lineIds: [],
+            lineIds: this.serviceIds,
             matchType: this.matchType,
             dayOfWeekFlags: this.dayOfWeekFlags,
             startTime: this.startTime,
@@ -414,6 +411,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onOperatorsChanged($event: string[]) {
     this.operatorIds = $event;
+    this.onFilterChanged();
+  }
+
+  onServicesChanged($event: string[]) {
+    this.serviceIds = $event;
     this.onFilterChanged();
   }
 

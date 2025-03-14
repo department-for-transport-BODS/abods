@@ -24,7 +24,11 @@ type Query {
   ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
-  lines(operatorId: String!, inputDate: String): [LineType!]!
+  lines(
+    operatorIds: [String!]!
+    inputDate: String!
+    endDate: String
+  ): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
   # To be removed soon
   # eslint-disable-next-line @graphql-eslint/no-unused-fields

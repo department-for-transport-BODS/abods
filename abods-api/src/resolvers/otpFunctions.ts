@@ -155,18 +155,22 @@ export const getLines: QueryResolvers["lines"] = async (
   args,
   context,
 ): Promise<LineType[]> => {
+  if (args.operatorIds.length === 0) return [];
   const user = await requireUserSession(context);
-  const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-  if (!userOperatorIds.includes(args.operatorId)) return [];
+  const operatorIds = (await getUserOperatorIds(user, context.kysely)).filter(
+    (n) => args.operatorIds.includes(n),
+  );
+  if (operatorIds.length === 0) return [];
 
-  const inputDate = args.inputDate
-    ? userSelectedDateAsUtc(args.inputDate).toDate()
-    : undefined;
+  const inputDate = userSelectedDateAsUtc(args.inputDate).toDate();
+  const endDate = args.endDate
+    ? userSelectedDateAsUtc(args.endDate).toDate()
+    : null;
 
   const services = await context.db.expected_services.findMany({
     where: {
-      operator_noc: args.operatorId,
-      date_of_journey: inputDate,
+      operator_noc: { in: operatorIds },
+      date_of_journey: endDate ? { gte: inputDate, lt: endDate } : inputDate,
     },
     select: {
       noc_and_line_and_servicecode: true,
