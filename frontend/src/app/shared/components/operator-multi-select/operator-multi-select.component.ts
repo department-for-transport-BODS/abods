@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { DashboardOperatorListGQL } from "../../../../generated/graphql";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { OperatorListGQL } from "../../../../generated/graphql";
 import { map } from "rxjs/operators";
 import { MultiselectCheckboxOption } from "../../gds/multiselect-checkbox/multiselect-checkbox.component";
 
@@ -8,27 +8,22 @@ import { MultiselectCheckboxOption } from "../../gds/multiselect-checkbox/multis
   templateUrl: "./operator-multi-select.component.html",
   styleUrls: ["./operator-multi-select.component.scss"],
 })
-export class OperatorMultiSelectComponent implements OnInit {
+export class OperatorMultiSelectComponent {
   @Input() value: string[] = [];
   @Input() fieldId = "operators";
   @Output() selectedChange = new EventEmitter<string[]>();
-  constructor(private operatorListQuery: DashboardOperatorListGQL) {}
+  constructor(private operatorListQuery: OperatorListGQL) {}
 
   operators = this.operatorListQuery.fetch().pipe(
-    map(
-      (result) =>
-        result.data.operators?.items.map(
-          (o): MultiselectCheckboxOption => ({
-            label: o.name ?? "",
-            value: o.operatorId ?? "",
-          }),
-        ) ?? [],
+    map((result) =>
+      result.data.operators.map(
+        (o): MultiselectCheckboxOption => ({
+          label: `${o.name} (${o.operatorId})`,
+          value: o.operatorId,
+        }),
+      ),
     ),
   );
-
-  ngOnInit() {
-    this.operatorListQuery.fetch({}).subscribe();
-  }
 
   onSelect($event: string[]) {
     this.value = $event;

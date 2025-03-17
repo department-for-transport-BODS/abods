@@ -11,7 +11,7 @@ import {
   StopStatistics,
 } from "../../generated/graphql";
 import { combineLatest, Subject, takeUntil } from "rxjs";
-import { debounceTime, map, tap, filter } from "rxjs/operators";
+import { debounceTime, map, tap, filter, mergeMap } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
@@ -38,6 +38,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   matchType: MatchType = MatchType.Evidenced;
   timingPointsOption = "timing-points";
   operatorIds: string[] = [];
+  serviceIds: string[] = [];
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
@@ -164,42 +165,39 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       }),
     );
 
-    combineLatest([
-      boundsChanged.pipe(debounceTime(200)),
-      this.apiFiltersChanged,
-    ]).subscribe(([bounds]) => {
-      if (!bounds) return;
-      // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
-      // TODO: limit date range
+    combineLatest([boundsChanged, this.apiFiltersChanged])
+      .pipe(
+        // Don't fetch too quickly if there's a lot of map movement happening
+        debounceTime(500),
+        // Don't run requests concurrently, and only run the latest when completed again
+        mergeMap(([bounds]) => {
+          // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
+          // TODO: limit date range
 
-      /**
-       *     TODO: Add filters:
-       *      Service (select multiple) (only show services in selected NOCs if selected)
-       *      Refine Results
-       *          Day e.g. Monday (select multiple)
-       *          Time range
-       * **/
-      this.isLoading = true;
-      this.query
-        .fetch({
-          boundingBox: bounds,
-          adminAreaIds: [],
-          fromTimestamp: this.from.toISO(),
-          toTimestamp: this.to.toISO(),
-          operatorIds: this.operatorIds,
-          lineIds: [],
-          matchType: this.matchType,
-          dayOfWeekFlags: this.dayOfWeekFlags,
-          startTime: this.startTime,
-          endTime: this.endTime,
-        })
-        .subscribe((response) => {
-          this.lastBounds = bounds;
-          this.rawStopData = response.data.stopAnalysis;
-          this.processStopData(this.visibleBounds);
-          this.isLoading = false;
-        });
-    });
+          const query = {
+            boundingBox: bounds!,
+            adminAreaIds: [], // nice to have, but not an AC yet
+            fromTimestamp: this.from.toISO(),
+            toTimestamp: this.to.toISO(),
+            operatorIds: this.operatorIds,
+            lineIds: this.serviceIds,
+            matchType: this.matchType,
+            dayOfWeekFlags: this.dayOfWeekFlags,
+            startTime: this.startTime,
+            endTime: this.endTime,
+          };
+          this.isLoading = true;
+          return this.query
+            .fetch(query)
+            .pipe(map((response) => [query, response] as const));
+        }, 1),
+      )
+      .subscribe(([query, response]) => {
+        this.lastBounds = query.boundingBox;
+        this.rawStopData = response.data.stopAnalysis;
+        this.processStopData(this.visibleBounds);
+        this.isLoading = false;
+      });
     this.onFilterChanged();
   }
 
@@ -280,14 +278,27 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFilterChanged() {
-    // TODO: update query params
-    console.log("Filters changed");
     this.apiFiltersChanged.next(undefined);
   }
 
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
+    this.onFilterChanged();
+  }
+
+  onOperatorsChanged($event: string[]) {
+    this.operatorIds = $event;
+    this.onFilterChanged();
+  }
+
+  onServicesChanged($event: string[]) {
+    this.serviceIds = $event;
+    this.onFilterChanged();
+  }
+
+  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = $event;
     this.onFilterChanged();
   }
 
@@ -315,9 +326,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.filteredStopData = filtered
       .map(
         (x): StopPerformance => ({
-          stopId: x.stopId.toString(),
+          stopId: x.atcoCode,
           stopInfo: {
-            stopId: x.stopId.toString(),
+            stopId: x.atcoCode,
             stopName: x.stopName,
             stopLocality: {
               localityName: x.localityName,
@@ -351,27 +362,28 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         // Combine points where the stop is used as a timing point and a non timing point
         filtered.reduce(
           (acc, cur) => {
-            if (!acc[cur.stopId]) {
-              acc[cur.stopId] = cur;
+            if (!acc[cur.atcoCode]) {
+              acc[cur.atcoCode] = cur;
               return acc;
             }
-            acc[cur.stopId] = {
-              stopId: cur.stopId,
+            acc[cur.atcoCode] = {
               stopName: cur.stopName,
               atcoCode: cur.atcoCode,
               latitude: cur.latitude,
               longitude: cur.longitude,
               localityName: cur.localityName,
               adminAreaName: cur.adminAreaName,
-              timingPoint: cur.timingPoint || acc[cur.stopId].timingPoint,
-              totalDelay: cur.totalDelay || acc[cur.stopId].totalDelay,
-              onTime: cur.onTime || acc[cur.stopId].onTime,
+              timingPoint: cur.timingPoint || acc[cur.atcoCode].timingPoint,
+              totalDelay: cur.totalDelay || acc[cur.atcoCode].totalDelay,
+              onTime: cur.onTime || acc[cur.atcoCode].onTime,
               completedDepartures:
-                cur.completedDepartures || acc[cur.stopId].completedDepartures,
+                cur.completedDepartures ||
+                acc[cur.atcoCode].completedDepartures,
               scheduledDepartures:
-                cur.scheduledDepartures || acc[cur.stopId].scheduledDepartures,
-              late: cur.late || acc[cur.stopId].late,
-              early: cur.early || acc[cur.stopId].early,
+                cur.scheduledDepartures ||
+                acc[cur.atcoCode].scheduledDepartures,
+              late: cur.late || acc[cur.atcoCode].late,
+              early: cur.early || acc[cur.atcoCode].early,
             };
             return acc;
           },
@@ -408,15 +420,5 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       newBounds.maxLongitude <= bounds.maxLongitude &&
       newBounds.maxLatitude <= bounds.maxLatitude
     );
-  }
-
-  onOperatorsChanged($event: string[]) {
-    this.operatorIds = $event;
-    this.onFilterChanged();
-  }
-
-  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags = $event;
-    this.onFilterChanged();
   }
 }

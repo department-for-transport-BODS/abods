@@ -6,8 +6,7 @@ import {
 } from "../../../generated/graphql";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
-import { map as _map, flatMap as _flatMap, uniq as _uniq } from "lodash-es";
-import { nonNullishArray } from "../array-operators";
+import { flatMap as _flatMap, uniq as _uniq } from "lodash-es";
 import { DateTime } from "luxon";
 
 export interface Operator {
@@ -25,16 +24,9 @@ export class OperatorService {
   ) {}
 
   fetchOperators(): Observable<Operator[]> {
-    return this.operatorListQuery.fetch({}).pipe(
-      map((result) =>
-        nonNullishArray(result?.data?.operators?.items).map(
-          ({ adminAreas, ...operator }) => ({
-            ...operator,
-            adminAreaIds: _map(nonNullishArray(adminAreas), "adminAreaId"),
-          }),
-        ),
-      ),
-    );
+    return this.operatorListQuery
+      .fetch({})
+      .pipe(map((result) => result.data.operators));
   }
 
   fetchOperator(nocCode: string): Observable<Operator | undefined> {
@@ -45,10 +37,13 @@ export class OperatorService {
     );
   }
 
-  fetchLines(operatorId: string, inputDate?: DateTime): Observable<LineType[]> {
+  fetchLines(operatorId: string, inputDate: DateTime): Observable<LineType[]> {
     return this.operatorLinesGQL
       .fetch(
-        { operatorId, inputDate: inputDate?.toISO() },
+        {
+          operatorIds: [operatorId],
+          inputDate: inputDate.toISO(),
+        },
         { fetchPolicy: "no-cache" },
       )
       .pipe(
