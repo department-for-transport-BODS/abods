@@ -13,7 +13,7 @@ import {
 import { requireUserSession } from "./helpers.js";
 import { getUserTypeDetails } from "../lib/operators.js";
 import logger from "../logger.js";
-import { Kysely } from "kysely";
+import { ComparisonOperatorExpression, Kysely } from "kysely";
 import { DB } from "../kysely.js";
 import dayjs from "dayjs";
 
@@ -27,7 +27,7 @@ const isUserAllowedAccess = (
   const diffLastAccessed = currentTimestamp.diff(dayjs(lastAccessed), "minute");
   if (!lastAccessed || diffLastAccessed > 60) return true;
 
-  if (accessedCount > accessAllowedWithinAnHour && diffLastAccessed <= 60) {
+  if (accessedCount >= accessAllowedWithinAnHour && diffLastAccessed <= 60) {
     return false;
   }
 
@@ -44,13 +44,19 @@ const updateAccess = async (
   const currentTimestamp = dayjs();
 
   let accessCount =
-    previousAccessDetails?.data_monitoring_access_count ?? 0 + 1;
+    (previousAccessDetails?.data_monitoring_access_count ?? 0) + 1;
+
+  let access_count_operator: ComparisonOperatorExpression = "=";
+
+  if (previousAccessDetails?.data_monitoring_access_count === null) {
+    access_count_operator = "is";
+  }
   let updateQuery = db
     .updateTable("login_details")
     .where("user_id", "=", user_id)
     .where(
       "data_monitoring_access_count",
-      "=",
+      access_count_operator,
       previousAccessDetails?.data_monitoring_access_count ?? null,
     );
 
@@ -61,7 +67,9 @@ const updateAccess = async (
       "hour",
     ) > 60
   ) {
-    accessCount = 0;
+    if (previousAccessDetails?.data_monitoring_access_count !== null) {
+      accessCount = 0;
+    }
     updateQuery = updateQuery.set({
       data_monitoring_last_accessed: currentTimestamp.toDate(),
     });
