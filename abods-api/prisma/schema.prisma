@@ -620,7 +620,7 @@ model ui_lta {
 
 model login_details {
   user_id                         Int @unique
+  last_login                      DateTime
   data_monitoring_access_count    Int?
   data_monitoring_last_accessed   DateTime?
-  last_login                      DateTime?
 }
