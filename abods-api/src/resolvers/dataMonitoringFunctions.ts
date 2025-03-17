@@ -24,9 +24,8 @@ const isUserAllowedAccess = (
   accessedCount: number,
 ) => {
   const currentTimestamp = dayjs();
-  if (!lastAccessed) return true;
-
   const diffLastAccessed = currentTimestamp.diff(dayjs(lastAccessed), "minute");
+  if (!lastAccessed || diffLastAccessed > 60) return true;
 
   if (accessedCount > accessAllowedWithinAnHour && diffLastAccessed <= 60) {
     return false;
@@ -37,21 +36,30 @@ const isUserAllowedAccess = (
 
 const updateAccess = async (
   user_id: number,
-  previousAccessCount: number | null,
-  dataMonitoringAccessCount: number,
-  dataMonitoringLastAccessed: Date | null | undefined,
+  previousAccessDetails: Awaited<
+    ReturnType<typeof getDataMonitoringAccessDetails>
+  >,
   db: Kysely<DB>,
 ) => {
   const currentTimestamp = dayjs();
-  let accessCount = dataMonitoringAccessCount + 1;
+
+  let accessCount =
+    previousAccessDetails?.data_monitoring_access_count ?? 0 + 1;
   let updateQuery = db
     .updateTable("login_details")
     .where("user_id", "=", user_id)
-    .where("data_monitoring_access_count", "=", previousAccessCount);
+    .where(
+      "data_monitoring_access_count",
+      "=",
+      previousAccessDetails?.data_monitoring_access_count ?? null,
+    );
 
   if (
-    !dataMonitoringLastAccessed ||
-    currentTimestamp.diff(dayjs(dataMonitoringLastAccessed), "hour") > 24
+    !previousAccessDetails?.data_monitoring_last_accessed ||
+    currentTimestamp.diff(
+      dayjs(previousAccessDetails?.data_monitoring_last_accessed),
+      "hour",
+    ) > 60
   ) {
     accessCount = 0;
     updateQuery = updateQuery.set({
@@ -112,9 +120,6 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     context.kysely,
   );
 
-  const previousAccessCount =
-    dashboardAccessDetails?.data_monitoring_access_count;
-
   const allowAccess = isUserAllowedAccess(
     dashboardAccessDetails?.data_monitoring_last_accessed,
     dashboardAccessDetails?.data_monitoring_access_count ?? 0,
@@ -128,9 +133,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const rowsUpdated = await updateAccess(
     user.id,
-    previousAccessCount ?? null,
-    dashboardAccessDetails?.data_monitoring_access_count ?? 0,
-    dashboardAccessDetails?.data_monitoring_last_accessed,
+    dashboardAccessDetails,
     context.kysely,
   );
 
