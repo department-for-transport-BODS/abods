@@ -278,14 +278,27 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFilterChanged() {
-    // TODO: update query params
-    console.log("Filters changed");
     this.apiFiltersChanged.next(undefined);
   }
 
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
+    this.onFilterChanged();
+  }
+
+  onOperatorsChanged($event: string[]) {
+    this.operatorIds = $event;
+    this.onFilterChanged();
+  }
+
+  onServicesChanged($event: string[]) {
+    this.serviceIds = $event;
+    this.onFilterChanged();
+  }
+
+  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = $event;
     this.onFilterChanged();
   }
 
@@ -407,20 +420,5 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       newBounds.maxLongitude <= bounds.maxLongitude &&
       newBounds.maxLatitude <= bounds.maxLatitude
     );
-  }
-
-  onOperatorsChanged($event: string[]) {
-    this.operatorIds = $event;
-    this.onFilterChanged();
-  }
-
-  onServicesChanged($event: string[]) {
-    this.serviceIds = $event;
-    this.onFilterChanged();
-  }
-
-  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags = $event;
-    this.onFilterChanged();
   }
 }

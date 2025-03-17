@@ -62,7 +62,9 @@
           fieldId="operators"
           (selectedChange)="onOperatorsChanged($event)"
         />
-        <ng-container *ngIf="operatorIds.length > 0">
+        <div
+          [ngStyle]="{ display: operatorIds.length > 0 ? undefined : 'none' }"
+        >
           <label class="govuk-label" for="services">Services</label>
           <app-service-multi-select
             [operators]="operatorIds"
@@ -72,7 +74,7 @@
             fieldId="services"
             (selectedChange)="onServicesChanged($event)"
           />
-        </ng-container>
+        </div>
       </div>
       <app-day-of-week-select
         [value]="dayOfWeekFlags"

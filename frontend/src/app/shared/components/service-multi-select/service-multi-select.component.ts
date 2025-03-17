@@ -49,11 +49,10 @@ export class ServiceMultiSelectComponent {
         }),
       ),
     ),
-    tap((o) =>
-      this.selectedChange.emit(
-        this.value.filter(o.map((n) => n.value).includes),
-      ),
-    ),
+    tap((options) => {
+      const available = options.map((o) => o.value);
+      this.onSelect(this.value.filter((s) => available.includes(s)));
+    }),
   );
 
   onSelect($event: string[]) {
