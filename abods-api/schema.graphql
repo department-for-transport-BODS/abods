@@ -33,8 +33,6 @@ type Query {
     endDate: String
   ): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
-  # To be removed soon
-  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
   embeddedUrl: AWSQuicksightUser!
