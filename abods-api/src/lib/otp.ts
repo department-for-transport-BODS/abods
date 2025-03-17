@@ -65,60 +65,6 @@ export const compareThresholds = async (
   };
 };
 
-export const getOperatorsFromOrgId = async (
-  orgIds: number[],
-  db: PrismaClient,
-  userOperatorIds?: string[],
-) => {
-  const where: Prisma.bods_organisationoperatorWhereInput = {
-    organisation_id: { in: orgIds },
-  };
-
-  if (userOperatorIds && userOperatorIds.length > 0) {
-    where.operatorref = {
-      in: userOperatorIds,
-    };
-  }
-
-  return db.bods_organisationoperator.findMany({
-    where: where,
-    select: {
-      operatorref: true,
-    },
-    distinct: ["operatorref"],
-  });
-};
-
-export const getOperatorsFroServiceDetails = async (
-  orgOperators: { operatorref: string }[],
-  db: PrismaClient,
-) => {
-  return db.service_details.findMany({
-    where: {
-      operator_noc: {
-        in: orgOperators.map((operator) => operator.operatorref),
-      },
-    },
-    select: {
-      operator_noc: true,
-      operator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    distinct: ["operator_noc"],
-  });
-};
-
-export const getNocAdminAreas = async (db: PrismaClient) => {
-  return db.noc_adminarea.findMany({
-    include: {
-      admin_area: true,
-    },
-  });
-};
-
 export const getSummaryStopsTotalHours = async (
   db: PrismaClient,
   inputs: FrequentServiceInfoInputType,

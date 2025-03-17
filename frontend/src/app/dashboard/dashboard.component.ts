@@ -109,7 +109,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe(([latestNocCode, ops]) => {
         if (latestNocCode) {
-          const operator = ops.find(({ nocCode }) => nocCode === latestNocCode);
+          const operator = ops.find(
+            ({ operatorId }) => operatorId === latestNocCode,
+          );
           if (operator) {
             this.operatorSubject.next(operator);
             this.selectedOperatorsSubject.next([operator]);
@@ -129,7 +131,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.service.listOperators.subscribe((ops) => {
       this.allOperatorsSubject.next(ops);
       if (ops.length === 1) {
-        this.nocCodeSubject.next(ops[0].nocCode!);
+        this.nocCodeSubject.next(ops[0].operatorId);
       }
     });
 
