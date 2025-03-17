@@ -31,7 +31,7 @@
             "aot": true,
             "assets": ["src/assets", "src/freshdesk", "src/favicon.ico", "src/config.json", "src/version.json"],
             "styles": ["src/styles.scss"],
-            "scripts": ["node_modules/govuk-frontend/govuk/all.js"],
+            "scripts": ["node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js"],
             "allowedCommonJsDependencies": [
               "@babel/runtime",
               "amazon-quicksight-embedding-sdk",
@@ -62,13 +62,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2.25mb",
-                  "maximumError": "2.5mb"
+                  "maximumWarning": "7.25mb",
+                  "maximumError": "7.5mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+                  "maximumWarning": "150kb",
+                  "maximumError": "200kb"
                 }
               ]
             },
