@@ -14,19 +14,6 @@ export const accountTypes = {
 export const supportUserEmailDomain = "@kpmg.co.uk";
 export const dftUserEmailDomain = "@dft.gov.uk";
 
-export const canUserViewServiceMonitoring = (
-  email: string,
-  account_type: number | null,
-) => {
-  email = email.toLowerCase();
-
-  // Allow access to users with dft.gov.uk and site admins (account_type = 1)
-  return (
-    email.endsWith(supportUserEmailDomain) ||
-    (account_type === accountTypes.admin && email.endsWith(dftUserEmailDomain))
-  );
-};
-
 export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
   return db
     .selectFrom("transmodel_tracks")

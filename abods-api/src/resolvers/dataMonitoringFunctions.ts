@@ -17,24 +17,18 @@ import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
 import dayjs from "dayjs";
 
-const allowedSessionsWithin10mins = 10;
-const accessAllowedWithinAnHour = 20;
-const accessAllowedWithinADay = 50;
+const accessAllowedWithinAnHour = 10;
 
 const isUserAllowedAccess = (
   lastAccessed: Date | null | undefined,
   accessedCount: number,
 ) => {
   const currentTimestamp = dayjs();
+  if (!lastAccessed) return true;
+
   const diffLastAccessed = currentTimestamp.diff(dayjs(lastAccessed), "minute");
 
-  if (
-    (lastAccessed &&
-      accessedCount > allowedSessionsWithin10mins &&
-      diffLastAccessed <= 10) ||
-    (accessedCount > accessAllowedWithinAnHour && diffLastAccessed <= 60) ||
-    (accessedCount > accessAllowedWithinADay && diffLastAccessed <= 24 * 60)
-  ) {
+  if (accessedCount > accessAllowedWithinAnHour && diffLastAccessed <= 60) {
     return false;
   }
 
@@ -43,6 +37,7 @@ const isUserAllowedAccess = (
 
 const updateAccess = async (
   user_id: number,
+  previousAccessCount: number | null,
   dataMonitoringAccessCount: number,
   dataMonitoringLastAccessed: Date | null | undefined,
   db: Kysely<DB>,
@@ -51,7 +46,8 @@ const updateAccess = async (
   let accessCount = dataMonitoringAccessCount + 1;
   let updateQuery = db
     .updateTable("login_details")
-    .where("user_id", "=", user_id);
+    .where("user_id", "=", user_id)
+    .where("data_monitoring_access_count", "=", previousAccessCount);
 
   if (
     !dataMonitoringLastAccessed ||
@@ -63,11 +59,13 @@ const updateAccess = async (
     });
   }
 
-  await updateQuery
+  const updatedRows = await updateQuery
     .set({
       data_monitoring_access_count: accessCount,
     })
-    .execute();
+    .executeTakeFirst();
+
+  return updatedRows.numUpdatedRows;
 };
 
 const getDataMonitoringAccessDetails = (user_id: number, db: Kysely<DB>) => {
@@ -109,10 +107,13 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     organisationNames,
   );
 
-  const [url, dashboardAccessDetails] = await Promise.all([
-    getDashboardUrl(sessionTags, dashboardId),
-    getDataMonitoringAccessDetails(user.id, context.kysely),
-  ]);
+  const dashboardAccessDetails = await getDataMonitoringAccessDetails(
+    user.id,
+    context.kysely,
+  );
+
+  const previousAccessCount =
+    dashboardAccessDetails?.data_monitoring_access_count;
 
   const allowAccess = isUserAllowedAccess(
     dashboardAccessDetails?.data_monitoring_last_accessed,
@@ -125,23 +126,30 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     };
   }
 
-  if (url) {
-    await Promise.all([
-      updateAccess(
-        user.id,
-        dashboardAccessDetails?.data_monitoring_access_count ?? 0,
-        dashboardAccessDetails?.data_monitoring_last_accessed,
-        context.kysely,
-      ),
-      sendDistributionMetric(
-        "abods.graphql.quicksight.request",
-        1,
-        "function:GraphQlFunction",
-        `env:${process.env.PROJECT_ENV}`,
-        `user:${user.id}`,
-      ),
-    ]);
+  const rowsUpdated = await updateAccess(
+    user.id,
+    previousAccessCount ?? null,
+    dashboardAccessDetails?.data_monitoring_access_count ?? 0,
+    dashboardAccessDetails?.data_monitoring_last_accessed,
+    context.kysely,
+  );
+
+  if (Number(rowsUpdated) < 1) {
+    return {
+      enabled: allowAccess,
+    };
   }
+
+  const [url, ___] = await Promise.all([
+    getDashboardUrl(sessionTags, dashboardId),
+    sendDistributionMetric(
+      "abods.graphql.quicksight.request",
+      1,
+      "function:GraphQlFunction",
+      `env:${process.env.PROJECT_ENV}`,
+      `user:${user.id}`,
+    ),
+  ]);
 
   logger.info("Dashboard enabled for user");
   return {

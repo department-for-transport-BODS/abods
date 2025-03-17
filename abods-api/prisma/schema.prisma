@@ -622,4 +622,5 @@ model login_details {
   user_id                         Int @unique
   data_monitoring_access_count    Int?
   data_monitoring_last_accessed   DateTime?
+  last_login                      DateTime?
 }
