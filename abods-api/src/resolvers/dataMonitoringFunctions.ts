@@ -68,7 +68,7 @@ const updateAccess = async (
     .execute();
 };
 
-const getDashboardAccessDetails = (user_id: number, db: Kysely<DB>) => {
+const getDataMonitoringAccessDetails = (user_id: number, db: Kysely<DB>) => {
   return db
     .selectFrom("Tokens")
     .select(["data_monitoring_access_count", "data_monitoring_last_accessed"])
@@ -109,7 +109,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const [url, dashboardAccessDetails] = await Promise.all([
     getDashboardUrl(sessionTags, dashboardId),
-    getDashboardAccessDetails(user.id, context.kysely),
+    getDataMonitoringAccessDetails(user.id, context.kysely),
   ]);
 
   const allowAccess = isUserAllowedAccess(
