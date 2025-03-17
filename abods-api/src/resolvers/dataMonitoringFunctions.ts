@@ -49,7 +49,9 @@ const updateAccess = async (
 ) => {
   const currentTimestamp = dayjs();
   let accessCount = dataMonitoringAccessCount + 1;
-  let updateQuery = db.updateTable("Tokens").where("user_id", "=", user_id);
+  let updateQuery = db
+    .updateTable("login_details")
+    .where("user_id", "=", user_id);
 
   if (
     !dataMonitoringLastAccessed ||
@@ -70,7 +72,7 @@ const updateAccess = async (
 
 const getDataMonitoringAccessDetails = (user_id: number, db: Kysely<DB>) => {
   return db
-    .selectFrom("Tokens")
+    .selectFrom("login_details")
     .select(["data_monitoring_access_count", "data_monitoring_last_accessed"])
     .where("user_id", "=", user_id)
     .executeTakeFirst();
@@ -149,7 +151,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 };
 
 const dataMonitoringResolvers: Resolvers = {
-  Mutation: {
+  Query: {
     embeddedUrl: getEmbeddedUrl,
   },
 };

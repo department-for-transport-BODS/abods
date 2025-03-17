@@ -66,8 +66,6 @@ model Tokens {
   token                             String?   @db.VarChar(150)
   expires                           DateTime? @default(dbgenerated("(now() + '1000:00:00'::interval hour)")) @db.Timestamp(6)
   user                              bods_user @relation(fields: [user_id], references: [id])
-  data_monitoring_access_count   Int?
-  data_monitoring_last_accessed  DateTime?
 }
 
 model SiriVMPositions {
@@ -618,4 +616,10 @@ model ui_lta {
 
   @@unique([id, name], map: "ui_lta_id_name_uniq")
   @@index([name])
+}
+
+model login_details {
+  user_id                         Int @unique
+  data_monitoring_access_count    Int?
+  data_monitoring_last_accessed   DateTime?
 }
