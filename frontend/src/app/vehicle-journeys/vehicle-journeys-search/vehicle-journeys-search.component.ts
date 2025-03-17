@@ -12,10 +12,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { DateTime, Duration, Interval } from "luxon";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 import { CustomValidators } from "../../shared/validators/custom-validators";
 import { combineLatest, Observable, of, Subject, switchMap } from "rxjs";
 import {
@@ -34,7 +31,7 @@ import { VehicleJourneysSearchService } from "./vehicle-journeys-search.service"
 import { ConfigService } from "../../config/config.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { isEqual as _isEqual } from "lodash-es";
-import { Journey, LineType } from "../../../generated/graphql";
+import { Journey, LineType, OperatorType } from "../../../generated/graphql";
 
 @Component({
   selector: "app-vehicle-journeys-search",
@@ -78,7 +75,7 @@ export class VehicleJourneysSearchComponent
 
   operatorInputTerm$ = new Subject<string>();
 
-  operators$?: Observable<Operator[]>;
+  operators$?: Observable<OperatorType[]>;
   services$?: Observable<LineType[]>;
 
   vehicleJourneys: Journey[] = [];
