@@ -62,10 +62,10 @@ model FeatureFlag {
 }
 
 model Tokens {
-  user_id                           Int       @id
-  token                             String?   @db.VarChar(150)
-  expires                           DateTime? @default(dbgenerated("(now() + '1000:00:00'::interval hour)")) @db.Timestamp(6)
-  user                              bods_user @relation(fields: [user_id], references: [id])
+  user_id Int       @id
+  token   String?   @db.VarChar(150)
+  expires DateTime? @default(dbgenerated("(now() + '1000:00:00'::interval hour)")) @db.Timestamp(6)
+  user    bods_user @relation(fields: [user_id], references: [id])
 }
 
 model SiriVMPositions {
@@ -619,8 +619,8 @@ model ui_lta {
 }
 
 model login_details {
-  user_id                         Int @unique
-  last_login                      DateTime
-  data_monitoring_access_count    Int?
-  data_monitoring_last_accessed   DateTime?
+  user_id                       Int       @id
+  last_login                    DateTime  @db.Timestamp(6)
+  data_monitoring_access_count  Int?
+  data_monitoring_last_accessed DateTime? @db.Timestamp(6)
 }
