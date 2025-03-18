@@ -331,7 +331,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.map.easeTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
+    this.map.fitBounds(location.bbox, { maxDuration: 500 });
   }
 
   zoomToPoint(center: [number, number]) {
