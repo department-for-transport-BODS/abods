@@ -88,7 +88,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
     .select((eb) => [
       eb.fn.coalesce("name", sql.lit("<unknown>")).as("name"),
       eb.fn.coalesce("operator_noc", sql.lit("<unknown>")).as("operatorId"),
-      sql<string>`string_agg(distinct n.adminarea_id::text, ',' order by adminarea_id asc)`.as(
+      sql<string>`string_agg(distinct n.adminarea_id::text, ',')`.as(
         "adminAreaIds",
       ),
     ])
