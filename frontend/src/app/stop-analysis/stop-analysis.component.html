@@ -93,7 +93,6 @@
       <mgl-map
         [style]="mapboxStyle"
         [maxBounds]="initialBounds"
-        (zoomEnd)="onMapZoomEnd()"
         (moveEnd)="onMapMoveEnd()"
         (mapLoad)="onMapLoad($event)"
       >
@@ -114,7 +113,7 @@
           id="stops"
           [data]="stopPoints"
           [cluster]="true"
-          [clusterRadius]="100"
+          [clusterRadius]="80"
           [clusterProperties]="clusterProperties"
         />
         <mgl-layer
@@ -129,8 +128,12 @@
               ['get', 'point_count'],
               20,
               5,
-              30,
+              25,
               20,
+              30,
+              50,
+              35,
+              100,
               40
             ],
             'circle-color': pointColours,
@@ -183,9 +186,9 @@
               ['exponential', 0.5],
               ['zoom'],
               11,
-              2,
+              0.8,
               14,
-              3
+              1
             ],
             'circle-stroke-color': '#ffffff'
           }"
@@ -210,6 +213,7 @@
               14,
               1
             ],
+            'icon-allow-overlap': true,
             'icon-image': timingPointIcons
           }"
         />

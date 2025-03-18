@@ -1,6 +1,14 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
-import { CirclePaint, LngLat, Map, SymbolLayout } from "mapbox-gl";
+import {
+  CirclePaint,
+  GeoJSONSource,
+  LngLat,
+  LngLatBounds,
+  Map,
+  MapMouseEvent,
+  SymbolLayout,
+} from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
@@ -18,8 +26,6 @@ import { Preset } from "../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
 import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
-
-const MAX_ZOOM_LEVEL = 12;
 
 @Component({
   selector: "app-stop-analysis",
@@ -59,6 +65,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   };
   redThreshold = 0.6;
   greenThreshold = 0.8;
+  boundWidth = 1;
+  boundingBoxTooBig = true;
   pointColours: CirclePaint["circle-color"] = [
     "case",
     ["==", ["get", "completedDepartures"], 0],
@@ -103,6 +111,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
   dayOfWeekFlags = getDefaultDayOfWeekFlags();
+  maxBoundWidth = 0.4;
 
   _startTime = "00:00";
   get startTime() {
@@ -119,10 +128,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   set endTime(val: string) {
     this._endTime = val;
     this.onFilterChanged();
-  }
-
-  get boundingBoxTooBig() {
-    return this.zoomLevel < MAX_ZOOM_LEVEL;
   }
 
   constructor(
@@ -143,10 +148,19 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     // TODO: parse query params
     const boundsChanged = this.boundsChanged.pipe(
       takeUntil(this.destroy$),
+      tap(() => {
+        if (!this.map) return undefined;
+        this.center = this.map.getCenter();
+        this.zoomLevel = this.map.getZoom();
+      }),
       map(() => {
         if (!this.map) return undefined;
+
+        const bounds = this.map.getBounds();
+        this.boundWidth = bounds.getEast() - bounds.getWest();
+        this.boundingBoxTooBig = this.boundWidth >= this.maxBoundWidth;
         if (this.boundingBoxTooBig) return undefined;
-        return this.getNewBounds(this.map);
+        return this.getNewBounds(bounds);
       }),
       tap((bounds) => {
         if (!bounds) return;
@@ -208,7 +222,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onMapLoad(map: Map): void {
     this.map = map;
-    this.onMapZoomEnd();
     this.onMapMoveEnd();
 
     // For some reason this doesn't work passing a method to the map layer props
@@ -259,11 +272,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onMapStyleChanged(style: string) {
     this.mapboxStyle = style;
-  }
-
-  onMapZoomEnd() {
-    if (!this.map) return;
-    this.zoomLevel = this.map.getZoom();
   }
 
   onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
@@ -400,8 +408,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     };
   }
 
-  getNewBounds(map: Map): BoundingBoxInputType {
-    const bounds = map.getBounds();
+  getNewBounds(bounds: LngLatBounds): BoundingBoxInputType {
     return {
       maxLatitude: bounds.getNorth(),
       minLatitude: bounds.getSouth(),
