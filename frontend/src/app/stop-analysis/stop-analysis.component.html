@@ -101,7 +101,7 @@
     <div class="map-container">
       <mgl-map
         [style]="mapboxStyle"
-        [maxBounds]="initialBounds"
+        [bounds]="initialBounds"
         (moveEnd)="onMapMoveEnd()"
         (mapLoad)="onMapLoad($event)"
       >
