@@ -57,15 +57,6 @@
           />
         </app-segmented-toggle>
       </div>
-      <app-filter-chips
-        [filters]="{
-          dayOfWeekFlags: this.dayOfWeekFlags,
-          startTime: this.startTime,
-          endTime: this.endTime,
-          adminAreaIds: this.adminAreaIds
-        }"
-        (filterChange)="onFiltersChanged($event)"
-      />
       <div>
         <label class="govuk-label" for="location"
           >Location name or postcode</label
@@ -97,6 +88,15 @@
           (selectedChange)="onServicesChanged($event)"
         />
       </div>
+      <app-filter-chips
+        [filters]="{
+          dayOfWeekFlags: this.dayOfWeekFlags,
+          startTime: this.startTime,
+          endTime: this.endTime,
+          adminAreaIds: this.adminAreaIds
+        }"
+        (filterChange)="onFiltersChanged($event)"
+      />
     </div>
     <div class="map-container">
       <mgl-map
