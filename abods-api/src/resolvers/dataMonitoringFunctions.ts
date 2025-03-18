@@ -67,9 +67,7 @@ const updateAccess = async (
       "minute",
     ) > 60
   ) {
-    if (previousAccessDetails?.data_monitoring_access_count !== null) {
-      accessCount = 0;
-    }
+    accessCount = 1;
     updateQuery = updateQuery.set({
       data_monitoring_last_accessed: currentTimestamp.toDate(),
     });
