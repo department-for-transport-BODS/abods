@@ -3,17 +3,6 @@ import { DB } from "../kysely";
 import { RouteType, ServiceLinkType } from "../types/generated.js";
 import haversineDistance from "haversine-distance";
 
-export const accountTypes = {
-  admin: 1,
-  orgAdmin: 2,
-  orgStaff: 3,
-  developer: 4,
-  agentUser: 5,
-};
-
-export const supportUserEmailDomain = "@kpmg.co.uk";
-export const dftUserEmailDomain = "@dft.gov.uk";
-
 export const getTracksData = async (stop_atcos: string[], db: Kysely<DB>) => {
   return db
     .selectFrom("transmodel_tracks")
