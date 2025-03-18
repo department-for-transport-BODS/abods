@@ -274,8 +274,26 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.mapboxStyle = style;
   }
 
-  onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
-    this.zoomToPoint([event.lngLat.lng, event.lngLat.lat]);
+  onClusterClick(e: MapMouseEvent): void {
+    if (!this.map) return;
+    const features = this.map.queryRenderedFeatures(e.point, {
+      layers: ["clusters"],
+    });
+    if (features.length === 0) return;
+    const feature = features[0].geometry;
+    if (feature.type !== "Point" || !features[0].properties) return;
+    const clusterId = features[0].properties.cluster_id as number;
+    const coordinates = feature.coordinates as [number, number];
+    (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
+      clusterId,
+      (err, zoom) => {
+        if (err || !this.map) return;
+        this.map.easeTo({
+          center: coordinates,
+          zoom: zoom,
+        });
+      },
+    );
   }
 
   onTableStopNameClicked($event: StopPerformance) {
