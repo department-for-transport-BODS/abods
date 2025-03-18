@@ -7,6 +7,19 @@
         [to]="to"
         (valueChanged)="onDatePickerChanged($event)"
       />
+
+      <button
+        class="more-filters button-link govuk-link"
+        aria-controls="panel"
+        id="panel-toggle"
+      >
+        <svg-icon
+          class="on-time__filter-icon"
+          src="assets/icons/refine.svg"
+          [applyClass]="true"
+        />
+        <span>Refine results</span>
+      </button>
       <div class="toggles">
         <app-segmented-toggle
           [(ngModel)]="matchType"

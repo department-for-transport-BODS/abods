@@ -3,16 +3,27 @@
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(2, min-content);
-  grid-column-gap: govuk-spacing(6);
-  grid-row-gap: govuk-spacing(2);
+  grid-template-columns: 3fr 2fr 2fr;
+  gap: govuk-spacing(6);
+
+  > * {
+    min-width: 0;
+  }
 }
 
 .toggles {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-end;
   gap: govuk-spacing(1);
+}
+
+.more-filters {
+  margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
+  display: flex;
+  justify-content: center;
 }
 
 .map-container {

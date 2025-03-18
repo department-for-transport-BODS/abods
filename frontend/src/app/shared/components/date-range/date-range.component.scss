@@ -2,9 +2,8 @@
 @import "src/assets/styles/helpers/helpers";
 
 .date-range {
-  display: grid;
-  grid-gap: govuk-spacing(6);
-  grid-template-columns: 267px 193px;
+  display: flex;
+  gap: govuk-spacing(3);
   &__input-wrapper {
     position: relative;
   }
