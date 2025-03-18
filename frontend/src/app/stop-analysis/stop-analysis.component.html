@@ -12,6 +12,7 @@
         class="more-filters button-link govuk-link"
         aria-controls="panel"
         id="panel-toggle"
+        (click)="onMoreFiltersClick()"
       >
         <svg-icon
           class="on-time__filter-icon"
@@ -56,6 +57,15 @@
           />
         </app-segmented-toggle>
       </div>
+      <app-filter-chips
+        [filters]="{
+          dayOfWeekFlags: this.dayOfWeekFlags,
+          startTime: this.startTime,
+          endTime: this.endTime,
+          adminAreaIds: this.adminAreaIds
+        }"
+        (filterChange)="onFiltersChanged($event)"
+      />
       <div>
         <label class="govuk-label" for="location"
           >Location name or postcode</label
@@ -87,18 +97,6 @@
           (selectedChange)="onServicesChanged($event)"
         />
       </div>
-      <app-day-of-week-select
-        [value]="dayOfWeekFlags"
-        (selectedChange)="onDayOfWeekFlagsChanged($event)"
-      />
-      <app-time-range-slider
-        labelMin="Start time"
-        labelMax="End time"
-        legend="Time range"
-        legendSize="s"
-        [(startTime)]="startTime"
-        [(endTime)]="endTime"
-      />
     </div>
     <div class="map-container">
       <mgl-map

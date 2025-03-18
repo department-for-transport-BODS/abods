@@ -25,7 +25,7 @@
         [(endTime)]="endTime"
         [error]="getErrors('startTime', 'endTime', 'startEndTime')"
       ></app-time-range-slider>
-      <fieldset class="govuk-fieldset">
+      <fieldset class="govuk-fieldset" *ngIf="showDelay">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
           Performance
         </legend>

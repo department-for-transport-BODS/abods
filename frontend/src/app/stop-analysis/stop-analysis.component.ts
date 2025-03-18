@@ -15,7 +15,9 @@ import {
   BoundingBoxInputType,
   DayOfWeekFlagsInputType,
   MatchType,
+  PerformanceFiltersInputType,
   StopAnalysisGQL,
+  StopAnalysisQueryVariables,
   StopStatistics,
 } from "../../generated/graphql";
 import { combineLatest, Subject, takeUntil } from "rxjs";
@@ -25,7 +27,8 @@ import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
-import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
+import { FiltersComponent } from "../on-time/filters/filters.component";
+import { PanelService } from "../shared/components/panel/panel.service";
 
 @Component({
   selector: "app-stop-analysis",
@@ -110,31 +113,20 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  dayOfWeekFlags = getDefaultDayOfWeekFlags();
+  dayOfWeekFlags: DayOfWeekFlagsInputType | null = null;
   maxBoundWidth = 0.4;
 
-  _startTime = "00:00";
-  get startTime() {
-    return this._startTime;
-  }
-  set startTime(val: string) {
-    this._startTime = val;
-    this.onFilterChanged();
-  }
-  _endTime = "23:59";
-  get endTime() {
-    return this._endTime;
-  }
-  set endTime(val: string) {
-    this._endTime = val;
-    this.onFilterChanged();
-  }
+  startTime: string | null = null;
+  endTime: string | null = null;
+
+  adminAreaIds: string[] | null = [];
 
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
+    private panelService: PanelService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -145,6 +137,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.setFilterPanelComponent();
     // TODO: parse query params
     const boundsChanged = this.boundsChanged.pipe(
       takeUntil(this.destroy$),
@@ -187,9 +180,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         mergeMap(([bounds]) => {
           // TODO: limit date range
 
-          const query = {
+          const query: StopAnalysisQueryVariables = {
             boundingBox: bounds!,
-            adminAreaIds: [], // nice to have, but not an AC yet
+            adminAreaIds: this.adminAreaIds ?? [],
             fromTimestamp: this.from.toISO(),
             toTimestamp: this.to.toISO(),
             operatorIds: this.operatorIds,
@@ -217,6 +210,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.destroyFilterPanel();
   }
 
   onMapLoad(map: Map): void {
@@ -319,11 +313,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onServicesChanged($event: string[]) {
     this.serviceIds = $event;
-    this.onFilterChanged();
-  }
-
-  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags = $event;
     this.onFilterChanged();
   }
 
@@ -444,5 +433,53 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       newBounds.maxLongitude <= bounds.maxLongitude &&
       newBounds.maxLatitude <= bounds.maxLatitude
     );
+  }
+
+  onFiltersChanged($event: PerformanceFiltersInputType) {
+    this.startTime = $event.startTime ?? null;
+    this.endTime = $event.endTime ?? null;
+    this.dayOfWeekFlags = $event.dayOfWeekFlags ?? null;
+    this.adminAreaIds = $event.adminAreaIds ?? null;
+    this.onFilterChanged();
+  }
+
+  onMoreFiltersClick() {
+    this.panelService.toggle();
+  }
+
+  setFilterPanelComponent() {
+    this.panelService.setComponent({
+      component: FiltersComponent,
+      inputs: [
+        {
+          name: "filters",
+          value: {
+            dayOfWeekFlags: this.dayOfWeekFlags,
+            startTime: this.startTime,
+            endTime: this.endTime,
+            adminAreaIds: this.adminAreaIds,
+          },
+        },
+        {
+          name: "showDelay",
+          value: false,
+        },
+      ],
+      outputs: [
+        {
+          name: "filtersChange",
+          outputEvent: ($event: PerformanceFiltersInputType) =>
+            this.onFiltersChanged($event),
+        },
+        {
+          name: "closeFilters",
+          outputEvent: () => this.panelService.close(),
+        },
+      ],
+    });
+  }
+
+  destroyFilterPanel() {
+    this.panelService.destroy();
   }
 }

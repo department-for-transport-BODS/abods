@@ -1001,13 +1001,13 @@ export type Stop = {
 export type StopAnalysisFiltersInput = {
   adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
-  dayOfWeekFlags: DayOfWeekFlagsInputType;
-  endTime: Scalars['String']['input'];
+  dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  endTime?: InputMaybe<Scalars['String']['input']>;
   fromTimestamp: Scalars['String']['input'];
   lineIds: Array<Scalars['String']['input']>;
   matchType: MatchType;
   operatorIds: Array<Scalars['String']['input']>;
-  startTime: Scalars['String']['input'];
+  startTime?: InputMaybe<Scalars['String']['input']>;
   toTimestamp: Scalars['String']['input'];
 };
 
@@ -1459,9 +1459,9 @@ export type StopAnalysisQueryVariables = Exact<{
   matchType: MatchType;
   operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
   toTimestamp: Scalars['String']['input'];
-  dayOfWeekFlags: DayOfWeekFlagsInputType;
-  startTime: Scalars['String']['input'];
-  endTime: Scalars['String']['input'];
+  dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  startTime?: InputMaybe<Scalars['String']['input']>;
+  endTime?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2769,7 +2769,7 @@ export const OperatorLinesDocument = gql`
     }
   }
 export const StopAnalysisDocument = gql`
-    query stopAnalysis($adminAreaIds: [String!]!, $boundingBox: BoundingBoxInputType!, $fromTimestamp: String!, $lineIds: [String!]!, $matchType: MatchType!, $operatorIds: [String!]!, $toTimestamp: String!, $dayOfWeekFlags: DayOfWeekFlagsInputType!, $startTime: String!, $endTime: String!) {
+    query stopAnalysis($adminAreaIds: [String!]!, $boundingBox: BoundingBoxInputType!, $fromTimestamp: String!, $lineIds: [String!]!, $matchType: MatchType!, $operatorIds: [String!]!, $toTimestamp: String!, $dayOfWeekFlags: DayOfWeekFlagsInputType, $startTime: String, $endTime: String) {
   stopAnalysis(
     inputs: {adminAreaIds: $adminAreaIds, boundingBox: $boundingBox, fromTimestamp: $fromTimestamp, lineIds: $lineIds, matchType: $matchType, operatorIds: $operatorIds, toTimestamp: $toTimestamp, dayOfWeekFlags: $dayOfWeekFlags, startTime: $startTime, endTime: $endTime}
   ) {

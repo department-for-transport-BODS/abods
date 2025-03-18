@@ -4,11 +4,16 @@
 .filters {
   display: grid;
   grid-template-columns: 3fr 2fr 2fr;
-  gap: govuk-spacing(6);
+  column-gap: govuk-spacing(6);
+  row-gap: govuk-spacing(3);
 
   > * {
     min-width: 0;
   }
+}
+
+app-filter-chips {
+  grid-column: 1 / span 3;
 }
 
 .toggles {
