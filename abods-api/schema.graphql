@@ -37,13 +37,12 @@ type Query {
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+  embeddedUrl: AWSQuicksightUser!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
-
-  embeddedUrl: AWSQuicksightUser!
 }
 
 type AWSQuicksightUser {
