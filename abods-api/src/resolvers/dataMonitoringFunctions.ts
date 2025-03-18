@@ -64,7 +64,7 @@ const updateAccess = async (
     !previousAccessDetails?.data_monitoring_last_accessed ||
     currentTimestamp.diff(
       dayjs(previousAccessDetails?.data_monitoring_last_accessed),
-      "hour",
+      "minute",
     ) > 60
   ) {
     if (previousAccessDetails?.data_monitoring_access_count !== null) {
