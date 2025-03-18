@@ -185,7 +185,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         debounceTime(500),
         // Don't run requests concurrently, and only run the latest when completed again
         mergeMap(([bounds]) => {
-          // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
           // TODO: limit date range
 
           const query = {
