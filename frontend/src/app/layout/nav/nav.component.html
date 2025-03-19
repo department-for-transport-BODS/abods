@@ -52,14 +52,7 @@
             >Corridors
           </a>
         </li>
-        <li
-          *ngIf="
-            loginInfo &&
-            loginInfo.canViewServiceMonitoring &&
-            configService.flag('serviceMonitoring')
-          "
-          class="nav__item"
-        >
+        <li *ngIf="loginInfo?.canViewServiceMonitoring" class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/service-monitoring']"
@@ -68,7 +61,7 @@
             >Service monitoring
           </a>
         </li>
-        <li class="nav__item" *ngIf="configService.flag('dataMonitoring')">
+        <li class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/data-monitoring']"
@@ -77,7 +70,7 @@
             >Data monitoring
           </a>
         </li>
-        <li class="nav__item" *ngIf="configService.flag('stopAnalysis')">
+        <li class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/stop-analysis']"

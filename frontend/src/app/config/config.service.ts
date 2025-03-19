@@ -84,11 +84,7 @@ function maxEnvironment(current: string, max: Environment): boolean {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function flags(currentEnv: string) {
   // TODO: get from API
-  return {
-    dataMonitoring: maxEnvironment(currentEnv, "test"),
-    serviceMonitoring: maxEnvironment(currentEnv, "test"),
-    stopAnalysis: maxEnvironment(currentEnv, "test"),
-  } as const;
+  return {} as const;
 }
 
 export interface FreshdeskConfig {
