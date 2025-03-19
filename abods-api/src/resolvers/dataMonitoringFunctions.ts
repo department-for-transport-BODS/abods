@@ -22,31 +22,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   __,
   context,
 ): Promise<AwsQuicksightUser> => {
-  checkRequiredQuicksightVars();
   const user = await requireUserSession(context);
-
-  const userDetails = await getUserTypeDetails(context.kysely, user.id);
-
-  const localTransportAuthorityNames = userDetails
-    .filter((user) => user.lta_name !== null)
-    .map((user) => user.lta_name!);
-
-  const organisationNames = userDetails
-    .filter((user) => user.org_name !== null)
-    .map((user) => user.org_name!);
-
-  const isAdmin = userDetails.some((user) => user.is_superuser === true);
-  const dashboardId = getDashboardId(isAdmin, localTransportAuthorityNames);
-
-  if (!dashboardId) {
-    throw Error("No quicksight dashboard id set in environment variables");
-  }
-
-  const sessionTags = getSessionTags(
-    isAdmin,
-    localTransportAuthorityNames,
-    organisationNames,
-  );
 
   const now = dayjs();
   const oneHourAgo = now.subtract(1, "hour");
@@ -84,8 +60,34 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .executeTakeFirst();
 
   if (Number(result.numUpdatedRows) < 1) {
+    logger.debug("Throttled access to data monitoring");
     return { enabled: false };
   }
+  logger.debug("Generating data monitoring url");
+  checkRequiredQuicksightVars();
+
+  const userDetails = await getUserTypeDetails(context.kysely, user.id);
+
+  const localTransportAuthorityNames = userDetails
+    .filter((user) => user.lta_name !== null)
+    .map((user) => user.lta_name!);
+
+  const organisationNames = userDetails
+    .filter((user) => user.org_name !== null)
+    .map((user) => user.org_name!);
+
+  const isAdmin = userDetails.some((user) => user.is_superuser === true);
+  const dashboardId = getDashboardId(isAdmin, localTransportAuthorityNames);
+
+  if (!dashboardId) {
+    throw Error("No quicksight dashboard id set in environment variables");
+  }
+
+  const sessionTags = getSessionTags(
+    isAdmin,
+    localTransportAuthorityNames,
+    organisationNames,
+  );
 
   const url = await getDashboardUrl(sessionTags, dashboardId);
   sendDistributionMetric(
