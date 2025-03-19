@@ -114,7 +114,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  maxBoundWidth = 0.4;
+  maxBoundWidth = 0.8;
   adminAreaIds: string[] | null = [];
 
   refinedFilters: PerformanceFiltersInputType = {};
