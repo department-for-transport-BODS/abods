@@ -50,7 +50,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
           .then(1)
           .else(eb("data_monitoring_access_count", "+", 1))
           .end(),
-        data_monitoring_last_accessed: eb
+        data_monitoring_access_refresh: eb
           .case()
           .when(replaceRecord)
           .then(now.add(1, "hour").toDate())
