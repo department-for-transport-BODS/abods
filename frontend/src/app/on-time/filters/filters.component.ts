@@ -13,7 +13,7 @@ import { AdminAreaService } from "../admin-area/admin-area.service";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map, switchMap, take, takeUntil } from "rxjs/operators";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
-import { BehaviorSubject, of, Subject } from "rxjs";
+import { of, Subject } from "rxjs";
 import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
 @Component({
@@ -85,54 +85,43 @@ export class FiltersComponent implements OnDestroy {
       value = {};
     }
 
-    this.setAdminAreaDropdown(value);
     this.oldFilters = value;
     this.setFilters(value);
   }
+  @Input() showDelay = true;
   @Input() showAdminAreas = true;
 
-  adminAreas$ = new BehaviorSubject<MultiselectCheckboxOption[]>([]);
+  private destroy$ = new Subject<void>();
+
+  adminAreas$ = this.showAdminAreas
+    ? this.adminAreaService.fetchAdminAreas().pipe(
+        takeUntil(this.destroy$),
+        map((areas) =>
+          areas
+            .map(
+              (area) =>
+                ({
+                  label: area.name,
+                  value: area.id,
+                }) as MultiselectCheckboxOption,
+            )
+            .sort(
+              (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
+                a.label.localeCompare(b.label),
+            ),
+        ),
+      )
+    : of([]);
   adminAreaIds: string[] = [];
 
   @Output() filtersChange = new EventEmitter<PerformanceFiltersInputType>();
   @Output() closeFilters = new EventEmitter();
-
-  private destroy$ = new Subject<void>();
 
   constructor(private adminAreaService: AdminAreaService) {}
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setAdminAreaDropdown(newFilters: PerformanceFiltersInputType): void {
-    const oldOpId = this.oldFilters?.operatorIds?.[0];
-    const newOpId = newFilters?.operatorIds?.[0];
-    if (oldOpId !== newOpId) {
-      this.adminAreaService
-        .fetchAdminAreasForOperator(newOpId!)
-        .pipe(
-          takeUntil(this.destroy$),
-          map((areas) =>
-            areas
-              .map(
-                (area) =>
-                  ({
-                    label: area.name,
-                    value: area.id,
-                  }) as MultiselectCheckboxOption,
-              )
-              .sort(
-                (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
-                  a.label.localeCompare(b.label),
-              ),
-          ),
-        )
-        .subscribe((data) => {
-          this.adminAreas$.next(data);
-        });
-    }
   }
 
   private setFilters(value: PerformanceFiltersInputType) {
@@ -179,6 +168,35 @@ export class FiltersComponent implements OnDestroy {
     this.validationErrors = { ...this.validationErrors, dayOfWeekFlags: "" };
   }
 
+  validate() {
+    const errors: Record<string, string | undefined> = {};
+
+    errors.dayOfWeekFlags = Object.values(this.dayOfWeekFlags).some((v) => v)
+      ? ""
+      : "Please select at least one day.";
+
+    const startHour = parseInt(this.startTime, 10);
+    const endHour = parseInt(this.endTime, 10);
+
+    if (
+      !/^\d\d:\d\d$/.test(this.startTime) ||
+      isNaN(startHour) ||
+      startHour < 0 ||
+      startHour > 23
+    )
+      errors.startTime = "Start time must be between '00:00' and '23:00'";
+    if (
+      !/^\d\d:\d\d$/.test(this.endTime) ||
+      isNaN(endHour) ||
+      endHour < 0 ||
+      endHour > 23
+    )
+      errors.endTime = "End time must be between '00:59' and '23:59'";
+    if (!errors.startTime && !errors.endTime && startHour > endHour)
+      errors.startEndTime = "Start time must be before end time.";
+    return errors;
+  }
+
   getErrors(...ks: string[]) {
     return ks.reduce((e, k) => {
       const ek = this.getError(k);
@@ -193,6 +211,12 @@ export class FiltersComponent implements OnDestroy {
   }
 
   apply() {
+    this.validationErrors = this.validate();
+
+    if (Object.values(this.validationErrors).some((v) => !!v)) {
+      return;
+    }
+
     const newFilters: PerformanceFiltersInputType = {};
 
     if (!Object.values(this.dayOfWeekFlags).every((v) => v)) {

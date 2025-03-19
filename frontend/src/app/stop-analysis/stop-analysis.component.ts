@@ -1,13 +1,23 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FeatureCollection, Point } from "geojson";
-import { CirclePaint, LngLat, Map, SymbolLayout } from "mapbox-gl";
+import {
+  CirclePaint,
+  GeoJSONSource,
+  LngLat,
+  LngLatBounds,
+  Map,
+  MapMouseEvent,
+  SymbolLayout,
+} from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   DayOfWeekFlagsInputType,
   MatchType,
+  PerformanceFiltersInputType,
   StopAnalysisGQL,
+  StopAnalysisQueryVariables,
   StopStatistics,
 } from "../../generated/graphql";
 import { combineLatest, Subject, takeUntil } from "rxjs";
@@ -17,9 +27,8 @@ import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
-import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
-
-const MAX_ZOOM_LEVEL = 12;
+import { FiltersComponent } from "../on-time/filters/filters.component";
+import { PanelService } from "../shared/components/panel/panel.service";
 
 @Component({
   selector: "app-stop-analysis",
@@ -59,6 +68,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   };
   redThreshold = 0.6;
   greenThreshold = 0.8;
+  boundWidth = 1;
+  boundingBoxTooBig = true;
   pointColours: CirclePaint["circle-color"] = [
     "case",
     ["==", ["get", "completedDepartures"], 0],
@@ -102,34 +113,20 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  dayOfWeekFlags = getDefaultDayOfWeekFlags();
+  dayOfWeekFlags: DayOfWeekFlagsInputType | null = null;
+  maxBoundWidth = 0.4;
 
-  _startTime = "00:00";
-  get startTime() {
-    return this._startTime;
-  }
-  set startTime(val: string) {
-    this._startTime = val;
-    this.onFilterChanged();
-  }
-  _endTime = "23:59";
-  get endTime() {
-    return this._endTime;
-  }
-  set endTime(val: string) {
-    this._endTime = val;
-    this.onFilterChanged();
-  }
+  startTime: string | null = null;
+  endTime: string | null = null;
 
-  get boundingBoxTooBig() {
-    return this.zoomLevel < MAX_ZOOM_LEVEL;
-  }
+  adminAreaIds: string[] | null = [];
 
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
+    private panelService: PanelService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -140,13 +137,23 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.setFilterPanelComponent();
     // TODO: parse query params
     const boundsChanged = this.boundsChanged.pipe(
       takeUntil(this.destroy$),
+      tap(() => {
+        if (!this.map) return undefined;
+        this.center = this.map.getCenter();
+        this.zoomLevel = this.map.getZoom();
+      }),
       map(() => {
         if (!this.map) return undefined;
+
+        const bounds = this.map.getBounds();
+        this.boundWidth = bounds.getEast() - bounds.getWest();
+        this.boundingBoxTooBig = this.boundWidth >= this.maxBoundWidth;
         if (this.boundingBoxTooBig) return undefined;
-        return this.getNewBounds(this.map);
+        return this.getNewBounds(bounds);
       }),
       tap((bounds) => {
         if (!bounds) return;
@@ -171,12 +178,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         debounceTime(500),
         // Don't run requests concurrently, and only run the latest when completed again
         mergeMap(([bounds]) => {
-          // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
           // TODO: limit date range
 
-          const query = {
+          const query: StopAnalysisQueryVariables = {
             boundingBox: bounds!,
-            adminAreaIds: [], // nice to have, but not an AC yet
+            adminAreaIds: this.adminAreaIds ?? [],
             fromTimestamp: this.from.toISO(),
             toTimestamp: this.to.toISO(),
             operatorIds: this.operatorIds,
@@ -204,11 +210,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.destroyFilterPanel();
   }
 
   onMapLoad(map: Map): void {
     this.map = map;
-    this.onMapZoomEnd();
     this.onMapMoveEnd();
 
     // For some reason this doesn't work passing a method to the map layer props
@@ -261,13 +267,26 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.mapboxStyle = style;
   }
 
-  onMapZoomEnd() {
+  onClusterClick(e: MapMouseEvent): void {
     if (!this.map) return;
-    this.zoomLevel = this.map.getZoom();
-  }
-
-  onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
-    this.zoomToPoint([event.lngLat.lng, event.lngLat.lat]);
+    const features = this.map.queryRenderedFeatures(e.point, {
+      layers: ["clusters"],
+    });
+    if (features.length === 0) return;
+    const feature = features[0].geometry;
+    if (feature.type !== "Point" || !features[0].properties) return;
+    const clusterId = features[0].properties.cluster_id as number;
+    const coordinates = feature.coordinates as [number, number];
+    (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
+      clusterId,
+      (err, zoom) => {
+        if (err || !this.map) return;
+        this.map.easeTo({
+          center: coordinates,
+          zoom: zoom,
+        });
+      },
+    );
   }
 
   onTableStopNameClicked($event: StopPerformance) {
@@ -297,15 +316,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.onFilterChanged();
   }
 
-  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags = $event;
-    this.onFilterChanged();
-  }
-
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.map.easeTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
+    this.map.fitBounds(location.bbox, { maxDuration: 500 });
   }
 
   zoomToPoint(center: [number, number]) {
@@ -400,8 +414,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     };
   }
 
-  getNewBounds(map: Map): BoundingBoxInputType {
-    const bounds = map.getBounds();
+  getNewBounds(bounds: LngLatBounds): BoundingBoxInputType {
     return {
       maxLatitude: bounds.getNorth(),
       minLatitude: bounds.getSouth(),
@@ -420,5 +433,53 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       newBounds.maxLongitude <= bounds.maxLongitude &&
       newBounds.maxLatitude <= bounds.maxLatitude
     );
+  }
+
+  onFiltersChanged($event: PerformanceFiltersInputType) {
+    this.startTime = $event.startTime ?? null;
+    this.endTime = $event.endTime ?? null;
+    this.dayOfWeekFlags = $event.dayOfWeekFlags ?? null;
+    this.adminAreaIds = $event.adminAreaIds ?? null;
+    this.onFilterChanged();
+  }
+
+  onMoreFiltersClick() {
+    this.panelService.toggle();
+  }
+
+  setFilterPanelComponent() {
+    this.panelService.setComponent({
+      component: FiltersComponent,
+      inputs: [
+        {
+          name: "filters",
+          value: {
+            dayOfWeekFlags: this.dayOfWeekFlags,
+            startTime: this.startTime,
+            endTime: this.endTime,
+            adminAreaIds: this.adminAreaIds,
+          },
+        },
+        {
+          name: "showDelay",
+          value: false,
+        },
+      ],
+      outputs: [
+        {
+          name: "filtersChange",
+          outputEvent: ($event: PerformanceFiltersInputType) =>
+            this.onFiltersChanged($event),
+        },
+        {
+          name: "closeFilters",
+          outputEvent: () => this.panelService.close(),
+        },
+      ],
+    });
+  }
+
+  destroyFilterPanel() {
+    this.panelService.destroy();
   }
 }

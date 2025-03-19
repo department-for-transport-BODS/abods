@@ -4,7 +4,8 @@
   (selectedChange)="onSelect($event)"
   [showAll]="true"
   [labelForId]="fieldId"
+  [disabled]="disabled"
   showAllLabel="All Services"
-  placeholderText="Services"
+  [placeholderText]="disabled && disabledText ? disabledText : 'Services'"
   ariaLabel="Services"
 />

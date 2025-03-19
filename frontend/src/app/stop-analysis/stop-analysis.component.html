@@ -7,6 +7,20 @@
         [to]="to"
         (valueChanged)="onDatePickerChanged($event)"
       />
+
+      <button
+        class="more-filters button-link govuk-link"
+        aria-controls="panel"
+        id="panel-toggle"
+        (click)="onMoreFiltersClick()"
+      >
+        <svg-icon
+          class="on-time__filter-icon"
+          src="assets/icons/refine.svg"
+          [applyClass]="true"
+        />
+        <span>Refine results</span>
+      </button>
       <div class="toggles">
         <app-segmented-toggle
           [(ngModel)]="matchType"
@@ -55,45 +69,39 @@
       </div>
       <div>
         <label class="govuk-label" for="operators">Operators</label>
-        <!--TODO: need to look at filtering to just the operators visible in the map,
-         and decide what to do if something not visible is selected-->
         <app-operator-multi-select
           [value]="operatorIds"
           fieldId="operators"
           (selectedChange)="onOperatorsChanged($event)"
         />
-        <div
-          [ngStyle]="{ display: operatorIds.length > 0 ? undefined : 'none' }"
-        >
-          <label class="govuk-label" for="services">Services</label>
-          <app-service-multi-select
-            [operators]="operatorIds"
-            [startDate]="from"
-            [endDate]="to"
-            [value]="serviceIds"
-            fieldId="services"
-            (selectedChange)="onServicesChanged($event)"
-          />
-        </div>
       </div>
-      <app-day-of-week-select
-        [value]="dayOfWeekFlags"
-        (selectedChange)="onDayOfWeekFlagsChanged($event)"
-      />
-      <app-time-range-slider
-        labelMin="Start time"
-        labelMax="End time"
-        legend="Time range"
-        legendSize="s"
-        [(startTime)]="startTime"
-        [(endTime)]="endTime"
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <app-service-multi-select
+          [operators]="operatorIds"
+          [startDate]="from"
+          [endDate]="to"
+          [value]="serviceIds"
+          [disabled]="operatorIds.length === 0"
+          disabledText="Select an operator"
+          fieldId="services"
+          (selectedChange)="onServicesChanged($event)"
+        />
+      </div>
+      <app-filter-chips
+        [filters]="{
+          dayOfWeekFlags: this.dayOfWeekFlags,
+          startTime: this.startTime,
+          endTime: this.endTime,
+          adminAreaIds: this.adminAreaIds
+        }"
+        (filterChange)="onFiltersChanged($event)"
       />
     </div>
     <div class="map-container">
       <mgl-map
         [style]="mapboxStyle"
-        [maxBounds]="initialBounds"
-        (zoomEnd)="onMapZoomEnd()"
+        [bounds]="initialBounds"
         (moveEnd)="onMapMoveEnd()"
         (mapLoad)="onMapLoad($event)"
       >
@@ -114,7 +122,7 @@
           id="stops"
           [data]="stopPoints"
           [cluster]="true"
-          [clusterRadius]="100"
+          [clusterRadius]="80"
           [clusterProperties]="clusterProperties"
         />
         <mgl-layer
@@ -129,8 +137,12 @@
               ['get', 'point_count'],
               20,
               5,
-              30,
+              25,
               20,
+              30,
+              50,
+              35,
+              100,
               40
             ],
             'circle-color': pointColours,
@@ -183,9 +195,9 @@
               ['exponential', 0.5],
               ['zoom'],
               11,
-              2,
+              0.8,
               14,
-              3
+              1
             ],
             'circle-stroke-color': '#ffffff'
           }"
@@ -210,6 +222,7 @@
               14,
               1
             ],
+            'icon-allow-overlap': true,
             'icon-image': timingPointIcons
           }"
         />

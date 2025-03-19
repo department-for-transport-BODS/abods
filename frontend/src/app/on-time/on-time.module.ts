@@ -92,6 +92,8 @@ import { StopsGridComponentDisplayComponent } from "./stops-grid/stops-grid-disp
     OperatorGridComponent,
     OnTimeGridComponent,
     StopsGridComponentDisplayComponent,
+    FilterChipsComponent,
+    FiltersComponent,
   ],
 })
 export class OnTimeModule {}

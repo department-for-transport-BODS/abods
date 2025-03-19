@@ -3,16 +3,32 @@
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(2, min-content);
-  grid-column-gap: govuk-spacing(6);
-  grid-row-gap: govuk-spacing(2);
+  grid-template-columns: 3fr 2fr 2fr;
+  column-gap: govuk-spacing(6);
+  row-gap: govuk-spacing(3);
+
+  > * {
+    min-width: 0;
+  }
+}
+
+app-filter-chips {
+  grid-column: 1 / span 3;
 }
 
 .toggles {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-end;
   gap: govuk-spacing(1);
+}
+
+.more-filters {
+  margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
+  display: flex;
+  justify-content: center;
 }
 
 .map-container {
@@ -31,7 +47,7 @@
   mgl-map {
     grid-area: 1 / 1;
     height: 1px;
-    min-height: 80vh;
+    min-height: 60vh;
     width: 100%;
     border: solid 1px $govuk-border-colour;
   }

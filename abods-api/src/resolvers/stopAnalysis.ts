@@ -44,9 +44,10 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .where("t.date_of_journey", ">=", startDateUtc.toDate())
     .where("t.date_of_journey", "<", endDateUtc.toDate());
 
-  const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
-  dbQuery = dbQuery.where("t.day_of_week", "in", days);
-
+  if (args.inputs.dayOfWeekFlags) {
+    const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
+    dbQuery = dbQuery.where("t.day_of_week", "in", days);
+  }
   let operatorIds = await getUserOperatorIds(user, context.kysely);
 
   if (args.inputs.operatorIds.length > 0) {
