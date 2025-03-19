@@ -36,32 +36,20 @@ export class FeedMonitoringService {
   ) {}
 
   get listOperators(): Observable<
-    { nocCode: string; operatorId: string; name?: string | null }[]
+    { operatorId: string; name?: string | null }[]
   > {
-    return this.operatorListQuery.fetch({}).pipe(
-      map(
-        ({ data }) =>
-          data?.operators?.items?.map(
-            (x) =>
-              x as {
-                nocCode: string;
-                operatorId: string;
-                name?: string | null;
-              },
-          ) ?? [],
-      ),
-    );
+    return this.operatorListQuery
+      .fetch({})
+      .pipe(map(({ data }) => data.operators));
   }
 
   fetchFeedMonitoringList(): Observable<BasicOperatorFragment[] | null> {
     return this.feedMonitoringListQuery.fetch({}).pipe(
       map(({ data }) => {
-        if (!data?.operators?.items?.length) {
+        if (!data.operatorsFeedMonitoring.length) {
           console.warn("No operators configured for user.");
-          return [];
-        } else {
-          return data?.operators.items?.map((x) => x as BasicOperatorFragment);
         }
+        return data.operatorsFeedMonitoring;
       }),
       catchError(() => of(null)),
     );
@@ -74,16 +62,13 @@ export class FeedMonitoringService {
   > {
     return this.operatorSparklineStatsQuery.fetch({ operatorIds }).pipe(
       map(({ data }) => {
-        if (!data?.operators?.items) {
+        if (!data.operatorsFeedMonitoring) {
           console.warn("Failed to fetch sparkline stats", operatorIds);
           return null;
         } else {
-          return data.operators.items.map((item) => ({
+          return data.operatorsFeedMonitoring.map((item) => ({
             operatorId: item?.operatorId,
-            last24Hours:
-              item?.feedMonitoring?.liveStats?.last24Hours?.map(
-                (x) => x as VehicleStatsType,
-              ) ?? [],
+            last24Hours: item?.feedMonitoring?.liveStats?.last24Hours ?? [],
           }));
         }
       }),
@@ -95,7 +80,7 @@ export class FeedMonitoringService {
   ): Observable<OperatorLiveStatusFragment | null> {
     return this.operatorLiveStatusQuery.fetch({ operatorId }).pipe(
       map((res) => {
-        const operator = res?.data?.operator ?? null;
+        const operator = res.data.operatorFeedMonitoring ?? null;
         if (!operator && res?.errors) {
           throw new Error(res.errors.map(({ message }) => message).join(", "));
         }
@@ -117,7 +102,7 @@ export class FeedMonitoringService {
       })
       .pipe(
         map((res) => {
-          const operator = res?.data?.operator ?? null;
+          const operator = res.data.operatorFeedMonitoring ?? null;
           if (!operator && res?.errors) {
             throw new Error(
               res.errors.map(({ message }) => message).join(", "),

@@ -3,10 +3,7 @@ import {
   Maybe,
   QueryResolvers,
   Resolvers,
-  RoleType,
-  ScopeEnum,
 } from "../types/generated.js";
-import { requireUserSession } from "./helpers.js";
 import logger from "../logger.js";
 
 // Summary: fetch api info
@@ -28,31 +25,9 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (
   };
 };
 
-// Summary: fetch roles
-export const getRoles: QueryResolvers["roles"] = async (
-  _,
-  __,
-  context,
-): Promise<Maybe<RoleType[]>> => {
-  await requireUserSession(context);
-  return [
-    {
-      id: "1",
-      name: "Staff",
-      scope: ScopeEnum.Organisation,
-    },
-    {
-      id: "2",
-      name: "Administrator",
-      scope: ScopeEnum.Organisation,
-    },
-  ];
-};
-
 const sharedResolvers: Resolvers = {
   Query: {
     apiInfo: getApiInfo,
-    roles: getRoles,
   },
 };
 

@@ -32,11 +32,6 @@ export type AddFirstStopInputType = {
   searchString?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type AdminAreaInfoType = {
-  __typename?: 'AdminAreaInfoType';
-  adminAreaId: Scalars['String']['output'];
-};
-
 export type AdminAreasType = {
   __typename?: 'AdminAreasType';
   id: Scalars['String']['output'];
@@ -135,21 +130,11 @@ export type CorridorInputType = {
   stopIds: Array<Scalars['String']['input']>;
 };
 
-export type CorridorJourneyTimeStatsType = {
-  __typename?: 'CorridorJourneyTimeStatsType';
-  avgTransitTime?: Maybe<Scalars['Float']['output']>;
-  maxTransitTime: Scalars['Int']['output'];
-  minTransitTime: Scalars['Int']['output'];
-  percentile25?: Maybe<Scalars['Float']['output']>;
-  percentile75?: Maybe<Scalars['Float']['output']>;
-  ts?: Maybe<Scalars['String']['output']>;
-};
-
 export type CorridorNamespace = {
   __typename?: 'CorridorNamespace';
-  addFirstStop?: Maybe<Array<Maybe<StopType>>>;
-  addSubsequentStops?: Maybe<Array<Maybe<StopType>>>;
-  corridorList?: Maybe<Array<Maybe<CorridorType>>>;
+  addFirstStop: Array<StopType>;
+  addSubsequentStops: Array<StopType>;
+  corridorList: Array<CorridorType>;
   getCorridor?: Maybe<CorridorType>;
   stats?: Maybe<CorridorStatsType>;
 };
@@ -186,7 +171,7 @@ export type CorridorStatsDayOfWeekType = {
 
 export type CorridorStatsHistogramType = {
   __typename?: 'CorridorStatsHistogramType';
-  hist?: Maybe<Array<CorridorHistogramType>>;
+  hist: Array<CorridorHistogramType>;
   ts?: Maybe<Scalars['String']['output']>;
 };
 
@@ -207,7 +192,7 @@ export type CorridorStatsPerServiceType = {
   recordedTransits?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   servicePatternName: Scalars['String']['output'];
-  totalJourneyTime?: Maybe<Scalars['Int']['output']>;
+  totalTransitTime?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CorridorStatsTimeOfDayType = {
@@ -222,28 +207,38 @@ export type CorridorStatsTimeOfDayType = {
 
 export type CorridorStatsType = {
   __typename?: 'CorridorStatsType';
-  journeyTimeDayOfWeekStats?: Maybe<Array<Maybe<CorridorStatsDayOfWeekType>>>;
-  journeyTimeHistogram?: Maybe<Array<Maybe<CorridorStatsHistogramType>>>;
-  journeyTimePerServiceStats?: Maybe<Array<Maybe<CorridorStatsPerServiceType>>>;
-  journeyTimeStats?: Maybe<Array<Maybe<CorridorJourneyTimeStatsType>>>;
-  journeyTimeTimeOfDayStats?: Maybe<Array<Maybe<CorridorStatsTimeOfDayType>>>;
-  serviceLinks?: Maybe<Array<Maybe<ServiceLinkType>>>;
+  serviceLinks: Array<ServiceLinkType>;
   summaryStats?: Maybe<CorridorSummaryStatsType>;
+  transitTimeDayOfWeekStats: Array<CorridorStatsDayOfWeekType>;
+  transitTimeHistogram: Array<CorridorStatsHistogramType>;
+  transitTimePerServiceStats: Array<CorridorStatsPerServiceType>;
+  transitTimeStats: Array<CorridorTransitTimeStatsType>;
+  transitTimeTimeOfDayStats: Array<CorridorStatsTimeOfDayType>;
 };
 
 export type CorridorSummaryStatsType = {
   __typename?: 'CorridorSummaryStatsType';
-  averageJourneyTime?: Maybe<Scalars['Int']['output']>;
+  averageTransitTime?: Maybe<Scalars['Int']['output']>;
   numberOfServices?: Maybe<Scalars['Int']['output']>;
   scheduledTransits?: Maybe<Scalars['Int']['output']>;
   totalTransits?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CorridorTransitTimeStatsType = {
+  __typename?: 'CorridorTransitTimeStatsType';
+  avgTransitTime?: Maybe<Scalars['Float']['output']>;
+  maxTransitTime: Scalars['Int']['output'];
+  minTransitTime: Scalars['Int']['output'];
+  percentile25?: Maybe<Scalars['Float']['output']>;
+  percentile75?: Maybe<Scalars['Float']['output']>;
+  ts?: Maybe<Scalars['String']['output']>;
 };
 
 export type CorridorType = {
   __typename?: 'CorridorType';
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
-  stops?: Maybe<Array<Maybe<StopInfoType>>>;
+  stops: Array<StopInfoType>;
 };
 
 export type CorridorUpdateInputType = {
@@ -282,7 +277,7 @@ export type EventData = {
 
 export type EventResponse = {
   __typename?: 'EventResponse';
-  items?: Maybe<Array<EventType>>;
+  items: Array<EventType>;
 };
 
 export type EventStatsType = {
@@ -307,7 +302,7 @@ export type FeedMonitoringType = {
   liveStats?: Maybe<LiveStatsType>;
   operatorId: Scalars['String']['output'];
   unavailableSince?: Maybe<Scalars['DateTime']['output']>;
-  vehicleStats?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  vehicleStats?: Maybe<Array<VehicleStatsType>>;
 };
 
 
@@ -381,9 +376,9 @@ export type HeadwayInputType = {
 export type HeadwayMetricsType = {
   __typename?: 'HeadwayMetricsType';
   frequentServiceInfo?: Maybe<FrequentServiceInfoType>;
-  frequentServices?: Maybe<Array<Maybe<FrequentServiceType>>>;
+  frequentServices?: Maybe<Array<FrequentServiceType>>;
   headwayOverview?: Maybe<HeadwayOverviewType>;
-  headwayTimeSeries?: Maybe<Array<Maybe<HeadwayTimeSeriesType>>>;
+  headwayTimeSeries?: Maybe<Array<HeadwayTimeSeriesType>>;
 };
 
 
@@ -430,7 +425,6 @@ export type HistoricalStatsType = {
 export type InvitationInput = {
   email: Scalars['String']['input'];
   organisation: OrganisationReferenceInput;
-  role: RoleReferenceInput;
 };
 
 export type InvitationResponseType = {
@@ -481,8 +475,8 @@ export type LiveStatsType = {
   expectedVehicles?: Maybe<Scalars['Int']['output']>;
   feedAlerts?: Maybe<Scalars['Int']['output']>;
   feedErrors?: Maybe<Scalars['Int']['output']>;
-  last20Minutes?: Maybe<Array<Maybe<VehicleStatsType>>>;
-  last24Hours?: Maybe<Array<Maybe<VehicleStatsType>>>;
+  last20Minutes?: Maybe<Array<VehicleStatsType>>;
+  last24Hours?: Maybe<Array<VehicleStatsType>>;
   operatorId: Scalars['String']['output'];
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
@@ -493,6 +487,14 @@ export type LocalityType = {
   localityAreaName?: Maybe<Scalars['String']['output']>;
   localityId?: Maybe<Scalars['String']['output']>;
   localityName?: Maybe<Scalars['String']['output']>;
+};
+
+export type LoginInfo = {
+  __typename?: 'LoginInfo';
+  canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewServiceMonitoring: Scalars['Boolean']['output'];
+  currentUserId: Scalars['String']['output'];
+  serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoginResponse = {
@@ -617,7 +619,7 @@ export type OnTimePerformanceType = {
   punctualityTimeOfDay?: Maybe<Array<PunctualityTimeOfDayType>>;
   punctualityTimeSeries?: Maybe<Array<PunctualityTimeSeriesType>>;
   servicePerformance?: Maybe<Array<ServicePerformanceType>>;
-  servicePunctuality?: Maybe<Array<Maybe<ServicePunctualityType>>>;
+  servicePunctuality: Array<ServicePunctualityType>;
   stopPerformance?: Maybe<Array<StopPerformanceType>>;
 };
 
@@ -666,13 +668,20 @@ export type OnTimePerformanceTypeStopPerformanceArgs = {
   inputs: PerformanceInputType;
 };
 
+export type OperatorFeedMonitoring = {
+  __typename?: 'OperatorFeedMonitoring';
+  feedMonitoring?: Maybe<FeedMonitoringType>;
+  name: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+};
+
 export type OperatorFilterInput = {
   operatorIds: Array<Scalars['String']['input']>;
 };
 
 export type OperatorPerformancePage = {
   __typename?: 'OperatorPerformancePage';
-  items?: Maybe<Array<OperatorPerformanceType>>;
+  items: Array<OperatorPerformanceType>;
   pageInfo?: Maybe<PageInfo>;
 };
 
@@ -688,26 +697,13 @@ export type OperatorPerformanceType = {
 
 export type OperatorType = {
   __typename?: 'OperatorType';
-  adminAreas?: Maybe<Array<Maybe<AdminAreaInfoType>>>;
-  feedMonitoring?: Maybe<FeedMonitoringType>;
-  name?: Maybe<Scalars['String']['output']>;
-  nocCode?: Maybe<Scalars['String']['output']>;
+  adminAreaIds: Array<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
-};
-
-export type OperatorsPage = {
-  __typename?: 'OperatorsPage';
-  items?: Maybe<Array<Maybe<OperatorType>>>;
 };
 
 export type OrganisationReferenceInput = {
   id: Scalars['String']['input'];
-};
-
-export type OrganisationType = {
-  __typename?: 'OrganisationType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
 };
 
 export enum OtpEnum {
@@ -801,7 +797,7 @@ export type Query = {
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
   embeddedUrl: AwsQuicksightUser;
-  eventStats?: Maybe<Array<Maybe<EventStatsType>>>;
+  eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
@@ -809,13 +805,13 @@ export type Query = {
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
-  operator?: Maybe<OperatorType>;
-  operators?: Maybe<OperatorsPage>;
-  roles?: Maybe<Array<RoleType>>;
+  operatorFeedMonitoring?: Maybe<OperatorFeedMonitoring>;
+  operators: Array<OperatorType>;
+  operatorsFeedMonitoring: Array<OperatorFeedMonitoring>;
   serviceInfo?: Maybe<ServiceInfoType>;
   servicePatterns: Array<ServicePatternType>;
-  stopAnalysis: Array<Maybe<StopAnalysisType>>;
-  user?: Maybe<UserType>;
+  stopAnalysis: Array<StopStatistics>;
+  user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
   users?: Maybe<Array<UserType>>;
@@ -864,17 +860,23 @@ export type QueryJourneyArgs = {
 
 
 export type QueryLinesArgs = {
-  inputDate?: InputMaybe<Scalars['String']['input']>;
-  operatorId: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  inputDate: Scalars['String']['input'];
+  operatorIds: Array<Scalars['String']['input']>;
 };
 
 
-export type QueryOperatorArgs = {
+export type QueryOperatorFeedMonitoringArgs = {
   operatorId: Scalars['String']['input'];
 };
 
 
 export type QueryOperatorsArgs = {
+  filterBy?: InputMaybe<OperatorFilterInput>;
+};
+
+
+export type QueryOperatorsFeedMonitoringArgs = {
   filterBy?: InputMaybe<OperatorFilterInput>;
 };
 
@@ -904,25 +906,9 @@ export enum RankingOrder {
   Descending = 'descending'
 }
 
-export type RoleReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type RoleType = {
-  __typename?: 'RoleType';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  scope: ScopeEnum;
-};
-
 export enum RouteType {
   InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
   Valid = 'VALID'
-}
-
-export enum ScopeEnum {
-  Organisation = 'organisation',
-  System = 'system'
 }
 
 export type ServiceInfoType = {
@@ -1013,29 +999,16 @@ export type Stop = {
 };
 
 export type StopAnalysisFiltersInput = {
-  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adminAreaIds: Array<Scalars['String']['input']>;
   boundingBox: BoundingBoxInputType;
-  fromTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-  lineId?: InputMaybe<Scalars['String']['input']>;
-  operatorId?: InputMaybe<Scalars['String']['input']>;
-  toTimestamp?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type StopAnalysisType = {
-  __typename?: 'StopAnalysisType';
-  averageDelay: Scalars['Float']['output'];
-  completedDepartures: Scalars['Int']['output'];
-  early: Scalars['Int']['output'];
-  late: Scalars['Int']['output'];
-  latitude: Scalars['Float']['output'];
-  lineId?: Maybe<Scalars['String']['output']>;
-  longitude: Scalars['Float']['output'];
-  onTime: Scalars['Int']['output'];
-  operatorId?: Maybe<Scalars['String']['output']>;
-  scheduledDepartures: Scalars['Int']['output'];
-  stopId: Scalars['Int']['output'];
-  stopName: Scalars['String']['output'];
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  endTime?: InputMaybe<Scalars['String']['input']>;
+  fromTimestamp: Scalars['String']['input'];
+  lineIds: Array<Scalars['String']['input']>;
+  matchType: MatchType;
+  operatorIds: Array<Scalars['String']['input']>;
+  startTime?: InputMaybe<Scalars['String']['input']>;
+  toTimestamp: Scalars['String']['input'];
 };
 
 export type StopInfoType = {
@@ -1058,7 +1031,24 @@ export type StopPerformanceType = {
   scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopInfo: StopInfoType;
-  timingPoint?: Maybe<Scalars['Boolean']['output']>;
+  timingPoint: Scalars['Boolean']['output'];
+};
+
+export type StopStatistics = {
+  __typename?: 'StopStatistics';
+  adminAreaName: Scalars['String']['output'];
+  atcoCode: Scalars['String']['output'];
+  completedDepartures: Scalars['Int']['output'];
+  early: Scalars['Int']['output'];
+  late: Scalars['Int']['output'];
+  latitude: Scalars['Float']['output'];
+  localityName: Scalars['String']['output'];
+  longitude: Scalars['Float']['output'];
+  onTime: Scalars['Int']['output'];
+  scheduledDepartures: Scalars['Int']['output'];
+  stopName: Scalars['String']['output'];
+  timingPoint: Scalars['Boolean']['output'];
+  totalDelay: Scalars['Float']['output'];
 };
 
 export type StopType = {
@@ -1079,19 +1069,15 @@ export enum StopsSegment {
 
 export type UserType = {
   __typename?: 'UserType';
-  email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
-  organisation?: Maybe<OrganisationType>;
-  roles?: Maybe<Array<RoleType>>;
   username: Scalars['String']['output'];
 };
 
 export type UserUpdateInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
-  role: RoleReferenceInput;
 };
 
 export type UserUpdateResponseType = {
@@ -1181,7 +1167,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
-  AdminAreaInfoType: ResolverTypeWrapper<Partial<AdminAreaInfoType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
   AlertInputType: ResolverTypeWrapper<Partial<AlertInputType>>;
   AlertReferenceInput: ResolverTypeWrapper<Partial<AlertReferenceInput>>;
@@ -1196,7 +1181,6 @@ export type ResolversTypes = ResolversObject<{
   CorridorGranularity: ResolverTypeWrapper<Partial<CorridorGranularity>>;
   CorridorHistogramType: ResolverTypeWrapper<Partial<CorridorHistogramType>>;
   CorridorInputType: ResolverTypeWrapper<Partial<CorridorInputType>>;
-  CorridorJourneyTimeStatsType: ResolverTypeWrapper<Partial<CorridorJourneyTimeStatsType>>;
   CorridorNamespace: ResolverTypeWrapper<Partial<CorridorNamespace>>;
   CorridorStatsDayOfWeekType: ResolverTypeWrapper<Partial<CorridorStatsDayOfWeekType>>;
   CorridorStatsHistogramType: ResolverTypeWrapper<Partial<CorridorStatsHistogramType>>;
@@ -1205,6 +1189,7 @@ export type ResolversTypes = ResolversObject<{
   CorridorStatsTimeOfDayType: ResolverTypeWrapper<Partial<CorridorStatsTimeOfDayType>>;
   CorridorStatsType: ResolverTypeWrapper<Partial<CorridorStatsType>>;
   CorridorSummaryStatsType: ResolverTypeWrapper<Partial<CorridorSummaryStatsType>>;
+  CorridorTransitTimeStatsType: ResolverTypeWrapper<Partial<CorridorTransitTimeStatsType>>;
   CorridorType: ResolverTypeWrapper<Partial<CorridorType>>;
   CorridorUpdateInputType: ResolverTypeWrapper<Partial<CorridorUpdateInputType>>;
   DashboardVehicles: ResolverTypeWrapper<Partial<DashboardVehicles>>;
@@ -1240,18 +1225,18 @@ export type ResolversTypes = ResolversObject<{
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;
+  LoginInfo: ResolverTypeWrapper<Partial<LoginInfo>>;
   LoginResponse: ResolverTypeWrapper<Partial<LoginResponse>>;
   MatchType: ResolverTypeWrapper<Partial<MatchType>>;
   Mutation: ResolverTypeWrapper<{}>;
   MutationResponseType: ResolverTypeWrapper<Partial<MutationResponseType>>;
   OnTimePerformanceType: ResolverTypeWrapper<Partial<OnTimePerformanceType>>;
+  OperatorFeedMonitoring: ResolverTypeWrapper<Partial<OperatorFeedMonitoring>>;
   OperatorFilterInput: ResolverTypeWrapper<Partial<OperatorFilterInput>>;
   OperatorPerformancePage: ResolverTypeWrapper<Partial<OperatorPerformancePage>>;
   OperatorPerformanceType: ResolverTypeWrapper<Partial<OperatorPerformanceType>>;
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
-  OperatorsPage: ResolverTypeWrapper<Partial<OperatorsPage>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
-  OrganisationType: ResolverTypeWrapper<Partial<OrganisationType>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
   PagingInputType: ResolverTypeWrapper<Partial<PagingInputType>>;
@@ -1263,10 +1248,7 @@ export type ResolversTypes = ResolversObject<{
   PunctualityTotalsType: ResolverTypeWrapper<Partial<PunctualityTotalsType>>;
   Query: ResolverTypeWrapper<{}>;
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
-  RoleReferenceInput: ResolverTypeWrapper<Partial<RoleReferenceInput>>;
-  RoleType: ResolverTypeWrapper<Partial<RoleType>>;
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
-  ScopeEnum: ResolverTypeWrapper<Partial<ScopeEnum>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
   ServicePatternType: ResolverTypeWrapper<Partial<ServicePatternType>>;
@@ -1277,9 +1259,9 @@ export type ResolversTypes = ResolversObject<{
   SignupPayloadType: ResolverTypeWrapper<Partial<SignupPayloadType>>;
   Stop: ResolverTypeWrapper<Partial<Stop>>;
   StopAnalysisFiltersInput: ResolverTypeWrapper<Partial<StopAnalysisFiltersInput>>;
-  StopAnalysisType: ResolverTypeWrapper<Partial<StopAnalysisType>>;
   StopInfoType: ResolverTypeWrapper<Partial<StopInfoType>>;
   StopPerformanceType: ResolverTypeWrapper<Partial<StopPerformanceType>>;
+  StopStatistics: ResolverTypeWrapper<Partial<StopStatistics>>;
   StopType: ResolverTypeWrapper<Partial<StopType>>;
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
@@ -1294,7 +1276,6 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
-  AdminAreaInfoType: Partial<AdminAreaInfoType>;
   AdminAreasType: Partial<AdminAreasType>;
   AlertInputType: Partial<AlertInputType>;
   AlertReferenceInput: Partial<AlertReferenceInput>;
@@ -1307,7 +1288,6 @@ export type ResolversParentTypes = ResolversObject<{
   BoundingBoxInputType: Partial<BoundingBoxInputType>;
   CorridorHistogramType: Partial<CorridorHistogramType>;
   CorridorInputType: Partial<CorridorInputType>;
-  CorridorJourneyTimeStatsType: Partial<CorridorJourneyTimeStatsType>;
   CorridorNamespace: Partial<CorridorNamespace>;
   CorridorStatsDayOfWeekType: Partial<CorridorStatsDayOfWeekType>;
   CorridorStatsHistogramType: Partial<CorridorStatsHistogramType>;
@@ -1316,6 +1296,7 @@ export type ResolversParentTypes = ResolversObject<{
   CorridorStatsTimeOfDayType: Partial<CorridorStatsTimeOfDayType>;
   CorridorStatsType: Partial<CorridorStatsType>;
   CorridorSummaryStatsType: Partial<CorridorSummaryStatsType>;
+  CorridorTransitTimeStatsType: Partial<CorridorTransitTimeStatsType>;
   CorridorType: Partial<CorridorType>;
   CorridorUpdateInputType: Partial<CorridorUpdateInputType>;
   DashboardVehicles: Partial<DashboardVehicles>;
@@ -1349,17 +1330,17 @@ export type ResolversParentTypes = ResolversObject<{
   LineType: Partial<LineType>;
   LiveStatsType: Partial<LiveStatsType>;
   LocalityType: Partial<LocalityType>;
+  LoginInfo: Partial<LoginInfo>;
   LoginResponse: Partial<LoginResponse>;
   Mutation: {};
   MutationResponseType: Partial<MutationResponseType>;
   OnTimePerformanceType: Partial<OnTimePerformanceType>;
+  OperatorFeedMonitoring: Partial<OperatorFeedMonitoring>;
   OperatorFilterInput: Partial<OperatorFilterInput>;
   OperatorPerformancePage: Partial<OperatorPerformancePage>;
   OperatorPerformanceType: Partial<OperatorPerformanceType>;
   OperatorType: Partial<OperatorType>;
-  OperatorsPage: Partial<OperatorsPage>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
-  OrganisationType: Partial<OrganisationType>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
   PerformanceFiltersInputType: Partial<PerformanceFiltersInputType>;
@@ -1369,8 +1350,6 @@ export type ResolversParentTypes = ResolversObject<{
   PunctualityTimeSeriesType: Partial<PunctualityTimeSeriesType>;
   PunctualityTotalsType: Partial<PunctualityTotalsType>;
   Query: {};
-  RoleReferenceInput: Partial<RoleReferenceInput>;
-  RoleType: Partial<RoleType>;
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
   ServicePatternType: Partial<ServicePatternType>;
@@ -1381,9 +1360,9 @@ export type ResolversParentTypes = ResolversObject<{
   SignupPayloadType: Partial<SignupPayloadType>;
   Stop: Partial<Stop>;
   StopAnalysisFiltersInput: Partial<StopAnalysisFiltersInput>;
-  StopAnalysisType: Partial<StopAnalysisType>;
   StopInfoType: Partial<StopInfoType>;
   StopPerformanceType: Partial<StopPerformanceType>;
+  StopStatistics: Partial<StopStatistics>;
   StopType: Partial<StopType>;
   String: Partial<Scalars['String']['output']>;
   Time: Partial<Scalars['Time']['output']>;
@@ -1396,11 +1375,6 @@ export type ResolversParentTypes = ResolversObject<{
 export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type AdminAreaInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreaInfoType'] = ResolversParentTypes['AdminAreaInfoType']> = ResolversObject<{
-  adminAreaId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1449,20 +1423,10 @@ export type CorridorHistogramTypeResolvers<ContextType = RequestContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CorridorJourneyTimeStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorJourneyTimeStatsType'] = ResolversParentTypes['CorridorJourneyTimeStatsType']> = ResolversObject<{
-  avgTransitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  maxTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorNamespace'] = ResolversParentTypes['CorridorNamespace']> = ResolversObject<{
-  addFirstStop?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddFirstStopArgs, 'inputs'>>;
-  addSubsequentStops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopType']>>>, ParentType, ContextType, RequireFields<CorridorNamespaceAddSubsequentStopsArgs, 'stopList'>>;
-  corridorList?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorType']>>>, ParentType, ContextType>;
+  addFirstStop?: Resolver<Array<ResolversTypes['StopType']>, ParentType, ContextType, RequireFields<CorridorNamespaceAddFirstStopArgs, 'inputs'>>;
+  addSubsequentStops?: Resolver<Array<ResolversTypes['StopType']>, ParentType, ContextType, RequireFields<CorridorNamespaceAddSubsequentStopsArgs, 'stopList'>>;
+  corridorList?: Resolver<Array<ResolversTypes['CorridorType']>, ParentType, ContextType>;
   getCorridor?: Resolver<Maybe<ResolversTypes['CorridorType']>, ParentType, ContextType, RequireFields<CorridorNamespaceGetCorridorArgs, 'corridorId'>>;
   stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, RequireFields<CorridorNamespaceStatsArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1479,7 +1443,7 @@ export type CorridorStatsDayOfWeekTypeResolvers<ContextType = RequestContext, Pa
 }>;
 
 export type CorridorStatsHistogramTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsHistogramType'] = ResolversParentTypes['CorridorStatsHistogramType']> = ResolversObject<{
-  hist?: Resolver<Maybe<Array<ResolversTypes['CorridorHistogramType']>>, ParentType, ContextType>;
+  hist?: Resolver<Array<ResolversTypes['CorridorHistogramType']>, ParentType, ContextType>;
   ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1491,7 +1455,7 @@ export type CorridorStatsPerServiceTypeResolvers<ContextType = RequestContext, P
   recordedTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   servicePatternName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  totalJourneyTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalTransitTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1506,28 +1470,38 @@ export type CorridorStatsTimeOfDayTypeResolvers<ContextType = RequestContext, Pa
 }>;
 
 export type CorridorStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsType'] = ResolversParentTypes['CorridorStatsType']> = ResolversObject<{
-  journeyTimeDayOfWeekStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsDayOfWeekType']>>>, ParentType, ContextType>;
-  journeyTimeHistogram?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsHistogramType']>>>, ParentType, ContextType>;
-  journeyTimePerServiceStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsPerServiceType']>>>, ParentType, ContextType>;
-  journeyTimeStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorJourneyTimeStatsType']>>>, ParentType, ContextType>;
-  journeyTimeTimeOfDayStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['CorridorStatsTimeOfDayType']>>>, ParentType, ContextType>;
-  serviceLinks?: Resolver<Maybe<Array<Maybe<ResolversTypes['ServiceLinkType']>>>, ParentType, ContextType>;
+  serviceLinks?: Resolver<Array<ResolversTypes['ServiceLinkType']>, ParentType, ContextType>;
   summaryStats?: Resolver<Maybe<ResolversTypes['CorridorSummaryStatsType']>, ParentType, ContextType>;
+  transitTimeDayOfWeekStats?: Resolver<Array<ResolversTypes['CorridorStatsDayOfWeekType']>, ParentType, ContextType>;
+  transitTimeHistogram?: Resolver<Array<ResolversTypes['CorridorStatsHistogramType']>, ParentType, ContextType>;
+  transitTimePerServiceStats?: Resolver<Array<ResolversTypes['CorridorStatsPerServiceType']>, ParentType, ContextType>;
+  transitTimeStats?: Resolver<Array<ResolversTypes['CorridorTransitTimeStatsType']>, ParentType, ContextType>;
+  transitTimeTimeOfDayStats?: Resolver<Array<ResolversTypes['CorridorStatsTimeOfDayType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorSummaryStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorSummaryStatsType'] = ResolversParentTypes['CorridorSummaryStatsType']> = ResolversObject<{
-  averageJourneyTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  averageTransitTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   numberOfServices?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type CorridorTransitTimeStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorTransitTimeStatsType'] = ResolversParentTypes['CorridorTransitTimeStatsType']> = ResolversObject<{
+  avgTransitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  maxTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type CorridorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorType'] = ResolversParentTypes['CorridorType']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  stops?: Resolver<Maybe<Array<Maybe<ResolversTypes['StopInfoType']>>>, ParentType, ContextType>;
+  stops?: Resolver<Array<ResolversTypes['StopInfoType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1558,7 +1532,7 @@ export type EventDataResolvers<ContextType = RequestContext, ParentType extends 
 }>;
 
 export type EventResponseResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventResponse'] = ResolversParentTypes['EventResponse']> = ResolversObject<{
-  items?: Resolver<Maybe<Array<ResolversTypes['EventType']>>, ParentType, ContextType>;
+  items?: Resolver<Array<ResolversTypes['EventType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1583,7 +1557,7 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   liveStats?: Resolver<Maybe<ResolversTypes['LiveStatsType']>, ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  vehicleStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'granularity' | 'start'>>;
+  vehicleStats?: Resolver<Maybe<Array<ResolversTypes['VehicleStatsType']>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'granularity' | 'start'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1606,9 +1580,9 @@ export type GpsPointTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayMetricsType'] = ResolversParentTypes['HeadwayMetricsType']> = ResolversObject<{
   frequentServiceInfo?: Resolver<Maybe<ResolversTypes['FrequentServiceInfoType']>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServiceInfoArgs, 'inputs'>>;
-  frequentServices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FrequentServiceType']>>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServicesArgs, 'fromTimestamp' | 'operatorId' | 'toTimestamp'>>;
+  frequentServices?: Resolver<Maybe<Array<ResolversTypes['FrequentServiceType']>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServicesArgs, 'fromTimestamp' | 'operatorId' | 'toTimestamp'>>;
   headwayOverview?: Resolver<Maybe<ResolversTypes['HeadwayOverviewType']>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayOverviewArgs, 'inputs'>>;
-  headwayTimeSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['HeadwayTimeSeriesType']>>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayTimeSeriesArgs, 'inputs'>>;
+  headwayTimeSeries?: Resolver<Maybe<Array<ResolversTypes['HeadwayTimeSeriesType']>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayTimeSeriesArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1672,8 +1646,8 @@ export type LiveStatsTypeResolvers<ContextType = RequestContext, ParentType exte
   expectedVehicles?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   feedAlerts?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   feedErrors?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  last20Minutes?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
-  last24Hours?: Resolver<Maybe<Array<Maybe<ResolversTypes['VehicleStatsType']>>>, ParentType, ContextType>;
+  last20Minutes?: Resolver<Maybe<Array<ResolversTypes['VehicleStatsType']>>, ParentType, ContextType>;
+  last24Hours?: Resolver<Maybe<Array<ResolversTypes['VehicleStatsType']>>, ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateFrequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1684,6 +1658,14 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
   localityAreaName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   localityId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   localityName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
+  canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1725,13 +1707,20 @@ export type OnTimePerformanceTypeResolvers<ContextType = RequestContext, ParentT
   punctualityTimeOfDay?: Resolver<Maybe<Array<ResolversTypes['PunctualityTimeOfDayType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypePunctualityTimeOfDayArgs, 'inputs'>>;
   punctualityTimeSeries?: Resolver<Maybe<Array<ResolversTypes['PunctualityTimeSeriesType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypePunctualityTimeSeriesArgs, 'inputs'>>;
   servicePerformance?: Resolver<Maybe<Array<ResolversTypes['ServicePerformanceType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeServicePerformanceArgs, 'inputs'>>;
-  servicePunctuality?: Resolver<Maybe<Array<Maybe<ResolversTypes['ServicePunctualityType']>>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeServicePunctualityArgs, 'inputs'>>;
+  servicePunctuality?: Resolver<Array<ResolversTypes['ServicePunctualityType']>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeServicePunctualityArgs, 'inputs'>>;
   stopPerformance?: Resolver<Maybe<Array<ResolversTypes['StopPerformanceType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeStopPerformanceArgs, 'inputs'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorFeedMonitoring'] = ResolversParentTypes['OperatorFeedMonitoring']> = ResolversObject<{
+  feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type OperatorPerformancePageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformancePage'] = ResolversParentTypes['OperatorPerformancePage']> = ResolversObject<{
-  items?: Resolver<Maybe<Array<ResolversTypes['OperatorPerformanceType']>>, ParentType, ContextType>;
+  items?: Resolver<Array<ResolversTypes['OperatorPerformanceType']>, ParentType, ContextType>;
   pageInfo?: Resolver<Maybe<ResolversTypes['PageInfo']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1747,22 +1736,9 @@ export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, Paren
 }>;
 
 export type OperatorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorType'] = ResolversParentTypes['OperatorType']> = ResolversObject<{
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AdminAreaInfoType']>>>, ParentType, ContextType>;
-  feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type OperatorsPageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorsPage'] = ResolversParentTypes['OperatorsPage']> = ResolversObject<{
-  items?: Resolver<Maybe<Array<Maybe<ResolversTypes['OperatorType']>>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type OrganisationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OrganisationType'] = ResolversParentTypes['OrganisationType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  adminAreaIds?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1814,31 +1790,24 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
-  eventStats?: Resolver<Maybe<Array<Maybe<ResolversTypes['EventStatsType']>>>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
+  eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
-  lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'operatorId'>>;
+  lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'inputDate' | 'operatorIds'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
-  operator?: Resolver<Maybe<ResolversTypes['OperatorType']>, ParentType, ContextType, RequireFields<QueryOperatorArgs, 'operatorId'>>;
-  operators?: Resolver<Maybe<ResolversTypes['OperatorsPage']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
+  operatorFeedMonitoring?: Resolver<Maybe<ResolversTypes['OperatorFeedMonitoring']>, ParentType, ContextType, RequireFields<QueryOperatorFeedMonitoringArgs, 'operatorId'>>;
+  operators?: Resolver<Array<ResolversTypes['OperatorType']>, ParentType, ContextType, Partial<QueryOperatorsArgs>>;
+  operatorsFeedMonitoring?: Resolver<Array<ResolversTypes['OperatorFeedMonitoring']>, ParentType, ContextType, Partial<QueryOperatorsFeedMonitoringArgs>>;
   serviceInfo?: Resolver<Maybe<ResolversTypes['ServiceInfoType']>, ParentType, ContextType, RequireFields<QueryServiceInfoArgs, 'serviceId'>>;
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
-  stopAnalysis?: Resolver<Array<Maybe<ResolversTypes['StopAnalysisType']>>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
-  user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
+  stopAnalysis?: Resolver<Array<ResolversTypes['StopStatistics']>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
+  user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
-}>;
-
-export type RoleTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['RoleType'] = ResolversParentTypes['RoleType']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  scope?: Resolver<ResolversTypes['ScopeEnum'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceInfoType'] = ResolversParentTypes['ServiceInfoType']> = ResolversObject<{
@@ -1903,23 +1872,6 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type StopAnalysisTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopAnalysisType'] = ResolversParentTypes['StopAnalysisType']> = ResolversObject<{
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  operatorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  timingPoint?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopInfoType'] = ResolversParentTypes['StopInfoType']> = ResolversObject<{
   sourceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1939,7 +1891,24 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
-  timingPoint?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type StopStatisticsResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopStatistics'] = ResolversParentTypes['StopStatistics']> = ResolversObject<{
+  adminAreaName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  atcoCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  localityName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  totalDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1959,12 +1928,9 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type UserTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserType'] = ResolversParentTypes['UserType']> = ResolversObject<{
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  organisation?: Resolver<Maybe<ResolversTypes['OrganisationType']>, ParentType, ContextType>;
-  roles?: Resolver<Maybe<Array<ResolversTypes['RoleType']>>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1984,14 +1950,12 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
-  AdminAreaInfoType?: AdminAreaInfoTypeResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
   AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
   AvlPoint?: AvlPointResolvers<ContextType>;
   CorridorHistogramType?: CorridorHistogramTypeResolvers<ContextType>;
-  CorridorJourneyTimeStatsType?: CorridorJourneyTimeStatsTypeResolvers<ContextType>;
   CorridorNamespace?: CorridorNamespaceResolvers<ContextType>;
   CorridorStatsDayOfWeekType?: CorridorStatsDayOfWeekTypeResolvers<ContextType>;
   CorridorStatsHistogramType?: CorridorStatsHistogramTypeResolvers<ContextType>;
@@ -1999,6 +1963,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   CorridorStatsTimeOfDayType?: CorridorStatsTimeOfDayTypeResolvers<ContextType>;
   CorridorStatsType?: CorridorStatsTypeResolvers<ContextType>;
   CorridorSummaryStatsType?: CorridorSummaryStatsTypeResolvers<ContextType>;
+  CorridorTransitTimeStatsType?: CorridorTransitTimeStatsTypeResolvers<ContextType>;
   CorridorType?: CorridorTypeResolvers<ContextType>;
   DashboardVehicles?: DashboardVehiclesResolvers<ContextType>;
   Date?: GraphQLScalarType;
@@ -2023,31 +1988,30 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
   LocalityType?: LocalityTypeResolvers<ContextType>;
+  LoginInfo?: LoginInfoResolvers<ContextType>;
   LoginResponse?: LoginResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   MutationResponseType?: MutationResponseTypeResolvers<ContextType>;
   OnTimePerformanceType?: OnTimePerformanceTypeResolvers<ContextType>;
+  OperatorFeedMonitoring?: OperatorFeedMonitoringResolvers<ContextType>;
   OperatorPerformancePage?: OperatorPerformancePageResolvers<ContextType>;
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
-  OperatorsPage?: OperatorsPageResolvers<ContextType>;
-  OrganisationType?: OrganisationTypeResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;
   PunctualityTimeSeriesType?: PunctualityTimeSeriesTypeResolvers<ContextType>;
   PunctualityTotalsType?: PunctualityTotalsTypeResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  RoleType?: RoleTypeResolvers<ContextType>;
   ServiceInfoType?: ServiceInfoTypeResolvers<ContextType>;
   ServiceLinkType?: ServiceLinkTypeResolvers<ContextType>;
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;
   ServicePerformanceType?: ServicePerformanceTypeResolvers<ContextType>;
   ServicePunctualityType?: ServicePunctualityTypeResolvers<ContextType>;
   Stop?: StopResolvers<ContextType>;
-  StopAnalysisType?: StopAnalysisTypeResolvers<ContextType>;
   StopInfoType?: StopInfoTypeResolvers<ContextType>;
   StopPerformanceType?: StopPerformanceTypeResolvers<ContextType>;
+  StopStatistics?: StopStatisticsResolvers<ContextType>;
   StopType?: StopTypeResolvers<ContextType>;
   Time?: GraphQLScalarType;
   UserType?: UserTypeResolvers<ContextType>;

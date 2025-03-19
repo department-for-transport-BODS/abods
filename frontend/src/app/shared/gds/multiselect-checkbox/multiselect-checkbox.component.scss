@@ -12,6 +12,9 @@
     @include govuk-font($size: 19, $line-height: 1.25);
     margin-bottom: govuk-spacing(1);
   }
+  &__disabled {
+    opacity: 0.5;
+  }
 }
 
 .ng-select.gds-select.gds-multiselect-checkbox {

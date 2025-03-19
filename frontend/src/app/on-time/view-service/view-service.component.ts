@@ -20,6 +20,7 @@ import {
 } from "rxjs/operators";
 import {
   FrequentServiceInfoType,
+  OperatorType,
   ServiceInfoType,
 } from "src/generated/graphql";
 import {
@@ -32,10 +33,7 @@ import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { nonNullOrUndefined } from "../../shared/rxjs-operators";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 import { cloneDeep } from "lodash-es";
 
 export const removeAdminAreaIds = (params: PerformanceParams) => {
@@ -49,8 +47,8 @@ export const removeAdminAreaIds = (params: PerformanceParams) => {
   styleUrls: ["../on-time.component.scss"],
 })
 export class ViewServiceComponent implements OnInit, OnDestroy {
-  allOperators: Operator[] = [];
-  operator?: Operator;
+  allOperators: OperatorType[] = [];
+  operator?: OperatorType;
   singleOperator = false;
   service: ServiceInfoType | null = null;
   lineNotFound = false;

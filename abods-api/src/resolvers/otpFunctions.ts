@@ -15,7 +15,6 @@ import {
   OnTimePerformanceTypeResolvers,
   OperatorPerformancePage,
   OperatorPerformanceType,
-  OperatorsPage,
   OperatorType,
   PerformanceInputType,
   PunctualityDayOfWeekType,
@@ -31,26 +30,25 @@ import {
   ServicePunctualityType,
   StopPerformanceType,
 } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import {
-  toUkTime,
   getFormattedDate,
+  toUkTime,
   userSelectedDateAsUtc,
 } from "../lib/dayjs.js";
 import {
   compareThresholds,
   getFrequentServiceActualHours,
-  getNocAdminAreas,
-  getOperatorsFromOrgId,
-  getOperatorsFroServiceDetails,
   getSummaryStopsTotalHours,
 } from "../lib/otp.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
-import { getUserOperatorIds } from "../lib/operators.js";
-import { Kysely } from "kysely";
+import {
+  getUserOperatorIds,
+  getUserOperatorIdsQuery,
+} from "../lib/operators.js";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs, { Dayjs } from "dayjs";
@@ -66,56 +64,42 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   _,
   args,
   context,
-): Promise<OperatorsPage> => {
-  const user = await requireUserSession(context);
-  try {
-    const userOperators = args.filterBy?.operatorIds
-      ? await getOperatorsDropDown(user, context.db, args.filterBy.operatorIds)
-      : await getOperatorsDropDown(user, context.db);
-
-    if (!userOperators) {
-      throw Error("No operators for user");
-    }
-
-    return {
-      items: userOperators,
-    };
-  } catch (error) {
-    logger.error(error, "An error occurred when getting operators");
-    return {};
-  }
-};
-
-const getOperatorsDropDown = async (
-  user: SessionUser,
-  db: PrismaClient,
-  userOperatorIds?: string[],
 ): Promise<OperatorType[]> => {
-  const orgOperators = await getOperatorsFromOrgId(
-    user.orgIds,
-    db,
-    userOperatorIds,
-  );
+  const user = await requireUserSession(context);
 
-  const [userOperators, adminAreas] = await Promise.all([
-    getOperatorsFroServiceDetails(orgOperators, db),
-    getNocAdminAreas(db),
-  ]);
-
-  return userOperators
-    .map((op) => ({
-      name: op.operator?.name ?? "unknown",
-      nocCode: op.operator_noc,
-      operatorId: op.operator_noc ?? "unknown",
-      adminAreas: adminAreas
-        .filter((area) => area.national_operator_code === op.operator_noc)
-        .map((area) => ({
-          adminAreaId: area.adminarea_id.toString(),
-          adminAreaName: area.admin_area.name,
-        })),
-    }))
-    .sort((a, b) =>
-      (a.name ?? "").localeCompare(b.name ?? "", undefined, { numeric: true }),
+  let query = context.kysely
+    .selectFrom("service_details as s")
+    .where(
+      "s.operator_noc",
+      "in",
+      getUserOperatorIdsQuery(context.kysely, user),
+    )
+    .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc")
+    .innerJoin(
+      "noc_adminarea as n",
+      "n.national_operator_code",
+      "s.operator_noc",
+    );
+  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+    query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+  return await query
+    .groupBy(["a.name", "s.operator_noc"])
+    .select((eb) => [
+      eb.fn.coalesce("name", sql.lit("<unknown>")).as("name"),
+      eb.fn.coalesce("operator_noc", sql.lit("<unknown>")).as("operatorId"),
+      sql<string>`string_agg(distinct n.adminarea_id::text, ',')`.as(
+        "adminAreaIds",
+      ),
+    ])
+    .orderBy("name")
+    .execute()
+    .then((x) =>
+      x.map((o) => ({
+        name: o.name,
+        operatorId: o.operatorId,
+        adminAreaIds: o.adminAreaIds.split(","),
+      })),
     );
 };
 
@@ -156,31 +140,30 @@ export const getLines: QueryResolvers["lines"] = async (
   context,
 ): Promise<LineType[]> => {
   const user = await requireUserSession(context);
-  const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-  if (!userOperatorIds.includes(args.operatorId)) return [];
 
-  const inputDate = args.inputDate
-    ? userSelectedDateAsUtc(args.inputDate).toDate()
-    : undefined;
+  if (args.operatorIds.length === 0) return [];
 
-  const services = await context.db.expected_services.findMany({
-    where: {
-      operator_noc: args.operatorId,
-      date_of_journey: inputDate,
-    },
-    select: {
-      noc_and_line_and_servicecode: true,
-      service_name: true,
-      line_name: true,
-    },
-    distinct: "noc_and_line_and_servicecode",
-  });
+  let query = context.kysely
+    .selectFrom("expected_services")
+    .where("operator_noc", "in", getUserOperatorIdsQuery(context.kysely, user))
+    .where("operator_noc", "in", args.operatorIds);
 
-  return services.map((service) => ({
-    id: service.noc_and_line_and_servicecode,
-    name: service.service_name,
-    number: service.line_name,
-  }));
+  const inputDate = userSelectedDateAsUtc(args.inputDate).toDate();
+  if (args.endDate) {
+    const endDate = userSelectedDateAsUtc(args.endDate).toDate();
+    query = query
+      .where("date_of_journey", ">=", inputDate)
+      .where("date_of_journey", "<", endDate);
+  } else {
+    query = query.where("date_of_journey", "=", inputDate);
+  }
+
+  return query
+    .select("noc_and_line_and_servicecode as id")
+    .select("service_name as name")
+    .select("line_name as number")
+    .distinctOn("noc_and_line_and_servicecode")
+    .execute();
 };
 
 async function getOtpServiceLinks(
@@ -255,39 +238,6 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     });
   }
   return result;
-};
-
-export const getOperator: QueryResolvers["operator"] = async (
-  _,
-  args,
-  context,
-): Promise<Maybe<OperatorType>> => {
-  await requireUserSession(context);
-  try {
-    // TODO: is operator id in users' operator id array
-    logger.debug({ operatorId: args.operatorId }, "getOperator");
-
-    const operator = await context.db.all_operators.findUnique({
-      where: {
-        operatorref: args.operatorId,
-      },
-    });
-
-    if (!operator) {
-      throw Error("No operator found");
-    }
-
-    const operatorPayload: OperatorType = {
-      operatorId: operator.operatorref,
-      name: operator.name,
-      nocCode: operator.operatorref,
-    };
-
-    return operatorPayload;
-  } catch (error) {
-    logger.error(error, "An error occurred when getting operator info");
-    return null;
-  }
 };
 
 export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctualityOverview"] =
@@ -800,72 +750,31 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         (n) => !filters.operatorIds || filters.operatorIds.includes(n),
       );
 
-      const where: Prisma.performance_statisticsWhereInput = {
-        operator_noc: {
-          in: operatorNocs,
-        },
-        date_period_start: userSelectedDateAsUtc(fromTimestamp).toDate(),
-        AND: [
-          {
-            OR: [
-              {
-                on_time_count: {
-                  gt: 0,
-                },
-                late_count: {
-                  gt: 0,
-                },
-                early_count: {
-                  gt: 0,
-                },
-              },
-            ],
-          },
-          {
-            OR: [
-              {
-                trend_on_time_count: {
-                  gt: 0,
-                },
-                trend_late_count: {
-                  gt: 0,
-                },
-                trend_early_count: {
-                  gt: 0,
-                },
-              },
-            ],
-          },
-        ],
-      };
+      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
+
+      let performanceMetricsQuery = context.kysely
+        .selectFrom("performance_statistics")
+        .selectAll()
+        .where("operator_noc", "in", operatorNocs)
+        .where(
+          "date_period_start",
+          "=",
+          userSelectedDateAsUtc(fromTimestamp).toDate(),
+        )
+        .where("percentage_change", "is not", null)
+        .orderBy("on_time_percentage", orderFilter)
+        .orderBy("percentage_change", orderFilter)
+        .limit(3);
 
       if (timingPointsOnly) {
-        where.is_timing_point = timingPointsOnly;
+        performanceMetricsQuery = performanceMetricsQuery.where(
+          "is_timing_point",
+          "=",
+          timingPointsOnly,
+        );
       }
 
-      const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
-      const performanceMetrics =
-        await context.db.performance_statistics.findMany({
-          where,
-          take: 3,
-          distinct: [
-            "date_period_start",
-            "date_period_end",
-            "date_period_end",
-            "on_time_percentage",
-            "early_count",
-            "late_count",
-            "on_time_count",
-          ],
-          orderBy: [
-            {
-              on_time_percentage: orderFilter,
-            },
-            {
-              trend_percentage: orderFilter,
-            },
-          ],
-        });
+      const performanceMetrics = await performanceMetricsQuery.execute();
 
       const services = await context.db.expected_services.findMany({
         where: {
@@ -1480,7 +1389,6 @@ export const getPrismaFiltersForOTPQuery = (
 const otpResolvers: Resolvers = {
   Query: {
     operators: getOperatorList,
-    operator: getOperator,
     onTimePerformance: emptyResolver,
     headwayMetrics: emptyResolver,
     serviceInfo: getServiceInfo,

@@ -1,18 +1,18 @@
 [
   {
-    "journeyTimeDayOfWeekStats": [
+    "transitTimeDayOfWeekStats": [
       {"dow": 3}
     ],
-    "journeyTimeHistogram": [
+    "transitTimeHistogram": [
       {"ts": "2024-04-10T12:00:00Z"}
     ],
-    "journeyTimePerServiceStats": [
+    "transitTimePerServiceStats": [
       {"lineName": "Downtown Express"}
     ],
-    "journeyTimeStats": [
+    "transitTimeStats": [
       {"ts": "2024-04-10T12:00:00Z"}
     ],
-    "journeyTimeTimeOfDayStats": [
+    "transitTimeTimeOfDayStats": [
       {"hour": 14}
     ],
     "serviceLinks": [
@@ -25,7 +25,7 @@
       }
     ],
     "summaryStats": {
-      "averageJourneyTime": 45,
+      "averageTransitTime": 45,
       "numberOfServices": 5,
       "operatorName": "City Transport",
       "percentile95": 59.0,

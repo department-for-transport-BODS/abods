@@ -617,3 +617,10 @@ model ui_lta {
   @@unique([id, name], map: "ui_lta_id_name_uniq")
   @@index([name])
 }
+
+model login_details {
+  user_id                        Int       @id
+  last_login                     DateTime  @db.Timestamp(6)
+  data_monitoring_access_count   Int?
+  data_monitoring_access_refresh DateTime? @db.Timestamp(6)
+}

@@ -3,8 +3,8 @@
 
 .date-range {
   display: grid;
-  grid-gap: govuk-spacing(6);
-  grid-template-columns: 267px 193px;
+  grid-gap: govuk-spacing(1);
+  grid-template-columns: 2fr 1fr;
   &__input-wrapper {
     position: relative;
   }

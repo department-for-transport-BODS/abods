@@ -5,11 +5,9 @@ import {
   EditUserGQL,
   FetchUserAlertGQL,
   InviteUserGQL,
-  ListRolesGQL,
   ListUserAlertsGQL,
   ListUsersGQL,
   RemoveUserGQL,
-  RoleFragment,
   UserFragment,
   UpdateUserAlertGQL,
   ListUserAlertsDocument,
@@ -56,7 +54,6 @@ export class OrganisationService {
     private editUser: EditUserGQL,
     private removeUser: RemoveUserGQL,
     private inviteUser: InviteUserGQL,
-    private listRoles: ListRolesGQL,
     private listUserAlerts: ListUserAlertsGQL,
     private fetchUserAlert: FetchUserAlertGQL,
     private updateUserAlert: UpdateUserAlertGQL,
@@ -84,24 +81,12 @@ export class OrganisationService {
       );
   }
 
-  listOrgRoles$(): Observable<RoleFragment[]> {
-    return this.listRoles
-      .fetch({})
-      .pipe(
-        map(
-          ({ data }) =>
-            data?.roles?.filter(({ scope }) => scope === "organisation") ?? [],
-        ),
-      );
-  }
-
   editUser$(
     username: string,
     firstName: string,
     lastName: string,
-    role: string,
   ): Observable<MutationResponse<UserFragment>> {
-    return this.editUser.mutate({ username, firstName, lastName, role }).pipe(
+    return this.editUser.mutate({ username, firstName, lastName }).pipe(
       tap(() => (this.userListDirty = true)),
       map(({ data, errors }) => {
         if (!data) {
@@ -144,7 +129,7 @@ export class OrganisationService {
     roleId: string,
     organisationId: string,
   ): Observable<MutationResponse<void>> {
-    return this.inviteUser.mutate({ email, roleId, organisationId }).pipe(
+    return this.inviteUser.mutate({ email, organisationId }).pipe(
       map(({ data, errors }) => {
         if (!data) {
           return mutationFailureResponse<void>(errors);

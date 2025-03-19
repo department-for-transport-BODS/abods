@@ -41,7 +41,7 @@ import {
   CorridorStatsViewParams,
   CorridorStop,
   CorridorSummary,
-  ICorridorJourneyTimeStats,
+  ICorridortransitTimeStats,
 } from "./types";
 
 let uniqueId = 0;
@@ -114,7 +114,7 @@ const formatDayOfWeek = (weekday: number) =>
 const isoDayOfWeek = (dow: number) => (dow === 0 ? 7 : dow);
 
 const addBoxPlotChartDataItems = (
-  stat: ICorridorJourneyTimeStats & BoxPlotChartDataItem,
+  stat: ICorridortransitTimeStats & BoxPlotChartDataItem,
 ) => {
   stat.yAxisMaxValue = stat.maxTransitTime;
   stat.yAxisMinValue = stat.minTransitTime;
@@ -271,18 +271,18 @@ export class CorridorsService {
     stats: CorridorStatsType,
     params: CorridorStatsViewParams,
   ): CorridorStats {
-    const timeSeries = nonNullishArray(stats.journeyTimeStats);
-    const dayOfWeek = nonNullishArray(stats.journeyTimeDayOfWeekStats);
-    const timeOfDay = nonNullishArray(stats.journeyTimeTimeOfDayStats);
+    const timeSeries = nonNullishArray(stats.transitTimeStats);
+    const dayOfWeek = nonNullishArray(stats.transitTimeDayOfWeekStats);
+    const timeOfDay = nonNullishArray(stats.transitTimeTimeOfDayStats);
     const histogram = nonNullishArray(
-      nonNullishArray(stats.journeyTimeHistogram)?.[0]?.hist,
+      nonNullishArray(stats.transitTimeHistogram)?.[0]?.hist,
     );
     const histBins = histogram.map((h) => h.bin);
     const histRange = _range(_min(histBins) ?? 0, (_max(histBins) ?? 0) + 2);
 
     return {
       summaryStats: stats.summaryStats ?? {},
-      journeyTimeStats: fillGaps(
+      transitTimeStats: fillGaps(
         "ts",
         timeSeries,
         Array.from(
@@ -294,10 +294,10 @@ export class CorridorsService {
           dateTime.toISO({ suppressMilliseconds: true }).replace("Z", "+00:00"),
         ),
       ),
-      journeyTimePerServiceStats: nonNullishArray(
-        stats.journeyTimePerServiceStats,
+      transitTimePerServiceStats: nonNullishArray(
+        stats.transitTimePerServiceStats,
       ),
-      journeyTimeDayOfWeekStats: fillGaps(
+      transitTimeDayOfWeekStats: fillGaps(
         "dow",
         dayOfWeek,
         _range(0, 7),
@@ -308,7 +308,7 @@ export class CorridorsService {
         }),
         "isoDayOfWeek",
       ),
-      journeyTimeTimeOfDayStats: fillGaps(
+      transitTimeTimeOfDayStats: fillGaps(
         "hour",
         timeOfDay,
         _range(0, 25),
@@ -325,11 +325,11 @@ export class CorridorsService {
           };
         },
       ),
-      journeyTimeHistogram: fillGaps("bin", histogram, histRange, (bin) => ({
+      transitTimeHistogram: fillGaps("bin", histogram, histRange, (bin) => ({
         xAxisCategory: formatMinuteSeconds(Number(bin)),
         xAxisLabel: formatDuration(Number(bin)),
       })),
-      serviceLinks: (stats.serviceLinks as ServiceLinkType[]) ?? [],
+      serviceLinks: stats.serviceLinks ?? [],
     };
   }
 
@@ -376,16 +376,15 @@ export class CorridorsService {
   }
 
   private addBoxPlotData(stats: CorridorStats): CorridorStats {
-    stats.journeyTimeStats.forEach((stat) => {
+    stats.transitTimeStats.forEach((stat) => {
       addBoxPlotChartDataItems(stat);
     });
-    stats.journeyTimeDayOfWeekStats.forEach((stat) => {
+    stats.transitTimeDayOfWeekStats.forEach((stat) => {
       addBoxPlotChartDataItems(stat);
     });
-    stats.journeyTimeTimeOfDayStats.forEach((stat) => {
+    stats.transitTimeTimeOfDayStats.forEach((stat) => {
       addBoxPlotChartDataItems(stat);
     });
     return stats;
   }
 }
-export { CorridorStop };

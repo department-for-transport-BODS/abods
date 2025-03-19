@@ -6,13 +6,12 @@ import {
   naptan_locality,
   naptan_stoppoint_latlong,
   PrismaClient,
-  Timetable,
 } from "@prisma/client";
 import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import { TimetableType } from "../resolvers/corridorFunctions.js";
 
-export enum CorridorJourneyStatsOption {
+export enum CorridorTransitStatsOption {
   day,
   hour,
   dayOfWeek,
@@ -38,8 +37,8 @@ export type CorridorResultsType = corridor & {
   corridor_stops?: CorridorStopsWithNaptanStops[];
 };
 
-export interface CorridorJourneyServiceStatsType {
-  totalJourneyTime: number;
+export interface CorridorTransitServiceStatsType {
+  totalTransitTime: number;
   recordedTransits: number;
   scheduledTransits: number;
   operatorNoc: string | null;
@@ -149,15 +148,6 @@ export const updateCorridorDb = (
   });
 };
 
-export const filteredJourneys = (
-  stopCount: number,
-  journeyMap: Map<string, Timetable[]>,
-): Map<string, Timetable[]> => {
-  return new Map<string, Timetable[]>(
-    [...journeyMap.entries()].filter(([_, arr]) => arr.length === stopCount),
-  );
-};
-
 export const isCorridorMappedToUserOrg = async (
   corridorId: number,
   user: SessionUser,
@@ -204,14 +194,12 @@ export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
   });
 };
 
-export const getJourneyDeparture = (
-  journey: TimetableType,
+export const getStopDepartureTime = (
+  stop: TimetableType,
   matchType: MatchType,
 ) => {
   return (
-    journey.actual_departure_time ??
-    (matchType === MatchType.Estimated
-      ? journey.timestamp_after_estimate
-      : null)
+    stop.actual_departure_time ??
+    (matchType === MatchType.Estimated ? stop.timestamp_after_estimate : null)
   );
 };

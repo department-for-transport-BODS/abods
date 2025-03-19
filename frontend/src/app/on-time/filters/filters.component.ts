@@ -13,17 +13,8 @@ import { AdminAreaService } from "../admin-area/admin-area.service";
 import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { map, switchMap, take, takeUntil } from "rxjs/operators";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
-import { BehaviorSubject, of, Subject } from "rxjs";
-
-const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
-  monday: true,
-  tuesday: true,
-  wednesday: true,
-  thursday: true,
-  friday: true,
-  saturday: true,
-  sunday: true,
-};
+import { of, Subject } from "rxjs";
+import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
 @Component({
   selector: "app-filters",
@@ -32,7 +23,7 @@ const defaultDayOfWeekFlags: DayOfWeekFlagsInputType = {
 })
 export class FiltersComponent implements OnDestroy {
   oldFilters?: PerformanceFiltersInputType;
-  dayOfWeekFlags: DayOfWeekFlagsInputType = defaultDayOfWeekFlags;
+  dayOfWeekFlags = getDefaultDayOfWeekFlags();
   _startTime = "00:00";
   get startTime() {
     return this._startTime;
@@ -94,54 +85,43 @@ export class FiltersComponent implements OnDestroy {
       value = {};
     }
 
-    this.setAdminAreaDropdown(value);
     this.oldFilters = value;
     this.setFilters(value);
   }
+  @Input() showDelay = true;
   @Input() showAdminAreas = true;
 
-  adminAreas$ = new BehaviorSubject<MultiselectCheckboxOption[]>([]);
+  private destroy$ = new Subject<void>();
+
+  adminAreas$ = this.showAdminAreas
+    ? this.adminAreaService.fetchAdminAreas().pipe(
+        takeUntil(this.destroy$),
+        map((areas) =>
+          areas
+            .map(
+              (area) =>
+                ({
+                  label: area.name,
+                  value: area.id,
+                }) as MultiselectCheckboxOption,
+            )
+            .sort(
+              (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
+                a.label.localeCompare(b.label),
+            ),
+        ),
+      )
+    : of([]);
   adminAreaIds: string[] = [];
 
   @Output() filtersChange = new EventEmitter<PerformanceFiltersInputType>();
   @Output() closeFilters = new EventEmitter();
-
-  private destroy$ = new Subject<void>();
 
   constructor(private adminAreaService: AdminAreaService) {}
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setAdminAreaDropdown(newFilters: PerformanceFiltersInputType): void {
-    const oldOpId = this.oldFilters?.operatorIds?.[0];
-    const newOpId = newFilters?.operatorIds?.[0];
-    if (oldOpId !== newOpId) {
-      this.adminAreaService
-        .fetchAdminAreasForOperator(newOpId!)
-        .pipe(
-          takeUntil(this.destroy$),
-          map((areas) =>
-            areas
-              .map(
-                (area) =>
-                  ({
-                    label: area.name,
-                    value: area.id,
-                  }) as MultiselectCheckboxOption,
-              )
-              .sort(
-                (a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
-                  a.label.localeCompare(b.label),
-              ),
-          ),
-        )
-        .subscribe((data) => {
-          this.adminAreas$.next(data);
-        });
-    }
   }
 
   private setFilters(value: PerformanceFiltersInputType) {
@@ -158,7 +138,7 @@ export class FiltersComponent implements OnDestroy {
 
     this.dayOfWeekFlags = dayOfWeekFlags
       ? { ...dayOfWeekFlags }
-      : { ...defaultDayOfWeekFlags };
+      : { ...getDefaultDayOfWeekFlags() };
     this.startTime = startTime ?? "00:00";
     this.endTime = endTime ?? "23:59";
     this.minDelay = minDelay ?? null;
@@ -183,8 +163,8 @@ export class FiltersComponent implements OnDestroy {
       });
   }
 
-  toggleDayOfTheWeek(k: keyof DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags[k] = !this.dayOfWeekFlags[k];
+  dayOfWeekFlagsChanged(value: DayOfWeekFlagsInputType) {
+    this.dayOfWeekFlags = value;
     this.validationErrors = { ...this.validationErrors, dayOfWeekFlags: "" };
   }
 

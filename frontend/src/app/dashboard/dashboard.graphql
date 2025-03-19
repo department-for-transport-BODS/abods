@@ -1,6 +1,5 @@
-fragment OperatorDashboard on OperatorType {
+fragment OperatorDashboard on OperatorFeedMonitoring {
   name
-  nocCode
   operatorId
   feedMonitoring {
     feedStatus
@@ -12,10 +11,8 @@ fragment OperatorDashboard on OperatorType {
 }
 
 query dashboardOperatorList {
-  operators {
-    items {
-      ...OperatorDashboard
-    }
+  operatorsFeedMonitoring {
+    ...OperatorDashboard
   }
 }
 

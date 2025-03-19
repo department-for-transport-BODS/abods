@@ -6,16 +6,8 @@ import {
 } from "../../../generated/graphql";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
-import { map as _map, flatMap as _flatMap, uniq as _uniq } from "lodash-es";
-import { nonNullishArray } from "../array-operators";
+import { flatMap as _flatMap, uniq as _uniq } from "lodash-es";
 import { DateTime } from "luxon";
-
-export interface Operator {
-  name?: string | null;
-  nocCode?: string | null;
-  operatorId?: string | null;
-  adminAreaIds: string[];
-}
 
 @Injectable({ providedIn: "root" })
 export class OperatorService {
@@ -24,31 +16,27 @@ export class OperatorService {
     private operatorLinesGQL: OperatorLinesGQL,
   ) {}
 
-  fetchOperators(): Observable<Operator[]> {
-    return this.operatorListQuery.fetch({}).pipe(
-      map((result) =>
-        nonNullishArray(result?.data?.operators?.items).map(
-          ({ adminAreas, ...operator }) => ({
-            ...operator,
-            adminAreaIds: _map(nonNullishArray(adminAreas), "adminAreaId"),
-          }),
-        ),
-      ),
-    );
+  fetchOperators() {
+    return this.operatorListQuery
+      .fetch({})
+      .pipe(map((result) => result.data.operators));
   }
 
-  fetchOperator(nocCode: string): Observable<Operator | undefined> {
+  fetchOperator(operatorId: string) {
     return this.fetchOperators().pipe(
       map((operators) =>
-        operators.find((operator) => operator.nocCode === nocCode),
+        operators.find((operator) => operator.operatorId === operatorId),
       ),
     );
   }
 
-  fetchLines(operatorId: string, inputDate?: DateTime): Observable<LineType[]> {
+  fetchLines(operatorId: string, inputDate: DateTime): Observable<LineType[]> {
     return this.operatorLinesGQL
       .fetch(
-        { operatorId, inputDate: inputDate?.toISO() },
+        {
+          operatorIds: [operatorId],
+          inputDate: inputDate.toISO(),
+        },
         { fetchPolicy: "no-cache" },
       )
       .pipe(
@@ -62,9 +50,7 @@ export class OperatorService {
 
   fetchAdminAreaIds(): Observable<string[]> {
     return this.fetchOperators().pipe(
-      map((operators: Operator[]) =>
-        _uniq(_flatMap(operators, "adminAreaIds")),
-      ),
+      map((operators) => _uniq(_flatMap(operators, "adminAreaIds"))),
     );
   }
 
@@ -74,13 +60,13 @@ export class OperatorService {
    * @param term
    * @returns
    */
-  searchOperators(term: string): Observable<Operator[]> {
+  searchOperators(term: string) {
     return this.fetchOperators().pipe(
       map((operators) =>
         operators.filter(
           (op) =>
             String(op.name).toLowerCase().includes(term.trim().toLowerCase()) ||
-            String(op.nocCode)
+            String(op.operatorId)
               .toLowerCase()
               .includes(term.trim().toLowerCase()),
         ),

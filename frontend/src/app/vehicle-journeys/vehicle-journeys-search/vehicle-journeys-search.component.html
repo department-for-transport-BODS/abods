@@ -32,7 +32,7 @@
           <ng-option
             *ngFor="let item of operators$ | async"
             [value]="item.operatorId"
-            >{{ item.name }} ({{ item.nocCode }})</ng-option
+            >{{ item.name }} ({{ item.operatorId }})</ng-option
           >
         </ng-select>
       </div>

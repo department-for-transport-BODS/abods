@@ -1,0 +1,23 @@
+<ng-select
+  class="gds-select location-search"
+  [labelForId]="fieldId"
+  placeholder="Search"
+  (change)="onLocationSelected($event)"
+  [typeahead]="locationSearch$"
+  [loading]="locationsLoading"
+>
+  <ng-template ng-loadingspinner-tmp>
+    <app-spinner size="x-small" />
+  </ng-template>
+  <ng-option *ngFor="let location of locations?.features" [value]="location">
+    {{ location.text }}
+    <span class="govuk-body-s text-secondary">
+      {{
+        [
+          location | geoContext: "locality",
+          location | geoContext: ["place", "district"]
+        ] | join
+      }}
+    </span>
+  </ng-option>
+</ng-select>

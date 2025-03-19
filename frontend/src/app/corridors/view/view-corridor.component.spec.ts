@@ -153,15 +153,15 @@ describe("ViewCorridorComponent", () => {
         of({
           summaryStats: {
             scheduledTransits: 100,
-            averageJourneyTime: 90,
+            averageTransitTime: 90,
             totalTransits: 90,
             numberOfServices: 5,
           },
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -212,15 +212,15 @@ describe("ViewCorridorComponent", () => {
         of({
           summaryStats: {
             scheduledTransits: 100,
-            averageJourneyTime: 90,
+            averageTransitTime: 90,
             totalTransits: 90,
             numberOfServices: 5,
           },
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -275,15 +275,15 @@ describe("ViewCorridorComponent", () => {
         of({
           summaryStats: {
             scheduledTransits: 100,
-            averageJourneyTime: 90,
+            averageTransitTime: 90,
             totalTransits: 90,
             numberOfServices: 5,
           },
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -325,9 +325,9 @@ describe("ViewCorridorComponent", () => {
       spyOn(service, "fetchStats").and.returnValue(
         of({
           summaryStats: {},
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [
             {
               lineName: "53",
               servicePatternName: "Sheffield to Mansfield",
@@ -335,7 +335,7 @@ describe("ViewCorridorComponent", () => {
               operatorName: "Stagecoach East Midlands",
               scheduledTransits: 25,
               recordedTransits: 24,
-              totalJourneyTime: 60,
+              totalTransitTime: 60,
             },
             {
               lineName: "77",
@@ -344,11 +344,11 @@ describe("ViewCorridorComponent", () => {
               operatorName: "Stagecoach East Midlands",
               scheduledTransits: 50,
               recordedTransits: 45,
-              totalJourneyTime: 30,
+              totalTransitTime: 30,
             },
           ],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -374,11 +374,11 @@ describe("ViewCorridorComponent", () => {
       spyOn(service, "fetchStats").and.returnValue(
         of({
           summaryStats: {},
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [
             {
               fromStop: "ST1234",
@@ -436,11 +436,11 @@ describe("ViewCorridorComponent", () => {
       spyOn(service, "fetchStats").and.returnValue(
         of({
           summaryStats: {},
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -510,11 +510,11 @@ describe("ViewCorridorComponent", () => {
       spyOn(service, "fetchStats").and.returnValue(
         of({
           summaryStats: {},
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );
@@ -535,11 +535,11 @@ describe("ViewCorridorComponent", () => {
       spyOn(service, "fetchStats").and.returnValue(
         of({
           summaryStats: {},
-          journeyTimeDayOfWeekStats: [],
-          journeyTimeHistogram: [],
-          journeyTimePerServiceStats: [],
-          journeyTimeStats: [],
-          journeyTimeTimeOfDayStats: [],
+          transitTimeDayOfWeekStats: [],
+          transitTimeHistogram: [],
+          transitTimePerServiceStats: [],
+          transitTimeStats: [],
+          transitTimeTimeOfDayStats: [],
           serviceLinks: [],
         }),
       );

@@ -12,6 +12,7 @@ import {
 } from "../../../generated/graphql";
 import { OperatorService } from "./operator.service";
 import { waitForAsync } from "@angular/core/testing";
+import { DateTime } from "luxon";
 
 describe("OperatorService", () => {
   let spectator: SpectatorService<OperatorService>;
@@ -59,7 +60,7 @@ describe("OperatorService", () => {
   }));
 
   it("should query lines", waitForAsync(() => {
-    spectator.service.fetchLines("OP01").subscribe((actual) => {
+    spectator.service.fetchLines("OP01", DateTime.now()).subscribe((actual) => {
       expect(actual).not.toBeNull();
       expect(actual.length).toEqual(1);
       expect(actual[0].id).toEqual("LI12345");

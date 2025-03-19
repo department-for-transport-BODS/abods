@@ -19,27 +19,41 @@ Parameters:
     Description: The name of the project
     Default: "abods"
     Type: String
-  RdsDbHostAddr:
-    Type: String
-    Default: ""
-  RdsDbPort:
-    Type: Number
-    Default: 5432
-  VpcId:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
-    Default: ""
-  VpcSubnets:
-    Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
-    Default: ""
   BodsVpcEndpoint:
     Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
     Default: ""
   BodsAccountId:
     Type: String
     Default: "228266753808"
+  QuickSightAdminDashboardId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: ""
+  QuickSightLtaDashboardId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: ""
+  QuickSightOperatorDashboardId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: ""
+  RdsDbHostAddr:
+    Type: String
+    Default: ""
+  RdsDbPort:
+    Type: Number
+    Default: 5432
+  ServiceMonitoringDashboardUrl:
+    Type: String
+    Default: "https://p.datadoghq.eu/sb/embed/e2f4b96a-30e0-11ec-a6fa-da7ad0900005-e3c4b6e999216c5bdb39edf1633a2848"
+  VpcId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
+    Default: ""
+  VpcSubnets:
+    Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
+    Default: ""
+
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, "local"]]
   IsNotProd: !Not [!Equals [!Ref Environment, "prod"]]
+
 Resources:
   ##############################################
   #### GRAPHQL FUNCTION (& ASSC. RESOURCES) ####
@@ -141,11 +155,13 @@ Resources:
           DD_TAGS: app:graphql,project:abods
           DD_TRACE_ENABLED: false
           DD_ENHANCED_METRICS: false
-          QUICKSIGHT_ASSUME_ROLE_ARN: !Sub "arn:aws:iam::${BodsAccountId}:role/abods-quicksight-assume-role"
-          QUICKSIGHT_AWS_ACCOUNT_ID: !Sub "${BodsAccountId}"
-          QUICKSIGHT_ADMIN_DASHBOARD_ID: "72fd7c01-f654-449b-92e2-bdb142d85e1d"
-          QUICKSIGHT_LTA_DASHBOARD_ID: "b716338e-2416-4c29-95f8-1c21e27c1ecf"
-          QUICKSIGHT_OPERATOR_DASHBOARD_ID: "5fce6742-935f-4a78-851b-c3f730dca44e"
+          QUICKSIGHT_ASSUME_ROLE_ARN: !Sub "arn:aws:iam::${BodsAccountId}:role/${ProjectName}-cross-account-quicksight-role"
+          QUICKSIGHT_AWS_ACCOUNT_ID: !Ref BodsAccountId
+          QUICKSIGHT_ADMIN_DASHBOARD_ID: !Ref QuickSightAdminDashboardId
+          QUICKSIGHT_LTA_DASHBOARD_ID: !Ref QuickSightLtaDashboardId
+          QUICKSIGHT_OPERATOR_DASHBOARD_ID: !Ref QuickSightOperatorDashboardId
+          QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "10"
+          DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
@@ -193,7 +209,15 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}"
       Policies:
-        - PolicyName: SecretsManagerGetSecretValueForAPIToken
+        - PolicyName: AssumeExternalBodsRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: !Sub "arn:aws:iam::${BodsAccountId}:role/${ProjectName}-cross-account-quicksight-role"
+        - PolicyName: SecretsManagerAccess
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -205,13 +229,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - kms:Decrypt
-                  - kms:DescribeKey
                 Resource:
-                  Fn::Sub: "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
-              - Effect: Allow
-                Action:
-                  - sts:AssumeRole
-                Resource: !Sub "arn:aws:iam::${BodsAccountId}:role/*"
+                  - !Sub "{{resolve:ssm:/${ProjectName}/shared/kms/secretsmanager/arn}}"
+
   GraphQlFunctionLoggingPolicy:
     Type: "AWS::IAM::Policy"
     Condition: IsNotLocal
@@ -232,17 +252,6 @@ Resources:
   #########################################
   #### GENERAL CONFIGURATION RESOURCES ####
   #########################################
-  # RuntimeDependenciesLayer:
-  #   Type: AWS::Serverless::LayerVersion
-  #   Metadata:
-  #     BuildMethod: makefile
-  #   Properties:
-  #     LayerName: !Sub '${ProjectName}-${Environment}-runtime-dependencies-layer'
-  #     ContentUri: .
-  #     CompatibleRuntimes:
-  #       - nodejs16.x
-  #     RetentionPolicy: Retain
-
   FrontendBucket:
     Type: AWS::S3::Bucket
     Condition: IsNotLocal

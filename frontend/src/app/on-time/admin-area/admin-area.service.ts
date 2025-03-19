@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { combineLatestWith, Observable } from "rxjs";
 import { map, shareReplay } from "rxjs/operators";
 import { FeatureCollection, Polygon } from "geojson";
-import { GetAdminAreasGQL } from "../../../generated/graphql";
+import { GetAdminAreasGQL, OperatorType } from "../../../generated/graphql";
 import { feature, featureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import flip from "@turf/flip";
@@ -13,10 +13,7 @@ import {
   sortBy as _sortBy,
   uniq as _uniq,
 } from "lodash-es";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 import { nonNullishArray } from "../../shared/array-operators";
 
 export interface AdminArea {
@@ -44,7 +41,7 @@ export class AdminAreaService {
   ) {}
 
   private _fetchAdminAreasByOperators(
-    project: (operators: Operator[]) => string[],
+    project: (operators: OperatorType[]) => string[],
   ) {
     return this.getAdminAreasGQL.fetch({}).pipe(
       map((result) => nonNullishArray(result.data?.adminAreas)),
@@ -68,7 +65,7 @@ export class AdminAreaService {
   }
 
   fetchAdminAreas(): Observable<AdminArea[]> {
-    return this._fetchAdminAreasByOperators((operators: Operator[]) =>
+    return this._fetchAdminAreasByOperators((operators) =>
       _uniq(_flatMap(operators, "adminAreaIds")),
     );
   }

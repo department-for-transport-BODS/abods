@@ -4,7 +4,6 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import {
   DelayFrequencyType,
-  Maybe,
   OnTimeDelayFrequencyGQL,
   OnTimeOperatorPerformanceListGQL,
   OnTimePunctualityDayOfWeekGQL,
@@ -20,23 +19,16 @@ import {
   PunctualityTimeOfDayType,
   PunctualityTimeSeriesType,
   PunctualityTotalsType,
-  Scalars,
   ServiceInfoGQL,
   ServiceInfoType,
   ServicePerformanceType,
   StopPerformanceType,
 } from "src/generated/graphql";
-import { keyBy as _keyBy, range as _range, sum, sumBy } from "lodash-es";
+import { keyBy as _keyBy, range as _range } from "lodash-es";
 import {
   isNotNullOrUndefined,
   nonNullOrUndefined,
 } from "../shared/rxjs-operators";
-
-export interface IPunctualityType {
-  early?: Maybe<Scalars["Int"]["output"]>;
-  late?: Maybe<Scalars["Int"]["output"]>;
-  onTime?: Maybe<Scalars["Int"]["output"]>;
-}
 
 export type PerformanceParams = Omit<PerformanceInputType, "filters"> & {
   filters: PerformanceFiltersInputType;
@@ -58,12 +50,6 @@ export type OperatorPerformance = Pick<
 export type ServicePerformance = Omit<ServicePerformanceType, "operatorInfo"> &
   OnTimeRatios;
 export type StopPerformance = StopPerformanceType & OnTimeRatios;
-export type AbstractPerformance = IPunctualityType &
-  OnTimeRatios &
-  Pick<
-    ServicePerformanceType & StopPerformanceType,
-    "scheduledDepartures" | "actualDepartures" | "averageDelay"
-  >;
 
 export type PunctualityOverview = Pick<
   PunctualityTotalsType,
@@ -339,27 +325,5 @@ export class OnTimeService {
       formatDayOfWeek,
       data,
     );
-  }
-
-  calculateTotals<T extends AbstractPerformance>(data: T[]): T[] {
-    const early = sumBy(data, "early");
-    const late = sumBy(data, "late");
-    const onTime = sumBy(data, "onTime");
-    const total = sumBy(data, "total");
-    return [
-      {
-        early,
-        late,
-        onTime,
-        earlyRatio: early / total || 0,
-        lateRatio: late / total || 0,
-        onTimeRatio: onTime / total || 0,
-        scheduledDepartures: sumBy(data, "scheduledDepartures"),
-        actualDepartures: sumBy(data, "actualDepartures"),
-        averageDelay:
-          sum(data.map((stop) => stop.actualDepartures * stop.averageDelay)) /
-            sumBy(data, "actualDepartures") || 0,
-      } as T,
-    ];
   }
 }

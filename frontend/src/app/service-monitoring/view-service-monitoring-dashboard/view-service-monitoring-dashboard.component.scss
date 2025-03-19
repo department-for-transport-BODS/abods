@@ -1,0 +1,11 @@
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
+
+.service-monitoring {
+  &__header-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    height: 550px;
+  }
+}
