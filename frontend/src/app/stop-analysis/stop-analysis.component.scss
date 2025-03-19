@@ -1,10 +1,16 @@
 @import "src/assets/styles/settings/settings";
 @import "src/assets/styles/helpers/helpers";
 
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
 .filters {
   display: grid;
   grid-template-columns: 3fr 2fr 2fr;
-  column-gap: govuk-spacing(6);
+  column-gap: govuk-spacing(3);
   row-gap: govuk-spacing(3);
 
   > * {
@@ -12,14 +18,16 @@
   }
 }
 
-app-filter-chips {
-  grid-column: 1 / span 3;
+.extra-filter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .toggles {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: flex-end;
   gap: govuk-spacing(1);
 }
