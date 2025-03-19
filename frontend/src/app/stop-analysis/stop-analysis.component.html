@@ -1,26 +1,49 @@
 <app-page>
   <ng-container ngProjectAs="content">
-    <app-page-header heading="Stop Analysis" />
-    <div class="filters govuk-!-margin-bottom-2">
-      <app-date-range-picker
-        [from]="from"
-        [to]="to"
-        (valueChanged)="onDatePickerChanged($event)"
-      />
-
-      <button
-        class="more-filters button-link govuk-link"
-        aria-controls="panel"
-        id="panel-toggle"
-        (click)="onMoreFiltersClick()"
-      >
-        <svg-icon
-          class="on-time__filter-icon"
-          src="assets/icons/refine.svg"
-          [applyClass]="true"
+    <div class="header-container">
+      <app-page-header heading="Stop Analysis" />
+      <div class="extra-filter-container">
+        <button
+          class="more-filters button-link govuk-link"
+          aria-controls="panel"
+          id="panel-toggle"
+          (click)="onMoreFiltersClick()"
+        >
+          <svg-icon
+            class="on-time__filter-icon"
+            src="assets/icons/refine.svg"
+            [applyClass]="true"
+          />
+          <span>Refine results</span>
+        </button>
+        <app-filter-chips
+          [filters]="refinedFilters"
+          (filterChange)="onFiltersChanged($event)"
         />
-        <span>Refine results</span>
-      </button>
+      </div>
+    </div>
+    <div class="filters govuk-!-margin-bottom-2">
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="adminAreaIds">Admin Areas</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreas$ | async"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreasChanged($event)"
+          [showAll]="true"
+          labelForId="adminAreaIds"
+          showAllLabel="All Areas"
+          placeholderText="Admin Areas"
+          ariaLabel="Admin Areas"
+        />
+      </div>
       <div class="toggles">
         <app-segmented-toggle
           [(ngModel)]="matchType"
@@ -88,15 +111,6 @@
           (selectedChange)="onServicesChanged($event)"
         />
       </div>
-      <app-filter-chips
-        [filters]="{
-          dayOfWeekFlags: this.dayOfWeekFlags,
-          startTime: this.startTime,
-          endTime: this.endTime,
-          adminAreaIds: this.adminAreaIds
-        }"
-        (filterChange)="onFiltersChanged($event)"
-      />
     </div>
     <div class="map-container">
       <mgl-map

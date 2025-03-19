@@ -13,7 +13,6 @@ import { ConfigService } from "../config/config.service";
 import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
-  DayOfWeekFlagsInputType,
   MatchType,
   PerformanceFiltersInputType,
   StopAnalysisGQL,
@@ -29,6 +28,8 @@ import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
 import { FiltersComponent } from "../on-time/filters/filters.component";
 import { PanelService } from "../shared/components/panel/panel.service";
+import { MultiselectCheckboxOption } from "../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
+import { AdminAreaService } from "../on-time/admin-area/admin-area.service";
 
 @Component({
   selector: "app-stop-analysis",
@@ -113,13 +114,27 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  dayOfWeekFlags: DayOfWeekFlagsInputType | null = null;
   maxBoundWidth = 0.4;
-
-  startTime: string | null = null;
-  endTime: string | null = null;
-
   adminAreaIds: string[] | null = [];
+
+  refinedFilters: PerformanceFiltersInputType = {};
+
+  adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
+    takeUntil(this.destroy$),
+    map((areas) =>
+      areas
+        .map(
+          (area) =>
+            ({
+              label: area.name,
+              value: area.id,
+            }) as MultiselectCheckboxOption,
+        )
+        .sort((a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
+          a.label.localeCompare(b.label),
+        ),
+    ),
+  );
 
   constructor(
     private config: ConfigService,
@@ -127,6 +142,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
     private panelService: PanelService,
+    private adminAreaService: AdminAreaService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -188,9 +204,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
             operatorIds: this.operatorIds,
             lineIds: this.serviceIds,
             matchType: this.matchType,
-            dayOfWeekFlags: this.dayOfWeekFlags,
-            startTime: this.startTime,
-            endTime: this.endTime,
+            dayOfWeekFlags: this.refinedFilters.dayOfWeekFlags,
+            startTime: this.refinedFilters.startTime,
+            endTime: this.refinedFilters.endTime,
           };
           this.isLoading = true;
           return this.query
@@ -303,6 +319,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
+    this.onFilterChanged();
+  }
+
+  onAdminAreasChanged($event: string[]) {
+    this.adminAreaIds = $event;
     this.onFilterChanged();
   }
 
@@ -436,10 +457,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFiltersChanged($event: PerformanceFiltersInputType) {
-    this.startTime = $event.startTime ?? null;
-    this.endTime = $event.endTime ?? null;
-    this.dayOfWeekFlags = $event.dayOfWeekFlags ?? null;
-    this.adminAreaIds = $event.adminAreaIds ?? null;
+    this.refinedFilters = $event;
     this.onFilterChanged();
   }
 
@@ -453,15 +471,14 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       inputs: [
         {
           name: "filters",
-          value: {
-            dayOfWeekFlags: this.dayOfWeekFlags,
-            startTime: this.startTime,
-            endTime: this.endTime,
-            adminAreaIds: this.adminAreaIds,
-          },
+          value: this.refinedFilters,
         },
         {
           name: "showDelay",
+          value: false,
+        },
+        {
+          name: "showAdminAreas",
           value: false,
         },
       ],
