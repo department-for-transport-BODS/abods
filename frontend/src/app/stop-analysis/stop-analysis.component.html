@@ -68,8 +68,8 @@
           />
         </app-segmented-toggle>
         <app-segmented-toggle
-          [(ngModel)]="timingPointsOption"
-          (ngModelChange)="processStopData(visibleBounds)"
+          [(ngModel)]="stopType"
+          (ngModelChange)="onStopTypeChanged()"
         >
           <app-segmented-toggle-item
             name="stops-filter"

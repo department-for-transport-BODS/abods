@@ -19,8 +19,8 @@ import {
   StopAnalysisQueryVariables,
   StopStatistics,
 } from "../../generated/graphql";
-import { combineLatest, Subject, takeUntil } from "rxjs";
-import { debounceTime, map, tap, filter, mergeMap } from "rxjs/operators";
+import { combineLatest, firstValueFrom, Subject, takeUntil } from "rxjs";
+import { debounceTime, filter, map, mergeMap, tap } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
@@ -30,6 +30,13 @@ import { FiltersComponent } from "../on-time/filters/filters.component";
 import { PanelService } from "../shared/components/panel/panel.service";
 import { MultiselectCheckboxOption } from "../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
 import { AdminAreaService } from "../on-time/admin-area/admin-area.service";
+import {
+  ActivatedRoute,
+  NavigationExtras,
+  ParamMap,
+  Router,
+} from "@angular/router";
+import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
 
 @Component({
   selector: "app-stop-analysis",
@@ -46,7 +53,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   errored = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  timingPointsOption = "timing-points";
+  stopType = "timing-points";
   operatorIds: string[] = [];
   serviceIds: string[] = [];
   to: DateTime;
@@ -143,6 +150,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     dateRangeService: DateRangeService,
     private panelService: PanelService,
     private adminAreaService: AdminAreaService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -154,7 +163,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setFilterPanelComponent();
-    // TODO: parse query params
     const boundsChanged = this.boundsChanged.pipe(
       takeUntil(this.destroy$),
       tap(() => {
@@ -175,6 +183,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         if (!bounds) return;
 
         this.visibleBounds = bounds;
+        this.updateQueryParams(this.visibleBounds);
 
         if (!this.lastBounds) return;
         if (!this.withinBounds(bounds, this.lastBounds)) return;
@@ -188,14 +197,16 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       }),
     );
 
-    combineLatest([boundsChanged, this.apiFiltersChanged])
+    const filtersChanged = this.apiFiltersChanged.pipe(
+      tap(() => this.updateQueryParams(undefined)),
+    );
+
+    combineLatest([boundsChanged, filtersChanged])
       .pipe(
         // Don't fetch too quickly if there's a lot of map movement happening
         debounceTime(500),
         // Don't run requests concurrently, and only run the latest when completed again
         mergeMap(([bounds]) => {
-          // TODO: limit date range
-
           const query: StopAnalysisQueryVariables = {
             boundingBox: bounds!,
             adminAreaIds: this.adminAreaIds ?? [],
@@ -220,7 +231,88 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         this.processStopData(this.visibleBounds);
         this.isLoading = false;
       });
+
+    firstValueFrom(this.route.queryParamMap)
+      .then((params) => this.parseParams(params))
+      .catch(console.log);
     this.onFilterChanged();
+  }
+
+  private updateQueryParams = (bounds: BoundingBoxInputType | undefined) => {
+    const nav: NavigationExtras = {
+      queryParams: {
+        dayOfWeek: this.refinedFilters.dayOfWeekFlags
+          ? Object.entries(this.refinedFilters.dayOfWeekFlags)
+              .filter(([_s, v]) => v)
+              .map(([s, _v]) => s)
+              .join()
+          : undefined,
+        stopType: this.stopType,
+        adminAreaIds: this.adminAreaIds ?? [],
+        fromTimestamp: this.from.toISO(),
+        toTimestamp: this.to.toISO(),
+        operatorIds: this.operatorIds,
+        lineIds: this.serviceIds,
+        matchType: this.matchType,
+        startTime: this.refinedFilters.startTime,
+        endTime: this.refinedFilters.endTime,
+      },
+      queryParamsHandling: "merge",
+    };
+    if (bounds) {
+      nav.queryParams = {
+        ...nav.queryParams,
+        minLatitude: bounds.minLatitude,
+        minLongitude: bounds.minLongitude,
+        maxLatitude: bounds.maxLatitude,
+        maxLongitude: bounds.maxLongitude,
+      };
+    }
+    this.router.navigate([], nav).catch(console.log);
+  };
+
+  private parseParams(params: ParamMap) {
+    const from = params.get("fromTimestamp");
+    const to = params.get("toTimestamp");
+    const matchType = params.get("matchType");
+    const startTime = params.get("startTime");
+    const endTime = params.get("endTime");
+    const adminAreaIds = params.getAll("adminAreaIds");
+    const serviceIds = params.getAll("lineIds");
+    const operatorIds = params.getAll("operatorIds");
+    const minLongitude = params.get("minLongitude");
+    const minLatitude = params.get("minLatitude");
+    const maxLongitude = params.get("maxLongitude");
+    const maxLatitude = params.get("maxLatitude");
+    const dayOfWeek = params.get("dayOfWeek");
+    const stopType = params.get("stopType");
+    if (from) this.from = DateTime.fromISO(from);
+    // The setter in the nested component is not triggered normally, but the setTimeout fixes it.
+    // It must need to do another round of change detection or something like that
+    if (to) setTimeout(() => (this.to = DateTime.fromISO(to)), 0);
+    if (stopType) this.stopType = stopType;
+    if (matchType) this.matchType = matchType as MatchType;
+    if (startTime) this.refinedFilters.startTime = startTime;
+    if (endTime) this.refinedFilters.endTime = endTime;
+    if (adminAreaIds) this.adminAreaIds = adminAreaIds;
+    if (serviceIds) this.serviceIds = serviceIds;
+    if (operatorIds) this.operatorIds = operatorIds;
+    if (dayOfWeek) {
+      const flags = getDefaultDayOfWeekFlags();
+      const days = dayOfWeek.split(",") ?? [];
+      for (const day of Object.keys(flags)) {
+        flags[day as keyof typeof flags] = days.includes(day);
+      }
+      this.refinedFilters.dayOfWeekFlags = flags;
+    }
+    if (minLongitude && minLatitude && maxLatitude && maxLongitude) {
+      this.visibleBounds = {
+        minLongitude: Number(minLongitude),
+        minLatitude: Number(minLatitude),
+        maxLongitude: Number(maxLongitude),
+        maxLatitude: Number(maxLatitude),
+      };
+    }
   }
 
   ngOnDestroy(): void {
@@ -272,6 +364,15 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       this.selectedCluster = undefined;
       this.cdr.detectChanges();
     });
+    map.fitBounds(
+      [
+        this.visibleBounds.minLongitude,
+        this.visibleBounds.minLatitude,
+        this.visibleBounds.maxLongitude,
+        this.visibleBounds.maxLatitude,
+      ],
+      { maxDuration: 500 },
+    );
   }
 
   onMapMoveEnd() {
@@ -343,6 +444,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.map.fitBounds(location.bbox, { maxDuration: 500 });
   }
 
+  onStopTypeChanged() {
+    this.updateQueryParams(undefined);
+    this.processStopData(this.visibleBounds);
+  }
+
   zoomToPoint(center: [number, number]) {
     if (!this.map) return;
     const zoom = this.map.getZoom() + 1;
@@ -352,7 +458,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   processStopData(bounds: BoundingBoxInputType): void {
     const filtered = this.rawStopData.filter(
       (n) =>
-        (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
+        (this.stopType !== "timing-points" || n.timingPoint) &&
         n.latitude >= bounds.minLatitude &&
         n.latitude <= bounds.maxLatitude &&
         n.longitude >= bounds.minLongitude &&
