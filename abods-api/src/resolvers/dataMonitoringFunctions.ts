@@ -25,22 +25,21 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   const user = await requireUserSession(context);
 
   const now = dayjs();
-  const oneHourAgo = now.subtract(1, "hour");
 
   const result = await context.kysely
     .updateTable("login_details")
     .where("user_id", "=", user.id)
     .where((eb) =>
       eb.or([
-        eb("data_monitoring_last_accessed", "is", null),
-        eb("data_monitoring_last_accessed", "<", oneHourAgo.toDate()),
+        eb("data_monitoring_access_refresh", "is", null),
+        eb("data_monitoring_access_refresh", "<", now.toDate()),
         eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour),
       ]),
     )
     .set((eb) => {
       const replaceRecord = eb.or([
-        eb("data_monitoring_last_accessed", "is", null),
-        eb("data_monitoring_last_accessed", "<", oneHourAgo.toDate()),
+        eb("data_monitoring_access_refresh", "is", null),
+        eb("data_monitoring_access_refresh", "<", now.toDate()),
       ]);
       return {
         data_monitoring_access_count: eb
@@ -52,8 +51,8 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
         data_monitoring_last_accessed: eb
           .case()
           .when(replaceRecord)
-          .then(now.toDate())
-          .else(eb.ref("data_monitoring_last_accessed"))
+          .then(now.add(1, "hour").toDate())
+          .else(eb.ref("data_monitoring_access_refresh"))
           .end(),
       };
     })

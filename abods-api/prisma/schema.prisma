@@ -619,8 +619,8 @@ model ui_lta {
 }
 
 model login_details {
-  user_id                       Int       @id
-  last_login                    DateTime  @db.Timestamp(6)
-  data_monitoring_access_count  Int?
-  data_monitoring_last_accessed DateTime? @db.Timestamp(6)
+  user_id                        Int       @id
+  last_login                     DateTime  @db.Timestamp(6)
+  data_monitoring_access_count   Int?
+  data_monitoring_access_refresh DateTime? @db.Timestamp(6)
 }
