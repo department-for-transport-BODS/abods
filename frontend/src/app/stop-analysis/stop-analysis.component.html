@@ -16,8 +16,13 @@
           />
           <span>Refine results</span>
         </button>
+        <!--Always passing the same filters value here seems to not always trigger change detection-->
         <app-filter-chips
-          [filters]="refinedFilters"
+          [filters]="{
+            startTime: refinedFilters.startTime,
+            endTime: refinedFilters.endTime,
+            dayOfWeekFlags: refinedFilters.dayOfWeekFlags
+          }"
           (filterChange)="onFiltersChanged($event)"
         />
       </div>

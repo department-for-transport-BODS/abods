@@ -457,7 +457,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFiltersChanged($event: PerformanceFiltersInputType) {
-    this.refinedFilters = $event;
+    // We can't replace the refinedFilters object as the dynamic filter component below has static inputs
+    this.refinedFilters.startTime = $event.startTime;
+    this.refinedFilters.endTime = $event.endTime;
+    this.refinedFilters.dayOfWeekFlags = $event.dayOfWeekFlags;
     this.onFilterChanged();
   }
 
