@@ -15,7 +15,9 @@ import { getUserTypeDetails } from "../lib/operators.js";
 import logger from "../logger.js";
 import dayjs from "dayjs";
 
-const accessAllowedWithinAnHour = 10;
+const accessAllowedWithinAnHour = Number(
+  process.env.QUICKSIGHT_ALLOW_USER_ACCESS_COUNT ?? 10,
+);
 
 export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   _,

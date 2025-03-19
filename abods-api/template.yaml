@@ -160,6 +160,7 @@ Resources:
           QUICKSIGHT_ADMIN_DASHBOARD_ID: !Ref QuickSightAdminDashboardId
           QUICKSIGHT_LTA_DASHBOARD_ID: !Ref QuickSightLtaDashboardId
           QUICKSIGHT_OPERATOR_DASHBOARD_ID: !Ref QuickSightOperatorDashboardId
+          QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "10"
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
