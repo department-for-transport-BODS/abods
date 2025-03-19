@@ -13,6 +13,8 @@ import { DateTime } from "luxon";
 export class ServiceMultiSelectComponent {
   @Input() value: string[] = [];
   @Input() fieldId = "services";
+  @Input() disabled = false;
+  @Input() disabledText = "";
   @Output() selectedChange = new EventEmitter<string[]>();
   @Input() set operators(value: string[]) {
     this.operators$.next(value);

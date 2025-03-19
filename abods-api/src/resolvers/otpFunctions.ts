@@ -85,17 +85,19 @@ export const getOperatorList: QueryResolvers["operators"] = async (
   }
   return await query
     .groupBy(["a.name", "s.operator_noc"])
-    .select("name")
-    .select("operator_noc")
-    .select(
-      sql<string>`string_agg(n.adminarea_id::text, ',')`.as("adminAreaIds"),
-    )
+    .select((eb) => [
+      eb.fn.coalesce("name", sql.lit("<unknown>")).as("name"),
+      eb.fn.coalesce("operator_noc", sql.lit("<unknown>")).as("operatorId"),
+      sql<string>`string_agg(distinct n.adminarea_id::text, ',')`.as(
+        "adminAreaIds",
+      ),
+    ])
     .orderBy("name")
     .execute()
     .then((x) =>
       x.map((o) => ({
-        name: o.name ?? "",
-        operatorId: o.operator_noc ?? "",
+        name: o.name,
+        operatorId: o.operatorId,
         adminAreaIds: o.adminAreaIds.split(","),
       })),
     );

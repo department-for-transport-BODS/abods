@@ -12,6 +12,8 @@
   [inputAttrs]="
     ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}
   "
+  [disabled]="disabled"
+  [class.gds-multiselect-checkbox__disabled]="disabled"
   (change)="onOptionChange()"
 >
   <ng-template ng-multi-label-tmp let-items="items">

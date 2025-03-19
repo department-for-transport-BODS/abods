@@ -8025,13 +8025,9 @@
             "name": "dayOfWeekFlags",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "INPUT_OBJECT",
-                "name": "DayOfWeekFlagsInputType",
-                "ofType": null
-              }
+              "kind": "INPUT_OBJECT",
+              "name": "DayOfWeekFlagsInputType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -8041,13 +8037,9 @@
             "name": "endTime",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -8137,13 +8129,9 @@
             "name": "startTime",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,

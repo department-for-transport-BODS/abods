@@ -1,12 +1,54 @@
 <app-page>
   <ng-container ngProjectAs="content">
-    <app-page-header heading="Stop Analysis" />
+    <div class="header-container">
+      <app-page-header heading="Stop Analysis" />
+      <div class="extra-filter-container">
+        <button
+          class="more-filters button-link govuk-link"
+          aria-controls="panel"
+          id="panel-toggle"
+          (click)="onMoreFiltersClick()"
+        >
+          <svg-icon
+            class="on-time__filter-icon"
+            src="assets/icons/refine.svg"
+            [applyClass]="true"
+          />
+          <span>Refine results</span>
+        </button>
+        <!--Always passing the same filters value here seems to not always trigger change detection-->
+        <app-filter-chips
+          [filters]="{
+            startTime: refinedFilters.startTime,
+            endTime: refinedFilters.endTime,
+            dayOfWeekFlags: refinedFilters.dayOfWeekFlags
+          }"
+          (filterChange)="onFiltersChanged($event)"
+        />
+      </div>
+    </div>
     <div class="filters govuk-!-margin-bottom-2">
-      <app-date-range-picker
-        [from]="from"
-        [to]="to"
-        (valueChanged)="onDatePickerChanged($event)"
-      />
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="adminAreaIds">Admin Areas</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreas$ | async"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreasChanged($event)"
+          [showAll]="true"
+          labelForId="adminAreaIds"
+          showAllLabel="All Areas"
+          placeholderText="Admin Areas"
+          ariaLabel="Admin Areas"
+        />
+      </div>
       <div class="toggles">
         <app-segmented-toggle
           [(ngModel)]="matchType"
@@ -55,45 +97,30 @@
       </div>
       <div>
         <label class="govuk-label" for="operators">Operators</label>
-        <!--TODO: need to look at filtering to just the operators visible in the map,
-         and decide what to do if something not visible is selected-->
         <app-operator-multi-select
           [value]="operatorIds"
           fieldId="operators"
           (selectedChange)="onOperatorsChanged($event)"
         />
-        <div
-          [ngStyle]="{ display: operatorIds.length > 0 ? undefined : 'none' }"
-        >
-          <label class="govuk-label" for="services">Services</label>
-          <app-service-multi-select
-            [operators]="operatorIds"
-            [startDate]="from"
-            [endDate]="to"
-            [value]="serviceIds"
-            fieldId="services"
-            (selectedChange)="onServicesChanged($event)"
-          />
-        </div>
       </div>
-      <app-day-of-week-select
-        [value]="dayOfWeekFlags"
-        (selectedChange)="onDayOfWeekFlagsChanged($event)"
-      />
-      <app-time-range-slider
-        labelMin="Start time"
-        labelMax="End time"
-        legend="Time range"
-        legendSize="s"
-        [(startTime)]="startTime"
-        [(endTime)]="endTime"
-      />
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <app-service-multi-select
+          [operators]="operatorIds"
+          [startDate]="from"
+          [endDate]="to"
+          [value]="serviceIds"
+          [disabled]="operatorIds.length === 0"
+          disabledText="Select an operator"
+          fieldId="services"
+          (selectedChange)="onServicesChanged($event)"
+        />
+      </div>
     </div>
     <div class="map-container">
       <mgl-map
         [style]="mapboxStyle"
-        [maxBounds]="initialBounds"
-        (zoomEnd)="onMapZoomEnd()"
+        [bounds]="initialBounds"
         (moveEnd)="onMapMoveEnd()"
         (mapLoad)="onMapLoad($event)"
       >
@@ -114,7 +141,7 @@
           id="stops"
           [data]="stopPoints"
           [cluster]="true"
-          [clusterRadius]="100"
+          [clusterRadius]="80"
           [clusterProperties]="clusterProperties"
         />
         <mgl-layer
@@ -129,8 +156,12 @@
               ['get', 'point_count'],
               20,
               5,
-              30,
+              25,
               20,
+              30,
+              50,
+              35,
+              100,
               40
             ],
             'circle-color': pointColours,
@@ -183,9 +214,9 @@
               ['exponential', 0.5],
               ['zoom'],
               11,
-              2,
+              0.8,
               14,
-              3
+              1
             ],
             'circle-stroke-color': '#ffffff'
           }"
@@ -210,6 +241,7 @@
               14,
               1
             ],
+            'icon-allow-overlap': true,
             'icon-image': timingPointIcons
           }"
         />

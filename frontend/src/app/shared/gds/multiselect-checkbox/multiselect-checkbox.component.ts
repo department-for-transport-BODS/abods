@@ -32,6 +32,7 @@ export interface MultiselectCheckboxOption {
 export class MultiselectCheckboxComponent implements ControlValueAccessor {
   @Input() options: MultiselectCheckboxOption[] | null = [];
   @Input() showAll = false;
+  @Input() disabled = false;
   @Input() showAllLabel = "";
   @Input() pluralLabel = "selected";
   @Input() placeholderText = "";
