@@ -22,7 +22,7 @@ export class ViewMonitorsComponent implements OnInit {
       .fetch({}, { fetchPolicy: "no-cache" })
       .pipe(
         mergeMap(async (response) => {
-          if (!response.data.embeddedUrl.enabled) {
+          if (!response.data?.embeddedUrl.enabled) {
             return false;
           }
           if (!response.data.embeddedUrl.url) {
