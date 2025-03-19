@@ -13,90 +13,57 @@ import {
 import { requireUserSession } from "./helpers.js";
 import { getUserTypeDetails } from "../lib/operators.js";
 import logger from "../logger.js";
-import { ComparisonOperatorExpression, Kysely } from "kysely";
-import { DB } from "../kysely.js";
 import dayjs from "dayjs";
 
 const accessAllowedWithinAnHour = 10;
-
-const isUserAllowedAccess = (
-  lastAccessed: Date | null | undefined,
-  accessedCount: number,
-) => {
-  const currentTimestamp = dayjs();
-  const diffLastAccessed = currentTimestamp.diff(dayjs(lastAccessed), "minute");
-  if (!lastAccessed || diffLastAccessed > 60) return true;
-
-  if (accessedCount >= accessAllowedWithinAnHour && diffLastAccessed <= 60) {
-    return false;
-  }
-
-  return true;
-};
-
-const updateAccess = async (
-  user_id: number,
-  previousAccessDetails: Awaited<
-    ReturnType<typeof getDataMonitoringAccessDetails>
-  >,
-  db: Kysely<DB>,
-) => {
-  const currentTimestamp = dayjs();
-
-  let accessCount =
-    (previousAccessDetails?.data_monitoring_access_count ?? 0) + 1;
-
-  let access_count_operator: ComparisonOperatorExpression = "=";
-
-  if (previousAccessDetails?.data_monitoring_access_count === null) {
-    access_count_operator = "is";
-  }
-  let updateQuery = db
-    .updateTable("login_details")
-    .where("user_id", "=", user_id)
-    .where(
-      "data_monitoring_access_count",
-      access_count_operator,
-      previousAccessDetails?.data_monitoring_access_count ?? null,
-    );
-
-  if (
-    !previousAccessDetails?.data_monitoring_last_accessed ||
-    currentTimestamp.diff(
-      dayjs(previousAccessDetails?.data_monitoring_last_accessed),
-      "minute",
-    ) > 60
-  ) {
-    accessCount = 1;
-    updateQuery = updateQuery.set({
-      data_monitoring_last_accessed: currentTimestamp.toDate(),
-    });
-  }
-
-  const updatedRows = await updateQuery
-    .set({
-      data_monitoring_access_count: accessCount,
-    })
-    .executeTakeFirst();
-
-  return updatedRows.numUpdatedRows;
-};
-
-const getDataMonitoringAccessDetails = (user_id: number, db: Kysely<DB>) => {
-  return db
-    .selectFrom("login_details")
-    .select(["data_monitoring_access_count", "data_monitoring_last_accessed"])
-    .where("user_id", "=", user_id)
-    .executeTakeFirst();
-};
 
 export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   _,
   __,
   context,
 ): Promise<AwsQuicksightUser> => {
-  checkRequiredQuicksightVars();
   const user = await requireUserSession(context);
+
+  const now = dayjs();
+
+  const result = await context.kysely
+    .updateTable("login_details")
+    .where("user_id", "=", user.id)
+    .where((eb) =>
+      eb.or([
+        eb("data_monitoring_access_refresh", "is", null),
+        eb("data_monitoring_access_refresh", "<", now.toDate()),
+        eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour),
+      ]),
+    )
+    .set((eb) => {
+      const replaceRecord = eb.or([
+        eb("data_monitoring_access_refresh", "is", null),
+        eb("data_monitoring_access_refresh", "<", now.toDate()),
+      ]);
+      return {
+        data_monitoring_access_count: eb
+          .case()
+          .when(replaceRecord)
+          .then(1)
+          .else(eb("data_monitoring_access_count", "+", 1))
+          .end(),
+        data_monitoring_last_accessed: eb
+          .case()
+          .when(replaceRecord)
+          .then(now.add(1, "hour").toDate())
+          .else(eb.ref("data_monitoring_access_refresh"))
+          .end(),
+      };
+    })
+    .executeTakeFirst();
+
+  if (Number(result.numUpdatedRows) < 1) {
+    logger.debug("Throttled access to data monitoring");
+    return { enabled: false };
+  }
+  logger.debug("Generating data monitoring url");
+  checkRequiredQuicksightVars();
 
   const userDetails = await getUserTypeDetails(context.kysely, user.id);
 
@@ -121,50 +88,16 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     organisationNames,
   );
 
-  const dashboardAccessDetails = await getDataMonitoringAccessDetails(
-    user.id,
-    context.kysely,
+  const url = await getDashboardUrl(sessionTags, dashboardId);
+  sendDistributionMetric(
+    "abods.graphql.quicksight.request",
+    1,
+    "function:GraphQlFunction",
+    `env:${process.env.PROJECT_ENV}`,
+    `user:${user.id}`,
   );
-
-  const allowAccess = isUserAllowedAccess(
-    dashboardAccessDetails?.data_monitoring_last_accessed,
-    dashboardAccessDetails?.data_monitoring_access_count ?? 0,
-  );
-
-  if (!allowAccess) {
-    return {
-      enabled: allowAccess,
-    };
-  }
-
-  const rowsUpdated = await updateAccess(
-    user.id,
-    dashboardAccessDetails,
-    context.kysely,
-  );
-
-  if (Number(rowsUpdated) < 1) {
-    return {
-      enabled: allowAccess,
-    };
-  }
-
-  const [url, ___] = await Promise.all([
-    getDashboardUrl(sessionTags, dashboardId),
-    sendDistributionMetric(
-      "abods.graphql.quicksight.request",
-      1,
-      "function:GraphQlFunction",
-      `env:${process.env.PROJECT_ENV}`,
-      `user:${user.id}`,
-    ),
-  ]);
-
   logger.info("Dashboard enabled for user");
-  return {
-    enabled: true,
-    url: url,
-  };
+  return { enabled: true, url: url };
 };
 
 const dataMonitoringResolvers: Resolvers = {
