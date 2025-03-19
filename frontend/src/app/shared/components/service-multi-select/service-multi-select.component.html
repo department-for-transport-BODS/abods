@@ -1,0 +1,11 @@
+<gds-multiselect-checkbox
+  [options]="services | async"
+  [ngModel]="value"
+  (selectedChange)="onSelect($event)"
+  [showAll]="true"
+  [labelForId]="fieldId"
+  [disabled]="disabled"
+  showAllLabel="All Services"
+  [placeholderText]="disabled && disabledText ? disabledText : 'Services'"
+  ariaLabel="Services"
+/>

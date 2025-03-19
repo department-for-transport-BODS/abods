@@ -39,9 +39,12 @@ sandbox:
       capabilities: "CAPABILITY_NAMED_IAM"
       parameter_overrides: ProjectName='abods'
         Environment='sandbox'
+        BodsVpcEndpoint='/abods/sandbox/external/bods-apigw-vpc-endpoint-ids'
+        QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
+        QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
+        QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
         VpcId='/abods/sandbox/vpc/id'
         VpcSubnets='/abods/sandbox/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/sandbox/external/bods-apigw-vpc-endpoint-ids'
 
 dev:
   deploy:
@@ -51,9 +54,12 @@ dev:
       capabilities: "CAPABILITY_NAMED_IAM"
       parameter_overrides: ProjectName='abods'
         Environment='dev'
+        BodsVpcEndpoint='/abods/dev/external/bods-apigw-vpc-endpoint-ids'
+        QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
+        QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
+        QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
         VpcId='/abods/dev/vpc/id'
         VpcSubnets='/abods/dev/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/dev/external/bods-apigw-vpc-endpoint-ids'
 
 test:
   deploy:
@@ -63,9 +69,12 @@ test:
       capabilities: "CAPABILITY_NAMED_IAM"
       parameter_overrides: ProjectName='abods'
         Environment='test'
+        BodsVpcEndpoint='/abods/test/external/bods-apigw-vpc-endpoint-ids'
+        QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
+        QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
+        QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
         VpcId='/abods/test/vpc/id'
         VpcSubnets='/abods/test/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/test/external/bods-apigw-vpc-endpoint-ids'
 
 uat:
   deploy:
@@ -75,9 +84,12 @@ uat:
       capabilities: "CAPABILITY_NAMED_IAM"
       parameter_overrides: ProjectName='abods'
         Environment='uat'
+        BodsVpcEndpoint='/abods/uat/external/bods-apigw-vpc-endpoint-ids'
+        QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/admin/id'
+        QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/lta/id'
+        QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/operator/id'
         VpcId='/abods/uat/vpc/id'
         VpcSubnets='/abods/uat/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/uat/external/bods-apigw-vpc-endpoint-ids'
 
 prod:
   sync:
@@ -90,6 +102,9 @@ prod:
       capabilities: "CAPABILITY_NAMED_IAM"
       parameter_overrides: ProjectName='abods'
         Environment='prod'
+        BodsVpcEndpoint='/abods/prod/external/bods-apigw-vpc-endpoint-ids'
+        QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/admin/id'
+        QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/lta/id'
+        QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/operator/id'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'
-        BodsVpcEndpoint='/abods/prod/external/bods-apigw-vpc-endpoint-ids'

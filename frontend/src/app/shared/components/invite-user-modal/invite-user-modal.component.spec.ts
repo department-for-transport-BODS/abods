@@ -11,7 +11,6 @@ import { of } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { OrganisationModule } from "src/app/organisation/organisation.module";
 import { OrganisationService } from "src/app/organisation/organisation.service";
-import { ScopeEnum } from "src/generated/graphql";
 import { SharedModule } from "../../shared.module";
 
 import { InviteUserModalComponent } from "./invite-user-modal.component";
@@ -19,13 +18,11 @@ import { InviteUserModalComponent } from "./invite-user-modal.component";
 const orgRoles = [
   {
     id: "2",
-    scope: ScopeEnum.Organisation,
     name: "Administrator",
   },
 
   {
     id: "4",
-    scope: ScopeEnum.Organisation,
     name: "Staff",
   },
 ];
@@ -56,7 +53,6 @@ describe("InviteUserModalComponent", () => {
     ngxService = spectator.inject(NgxSmartModalService);
     spectator.component.ngOnInit();
 
-    spyOn(service, "listOrgRoles$").and.returnValue(of(orgRoles));
     spyOnProperty(authService, "authenticatedUser$").and.returnValue(
       of({
         roles: [{ name: "Administrator", scope: "organisation" }],

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Feature, FeatureCollection, Point } from "geojson";
-import { CorridorStop } from "../../corridors.service";
+import { CorridorStop } from "../../types";
 
 @Component({
   selector: "app-corridor-stop-list",

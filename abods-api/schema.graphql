@@ -3,14 +3,16 @@ scalar Time
 scalar Date
 
 type Query {
-  user: UserType
+  user: LoginInfo
   users: [UserType!]
   apiInfo: ApiInfoType
-  roles: [RoleType!]
   userAlerts: [AlertType!]
   userAlert(alertId: String!): AlertType
-  operator(operatorId: String!): OperatorType
-  operators(filterBy: OperatorFilterInput): OperatorsPage
+  operatorFeedMonitoring(operatorId: String!): OperatorFeedMonitoring
+  operatorsFeedMonitoring(
+    filterBy: OperatorFilterInput
+  ): [OperatorFeedMonitoring!]!
+  operators(filterBy: OperatorFilterInput): [OperatorType!]!
   adminAreas: [AdminAreasType!]
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
@@ -22,23 +24,23 @@ type Query {
     operatorId: String!
     start: DateTime!
     end: DateTime!
-  ): [EventStatsType]
+  ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
-  lines(operatorId: String!, inputDate: String): [LineType!]!
+  lines(
+    operatorIds: [String!]!
+    inputDate: String!
+    endDate: String
+  ): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
+  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
+  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
+  embeddedUrl: AWSQuicksightUser!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
-
-  dashboardVehicles(operatorId: String): [DashboardVehicles!]!
-
-  # eslint-disable-next-line @graphql-eslint/no-unused-fields
-  stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopAnalysisType]!
-
-  embeddedUrl: AWSQuicksightUser!
 }
 
 type AWSQuicksightUser {
@@ -62,7 +64,7 @@ type EventStatsType {
 }
 
 type EventResponse {
-  items: [EventType!]
+  items: [EventType!]!
 }
 
 type EventType {
@@ -77,10 +79,10 @@ type EventData {
 
 type CorridorNamespace {
   getCorridor(corridorId: Int!): CorridorType
-  corridorList: [CorridorType]
+  corridorList: [CorridorType!]!
   stats(inputs: CorridorStatsInputType!): CorridorStatsType
-  addFirstStop(inputs: AddFirstStopInputType!): [StopType]
-  addSubsequentStops(stopList: [String!]!): [StopType]
+  addFirstStop(inputs: AddFirstStopInputType!): [StopType!]!
+  addSubsequentStops(stopList: [String!]!): [StopType!]!
 }
 
 input AddFirstStopInputType {
@@ -99,17 +101,17 @@ input BoundingBoxInputType {
 type CorridorType {
   id: Int!
   name: String!
-  stops: [StopInfoType]
+  stops: [StopInfoType!]!
 }
 
 type CorridorStatsType {
   summaryStats: CorridorSummaryStatsType
-  journeyTimeStats: [CorridorJourneyTimeStatsType]
-  journeyTimeTimeOfDayStats: [CorridorStatsTimeOfDayType]
-  journeyTimeDayOfWeekStats: [CorridorStatsDayOfWeekType]
-  journeyTimeHistogram: [CorridorStatsHistogramType]
-  journeyTimePerServiceStats: [CorridorStatsPerServiceType]
-  serviceLinks: [ServiceLinkType]
+  transitTimeStats: [CorridorTransitTimeStatsType!]!
+  transitTimeTimeOfDayStats: [CorridorStatsTimeOfDayType!]!
+  transitTimeDayOfWeekStats: [CorridorStatsDayOfWeekType!]!
+  transitTimeHistogram: [CorridorStatsHistogramType!]!
+  transitTimePerServiceStats: [CorridorStatsPerServiceType!]!
+  serviceLinks: [ServiceLinkType!]!
 }
 
 input CorridorStatsInputType {
@@ -127,13 +129,13 @@ enum MatchType {
 }
 
 type CorridorSummaryStatsType {
-  averageJourneyTime: Int
+  averageTransitTime: Int
   numberOfServices: Int
   scheduledTransits: Int
   totalTransits: Int
 }
 
-type CorridorJourneyTimeStatsType {
+type CorridorTransitTimeStatsType {
   avgTransitTime: Float
   maxTransitTime: Int!
   minTransitTime: Int!
@@ -167,11 +169,11 @@ type CorridorStatsPerServiceType {
   recordedTransits: Int
   scheduledTransits: Int
   servicePatternName: String!
-  totalJourneyTime: Int
+  totalTransitTime: Int
 }
 
 type CorridorStatsHistogramType {
-  hist: [CorridorHistogramType!]
+  hist: [CorridorHistogramType!]!
   ts: String
 }
 
@@ -243,12 +245,12 @@ type HeadwayMetricsType {
     operatorId: String!
     fromTimestamp: String!
     toTimestamp: String!
-  ): [FrequentServiceType]
+  ): [FrequentServiceType!]
   frequentServiceInfo(
     inputs: FrequentServiceInfoInputType!
   ): FrequentServiceInfoType
   headwayOverview(inputs: HeadwayInputType!): HeadwayOverviewType
-  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType]
+  headwayTimeSeries(inputs: HeadwayInputType!): [HeadwayTimeSeriesType!]
 }
 
 input CorridorInputType {
@@ -360,15 +362,15 @@ type AdminAreasType {
   shape: String!
 }
 
-type OperatorsPage {
-  items: [OperatorType]
+type OperatorType {
+  name: String!
+  operatorId: String!
+  adminAreaIds: [String!]!
 }
 
-type OperatorType {
-  name: String
-  nocCode: String
+type OperatorFeedMonitoring {
+  name: String!
   operatorId: String!
-  adminAreas: [AdminAreaInfoType]
   feedMonitoring: FeedMonitoringType
 }
 
@@ -384,7 +386,7 @@ type FeedMonitoringType {
     granularity: Granularity!
     start: DateTime!
     end: DateTime!
-  ): [VehicleStatsType]
+  ): [VehicleStatsType!]
 }
 
 type HistoricalStatsType {
@@ -404,19 +406,14 @@ type LiveStatsType {
   expectedVehicles: Int
   feedAlerts: Int
   feedErrors: Int
-  last20Minutes: [VehicleStatsType]
-  last24Hours: [VehicleStatsType]
+  last20Minutes: [VehicleStatsType!]
+  last24Hours: [VehicleStatsType!]
   updateFrequency: Int
-}
-
-type AdminAreaInfoType {
-  adminAreaId: String!
 }
 
 input UserUpdateInput {
   firstName: String!
   lastName: String!
-  role: RoleReferenceInput!
 }
 
 type UserUpdateResponseType {
@@ -442,14 +439,9 @@ type InvitationType {
 input InvitationInput {
   email: String!
   organisation: OrganisationReferenceInput!
-  role: RoleReferenceInput!
 }
 
 input OrganisationReferenceInput {
-  id: String!
-}
-
-input RoleReferenceInput {
   id: String!
 }
 
@@ -492,30 +484,18 @@ type LoginResponse {
   expiresAt: String
 }
 
+type LoginInfo {
+  currentUserId: String!
+  canViewServiceMonitoring: Boolean!
+  canEditAllAlerts: Boolean!
+  serviceMonitoringEmbedUrl: String
+}
+
 type UserType {
   id: String!
-  email: String!
   username: String!
   firstName: String
   lastName: String
-  organisation: OrganisationType
-  roles: [RoleType!]
-}
-
-type OrganisationType {
-  id: String!
-  name: String!
-}
-
-type RoleType {
-  id: String!
-  name: String!
-  scope: ScopeEnum!
-}
-
-enum ScopeEnum {
-  organisation
-  system
 }
 
 type OnTimePerformanceType {
@@ -534,7 +514,7 @@ type OnTimePerformanceType {
   servicePerformance(inputs: PerformanceInputType!): [ServicePerformanceType!]
   servicePunctuality(
     inputs: ServicePerformanceInputType!
-  ): [ServicePunctualityType]
+  ): [ServicePunctualityType!]!
   stopPerformance(inputs: PerformanceInputType!): [StopPerformanceType!]
 }
 
@@ -545,7 +525,7 @@ type DelayFrequencyType {
 
 type OperatorPerformancePage {
   pageInfo: PageInfo
-  items: [OperatorPerformanceType!]
+  items: [OperatorPerformanceType!]!
 }
 
 type OperatorPerformanceType {
@@ -627,7 +607,7 @@ type StopPerformanceType {
   scheduledDepartures: Int!
   stopId: String!
   stopInfo: StopInfoType!
-  timingPoint: Boolean
+  timingPoint: Boolean!
 }
 
 type StopInfoType {
@@ -763,28 +743,32 @@ enum RouteType {
 # eslint-disable @graphql-eslint/no-unused-fields
 
 input StopAnalysisFiltersInput {
-  adminAreaIds: [String!]
+  adminAreaIds: [String!]!
   boundingBox: BoundingBoxInputType!
-  fromTimestamp: DateTime
-  toTimestamp: DateTime
-  operatorId: String
-  lineId: String
+  fromTimestamp: String!
+  lineIds: [String!]!
+  matchType: MatchType!
+  operatorIds: [String!]!
+  toTimestamp: String!
+  dayOfWeekFlags: DayOfWeekFlagsInputType
+  startTime: String
+  endTime: String
 }
 
-type StopAnalysisType {
-  averageDelay: Float!
+type StopStatistics {
+  atcoCode: String!
+  stopName: String!
+  localityName: String!
+  adminAreaName: String!
+  timingPoint: Boolean!
+  latitude: Float!
+  longitude: Float!
   early: Int!
   late: Int!
-  lineId: String
   onTime: Int!
   scheduledDepartures: Int!
   completedDepartures: Int!
-  stopId: Int!
-  stopName: String!
-  timingPoint: Boolean
-  operatorId: String
-  latitude: Float!
-  longitude: Float!
+  totalDelay: Float!
 }
 """
 Filters for AvlLineLevelStatus

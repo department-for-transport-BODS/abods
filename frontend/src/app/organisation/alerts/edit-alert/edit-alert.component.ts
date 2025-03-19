@@ -12,6 +12,7 @@ import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.compo
 import {
   AlertFragment,
   AlertTypeEnum,
+  LoginInfo,
   UserFragment,
 } from "src/generated/graphql";
 import { OrganisationService } from "../../organisation.service";
@@ -37,7 +38,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
 
   errors: FormErrors[] = [];
   submitted = false;
-  authenticatedUser: UserFragment | null = null;
+  authenticatedUser: LoginInfo | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -60,7 +61,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
       }),
       this.authService.authenticatedUser$.subscribe((user) => {
         this.authenticatedUser = user;
-        if (user?.roles?.some(({ name }) => name === "Administrator")) {
+        if (user?.canEditAllAlerts) {
           this.alertForm.get("sendToId")?.enable();
         }
       }),
@@ -96,7 +97,7 @@ export class EditAlertComponent implements OnInit, OnDestroy {
       alertType: alertType ?? "",
       eventHysterisis: eventHysterisis ?? 5,
       eventThreshold: eventThreshold ?? 1,
-      sendToId: sendTo?.id ?? this.authenticatedUser?.id ?? "",
+      sendToId: sendTo?.id ?? this.authenticatedUser?.currentUserId ?? "",
     };
 
     this.errors = [];

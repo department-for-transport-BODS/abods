@@ -28,9 +28,7 @@
     @include govuk-responsive-margin(6, "top");
   }
   &__location {
-    @include govuk-font(19);
     max-width: 41ex;
-    @include govuk-responsive-margin(6, "bottom");
   }
   &__search {
     margin-top: -(govuk-spacing(2));

@@ -1,0 +1,375 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <div class="header-container">
+      <app-page-header heading="Stop Analysis" />
+      <div class="extra-filter-container">
+        <button
+          class="more-filters button-link govuk-link"
+          aria-controls="panel"
+          id="panel-toggle"
+          (click)="onMoreFiltersClick()"
+        >
+          <svg-icon
+            class="on-time__filter-icon"
+            src="assets/icons/refine.svg"
+            [applyClass]="true"
+          />
+          <span>Refine results</span>
+        </button>
+        <!--Always passing the same filters value here seems to not always trigger change detection-->
+        <app-filter-chips
+          [filters]="{
+            startTime: refinedFilters.startTime,
+            endTime: refinedFilters.endTime,
+            dayOfWeekFlags: refinedFilters.dayOfWeekFlags
+          }"
+          (filterChange)="onFiltersChanged($event)"
+        />
+      </div>
+    </div>
+    <div class="filters govuk-!-margin-bottom-2">
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="adminAreaIds">Admin Areas</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreas$ | async"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreasChanged($event)"
+          [showAll]="true"
+          labelForId="adminAreaIds"
+          showAllLabel="All Areas"
+          placeholderText="Admin Areas"
+          ariaLabel="Admin Areas"
+        />
+      </div>
+      <div class="toggles">
+        <app-segmented-toggle
+          [(ngModel)]="matchType"
+          (ngModelChange)="onFilterChanged()"
+        >
+          <app-segmented-toggle-item
+            name="match-type"
+            identifier="estimated"
+            value="estimated"
+            label="Estimated"
+          />
+          <app-segmented-toggle-item
+            name="match-type"
+            identifier="evidenced"
+            value="evidenced"
+            label="Evidenced"
+          />
+        </app-segmented-toggle>
+        <app-segmented-toggle
+          [(ngModel)]="timingPointsOption"
+          (ngModelChange)="processStopData(visibleBounds)"
+        >
+          <app-segmented-toggle-item
+            name="stops-filter"
+            identifier="all-stops"
+            value="all-stops"
+            label="All stops"
+          />
+          <app-segmented-toggle-item
+            name="stops-filter"
+            identifier="timing-points"
+            value="timing-points"
+            label="Timing points"
+          />
+        </app-segmented-toggle>
+      </div>
+      <div>
+        <label class="govuk-label" for="location"
+          >Location name or postcode</label
+        >
+        <app-location-search
+          [searchCenter]="center"
+          fieldId="location"
+          (locationSelected)="onLocationSearchSelection($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="operators">Operators</label>
+        <app-operator-multi-select
+          [value]="operatorIds"
+          fieldId="operators"
+          (selectedChange)="onOperatorsChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <app-service-multi-select
+          [operators]="operatorIds"
+          [startDate]="from"
+          [endDate]="to"
+          [value]="serviceIds"
+          [disabled]="operatorIds.length === 0"
+          disabledText="Select an operator"
+          fieldId="services"
+          (selectedChange)="onServicesChanged($event)"
+        />
+      </div>
+    </div>
+    <div class="map-container">
+      <mgl-map
+        [style]="mapboxStyle"
+        [bounds]="initialBounds"
+        (moveEnd)="onMapMoveEnd()"
+        (mapLoad)="onMapLoad($event)"
+      >
+        <mgl-control position="top-left">
+          <app-dropdown
+            identifier="map-display-menu"
+            triggerLabel="Display options"
+            [width]="200"
+          >
+            <p class="govuk-body govuk-!-margin-bottom-2">
+              <strong>Map view</strong>
+            </p>
+            <app-map-view-toggle (mapboxStyle)="onMapStyleChanged($event)" />
+          </app-dropdown>
+        </mgl-control>
+        <mgl-geojson-source
+          *ngIf="!boundingBoxTooBig"
+          id="stops"
+          [data]="stopPoints"
+          [cluster]="true"
+          [clusterRadius]="80"
+          [clusterProperties]="clusterProperties"
+        />
+        <mgl-layer
+          *ngIf="!boundingBoxTooBig"
+          id="clusters"
+          type="circle"
+          source="stops"
+          [filter]="['has', 'point_count']"
+          [paint]="{
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20,
+              5,
+              25,
+              20,
+              30,
+              50,
+              35,
+              100,
+              40
+            ],
+            'circle-color': pointColours,
+            'circle-stroke-width': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              11,
+              2,
+              14,
+              3
+            ],
+            'circle-stroke-color': '#ffffff'
+          }"
+          (layerClick)="onClusterClick($event)"
+        />
+        <mgl-layer
+          *ngIf="!boundingBoxTooBig"
+          id="cluster-count"
+          type="symbol"
+          source="stops"
+          [filter]="['has', 'point_count']"
+          [layout]="{
+            'text-field': [
+              'number-format',
+              ['get', 'point_count'],
+              { 'min-fraction-digits': 0, 'max-fraction-digits': 1 }
+            ],
+            'text-size': 16
+          }"
+          [paint]="{
+            'text-color': '#000000'
+          }"
+        />
+        <mgl-layer
+          *ngIf="!boundingBoxTooBig"
+          id="other-stops"
+          type="circle"
+          source="stops"
+          [filter]="[
+            'all',
+            ['!', ['has', 'point_count']],
+            ['!', ['get', 'timingPoint']]
+          ]"
+          [paint]="{
+            'circle-radius': 14,
+            'circle-color': pointColours,
+            'circle-stroke-width': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              11,
+              0.8,
+              14,
+              1
+            ],
+            'circle-stroke-color': '#ffffff'
+          }"
+        />
+        <mgl-layer
+          *ngIf="!boundingBoxTooBig"
+          id="timing-stops"
+          type="symbol"
+          source="stops"
+          [filter]="[
+            'all',
+            ['!', ['has', 'point_count']],
+            ['get', 'timingPoint']
+          ]"
+          [layout]="{
+            'icon-size': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              11,
+              0.8,
+              14,
+              1
+            ],
+            'icon-allow-overlap': true,
+            'icon-image': timingPointIcons
+          }"
+        />
+        <mgl-popup
+          *ngIf="selectedStop"
+          [lngLat]="[selectedStop.longitude, selectedStop.latitude]"
+          [closeButton]="false"
+          [closeOnClick]="false"
+        >
+          <div>
+            <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+              {{ selectedStop.stopName }}
+            </h3>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>ATCO:</strong> {{ selectedStop.atcoCode }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>On time:</strong>
+              {{
+                selectedStop.onTime / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Early:</strong>
+              {{
+                selectedStop.early / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Late:</strong>
+              {{
+                selectedStop.late / selectedStop.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Incomplete:</strong>
+              {{
+                (selectedStop.scheduledDepartures -
+                  selectedStop.completedDepartures) /
+                  selectedStop.scheduledDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+          </div>
+        </mgl-popup>
+        <mgl-popup
+          *ngIf="selectedCluster"
+          [lngLat]="selectedClusterCoordinates"
+          [closeButton]="false"
+          [closeOnClick]="false"
+        >
+          <div>
+            <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+              Cluster of {{ selectedCluster.point_count }} stops
+            </h3>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>On time:</strong>
+              {{
+                selectedCluster.onTime / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Early:</strong>
+              {{
+                selectedCluster.early / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-1">
+              <strong>Late:</strong>
+              {{
+                selectedCluster.late / selectedCluster.completedDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+            <p class="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Incomplete:</strong>
+              {{
+                (selectedCluster.scheduledDepartures -
+                  selectedCluster.completedDepartures) /
+                  selectedCluster.scheduledDepartures
+                  | noInfinity
+                  | percent: "1.0-2"
+              }}
+            </p>
+          </div>
+        </mgl-popup>
+        <mgl-control position="bottom-left">
+          <div class="map__legend map__legend">
+            <span class="map__dot map__dot--high"></span>
+            <span>> {{ greenThreshold | percent }} on-time</span>
+            <span class="map__dot map__dot--med"></span>
+            <span
+              >{{ redThreshold | percent }} -
+              {{ greenThreshold | percent }} on-time</span
+            >
+            <span class="map__dot map__dot--low"></span>
+            <span>< {{ redThreshold | percent }} on-time</span>
+            <span class="map__dot map__dot--no-data"></span>
+            <span>No data</span>
+          </div>
+        </mgl-control>
+        <mgl-control mglNavigation />
+        <mgl-control mglGeolocate />
+      </mgl-map>
+      <div class="map-overlay">
+        <p *ngIf="boundingBoxTooBig">Zoom in to show stops</p>
+        <app-spinner *ngIf="isLoading" />
+      </div>
+    </div>
+
+    <app-stops-grid-display
+      [errored]="errored"
+      [loading]="isLoading"
+      [data]="filteredStopData"
+      [paginate]="true"
+      (stopNameClicked)="onTableStopNameClicked($event)"
+    />
+  </ng-container>
+</app-page>

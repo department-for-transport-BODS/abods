@@ -49,7 +49,6 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
   operatorId = "";
   allOperators?: {
     name?: string | null;
-    nocCode: string;
     operatorId: string;
   }[];
 
@@ -101,7 +100,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
         this.fmService.listOperators.pipe(
           map((allOperators) => {
             const operatorId =
-              allOperators?.find((operator) => operator.nocCode === noc)
+              allOperators?.find((operator) => operator.operatorId === noc)
                 ?.operatorId || "";
             return {
               allOperators: allOperators,

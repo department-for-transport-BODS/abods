@@ -8,10 +8,11 @@ import {
 import { NgxSmartModalComponent, NgxSmartModalService } from "ngx-smart-modal";
 import { Subscription } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
-import { UserFragment } from "src/generated/graphql";
 import { AlertViewModel } from "../models";
 import { OrganisationService } from "../organisation.service";
 import { EditAlertComponent } from "./edit-alert/edit-alert.component";
+import { LoginInfo } from "../../../generated/graphql";
+
 @Component({
   selector: "app-alerts",
   templateUrl: "./alerts.component.html",
@@ -26,7 +27,7 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   alerts: AlertViewModel[] = [];
 
   editModal?: NgxSmartModalComponent;
-  authenticatedUser?: UserFragment | null;
+  authenticatedUser?: LoginInfo | null;
 
   modalEditing = false;
 
@@ -73,11 +74,9 @@ export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.editModal?.close();
   }
 
-  get authUserIsAdmin() {
-    return (
-      this.authenticatedUser?.roles?.some(
-        ({ name }) => name === "Administrator",
-      ) ?? false
-    );
+  canEditAlert(alert: AlertViewModel) {
+    const user = this.authenticatedUser;
+    if (!user) return false;
+    return user.canEditAllAlerts || alert.sendToId === user.currentUserId;
   }
 }

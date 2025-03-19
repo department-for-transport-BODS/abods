@@ -97,6 +97,13 @@ const routes: Routes = [
         (mod) => mod.StopAnalysisModule,
       ),
   },
+  {
+    path: "service-monitoring",
+    loadChildren: () =>
+      import("./service-monitoring/service-monitoring.module").then(
+        (mod) => mod.ServiceMonitoringModule,
+      ),
+  },
   { path: "not-authorised", component: NotAuthorisedComponent },
   { path: "**", component: NotFoundComponent },
 ];

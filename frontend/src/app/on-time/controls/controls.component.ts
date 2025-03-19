@@ -14,11 +14,7 @@ import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { DateTime } from "luxon";
 import { BehaviorSubject, combineLatest, Subject } from "rxjs";
 import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
-import {
-  DayOfWeekFlagsInputType,
-  MatchType,
-  PerformanceFiltersInputType,
-} from "src/generated/graphql";
+import { MatchType, PerformanceFiltersInputType } from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
 import { isEqual as _isEqual } from "lodash-es";
 import { PerformanceParams } from "../on-time.service";
@@ -31,6 +27,7 @@ import {
 } from "../../shared/components/date-range/date-range.types";
 import { PanelService } from "../../shared/components/panel/panel.service";
 import { ifNullOrUndefinedReturnEmptyString } from "../../shared/rxjs-operators";
+import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
 export type TimingPoints = "all-stops" | "timing-points";
 
@@ -146,25 +143,13 @@ export class ControlsComponent
     }
 
     if (queryParams.get("dayOfWeek")) {
-      const dayOfWeekFlags: DayOfWeekFlagsInputType = {
-        monday: false,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false,
-      };
+      const flags = getDefaultDayOfWeekFlags();
 
-      queryParams
-        .get("dayOfWeek")
-        ?.split(",")
-        .map((day) => {
-          if (day as keyof DayOfWeekFlagsInputType)
-            dayOfWeekFlags[day as keyof DayOfWeekFlagsInputType] = true;
-        });
-
-      filters.dayOfWeekFlags = dayOfWeekFlags;
+      const days = queryParams.get("dayOfWeek")?.split(",") ?? [];
+      for (const day of Object.keys(flags)) {
+        flags[day as keyof typeof flags] = days.includes(day);
+      }
+      filters.dayOfWeekFlags = flags;
     }
 
     if (queryParams.get("startTime")) {

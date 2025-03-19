@@ -34,7 +34,6 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
   operatorId?: string;
   allOperators?: {
     name?: string | null;
-    nocCode: string;
     operatorId: string;
   }[];
   lastCheck?: DateTime;
@@ -53,7 +52,7 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
   intervalLast20Minutes = Interval.invalid("no value");
 
   get bodsLink(): string {
-    return `https://data.bus-data.dft.gov.uk/timetable/?q=${this.operator?.nocCode}`;
+    return `https://data.bus-data.dft.gov.uk/timetable/?q=${this.operator?.operatorId}`;
   }
 
   get showBodsLink(): boolean {
@@ -75,8 +74,8 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
         switchMap(() => this.fmService.listOperators),
         tap((allOperators) => {
           this.allOperators = allOperators;
-          this.operatorId = this.allOperators?.find(
-            (operator) => operator.nocCode === this.nocCode,
+          this.operatorId = this.allOperators.find(
+            (operator) => operator.operatorId === this.nocCode,
           )?.operatorId;
         }),
         switchMap(() => {

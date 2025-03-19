@@ -1,6 +1,6 @@
 [
   {
-    "averageJourneyTime": 45,
+    "averageTransitTime": 45,
     "numberOfServices": 5,
     "operatorName": "City Transport",
     "percentile95": 59.0,

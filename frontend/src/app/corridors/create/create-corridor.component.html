@@ -73,32 +73,12 @@
                   <label class="govuk-label" for="location-query"
                     >Location name or postcode</label
                   >
-                  <ng-select
-                    class="gds-select create-corridor__location govuk-input--width-20"
-                    labelForId="location-query"
-                    placeholder="Search"
-                    (change)="selectLocation($event)"
-                    [typeahead]="locationSearch$"
-                    [loading]="locationsLoading"
-                  >
-                    <ng-template ng-loadingspinner-tmp>
-                      <app-spinner size="x-small"></app-spinner>
-                    </ng-template>
-                    <ng-option
-                      *ngFor="let location of locations?.features"
-                      [value]="location"
-                    >
-                      {{ location.text }}
-                      <span class="govuk-body-s text-secondary">
-                        {{
-                          [
-                            location | geoContext: "locality",
-                            location | geoContext: ["place", "district"]
-                          ] | join
-                        }}
-                      </span>
-                    </ng-option>
-                  </ng-select>
+                  <app-location-search
+                    class="create-corridor__location govuk-input--width-20"
+                    fieldId="location-query"
+                    [searchCenter]="center"
+                    (locationSelected)="selectLocation($event)"
+                  />
                 </div>
               </div>
             </ng-container>

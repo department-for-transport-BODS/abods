@@ -33,7 +33,7 @@ import {
 import { BaseChartOptions } from "../corridor-chart/BaseChartOption";
 import {
   CorridorStatsViewParams,
-  ICorridorJourneyTimeStats,
+  ICorridortransitTimeStats,
 } from "../../types";
 
 export type YAxisMinValueType = "yAxisMinValue";
@@ -69,11 +69,11 @@ export interface BoxPlotChartDataItem {
 })
 export class BoxPlotChartComponent
   implements
-    CorridorChart<(ICorridorJourneyTimeStats & BoxPlotChartDataItem)[]>,
+    CorridorChart<(ICorridortransitTimeStats & BoxPlotChartDataItem)[]>,
     OnChanges,
     AfterViewInit
 {
-  @Input() data?: (ICorridorJourneyTimeStats & BoxPlotChartDataItem)[];
+  @Input() data?: (ICorridortransitTimeStats & BoxPlotChartDataItem)[];
   @Input() loading?: boolean;
   @Input() noData = false;
   @Input() xAxisTitle?: string;
