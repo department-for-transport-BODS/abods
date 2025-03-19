@@ -85,8 +85,8 @@ function maxEnvironment(current: string, max: Environment): boolean {
 function flags(currentEnv: string) {
   // TODO: get from API
   return {
-    dataMonitoring: maxEnvironment(currentEnv, "uat"),
-    serviceMonitoring: maxEnvironment(currentEnv, "uat"),
+    dataMonitoring: maxEnvironment(currentEnv, "test"),
+    serviceMonitoring: maxEnvironment(currentEnv, "test"),
     stopAnalysis: maxEnvironment(currentEnv, "test"),
   } as const;
 }
