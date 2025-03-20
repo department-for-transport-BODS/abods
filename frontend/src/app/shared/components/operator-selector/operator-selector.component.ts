@@ -30,10 +30,7 @@ export class OperatorSelectorComponent {
   @Input() spaceAbove?: GDSSpacingSizes;
   @Input() spaceBelow?: GDSSpacingSizes = "6";
 
-  @Output() operatorChange = new EventEmitter<{
-    nocCode: string;
-    name?: string;
-  }>();
+  @Output() operatorChange = new EventEmitter<{ nocCode: string }>();
 
   changeOperator(nocCode: string) {
     this.operatorChange.emit({ nocCode });

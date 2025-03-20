@@ -98,6 +98,7 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       x.map((o) => ({
         name: o.name,
         operatorId: o.operatorId,
+        nocCode: o.operatorId,
         adminAreaIds: o.adminAreaIds.split(","),
       })),
     );
