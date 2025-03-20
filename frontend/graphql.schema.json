@@ -5075,6 +5075,22 @@
             "deprecationReason": null
           },
           {
+            "name": "nocCode",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": true,
+            "deprecationReason": "nocCode is deprecated. Use operatorId instead."
+          },
+          {
             "name": "operatorId",
             "description": null,
             "args": [],
@@ -5308,6 +5324,22 @@
           },
           {
             "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nocCode",
             "description": null,
             "args": [],
             "type": {

@@ -237,6 +237,7 @@ export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
 
     return {
       operatorId: operator.operatorref,
+      nocCode: operator.operatorref,
       name: operator.name ?? "Unknown",
     };
   } catch (error) {
@@ -270,6 +271,7 @@ export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
         x.map((o) => ({
           name: o.name ?? "",
           operatorId: o.operator_noc ?? "",
+          nocCode: o.operator_noc ?? "",
         })),
       );
   };
