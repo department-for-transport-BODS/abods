@@ -26,6 +26,7 @@ describe("FreshdeskApiService", () => {
       organisation: "43000590076",
       dataMonitoring: "43000590077",
       serviceMonitoring: "43000590078",
+      stopAnalysis: "43000590079",
     },
   };
 
