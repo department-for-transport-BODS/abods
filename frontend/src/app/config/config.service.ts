@@ -59,6 +59,8 @@ export interface FreshdeskFolderConfig {
   vehicleJourneys: string;
   corridors: string;
   organisation: string;
+  dataMonitoring: string;
+  serviceMonitoring: string;
   [key: string]: string;
 }
 
@@ -186,6 +188,8 @@ export class ConfigService {
         vehicleJourneys: "",
         corridors: "",
         organisation: "",
+        dataMonitoring: "",
+        serviceMonitoring: "",
       },
     };
     return this.loadValue(() => {

@@ -24,6 +24,8 @@ describe("FreshdeskApiService", () => {
       vehicleJourneys: "43000590036",
       corridors: "43000590037",
       organisation: "43000590076",
+      dataMonitoring: "43000590077",
+      serviceMonitoring: "43000590078",
     },
   };
 
