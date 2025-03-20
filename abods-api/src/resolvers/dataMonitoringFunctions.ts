@@ -14,6 +14,8 @@ import { requireUserSession } from "./helpers.js";
 import { getUserTypeDetails } from "../lib/operators.js";
 import logger from "../logger.js";
 import dayjs from "dayjs";
+import { ExpressionBuilder } from "kysely";
+import { DB } from "../kysely";
 
 const accessAllowedWithinAnHour = Number(
   process.env.QUICKSIGHT_ALLOW_USER_ACCESS_COUNT ?? 10,
@@ -28,36 +30,33 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
 
   const now = dayjs();
 
+  const pastRefreshTime = (eb: ExpressionBuilder<DB, "login_details">) =>
+    eb.or([
+      eb("data_monitoring_access_refresh", "is", null),
+      eb("data_monitoring_access_refresh", "<", now.toDate()),
+    ]);
+
+  const withinAllowedAccess = (eb: ExpressionBuilder<DB, "login_details">) =>
+    eb.or([eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour)]);
+
   const result = await context.kysely
     .updateTable("login_details")
     .where("user_id", "=", user.id)
-    .where((eb) =>
-      eb.or([
-        eb("data_monitoring_access_refresh", "is", null),
-        eb("data_monitoring_access_refresh", "<", now.toDate()),
-        eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour),
-      ]),
-    )
-    .set((eb) => {
-      const replaceRecord = eb.or([
-        eb("data_monitoring_access_refresh", "is", null),
-        eb("data_monitoring_access_refresh", "<", now.toDate()),
-      ]);
-      return {
-        data_monitoring_access_count: eb
-          .case()
-          .when(replaceRecord)
-          .then(1)
-          .else(eb("data_monitoring_access_count", "+", 1))
-          .end(),
-        data_monitoring_access_refresh: eb
-          .case()
-          .when(replaceRecord)
-          .then(now.add(1, "hour").toDate())
-          .else(eb.ref("data_monitoring_access_refresh"))
-          .end(),
-      };
-    })
+    .where((eb) => eb.or([pastRefreshTime(eb), withinAllowedAccess(eb)]))
+    .set((eb) => ({
+      data_monitoring_access_count: eb
+        .case()
+        .when(pastRefreshTime(eb))
+        .then(1)
+        .else(eb("data_monitoring_access_count", "+", 1))
+        .end(),
+      data_monitoring_access_refresh: eb
+        .case()
+        .when(pastRefreshTime(eb))
+        .then(now.add(1, "hour").toDate())
+        .else(eb.ref("data_monitoring_access_refresh"))
+        .end(),
+    }))
     .executeTakeFirst();
 
   if (Number(result.numUpdatedRows) < 1) {
