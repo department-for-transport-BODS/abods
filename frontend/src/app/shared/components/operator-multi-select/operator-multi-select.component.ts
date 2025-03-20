@@ -14,7 +14,7 @@ export class OperatorMultiSelectComponent {
   @Output() selectedChange = new EventEmitter<string[]>();
   constructor(private operatorListQuery: OperatorListGQL) {}
 
-  operators = this.operatorListQuery.fetch().pipe(
+  operators = this.operatorListQuery.fetch({}).pipe(
     map((result) =>
       result.data.operators.map(
         (o): MultiselectCheckboxOption => ({

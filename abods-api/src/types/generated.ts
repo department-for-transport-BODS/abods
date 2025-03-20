@@ -672,6 +672,8 @@ export type OperatorFeedMonitoring = {
   __typename?: 'OperatorFeedMonitoring';
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name: Scalars['String']['output'];
+  /** @deprecated nocCode is deprecated. Use operatorId instead. */
+  nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
 };
 
@@ -699,6 +701,7 @@ export type OperatorType = {
   __typename?: 'OperatorType';
   adminAreaIds: Array<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
 };
 
@@ -1715,6 +1718,7 @@ export type OnTimePerformanceTypeResolvers<ContextType = RequestContext, ParentT
 export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorFeedMonitoring'] = ResolversParentTypes['OperatorFeedMonitoring']> = ResolversObject<{
   feedMonitoring?: Resolver<Maybe<ResolversTypes['FeedMonitoringType']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nocCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1738,6 +1742,7 @@ export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, Paren
 export type OperatorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorType'] = ResolversParentTypes['OperatorType']> = ResolversObject<{
   adminAreaIds?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nocCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
