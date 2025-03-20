@@ -15,11 +15,7 @@ import {
   OperatorFeedMonitoring,
   OperatorFeedMonitoringResolvers,
 } from "../types/generated.js";
-import {
-  getOperatorWithFeed,
-  getVehicleCounts,
-} from "../lib/feedMonitoring.js";
-import { feed_monitor_summary } from "@prisma/client";
+import { getVehicleCounts } from "../lib/feedMonitoring.js";
 import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
 import dayjs from "dayjs";
@@ -46,12 +42,11 @@ export const getEventStats: QueryResolvers["eventStats"] =
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
   async (parent, args, context): Promise<HistoricalStatsType> => {
     if (!parent.operatorId) throw "Invalid data";
-    const result = await context.db.feed_monitor_daily_summary.findFirst({
-      where: {
-        operator_noc: parent.operatorId,
-        date_of_journey: args.date,
-      },
-    });
+    const result = await context.kysely
+      .selectFrom("feed_monitor_daily_summary")
+      .where("operator_noc", "=", parent.operatorId)
+      .select(["availability", "update_frequency"])
+      .executeTakeFirst();
 
     return {
       updateFrequency: result?.update_frequency,
@@ -65,19 +60,12 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   context,
 ): Promise<VehicleStatsType[]> => {
   if (!parent.operatorId) throw "Invalid data";
-  const result = await context.db.feed_monitor_hourly_summary.findMany({
-    where: {
-      operator_noc: parent.operatorId,
-    },
-    select: {
-      actual: true,
-      expected: true,
-      received_interval: true,
-    },
-    orderBy: {
-      received_interval: "asc",
-    },
-  });
+  const result = await context.kysely
+    .selectFrom("feed_monitor_hourly_summary")
+    .where("operator_noc", "=", parent.operatorId)
+    .orderBy("received_interval")
+    .select(["actual", "expected", "received_interval"])
+    .execute();
 
   return result.map((summary) => ({
     timestamp: getFormattedDate(summary.received_interval),
@@ -89,18 +77,14 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
   async (parent, args, context): Promise<VehicleStatsType[]> => {
     if (!parent.operatorId) throw "Invalid data";
-    const result = await context.db.feed_monitor_minute_summary.findMany({
-      where: {
-        operator_noc: parent.operatorId,
-        received_interval: {
-          gte: args.start,
-          lte: args.end,
-        },
-      },
-      orderBy: {
-        received_interval: "asc",
-      },
-    });
+    const result = await context.kysely
+      .selectFrom("feed_monitor_minute_summary")
+      .where("operator_noc", "=", parent.operatorId)
+      .where("received_interval", ">=", new Date(args.start))
+      .where("received_interval", "<=", new Date(args.end))
+      .orderBy("received_interval")
+      .select(["actual", "expected", "received_interval"])
+      .execute();
 
     return result.map((summary) => ({
       timestamp: getFormattedDate(summary.received_interval),
@@ -115,23 +99,29 @@ const getEvents: QueryResolvers["events"] = (): EventResponse => ({
 
 export const getFeedMonitoringList: OperatorFeedMonitoringResolvers["feedMonitoring"] =
   async (parent, _, context): Promise<FeedMonitoringType> => {
-    if (!parent.operatorId) throw "Parent data not set";
-    const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
-      context.db,
-      parent.operatorId,
-    );
-
-    return {
-      operatorId: parent.operatorId,
-      feedStatus: !feed_summary?.unavailable_since,
-      availability: Number(feed_summary?.availability ?? 0),
-      lastOutage: feed_summary?.last_outage,
-      unavailableSince: feed_summary?.unavailable_since,
-      liveStats: {
-        operatorId: parent.operatorId,
-        updateFrequency: feed_summary?.update_frequency,
-      },
-    };
+    const operatorId = parent.operatorId;
+    if (!operatorId) throw "Parent data not set";
+    return await context.kysely
+      .selectFrom("feed_monitor_summary")
+      .where("operator_noc", "=", operatorId)
+      .select([
+        "availability",
+        "last_outage",
+        "unavailable_since",
+        "update_frequency",
+      ])
+      .executeTakeFirst()
+      .then((feed_summary) => ({
+        operatorId: operatorId,
+        feedStatus: !feed_summary?.unavailable_since,
+        availability: Number(feed_summary?.availability ?? 0),
+        lastOutage: feed_summary?.last_outage,
+        unavailableSince: feed_summary?.unavailable_since,
+        liveStats: {
+          operatorId: operatorId,
+          updateFrequency: feed_summary?.update_frequency,
+        },
+      }));
   };
 
 export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
@@ -225,11 +215,11 @@ export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
     // TODO: is operator id in users' operator id array
     logger.debug({ operatorId: args.operatorId }, "getOperator");
 
-    const operator = await context.db.all_operators.findUnique({
-      where: {
-        operatorref: args.operatorId,
-      },
-    });
+    const operator = await context.kysely
+      .selectFrom("all_operators")
+      .where("operatorref", "=", args.operatorId)
+      .select(["operatorref", "name"])
+      .executeTakeFirst();
 
     if (!operator) {
       throw Error("No operator found");

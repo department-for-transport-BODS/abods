@@ -15,10 +15,11 @@ import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2";
 import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
-import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
 import { isLocal } from "../prismaClient.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 const accountTypes = {
@@ -302,7 +303,7 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
       throw new Error("Alert id required");
     }
 
-    return getUserAlertFromDb(args.alertId, user.id, context.db);
+    return getUserAlertFromDb(args.alertId, user.id, context.kysely);
   } catch (error) {
     logger.error(error, "An error occurred when getting user alert info");
     return null;
@@ -312,33 +313,17 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
 async function getUserAlertFromDb(
   alertId: string,
   userId: number,
-  db: PrismaClient,
+  db: Kysely<DB>,
 ) {
   // fetch alert by id and ONLY if user is creator or recipient
-  const alert = await db.alert.findUnique({
-    where: {
-      id: alertId,
-      AND: {
-        OR: [
-          {
-            created_by: {
-              equals: userId,
-            },
-          },
-          {
-            send_to: {
-              equals: userId,
-            },
-          },
-        ],
-      },
-    },
-    include: {
-      created_by_user: true,
-      send_to_user: true,
-    },
-  });
-
+  const alert = await db
+    .selectFrom("Alert")
+    .where("id", "=", alertId)
+    .where((eb) =>
+      eb.or([eb("send_to", "=", userId), eb("created_by", "=", userId)]),
+    )
+    .select(["id", "alert", "event_hysterisis", "event_threshold"])
+    .executeTakeFirst();
   if (!alert) {
     throw new Error("Alert not found");
   }
@@ -346,24 +331,14 @@ async function getUserAlertFromDb(
   return {
     alertId: alert.id,
     alertType: alert.alert?.trim() as AlertTypeEnum,
-    eventHysterisis: alert.event_hysterisis?.toNumber(),
-    eventThreshold: alert.event_threshold?.toNumber(),
-    createdBy: alert.created_by_user
-      ? {
-          id: alert.created_by_user.id.toString(),
-          username: alert.created_by_user.username,
-          firstName: alert.created_by_user.first_name,
-          lastName: alert.created_by_user.last_name,
-        }
-      : null,
-    sendTo: alert.send_to_user
-      ? {
-          id: alert.send_to_user.id.toString(),
-          username: alert.send_to_user.username,
-          firstName: alert.send_to_user.first_name,
-          lastName: alert.send_to_user.last_name,
-        }
-      : null,
+    eventHysterisis:
+      alert.event_hysterisis === undefined || alert.event_hysterisis === null
+        ? alert.event_hysterisis
+        : Number(alert.event_hysterisis),
+    eventThreshold:
+      alert.event_threshold === undefined || alert.event_threshold === null
+        ? alert.event_threshold
+        : Number(alert.event_threshold),
   };
 }
 
@@ -377,15 +352,16 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
     // TODO: check if sendto user id is in one of the same organisations as created_by user
-    await context.db.alert.create({
-      data: {
+    await context.kysely
+      .insertInto("Alert")
+      .values({
         alert: alertType,
-        event_hysterisis: eventHysterisis,
-        event_threshold: eventThreshold,
+        event_hysterisis: eventHysterisis?.toString(),
+        event_threshold: eventThreshold?.toString(),
         send_to: Number(sendTo.id),
         created_by: user.id,
-      },
-    });
+      })
+      .execute();
 
     return {
       error: null,
@@ -413,23 +389,26 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
+    const alert = await getUserAlertFromDb(
+      args.alertId,
+      user.id,
+      context.kysely,
+    );
 
     if (!alert) {
       throw new Error("Alert not found");
     }
 
-    await context.db.alert.update({
-      where: {
-        id: alert.alertId,
-      },
-      data: {
+    await context.kysely
+      .updateTable("Alert")
+      .where("id", "=", args.alertId)
+      .set({
         alert: alertType,
-        event_hysterisis: eventHysterisis,
-        event_threshold: eventThreshold,
+        event_hysterisis: eventHysterisis?.toString(),
+        event_threshold: eventThreshold?.toString(),
         send_to: sendTo ? Number(sendTo.id) : null,
-      },
-    });
+      })
+      .execute();
 
     return {
       error: null,
@@ -455,10 +434,17 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
+    const alert = await getUserAlertFromDb(
+      args.alertId,
+      user.id,
+      context.kysely,
+    );
 
     if (alert) {
-      await context.db.alert.delete({ where: { id: args.alertId } });
+      await context.kysely
+        .deleteFrom("Alert")
+        .where("id", "=", args.alertId)
+        .execute();
     } else {
       throw "Not Authorized";
     }

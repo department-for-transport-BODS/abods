@@ -1,19 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { Kysely, NotNull } from "kysely";
 import { DB } from "../kysely";
-
-export enum VehicleCountType {
-  Actual = "actual",
-  Expected = "expected",
-}
-
-export const getOperatorWithFeed = (db: PrismaClient, operatorRefs: string) => {
-  return db.feed_monitor_summary.findUnique({
-    where: {
-      operator_noc: operatorRefs,
-    },
-  });
-};
 
 export const getVehicleCounts = (
   db: Kysely<DB>,

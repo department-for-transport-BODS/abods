@@ -112,16 +112,12 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
   const user = await requireUserSession(context);
   try {
     const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-    const service = await context.db.expected_services.findFirst({
-      where: {
-        noc_and_line_and_servicecode: args.serviceId,
-      },
-      select: {
-        operator_noc: true,
-        line_name: true,
-        service_name: true,
-      },
-    });
+
+    const service = await context.kysely
+      .selectFrom("expected_services")
+      .where("noc_and_line_and_servicecode", "=", args.serviceId)
+      .select(["operator_noc", "line_name", "service_name"])
+      .executeTakeFirst();
 
     if (!service) {
       throw Error("No service found");
@@ -190,38 +186,25 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
   context,
 ): Promise<ServicePatternType[]> => {
   await requireUserSession(context);
-  const routesQueryResults = await context.db.distinct_routes.findMany({
-    where: {
-      servicepattern_route: {
-        noc_and_line_and_servicecode: args.lineId,
-      },
-    },
-    select: {
-      id: true,
-      route: true,
-    },
-  });
+
+  const routesQueryResults = await context.kysely
+    .selectFrom("distinct_routes as d")
+    .innerJoin("servicepattern_route as s", "d.id", "s.distinct_route_id")
+    .select(["d.id", "d.route"])
+    .execute();
   const routes = routesQueryResults.map((n) => ({
     ...n,
     stopIds: n.route.split(","),
   }));
   const allStopIds = [...new Set(routes.flatMap((n) => n.stopIds))];
-  const stopQueryResults = await context.db.naptan_stoppoint_latlong.findMany({
-    where: {
-      atco_code: { in: allStopIds },
-      NOT: {
-        atco_code: null,
-        longitude: null,
-        latitude: null,
-      },
-    },
-    select: {
-      common_name: true,
-      atco_code: true,
-      longitude: true,
-      latitude: true,
-    },
-  });
+  const stopQueryResults = await context.kysely
+    .selectFrom("naptan_stoppoint_latlong")
+    .where("atco_code", "in", allStopIds)
+    .where("atco_code", "is not", null)
+    .where("longitude", "is not", null)
+    .where("latitude", "is not", null)
+    .select(["common_name", "atco_code", "longitude", "latitude"])
+    .execute();
   const stopDetails = stopQueryResults.map((n) => ({
     stopName: n.common_name,
     // workaround for nullable db columns that can probably be not null, the where clause should exclude null for now
@@ -783,19 +766,14 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
 
       const performanceMetrics = await performanceMetricsQuery.execute();
 
-      const services = await context.db.expected_services.findMany({
-        where: {
-          noc_and_line_and_servicecode: {
-            in: performanceMetrics.map(
-              (stat) => stat.noc_and_line_and_servicecode,
-            ),
-          },
-        },
-        select: {
-          noc_and_line_and_servicecode: true,
-          service_name: true,
-        },
-      });
+      const codes = performanceMetrics.map(
+        (stat) => stat.noc_and_line_and_servicecode,
+      );
+      const services = await context.kysely
+        .selectFrom("expected_services")
+        .where("noc_and_line_and_servicecode", "in", codes)
+        .select(["noc_and_line_and_servicecode", "service_name"])
+        .execute();
 
       return performanceMetrics.map((stats) => ({
         nocCode: stats.operator_noc,
@@ -981,17 +959,11 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             (result) => result.noc_and_line_and_servicecode,
           );
 
-          const services = await context.db.expected_services.findMany({
-            where: {
-              noc_and_line_and_servicecode: {
-                in: noc_and_lines,
-              },
-            },
-            select: {
-              service_name: true,
-              noc_and_line_and_servicecode: true,
-            },
-          });
+          const services = await context.kysely
+            .selectFrom("expected_services")
+            .where("noc_and_line_and_servicecode", "in", noc_and_lines)
+            .select(["noc_and_line_and_servicecode", "service_name"])
+            .execute();
 
           results.forEach((res) => {
             const avgDelay = res._avg.avg_time_difference
@@ -1038,28 +1010,23 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
     const user = await requireUserSession(context);
     try {
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      if (userOperatorIds.includes(args.operatorId)) {
-        const results =
-          await context.db.timetable_frequent_summary_services.findMany({
-            where: {
-              operator_noc: args.operatorId,
-              date_of_journey: {
-                gte: userSelectedDateAsUtc(args.fromTimestamp).toDate(),
-                lt: userSelectedDateAsUtc(args.toTimestamp).toDate(),
-              },
-            },
-            select: {
-              noc_and_line_and_servicecode: true,
-            },
-            distinct: ["noc_and_line_and_servicecode"],
-          });
-
-        return results.map((result) => ({
-          serviceId: result.noc_and_line_and_servicecode,
-        }));
+      if (!userOperatorIds.includes(args.operatorId)) {
+        return [];
       }
+      const end = userSelectedDateAsUtc(args.toTimestamp).toDate();
+      const start = userSelectedDateAsUtc(args.fromTimestamp).toDate();
+      const results = await context.kysely
+        .selectFrom("timetable_frequent_summary_services")
+        .where("operator_noc", "=", args.operatorId)
+        .where("date_of_journey", ">=", start)
+        .where("date_of_journey", "<", end)
+        .select("noc_and_line_and_servicecode")
+        .distinct()
+        .execute();
 
-      return [];
+      return results.map((result) => ({
+        serviceId: result.noc_and_line_and_servicecode,
+      }));
     } catch (error) {
       logger.error(error, "An error occurred when getting frequent services");
       return null;
@@ -1226,27 +1193,23 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 ): Promise<Maybe<AdminAreasType[]>> => {
   const user = await requireUserSession(context);
   try {
-    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-    const adminAreaRecords = await context.db.noc_adminarea.findMany({
-      where: {
-        national_operator_code: {
-          in: userOperatorIds,
-        },
-      },
-      select: {
-        adminarea_id: true,
-      },
-    });
+    const adminAreaRecords = await context.kysely
+      .selectFrom("noc_adminarea")
+      .where(
+        "national_operator_code",
+        "in",
+        getUserOperatorIdsQuery(context.kysely, user),
+      )
+      .select("adminarea_id")
+      .execute();
 
     if (adminAreaRecords) {
       const adminareaIds = adminAreaRecords.map((a) => a.adminarea_id);
-      const adminAreas = await context.db.naptan_adminarea_with_shape.findMany({
-        where: {
-          id: {
-            in: adminareaIds,
-          },
-        },
-      });
+      const adminAreas = await context.kysely
+        .selectFrom("naptan_adminarea_with_shape")
+        .where("id", "in", adminareaIds)
+        .select(["id", "name", "st_asgeojson"])
+        .execute();
 
       if (!adminAreas) {
         throw Error("No admin areas found");

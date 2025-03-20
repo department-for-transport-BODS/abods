@@ -10,6 +10,9 @@ import {
 import { CorridorType, MatchType } from "../types/generated.js";
 import { SessionUser } from "../types/extra.js";
 import { TimetableType } from "../resolvers/corridorFunctions.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely";
+import { getUserOperatorIdsQuery } from "./operators";
 
 export enum CorridorTransitStatsOption {
   day,
@@ -117,82 +120,56 @@ export const getCorridor = (
   });
 };
 
-export const deleteCorridorDb = (corridorId: number, db: PrismaClient) => {
-  return db.corridor.delete({
-    where: {
-      corridor_id: corridorId,
-    },
-  });
-};
+export const deleteCorridorDb = (corridorId: number, db: Kysely<DB>) =>
+  db.deleteFrom("corridor").where("corridor_id", "=", corridorId).execute();
 
-export const deleteCorridorStops = (corridorId: number, db: PrismaClient) => {
-  return db.corridor_stops.deleteMany({
-    where: {
-      corridor_id: corridorId,
-    },
-  });
-};
+export const deleteCorridorStops = (corridorId: number, db: Kysely<DB>) =>
+  db
+    .deleteFrom("corridor_stops")
+    .where("corridor_id", "=", corridorId)
+    .execute();
 
 export const updateCorridorDb = (
   corridorId: number,
   corridorName: string,
-  db: PrismaClient,
+  db: Kysely<DB>,
 ) => {
-  return db.corridor.update({
-    where: {
-      corridor_id: corridorId,
-    },
-    data: {
+  return db
+    .updateTable("corridor")
+    .where("corridor_id", "=", corridorId)
+    .set({
       corridor_name: corridorName,
-    },
-  });
+    })
+    .execute();
 };
 
 export const isCorridorMappedToUserOrg = async (
   corridorId: number,
   user: SessionUser,
-  db: PrismaClient,
+  db: Kysely<DB>,
 ): Promise<boolean> => {
-  const result = await db.corridor.findFirst({
-    where: {
-      corridor_id: corridorId,
-      organisation_id: { in: user.orgIds },
-    },
-  });
-
+  const result = await db
+    .selectFrom("corridor")
+    .where("corridor_id", "=", corridorId)
+    .where("organisation_id", "in", user.orgIds)
+    .select("corridor_id")
+    .executeTakeFirst();
   return !!result;
 };
 
-export const distinctRoutes = (db: PrismaClient, stopsPattern: string) => {
-  return db.distinct_routes.findMany({
-    where: {
-      route: {
-        contains: stopsPattern,
-      },
-    },
-  });
-};
+export const distinctRoutes = (db: Kysely<DB>, stopsPattern: string) =>
+  db
+    .selectFrom("distinct_routes")
+    .where("route", "like", `%${stopsPattern}%`)
+    .select(["route"])
+    .execute();
 
-export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
-  const orgOperators = await db.bods_organisationoperator.findMany({
-    where: {
-      organisation_id: { in: user.orgIds },
-    },
-    select: {
-      operatorref: true,
-    },
-  });
-  return db.noc_adminarea.findMany({
-    where: {
-      national_operator_code: {
-        in: orgOperators.map((op) => op.operatorref),
-      },
-    },
-    select: {
-      adminarea_id: true,
-    },
-  });
-};
+export const getOrgAdminAreas = async (db: Kysely<DB>, user: SessionUser) =>
+  db
+    .selectFrom("noc_adminarea")
+    .where("national_operator_code", "in", getUserOperatorIdsQuery(db, user))
+    .select("adminarea_id")
+    .execute();
 
 export const getStopDepartureTime = (
   stop: TimetableType,

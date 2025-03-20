@@ -9,21 +9,20 @@ import { tokenAuthRequiredResolver } from "../lib/apiauth.js";
 export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
   async (_, args, context): Promise<AvlLineLevelStatus[]> => {
     try {
-      const avlData = await context.db.avl_line_level_monitoring.findMany({
-        where: {
-          ...(args.filters?.operatorNoc
-            ? { operatorNoc: args.filters.operatorNoc }
-            : {}),
-          ...(args.filters?.lineName
-            ? { lineName: args.filters.lineName }
-            : {}),
-        },
-        select: {
-          operatorNoc: true,
-          lineName: true,
-          lastRecordedAtTime: true,
-        },
-      });
+      let query = context.kysely.selectFrom("avl_line_level_monitoring");
+      if (args.filters?.operatorNoc) {
+        query = query.where("operator_noc", "=", args.filters.operatorNoc);
+      }
+      if (args.filters?.lineName) {
+        query = query.where("line_name", "=", args.filters.lineName);
+      }
+      const avlData = await query
+        .select([
+          "operator_noc as operatorNoc",
+          "line_name as lineName",
+          "last_recorded_at_time as lastRecordedAtTime",
+        ])
+        .execute();
       if (!avlData || avlData.length === 0) {
         logger.debug({ filters: args.filters }, "No AVL data found");
         return [];

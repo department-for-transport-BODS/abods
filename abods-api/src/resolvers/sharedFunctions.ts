@@ -12,7 +12,10 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (
   __,
   context,
 ): Promise<Maybe<ApiInfoType>> => {
-  const apiInfo = await context.db.apiInfo.findFirst();
+  const apiInfo = await context.kysely
+    .selectFrom("ApiInfo")
+    .select(["build_number", "version"])
+    .executeTakeFirst();
 
   if (!apiInfo) {
     logger.error("No api info found in database");

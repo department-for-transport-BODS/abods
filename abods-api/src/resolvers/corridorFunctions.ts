@@ -115,7 +115,7 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
     };
   }
 
-  const adminAreas = await getOrgAdminAreas(context.db, user);
+  const adminAreas = await getOrgAdminAreas(context.kysely, user);
 
   where.admin_area_id = {
     in: adminAreas.map((admin) => admin.adminarea_id),
@@ -151,8 +151,8 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     stopList.push(""); // Push blank to add comma at the end
     const stopsPattern = stopList.join(",");
     const [routes, adminAreas] = await Promise.all([
-      distinctRoutes(context.db, stopsPattern),
-      getOrgAdminAreas(context.db, user),
+      distinctRoutes(context.kysely, stopsPattern),
+      getOrgAdminAreas(context.kysely, user),
     ]);
 
     const newStopList: string[] = [];
@@ -274,7 +274,7 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
     !(await isCorridorMappedToUserOrg(
       Number(args.corridorId),
       user,
-      context.db,
+      context.kysely,
     ))
   ) {
     throw "Not Authorized";
@@ -283,8 +283,8 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
   if (!args.corridorId) throw "Bad Request";
 
   await Promise.all([
-    deleteCorridorDb(args.corridorId, context.db),
-    deleteCorridorStops(args.corridorId, context.db),
+    deleteCorridorDb(args.corridorId, context.kysely),
+    deleteCorridorStops(args.corridorId, context.kysely),
   ]);
 
   return {
@@ -300,7 +300,11 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
   if (!args.inputs) throw "Bad Request";
   const user = await requireUserSession(context);
   if (
-    !(await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db))
+    !(await isCorridorMappedToUserOrg(
+      Number(args.inputs.id),
+      user,
+      context.kysely,
+    ))
   ) {
     throw "Not Authorized";
   }
@@ -309,8 +313,8 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
     throw "Bad Request";
 
   await Promise.all([
-    updateCorridorDb(args.inputs.id, args.inputs.name, context.db),
-    deleteCorridorStops(args.inputs.id, context.db),
+    updateCorridorDb(args.inputs.id, args.inputs.name, context.kysely),
+    deleteCorridorStops(args.inputs.id, context.kysely),
   ]);
 
   await insertCorridorStops(
@@ -357,7 +361,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   }
 
   if (
-    !(await isCorridorMappedToUserOrg(Number(corridorId), user, context.db))
+    !(await isCorridorMappedToUserOrg(Number(corridorId), user, context.kysely))
   ) {
     throw "Not Authorized";
   }

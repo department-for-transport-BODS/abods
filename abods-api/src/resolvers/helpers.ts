@@ -35,12 +35,12 @@ export const requireUserSession = async (context: RequestContext) => {
   logger.debug("Within get session function");
 
   // temporary session token storage
-  const sessionRecord = await context.db.tokens.findFirst({
-    where: {
-      token: sessionId,
-      expires: { gt: new Date() },
-    },
-  });
+  const sessionRecord = await context.kysely
+    .selectFrom("Tokens")
+    .where("token", "=", sessionId)
+    .where("expires", ">", new Date())
+    .select("user_id")
+    .executeTakeFirst();
 
   logger.debug(
     { sessionRecord, sessionId },
@@ -51,26 +51,27 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
   // fetch user from bods
-  const bodsUser = await context.db.bods_user.findUnique({
-    where: { id: sessionRecord.user_id },
-    select: {
-      userOrganisations: { select: { organisation_id: true } },
-      is_active: true,
-    },
-  });
+
+  const bodsUser = await context.kysely
+    .selectFrom("bods_user as u")
+    .innerJoin("bods_userorganisation as o", "o.user_id", "u.id")
+    .where("u.id", "=", sessionRecord.user_id)
+    .select("u.is_active")
+    .select("o.organisation_id")
+    .execute();
 
   logger.debug({ bodsUser }, "Retrieved bods user");
   if (!bodsUser) {
     logger.debug("No bods user found");
     throwUnauthenticatedError();
   }
-  if (!bodsUser.is_active) {
+  if (!bodsUser.every((n) => n.is_active)) {
     logger.debug("User exists but is not active");
     throwUnauthenticatedError();
   }
 
   const orgIds = getUserOrgIds({
-    userOrganisations: bodsUser.userOrganisations,
+    userOrganisations: bodsUser,
     id: sessionRecord.user_id,
   });
 
