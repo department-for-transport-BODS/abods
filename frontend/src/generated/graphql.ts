@@ -672,6 +672,8 @@ export type OperatorFeedMonitoring = {
   __typename?: 'OperatorFeedMonitoring';
   feedMonitoring?: Maybe<FeedMonitoringType>;
   name: Scalars['String']['output'];
+  /** @deprecated nocCode is deprecated. Use operatorId instead. */
+  nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
 };
 
@@ -699,6 +701,7 @@ export type OperatorType = {
   __typename?: 'OperatorType';
   adminAreaIds: Array<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
 };
 
@@ -1166,12 +1169,12 @@ export type UpdateCorridorMutationVariables = Exact<{
 
 export type UpdateCorridorMutation = { __typename?: 'Mutation', updateCorridor: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
 
-export type OperatorDashboardFragment = { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null };
+export type OperatorDashboardFragment = { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null };
 
 export type DashboardOperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboardOperatorListQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null }> };
+export type DashboardOperatorListQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, liveStats?: { __typename?: 'LiveStatsType', feedErrors?: number | null, feedAlerts?: number | null } | null } | null }> };
 
 export type DashboardOperatorVehicleCountsListQueryVariables = Exact<{
   operatorId?: InputMaybe<Scalars['String']['input']>;
@@ -1223,30 +1226,30 @@ export type EventStatsQuery = { __typename?: 'Query', eventStats: Array<{ __type
 
 export type VehicleStatFragment = { __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string };
 
-export type BasicOperatorFragment = { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null };
+export type BasicOperatorFragment = { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null };
 
-export type OperatorLiveStatusFragment = { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null };
+export type OperatorLiveStatusFragment = { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null };
 
-export type OperatorFeedHistoryFragment = { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null };
+export type OperatorFeedHistoryFragment = { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null };
 
 export type FeedMonitoringListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FeedMonitoringListQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null }> };
+export type FeedMonitoringListQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null } | null } | null }> };
 
 export type OperatorSparklineStatsQueryVariables = Exact<{
   operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
-export type OperatorSparklineStatsQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null }> };
+export type OperatorSparklineStatsQuery = { __typename?: 'Query', operatorsFeedMonitoring: Array<{ __typename?: 'OperatorFeedMonitoring', nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', liveStats?: { __typename?: 'LiveStatsType', last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null }> };
 
 export type OperatorLiveStatusQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
 }>;
 
 
-export type OperatorLiveStatusQuery = { __typename?: 'Query', operatorFeedMonitoring?: { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null } | null };
+export type OperatorLiveStatusQuery = { __typename?: 'Query', operatorFeedMonitoring?: { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', feedStatus?: boolean | null, availability?: number | null, lastOutage?: string | null, unavailableSince?: string | null, liveStats?: { __typename?: 'LiveStatsType', updateFrequency?: number | null, currentVehicles?: number | null, expectedVehicles?: number | null, last24Hours?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null, last20Minutes?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null } | null };
 
 export type OperatorHistoricStatsQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
@@ -1256,7 +1259,7 @@ export type OperatorHistoricStatsQueryVariables = Exact<{
 }>;
 
 
-export type OperatorHistoricStatsQuery = { __typename?: 'Query', operatorFeedMonitoring?: { __typename?: 'OperatorFeedMonitoring', name: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null };
+export type OperatorHistoricStatsQuery = { __typename?: 'Query', operatorFeedMonitoring?: { __typename?: 'OperatorFeedMonitoring', name: string, nocCode: string, operatorId: string, feedMonitoring?: { __typename?: 'FeedMonitoringType', historicalStats?: { __typename?: 'HistoricalStatsType', updateFrequency?: number | null, availability?: number | null } | null, vehicleStats?: Array<{ __typename?: 'VehicleStatsType', actual: number, expected: number, timestamp: string }> | null } | null } | null };
 
 export type GetAdminAreasQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1440,7 +1443,7 @@ export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OperatorListQuery = { __typename?: 'Query', operators: Array<{ __typename?: 'OperatorType', name: string, operatorId: string, adminAreaIds: Array<string> }> };
+export type OperatorListQuery = { __typename?: 'Query', operators: Array<{ __typename?: 'OperatorType', name: string, nocCode: string, operatorId: string, adminAreaIds: Array<string> }> };
 
 export type OperatorLinesQueryVariables = Exact<{
   operatorIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -1533,6 +1536,7 @@ export type GetVersionQuery = { __typename?: 'Query', apiInfo?: { __typename?: '
 export const OperatorDashboardFragmentDoc = gql`
     fragment OperatorDashboard on OperatorFeedMonitoring {
   name
+  nocCode
   operatorId
   feedMonitoring {
     feedStatus
@@ -1555,6 +1559,7 @@ export const EventFragmentDoc = gql`
 export const BasicOperatorFragmentDoc = gql`
     fragment BasicOperator on OperatorFeedMonitoring {
   name
+  nocCode
   operatorId
   feedMonitoring {
     feedStatus
@@ -1577,6 +1582,7 @@ export const VehicleStatFragmentDoc = gql`
 export const OperatorLiveStatusFragmentDoc = gql`
     fragment OperatorLiveStatus on OperatorFeedMonitoring {
   name
+  nocCode
   operatorId
   feedMonitoring {
     feedStatus
@@ -1600,6 +1606,7 @@ export const OperatorLiveStatusFragmentDoc = gql`
 export const OperatorFeedHistoryFragmentDoc = gql`
     fragment OperatorFeedHistory on OperatorFeedMonitoring {
   name
+  nocCode
   operatorId
   feedMonitoring {
     historicalStats(date: $date) {
@@ -2109,6 +2116,7 @@ export const FeedMonitoringListDocument = gql`
 export const OperatorSparklineStatsDocument = gql`
     query operatorSparklineStats($operatorIds: [String!]!) {
   operatorsFeedMonitoring(filterBy: {operatorIds: $operatorIds}) {
+    nocCode
     operatorId
     feedMonitoring {
       liveStats {
@@ -2732,6 +2740,7 @@ export const OperatorListDocument = gql`
     query operatorList {
   operators {
     name
+    nocCode
     operatorId
     adminAreaIds
   }

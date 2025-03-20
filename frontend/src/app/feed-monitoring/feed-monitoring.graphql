@@ -6,6 +6,8 @@ fragment VehicleStat on VehicleStatsType {
 
 fragment BasicOperator on OperatorFeedMonitoring {
   name
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     feedStatus
@@ -20,6 +22,8 @@ fragment BasicOperator on OperatorFeedMonitoring {
 
 fragment OperatorLiveStatus on OperatorFeedMonitoring {
   name
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     feedStatus
@@ -42,6 +46,8 @@ fragment OperatorLiveStatus on OperatorFeedMonitoring {
 
 fragment OperatorFeedHistory on OperatorFeedMonitoring {
   name
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     historicalStats(date: $date) {
@@ -62,6 +68,8 @@ query feedMonitoringList {
 
 query operatorSparklineStats($operatorIds: [String!]!) {
   operatorsFeedMonitoring(filterBy: { operatorIds: $operatorIds }) {
+    # Remove this when we're sure it's not used. There is no type safety where it is
+    nocCode # eslint-disable-line @graphql-eslint/no-deprecated
     operatorId
     feedMonitoring {
       liveStats {

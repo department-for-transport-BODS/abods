@@ -1,6 +1,7 @@
 query operatorList {
   operators {
     name
+    nocCode
     operatorId
     adminAreaIds
   }
