@@ -29,7 +29,8 @@
       "vehicleJourneys": "43000590098",
       "corridors": "43000590099",
       "organisation": "43000590100",
-      "dataMonitoring": "43000590101"
+      "dataMonitoring": "43000590101",
+      "serviceMonitoring": "43000590102"
     }
   }
 }
