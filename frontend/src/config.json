@@ -30,7 +30,8 @@
       "corridors": "43000590099",
       "organisation": "43000590100",
       "dataMonitoring": "43000590101",
-      "serviceMonitoring": "43000590102"
+      "serviceMonitoring": "43000590102",
+      "stopAnalysis": "43000590103"
     }
   }
 }
