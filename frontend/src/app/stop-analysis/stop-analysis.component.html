@@ -110,15 +110,15 @@
       </div>
       <div>
         <label class="govuk-label" for="services">Services</label>
-        <app-service-multi-select
-          [operators]="operatorIds"
-          [startDate]="from"
-          [endDate]="to"
-          [value]="serviceIds"
-          [disabled]="operatorIds.length === 0"
-          disabledText="Select an operator"
-          fieldId="services"
+        <gds-multiselect-checkbox
+          [options]="services$ | async"
+          [ngModel]="serviceIds"
           (selectedChange)="onServicesChanged($event)"
+          [showAll]="true"
+          labelForId="services"
+          showAllLabel="All Services"
+          placeholderText="Services"
+          ariaLabel="Services"
         />
       </div>
     </div>

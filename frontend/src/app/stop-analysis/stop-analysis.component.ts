@@ -17,6 +17,7 @@ import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   MatchType,
+  OperatorLinesGQL,
   OperatorListGQL,
   OperatorType,
   PerformanceFiltersInputType,
@@ -24,7 +25,7 @@ import {
   StopAnalysisQueryVariables,
   StopStatistics,
 } from "../../generated/graphql";
-import { combineLatest, firstValueFrom, Subject, takeUntil } from "rxjs";
+import { combineLatest, firstValueFrom, of, Subject, takeUntil } from "rxjs";
 import { debounceTime, filter, map, mergeMap, tap } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../on-time/on-time.service";
@@ -142,6 +143,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   labelPosition?: Feature<Point>;
 
   allAdminAreas: AdminArea[] = [];
+  adminAreasChanged = new Subject();
   adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
     takeUntil(this.destroy$),
     tap((areas) => {
@@ -168,7 +170,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     takeUntil(this.destroy$),
     tap((result) => (this.allOperators = result.data.operators)),
   );
-  operators$ = combineLatest([this.operators, this.apiFiltersChanged]).pipe(
+  operators$ = combineLatest([this.operators, this.adminAreasChanged]).pipe(
     takeUntil(this.destroy$),
     map(([result]) =>
       result.data.operators
@@ -187,7 +189,50 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     ),
     tap((options) => {
       const available = options.map((o) => o.value);
-      this.operatorIds.filter((s) => available.includes(s));
+      const newIds = this.operatorIds.filter((s) => available.includes(s));
+      console.log(available);
+      console.log(newIds);
+      if (this.operatorIds.length !== newIds.length) {
+        this.onOperatorsChanged(newIds);
+      }
+    }),
+  );
+
+  allServices$ = this.apiFiltersChanged.pipe(
+    mergeMap(() => {
+      if (this.operatorIds.length === 0) return of({ data: { lines: [] } });
+      return this.operatorLinesQuery.fetch({
+        operatorIds: this.operatorIds,
+        inputDate: this.from.toISO(),
+        endDate: this.to.toISO(),
+      });
+    }),
+  );
+
+  services$ = combineLatest([this.allServices$, this.adminAreasChanged]).pipe(
+    map(([result]) =>
+      result.data.lines
+        .filter((line) =>
+          line.adminAreaIds.some(
+            (a) =>
+              !this.adminAreaIds ||
+              this.adminAreaIds.length === 0 ||
+              this.adminAreaIds?.includes(a),
+          ),
+        )
+        .map(
+          (o): MultiselectCheckboxOption => ({
+            label: `${o.number}: ${o.name}`,
+            value: o.id,
+          }),
+        ),
+    ),
+    tap((options) => {
+      const available = options.map((o) => o.value);
+      const newIds = this.serviceIds.filter((s) => available.includes(s));
+      if (this.serviceIds.length !== newIds.length) {
+        this.onServicesChanged(newIds);
+      }
     }),
   );
 
@@ -195,6 +240,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     private config: ConfigService,
     private query: StopAnalysisGQL,
     private operatorListQuery: OperatorListGQL,
+    private operatorLinesQuery: OperatorLinesGQL,
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
     private panelService: PanelService,
@@ -343,7 +389,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     if (matchType) this.matchType = matchType as MatchType;
     if (startTime) this.refinedFilters.startTime = startTime;
     if (endTime) this.refinedFilters.endTime = endTime;
-    if (adminAreaIds) this.adminAreaIds = adminAreaIds;
+    if (adminAreaIds) this.onAdminAreasChanged(adminAreaIds);
     if (serviceIds) this.serviceIds = serviceIds;
     if (operatorIds) this.operatorIds = operatorIds;
     if (dayOfWeek) {
@@ -434,9 +480,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
   ): void {
     if (!this.map) return;
-    const features = this.map.queryRenderedFeatures(e.point, {
-      layers: ["clusters"],
-    });
+    const features = this.boundingBoxTooBig
+      ? []
+      : this.map.queryRenderedFeatures(e.point, {
+          layers: ["clusters"],
+        });
     if (features.length !== 0) {
       const feature = features[0].geometry;
       if (feature.type !== "Point" || !features[0].properties) return;
@@ -556,6 +604,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onAdminAreasChanged($event: string[]) {
     this.adminAreaIds = $event;
     this.showFilterArea();
+    this.adminAreasChanged.next(undefined);
     this.onFilterChanged();
   }
 

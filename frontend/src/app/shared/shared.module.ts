@@ -72,7 +72,6 @@ import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive"
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
 import { LocationSearchComponent } from "./components/location-search/location-search.component";
 import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of-week-select.component";
-import { ServiceMultiSelectComponent } from "./components/service-multi-select/service-multi-select.component";
 
 @NgModule({
   declarations: [
@@ -137,7 +136,6 @@ import { ServiceMultiSelectComponent } from "./components/service-multi-select/s
     MouseupOutsideDirective,
     FreshdeskHtmlFormatterPipe,
     LocationSearchComponent,
-    ServiceMultiSelectComponent,
     DayOfWeekSelectComponent,
   ],
   providers: [PercentPipe],
@@ -215,7 +213,6 @@ import { ServiceMultiSelectComponent } from "./components/service-multi-select/s
     MouseupOutsideDirective,
     LocationSearchComponent,
     DayOfWeekSelectComponent,
-    ServiceMultiSelectComponent,
   ],
 })
 export class SharedModule {}
