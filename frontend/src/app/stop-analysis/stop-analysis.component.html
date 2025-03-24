@@ -250,6 +250,56 @@
             'icon-image': timingPointIcons
           }"
         />
+        <mgl-geojson-source
+          id="boundaries"
+          promoteId="id"
+          [data]="visibleAdminAreas"
+        />
+        <mgl-layer
+          id="admin-area-boundaries"
+          source="boundaries"
+          type="fill"
+          [paint]="{
+            'fill-color': '#28A197',
+            'fill-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              9,
+              [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                0.5,
+                0.3
+              ],
+              12,
+              0
+            ]
+          }"
+          (layerMouseMove)="onBoundaryHover($event)"
+          (layerMouseLeave)="onClearBoundaryHover()"
+          (layerClick)="onAdminAreaClick($event)"
+        />
+        <mgl-popup
+          *ngIf="
+            hoveredAdminArea &&
+            labelPosition &&
+            zoomLevel < 11 &&
+            (!adminAreaIds || adminAreaIds.length !== 1)
+          "
+          [feature]="labelPosition"
+          [closeButton]="false"
+          [closeOnClick]="false"
+          maxWidth="200"
+          className="gds-popup"
+        >
+          <div
+            class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
+          >
+            {{ hoveredAdminArea.properties.name }}
+          </div>
+          <div class="govuk-body-small">{{ hoveredAdminArea.id }}</div>
+        </mgl-popup>
         <mgl-popup
           *ngIf="selectedStop"
           [lngLat]="[selectedStop.longitude, selectedStop.latitude]"

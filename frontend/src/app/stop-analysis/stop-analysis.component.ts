@@ -1,17 +1,19 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
-import { FeatureCollection, Point, Polygon } from "geojson";
+import { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import {
   CirclePaint,
+  EventData,
   GeoJSONSource,
   LngLat,
   LngLatBounds,
   LngLatBoundsLike,
   Map,
+  MapboxGeoJSONFeature,
   MapMouseEvent,
   SymbolLayout,
 } from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
-import { BRITISH_ISLES_BBOX } from "../shared/geo";
+import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   MatchType,
@@ -46,6 +48,8 @@ import {
 import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { featureCollection } from "@turf/helpers";
+import pointOnFeature from "@turf/point-on-feature";
+import bboxClip from "@turf/bbox-clip";
 
 @Component({
   selector: "app-stop-analysis",
@@ -138,6 +142,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   visibleAdminAreas: FeatureCollection<Polygon, AdminArea> = featureCollection(
     [],
   );
+  hoveredAdminArea?: Feature<Polygon, AdminArea>;
+  labelPosition?: Feature<Point>;
 
   allAdminAreas: AdminArea[] = [];
   adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
@@ -444,6 +450,50 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         });
       },
     );
+  }
+
+  onBoundaryHover(
+    event: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ) {
+    if (!this.map) return;
+    const adminArea = event.features?.[0] as Feature;
+    if (this.hoveredAdminArea && this.hoveredAdminArea?.id !== adminArea?.id) {
+      this.onClearBoundaryHover();
+    }
+    this.hoveredAdminArea = adminArea as Feature<Polygon, AdminArea>;
+    this.map.setFeatureState(
+      { source: "boundaries", id: this.hoveredAdminArea?.id },
+      { hover: true },
+    );
+    this.recalculateLabelPosition();
+  }
+
+  onClearBoundaryHover() {
+    if (!this.map) return;
+    this.map.removeFeatureState(
+      { source: "boundaries", id: this.hoveredAdminArea?.id },
+      "hover",
+    );
+    this.hoveredAdminArea = undefined;
+    this.labelPosition = undefined;
+  }
+
+  onAdminAreaClick(
+    event: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ) {
+    if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
+    const adminArea = event.features?.[0] as Feature;
+    this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
+  }
+
+  recalculateLabelPosition() {
+    if (!this.map) return;
+    if (this.hoveredAdminArea) {
+      const viewBounds = this.map.getBounds();
+      this.labelPosition = pointOnFeature(
+        bboxClip(this.hoveredAdminArea, asBbox(viewBounds)),
+      );
+    }
   }
 
   onTableStopNameClicked($event: StopPerformance) {
