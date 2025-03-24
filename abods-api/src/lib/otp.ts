@@ -1,63 +1,46 @@
-import { Prisma, PrismaClient } from "@prisma/client";
 import {
   FrequentServiceInfoInputType,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
-import {
-  getPrismaFiltersForOTPQuery,
-  timeDiffFilters,
-} from "../resolvers/otpFunctions.js";
-
-const getThresholds = async (
-  db: PrismaClient,
-  where: Prisma.timetable_threshold_summaryWhereInput,
-) => {
-  return db.timetable_threshold_summary.aggregate({
-    _sum: { otp_count: true },
-    where: { ...where },
-  });
-};
+import { otpFilters, timeDiffFilters } from "../resolvers/otpFunctions.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely";
+import { getUserOperatorIdsQuery } from "./operators";
+import { SessionUser } from "../types/extra";
 
 export const compareThresholds = async (
   inputs: PerformanceInputType,
-  userOperatorIds: string[],
-  db: PrismaClient,
+  db: Kysely<DB>,
+  user: SessionUser,
 ): Promise<PunctualityTotalsType | null> => {
   if (!inputs.filters.onTimeMinMinutes || !inputs.filters.onTimeMaxMinutes) {
     return null;
   }
-  const where = timeDiffFilters(inputs, userOperatorIds);
+  const query = timeDiffFilters(
+    db
+      .selectFrom("timetable_threshold_summary")
+      .where("operator_noc", "in", getUserOperatorIdsQuery(db, user)),
+    inputs,
+  ).select((eb) => eb.fn.sum<number>("otp_count").as("otp_count"));
 
   const [early, late, onTime] = await Promise.all([
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        lt: inputs.filters.onTimeMinMinutes,
-      },
-    }),
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        gte: inputs.filters.onTimeMaxMinutes,
-      },
-    }),
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        gte: inputs.filters.onTimeMinMinutes,
-        lt: inputs.filters.onTimeMaxMinutes,
-      },
-    }),
+    query
+      .where("time_diff_minutes", "<", inputs.filters.onTimeMinMinutes)
+      .executeTakeFirst(),
+    query
+      .where("time_diff_minutes", ">=", inputs.filters.onTimeMaxMinutes)
+      .executeTakeFirst(),
+    query
+      .where("time_diff_minutes", ">=", inputs.filters.onTimeMaxMinutes)
+      .where("time_diff_minutes", "<", inputs.filters.onTimeMinMinutes)
+      .executeTakeFirst(),
   ]);
 
   return {
-    early: early._sum.otp_count ?? 0,
-    late: late._sum.otp_count ?? 0,
-    onTime: onTime._sum.otp_count ?? 0,
+    early: early?.otp_count ?? 0,
+    late: late?.otp_count ?? 0,
+    onTime: onTime?.otp_count ?? 0,
     scheduled: 0,
     completed: 0,
     averageDeviation: 0,
@@ -66,33 +49,37 @@ export const compareThresholds = async (
 };
 
 export const getSummaryStopsTotalHours = async (
-  db: PrismaClient,
+  db: Kysely<DB>,
   inputs: FrequentServiceInfoInputType,
-  userOperatorIds: string[],
+  user: SessionUser,
 ) => {
-  const results = await db.timetable_summary_stops_tz.findMany({
-    distinct: ["departure_hour"],
-    where: {
-      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-      scheduled: { gt: 0 },
-    },
-    select: { departure_hour: true },
-  });
+  const results = await otpFilters(
+    db
+      .selectFrom("timetable_summary_stops_tz")
+      .where("operator_noc", "in", getUserOperatorIdsQuery(db, user)),
+    inputs,
+  )
+    .where("scheduled", ">", 0)
+    .select("departure_hour")
+    .distinct()
+    .execute();
   return results.length;
 };
 
 export const getFrequentServiceActualHours = async (
-  db: PrismaClient,
+  db: Kysely<DB>,
   inputs: FrequentServiceInfoInputType,
-  userOperatorIds: string[],
+  user: SessionUser,
 ) => {
-  const results = await db.timetable_frequent_summary_services.findMany({
-    distinct: ["departure_hour"],
-    where: {
-      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-      actual_headway: { gt: 0 },
-    },
-    select: { departure_hour: true },
-  });
+  const results = await otpFilters(
+    db
+      .selectFrom("timetable_frequent_summary_services")
+      .where("operator_noc", "in", getUserOperatorIdsQuery(db, user)),
+    inputs,
+  )
+    .where("actual_headway", ">", "0")
+    .select("departure_hour")
+    .distinct()
+    .execute();
   return results.length;
 };
