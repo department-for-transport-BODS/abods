@@ -97,10 +97,15 @@
       </div>
       <div>
         <label class="govuk-label" for="operators">Operators</label>
-        <app-operator-multi-select
-          [value]="operatorIds"
-          fieldId="operators"
+        <gds-multiselect-checkbox
+          [options]="operators$ | async"
+          [ngModel]="operatorIds"
           (selectedChange)="onOperatorsChanged($event)"
+          [showAll]="true"
+          labelForId="operators"
+          showAllLabel="All Operators"
+          placeholderText="Operators"
+          ariaLabel="Operators"
         />
       </div>
       <div>

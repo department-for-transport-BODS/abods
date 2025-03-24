@@ -5,6 +5,7 @@ import {
   GeoJSONSource,
   LngLat,
   LngLatBounds,
+  LngLatBoundsLike,
   Map,
   MapMouseEvent,
   SymbolLayout,
@@ -14,6 +15,8 @@ import { BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   MatchType,
+  OperatorListGQL,
+  OperatorType,
   PerformanceFiltersInputType,
   StopAnalysisGQL,
   StopAnalysisQueryVariables,
@@ -29,7 +32,11 @@ import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
 import { FiltersComponent } from "../on-time/filters/filters.component";
 import { PanelService } from "../shared/components/panel/panel.service";
 import { MultiselectCheckboxOption } from "../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
-import { AdminAreaService } from "../on-time/admin-area/admin-area.service";
+import {
+  AdminArea,
+  AdminAreaService,
+  computeAdminAreaBoundaries,
+} from "../on-time/admin-area/admin-area.service";
 import {
   ActivatedRoute,
   NavigationExtras,
@@ -37,6 +44,7 @@ import {
   Router,
 } from "@angular/router";
 import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 
 @Component({
   selector: "app-stop-analysis",
@@ -126,8 +134,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   refinedFilters: PerformanceFiltersInputType = {};
 
+  allAdminAreas: AdminArea[] = [];
   adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
     takeUntil(this.destroy$),
+    tap((areas) => (this.allAdminAreas = areas)),
     map((areas) =>
       areas
         .map(
@@ -143,9 +153,24 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     ),
   );
 
+  allOperators: OperatorType[] = [];
+  operators$ = this.operatorListQuery.fetch({}).pipe(
+    takeUntil(this.destroy$),
+    tap((result) => (this.allOperators = result.data.operators)),
+    map((result) =>
+      result.data.operators.map(
+        (o): MultiselectCheckboxOption => ({
+          label: `${o.name} (${o.operatorId})`,
+          value: o.operatorId,
+        }),
+      ),
+    ),
+  );
+
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
+    private operatorListQuery: OperatorListGQL,
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
     private panelService: PanelService,
@@ -364,15 +389,12 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       this.selectedCluster = undefined;
       this.cdr.detectChanges();
     });
-    map.fitBounds(
-      [
-        this.visibleBounds.minLongitude,
-        this.visibleBounds.minLatitude,
-        this.visibleBounds.maxLongitude,
-        this.visibleBounds.maxLatitude,
-      ],
-      { maxDuration: 500 },
-    );
+    this.showBoundingBox(map, [
+      this.visibleBounds.minLongitude,
+      this.visibleBounds.minLatitude,
+      this.visibleBounds.maxLongitude,
+      this.visibleBounds.maxLatitude,
+    ]);
   }
 
   onMapMoveEnd() {
@@ -423,13 +445,35 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.onFilterChanged();
   }
 
+  showFilterArea() {
+    if (!this.map) return;
+    let areaIdsToShow = this.adminAreaIds ?? [];
+    if (areaIdsToShow.length === 0) {
+      areaIdsToShow = [
+        ...new Set(
+          this.allOperators
+            .filter((n) => this.operatorIds.includes(n.operatorId))
+            .map((n) => n.adminAreaIds)
+            .flat(),
+        ),
+      ];
+    }
+    const selectedAreas = this.allAdminAreas.filter((n) =>
+      areaIdsToShow.includes(n.id),
+    );
+    const bounds = computeAdminAreaBoundaries(selectedAreas).bbox as BBox2d;
+    if (bounds) this.showBoundingBox(this.map, bounds);
+  }
+
   onAdminAreasChanged($event: string[]) {
     this.adminAreaIds = $event;
+    this.showFilterArea();
     this.onFilterChanged();
   }
 
   onOperatorsChanged($event: string[]) {
     this.operatorIds = $event;
+    this.showFilterArea();
     this.onFilterChanged();
   }
 
@@ -441,8 +485,12 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.map.fitBounds(location.bbox, { maxDuration: 500 });
+    this.showBoundingBox(this.map, location.bbox);
   }
+
+  private showBoundingBox = (map: Map, bbox: LngLatBoundsLike) => {
+    map.fitBounds(bbox, { maxDuration: 500 });
+  };
 
   onStopTypeChanged() {
     this.updateQueryParams(undefined);
