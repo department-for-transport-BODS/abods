@@ -217,7 +217,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
             (a) =>
               !this.adminAreaIds ||
               this.adminAreaIds.length === 0 ||
-              this.adminAreaIds?.includes(a),
+              this.adminAreaIds?.includes(a.toString()),
           ),
         )
         .map(
