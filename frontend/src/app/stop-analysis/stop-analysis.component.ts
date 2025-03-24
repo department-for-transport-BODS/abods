@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
-import { FeatureCollection, Point } from "geojson";
+import { FeatureCollection, Point, Polygon } from "geojson";
 import {
   CirclePaint,
   GeoJSONSource,
@@ -45,6 +45,7 @@ import {
 } from "@angular/router";
 import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { featureCollection } from "@turf/helpers";
 
 @Component({
   selector: "app-stop-analysis",
@@ -134,10 +135,17 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   refinedFilters: PerformanceFiltersInputType = {};
 
+  visibleAdminAreas: FeatureCollection<Polygon, AdminArea> = featureCollection(
+    [],
+  );
+
   allAdminAreas: AdminArea[] = [];
   adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
     takeUntil(this.destroy$),
-    tap((areas) => (this.allAdminAreas = areas)),
+    tap((areas) => {
+      this.allAdminAreas = areas;
+      this.updateVisibleAdminAreas();
+    }),
     map((areas) =>
       areas
         .map(
@@ -154,16 +162,26 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   );
 
   allOperators: OperatorType[] = [];
-  operators$ = this.operatorListQuery.fetch({}).pipe(
+  operators = this.operatorListQuery.fetch({}).pipe(
     takeUntil(this.destroy$),
     tap((result) => (this.allOperators = result.data.operators)),
-    map((result) =>
-      result.data.operators.map(
-        (o): MultiselectCheckboxOption => ({
-          label: `${o.name} (${o.operatorId})`,
-          value: o.operatorId,
-        }),
-      ),
+  );
+  operators$ = combineLatest([this.operators, this.apiFiltersChanged]).pipe(
+    takeUntil(this.destroy$),
+    map(([result]) =>
+      result.data.operators
+        .filter(
+          (o) =>
+            !this.adminAreaIds ||
+            this.adminAreaIds.length === 0 ||
+            o.adminAreaIds.some((a) => this.adminAreaIds?.includes(a)),
+        )
+        .map(
+          (o): MultiselectCheckboxOption => ({
+            label: `${o.name} (${o.operatorId})`,
+            value: o.operatorId,
+          }),
+        ),
     ),
   );
 
@@ -445,8 +463,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.onFilterChanged();
   }
 
-  showFilterArea() {
-    if (!this.map) return;
+  updateVisibleAdminAreas() {
     let areaIdsToShow = this.adminAreaIds ?? [];
     if (areaIdsToShow.length === 0) {
       areaIdsToShow = [
@@ -458,11 +475,18 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         ),
       ];
     }
-    const selectedAreas = this.allAdminAreas.filter((n) =>
-      areaIdsToShow.includes(n.id),
+
+    const selectedAreas = this.allAdminAreas.filter(
+      (n) => areaIdsToShow.length === 0 || areaIdsToShow.includes(n.id),
     );
-    const bounds = computeAdminAreaBoundaries(selectedAreas).bbox as BBox2d;
-    if (bounds) this.showBoundingBox(this.map, bounds);
+    this.visibleAdminAreas = computeAdminAreaBoundaries(selectedAreas);
+  }
+
+  showFilterArea() {
+    this.updateVisibleAdminAreas();
+    if (this.map) {
+      this.showBoundingBox(this.map, this.visibleAdminAreas.bbox as BBox2d);
+    }
   }
 
   onAdminAreasChanged($event: string[]) {
