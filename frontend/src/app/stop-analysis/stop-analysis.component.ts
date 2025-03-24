@@ -121,12 +121,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     ],
   ];
   zoomLevel = 0;
-  visibleBounds: BoundingBoxInputType = {
-    maxLatitude: this.initialBounds[3],
-    minLatitude: this.initialBounds[1],
-    maxLongitude: this.initialBounds[2],
-    minLongitude: this.initialBounds[0],
-  };
+  visibleBounds = this.toBoundingBoxInputType(this.initialBounds);
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
   selectedStop: StopStatistics | undefined;
@@ -541,9 +536,21 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   showFilterArea() {
     this.updateVisibleAdminAreas();
-    if (this.map) {
-      this.showBoundingBox(this.map, this.visibleAdminAreas.bbox as BBox2d);
-    }
+    if (!this.map) return;
+    const bbox = this.visibleAdminAreas.bbox as BBox2d;
+    if (
+      this.withinBounds(this.visibleBounds, this.toBoundingBoxInputType(bbox))
+    )
+      return;
+    this.showBoundingBox(this.map, bbox);
+  }
+  toBoundingBoxInputType(input: BBox2d): BoundingBoxInputType {
+    return {
+      maxLatitude: input[3],
+      minLatitude: input[1],
+      maxLongitude: input[2],
+      minLongitude: input[0],
+    };
   }
 
   onAdminAreasChanged($event: string[]) {
