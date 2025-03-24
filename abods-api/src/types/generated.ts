@@ -464,6 +464,7 @@ export enum LineDirection {
 
 export type LineType = {
   __typename?: 'LineType';
+  adminAreaIds: Array<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   number: Scalars['String']['output'];
@@ -1638,6 +1639,7 @@ export type JourneyResultResolvers<ContextType = RequestContext, ParentType exte
 }>;
 
 export type LineTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LineType'] = ResolversParentTypes['LineType']> = ResolversObject<{
+  adminAreaIds?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
