@@ -60,7 +60,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   from: DateTime;
   private apiFiltersChanged = new Subject();
 
-  private map: Map | undefined = undefined;
+  map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
   initialBounds = BRITISH_ISLES_BBOX;
   private boundsChanged = new Subject();
