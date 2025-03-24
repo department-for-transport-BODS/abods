@@ -456,6 +456,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     event: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
   ) {
     if (!this.map) return;
+    if (this.adminAreaIds && this.adminAreaIds.length === 1) return;
     const adminArea = event.features?.[0] as Feature;
     if (this.hoveredAdminArea && this.hoveredAdminArea?.id !== adminArea?.id) {
       this.onClearBoundaryHover();

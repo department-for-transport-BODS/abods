@@ -281,12 +281,7 @@
           (layerClick)="onAdminAreaClick($event)"
         />
         <mgl-popup
-          *ngIf="
-            hoveredAdminArea &&
-            labelPosition &&
-            zoomLevel < 11 &&
-            (!adminAreaIds || adminAreaIds.length !== 1)
-          "
+          *ngIf="hoveredAdminArea && labelPosition && zoomLevel < 11"
           [feature]="labelPosition"
           [closeButton]="false"
           [closeOnClick]="false"
