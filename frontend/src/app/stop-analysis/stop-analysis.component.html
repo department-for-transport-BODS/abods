@@ -68,8 +68,8 @@
           />
         </app-segmented-toggle>
         <app-segmented-toggle
-          [(ngModel)]="timingPointsOption"
-          (ngModelChange)="processStopData(visibleBounds)"
+          [(ngModel)]="stopType"
+          (ngModelChange)="onStopTypeChanged()"
         >
           <app-segmented-toggle-item
             name="stops-filter"
@@ -359,7 +359,7 @@
         <mgl-control mglGeolocate />
       </mgl-map>
       <div class="map-overlay">
-        <p *ngIf="boundingBoxTooBig">Zoom in to show stops</p>
+        <p *ngIf="boundingBoxTooBig && map">Zoom in to show stops</p>
         <app-spinner *ngIf="isLoading" />
       </div>
     </div>
