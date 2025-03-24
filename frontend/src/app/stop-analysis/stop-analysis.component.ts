@@ -190,6 +190,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           }),
         ),
     ),
+    tap((options) => {
+      const available = options.map((o) => o.value);
+      this.operatorIds.filter((s) => available.includes(s));
+    }),
   );
 
   constructor(
