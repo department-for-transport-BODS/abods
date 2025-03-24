@@ -28,10 +28,10 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
       join.onRef("bo.id", "=", "buo.organisation_id").on("ul.id", "is", null),
     )
     .where("buo.user_id", "=", user_id)
-    .select((eb) => [
-      eb.ref("bo.is_abods_global_viewer").as("is_superuser"),
-      eb.ref("ul.name").as("lta_name"),
-      eb.ref("bo.name").as("org_name"),
+    .select([
+      "bo.is_abods_global_viewer as is_superuser",
+      "ul.name as lta_name",
+      "bo.name as org_name",
     ])
     .execute();
 };
