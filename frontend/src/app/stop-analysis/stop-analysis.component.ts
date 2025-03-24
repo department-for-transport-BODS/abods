@@ -90,6 +90,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   redThreshold = 0.6;
   greenThreshold = 0.8;
   boundWidth = 1;
+  adminAreaHiddenZoomLevel = 12;
   boundingBoxTooBig = true;
   pointColours: CirclePaint["circle-color"] = [
     "case",
@@ -430,26 +431,35 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.mapboxStyle = style;
   }
 
-  onClusterClick(e: MapMouseEvent): void {
+  onLayerClick(
+    e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ): void {
     if (!this.map) return;
     const features = this.map.queryRenderedFeatures(e.point, {
       layers: ["clusters"],
     });
-    if (features.length === 0) return;
-    const feature = features[0].geometry;
-    if (feature.type !== "Point" || !features[0].properties) return;
-    const clusterId = features[0].properties.cluster_id as number;
-    const coordinates = feature.coordinates as [number, number];
-    (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
-      clusterId,
-      (err, zoom) => {
-        if (err || !this.map) return;
-        this.map.easeTo({
-          center: coordinates,
-          zoom: zoom,
-        });
-      },
-    );
+    if (features.length !== 0) {
+      const feature = features[0].geometry;
+      if (feature.type !== "Point" || !features[0].properties) return;
+      const clusterId = features[0].properties.cluster_id as number;
+      const coordinates = feature.coordinates as [number, number];
+      (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
+        clusterId,
+        (err, zoom) => {
+          if (err || !this.map) return;
+          this.map.easeTo({
+            center: coordinates,
+            zoom: zoom,
+          });
+        },
+      );
+      return;
+    } else {
+      if (this.zoomLevel >= this.adminAreaHiddenZoomLevel) return;
+      const adminArea = e.features?.[0] as Feature;
+      if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
+      this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
+    }
   }
 
   onBoundaryHover(
@@ -477,14 +487,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     );
     this.hoveredAdminArea = undefined;
     this.labelPosition = undefined;
-  }
-
-  onAdminAreaClick(
-    event: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
-  ) {
-    if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
-    const adminArea = event.features?.[0] as Feature;
-    this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
   }
 
   recalculateLabelPosition() {

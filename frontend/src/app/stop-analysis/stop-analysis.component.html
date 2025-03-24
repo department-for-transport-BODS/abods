@@ -181,7 +181,7 @@
             ],
             'circle-stroke-color': '#ffffff'
           }"
-          (layerClick)="onClusterClick($event)"
+          (layerClick)="onLayerClick($event)"
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
@@ -272,13 +272,13 @@
                 0.5,
                 0.3
               ],
-              12,
+              adminAreaHiddenZoomLevel,
               0
             ]
           }"
           (layerMouseMove)="onBoundaryHover($event)"
           (layerMouseLeave)="onClearBoundaryHover()"
-          (layerClick)="onAdminAreaClick($event)"
+          (layerClick)="onLayerClick($event)"
         />
         <mgl-popup
           *ngIf="hoveredAdminArea && labelPosition && zoomLevel < 11"
