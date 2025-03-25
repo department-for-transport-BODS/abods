@@ -190,8 +190,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     tap((options) => {
       const available = options.map((o) => o.value);
       const newIds = this.operatorIds.filter((s) => available.includes(s));
-      console.log(available);
-      console.log(newIds);
       if (this.operatorIds.length !== newIds.length) {
         this.onOperatorsChanged(newIds);
       }
