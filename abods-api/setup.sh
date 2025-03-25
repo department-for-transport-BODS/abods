@@ -17,6 +17,3 @@ echo 'DB_NAME=abods' >> .env
 echo 'TZ=UTC' >> .env
 echo 'LOG_LEVEL=debug' >> .env
 echo "DATABASE_URL=postgresql://abods_proxy_rw:${DB_PASSWORD//@/%40}@localhost:15432/abods?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true" >> .env
-echo 'FLAG_DATA_MONITORING=true' >> .env
-echo 'FLAG_SERVICE_MONITORING=true' >> .env
-echo 'FLAG_STOP_ANALYSIS=true' >> .env
