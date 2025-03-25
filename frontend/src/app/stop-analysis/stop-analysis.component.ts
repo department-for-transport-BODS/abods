@@ -480,33 +480,42 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
   ): void {
     if (!this.map) return;
-    const features = this.boundingBoxTooBig
-      ? []
-      : this.map.queryRenderedFeatures(e.point, {
-          layers: ["clusters"],
-        });
-    if (features.length !== 0) {
-      const feature = features[0].geometry;
-      if (feature.type !== "Point" || !features[0].properties) return;
-      const clusterId = features[0].properties.cluster_id as number;
-      const coordinates = feature.coordinates as [number, number];
-      (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
-          if (err || !this.map) return;
-          this.map.easeTo({
-            center: coordinates,
-            zoom: zoom,
-          });
-        },
-      );
+    if (this.boundingBoxTooBig) {
+      // We aren't displaying clusters here, so the click must be an admin area
+      this.adminAreaClicked(e);
       return;
-    } else {
-      if (this.zoomLevel >= this.adminAreaHiddenZoomLevel) return;
-      const adminArea = e.features?.[0] as Feature;
-      if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
-      this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
     }
+    const features = this.map.queryRenderedFeatures(e.point, {
+      layers: ["clusters"],
+    });
+    if (features.length === 0) {
+      // There were no clusters at the point clicked, so assume a click on admin area
+      this.adminAreaClicked(e);
+      return;
+    }
+    const feature = features[0].geometry;
+    if (feature.type !== "Point" || !features[0].properties) return;
+    const clusterId = features[0].properties.cluster_id as number;
+    const coordinates = feature.coordinates as [number, number];
+    (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
+      clusterId,
+      (err, zoom) => {
+        if (err || !this.map) return;
+        this.map.easeTo({
+          center: coordinates,
+          zoom: zoom,
+        });
+      },
+    );
+  }
+
+  adminAreaClicked(
+    e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ) {
+    if (this.zoomLevel >= this.adminAreaHiddenZoomLevel) return;
+    const adminArea = e.features?.[0] as Feature;
+    if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
+    this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
   }
 
   onBoundaryHover(
