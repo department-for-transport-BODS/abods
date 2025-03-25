@@ -293,6 +293,12 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
+export enum FeatureFlag {
+  DataMonitoring = 'DataMonitoring',
+  ServiceMonitoring = 'ServiceMonitoring',
+  StopAnalysis = 'StopAnalysis'
+}
+
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -495,6 +501,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  flags: Array<FeatureFlag>;
   serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1205,6 +1212,7 @@ export type ResolversTypes = ResolversObject<{
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
   EventType: ResolverTypeWrapper<Partial<EventType>>;
+  FeatureFlag: ResolverTypeWrapper<Partial<FeatureFlag>>;
   FeedMonitoringType: ResolverTypeWrapper<Partial<FeedMonitoringType>>;
   Float: ResolverTypeWrapper<Partial<Scalars['Float']['output']>>;
   FrequentServiceInfoFilterType: ResolverTypeWrapper<Partial<FrequentServiceInfoFilterType>>;
@@ -1670,6 +1678,7 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
   serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

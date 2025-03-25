@@ -1,6 +1,7 @@
 import {
   AlertType,
   AlertTypeEnum,
+  FeatureFlag,
   LoginInfo,
   LoginResponse,
   Maybe,
@@ -98,6 +99,18 @@ export const getUser: QueryResolvers["user"] = async (
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
     );
+
+    const flags: FeatureFlag[] = [];
+    if (process.env.FLAG_DATA_MONITORING === "true") {
+      flags.push(FeatureFlag.DataMonitoring);
+    }
+    if (process.env.FLAG_SERVICE_MONITORING === "true") {
+      flags.push(FeatureFlag.ServiceMonitoring);
+    }
+    if (process.env.FLAG_STOP_ANALYSIS === "true") {
+      flags.push(FeatureFlag.StopAnalysis);
+    }
+
     return {
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
@@ -105,6 +118,7 @@ export const getUser: QueryResolvers["user"] = async (
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
+      flags: flags,
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");

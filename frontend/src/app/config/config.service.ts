@@ -65,34 +65,6 @@ export interface FreshdeskFolderConfig {
   [key: string]: string;
 }
 
-const environments = [
-  "local",
-  "sandbox",
-  "dev",
-  "test",
-  "uat",
-  "prod",
-] as const;
-export type Environment = (typeof environments)[number];
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function maxEnvironment(current: string, max: Environment): boolean {
-  const currentIndex = environments.indexOf(current as Environment);
-  const maxIndex = environments.indexOf(max);
-  if (currentIndex < 0 || maxIndex < 0) return false;
-
-  return maxIndex >= currentIndex;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function flags(currentEnv: string) {
-  // TODO: get from API
-  return {
-    dataMonitoring: maxEnvironment(currentEnv, "test"),
-    serviceMonitoring: maxEnvironment(currentEnv, "test"),
-  } as const;
-}
-
 export interface FreshdeskConfig {
   /**
    * Endpoint to freshdesk proxy API
@@ -111,10 +83,6 @@ export class ConfigService {
   private config?: ConfigObject;
 
   constructor(private http: HttpClient) {}
-
-  flag(key: keyof ReturnType<typeof flags>): boolean {
-    return flags(this.envName)[key];
-  }
 
   get apiUrl(): string {
     return this.loadStringValue("apiUrl", "");

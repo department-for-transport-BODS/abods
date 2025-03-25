@@ -162,6 +162,9 @@ Resources:
           QUICKSIGHT_OPERATOR_DASHBOARD_ID: !Ref QuickSightOperatorDashboardId
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
+          FLAG_DATA_MONITORING: !If [IsNotProd, "true", "false"]
+          FLAG_SERVICE_MONITORING: !If [IsNotProd, "true", "false"]
+          FLAG_STOP_ANALYSIS: !If [IsNotProd, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
