@@ -464,6 +464,7 @@ export enum LineDirection {
 
 export type LineType = {
   __typename?: 'LineType';
+  adminAreaIds: Array<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   number: Scalars['String']['output'];
@@ -1452,7 +1453,7 @@ export type OperatorLinesQueryVariables = Exact<{
 }>;
 
 
-export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
+export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string, adminAreaIds: Array<number> }> };
 
 export type StopAnalysisQueryVariables = Exact<{
   adminAreaIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -2763,6 +2764,7 @@ export const OperatorLinesDocument = gql`
     id
     name
     number
+    adminAreaIds
   }
 }
     `;

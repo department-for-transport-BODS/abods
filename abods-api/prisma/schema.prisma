@@ -567,6 +567,7 @@ view expected_services {
   service_name                 String
   date_of_journey              DateTime
   operator_noc                 String
+  admin_area_id                Int[]
   expected_operator            expected_operators  @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys            expected_journeys[]
 

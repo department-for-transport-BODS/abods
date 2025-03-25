@@ -330,6 +330,7 @@ type LineType {
   id: String!
   name: String!
   number: String!
+  adminAreaIds: [Int!]!
 }
 
 type ServicePatternType {
