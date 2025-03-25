@@ -51,6 +51,7 @@
       </div>
       <div class="toggles">
         <app-segmented-toggle
+          legend="Show performance using data from"
           [(ngModel)]="matchType"
           (ngModelChange)="onFilterChanged()"
         >
@@ -68,6 +69,7 @@
           />
         </app-segmented-toggle>
         <app-segmented-toggle
+          legend="Show performance using data from"
           [(ngModel)]="stopType"
           (ngModelChange)="onStopTypeChanged()"
         >

@@ -26,7 +26,10 @@
   </div>
   <div class="on-time__timing-toggle">
     <div class="on-time__timing-toggle-row">
-      <app-segmented-toggle [(ngModel)]="matchType">
+      <app-segmented-toggle
+        legend="Show performance using data from"
+        [(ngModel)]="matchType"
+      >
         <app-segmented-toggle-item
           name="match-type"
           identifier="estimated"

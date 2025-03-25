@@ -39,6 +39,7 @@
               This will not change performance data.
             </p>
             <app-segmented-toggle
+              legend="Other journeys for the service are"
               [(ngModel)]="vehicleRef"
               (ngModelChange)="onVehicleChange()"
             >
@@ -61,6 +62,7 @@
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-segmented-toggle
+            legend="Show performance using data from"
             [(ngModel)]="matchType"
             (ngModelChange)="onMatchTypeChange()"
           >
@@ -78,6 +80,7 @@
             ></app-segmented-toggle-item>
           </app-segmented-toggle>
           <app-segmented-toggle
+            legend="Show performance using data from"
             [(ngModel)]="timingPointsOption"
             (ngModelChange)="onTimingPointsToggleChange()"
           >

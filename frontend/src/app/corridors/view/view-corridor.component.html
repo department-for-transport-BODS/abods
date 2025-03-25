@@ -16,6 +16,7 @@
       <div class="corridor__date-wrapper">
         <app-date-range [formControl]="dateRange"></app-date-range>
         <app-segmented-toggle
+          legend="Show performance using data from"
           [(ngModel)]="matchTypeToggle"
           (ngModelChange)="onMatchTypeToggleChange()"
         >
