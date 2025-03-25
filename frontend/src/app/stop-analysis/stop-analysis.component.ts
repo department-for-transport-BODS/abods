@@ -287,9 +287,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     const dayOfWeek = params.get("dayOfWeek");
     const stopType = params.get("stopType");
     if (from) this.from = DateTime.fromISO(from);
-    // The setter in the nested component is not triggered normally, but the setTimeout fixes it.
-    // It must need to do another round of change detection or something like that
-    if (to) setTimeout(() => (this.to = DateTime.fromISO(to)), 0);
+    if (to) this.to = DateTime.fromISO(to);
     if (stopType) this.stopType = stopType;
     if (matchType) this.matchType = matchType as MatchType;
     if (startTime) this.refinedFilters.startTime = startTime;
