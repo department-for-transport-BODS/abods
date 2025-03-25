@@ -9,7 +9,6 @@ import {
 import { DateTime } from "luxon";
 import { FormControl } from "@angular/forms";
 import { DateRangeService } from "../../services/date-range.service";
-import { ComponentChanges } from "../../../vehicle-journeys/vehicle-journeys-view/journey-map/journey-map.component";
 
 @Component({
   selector: "app-date-range-picker",
@@ -31,27 +30,17 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
     { nonNullable: true },
   );
 
-  ngOnChanges(changes: ComponentChanges<DateRangePickerComponent>) {
-    if (changes.from) {
-      this.setDateRangeValue(changes.from.currentValue, this.to);
-    }
-
-    if (changes.to) {
-      this.setDateRangeValue(this.from, changes.to.currentValue);
-    }
+  ngOnChanges() {
+    this.dateRange.setValue({
+      from: this.from,
+      to: this.to,
+      preset: this.getPreset(this.from, this.to),
+    });
   }
 
   ngOnInit(): void {
     this.dateRange.valueChanges.subscribe(({ from, to }) => {
       this.valueChanged.emit({ from, to });
-    });
-  }
-
-  setDateRangeValue(from: DateTime, to: DateTime): void {
-    this.dateRange.setValue({
-      from: from,
-      to: to,
-      preset: this.getPreset(this.from, this.to),
     });
   }
 
