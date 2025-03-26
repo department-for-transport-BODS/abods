@@ -27,9 +27,6 @@ export class NavComponent implements OnInit {
         this.hasFlag(info, FeatureFlag.ServiceMonitoring),
     ),
   );
-  canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.DataMonitoring)),
-  );
   canViewStopAnalysis = this.authUserService.authenticatedUser$.pipe(
     map((info) => this.hasFlag(info, FeatureFlag.StopAnalysis)),
   );

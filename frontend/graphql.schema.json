@@ -2357,12 +2357,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "DataMonitoring",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ServiceMonitoring",
             "description": null,
             "isDeprecated": false,
