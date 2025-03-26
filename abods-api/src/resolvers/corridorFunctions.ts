@@ -1,23 +1,17 @@
-import { Prisma, PrismaClient, Timetable } from "@prisma/client";
+import { Prisma, Timetable } from "@prisma/client";
 import {
-  CorridorTransitServiceStatsType,
   CorridorTransitStatsOption,
-  CorridorResultsType,
+  CorridorTransitServiceStatsType,
   deleteCorridorDb,
   deleteCorridorStops,
   distinctRoutes,
-  getCorridor,
-  getCorridorList,
-  getStopDepartureTime,
   getOrgAdminAreas,
+  getStopDepartureTime,
   isCorridorMappedToUserOrg,
-  returnCorridor,
-  returnCorridorType,
   updateCorridorDb,
 } from "../lib/corridor.js";
 import {
   CorridorGranularity,
-  CorridorTransitTimeStatsType,
   CorridorNamespaceResolvers,
   CorridorStatsDayOfWeekType,
   CorridorStatsHistogramType,
@@ -27,6 +21,7 @@ import {
   CorridorStatsType,
   CorridorStatsTypeResolvers,
   CorridorSummaryStatsType,
+  CorridorTransitTimeStatsType,
   CorridorType,
   MatchType,
   Maybe,
@@ -45,6 +40,71 @@ import { getPercentile } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs from "dayjs";
+import { Kysely, SelectQueryBuilder } from "kysely";
+import { SessionUser } from "../types/extra.js";
+import { corridor, DB } from "../kysely.js";
+
+type baseQueryType = SelectQueryBuilder<DB & { c: corridor }, "c", object>;
+const corridorsQuery = async (
+  db: Kysely<DB>,
+  user: SessionUser,
+  filter?: (q: baseQueryType) => baseQueryType,
+) => {
+  let baseQuery: baseQueryType = db.selectFrom("corridor as c");
+  if (filter) {
+    baseQuery = filter(baseQuery);
+  }
+  const results = await baseQuery
+    .where("c.organisation_id", "in", user.orgIds)
+    .leftJoin("corridor_stops as s", "s.corridor_id", "c.corridor_id")
+    .innerJoin("naptan_stoppoint_latlong as n", "n.id", "s.stop_id")
+    .innerJoin("naptan_locality as l", "l.gazetteer_id", "n.locality_id")
+    .innerJoin("naptan_adminarea as a", "a.id", "l.admin_area_id")
+    .select([
+      "c.corridor_id",
+      "c.corridor_name",
+      "s.stop_id",
+      "n.atco_code",
+      "n.locality_id",
+      "n.latitude",
+      "n.longitude",
+      "n.common_name",
+      "l.name as localityName",
+      "l.admin_area_id as admin_area_id",
+      "a.name as admin_area_name",
+    ])
+    .execute();
+
+  const map: Record<string, CorridorType> = {};
+  for (const row of results) {
+    if (!(row.corridor_id in map)) {
+      map[row.corridor_id] = {
+        id: row.corridor_id,
+        name: row.corridor_name,
+        stops: [],
+      };
+    }
+    if (!row.stop_id) {
+      continue;
+    }
+    map[row.corridor_id].stops.push({
+      stopId: row.stop_id.toString(),
+      sourceId: row.atco_code,
+      stopLocality: {
+        localityAreaId: row.admin_area_id,
+        localityAreaName: row.admin_area_name,
+        localityId: row.locality_id,
+        localityName: row.localityName,
+      },
+      stopLocation: {
+        latitude: Number(row.latitude),
+        longitude: Number(row.longitude),
+      },
+      stopName: row.common_name,
+    });
+  }
+  return Object.values(map);
+};
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -52,13 +112,7 @@ export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   context,
 ): Promise<CorridorType[]> => {
   const user = await requireUserSession(context);
-
-  const results: CorridorResultsType[] = await getCorridorList(
-    context.db,
-    user,
-  );
-
-  return returnCorridorType(results);
+  return await corridorsQuery(context.kysely, user);
 };
 
 export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
@@ -67,12 +121,13 @@ export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
   context,
 ): Promise<Maybe<CorridorType>> => {
   const user = await requireUserSession(context);
-  const corridor: CorridorResultsType | null = await getCorridor(
-    args.corridorId,
-    context.db,
-    user,
+  const corridors = await corridorsQuery(context.kysely, user, (q) =>
+    q.where("c.corridor_id", "=", args.corridorId),
   );
-  return corridor ? returnCorridor(corridor) : null;
+  if (corridors.length === 0) {
+    return null;
+  }
+  return corridors[0];
 };
 
 export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
@@ -87,53 +142,52 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
   }
   const { boundingBox, searchString } = args.inputs;
 
-  const where: Prisma.naptan_stoppoint_latlongWhereInput = {};
-
-  if (searchString) {
-    where.OR = [
-      {
-        atco_code: {
-          contains: searchString,
-        },
-      },
-      {
-        common_name: {
-          contains: searchString,
-          mode: "insensitive",
-        },
-      },
-    ];
-  } else {
-    where.latitude = {
-      gte: boundingBox?.minLatitude ?? 0,
-      lte: boundingBox?.maxLatitude ?? 0,
-    };
-
-    where.longitude = {
-      gte: boundingBox?.minLongitude ?? 0,
-      lte: boundingBox?.maxLongitude ?? 0,
-    };
-  }
-
   const adminAreas = await getOrgAdminAreas(context.kysely, user);
 
-  where.admin_area_id = {
-    in: adminAreas.map((admin) => admin.adminarea_id),
-  };
-
-  const results = await context.db.naptan_stoppoint_latlong.findMany({
-    where: where,
-    include: {
-      locality: true,
-    },
-  });
+  let baseQuery = context.kysely
+    .selectFrom("naptan_stoppoint_latlong as s")
+    .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
+    .where(
+      "l.admin_area_id",
+      "in",
+      adminAreas.map((admin) => admin.adminarea_id.toString()),
+    );
+  if (searchString) {
+    baseQuery = baseQuery.where((eb) =>
+      eb.or([
+        eb("atco_code", "like", `%${searchString}%`),
+        eb(
+          eb.fn<string>("lower", ["common_name"]),
+          "like",
+          `%${searchString.toLowerCase()}%`,
+        ),
+      ]),
+    );
+  } else {
+    baseQuery = baseQuery
+      .where("latitude", ">=", boundingBox?.minLatitude ?? 0)
+      .where("latitude", "<=", boundingBox?.maxLatitude ?? 0)
+      .where("longitude", ">=", boundingBox?.minLongitude ?? 0)
+      .where("longitude", "<=", boundingBox?.maxLongitude ?? 0);
+  }
+  const results = await baseQuery
+    .select([
+      "s.id",
+      "s.common_name",
+      "s.latitude",
+      "s.longitude",
+      "s.admin_area_id",
+      "s.atco_code",
+      "l.name as locality_name",
+    ])
+    .execute();
 
   return results.map((stop) => ({
     stopId: stop.id.toString(),
     stopName: stop.common_name,
     lat: Number(stop.latitude),
     lon: Number(stop.longitude),
-    localityName: stop.locality.name,
+    localityName: stop.locality_name,
     adminAreaId: stop.admin_area_id.toString(),
     sourceId: stop.atco_code,
   }));
@@ -175,19 +229,26 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     });
 
     if (newStopList.length > 0) {
-      const stops = await context.db.naptan_stoppoint_latlong.findMany({
-        where: {
-          atco_code: {
-            in: newStopList,
-          },
-          admin_area_id: {
-            in: adminAreas.map((admin) => admin.adminarea_id),
-          },
-        },
-        include: {
-          locality: true,
-        },
-      });
+      const stops = await context.kysely
+        .selectFrom("naptan_stoppoint_latlong as s")
+        .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
+        .where("s.atco_code", "in", newStopList)
+        .where(
+          "s.admin_area_id",
+          "in",
+          adminAreas.map((admin) => admin.adminarea_id),
+        )
+        .select([
+          "s.admin_area_id",
+          "s.id",
+          "s.common_name",
+          "s.longitude",
+          "s.latitude",
+          "l.name as locality_name",
+          "s.locality_id",
+          "s.atco_code",
+        ])
+        .execute();
 
       return stops.map((stop) => ({
         adminAreaId: stop.admin_area_id.toString(),
@@ -196,7 +257,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
         stopName: stop.common_name,
         lon: Number(stop.longitude),
         lat: Number(stop.latitude),
-        localityName: stop.locality.name,
+        localityName: stop.locality_name,
         localityId: stop.locality_id,
         sourceId: stop.atco_code,
       }));
@@ -213,55 +274,35 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const user = await requireUserSession(context);
   if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
 
-  const corridor = await context.db.corridor.create({
-    data: {
+  const corridor = await context.kysely
+    .insertInto("corridor")
+    .values({
       corridor_name: args.payload.name,
       // Not good. Should be changed later
       // This won't be visible to any other orgs they are assigned to.
       // Visibility will be somewhat random, though consistent because we sort the org numbers
       organisation_id: user.orgIds[0],
       user_id: user.id,
-    },
-    select: {
-      corridor_id: true,
-    },
-  });
+    })
+    .executeTakeFirst();
+  if (!corridor.insertId) {
+    return { success: false };
+  }
 
-  await insertCorridorStops(
-    corridor.corridor_id,
-    args.payload.stopIds.map(String),
-    context.db,
-  );
+  await context.kysely
+    .insertInto("corridor_stops")
+    .values(
+      args.payload.stopIds.map((stop, index) => ({
+        corridor_id: Number(corridor.insertId),
+        corridor_index: index,
+        stop_id: Number(stop),
+      })),
+    )
+    .execute();
 
   return {
     success: true,
   };
-};
-
-const insertCorridorStops = async (
-  corridor_id: number,
-  stopIds: string[],
-  db: PrismaClient,
-) => {
-  const numberStopsList = stopIds.map(Number);
-
-  const records: {
-    corridor_id: number;
-    corridor_index: number;
-    stop_id: number;
-  }[] = [];
-
-  numberStopsList.map((stop, index) => {
-    records.push({
-      corridor_id: Number(corridor_id),
-      corridor_index: index,
-      stop_id: stop,
-    });
-  });
-
-  await db.corridor_stops.createMany({
-    data: records,
-  });
 };
 
 export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
@@ -317,11 +358,16 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
     deleteCorridorStops(args.inputs.id, context.kysely),
   ]);
 
-  await insertCorridorStops(
-    args.inputs.id,
-    args.inputs.stopList.map(String),
-    context.db,
-  );
+  await context.kysely
+    .insertInto("corridor_stops")
+    .values(
+      args.inputs.stopList.map((stop, index) => ({
+        corridor_id: args.inputs.id,
+        corridor_index: index,
+        stop_id: Number(stop),
+      })),
+    )
+    .execute();
 
   return {
     success: true,
@@ -619,7 +665,6 @@ export const getTransitStatsPerService: CorridorStatsTypeResolvers["transitTimeP
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
     const transitStats = new Map<string, CorridorTransitServiceStatsType>();
-    const stats: CorridorStatsPerServiceType[] = [];
     data.corridorTransits.map((transit) => {
       const firstDeparture = transit[0];
 
@@ -650,33 +695,37 @@ export const getTransitStatsPerService: CorridorStatsTypeResolvers["transitTimeP
       transitStats.set(service, transitTime);
     });
 
-    if (transitStats.size > 0) {
-      const services = await context.db.service_details.findMany({
-        where: {
-          noc_and_line_and_servicecode: {
-            in: [...transitStats.keys()],
-          },
-        },
-        include: {
-          operator: true,
-        },
-      });
-
-      transitStats.forEach((transits, key) => {
-        const serviceDetails = services.find(
-          (service) => service.noc_and_line_and_servicecode === key,
-        );
-        stats.push({
-          lineName: serviceDetails?.line_name ?? "",
-          operatorName: serviceDetails?.operator?.name ?? "NA",
-          noc: serviceDetails?.operator_noc,
-          servicePatternName: serviceDetails?.service_name ?? "",
-          recordedTransits: transits.recordedTransits,
-          totalTransitTime: transits.totalTransitTime,
-          scheduledTransits: transits.scheduledTransits,
-        });
-      });
+    if (transitStats.size <= 0) {
+      return [];
     }
+    const services = await context.kysely
+      .selectFrom("service_details as s")
+      .innerJoin("all_operators as o", "o.operatorref", "s.operator_noc")
+      .where("noc_and_line_and_servicecode", "in", [...transitStats.keys()])
+      .select([
+        "s.noc_and_line_and_servicecode",
+        "s.line_name",
+        "s.operator_noc",
+        "s.service_name",
+        "o.name as operator_name",
+      ])
+      .execute();
+
+    const stats: CorridorStatsPerServiceType[] = [];
+    transitStats.forEach((transits, key) => {
+      const serviceDetails = services.find(
+        (service) => service.noc_and_line_and_servicecode === key,
+      );
+      return {
+        lineName: serviceDetails?.line_name ?? "",
+        operatorName: serviceDetails?.operator_name ?? "NA",
+        noc: serviceDetails?.operator_noc,
+        servicePatternName: serviceDetails?.service_name ?? "",
+        recordedTransits: transits.recordedTransits,
+        totalTransitTime: transits.totalTransitTime,
+        scheduledTransits: transits.scheduledTransits,
+      };
+    });
 
     return stats;
   };

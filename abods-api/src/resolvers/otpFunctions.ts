@@ -41,7 +41,6 @@ import {
   getFrequentServiceActualHours,
   getSummaryStopsTotalHours,
 } from "../lib/otp.js";
-import { Prisma } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import {
@@ -333,27 +332,31 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       // start - performance timer
       const startTimer = performance.now();
 
-      const opPerformances: OperatorPerformanceType[] = [];
-
-      const { filters } = args.inputs;
-      const { adminAreaIds } = filters || {};
-
       // get an array of user's org's operator nocs.
-      const operators = await context.db.all_operators.findMany({
-        where: {
-          noc_adminarea:
-            adminAreaIds && adminAreaIds.length > 0
-              ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
-              : Prisma.skip,
-          operatorOrganisations: {
-            some: { organisation_id: { in: user.orgIds } },
-          },
-        },
-        select: {
-          operatorref: true,
-          name: true,
-        },
-      });
+      let operatorQuery = context.kysely
+        .selectFrom("all_operators")
+        .where(
+          "operatorref",
+          "in",
+          getUserOperatorIdsQuery(context.kysely, user),
+        );
+      if (
+        args.inputs.filters.adminAreaIds &&
+        args.inputs.filters.adminAreaIds.length > 0
+      ) {
+        operatorQuery = operatorQuery.where(
+          "operatorref",
+          "in",
+          context.kysely
+            .selectFrom("noc_adminarea")
+            .where(
+              "adminarea_id",
+              "in",
+              args.inputs.filters.adminAreaIds.map(Number),
+            )
+            .select("national_operator_code"),
+        );
+      }
 
       const results = await otpFilters(
         context.kysely
@@ -375,7 +378,11 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           eb.fn.sum<number>("completed").as("completed"),
         ])
         .execute();
+      const operators = await operatorQuery
+        .select(["operatorref", "name"])
+        .execute();
 
+      const opPerformances: OperatorPerformanceType[] = [];
       for (const item of operators.sort((a, b) =>
         (a.name ?? "").localeCompare(b.name ?? "", undefined, {
           numeric: true,
@@ -808,30 +815,21 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       const stopIds = results.map((res) => res.stop_id);
 
-      const stops = await context.db.naptan_stoppoint_latlong.findMany({
-        where: {
-          id: {
-            in: stopIds,
-          },
-        },
-        select: {
-          id: true,
-          longitude: true,
-          latitude: true,
-          atco_code: true,
-          locality: {
-            select: {
-              gazetteer_id: true,
-              name: true,
-              admin_area: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      const stops = await context.kysely
+        .selectFrom("naptan_stoppoint_latlong as s")
+        .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
+        .innerJoin("naptan_adminarea as a", "a.id", "l.admin_area_id")
+        .where("s.id", "in", stopIds)
+        .select([
+          "s.id",
+          "s.longitude",
+          "s.latitude",
+          "s.atco_code",
+          "l.gazetteer_id",
+          "l.name as localityName",
+          "a.name as adminAreaName",
+        ])
+        .execute();
 
       return results.map((res) => {
         // avg delay
@@ -848,9 +846,9 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             stopName: res.common_name ? res.common_name : "",
             stopLocality: {
               localityId: "",
-              localityName: stop?.locality?.name ?? "",
+              localityName: stop?.localityName ?? "",
               localityAreaId: "",
-              localityAreaName: stop?.locality?.admin_area.name ?? "",
+              localityAreaName: stop?.adminAreaName ?? "",
             },
             sourceId: stop?.atco_code ?? "",
             stopLocation: {
