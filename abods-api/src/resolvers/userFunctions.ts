@@ -17,7 +17,7 @@ import logger from "../logger.js";
 import { requireUserSession } from "./helpers.js";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
-import { isLocal } from "../prismaClient.js";
+import { isLocal } from "../dbHelpers.js";
 import { Kysely, sql } from "kysely";
 import { DB } from "../kysely";
 

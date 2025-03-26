@@ -1,4 +1,3 @@
-import { Prisma, Timetable } from "@prisma/client";
 import {
   CorridorTransitStatsOption,
   CorridorTransitServiceStatsType,
@@ -42,7 +41,7 @@ import { listServiceLinks } from "../lib/common.js";
 import dayjs from "dayjs";
 import { Kysely, SelectQueryBuilder } from "kysely";
 import { SessionUser } from "../types/extra.js";
-import { corridor, DB } from "../kysely.js";
+import { corridor, DB, Timetable } from "../kysely.js";
 
 type baseQueryType = SelectQueryBuilder<DB & { c: corridor }, "c", object>;
 const corridorsQuery = async (
@@ -383,16 +382,17 @@ export type TimetableType = Pick<
   Timetable,
   | "stop_id"
   | "stop_index"
-  | "actual_departure_time"
-  | "timestamp_after_estimate"
-  | "expected_departure_time"
   | "operator_noc"
   | "service_code"
   | "line_name"
-  | "date_of_journey"
   | "vehiclejourney_id"
   | "group_id"
->;
+> & {
+  actual_departure_time: Date | null;
+  expected_departure_time: Date | null;
+  timestamp_after_estimate: Date | null;
+  date_of_journey: Date;
+};
 
 export const getStats: CorridorNamespaceResolvers["stats"] = async (
   _,

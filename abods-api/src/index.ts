@@ -9,7 +9,6 @@ import gql from "graphql-tag";
 import { resolve } from "path";
 import resolvers from "./resolvers/index.js";
 import fs from "fs";
-import { createContext } from "./context.js";
 import { RequestContext } from "./types/extra.js";
 import logger from "./logger.js";
 import { getAPITokenHash } from "./lib/apiauth.js";
@@ -17,8 +16,6 @@ import { IncomingHttpHeaders } from "http";
 
 import { DB } from "./kysely.js";
 import { Kysely } from "kysely";
-import { DefaultArgs } from "@prisma/client/runtime/library.js";
-import { Prisma, PrismaClient } from "@prisma/client";
 import { getKyselyClient } from "./kyselyClient.js";
 import datadogMetricsPlugin from "./lib/datadog.js";
 import { datadog } from "datadog-lambda-js";
@@ -27,9 +24,6 @@ import dayjs from "dayjs";
 
 export let kysely: Kysely<DB> | undefined = undefined;
 
-let db:
-  | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
-  | undefined = undefined;
 let startTime = dayjs();
 const apiKeyAuth = await getAPITokenHash();
 
@@ -61,14 +55,11 @@ app.use(
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = dayjs().isAfter(startTime.add(10, "minute"));
-      if (!db || !kysely || retry) {
-        [db, kysely] = await Promise.all([
-          createContext(true),
-          getKyselyClient(),
-        ]);
+      if (!kysely || retry) {
+        [kysely] = await Promise.all([getKyselyClient()]);
         startTime = dayjs();
       }
-      return { req, res, headers, db, apiKeyAuth, kysely };
+      return { req, res, headers, apiKeyAuth, kysely };
     },
   }),
 );

@@ -1,6 +1,6 @@
 import { Kysely, PostgresDialect } from "kysely";
 import { DB } from "./kysely";
-import { getDatabaseUrl, isLocal } from "./prismaClient.js";
+import { getDatabaseUrl, isLocal } from "./dbHelpers.js";
 import logger from "./logger.js";
 import pg from "pg";
 
