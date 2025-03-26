@@ -2363,12 +2363,6 @@
             "deprecationReason": null
           },
           {
-            "name": "ServiceMonitoring",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "StopAnalysis",
             "description": null,
             "isDeprecated": false,
