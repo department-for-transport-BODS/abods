@@ -18,7 +18,7 @@ import { requireUserSession } from "./helpers.js";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
 import { isLocal } from "../prismaClient.js";
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
@@ -40,22 +40,18 @@ export const getUsers: QueryResolvers["users"] = async (
 ): Promise<Maybe<UserType[]>> => {
   const user = await requireUserSession(context);
   try {
-    return await context.db.bods_user
-      .findMany({
-        where: {
-          userOrganisations: {
-            every: {
-              organisation_id: { in: user.orgIds },
-            },
-          },
-        },
-        select: {
-          id: true,
-          username: true,
-          first_name: true,
-          last_name: true,
-        },
-      })
+    return await context.kysely
+      .selectFrom("bods_user")
+      .where(
+        "id",
+        "in",
+        context.kysely
+          .selectFrom("bods_userorganisation")
+          .where("bods_userorganisation.organisation_id", "in", user.orgIds)
+          .select("user_id"),
+      )
+      .select(["id", "username", "first_name", "last_name"])
+      .execute()
       .then((x) =>
         x.map((thisUser) => ({
           id: String(thisUser.id),
@@ -92,18 +88,22 @@ export const getUser: QueryResolvers["user"] = async (
 ): Promise<Maybe<LoginInfo>> => {
   const user = await requireUserSession(context);
   try {
-    const userDetails = await context.db.bods_user.findUniqueOrThrow({
-      where: { id: user.id },
-      select: {
-        userOrganisations: {
-          select: {
-            organisation: { select: { is_abods_global_viewer: true } },
-          },
-        },
-        email: true,
-        account_type: true,
-      },
-    });
+    const userDetails = await context.kysely
+      .selectFrom("bods_user")
+      .where("id", "=", user.id)
+      .select(["email", "account_type"])
+      .select((eb) =>
+        eb
+          .exists(
+            eb
+              .selectFrom("bods_userorganisation as uo")
+              .innerJoin("bods_organisation as o", "o.id", "uo.organisation_id")
+              .where("uo.user_id", "=", user.id)
+              .where("o.is_abods_global_viewer", "=", true),
+          )
+          .as("has_global_viewer_org"),
+      )
+      .executeTakeFirstOrThrow();
 
     const email = userDetails.email.toLowerCase();
 
@@ -113,13 +113,10 @@ export const getUser: QueryResolvers["user"] = async (
       (userDetails.account_type === accountTypes.admin &&
         email.endsWith(dftUserEmailDomain));
 
-    const isAdmin = userDetails.userOrganisations.some(
-      (org) => org.organisation.is_abods_global_viewer === true,
-    );
     return {
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
-      canEditAllAlerts: isAdmin,
+      canEditAllAlerts: Boolean(userDetails.has_global_viewer_org),
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
@@ -140,55 +137,58 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
   const user = await requireUserSession(context);
   try {
     // fetch alerts ONLY if user is creator or recipient
-    const alerts = await context.db.alert.findMany({
-      where: {
-        OR: [
-          {
-            created_by: {
-              equals: user.id,
-            },
-          },
-          {
-            send_to: {
-              equals: user.id,
-            },
-          },
-        ],
-      },
-      include: {
-        created_by_user: true,
-        send_to_user: true,
-      },
-    });
+    const alerts = await context.kysely
+      .selectFrom("Alert as a")
+      .where((eb) =>
+        eb.or([
+          eb("a.created_by", "=", user.id),
+          eb("a.send_to", "=", user.id),
+        ]),
+      )
+      .leftJoin("bods_user as c", "c.id", "a.created_by")
+      .leftJoin("bods_user as s", "s.id", "a.send_to")
+      .select([
+        "a.id",
+        "a.alert",
+        "a.event_hysterisis",
+        "a.event_threshold",
+        "c.id as creator_id",
+        "c.username as creator_username",
+        "c.first_name as creator_first_name",
+        "c.last_name as creator_last_name",
+        "s.id as sender_id",
+        "s.username as sender_username",
+        "s.first_name as sender_first_name",
+        "s.last_name as sender_last_name",
+      ])
+      .execute();
 
-    if (!alerts) {
+    if (alerts.length === 0) {
       throw new Error("Alerts not found");
     }
 
-    return alerts.map((alert) => {
-      return {
-        alertId: alert.id,
-        alertType: alert.alert?.trim() as AlertTypeEnum,
-        eventHysterisis: alert.event_hysterisis?.toNumber(),
-        eventThreshold: alert.event_threshold?.toNumber(),
-        createdBy: alert.created_by_user
-          ? {
-              id: String(alert.created_by_user.id),
-              username: alert.created_by_user.username,
-              firstName: alert.created_by_user.first_name,
-              lastName: alert.created_by_user.last_name,
-            }
-          : null,
-        sendTo: alert.send_to_user
-          ? {
-              id: String(alert.send_to_user.id),
-              username: alert.send_to_user.username,
-              firstName: alert.send_to_user.first_name,
-              lastName: alert.send_to_user.last_name,
-            }
-          : null,
-      };
-    });
+    return alerts.map((alert) => ({
+      alertId: alert.id,
+      alertType: alert.alert?.trim() as AlertTypeEnum,
+      eventHysterisis: Number(alert.event_hysterisis),
+      eventThreshold: Number(alert.event_threshold),
+      createdBy: alert.creator_id
+        ? {
+            id: String(alert.creator_id),
+            username: alert.creator_username!,
+            firstName: alert.creator_first_name!,
+            lastName: alert.creator_last_name!,
+          }
+        : null,
+      sendTo: alert.sender_id
+        ? {
+            id: String(alert.sender_id),
+            username: alert.sender_username!,
+            firstName: alert.sender_first_name!,
+            lastName: alert.sender_last_name!,
+          }
+        : null,
+    }));
   } catch (error) {
     logger.error(error, "An error occurred when getting user alerts");
     return null;
@@ -207,17 +207,32 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const bodsUser = await context.db.bods_user.findFirst({
-      where: {
-        email: { equals: args.username, mode: "insensitive" },
-        is_active: true,
-      },
-      select: {
-        id: true,
-        password: true,
-        userOrganisations: { select: { organisation_id: true } },
-      },
-    });
+    const bodsUser = await context.kysely
+      .selectFrom("bods_user as u")
+      .innerJoin("bods_userorganisation as o", "o.user_id", "u.id")
+      .where(
+        (eb) => eb.fn<string>("lower", ["u.email"]),
+        "=",
+        args.username.toLowerCase(),
+      )
+      .where("u.is_active", "=", true)
+      .groupBy(["u.id", "u.password"])
+      .select([
+        "u.id",
+        "u.password",
+        sql<string>`string_agg(distinct o.organisation_id::text, ',')`.as(
+          "org_ids",
+        ),
+      ])
+      .executeTakeFirst()
+      .then((r) => {
+        if (!r) return r;
+        return {
+          password: r.password,
+          id: r.id,
+          orgIds: r.org_ids.split(",").map(Number),
+        };
+      });
 
     if (!bodsUser) {
       logger.debug("User not found in bods user table");
@@ -236,16 +251,23 @@ export const loginUser: MutationResolvers["login"] = async (
       const tokenRecord = { user_id, token, expires };
       const loginDetails = { user_id, last_login: now };
       await Promise.all([
-        context.db.tokens.upsert({
-          where: { user_id },
-          create: tokenRecord,
-          update: tokenRecord,
-        }),
-        context.db.login_details.upsert({
-          where: { user_id },
-          create: loginDetails,
-          update: loginDetails,
-        }),
+        context.kysely
+          .insertInto("Tokens")
+          .values(tokenRecord)
+          .onConflict((oc) =>
+            oc.doUpdateSet((eb) => ({
+              token: eb.ref("excluded.token"),
+              expires: eb.ref("excluded.expires"),
+            })),
+          ),
+        context.kysely
+          .insertInto("login_details")
+          .values(loginDetails)
+          .onConflict((oc) =>
+            oc.doUpdateSet((eb) => ({
+              last_login: eb.ref("excluded.last_login"),
+            })),
+          ),
       ]);
       const expiryTimestamp = expires.toUTCString();
 
@@ -279,12 +301,10 @@ export const logoutUser: MutationResolvers["logout"] = async (
 ): Promise<boolean> => {
   const user = await requireUserSession(context);
   try {
-    await context.db.tokens.delete({
-      where: {
-        user_id: user.id,
-      },
-    });
-
+    await context.kysely
+      .deleteFrom("Tokens")
+      .where("user_id", "=", user.id)
+      .execute();
     return true;
   } catch (error) {
     logger.error(error, "An error occurred on user log out");
