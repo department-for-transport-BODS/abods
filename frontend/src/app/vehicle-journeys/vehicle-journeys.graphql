@@ -13,6 +13,7 @@ query journey($groupId: String!, $lineId: String!) {
       otp
       directionRef
       incompleteReason
+      setDown
     }
     avls {
       recordedAtTimeUtc

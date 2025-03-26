@@ -738,6 +738,7 @@ type Stop {
   otp: OtpEnum
   directionRef: String!
   incompleteReason: Int!
+  setDown: Boolean!
 }
 
 enum OtpEnum {
