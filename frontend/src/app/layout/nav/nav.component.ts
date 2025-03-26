@@ -30,9 +30,6 @@ export class NavComponent implements OnInit {
   canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
     map((info) => this.hasFlag(info, FeatureFlag.DataMonitoring)),
   );
-  canViewStopAnalysis = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.StopAnalysis)),
-  );
 
   ngOnInit(): void {
     initAll();
