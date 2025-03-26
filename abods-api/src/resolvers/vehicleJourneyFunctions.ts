@@ -9,7 +9,8 @@ import {
 import { requireUserSession } from "./helpers.js";
 import dayjs from "dayjs";
 import { GraphQLError } from "graphql";
-import { PrismaClient } from "@prisma/client";
+import { Kysely } from "kysely";
+import { DB } from "../kysely.js";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -18,72 +19,72 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
 ): Promise<Journey[]> => {
   await requireUserSession(context);
 
-  return context.db.expected_journeys
-    .findMany({
-      where: {
-        noc_and_line_and_servicecode: args.lineId,
-        date_of_journey: userSelectedDateAsUtc(args.dateOfJourney).toDate(),
-      },
-      select: {
-        expected_journey_start: true,
-        group_id: true,
-        journey_pattern_description: true,
-        direction: true,
-        expected_services: {
-          select: {
-            line_name: true,
-            expected_operator: {
-              select: {
-                operator_noc: true,
-                operator_name: true,
-              },
-            },
-          },
-        },
-      },
-    })
+  return await context.kysely
+    .selectFrom("expected_journeys as j")
+    .innerJoin("expected_services as s", (join) =>
+      join
+        .onRef("s.date_of_journey", "=", "j.date_of_journey")
+        .onRef(
+          "s.noc_and_line_and_servicecode",
+          "=",
+          "j.noc_and_line_and_servicecode",
+        ),
+    )
+    .innerJoin("expected_operators as o", (join) =>
+      join
+        .onRef("o.date_of_journey", "=", "s.date_of_journey")
+        .onRef("o.operator_noc", "=", "s.operator_noc"),
+    )
+    .where("j.noc_and_line_and_servicecode", "=", args.lineId)
+    .where(
+      "j.date_of_journey",
+      "=",
+      userSelectedDateAsUtc(args.dateOfJourney).toDate(),
+    )
+    .select([
+      "j.expected_journey_start",
+      "j.group_id",
+      "j.journey_pattern_description",
+      "j.direction",
+      "s.line_name",
+      "s.operator_noc",
+      "o.operator_name",
+    ])
+    .execute()
     .then((j) =>
       j.map((journey) => ({
         groupId: journey.group_id,
         directionRef: journey.direction,
         startTime: getFormattedDate(journey.expected_journey_start),
         serviceName: journey.journey_pattern_description,
-        serviceNumber: journey.expected_services?.line_name ?? "unknown",
-        operatorNoc:
-          journey.expected_services?.expected_operator.operator_noc ??
-          "unknown",
-        operatorName:
-          journey.expected_services?.expected_operator.operator_name ??
-          "unknown",
+        serviceNumber: journey.line_name,
+        operatorNoc: journey.operator_noc,
+        operatorName: journey.operator_name ?? "unknown",
       })),
     );
 };
 
 const getAvlData = (
-  db: PrismaClient,
+  db: Kysely<DB>,
   dateString: string,
   newGroupId: string,
   minRange: dayjs.Dayjs,
   maxRange: dayjs.Dayjs,
 ) =>
-  db.siriVMPositions
-    .findMany({
-      where: {
-        date_of_journey: new Date(dateString),
-        group_id: newGroupId,
-        recorded_at_time: {
-          gte: minRange.toDate(),
-          lte: maxRange.toDate(),
-        },
-      },
-      select: {
-        latitude: true,
-        longitude: true,
-        recorded_at_time: true,
-        vehicle_ref: true,
-        direction_ref: true,
-      },
-    })
+  db
+    .selectFrom("SiriVMPositions")
+    .where("date_of_journey", "=", new Date(dateString))
+    .where("group_id", "=", newGroupId)
+    .where("recorded_at_time", ">=", minRange.toDate())
+    .where("recorded_at_time", "<=", maxRange.toDate())
+    .select([
+      "latitude",
+      "longitude",
+      "recorded_at_time",
+      "vehicle_ref",
+      "direction_ref",
+    ])
+    .execute()
     .then((j) =>
       j.map((s) => ({
         latitude: s.latitude ?? 0,
@@ -111,27 +112,25 @@ export const getJourney: QueryResolvers["journey"] = async (
   );
   const groupIdPrefix = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
 
-  const stops = await context.db.timetable
-    .findMany({
-      where: {
-        date_of_journey: new Date(dateOfJourneyString),
-        group_id: args.groupId,
-      },
-      select: {
-        stop_latitude: true,
-        stop_longitude: true,
-        actual_departure_time: true,
-        expected_departure_time: true,
-        is_timing_point: true,
-        stop_id: true,
-        stop_index: true,
-        common_name: true,
-        otp_state: true,
-        timestamp_after_estimate: true,
-        direction: true,
-        incomplete_reason: true,
-      },
-    })
+  const stops = await context.kysely
+    .selectFrom("Timetable")
+    .where("date_of_journey", "=", new Date(dateOfJourneyString))
+    .where("group_id", "=", args.groupId)
+    .select([
+      "stop_latitude",
+      "stop_longitude",
+      "actual_departure_time",
+      "expected_departure_time",
+      "is_timing_point",
+      "stop_id",
+      "stop_index",
+      "common_name",
+      "otp_state",
+      "timestamp_after_estimate",
+      "direction",
+      "incomplete_reason",
+    ])
+    .execute()
     .then((r) =>
       r
         .map((s) => ({
@@ -185,7 +184,7 @@ export const getJourney: QueryResolvers["journey"] = async (
     // Some of the avl data has the wrong group id when running overnight, so we construct a new one
     const newGroupId = groupIdPrefix + "|" + dateString;
     avlPromises.push(
-      getAvlData(context.db, dateString, newGroupId, minRange, maxRange),
+      getAvlData(context.kysely, dateString, newGroupId, minRange, maxRange),
     );
     currentDay = currentDay.add(1, "day");
   }
