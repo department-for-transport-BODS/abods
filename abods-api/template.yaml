@@ -61,6 +61,8 @@ Resources:
   GraphQlApi:
     Type: AWS::Serverless::Api
     Properties:
+      # checkov:skip=CKV_AWS_76:No need for logging right now, we may want to send them to datadog later though
+      # checkov:skip=CKV_AWS_120:Caching will take some effort to configure, as all GQL requests are POSTs
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api
       StageName: !Ref Environment
       EndpointConfiguration:
@@ -80,6 +82,8 @@ Resources:
   PrivateGraphQlApi:
     Type: AWS::Serverless::Api
     Properties:
+      # checkov:skip=CKV_AWS_76:No need for logging right now, we may want to send them to datadog later though
+      # checkov:skip=CKV_AWS_120:We don't want caching on this internal API as it will only be called from machines
       Name: !Sub ${ProjectName}-${Environment}-graphql-function-api-private
       Description: "Private API to allow BODS to access platform via VPC Endpoint"
       StageName: !Ref Environment
@@ -103,6 +107,8 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
+      # checkov:skip=CKV_AWS_116:Not sure how a DLQ would help
+      # checkov:skip=CKV_AWS_115:Can just use the account level concurrency
       FunctionName: !Sub ${ProjectName}-${Environment}-graphql-function
       Role: !GetAtt GraphQlFunctionExecutionRole.Arn
       CodeUri: .
@@ -183,6 +189,7 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: "-1"
           CidrIp: "0.0.0.0/0"
+          Description: "Allow all egress"
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -259,6 +266,8 @@ Resources:
     Type: AWS::S3::Bucket
     Condition: IsNotLocal
     Properties:
+      # checkov:skip=CKV_AWS_18:Just contains front end resources, so not concerned about access logs
+      # checkov:skip=CKV_AWS_21:No need for versioning, we should re-run CI to recreate anything
       BucketName: !Sub "${ProjectName}-${Environment}-deployment-frontend"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -292,6 +301,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Condition: IsNotLocal
     Properties:
+      # checkov:skip=CKV_AWS_68:We should set up a WAF later
       DistributionConfig:
         Enabled: true
         Comment: !Sub "${ProjectName}-${Environment}-cdn"

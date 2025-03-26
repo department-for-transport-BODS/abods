@@ -2,11 +2,14 @@ name: cleanup branches
 on:
   schedule:
     - cron: "0 0 * * *"
+permissions: read-all
 
 jobs:
   remove-stale-branches:
     name: remove stale branches
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: fpicalausa/remove-stale-branches@v2.2.0
         with:
