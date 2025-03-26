@@ -68,7 +68,22 @@ export const getUsers: QueryResolvers["users"] = async (
     return null;
   }
 };
-// Summary: fetch a single user by id
+
+const getFeatureFlags = () => {
+  const flags: FeatureFlag[] = [];
+  const flagPrefix = "ABODS_FLAG_";
+  for (const key of Object.keys(FeatureFlag)) {
+    const envVarName = flagPrefix + key;
+    const flag = FeatureFlag[key as FeatureFlag];
+    if (!isLocal()) {
+      if (!(envVarName in process.env)) continue;
+      if (process.env[envVarName] !== "true") continue;
+    }
+    flags.push(flag);
+  }
+  return flags;
+};
+
 export const getUser: QueryResolvers["user"] = async (
   _,
   __,
@@ -100,21 +115,6 @@ export const getUser: QueryResolvers["user"] = async (
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
     );
-
-    const flags: FeatureFlag[] = [];
-    const addFlag = (env_var: string, flag: FeatureFlag) => {
-      if (isLocal()) {
-        flags.push(flag);
-      }
-      if (env_var in process.env && process.env[env_var] === "true") {
-        flags.push(flag);
-      }
-    };
-
-    addFlag("FLAG_DATA_MONITORING", FeatureFlag.DataMonitoring);
-    addFlag("FLAG_SERVICE_MONITORING", FeatureFlag.ServiceMonitoring);
-    addFlag("FLAG_STOP_ANALYSIS", FeatureFlag.StopAnalysis);
-
     return {
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
@@ -122,7 +122,7 @@ export const getUser: QueryResolvers["user"] = async (
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
-      flags: flags,
+      flags: getFeatureFlags(),
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
