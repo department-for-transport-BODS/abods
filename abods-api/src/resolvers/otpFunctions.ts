@@ -116,6 +116,11 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
       where: {
         noc_and_line_and_servicecode: args.serviceId,
       },
+      select: {
+        operator_noc: true,
+        line_name: true,
+        service_name: true,
+      },
     });
 
     if (!service) {
@@ -786,6 +791,10 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
             ),
           },
         },
+        select: {
+          noc_and_line_and_servicecode: true,
+          service_name: true,
+        },
       });
 
       return performanceMetrics.map((stats) => ({
@@ -977,6 +986,10 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               noc_and_line_and_servicecode: {
                 in: noc_and_lines,
               },
+            },
+            select: {
+              service_name: true,
+              noc_and_line_and_servicecode: true,
             },
           });
 
