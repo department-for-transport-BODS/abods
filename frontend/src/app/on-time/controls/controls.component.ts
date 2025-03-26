@@ -86,6 +86,10 @@ export class ControlsComponent
       .catch(console.log);
   }
 
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    this.matchType = matchTypeValue;
+  }
+
   /** @deprecated this will be removed in ABOD-350 */
   get filters(): PerformanceFiltersInputType {
     return this.filtersSubject.value;
