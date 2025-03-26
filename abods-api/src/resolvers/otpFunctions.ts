@@ -67,13 +67,9 @@ export const getOperatorList: QueryResolvers["operators"] = async (
 ): Promise<OperatorType[]> => {
   const user = await requireUserSession(context);
 
-  let query = context.kysely
+  let query = context.db
     .selectFrom("service_details as s")
-    .where(
-      "s.operator_noc",
-      "in",
-      getUserOperatorIdsQuery(context.kysely, user),
-    )
+    .where("s.operator_noc", "in", getUserOperatorIdsQuery(context.db, user))
     .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc")
     .innerJoin(
       "noc_adminarea as n",
@@ -111,9 +107,9 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
 ): Promise<Maybe<ServiceInfoType>> => {
   const user = await requireUserSession(context);
   try {
-    const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+    const userOperatorIds = await getUserOperatorIds(user, context.db);
 
-    const service = await context.kysely
+    const service = await context.db
       .selectFrom("expected_services")
       .where("noc_and_line_and_servicecode", "=", args.serviceId)
       .select(["operator_noc", "line_name", "service_name"])
@@ -145,9 +141,9 @@ export const getLines: QueryResolvers["lines"] = async (
 
   if (args.operatorIds.length === 0) return [];
 
-  let query = context.kysely
+  let query = context.db
     .selectFrom("expected_services")
-    .where("operator_noc", "in", getUserOperatorIdsQuery(context.kysely, user))
+    .where("operator_noc", "in", getUserOperatorIdsQuery(context.db, user))
     .where("operator_noc", "in", args.operatorIds);
 
   const inputDate = userSelectedDateAsUtc(args.inputDate).toDate();
@@ -193,7 +189,7 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
 ): Promise<ServicePatternType[]> => {
   await requireUserSession(context);
 
-  const routesQueryResults = await context.kysely
+  const routesQueryResults = await context.db
     .selectFrom("distinct_routes as d")
     .innerJoin("servicepattern_route as s", "d.id", "s.distinct_route_id")
     .select(["d.id", "d.route"])
@@ -203,7 +199,7 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     stopIds: n.route.split(","),
   }));
   const allStopIds = [...new Set(routes.flatMap((n) => n.stopIds))];
-  const stopQueryResults = await context.kysely
+  const stopQueryResults = await context.db
     .selectFrom("naptan_stoppoint_latlong")
     .where("atco_code", "in", allStopIds)
     .where("atco_code", "is not", null)
@@ -225,7 +221,7 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     const serviceLinks = await getOtpServiceLinks(
       stops,
       route.stopIds,
-      context.kysely,
+      context.db,
     );
     result.push({
       stops,
@@ -247,7 +243,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       const { lineIds, onTimeMaxMinutes, onTimeMinMinutes } = filters || {};
 
       if (onTimeMinMinutes || onTimeMaxMinutes) {
-        return compareThresholds(args.inputs, context.kysely, user);
+        return compareThresholds(args.inputs, context.db, user);
       }
       const inputs = {
         ...args.inputs,
@@ -257,7 +253,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         },
       };
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom(
             lineIds
               ? "timetable_summary_service_tz"
@@ -266,7 +262,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         inputs,
       )
@@ -339,13 +335,9 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       const startTimer = performance.now();
 
       // get an array of user's org's operator nocs.
-      let operatorQuery = context.kysely
+      let operatorQuery = context.db
         .selectFrom("all_operators")
-        .where(
-          "operatorref",
-          "in",
-          getUserOperatorIdsQuery(context.kysely, user),
-        );
+        .where("operatorref", "in", getUserOperatorIdsQuery(context.db, user));
       if (
         args.inputs.filters.adminAreaIds &&
         args.inputs.filters.adminAreaIds.length > 0
@@ -353,7 +345,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         operatorQuery = operatorQuery.where(
           "operatorref",
           "in",
-          context.kysely
+          context.db
             .selectFrom("noc_adminarea")
             .where(
               "adminarea_id",
@@ -365,12 +357,12 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       }
 
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom("timetable_summary_operator_t")
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -446,7 +438,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
       }
       logger.debug({ operatorIds }, "getPunctualityDayOfWeek");
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom(
             lineIds
               ? "timetable_summary_service_tz"
@@ -455,7 +447,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -561,7 +553,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
         return null;
       }
       logger.debug({ operatorIds }, "getDelayFrequency");
-      return getStopsDistribution(args.inputs, context.kysely, user);
+      return getStopsDistribution(args.inputs, context.db, user);
     } catch (error) {
       logger.error(
         error,
@@ -591,7 +583,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
       }
       logger.debug({ operatorIds }, "getPunctualityTimeOfDay");
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom(
             lineIds
               ? "timetable_summary_service_tz"
@@ -600,7 +592,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -643,14 +635,14 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
         return null;
       }
       // get an array of user's org's operator nocs.
-      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+      const userOperatorIds = await getUserOperatorIds(user, context.db);
       const operator_noc_to_filter = operatorIds[0];
 
       if (!userOperatorIds.includes(operator_noc_to_filter)) {
         return null;
       }
       const query = otpFilters(
-        context.kysely
+        context.db
           .selectFrom(
             lineIds
               ? "timetable_summary_service_tz"
@@ -659,7 +651,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       );
@@ -711,14 +703,14 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
 
       const timingPointsOnly = filters.timingPointsOnly;
 
-      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+      const userOperatorIds = await getUserOperatorIds(user, context.db);
       const operatorNocs = userOperatorIds.filter(
         (n) => n && (!filters.operatorIds || filters.operatorIds.includes(n)),
       );
 
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
 
-      let performanceMetricsQuery = context.kysely
+      let performanceMetricsQuery = context.db
         .selectFrom("performance_statistics")
         .selectAll()
         .where("operator_noc", "in", operatorNocs)
@@ -745,7 +737,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
       const codes = performanceMetrics.map(
         (stat) => stat.noc_and_line_and_servicecode,
       );
-      const services = await context.kysely
+      const services = await context.db
         .selectFrom("expected_services")
         .where("noc_and_line_and_servicecode", "in", codes)
         .select(["noc_and_line_and_servicecode", "service_name"])
@@ -798,12 +790,12 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
       logger.debug({ operatorIds }, "getStopPerformance");
       // get a sum per day
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom("timetable_summary_stops_tz")
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -821,7 +813,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       const stopIds = results.map((res) => res.stop_id);
 
-      const stops = await context.kysely
+      const stops = await context.db
         .selectFrom("naptan_stoppoint_latlong as s")
         .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
         .innerJoin("naptan_adminarea as a", "a.id", "l.admin_area_id")
@@ -892,7 +884,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         return [];
       }
       // get an array of user's org's operator nocs.
-      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+      const userOperatorIds = await getUserOperatorIds(user, context.db);
       const operator_noc_to_filter = operatorIds[0];
 
       if (!userOperatorIds.includes(operator_noc_to_filter)) {
@@ -900,12 +892,12 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
       }
       // get a sum per day
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom("timetable_summary_service_tz")
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -925,7 +917,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         (result) => result.noc_and_line_and_servicecode,
       );
 
-      const services = await context.kysely
+      const services = await context.db
         .selectFrom("expected_services")
         .where("noc_and_line_and_servicecode", "in", noc_and_lines)
         .select(["noc_and_line_and_servicecode", "service_name"])
@@ -969,13 +961,13 @@ export const getFrequentServices: HeadwayMetricsTypeResolvers["frequentServices"
   async (_, args, context): Promise<Maybe<FrequentServiceType[]>> => {
     const user = await requireUserSession(context);
     try {
-      const userOperatorIds = await getUserOperatorIds(user, context.kysely);
+      const userOperatorIds = await getUserOperatorIds(user, context.db);
       if (!userOperatorIds.includes(args.operatorId)) {
         return [];
       }
       const end = userSelectedDateAsUtc(args.toTimestamp).toDate();
       const start = userSelectedDateAsUtc(args.fromTimestamp).toDate();
-      const results = await context.kysely
+      const results = await context.db
         .selectFrom("timetable_frequent_summary_services")
         .where("operator_noc", "=", args.operatorId)
         .where("date_of_journey", ">=", start)
@@ -998,8 +990,8 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
     const user = await requireUserSession(context);
     try {
       const [totalHours, actualHours] = await Promise.all([
-        getSummaryStopsTotalHours(context.kysely, args.inputs, user),
-        getFrequentServiceActualHours(context.kysely, args.inputs, user),
+        getSummaryStopsTotalHours(context.db, args.inputs, user),
+        getFrequentServiceActualHours(context.db, args.inputs, user),
       ]);
 
       return {
@@ -1020,12 +1012,12 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
     const user = await requireUserSession(context);
     try {
       const results = await otpFilters(
-        context.kysely
+        context.db
           .selectFrom("timetable_frequent_summary_services")
           .where(
             "operator_noc",
             "in",
-            getUserOperatorIdsQuery(context.kysely, user),
+            getUserOperatorIdsQuery(context.db, user),
           ),
         args.inputs,
       )
@@ -1059,13 +1051,9 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
 export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSeries"] =
   async (_, args, context): Promise<Maybe<HeadwayTimeSeriesType[]>> => {
     const user = await requireUserSession(context);
-    const baseQuery = context.kysely
+    const baseQuery = context.db
       .selectFrom("timetable_frequent_summary_services")
-      .where(
-        "operator_noc",
-        "in",
-        getUserOperatorIdsQuery(context.kysely, user),
-      );
+      .where("operator_noc", "in", getUserOperatorIdsQuery(context.db, user));
     try {
       const results = await otpFilters(baseQuery, args.inputs)
         .where("headway_stops_count", ">", "0")
@@ -1146,12 +1134,12 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
 ): Promise<Maybe<AdminAreasType[]>> => {
   const user = await requireUserSession(context);
   try {
-    const adminAreaRecords = await context.kysely
+    const adminAreaRecords = await context.db
       .selectFrom("noc_adminarea")
       .where(
         "national_operator_code",
         "in",
-        getUserOperatorIdsQuery(context.kysely, user),
+        getUserOperatorIdsQuery(context.db, user),
       )
       .select("adminarea_id")
       .execute();
@@ -1160,7 +1148,7 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
       const adminareaIds = adminAreaRecords.map((a) =>
         a.adminarea_id.toString(),
       );
-      const adminAreas = await context.kysely
+      const adminAreas = await context.db
         .selectFrom("naptan_adminarea_with_shape")
         .where("id", "in", adminareaIds)
         .select(["id", "name", "st_asgeojson"])

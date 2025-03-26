@@ -12,7 +12,7 @@ export const getApiInfo: QueryResolvers["apiInfo"] = async (
   __,
   context,
 ): Promise<Maybe<ApiInfoType>> => {
-  const apiInfo = await context.kysely
+  const apiInfo = await context.db
     .selectFrom("ApiInfo")
     .select(["build_number", "version"])
     .executeTakeFirst();

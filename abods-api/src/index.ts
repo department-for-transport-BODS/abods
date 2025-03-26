@@ -22,7 +22,7 @@ import { datadog } from "datadog-lambda-js";
 import { apolloLogger } from "./apolloLogger.js";
 import dayjs from "dayjs";
 
-export let kysely: Kysely<DB> | undefined = undefined;
+export let db: Kysely<DB> | undefined = undefined;
 
 let startTime = dayjs();
 const apiKeyAuth = await getAPITokenHash();
@@ -55,11 +55,11 @@ app.use(
       const headers: IncomingHttpHeaders = event.headers;
       logger.debug("Server started and within context block");
       const retry = dayjs().isAfter(startTime.add(10, "minute"));
-      if (!kysely || retry) {
-        [kysely] = await Promise.all([getKyselyClient()]);
+      if (!db || retry) {
+        db = await getKyselyClient();
         startTime = dayjs();
       }
-      return { req, res, headers, apiKeyAuth, kysely };
+      return { req, res, headers, apiKeyAuth, db };
     },
   }),
 );

@@ -116,7 +116,7 @@ export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   context,
 ): Promise<CorridorType[]> => {
   const user = await requireUserSession(context);
-  return await corridorsQuery(context.kysely, user);
+  return await corridorsQuery(context.db, user);
 };
 
 export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
@@ -125,7 +125,7 @@ export const getCorridors: CorridorNamespaceResolvers["getCorridor"] = async (
   context,
 ): Promise<Maybe<CorridorType>> => {
   const user = await requireUserSession(context);
-  const corridors = await corridorsQuery(context.kysely, user, (q) =>
+  const corridors = await corridorsQuery(context.db, user, (q) =>
     q.where("c.corridor_id", "=", args.corridorId.toString()),
   );
   if (corridors.length === 0) {
@@ -146,10 +146,10 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
   }
   const { boundingBox, searchString } = args.inputs;
 
-  let baseQuery = context.kysely
+  let baseQuery = context.db
     .selectFrom("naptan_stoppoint_latlong as s")
     .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
-    .where("l.admin_area_id", "in", getOrgAdminAreas(context.kysely, user));
+    .where("l.admin_area_id", "in", getOrgAdminAreas(context.db, user));
   if (searchString) {
     baseQuery = baseQuery.where((eb) =>
       eb.or([
@@ -202,7 +202,7 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     }
     stopList.push(""); // Push blank to add comma at the end
     const stopsPattern = stopList.join(",");
-    const routes = await distinctRoutes(context.kysely, stopsPattern);
+    const routes = await distinctRoutes(context.db, stopsPattern);
 
     const newStopList: string[] = [];
     routes.map((data) => {
@@ -224,11 +224,11 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     });
 
     if (newStopList.length > 0) {
-      const stops = await context.kysely
+      const stops = await context.db
         .selectFrom("naptan_stoppoint_latlong as s")
         .innerJoin("naptan_locality as l", "l.gazetteer_id", "s.locality_id")
         .where("s.atco_code", "in", newStopList)
-        .where("s.admin_area_id", "in", getOrgAdminAreas(context.kysely, user))
+        .where("s.admin_area_id", "in", getOrgAdminAreas(context.db, user))
         .select([
           "s.admin_area_id",
           "s.id",
@@ -265,7 +265,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const user = await requireUserSession(context);
   if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
 
-  const corridor = await context.kysely
+  const corridor = await context.db
     .insertInto("corridor")
     .values({
       corridor_name: args.payload.name,
@@ -280,7 +280,7 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
     return { success: false };
   }
 
-  await context.kysely
+  await context.db
     .insertInto("corridor_stops")
     .values(
       args.payload.stopIds.map((stop, index) => ({
@@ -306,7 +306,7 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
     !(await isCorridorMappedToUserOrg(
       args.corridorId.toString(),
       user,
-      context.kysely,
+      context.db,
     ))
   ) {
     throw "Not Authorized";
@@ -315,8 +315,8 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
   if (!args.corridorId) throw "Bad Request";
 
   await Promise.all([
-    deleteCorridorDb(args.corridorId.toString(), context.kysely),
-    deleteCorridorStops(args.corridorId.toString(), context.kysely),
+    deleteCorridorDb(args.corridorId.toString(), context.db),
+    deleteCorridorStops(args.corridorId.toString(), context.db),
   ]);
 
   return {
@@ -335,7 +335,7 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
     !(await isCorridorMappedToUserOrg(
       args.inputs.id.toString(),
       user,
-      context.kysely,
+      context.db,
     ))
   ) {
     throw "Not Authorized";
@@ -345,15 +345,11 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
     throw "Bad Request";
 
   await Promise.all([
-    updateCorridorDb(
-      args.inputs.id.toString(),
-      args.inputs.name,
-      context.kysely,
-    ),
-    deleteCorridorStops(args.inputs.id.toString(), context.kysely),
+    updateCorridorDb(args.inputs.id.toString(), args.inputs.name, context.db),
+    deleteCorridorStops(args.inputs.id.toString(), context.db),
   ]);
 
-  await context.kysely
+  await context.db
     .insertInto("corridor_stops")
     .values(
       args.inputs.stopList.map((stop, index) => ({
@@ -403,18 +399,14 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   }
 
   if (
-    !(await isCorridorMappedToUserOrg(
-      corridorId.toString(),
-      user,
-      context.kysely,
-    ))
+    !(await isCorridorMappedToUserOrg(corridorId.toString(), user, context.db))
   ) {
     throw "Not Authorized";
   }
 
   const corridor = stopList;
 
-  const timetables = context.kysely
+  const timetables = context.db
     .selectFrom("Timetable")
     .where(
       "date_of_journey",
@@ -426,7 +418,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
   const journeysWithAtLeastAsManyStops = timetables
     .groupBy(["group_id", "vehiclejourney_id"])
-    .having(context.kysely.fn.count("stop_id"), ">=", corridor.length)
+    .having(context.db.fn.count("stop_id"), ">=", corridor.length)
     .select("group_id");
 
   const results: TimetableType[] = await timetables
@@ -700,7 +692,7 @@ export const getTransitStatsPerService: CorridorStatsTypeResolvers["transitTimeP
     if (transitStats.size <= 0) {
       return [];
     }
-    const services = await context.kysely
+    const services = await context.db
       .selectFrom("service_details as s")
       .innerJoin("all_operators as o", "o.operatorref", "s.operator_noc")
       .where("noc_and_line_and_servicecode", "in", [...transitStats.keys()])
@@ -776,7 +768,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
 
-    const results = await context.kysely
+    const results = await context.db
       .selectFrom("corridor_stops")
       .innerJoin(
         "naptan_stoppoint_latlong",
@@ -802,7 +794,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 
-    return listServiceLinks(results, context.kysely);
+    return listServiceLinks(results, context.db);
   };
 
 const corridorResovlers: Resolvers = {

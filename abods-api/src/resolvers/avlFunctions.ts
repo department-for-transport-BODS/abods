@@ -9,7 +9,7 @@ import { tokenAuthRequiredResolver } from "../lib/apiauth.js";
 export const getAVLLineLevelStatus: QueryResolvers["avlLineLevelStatus"] =
   async (_, args, context): Promise<AvlLineLevelStatus[]> => {
     try {
-      let query = context.kysely.selectFrom("avl_line_level_monitoring");
+      let query = context.db.selectFrom("avl_line_level_monitoring");
       if (args.filters?.operatorNoc) {
         query = query.where("operator_noc", "=", args.filters.operatorNoc);
       }

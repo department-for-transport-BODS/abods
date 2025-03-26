@@ -40,12 +40,12 @@ export const getUsers: QueryResolvers["users"] = async (
 ): Promise<Maybe<UserType[]>> => {
   const user = await requireUserSession(context);
   try {
-    return await context.kysely
+    return await context.db
       .selectFrom("bods_user")
       .where(
         "id",
         "in",
-        context.kysely
+        context.db
           .selectFrom("bods_userorganisation")
           .where("bods_userorganisation.organisation_id", "in", user.orgIds)
           .select("user_id"),
@@ -88,7 +88,7 @@ export const getUser: QueryResolvers["user"] = async (
 ): Promise<Maybe<LoginInfo>> => {
   const user = await requireUserSession(context);
   try {
-    const userDetails = await context.kysely
+    const userDetails = await context.db
       .selectFrom("bods_user")
       .where("id", "=", user.id)
       .select(["email", "account_type"])
@@ -138,7 +138,7 @@ export const getUserAlerts: QueryResolvers["userAlerts"] = async (
   const user = await requireUserSession(context);
   try {
     // fetch alerts ONLY if user is creator or recipient
-    const alerts = await context.kysely
+    const alerts = await context.db
       .selectFrom("Alert as a")
       .where((eb) =>
         eb.or([
@@ -208,7 +208,7 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const bodsUser = await context.kysely
+    const bodsUser = await context.db
       .selectFrom("bods_user as u")
       .innerJoin("bods_userorganisation as o", "o.user_id", "u.id")
       .where(
@@ -252,7 +252,7 @@ export const loginUser: MutationResolvers["login"] = async (
       const tokenRecord = { user_id, token, expires };
       const loginDetails = { user_id, last_login: now };
       await Promise.all([
-        context.kysely
+        context.db
           .insertInto("Tokens")
           .values(tokenRecord)
           .onConflict((oc) =>
@@ -261,7 +261,7 @@ export const loginUser: MutationResolvers["login"] = async (
               expires: eb.ref("excluded.expires"),
             })),
           ),
-        context.kysely
+        context.db
           .insertInto("login_details")
           .values(loginDetails)
           .onConflict((oc) =>
@@ -302,7 +302,7 @@ export const logoutUser: MutationResolvers["logout"] = async (
 ): Promise<boolean> => {
   const user = await requireUserSession(context);
   try {
-    await context.kysely
+    await context.db
       .deleteFrom("Tokens")
       .where("user_id", "=", user.id)
       .execute();
@@ -324,7 +324,7 @@ export const getUserAlert: QueryResolvers["userAlert"] = async (
       throw new Error("Alert id required");
     }
 
-    return getUserAlertFromDb(args.alertId, user.id, context.kysely);
+    return getUserAlertFromDb(args.alertId, user.id, context.db);
   } catch (error) {
     logger.error(error, "An error occurred when getting user alert info");
     return null;
@@ -373,7 +373,7 @@ export const addUserAlert: MutationResolvers["addUserAlert"] = async (
     const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
 
     // TODO: check if sendto user id is in one of the same organisations as created_by user
-    await context.kysely
+    await context.db
       .insertInto("Alert")
       .values({
         alert: alertType,
@@ -410,17 +410,13 @@ const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    const alert = await getUserAlertFromDb(
-      args.alertId,
-      user.id,
-      context.kysely,
-    );
+    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if (!alert) {
       throw new Error("Alert not found");
     }
 
-    await context.kysely
+    await context.db
       .updateTable("Alert")
       .where("id", "=", args.alertId)
       .set({
@@ -455,14 +451,10 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
       throw new Error("AlertId is required");
     }
 
-    const alert = await getUserAlertFromDb(
-      args.alertId,
-      user.id,
-      context.kysely,
-    );
+    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
 
     if (alert) {
-      await context.kysely
+      await context.db
         .deleteFrom("Alert")
         .where("id", "=", args.alertId)
         .execute();

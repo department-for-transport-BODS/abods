@@ -17,7 +17,7 @@
     "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
     "lint": "eslint --ignore-pattern src/kysely.ts --fix --cache --quiet .",
     "lint:check": "eslint --ignore-pattern src/kysely.ts .",
-    "kysely:pull": "kysely-codegen --include-pattern=\"public.(Alert|all_operators|ApiInfo|avl_line_level_monitoring|bods_organisation|bods_organisationoperator|bods_user|bods_userorganisation|corridor|corridor_stops|distinct_routes|expected_journeys|expected_operators|expected_services|FeatureFlag|feed_monitor_daily_summary|feed_monitor_hourly_summary|feed_monitor_minute_summary|feed_monitor_summary|login_details|naptan_adminarea|naptan_adminarea_with_shape|naptan_locality|naptan_stoppoint_latlong|noc_adminarea|organisation_organisation_admin_areas|performance_statistics|service_details|servicepattern_route|SiriVMPositions|Timetable|timetable_frequent_summary_services|timetable_summary_operator_t|timetable_summary_service_tz|timetable_summary_stops_tz|timetable_threshold_summary|Tokens|transmodel_servicepatternstop|transmodel_tracks|transmodel_vehiclejourney|ui_lta)\" --out-file ./src/kysely.generated.ts"
+    "kysely:pull": "kysely-codegen"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",

@@ -36,7 +36,7 @@ export const requireUserSession = async (context: RequestContext) => {
   logger.debug("Within get session function");
 
   // temporary session token storage
-  const sessionRecord = await context.kysely
+  const sessionRecord = await context.db
     .selectFrom("Tokens")
     .where("token", "=", sessionId)
     .where("expires", ">", new Date())
@@ -52,7 +52,7 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
 
-  const bodsUser = await context.kysely
+  const bodsUser = await context.db
     .selectFrom("bods_user as u")
     .innerJoin("bods_userorganisation as o", "o.user_id", "u.id")
     .where("u.id", "=", sessionRecord.user_id)

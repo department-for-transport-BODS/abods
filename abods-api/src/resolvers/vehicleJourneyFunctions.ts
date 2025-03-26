@@ -19,7 +19,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
 ): Promise<Journey[]> => {
   await requireUserSession(context);
 
-  return await context.kysely
+  return await context.db
     .selectFrom("expected_journeys as j")
     .innerJoin("expected_services as s", (join) =>
       join
@@ -112,7 +112,7 @@ export const getJourney: QueryResolvers["journey"] = async (
   );
   const groupIdPrefix = args.groupId.slice(0, args.groupId.lastIndexOf("|"));
 
-  const stops = await context.kysely
+  const stops = await context.db
     .selectFrom("Timetable")
     .where("date_of_journey", "=", new Date(dateOfJourneyString))
     .where("group_id", "=", args.groupId)
@@ -184,7 +184,7 @@ export const getJourney: QueryResolvers["journey"] = async (
     // Some of the avl data has the wrong group id when running overnight, so we construct a new one
     const newGroupId = groupIdPrefix + "|" + dateString;
     avlPromises.push(
-      getAvlData(context.kysely, dateString, newGroupId, minRange, maxRange),
+      getAvlData(context.db, dateString, newGroupId, minRange, maxRange),
     );
     currentDay = currentDay.add(1, "day");
   }

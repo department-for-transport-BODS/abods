@@ -42,7 +42,7 @@ export const getEventStats: QueryResolvers["eventStats"] =
 export const getHistoricalStats: FeedMonitoringTypeResolvers["historicalStats"] =
   async (parent, args, context): Promise<HistoricalStatsType> => {
     if (!parent.operatorId) throw "Invalid data";
-    const result = await context.kysely
+    const result = await context.db
       .selectFrom("feed_monitor_daily_summary")
       .where("operator_noc", "=", parent.operatorId)
       .select(["availability", "update_frequency"])
@@ -60,7 +60,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   context,
 ): Promise<VehicleStatsType[]> => {
   if (!parent.operatorId) throw "Invalid data";
-  const result = await context.kysely
+  const result = await context.db
     .selectFrom("feed_monitor_hourly_summary")
     .where("operator_noc", "=", parent.operatorId)
     .orderBy("received_interval")
@@ -77,7 +77,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
   async (parent, args, context): Promise<VehicleStatsType[]> => {
     if (!parent.operatorId) throw "Invalid data";
-    const result = await context.kysely
+    const result = await context.db
       .selectFrom("feed_monitor_minute_summary")
       .where("operator_noc", "=", parent.operatorId)
       .where("received_interval", ">=", new Date(args.start))
@@ -101,7 +101,7 @@ export const getFeedMonitoringList: OperatorFeedMonitoringResolvers["feedMonitor
   async (parent, _, context): Promise<FeedMonitoringType> => {
     const operatorId = parent.operatorId;
     if (!operatorId) throw "Parent data not set";
-    return await context.kysely
+    return await context.db
       .selectFrom("feed_monitor_summary")
       .where("operator_noc", "=", operatorId)
       .select([
@@ -141,7 +141,7 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
       const startTime = endTime.subtract(1, "minute").toDate();
       promises.push(
         getVehicleCounts(
-          context.kysely,
+          context.db,
           parent.operatorId,
           startTime,
           endTime.toDate(),
@@ -180,7 +180,7 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
 ): Promise<DashboardVehicles[]> => {
   const user = await requireUserSession(context);
 
-  const summary = context.kysely
+  const summary = context.db
     .selectFrom("feed_monitor_minute_summary")
     .where("date_of_journey", "=", new Date());
 
@@ -189,7 +189,7 @@ const getDashboardVehicles: QueryResolvers["dashboardVehicles"] = async (
   return summary
     .groupBy("operator_noc")
     .$if(!!operatorId, (qb) => qb.where("operator_noc", "=", operatorId))
-    .where("operator_noc", "in", getUserOperatorIdsQuery(context.kysely, user))
+    .where("operator_noc", "in", getUserOperatorIdsQuery(context.db, user))
     .where(
       "received_interval",
       "=",
@@ -215,7 +215,7 @@ export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
     // TODO: is operator id in users' operator id array
     logger.debug({ operatorId: args.operatorId }, "getOperator");
 
-    const operator = await context.kysely
+    const operator = await context.db
       .selectFrom("all_operators")
       .where("operatorref", "=", args.operatorId)
       .select(["operatorref", "name"])
@@ -240,13 +240,9 @@ export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
   async (_, args, context): Promise<OperatorFeedMonitoring[]> => {
     const user = await requireUserSession(context);
 
-    let query = context.kysely
+    let query = context.db
       .selectFrom("service_details as s")
-      .where(
-        "s.operator_noc",
-        "in",
-        getUserOperatorIdsQuery(context.kysely, user),
-      )
+      .where("s.operator_noc", "in", getUserOperatorIdsQuery(context.db, user))
       .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc");
     if (args.filterBy && (args.filterBy.operatorIds.length ?? 0) > 0) {
       query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);

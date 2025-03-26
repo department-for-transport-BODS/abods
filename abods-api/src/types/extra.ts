@@ -14,7 +14,7 @@ export interface RequestContext extends BaseContext {
   res: express.Response;
   headers: IncomingHttpHeaders;
   apiKeyAuth?: AuthContext;
-  kysely: Kysely<DB>;
+  db: Kysely<DB>;
 }
 
 export interface SessionUser {

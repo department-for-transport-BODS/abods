@@ -39,7 +39,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   const withinAllowedAccess = (eb: ExpressionBuilder<DB, "login_details">) =>
     eb.or([eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour)]);
 
-  const result = await context.kysely
+  const result = await context.db
     .updateTable("login_details")
     .where("user_id", "=", user.id)
     .where((eb) => eb.or([pastRefreshTime(eb), withinAllowedAccess(eb)]))
@@ -66,7 +66,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   logger.debug("Generating data monitoring url");
   checkRequiredQuicksightVars();
 
-  const userDetails = await getUserTypeDetails(context.kysely, user.id);
+  const userDetails = await getUserTypeDetails(context.db, user.id);
 
   const localTransportAuthorityNames = userDetails
     .filter((user) => user.lta_name !== null)

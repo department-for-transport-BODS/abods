@@ -20,7 +20,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 ): Promise<StopStatistics[]> => {
   const user = await requireUserSession(context);
 
-  let dbQuery = context.kysely
+  let dbQuery = context.db
     .selectFrom("timetable_summary_stops_tz as t")
     .innerJoin("naptan_stoppoint_latlong as n", "n.id", "t.stop_id")
     .innerJoin("naptan_locality as l", "n.locality_id", "l.gazetteer_id")
@@ -48,7 +48,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
     dbQuery = dbQuery.where("t.day_of_week", "in", days);
   }
-  let operatorIds = await getUserOperatorIds(user, context.kysely);
+  let operatorIds = await getUserOperatorIds(user, context.db);
 
   if (args.inputs.operatorIds.length > 0) {
     operatorIds = args.inputs.operatorIds.filter((n) =>
