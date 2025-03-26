@@ -226,8 +226,8 @@ export const getOperator: QueryResolvers["operatorFeedMonitoring"] = async (
     }
 
     return {
-      operatorId: operator.operatorref,
-      nocCode: operator.operatorref,
+      operatorId: operator.operatorref ?? "Unknown",
+      nocCode: operator.operatorref ?? "Unknown",
       name: operator.name ?? "Unknown",
     };
   } catch (error) {

@@ -21,17 +21,17 @@ export interface CorridorTransitServiceStatsType {
   lineName: string | null;
 }
 
-export const deleteCorridorDb = (corridorId: number, db: Kysely<DB>) =>
+export const deleteCorridorDb = (corridorId: string, db: Kysely<DB>) =>
   db.deleteFrom("corridor").where("corridor_id", "=", corridorId).execute();
 
-export const deleteCorridorStops = (corridorId: number, db: Kysely<DB>) =>
+export const deleteCorridorStops = (corridorId: string, db: Kysely<DB>) =>
   db
     .deleteFrom("corridor_stops")
     .where("corridor_id", "=", corridorId)
     .execute();
 
 export const updateCorridorDb = (
-  corridorId: number,
+  corridorId: string,
   corridorName: string,
   db: Kysely<DB>,
 ) => {
@@ -45,14 +45,18 @@ export const updateCorridorDb = (
 };
 
 export const isCorridorMappedToUserOrg = async (
-  corridorId: number,
+  corridorId: string,
   user: SessionUser,
   db: Kysely<DB>,
 ): Promise<boolean> => {
   const result = await db
     .selectFrom("corridor")
     .where("corridor_id", "=", corridorId)
-    .where("organisation_id", "in", user.orgIds)
+    .where(
+      "organisation_id",
+      "in",
+      user.orgIds.map((x) => x.toString()),
+    )
     .select("corridor_id")
     .executeTakeFirst();
   return !!result;
@@ -65,12 +69,11 @@ export const distinctRoutes = (db: Kysely<DB>, stopsPattern: string) =>
     .select(["route"])
     .execute();
 
-export const getOrgAdminAreas = async (db: Kysely<DB>, user: SessionUser) =>
+export const getOrgAdminAreas = (db: Kysely<DB>, user: SessionUser) =>
   db
     .selectFrom("noc_adminarea")
     .where("national_operator_code", "in", getUserOperatorIdsQuery(db, user))
-    .select("adminarea_id")
-    .execute();
+    .select("adminarea_id");
 
 export const getStopDepartureTime = (
   stop: TimetableType,

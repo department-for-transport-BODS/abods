@@ -55,7 +55,7 @@ export const getUsers: QueryResolvers["users"] = async (
       .then((x) =>
         x.map((thisUser) => ({
           id: String(thisUser.id),
-          username: thisUser.username,
+          username: thisUser.username ?? "",
           firstName: thisUser.first_name,
           lastName: thisUser.last_name,
         })),
@@ -104,6 +104,7 @@ export const getUser: QueryResolvers["user"] = async (
           .as("has_global_viewer_org"),
       )
       .executeTakeFirstOrThrow();
+    if (!userDetails.email) throw new Error("Email is null");
 
     const email = userDetails.email.toLowerCase();
 
@@ -234,7 +235,7 @@ export const loginUser: MutationResolvers["login"] = async (
         };
       });
 
-    if (!bodsUser) {
+    if (!bodsUser?.password || !bodsUser.id) {
       logger.debug("User not found in bods user table");
       throw "Invalid username or password";
     }

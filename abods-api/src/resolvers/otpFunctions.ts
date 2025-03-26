@@ -166,7 +166,13 @@ export const getLines: QueryResolvers["lines"] = async (
     .select("line_name as number")
     .select("admin_area_id as adminAreaIds")
     .distinctOn("noc_and_line_and_servicecode")
-    .execute();
+    .execute()
+    .then((r) =>
+      r.map((x) => ({
+        ...x,
+        adminAreaIds: x.adminAreaIds.filter((i) => i).map((i) => i!),
+      })),
+    );
 };
 
 async function getOtpServiceLinks(
@@ -206,7 +212,7 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
     .select(["common_name", "atco_code", "longitude", "latitude"])
     .execute();
   const stopDetails = stopQueryResults.map((n) => ({
-    stopName: n.common_name,
+    stopName: n.common_name ?? "unknown",
     // workaround for nullable db columns that can probably be not null, the where clause should exclude null for now
     stopId: n.atco_code!,
     lon: n.longitude!,
@@ -707,7 +713,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       const operatorNocs = userOperatorIds.filter(
-        (n) => !filters.operatorIds || filters.operatorIds.includes(n),
+        (n) => n && (!filters.operatorIds || filters.operatorIds.includes(n)),
       );
 
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
@@ -749,14 +755,14 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         nocCode: stats.operator_noc,
         lineId: stats.noc_and_line_and_servicecode,
         lineInfo: {
-          serviceId: stats.noc_and_line_and_servicecode,
+          serviceId: stats.noc_and_line_and_servicecode ?? "unknown",
           serviceName:
             services.find(
               (service) =>
                 service.noc_and_line_and_servicecode ===
                 stats.noc_and_line_and_servicecode,
             )?.service_name ?? "",
-          serviceNumber: stats.line_name,
+          serviceNumber: stats.line_name ?? "unknown",
         },
         onTime: stats.on_time_count,
         early: stats.early_count,
@@ -1151,7 +1157,9 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
       .execute();
 
     if (adminAreaRecords) {
-      const adminareaIds = adminAreaRecords.map((a) => a.adminarea_id);
+      const adminareaIds = adminAreaRecords.map((a) =>
+        a.adminarea_id.toString(),
+      );
       const adminAreas = await context.kysely
         .selectFrom("naptan_adminarea_with_shape")
         .where("id", "in", adminareaIds)
@@ -1163,9 +1171,9 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
       }
 
       return adminAreas.map((adminArea) => ({
-        id: adminArea.id.toString(),
-        name: adminArea.name,
-        shape: adminArea.st_asgeojson,
+        id: adminArea.id?.toString() ?? "unknown",
+        name: adminArea.name ?? "unknown",
+        shape: adminArea.st_asgeojson ?? "[]",
       }));
     }
 
@@ -1240,12 +1248,12 @@ export function otpFilters<T extends tables>(
     query = query.where(
       "departure_hour_only",
       ">=",
-      sql<Date>`${startDateTimeUtc.format("HH:mm:ss Z")}`,
+      startDateTimeUtc.format("HH:mm:ss Z"),
     );
     query = query.where(
       "departure_hour_only",
       "<=",
-      sql<Date>`${endDateTimeUtc.format("HH:mm:ss Z")}`,
+      endDateTimeUtc.format("HH:mm:ss Z"),
     );
   }
 

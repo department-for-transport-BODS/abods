@@ -39,7 +39,10 @@ export const getPercentile = (percentile: number, sortedArray: number[]) => {
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
 };
 
-export const getUserOrgIds = (user: { id: number; orgIds: number[] }) => {
+export const getUserOrgIds = (user: {
+  id: number | null;
+  orgIds: number[];
+}) => {
   if (user.orgIds.length < 1) {
     logger.error({ userId: user.id }, "User not mapped to an organisation");
     throwUnauthenticatedError("User not mapped to any organisation");

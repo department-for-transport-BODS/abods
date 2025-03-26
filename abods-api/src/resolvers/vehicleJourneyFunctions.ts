@@ -53,10 +53,10 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     .execute()
     .then((j) =>
       j.map((journey) => ({
-        groupId: journey.group_id,
+        groupId: journey.group_id ?? "unknown",
         directionRef: journey.direction,
         startTime: getFormattedDate(journey.expected_journey_start),
-        serviceName: journey.journey_pattern_description,
+        serviceName: journey.journey_pattern_description ?? "unknown",
         serviceNumber: journey.line_name,
         operatorNoc: journey.operator_noc,
         operatorName: journey.operator_name ?? "unknown",
@@ -141,8 +141,8 @@ export const getJourney: QueryResolvers["journey"] = async (
           scheduledDepartureUtc: (
             s.expected_departure_time ?? new Date(2000, 0, 1, 0, 0, 0, 0)
           ).toISOString(),
-          stopIndex: s.stop_index,
-          stopId: s.stop_id,
+          stopIndex: s.stop_index ?? 0,
+          stopId: Number(s.stop_id),
           stopName: s.common_name ?? "Unknown",
           isTimingPoint: s.is_timing_point ?? false,
           otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,

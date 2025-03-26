@@ -96,12 +96,12 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   dbQuery = dbQuery.where(
     "t.departure_hour_only",
     ">=",
-    sql<Date>`${startDateTimeUtc.format("HH:mm:ss Z")}`,
+    startDateTimeUtc.format("HH:mm:ss Z"),
   );
   dbQuery = dbQuery.where(
     "t.departure_hour_only",
     "<=",
-    sql<Date>`${endDateTimeUtc.format("HH:mm:ss Z")}`,
+    endDateTimeUtc.format("HH:mm:ss Z"),
   );
 
   // todo: throw if the bounding box is too big
@@ -125,12 +125,12 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "t.stop_latitude as latitude",
       "t.stop_longitude as longitude",
       "t.is_timing_point as timingPoint",
-      "n.common_name as stopName",
       "l.name as localityName",
       "a.name as adminAreaName",
     ])
     .select((eb) => [
       eb.fn.coalesce("n.atco_code", sql.lit("<unknown>")).as("atcoCode"),
+      eb.fn.coalesce("n.common_name", sql.lit("<unknown>")).as("stopName"),
       eb.fn.sum<number>("t.early_count").as("early"),
       eb.fn.sum<number>("t.late_count").as("late"),
       eb.fn.sum<number>("t.on_time_count").as("onTime"),
