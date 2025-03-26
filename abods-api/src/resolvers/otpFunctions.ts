@@ -163,6 +163,7 @@ export const getLines: QueryResolvers["lines"] = async (
     .select("noc_and_line_and_servicecode as id")
     .select("service_name as name")
     .select("line_name as number")
+    .select("admin_area_id as adminAreaIds")
     .distinctOn("noc_and_line_and_servicecode")
     .execute();
 };
