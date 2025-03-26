@@ -1,6 +1,7 @@
 import {
   AlertType,
   AlertTypeEnum,
+  FeatureFlag,
   LoginInfo,
   LoginResponse,
   Maybe,
@@ -17,6 +18,7 @@ import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
+import { isLocal } from "../prismaClient";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 const accountTypes = {
@@ -98,6 +100,21 @@ export const getUser: QueryResolvers["user"] = async (
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
     );
+
+    const flags: FeatureFlag[] = [];
+    const addFlag = (env_var: string, flag: FeatureFlag) => {
+      if (isLocal()) {
+        flags.push(flag);
+      }
+      if (env_var in process.env && process.env[env_var] === "true") {
+        flags.push(flag);
+      }
+    };
+
+    addFlag("FLAG_DATA_MONITORING", FeatureFlag.DataMonitoring);
+    addFlag("FLAG_SERVICE_MONITORING", FeatureFlag.ServiceMonitoring);
+    addFlag("FLAG_STOP_ANALYSIS", FeatureFlag.StopAnalysis);
+
     return {
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
@@ -105,6 +122,7 @@ export const getUser: QueryResolvers["user"] = async (
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
+      flags: flags,
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");

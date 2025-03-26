@@ -493,6 +493,13 @@ type LoginInfo {
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
   serviceMonitoringEmbedUrl: String
+  flags: [FeatureFlag!]!
+}
+
+enum FeatureFlag {
+  ServiceMonitoring
+  DataMonitoring
+  StopAnalysis
 }
 
 type UserType {

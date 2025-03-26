@@ -293,6 +293,12 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
+export enum FeatureFlag {
+  DataMonitoring = 'DataMonitoring',
+  ServiceMonitoring = 'ServiceMonitoring',
+  StopAnalysis = 'StopAnalysis'
+}
+
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -495,6 +501,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  flags: Array<FeatureFlag>;
   serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1113,7 +1120,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1689,6 +1696,7 @@ export const UserDocument = gql`
     canViewServiceMonitoring
     canEditAllAlerts
     serviceMonitoringEmbedUrl
+    flags
   }
 }
     `;
