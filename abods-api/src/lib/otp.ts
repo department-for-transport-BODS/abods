@@ -6,7 +6,7 @@ import {
 import { otpFilters, timeDiffFilters } from "../resolvers/otpFunctions.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
-import { getUserOperatorIdsQuery } from "./operators";
+import { getUserOperatorIdsQuery } from "./operators.js";
 import { SessionUser } from "../types/extra";
 
 export const compareThresholds = async (

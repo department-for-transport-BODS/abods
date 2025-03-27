@@ -3,7 +3,7 @@ import { SessionUser } from "../types/extra.js";
 import { TimetableType } from "../resolvers/corridorFunctions.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
-import { getUserOperatorIdsQuery } from "./operators";
+import { getUserOperatorIdsQuery } from "./operators.js";
 
 export enum CorridorTransitStatsOption {
   day,
