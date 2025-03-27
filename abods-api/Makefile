@@ -16,7 +16,6 @@ build-RuntimeDependenciesLayer: cmd-exists-npm
 	mkdir -p "$(ARTIFACTS_DIR)/nodejs"
 	cp package.json package-lock.json "$(ARTIFACTS_DIR)/nodejs/"
 	npm install --prefix "$(ARTIFACTS_DIR)/nodejs/"
-	rm -rf "$(ARTIFACTS_DIR)/nodejs/node_modules/.prisma"
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 build-lambda-common: cmd-exists-npm
@@ -29,7 +28,6 @@ build-lambda-common: cmd-exists-npm
 copy-build-artefacts:
 	cp -r dist "$(ARTIFACTS_DIR)/"
 	cp -r node_modules "$(ARTIFACTS_DIR)/"
-	cp -r prisma "$(ARTIFACTS_DIR)/"
 	cp package.json package-lock.json "$(ARTIFACTS_DIR)/"
 	mkdir -p "$(ARTIFACTS_DIR)/$$(dirname $(GRAPHQL_SCHEMA))"
 	cp "$(PWD)/$(GRAPHQL_SCHEMA)" "$(ARTIFACTS_DIR)/$(GRAPHQL_SCHEMA)"

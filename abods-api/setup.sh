@@ -3,7 +3,6 @@
 set -euo pipefail
 
 npm install
-npx prisma generate
 
 DB_PASSWORD=$(aws secretsmanager get-secret-value --region eu-west-2 --secret-id abods/sandbox/rds/user/abods_proxy_rw | jq -r '.SecretString | fromjson | .password')
 echo 'PROJECT_ENV=local' > .env

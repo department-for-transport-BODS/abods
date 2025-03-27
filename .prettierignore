@@ -10,7 +10,6 @@ package-lock.json
 # Files that can't be parsed
 .*
 VERSION
-*.prisma
 Makefile
 *.sh
 *.toml
