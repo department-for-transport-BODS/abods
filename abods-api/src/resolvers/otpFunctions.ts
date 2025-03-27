@@ -1197,13 +1197,8 @@ export function otpFilters<T extends tables>(
     HeadwayInputType &
     FrequentServiceInfoInputType,
 ): SelectQueryBuilder<DB, T, object> {
-  // We need to convert to a more concrete type to get type checking here,
-  // so we need to ensure that we don't apply filtering to a table that doesn't have the right columns
-  let query = queryInput as unknown as SelectQueryBuilder<
-    DB,
-    "timetable_summary_service_tz",
-    object
-  >;
+  // We need to convert to non-generic type to get type checking here, even though this seems equivalent
+  let query = queryInput as unknown as SelectQueryBuilder<DB, tables, object>;
 
   const startDateUtc = userSelectedDateAsUtc(inputs.fromTimestamp);
   const endDateUtc = userSelectedDateAsUtc(inputs.toTimestamp);
@@ -1290,6 +1285,7 @@ export function otpFilters<T extends tables>(
     }
   }
 
+  // The caller needs the result back as the generic type
   return query as unknown as SelectQueryBuilder<DB, T, object>;
 }
 
