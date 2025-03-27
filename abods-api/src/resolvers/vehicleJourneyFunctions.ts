@@ -152,13 +152,9 @@ export const getJourney: QueryResolvers["journey"] = async (
           incompleteReason: s.incomplete_reason ?? 0,
           setDown: s.set_down ?? false,
         }))
-        .sort((a, b) => {
-          return a.scheduledDepartureUtc < b.scheduledDepartureUtc
-            ? -1
-            : a.scheduledDepartureUtc > b.scheduledDepartureUtc
-              ? 1
-              : 0;
-        }),
+        .sort((a, b) =>
+          a.scheduledDepartureUtc.localeCompare(b.scheduledDepartureUtc),
+        ),
     );
 
   if (stops.length < 1) {
