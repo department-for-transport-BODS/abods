@@ -57,7 +57,7 @@ export const requireUserSession = async (context: RequestContext) => {
     .innerJoin("bods_userorganisation as o", "o.user_id", "u.id")
     .where("u.id", "=", sessionRecord.user_id)
     .where("u.is_active", "=", true)
-    .groupBy(["u.id", "u.password"])
+    .groupBy(["u.id", "u.is_active"])
     .select([
       "u.id",
       "u.is_active",

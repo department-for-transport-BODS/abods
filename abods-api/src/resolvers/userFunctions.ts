@@ -256,19 +256,21 @@ export const loginUser: MutationResolvers["login"] = async (
           .insertInto("Tokens")
           .values(tokenRecord)
           .onConflict((oc) =>
-            oc.doUpdateSet((eb) => ({
+            oc.column("user_id").doUpdateSet((eb) => ({
               token: eb.ref("excluded.token"),
               expires: eb.ref("excluded.expires"),
             })),
-          ),
+          )
+          .execute(),
         context.db
           .insertInto("login_details")
           .values(loginDetails)
           .onConflict((oc) =>
-            oc.doUpdateSet((eb) => ({
+            oc.column("user_id").doUpdateSet((eb) => ({
               last_login: eb.ref("excluded.last_login"),
             })),
-          ),
+          )
+          .execute(),
       ]);
       const expiryTimestamp = expires.toUTCString();
 
