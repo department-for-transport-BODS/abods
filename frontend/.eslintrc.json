@@ -4,8 +4,7 @@
     "projects/**/*",
     "src/test-support/*",
     "**/*.spec.ts",
-    "**/generated/graphql.ts",
-    "src/polyfills.ts"
+    "**/generated/graphql.ts"
   ],
   "plugins": ["jasmine"],
   "overrides": [
