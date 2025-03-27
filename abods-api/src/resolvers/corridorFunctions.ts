@@ -42,9 +42,12 @@ import dayjs from "dayjs";
 import { Kysely, SelectQueryBuilder } from "kysely";
 import { SessionUser } from "../types/extra.js";
 import { DB } from "../kysely.js";
-import { Corridor, Timetable } from "../kysely.generated.js";
 
-type baseQueryType = SelectQueryBuilder<DB & { c: Corridor }, "c", object>;
+type baseQueryType = SelectQueryBuilder<
+  DB & { c: DB["corridor"] },
+  "c",
+  object
+>;
 const corridorsQuery = async (
   db: Kysely<DB>,
   user: SessionUser,
@@ -371,7 +374,7 @@ interface StatsCache {
 }
 
 export type TimetableType = Pick<
-  Timetable,
+  DB["Timetable"],
   | "stop_index"
   | "operator_noc"
   | "service_code"
