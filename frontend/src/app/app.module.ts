@@ -12,7 +12,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AuthenticationModule } from "./authentication/authentication.module";
 import { PercentPipe, ViewportScroller } from "@angular/common";
-import { Event, Router, Scroll } from "@angular/router";
+import { Event, EventType, Router, Scroll } from "@angular/router";
 import { filter, pairwise } from "rxjs/operators";
 import { UserModule } from "./user/user.module";
 
@@ -103,8 +103,10 @@ export class AppModule {
         } else {
           // Check if routes match, or if it is only a query param change
           if (
+            previous.routerEvent.type === EventType.NavigationEnd &&
+            current.routerEvent.type === EventType.NavigationEnd &&
             this.getBaseRoute(previous.routerEvent.urlAfterRedirects) !==
-            this.getBaseRoute(current.routerEvent.urlAfterRedirects)
+              this.getBaseRoute(current.routerEvent.urlAfterRedirects)
           ) {
             // Routes don't match, this is actual forward navigation
             // Default behavior: scroll to top

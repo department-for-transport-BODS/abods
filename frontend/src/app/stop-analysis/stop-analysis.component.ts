@@ -8,6 +8,7 @@ import {
   LngLatBounds,
   LngLatBoundsLike,
   Map,
+  MapboxEvent,
   MapboxGeoJSONFeature,
   MapMouseEvent,
   SymbolLayout,
@@ -412,7 +413,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.destroyFilterPanel();
   }
 
-  onMapLoad(map: Map): void {
+  onMapLoad(event: MapboxEvent & EventData): void {
+    const map = event.target;
     this.map = map;
     this.onMapMoveEnd();
 

@@ -2,9 +2,9 @@
   "apiUrl": "http://localhost:4200/api",
   "envName": "local",
   "analyticsId": "1234",
-  "mapboxToken": "",
-  "mapboxStyle": "",
-  "mapboxSatelliteStyle": "",
+  "mapboxToken": "pk.eyJ1IjoiYWJvZHNwcm9kdWN0IiwiYSI6ImNtN2txZDRhYTAzYWgybHFxbHNiYjU2cHUifQ.0WKOo5AhZ_0eXGXG_NXlzg",
+  "mapboxStyle": "mapbox://styles/abodsproduct/cly75mrer00e101pi0u934ipk",
+  "mapboxSatelliteStyle": "mapbox://styles/abodsproduct/cly75o0ex00ey01nw53xg1bk9",
   "vehicleJourneys": {
     "validDateRange": {
       "offsetISO": "PT0H",

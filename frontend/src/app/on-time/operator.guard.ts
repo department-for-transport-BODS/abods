@@ -1,17 +1,12 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  Router,
-  UrlTree,
-} from "@angular/router";
+import { ActivatedRouteSnapshot, Router, UrlTree } from "@angular/router";
 import { filter, map, Observable, of, switchMap } from "rxjs";
 import { OperatorService } from "../shared/services/operator.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class OperatorGuard implements CanActivate {
+export class OperatorGuard {
   constructor(
     private operatorService: OperatorService,
     private router: Router,
