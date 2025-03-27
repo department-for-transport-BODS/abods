@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
+      pull-requests: read
     steps:
       - uses: fpicalausa/remove-stale-branches@v2.2.0
         with:
