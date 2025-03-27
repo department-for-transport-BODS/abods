@@ -15,6 +15,7 @@ export type DB = db & {
     national_operator_code: string;
     adminarea_id: number;
   };
+  // For some reason codegen didn't correctly identify the id column as generated. There might be something to change in the db
   Alert: db["Alert"] & {
     id: Generated<string>;
   };
