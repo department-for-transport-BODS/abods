@@ -21,12 +21,13 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/raa-client",
+            "outputPath": {
+              "base": "dist/raa-client"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": ["src/assets", "src/freshdesk", "src/favicon.ico", "src/config.json", "src/version.json"],
@@ -42,7 +43,13 @@
               "rgbcolor",
               "svgson"
             ],
-            "verbose": false
+            "verbose": false,
+            "browser": "src/main.ts",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "."
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -57,8 +64,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -73,9 +78,7 @@
               ]
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -109,7 +112,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": ["src/favicon.ico", "src/assets", "src/config.json"],

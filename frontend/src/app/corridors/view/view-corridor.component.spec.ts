@@ -20,7 +20,7 @@ import { AgGridModule } from "ag-grid-angular";
 import { LuxonModule } from "luxon-angular";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import {} from "@angular/common/http/testing";
 import { SegmentSelectorComponent } from "../segment-selector/segment-selector.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { Custom } from "src/app/shared/components/date-range/date-range.types";

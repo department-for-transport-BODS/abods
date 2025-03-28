@@ -4,7 +4,10 @@ import { APP_INITIALIZER, NgModule } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { GraphQLModule } from "./graphql.module";
-import { HttpClientModule } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { SharedModule } from "./shared/shared.module";
 import { LayoutModule } from "./layout/layout.module";
 import { ConfigService } from "./config/config.service";
@@ -27,12 +30,12 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule,
     SharedModule,
     LayoutModule,
     GraphQLModule,
-    HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
@@ -65,8 +68,8 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
     },
     PercentPipe,
     CookieService,
+    provideHttpClient(withInterceptorsFromDi()),
   ],
-  bootstrap: [AppComponent],
 })
 export class AppModule {
   constructor(
