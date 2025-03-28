@@ -93,8 +93,8 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       //await Promise.all([prisma.$disconnect(), prisma.$connect()]);
     } catch (error) {
       sendErrorMetric(error);
-      throw new Error("Failed to connect to database using prisma");
       logger.error(error);
+      throw new Error("Failed to connect to database using prisma");
     }
     logger.debug("Prisma has connected to the database");
   }
