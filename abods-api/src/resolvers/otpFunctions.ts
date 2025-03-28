@@ -52,6 +52,8 @@ import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs, { Dayjs } from "dayjs";
+import { isNullableType } from "graphql";
+import { Decimal } from "@prisma/client/runtime/library.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -1101,6 +1103,10 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         gt: 0,
       };
 
+      where.excess_wait_time = {
+        not: null,
+      };
+
       const results =
         await context.db.timetable_frequent_summary_services.findMany({
           where: where,
@@ -1110,12 +1116,25 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
           },
         });
 
+      const resultsWithoutNullWaitTimes = results
+        .filter((headway) => headway.excess_wait_time !== null)
+        .map((headway) => ({
+          excess_wait_time: headway.excess_wait_time,
+          headway_stops_count: headway.headway_stops_count,
+        }));
+
+      if (resultsWithoutNullWaitTimes.length < 1) {
+        return {
+          excessWaitTime: undefined,
+        };
+      }
+
       let headway = {
         excessWaitTime: 0,
         headwayCount: 0,
       };
 
-      headway = results.reduce((acc, currentHeadway) => {
+      headway = resultsWithoutNullWaitTimes.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
           currentHeadway.excess_wait_time.toNumber() *
           currentHeadway.headway_stops_count.toNumber();

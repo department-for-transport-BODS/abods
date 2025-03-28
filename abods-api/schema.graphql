@@ -316,7 +316,7 @@ type FrequentServiceInfoType {
 }
 
 type HeadwayOverviewType {
-  excessWaitTime: Float!
+  excessWaitTime: Float
 }
 
 type HeadwayTimeSeriesType {
