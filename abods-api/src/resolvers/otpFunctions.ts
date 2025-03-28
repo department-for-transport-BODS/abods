@@ -52,8 +52,6 @@ import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs, { Dayjs } from "dayjs";
-import { isNullableType } from "graphql";
-import { Decimal } from "@prisma/client/runtime/library.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -1116,14 +1114,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
           },
         });
 
-      const resultsWithoutNullWaitTimes = results
-        .filter((headway) => headway.excess_wait_time !== null)
-        .map((headway) => ({
-          excess_wait_time: headway.excess_wait_time,
-          headway_stops_count: headway.headway_stops_count,
-        }));
-
-      if (resultsWithoutNullWaitTimes.length < 1) {
+      if (results.length < 1) {
         return {
           excessWaitTime: undefined,
         };
@@ -1134,9 +1125,10 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         headwayCount: 0,
       };
 
-      headway = resultsWithoutNullWaitTimes.reduce((acc, currentHeadway) => {
+      headway = results.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
-          currentHeadway.excess_wait_time.toNumber() *
+          // We've filtered out null values in where clause so its fine to assert not null
+          currentHeadway.excess_wait_time!.toNumber() *
           currentHeadway.headway_stops_count.toNumber();
         acc.headwayCount += currentHeadway.headway_stops_count.toNumber();
 
@@ -1161,6 +1153,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       where.headway_stops_count = {
         gt: 0,
+      };
+
+      where.actual_headway = {
+        not: null,
+      };
+      where.expected_headway = {
+        not: null,
+      };
+      where.excess_wait_time = {
+        not: null,
       };
 
       const results =
@@ -1201,13 +1203,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
             headway_stops_count: 0,
           });
           headwayData.actual_headway +=
-            result.actual_headway.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.actual_headway!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.expected_headway +=
-            result.expected_headway.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.expected_headway!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.excess_wait_time +=
-            result.excess_wait_time.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.excess_wait_time!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.headway_stops_count +=
             result.headway_stops_count.toNumber();

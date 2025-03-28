@@ -416,9 +416,9 @@ export type HeadwayOverviewType = {
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime: Scalars['Float']['output'];
-  excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
+  actualWaitTime?: Maybe<Scalars['Float']['output']>;
+  excessWaitTime?: Maybe<Scalars['Float']['output']>;
+  scheduledWaitTime?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -1604,9 +1604,9 @@ export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentTyp
 }>;
 
 export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayTimeSeriesType'] = ResolversParentTypes['HeadwayTimeSeriesType']> = ResolversObject<{
-  actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  actualWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  excessWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  scheduledWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

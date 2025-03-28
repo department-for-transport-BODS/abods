@@ -416,9 +416,9 @@ export type HeadwayOverviewType = {
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime: Scalars['Float']['output'];
-  excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
+  actualWaitTime?: Maybe<Scalars['Float']['output']>;
+  excessWaitTime?: Maybe<Scalars['Float']['output']>;
+  scheduledWaitTime?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -1279,7 +1279,7 @@ export type HeadwayTimeSeriesQueryVariables = Exact<{
 }>;
 
 
-export type HeadwayTimeSeriesQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayTimeSeries?: Array<{ __typename?: 'HeadwayTimeSeriesType', ts: string, actual: number, scheduled: number, excess: number }> | null } | null };
+export type HeadwayTimeSeriesQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayTimeSeries?: Array<{ __typename?: 'HeadwayTimeSeriesType', ts: string, actual?: number | null, scheduled?: number | null, excess?: number | null }> | null } | null };
 
 export type HeadwayOverviewQueryVariables = Exact<{
   params: HeadwayInputType;

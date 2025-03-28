@@ -321,9 +321,9 @@ type HeadwayOverviewType {
 
 type HeadwayTimeSeriesType {
   ts: DateTime!
-  actualWaitTime: Float!
-  excessWaitTime: Float!
-  scheduledWaitTime: Float!
+  actualWaitTime: Float
+  excessWaitTime: Float
+  scheduledWaitTime: Float
 }
 
 type LineType {
