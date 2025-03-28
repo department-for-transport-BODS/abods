@@ -18,6 +18,7 @@ let nextUniqueId = 0;
   selector: "app-segmented-toggle-item",
   templateUrl: "./segmented-toggle-item.component.html",
   styleUrls: ["./segmented-toggle-item.component.scss"],
+  standalone: false,
 })
 export class SegmentedToggleItemComponent {
   @Input()

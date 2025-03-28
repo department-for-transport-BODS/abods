@@ -10,6 +10,7 @@ enum MapboxStyleOption {
   selector: "app-map-view-toggle",
   templateUrl: "./map-view-toggle.component.html",
   styleUrls: ["./map-view-toggle.component.scss"],
+  standalone: false,
 })
 export class MapViewToggleComponent {
   @Output() mapboxStyle = new EventEmitter<string>();

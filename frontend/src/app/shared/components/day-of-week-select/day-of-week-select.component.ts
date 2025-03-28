@@ -6,6 +6,7 @@ import { getDefaultDayOfWeekFlags } from "./day-of-week-utils";
   selector: "app-day-of-week-select",
   templateUrl: "./day-of-week-select.component.html",
   styleUrls: ["./day-of-week-select.component.scss"],
+  standalone: false,
 })
 export class DayOfWeekSelectComponent {
   @Input() value = getDefaultDayOfWeekFlags();

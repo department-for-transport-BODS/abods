@@ -45,6 +45,7 @@ export const removeAdminAreaIds = (params: PerformanceParams) => {
 @Component({
   templateUrl: "view-service.component.html",
   styleUrls: ["../on-time.component.scss"],
+  standalone: false,
 })
 export class ViewServiceComponent implements OnInit, OnDestroy {
   allOperators: OperatorType[] = [];

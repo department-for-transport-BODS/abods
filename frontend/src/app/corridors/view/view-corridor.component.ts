@@ -48,6 +48,7 @@ import {
 @Component({
   templateUrl: "view-corridor.component.html",
   styleUrls: ["./view-corridor.component.scss"],
+  standalone: false,
 })
 export class ViewCorridorComponent implements OnInit, OnDestroy {
   dateRange = new FormControl(

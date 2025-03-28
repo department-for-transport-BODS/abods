@@ -1,5 +1,5 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { APP_INITIALIZER, NgModule } from "@angular/core";
+import { NgModule, inject, provideAppInitializer } from "@angular/core";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -49,13 +49,13 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
     AccessibilityModule,
   ],
   providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (config: ConfigService) => async () =>
-        await config.loadConfig(),
-      deps: [ConfigService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const initializerFn = (
+        (config: ConfigService) => async () =>
+          await config.loadConfig()
+      )(inject(ConfigService));
+      return initializerFn();
+    }),
     {
       provide: MAPBOX_API_KEY,
       useFactory: (config: ConfigService) => config.mapboxToken,

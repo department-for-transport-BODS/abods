@@ -10,6 +10,7 @@ import {
   selector: "app-stat",
   templateUrl: "./stat.component.html",
   styleUrls: ["./stat.component.scss"],
+  standalone: false,
 })
 export class StatComponent<T> implements AfterViewInit {
   @Input() label?: string;

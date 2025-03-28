@@ -15,6 +15,7 @@ let nextUniqueId = 0;
   templateUrl: "./accordion.component.html",
   styleUrls: ["./accordion.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class AccordionComponent implements AfterContentChecked {
   private _uid = `gds-accordion-${nextUniqueId++}`;

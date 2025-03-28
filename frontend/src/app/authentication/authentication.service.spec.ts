@@ -22,7 +22,11 @@ import {
   withInterceptorsFromDi,
 } from "@angular/common/http";
 
-@Component({ template: "", selector: "app-mock-login" })
+@Component({
+  template: "",
+  selector: "app-mock-login",
+  standalone: false,
+})
 export class MockLoginComponent {}
 
 describe("AuthenticationService", () => {

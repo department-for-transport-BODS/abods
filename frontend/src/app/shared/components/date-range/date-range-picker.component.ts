@@ -13,6 +13,7 @@ import { DateRangeService } from "../../services/date-range.service";
 @Component({
   selector: "app-date-range-picker",
   template: `<app-date-range [formControl]="dateRange" />`,
+  standalone: false,
 })
 export class DateRangePickerComponent implements OnInit, OnChanges {
   constructor(private dateRangeService: DateRangeService) {}

@@ -22,6 +22,7 @@ import { DateRangeService } from "../../services/date-range.service";
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class DateRangeComponent implements ControlValueAccessor {
   value: FromToPreset;

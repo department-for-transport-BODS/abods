@@ -10,6 +10,7 @@ export interface IHeatmap {
   selector: "app-datenav",
   templateUrl: "./datenav.component.html",
   styleUrls: ["./datenav.component.scss"],
+  standalone: false,
 })
 export class DatenavComponent {
   @Input() stats: IHeatmap[] | undefined = [];

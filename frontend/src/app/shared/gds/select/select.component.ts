@@ -22,6 +22,7 @@ let nextUniqueId = 0;
       multi: true,
     },
   ],
+  standalone: false,
 })
 export class SelectComponent implements ControlValueAccessor, AfterViewInit {
   @Input() label?: string;

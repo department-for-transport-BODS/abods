@@ -16,7 +16,7 @@ import {
 } from "src/generated/graphql";
 import { Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { GraphQLError } from "graphql";
+import { GraphQLFormattedError } from "graphql";
 
 interface MutationResponse<T> {
   error?: string | null;
@@ -35,7 +35,7 @@ const serverFailureResponse = <T>(): MutationResponse<T> =>
   );
 
 const mutationFailureResponse = <T>(
-  errors: Readonly<GraphQLError[] | undefined>,
+  errors: Readonly<GraphQLFormattedError[] | undefined>,
 ): MutationResponse<T> => {
   return failureResponse(
     errors

@@ -7,6 +7,7 @@ import { incompleteConversion } from "../../../shared/incompleteReasonUtils";
   selector: "app-otp-stats",
   templateUrl: "./otp-stats.component.html",
   styleUrls: ["./otp-stats.component.scss"],
+  standalone: false,
 })
 export class OtpStatsComponent {
   @Input() view: JourneyInfo | null = null;

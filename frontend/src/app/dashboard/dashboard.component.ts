@@ -29,6 +29,7 @@ type TimingPointsOption = "timing-points" | "all-stops";
   selector: "app-dashboard",
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],
+  standalone: false,
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   subs: Subscription[] = [];

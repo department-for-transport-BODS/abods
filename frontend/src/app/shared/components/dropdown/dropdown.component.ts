@@ -8,6 +8,7 @@ const dropdownBorder = 1;
   selector: "app-dropdown",
   templateUrl: "./dropdown.component.html",
   styleUrls: ["./dropdown.component.scss"],
+  standalone: false,
 })
 export class DropdownComponent implements OnInit {
   @Input() triggerLabel!: string;

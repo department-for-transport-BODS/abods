@@ -13,6 +13,7 @@ import { OperatorService } from "../../shared/services/operator.service";
 @Component({
   templateUrl: "view-operator.component.html",
   styleUrls: ["../on-time.component.scss"],
+  standalone: false,
 })
 export class ViewOperatorComponent implements OnInit, OnDestroy {
   allOperators: OperatorType[] = [];

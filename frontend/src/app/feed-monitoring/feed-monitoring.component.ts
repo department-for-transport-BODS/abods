@@ -32,6 +32,7 @@ import { SelectableTextCellRendererComponent } from "../shared/components/ag-gri
   selector: "app-feed-monitoring",
   templateUrl: "./feed-monitoring.component.html",
   styleUrls: ["./feed-monitoring.component.scss"],
+  standalone: false,
 })
 export class FeedMonitoringComponent
   implements OnInit, AfterViewInit, OnDestroy

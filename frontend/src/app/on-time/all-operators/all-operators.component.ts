@@ -11,6 +11,7 @@ import { nonNullishArray } from "../../shared/array-operators";
 @Component({
   templateUrl: "all-operators.component.html",
   styleUrls: ["./all-operators.component.scss"],
+  standalone: false,
 })
 export class AllOperatorsComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();

@@ -132,6 +132,7 @@ const column: (
   selector: "app-on-time-grid",
   templateUrl: "./on-time-grid.component.html",
   styleUrls: ["./on-time-grid.component.scss"],
+  standalone: false,
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   private _columnDescriptions: ColumnDescription[] = [];

@@ -18,6 +18,7 @@ import { AlertMode, AlertListViewModel } from "./alert-list-view-model";
   selector: "app-alert-list",
   templateUrl: "./alert-list.component.html",
   styleUrls: ["./alert-list.component.scss"],
+  standalone: false,
 })
 export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
   @Input() mode!: AlertMode;
@@ -82,7 +83,7 @@ export class AlertListComponent implements OnInit, OnDestroy, OnChanges {
         takeUntil(this.destroy$),
       )
       .subscribe((events) => {
-        this.events = events!
+        this.events = events
           .map((event) => new AlertListViewModel(event, this.mode))
           .filter((x) => x.type)
           .sort((a, b) => a.compare(b));

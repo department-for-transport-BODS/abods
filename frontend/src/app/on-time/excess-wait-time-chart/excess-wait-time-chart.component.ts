@@ -43,6 +43,7 @@ const tooltipHtml = (
   styles: [
     ":host { flex-direction: column; justify-content: space-evenly; } .chart { width: 100%; flex-grow: 1; }",
   ],
+  standalone: false,
 })
 export class ExcessWaitTimeChartComponent implements OnInit, AfterViewInit {
   @ViewChild(XYChart) chart!: XYChart;

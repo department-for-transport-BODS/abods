@@ -57,6 +57,7 @@ import bboxClip from "@turf/bbox-clip";
   selector: "app-stop-analysis",
   templateUrl: "./stop-analysis.component.html",
   styleUrls: ["./stop-analysis.component.scss"],
+  standalone: false,
 })
 export class StopAnalysisComponent implements OnInit, OnDestroy {
   stopPoints: FeatureCollection<Point, StopStatistics> = {

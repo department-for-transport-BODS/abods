@@ -17,6 +17,7 @@ export interface ButtonCellRendererParams extends ICellRendererParams {
     {{ label }}
   </button>`,
   styleUrls: ["./button-cell.component.scss"],
+  standalone: false,
 })
 export class ButtonCellRendererComponent implements AgRendererComponent {
   label?: string;

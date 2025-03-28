@@ -17,6 +17,7 @@ import { removeAdminAreaIds } from "../view-service/view-service.component";
     [data]="data"
     [csvFilename]="csvFilename"
   />`,
+  standalone: false,
 })
 export class StopsGridComponent implements OnInit, OnDestroy {
   data?: StopPerformance[];

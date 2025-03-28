@@ -7,6 +7,7 @@ import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
   selector: "app-journey-nav",
   templateUrl: "journey-nav.component.html",
   styleUrls: ["./journey-nav.component.scss"],
+  standalone: false,
 })
 export class JourneyNavComponent {
   @Input() loading = false;

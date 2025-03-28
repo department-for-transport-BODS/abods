@@ -8,6 +8,7 @@ import { WholeNumberFormControlDirective } from "./whole-number-form-control.dir
   template: `<form [formGroup]="form">
     <input formControlName="number" type="number" wholeNumber />
   </form>`,
+  standalone: false,
 })
 class TestComponent {
   form: FormGroup;

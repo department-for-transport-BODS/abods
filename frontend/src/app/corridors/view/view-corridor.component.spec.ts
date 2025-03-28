@@ -78,6 +78,7 @@ const corridor = {
   providers: [
     { provide: MapComponent, useExisting: forwardRef(() => StubMapComponent) },
   ],
+  standalone: false,
 })
 export class StubMapComponent implements OnInit {
   @Output() moveEnd = new EventEmitter<void>();

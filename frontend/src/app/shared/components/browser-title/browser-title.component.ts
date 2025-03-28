@@ -10,6 +10,7 @@ import { BrowserTitleService } from "./browser-title.service";
 @Component({
   selector: "app-browser-title",
   template: `<ng-container *ngIf="renderTitle">{{ title }}</ng-container>`,
+  standalone: false,
 })
 export class BrowserTitleComponent implements OnChanges {
   @Input() title?: string;

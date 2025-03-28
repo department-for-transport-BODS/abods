@@ -66,6 +66,7 @@ export interface BoxPlotChartDataItem {
       }
     `,
   ],
+  standalone: false,
 })
 export class BoxPlotChartComponent
   implements

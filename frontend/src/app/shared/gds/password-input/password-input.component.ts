@@ -18,6 +18,7 @@ let nextUniqueId = 0;
       multi: true,
     },
   ],
+  standalone: false,
 })
 export class PasswordInputComponent implements ControlValueAccessor {
   @Input()
