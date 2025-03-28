@@ -107,7 +107,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   gridOptions: GridOptions = {
     rowSelection: "single",
     suppressDragLeaveHidesColumns: true,
-    suppressCellSelection: false,
+    suppressCellFocus: false,
     onFirstDataRendered: this.gridHeaderHeightSetter.bind(this),
   };
 

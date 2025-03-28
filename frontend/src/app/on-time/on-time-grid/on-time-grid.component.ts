@@ -274,7 +274,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   gridOptions: GridOptions = {
     rowSelection: "single",
     suppressDragLeaveHidesColumns: true,
-    suppressCellSelection: false,
+    suppressCellFocus: false,
     onFirstDataRendered: this.headerHeightSetter.bind(this),
     noRowsOverlayComponent: NoRowsOverlayComponent,
     noRowsOverlayComponentParams: () => this.overlayParams,

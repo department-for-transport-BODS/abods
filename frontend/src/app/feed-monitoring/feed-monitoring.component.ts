@@ -55,7 +55,7 @@ export class FeedMonitoringComponent
       headerHeight: 45,
       rowHeight: 57,
       rowSelection: "single",
-      suppressCellSelection: false,
+      suppressCellFocus: false,
       suppressDragLeaveHidesColumns: true,
     };
   };
