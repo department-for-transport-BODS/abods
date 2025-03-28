@@ -46,6 +46,9 @@
             "verbose": false,
             "browser": "src/main.ts",
             "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": ["mixed-decls", "import", "global-builtin"]
+              },
               "includePaths": [
                 "."
               ]
