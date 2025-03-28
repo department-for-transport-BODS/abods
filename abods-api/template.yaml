@@ -7,7 +7,7 @@ Globals:
   Function:
     Architectures:
       - x86_64
-    Runtime: nodejs18.x
+    Runtime: nodejs20.x
     MemorySize: 1024
     Timeout: 60
 
