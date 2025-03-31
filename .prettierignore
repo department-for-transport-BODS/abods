@@ -13,5 +13,6 @@ VERSION
 *.prisma
 Makefile
 *.sh
+*.png
 *.toml
 frontend/src/freshdesk/*
