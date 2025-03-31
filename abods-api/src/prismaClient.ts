@@ -88,9 +88,7 @@ async function initialisePrismaClient(force = false): Promise<PrismaClient> {
       }),
     );
     try {
-      await prisma.$disconnect();
-      await prisma.$connect();
-      //await Promise.all([prisma.$disconnect(), prisma.$connect()]);
+      await Promise.all([prisma.$disconnect(), prisma.$connect()]);
     } catch (error) {
       sendErrorMetric(error);
       logger.error(error);
