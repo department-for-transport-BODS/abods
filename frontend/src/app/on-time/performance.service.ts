@@ -39,9 +39,7 @@ export class PerformanceService {
     );
   }
 
-  fetchOverviewStats(
-    params: PerformanceParams,
-  ): Observable<{
+  fetchOverviewStats(params: PerformanceParams): Observable<{
     onTime?: PunctualityOverview;
     headway?: HeadwayOverviewType;
   }> {
