@@ -411,14 +411,14 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  excessWaitTime?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime?: Maybe<Scalars['Float']['output']>;
-  excessWaitTime?: Maybe<Scalars['Float']['output']>;
-  scheduledWaitTime?: Maybe<Scalars['Float']['output']>;
+  actual?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
+  scheduled?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -1599,14 +1599,14 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
-  excessWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayTimeSeriesType'] = ResolversParentTypes['HeadwayTimeSeriesType']> = ResolversObject<{
-  actualWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  excessWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  actual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  scheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

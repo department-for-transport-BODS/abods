@@ -3237,7 +3237,7 @@
         "isOneOf": null,
         "fields": [
           {
-            "name": "excessWaitTime",
+            "name": "excess",
             "description": null,
             "args": [],
             "type": {
@@ -3261,7 +3261,7 @@
         "isOneOf": null,
         "fields": [
           {
-            "name": "actualWaitTime",
+            "name": "actual",
             "description": null,
             "args": [],
             "type": {
@@ -3273,7 +3273,7 @@
             "deprecationReason": null
           },
           {
-            "name": "excessWaitTime",
+            "name": "excess",
             "description": null,
             "args": [],
             "type": {
@@ -3285,7 +3285,7 @@
             "deprecationReason": null
           },
           {
-            "name": "scheduledWaitTime",
+            "name": "scheduled",
             "description": null,
             "args": [],
             "type": {

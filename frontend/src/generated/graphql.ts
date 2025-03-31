@@ -411,14 +411,14 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  excessWaitTime?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime?: Maybe<Scalars['Float']['output']>;
-  excessWaitTime?: Maybe<Scalars['Float']['output']>;
-  scheduledWaitTime?: Maybe<Scalars['Float']['output']>;
+  actual?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
+  scheduled?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -2209,9 +2209,9 @@ export const HeadwayTimeSeriesDocument = gql`
   headwayMetrics {
     headwayTimeSeries(inputs: $params) {
       ts
-      actual: actualWaitTime
-      scheduled: scheduledWaitTime
-      excess: excessWaitTime
+      actual
+      scheduled
+      excess
     }
   }
 }
@@ -2231,7 +2231,7 @@ export const HeadwayOverviewDocument = gql`
     query headwayOverview($params: HeadwayInputType!) {
   headwayMetrics {
     headwayOverview(inputs: $params) {
-      excess: excessWaitTime
+      excess
     }
   }
 }

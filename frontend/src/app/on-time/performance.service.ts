@@ -5,10 +5,11 @@ import {
   PunctualityOverview,
   ServicePerformance,
 } from "./on-time.service";
-import { Headway, HeadwayService } from "./headway.service";
+import { HeadwayService } from "./headway.service";
 import { catchError, map } from "rxjs/operators";
 import { combineLatest, forkJoin, iif, Observable, of } from "rxjs";
 import { map as _map } from "lodash-es";
+import { HeadwayOverviewType } from "../../generated/graphql";
 
 export interface FrequentServicePerformance extends ServicePerformance {
   frequent: boolean;
@@ -40,7 +41,10 @@ export class PerformanceService {
 
   fetchOverviewStats(
     params: PerformanceParams,
-  ): Observable<{ onTime?: PunctualityOverview; headway?: Headway }> {
+  ): Observable<{
+    onTime?: PunctualityOverview;
+    headway?: HeadwayOverviewType;
+  }> {
     return combineLatest({
       onTime: this.onTimeService
         .fetchOnTimeStats(params)

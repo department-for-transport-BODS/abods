@@ -1116,7 +1116,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
 
       if (results.length < 1) {
         return {
-          excessWaitTime: undefined,
+          excess: undefined,
         };
       }
 
@@ -1136,7 +1136,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       }, headway);
 
       return {
-        excessWaitTime: headway.excessWaitTime / headway.headwayCount,
+        excess: headway.excessWaitTime / headway.headwayCount,
       };
     } catch (error) {
       logger.error(error, "An error occurred when getting headway overview");
@@ -1225,11 +1225,9 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         returnHeadways.push({
           ts: new Date(departure_hour),
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
-          actualWaitTime: headway.actual_headway / headway.headway_stops_count,
-          scheduledWaitTime:
-            headway.expected_headway / headway.headway_stops_count,
-          excessWaitTime:
-            headway.excess_wait_time / headway.headway_stops_count,
+          actual: headway.actual_headway / headway.headway_stops_count,
+          scheduled: headway.expected_headway / headway.headway_stops_count,
+          excess: headway.excess_wait_time / headway.headway_stops_count,
         });
       }
 
