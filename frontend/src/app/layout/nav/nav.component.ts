@@ -21,11 +21,7 @@ export class NavComponent implements OnInit {
     return info.flags.some((f) => f === flag);
   }
   canViewServiceMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map(
-      (info) =>
-        info.canViewServiceMonitoring &&
-        this.hasFlag(info, FeatureFlag.ServiceMonitoring),
-    ),
+    map((info) => info.canViewServiceMonitoring),
   );
   canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
     map((info) => this.hasFlag(info, FeatureFlag.DataMonitoring)),
