@@ -89,7 +89,6 @@ export class LiveStatusComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe((operatorLiveStatus) => {
-        console.log("operatorLiveStatus----", operatorLiveStatus);
         if (operatorLiveStatus) {
           this.chartsLoading = false;
           this.operatorLoading = false;
