@@ -5,6 +5,7 @@ import {
   Input,
   TemplateRef,
 } from "@angular/core";
+import { StatTemplateDirective } from "./stat.directive";
 
 @Component({
   selector: "app-stat",
@@ -18,7 +19,8 @@ export class StatComponent<T> implements AfterViewInit {
   @Input() tooltip?: string | TemplateRef<any>;
   @Input() identifier?: string;
   @Input() statLoaded = true;
-  @ContentChild("statTemplate") statTemplate?: TemplateRef<T>;
+  @ContentChild(StatTemplateDirective, { read: TemplateRef })
+  statTemplate?: TemplateRef<T>;
   @Input() statFormatter?: (t: T) => string;
 
   format(): string {
