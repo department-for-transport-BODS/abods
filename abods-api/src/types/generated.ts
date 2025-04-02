@@ -293,6 +293,12 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
+export enum FeatureFlag {
+  DataMonitoring = 'DataMonitoring',
+  ServiceMonitoring = 'ServiceMonitoring',
+  StopAnalysis = 'StopAnalysis'
+}
+
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -464,6 +470,7 @@ export enum LineDirection {
 
 export type LineType = {
   __typename?: 'LineType';
+  adminAreaIds: Array<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   number: Scalars['String']['output'];
@@ -494,6 +501,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  flags: Array<FeatureFlag>;
   serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1204,6 +1212,7 @@ export type ResolversTypes = ResolversObject<{
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
   EventType: ResolverTypeWrapper<Partial<EventType>>;
+  FeatureFlag: ResolverTypeWrapper<Partial<FeatureFlag>>;
   FeedMonitoringType: ResolverTypeWrapper<Partial<FeedMonitoringType>>;
   Float: ResolverTypeWrapper<Partial<Scalars['Float']['output']>>;
   FrequentServiceInfoFilterType: ResolverTypeWrapper<Partial<FrequentServiceInfoFilterType>>;
@@ -1638,6 +1647,7 @@ export type JourneyResultResolvers<ContextType = RequestContext, ParentType exte
 }>;
 
 export type LineTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LineType'] = ResolversParentTypes['LineType']> = ResolversObject<{
+  adminAreaIds?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1668,6 +1678,7 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
   serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

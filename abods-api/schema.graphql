@@ -330,6 +330,7 @@ type LineType {
   id: String!
   name: String!
   number: String!
+  adminAreaIds: [Int!]!
 }
 
 type ServicePatternType {
@@ -492,6 +493,13 @@ type LoginInfo {
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
   serviceMonitoringEmbedUrl: String
+  flags: [FeatureFlag!]!
+}
+
+enum FeatureFlag {
+  ServiceMonitoring
+  DataMonitoring
+  StopAnalysis
 }
 
 type UserType {

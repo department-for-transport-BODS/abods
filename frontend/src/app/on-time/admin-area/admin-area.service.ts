@@ -82,28 +82,29 @@ export class AdminAreaService {
     FeatureCollection<Polygon, AdminArea>
   > {
     return this.fetchAdminAreas().pipe(
-      map((adminAreas) => {
-        const features = adminAreas.map((adminArea) => {
-          const boundaryPolygon = feature(
-            JSON.parse(adminArea.shape),
-            adminArea,
-          );
-
-          // The GeoJSON spec specifies the coordinate order lon-lat (or easting-northing), however
-          // the backend produces lat-lon, so we need to flip it. Do it in-place for performance.
-          // @see https://macwright.com/lonlat/
-          // @see https://www.npmjs.com/package/@turf/flip
-          // TODO convince the backend team to please change this
-          flip(boundaryPolygon, { mutate: true });
-
-          boundaryPolygon.bbox = bbox(boundaryPolygon);
-          return boundaryPolygon;
-        });
-        const boundaries = featureCollection(features);
-        boundaries.bbox = combineBounds(features.map((f) => f.bbox as BBox2d));
-        return boundaries;
-      }),
+      map(computeAdminAreaBoundaries),
       shareReplay(),
     );
   }
 }
+
+export const computeAdminAreaBoundaries = (adminAreas: AdminArea[]) => {
+  const features = adminAreas.map(computeAreaBoundary);
+  const boundaries = featureCollection(features);
+  boundaries.bbox = combineBounds(features.map((f) => f.bbox as BBox2d));
+  return boundaries;
+};
+
+const computeAreaBoundary = (adminArea: AdminArea) => {
+  const boundaryPolygon = feature(JSON.parse(adminArea.shape), adminArea);
+
+  // The GeoJSON spec specifies the coordinate order lon-lat (or easting-northing), however
+  // the backend produces lat-lon, so we need to flip it. Do it in-place for performance.
+  // @see https://macwright.com/lonlat/
+  // @see https://www.npmjs.com/package/@turf/flip
+  // TODO convince the backend team to please change this
+  flip(boundaryPolygon, { mutate: true });
+
+  boundaryPolygon.bbox = bbox(boundaryPolygon);
+  return boundaryPolygon;
+};
