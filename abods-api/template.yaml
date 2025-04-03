@@ -170,7 +170,7 @@ Resources:
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
           ABODS_FLAG_DataMonitoring: !If [IsNotProd, "true", "false"]
           ABODS_FLAG_ServiceMonitoring: !If [IsNotProd, "true", "false"]
-          ABODS_FLAG_StopAnalysis: "true"
+          ABODS_FLAG_StopAnalysis: !If [IsNotProd, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
