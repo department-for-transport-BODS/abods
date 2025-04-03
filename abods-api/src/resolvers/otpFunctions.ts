@@ -1102,7 +1102,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       };
 
       where.excess_wait_time = {
-        not: undefined,
+        not: null,
       };
 
       const results =
@@ -1156,13 +1156,13 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
       };
 
       where.actual_headway = {
-        not: undefined,
+        not: null,
       };
       where.expected_headway = {
-        not: undefined,
+        not: null,
       };
       where.excess_wait_time = {
-        not: undefined,
+        not: null,
       };
 
       const results =
