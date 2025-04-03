@@ -9,7 +9,10 @@ jobs:
     name: remove stale branches
     runs-on: ubuntu-latest
     permissions:
+      # https://github.com/fpicalausa/remove-stale-branches/issues/25#issuecomment-2739147694
       contents: write
+      actions: read
+      pull-requests: read
     steps:
       - uses: fpicalausa/remove-stale-branches@v2.2.0
         with:
