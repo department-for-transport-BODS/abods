@@ -16,6 +16,5 @@ query operatorLines(
     id
     name
     number
-    adminAreaIds
   }
 }

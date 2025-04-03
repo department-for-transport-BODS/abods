@@ -2,7 +2,6 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuardService } from "../authentication/auth-guard.service";
 import { ViewServiceMonitoringDashboardComponent } from "./view-service-monitoring-dashboard/view-service-monitoring-dashboard.component";
-import { HelpdeskResolver } from "../shared/resolvers/helpdesk.resolver";
 
 const routes: Routes = [
   {
@@ -11,11 +10,6 @@ const routes: Routes = [
     children: [
       { path: "", component: ViewServiceMonitoringDashboardComponent },
     ],
-    data: {
-      helpdeskFolder: "serviceMonitoring",
-      helpdeskTitle: "Service monitoring",
-    },
-    resolve: { helpdesk: HelpdeskResolver },
   },
 ];
 

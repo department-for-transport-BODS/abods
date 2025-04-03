@@ -293,12 +293,6 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
-export enum FeatureFlag {
-  DataMonitoring = 'DataMonitoring',
-  ServiceMonitoring = 'ServiceMonitoring',
-  StopAnalysis = 'StopAnalysis'
-}
-
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -470,7 +464,6 @@ export enum LineDirection {
 
 export type LineType = {
   __typename?: 'LineType';
-  adminAreaIds: Array<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   number: Scalars['String']['output'];
@@ -501,7 +494,6 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
-  flags: Array<FeatureFlag>;
   serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1120,7 +1112,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1460,7 +1452,7 @@ export type OperatorLinesQueryVariables = Exact<{
 }>;
 
 
-export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string, adminAreaIds: Array<number> }> };
+export type OperatorLinesQuery = { __typename?: 'Query', lines: Array<{ __typename?: 'LineType', id: string, name: string, number: string }> };
 
 export type StopAnalysisQueryVariables = Exact<{
   adminAreaIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -1696,7 +1688,6 @@ export const UserDocument = gql`
     canViewServiceMonitoring
     canEditAllAlerts
     serviceMonitoringEmbedUrl
-    flags
   }
 }
     `;
@@ -2772,7 +2763,6 @@ export const OperatorLinesDocument = gql`
     id
     name
     number
-    adminAreaIds
   }
 }
     `;

@@ -2,9 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import { initAll } from "govuk-frontend";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { NavService } from "./nav.service";
+import { ConfigService } from "../../config/config.service";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
-import { map } from "rxjs/operators";
-import { FeatureFlag, LoginInfo } from "../../../generated/graphql";
+import { LoginInfo } from "../../../generated/graphql";
 
 @Component({
   selector: "app-nav",
@@ -12,30 +12,20 @@ import { FeatureFlag, LoginInfo } from "../../../generated/graphql";
   styleUrls: ["./nav.component.scss"],
 })
 export class NavComponent implements OnInit {
+  loginInfo: LoginInfo | null = null;
+
   constructor(
     public navService: NavService,
     private helpdeskPanelService: HelpdeskPanelService,
+    public configService: ConfigService,
     private authUserService: AuthenticatedUserService,
   ) {}
-  hasFlag(info: LoginInfo, flag: FeatureFlag) {
-    return info.flags.some((f) => f === flag);
-  }
-  canViewServiceMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map(
-      (info) =>
-        info.canViewServiceMonitoring &&
-        this.hasFlag(info, FeatureFlag.ServiceMonitoring),
-    ),
-  );
-  canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.DataMonitoring)),
-  );
-  canViewStopAnalysis = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.StopAnalysis)),
-  );
 
   ngOnInit(): void {
     initAll();
+    this.authUserService.authenticatedUser$.subscribe((loginInfo) => {
+      this.loginInfo = loginInfo;
+    });
   }
 
   openHelpdesk() {

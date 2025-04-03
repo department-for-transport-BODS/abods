@@ -116,11 +116,6 @@ export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
       where: {
         noc_and_line_and_servicecode: args.serviceId,
       },
-      select: {
-        operator_noc: true,
-        line_name: true,
-        service_name: true,
-      },
     });
 
     if (!service) {
@@ -168,7 +163,6 @@ export const getLines: QueryResolvers["lines"] = async (
     .select("noc_and_line_and_servicecode as id")
     .select("service_name as name")
     .select("line_name as number")
-    .select("admin_area_id as adminAreaIds")
     .distinctOn("noc_and_line_and_servicecode")
     .execute();
 };
@@ -791,10 +785,6 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
             ),
           },
         },
-        select: {
-          noc_and_line_and_servicecode: true,
-          service_name: true,
-        },
       });
 
       return performanceMetrics.map((stats) => ({
@@ -986,10 +976,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               noc_and_line_and_servicecode: {
                 in: noc_and_lines,
               },
-            },
-            select: {
-              service_name: true,
-              noc_and_line_and_servicecode: true,
             },
           });
 

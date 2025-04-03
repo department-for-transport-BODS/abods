@@ -1,7 +1,6 @@
 import {
   AlertType,
   AlertTypeEnum,
-  FeatureFlag,
   LoginInfo,
   LoginResponse,
   Maybe,
@@ -18,7 +17,6 @@ import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
-import { isLocal } from "../prismaClient.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 const accountTypes = {
@@ -68,22 +66,7 @@ export const getUsers: QueryResolvers["users"] = async (
     return null;
   }
 };
-
-const getFeatureFlags = () => {
-  const flags: FeatureFlag[] = [];
-  const flagPrefix = "ABODS_FLAG_";
-  for (const key of Object.keys(FeatureFlag)) {
-    const envVarName = flagPrefix + key;
-    const flag = FeatureFlag[key as FeatureFlag];
-    if (!isLocal()) {
-      if (!(envVarName in process.env)) continue;
-      if (process.env[envVarName] !== "true") continue;
-    }
-    flags.push(flag);
-  }
-  return flags;
-};
-
+// Summary: fetch a single user by id
 export const getUser: QueryResolvers["user"] = async (
   _,
   __,
@@ -122,7 +105,6 @@ export const getUser: QueryResolvers["user"] = async (
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
-      flags: getFeatureFlags(),
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");

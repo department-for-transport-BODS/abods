@@ -68,8 +68,8 @@
           />
         </app-segmented-toggle>
         <app-segmented-toggle
-          [(ngModel)]="stopType"
-          (ngModelChange)="onStopTypeChanged()"
+          [(ngModel)]="timingPointsOption"
+          (ngModelChange)="processStopData(visibleBounds)"
         >
           <app-segmented-toggle-item
             name="stops-filter"
@@ -97,28 +97,23 @@
       </div>
       <div>
         <label class="govuk-label" for="operators">Operators</label>
-        <gds-multiselect-checkbox
-          [options]="operators$ | async"
-          [ngModel]="operatorIds"
+        <app-operator-multi-select
+          [value]="operatorIds"
+          fieldId="operators"
           (selectedChange)="onOperatorsChanged($event)"
-          [showAll]="true"
-          labelForId="operators"
-          showAllLabel="All Operators"
-          placeholderText="Operators"
-          ariaLabel="Operators"
         />
       </div>
       <div>
         <label class="govuk-label" for="services">Services</label>
-        <gds-multiselect-checkbox
-          [options]="services$ | async"
-          [ngModel]="serviceIds"
+        <app-service-multi-select
+          [operators]="operatorIds"
+          [startDate]="from"
+          [endDate]="to"
+          [value]="serviceIds"
+          [disabled]="operatorIds.length === 0"
+          disabledText="Select an operator"
+          fieldId="services"
           (selectedChange)="onServicesChanged($event)"
-          [showAll]="true"
-          labelForId="services"
-          showAllLabel="All Services"
-          placeholderText="Services"
-          ariaLabel="Services"
         />
       </div>
     </div>
@@ -181,7 +176,7 @@
             ],
             'circle-stroke-color': '#ffffff'
           }"
-          (layerClick)="onLayerClick($event)"
+          (layerClick)="onClusterClick($event)"
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
@@ -250,51 +245,6 @@
             'icon-image': timingPointIcons
           }"
         />
-        <mgl-geojson-source
-          id="boundaries"
-          promoteId="id"
-          [data]="visibleAdminAreas"
-        />
-        <mgl-layer
-          id="admin-area-boundaries"
-          source="boundaries"
-          type="fill"
-          [paint]="{
-            'fill-color': '#28A197',
-            'fill-opacity': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              9,
-              [
-                'case',
-                ['boolean', ['feature-state', 'hover'], false],
-                0.5,
-                0.3
-              ],
-              adminAreaHiddenZoomLevel,
-              0
-            ]
-          }"
-          (layerMouseMove)="onBoundaryHover($event)"
-          (layerMouseLeave)="onClearBoundaryHover()"
-          (layerClick)="onLayerClick($event)"
-        />
-        <mgl-popup
-          *ngIf="hoveredAdminArea && labelPosition && zoomLevel < 11"
-          [feature]="labelPosition"
-          [closeButton]="false"
-          [closeOnClick]="false"
-          maxWidth="200"
-          className="gds-popup"
-        >
-          <div
-            class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
-          >
-            {{ hoveredAdminArea.properties.name }}
-          </div>
-          <div class="govuk-body-small">{{ hoveredAdminArea.id }}</div>
-        </mgl-popup>
         <mgl-popup
           *ngIf="selectedStop"
           [lngLat]="[selectedStop.longitude, selectedStop.latitude]"
@@ -409,7 +359,7 @@
         <mgl-control mglGeolocate />
       </mgl-map>
       <div class="map-overlay">
-        <p *ngIf="boundingBoxTooBig && map">Zoom in to show stops</p>
+        <p *ngIf="boundingBoxTooBig">Zoom in to show stops</p>
         <app-spinner *ngIf="isLoading" />
       </div>
     </div>

@@ -15,6 +15,5 @@ query user {
     canViewServiceMonitoring
     canEditAllAlerts
     serviceMonitoringEmbedUrl
-    flags
   }
 }

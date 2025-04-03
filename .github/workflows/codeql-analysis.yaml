@@ -1,5 +1,4 @@
 name: "code quality check"
-permissions: read-all
 
 on:
   push:
@@ -21,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["javascript"]
+        language: ["cpp", "csharp", "go", "java", "javascript", "python"]
 
     steps:
       - name: Checkout repository

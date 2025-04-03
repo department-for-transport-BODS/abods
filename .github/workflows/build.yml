@@ -1,6 +1,5 @@
 name: build application
 run-name: build application from ${{ github.ref_name }} @ ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
-permissions: read-all
 
 on:
   workflow_dispatch:
