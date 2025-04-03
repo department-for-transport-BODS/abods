@@ -90,7 +90,7 @@ export const getFrequentServiceActualHours = async (
     distinct: ["departure_hour"],
     where: {
       ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-      actual_headway: { gt: 0 },
+      actual_headway: { not: null },
     },
     select: { departure_hour: true },
   });
