@@ -128,6 +128,14 @@ enum MatchType {
   evidenced
 }
 
+"""
+Maps to 'timing-points' and 'all-stops'
+"""
+enum StopTypeOption {
+  timing_points
+  all_stops
+}
+
 type CorridorSummaryStatsType {
   averageTransitTime: Int
   numberOfServices: Int

@@ -73,6 +73,7 @@ import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdes
 import { LocationSearchComponent } from "./components/location-search/location-search.component";
 import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of-week-select.component";
 import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle/match-type-segmented-toggle.component";
+import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/stop-type-segmented-toggle.component";
 
 @NgModule({
   declarations: [
@@ -91,6 +92,7 @@ import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle
     StatusComponent,
     LinkComponent,
     MatchTypeSegmentedToggleComponent,
+    StopTypeSegmentedToggleComponent,
     SegmentedToggleComponent,
     SegmentedToggleItemComponent,
     TabsComponent,
@@ -181,6 +183,7 @@ import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle
     DateRangeComponent,
     DateComponent,
     MatchTypeSegmentedToggleComponent,
+    StopTypeSegmentedToggleComponent,
     SegmentedToggleComponent,
     SegmentedToggleItemComponent,
     PanelComponent,

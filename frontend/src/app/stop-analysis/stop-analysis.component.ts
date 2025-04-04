@@ -562,6 +562,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.apiFiltersChanged.next(undefined);
   }
 
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    this.matchType = matchTypeValue;
+    this.onFilterChanged();
+  }
+
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;

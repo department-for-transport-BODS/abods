@@ -13,7 +13,7 @@
         [allowAll]="true"
       >
       </app-operator-selector>
-      <app-segmented-toggle
+      <!-- <app-segmented-toggle
         legend="Show performance using data from"
         [(ngModel)]="timingPointsOption"
         (ngModelChange)="onTimingPointsToggleChange()"
@@ -30,7 +30,11 @@
           value="timing-points"
           label="Timing points"
         ></app-segmented-toggle-item>
-      </app-segmented-toggle>
+      </app-segmented-toggle> -->
+      <app-stop-type-segmented-toggle
+        [stopType]="stopType"
+        (toggleChange)="stopTypeToggleChange($event)"
+      />
     </div>
     <div class="dashboard__layout">
       <div class="dashboard__performance">

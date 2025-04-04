@@ -61,24 +61,9 @@
           [journey]="journeys[currentJourneyIndex]"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
-          <app-segmented-toggle
-            legend="Show performance using data from"
-            [(ngModel)]="matchType"
-            (ngModelChange)="onMatchTypeChange()"
-          >
-            <app-segmented-toggle-item
-              name="match-type"
-              identifier="estimated"
-              value="estimated"
-              label="Estimated"
-            ></app-segmented-toggle-item>
-            <app-segmented-toggle-item
-              name="match-type"
-              identifier="evidenced"
-              value="evidenced"
-              label="Evidenced"
-            ></app-segmented-toggle-item>
-          </app-segmented-toggle>
+          <app-match-type-segmented-toggle
+            (toggleChange)="matchTypeToggleChange($event)"
+          />
           <app-segmented-toggle
             legend="Show performance using data from"
             [(ngModel)]="timingPointsOption"

@@ -224,8 +224,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       .catch(console.log);
   }
 
-  onMatchTypeChange() {
-    const matchType = this.matchType;
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    const matchType = matchTypeValue;
     return this.router
       .navigate([], {
         queryParams: { match_type: matchType },
