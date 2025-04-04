@@ -316,14 +316,14 @@ type FrequentServiceInfoType {
 }
 
 type HeadwayOverviewType {
-  excessWaitTime: Float!
+  excess: Float
 }
 
 type HeadwayTimeSeriesType {
   ts: DateTime!
-  actualWaitTime: Float!
-  excessWaitTime: Float!
-  scheduledWaitTime: Float!
+  actual: Float
+  excess: Float
+  scheduled: Float
 }
 
 type LineType {
@@ -493,6 +493,13 @@ type LoginInfo {
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
   serviceMonitoringEmbedUrl: String
+  flags: [FeatureFlag!]!
+}
+
+enum FeatureFlag {
+  ServiceMonitoring
+  DataMonitoring
+  StopAnalysis
 }
 
 type UserType {

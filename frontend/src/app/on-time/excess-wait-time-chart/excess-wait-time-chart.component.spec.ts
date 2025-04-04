@@ -31,8 +31,8 @@ describe("ExcessWaitTimeChartComponent", () => {
   it("should set min and max dates", () => {
     spyOn(headwayService, "fetchTimeSeries").and.returnValue(of([]));
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO("2022-02-21"),
-      toTimestamp: DateTime.fromISO("2022-03-21"),
+      fromTimestamp: "2022-02-21",
+      toTimestamp: "2022-03-21",
       filters: { nocCodes: ["SCEM"], lineIds: ["LI12345"] },
     };
     spectator.detectChanges();

@@ -479,9 +479,9 @@ model timetable_frequent_summary_services {
   max_early                    Int
   max_late                     Int
   avg_time_difference          Decimal  @db.Decimal
-  expected_headway             Decimal  @db.Decimal
-  actual_headway               Decimal  @db.Decimal
-  excess_wait_time             Decimal  @db.Decimal
+  expected_headway             Decimal?  @db.Decimal
+  actual_headway               Decimal?  @db.Decimal
+  excess_wait_time             Decimal?  @db.Decimal
   headway_stops_count          Decimal  @db.Decimal
   estimated                    Boolean
   is_timing_point              Boolean?
@@ -567,7 +567,7 @@ view expected_services {
   service_name                 String
   date_of_journey              DateTime
   operator_noc                 String
-  admin_area_id                Int[]
+  admin_area_id                Int[] // TODO: fix - Actually an array of nullable integers but that can't be expressed in prisma
   expected_operator            expected_operators  @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys            expected_journeys[]
 
