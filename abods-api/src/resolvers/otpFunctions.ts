@@ -1297,8 +1297,7 @@ export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
   return toUkTime(timestamp)
     .set("hour", hours)
     .set("minute", minutes)
-    .startOf("minute")
-    .utc();
+    .startOf("minute");
 };
 
 export const getPrismaFiltersForOTPQuery = (

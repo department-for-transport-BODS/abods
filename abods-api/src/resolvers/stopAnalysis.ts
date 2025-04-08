@@ -96,12 +96,12 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   dbQuery = dbQuery.where(
     "t.departure_hour_only",
     ">=",
-    sql<Date>`${startDateTimeUtc.format("HH:mm:ss Z")}`,
+    sql<Date>`${startDateTimeUtc.format("HH:mm:ssZ")}::timetz`,
   );
   dbQuery = dbQuery.where(
     "t.departure_hour_only",
     "<=",
-    sql<Date>`${endDateTimeUtc.format("HH:mm:ss Z")}`,
+    sql<Date>`${endDateTimeUtc.format("HH:mm:ssZ")}::timetz`,
   );
 
   // todo: throw if the bounding box is too big
