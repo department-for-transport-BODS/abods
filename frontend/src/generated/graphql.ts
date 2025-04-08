@@ -411,14 +411,14 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  excessWaitTime: Scalars['Float']['output'];
+  excess?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime: Scalars['Float']['output'];
-  excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
+  actual?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
+  scheduled?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -1279,14 +1279,14 @@ export type HeadwayTimeSeriesQueryVariables = Exact<{
 }>;
 
 
-export type HeadwayTimeSeriesQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayTimeSeries?: Array<{ __typename?: 'HeadwayTimeSeriesType', ts: string, actual: number, scheduled: number, excess: number }> | null } | null };
+export type HeadwayTimeSeriesQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayTimeSeries?: Array<{ __typename?: 'HeadwayTimeSeriesType', ts: string, actual?: number | null, scheduled?: number | null, excess?: number | null }> | null } | null };
 
 export type HeadwayOverviewQueryVariables = Exact<{
   params: HeadwayInputType;
 }>;
 
 
-export type HeadwayOverviewQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayOverview?: { __typename?: 'HeadwayOverviewType', excess: number } | null } | null };
+export type HeadwayOverviewQuery = { __typename?: 'Query', headwayMetrics?: { __typename?: 'HeadwayMetricsType', headwayOverview?: { __typename?: 'HeadwayOverviewType', excess?: number | null } | null } | null };
 
 export type HeadwayFrequentServicesQueryVariables = Exact<{
   operatorId: Scalars['String']['input'];
@@ -2209,9 +2209,9 @@ export const HeadwayTimeSeriesDocument = gql`
   headwayMetrics {
     headwayTimeSeries(inputs: $params) {
       ts
-      actual: actualWaitTime
-      scheduled: scheduledWaitTime
-      excess: excessWaitTime
+      actual
+      scheduled
+      excess
     }
   }
 }
@@ -2231,7 +2231,7 @@ export const HeadwayOverviewDocument = gql`
     query headwayOverview($params: HeadwayInputType!) {
   headwayMetrics {
     headwayOverview(inputs: $params) {
-      excess: excessWaitTime
+      excess
     }
   }
 }

@@ -705,16 +705,14 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
               localityName: cur.localityName,
               adminAreaName: cur.adminAreaName,
               timingPoint: cur.timingPoint || acc[cur.atcoCode].timingPoint,
-              totalDelay: cur.totalDelay || acc[cur.atcoCode].totalDelay,
-              onTime: cur.onTime || acc[cur.atcoCode].onTime,
+              totalDelay: cur.totalDelay + acc[cur.atcoCode].totalDelay,
+              onTime: cur.onTime + acc[cur.atcoCode].onTime,
               completedDepartures:
-                cur.completedDepartures ||
-                acc[cur.atcoCode].completedDepartures,
+                cur.completedDepartures + acc[cur.atcoCode].completedDepartures,
               scheduledDepartures:
-                cur.scheduledDepartures ||
-                acc[cur.atcoCode].scheduledDepartures,
-              late: cur.late || acc[cur.atcoCode].late,
-              early: cur.early || acc[cur.atcoCode].early,
+                cur.scheduledDepartures + acc[cur.atcoCode].scheduledDepartures,
+              late: cur.late + acc[cur.atcoCode].late,
+              early: cur.early + acc[cur.atcoCode].early,
             };
             return acc;
           },

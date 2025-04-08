@@ -1101,6 +1101,10 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         gt: 0,
       };
 
+      where.excess_wait_time = {
+        not: null,
+      };
+
       const results =
         await context.db.timetable_frequent_summary_services.findMany({
           where: where,
@@ -1110,6 +1114,12 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
           },
         });
 
+      if (results.length < 1) {
+        return {
+          excess: undefined,
+        };
+      }
+
       let headway = {
         excessWaitTime: 0,
         headwayCount: 0,
@@ -1117,7 +1127,8 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
 
       headway = results.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
-          currentHeadway.excess_wait_time.toNumber() *
+          // We've filtered out null values in where clause so its fine to assert not null
+          currentHeadway.excess_wait_time!.toNumber() *
           currentHeadway.headway_stops_count.toNumber();
         acc.headwayCount += currentHeadway.headway_stops_count.toNumber();
 
@@ -1125,7 +1136,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       }, headway);
 
       return {
-        excessWaitTime: headway.excessWaitTime / headway.headwayCount,
+        excess: headway.excessWaitTime / headway.headwayCount,
       };
     } catch (error) {
       logger.error(error, "An error occurred when getting headway overview");
@@ -1142,6 +1153,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
 
       where.headway_stops_count = {
         gt: 0,
+      };
+
+      where.actual_headway = {
+        not: null,
+      };
+      where.expected_headway = {
+        not: null,
+      };
+      where.excess_wait_time = {
+        not: null,
       };
 
       const results =
@@ -1182,13 +1203,16 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
             headway_stops_count: 0,
           });
           headwayData.actual_headway +=
-            result.actual_headway.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.actual_headway!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.expected_headway +=
-            result.expected_headway.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.expected_headway!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.excess_wait_time +=
-            result.excess_wait_time.toNumber() *
+            // We've filtered out null values in where clause so its fine to assert not null
+            result.excess_wait_time!.toNumber() *
             result.headway_stops_count.toNumber();
           headwayData.headway_stops_count +=
             result.headway_stops_count.toNumber();
@@ -1201,11 +1225,9 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         returnHeadways.push({
           ts: new Date(departure_hour),
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
-          actualWaitTime: headway.actual_headway / headway.headway_stops_count,
-          scheduledWaitTime:
-            headway.expected_headway / headway.headway_stops_count,
-          excessWaitTime:
-            headway.excess_wait_time / headway.headway_stops_count,
+          actual: headway.actual_headway / headway.headway_stops_count,
+          scheduled: headway.expected_headway / headway.headway_stops_count,
+          excess: headway.excess_wait_time / headway.headway_stops_count,
         });
       }
 
