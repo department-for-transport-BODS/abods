@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  Renderer2,
-  ViewChild,
-} from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { createEmbeddingContext } from "amazon-quicksight-embedding-sdk";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
 import { DashboadEmbeddedUrlGQL } from "../../../generated/graphql";
@@ -21,10 +15,7 @@ export class ViewMonitorsComponent implements OnInit {
   errors: FormErrors[] = [];
   loading = false;
 
-  constructor(
-    private renderer: Renderer2,
-    private embeddedUrlQuery: DashboadEmbeddedUrlGQL,
-  ) {}
+  constructor(private embeddedUrlQuery: DashboadEmbeddedUrlGQL) {}
   ngOnInit(): void {
     this.loading = true;
     this.embeddedUrlQuery
@@ -62,14 +53,12 @@ export class ViewMonitorsComponent implements OnInit {
   }
 
   async embedDashboard(embedUrl: string): Promise<void> {
-    const iframe = this.renderer.createElement("iframe");
-    this.renderer.setAttribute(iframe, "width", "100%");
-    this.renderer.setAttribute(iframe, "height", "auto");
-    this.renderer.appendChild(this.dashboardContainer.nativeElement, iframe);
     const context = await createEmbeddingContext();
     await context.embedDashboard({
       url: embedUrl,
       container: this.dashboardContainer.nativeElement,
+      height: "700px",
+      width: "100%",
     });
   }
 }
