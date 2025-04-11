@@ -17,7 +17,7 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
   return db
     .selectFrom("bods_user as bu")
     .innerJoin("bods_userorganisation as buo", "buo.user_id", "bu.id")
-    .leftJoin("bods_organisation_organisation_admin_areas as ooaa", (join) =>
+    .leftJoin("organisation_organisation_admin_areas as ooaa", (join) =>
       join
         .onRef("buo.organisation_id", "=", "ooaa.organisation_id")
         .on("bu.is_superuser", "=", false),
