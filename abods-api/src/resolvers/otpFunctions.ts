@@ -51,7 +51,7 @@ import {
 import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
