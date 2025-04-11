@@ -130,6 +130,7 @@ export const getJourney: QueryResolvers["journey"] = async (
         timestamp_after_estimate: true,
         direction: true,
         incomplete_reason: true,
+        set_down: true,
       },
     })
     .then((r) =>
@@ -149,14 +150,11 @@ export const getJourney: QueryResolvers["journey"] = async (
           otp: s.otp_state ? OtpEnum[s.otp_state as OtpEnum] : null,
           directionRef: s.direction ?? "unknown",
           incompleteReason: s.incomplete_reason ?? 0,
+          setDown: s.set_down ?? false,
         }))
-        .sort((a, b) => {
-          return a.scheduledDepartureUtc < b.scheduledDepartureUtc
-            ? -1
-            : a.scheduledDepartureUtc > b.scheduledDepartureUtc
-              ? 1
-              : 0;
-        }),
+        .sort((a, b) =>
+          a.scheduledDepartureUtc.localeCompare(b.scheduledDepartureUtc),
+        ),
     );
 
   if (stops.length < 1) {

@@ -1004,6 +1004,7 @@ export type Stop = {
   longitude: Scalars['Float']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
+  setDown: Scalars['Boolean']['output'];
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
@@ -1526,7 +1527,7 @@ export type JourneyQueryVariables = Exact<{
 }>;
 
 
-export type JourneyQuery = { __typename?: 'Query', journey: { __typename?: 'JourneyResult', stops: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number }>, avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> } };
+export type JourneyQuery = { __typename?: 'Query', journey: { __typename?: 'JourneyResult', stops: Array<{ __typename?: 'Stop', estimatedDepartureUtc?: string | null, actualDepartureUtc?: string | null, scheduledDepartureUtc: string, latitude: number, longitude: number, stopIndex: number, stopName: string, stopId: number, isTimingPoint: boolean, otp?: OtpEnum | null, directionRef: string, incompleteReason: number, setDown: boolean }>, avls: Array<{ __typename?: 'AvlPoint', recordedAtTimeUtc: string, latitude: number, longitude: number, vehicleRef: string, directionRef: string }> } };
 
 export type JourneysQueryVariables = Exact<{
   dateOfJourney: Scalars['String']['input'];
@@ -2934,6 +2935,7 @@ export const JourneyDocument = gql`
       otp
       directionRef
       incompleteReason
+      setDown
     }
     avls {
       recordedAtTimeUtc
