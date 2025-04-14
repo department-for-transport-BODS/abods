@@ -105,8 +105,7 @@ Resources:
                   aws:SourceVpce: !Ref BodsVpcEndpoint
 
   # TODO: FIX THIS
-  #checkov:skip=CKV_AWS_363:Ensure Lambda Runtime is not deprecated
-  GraphQlFunction:
+  GraphQlFunction: #checkov:skip=CKV_AWS_363:Ensure Lambda Runtime is not deprecated
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
