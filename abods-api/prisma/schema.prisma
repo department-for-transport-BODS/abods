@@ -606,7 +606,7 @@ model transmodel_tracks {
   @@index([from_atco_code, to_atco_code], map: "transmodel_tracks_geometry_idx")
 }
 
-view organisation_organisation_admin_areas {
+view bods_organisation_organisation_admin_areas {
   id              Int  @unique // TODO: fix - nullable in db, not unique
   organisation_id Int?
   adminarea_id    Int?
