@@ -9,7 +9,7 @@ Globals:
       - x86_64
     # TODO: FIX THIS
     #checkov:skip=CKV_AWS_363:Ensure Lambda Runtime is not deprecated
-    Runtime: nodejs16.x 
+    Runtime: nodejs16.x
     MemorySize: 1024
     Timeout: 60
 
