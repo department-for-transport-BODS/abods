@@ -60,6 +60,8 @@ export class StopItemComponent {
 
   get incompleteReason() {
     if (!this.stop) return null;
+    if (this.stop.setDown)
+      return "unmatched set down stop - not included in OTP calculations";
     return incompleteIdToString(this.stop.incompleteReason);
   }
 }

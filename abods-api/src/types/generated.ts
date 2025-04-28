@@ -293,6 +293,12 @@ export type EventType = {
   type: Scalars['String']['output'];
 };
 
+export enum FeatureFlag {
+  DataMonitoring = 'DataMonitoring',
+  ServiceMonitoring = 'ServiceMonitoring',
+  StopAnalysis = 'StopAnalysis'
+}
+
 export type FeedMonitoringType = {
   __typename?: 'FeedMonitoringType';
   availability?: Maybe<Scalars['Float']['output']>;
@@ -405,14 +411,14 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  excessWaitTime: Scalars['Float']['output'];
+  excess?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime: Scalars['Float']['output'];
-  excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
+  actual?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
+  scheduled?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -495,6 +501,7 @@ export type LoginInfo = {
   canEditAllAlerts: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
+  flags: Array<FeatureFlag>;
   serviceMonitoringEmbedUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -997,6 +1004,7 @@ export type Stop = {
   longitude: Scalars['Float']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
+  setDown: Scalars['Boolean']['output'];
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
@@ -1205,6 +1213,7 @@ export type ResolversTypes = ResolversObject<{
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
   EventType: ResolverTypeWrapper<Partial<EventType>>;
+  FeatureFlag: ResolverTypeWrapper<Partial<FeatureFlag>>;
   FeedMonitoringType: ResolverTypeWrapper<Partial<FeedMonitoringType>>;
   Float: ResolverTypeWrapper<Partial<Scalars['Float']['output']>>;
   FrequentServiceInfoFilterType: ResolverTypeWrapper<Partial<FrequentServiceInfoFilterType>>;
@@ -1591,14 +1600,14 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
-  excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayTimeSeriesType'] = ResolversParentTypes['HeadwayTimeSeriesType']> = ResolversObject<{
-  actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  actual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  scheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1670,6 +1679,7 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
   serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1873,6 +1883,7 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   otp?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
   scheduledDepartureUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  setDown?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
