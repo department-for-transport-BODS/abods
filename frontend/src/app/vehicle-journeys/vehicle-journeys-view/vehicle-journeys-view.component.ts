@@ -136,11 +136,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           // but for now it's quicker to iterate here in local dev
           const direction = this.directionRef?.toLowerCase();
           const stopData = [...result.data.journey.stops];
-          const stops = stopData
-            .filter(
-              (n) => !direction || n.directionRef.toLowerCase() === direction,
-            )
-            .sort((a, b) => a.stopIndex - b.stopIndex);
+          const stops = stopData.filter(
+            (n) => !direction || n.directionRef.toLowerCase() === direction,
+          );
 
           // If there are multiple directions in the timetable, then filter to just avls for the direction query param.
           // The other direction's data will be on another screen.

@@ -129,6 +129,7 @@ model Timetable {
   departure_day_shift      Boolean?
   siri_vm_position_id      BigInt?
   incomplete_reason        Int?
+  set_down                 Boolean?
   stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
   @@id([timetable_id, date_of_journey], map: "timetable_pk_240603")
@@ -605,7 +606,7 @@ model transmodel_tracks {
   @@index([from_atco_code, to_atco_code], map: "transmodel_tracks_geometry_idx")
 }
 
-view organisation_organisation_admin_areas {
+view bods_organisation_organisation_admin_areas {
   id              Int  @unique // TODO: fix - nullable in db, not unique
   organisation_id Int?
   adminarea_id    Int?
