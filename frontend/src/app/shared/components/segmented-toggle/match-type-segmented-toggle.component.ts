@@ -13,13 +13,13 @@ import { MatchType } from "../../../../generated/graphql";
       identifier="estimated"
       value="estimated"
       label="Estimated"
-    ></app-segmented-toggle-item>
+    />
     <app-segmented-toggle-item
       name="match-type"
       identifier="evidenced"
       value="evidenced"
       label="Evidenced"
-    ></app-segmented-toggle-item>
+    />
   </app-segmented-toggle>`,
 })
 export class MatchTypeSegmentedToggleComponent {
