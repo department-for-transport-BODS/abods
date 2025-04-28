@@ -8,6 +8,7 @@ import { MinNumberFormControlDirective } from "./min-number-form-control.directi
   template: `<form [formGroup]="form">
     <input formControlName="number" type="number" [minNumber]="10" />
   </form>`,
+  standalone: false,
 })
 class TestComponent {
   form: FormGroup;

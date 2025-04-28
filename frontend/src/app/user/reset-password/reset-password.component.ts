@@ -22,6 +22,7 @@ import { UserService } from "../user.service";
 @Component({
   selector: "app-reset-password",
   templateUrl: "./reset-password.component.html",
+  standalone: false,
 })
 export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetPasswordForm: FormGroup;

@@ -1,4 +1,4 @@
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
@@ -10,6 +10,10 @@ import { OnTimePerformanceEnum } from "../../on-time-performance.enum";
 import { VehiclePingStop } from "../../vehicle-ping-stop.model";
 
 import { StopItemComponent } from "./stop-item.component";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 
 const scheduled = DateTime.fromISO("2022-08-18T11:20:00.000+01:00", {
   zone: "utc",
@@ -40,11 +44,10 @@ describe("StopItemComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [StopItemComponent],
-      imports: [
-        SharedModule,
-        HttpClientTestingModule,
-        NgxTippyModule,
-        LuxonModule,
+      imports: [SharedModule, NgxTippyModule, LuxonModule],
+      providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
   });

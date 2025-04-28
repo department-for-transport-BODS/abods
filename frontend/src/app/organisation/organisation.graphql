@@ -9,6 +9,7 @@ fragment Alert on AlertType {
   alertId
   alertType
   createdBy {
+    id
     firstName
     lastName
     username

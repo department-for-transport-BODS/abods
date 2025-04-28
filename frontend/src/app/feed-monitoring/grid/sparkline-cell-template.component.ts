@@ -15,6 +15,7 @@ import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
   selector: "app-feed-monitoring-sparkline-cell-template",
   template: '<div class="vehicle-sparkline-template" [id]="chartId"></div>',
   styleUrls: ["./sparkline-cell-template.component.scss"],
+  standalone: false,
 })
 export class SparklineCellTemplateComponent
   extends BaseChart

@@ -12,6 +12,7 @@ import { AuthenticatedUserService } from "../../authentication/authenticated-use
   selector: "app-view-service-monitoring-dashboard",
   templateUrl: "./view-service-monitoring-dashboard.component.html",
   styleUrls: ["./view-service-monitoring-dashboard.component.scss"],
+  standalone: false,
 })
 export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
   @ViewChild("iframeContainer", { static: true }) iframeContainer!: ElementRef;

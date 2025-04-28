@@ -4,6 +4,7 @@ import { Component, Input } from "@angular/core";
   selector: "app-vehicles-status",
   templateUrl: "./vehicles-status.component.html",
   styleUrls: ["./vehicles-status.component.scss"],
+  standalone: false,
 })
 export class VehiclesStatusComponent {
   @Input() expected?: number | null;

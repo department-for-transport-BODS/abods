@@ -4,6 +4,7 @@ import { AgGridFormatterService } from "./ag-grid-formatter.service";
 
 @Directive({
   selector: "ag-grid-angular[appAgGrid]",
+  standalone: false,
 })
 export class AgGridDirective {
   gridApi?: GridApi;

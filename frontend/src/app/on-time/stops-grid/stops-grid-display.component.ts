@@ -16,6 +16,7 @@ import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
     [paginate]="paginate"
     (cellClicked)="handleCellClicked($event)"
   />`,
+  standalone: false,
 })
 export class StopsGridComponentDisplayComponent {
   @Input() data?: StopPerformance[];

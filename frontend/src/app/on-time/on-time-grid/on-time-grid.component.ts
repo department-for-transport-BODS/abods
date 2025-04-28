@@ -132,6 +132,7 @@ const column: (
   selector: "app-on-time-grid",
   templateUrl: "./on-time-grid.component.html",
   styleUrls: ["./on-time-grid.component.scss"],
+  standalone: false,
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   private _columnDescriptions: ColumnDescription[] = [];
@@ -273,7 +274,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   gridOptions: GridOptions = {
     rowSelection: "single",
     suppressDragLeaveHidesColumns: true,
-    suppressCellSelection: false,
+    suppressCellFocus: false,
     onFirstDataRendered: this.headerHeightSetter.bind(this),
     noRowsOverlayComponent: NoRowsOverlayComponent,
     noRowsOverlayComponentParams: () => this.overlayParams,

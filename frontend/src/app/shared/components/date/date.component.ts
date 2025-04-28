@@ -15,6 +15,7 @@ let nextUniqueId = 0;
       multi: true,
     },
   ],
+  standalone: false,
 })
 export class DateComponent implements ControlValueAccessor {
   @Input() inputId = `date-${nextUniqueId++}`;

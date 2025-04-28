@@ -10,6 +10,7 @@ const PAGES_MIDDLE = 3;
   selector: "app-paging-panel",
   templateUrl: "paging-panel.component.html",
   styleUrls: ["./paging-panel.component.scss"],
+  standalone: false,
 })
 export class PagingPanelComponent {
   @Input() noun = "row";

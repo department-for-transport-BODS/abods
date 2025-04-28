@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
-@Pipe({ name: "noInfinity" })
+@Pipe({
+  name: "noInfinity",
+  standalone: false,
+})
 export class NoInfinityPipe implements PipeTransform {
   transform(value: number | null | undefined): number | null | undefined {
     return value === Infinity ? NaN : value;

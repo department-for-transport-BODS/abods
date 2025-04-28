@@ -20,6 +20,7 @@ import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-se
   selector: "app-filters",
   templateUrl: "./filters.component.html",
   styleUrls: ["./filters.component.scss"],
+  standalone: false,
 })
 export class FiltersComponent implements OnDestroy {
   oldFilters?: PerformanceFiltersInputType;

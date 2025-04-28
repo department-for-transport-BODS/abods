@@ -4,6 +4,7 @@ import { NavService } from "../nav.service";
   selector: "app-nav-toggle",
   templateUrl: "./nav-toggle.component.html",
   styleUrls: ["./nav-toggle.component.scss"],
+  standalone: false,
 })
 export class NavToggleComponent {
   @Input() appearance?: "light";

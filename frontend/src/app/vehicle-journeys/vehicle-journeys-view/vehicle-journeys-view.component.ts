@@ -43,6 +43,7 @@ const getInitialVehicleRef = (stops: Stop[], avl_list: AvlPoint[]) => {
   selector: "app-vehicle-journeys-view",
   templateUrl: "./vehicle-journeys-view.component.html",
   styleUrls: ["./vehicle-journeys-view.component.scss"],
+  standalone: false,
 })
 export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeyInfo: JourneyInfo | null = null;

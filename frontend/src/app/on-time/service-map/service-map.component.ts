@@ -50,6 +50,7 @@ export type PopupInfo = StopInfo;
   selector: "app-service-map",
   templateUrl: "service-map.component.html",
   styleUrls: ["./service-map.component.scss"],
+  standalone: false,
 })
 export class ServiceMapComponent implements OnInit, OnDestroy {
   @Input()

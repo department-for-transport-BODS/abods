@@ -41,6 +41,7 @@ export type AM4Theme = keyof typeof SUPPORTED_THEMES;
       deps: [forwardRef(() => XYChartComponent)],
     },
   ],
+  standalone: false,
 })
 export class XYChartComponent implements OnInit, OnDestroy {
   private chart!: XYChart;

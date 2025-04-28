@@ -49,6 +49,7 @@ const validLocationSearchBounds = (bounds?: LngLatBounds) =>
 @Component({
   templateUrl: "create-corridor.component.html",
   styleUrls: ["./create-corridor.component.scss"],
+  standalone: false,
 })
 export class CreateCorridorComponent implements OnInit, OnDestroy {
   corridorForm = this.formBuilder.group({

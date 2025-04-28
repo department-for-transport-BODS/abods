@@ -6,7 +6,7 @@
   [fitBounds]="bounds"
   [fitBoundsOptions]="{ padding: 50, linear: true, maxZoom: 16 }"
   [cursorStyle]="cursorStyle"
-  (mapLoad)="map = $event"
+  (mapLoad)="map = $event.target"
   (moveStart)="moveCounter = moveCounter + 1"
   class="vehicle-journey__map"
 >

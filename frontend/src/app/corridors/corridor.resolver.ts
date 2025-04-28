@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Resolve, ActivatedRouteSnapshot } from "@angular/router";
+import { ActivatedRouteSnapshot } from "@angular/router";
 import { catchError, Observable, of } from "rxjs";
 import { CorridorsService } from "./corridors.service";
 import { CorridorNotFoundView } from "./corridor-not-found-view.model";
@@ -8,9 +8,7 @@ import { Corridor } from "./types";
 @Injectable({
   providedIn: "root",
 })
-export class CorridorResolver
-  implements Resolve<Observable<Corridor | CorridorNotFoundView>>
-{
+export class CorridorResolver {
   constructor(private corridorsService: CorridorsService) {}
 
   resolve(

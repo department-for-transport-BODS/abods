@@ -5,6 +5,7 @@ import { Granularity, VehicleStatsType } from "src/generated/graphql";
   selector: "app-live-vehicle-stats",
   template: "<div></div>",
   styleUrls: [],
+  standalone: false,
 })
 
 // Currently dumb but maybe in the future more interesting mock for the live stats chart

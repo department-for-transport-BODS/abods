@@ -30,6 +30,7 @@ import { Interval } from "luxon";
   styles: [
     ":host { display: block; position: absolute; width: 350px; height: 60px; top: -1999px; }",
   ],
+  standalone: false,
 })
 export class SparklineFactoryComponent
   extends BaseChart

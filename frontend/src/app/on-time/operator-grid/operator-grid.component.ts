@@ -47,6 +47,7 @@ interface AdminAreaParams {
   selector: "app-operators-grid",
   templateUrl: "operator-grid.component.html",
   styleUrls: ["./operator-grid.component.scss"],
+  standalone: false,
 })
 export class OperatorGridComponent implements OnInit, OnDestroy {
   columnDefs: ColDef[] = [

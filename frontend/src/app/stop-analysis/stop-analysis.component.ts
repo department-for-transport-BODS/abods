@@ -8,6 +8,7 @@ import {
   LngLatBounds,
   LngLatBoundsLike,
   Map,
+  MapboxEvent,
   MapboxGeoJSONFeature,
   MapMouseEvent,
   SymbolLayout,
@@ -56,6 +57,7 @@ import bboxClip from "@turf/bbox-clip";
   selector: "app-stop-analysis",
   templateUrl: "./stop-analysis.component.html",
   styleUrls: ["./stop-analysis.component.scss"],
+  standalone: false,
 })
 export class StopAnalysisComponent implements OnInit, OnDestroy {
   stopPoints: FeatureCollection<Point, StopStatistics> = {
@@ -412,7 +414,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.destroyFilterPanel();
   }
 
-  onMapLoad(map: Map): void {
+  onMapLoad(event: MapboxEvent & EventData): void {
+    const map = event.target;
     this.map = map;
     this.onMapMoveEnd();
 

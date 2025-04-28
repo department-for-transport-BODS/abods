@@ -37,6 +37,7 @@ import { Journey, LineType, OperatorType } from "../../../generated/graphql";
   selector: "app-vehicle-journeys-search",
   templateUrl: "./vehicle-journeys-search.component.html",
   styleUrls: ["./vehicle-journeys-search.component.scss"],
+  standalone: false,
 })
 export class VehicleJourneysSearchComponent
   implements OnInit, AfterViewInit, OnDestroy

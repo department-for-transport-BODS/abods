@@ -5,7 +5,10 @@ import { AgGridFormatterService } from "./ag-grid-formatter.service";
 import { GridApi, ColumnApi } from "ag-grid-community";
 import { MockProvider } from "ng-mocks";
 
-@Component({ template: `<ag-grid-angular appAgGrid></ag-grid-angular>` })
+@Component({
+  template: `<ag-grid-angular appAgGrid></ag-grid-angular>`,
+  standalone: false,
+})
 class HostComponent {}
 
 describe("AgGridDirective", () => {

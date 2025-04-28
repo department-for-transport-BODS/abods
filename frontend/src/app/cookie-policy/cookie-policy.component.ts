@@ -16,6 +16,7 @@ import { LoggedInService } from "../authentication/loggedIn.service";
   selector: "app-cookie-policy",
   templateUrl: "./cookie-policy.component.html",
   styleUrls: ["./cookie-policy.component.scss"],
+  standalone: false,
 })
 export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
   acceptCookies: "yes" | "no" = "no";

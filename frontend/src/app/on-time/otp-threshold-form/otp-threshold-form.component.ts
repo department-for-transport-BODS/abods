@@ -25,6 +25,7 @@ interface OtpThresholdForm {
   selector: "app-otp-threshold-form",
   templateUrl: "./otp-threshold-form.component.html",
   styleUrls: ["./otp-threshold-form.component.scss"],
+  standalone: false,
 })
 export class OtpThresholdFormComponent implements AfterViewInit, OnDestroy {
   @Output() compare = new EventEmitter<OtpThresholdParams>();

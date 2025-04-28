@@ -37,6 +37,7 @@ export interface IconHeaderParams extends IHeaderParams {
     </div>
   </div>`,
   styleUrls: ["./icon-header.component.scss"],
+  standalone: false,
 })
 export class IconHeaderComponent implements IHeaderAngularComp {
   public params?: IconHeaderParams;

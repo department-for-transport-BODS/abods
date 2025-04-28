@@ -6,6 +6,7 @@ import { CorridorStop } from "../../types";
   selector: "app-corridor-stop-list",
   templateUrl: "./corridor-stop-list.component.html",
   styleUrls: ["./corridor-stop-list.component.scss"],
+  standalone: false,
 })
 export class CorridorStopListComponent {
   @Input() corridorStops?: FeatureCollection<Point, CorridorStop>;

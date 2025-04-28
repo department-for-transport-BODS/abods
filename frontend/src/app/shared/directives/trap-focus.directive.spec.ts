@@ -8,6 +8,7 @@ import { By } from "@angular/platform-browser";
     <div [appTrapFocus]="trap"><button>Test</button></div>
     <div id="outside"></div>
   `,
+  standalone: false,
 })
 class TestComponent {
   @Input() trap = false;

@@ -4,6 +4,7 @@ import { AuthenticationService } from "../authentication.service";
 @Component({
   selector: "app-logout",
   templateUrl: "./logout.component.html",
+  standalone: false,
 })
 export class LogoutComponent {
   constructor(private authenticationService: AuthenticationService) {}

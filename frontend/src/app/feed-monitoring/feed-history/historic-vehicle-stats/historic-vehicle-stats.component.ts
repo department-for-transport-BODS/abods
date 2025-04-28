@@ -22,6 +22,7 @@ import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
   selector: "app-historic-vehicle-stats",
   templateUrl: "./historic-vehicle-stats.component.html",
   styleUrls: ["./historic-vehicle-stats.component.scss"],
+  standalone: false,
 })
 export class HistoricVehicleStatsComponent
   extends BaseChart

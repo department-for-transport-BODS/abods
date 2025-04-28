@@ -12,6 +12,7 @@ export interface StopHoverEvent {
   selector: "app-stop-item",
   templateUrl: "./stop-item.component.html",
   styleUrls: ["../stop-list.component.scss", "./stop-item.component.scss"],
+  standalone: false,
 })
 export class StopItemComponent {
   @Input() stop!: Stop;

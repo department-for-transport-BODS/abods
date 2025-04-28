@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
   selector: "app-otp-param-range-slider",
   templateUrl: "./otp-param-range-slider.component.html",
   styleUrls: ["./otp-param-range-slider.component.scss"],
+  standalone: false,
 })
 export class OtpParamRangeSliderComponent {
   @Input() early!: number;
