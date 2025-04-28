@@ -199,8 +199,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .catch(console.log);
   }
 
-  stopTypeToggleChange(stopType: StopTypeOption) {
-    const allStops = stopType;
+  stopTypeToggleChange(stopType: string) {
+    const allStops = stopType === StopTypeOption.AllStops ? true : null;
     this.router
       .navigate([], {
         queryParams: { allStops },

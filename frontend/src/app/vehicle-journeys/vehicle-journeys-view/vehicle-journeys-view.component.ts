@@ -18,6 +18,7 @@ import {
   MatchType,
   JourneyGQL,
   Stop,
+  StopTypeOption,
 } from "../../../generated/graphql";
 import { DateTime } from "luxon";
 
@@ -54,7 +55,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeysLoading = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  timingPointsOption: "timing-points" | "all-stops" = "timing-points";
+  stopType: StopTypeOption = StopTypeOption.TimingPoints;
+  // Required to check in the template
+  StopTypeOption = StopTypeOption;
 
   selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
@@ -96,7 +99,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
         matchType: queryParams.get("match_type") as MatchType | undefined,
-        timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
         direction: queryParams.get("direction"),
       })),
@@ -107,10 +109,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           service: urlData.lineId,
         };
         this.matchType = urlData.matchType ?? MatchType.Evidenced;
-        this.timingPointsOption =
-          urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
-            ? "timing-points"
-            : "all-stops";
+        this.stopType =
+          urlData.allStops !== "true"
+            ? StopTypeOption.TimingPoints
+            : StopTypeOption.AllStops;
         this.groupId = urlData.groupId;
         this.directionRef = urlData.direction;
       }),
@@ -212,8 +214,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     this.onDestroy$.complete();
   }
 
-  onTimingPointsToggleChange() {
-    const allStops = this.timingPointsOption === "all-stops" ? true : null;
+  stopTypeToggleChange(stopType: StopTypeOption) {
+    const allStops = stopType === StopTypeOption.AllStops ? true : null;
     return this.router
       .navigate([], {
         queryParams: { allStops },

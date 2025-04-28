@@ -8859,7 +8859,7 @@
       {
         "kind": "ENUM",
         "name": "StopTypeOption",
-        "description": "Maps to 'timing-points' and 'all-stops'",
+        "description": null,
         "isOneOf": null,
         "fields": null,
         "inputFields": null,

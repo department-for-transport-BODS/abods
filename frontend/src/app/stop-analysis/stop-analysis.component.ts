@@ -24,6 +24,7 @@ import {
   StopAnalysisGQL,
   StopAnalysisQueryVariables,
   StopStatistics,
+  StopTypeOption,
 } from "../../generated/graphql";
 import { combineLatest, firstValueFrom, of, Subject, takeUntil } from "rxjs";
 import { debounceTime, filter, map, mergeMap, tap } from "rxjs/operators";
@@ -67,7 +68,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   errored = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  stopType = "timing-points";
+  stopType: StopTypeOption = StopTypeOption.TimingPoints;
   operatorIds: string[] = [];
   serviceIds: string[] = [];
   to: DateTime;
@@ -381,7 +382,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     const stopType = params.get("stopType");
     if (from) this.from = DateTime.fromISO(from);
     if (to) this.to = DateTime.fromISO(to);
-    if (stopType) this.stopType = stopType;
+    if (stopType) this.stopType = stopType as StopTypeOption;
     if (matchType) this.matchType = matchType as MatchType;
     if (startTime) this.refinedFilters.startTime = startTime;
     if (endTime) this.refinedFilters.endTime = endTime;
@@ -639,7 +640,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     map.fitBounds(bbox, { maxDuration: 500 });
   };
 
-  onStopTypeChanged() {
+  stopTypeToggleChange(stopType: StopTypeOption) {
+    this.stopType = stopType;
     this.updateQueryParams(undefined);
     this.processStopData(this.visibleBounds);
   }
@@ -653,7 +655,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   processStopData(bounds: BoundingBoxInputType): void {
     const filtered = this.rawStopData.filter(
       (n) =>
-        (this.stopType !== "timing-points" || n.timingPoint) &&
+        (this.stopType !== StopTypeOption.TimingPoints || n.timingPoint) &&
         n.latitude >= bounds.minLatitude &&
         n.latitude <= bounds.maxLatitude &&
         n.longitude >= bounds.minLongitude &&

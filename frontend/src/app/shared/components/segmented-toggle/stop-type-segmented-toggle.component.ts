@@ -11,13 +11,13 @@ import { StopTypeOption } from "../../../../generated/graphql";
     <app-segmented-toggle-item
       name="stop-type"
       identifier="all-stops"
-      value="all-stops"
+      value="all_stops"
       label="All stops"
     ></app-segmented-toggle-item>
     <app-segmented-toggle-item
       name="stop-type"
       identifier="timing-points"
-      value="timing-points"
+      value="timing_points"
       label="Timing points"
     ></app-segmented-toggle-item>
   </app-segmented-toggle>`,
@@ -27,7 +27,6 @@ export class StopTypeSegmentedToggleComponent {
   @Output() toggleChange = new EventEmitter<StopTypeOption>();
 
   emitChange() {
-    console.log("stopType---", this.stopType);
     this.toggleChange.emit(this.stopType);
   }
 }

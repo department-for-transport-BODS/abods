@@ -128,9 +128,6 @@ enum MatchType {
   evidenced
 }
 
-"""
-Maps to 'timing-points' and 'all-stops'
-"""
 enum StopTypeOption { # eslint-disable-line @graphql-eslint/no-unreachable-types
   timing_points
   all_stops
