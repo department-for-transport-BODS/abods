@@ -54,7 +54,7 @@
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
-    "@types/node": "~20.17.28",
+    "@types/node": "~22.15.3",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.2",
