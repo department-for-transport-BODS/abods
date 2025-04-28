@@ -11,7 +11,6 @@ import { GraphQLError } from "graphql";
 import dayjs from "dayjs";
 import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
-import { addUkTime } from "./otpFunctions.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -44,9 +43,10 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .where("t.date_of_journey", ">=", startDateUtc.toDate())
     .where("t.date_of_journey", "<", endDateUtc.toDate());
 
-  const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
-  dbQuery = dbQuery.where("t.day_of_week", "in", days);
-
+  if (args.inputs.dayOfWeekFlags) {
+    const days = getDayOfWeekNumbers(args.inputs.dayOfWeekFlags);
+    dbQuery = dbQuery.where("t.day_of_week", "in", days);
+  }
   let operatorIds = await getUserOperatorIds(user, context.kysely);
 
   if (args.inputs.operatorIds.length > 0) {
@@ -86,21 +86,17 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 
   // If start or end time aren't set, use the start and end of the day as default values,
   // so that we can still use the result in the filters
-  const startDateTimeUtc = addUkTime(
-    startDateUtc,
-    args.inputs.startTime ?? "00:00",
+  const startDateTime = Number(
+    (args.inputs.startTime ?? "00:00").split(":")[0],
   );
-  const endDateTimeUtc = addUkTime(endDateUtc, args.inputs.endTime ?? "23:59");
-  // Specifying date as the type param just to satisfy our generated kysely types
+  const endDateTime = Number((args.inputs.endTime ?? "23:59").split(":")[0]);
+
   dbQuery = dbQuery.where(
-    "t.departure_hour_only",
-    ">=",
-    sql<Date>`${startDateTimeUtc.format("HH:mm:ss Z")}`,
-  );
-  dbQuery = dbQuery.where(
-    "t.departure_hour_only",
-    "<=",
-    sql<Date>`${endDateTimeUtc.format("HH:mm:ss Z")}`,
+    (eb) =>
+      sql<boolean>`
+      EXTRACT(HOUR FROM ${eb.ref("t.departure_hour")} AT TIME ZONE ${eb.val("Europe/London")}) 
+      BETWEEN ${eb.val(startDateTime)} AND ${eb.val(endDateTime)}
+    `,
   );
 
   // todo: throw if the bounding box is too big
@@ -121,7 +117,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "a.name",
     ])
     .select([
-      "t.stop_id as stopId",
       "t.stop_latitude as latitude",
       "t.stop_longitude as longitude",
       "t.is_timing_point as timingPoint",

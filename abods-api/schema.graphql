@@ -8,8 +8,11 @@ type Query {
   apiInfo: ApiInfoType
   userAlerts: [AlertType!]
   userAlert(alertId: String!): AlertType
-  operator(operatorId: String!): OperatorType
-  operators(filterBy: OperatorFilterInput): OperatorsPage
+  operatorFeedMonitoring(operatorId: String!): OperatorFeedMonitoring
+  operatorsFeedMonitoring(
+    filterBy: OperatorFilterInput
+  ): [OperatorFeedMonitoring!]!
+  operators(filterBy: OperatorFilterInput): [OperatorType!]!
   adminAreas: [AdminAreasType!]
   onTimePerformance: OnTimePerformanceType
   headwayMetrics: HeadwayMetricsType
@@ -24,10 +27,12 @@ type Query {
   ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
-  lines(operatorId: String!, inputDate: String): [LineType!]!
+  lines(
+    operatorIds: [String!]!
+    inputDate: String!
+    endDate: String
+  ): [LineType!]!
   servicePatterns(operatorId: String!, lineId: String!): [ServicePatternType!]!
-  # To be removed soon
-  # eslint-disable-next-line @graphql-eslint/no-unused-fields
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
   embeddedUrl: AWSQuicksightUser!
@@ -311,20 +316,21 @@ type FrequentServiceInfoType {
 }
 
 type HeadwayOverviewType {
-  excessWaitTime: Float!
+  excess: Float
 }
 
 type HeadwayTimeSeriesType {
   ts: DateTime!
-  actualWaitTime: Float!
-  excessWaitTime: Float!
-  scheduledWaitTime: Float!
+  actual: Float
+  excess: Float
+  scheduled: Float
 }
 
 type LineType {
   id: String!
   name: String!
   number: String!
+  adminAreaIds: [Int!]!
 }
 
 type ServicePatternType {
@@ -357,15 +363,18 @@ type AdminAreasType {
   shape: String!
 }
 
-type OperatorsPage {
-  items: [OperatorType!]!
+type OperatorType {
+  name: String!
+  nocCode: String!
+  operatorId: String!
+  adminAreaIds: [String!]!
 }
 
-type OperatorType {
-  name: String
-  nocCode: String
+type OperatorFeedMonitoring {
+  name: String!
+  nocCode: String!
+    @deprecated(reason: "nocCode is deprecated. Use operatorId instead.") # eslint-disable-line @graphql-eslint/require-deprecation-date
   operatorId: String!
-  adminAreas: [AdminAreaInfoType!]
   feedMonitoring: FeedMonitoringType
 }
 
@@ -404,10 +413,6 @@ type LiveStatsType {
   last20Minutes: [VehicleStatsType!]
   last24Hours: [VehicleStatsType!]
   updateFrequency: Int
-}
-
-type AdminAreaInfoType {
-  adminAreaId: String!
 }
 
 input UserUpdateInput {
@@ -488,6 +493,13 @@ type LoginInfo {
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
   serviceMonitoringEmbedUrl: String
+  flags: [FeatureFlag!]!
+}
+
+enum FeatureFlag {
+  ServiceMonitoring
+  DataMonitoring
+  StopAnalysis
 }
 
 type UserType {
@@ -726,6 +738,7 @@ type Stop {
   otp: OtpEnum
   directionRef: String!
   incompleteReason: Int!
+  setDown: Boolean!
 }
 
 enum OtpEnum {
@@ -749,13 +762,12 @@ input StopAnalysisFiltersInput {
   matchType: MatchType!
   operatorIds: [String!]!
   toTimestamp: String!
-  dayOfWeekFlags: DayOfWeekFlagsInputType!
-  startTime: String!
-  endTime: String!
+  dayOfWeekFlags: DayOfWeekFlagsInputType
+  startTime: String
+  endTime: String
 }
 
 type StopStatistics {
-  stopId: Int!
   atcoCode: String!
   stopName: String!
   localityName: String!

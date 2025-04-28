@@ -158,7 +158,9 @@ export class OnTimeService {
           this.fillTimeOfDayGaps(
             assert(data?.onTimePerformance?.punctualityTimeOfDay).map(
               (value) => {
-                const time = DateTime.fromISO(value.timeOfDay, { zone: "utc" });
+                const time = DateTime.fromISO(value.timeOfDay, {
+                  zone: "Europe/London",
+                });
                 const timeOfDay = time.toFormat("HH:mm");
                 return {
                   ...OnTimeService.calculateOnTimePcts(value),

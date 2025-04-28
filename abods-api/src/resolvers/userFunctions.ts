@@ -1,6 +1,7 @@
 import {
   AlertType,
   AlertTypeEnum,
+  FeatureFlag,
   LoginInfo,
   LoginResponse,
   Maybe,
@@ -17,6 +18,7 @@ import { requireUserSession } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { getUserOrgIds } from "../lib/utils.js";
+import { isLocal } from "../prismaClient.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 const accountTypes = {
@@ -66,7 +68,22 @@ export const getUsers: QueryResolvers["users"] = async (
     return null;
   }
 };
-// Summary: fetch a single user by id
+
+const getFeatureFlags = () => {
+  const flags: FeatureFlag[] = [];
+  const flagPrefix = "ABODS_FLAG_";
+  for (const key of Object.keys(FeatureFlag)) {
+    const envVarName = flagPrefix + key;
+    const flag = FeatureFlag[key as FeatureFlag];
+    if (!isLocal()) {
+      if (!(envVarName in process.env)) continue;
+      if (process.env[envVarName] !== "true") continue;
+    }
+    flags.push(flag);
+  }
+  return flags;
+};
+
 export const getUser: QueryResolvers["user"] = async (
   _,
   __,
@@ -105,6 +122,7 @@ export const getUser: QueryResolvers["user"] = async (
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
+      flags: getFeatureFlags(),
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
@@ -211,14 +229,23 @@ export const loginUser: MutationResolvers["login"] = async (
     if (await argon2.verify(strippedPassword, args.password)) {
       const token = uuidv4();
       const expiryTimeMilliseconds = SESSION_EXPIRY_TIME_IN_SECONDS * 1000;
+      const now = new Date();
       const expires = new Date(Date.now() + expiryTimeMilliseconds);
       const user_id = bodsUser.id;
       const tokenRecord = { user_id, token, expires };
-      await context.db.tokens.upsert({
-        where: { user_id },
-        create: tokenRecord,
-        update: tokenRecord,
-      });
+      const loginDetails = { user_id, last_login: now };
+      await Promise.all([
+        context.db.tokens.upsert({
+          where: { user_id },
+          create: tokenRecord,
+          update: tokenRecord,
+        }),
+        context.db.login_details.upsert({
+          where: { user_id },
+          create: loginDetails,
+          update: loginDetails,
+        }),
+      ]);
       const expiryTimestamp = expires.toUTCString();
 
       context.res.setHeader(

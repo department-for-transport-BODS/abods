@@ -1,6 +1,7 @@
-fragment OperatorDashboard on OperatorType {
+fragment OperatorDashboard on OperatorFeedMonitoring {
   name
-  nocCode
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     feedStatus
@@ -12,10 +13,8 @@ fragment OperatorDashboard on OperatorType {
 }
 
 query dashboardOperatorList {
-  operators {
-    items {
-      ...OperatorDashboard
-    }
+  operatorsFeedMonitoring {
+    ...OperatorDashboard
   }
 }
 

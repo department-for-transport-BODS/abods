@@ -18,7 +18,7 @@ export class SingleOperatorGuardService implements CanActivate {
       .pipe(
         map((list) =>
           list.length === 1
-            ? this.router.createUrlTree(["on-time", list[0].nocCode])
+            ? this.router.createUrlTree(["on-time", list[0].operatorId])
             : true,
         ),
       );

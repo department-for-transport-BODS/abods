@@ -4,9 +4,10 @@ fragment VehicleStat on VehicleStatsType {
   timestamp
 }
 
-fragment BasicOperator on OperatorType {
+fragment BasicOperator on OperatorFeedMonitoring {
   name
-  nocCode
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     feedStatus
@@ -19,9 +20,10 @@ fragment BasicOperator on OperatorType {
   }
 }
 
-fragment OperatorLiveStatus on OperatorType {
+fragment OperatorLiveStatus on OperatorFeedMonitoring {
   name
-  nocCode
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     feedStatus
@@ -42,9 +44,10 @@ fragment OperatorLiveStatus on OperatorType {
   }
 }
 
-fragment OperatorFeedHistory on OperatorType {
+fragment OperatorFeedHistory on OperatorFeedMonitoring {
   name
-  nocCode
+  # Remove this when we're sure it's not used. There is no type safety where it is
+  nocCode # eslint-disable-line @graphql-eslint/no-deprecated
   operatorId
   feedMonitoring {
     historicalStats(date: $date) {
@@ -58,23 +61,20 @@ fragment OperatorFeedHistory on OperatorType {
 }
 
 query feedMonitoringList {
-  operators {
-    items {
-      ...BasicOperator
-    }
+  operatorsFeedMonitoring {
+    ...BasicOperator
   }
 }
 
 query operatorSparklineStats($operatorIds: [String!]!) {
-  operators(filterBy: { operatorIds: $operatorIds }) {
-    items {
-      nocCode
-      operatorId
-      feedMonitoring {
-        liveStats {
-          last24Hours {
-            ...VehicleStat
-          }
+  operatorsFeedMonitoring(filterBy: { operatorIds: $operatorIds }) {
+    # Remove this when we're sure it's not used. There is no type safety where it is
+    nocCode # eslint-disable-line @graphql-eslint/no-deprecated
+    operatorId
+    feedMonitoring {
+      liveStats {
+        last24Hours {
+          ...VehicleStat
         }
       }
     }
@@ -82,7 +82,7 @@ query operatorSparklineStats($operatorIds: [String!]!) {
 }
 
 query operatorLiveStatus($operatorId: String!) {
-  operator(operatorId: $operatorId) {
+  operatorFeedMonitoring(operatorId: $operatorId) {
     ...OperatorLiveStatus
   }
 }
@@ -93,7 +93,7 @@ query operatorHistoricStats(
   $start: DateTime!
   $end: DateTime!
 ) {
-  operator(operatorId: $operatorId) {
+  operatorFeedMonitoring(operatorId: $operatorId) {
     ...OperatorFeedHistory
   }
 }

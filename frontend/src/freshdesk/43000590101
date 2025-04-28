@@ -1,0 +1,27 @@
+[
+  {
+    "id": 43000700923,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-28T08:53:13Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590101,
+    "title": "Data monitoring",
+    "updated_at": "2025-02-17T13:07:00Z",
+    "description": "<p dir=\"ltr\">The Data Monitoring dashboard provides a centralised-view on the completeness and quality of Timetables, Automatic Vehicle Location (AVL) and Fares data published to the Bus Open Data Service (BODS) for registered bus services. .</p><p dir=\"ltr\">This interactive dashboard improves a users ability to assess the health and quality of BODS data, enabling bus operators to monitor data quality for their registered bus services, local authorities to oversee data quality in their area, and regulation authorities to evaluate the health of data for operators in scope of the open data regulations.</p><p dir=\"ltr\">This can be used to generate insights and help inform areas that require action to improve the quality of data published to BODS.</p><p dir=\"ltr\">Please visit the 'Help Page' on the dashboard for further information.</p>",
+    "description_text": "The Data Monitoring dashboard provides a centralised-view on the completeness and quality of Timetables, Automatic Vehicle Location (AVL) and Fares data published to the Bus Open Data Service (BODS) for registered bus services. This interactive dashboard improves a users ability to assess the health and quality of BODS data, enabling bus operators to monitor data quality for their registered bus services, local authorities to oversee data quality in their area, and regulation authorities to evaluate the health of data for operators in scope of the open data regulations. This can be used to generate insights and help inform areas that require action to improve the quality of data published to BODS. Please visit the 'Help Page' on the dashboard for further information.",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 1,
+    "suggested": 0,
+    "feedback_count": 0
+  }
+]

@@ -1,63 +1,99 @@
-import { Prisma, PrismaClient } from "@prisma/client";
 import {
   FrequentServiceInfoInputType,
+  OtpEnum,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
 import {
-  getPrismaFiltersForOTPQuery,
-  timeDiffFilters,
+  getKyselyFiltersForOTPQuery,
+  kyselyFilterForAdminIds,
 } from "../resolvers/otpFunctions.js";
+import { Kysely } from "kysely";
+import { DB } from "../kysely.js";
 
 const getThresholds = async (
-  db: PrismaClient,
-  where: Prisma.timetable_threshold_summaryWhereInput,
+  db: Kysely<DB>,
+  inputs: PerformanceInputType,
+  userOperatorIds: string[],
+  otpType: OtpEnum,
 ) => {
-  return db.timetable_threshold_summary.aggregate({
-    _sum: { otp_count: true },
-    where: { ...where },
-  });
+  const { filters } = inputs;
+  const {
+    startTime,
+    endTime,
+    adminAreaIds,
+    onTimeMinMinutes,
+    onTimeMaxMinutes,
+  } = filters || {};
+
+  let summarySubQuery = getKyselyFiltersForOTPQuery(
+    db,
+    "timetable_threshold_summary",
+    inputs,
+    userOperatorIds,
+  );
+
+  if (otpType === OtpEnum.Early && onTimeMinMinutes) {
+    summarySubQuery = summarySubQuery.where(
+      "time_diff_minutes",
+      "<",
+      onTimeMinMinutes,
+    );
+  }
+
+  if (otpType === OtpEnum.OnTime && onTimeMinMinutes && onTimeMaxMinutes) {
+    summarySubQuery = summarySubQuery
+      .where("time_diff_minutes", "<", onTimeMaxMinutes)
+      .where("time_diff_minutes", ">=", onTimeMinMinutes);
+  }
+
+  if (otpType === OtpEnum.Late && onTimeMaxMinutes) {
+    summarySubQuery = summarySubQuery.where(
+      "time_diff_minutes",
+      ">=",
+      onTimeMaxMinutes,
+    );
+  }
+
+  summarySubQuery = kyselyFilterForAdminIds(
+    summarySubQuery,
+    adminAreaIds ?? [],
+  );
+
+  const aliasedSubQuery = summarySubQuery.as("summary");
+
+  let mainQuery = db
+    .selectFrom(aliasedSubQuery)
+    .select(db.fn.sum("otp_count").as("otp_count"));
+
+  if (startTime || endTime) {
+    const start = Number((startTime ?? "00:00").split(":")[0]);
+    const end = Number((endTime ?? "23:59").split(":")[0]);
+    mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
+  }
+
+  return mainQuery.executeTakeFirst();
 };
 
 export const compareThresholds = async (
   inputs: PerformanceInputType,
   userOperatorIds: string[],
-  db: PrismaClient,
+  db: Kysely<DB>,
 ): Promise<PunctualityTotalsType | null> => {
   if (!inputs.filters.onTimeMinMinutes || !inputs.filters.onTimeMaxMinutes) {
     return null;
   }
-  const where = timeDiffFilters(inputs, userOperatorIds);
 
   const [early, late, onTime] = await Promise.all([
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        lt: inputs.filters.onTimeMinMinutes,
-      },
-    }),
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        gte: inputs.filters.onTimeMaxMinutes,
-      },
-    }),
-    getThresholds(db, {
-      ...where,
-      time_diff_minutes: {
-        ...where.time_diff_minutes,
-        gte: inputs.filters.onTimeMinMinutes,
-        lt: inputs.filters.onTimeMaxMinutes,
-      },
-    }),
+    getThresholds(db, inputs, userOperatorIds, OtpEnum.Early),
+    getThresholds(db, inputs, userOperatorIds, OtpEnum.Late),
+    getThresholds(db, inputs, userOperatorIds, OtpEnum.OnTime),
   ]);
 
   return {
-    early: early._sum.otp_count ?? 0,
-    late: late._sum.otp_count ?? 0,
-    onTime: onTime._sum.otp_count ?? 0,
+    early: Number(early?.otp_count ?? 0),
+    late: Number(late?.otp_count ?? 0),
+    onTime: Number(onTime?.otp_count ?? 0),
     scheduled: 0,
     completed: 0,
     averageDeviation: 0,
@@ -65,88 +101,72 @@ export const compareThresholds = async (
   };
 };
 
-export const getOperatorsFromOrgId = async (
-  orgIds: number[],
-  db: PrismaClient,
-  userOperatorIds?: string[],
-) => {
-  const where: Prisma.bods_organisationoperatorWhereInput = {
-    organisation_id: { in: orgIds },
-  };
-
-  if (userOperatorIds && userOperatorIds.length > 0) {
-    where.operatorref = {
-      in: userOperatorIds,
-    };
-  }
-
-  return db.bods_organisationoperator.findMany({
-    where: where,
-    select: {
-      operatorref: true,
-    },
-    distinct: ["operatorref"],
-  });
-};
-
-export const getOperatorsFroServiceDetails = async (
-  orgOperators: { operatorref: string }[],
-  db: PrismaClient,
-) => {
-  return db.service_details.findMany({
-    where: {
-      operator_noc: {
-        in: orgOperators.map((operator) => operator.operatorref),
-      },
-    },
-    select: {
-      operator_noc: true,
-      operator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    distinct: ["operator_noc"],
-  });
-};
-
-export const getNocAdminAreas = async (db: PrismaClient) => {
-  return db.noc_adminarea.findMany({
-    include: {
-      admin_area: true,
-    },
-  });
-};
-
 export const getSummaryStopsTotalHours = async (
-  db: PrismaClient,
+  db: Kysely<DB>,
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const results = await db.timetable_summary_stops_tz.findMany({
-    distinct: ["departure_hour"],
-    where: {
-      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-      scheduled: { gt: 0 },
-    },
-    select: { departure_hour: true },
-  });
+  const { filters } = inputs;
+  const { startTime, endTime } = filters || {};
+
+  const summarySubQuery = getKyselyFiltersForOTPQuery(
+    db,
+    "timetable_summary_stops_tz",
+    inputs,
+    userOperatorIds,
+  );
+
+  const aliasedSubQuery = summarySubQuery
+    .where("scheduled", ">", 0)
+    .as("summary");
+
+  let mainQuery = db
+    .selectFrom(aliasedSubQuery)
+    .select(["departure_hour"])
+    .distinct();
+
+  if (startTime || endTime) {
+    const start = Number((startTime ?? "00:00").split(":")[0]);
+    const end = Number((endTime ?? "23:59").split(":")[0]);
+    mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
+  }
+
+  const results = await mainQuery.execute();
+
   return results.length;
 };
 
 export const getFrequentServiceActualHours = async (
-  db: PrismaClient,
+  db: Kysely<DB>,
   inputs: FrequentServiceInfoInputType,
   userOperatorIds: string[],
 ) => {
-  const results = await db.timetable_frequent_summary_services.findMany({
-    distinct: ["departure_hour"],
-    where: {
-      ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-      actual_headway: { gt: 0 },
-    },
-    select: { departure_hour: true },
-  });
+  const { filters } = inputs;
+  const { startTime, endTime } = filters || {};
+
+  const summarySubQuery = getKyselyFiltersForOTPQuery(
+    db,
+    "timetable_frequent_summary_services",
+    inputs,
+    userOperatorIds,
+  );
+
+  const aliasedSubQuery = summarySubQuery
+    .where("actual_headway", "is not", null)
+    .as("summary");
+
+  let mainQuery = db
+    .selectFrom(aliasedSubQuery)
+    .select(["departure_hour"])
+    .distinct();
+
+  if (startTime || endTime) {
+    const start = Number((startTime ?? "00:00").split(":")[0]);
+    const end = Number((endTime ?? "23:59").split(":")[0]);
+    mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
+  }
+
+  const results = await mainQuery.execute();
+
   return results.length;
 };

@@ -2,31 +2,31 @@ import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ReplaySubject, Subject } from "rxjs";
 import { delay, filter, map, switchMap, takeUntil, tap } from "rxjs/operators";
-import { FrequentServiceInfoType } from "src/generated/graphql";
+import {
+  FrequentServiceInfoType,
+  HeadwayOverviewType,
+  OperatorType,
+} from "src/generated/graphql";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Headway } from "../headway.service";
 import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 
 @Component({
   templateUrl: "view-operator.component.html",
   styleUrls: ["../on-time.component.scss"],
 })
 export class ViewOperatorComponent implements OnInit, OnDestroy {
-  allOperators: Operator[] = [];
-  operator?: Operator;
+  allOperators: OperatorType[] = [];
+  operator?: OperatorType;
   singleOperator = false;
 
   destroy$ = new Subject<void>();
   params$ = new ReplaySubject<PerformanceParams>();
 
   overview?: PunctualityOverview;
-  headwayOverview?: Headway;
+  headwayOverview?: HeadwayOverviewType;
   overviewLoading = true;
 
   frequentServiceInfo?: FrequentServiceInfoType;

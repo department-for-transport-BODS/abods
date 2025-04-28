@@ -1,25 +1,56 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
-import { FeatureCollection, Point } from "geojson";
-import { CirclePaint, LngLat, Map, SymbolLayout } from "mapbox-gl";
+import { Feature, FeatureCollection, Point, Polygon } from "geojson";
+import {
+  CirclePaint,
+  EventData,
+  GeoJSONSource,
+  LngLat,
+  LngLatBounds,
+  LngLatBoundsLike,
+  Map,
+  MapboxGeoJSONFeature,
+  MapMouseEvent,
+  SymbolLayout,
+} from "mapbox-gl";
 import { ConfigService } from "../config/config.service";
-import { BRITISH_ISLES_BBOX } from "../shared/geo";
+import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
-  DayOfWeekFlagsInputType,
   MatchType,
+  OperatorLinesGQL,
+  OperatorListGQL,
+  OperatorType,
+  PerformanceFiltersInputType,
   StopAnalysisGQL,
+  StopAnalysisQueryVariables,
   StopStatistics,
 } from "../../generated/graphql";
-import { combineLatest, Subject, takeUntil } from "rxjs";
-import { debounceTime, map, tap, filter } from "rxjs/operators";
+import { combineLatest, firstValueFrom, of, Subject, takeUntil } from "rxjs";
+import { debounceTime, filter, map, mergeMap, tap } from "rxjs/operators";
 import { DateTime } from "luxon";
 import { StopPerformance } from "../on-time/on-time.service";
 import { Preset } from "../shared/components/date-range/date-range.types";
 import { DateRangeService } from "../shared/services/date-range.service";
 import { GeocodingFeature } from "../shared/mapbox/geocoding.types";
+import { FiltersComponent } from "../on-time/filters/filters.component";
+import { PanelService } from "../shared/components/panel/panel.service";
+import { MultiselectCheckboxOption } from "../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
+import {
+  AdminArea,
+  AdminAreaService,
+  computeAdminAreaBoundaries,
+} from "../on-time/admin-area/admin-area.service";
+import {
+  ActivatedRoute,
+  NavigationExtras,
+  ParamMap,
+  Router,
+} from "@angular/router";
 import { getDefaultDayOfWeekFlags } from "../shared/components/day-of-week-select/day-of-week-utils";
-
-const MAX_ZOOM_LEVEL = 12;
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { featureCollection } from "@turf/helpers";
+import pointOnFeature from "@turf/point-on-feature";
+import bboxClip from "@turf/bbox-clip";
 
 @Component({
   selector: "app-stop-analysis",
@@ -36,13 +67,14 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   errored = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  timingPointsOption = "timing-points";
+  stopType = "timing-points";
   operatorIds: string[] = [];
+  serviceIds: string[] = [];
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
 
-  private map: Map | undefined = undefined;
+  map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
   initialBounds = BRITISH_ISLES_BBOX;
   private boundsChanged = new Subject();
@@ -58,6 +90,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   };
   redThreshold = 0.6;
   greenThreshold = 0.8;
+  boundWidth = 1;
+  adminAreaHiddenZoomLevel = 12;
+  boundingBoxTooBig = true;
   pointColours: CirclePaint["circle-color"] = [
     "case",
     ["==", ["get", "completedDepartures"], 0],
@@ -87,12 +122,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     ],
   ];
   zoomLevel = 0;
-  visibleBounds: BoundingBoxInputType = {
-    maxLatitude: this.initialBounds[3],
-    minLatitude: this.initialBounds[1],
-    maxLongitude: this.initialBounds[2],
-    minLongitude: this.initialBounds[0],
-  };
+  visibleBounds = this.toBoundingBoxInputType(this.initialBounds);
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
   selectedStop: StopStatistics | undefined;
@@ -101,34 +131,120 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     | undefined = undefined;
   selectedClusterCoordinates: [number, number] = [0, 0];
   center: LngLat | undefined;
-  dayOfWeekFlags = getDefaultDayOfWeekFlags();
+  maxBoundWidth = 0.8;
+  adminAreaIds: string[] | null = [];
 
-  _startTime = "00:00";
-  get startTime() {
-    return this._startTime;
-  }
-  set startTime(val: string) {
-    this._startTime = val;
-    this.onFilterChanged();
-  }
-  _endTime = "23:59";
-  get endTime() {
-    return this._endTime;
-  }
-  set endTime(val: string) {
-    this._endTime = val;
-    this.onFilterChanged();
-  }
+  refinedFilters: PerformanceFiltersInputType = {};
 
-  get boundingBoxTooBig() {
-    return this.zoomLevel < MAX_ZOOM_LEVEL;
-  }
+  visibleAdminAreas: FeatureCollection<Polygon, AdminArea> = featureCollection(
+    [],
+  );
+  hoveredAdminArea?: Feature<Polygon, AdminArea>;
+  labelPosition?: Feature<Point>;
+
+  allAdminAreas: AdminArea[] = [];
+  adminAreasChanged = new Subject();
+  adminAreas$ = this.adminAreaService.fetchAdminAreas().pipe(
+    takeUntil(this.destroy$),
+    tap((areas) => {
+      this.allAdminAreas = areas;
+      this.updateVisibleAdminAreas();
+    }),
+    map((areas) =>
+      areas
+        .map(
+          (area) =>
+            ({
+              label: area.name,
+              value: area.id,
+            }) as MultiselectCheckboxOption,
+        )
+        .sort((a: MultiselectCheckboxOption, b: MultiselectCheckboxOption) =>
+          a.label.localeCompare(b.label),
+        ),
+    ),
+  );
+
+  allOperators: OperatorType[] = [];
+  operators = this.operatorListQuery.fetch({}).pipe(
+    takeUntil(this.destroy$),
+    tap((result) => (this.allOperators = result.data.operators)),
+  );
+  operators$ = combineLatest([this.operators, this.adminAreasChanged]).pipe(
+    takeUntil(this.destroy$),
+    map(([result]) =>
+      result.data.operators
+        .filter(
+          (o) =>
+            !this.adminAreaIds ||
+            this.adminAreaIds.length === 0 ||
+            o.adminAreaIds.some((a) => this.adminAreaIds?.includes(a)),
+        )
+        .map(
+          (o): MultiselectCheckboxOption => ({
+            label: `${o.name} (${o.operatorId})`,
+            value: o.operatorId,
+          }),
+        ),
+    ),
+    tap((options) => {
+      const available = options.map((o) => o.value);
+      const newIds = this.operatorIds.filter((s) => available.includes(s));
+      if (this.operatorIds.length !== newIds.length) {
+        this.onOperatorsChanged(newIds);
+      }
+    }),
+  );
+
+  allServices$ = this.apiFiltersChanged.pipe(
+    mergeMap(() => {
+      if (this.operatorIds.length === 0) return of({ data: { lines: [] } });
+      return this.operatorLinesQuery.fetch({
+        operatorIds: this.operatorIds,
+        inputDate: this.from.toISO(),
+        endDate: this.to.toISO(),
+      });
+    }),
+  );
+
+  services$ = combineLatest([this.allServices$, this.adminAreasChanged]).pipe(
+    map(([result]) =>
+      result.data.lines
+        .filter((line) =>
+          line.adminAreaIds.some(
+            (a) =>
+              !this.adminAreaIds ||
+              this.adminAreaIds.length === 0 ||
+              this.adminAreaIds?.includes(a.toString()),
+          ),
+        )
+        .map(
+          (o): MultiselectCheckboxOption => ({
+            label: `${o.number}: ${o.name}`,
+            value: o.id,
+          }),
+        ),
+    ),
+    tap((options) => {
+      const available = options.map((o) => o.value);
+      const newIds = this.serviceIds.filter((s) => available.includes(s));
+      if (this.serviceIds.length !== newIds.length) {
+        this.onServicesChanged(newIds);
+      }
+    }),
+  );
 
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
+    private operatorListQuery: OperatorListGQL,
+    private operatorLinesQuery: OperatorLinesGQL,
     private cdr: ChangeDetectorRef,
     dateRangeService: DateRangeService,
+    private panelService: PanelService,
+    private adminAreaService: AdminAreaService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -139,18 +255,28 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // TODO: parse query params
+    this.setFilterPanelComponent();
     const boundsChanged = this.boundsChanged.pipe(
       takeUntil(this.destroy$),
+      tap(() => {
+        if (!this.map) return undefined;
+        this.center = this.map.getCenter();
+        this.zoomLevel = this.map.getZoom();
+      }),
       map(() => {
         if (!this.map) return undefined;
+
+        const bounds = this.map.getBounds();
+        this.boundWidth = bounds.getEast() - bounds.getWest();
+        this.boundingBoxTooBig = this.boundWidth >= this.maxBoundWidth;
         if (this.boundingBoxTooBig) return undefined;
-        return this.getNewBounds(this.map);
+        return this.getNewBounds(bounds);
       }),
       tap((bounds) => {
         if (!bounds) return;
 
         this.visibleBounds = bounds;
+        this.updateQueryParams(this.visibleBounds);
 
         if (!this.lastBounds) return;
         if (!this.withinBounds(bounds, this.lastBounds)) return;
@@ -164,53 +290,130 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       }),
     );
 
-    combineLatest([
-      boundsChanged.pipe(debounceTime(200)),
-      this.apiFiltersChanged,
-    ]).subscribe(([bounds]) => {
-      if (!bounds) return;
-      // TODO: Might be best to expand the bounds here to that of the max zoom level to minimise fetching more
-      // TODO: limit date range
+    const filtersChanged = this.apiFiltersChanged.pipe(
+      tap(() => this.updateQueryParams(undefined)),
+    );
 
-      /**
-       *     TODO: Add filters:
-       *      Service (select multiple) (only show services in selected NOCs if selected)
-       *      Refine Results
-       *          Day e.g. Monday (select multiple)
-       *          Time range
-       * **/
-      this.isLoading = true;
-      this.query
-        .fetch({
-          boundingBox: bounds,
-          adminAreaIds: [],
-          fromTimestamp: this.from.toISO(),
-          toTimestamp: this.to.toISO(),
-          operatorIds: this.operatorIds,
-          lineIds: [],
-          matchType: this.matchType,
-          dayOfWeekFlags: this.dayOfWeekFlags,
-          startTime: this.startTime,
-          endTime: this.endTime,
-        })
-        .subscribe((response) => {
-          this.lastBounds = bounds;
-          this.rawStopData = response.data.stopAnalysis;
-          this.processStopData(this.visibleBounds);
-          this.isLoading = false;
-        });
-    });
+    combineLatest([boundsChanged, filtersChanged])
+      .pipe(
+        // Don't fetch too quickly if there's a lot of map movement happening
+        debounceTime(500),
+        // Don't run requests concurrently, and only run the latest when completed again
+        mergeMap(([bounds]) => {
+          const query: StopAnalysisQueryVariables = {
+            boundingBox: bounds!,
+            adminAreaIds: this.adminAreaIds ?? [],
+            fromTimestamp: this.from.toISO(),
+            toTimestamp: this.to.toISO(),
+            operatorIds: this.operatorIds,
+            lineIds: this.serviceIds,
+            matchType: this.matchType,
+            dayOfWeekFlags: this.refinedFilters.dayOfWeekFlags,
+            startTime: this.refinedFilters.startTime,
+            endTime: this.refinedFilters.endTime,
+          };
+          this.isLoading = true;
+          return this.query
+            .fetch(query)
+            .pipe(map((response) => [query, response] as const));
+        }, 1),
+      )
+      .subscribe(([query, response]) => {
+        this.lastBounds = query.boundingBox;
+        this.rawStopData = response.data.stopAnalysis;
+        this.processStopData(this.visibleBounds);
+        this.isLoading = false;
+      });
+
+    firstValueFrom(this.route.queryParamMap)
+      .then((params) => this.parseParams(params))
+      .catch(console.log);
     this.onFilterChanged();
+  }
+
+  private updateQueryParams = (bounds: BoundingBoxInputType | undefined) => {
+    const nav: NavigationExtras = {
+      queryParams: {
+        dayOfWeek: this.refinedFilters.dayOfWeekFlags
+          ? Object.entries(this.refinedFilters.dayOfWeekFlags)
+              .filter(([_s, v]) => v)
+              .map(([s, _v]) => s)
+              .join()
+          : undefined,
+        stopType: this.stopType,
+        adminAreaIds: this.adminAreaIds ?? [],
+        fromTimestamp: this.from.toISO(),
+        toTimestamp: this.to.toISO(),
+        operatorIds: this.operatorIds,
+        lineIds: this.serviceIds,
+        matchType: this.matchType,
+        startTime: this.refinedFilters.startTime,
+        endTime: this.refinedFilters.endTime,
+      },
+      queryParamsHandling: "merge",
+    };
+    if (bounds) {
+      nav.queryParams = {
+        ...nav.queryParams,
+        minLatitude: bounds.minLatitude,
+        minLongitude: bounds.minLongitude,
+        maxLatitude: bounds.maxLatitude,
+        maxLongitude: bounds.maxLongitude,
+      };
+    }
+    this.router.navigate([], nav).catch(console.log);
+  };
+
+  private parseParams(params: ParamMap) {
+    const from = params.get("fromTimestamp");
+    const to = params.get("toTimestamp");
+    const matchType = params.get("matchType");
+    const startTime = params.get("startTime");
+    const endTime = params.get("endTime");
+    const adminAreaIds = params.getAll("adminAreaIds");
+    const serviceIds = params.getAll("lineIds");
+    const operatorIds = params.getAll("operatorIds");
+    const minLongitude = params.get("minLongitude");
+    const minLatitude = params.get("minLatitude");
+    const maxLongitude = params.get("maxLongitude");
+    const maxLatitude = params.get("maxLatitude");
+    const dayOfWeek = params.get("dayOfWeek");
+    const stopType = params.get("stopType");
+    if (from) this.from = DateTime.fromISO(from);
+    if (to) this.to = DateTime.fromISO(to);
+    if (stopType) this.stopType = stopType;
+    if (matchType) this.matchType = matchType as MatchType;
+    if (startTime) this.refinedFilters.startTime = startTime;
+    if (endTime) this.refinedFilters.endTime = endTime;
+    if (adminAreaIds) this.onAdminAreasChanged(adminAreaIds);
+    if (serviceIds) this.serviceIds = serviceIds;
+    if (operatorIds) this.operatorIds = operatorIds;
+    if (dayOfWeek) {
+      const flags = getDefaultDayOfWeekFlags();
+      const days = dayOfWeek.split(",") ?? [];
+      for (const day of Object.keys(flags)) {
+        flags[day as keyof typeof flags] = days.includes(day);
+      }
+      this.refinedFilters.dayOfWeekFlags = flags;
+    }
+    if (minLongitude && minLatitude && maxLatitude && maxLongitude) {
+      this.visibleBounds = {
+        minLongitude: Number(minLongitude),
+        minLatitude: Number(minLatitude),
+        maxLongitude: Number(maxLongitude),
+        maxLatitude: Number(maxLatitude),
+      };
+    }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.destroyFilterPanel();
   }
 
   onMapLoad(map: Map): void {
     this.map = map;
-    this.onMapZoomEnd();
     this.onMapMoveEnd();
 
     // For some reason this doesn't work passing a method to the map layer props
@@ -252,6 +455,12 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       this.selectedCluster = undefined;
       this.cdr.detectChanges();
     });
+    this.showBoundingBox(map, [
+      this.visibleBounds.minLongitude,
+      this.visibleBounds.minLatitude,
+      this.visibleBounds.maxLongitude,
+      this.visibleBounds.maxLatitude,
+    ]);
   }
 
   onMapMoveEnd() {
@@ -263,13 +472,83 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.mapboxStyle = style;
   }
 
-  onMapZoomEnd() {
+  onLayerClick(
+    e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ): void {
     if (!this.map) return;
-    this.zoomLevel = this.map.getZoom();
+    if (this.boundingBoxTooBig) {
+      // We aren't displaying clusters here, so the click must be an admin area
+      this.adminAreaClicked(e);
+      return;
+    }
+    const features = this.map.queryRenderedFeatures(e.point, {
+      layers: ["clusters"],
+    });
+    if (features.length === 0) {
+      // There were no clusters at the point clicked, so assume a click on admin area
+      this.adminAreaClicked(e);
+      return;
+    }
+    const feature = features[0].geometry;
+    if (feature.type !== "Point" || !features[0].properties) return;
+    const clusterId = features[0].properties.cluster_id as number;
+    const coordinates = feature.coordinates as [number, number];
+    (this.map.getSource("stops") as GeoJSONSource).getClusterExpansionZoom(
+      clusterId,
+      (err, zoom) => {
+        if (err || !this.map) return;
+        this.map.easeTo({
+          center: coordinates,
+          zoom: zoom,
+        });
+      },
+    );
   }
 
-  onClusterClick(event: { lngLat: { lng: number; lat: number } }): void {
-    this.zoomToPoint([event.lngLat.lng, event.lngLat.lat]);
+  adminAreaClicked(
+    e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ) {
+    if (this.zoomLevel >= this.adminAreaHiddenZoomLevel) return;
+    const adminArea = e.features?.[0] as Feature;
+    if (this.adminAreaIds && this.adminAreaIds.length > 0) return;
+    this.onAdminAreasChanged([(adminArea.properties as AdminArea).id]);
+  }
+
+  onBoundaryHover(
+    event: MapMouseEvent & { features?: MapboxGeoJSONFeature[] } & EventData,
+  ) {
+    if (!this.map) return;
+    if (this.adminAreaIds && this.adminAreaIds.length === 1) return;
+    const adminArea = event.features?.[0] as Feature;
+    if (this.hoveredAdminArea && this.hoveredAdminArea?.id !== adminArea?.id) {
+      this.onClearBoundaryHover();
+    }
+    this.hoveredAdminArea = adminArea as Feature<Polygon, AdminArea>;
+    this.map.setFeatureState(
+      { source: "boundaries", id: this.hoveredAdminArea?.id },
+      { hover: true },
+    );
+    this.recalculateLabelPosition();
+  }
+
+  onClearBoundaryHover() {
+    if (!this.map) return;
+    this.map.removeFeatureState(
+      { source: "boundaries", id: this.hoveredAdminArea?.id },
+      "hover",
+    );
+    this.hoveredAdminArea = undefined;
+    this.labelPosition = undefined;
+  }
+
+  recalculateLabelPosition() {
+    if (!this.map) return;
+    if (this.hoveredAdminArea) {
+      const viewBounds = this.map.getBounds();
+      this.labelPosition = pointOnFeature(
+        bboxClip(this.hoveredAdminArea, asBbox(viewBounds)),
+      );
+    }
   }
 
   onTableStopNameClicked($event: StopPerformance) {
@@ -280,8 +559,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFilterChanged() {
-    // TODO: update query params
-    console.log("Filters changed");
     this.apiFiltersChanged.next(undefined);
   }
 
@@ -291,10 +568,75 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.onFilterChanged();
   }
 
+  updateVisibleAdminAreas() {
+    let areaIdsToShow = this.adminAreaIds ?? [];
+    if (areaIdsToShow.length === 0) {
+      areaIdsToShow = [
+        ...new Set(
+          this.allOperators
+            .filter((n) => this.operatorIds.includes(n.operatorId))
+            .map((n) => n.adminAreaIds)
+            .flat(),
+        ),
+      ];
+    }
+
+    const selectedAreas = this.allAdminAreas.filter(
+      (n) => areaIdsToShow.length === 0 || areaIdsToShow.includes(n.id),
+    );
+    this.visibleAdminAreas = computeAdminAreaBoundaries(selectedAreas);
+  }
+
+  showFilterArea() {
+    this.updateVisibleAdminAreas();
+    if (!this.map) return;
+    const bbox = this.visibleAdminAreas.bbox as BBox2d;
+    if (
+      this.withinBounds(this.visibleBounds, this.toBoundingBoxInputType(bbox))
+    )
+      return;
+    this.showBoundingBox(this.map, bbox);
+  }
+  toBoundingBoxInputType(input: BBox2d): BoundingBoxInputType {
+    return {
+      maxLatitude: input[3],
+      minLatitude: input[1],
+      maxLongitude: input[2],
+      minLongitude: input[0],
+    };
+  }
+
+  onAdminAreasChanged($event: string[]) {
+    this.adminAreaIds = $event;
+    this.showFilterArea();
+    this.adminAreasChanged.next(undefined);
+    this.onFilterChanged();
+  }
+
+  onOperatorsChanged($event: string[]) {
+    this.operatorIds = $event;
+    this.showFilterArea();
+    this.onFilterChanged();
+  }
+
+  onServicesChanged($event: string[]) {
+    this.serviceIds = $event;
+    this.onFilterChanged();
+  }
+
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.map.easeTo({ center: location.center, zoom: MAX_ZOOM_LEVEL });
+    this.showBoundingBox(this.map, location.bbox);
+  }
+
+  private showBoundingBox = (map: Map, bbox: LngLatBoundsLike) => {
+    map.fitBounds(bbox, { maxDuration: 500 });
+  };
+
+  onStopTypeChanged() {
+    this.updateQueryParams(undefined);
+    this.processStopData(this.visibleBounds);
   }
 
   zoomToPoint(center: [number, number]) {
@@ -306,7 +648,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   processStopData(bounds: BoundingBoxInputType): void {
     const filtered = this.rawStopData.filter(
       (n) =>
-        (this.timingPointsOption !== "timing-points" || n.timingPoint) &&
+        (this.stopType !== "timing-points" || n.timingPoint) &&
         n.latitude >= bounds.minLatitude &&
         n.latitude <= bounds.maxLatitude &&
         n.longitude >= bounds.minLongitude &&
@@ -315,9 +657,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.filteredStopData = filtered
       .map(
         (x): StopPerformance => ({
-          stopId: x.stopId.toString(),
+          stopId: x.atcoCode,
           stopInfo: {
-            stopId: x.stopId.toString(),
+            stopId: x.atcoCode,
             stopName: x.stopName,
             stopLocality: {
               localityName: x.localityName,
@@ -351,27 +693,26 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         // Combine points where the stop is used as a timing point and a non timing point
         filtered.reduce(
           (acc, cur) => {
-            if (!acc[cur.stopId]) {
-              acc[cur.stopId] = cur;
+            if (!acc[cur.atcoCode]) {
+              acc[cur.atcoCode] = cur;
               return acc;
             }
-            acc[cur.stopId] = {
-              stopId: cur.stopId,
+            acc[cur.atcoCode] = {
               stopName: cur.stopName,
               atcoCode: cur.atcoCode,
               latitude: cur.latitude,
               longitude: cur.longitude,
               localityName: cur.localityName,
               adminAreaName: cur.adminAreaName,
-              timingPoint: cur.timingPoint || acc[cur.stopId].timingPoint,
-              totalDelay: cur.totalDelay || acc[cur.stopId].totalDelay,
-              onTime: cur.onTime || acc[cur.stopId].onTime,
+              timingPoint: cur.timingPoint || acc[cur.atcoCode].timingPoint,
+              totalDelay: cur.totalDelay + acc[cur.atcoCode].totalDelay,
+              onTime: cur.onTime + acc[cur.atcoCode].onTime,
               completedDepartures:
-                cur.completedDepartures || acc[cur.stopId].completedDepartures,
+                cur.completedDepartures + acc[cur.atcoCode].completedDepartures,
               scheduledDepartures:
-                cur.scheduledDepartures || acc[cur.stopId].scheduledDepartures,
-              late: cur.late || acc[cur.stopId].late,
-              early: cur.early || acc[cur.stopId].early,
+                cur.scheduledDepartures + acc[cur.atcoCode].scheduledDepartures,
+              late: cur.late + acc[cur.atcoCode].late,
+              early: cur.early + acc[cur.atcoCode].early,
             };
             return acc;
           },
@@ -388,8 +729,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     };
   }
 
-  getNewBounds(map: Map): BoundingBoxInputType {
-    const bounds = map.getBounds();
+  getNewBounds(bounds: LngLatBounds): BoundingBoxInputType {
     return {
       maxLatitude: bounds.getNorth(),
       minLatitude: bounds.getSouth(),
@@ -410,13 +750,50 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     );
   }
 
-  onOperatorsChanged($event: string[]) {
-    this.operatorIds = $event;
+  onFiltersChanged($event: PerformanceFiltersInputType) {
+    // We can't replace the refinedFilters object as the dynamic filter component below has static inputs
+    this.refinedFilters.startTime = $event.startTime;
+    this.refinedFilters.endTime = $event.endTime;
+    this.refinedFilters.dayOfWeekFlags = $event.dayOfWeekFlags;
     this.onFilterChanged();
   }
 
-  onDayOfWeekFlagsChanged($event: DayOfWeekFlagsInputType) {
-    this.dayOfWeekFlags = $event;
-    this.onFilterChanged();
+  onMoreFiltersClick() {
+    this.panelService.toggle();
+  }
+
+  setFilterPanelComponent() {
+    this.panelService.setComponent({
+      component: FiltersComponent,
+      inputs: [
+        {
+          name: "filters",
+          value: this.refinedFilters,
+        },
+        {
+          name: "showDelay",
+          value: false,
+        },
+        {
+          name: "showAdminAreas",
+          value: false,
+        },
+      ],
+      outputs: [
+        {
+          name: "filtersChange",
+          outputEvent: ($event: PerformanceFiltersInputType) =>
+            this.onFiltersChanged($event),
+        },
+        {
+          name: "closeFilters",
+          outputEvent: () => this.panelService.close(),
+        },
+      ],
+    });
+  }
+
+  destroyFilterPanel() {
+    this.panelService.destroy();
   }
 }

@@ -1,12 +1,54 @@
 <app-page>
   <ng-container ngProjectAs="content">
-    <app-page-header heading="Stop Analysis" />
+    <div class="header-container">
+      <app-page-header heading="Stop Analysis" />
+      <div class="extra-filter-container">
+        <button
+          class="more-filters button-link govuk-link"
+          aria-controls="panel"
+          id="panel-toggle"
+          (click)="onMoreFiltersClick()"
+        >
+          <svg-icon
+            class="on-time__filter-icon"
+            src="assets/icons/refine.svg"
+            [applyClass]="true"
+          />
+          <span>Refine results</span>
+        </button>
+        <!--Always passing the same filters value here seems to not always trigger change detection-->
+        <app-filter-chips
+          [filters]="{
+            startTime: refinedFilters.startTime,
+            endTime: refinedFilters.endTime,
+            dayOfWeekFlags: refinedFilters.dayOfWeekFlags
+          }"
+          (filterChange)="onFiltersChanged($event)"
+        />
+      </div>
+    </div>
     <div class="filters govuk-!-margin-bottom-2">
-      <app-date-range-picker
-        [from]="from"
-        [to]="to"
-        (valueChanged)="onDatePickerChanged($event)"
-      />
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="adminAreaIds">Admin Areas</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreas$ | async"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreasChanged($event)"
+          [showAll]="true"
+          labelForId="adminAreaIds"
+          showAllLabel="All Areas"
+          placeholderText="Admin Areas"
+          ariaLabel="Admin Areas"
+        />
+      </div>
       <div class="toggles">
         <app-segmented-toggle
           [(ngModel)]="matchType"
@@ -26,8 +68,8 @@
           />
         </app-segmented-toggle>
         <app-segmented-toggle
-          [(ngModel)]="timingPointsOption"
-          (ngModelChange)="processStopData(visibleBounds)"
+          [(ngModel)]="stopType"
+          (ngModelChange)="onStopTypeChanged()"
         >
           <app-segmented-toggle-item
             name="stops-filter"
@@ -55,30 +97,35 @@
       </div>
       <div>
         <label class="govuk-label" for="operators">Operators</label>
-        <app-operator-multi-select
-          [value]="operatorIds"
-          fieldId="operators"
+        <gds-multiselect-checkbox
+          [options]="operators$ | async"
+          [ngModel]="operatorIds"
           (selectedChange)="onOperatorsChanged($event)"
+          [showAll]="true"
+          labelForId="operators"
+          showAllLabel="All Operators"
+          placeholderText="Operators"
+          ariaLabel="Operators"
         />
       </div>
-      <app-day-of-week-select
-        [value]="dayOfWeekFlags"
-        (selectedChange)="onDayOfWeekFlagsChanged($event)"
-      />
-      <app-time-range-slider
-        labelMin="Start time"
-        labelMax="End time"
-        legend="Time range"
-        legendSize="s"
-        [(startTime)]="startTime"
-        [(endTime)]="endTime"
-      />
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <gds-multiselect-checkbox
+          [options]="services$ | async"
+          [ngModel]="serviceIds"
+          (selectedChange)="onServicesChanged($event)"
+          [showAll]="true"
+          labelForId="services"
+          showAllLabel="All Services"
+          placeholderText="Services"
+          ariaLabel="Services"
+        />
+      </div>
     </div>
     <div class="map-container">
       <mgl-map
         [style]="mapboxStyle"
-        [maxBounds]="initialBounds"
-        (zoomEnd)="onMapZoomEnd()"
+        [bounds]="initialBounds"
         (moveEnd)="onMapMoveEnd()"
         (mapLoad)="onMapLoad($event)"
       >
@@ -99,7 +146,7 @@
           id="stops"
           [data]="stopPoints"
           [cluster]="true"
-          [clusterRadius]="100"
+          [clusterRadius]="80"
           [clusterProperties]="clusterProperties"
         />
         <mgl-layer
@@ -114,8 +161,12 @@
               ['get', 'point_count'],
               20,
               5,
-              30,
+              25,
               20,
+              30,
+              50,
+              35,
+              100,
               40
             ],
             'circle-color': pointColours,
@@ -130,7 +181,7 @@
             ],
             'circle-stroke-color': '#ffffff'
           }"
-          (layerClick)="onClusterClick($event)"
+          (layerClick)="onLayerClick($event)"
         />
         <mgl-layer
           *ngIf="!boundingBoxTooBig"
@@ -168,9 +219,9 @@
               ['exponential', 0.5],
               ['zoom'],
               11,
-              2,
+              0.8,
               14,
-              3
+              1
             ],
             'circle-stroke-color': '#ffffff'
           }"
@@ -195,9 +246,55 @@
               14,
               1
             ],
+            'icon-allow-overlap': true,
             'icon-image': timingPointIcons
           }"
         />
+        <mgl-geojson-source
+          id="boundaries"
+          promoteId="id"
+          [data]="visibleAdminAreas"
+        />
+        <mgl-layer
+          id="admin-area-boundaries"
+          source="boundaries"
+          type="fill"
+          [paint]="{
+            'fill-color': '#28A197',
+            'fill-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              9,
+              [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                0.5,
+                0.3
+              ],
+              adminAreaHiddenZoomLevel,
+              0
+            ]
+          }"
+          (layerMouseMove)="onBoundaryHover($event)"
+          (layerMouseLeave)="onClearBoundaryHover()"
+          (layerClick)="onLayerClick($event)"
+        />
+        <mgl-popup
+          *ngIf="hoveredAdminArea && labelPosition && zoomLevel < 11"
+          [feature]="labelPosition"
+          [closeButton]="false"
+          [closeOnClick]="false"
+          maxWidth="200"
+          className="gds-popup"
+        >
+          <div
+            class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1"
+          >
+            {{ hoveredAdminArea.properties.name }}
+          </div>
+          <div class="govuk-body-small">{{ hoveredAdminArea.id }}</div>
+        </mgl-popup>
         <mgl-popup
           *ngIf="selectedStop"
           [lngLat]="[selectedStop.longitude, selectedStop.latitude]"
@@ -312,7 +409,7 @@
         <mgl-control mglGeolocate />
       </mgl-map>
       <div class="map-overlay">
-        <p *ngIf="boundingBoxTooBig">Zoom in to show stops</p>
+        <p *ngIf="boundingBoxTooBig && map">Zoom in to show stops</p>
         <app-spinner *ngIf="isLoading" />
       </div>
     </div>
