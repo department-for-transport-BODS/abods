@@ -1,6 +1,6 @@
 $rem-base: 16;
-
-@import "govuk-frontend/govuk/settings/_all.scss";
+$govuk-new-organisation-colours: true;
+@import "govuk-frontend/dist/govuk/index";
 
 @import "_layout";
 @import "_animations";

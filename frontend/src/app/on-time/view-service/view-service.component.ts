@@ -20,6 +20,7 @@ import {
 } from "rxjs/operators";
 import {
   FrequentServiceInfoType,
+  HeadwayOverviewType,
   OperatorType,
   ServiceInfoType,
 } from "src/generated/graphql";
@@ -28,13 +29,13 @@ import {
   PerformanceParams,
   PunctualityOverview,
 } from "../on-time.service";
-import { Headway, HeadwayService } from "../headway.service";
 import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { nonNullOrUndefined } from "../../shared/rxjs-operators";
 import { OperatorService } from "../../shared/services/operator.service";
 import { cloneDeep } from "lodash-es";
+import { HeadwayService } from "../headway.service";
 
 export const removeAdminAreaIds = (params: PerformanceParams) => {
   const paramsWithoutAdminAreas = cloneDeep(params);
@@ -58,7 +59,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
   params$ = new ReplaySubject<PerformanceParams>();
 
   overview?: PunctualityOverview;
-  headwayOverview?: Headway;
+  headwayOverview?: HeadwayOverviewType;
   overviewLoading = true;
 
   frequentServiceInfo?: FrequentServiceInfoType;

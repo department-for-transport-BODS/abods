@@ -43,9 +43,10 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
         return;
       }
       this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
+      this.renderer.setStyle(iframe, "border", "none");
       this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
       this.renderer.setAttribute(iframe, "width", "100%");
-      this.renderer.setAttribute(iframe, "height", "550");
+      this.renderer.setAttribute(iframe, "height", "100%");
       this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
       this.errors = [];
     });

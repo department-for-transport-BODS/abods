@@ -411,14 +411,14 @@ export type HeadwayMetricsTypeHeadwayTimeSeriesArgs = {
 
 export type HeadwayOverviewType = {
   __typename?: 'HeadwayOverviewType';
-  excessWaitTime: Scalars['Float']['output'];
+  excess?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HeadwayTimeSeriesType = {
   __typename?: 'HeadwayTimeSeriesType';
-  actualWaitTime: Scalars['Float']['output'];
-  excessWaitTime: Scalars['Float']['output'];
-  scheduledWaitTime: Scalars['Float']['output'];
+  actual?: Maybe<Scalars['Float']['output']>;
+  excess?: Maybe<Scalars['Float']['output']>;
+  scheduled?: Maybe<Scalars['Float']['output']>;
   ts: Scalars['DateTime']['output'];
 };
 
@@ -1004,6 +1004,7 @@ export type Stop = {
   longitude: Scalars['Float']['output'];
   otp?: Maybe<OtpEnum>;
   scheduledDepartureUtc: Scalars['String']['output'];
+  setDown: Scalars['Boolean']['output'];
   stopId: Scalars['Int']['output'];
   stopIndex: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
@@ -1599,14 +1600,14 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
-  excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayTimeSeriesType'] = ResolversParentTypes['HeadwayTimeSeriesType']> = ResolversObject<{
-  actualWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  excessWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  scheduledWaitTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  actual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  scheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1882,6 +1883,7 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   otp?: Resolver<Maybe<ResolversTypes['OtpEnum']>, ParentType, ContextType>;
   scheduledDepartureUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  setDown?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

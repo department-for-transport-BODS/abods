@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Headway } from "../headway.service";
 import { Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
+import { HeadwayOverviewType } from "../../../generated/graphql";
 
 @Component({
   selector: "app-overview-stats",
@@ -17,7 +17,7 @@ export class OverviewStatsComponent {
   @Input() showNoData = true;
   @Input() overview?: PunctualityOverview;
   @Input() frequent = false;
-  @Input() headwayOverview?: Headway;
+  @Input() headwayOverview?: HeadwayOverviewType;
   @Input() loading = true;
   @Input() nested = false;
   @Input() params$?: Observable<PerformanceParams>;
@@ -46,8 +46,10 @@ export class OverviewStatsComponent {
     return this.overview?.noData ?? NaN;
   }
 
-  get excess(): number {
-    return (this.headwayOverview?.excess || 0) * 60000;
+  get excess(): number | undefined {
+    return this.headwayOverview?.excess
+      ? this.headwayOverview?.excess * 60000
+      : undefined;
   }
 
   get incompleteSummary() {
