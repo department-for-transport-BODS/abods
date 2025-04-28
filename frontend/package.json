@@ -40,7 +40,7 @@
     "angular-google-tag-manager": "^1.7.0",
     "angular-svg-icon": "^13.0.0",
     "apollo-angular": "^4.2.0",
-    "govuk-frontend": "^4.5.0",
+    "govuk-frontend": "^5.9.0",
     "graphql": "^15.3.0",
     "lodash-es": "^4.17.20",
     "luxon": "^2.5.2",

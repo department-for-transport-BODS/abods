@@ -23,7 +23,6 @@ export class ButtonDirective {
     return asClassString({
       "govuk-button": true,
       [`govuk-button--${this.appearance}`]: this.appearance,
-      "govuk-button--disabled": this.disabled,
       [`govuk-!-margin-bottom-${this.spaceBelow}`]: this.spaceBelow,
       [`govuk-!-margin-top-${this.spaceAbove}`]: this.spaceAbove,
     });
