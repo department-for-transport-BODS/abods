@@ -17,6 +17,7 @@ import { GDSSpacingSizes } from "src/app/shared/types";
       {{ text }}
     </button>
   `,
+  standalone: false,
 })
 export class ButtonComponent {
   @Input() text?: string;

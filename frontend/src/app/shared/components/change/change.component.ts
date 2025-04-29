@@ -8,6 +8,7 @@ import { Component, Input } from "@angular/core";
     >
   </div>`,
   styleUrls: ["./change.component.scss"],
+  standalone: false,
 })
 export class ChangeComponent {
   @Input() size?: "small"; // small has font-size of 16

@@ -17,6 +17,7 @@ import { debounceTime, pairwise, startWith, takeUntil } from "rxjs/operators";
   templateUrl: "./range-slider.component.html",
   styleUrls: ["./range-slider.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
   @Input() min!: number;

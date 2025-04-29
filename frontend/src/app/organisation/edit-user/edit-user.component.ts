@@ -16,6 +16,7 @@ import { distinctUntilChanged, filter, map } from "rxjs/operators";
   selector: "app-edit-user",
   templateUrl: "./edit-user.component.html",
   styleUrls: ["./edit-user.component.scss"],
+  standalone: false,
 })
 export class EditUserComponent implements OnInit {
   userForm: FormGroup;

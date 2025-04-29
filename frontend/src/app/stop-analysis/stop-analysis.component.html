@@ -50,40 +50,13 @@
         />
       </div>
       <div class="toggles">
-        <app-segmented-toggle
-          [(ngModel)]="matchType"
-          (ngModelChange)="onFilterChanged()"
-        >
-          <app-segmented-toggle-item
-            name="match-type"
-            identifier="estimated"
-            value="estimated"
-            label="Estimated"
-          />
-          <app-segmented-toggle-item
-            name="match-type"
-            identifier="evidenced"
-            value="evidenced"
-            label="Evidenced"
-          />
-        </app-segmented-toggle>
-        <app-segmented-toggle
-          [(ngModel)]="stopType"
-          (ngModelChange)="onStopTypeChanged()"
-        >
-          <app-segmented-toggle-item
-            name="stops-filter"
-            identifier="all-stops"
-            value="all-stops"
-            label="All stops"
-          />
-          <app-segmented-toggle-item
-            name="stops-filter"
-            identifier="timing-points"
-            value="timing-points"
-            label="Timing points"
-          />
-        </app-segmented-toggle>
+        <app-match-type-segmented-toggle
+          (toggleChange)="matchTypeToggleChange($event)"
+        />
+        <app-stop-type-segmented-toggle
+          [stopType]="stopType"
+          (toggleChange)="stopTypeToggleChange($event)"
+        />
       </div>
       <div>
         <label class="govuk-label" for="location"

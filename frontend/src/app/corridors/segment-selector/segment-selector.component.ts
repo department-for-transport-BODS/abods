@@ -25,6 +25,7 @@ export const enum ServiceLinkValidity {
   selector: "app-segment-selector",
   templateUrl: "./segment-selector.component.html",
   styleUrls: ["./segment-selector.component.scss"],
+  standalone: false,
 })
 export class SegmentSelectorComponent implements OnChanges, AfterViewInit {
   @Input() stops?: CorridorStop[];

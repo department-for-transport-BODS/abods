@@ -8,6 +8,7 @@ import { OrganisationService } from "../organisation.service";
   selector: "app-users",
   templateUrl: "./users.component.html",
   styleUrls: ["./users.component.scss"],
+  standalone: false,
 })
 export class UsersComponent implements OnInit, OnDestroy {
   submitted = false;

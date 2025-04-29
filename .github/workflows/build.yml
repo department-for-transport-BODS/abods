@@ -47,7 +47,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -103,7 +103,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: setup sam
         uses: aws-actions/setup-sam@v2
@@ -211,8 +211,8 @@ jobs:
             mv tmp.json src/config.json
 
           npm install
-          npm install -g @angular/cli@$(jq -r '.devDependencies["@angular/cli"]' package.json | sed 's/[^0-9.]//g') && \
-            ng build -c production
+          npx ng build -c production
+          mv ./dist/raa-client/browser/* ./dist/raa-client
 
           echo "[INFO] Uploading application component (FRONTEND) for ${ENVIRONMENT^^}"
           aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/

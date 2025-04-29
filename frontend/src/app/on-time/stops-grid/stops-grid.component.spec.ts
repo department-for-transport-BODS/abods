@@ -12,7 +12,7 @@ import { StopsGridComponent } from "./stops-grid.component";
 import { TimingRendererComponent } from "./timing-renderer/timing-renderer.component";
 import { CommonModule, PercentPipe } from "@angular/common";
 import { fakeAsync, flush, tick } from "@angular/core/testing";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import {} from "@angular/common/http/testing";
 import { OnTimeModule } from "../on-time.module";
 import { ApolloTestingModule } from "apollo-angular/testing";
 

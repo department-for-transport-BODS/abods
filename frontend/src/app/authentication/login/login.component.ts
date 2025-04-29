@@ -13,6 +13,7 @@ import { AuthenticationService } from "../authentication.service";
 @Component({
   selector: "app-auth-login",
   templateUrl: "./login.component.html",
+  standalone: false,
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;

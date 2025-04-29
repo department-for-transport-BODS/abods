@@ -30,6 +30,7 @@ import { IHeatmap } from "./datenav/datenav.component";
   selector: "app-history",
   templateUrl: "./feed-history.component.html",
   styleUrls: ["./feed-history.component.scss"],
+  standalone: false,
 })
 export class FeedHistoryComponent implements OnInit, OnDestroy {
   constructor(

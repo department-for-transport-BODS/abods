@@ -7,10 +7,8 @@ Globals:
   Function:
     Architectures:
       - x86_64
-    # TODO: FIX THIS
-    #checkov:skip=CKV_AWS_363:Ensure Lambda Runtime is not deprecated
-    Runtime: nodejs16.x
     MemorySize: 5120
+    Runtime: nodejs20.x
     Timeout: 60
 
 Parameters:

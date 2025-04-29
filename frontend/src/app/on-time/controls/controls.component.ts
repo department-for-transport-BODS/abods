@@ -14,7 +14,11 @@ import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { DateTime } from "luxon";
 import { BehaviorSubject, combineLatest, Subject } from "rxjs";
 import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
-import { MatchType, PerformanceFiltersInputType } from "src/generated/graphql";
+import {
+  MatchType,
+  PerformanceFiltersInputType,
+  StopTypeOption,
+} from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
 import { isEqual as _isEqual } from "lodash-es";
 import { PerformanceParams } from "../on-time.service";
@@ -29,12 +33,11 @@ import { PanelService } from "../../shared/components/panel/panel.service";
 import { ifNullOrUndefinedReturnEmptyString } from "../../shared/rxjs-operators";
 import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
-export type TimingPoints = "all-stops" | "timing-points";
-
 @Component({
   selector: "app-controls",
   templateUrl: "controls.component.html",
   styleUrls: ["./controls.component.scss"],
+  standalone: false,
 })
 export class ControlsComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy
@@ -57,14 +60,14 @@ export class ControlsComponent
   @ViewChild(FiltersComponent) filtersComponent?: FiltersComponent;
 
   // TODO ABOD-350 prefer a form to custom binding
-  get timingPointsOption(): TimingPoints {
+  get stopType(): StopTypeOption {
     return this.filtersSubject.value.timingPointsOnly
-      ? "timing-points"
-      : "all-stops";
+      ? StopTypeOption.TimingPoints
+      : StopTypeOption.AllStops;
   }
 
-  set timingPointsOption(timingPointsOption: TimingPoints) {
-    const allStops = timingPointsOption === "all-stops" || null;
+  set stopType(stopType: StopTypeOption) {
+    const allStops = stopType === StopTypeOption.AllStops || null;
     this.router
       .navigate([], {
         queryParams: { allStops, timingPointsOnly: null },
@@ -84,6 +87,14 @@ export class ControlsComponent
         queryParamsHandling: "merge",
       })
       .catch(console.log);
+  }
+
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    this.matchType = matchTypeValue;
+  }
+
+  stopTypeToggleChange(stopType: StopTypeOption) {
+    this.stopType = stopType;
   }
 
   /** @deprecated this will be removed in ABOD-350 */

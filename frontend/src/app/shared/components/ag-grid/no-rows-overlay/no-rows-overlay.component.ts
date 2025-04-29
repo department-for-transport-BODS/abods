@@ -13,6 +13,7 @@ export type NoRowsOverlayParams = INoRowsOverlayParams & { message: string };
     {{ message }}
   </div>`,
   styleUrls: ["./no-rows-overlay.component.scss"],
+  standalone: false,
 })
 export class NoRowsOverlayComponent
   implements INoRowsOverlayAngularComp, AfterContentChecked

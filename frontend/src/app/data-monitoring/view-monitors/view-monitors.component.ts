@@ -8,6 +8,7 @@ import { mergeMap } from "rxjs";
   selector: "app-view-monitors",
   templateUrl: "./view-monitors.component.html",
   styleUrls: ["./view-monitors.component.scss"],
+  standalone: false,
 })
 export class ViewMonitorsComponent implements OnInit {
   @ViewChild("dashboardContainer", { static: false })
@@ -57,7 +58,7 @@ export class ViewMonitorsComponent implements OnInit {
     await context.embedDashboard({
       url: embedUrl,
       container: this.dashboardContainer.nativeElement,
-      height: "700px",
+      height: "1330px",
       width: "100%",
     });
   }

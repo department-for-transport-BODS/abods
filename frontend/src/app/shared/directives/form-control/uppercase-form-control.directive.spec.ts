@@ -8,6 +8,7 @@ import { UppercaseFormControlDirective } from "./uppercase-form-control.directiv
   template: `<form [formGroup]="form">
     <input formControlName="email" uppercase />
   </form>`,
+  standalone: false,
 })
 class TestComponent {
   form: FormGroup;

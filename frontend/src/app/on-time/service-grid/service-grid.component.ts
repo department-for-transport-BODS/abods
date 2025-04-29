@@ -24,6 +24,7 @@ import { ActivatedRoute } from "@angular/router";
     [paginate]="true"
     [showFilter]="true"
   ></app-on-time-grid>`,
+  standalone: false,
 })
 export class ServiceGridComponent implements OnInit, OnDestroy {
   columnDescriptions: ColumnDescription[] = [

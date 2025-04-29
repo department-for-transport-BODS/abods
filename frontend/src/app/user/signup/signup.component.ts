@@ -16,6 +16,7 @@ import { UserService } from "../user.service";
 @Component({
   selector: "app-signup",
   templateUrl: "./signup.component.html",
+  standalone: false,
 })
 export class SignupComponent implements OnInit, OnDestroy {
   signUpForm: FormGroup;

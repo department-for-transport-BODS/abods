@@ -16,6 +16,7 @@ import { AsyncStatus, withStatus } from "../pending.model";
     category="dayOfWeek"
     [centerAxis]="true"
   ></app-stacked-histogram-chart>`,
+  standalone: false,
 })
 export class DayOfWeekChartComponent implements OnInit, OnDestroy {
   @Input()

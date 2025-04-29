@@ -31,6 +31,7 @@ import { startWith } from "rxjs/operators";
     </div>
   `,
   styleUrls: ["./tabs.component.scss"],
+  standalone: false,
 })
 export class TabsComponent implements AfterContentInit {
   @Output() tabChanged = new EventEmitter<TabComponent>();

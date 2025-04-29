@@ -28,6 +28,7 @@ export interface MultiselectCheckboxOption {
     },
   ],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class MultiselectCheckboxComponent implements ControlValueAccessor {
   @Input() options: MultiselectCheckboxOption[] | null = [];

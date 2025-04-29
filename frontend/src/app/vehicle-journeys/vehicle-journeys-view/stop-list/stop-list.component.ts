@@ -7,6 +7,7 @@ import { JourneyInfo } from "../vehicle-journeys-view.component";
   selector: "app-stop-list",
   templateUrl: "./stop-list.component.html",
   styleUrls: ["./stop-list.component.scss"],
+  standalone: false,
 })
 export class StopListComponent {
   @Input() view: JourneyInfo | null = null;

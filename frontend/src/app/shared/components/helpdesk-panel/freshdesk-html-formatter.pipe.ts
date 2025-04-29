@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
   name: "freshdeskHtmlFormatter",
+  standalone: false,
 })
 export class FreshdeskHtmlFormatterPipe implements PipeTransform {
   transform(value: string): string {
