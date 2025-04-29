@@ -1074,6 +1074,11 @@ export type StopType = {
   stopName: Scalars['String']['output'];
 };
 
+export enum StopTypeOption {
+  AllStops = 'all_stops',
+  TimingPoints = 'timing_points'
+}
+
 export enum StopsSegment {
   First = 'First',
   Intermediate = 'Intermediate'
@@ -1276,6 +1281,7 @@ export type ResolversTypes = ResolversObject<{
   StopPerformanceType: ResolverTypeWrapper<Partial<StopPerformanceType>>;
   StopStatistics: ResolverTypeWrapper<Partial<StopStatistics>>;
   StopType: ResolverTypeWrapper<Partial<StopType>>;
+  StopTypeOption: ResolverTypeWrapper<Partial<StopTypeOption>>;
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
   Time: ResolverTypeWrapper<Partial<Scalars['Time']['output']>>;
