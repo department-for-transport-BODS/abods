@@ -21,6 +21,7 @@ import { MatchType } from "../../../../generated/graphql";
       label="Evidenced"
     />
   </app-segmented-toggle>`,
+  standalone: false,
 })
 export class MatchTypeSegmentedToggleComponent {
   @Input() matchType: MatchType = MatchType.Evidenced;

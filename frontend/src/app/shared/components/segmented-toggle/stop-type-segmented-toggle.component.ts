@@ -21,6 +21,7 @@ import { StopTypeOption } from "../../../../generated/graphql";
       label="Timing points"
     />
   </app-segmented-toggle>`,
+  standalone: false,
 })
 export class StopTypeSegmentedToggleComponent {
   @Input() stopType: StopTypeOption = StopTypeOption.TimingPoints;
