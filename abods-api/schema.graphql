@@ -128,11 +128,6 @@ enum MatchType {
   evidenced
 }
 
-enum StopTypeOption { # eslint-disable-line @graphql-eslint/no-unreachable-types
-  timing_points
-  all_stops
-}
-
 type CorridorSummaryStatsType {
   averageTransitTime: Int
   numberOfServices: Int

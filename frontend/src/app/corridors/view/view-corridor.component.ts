@@ -66,6 +66,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
   onDestroy$ = new Subject<void>();
   moveCounter = 0;
   matchType = new Subject<MatchType>();
+  matchTypeToggle: MatchType = MatchType.Evidenced;
 
   speedStats?: SpeedStats;
   mode: "time" | "speed" = "time";
@@ -288,12 +289,12 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
           }
         });
 
-      this.matchType.next(MatchType.Evidenced);
+      this.matchType.next(this.matchTypeToggle);
     }
   }
 
-  matchTypeToggleChange(matchTypeValue: MatchType) {
-    this.matchType.next(matchTypeValue);
+  onMatchTypeToggleChange() {
+    this.matchType.next(this.matchTypeToggle);
   }
 
   setCoordinates(segment: CorridorStop[]): Position[] {

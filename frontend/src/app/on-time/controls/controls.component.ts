@@ -14,11 +14,7 @@ import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { DateTime } from "luxon";
 import { BehaviorSubject, combineLatest, Subject } from "rxjs";
 import { distinctUntilChanged, map, takeUntil } from "rxjs/operators";
-import {
-  MatchType,
-  PerformanceFiltersInputType,
-  StopTypeOption,
-} from "src/generated/graphql";
+import { MatchType, PerformanceFiltersInputType } from "src/generated/graphql";
 import { FormControl } from "@angular/forms";
 import { isEqual as _isEqual } from "lodash-es";
 import { PerformanceParams } from "../on-time.service";
@@ -32,6 +28,8 @@ import {
 import { PanelService } from "../../shared/components/panel/panel.service";
 import { ifNullOrUndefinedReturnEmptyString } from "../../shared/rxjs-operators";
 import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
+
+export type TimingPoints = "all-stops" | "timing-points";
 
 @Component({
   selector: "app-controls",
@@ -60,14 +58,14 @@ export class ControlsComponent
   @ViewChild(FiltersComponent) filtersComponent?: FiltersComponent;
 
   // TODO ABOD-350 prefer a form to custom binding
-  get stopType(): StopTypeOption {
+  get timingPointsOption(): TimingPoints {
     return this.filtersSubject.value.timingPointsOnly
-      ? StopTypeOption.TimingPoints
-      : StopTypeOption.AllStops;
+      ? "timing-points"
+      : "all-stops";
   }
 
-  set stopType(stopType: StopTypeOption) {
-    const allStops = stopType === StopTypeOption.AllStops || null;
+  set timingPointsOption(timingPointsOption: TimingPoints) {
+    const allStops = timingPointsOption === "all-stops" || null;
     this.router
       .navigate([], {
         queryParams: { allStops, timingPointsOnly: null },
@@ -87,14 +85,6 @@ export class ControlsComponent
         queryParamsHandling: "merge",
       })
       .catch(console.log);
-  }
-
-  matchTypeToggleChange(matchTypeValue: MatchType) {
-    this.matchType = matchTypeValue;
-  }
-
-  stopTypeToggleChange(stopType: StopTypeOption) {
-    this.stopType = stopType;
   }
 
   /** @deprecated this will be removed in ABOD-350 */
