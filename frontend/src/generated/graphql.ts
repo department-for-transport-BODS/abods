@@ -1074,11 +1074,6 @@ export type StopType = {
   stopName: Scalars['String']['output'];
 };
 
-export enum StopTypeOption {
-  AllStops = 'all_stops',
-  TimingPoints = 'timing_points'
-}
-
 export enum StopsSegment {
   First = 'First',
   Intermediate = 'Intermediate'
