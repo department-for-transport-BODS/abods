@@ -1,4 +1,4 @@
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Router } from "@angular/router";
@@ -17,8 +17,16 @@ import {
 import { AuthenticatedUserService } from "./authenticated-user.service";
 
 import { AuthenticationService } from "./authentication.service";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 
-@Component({ template: "", selector: "app-mock-login" })
+@Component({
+  template: "",
+  selector: "app-mock-login",
+  standalone: false,
+})
 export class MockLoginComponent {}
 
 describe("AuthenticationService", () => {
@@ -38,10 +46,16 @@ describe("AuthenticationService", () => {
         RouterTestingModule.withRoutes([
           { path: "login", component: MockLoginComponent },
         ]),
-        HttpClientTestingModule,
         ApolloTestingModule,
       ],
-      providers: [UserGQL, AuthenticatedUserService, LoginGQL, LogoutGQL],
+      providers: [
+        UserGQL,
+        AuthenticatedUserService,
+        LoginGQL,
+        LogoutGQL,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(AuthenticationService);
     userQuery = TestBed.inject(UserGQL);

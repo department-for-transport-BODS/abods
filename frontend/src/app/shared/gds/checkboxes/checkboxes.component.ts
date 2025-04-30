@@ -21,6 +21,7 @@ import { Component, Input } from "@angular/core";
     </div>
   `,
   styleUrls: ["checkboxes.component.scss"],
+  standalone: false,
 })
 export class CheckboxesComponent {
   @Input() size?: "small";

@@ -45,6 +45,7 @@ function removeFeatureStateSafe(
   selector: "app-corridor-map",
   templateUrl: "./corridor-map.component.html",
   styleUrls: ["./corridor-map.component.scss"],
+  standalone: false,
 })
 export class CorridorMapComponent implements OnInit, OnDestroy {
   @Input() stopList: CorridorStop[] = [];

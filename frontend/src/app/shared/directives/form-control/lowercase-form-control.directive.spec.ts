@@ -8,6 +8,7 @@ import { LowercaseFormControlDirective } from "./lowercase-form-control.directiv
   template: `<form [formGroup]="form">
     <input formControlName="email" lowercase />
   </form>`,
+  standalone: false,
 })
 class TestComponent {
   form: FormGroup;

@@ -30,6 +30,7 @@ const TOOLTIP_HTML = `<header class="amcharts__tooltip-heading">{tooltipLabel}</
   selector: "app-stacked-histogram-chart",
   template: "",
   styles: [":host { display: block; min-height: 100%; width: 100%;}"],
+  standalone: false,
 })
 export class StackedHistogramChartComponent
   extends BaseChart

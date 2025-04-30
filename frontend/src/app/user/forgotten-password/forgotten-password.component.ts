@@ -13,6 +13,7 @@ import { UserService } from "../user.service";
 @Component({
   selector: "app-forgotten-password",
   templateUrl: "./forgotten-password.component.html",
+  standalone: false,
 })
 export class ForgottenPasswordComponent implements OnInit, OnDestroy {
   forgottenPasswordForm: FormGroup;

@@ -9,6 +9,7 @@ import {
   selector: "app-otp-threshold-modal-link",
   templateUrl: "./otp-threshold-modal-link.component.html",
   styleUrls: ["./otp-threshold-modal-link.component.scss"],
+  standalone: false,
 })
 export class OtpThresholdModalLinkComponent {
   @Input() modalData!: OtpThresholdModalData;

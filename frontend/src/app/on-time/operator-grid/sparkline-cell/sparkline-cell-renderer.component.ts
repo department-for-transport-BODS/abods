@@ -6,6 +6,7 @@ import { SafeHtml } from "@angular/platform-browser";
 @Component({
   template: ``,
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class SparklineCellRendererComponent implements AgRendererComponent {
   @HostBinding("innerHtml")

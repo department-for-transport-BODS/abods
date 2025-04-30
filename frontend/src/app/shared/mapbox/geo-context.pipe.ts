@@ -7,6 +7,7 @@ import { isArray } from "lodash-es";
  */
 @Pipe({
   name: "geoContext",
+  standalone: false,
 })
 export class GeoContextPipe implements PipeTransform {
   transform(

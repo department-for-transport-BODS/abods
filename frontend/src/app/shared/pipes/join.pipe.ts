@@ -3,6 +3,7 @@ import { nonNullishArray, NullishArray } from "../array-operators";
 
 @Pipe({
   name: "join",
+  standalone: false,
 })
 export class JoinPipe implements PipeTransform {
   transform(

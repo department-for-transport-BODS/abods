@@ -5,6 +5,7 @@ import { PerformanceCategories } from "../../dashboard.types";
   selector: "app-performance-chart",
   template: "<div></div>",
   styleUrls: [],
+  standalone: false,
 })
 
 // Currently dumb but maybe in the future more interesting mock for the punctuality chart

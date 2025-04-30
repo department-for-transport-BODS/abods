@@ -22,6 +22,7 @@ import {
     <button (click)="testOutput1.emit()">Button 1</button>
     <button (click)="testOutput2.emit()">Button 2</button>
   `,
+  standalone: false,
 })
 class TestDynamicComponent {
   @Input() testInput1!: string;
@@ -32,6 +33,7 @@ class TestDynamicComponent {
 
 @Component({
   template: `<ng-template appDynamicPanelComponentHost></ng-template>`,
+  standalone: false,
 })
 class TestHostComponent {
   @ViewChild(DynamicPanelComponentHostDirective, { static: true })

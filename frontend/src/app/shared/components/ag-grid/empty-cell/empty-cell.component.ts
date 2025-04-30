@@ -4,6 +4,7 @@ import { AgRendererComponent } from "ag-grid-angular";
 @Component({
   selector: "app-empty-cell",
   template: "",
+  standalone: false,
 })
 export class EmptyCellComponent implements AgRendererComponent {
   refresh(): boolean {

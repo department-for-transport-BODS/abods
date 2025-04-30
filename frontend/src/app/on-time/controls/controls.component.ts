@@ -37,6 +37,7 @@ import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-se
   selector: "app-controls",
   templateUrl: "controls.component.html",
   styleUrls: ["./controls.component.scss"],
+  standalone: false,
 })
 export class ControlsComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy

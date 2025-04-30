@@ -17,6 +17,7 @@ import { LoginInfo } from "../../../generated/graphql";
   selector: "app-alerts",
   templateUrl: "./alerts.component.html",
   styleUrls: ["./alerts.component.scss"],
+  standalone: false,
 })
 export class AlertsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(EditAlertComponent) editAlertComponent?: EditAlertComponent;

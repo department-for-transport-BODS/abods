@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
   templateUrl: "./chart-no-data-wrapper.component.html",
   styleUrls: ["./chart-no-data-wrapper.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class ChartNoDataWrapperComponent {
   @Input() noData = false;

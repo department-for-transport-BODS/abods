@@ -10,6 +10,7 @@ import { HeadwayOverviewType } from "../../../generated/graphql";
   templateUrl: "./overview-stats.component.html",
   styleUrls: ["./overview-stats.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class OverviewStatsComponent {
   @Input() showTotal = false;

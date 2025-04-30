@@ -5,6 +5,7 @@ import { GDSSpacingSizes } from "src/app/shared/types";
   template:
     '<div [ngClass]="boxClasses" [style.minHeight]="minHeight"><ng-content></ng-content></div>',
   styleUrls: ["./box.component.scss"],
+  standalone: false,
 })
 export class BoxComponent {
   @Input() minHeight?: string;

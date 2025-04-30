@@ -4,6 +4,7 @@ import { NgControl } from "@angular/forms";
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: "[formControlName][wholeNumber]",
+  standalone: false,
 })
 export class WholeNumberFormControlDirective {
   constructor(private ngControl: NgControl) {}

@@ -1383,7 +1383,7 @@ export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servi
 
 export type UserFragment = { __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null };
 
-export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
+export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
 
 export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1393,14 +1393,14 @@ export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?
 export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListUserAlertsQuery = { __typename?: 'Query', userAlerts?: Array<{ __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null }> | null };
+export type ListUserAlertsQuery = { __typename?: 'Query', userAlerts?: Array<{ __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null }> | null };
 
 export type FetchUserAlertQueryVariables = Exact<{
   alertId: Scalars['String']['input'];
 }>;
 
 
-export type FetchUserAlertQuery = { __typename?: 'Query', userAlert?: { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null } | null };
+export type FetchUserAlertQuery = { __typename?: 'Query', userAlert?: { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null } | null };
 
 export type EditUserMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -1646,6 +1646,7 @@ export const AlertFragmentDoc = gql`
   alertId
   alertType
   createdBy {
+    id
     firstName
     lastName
     username

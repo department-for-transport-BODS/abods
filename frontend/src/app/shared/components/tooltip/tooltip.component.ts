@@ -13,6 +13,7 @@ import type { Placement } from "tippy.js";
   templateUrl: "./tooltip.component.html",
   styleUrls: ["./tooltip.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class TooltipComponent implements OnInit {
   @Input() message?: string | TemplateRef<any> | null = "";

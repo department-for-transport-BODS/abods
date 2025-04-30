@@ -29,6 +29,7 @@ import take from "lodash-es/take";
   selector: "app-dashboard",
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],
+  standalone: false,
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   subs: Subscription[] = [];

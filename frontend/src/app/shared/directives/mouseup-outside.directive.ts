@@ -8,6 +8,7 @@ import {
 
 @Directive({
   selector: "[appMouseupOutside]",
+  standalone: false,
 })
 export class MouseupOutsideDirective {
   @Output() appMouseupOutside = new EventEmitter<HTMLElement>();

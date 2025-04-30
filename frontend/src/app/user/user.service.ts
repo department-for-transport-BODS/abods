@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { GraphQLError } from "graphql";
+import { GraphQLFormattedError } from "graphql";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import {
@@ -26,7 +26,7 @@ const serverFailureResponse: UserMutationResponse = failureResponse(
 );
 
 const mutationFailureResponse = (
-  errors: Readonly<GraphQLError[] | undefined>,
+  errors: Readonly<GraphQLFormattedError[] | undefined>,
 ): UserMutationResponse => {
   return failureResponse(
     errors

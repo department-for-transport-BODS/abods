@@ -13,6 +13,7 @@ import { Component, Input } from "@angular/core";
     </fieldset>
   `,
   styles: [],
+  standalone: false,
 })
 export class FieldsetComponent {
   @Input() legend?: string;

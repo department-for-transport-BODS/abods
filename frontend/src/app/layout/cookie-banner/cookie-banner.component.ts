@@ -6,6 +6,7 @@ import { CookiePolicyService } from "../../shared/services/cookie-policy.service
   selector: "app-cookie-banner",
   templateUrl: "./cookie-banner.component.html",
   styleUrls: ["./cookie-banner.component.scss"],
+  standalone: false,
 })
 export class CookieBannerComponent {
   hidden = false;

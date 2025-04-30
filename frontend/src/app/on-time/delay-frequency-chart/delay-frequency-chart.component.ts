@@ -32,6 +32,7 @@ const tooltipHTML = `
   selector: "app-delay-frequency-chart",
   template: ``,
   styles: [],
+  standalone: false,
 })
 export class DelayFrequencyChartComponent
   extends BaseChart
