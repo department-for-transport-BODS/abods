@@ -85,7 +85,6 @@ export class SparklineCellTemplateComponent
             .then((svg) => {
               const svgson = parseSync(svg);
               svgson.attributes.width = "100%";
-              svgson.attributes.title = "Last 24 hours vehicle stats";
               svgson.attributes.preserveAspectRatio = "none";
               callback(stringify(svgson));
             })

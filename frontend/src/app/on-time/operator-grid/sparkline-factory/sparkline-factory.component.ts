@@ -23,7 +23,6 @@ import { TimeSeriesData } from "../../on-time.service";
 import { map, mergeMap } from "rxjs/operators";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { Interval } from "luxon";
-import { parseSync, stringify } from "svgson";
 
 @Component({
   selector: "app-sparkline-factory",
@@ -50,7 +49,6 @@ export class SparklineFactoryComponent
   renderStatic(
     data: TimeSeriesData[],
     interval: Interval,
-    altTitle?: string,
   ): Observable<SafeHtml> {
     const rendered$ = new Subject<void>();
 
@@ -70,16 +68,7 @@ export class SparklineFactoryComponent
     });
 
     return rendered$.asObservable().pipe(
-      mergeMap(() =>
-        this.chart.exporting.getSVG("svg", {}, false).then((svg) => {
-          if (!altTitle) {
-            return svg;
-          }
-          const svgson = parseSync(svg);
-          svgson.attributes.title = altTitle ?? "";
-          return stringify(svgson);
-        }),
-      ),
+      mergeMap(() => this.chart.exporting.getSVG("svg", {}, false)),
       map((svg) => this.domSanitizer.bypassSecurityTrustHtml(svg)),
     );
   }

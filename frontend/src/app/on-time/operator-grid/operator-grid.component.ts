@@ -235,7 +235,6 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
         DateTime.fromISO(toTimestamp).minus({ [granularity ?? "days"]: 1 }),
       );
 
-    const altText = "On time stats for the selected duration";
     this.loaded$
       .pipe(
         switchMap(() => this.gridReady$),
@@ -258,7 +257,7 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
             ),
             concatMap(({ node, data }) =>
               this.sparklineFactory
-                .renderStatic(data, chartInterval(params), altText)
+                .renderStatic(data, chartInterval(params))
                 .pipe(map((svg) => ({ node, svg }))),
             ),
             map((result) => ({ event, ...result })),
