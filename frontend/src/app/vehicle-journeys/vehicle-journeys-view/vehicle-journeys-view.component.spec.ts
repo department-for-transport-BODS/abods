@@ -163,4 +163,44 @@ describe("VehicleJourneysViewComponent", () => {
 
     expect(spectator.component.timingPointsOption).toEqual("timing-points");
   });
+
+  it("should display cancellation warning if selected journey is marked as cancelled", () => {
+    spyOn(viewService, "getVehicleJourneyView").and.returnValue(of(mockView));
+    spectator.setRouteParam("journeyId", journeyId);
+    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+
+    spectator.component.journeys = [
+      {
+        isCancelled: false,
+        directionRef: "inbound",
+        groupId: "arbb|a|5113|2025-05-05",
+        operatorName: "Arriva Beds and Bucks",
+        operatorNoc: "ARBB",
+        serviceName: "Dunstable to Luton Airport",
+        serviceNumber: "A",
+        startTime: "2025-05-05T02:00:00+01:00",
+      },
+      {
+        isCancelled: true,
+        directionRef: "inbound",
+        groupId: "arbb|a|5113|2025-05-05",
+        operatorName: "Arriva Beds and Bucks",
+        operatorNoc: "ARBB",
+        serviceName: "Dunstable to Luton Airport",
+        serviceNumber: "A",
+        startTime: "2025-05-05T03:00:00+01:00",
+      },
+    ];
+    spectator.component.currentJourneyIndex = 1;
+
+    spectator.detectChanges();
+
+    expect(
+      spectator.query(
+        byTextContent("Journey Cancelled", {
+          selector: ".govuk-error-summary__title",
+        }),
+      ),
+    ).toBeVisible();
+  });
 });
