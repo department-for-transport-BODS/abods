@@ -166,6 +166,7 @@ model expected_journeys {
   admin_area_id                Int[]
   expected_journey_end         DateTime?          @db.Timestamptz(6)
   direction                    String?
+  is_cancelled                 Boolean?
   expected_services            expected_services? @relation(fields: [noc_and_line_and_servicecode, date_of_journey], references: [noc_and_line_and_servicecode, date_of_journey])
 
   @@id([noc_and_line_and_servicecode, journey_code, date_of_journey]) // TODO: fix - not in db

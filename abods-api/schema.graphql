@@ -196,6 +196,7 @@ type Journey {
   serviceNumber: String!
   operatorName: String!
   operatorNoc: String!
+  isCancelled: Boolean!
 }
 
 type ServiceInfoType {
