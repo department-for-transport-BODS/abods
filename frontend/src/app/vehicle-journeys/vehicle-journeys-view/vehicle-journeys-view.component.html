@@ -53,6 +53,25 @@
           </div>
         </div>
       </div>
+      <div
+        class="govuk-error-summary"
+        data-module="govuk-error-summary"
+        *ngIf="
+          journeys[currentJourneyIndex]
+            ? journeys[currentJourneyIndex].isCancelled
+            : false
+        "
+      >
+        <div role="alert">
+          <h2 class="govuk-error-summary__title">Journey Cancelled</h2>
+          <div class="govuk-error-summary__body">
+            <p>
+              This journey has been cancelled (per SIRI-SX data) and will
+              therefore not be included in on-time performance statistics.
+            </p>
+          </div>
+        </div>
+      </div>
       <div class="vehicle-journeys__header-container">
         <app-journey-info
           [vehicleRef]="vehicleRef"
