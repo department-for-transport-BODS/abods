@@ -593,6 +593,10 @@ type ServicePerformanceType {
   onTime: Int!
   scheduledDepartures: Int!
   lineInfo: ServiceInfoType!
+  earlyInSeconds: Float!
+  lateInSeconds: Float!
+  onTimeInSeconds: Float!
+  direction: Direction!
 }
 
 type ServicePunctualityType {
@@ -619,6 +623,12 @@ type StopPerformanceType {
   stopId: String!
   stopInfo: StopInfoType!
   timingPoint: Boolean!
+  earlyInSeconds: Float!
+  lateInSeconds: Float!
+  onTimeInSeconds: Float!
+  direction: Direction!
+  averageScheduled: Float!
+  averageActual: Float!
 }
 
 type StopInfoType {
@@ -683,6 +693,13 @@ enum LineDirection {
   All
   Inbound
   Outbound
+}
+
+enum Direction {
+  inbound
+  outbound
+  clockwise
+  anticlockwise
 }
 
 enum StopsSegment {
@@ -781,6 +798,17 @@ type StopStatistics {
   scheduledDepartures: Int!
   completedDepartures: Int!
   totalDelay: Float!
+  earlyInSeconds: Float!
+  lateInSeconds: Float!
+  onTimeInSeconds: Float!
+  averageDelay: Int!
+  direction: String!
+  countDelayed: Int!
+  averageScheduled: Float!
+  averageScheduledTimingPoint: Float
+  averageActual: Float!
+  averageActualTimingPoint: Float
+  rowCount: Int
 }
 """
 Filters for AvlLineLevelStatus

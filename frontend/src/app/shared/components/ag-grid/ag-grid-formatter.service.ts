@@ -17,6 +17,8 @@ export class AgGridFormatterService {
       Duration.fromObject({ seconds: Math.abs(rounded) }).toFormat("mm:ss")
     );
   };
-  averageDelayValueExportFormatter = ({ value }: { value: number }) =>
+  averageColumnValueExportFormatter = ({ value }: { value: number }) =>
     value.toFixed(0);
+  toCamelcase = ({ value }: { value: string | undefined }) =>
+    value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
 }

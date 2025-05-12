@@ -217,11 +217,9 @@ export class OnTimeService {
       .watch({ params }, { fetchPolicy: "no-cache", errorPolicy: "none" })
       .valueChanges.pipe(
         map(({ data }) =>
-          (data?.onTimePerformance?.stopPerformance ?? [])
-            .map(OnTimeService.calculateOnTimePcts)
-            .sort((a, b) =>
-              a.stopInfo.stopName.localeCompare(b.stopInfo.stopName),
-            ),
+          (data?.onTimePerformance?.stopPerformance ?? []).map(
+            OnTimeService.calculateOnTimePcts,
+          ),
         ),
       );
   }

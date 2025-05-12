@@ -17,6 +17,7 @@ import { ConfigService } from "../config/config.service";
 import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
+  Direction,
   MatchType,
   OperatorLinesGQL,
   OperatorListGQL,
@@ -680,12 +681,24 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: x.totalDelay / x.completedDepartures || 0,
+          averageDelay: x.averageDelay / x.countDelayed || 0,
           total: x.completedDepartures,
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,
           lateRatio: x.late / x.completedDepartures || 0,
           completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
+          direction: x.direction as Direction,
+          averageScheduled:
+            this.stopType === "timing-points"
+              ? x.averageScheduledTimingPoint ?? 0
+              : x.averageScheduled,
+          averageActual:
+            this.stopType === "timing-points"
+              ? x.averageActualTimingPoint ?? 0
+              : x.averageActual,
+          onTimeInSeconds: x.onTimeInSeconds,
+          earlyInSeconds: x.earlyInSeconds,
+          lateInSeconds: x.lateInSeconds,
         }),
       )
       .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
@@ -716,6 +729,26 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
                 cur.scheduledDepartures + acc[cur.atcoCode].scheduledDepartures,
               late: cur.late + acc[cur.atcoCode].late,
               early: cur.early + acc[cur.atcoCode].early,
+              direction: cur.direction,
+              countDelayed: cur.countDelayed + acc[cur.atcoCode].countDelayed,
+              averageDelay: cur.averageDelay + acc[cur.atcoCode].averageDelay,
+              averageScheduled:
+                cur.averageScheduled + acc[cur.atcoCode].averageScheduled,
+              averageActual:
+                cur.averageActual + acc[cur.atcoCode].averageActual,
+              averageScheduledTimingPoint:
+                cur.averageScheduledTimingPoint ??
+                0 + (acc[cur.atcoCode].averageScheduledTimingPoint ?? 0),
+              averageActualTimingPoint:
+                cur.averageActualTimingPoint ??
+                0 + (acc[cur.atcoCode].averageActualTimingPoint ?? 0),
+              onTimeInSeconds:
+                cur.onTimeInSeconds + acc[cur.atcoCode].onTimeInSeconds,
+              earlyInSeconds:
+                cur.earlyInSeconds + acc[cur.atcoCode].earlyInSeconds,
+              lateInSeconds:
+                cur.lateInSeconds + acc[cur.atcoCode].lateInSeconds,
+              rowCount: 1 + (acc[cur.atcoCode].rowCount ?? 0), // Used to calculate averages
             };
             return acc;
           },

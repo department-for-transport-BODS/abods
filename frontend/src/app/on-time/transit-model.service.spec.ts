@@ -27,7 +27,6 @@ describe("StopPerformanceService", () => {
     const expected: ServicePatternType = {
       servicePatternId: "123",
       serviceLinks: [],
-      name: "High Wycombe to Chesham",
       stops: [
         { stopId: "ST0000001", stopName: "Railway Station", lat: 52, lon: 0 },
       ],
@@ -38,7 +37,6 @@ describe("StopPerformanceService", () => {
       .subscribe(([actual]) => {
         expect(actual).not.toBeNull();
         expect(actual.servicePatternId).toEqual("123");
-        expect(actual.name).toEqual("High Wycombe to Chesham");
         expect(actual.stops[0]).toEqual(
           jasmine.objectContaining({ ...expected.stops[0] }),
         );

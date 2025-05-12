@@ -41,6 +41,7 @@
 
 .map-container {
   display: grid;
+  margin-bottom: 20px;
   .map-overlay {
     grid-area: 1 / 1;
     z-index: 1;

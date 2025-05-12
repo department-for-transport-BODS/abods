@@ -20,7 +20,7 @@ export class AgGridDirective {
 
   constructor(private formatter: AgGridFormatterService) {}
 
-  export(filename: string) {
+  export<T>(filename: string, averageValueColumns?: (keyof T)[]) {
     const topRow = this.gridApi?.getPinnedTopRow(0)?.data;
 
     this.gridApi?.setPinnedTopRowData([
@@ -46,17 +46,28 @@ export class AgGridDirective {
         const columnId = cell.column.getColId();
         if (columnId.endsWith("Pct")) {
           return this.formatter.percentValueFormatter(cell);
-        } else if (columnId === "averageDelay") {
-          return this.formatter.averageDelayValueExportFormatter(cell);
+        } else if (
+          averageValueColumns?.includes(columnId as keyof T) ||
+          columnId.endsWith("PctTime")
+        ) {
+          return this.formatter.averageColumnValueExportFormatter(cell);
         }
         return cell.value;
       },
       processHeaderCallback: (cell) => {
         const columnId = cell.column.getColId();
-        if (columnId === "averageDelay") {
-          return "Av. delay (seconds)";
+        const headerName = cell.column.getDefinition().headerName;
+        if (
+          averageValueColumns?.includes(columnId as keyof T) ||
+          columnId.endsWith("PctTime")
+        ) {
+          return `${headerName} (seconds)`;
         }
-        return cell.column.getDefinition().headerName ?? "";
+
+        if (columnId.endsWith("Pct")) {
+          return `${headerName} (percentage)`;
+        }
+        return headerName ?? "";
       },
     });
 

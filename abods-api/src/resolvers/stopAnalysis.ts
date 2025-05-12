@@ -115,6 +115,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "n.atco_code",
       "l.name",
       "a.name",
+      "t.direction",
     ])
     .select([
       "t.stop_latitude as latitude",
@@ -123,6 +124,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "n.common_name as stopName",
       "l.name as localityName",
       "a.name as adminAreaName",
+      "t.direction as direction",
     ])
     .select((eb) => [
       eb.fn.coalesce("n.atco_code", sql.lit("<unknown>")).as("atcoCode"),
@@ -132,6 +134,45 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("t.scheduled").as("scheduledDepartures"),
       eb.fn.sum<number>("t.completed").as("completedDepartures"),
       eb.fn.sum<number>("t.avg_time_difference").as("totalDelay"),
+      eb.fn.sum<number>("t.count_delayed").as("countDelayed"),
+      eb.fn
+        .sum<number>(
+          sql`COALESCE((${eb.ref("t.count_delayed")} * ${eb.ref("t.average_delay")}), 0)`,
+        )
+        .as("averageDelay"),
+      eb.fn
+        .coalesce(
+          eb.fn.avg<number>("t.diff_sched_time_to_stop"),
+          sql<number>`0`,
+        )
+        .as("averageScheduled"),
+      eb.fn
+        .coalesce(
+          eb.fn.avg<number>("t.diff_sched_time_to_stop_timing_point"),
+          sql<number>`0`,
+        )
+        .as("averageScheduledTimingPoint"),
+      eb.fn
+        .coalesce(
+          eb.fn.avg<number>("t.diff_actual_time_to_stop"),
+          sql<number>`0`,
+        )
+        .as("averageActual"),
+      eb.fn
+        .coalesce(
+          eb.fn.avg<number>("t.diff_actual_time_to_stop_timing_point"),
+          sql<number>`0`,
+        )
+        .as("averageActualTimingPoint"),
+      sql<number>`COALESCE(AVG(${eb.ref("t.avg_time_difference")}) FILTER (WHERE ${eb.ref("t.on_time_count")} > 0), 0) * 60`.as(
+        "onTimeInSeconds",
+      ),
+      sql<number>`COALESCE(AVG(${eb.ref("t.avg_time_difference")}) FILTER (WHERE ${eb.ref("t.late_count")} > 0), 0) * 60`.as(
+        "lateInSeconds",
+      ),
+      sql<number>`COALESCE(AVG(${eb.ref("t.avg_time_difference")}) FILTER (WHERE ${eb.ref("t.early_count")} > 0), 0) * 60`.as(
+        "earlyInSeconds",
+      ),
     ])
     .execute();
 };
