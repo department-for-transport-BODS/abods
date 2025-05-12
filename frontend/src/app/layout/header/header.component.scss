@@ -31,3 +31,39 @@
     }
   }
 }
+
+// ---------------------------------------------
+// REBRAND OVERRIDES — only active with class on <html>
+// ---------------------------------------------
+html.govuk-template--rebranded .header {
+  .govuk-header__product-name {
+    // Product name alignment with logo
+    margin-top: -3px;
+  }
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    @include govuk-clearfix();
+    &:after {
+      display: none;
+    }
+  }
+
+  &__help-icon {
+    color: govuk-colour("white");
+    width: 24px;
+  }
+  &__help-link {
+    @include bp($to-desktop) {
+      display: none;
+    }
+    @include govuk-font(19);
+    margin-bottom: 0;
+    &:focus {
+      .header__help-icon {
+        color: govuk-colour("black");
+      }
+    }
+  }
+}
