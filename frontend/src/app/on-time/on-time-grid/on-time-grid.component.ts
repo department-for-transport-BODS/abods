@@ -267,51 +267,18 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   @Input() csvFilename?: string | null;
 
   private _data: TData[] | undefined;
-  totalData: AbstractPerformance[] | undefined;
+  summaryHeaderData: (BasePerformance | StopPerformanceGridType)[] | undefined;
   @Input() set data(value: TData[] | undefined) {
     this._data = value;
 
     if (!value || value.length === 0) {
-      this.totalData = undefined;
+      this.summaryHeaderData = undefined;
       return;
     }
 
-    const early = sumBy(value, "early");
-    const late = sumBy(value, "late");
-    const onTime = sumBy(value, "onTime");
-    const total = sumBy(value, "total");
-    const scheduled = sumBy(value, "scheduledDepartures");
-    const actual = sumBy(value, "actualDepartures");
-
-    const averageDelay = sumBy(value, "averageDelay") / value.length;
-    const averageScheduled = sumBy(value, "averageScheduled") / value.length;
-    const averageActual = sumBy(value, "averageActual") / value.length;
-    const onTimeInSeconds = sumBy(value, "onTimeInSeconds") / value.length;
-    const earlyInSeconds = sumBy(value, "earlyInSeconds") / value.length;
-    const lateInSeconds = sumBy(value, "lateInSeconds") / value.length;
-
-    this.totalData = [
-      {
-        early: early,
-        late: late,
-        onTime: onTime,
-        earlyRatio: early / total || 0,
-        lateRatio: late / total || 0,
-        onTimeRatio: onTime / total || 0,
-        scheduledDepartures: scheduled,
-        actualDepartures: actual,
-        averageDelay: averageDelay || 0,
-        noData: actual - scheduled,
-        completedRatio: actual / total || 0,
-        total: total,
-        averageScheduled: averageScheduled,
-        averageActual: averageActual,
-        onTimeInSeconds: onTimeInSeconds,
-        earlyInSeconds: earlyInSeconds,
-        lateInSeconds: lateInSeconds,
-      },
-    ];
+    this.summaryHeaderData = this.returnSummaryTotal(value);
   }
+
   get data() {
     return this._data;
   }
@@ -352,6 +319,57 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     private formBuilder: FormBuilder,
   ) {
     this._mode = Mode.percent;
+  }
+
+  returnSummaryTotal(
+    value: (StopPerformanceGridType | BasePerformance)[],
+  ): (BasePerformance | StopPerformanceGridType)[] {
+    const early = sumBy(value, "early");
+    const late = sumBy(value, "late");
+    const onTime = sumBy(value, "onTime");
+    const total = sumBy(value, "total");
+    const scheduled = sumBy(value, "scheduledDepartures");
+    const actual = sumBy(value, "actualDepartures");
+
+    const averageDelay = sumBy(value, "averageDelay") / value.length;
+    const onTimeInSeconds = sumBy(value, "onTimeInSeconds") / value.length;
+    const earlyInSeconds = sumBy(value, "earlyInSeconds") / value.length;
+    const lateInSeconds = sumBy(value, "lateInSeconds") / value.length;
+
+    const isStopGrid = value?.some((row) => this.isGridTypeStop(row));
+
+    let summary: StopPerformanceGridType | BasePerformance = {
+      early: early,
+      late: late,
+      onTime: onTime,
+      earlyRatio: early / total || 0,
+      lateRatio: late / total || 0,
+      onTimeRatio: onTime / total || 0,
+      scheduledDepartures: scheduled,
+      actualDepartures: actual,
+      averageDelay: averageDelay || 0,
+      noData: actual - scheduled,
+      completedRatio: actual / total || 0,
+      total: total,
+      onTimeInSeconds: onTimeInSeconds,
+      earlyInSeconds: earlyInSeconds,
+      lateInSeconds: lateInSeconds,
+    };
+
+    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
+
+    if (isStopGrid) {
+      const averageScheduled = sumBy(value, "averageScheduled") / value.length;
+      const averageActual = sumBy(value, "averageActual") / value.length;
+
+      summary = {
+        ...summary,
+        averageScheduled,
+        averageActual,
+      } satisfies StopPerformanceGridType;
+    }
+    summaryArray.push(summary);
+    return summaryArray;
   }
 
   overlayParams: NoRowsOverlayParams = {
