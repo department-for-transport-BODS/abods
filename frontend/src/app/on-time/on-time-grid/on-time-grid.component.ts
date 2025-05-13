@@ -321,6 +321,24 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this._mode = Mode.percent;
   }
 
+  sumByOrNull<T>(
+    array: T[],
+    iteratee: (item: T) => number | null | undefined,
+  ): number | null {
+    let sum = 0;
+    let hasValue = false;
+
+    for (const item of array) {
+      const value = iteratee(item);
+      if (value != null) {
+        sum += value;
+        hasValue = true;
+      }
+    }
+
+    return hasValue ? sum : null;
+  }
+
   returnSummaryTotal(
     value: (StopPerformanceGridType | BasePerformance)[],
   ): (BasePerformance | StopPerformanceGridType)[] {
@@ -331,10 +349,20 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
 
-    const averageDelay = sumBy(value, "averageDelay") / value.length;
-    const onTimeInSeconds = sumBy(value, "onTimeInSeconds") / value.length;
-    const earlyInSeconds = sumBy(value, "earlyInSeconds") / value.length;
-    const lateInSeconds = sumBy(value, "lateInSeconds") / value.length;
+    const averageDelay = value.some((val) => val.averageDelay != undefined)
+      ? sumBy(value, "averageDelay") / value.length
+      : undefined;
+    const onTimeInSeconds = value.some(
+      (val) => val.onTimeInSeconds != undefined,
+    )
+      ? sumBy(value, "onTimeInSeconds") / value.length
+      : undefined;
+    const earlyInSeconds = value.some((val) => val.earlyInSeconds != undefined)
+      ? sumBy(value, "earlyInSeconds") / value.length
+      : undefined;
+    const lateInSeconds = value.some((val) => val.earlyInSeconds != undefined)
+      ? sumBy(value, "lateInSeconds") / value.length
+      : undefined;
 
     const isStopGrid = value?.some((row) => this.isGridTypeStop(row));
 
@@ -347,7 +375,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: averageDelay || 0,
+      averageDelay: averageDelay,
       noData: actual - scheduled,
       completedRatio: actual / total || 0,
       total: total,
@@ -359,8 +387,17 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
 
     if (isStopGrid) {
-      const averageScheduled = sumBy(value, "averageScheduled") / value.length;
-      const averageActual = sumBy(value, "averageActual") / value.length;
+      const stopGrid = value.filter((val) => this.isGridTypeStop(val));
+      const averageScheduled = stopGrid.some(
+        (val) => val.averageScheduled != undefined,
+      )
+        ? sumBy(value, "averageScheduled") / value.length
+        : undefined;
+      const averageActual = stopGrid.some(
+        (val) => val.averageActual != undefined,
+      )
+        ? sumBy(value, "averageActual") / value.length
+        : undefined;
 
       summary = {
         ...summary,

@@ -13,7 +13,7 @@ import {
   values,
 } from "lodash-es";
 import { isNotNullOrUndefined } from "../shared/rxjs-operators";
-import { StopType } from "../../generated/graphql";
+import { Maybe, StopType } from "../../generated/graphql";
 
 export type NormalizedStopPerformance = StopPerformance & {
   earlyNorm: number;
@@ -68,7 +68,10 @@ export class StopPerformanceService {
   // Scale performance values to fit a normal distribution with mean zero and standard deviation one
   normalize(stops: StopPerformance[]): NormalizedStopPerformance[] {
     // TODO is this the correct way to calculate standard deviation for this data set? Its close enough for now!
-    const stdDeviation = (arr: (number | null)[], mean: number) =>
+    const stdDeviation = (
+      arr: (number | null | Maybe<number> | undefined)[],
+      mean: number,
+    ) =>
       Math.sqrt(
         _mean(
           arr
@@ -81,7 +84,7 @@ export class StopPerformanceService {
     const late = sumBy(stops, "late");
     const total = sumBy(stops, "total");
     const delay = sum(
-      stops.map((stop) => stop.actualDepartures * stop.averageDelay),
+      stops.map((stop) => stop.actualDepartures * (stop.averageDelay ?? 0)),
     );
 
     const earlyMean = early / total;

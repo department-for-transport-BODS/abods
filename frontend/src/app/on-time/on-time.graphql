@@ -128,6 +128,7 @@ query onTimeOperatorPerformanceList($params: PerformanceInputType!) {
         early
         onTime
         late
+        averageDelay
       }
     }
   }

@@ -417,6 +417,12 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           context.kysely.fn.sum("on_time_count").as("on_time_count"),
           context.kysely.fn.sum("completed").as("completed"),
           context.kysely.fn.sum("scheduled").as("scheduled"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
         ])
         .groupBy(["operator_noc"]);
 
@@ -447,7 +453,14 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               : 0,
             totalLate = operatorOtpStats.late_count
               ? operatorOtpStats.late_count
-              : 0;
+              : 0,
+            averageDelay =
+              operatorOtpStats.average_delay === undefined
+                ? undefined
+                : Number(operatorOtpStats.count_delayed) > 0
+                  ? Number(operatorOtpStats.average_delay) /
+                    Number(operatorOtpStats.count_delayed)
+                  : 0;
 
           const opPerformance: OperatorPerformanceType = {
             nocCode: item.operatorref,
@@ -456,6 +469,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
             early: Number(totalEarly),
             late: Number(totalLate),
             onTime: Number(totalOntime),
+            averageDelay: averageDelay,
           };
           opPerformances.push(opPerformance);
         }
@@ -1012,13 +1026,13 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
                 "on_time_in_seconds",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
                 "late_in_seconds",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
             ])
@@ -1073,6 +1087,21 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             const stop = stops.find(
               (dbStop) => dbStop.id === Number(res.stop_id),
             );
+            const averageScheduled = isTimingPoint
+              ? Number(res.diff_sched_time_to_stop_timing_point)
+                ? Number(res.diff_sched_time_to_stop_timing_point)
+                : undefined
+              : res.diff_sched_time_to_stop
+                ? Number(res.diff_sched_time_to_stop)
+                : undefined;
+            const averageActual = isTimingPoint
+              ? res.diff_actual_time_to_stop_timing_point
+                ? Number(res.diff_actual_time_to_stop_timing_point)
+                : undefined
+              : res.diff_actual_time_to_stop
+                ? Number(res.diff_actual_time_to_stop)
+                : undefined;
+
             stopPerformances.push({
               lineId: lineIds[0],
               stopId: stop?.atco_code ?? "",
@@ -1096,22 +1125,34 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
-              averageDelay: Number(res.count_delayed)
-                ? Number(res.average_delay) / Number(res.count_delayed)
-                : 0,
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
               timingPoint: res.is_timing_point ?? false,
               direction: (
                 res.direction ?? Direction.Inbound
               ).toLowerCase() as Direction,
-              averageScheduled: isTimingPoint
-                ? Number(res.diff_sched_time_to_stop_timing_point)
-                : Number(res.diff_sched_time_to_stop),
-              averageActual: isTimingPoint
-                ? Number(res.diff_actual_time_to_stop_timing_point)
-                : Number(res.diff_actual_time_to_stop),
-              onTimeInSeconds: res.on_time_in_seconds ?? 0,
-              earlyInSeconds: res.early_in_seconds ?? 0,
-              lateInSeconds: res.late_in_seconds ?? 0,
+              averageScheduled: averageScheduled,
+              averageActual: averageActual,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
             });
           });
         }
@@ -1177,13 +1218,13 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
                 "on_time_in_seconds",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
                 "late_in_seconds",
               ),
-              sql<number>`AVG(${eb.ref("avg_time_difference")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
             ])
@@ -1233,15 +1274,31 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
-              averageDelay: Number(res.count_delayed)
-                ? Number(res.average_delay) / Number(res.count_delayed)
-                : 0,
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
               direction: (
                 res.direction ?? Direction.Inbound
               ).toLowerCase() as Direction,
-              onTimeInSeconds: res.on_time_in_seconds ?? 0,
-              earlyInSeconds: res.early_in_seconds ?? 0,
-              lateInSeconds: res.late_in_seconds ?? 0,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
               lineInfo: {
                 serviceId: res.noc_and_line_and_servicecode!,
                 serviceNumber: res.line_name!,
