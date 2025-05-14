@@ -6251,6 +6251,18 @@
         "isOneOf": null,
         "fields": [
           {
+            "name": "averageDelay",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "averageDeviation",
             "description": null,
             "args": [],

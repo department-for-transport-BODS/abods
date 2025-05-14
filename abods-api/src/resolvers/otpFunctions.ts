@@ -307,6 +307,12 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           context.kysely.fn.sum("on_time_count").as("on_time_count"),
           context.kysely.fn.sum("completed").as("completed"),
           context.kysely.fn.sum("scheduled").as("scheduled"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
         ])
         .groupBy(["incomplete_reason", "estimated"]);
 
@@ -327,9 +333,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         onTime: 0,
         completed: 0,
         averageDeviation: 0,
+        averageDelay: 0,
         incomplete: "{}", // To be replaced
       };
       const incompleteReasons: Record<number, number> = {};
+      let averageDelayed: number | undefined = undefined;
       for (const result of results) {
         // https://github.com/kysely-org/kysely/issues/749
         const scheduled = Number(result.scheduled ?? 0);
@@ -352,11 +360,20 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         returnVal.late += late;
         returnVal.onTime += onTime;
         returnVal.completed += completed;
-
+        if (
+          result.count_delayed != undefined &&
+          result.average_delay != undefined &&
+          Number(result.count_delayed) > 0
+        ) {
+          averageDelayed =
+            averageDelayed ??
+            0 + Number(result.average_delay) / Number(result.count_delayed);
+        }
         incompleteReasons[reasonId] ??= 0;
         incompleteReasons[reasonId] += scheduled - completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
+      returnVal.averageDelay = averageDelayed;
 
       return returnVal;
     } catch (error) {

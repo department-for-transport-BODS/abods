@@ -28,6 +28,7 @@ query onTimeStats($params: PerformanceInputType!) {
       completed
       averageDeviation
       incomplete
+      averageDelay
     }
   }
 }

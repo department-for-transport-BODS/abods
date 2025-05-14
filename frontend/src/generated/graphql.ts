@@ -799,6 +799,7 @@ export type PunctualityTimeSeriesType = {
 
 export type PunctualityTotalsType = {
   __typename?: 'PunctualityTotalsType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
@@ -1352,7 +1353,7 @@ export type OnTimeStatsQueryVariables = Exact<{
 }>;
 
 
-export type OnTimeStatsQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', punctualityOverview?: { __typename?: 'PunctualityTotalsType', early: number, late: number, onTime: number, scheduled: number, completed: number, averageDeviation?: number | null, incomplete: string } | null } | null };
+export type OnTimeStatsQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', punctualityOverview?: { __typename?: 'PunctualityTotalsType', early: number, late: number, onTime: number, scheduled: number, completed: number, averageDeviation?: number | null, incomplete: string, averageDelay?: number | null } | null } | null };
 
 export type OnTimePunctualityTimeOfDayQueryVariables = Exact<{
   params: PerformanceInputType;
@@ -2377,6 +2378,7 @@ export const OnTimeStatsDocument = gql`
       completed
       averageDeviation
       incomplete
+      averageDelay
     }
   }
 }

@@ -799,6 +799,7 @@ export type PunctualityTimeSeriesType = {
 
 export type PunctualityTotalsType = {
   __typename?: 'PunctualityTotalsType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
@@ -1820,6 +1821,7 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
 }>;
 
 export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTotalsType'] = ResolversParentTypes['PunctualityTotalsType']> = ResolversObject<{
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   averageDeviation?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

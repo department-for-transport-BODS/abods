@@ -563,6 +563,7 @@ type PunctualityDayOfWeekType {
 
 type PunctualityTotalsType {
   averageDeviation: Float
+  averageDelay: Float
   completed: Int!
   early: Int!
   late: Int!

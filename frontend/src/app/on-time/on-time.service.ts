@@ -53,7 +53,13 @@ export type StopPerformance = StopPerformanceType & OnTimeRatios;
 
 export type PunctualityOverview = Pick<
   PunctualityTotalsType,
-  "early" | "onTime" | "late" | "completed" | "scheduled" | "incomplete"
+  | "early"
+  | "onTime"
+  | "late"
+  | "completed"
+  | "scheduled"
+  | "incomplete"
+  | "averageDelay"
 > & {
   noData: number;
 };
