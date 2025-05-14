@@ -472,7 +472,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? operatorOtpStats.late_count
               : 0,
             averageDelay =
-              operatorOtpStats.average_delay === undefined
+              operatorOtpStats.average_delay == undefined
                 ? undefined
                 : Number(operatorOtpStats.count_delayed) > 0
                   ? Number(operatorOtpStats.average_delay) /
@@ -1147,9 +1147,9 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
               timingPoint: res.is_timing_point ?? false,
-              direction: (
-                res.direction ?? Direction.Inbound
-              ).toLowerCase() as Direction,
+              direction: res.direction
+                ? (res.direction.toLowerCase() as Direction)
+                : undefined,
               averageScheduled: averageScheduled,
               averageActual: averageActual,
               onTimeInSeconds:

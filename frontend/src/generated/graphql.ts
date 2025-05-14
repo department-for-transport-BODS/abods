@@ -970,7 +970,7 @@ export type ServicePerformanceType = {
   __typename?: 'ServicePerformanceType';
   actualDepartures: Scalars['Int']['output'];
   averageDelay?: Maybe<Scalars['Float']['output']>;
-  direction: Direction;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
   earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
@@ -1051,7 +1051,7 @@ export type StopPerformanceType = {
   averageActual?: Maybe<Scalars['Float']['output']>;
   averageDelay?: Maybe<Scalars['Float']['output']>;
   averageScheduled?: Maybe<Scalars['Float']['output']>;
-  direction: Direction;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
   earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
@@ -1076,7 +1076,7 @@ export type StopStatistics = {
   averageScheduledTimingPoint?: Maybe<Scalars['Float']['output']>;
   completedDepartures: Scalars['Int']['output'];
   countDelayed?: Maybe<Scalars['Int']['output']>;
-  direction: Scalars['String']['output'];
+  direction?: Maybe<Scalars['String']['output']>;
   early: Scalars['Int']['output'];
   earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
@@ -1374,14 +1374,14 @@ export type OnTimeServicePerformanceListQueryVariables = Exact<{
 }>;
 
 
-export type OnTimeServicePerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePerformance?: Array<{ __typename?: 'ServicePerformanceType', lineId?: string | null, early: number, onTime: number, late: number, averageDelay?: number | null, scheduledDepartures: number, actualDepartures: number, direction: Direction, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, lineInfo: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } }> | null } | null };
+export type OnTimeServicePerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', servicePerformance?: Array<{ __typename?: 'ServicePerformanceType', lineId?: string | null, early: number, onTime: number, late: number, averageDelay?: number | null, scheduledDepartures: number, actualDepartures: number, direction?: Direction | null, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, lineInfo: { __typename?: 'ServiceInfoType', serviceId: string, serviceName: string, serviceNumber: string } }> | null } | null };
 
 export type OnTimeStopPerformanceListQueryVariables = Exact<{
   params: PerformanceInputType;
 }>;
 
 
-export type OnTimeStopPerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', stopPerformance?: Array<{ __typename?: 'StopPerformanceType', lineId?: string | null, stopId: string, early: number, onTime: number, late: number, averageDelay?: number | null, scheduledDepartures: number, actualDepartures: number, timingPoint: boolean, direction: Direction, averageScheduled?: number | null, averageActual?: number | null, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, stopInfo: { __typename?: 'StopInfoType', stopId: string, sourceId?: string | null, stopName: string, stopLocation: { __typename?: 'GpsPointType', latitude: number, longitude: number }, stopLocality: { __typename?: 'LocalityType', localityId?: string | null, localityName?: string | null, localityAreaId?: string | null, localityAreaName?: string | null } } }> | null } | null };
+export type OnTimeStopPerformanceListQuery = { __typename?: 'Query', onTimePerformance?: { __typename?: 'OnTimePerformanceType', stopPerformance?: Array<{ __typename?: 'StopPerformanceType', lineId?: string | null, stopId: string, early: number, onTime: number, late: number, averageDelay?: number | null, scheduledDepartures: number, actualDepartures: number, timingPoint: boolean, direction?: Direction | null, averageScheduled?: number | null, averageActual?: number | null, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, stopInfo: { __typename?: 'StopInfoType', stopId: string, sourceId?: string | null, stopName: string, stopLocation: { __typename?: 'GpsPointType', latitude: number, longitude: number }, stopLocality: { __typename?: 'LocalityType', localityId?: string | null, localityName?: string | null, localityAreaId?: string | null, localityAreaName?: string | null } } }> | null } | null };
 
 export type OnTimeOperatorPerformanceListQueryVariables = Exact<{
   params: PerformanceInputType;
@@ -1506,7 +1506,7 @@ export type StopAnalysisQueryVariables = Exact<{
 }>;
 
 
-export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, averageDelay?: number | null, direction: string, countDelayed?: number | null, averageScheduled?: number | null, averageScheduledTimingPoint?: number | null, averageActual?: number | null, averageActualTimingPoint?: number | null }> };
+export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, averageDelay?: number | null, direction?: string | null, countDelayed?: number | null, averageScheduled?: number | null, averageScheduledTimingPoint?: number | null, averageActual?: number | null, averageActualTimingPoint?: number | null }> };
 
 export type RequestResetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
