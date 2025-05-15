@@ -362,13 +362,11 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const atcoSequence = stopList.join(",");
-
   const journeysPassingCorridor = context.kysely
     .selectFrom("route_to_journeys as rj")
     .innerJoin("distinct_routes as dr", "rj.distinct_route_id", "dr.id")
     .innerJoin("Timetable as tt", "tt.group_id", "rj.group_id")
-    .where("dr.route", "like", `%${atcoSequence}%`)
+    .where("dr.route", "like", `%${stopList.join(",")}%`)
     .where(
       "tt.date_of_journey",
       ">=",
