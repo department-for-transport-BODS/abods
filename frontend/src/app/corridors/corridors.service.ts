@@ -255,7 +255,7 @@ export class CorridorsService {
           fromTimestamp: from.toISO(),
           toTimestamp: to.toISO(),
           granularity,
-          stopList: stops.map((stop) => stop.stopId),
+          stopList: stops.map((stop) => stop.naptan),
           matchType,
         },
       })

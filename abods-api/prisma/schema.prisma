@@ -626,3 +626,10 @@ model login_details {
   data_monitoring_access_count   Int?
   data_monitoring_access_refresh DateTime? @db.Timestamp(6)
 }
+
+model route_to_journeys {
+  id                Int    @id @default(autoincrement())
+  group_id          String
+  date_of_journey   DateTime  @db.Date
+  distinct_route_id Int
+}
