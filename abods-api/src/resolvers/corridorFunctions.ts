@@ -364,7 +364,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
   const atcoSequence = `%${stopList.join(",")}%`;
 
-  const journeysWithAtLeastAsManyStops = context.kysely
+  const journeysPassingCorridor = context.kysely
     .selectFrom("route_to_journeys as rj")
     .innerJoin("distinct_routes as dr", "rj.distinct_route_id", "dr.id")
     .innerJoin("Timetable as tt", "tt.group_id", "rj.group_id")
@@ -408,7 +408,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     .where("n.atco_code", "in", stopList);
 
   const results: TimetableType[] = await timetables
-    .where("t.group_id", "in", journeysWithAtLeastAsManyStops)
+    .where("t.group_id", "in", journeysPassingCorridor)
     .select([
       "t.atco_code",
       "t.stop_index",
