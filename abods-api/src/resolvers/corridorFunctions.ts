@@ -362,37 +362,40 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const journeysPassingCorridor = context.kysely
-    .selectFrom("route_to_journeys as rj")
-    .innerJoin("distinct_routes as dr", "rj.distinct_route_id", "dr.id")
-    .innerJoin("Timetable as tt", "tt.group_id", "rj.group_id")
-    .where("dr.route", "like", `%${stopList.join(",")}%`)
-    .where(
-      "tt.date_of_journey",
-      ">=",
-      userSelectedDateAsUtc(fromTimestamp).toDate(),
-    )
-    .where(
-      "tt.date_of_journey",
-      "<",
-      userSelectedDateAsUtc(toTimestamp).toDate(),
-    )
-    .where(
-      "rj.date_of_journey",
-      ">=",
-      userSelectedDateAsUtc(fromTimestamp).toDate(),
-    )
-    .where(
-      "rj.date_of_journey",
-      "<",
-      userSelectedDateAsUtc(toTimestamp).toDate(),
-    )
-    .select(["tt.group_id"])
-    .distinct();
-
   const timetables = context.kysely
+    .with("corridor_journeys", (db) =>
+      db
+        .selectFrom("route_to_journeys as rj")
+        .innerJoin("distinct_routes as dr", "rj.distinct_route_id", "dr.id")
+        .where("dr.route", "like", `%${stopList.join(",")}%`)
+        .where(
+          "rj.date_of_journey",
+          ">=",
+          userSelectedDateAsUtc(fromTimestamp).toDate(),
+        )
+        .where(
+          "rj.date_of_journey",
+          "<",
+          userSelectedDateAsUtc(toTimestamp).toDate(),
+        )
+        .select([
+          "rj.group_id as group_id",
+          "rj.date_of_journey as date_of_journey",
+        ]),
+    )
+    .with("naptan_stops", (db) =>
+      db
+        .selectFrom("naptan_stoppoint_latlong as nsl")
+        .where("nsl.atco_code", "in", stopList)
+        .select("nsl.id as naptan_id"),
+    )
     .selectFrom("Timetable as t")
-    .innerJoin("naptan_stoppoint_latlong as n", "n.id", "t.stop_id")
+    .innerJoin("naptan_stops as n", "n.naptan_id", "t.stop_id")
+    .innerJoin("corridor_journeys as cj", (join) =>
+      join
+        .onRef("cj.group_id", "=", "t.group_id")
+        .onRef("cj.date_of_journey", "=", "t.date_of_journey"),
+    )
     .where(
       "t.date_of_journey",
       ">=",
@@ -403,10 +406,6 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       "<",
       userSelectedDateAsUtc(toTimestamp).toDate(),
     )
-    .where("n.atco_code", "in", stopList);
-
-  const results: TimetableType[] = await timetables
-    .where("t.group_id", "in", journeysPassingCorridor)
     .select([
       "t.atco_code",
       "t.stop_index",
@@ -419,8 +418,9 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       "t.vehiclejourney_id",
       "t.group_id",
       "t.date_of_journey",
-    ])
-    .execute();
+    ]);
+
+  const results: TimetableType[] = await timetables.execute();
 
   const corridorTransits = extractCorridorTransits(results, stopList);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
