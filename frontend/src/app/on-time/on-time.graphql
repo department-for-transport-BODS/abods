@@ -80,6 +80,7 @@ query onTimeStopPerformanceList($params: PerformanceInputType!) {
       stopId
       stopInfo {
         stopId
+        sourceId
         stopName
         stopLocation {
           latitude
