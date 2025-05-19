@@ -700,11 +700,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
           direction: x.direction as Maybe<Direction> | undefined,
           averageScheduled:
-            this.stopType === "timing-points"
+            this.stopType === StopTypeOption.TimingPoints
               ? x.averageScheduledTimingPoint
               : x.averageScheduled,
           averageActual:
-            this.stopType === "timing-points"
+            this.stopType === StopTypeOption.TimingPoints
               ? x.averageActualTimingPoint
               : x.averageActual,
           onTimeInSeconds: this.getDividedValueOrUndefined(
