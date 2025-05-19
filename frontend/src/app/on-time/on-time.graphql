@@ -28,6 +28,7 @@ query onTimeStats($params: PerformanceInputType!) {
       completed
       averageDeviation
       incomplete
+      averageDelay
     }
   }
 }
@@ -69,6 +70,10 @@ query onTimeServicePerformanceList($params: PerformanceInputType!) {
       averageDelay
       scheduledDepartures
       actualDepartures
+      direction
+      onTimeInSeconds
+      earlyInSeconds
+      lateInSeconds
     }
   }
 }
@@ -100,6 +105,12 @@ query onTimeStopPerformanceList($params: PerformanceInputType!) {
       scheduledDepartures
       actualDepartures
       timingPoint
+      direction
+      averageScheduled
+      averageActual
+      onTimeInSeconds
+      earlyInSeconds
+      lateInSeconds
     }
   }
 }
@@ -118,6 +129,7 @@ query onTimeOperatorPerformanceList($params: PerformanceInputType!) {
         early
         onTime
         late
+        averageDelay
       }
     }
   }

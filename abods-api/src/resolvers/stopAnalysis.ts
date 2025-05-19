@@ -115,6 +115,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "n.atco_code",
       "l.name",
       "a.name",
+      "t.direction",
     ])
     .select([
       "t.stop_latitude as latitude",
@@ -123,6 +124,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "n.common_name as stopName",
       "l.name as localityName",
       "a.name as adminAreaName",
+      "t.direction as direction",
     ])
     .select((eb) => [
       eb.fn.coalesce("n.atco_code", sql.lit("<unknown>")).as("atcoCode"),
@@ -132,7 +134,41 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("t.scheduled").as("scheduledDepartures"),
       eb.fn.sum<number>("t.completed").as("completedDepartures"),
       eb.fn.sum<number>("t.avg_time_difference").as("totalDelay"),
+      eb.fn.sum<number>("t.count_delayed").as("countDelayed"),
+      eb.fn
+        .sum<number>(
+          sql`(${eb.ref("t.count_delayed")} * ${eb.ref("t.average_delay")})`,
+        )
+        .as("averageDelay"),
+      eb.fn
+        .avg<number | null>("t.diff_sched_time_to_stop")
+        .as("averageScheduled"),
+      eb.fn
+        .avg<number | null>("t.diff_sched_time_to_stop_timing_point")
+        .as("averageScheduledTimingPoint"),
+      eb.fn
+        .avg<number | null>("t.diff_actual_time_to_stop")
+        .as("averageActual"),
+      eb.fn
+        .avg<number | null>("t.diff_actual_time_to_stop_timing_point")
+        .as("averageActualTimingPoint"),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")} * ${eb.ref("t.on_time_count")}) FILTER (WHERE ${eb.ref("t.on_time_count")} > 0) * 60`.as(
+        "onTimeInSeconds",
+      ),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")} * ${eb.ref("t.late_count")}) FILTER (WHERE ${eb.ref("t.late_count")} > 0) * 60`.as(
+        "lateInSeconds",
+      ),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")}  * ${eb.ref("t.early_count")}) FILTER (WHERE ${eb.ref("t.early_count")} > 0) * 60`.as(
+        "earlyInSeconds",
+      ),
     ])
+    .where("n.atco_code", "=", "0100BRA10196")
     .execute();
 };
 

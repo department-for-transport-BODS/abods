@@ -4,6 +4,7 @@ import { StopPerformanceService } from "./stop-performance.service";
 import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
 import { ServicePattern } from "./transit-model.service";
 import objectContaining = jasmine.objectContaining;
+import { Direction } from "../../generated/graphql";
 
 const stopPerf = (
   early: number,
@@ -37,6 +38,12 @@ const stopPerf = (
   timingPoint: false,
   averageDelay: 60,
   completedRatio: 0,
+  direction: Direction.Inbound,
+  averageScheduled: 60,
+  averageActual: 60,
+  earlyInSeconds: 60,
+  lateInSeconds: 60,
+  onTimeInSeconds: 60,
 });
 
 describe("StopPerformanceService", () => {
@@ -54,7 +61,6 @@ describe("StopPerformanceService", () => {
     const transitModel: ServicePattern[] = [
       {
         servicePatternId: "001",
-        name: "A to B",
         stops: [
           { stopId: "ST00001", stopName: "A", lat: 50, lon: 0 },
           { stopId: "ST00002", stopName: "B", lat: 51, lon: 0 },
@@ -146,7 +152,6 @@ describe("StopPerformanceService", () => {
     const transitModel: ServicePattern[] = [
       {
         servicePatternId: "001",
-        name: "A to B",
         stops: [
           { stopId: "ST00001", stopName: "A", lat: 50, lon: 0 },
           { stopId: "ST00002", stopName: "B", lat: 51, lon: 0 },

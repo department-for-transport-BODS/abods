@@ -546,6 +546,7 @@ type OperatorPerformanceType {
   nocCode: String
   onTime: Int!
   operatorId: String
+  averageDelay: Float
 }
 
 type PageInfo {
@@ -562,6 +563,7 @@ type PunctualityDayOfWeekType {
 
 type PunctualityTotalsType {
   averageDeviation: Float
+  averageDelay: Float
   completed: Int!
   early: Int!
   late: Int!
@@ -586,13 +588,17 @@ type PunctualityTimeSeriesType {
 
 type ServicePerformanceType {
   actualDepartures: Int!
-  averageDelay: Float!
+  averageDelay: Float
   early: Int!
   late: Int!
   lineId: String
   onTime: Int!
   scheduledDepartures: Int!
   lineInfo: ServiceInfoType!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  direction: Direction
 }
 
 type ServicePunctualityType {
@@ -610,7 +616,7 @@ type ServicePunctualityType {
 
 type StopPerformanceType {
   actualDepartures: Int!
-  averageDelay: Float!
+  averageDelay: Float
   early: Int!
   late: Int!
   lineId: String
@@ -619,6 +625,12 @@ type StopPerformanceType {
   stopId: String!
   stopInfo: StopInfoType!
   timingPoint: Boolean!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  direction: Direction
+  averageScheduled: Float
+  averageActual: Float
 }
 
 type StopInfoType {
@@ -683,6 +695,13 @@ enum LineDirection {
   All
   Inbound
   Outbound
+}
+
+enum Direction {
+  inbound
+  outbound
+  clockwise
+  anticlockwise
 }
 
 enum StopsSegment {
@@ -781,6 +800,16 @@ type StopStatistics {
   scheduledDepartures: Int!
   completedDepartures: Int!
   totalDelay: Float!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  averageDelay: Int
+  direction: String
+  countDelayed: Int
+  averageScheduled: Float
+  averageScheduledTimingPoint: Float
+  averageActual: Float
+  averageActualTimingPoint: Float
 }
 """
 Filters for AvlLineLevelStatus

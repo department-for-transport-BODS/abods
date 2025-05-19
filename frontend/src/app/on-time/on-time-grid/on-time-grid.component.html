@@ -4,15 +4,27 @@
     [ngClass]="{ 'on-time-grid--hidden': loading || errored }"
   >
     <div class="on-time-grid__controls">
-      <div class="on-time-grid__controls--filter">
+      <div *ngIf="showFilter" class="on-time-grid__controls--filter">
         <gds-text-input
-          *ngIf="showFilter"
           [label]="'Search for a ' + noun"
           name="filter"
           inputId="on-time-grid-filter"
           width="20"
           [(ngModel)]="gridFilter"
         ></gds-text-input>
+      </div>
+      <div class="on-time-grid__dropdown--filter">
+        <label class="govuk-label" for="services">Services</label>
+        <gds-multiselect-checkbox
+          [options]="directionOptions"
+          [ngModel]="directions"
+          (selectedChange)="onDirectionsChanged($event)"
+          [showAll]="true"
+          labelForId="directionsDropdown"
+          showAllLabel="All Directions"
+          placeholderText="Directions"
+          ariaLabel="Directions"
+        />
       </div>
       <div class="on-time-grid__options">
         <div>
@@ -23,22 +35,31 @@
             Display options
           </button>
         </div>
-        <gds-radios size="small" layout="inline">
-          <gds-radio-item
-            label="Percentage"
-            name="show-percent"
-            inputId="on-time-grid-show-percent"
-            [(ngModel)]="mode"
-            [value]="'percent'"
-          ></gds-radio-item>
-          <gds-radio-item
-            label="Count"
-            name="show-count"
-            inputId="on-time-grid-show-count"
-            [(ngModel)]="mode"
-            [value]="'count'"
-          ></gds-radio-item>
-        </gds-radios>
+        <div>
+          <gds-radios size="small" layout="inline">
+            <gds-radio-item
+              label="Percentage"
+              name="show-percent"
+              inputId="on-time-grid-show-percent"
+              [(ngModel)]="mode"
+              [value]="Mode.percent"
+            ></gds-radio-item>
+            <gds-radio-item
+              label="Count"
+              name="show-count"
+              inputId="on-time-grid-show-count"
+              [(ngModel)]="mode"
+              [value]="Mode.count"
+            ></gds-radio-item>
+            <gds-radio-item
+              label="Time"
+              name="show-time"
+              inputId="on-time-grid-show-time"
+              [(ngModel)]="mode"
+              [value]="Mode.time"
+            ></gds-radio-item>
+          </gds-radios>
+        </div>
       </div>
     </div>
 
@@ -47,7 +68,7 @@
       (agGridReady)="onTimeGridReady()"
       class="ag-theme-compact ag-theme-wrapped-header"
       [rowData]="data"
-      [pinnedTopRowData]="totalData"
+      [pinnedTopRowData]="summaryHeaderData"
       [columnDefs]="columnDefs"
       [gridOptions]="gridOptions"
       [defaultColDef]="defaultColDef"
@@ -59,6 +80,7 @@
       [quickFilterText]="gridFilter"
       (filterChanged)="filterChanged($event)"
       (paginationChanged)="paging.paginationChanged($event)"
+      [gridOptions]="gridOptions"
     >
     </ag-grid-angular>
     <div class="on-time-grid__footer">

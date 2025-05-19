@@ -271,6 +271,8 @@ model timetable_summary_operator_t {
   admin_areas         Int[]
   estimated           Boolean? @default(false)
   incomplete_reason   Int?
+  count_delayed       Int
+  average_delay       Int
 
   @@index([day_of_week], map: "day_of_week_operatort")
   @@index([departure_hour_only], map: "departure_hour_only_operatort")
@@ -328,8 +330,11 @@ model timetable_summary_service_tz {
   admin_areas                  Int[]
   estimated                    Boolean  @default(false)
   incomplete_reason            Int?
+  direction                    String
+  count_delayed                Int
+  average_delay                Int
 
-  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode]) // TODO: fix - not in db
+  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode, direction]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_servicetz")
   @@index([day_of_week], map: "day_of_week_servicetz")
   @@index([departure_hour_only], map: "departure_hour_only_servicetz")
@@ -367,8 +372,16 @@ model timetable_summary_stops_tz {
   avg_time_difference          Decimal? @db.Decimal
   estimated                    Boolean  @default(false)
   incomplete_reason            Int?
+  direction                               String
+  stop_index                              Int
+  count_delayed                           Int
+  average_delay                           Int
+  diff_sched_time_to_stop                 Int
+  diff_sched_time_to_stop_timing_point    Int
+  diff_actual_time_to_stop                Int
+  diff_actual_time_to_stop_timing_point   Int
 
-  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude]) // TODO: fix - not in db
+  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude, direction, stop_index]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_stopstz")
   @@index([day_of_week], map: "day_of_week_stopstz")
   @@index([departure_hour_only], map: "departure_hour_only_stopstz")

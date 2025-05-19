@@ -270,6 +270,13 @@ export type DelayFrequencyType = {
   frequency?: Maybe<Scalars['Int']['output']>;
 };
 
+export enum Direction {
+  Anticlockwise = 'anticlockwise',
+  Clockwise = 'clockwise',
+  Inbound = 'inbound',
+  Outbound = 'outbound'
+}
+
 export type EventData = {
   __typename?: 'EventData';
   message: Scalars['String']['output'];
@@ -697,6 +704,7 @@ export type OperatorPerformancePage = {
 
 export type OperatorPerformanceType = {
   __typename?: 'OperatorPerformanceType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -791,6 +799,7 @@ export type PunctualityTimeSeriesType = {
 
 export type PunctualityTotalsType = {
   __typename?: 'PunctualityTotalsType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
@@ -960,12 +969,16 @@ export type ServicePerformanceInputType = {
 export type ServicePerformanceType = {
   __typename?: 'ServicePerformanceType';
   actualDepartures: Scalars['Int']['output'];
-  averageDelay: Scalars['Float']['output'];
+  averageDelay?: Maybe<Scalars['Float']['output']>;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   lineId?: Maybe<Scalars['String']['output']>;
   lineInfo: ServiceInfoType;
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
 };
 
@@ -1035,11 +1048,17 @@ export type StopInfoType = {
 export type StopPerformanceType = {
   __typename?: 'StopPerformanceType';
   actualDepartures: Scalars['Int']['output'];
-  averageDelay: Scalars['Float']['output'];
+  averageActual?: Maybe<Scalars['Float']['output']>;
+  averageDelay?: Maybe<Scalars['Float']['output']>;
+  averageScheduled?: Maybe<Scalars['Float']['output']>;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   lineId?: Maybe<Scalars['String']['output']>;
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopInfo: StopInfoType;
@@ -1050,13 +1069,23 @@ export type StopStatistics = {
   __typename?: 'StopStatistics';
   adminAreaName: Scalars['String']['output'];
   atcoCode: Scalars['String']['output'];
+  averageActual?: Maybe<Scalars['Float']['output']>;
+  averageActualTimingPoint?: Maybe<Scalars['Float']['output']>;
+  averageDelay?: Maybe<Scalars['Int']['output']>;
+  averageScheduled?: Maybe<Scalars['Float']['output']>;
+  averageScheduledTimingPoint?: Maybe<Scalars['Float']['output']>;
   completedDepartures: Scalars['Int']['output'];
+  countDelayed?: Maybe<Scalars['Int']['output']>;
+  direction?: Maybe<Scalars['String']['output']>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   latitude: Scalars['Float']['output'];
   localityName: Scalars['String']['output'];
   longitude: Scalars['Float']['output'];
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
   timingPoint: Scalars['Boolean']['output'];
@@ -1209,6 +1238,7 @@ export type ResolversTypes = ResolversObject<{
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
   DelayFrequencyType: ResolverTypeWrapper<Partial<DelayFrequencyType>>;
+  Direction: ResolverTypeWrapper<Partial<Direction>>;
   EventData: ResolverTypeWrapper<Partial<EventData>>;
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
@@ -1742,6 +1772,7 @@ export type OperatorPerformancePageResolvers<ContextType = RequestContext, Paren
 }>;
 
 export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformanceType'] = ResolversParentTypes['OperatorPerformanceType']> = ResolversObject<{
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1790,6 +1821,7 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
 }>;
 
 export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTotalsType'] = ResolversParentTypes['PunctualityTotalsType']> = ResolversObject<{
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   averageDeviation?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1852,12 +1884,16 @@ export type ServicePatternTypeResolvers<ContextType = RequestContext, ParentType
 
 export type ServicePerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePerformanceType'] = ResolversParentTypes['ServicePerformanceType']> = ResolversObject<{
   actualDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   lineInfo?: Resolver<ResolversTypes['ServiceInfoType'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1901,11 +1937,17 @@ export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopPerformanceType'] = ResolversParentTypes['StopPerformanceType']> = ResolversObject<{
   actualDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  averageActual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageScheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
@@ -1916,13 +1958,23 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
 export type StopStatisticsResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopStatistics'] = ResolversParentTypes['StopStatistics']> = ResolversObject<{
   adminAreaName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   atcoCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  averageActual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageActualTimingPoint?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  averageScheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageScheduledTimingPoint?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   localityName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
