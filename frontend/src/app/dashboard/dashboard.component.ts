@@ -16,14 +16,14 @@ import {
 } from "rxjs/operators";
 import {
   DashboardVehicles,
+  MatchType,
   OperatorDashboardFragment,
   PerformanceFiltersInputType,
+  StopTypeOption,
 } from "../../generated/graphql";
 import { DashboardService } from "./dashboard.service";
 import orderBy from "lodash-es/orderBy";
 import take from "lodash-es/take";
-
-type TimingPointsOption = "timing-points" | "all-stops";
 
 @Component({
   selector: "app-dashboard",
@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   feedStatusOperators: OperatorDashboardFragment[] = [];
 
-  timingPointsOption: TimingPointsOption = "timing-points";
+  stopType: StopTypeOption = StopTypeOption.TimingPoints;
 
   performanceFilters$ = new BehaviorSubject<PerformanceFiltersInputType>({});
 
@@ -173,7 +173,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.onDestroy$))
       .subscribe(([operator, allStops]) => {
         operator = operator as OperatorDashboardFragment;
-        this.timingPointsOption = allStops ? "all-stops" : "timing-points";
+        this.stopType = allStops
+          ? StopTypeOption.AllStops
+          : StopTypeOption.TimingPoints;
         this.performanceFilters$.next({
           timingPointsOnly: allStops ? undefined : true,
           operatorIds:
@@ -198,8 +200,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .catch(console.log);
   }
 
-  onTimingPointsToggleChange() {
-    const allStops = this.timingPointsOption === "all-stops" ? true : null;
+  stopTypeToggleChange(stopType: string) {
+    const allStops = stopType === StopTypeOption.AllStops ? true : null;
+    this.router
+      .navigate([], {
+        queryParams: { allStops },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
+  }
+
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    const allStops = matchTypeValue;
     this.router
       .navigate([], {
         queryParams: { allStops },

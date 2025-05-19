@@ -1439,6 +1439,12 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
         };
       }
 
+      if (results.length < 1) {
+        return {
+          excess: undefined,
+        };
+      }
+
       let headway = {
         excessWaitTime: 0,
         headwayCount: 0,

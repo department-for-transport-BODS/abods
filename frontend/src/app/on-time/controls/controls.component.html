@@ -26,39 +26,16 @@
   </div>
   <div class="on-time__timing-toggle">
     <div class="on-time__timing-toggle-row">
-      <app-segmented-toggle [(ngModel)]="matchType">
-        <app-segmented-toggle-item
-          name="match-type"
-          identifier="estimated"
-          value="estimated"
-          label="Estimated"
-        ></app-segmented-toggle-item>
-        <app-segmented-toggle-item
-          name="match-type"
-          identifier="evidenced"
-          value="evidenced"
-          label="Evidenced"
-        ></app-segmented-toggle-item>
-      </app-segmented-toggle>
+      <app-match-type-segmented-toggle
+        [matchType]="matchType"
+        (toggleChange)="matchTypeToggleChange($event)"
+      />
     </div>
     <div class="on-time__timing-toggle-row">
-      <app-segmented-toggle
-        legend="Show performance using data from"
-        [(ngModel)]="timingPointsOption"
-      >
-        <app-segmented-toggle-item
-          name="stops-filter"
-          identifier="all-stops"
-          value="all-stops"
-          label="All stops"
-        ></app-segmented-toggle-item>
-        <app-segmented-toggle-item
-          name="stops-filter"
-          identifier="timing-points"
-          value="timing-points"
-          label="Timing points"
-        ></app-segmented-toggle-item>
-      </app-segmented-toggle>
+      <app-stop-type-segmented-toggle
+        [stopType]="stopType"
+        (toggleChange)="stopTypeToggleChange($event)"
+      />
     </div>
   </div>
 </div>
