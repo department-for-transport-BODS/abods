@@ -641,7 +641,7 @@ model login_details {
 }
 
 model route_to_journeys {
-  id                Int    @id @default(autoincrement())
+  id                BigInt    @id @default(autoincrement())
   group_id          String
   date_of_journey   DateTime  @db.Date
   distinct_route_id Int
