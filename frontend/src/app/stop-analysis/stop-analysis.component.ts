@@ -638,7 +638,14 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.showBoundingBox(this.map, location.bbox);
+    if (location?.bbox) {
+      this.showBoundingBox(this.map, location.bbox);
+    } else if (location?.center) {
+      this.map.flyTo({
+        center: location.center,
+        zoom: 15,
+      });
+    }
   }
 
   private showBoundingBox = (map: Map, bbox: LngLatBoundsLike) => {
