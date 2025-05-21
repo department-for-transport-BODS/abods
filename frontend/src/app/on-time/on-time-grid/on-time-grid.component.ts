@@ -78,6 +78,7 @@ type CamelcaseColumn = {
 type AvDelayColumn = {
   columnType: "AvDelay";
   isHideable: true;
+  positiveOnly?: true;
 } & ColumnBase;
 
 export type ColumnDescription =
@@ -147,7 +148,11 @@ const column: (
       return [
         {
           ...column,
-          valueFormatter: formatter.averageDelayValueFormatter,
+          valueFormatter: ({ value }: { value: number | undefined }) =>
+            formatter.averageDelayValueFormatter(
+              { value },
+              column.positiveOnly,
+            ),
           hide: !column.isDefaultShown,
         },
       ];
@@ -211,7 +216,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     }),
   );
 
-  directions: Direction[] = [];
+  directions: Direction[] = [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {

@@ -158,6 +158,7 @@ export class StopsGridComponentDisplayComponent {
       columnType: "AvDelay",
       colId: "averageDelay",
       field: "averageDelay",
+      positiveOnly: true,
       isHideable: true,
       isDefaultShown: true,
       headerName: "Av. delay",
