@@ -168,7 +168,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         "earlyInSeconds",
       ),
     ])
-    .where("n.atco_code", "=", "0100BRA10196")
     .execute();
 };
 
