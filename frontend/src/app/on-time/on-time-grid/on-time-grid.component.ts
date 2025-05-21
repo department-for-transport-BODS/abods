@@ -216,7 +216,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     }),
   );
 
-  directions: Direction[] = [];
+  directions: Direction[] = [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
