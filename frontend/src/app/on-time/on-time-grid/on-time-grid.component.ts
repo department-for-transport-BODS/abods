@@ -78,7 +78,7 @@ type CamelcaseColumn = {
 type AvDelayColumn = {
   columnType: "AvDelay";
   isHideable: true;
-  withPositive?: true;
+  positiveOnly?: true;
 } & ColumnBase;
 
 export type ColumnDescription =
@@ -151,7 +151,7 @@ const column: (
           valueFormatter: ({ value }: { value: number | undefined }) =>
             formatter.averageDelayValueFormatter(
               { value },
-              column.withPositive,
+              column.positiveOnly,
             ),
           hide: !column.isDefaultShown,
         },
