@@ -306,12 +306,14 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           context.kysely.fn.sum("late_count").as("late_count"),
           context.kysely.fn.sum("on_time_count").as("on_time_count"),
           context.kysely.fn.sum("completed").as("completed"),
-          context.kysely.fn.sum("scheduled").as("scheduled"),
           context.kysely.fn.sum("count_delayed").as("count_delayed"),
         ])
         .select((eb) => [
           sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
             "average_delay",
+          ),
+          sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+            "scheduled",
           ),
         ])
         .groupBy(["incomplete_reason", "estimated"]);

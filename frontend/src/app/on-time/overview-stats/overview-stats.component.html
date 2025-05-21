@@ -112,7 +112,9 @@
     "
     id="on-time-overview-stat-no-data"
   ></app-stat>
-  <ng-template #averageDelayTooltip> Average delay tooltip. </ng-template>
+  <ng-template #averageDelayTooltip>
+    Average delay with data displayed in minutes and second format MM:SS.
+  </ng-template>
   <ng-template #noDataTooltip>
     {{ noData | number }} of {{ scheduled | number }} stop departures have
     limited or missing real-time data so we are unable to calculate an accurate
