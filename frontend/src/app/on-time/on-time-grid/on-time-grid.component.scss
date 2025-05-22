@@ -18,6 +18,15 @@
       margin-right: govuk-spacing(4);
     }
   }
+  &__disable-direction-controls {
+    position: relative;
+    display: flex;
+    justify-content: end;
+    &--filter {
+      flex-grow: 2;
+      margin-right: govuk-spacing(4);
+    }
+  }
   &__dropdown {
     position: relative;
     display: flex;

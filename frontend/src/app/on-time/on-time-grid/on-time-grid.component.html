@@ -3,7 +3,13 @@
     class="on-time-grid--loaded"
     [ngClass]="{ 'on-time-grid--hidden': loading || errored }"
   >
-    <div class="on-time-grid__controls">
+    <div
+      [ngClass]="
+        enableDirection() === true
+          ? 'on-time-grid__disable-direction-controls'
+          : 'on-time-grid__controls'
+      "
+    >
       <div *ngIf="showFilter" class="on-time-grid__controls--filter">
         <gds-text-input
           [label]="'Search for a ' + noun"
@@ -13,7 +19,7 @@
           [(ngModel)]="gridFilter"
         ></gds-text-input>
       </div>
-      <div class="on-time-grid__dropdown--filter">
+      <div *ngIf="!enableDirection()" class="on-time-grid__dropdown--filter">
         <label class="govuk-label" for="services">Services</label>
         <gds-multiselect-checkbox
           [options]="directionOptions"
@@ -52,6 +58,7 @@
               [value]="Mode.count"
             ></gds-radio-item>
             <gds-radio-item
+              *ngIf="!enableDirection()"
               label="Time"
               name="show-time"
               inputId="on-time-grid-show-time"

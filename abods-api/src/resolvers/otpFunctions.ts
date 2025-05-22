@@ -1013,34 +1013,69 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             adminAreaIds ?? [],
           );
 
+          const isDirectionEnabled =
+            process.env.ABODS_FLAG_Directions === "true";
+
           // Needs to be aliased separately. Need to find out why
           const aliasedSubQuery = summarySubQuery.as("summary");
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
-            .select([
-              "stop_id",
-              "common_name",
-              "is_timing_point",
-              "direction",
-              context.kysely.fn.sum("early_count").as("early_count"),
-              context.kysely.fn.sum("late_count").as("late_count"),
-              context.kysely.fn.sum("on_time_count").as("on_time_count"),
-              context.kysely.fn.sum("completed").as("completed"),
-              context.kysely.fn.sum("scheduled").as("scheduled"),
-              context.kysely.fn.sum("count_delayed").as("count_delayed"),
-              context.kysely.fn
-                .avg("diff_sched_time_to_stop")
-                .as("diff_sched_time_to_stop"),
-              context.kysely.fn
-                .avg("diff_sched_time_to_stop_timing_point")
-                .as("diff_sched_time_to_stop_timing_point"),
-              context.kysely.fn
-                .avg("diff_actual_time_to_stop")
-                .as("diff_actual_time_to_stop"),
-              context.kysely.fn
-                .avg("diff_actual_time_to_stop_timing_point")
-                .as("diff_actual_time_to_stop_timing_point"),
-            ])
+            .select(
+              isDirectionEnabled
+                ? [
+                    "stop_id",
+                    "common_name",
+                    "is_timing_point",
+                    context.kysely.fn.sum("early_count").as("early_count"),
+                    context.kysely.fn.sum("late_count").as("late_count"),
+                    context.kysely.fn.sum("on_time_count").as("on_time_count"),
+                    context.kysely.fn.sum("completed").as("completed"),
+                    context.kysely.fn.sum("scheduled").as("scheduled"),
+                    context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                    context.kysely.fn
+                      .avg("diff_sched_time_to_stop")
+                      .as("diff_sched_time_to_stop"),
+                    context.kysely.fn
+                      .avg("diff_sched_time_to_stop_timing_point")
+                      .as("diff_sched_time_to_stop_timing_point"),
+                    context.kysely.fn
+                      .avg("diff_actual_time_to_stop")
+                      .as("diff_actual_time_to_stop"),
+                    context.kysely.fn
+                      .avg("diff_actual_time_to_stop_timing_point")
+                      .as("diff_actual_time_to_stop_timing_point"),
+                    context.kysely.fn
+                      .avg("avg_time_difference")
+                      .as("avg_time_difference"),
+                  ]
+                : [
+                    "stop_id",
+                    "common_name",
+                    "is_timing_point",
+                    "direction",
+                    context.kysely.fn.sum("early_count").as("early_count"),
+                    context.kysely.fn.sum("late_count").as("late_count"),
+                    context.kysely.fn.sum("on_time_count").as("on_time_count"),
+                    context.kysely.fn.sum("completed").as("completed"),
+                    context.kysely.fn.sum("scheduled").as("scheduled"),
+                    context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                    context.kysely.fn
+                      .avg("avg_time_difference")
+                      .as("avg_time_difference"), // To be deleted when ABODS_FLAG_Directions is removed
+                    context.kysely.fn
+                      .avg("diff_sched_time_to_stop")
+                      .as("diff_sched_time_to_stop"),
+                    context.kysely.fn
+                      .avg("diff_sched_time_to_stop_timing_point")
+                      .as("diff_sched_time_to_stop_timing_point"),
+                    context.kysely.fn
+                      .avg("diff_actual_time_to_stop")
+                      .as("diff_actual_time_to_stop"),
+                    context.kysely.fn
+                      .avg("diff_actual_time_to_stop_timing_point")
+                      .as("diff_actual_time_to_stop_timing_point"),
+                  ],
+            )
             .select((eb) => [
               sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
@@ -1055,14 +1090,17 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 "early_in_seconds",
               ),
             ])
-            .groupBy([
-              "stop_id",
-              "common_name",
-              "is_timing_point",
-              "direction",
-              "stop_index",
-            ])
-            .orderBy("direction", "asc")
+            .groupBy(
+              isDirectionEnabled
+                ? ["stop_id", "common_name", "is_timing_point", "stop_index"]
+                : [
+                    "stop_id",
+                    "common_name",
+                    "is_timing_point",
+                    "direction",
+                    "stop_index",
+                  ],
+            )
             .orderBy("stop_index", "asc");
 
           if (startTime || endTime) {
@@ -1103,6 +1141,9 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
           });
 
           results.forEach((res) => {
+            const timeInSeconds = res.avg_time_difference
+              ? Number(res.avg_time_difference) * 60
+              : 0;
             const stop = stops.find(
               (dbStop) => dbStop.id === Number(res.stop_id),
             );
@@ -1144,8 +1185,9 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
-              averageDelay:
-                Number(res.count_delayed) > 0
+              averageDelay: isDirectionEnabled
+                ? timeInSeconds
+                : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
               countDelayed: Number(res.count_delayed),
@@ -1203,6 +1245,8 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
+        const isDirectionEnabled = process.env.ABODS_FLAG_Directions === "true";
+
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
@@ -1220,20 +1264,36 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           const aliasedSubQuery = summarySubQuery.as("summary");
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
-            .select([
-              "noc_and_line_and_servicecode",
-              "line_name",
-              "direction",
-              context.kysely.fn.sum("early_count").as("early_count"),
-              context.kysely.fn.sum("late_count").as("late_count"),
-              context.kysely.fn.sum("on_time_count").as("on_time_count"),
-              context.kysely.fn.sum("completed").as("completed"),
-              context.kysely.fn.sum("scheduled").as("scheduled"),
-              context.kysely.fn
-                .avg("avg_time_difference")
-                .as("avg_time_difference"),
-              context.kysely.fn.sum("count_delayed").as("count_delayed"),
-            ])
+            .select(
+              isDirectionEnabled
+                ? [
+                    "noc_and_line_and_servicecode",
+                    "line_name",
+                    context.kysely.fn.sum("early_count").as("early_count"),
+                    context.kysely.fn.sum("late_count").as("late_count"),
+                    context.kysely.fn.sum("on_time_count").as("on_time_count"),
+                    context.kysely.fn.sum("completed").as("completed"),
+                    context.kysely.fn.sum("scheduled").as("scheduled"),
+                    context.kysely.fn
+                      .avg("avg_time_difference")
+                      .as("avg_time_difference"),
+                    context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                  ]
+                : [
+                    "noc_and_line_and_servicecode",
+                    "line_name",
+                    "direction",
+                    context.kysely.fn.sum("early_count").as("early_count"),
+                    context.kysely.fn.sum("late_count").as("late_count"),
+                    context.kysely.fn.sum("on_time_count").as("on_time_count"),
+                    context.kysely.fn.sum("completed").as("completed"),
+                    context.kysely.fn.sum("scheduled").as("scheduled"),
+                    context.kysely.fn
+                      .avg("avg_time_difference")
+                      .as("avg_time_difference"),
+                    context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                  ],
+            )
             .select((eb) => [
               sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
@@ -1248,11 +1308,11 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                 "early_in_seconds",
               ),
             ])
-            .groupBy([
-              "noc_and_line_and_servicecode",
-              "line_name",
-              "direction",
-            ]);
+            .groupBy(
+              isDirectionEnabled
+                ? ["noc_and_line_and_servicecode", "line_name"]
+                : ["noc_and_line_and_servicecode", "line_name", "direction"],
+            );
 
           if (startTime || endTime) {
             const start = Number((startTime ?? "00:00").split(":")[0]);
@@ -1281,6 +1341,9 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           });
 
           results.forEach((res) => {
+            const avgDelay = res.avg_time_difference
+              ? Number(res.avg_time_difference) * 60
+              : 0;
             const service = services.find(
               (serv) =>
                 serv.noc_and_line_and_servicecode ===
@@ -1295,8 +1358,9 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               countDelayed: Number(res.count_delayed),
-              averageDelay:
-                Number(res.count_delayed) > 0
+              averageDelay: isDirectionEnabled
+                ? avgDelay
+                : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
               direction: (
