@@ -221,7 +221,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
   directionOptions: MultiselectCheckboxOption[] = [];
 
-  directions: Direction[] = [Direction.Inbound];
+  directions: Direction[] = this.enableDirection() ? [] : [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
