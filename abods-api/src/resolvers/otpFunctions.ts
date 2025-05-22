@@ -1014,7 +1014,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
           );
 
           const isDirectionEnabled =
-            process.env.ABODS_FLAG_Directions === "true";
+            process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
           // Needs to be aliased separately. Need to find out why
           const aliasedSubQuery = summarySubQuery.as("summary");
@@ -1245,7 +1245,8 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
-        const isDirectionEnabled = process.env.ABODS_FLAG_Directions === "true";
+        const isDirectionEnabled =
+          process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           let summarySubQuery = getKyselyFiltersForOTPQuery(

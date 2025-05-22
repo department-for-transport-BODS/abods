@@ -99,7 +99,8 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     `,
   );
 
-  const isDirectionEnabled = process.env.ABODS_FLAG_Directions === "true";
+  const isDirectionEnabled =
+    process.env.ABODS_FLAG_DirectionsDisabled === "true";
   // todo: throw if the bounding box is too big
   return dbQuery
     .where("t.stop_latitude", ">=", args.inputs.boundingBox.minLatitude)
