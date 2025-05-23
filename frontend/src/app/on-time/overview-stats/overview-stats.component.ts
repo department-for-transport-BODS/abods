@@ -68,7 +68,10 @@ export class OverviewStatsComponent {
       return "-";
     }
     const seconds = this.overview?.averageDelay;
-    return "+" + Duration.fromObject({ seconds }).toFormat("mm:ss");
+    return (
+      "+" +
+      Duration.fromObject({ seconds: Math.abs(seconds) }).toFormat("mm:ss")
+    );
   }
 
   constructor(private helpdeskPanelService: HelpdeskPanelService) {}

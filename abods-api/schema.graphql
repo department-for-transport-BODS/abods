@@ -594,6 +594,7 @@ type PunctualityTimeSeriesType {
 type ServicePerformanceType {
   actualDepartures: Int!
   averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
@@ -622,6 +623,7 @@ type ServicePunctualityType {
 type StopPerformanceType {
   actualDepartures: Int!
   averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
