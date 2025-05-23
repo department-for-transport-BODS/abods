@@ -344,7 +344,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   }
 
   enableDirection() {
-    let isDirectionEnabled = true;
+    let isDirectionDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
         map((info) =>
@@ -352,10 +352,10 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
         ),
       )
       .subscribe((value) => {
-        isDirectionEnabled = value;
+        isDirectionDisabled = value;
       });
 
-    return isDirectionEnabled;
+    return isDirectionDisabled;
   }
   sumByOrNull<T>(
     array: T[],

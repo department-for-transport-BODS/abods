@@ -429,7 +429,7 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
   }
 
   enableDirection() {
-    let isDirectionEnabled = true;
+    let isDirectionDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
         map((info) =>
@@ -437,9 +437,9 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
         ),
       )
       .subscribe((value) => {
-        isDirectionEnabled = value;
+        isDirectionDisabled = value;
       });
 
-    return isDirectionEnabled;
+    return isDirectionDisabled;
   }
 }

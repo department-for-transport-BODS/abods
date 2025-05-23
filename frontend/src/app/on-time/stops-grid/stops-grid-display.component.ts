@@ -405,7 +405,7 @@ export class StopsGridComponentDisplayComponent {
   ) {}
 
   enableDirection() {
-    let isDirectionEnabled = true;
+    let isDirectionDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
         map((info) =>
@@ -413,9 +413,9 @@ export class StopsGridComponentDisplayComponent {
         ),
       )
       .subscribe((value) => {
-        isDirectionEnabled = value;
+        isDirectionDisabled = value;
       });
 
-    return isDirectionEnabled;
+    return isDirectionDisabled;
   }
 }

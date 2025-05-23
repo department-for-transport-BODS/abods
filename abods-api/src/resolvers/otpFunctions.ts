@@ -1013,7 +1013,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             adminAreaIds ?? [],
           );
 
-          const isDirectionEnabled =
+          const isDirectionDisabled =
             process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
           // Needs to be aliased separately. Need to find out why
@@ -1021,7 +1021,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select(
-              isDirectionEnabled
+              isDirectionDisabled
                 ? [
                     "stop_id",
                     "common_name",
@@ -1091,7 +1091,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               ),
             ])
             .groupBy(
-              isDirectionEnabled
+              isDirectionDisabled
                 ? ["stop_id", "common_name", "is_timing_point", "stop_index"]
                 : [
                     "stop_id",
@@ -1185,7 +1185,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
-              averageDelay: isDirectionEnabled
+              averageDelay: isDirectionDisabled
                 ? timeInSeconds
                 : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
@@ -1245,7 +1245,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
 
-        const isDirectionEnabled =
+        const isDirectionDisabled =
           process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
@@ -1266,7 +1266,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select(
-              isDirectionEnabled
+              isDirectionDisabled
                 ? [
                     "noc_and_line_and_servicecode",
                     "line_name",
@@ -1310,7 +1310,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               ),
             ])
             .groupBy(
-              isDirectionEnabled
+              isDirectionDisabled
                 ? ["noc_and_line_and_servicecode", "line_name"]
                 : ["noc_and_line_and_servicecode", "line_name", "direction"],
             );
@@ -1359,7 +1359,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               countDelayed: Number(res.count_delayed),
-              averageDelay: isDirectionEnabled
+              averageDelay: isDirectionDisabled
                 ? avgDelay
                 : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)

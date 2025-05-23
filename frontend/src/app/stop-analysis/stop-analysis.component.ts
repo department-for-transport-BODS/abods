@@ -242,7 +242,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   );
 
   enableDirection() {
-    let isDirectionEnabled = true;
+    let isDirectionDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
         map((info) =>
@@ -250,10 +250,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         ),
       )
       .subscribe((value) => {
-        isDirectionEnabled = value;
+        isDirectionDisabled = value;
       });
 
-    return isDirectionEnabled;
+    return isDirectionDisabled;
   }
 
   constructor(

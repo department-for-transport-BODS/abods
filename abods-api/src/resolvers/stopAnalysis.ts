@@ -99,7 +99,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     `,
   );
 
-  const isDirectionEnabled =
+  const isDirectionDisabled =
     process.env.ABODS_FLAG_DirectionsDisabled === "true";
   // todo: throw if the bounding box is too big
   return dbQuery
@@ -109,7 +109,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .where("t.stop_longitude", "<=", args.inputs.boundingBox.maxLongitude)
     .where("t.operator_noc", "in", operatorIds)
     .groupBy(
-      isDirectionEnabled
+      isDirectionDisabled
         ? [
             "t.stop_id",
             "t.stop_latitude",
@@ -133,7 +133,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
           ],
     )
     .select(
-      isDirectionEnabled
+      isDirectionDisabled
         ? [
             "t.stop_latitude as latitude",
             "t.stop_longitude as longitude",
