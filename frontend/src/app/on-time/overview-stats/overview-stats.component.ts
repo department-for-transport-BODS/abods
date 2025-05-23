@@ -87,7 +87,7 @@ export class OverviewStatsComponent {
   }
 
   enableDirection() {
-    let isDirectionDisabled = false;
+    let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
         map((info) =>
@@ -95,9 +95,9 @@ export class OverviewStatsComponent {
         ),
       )
       .subscribe((value) => {
-        isDirectionDisabled = value;
+        isDirectionsDisabled = value;
       });
 
-    return isDirectionDisabled;
+    return isDirectionsDisabled;
   }
 }
