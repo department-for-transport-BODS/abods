@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
-import { HeadwayOverviewType } from "../../../generated/graphql";
+import { FeatureFlag, HeadwayOverviewType } from "../../../generated/graphql";
 import { Duration } from "luxon";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
 
 @Component({
   selector: "app-overview-stats",
@@ -74,9 +76,28 @@ export class OverviewStatsComponent {
     );
   }
 
-  constructor(private helpdeskPanelService: HelpdeskPanelService) {}
+  constructor(
+    private helpdeskPanelService: HelpdeskPanelService,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
+  ) {}
 
   openHelpdesk() {
     this.helpdeskPanelService.open();
+  }
+
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
   }
 }

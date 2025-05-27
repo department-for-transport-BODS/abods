@@ -100,7 +100,7 @@
     id="on-time-overview-stat-no-data"
   ></app-stat>
   <app-stat
-    *ngIf="showNoData"
+    *ngIf="showNoData && !enableDirection()"
     label="Average delay"
     class="on-time-overview__stat on-time-overview__no-data"
     [statValue]="averageDelay || 'Unavailable'"

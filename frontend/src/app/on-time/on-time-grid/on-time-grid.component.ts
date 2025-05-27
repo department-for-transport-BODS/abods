@@ -24,11 +24,13 @@ import {
   map as _map,
   forEach as _forEach,
   sumBy,
+  sum,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import {
   Direction,
+  FeatureFlag,
   Maybe,
   Scalars,
   ServicePerformanceType,
@@ -36,6 +38,9 @@ import {
 } from "../../../generated/graphql";
 import { OnTimeRatios } from "../on-time.service";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { map } from "rxjs/operators";
 
 type ColumnBase = {
   title: string;
@@ -46,7 +51,7 @@ type ColumnBase = {
 
 type WithPctColumn = {
   columnType: "WithPct";
-  isHideable: true;
+  isHideable: boolean;
   pctField?: string;
   pctValueGetter?: ((params: ValueGetterParams) => any) | string;
 } & ColumnBase;
@@ -72,7 +77,7 @@ type NormalColumn = {
 
 type CamelcaseColumn = {
   columnType: "Camelcase";
-  isHideable: true;
+  isHideable: boolean;
 } & ColumnBase;
 
 type AvDelayColumn = {
@@ -216,7 +221,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
   directionOptions: MultiselectCheckboxOption[] = [];
 
-  directions: Direction[] = [Direction.Inbound];
+  directions: Direction[] = this.enableDirection() ? [] : [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
@@ -332,10 +337,26 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     private formatter: AgGridFormatterService,
     private ngxSmartModalService: NgxSmartModalService,
     private formBuilder: FormBuilder,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
   ) {
     this._mode = Mode.percent;
   }
 
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
+  }
   sumByOrNull<T>(
     array: T[],
     iteratee: (item: T) => number | null | undefined,
@@ -363,6 +384,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const total = sumBy(value, "total");
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
+    const totalDelay = sum(
+      value.map((stop) => stop.actualDepartures * (stop.averageDelay ?? 0)),
+    );
 
     const valueWithDelay = value.filter(
       (data) => data.averageDelay != undefined,
@@ -398,7 +422,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: averageDelay,
+      averageDelay: this.enableDirection()
+        ? totalDelay / actual || 0
+        : averageDelay,
       noData: actual - scheduled,
       completedRatio: actual / total || 0,
       total: total,
