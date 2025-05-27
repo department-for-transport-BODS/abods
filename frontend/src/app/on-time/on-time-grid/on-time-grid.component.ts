@@ -105,6 +105,7 @@ export type BasePerformance = IPunctualityType &
     | "onTimeInSeconds"
     | "lateInSeconds"
     | "earlyInSeconds"
+    | "countDelayed"
   > &
   // direction is partial as its not displayed in the total data or the table header
   Partial<Pick<ServicePerformanceType & StopPerformanceType, "direction">>;
@@ -209,12 +210,11 @@ const column: (
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
-  directionOptions: MultiselectCheckboxOption[] = Object.keys(Direction).map(
-    (key) => ({
-      label: key,
-      value: Direction[key as keyof typeof Direction],
-    }),
-  );
+  uniqueDirection: Direction[] = [
+    ...new Set(this.data?.map((item) => item.direction)),
+  ].filter((direction) => direction != undefined);
+
+  directionOptions: MultiselectCheckboxOption[] = [];
 
   directions: Direction[] = [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
@@ -282,6 +282,16 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     }
 
     this.summaryHeaderData = this.returnSummaryTotal(value);
+    this.uniqueDirection = [
+      ...new Set(this.data?.map((item) => item.direction)),
+    ].filter((direction) => direction != undefined);
+
+    this.directionOptions = this.uniqueDirection.map((value: Direction) => ({
+      value: value,
+      label: Object.keys(Direction).find(
+        (key) => Direction[key as keyof typeof Direction] === value,
+      )!,
+    }));
   }
 
   get data() {
@@ -354,8 +364,16 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
 
-    const averageDelay = value.some((val) => val.averageDelay != undefined)
-      ? sumBy(value, "averageDelay") / value.length
+    const valueWithDelay = value.filter(
+      (data) => data.averageDelay != undefined,
+    );
+    const averageDelay = valueWithDelay.some(
+      (val) => val.averageDelay != undefined && val.countDelayed != undefined,
+    )
+      ? sumBy(
+          value,
+          (item) => (item.averageDelay ?? 0) * (item.countDelayed ?? 0),
+        ) / sumBy(value, "countDelayed")
       : undefined;
     const onTimeInSeconds = value.some(
       (val) => val.onTimeInSeconds != undefined,

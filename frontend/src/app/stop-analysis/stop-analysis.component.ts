@@ -704,6 +704,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,
           lateRatio: x.late / x.completedDepartures || 0,
+          countDelayed: x.countDelayed,
           completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
           direction: x.direction as Maybe<Direction> | undefined,
           averageScheduled:

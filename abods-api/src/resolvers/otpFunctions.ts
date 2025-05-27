@@ -1148,6 +1148,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
+              countDelayed: Number(res.count_delayed),
               timingPoint: res.is_timing_point ?? false,
               direction: res.direction
                 ? (res.direction.toLowerCase() as Direction)
@@ -1293,6 +1294,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
+              countDelayed: Number(res.count_delayed),
               averageDelay:
                 Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
