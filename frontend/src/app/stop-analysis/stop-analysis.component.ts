@@ -18,6 +18,7 @@ import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   Direction,
+  FeatureFlag,
   MatchType,
   Maybe,
   OperatorLinesGQL,
@@ -55,6 +56,7 @@ import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { featureCollection } from "@turf/helpers";
 import pointOnFeature from "@turf/point-on-feature";
 import bboxClip from "@turf/bbox-clip";
+import { AuthenticatedUserService } from "../authentication/authenticated-user.service";
 
 @Component({
   selector: "app-stop-analysis",
@@ -239,6 +241,21 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }),
   );
 
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
+  }
+
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
@@ -250,6 +267,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     private adminAreaService: AdminAreaService,
     private router: Router,
     private route: ActivatedRoute,
+    private authUserService: AuthenticatedUserService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -696,10 +714,9 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: this.getDividedValueOrUndefined(
-            x.averageDelay,
-            x.countDelayed,
-          ),
+          averageDelay: this.enableDirection()
+            ? x.totalDelay / x.completedDepartures || 0
+            : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
           total: x.completedDepartures,
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,

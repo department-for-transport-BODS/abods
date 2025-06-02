@@ -505,6 +505,7 @@ enum FeatureFlag {
   ServiceMonitoring
   DataMonitoring
   StopAnalysis
+  DirectionsDisabled
 }
 
 type UserType {
