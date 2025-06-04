@@ -13,23 +13,10 @@
         [allowAll]="true"
       >
       </app-operator-selector>
-      <app-segmented-toggle
-        [(ngModel)]="timingPointsOption"
-        (ngModelChange)="onTimingPointsToggleChange()"
-      >
-        <app-segmented-toggle-item
-          name="stops-filter"
-          identifier="all-stops"
-          value="all-stops"
-          label="All stops"
-        ></app-segmented-toggle-item>
-        <app-segmented-toggle-item
-          name="stops-filter"
-          identifier="timing-points"
-          value="timing-points"
-          label="Timing points"
-        ></app-segmented-toggle-item>
-      </app-segmented-toggle>
+      <app-stop-type-segmented-toggle
+        [stopType]="stopType"
+        (toggleChange)="stopTypeToggleChange($event)"
+      />
     </div>
     <div class="dashboard__layout">
       <div class="dashboard__performance">

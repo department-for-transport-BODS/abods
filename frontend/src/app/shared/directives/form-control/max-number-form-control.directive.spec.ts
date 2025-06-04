@@ -8,6 +8,7 @@ import { MaxNumberFormControlDirective } from "./max-number-form-control.directi
   template: `<form [formGroup]="form">
     <input formControlName="number" type="number" [maxNumber]="10" />
   </form>`,
+  standalone: false,
 })
 class TestComponent {
   form: FormGroup;

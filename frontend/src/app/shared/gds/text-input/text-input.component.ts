@@ -28,6 +28,7 @@ let nextUniqueId = 0;
       multi: true,
     },
   ],
+  standalone: false,
 })
 export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   @Input()

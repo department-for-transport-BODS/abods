@@ -21,6 +21,7 @@ import { OrganisationService } from "../../organisation.service";
   selector: "app-edit-alert",
   templateUrl: "./edit-alert.component.html",
   styleUrls: ["./edit-alert.component.scss"],
+  standalone: false,
 })
 export class EditAlertComponent implements OnInit, OnDestroy {
   @Output() closeEdit = new EventEmitter();

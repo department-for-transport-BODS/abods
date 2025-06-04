@@ -12,6 +12,7 @@ export const LIST_LEN = 100;
     "../corridor-stop-list/corridor-stop-list.component.scss",
     "./stop-search-list.component.scss",
   ],
+  standalone: false,
 })
 export class StopSearchListComponent {
   @Input() matchingStops?: FeatureCollection<Point, CorridorStop>;

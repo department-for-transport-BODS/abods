@@ -6,6 +6,7 @@ const isPositiveDuration = (value: Duration): boolean => value.valueOf() > 0;
 
 @Pipe({
   name: "formatDuration",
+  standalone: false,
 })
 export class FormatDurationPipe implements PipeTransform {
   /**

@@ -53,7 +53,13 @@ export type StopPerformance = StopPerformanceType & OnTimeRatios;
 
 export type PunctualityOverview = Pick<
   PunctualityTotalsType,
-  "early" | "onTime" | "late" | "completed" | "scheduled" | "incomplete"
+  | "early"
+  | "onTime"
+  | "late"
+  | "completed"
+  | "scheduled"
+  | "incomplete"
+  | "averageDelay"
 > & {
   noData: number;
 };
@@ -217,11 +223,9 @@ export class OnTimeService {
       .watch({ params }, { fetchPolicy: "no-cache", errorPolicy: "none" })
       .valueChanges.pipe(
         map(({ data }) =>
-          (data?.onTimePerformance?.stopPerformance ?? [])
-            .map(OnTimeService.calculateOnTimePcts)
-            .sort((a, b) =>
-              a.stopInfo.stopName.localeCompare(b.stopInfo.stopName),
-            ),
+          (data?.onTimePerformance?.stopPerformance ?? []).map(
+            OnTimeService.calculateOnTimePcts,
+          ),
         ),
       );
   }

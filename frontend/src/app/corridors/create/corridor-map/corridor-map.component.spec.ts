@@ -37,6 +37,7 @@ import { CorridorMapComponent } from "./corridor-map.component";
   providers: [
     { provide: MapComponent, useExisting: forwardRef(() => StubMapComponent) },
   ],
+  standalone: false,
 })
 export class StubMapComponent implements OnInit {
   @Output() moveEnd = new EventEmitter<void>();

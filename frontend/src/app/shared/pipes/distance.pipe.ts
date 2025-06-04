@@ -108,6 +108,7 @@ type UnitFormatter = (value: string | number, unitFormat: UnitFormat) => string;
 
 @Pipe({
   name: "distance",
+  standalone: false,
 })
 export class DistancePipe implements PipeTransform {
   constructor(@Inject(LOCALE_ID) private _locale: string) {}

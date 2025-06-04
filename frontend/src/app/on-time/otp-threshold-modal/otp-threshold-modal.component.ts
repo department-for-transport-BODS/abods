@@ -32,6 +32,7 @@ interface OtpThresholdTableData {
   selector: "app-otp-threshold-modal",
   templateUrl: "./otp-threshold-modal.component.html",
   styleUrls: ["./otp-threshold-modal.component.scss"],
+  standalone: false,
 })
 export class OtpThresholdModalComponent implements AfterViewInit, OnDestroy {
   identifier = OTP_THRESHOLD_MODAL_ID;

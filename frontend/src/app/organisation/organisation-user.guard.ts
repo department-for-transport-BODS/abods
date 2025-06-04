@@ -1,17 +1,12 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  Router,
-  UrlTree,
-} from "@angular/router";
+import { ActivatedRouteSnapshot, Router, UrlTree } from "@angular/router";
 import { filter, map, Observable, of, switchMap } from "rxjs";
 import { OrganisationService } from "./organisation.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class OrganisationUserGuard implements CanActivate {
+export class OrganisationUserGuard {
   constructor(
     private organisationService: OrganisationService,
     private router: Router,

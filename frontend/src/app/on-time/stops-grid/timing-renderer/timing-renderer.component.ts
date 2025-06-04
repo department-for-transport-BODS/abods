@@ -13,6 +13,7 @@ import { ICellRendererParams } from "ag-grid-community";
     <span class="govuk-visually-hidden">Timing point</span>
   </div>`,
   styleUrls: ["./timing-renderer.component.scss"],
+  standalone: false,
 })
 export class TimingRendererComponent implements AgRendererComponent {
   params?: ICellRendererParams;

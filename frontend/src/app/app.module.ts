@@ -1,10 +1,13 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { APP_INITIALIZER, NgModule } from "@angular/core";
+import { NgModule, inject, provideAppInitializer } from "@angular/core";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { GraphQLModule } from "./graphql.module";
-import { HttpClientModule } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { SharedModule } from "./shared/shared.module";
 import { LayoutModule } from "./layout/layout.module";
 import { ConfigService } from "./config/config.service";
@@ -12,7 +15,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AuthenticationModule } from "./authentication/authentication.module";
 import { PercentPipe, ViewportScroller } from "@angular/common";
-import { Event, Router, Scroll } from "@angular/router";
+import { Event, EventType, Router, Scroll } from "@angular/router";
 import { filter, pairwise } from "rxjs/operators";
 import { UserModule } from "./user/user.module";
 
@@ -27,12 +30,12 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule,
     SharedModule,
     LayoutModule,
     GraphQLModule,
-    HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
@@ -46,13 +49,13 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
     AccessibilityModule,
   ],
   providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (config: ConfigService) => async () =>
-        await config.loadConfig(),
-      deps: [ConfigService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const initializerFn = (
+        (config: ConfigService) => async () =>
+          await config.loadConfig()
+      )(inject(ConfigService));
+      return initializerFn();
+    }),
     {
       provide: MAPBOX_API_KEY,
       useFactory: (config: ConfigService) => config.mapboxToken,
@@ -65,8 +68,8 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
     },
     PercentPipe,
     CookieService,
+    provideHttpClient(withInterceptorsFromDi()),
   ],
-  bootstrap: [AppComponent],
 })
 export class AppModule {
   constructor(
@@ -103,8 +106,10 @@ export class AppModule {
         } else {
           // Check if routes match, or if it is only a query param change
           if (
+            previous.routerEvent.type === EventType.NavigationEnd &&
+            current.routerEvent.type === EventType.NavigationEnd &&
             this.getBaseRoute(previous.routerEvent.urlAfterRedirects) !==
-            this.getBaseRoute(current.routerEvent.urlAfterRedirects)
+              this.getBaseRoute(current.routerEvent.urlAfterRedirects)
           ) {
             // Routes don't match, this is actual forward navigation
             // Default behavior: scroll to top

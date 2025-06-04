@@ -29,6 +29,7 @@ import { PerformanceCategories } from "../dashboard.types";
   selector: "app-performance",
   templateUrl: "./performance.component.html",
   styleUrls: ["./performance.component.scss"],
+  standalone: false,
 })
 export class PerformanceComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() operators?:

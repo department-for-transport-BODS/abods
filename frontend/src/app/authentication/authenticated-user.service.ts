@@ -17,7 +17,7 @@ export class AuthenticatedUserService {
   get authenticatedUser$(): Observable<LoginInfo> {
     return this.userSubject.pipe(
       filter((u) => u !== null),
-      map((u) => u!),
+      map((u) => u),
     );
   }
 

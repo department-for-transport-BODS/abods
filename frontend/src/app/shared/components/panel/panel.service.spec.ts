@@ -6,7 +6,9 @@ import {
 } from "./dynamic-panel-component-loader.service";
 import { PanelService } from "./panel.service";
 
-@Component({})
+@Component({
+  standalone: false,
+})
 class TestDynamicComponent {}
 
 describe("PanelService", () => {

@@ -133,6 +133,7 @@ export class WindowVirtualScrollStrategy implements VirtualScrollStrategy {
       deps: [forwardRef(() => WindowVirtualScrollDirective)],
     },
   ],
+  standalone: false,
 })
 export class WindowVirtualScrollDirective
   implements OnChanges, AfterViewChecked

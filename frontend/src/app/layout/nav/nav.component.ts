@@ -4,34 +4,35 @@ import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/hel
 import { NavService } from "./nav.service";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { map } from "rxjs/operators";
-import { FeatureFlag, LoginInfo } from "../../../generated/graphql";
+import { FeatureFlag } from "../../../generated/graphql";
+import { ConfigService } from "../../config/config.service";
 
 @Component({
   selector: "app-nav",
   templateUrl: "./nav.component.html",
   styleUrls: ["./nav.component.scss"],
+  standalone: false,
 })
 export class NavComponent implements OnInit {
   constructor(
     public navService: NavService,
     private helpdeskPanelService: HelpdeskPanelService,
     private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
   ) {}
-  hasFlag(info: LoginInfo, flag: FeatureFlag) {
-    return info.flags.some((f) => f === flag);
-  }
+
   canViewServiceMonitoring = this.authUserService.authenticatedUser$.pipe(
     map(
       (info) =>
         info.canViewServiceMonitoring &&
-        this.hasFlag(info, FeatureFlag.ServiceMonitoring),
+        this.config.hasFlag(info, FeatureFlag.ServiceMonitoring),
     ),
   );
   canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.DataMonitoring)),
+    map((info) => this.config.hasFlag(info, FeatureFlag.DataMonitoring)),
   );
   canViewStopAnalysis = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.hasFlag(info, FeatureFlag.StopAnalysis)),
+    map((info) => this.config.hasFlag(info, FeatureFlag.StopAnalysis)),
   );
 
   ngOnInit(): void {

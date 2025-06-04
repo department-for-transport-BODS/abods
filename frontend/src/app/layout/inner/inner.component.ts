@@ -4,5 +4,6 @@ import { Component } from "@angular/core";
   selector: "[app-inner]",
   template: "<ng-content></ng-content>",
   styleUrls: ["./inner.component.scss"],
+  standalone: false,
 })
 export class InnerComponent {}

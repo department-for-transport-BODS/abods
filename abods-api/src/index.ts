@@ -55,20 +55,25 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { event } = getCurrentInvoke();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const headers: IncomingHttpHeaders = event.headers;
-      logger.debug("Server started and within context block");
-      const retry = dayjs().isAfter(startTime.add(10, "minute"));
-      if (!db || !kysely || retry) {
-        [db, kysely] = await Promise.all([
-          createContext(true),
-          getKyselyClient(),
-        ]);
-        startTime = dayjs();
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const { event } = getCurrentInvoke();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const headers: IncomingHttpHeaders = event.headers;
+        logger.debug("Server started and within context block");
+        const retry = dayjs().isAfter(startTime.add(10, "minute"));
+        if (!db || !kysely || retry) {
+          [db, kysely] = await Promise.all([
+            createContext(true),
+            getKyselyClient(),
+          ]);
+          startTime = dayjs();
+        }
+        return { req, res, headers, db, apiKeyAuth, kysely };
+      } catch (e) {
+        logger.error(e);
+        throw e;
       }
-      return { req, res, headers, db, apiKeyAuth, kysely };
     },
   }),
 );

@@ -26,6 +26,7 @@ export interface SelectableTextCellRendererParams extends ICellRendererParams {
       </app-tooltip>
     </ng-template> `,
   styleUrls: ["./selectable-text-cell.component.scss"],
+  standalone: false,
 })
 export class SelectableTextCellRendererComponent
   implements AgRendererComponent

@@ -8,6 +8,7 @@ import {
   LngLatBounds,
   LngLatBoundsLike,
   Map,
+  MapboxEvent,
   MapboxGeoJSONFeature,
   MapMouseEvent,
   SymbolLayout,
@@ -16,7 +17,10 @@ import { ConfigService } from "../config/config.service";
 import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
+  Direction,
+  FeatureFlag,
   MatchType,
+  Maybe,
   OperatorLinesGQL,
   OperatorListGQL,
   OperatorType,
@@ -24,6 +28,7 @@ import {
   StopAnalysisGQL,
   StopAnalysisQueryVariables,
   StopStatistics,
+  StopTypeOption,
 } from "../../generated/graphql";
 import { combineLatest, firstValueFrom, of, Subject, takeUntil } from "rxjs";
 import { debounceTime, filter, map, mergeMap, tap } from "rxjs/operators";
@@ -51,11 +56,13 @@ import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { featureCollection } from "@turf/helpers";
 import pointOnFeature from "@turf/point-on-feature";
 import bboxClip from "@turf/bbox-clip";
+import { AuthenticatedUserService } from "../authentication/authenticated-user.service";
 
 @Component({
   selector: "app-stop-analysis",
   templateUrl: "./stop-analysis.component.html",
   styleUrls: ["./stop-analysis.component.scss"],
+  standalone: false,
 })
 export class StopAnalysisComponent implements OnInit, OnDestroy {
   stopPoints: FeatureCollection<Point, StopStatistics> = {
@@ -67,7 +74,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   errored = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  stopType = "timing-points";
+  stopType: StopTypeOption = StopTypeOption.TimingPoints;
   operatorIds: string[] = [];
   serviceIds: string[] = [];
   to: DateTime;
@@ -234,6 +241,21 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }),
   );
 
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
+  }
+
   constructor(
     private config: ConfigService,
     private query: StopAnalysisGQL,
@@ -245,6 +267,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     private adminAreaService: AdminAreaService,
     private router: Router,
     private route: ActivatedRoute,
+    private authUserService: AuthenticatedUserService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -381,7 +404,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     const stopType = params.get("stopType");
     if (from) this.from = DateTime.fromISO(from);
     if (to) this.to = DateTime.fromISO(to);
-    if (stopType) this.stopType = stopType;
+    if (stopType) this.stopType = stopType as StopTypeOption;
     if (matchType) this.matchType = matchType as MatchType;
     if (startTime) this.refinedFilters.startTime = startTime;
     if (endTime) this.refinedFilters.endTime = endTime;
@@ -412,7 +435,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.destroyFilterPanel();
   }
 
-  onMapLoad(map: Map): void {
+  onMapLoad(event: MapboxEvent & EventData): void {
+    const map = event.target;
     this.map = map;
     this.onMapMoveEnd();
 
@@ -562,6 +586,11 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     this.apiFiltersChanged.next(undefined);
   }
 
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    this.matchType = matchTypeValue;
+    this.onFilterChanged();
+  }
+
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
@@ -627,14 +656,22 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   onLocationSearchSelection(location?: GeocodingFeature) {
     if (!this.map) return;
     if (!location) return;
-    this.showBoundingBox(this.map, location.bbox);
+    if (location?.bbox) {
+      this.showBoundingBox(this.map, location.bbox);
+    } else if (location?.center) {
+      this.map.flyTo({
+        center: location.center,
+        zoom: 15,
+      });
+    }
   }
 
   private showBoundingBox = (map: Map, bbox: LngLatBoundsLike) => {
     map.fitBounds(bbox, { maxDuration: 500 });
   };
 
-  onStopTypeChanged() {
+  stopTypeToggleChange(stopType: StopTypeOption) {
+    this.stopType = stopType;
     this.updateQueryParams(undefined);
     this.processStopData(this.visibleBounds);
   }
@@ -648,7 +685,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   processStopData(bounds: BoundingBoxInputType): void {
     const filtered = this.rawStopData.filter(
       (n) =>
-        (this.stopType !== "timing-points" || n.timingPoint) &&
+        (this.stopType !== StopTypeOption.TimingPoints || n.timingPoint) &&
         n.latitude >= bounds.minLatitude &&
         n.latitude <= bounds.maxLatitude &&
         n.longitude >= bounds.minLongitude &&
@@ -677,12 +714,36 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: x.totalDelay / x.completedDepartures || 0,
+          averageDelay: this.enableDirection()
+            ? x.totalDelay / x.completedDepartures || 0
+            : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
           total: x.completedDepartures,
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,
           lateRatio: x.late / x.completedDepartures || 0,
+          countDelayed: x.countDelayed,
           completedRatio: x.completedDepartures / x.scheduledDepartures || 0,
+          direction: x.direction as Maybe<Direction> | undefined,
+          averageScheduled:
+            this.stopType === StopTypeOption.TimingPoints
+              ? x.averageScheduledTimingPoint
+              : x.averageScheduled,
+          averageActual:
+            this.stopType === StopTypeOption.TimingPoints
+              ? x.averageActualTimingPoint
+              : x.averageActual,
+          onTimeInSeconds: this.getDividedValueOrUndefined(
+            x.onTimeInSeconds,
+            x.onTime,
+          ),
+          earlyInSeconds: this.getDividedValueOrUndefined(
+            x.earlyInSeconds,
+            x.early,
+          ),
+          lateInSeconds: this.getDividedValueOrUndefined(
+            x.lateInSeconds,
+            x.late,
+          ),
         }),
       )
       .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
@@ -697,6 +758,32 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
               acc[cur.atcoCode] = cur;
               return acc;
             }
+
+            const averageDelay = this.getWeightedAverage(
+              cur.averageDelay,
+              cur.countDelayed,
+              acc[cur.atcoCode].averageDelay,
+              acc[cur.atcoCode].countDelayed,
+            );
+            const onTimeInSeconds = this.getWeightedAverage(
+              cur.onTimeInSeconds,
+              cur.onTime,
+              acc[cur.atcoCode].onTimeInSeconds,
+              acc[cur.atcoCode].onTime,
+            );
+            const earlyInSeconds = this.getWeightedAverage(
+              cur.earlyInSeconds,
+              cur.early,
+              acc[cur.atcoCode].earlyInSeconds,
+              acc[cur.atcoCode].early,
+            );
+            const lateInSeconds = this.getWeightedAverage(
+              cur.lateInSeconds,
+              cur.late,
+              acc[cur.atcoCode].lateInSeconds,
+              acc[cur.atcoCode].late,
+            );
+
             acc[cur.atcoCode] = {
               stopName: cur.stopName,
               atcoCode: cur.atcoCode,
@@ -713,6 +800,35 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
                 cur.scheduledDepartures + acc[cur.atcoCode].scheduledDepartures,
               late: cur.late + acc[cur.atcoCode].late,
               early: cur.early + acc[cur.atcoCode].early,
+              direction: cur.direction,
+              countDelayed:
+                cur.countDelayed == undefined &&
+                acc[cur.atcoCode].countDelayed == undefined
+                  ? undefined
+                  : cur.countDelayed ??
+                    0 + (acc[cur.atcoCode].countDelayed ?? 0),
+              averageDelay: averageDelay,
+              averageScheduled:
+                cur.averageScheduled == undefined &&
+                acc[cur.atcoCode].averageScheduled == undefined
+                  ? undefined
+                  : cur.averageScheduled ??
+                    0 + (acc[cur.atcoCode].averageScheduled ?? 0),
+              averageActual:
+                cur.averageActual == undefined &&
+                acc[cur.atcoCode].averageActual == undefined
+                  ? undefined
+                  : cur.averageActual ??
+                    0 + (acc[cur.atcoCode].averageActual ?? 0),
+              averageScheduledTimingPoint:
+                cur.averageScheduledTimingPoint ??
+                0 + (acc[cur.atcoCode].averageScheduledTimingPoint ?? 0),
+              averageActualTimingPoint:
+                cur.averageActualTimingPoint ??
+                0 + (acc[cur.atcoCode].averageActualTimingPoint ?? 0),
+              onTimeInSeconds: onTimeInSeconds,
+              earlyInSeconds: earlyInSeconds,
+              lateInSeconds: lateInSeconds,
             };
             return acc;
           },
@@ -727,6 +843,45 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         },
       })),
     };
+  }
+
+  getWeightedAverage(
+    aggValue: number | undefined | null,
+    aggMultiplier: number | undefined | null,
+    currentValue: number | undefined | null,
+    currentValueMultiplier: number | undefined | null,
+  ) {
+    if (aggValue == undefined && currentValue == undefined) {
+      return undefined;
+    }
+
+    if (!aggMultiplier && !currentValueMultiplier) {
+      return undefined;
+    }
+
+    if (aggValue === 0 && currentValue === 0) {
+      return 0;
+    }
+    return (
+      (aggValue ??
+        0 * (aggMultiplier ?? 0) +
+          (currentValue ?? 0 * (currentValueMultiplier ?? 0))) /
+      (aggMultiplier ?? 0 + (currentValueMultiplier ?? 0))
+    );
+  }
+
+  getDividedValueOrUndefined(
+    numerator: Maybe<number> | number | undefined,
+    denominator: Maybe<number> | number | undefined,
+  ) {
+    if (numerator == undefined || denominator == undefined) {
+      return undefined;
+    }
+    if (denominator === 0) {
+      return 0;
+    }
+
+    return numerator / denominator;
   }
 
   getNewBounds(bounds: LngLatBounds): BoundingBoxInputType {

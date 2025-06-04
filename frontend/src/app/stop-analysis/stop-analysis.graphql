@@ -37,5 +37,15 @@ query stopAnalysis(
     scheduledDepartures
     completedDepartures
     totalDelay
+    onTimeInSeconds
+    earlyInSeconds
+    lateInSeconds
+    averageDelay
+    direction
+    countDelayed
+    averageScheduled
+    averageScheduledTimingPoint
+    averageActual
+    averageActualTimingPoint
   }
 }

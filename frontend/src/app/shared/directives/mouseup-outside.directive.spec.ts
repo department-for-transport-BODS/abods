@@ -8,6 +8,7 @@ import { MouseupOutsideDirective } from "./mouseup-outside.directive";
     <div (appMouseupOutside)="onMouseupOutside()"></div>
     <div id="outside"></div>
   `,
+  standalone: false,
 })
 class TestComponent {
   // eslint-disable-next-line @typescript-eslint/no-empty-function

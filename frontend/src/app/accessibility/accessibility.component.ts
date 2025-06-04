@@ -5,6 +5,7 @@ import { LoggedInService } from "../authentication/loggedIn.service";
   selector: "app-accessibility",
   templateUrl: "./accessibility.component.html",
   styleUrls: ["./accessibility.component.scss"],
+  standalone: false,
 })
 export class AccessibilityComponent {
   constructor(public loggedInService: LoggedInService) {}

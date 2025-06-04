@@ -41,6 +41,7 @@
 
 .map-container {
   display: grid;
+  margin-bottom: 20px;
   .map-overlay {
     grid-area: 1 / 1;
     z-index: 1;
@@ -68,7 +69,7 @@
 
 .map {
   &__legend {
-    @include govuk-font(14);
+    @include govuk-font(16);
     background-color: #ffffff;
     padding: govuk-spacing(1);
     display: grid;

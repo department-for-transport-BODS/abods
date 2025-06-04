@@ -15,6 +15,7 @@ import { Corridor, CorridorSummary } from "../types";
   selector: "app-corridors-grid",
   templateUrl: "corridors-grid.component.html",
   styleUrls: ["./corridors-grid.component.scss"],
+  standalone: false,
 })
 export class CorridorsGridComponent implements OnInit, OnDestroy {
   columnDefs: ColDef[] = [

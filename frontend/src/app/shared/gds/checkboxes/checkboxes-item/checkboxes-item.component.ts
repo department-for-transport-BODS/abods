@@ -38,6 +38,7 @@ let nextUniqueId = 0;
       useExisting: forwardRef(() => CheckboxesItemComponent),
     },
   ],
+  standalone: false,
 })
 export class CheckboxesItemComponent {
   @Input() inputId = `gds-checkbox-item-${nextUniqueId++}`;

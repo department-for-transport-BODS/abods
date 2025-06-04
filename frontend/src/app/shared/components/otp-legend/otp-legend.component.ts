@@ -4,5 +4,6 @@ import { Component } from "@angular/core";
   selector: "app-otp-legend",
   templateUrl: "./otp-legend.component.html",
   styleUrls: ["./otp-legend.component.scss"],
+  standalone: false,
 })
 export class OtpLegendComponent {}

@@ -2,7 +2,10 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
-import { HttpClientModule } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { AngularSvgIconModule } from "angular-svg-icon";
 import { SharedModule } from "src/app/shared/shared.module";
 import { UserAccountComponent } from "./nav/user-account/user-account.component";
@@ -28,16 +31,6 @@ import { CookieBannerComponent } from "./cookie-banner/cookie-banner.component";
     NavToggleComponent,
     CookieBannerComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    SharedModule,
-    AngularSvgIconModule.forRoot(),
-    HttpClientModule,
-    NgxTippyModule,
-  ],
-  providers: [],
   exports: [
     UserAccountComponent,
     InnerComponent,
@@ -48,5 +41,14 @@ import { CookieBannerComponent } from "./cookie-banner/cookie-banner.component";
     PageComponent,
     CookieBannerComponent,
   ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    SharedModule,
+    AngularSvgIconModule.forRoot(),
+    NgxTippyModule,
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
 })
 export class LayoutModule {}

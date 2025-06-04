@@ -14,6 +14,7 @@ import { NgxTippyProps } from "ngx-tippy-wrapper";
   selector: "app-datenav-item",
   templateUrl: "./datenav-item.component.html",
   styleUrls: ["./datenav-item.component.scss"],
+  standalone: false,
 })
 export class DatenavItemComponent implements OnInit {
   @Input() heat?: number;

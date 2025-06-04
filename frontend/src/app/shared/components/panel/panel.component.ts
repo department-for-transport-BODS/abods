@@ -17,6 +17,7 @@ import { DynamicPanelComponentHostDirective } from "./dynamic-panel-component-ho
   templateUrl: "./panel.component.html",
   styleUrls: ["./panel.component.scss"],
   providers: [DynamicPanelComponentLoaderService],
+  standalone: false,
 })
 export class PanelComponent implements AfterViewInit, OnDestroy {
   @ViewChild("closeButton") closeButton?: ElementRef;

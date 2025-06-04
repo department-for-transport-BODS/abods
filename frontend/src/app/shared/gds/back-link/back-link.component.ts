@@ -14,6 +14,7 @@ import { ActivatedRoute, Params, QueryParamsHandling } from "@angular/router";
     >
   `,
   styleUrls: ["./back-link.component.scss"],
+  standalone: false,
 })
 export class BackLinkComponent {
   @Input() label?: string;

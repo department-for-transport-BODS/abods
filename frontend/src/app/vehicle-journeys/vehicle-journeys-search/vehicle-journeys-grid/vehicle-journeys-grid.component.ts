@@ -6,6 +6,7 @@ import { formatJourneyStartTime } from "../../vehicleJourneyUtils";
   selector: "app-vehicle-journeys-grid",
   templateUrl: "./vehicle-journeys-grid.component.html",
   styleUrls: ["./vehicle-journeys-grid.component.scss"],
+  standalone: false,
 })
 export class VehicleJourneysGridComponent {
   @Input() set data(data: Journey[]) {

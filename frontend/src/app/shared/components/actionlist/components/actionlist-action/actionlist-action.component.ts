@@ -4,6 +4,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
   selector: "[app-actionlist-action]",
   templateUrl: "actionlist-action.component.html",
   styleUrls: ["./actionlist-action.component.scss"],
+  standalone: false,
 })
 export class ActionListActionComponent {
   @Input() route?: unknown[] | string; // use when routing to an internal page

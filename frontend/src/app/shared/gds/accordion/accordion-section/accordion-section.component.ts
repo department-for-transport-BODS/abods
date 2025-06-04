@@ -6,6 +6,7 @@ let nextUniqueId = 0;
   selector: "gds-accordion-section",
   templateUrl: "./accordion-section.component.html",
   styleUrls: ["./accordion-section.component.scss"],
+  standalone: false,
 })
 export class AccordionSectionComponent {
   @Input() heading = "";

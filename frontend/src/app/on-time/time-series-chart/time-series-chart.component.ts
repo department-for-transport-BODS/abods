@@ -26,6 +26,7 @@ import { DateTime } from "luxon";
 @Component({
   selector: "app-on-time-time-series-chart",
   template: ``,
+  standalone: false,
 })
 export class TimeSeriesChartComponent
   extends BaseChart

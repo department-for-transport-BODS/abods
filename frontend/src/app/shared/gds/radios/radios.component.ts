@@ -2,6 +2,7 @@ import { Component, Input } from "@angular/core";
 @Component({
   selector: "gds-radios",
   templateUrl: "./radios.component.html",
+  standalone: false,
 })
 export class RadiosComponent {
   @Input() layout?: "inline";

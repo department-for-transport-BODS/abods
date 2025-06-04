@@ -12,6 +12,7 @@ import {
 
 @Directive({
   selector: "[appTrapFocus]",
+  standalone: false,
 })
 export class TrapFocusDirective implements OnChanges, OnDestroy {
   @Input() appTrapFocus!: boolean;
