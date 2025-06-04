@@ -15,13 +15,14 @@
     justify-content: space-between;
     &--filter {
       width: 20%;
+      flex-grow: 2;
       margin-right: govuk-spacing(4);
     }
   }
   &__disable-direction-controls {
     position: relative;
     display: flex;
-    justify-content: end;
+    justify-content: space-between;
     &--filter {
       flex-grow: 2;
       margin-right: govuk-spacing(4);
