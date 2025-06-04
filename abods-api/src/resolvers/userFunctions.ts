@@ -75,7 +75,7 @@ const getFeatureFlags = () => {
   for (const key of Object.keys(FeatureFlag)) {
     const envVarName = flagPrefix + key;
     const flag = FeatureFlag[key as FeatureFlag];
-    if (!isLocal()) {
+    if (!isLocal() || process.env.ENABLE_FEATURE_FLAG_LOCAL) {
       if (!(envVarName in process.env)) continue;
       if (process.env[envVarName] !== "true") continue;
     }

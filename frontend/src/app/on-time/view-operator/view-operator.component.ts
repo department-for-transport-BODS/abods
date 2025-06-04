@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { ReplaySubject, Subject } from "rxjs";
 import { delay, filter, map, switchMap, takeUntil, tap } from "rxjs/operators";
 import {
+  Direction,
   FrequentServiceInfoType,
   HeadwayOverviewType,
   OperatorType,
@@ -32,6 +33,8 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
 
   frequentServiceInfo?: FrequentServiceInfoType;
   frequentServiceInfoLoading = true;
+
+  preSelectedDirections: Direction[] = [];
 
   @ViewChild(TabsComponent) tabs?: TabsComponent;
 
@@ -94,6 +97,13 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
       .subscribe((tab) => {
         this.tabs?.openTab(tab, { emit: false });
       });
+
+    this.route.queryParamMap
+      .pipe(map((paramMap) => paramMap.getAll("direction")))
+      .subscribe((directions) => {
+        this.preSelectedDirections = directions as Direction[];
+        console.log("from querymap----", this.preSelectedDirections);
+      });
   }
 
   ngOnDestroy(): void {
@@ -124,6 +134,15 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
     this.router
       .navigate([], {
         queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
+  }
+
+  onDirectionChange(direction: Direction[]) {
+    this.router
+      .navigate([], {
+        queryParams: { direction },
         queryParamsHandling: "merge",
       })
       .catch(console.log);

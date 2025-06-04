@@ -169,7 +169,11 @@
         [loading]="overviewLoading"
         [params$]="params$.asObservable()"
       ></app-overview-stats>
-      <app-stops-grid [params]="params$ | async"></app-stops-grid>
+      <app-stops-grid
+        [params]="params$ | async"
+        [preSelectedDirections]="preSelectedDirections"
+        (directionsChanged)="onDirectionChange($event)"
+      ></app-stops-grid>
     </ng-container>
   </ng-container>
 </app-page>

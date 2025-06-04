@@ -2,6 +2,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnInit,
   Output,
   ViewChild,
 } from "@angular/core";
@@ -213,15 +214,14 @@ const column: (
   styleUrls: ["./on-time-grid.component.scss"],
   standalone: false,
 })
-export class OnTimeGridComponent<TData extends AbstractPerformance> {
+export class OnTimeGridComponent<TData extends AbstractPerformance>
+  implements OnInit
+{
   Mode = Mode; // added to expose enum in html
-  uniqueDirection: Direction[] = [
-    ...new Set(this.data?.map((item) => item.direction)),
-  ].filter((direction) => direction != undefined);
 
   directionOptions: MultiselectCheckboxOption[] = [];
 
-  directions: Direction[] = this.enableDirection() ? [] : [Direction.Inbound];
+  directions: Direction[] = [];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
@@ -258,6 +258,21 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     });
   }
 
+  private _preSelectedDirections: Direction[] = [];
+  @Input() get preSelectedDirections(): Direction[] {
+    return this._preSelectedDirections;
+  }
+  set preSelectedDirections(preSelectedDirections: Direction[]) {
+    this._preSelectedDirections = preSelectedDirections;
+    if (
+      !this.isDirectionsDisabled() &&
+      this.directions.length === 0 &&
+      preSelectedDirections.length > 0
+    ) {
+      this.directions = preSelectedDirections;
+    }
+  }
+
   private _noun?: string;
   @Input() get noun(): string {
     return this._noun ?? "";
@@ -287,16 +302,16 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     }
 
     this.summaryHeaderData = this.returnSummaryTotal(value);
-    this.uniqueDirection = [
-      ...new Set(this.data?.map((item) => item.direction)),
-    ].filter((direction) => direction != undefined);
 
-    this.directionOptions = this.uniqueDirection.map((value: Direction) => ({
-      value: value,
-      label: Object.keys(Direction).find(
-        (key) => Direction[key as keyof typeof Direction] === value,
-      )!,
-    }));
+    console.log("setter----", this._data?.length);
+    // if (
+    //   this.directions.length === 0 &&
+    //   value.some(
+    //     (data) => data.direction && data.direction === Direction.Inbound
+    //   )
+    // ) {
+    //   this.directions = [Direction.Inbound];
+    // }
   }
 
   get data() {
@@ -309,6 +324,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
   @Output() gridReady = new EventEmitter();
   @Output() cellClicked = new EventEmitter<{ column: string; data: TData }>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   get mode() {
     return this._mode;
@@ -343,7 +359,18 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this._mode = Mode.percent;
   }
 
-  enableDirection() {
+  ngOnInit(): void {
+    this.directionOptions = Object.entries(Direction).map(([key, value]) => ({
+      value: value,
+      label: key,
+    }));
+
+    if (!this.isDirectionsDisabled()) {
+      this.directions = this.preSelectedDirections;
+    }
+  }
+
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -422,7 +449,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: this.enableDirection()
+      averageDelay: this.isDirectionsDisabled()
         ? totalDelay / actual || 0
         : averageDelay,
       noData: actual - scheduled,
@@ -515,6 +542,19 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   onDirectionsChanged($event: string[]) {
     this.directions = $event as Direction[];
     this.onTimeGrid?.gridApi?.onFilterChanged();
+    let filteredData = structuredClone(this.data) ?? [];
+    if (this.directions.length > 0) {
+      filteredData =
+        filteredData.filter(
+          (row) => row.direction && this.directions.includes(row.direction),
+        ) ?? [];
+    }
+    console.log("data length----", this.data?.length);
+    console.log("filteredData length----", filteredData.length);
+    console.log("data length222----", this.data?.length);
+    this.summaryHeaderData = this.returnSummaryTotal(filteredData);
+    console.log("this.summaryHeaderData----", this.summaryHeaderData);
+    this.directionsChanged.emit(this.directions);
   }
 
   columnsChanged(): void {

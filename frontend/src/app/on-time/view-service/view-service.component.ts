@@ -19,6 +19,7 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import {
+  Direction,
   FrequentServiceInfoType,
   HeadwayOverviewType,
   OperatorType,
@@ -81,6 +82,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
 
   timingPointsOnly = false;
   minMaxDelay = false;
+  preSelectedDirections: Direction[] = [];
 
   constructor(
     private router: Router,
@@ -210,6 +212,16 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
       });
 
     queryParamMap$
+      .pipe(map((paramMap) => paramMap.getAll("direction")))
+      .subscribe((directions) => {
+        this.preSelectedDirections = directions as Direction[];
+        console.log(
+          "this.preSelectedDirections---",
+          this.preSelectedDirections,
+        );
+      });
+
+    queryParamMap$
       .pipe(
         filter(
           (paramMap) =>
@@ -263,5 +275,14 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
     const ret: Params = { overview: null };
     if (this.mapTab?.active) ret.tab = null;
     return ret;
+  }
+
+  onDirectionChange(direction: Direction[]) {
+    this.router
+      .navigate([], {
+        queryParams: { direction },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

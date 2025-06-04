@@ -6,7 +6,7 @@ import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
 import { map } from "rxjs/operators";
-import { FeatureFlag } from "../../../generated/graphql";
+import { Direction, FeatureFlag } from "../../../generated/graphql";
 
 @Component({
   selector: "app-stops-grid-display",
@@ -18,7 +18,9 @@ import { FeatureFlag } from "../../../generated/graphql";
     [data]="data"
     [csvFilename]="csvFilename"
     [paginate]="paginate"
+    [preSelectedDirections]="preSelectedDirections"
     (cellClicked)="handleCellClicked($event)"
+    (directionsChanged)="onDirectionChange($event)"
   />`,
   standalone: false,
 })
@@ -28,6 +30,7 @@ export class StopsGridComponentDisplayComponent {
   @Input() errored = false;
   @Input() paginate = false;
   @Input() csvFilename: string | undefined;
+  @Input() preSelectedDirections: Direction[] = [];
 
   columnDescriptions: ColumnDescription[] = this.enableDirection()
     ? [
@@ -392,6 +395,7 @@ export class StopsGridComponentDisplayComponent {
         },
       ];
   @Output() stopNameClicked = new EventEmitter<StopPerformance>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   handleCellClicked($event: { column: string; data: StopPerformance }) {
     if ($event.column === "stopName") {
@@ -417,5 +421,13 @@ export class StopsGridComponentDisplayComponent {
       });
 
     return isDirectionsDisabled;
+  }
+
+  onDirectionChange($event: Direction[]) {
+    this.directionsChanged.emit($event);
+    console.log("grid emit----", $event);
+    // this.data = this.data?.filter(
+    //   (stop) => stop.direction && $event.includes(stop.direction)
+    // );
   }
 }

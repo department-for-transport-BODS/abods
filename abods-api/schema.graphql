@@ -708,8 +708,6 @@ enum LineDirection {
 enum Direction {
   inbound
   outbound
-  clockwise
-  anticlockwise
 }
 
 enum StopsSegment {

@@ -2189,18 +2189,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "anticlockwise",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "clockwise",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "inbound",
             "description": null,
             "isDeprecated": false,

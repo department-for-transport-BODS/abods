@@ -271,8 +271,6 @@ export type DelayFrequencyType = {
 };
 
 export enum Direction {
-  Anticlockwise = 'anticlockwise',
-  Clockwise = 'clockwise',
   Inbound = 'inbound',
   Outbound = 'outbound'
 }

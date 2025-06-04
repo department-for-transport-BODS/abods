@@ -1052,7 +1052,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     "stop_id",
                     "common_name",
                     "is_timing_point",
-                    "direction",
                     context.kysely.fn.sum("early_count").as("early_count"),
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
@@ -1074,6 +1073,29 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     context.kysely.fn
                       .avg("diff_actual_time_to_stop_timing_point")
                       .as("diff_actual_time_to_stop_timing_point"),
+                  ],
+            )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
                   ],
             )
             .select((eb) => [
@@ -1193,7 +1215,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               countDelayed: Number(res.count_delayed),
               timingPoint: res.is_timing_point ?? false,
               direction: res.direction
-                ? (res.direction.toLowerCase() as Direction)
+                ? (res.direction as Direction)
                 : undefined,
               averageScheduled: averageScheduled,
               averageActual: averageActual,
@@ -1293,6 +1315,29 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                  ],
+            )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
                   ],
             )
             .select((eb) => [

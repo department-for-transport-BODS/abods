@@ -5,7 +5,7 @@
   >
     <div
       [ngClass]="
-        enableDirection() === true
+        isDirectionsDisabled() === true
           ? 'on-time-grid__disable-direction-controls'
           : 'on-time-grid__controls'
       "
@@ -19,8 +19,11 @@
           [(ngModel)]="gridFilter"
         ></gds-text-input>
       </div>
-      <div *ngIf="!enableDirection()" class="on-time-grid__dropdown--filter">
-        <label class="govuk-label" for="services">Services</label>
+      <div
+        *ngIf="!isDirectionsDisabled()"
+        class="on-time-grid__dropdown--filter"
+      >
+        <label class="govuk-label" for="services">Directions</label>
         <gds-multiselect-checkbox
           [options]="directionOptions"
           [ngModel]="directions"
@@ -58,7 +61,7 @@
               [value]="Mode.count"
             ></gds-radio-item>
             <gds-radio-item
-              *ngIf="!enableDirection()"
+              *ngIf="!isDirectionsDisabled()"
               label="Time"
               name="show-time"
               inputId="on-time-grid-show-time"
