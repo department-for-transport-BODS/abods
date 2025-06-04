@@ -25,6 +25,7 @@ export interface DayOfWeekLabel {
   selector: "app-filter-chips",
   templateUrl: "./filter-chips.component.html",
   styleUrls: ["./filter-chips.component.scss"],
+  standalone: false,
 })
 export class FilterChipsComponent implements OnChanges {
   @Input() showAdminAreas = true;

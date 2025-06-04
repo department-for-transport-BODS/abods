@@ -81,6 +81,7 @@ export type ComponentChanges<T> = {
   selector: "app-journey-map",
   templateUrl: "./journey-map.component.html",
   styleUrls: ["./journey-map.component.scss"],
+  standalone: false,
 })
 export class JourneyMapComponent implements OnChanges {
   protected readonly DateTime = DateTime;

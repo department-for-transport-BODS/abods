@@ -15,6 +15,7 @@ import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { OnTimeModule } from "../on-time.module";
 import { ApolloTestingModule } from "apollo-angular/testing";
+import { Direction } from "../../../generated/graphql";
 
 describe("StopsGridComponent", () => {
   let spectator: Spectator<StopsGridComponent>;
@@ -66,6 +67,12 @@ describe("StopsGridComponent", () => {
       lateRatio: 0,
       averageDelay: 12,
       timingPoint: false,
+      direction: Direction.Inbound,
+      averageScheduled: 60,
+      averageActual: 60,
+      onTimeInSeconds: 60,
+      lateInSeconds: 60,
+      earlyInSeconds: 60,
     },
     {
       lineId: "LI00001",
@@ -94,6 +101,12 @@ describe("StopsGridComponent", () => {
       lateRatio: 1 / 29,
       averageDelay: 44,
       timingPoint: true,
+      direction: Direction.Inbound,
+      averageScheduled: 60,
+      averageActual: 60,
+      onTimeInSeconds: 60,
+      lateInSeconds: 60,
+      earlyInSeconds: 60,
     },
   ];
 
@@ -104,8 +117,8 @@ describe("StopsGridComponent", () => {
 
   it("should call service without admin area ids", () => {
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
       filters: { nocCodes: ["NOC1"], adminAreaIds: ["AA050"] },
     };
 
@@ -116,8 +129,8 @@ describe("StopsGridComponent", () => {
 
     expect(spy).toHaveBeenCalledWith(
       jasmine.objectContaining({
-        fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
-        toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+        fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+        toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
         filters: { nocCodes: ["NOC1"] },
       }),
     );
@@ -150,8 +163,8 @@ describe("StopsGridComponent", () => {
     ];
 
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
       filters: { nocCodes: ["NOC1"] },
     };
 
@@ -176,8 +189,8 @@ describe("StopsGridComponent", () => {
 
   it("should calculate summary row correctly", fakeAsync(() => {
     spectator.component.params = {
-      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
       filters: { nocCodes: ["NOC1"] },
     };
 

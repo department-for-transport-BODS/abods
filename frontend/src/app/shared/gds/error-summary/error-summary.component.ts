@@ -54,6 +54,7 @@ export interface FormErrors {
     </div>
   `,
   styles: [],
+  standalone: false,
 })
 export class ErrorSummaryComponent {
   @Input() errors: FormErrors[] = [];

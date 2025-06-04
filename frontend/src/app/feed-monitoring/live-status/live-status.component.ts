@@ -19,6 +19,7 @@ import { FeedMonitoringService } from "../feed-monitoring.service";
   selector: "app-live-status",
   templateUrl: "./live-status.component.html",
   styleUrls: ["./live-status.component.scss"],
+  standalone: false,
 })
 export class LiveStatusComponent implements OnInit, OnDestroy {
   constructor(

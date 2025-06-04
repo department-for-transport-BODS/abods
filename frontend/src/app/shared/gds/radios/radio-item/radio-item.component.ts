@@ -20,6 +20,7 @@ let nextUniqueId = 0;
       useExisting: forwardRef(() => RadioItemComponent),
     },
   ],
+  standalone: false,
 })
 export class RadioItemComponent implements ControlValueAccessor {
   @Input() inputName = "";

@@ -9,6 +9,7 @@ export type DateRange = Partial<Pick<Interval, "start" | "end">>;
   selector: "app-date-range-controls",
   templateUrl: "./date-range-controls.component.html",
   styleUrls: ["./date-range-controls.component.scss"],
+  standalone: false,
 })
 export class DateRangeControlsComponent implements OnInit {
   /*

@@ -18,6 +18,7 @@ import { PerformanceCategories } from "../../dashboard.types";
   selector: "app-performance-chart",
   template: `<div class="performance-chart" [id]="chartId"></div>`,
   styles: [".performance-chart { min-height: 300px }"],
+  standalone: false,
 })
 export class PerformanceChartComponent
   extends BaseChart

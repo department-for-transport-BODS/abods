@@ -12,6 +12,7 @@ import { Component, Input } from "@angular/core";
       </div>
     </div>
   `,
+  standalone: false,
 })
 export class RadioConditionalComponent {
   @Input() visible = false;

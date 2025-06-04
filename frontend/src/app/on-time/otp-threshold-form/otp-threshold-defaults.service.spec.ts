@@ -1,4 +1,7 @@
-import { HttpClientModule } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { TestBed } from "@angular/core/testing";
 import { ConfigService } from "../../config/config.service";
 
@@ -9,8 +12,8 @@ describe("OtpThresholdFormService", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ConfigService],
-      imports: [HttpClientModule],
+      imports: [],
+      providers: [ConfigService, provideHttpClient(withInterceptorsFromDi())],
     });
     service = TestBed.inject(OtpThresholdDefaultsService);
   });

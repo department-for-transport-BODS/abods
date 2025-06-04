@@ -1,10 +1,12 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ViewEncapsulation } from "@angular/core";
 import { AuthenticationService } from "../../authentication/authentication.service";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 @Component({
   selector: "app-header",
   templateUrl: "./header.component.html",
   styleUrls: ["./header.component.scss"],
+  standalone: false,
+  encapsulation: ViewEncapsulation.None,
 })
 export class HeaderComponent {
   @Input() service?: string;

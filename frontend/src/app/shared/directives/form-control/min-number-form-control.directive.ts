@@ -4,6 +4,7 @@ import { NgControl } from "@angular/forms";
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: "[formControlName][minNumber]",
+  standalone: false,
 })
 export class MinNumberFormControlDirective {
   @Input() minNumber!: number;

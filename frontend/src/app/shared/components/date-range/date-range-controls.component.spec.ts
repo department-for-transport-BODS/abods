@@ -1,4 +1,4 @@
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { FormsModule } from "@angular/forms";
 import { byText, createHostFactory, Spectator } from "@ngneat/spectator";
 import { DateTime, Settings } from "luxon";
@@ -8,6 +8,10 @@ import { SharedModule } from "../../shared.module";
 import { DateRangeControlsComponent } from "./date-range-controls.component";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 
 describe("DateRangeControlsComponent", () => {
   let spectator: Spectator<DateRangeControlsComponent>;
@@ -164,7 +168,11 @@ describe("DateRangeControlsComponent (Angular)", () => {
 
     TestBed.configureTestingModule({
       declarations: [DateRangeControlsComponent],
-      imports: [SharedModule, HttpClientTestingModule],
+      imports: [SharedModule],
+      providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
     });
     fixture = TestBed.createComponent(DateRangeControlsComponent);
   });

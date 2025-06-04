@@ -331,7 +331,7 @@ interface StatsCache {
 
 export type TimetableType = Pick<
   Timetable,
-  | "stop_id"
+  | "atco_code"
   | "stop_index"
   | "actual_departure_time"
   | "timestamp_after_estimate"
@@ -362,41 +362,67 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     throw "Not Authorized";
   }
 
-  const corridor = stopList.map(Number);
-
   const timetables = context.kysely
-    .selectFrom("Timetable")
+    .with("corridor_journeys", (db) =>
+      db
+        .selectFrom("route_to_journeys as rj")
+        .innerJoin("distinct_routes as dr", "rj.distinct_route_id", "dr.id")
+        .where("dr.route", "like", `%${stopList.join(",")}%`)
+        .where(
+          "rj.date_of_journey",
+          ">=",
+          userSelectedDateAsUtc(fromTimestamp).toDate(),
+        )
+        .where(
+          "rj.date_of_journey",
+          "<",
+          userSelectedDateAsUtc(toTimestamp).toDate(),
+        )
+        .select([
+          "rj.group_id as group_id",
+          "rj.date_of_journey as date_of_journey",
+        ]),
+    )
+    .with("naptan_stops", (db) =>
+      db
+        .selectFrom("naptan_stoppoint_latlong as nsl")
+        .where("nsl.atco_code", "in", stopList)
+        .select("nsl.id as naptan_id"),
+    )
+    .selectFrom("Timetable as t")
+    .innerJoin("naptan_stops as n", "n.naptan_id", "t.stop_id")
+    .innerJoin("corridor_journeys as cj", (join) =>
+      join
+        .onRef("cj.group_id", "=", "t.group_id")
+        .onRef("cj.date_of_journey", "=", "t.date_of_journey"),
+    )
     .where(
-      "date_of_journey",
+      "t.date_of_journey",
       ">=",
       userSelectedDateAsUtc(fromTimestamp).toDate(),
     )
-    .where("date_of_journey", "<", userSelectedDateAsUtc(toTimestamp).toDate())
-    .where("stop_id", "in", corridor);
-
-  const journeysWithAtLeastAsManyStops = timetables
-    .groupBy(["group_id", "vehiclejourney_id"])
-    .having(context.kysely.fn.count("stop_id"), ">=", corridor.length)
-    .select("group_id");
-
-  const results: TimetableType[] = await timetables
-    .where("group_id", "in", journeysWithAtLeastAsManyStops)
+    .where(
+      "t.date_of_journey",
+      "<",
+      userSelectedDateAsUtc(toTimestamp).toDate(),
+    )
     .select([
-      "stop_id",
-      "stop_index",
-      "actual_departure_time",
-      "timestamp_after_estimate",
-      "expected_departure_time",
-      "operator_noc",
-      "service_code",
-      "line_name",
-      "vehiclejourney_id",
-      "group_id",
-      "date_of_journey",
-    ])
-    .execute();
-  const corridorTransits = extractCorridorTransits(results, corridor);
+      "t.atco_code",
+      "t.stop_index",
+      "t.actual_departure_time",
+      "t.timestamp_after_estimate",
+      "t.expected_departure_time",
+      "t.operator_noc",
+      "t.service_code",
+      "t.line_name",
+      "t.vehiclejourney_id",
+      "t.group_id",
+      "t.date_of_journey",
+    ]);
 
+  const results: TimetableType[] = await timetables.execute();
+
+  const corridorTransits = extractCorridorTransits(results, stopList);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
   return {
     inputs: args.inputs,
@@ -406,7 +432,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
 const extractCorridorTransits = (
   stops: TimetableType[],
-  corridor: number[],
+  corridor: string[],
 ) => {
   // Group stops into journeys
   const journeyMap: Record<string, TimetableType[]> = {};
@@ -422,7 +448,7 @@ const extractCorridorTransits = (
     for (const stop of sortedJourney) {
       // Ignore stops that aren't along the corridor
       // The stop_id value is actually a BigInt, while it is set as int in prisma
-      if (Number(stop.stop_id) !== corridor[corridorIndex]) continue;
+      if (stop.atco_code !== corridor[corridorIndex]) continue;
 
       currentTransit.push(stop);
       corridorIndex += 1;

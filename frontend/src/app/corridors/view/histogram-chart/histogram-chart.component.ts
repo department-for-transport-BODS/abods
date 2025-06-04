@@ -43,6 +43,7 @@ export type HistogramChartDataItem = CorridorHistogramType & {
       }
     `,
   ],
+  standalone: false,
 })
 export class HistogramChartComponent
   implements CorridorChart<HistogramChartDataItem[]>, OnChanges, AfterViewInit

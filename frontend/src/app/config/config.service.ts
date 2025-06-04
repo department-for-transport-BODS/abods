@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { map } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { merge } from "lodash-es";
+import { FeatureFlag, LoginInfo } from "../../generated/graphql";
 
 export interface ConfigObject {
   apiUrl: string;
@@ -198,5 +199,9 @@ export class ConfigService {
     } catch {
       return defaultValue;
     }
+  }
+
+  hasFlag(info: LoginInfo, flag: FeatureFlag) {
+    return info.flags.some((f) => f === flag);
   }
 }

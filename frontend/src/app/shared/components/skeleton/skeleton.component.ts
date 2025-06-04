@@ -5,6 +5,7 @@ import { GDSTypeSizes, GDSSpacingSizes } from "src/app/shared/types";
   template:
     '<div [ngClass]="skeletonClasses" [style.width]="width" [style.height]="height"></div>',
   styleUrls: ["./skeleton.component.scss"],
+  standalone: false,
 })
 export class SkeletonComponent {
   @Input() width?: string;

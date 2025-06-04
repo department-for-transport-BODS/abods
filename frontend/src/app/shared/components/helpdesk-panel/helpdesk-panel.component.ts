@@ -10,6 +10,7 @@ import { HelpdeskPanelService } from "./helpdesk-panel.service";
   selector: "app-helpdesk-panel",
   templateUrl: "./helpdesk-panel.component.html",
   styleUrls: ["./helpdesk-panel.component.scss"],
+  standalone: false,
 })
 export class HelpdeskPanelComponent implements OnInit, OnDestroy {
   get isOpen(): boolean {

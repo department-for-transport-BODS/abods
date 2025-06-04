@@ -12,6 +12,7 @@ import { takeUntil } from "rxjs/operators";
 
 @Directive({
   selector: "mgl-map[appAutoResizeMap]",
+  standalone: false,
 })
 export class AutoResizeMapDirective
   implements OnInit, AfterViewChecked, OnDestroy

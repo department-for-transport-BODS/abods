@@ -18,6 +18,7 @@ export interface IconCellRendererParams extends ICellRendererParams {
     <span class="govuk-visually-hidden">{{ params?.label }}</span>
   </div>`,
   styleUrls: ["./icon-cell-renderer.component.scss"],
+  standalone: false,
 })
 export class IconCellRendererComponent implements AgRendererComponent {
   params?: IconCellRendererParams;

@@ -3,11 +3,15 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { AutoResizeMapDirective } from "./auto-resize-map.directive";
 
-@Component({ selector: "mgl-map" }) // eslint-disable-line
+@Component({
+  selector: "mgl-map",
+  standalone: false,
+}) // eslint-disable-line
 class MockMapComponent {}
 
 @Component({
   template: `<mgl-map [appAutoResizeMap]="map"></mgl-map>`,
+  standalone: false,
 })
 class MockHostComponent {
   map = {

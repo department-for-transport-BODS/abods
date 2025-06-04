@@ -7,6 +7,7 @@ import { ICellRendererParams } from "ag-grid-community";
   templateUrl: "./active-cell.component.html",
   styleUrls: ["./active-cell.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class ActiveCellComponent implements AgRendererComponent {
   params?: ICellRendererParams;

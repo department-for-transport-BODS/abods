@@ -9,6 +9,7 @@ import {
   ColDef,
   FilterChangedEvent,
   GridOptions,
+  RowNode,
   ValueGetterParams,
 } from "ag-grid-community";
 import {
@@ -28,12 +29,18 @@ import {
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import {
+  Direction,
+  FeatureFlag,
   Maybe,
   Scalars,
   ServicePerformanceType,
   StopPerformanceType,
 } from "../../../generated/graphql";
 import { OnTimeRatios } from "../on-time.service";
+import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { map } from "rxjs/operators";
 
 type ColumnBase = {
   title: string;
@@ -44,9 +51,18 @@ type ColumnBase = {
 
 type WithPctColumn = {
   columnType: "WithPct";
+  isHideable: boolean;
+  pctField?: string;
+  pctValueGetter?: ((params: ValueGetterParams) => any) | string;
+} & ColumnBase;
+
+type WithPctTimeColumn = {
+  columnType: "WithPctTime";
   isHideable: true;
   pctField?: string;
   pctValueGetter?: ((params: ValueGetterParams) => any) | string;
+  timeField?: string;
+  timeValueGetter?: ((params: ValueGetterParams) => any) | string;
 } & ColumnBase;
 
 type PermanentColumn = {
@@ -59,16 +75,24 @@ type NormalColumn = {
   isHideable: true;
 } & ColumnBase;
 
+type CamelcaseColumn = {
+  columnType: "Camelcase";
+  isHideable: boolean;
+} & ColumnBase;
+
 type AvDelayColumn = {
   columnType: "AvDelay";
   isHideable: true;
+  positiveOnly?: true;
 } & ColumnBase;
 
 export type ColumnDescription =
   | NormalColumn
   | PermanentColumn
   | WithPctColumn
-  | AvDelayColumn;
+  | AvDelayColumn
+  | WithPctTimeColumn
+  | CamelcaseColumn;
 
 export interface IPunctualityType {
   early?: Maybe<Scalars["Int"]["output"]>;
@@ -76,12 +100,31 @@ export interface IPunctualityType {
   onTime?: Maybe<Scalars["Int"]["output"]>;
 }
 
-export type AbstractPerformance = IPunctualityType &
+export type BasePerformance = IPunctualityType &
   OnTimeRatios &
   Pick<
     ServicePerformanceType & StopPerformanceType,
-    "scheduledDepartures" | "actualDepartures" | "averageDelay"
-  >;
+    | "scheduledDepartures"
+    | "actualDepartures"
+    | "averageDelay"
+    | "onTimeInSeconds"
+    | "lateInSeconds"
+    | "earlyInSeconds"
+    | "countDelayed"
+  > &
+  // direction is partial as its not displayed in the total data or the table header
+  Partial<Pick<ServicePerformanceType & StopPerformanceType, "direction">>;
+
+export type StopPerformanceGridType = BasePerformance &
+  Pick<StopPerformanceType, "averageScheduled" | "averageActual">;
+
+export type AbstractPerformance = BasePerformance | StopPerformanceGridType;
+
+enum Mode {
+  percent = "percent",
+  count = "count",
+  time = "time",
+}
 
 const column: (
   formatter: AgGridFormatterService,
@@ -100,11 +143,22 @@ const column: (
         ];
       }
       return [column];
+    case "Camelcase":
+      return [
+        {
+          ...column,
+          valueFormatter: formatter.toCamelcase,
+        },
+      ];
     case "AvDelay":
       return [
         {
           ...column,
-          valueFormatter: formatter.averageDelayValueFormatter,
+          valueFormatter: ({ value }: { value: number | undefined }) =>
+            formatter.averageDelayValueFormatter(
+              { value },
+              column.positiveOnly,
+            ),
           hide: !column.isDefaultShown,
         },
       ];
@@ -125,6 +179,31 @@ const column: (
           hide: !column.isDefaultShown,
         },
       ];
+    case "WithPctTime":
+      return [
+        {
+          ...column,
+          valueFormatter: ({ value }: { value: number }) =>
+            value.toLocaleString(),
+          hide: true,
+        },
+        {
+          ...column,
+          colId: `${column.colId}Pct`,
+          field: column.pctField,
+          valueGetter: column.pctValueGetter,
+          valueFormatter: formatter.percentValueFormatter,
+          hide: !column.isDefaultShown,
+        },
+        {
+          ...column,
+          colId: `${column.colId}Time`,
+          field: column.timeField,
+          valueGetter: column.timeValueGetter,
+          valueFormatter: formatter.averageDelayValueFormatter,
+          hide: true,
+        },
+      ];
   }
 };
 
@@ -132,8 +211,17 @@ const column: (
   selector: "app-on-time-grid",
   templateUrl: "./on-time-grid.component.html",
   styleUrls: ["./on-time-grid.component.scss"],
+  standalone: false,
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
+  Mode = Mode; // added to expose enum in html
+  uniqueDirection: Direction[] = [
+    ...new Set(this.data?.map((item) => item.direction)),
+  ].filter((direction) => direction != undefined);
+
+  directionOptions: MultiselectCheckboxOption[] = [];
+
+  directions: Direction[] = this.enableDirection() ? [] : [Direction.Inbound];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
@@ -189,41 +277,28 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   @Input() csvFilename?: string | null;
 
   private _data: TData[] | undefined;
-  totalData: AbstractPerformance[] | undefined;
+  summaryHeaderData: (BasePerformance | StopPerformanceGridType)[] | undefined;
   @Input() set data(value: TData[] | undefined) {
     this._data = value;
 
-    if (!value) {
-      this.totalData = undefined;
+    if (!value || value.length === 0) {
+      this.summaryHeaderData = undefined;
       return;
     }
 
-    const early = sumBy(value, "early");
-    const late = sumBy(value, "late");
-    const onTime = sumBy(value, "onTime");
-    const total = sumBy(value, "total");
-    const scheduled = sumBy(value, "scheduledDepartures");
-    const actual = sumBy(value, "actualDepartures");
-    const totalDelay = sum(
-      value.map((stop) => stop.actualDepartures * stop.averageDelay),
-    );
-    this.totalData = [
-      {
-        early: early,
-        late: late,
-        onTime: onTime,
-        earlyRatio: early / total || 0,
-        lateRatio: late / total || 0,
-        onTimeRatio: onTime / total || 0,
-        scheduledDepartures: scheduled,
-        actualDepartures: actual,
-        averageDelay: totalDelay / actual || 0,
-        noData: actual - scheduled,
-        completedRatio: actual / total || 0,
-        total: total,
-      },
-    ];
+    this.summaryHeaderData = this.returnSummaryTotal(value);
+    this.uniqueDirection = [
+      ...new Set(this.data?.map((item) => item.direction)),
+    ].filter((direction) => direction != undefined);
+
+    this.directionOptions = this.uniqueDirection.map((value: Direction) => ({
+      value: value,
+      label: Object.keys(Direction).find(
+        (key) => Direction[key as keyof typeof Direction] === value,
+      )!,
+    }));
   }
+
   get data() {
     return this._data;
   }
@@ -238,7 +313,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   get mode() {
     return this._mode;
   }
-  set mode(val: "percent" | "count") {
+  set mode(val: Mode) {
     this._mode = val;
     this.columnsChanged();
   }
@@ -252,7 +327,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this.columnsChanged();
   }
 
-  private _mode: "percent" | "count";
+  private _mode: Mode;
   private _selectedColumns: string[] = [];
 
   displayOptionsForm: FormGroup = this.formBuilder.group({});
@@ -262,8 +337,125 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     private formatter: AgGridFormatterService,
     private ngxSmartModalService: NgxSmartModalService,
     private formBuilder: FormBuilder,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
   ) {
-    this._mode = "percent";
+    this._mode = Mode.percent;
+  }
+
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
+  }
+  sumByOrNull<T>(
+    array: T[],
+    iteratee: (item: T) => number | null | undefined,
+  ): number | null {
+    let sum = 0;
+    let hasValue = false;
+
+    for (const item of array) {
+      const value = iteratee(item);
+      if (value != null) {
+        sum += value;
+        hasValue = true;
+      }
+    }
+
+    return hasValue ? sum : null;
+  }
+
+  returnSummaryTotal(
+    value: (StopPerformanceGridType | BasePerformance)[],
+  ): (BasePerformance | StopPerformanceGridType)[] {
+    const early = sumBy(value, "early");
+    const late = sumBy(value, "late");
+    const onTime = sumBy(value, "onTime");
+    const total = sumBy(value, "total");
+    const scheduled = sumBy(value, "scheduledDepartures");
+    const actual = sumBy(value, "actualDepartures");
+    const totalDelay = sum(
+      value.map((stop) => stop.actualDepartures * (stop.averageDelay ?? 0)),
+    );
+
+    const valueWithDelay = value.filter(
+      (data) => data.averageDelay != undefined,
+    );
+    const averageDelay = valueWithDelay.some(
+      (val) => val.averageDelay != undefined && val.countDelayed != undefined,
+    )
+      ? sumBy(
+          value,
+          (item) => (item.averageDelay ?? 0) * (item.countDelayed ?? 0),
+        ) / sumBy(value, "countDelayed")
+      : undefined;
+    const onTimeInSeconds = value.some(
+      (val) => val.onTimeInSeconds != undefined,
+    )
+      ? sumBy(value, "onTimeInSeconds") / value.length
+      : undefined;
+    const earlyInSeconds = value.some((val) => val.earlyInSeconds != undefined)
+      ? sumBy(value, "earlyInSeconds") / value.length
+      : undefined;
+    const lateInSeconds = value.some((val) => val.earlyInSeconds != undefined)
+      ? sumBy(value, "lateInSeconds") / value.length
+      : undefined;
+
+    const isStopGrid = value?.some((row) => this.isGridTypeStop(row));
+
+    let summary: StopPerformanceGridType | BasePerformance = {
+      early: early,
+      late: late,
+      onTime: onTime,
+      earlyRatio: early / total || 0,
+      lateRatio: late / total || 0,
+      onTimeRatio: onTime / total || 0,
+      scheduledDepartures: scheduled,
+      actualDepartures: actual,
+      averageDelay: this.enableDirection()
+        ? totalDelay / actual || 0
+        : averageDelay,
+      noData: actual - scheduled,
+      completedRatio: actual / total || 0,
+      total: total,
+      onTimeInSeconds: onTimeInSeconds,
+      earlyInSeconds: earlyInSeconds,
+      lateInSeconds: lateInSeconds,
+    };
+
+    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
+
+    if (isStopGrid) {
+      const stopGrid = value.filter((val) => this.isGridTypeStop(val));
+      const averageScheduled = stopGrid.some(
+        (val) => val.averageScheduled != undefined,
+      )
+        ? sumBy(value, "averageScheduled") / value.length
+        : undefined;
+      const averageActual = stopGrid.some(
+        (val) => val.averageActual != undefined,
+      )
+        ? sumBy(value, "averageActual") / value.length
+        : undefined;
+
+      summary = {
+        ...summary,
+        averageScheduled,
+        averageActual,
+      } satisfies StopPerformanceGridType;
+    }
+    summaryArray.push(summary);
+    return summaryArray;
   }
 
   overlayParams: NoRowsOverlayParams = {
@@ -273,11 +465,14 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   gridOptions: GridOptions = {
     rowSelection: "single",
     suppressDragLeaveHidesColumns: true,
-    suppressCellSelection: false,
+    suppressCellFocus: false,
     onFirstDataRendered: this.headerHeightSetter.bind(this),
     noRowsOverlayComponent: NoRowsOverlayComponent,
     noRowsOverlayComponentParams: () => this.overlayParams,
     suppressPropertyNamesCheck: true,
+    isExternalFilterPresent: () => this.isExternalFilterPresent(),
+    doesExternalFilterPass: (node: RowNode<TData>) =>
+      this.doesExternalFilterPass(node),
     onCellClicked: (params: any) => {
       this.cellClicked.emit({
         column: params.column.getColId() as string,
@@ -306,6 +501,22 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this.gridReady.emit();
   }
 
+  isExternalFilterPresent() {
+    return this.directions.length > 0;
+  }
+
+  doesExternalFilterPass(node: RowNode<TData>) {
+    if (!node.data?.direction) {
+      return false;
+    }
+    return this.directions.includes(node.data?.direction);
+  }
+
+  onDirectionsChanged($event: string[]) {
+    this.directions = $event as Direction[];
+    this.onTimeGrid?.gridApi?.onFilterChanged();
+  }
+
   columnsChanged(): void {
     _map(this.columnDescriptions, ({ colId, columnType }) => {
       const isSelected = this.selectedColumns.includes(colId);
@@ -313,11 +524,25 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
         case "WithPct":
           this.onTimeGrid?.columnApi?.setColumnVisible(
             `${colId}Pct`,
-            this.mode === "percent" && isSelected,
+            this.mode === Mode.percent && isSelected,
           );
           this.onTimeGrid?.columnApi?.setColumnVisible(
             colId,
-            this.mode !== "percent" && isSelected,
+            this.mode !== Mode.percent && isSelected,
+          );
+          return;
+        case "WithPctTime":
+          this.onTimeGrid?.columnApi?.setColumnVisible(
+            `${colId}Time`,
+            this.mode === Mode.time && isSelected,
+          );
+          this.onTimeGrid?.columnApi?.setColumnVisible(
+            `${colId}Pct`,
+            this.mode === Mode.percent && isSelected,
+          );
+          this.onTimeGrid?.columnApi?.setColumnVisible(
+            colId,
+            this.mode === Mode.count && isSelected,
           );
           return;
         default:
@@ -344,8 +569,32 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     }
   }
 
+  isGridTypeStop(data: AbstractPerformance): data is StopPerformanceGridType {
+    return "averageScheduled" in data && "averageActual" in data;
+  }
+
   export() {
-    this.onTimeGrid?.export(this.csvFilename ?? "export");
+    const serviceGridAverageValueColumns: (keyof Pick<
+      AbstractPerformance,
+      "averageDelay"
+    >)[] = ["averageDelay"];
+    const stopGridAverageValueColumns: (keyof Pick<
+      StopPerformanceGridType,
+      "averageDelay" | "averageActual" | "averageScheduled"
+    >)[] = ["averageDelay", "averageActual", "averageScheduled"];
+    const isStopGrid = this.data?.some((row) => this.isGridTypeStop(row));
+
+    if (isStopGrid) {
+      this.onTimeGrid?.export<StopPerformanceGridType>(
+        this.csvFilename ?? "export",
+        stopGridAverageValueColumns,
+      );
+    } else {
+      this.onTimeGrid?.export<BasePerformance>(
+        this.csvFilename ?? "export",
+        serviceGridAverageValueColumns,
+      );
+    }
   }
 
   columnName(colId: string) {

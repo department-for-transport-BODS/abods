@@ -58,6 +58,7 @@ class ServiceViewModel {
   selector: "app-performance-ranking",
   templateUrl: "./ranking-table.component.html",
   styleUrls: ["./ranking-table.component.scss"],
+  standalone: false,
 })
 export class PerformanceRankingComponent implements OnInit, OnChanges {
   @Input() services?: ServicePunctualityType[];

@@ -13,6 +13,7 @@ import { Component, Input } from "@angular/core";
     </div>
   `,
   styles: [],
+  standalone: false,
 })
 export class PanelComponent {
   @Input() title?: string;

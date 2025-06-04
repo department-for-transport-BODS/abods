@@ -1,15 +1,19 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
-import { HeadwayOverviewType } from "../../../generated/graphql";
+import { FeatureFlag, HeadwayOverviewType } from "../../../generated/graphql";
+import { Duration } from "luxon";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
 
 @Component({
   selector: "app-overview-stats",
   templateUrl: "./overview-stats.component.html",
   styleUrls: ["./overview-stats.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class OverviewStatsComponent {
   @Input() showTotal = false;
@@ -61,9 +65,39 @@ export class OverviewStatsComponent {
     return incompleteConversion(incomplete);
   }
 
-  constructor(private helpdeskPanelService: HelpdeskPanelService) {}
+  get averageDelay() {
+    if (!this.overview?.averageDelay) {
+      return "-";
+    }
+    const seconds = this.overview?.averageDelay;
+    return (
+      "+" +
+      Duration.fromObject({ seconds: Math.abs(seconds) }).toFormat("mm:ss")
+    );
+  }
+
+  constructor(
+    private helpdeskPanelService: HelpdeskPanelService,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
+  ) {}
 
   openHelpdesk() {
     this.helpdeskPanelService.open();
+  }
+
+  enableDirection() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
   }
 }

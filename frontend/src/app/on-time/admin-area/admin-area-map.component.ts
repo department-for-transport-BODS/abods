@@ -79,6 +79,7 @@ import { ConfigService } from "../../config/config.service";
       }
     `,
   ],
+  standalone: false,
 })
 export class AdminAreaMapComponent implements OnInit {
   get adminAreaIds(): string[] {

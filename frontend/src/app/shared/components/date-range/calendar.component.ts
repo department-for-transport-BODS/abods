@@ -22,6 +22,7 @@ function* daysOf(interval: Interval) {
   selector: "app-calendar",
   templateUrl: "calendar.component.html",
   styleUrls: ["date-range-controls.component.scss"],
+  standalone: false,
 })
 export class CalendarComponent implements OnChanges {
   @Input() selectableRange = Interval.before(

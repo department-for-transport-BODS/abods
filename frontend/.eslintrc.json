@@ -4,8 +4,7 @@
     "projects/**/*",
     "src/test-support/*",
     "**/*.spec.ts",
-    "**/generated/graphql.ts",
-    "src/polyfills.ts"
+    "**/generated/graphql.ts"
   ],
   "plugins": ["jasmine"],
   "overrides": [
@@ -92,8 +91,10 @@
       "files": ["*.graphql"],
       "extends": "plugin:@graphql-eslint/operations-recommended",
       "parserOptions": {
-        "schema": "../abods-api/schema.graphql",
-        "operations": "./**/*.graphql"
+        "graphQLConfig": {
+          "schema": "../abods-api/schema.graphql",
+          "documents": "./**/*.graphql"
+        }
       },
       "rules": {
         "@graphql-eslint/naming-convention": "off"

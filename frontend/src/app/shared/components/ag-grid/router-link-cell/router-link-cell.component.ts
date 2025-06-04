@@ -33,6 +33,7 @@ export interface RouterLinkCellRendererParams extends ICellRendererParams {
   </div>`,
   styleUrls: ["./router-link-cell.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class RouterLinkCellRendererComponent implements AgRendererComponent {
   label?: string;
