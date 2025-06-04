@@ -2,11 +2,9 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges,
 } from "@angular/core";
 import {
   OnTimeService,
@@ -31,14 +29,12 @@ import { Direction } from "../../../generated/graphql";
   />`,
   standalone: false,
 })
-export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
+export class StopsGridComponent implements OnInit, OnDestroy {
   data?: StopPerformance[];
   loading = true;
   errored = false;
   csvFilename = "Stop_Performance";
   destroy$ = new Subject<void>();
-
-  backupData: StopPerformance[] = [];
 
   @Input() preSelectedDirections: Direction[] = [];
   @Input()
@@ -52,18 +48,6 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
   @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   constructor(private onTimeService: OnTimeService) {}
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.preSelectedDirections) {
-      const currentDirections = changes.preSelectedDirections.currentValue;
-      console.log("this.currentDirections---", currentDirections);
-      // this.data = this.backupData.filter(
-      //   (stop) =>
-      //     stop.direction &&
-      //     currentDirections.includes(stop.direction)
-      // );
-    }
-  }
 
   ngOnInit() {
     this.params$
@@ -86,32 +70,6 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
       )
       .subscribe((data) => {
         this.data = data;
-        this.backupData = this.data;
-
-        // if (
-        //   this.preSelectedDirections.length === 0 &&
-        //   this.data.some(
-        //     (stop) =>
-        //       stop.direction && stop.direction === Direction.Inbound
-        //   )
-        // ) {
-        //   this.data = this.data.filter(
-        //     (stop) =>
-        //       stop.direction && stop.direction === Direction.Inbound
-        //   );
-        // }
-
-        console.log(
-          "this.preSelectedDirections---",
-          this.preSelectedDirections,
-        );
-
-        // if(this.preSelectedDirections.length > 0){
-        //   this.data = this.data.filter(
-        //     (stop) =>
-        //       stop.direction && this.preSelectedDirections.includes(stop.direction)
-        //   )
-        // }
         this.loading = false;
       });
   }

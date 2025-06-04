@@ -2,11 +2,9 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges,
 } from "@angular/core";
 import { ICellRendererParams } from "ag-grid-community";
 import { DateTime } from "luxon";
@@ -40,7 +38,7 @@ import { Direction, FeatureFlag } from "../../../generated/graphql";
   ></app-on-time-grid>`,
   standalone: false,
 })
-export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
+export class ServiceGridComponent implements OnInit, OnDestroy {
   columnDescriptions: ColumnDescription[] = this.enableDirection()
     ? [
         {
@@ -277,6 +275,8 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           isHideable: true,
           isDefaultShown: true,
           headerName: "Direction",
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.direction ?? "-",
           sortable: true,
           unSortIcon: true,
           maxWidth: 130,
@@ -403,17 +403,6 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
     private config: ConfigService,
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.preSelectedDirections) {
-      const currentDirections = changes.preSelectedDirections.currentValue;
-      console.log("service----");
-      // this.data = this.backupData.filter(
-      //   (service) =>
-      //     service.direction && currentDirections.includes(service.direction)
-      // );
-    }
-  }
-
   destroy$ = new Subject<void>();
 
   ngOnInit(): void {
@@ -442,33 +431,8 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
             { numeric: true },
           ),
         );
+
         this.backupData = this.data;
-
-        console.log(
-          "service this.preSelectedDirections----",
-          this.preSelectedDirections,
-        );
-        // if (
-        //   this.preSelectedDirections.length === 0 &&
-        //   this.data.some(
-        //     (service) =>
-        //       service.direction && service.direction === Direction.Inbound
-        //   )
-        // ) {
-        //   this.data = this.data.filter(
-        //     (service) =>
-        //       service.direction && service.direction === Direction.Inbound
-        //   );
-        // }
-
-        // if (this.preSelectedDirections.length > 0) {
-        //   this.data = this.data.filter(
-        //     (service) =>
-        //       service.direction &&
-        //       this.preSelectedDirections.includes(service.direction)
-        //   );
-        // }
-
         this.loading = false;
       });
   }
@@ -503,8 +467,5 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
 
   onDirectionChange($event: Direction[]) {
     this.directionsChanged.emit($event);
-    this.data = this.data.filter(
-      (service) => service.direction && $event.includes(service.direction),
-    );
   }
 }

@@ -264,12 +264,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
   }
   set preSelectedDirections(preSelectedDirections: Direction[]) {
     this._preSelectedDirections = preSelectedDirections;
-    if (
-      !this.isDirectionsDisabled() &&
-      this.directions.length === 0 &&
-      preSelectedDirections.length > 0
-    ) {
+    if (!this.isDirectionsDisabled()) {
       this.directions = preSelectedDirections;
+      this.updateGrid();
     }
   }
 
@@ -302,16 +299,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
     }
 
     this.summaryHeaderData = this.returnSummaryTotal(value);
-
-    console.log("setter----", this._data?.length);
-    // if (
-    //   this.directions.length === 0 &&
-    //   value.some(
-    //     (data) => data.direction && data.direction === Direction.Inbound
-    //   )
-    // ) {
-    //   this.directions = [Direction.Inbound];
-    // }
   }
 
   get data() {
@@ -529,31 +516,33 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
   }
 
   isExternalFilterPresent() {
-    return this.directions.length > 0;
+    return (this.data ?? []).length > 0;
   }
 
   doesExternalFilterPass(node: RowNode<TData>) {
+    if (this.directions.length === 0 && !node.data?.direction) {
+      return true;
+    }
     if (!node.data?.direction) {
       return false;
     }
     return this.directions.includes(node.data?.direction);
   }
 
-  onDirectionsChanged($event: string[]) {
-    this.directions = $event as Direction[];
+  updateGrid() {
     this.onTimeGrid?.gridApi?.onFilterChanged();
     let filteredData = structuredClone(this.data) ?? [];
-    if (this.directions.length > 0) {
-      filteredData =
-        filteredData.filter(
-          (row) => row.direction && this.directions.includes(row.direction),
-        ) ?? [];
-    }
-    console.log("data length----", this.data?.length);
-    console.log("filteredData length----", filteredData.length);
-    console.log("data length222----", this.data?.length);
+    //if (this.directions.length > 0) {
+    filteredData =
+      filteredData.filter(
+        (row) => row.direction && this.directions.includes(row.direction),
+      ) ?? [];
+    //}
     this.summaryHeaderData = this.returnSummaryTotal(filteredData);
-    console.log("this.summaryHeaderData----", this.summaryHeaderData);
+  }
+  onDirectionsChanged($event: string[]) {
+    this.directions = $event as Direction[];
+    this.updateGrid();
     this.directionsChanged.emit(this.directions);
   }
 

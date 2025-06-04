@@ -1409,9 +1409,9 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                 : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
-              direction: (
-                res.direction ?? Direction.Inbound
-              ).toLowerCase() as Direction,
+              direction: res.direction
+                ? (res.direction.toLowerCase() as Direction)
+                : undefined,
               onTimeInSeconds:
                 res.on_time_count == undefined
                   ? undefined

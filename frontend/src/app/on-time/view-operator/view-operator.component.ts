@@ -102,7 +102,6 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
       .pipe(map((paramMap) => paramMap.getAll("direction")))
       .subscribe((directions) => {
         this.preSelectedDirections = directions as Direction[];
-        console.log("from querymap----", this.preSelectedDirections);
       });
   }
 

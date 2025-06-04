@@ -255,8 +255,10 @@ export class StopsGridComponentDisplayComponent {
           columnType: "Camelcase",
           colId: "direction",
           field: "direction",
+          valueGetter: ({ data }: { data: StopPerformance }) =>
+            data.direction ?? "-",
           isHideable: true,
-          isDefaultShown: false,
+          isDefaultShown: true,
           headerName: "Direction",
           sortable: true,
           unSortIcon: true,
@@ -425,9 +427,5 @@ export class StopsGridComponentDisplayComponent {
 
   onDirectionChange($event: Direction[]) {
     this.directionsChanged.emit($event);
-    console.log("grid emit----", $event);
-    // this.data = this.data?.filter(
-    //   (stop) => stop.direction && $event.includes(stop.direction)
-    // );
   }
 }

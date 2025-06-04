@@ -415,7 +415,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     if (adminAreaIds) this.onAdminAreasChanged(adminAreaIds);
     if (serviceIds) this.serviceIds = serviceIds;
     if (operatorIds) this.operatorIds = operatorIds;
-    if (directions) this.directions = directions as Direction[];
+    if (directions && directions.length > 0)
+      this.directions = directions as Direction[];
     if (dayOfWeek) {
       const flags = getDefaultDayOfWeekFlags();
       const days = dayOfWeek.split(",") ?? [];
@@ -961,9 +962,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   onDirectionChange(directions: Direction[]) {
     this.directions = directions;
-    this.filteredStopData = this.backupFilteredStopData.filter(
-      (stop) => stop.direction && directions.includes(stop.direction),
-    );
     this.updateQueryParams(undefined);
   }
 }
