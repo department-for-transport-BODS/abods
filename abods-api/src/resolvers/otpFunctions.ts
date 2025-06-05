@@ -266,12 +266,12 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
     try {
       const { filters } = args.inputs;
       const {
-        lineIds,
         onTimeMaxMinutes,
         onTimeMinMinutes,
         adminAreaIds,
         startTime,
         endTime,
+        operatorIds,
       } = filters || {};
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
@@ -279,9 +279,10 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
       }
 
-      const summaryTable = lineIds
-        ? "timetable_summary_service_tz"
-        : "timetable_summary_operator_t";
+      const summaryTable =
+        operatorIds && operatorIds.length > 0
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
 
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
@@ -1762,6 +1763,7 @@ export const getKyselyFiltersForOTPQuery = (
     lineId,
     dayOfWeekFlags,
     matchType,
+    direction,
   } = filters || {};
   const operatorIds = filters?.operatorIds ?? [];
 
@@ -1817,6 +1819,10 @@ export const getKyselyFiltersForOTPQuery = (
 
   if (lines) {
     query = query.where("noc_and_line_and_servicecode", "in", lines);
+  }
+
+  if (direction) {
+    query = query.where("direction", "in", direction);
   }
 
   return query;

@@ -184,7 +184,7 @@ const column: (
         {
           ...column,
           valueFormatter: ({ value }: { value: number }) =>
-            value.toLocaleString(),
+            value != undefined ? value.toLocaleString() : "-",
           hide: true,
         },
         {

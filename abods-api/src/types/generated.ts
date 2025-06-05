@@ -468,12 +468,6 @@ export type JourneyResult = {
   stops: Array<Stop>;
 };
 
-export enum LineDirection {
-  All = 'All',
-  Inbound = 'Inbound',
-  Outbound = 'Outbound'
-}
-
 export type LineType = {
   __typename?: 'LineType';
   adminAreaIds: Array<Scalars['Int']['output']>;
@@ -745,11 +739,11 @@ export type PerformanceFiltersInputType = {
   addNonTagged?: InputMaybe<Scalars['Boolean']['input']>;
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  direction?: InputMaybe<Array<InputMaybe<Direction>>>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
-  lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
@@ -1270,7 +1264,6 @@ export type ResolversTypes = ResolversObject<{
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
-  LineDirection: ResolverTypeWrapper<Partial<LineDirection>>;
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;

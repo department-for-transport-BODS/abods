@@ -332,7 +332,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "onTimeRatio",
           timeField: "onTimeInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.onTimeInSeconds,
+            data.actualDepartures ? data.onTimeInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.onTime : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.onTimeRatio : undefined,
           headerName: "On time",
           sortable: true,
           unSortIcon: true,
@@ -349,7 +353,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "lateRatio",
           timeField: "lateInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.lateInSeconds,
+            data.actualDepartures ? data.lateInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.late : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.lateRatio : undefined,
           headerName: "Late",
           sortable: true,
           unSortIcon: true,
@@ -366,7 +374,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "earlyRatio",
           timeField: "earlyInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.earlyInSeconds,
+            data.actualDepartures ? data.earlyInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.early : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.earlyRatio : undefined,
           headerName: "Early",
           sortable: true,
           unSortIcon: true,

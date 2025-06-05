@@ -56,4 +56,12 @@ export class PerformanceService {
       ),
     });
   }
+
+  fetchOnTimeOverviewStats(
+    params: PerformanceParams,
+  ): Observable<PunctualityOverview | undefined> {
+    return this.onTimeService
+      .fetchOnTimeStats(params)
+      .pipe(catchError(() => of(undefined)));
+  }
 }

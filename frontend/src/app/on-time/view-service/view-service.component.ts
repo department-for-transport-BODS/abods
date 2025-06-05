@@ -83,6 +83,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
   timingPointsOnly = false;
   minMaxDelay = false;
   preSelectedDirections: Direction[] = [];
+  performanceParams?: PerformanceParams;
 
   constructor(
     private router: Router,
@@ -106,6 +107,8 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
           this.timingPointsOnly = params.filters.timingPointsOnly ?? false;
           this.minMaxDelay =
             !!params.filters.minDelay || !!params.filters.maxDelay;
+          // deep copy
+          this.performanceParams = JSON.parse(JSON.stringify(params));
         }),
         map((params) => removeAdminAreaIds(params)),
         switchMap((params: PerformanceParams) =>
@@ -212,13 +215,28 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
       });
 
     queryParamMap$
-      .pipe(map((paramMap) => paramMap.getAll("direction")))
-      .subscribe((directions) => {
-        this.preSelectedDirections = directions as Direction[];
-        console.log(
-          "this.preSelectedDirections---",
-          this.preSelectedDirections,
-        );
+      .pipe(
+        map((paramMap) => paramMap.getAll("direction")),
+        tap(
+          (directions) =>
+            (this.preSelectedDirections = directions as Direction[]),
+        ),
+        switchMap((directions) => {
+          if (this.performanceParams !== undefined) {
+            this.overview = undefined;
+            this.overviewLoading = true;
+            this.performanceParams.filters.direction =
+              directions as Direction[];
+            return this.performanceService.fetchOnTimeOverviewStats(
+              this.performanceParams,
+            );
+          }
+          return of(null);
+        }),
+      )
+      .subscribe((overview) => {
+        if (overview) this.overview = overview;
+        this.overviewLoading = false;
       });
 
     queryParamMap$

@@ -10,7 +10,7 @@ export class AgGridFormatterService {
 
   percentValueFormatter = ({ value }: { value: number | undefined }) => {
     if (value === undefined) {
-      return "";
+      return "-";
     }
     return this.percent.transform(value, "1.0-1") ?? "";
   };
