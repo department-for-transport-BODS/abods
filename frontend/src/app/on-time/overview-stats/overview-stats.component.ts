@@ -86,7 +86,7 @@ export class OverviewStatsComponent {
     this.helpdeskPanelService.open();
   }
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(

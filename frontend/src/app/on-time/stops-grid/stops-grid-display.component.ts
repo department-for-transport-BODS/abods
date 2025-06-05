@@ -32,7 +32,7 @@ export class StopsGridComponentDisplayComponent {
   @Input() csvFilename: string | undefined;
   @Input() preSelectedDirections: Direction[] = [];
 
-  columnDescriptions: ColumnDescription[] = this.enableDirection()
+  columnDescriptions: ColumnDescription[] = this.isDirectionsDisabled()
     ? [
         {
           title: "NAPTAN",
@@ -410,7 +410,7 @@ export class StopsGridComponentDisplayComponent {
     private config: ConfigService,
   ) {}
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(

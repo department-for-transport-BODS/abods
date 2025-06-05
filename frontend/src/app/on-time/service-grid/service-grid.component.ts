@@ -39,7 +39,7 @@ import { Direction, FeatureFlag } from "../../../generated/graphql";
   standalone: false,
 })
 export class ServiceGridComponent implements OnInit, OnDestroy {
-  columnDescriptions: ColumnDescription[] = this.enableDirection()
+  columnDescriptions: ColumnDescription[] = this.isDirectionsDisabled()
     ? [
         {
           title: "Frequent service",
@@ -450,7 +450,7 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     )}`;
   }
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(

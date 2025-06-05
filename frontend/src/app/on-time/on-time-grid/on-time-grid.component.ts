@@ -2,7 +2,6 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnInit,
   Output,
   ViewChild,
 } from "@angular/core";
@@ -214,12 +213,15 @@ const column: (
   styleUrls: ["./on-time-grid.component.scss"],
   standalone: false,
 })
-export class OnTimeGridComponent<TData extends AbstractPerformance>
-  implements OnInit
-{
+export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
 
-  directionOptions: MultiselectCheckboxOption[] = [];
+  directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction).map(
+    ([key, value]) => ({
+      value: value,
+      label: key,
+    }),
+  );
 
   directions: Direction[] = [];
   private _columnDescriptions: ColumnDescription[] = [];
@@ -298,7 +300,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
       return;
     }
 
-    this.summaryHeaderData = this.returnSummaryTotal(value);
+    this.updateGrid();
   }
 
   get data() {
@@ -346,17 +348,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
     this._mode = Mode.percent;
   }
 
-  ngOnInit(): void {
-    this.directionOptions = Object.entries(Direction).map(([key, value]) => ({
-      value: value,
-      label: key,
-    }));
-
-    if (!this.isDirectionsDisabled()) {
-      this.directions = this.preSelectedDirections;
-    }
-  }
-
   isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
@@ -392,6 +383,11 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
   returnSummaryTotal(
     value: (StopPerformanceGridType | BasePerformance)[],
   ): (BasePerformance | StopPerformanceGridType)[] {
+    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
+
+    if (value.length === 0) {
+      return summaryArray;
+    }
     const early = sumBy(value, "early");
     const late = sumBy(value, "late");
     const onTime = sumBy(value, "onTime");
@@ -447,8 +443,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
       lateInSeconds: lateInSeconds,
     };
 
-    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
-
     if (isStopGrid) {
       const stopGrid = value.filter((val) => this.isGridTypeStop(val));
       const averageScheduled = stopGrid.some(
@@ -494,7 +488,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
       });
     },
   };
-  // autoHeight: true,
 
   defaultColDef: ColDef = {
     resizable: false,
@@ -532,12 +525,10 @@ export class OnTimeGridComponent<TData extends AbstractPerformance>
   updateGrid() {
     this.onTimeGrid?.gridApi?.onFilterChanged();
     let filteredData = structuredClone(this.data) ?? [];
-    //if (this.directions.length > 0) {
     filteredData =
       filteredData.filter(
         (row) => row.direction && this.directions.includes(row.direction),
       ) ?? [];
-    //}
     this.summaryHeaderData = this.returnSummaryTotal(filteredData);
   }
   onDirectionsChanged($event: string[]) {

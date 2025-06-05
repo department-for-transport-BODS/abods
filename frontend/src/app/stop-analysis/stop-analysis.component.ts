@@ -80,7 +80,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
-  directions: Direction[] = [Direction.Inbound];
+  directions: Direction[] = [Direction.Inbound, Direction.Outbound];
 
   map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -243,7 +243,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }),
   );
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -720,7 +720,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: this.enableDirection()
+          averageDelay: this.isDirectionsDisabled()
             ? x.totalDelay / x.completedDepartures || 0
             : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
           total: x.completedDepartures,
