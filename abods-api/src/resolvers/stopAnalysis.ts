@@ -149,7 +149,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
             "n.common_name as stopName",
             "l.name as localityName",
             "a.name as adminAreaName",
-            //"t.direction as direction",
           ],
     )
     .select((eb) => [
