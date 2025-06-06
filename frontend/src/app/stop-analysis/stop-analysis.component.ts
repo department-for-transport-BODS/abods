@@ -80,6 +80,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
+  directions: Direction[] = [Direction.Inbound, Direction.Outbound];
 
   map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -132,6 +133,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   visibleBounds = this.toBoundingBoxInputType(this.initialBounds);
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
+  backupFilteredStopData: StopPerformance[] = [];
   selectedStop: StopStatistics | undefined;
   selectedCluster:
     | Record<keyof typeof this.clusterProperties | "point_count", number>
@@ -241,7 +243,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }),
   );
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -372,6 +374,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         matchType: this.matchType,
         startTime: this.refinedFilters.startTime,
         endTime: this.refinedFilters.endTime,
+        direction: this.directions,
       },
       queryParamsHandling: "merge",
     };
@@ -402,6 +405,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     const maxLatitude = params.get("maxLatitude");
     const dayOfWeek = params.get("dayOfWeek");
     const stopType = params.get("stopType");
+    const directions = params.getAll("direction");
     if (from) this.from = DateTime.fromISO(from);
     if (to) this.to = DateTime.fromISO(to);
     if (stopType) this.stopType = stopType as StopTypeOption;
@@ -411,6 +415,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     if (adminAreaIds) this.onAdminAreasChanged(adminAreaIds);
     if (serviceIds) this.serviceIds = serviceIds;
     if (operatorIds) this.operatorIds = operatorIds;
+    if (directions && directions.length > 0)
+      this.directions = directions as Direction[];
     if (dayOfWeek) {
       const flags = getDefaultDayOfWeekFlags();
       const days = dayOfWeek.split(",") ?? [];
@@ -714,7 +720,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: this.enableDirection()
+          averageDelay: this.isDirectionsDisabled()
             ? x.totalDelay / x.completedDepartures || 0
             : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
           total: x.completedDepartures,
@@ -747,6 +753,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         }),
       )
       .sort((a, b) => a.stopInfo.stopName.localeCompare(b.stopInfo.stopName));
+
+    this.backupFilteredStopData = this.filteredStopData;
 
     this.stopPoints = {
       type: "FeatureCollection",
@@ -950,5 +958,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   destroyFilterPanel() {
     this.panelService.destroy();
+  }
+
+  onDirectionChange(directions: Direction[]) {
+    this.directions = directions;
+    this.updateQueryParams(undefined);
   }
 }

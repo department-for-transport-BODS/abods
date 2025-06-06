@@ -1,4 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { ICellRendererParams } from "ag-grid-community";
 import { DateTime } from "luxon";
 import { of, ReplaySubject, Subject } from "rxjs";
@@ -13,7 +20,7 @@ import { EmptyCellComponent } from "../../shared/components/ag-grid/empty-cell/e
 import { ActivatedRoute } from "@angular/router";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
-import { FeatureFlag } from "../../../generated/graphql";
+import { Direction, FeatureFlag } from "../../../generated/graphql";
 
 @Component({
   selector: "app-service-grid",
@@ -26,11 +33,13 @@ import { FeatureFlag } from "../../../generated/graphql";
     [csvFilename]="csvFilename"
     [paginate]="true"
     [showFilter]="true"
+    [preSelectedDirections]="preSelectedDirections"
+    (directionsChanged)="onDirectionChange($event)"
   ></app-on-time-grid>`,
   standalone: false,
 })
 export class ServiceGridComponent implements OnInit, OnDestroy {
-  columnDescriptions: ColumnDescription[] = this.enableDirection()
+  columnDescriptions: ColumnDescription[] = this.isDirectionsDisabled()
     ? [
         {
           title: "Frequent service",
@@ -239,7 +248,12 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
             routerLinkGetter: (params: ICellRendererParams) => [
               params.data.lineId,
             ],
-            queryParamsHandling: "preserve",
+            queryParamsGetter: (params: ICellRendererParams) => {
+              return {
+                direction: params.data.direction,
+              };
+            },
+            queryParamsHandling: "merge",
           },
           cellRendererSelector: (params) => {
             if (params.node.rowPinned) {
@@ -255,12 +269,14 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
         },
         {
           title: "Direction",
-          columnType: "Normal",
+          columnType: "Camelcase",
           colId: "direction",
           field: "direction",
           isHideable: true,
           isDefaultShown: true,
           headerName: "Direction",
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.direction ?? "-",
           sortable: true,
           unSortIcon: true,
           maxWidth: 130,
@@ -316,7 +332,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "onTimeRatio",
           timeField: "onTimeInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.onTimeInSeconds,
+            data.actualDepartures ? data.onTimeInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.onTime : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.onTimeRatio : undefined,
           headerName: "On time",
           sortable: true,
           unSortIcon: true,
@@ -333,7 +353,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "lateRatio",
           timeField: "lateInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.lateInSeconds,
+            data.actualDepartures ? data.lateInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.late : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.lateRatio : undefined,
           headerName: "Late",
           sortable: true,
           unSortIcon: true,
@@ -350,7 +374,11 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           pctField: "earlyRatio",
           timeField: "earlyInMins",
           timeValueGetter: ({ data }: { data: ServicePerformance }) =>
-            data.earlyInSeconds,
+            data.actualDepartures ? data.earlyInSeconds : undefined,
+          valueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.early : undefined,
+          pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+            data.actualDepartures ? data.earlyRatio : undefined,
           headerName: "Early",
           sortable: true,
           unSortIcon: true,
@@ -367,6 +395,10 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
   csvFilename = "Service_Performance";
 
   data: ServicePerformance[] = [];
+  backupData: ServicePerformance[] = [];
+
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
+  @Input() preSelectedDirections: Direction[] = [];
 
   @Input()
   set params(params: PerformanceParams | null) {
@@ -411,6 +443,8 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
             { numeric: true },
           ),
         );
+
+        this.backupData = this.data;
         this.loading = false;
       });
   }
@@ -428,7 +462,7 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     )}`;
   }
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -441,5 +475,9 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
       });
 
     return isDirectionsDisabled;
+  }
+
+  onDirectionChange($event: Direction[]) {
+    this.directionsChanged.emit($event);
   }
 }

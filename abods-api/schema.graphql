@@ -676,7 +676,7 @@ input PerformanceFiltersInputType {
   excludedDates: [Date!]
   excludeItoLineId: String
   granularity: Granularity
-  lineDirection: LineDirection
+  direction: [Direction]
   lineIds: [String!]
   maxDelay: Int
   minDelay: Int
@@ -699,17 +699,9 @@ enum Granularity {
   month
 }
 
-enum LineDirection {
-  All
-  Inbound
-  Outbound
-}
-
 enum Direction {
   inbound
   outbound
-  clockwise
-  anticlockwise
 }
 
 enum StopsSegment {

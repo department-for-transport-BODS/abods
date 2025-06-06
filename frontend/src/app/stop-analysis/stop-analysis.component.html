@@ -392,7 +392,9 @@
       [loading]="isLoading"
       [data]="filteredStopData"
       [paginate]="true"
+      [preSelectedDirections]="directions"
       (stopNameClicked)="onTableStopNameClicked($event)"
+      (directionsChanged)="onDirectionChange($event)"
     />
   </ng-container>
 </app-page>

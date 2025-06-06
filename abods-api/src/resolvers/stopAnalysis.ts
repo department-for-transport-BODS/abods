@@ -149,7 +149,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
             "n.common_name as stopName",
             "l.name as localityName",
             "a.name as adminAreaName",
-            "t.direction as direction",
           ],
     )
     .select((eb) => [
@@ -194,6 +193,21 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         "earlyInSeconds",
       ),
     ])
+    .select((eb) =>
+      isDirectionsDisabled
+        ? []
+        : [
+            eb
+              .case()
+              .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "anticlockwise")
+              .then("inbound")
+              .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "clockwise")
+              .then("outbound")
+              .else(eb.ref("t.direction"))
+              .end()
+              .as("direction"),
+          ],
+    )
     .execute();
 };
 
