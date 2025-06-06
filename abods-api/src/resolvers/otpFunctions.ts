@@ -1054,7 +1054,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
                     context.kysely.fn
                       .avg("diff_sched_time_to_stop")
@@ -1080,7 +1079,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
                     context.kysely.fn
                       .avg("avg_time_difference")
@@ -1099,6 +1097,23 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                       .as("diff_actual_time_to_stop_timing_point"),
                   ],
             )
+            .select((eb) => [
+              sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
             .select((eb) =>
               isDirectionsDisabled
                 ? []
@@ -1122,20 +1137,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                       .as("direction"),
                   ],
             )
-            .select((eb) => [
-              sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
-                "average_delay",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
-                "on_time_in_seconds",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
-                "late_in_seconds",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
-                "early_in_seconds",
-              ),
-            ])
             .groupBy(
               isDirectionsDisabled
                 ? ["stop_id", "common_name", "is_timing_point", "stop_index"]
@@ -1320,7 +1321,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
@@ -1334,13 +1334,29 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
                   ],
             )
+            .select((eb) => [
+              sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
             .select((eb) =>
               isDirectionsDisabled
                 ? []
@@ -1364,20 +1380,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                       .as("direction"),
                   ],
             )
-            .select((eb) => [
-              sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
-                "average_delay",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
-                "on_time_in_seconds",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
-                "late_in_seconds",
-              ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
-                "early_in_seconds",
-              ),
-            ])
             .groupBy(
               isDirectionsDisabled
                 ? ["noc_and_line_and_servicecode", "line_name"]
