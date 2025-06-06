@@ -1,7 +1,15 @@
 import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 import { of, ReplaySubject, Subject } from "rxjs";
-import { delay, filter, map, switchMap, takeUntil, tap } from "rxjs/operators";
+import {
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from "rxjs/operators";
 import {
   Direction,
   FrequentServiceInfoType,
@@ -13,6 +21,7 @@ import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { OperatorService } from "../../shared/services/operator.service";
+import { isEqual } from "lodash-es";
 
 @Component({
   templateUrl: "view-operator.component.html",
@@ -72,7 +81,13 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
           filters: { ...params.filters, direction: this.preSelectedDirections },
         })),
         switchMap((params: PerformanceParams) =>
-          this.performanceService.fetchOverviewStats(params),
+          this.preSelectedDirections && this.preSelectedDirections.length > 0
+            ? this.performanceService.fetchOverviewStats(params)
+            : this.performanceService
+                .fetchHeadwayOverviewStats(params)
+                .pipe(
+                  map((headway) => ({ onTime: undefined, headway: headway })),
+                ),
         ),
         takeUntil(this.destroy$),
       )
@@ -112,14 +127,19 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
     this.route.queryParamMap
       .pipe(
         map((paramMap) => paramMap.getAll("direction")),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         tap(
           (directions) =>
             (this.preSelectedDirections = directions as Direction[]),
         ),
         switchMap((directions) => {
-          if (this.performanceParams !== undefined) {
-            this.overview = undefined;
-            this.overviewLoading = true;
+          this.overview = undefined;
+          this.overviewLoading = true;
+          if (
+            this.performanceParams !== undefined &&
+            directions &&
+            directions.length > 0
+          ) {
             this.performanceParams.filters.direction =
               directions as Direction[];
             return this.performanceService.fetchOnTimeOverviewStats(

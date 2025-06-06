@@ -282,6 +282,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
 
       const inputDirections = Array.isArray(direction) && direction.length > 0;
 
+      // operatorIds is never null for service and stops summary
       if (operatorIds && !isDirectionsDisabled && !inputDirections) {
         return null;
       }

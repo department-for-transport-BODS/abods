@@ -35,7 +35,7 @@ import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { nonNullOrUndefined } from "../../shared/rxjs-operators";
 import { OperatorService } from "../../shared/services/operator.service";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, isEqual } from "lodash-es";
 import { HeadwayService } from "../headway.service";
 
 export const removeAdminAreaIds = (params: PerformanceParams) => {
@@ -115,7 +115,13 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
           filters: { ...params.filters, direction: this.preSelectedDirections },
         })),
         switchMap((params: PerformanceParams) =>
-          this.performanceService.fetchOverviewStats(params),
+          this.preSelectedDirections && this.preSelectedDirections.length > 0
+            ? this.performanceService.fetchOverviewStats(params)
+            : this.performanceService
+                .fetchHeadwayOverviewStats(params)
+                .pipe(
+                  map((headway) => ({ onTime: undefined, headway: headway })),
+                ),
         ),
         takeUntil(this.destroy$),
       )
@@ -220,14 +226,19 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
     queryParamMap$
       .pipe(
         map((paramMap) => paramMap.getAll("direction")),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         tap(
           (directions) =>
             (this.preSelectedDirections = directions as Direction[]),
         ),
         switchMap((directions) => {
-          if (this.performanceParams !== undefined) {
-            this.overview = undefined;
-            this.overviewLoading = true;
+          this.overview = undefined;
+          this.overviewLoading = true;
+          if (
+            this.performanceParams !== undefined &&
+            directions &&
+            directions.length > 0
+          ) {
             this.performanceParams.filters.direction =
               directions as Direction[];
             return this.performanceService.fetchOnTimeOverviewStats(

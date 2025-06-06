@@ -64,4 +64,12 @@ export class PerformanceService {
       .fetchOnTimeStats(params)
       .pipe(catchError(() => of(undefined)));
   }
+
+  fetchHeadwayOverviewStats(
+    params: PerformanceParams,
+  ): Observable<HeadwayOverviewType | undefined> {
+    return this.headwayService
+      .fetchOverview(params)
+      .pipe(catchError(() => of(undefined)));
+  }
 }

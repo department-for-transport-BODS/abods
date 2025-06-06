@@ -360,7 +360,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
         isDirectionsDisabled = value;
       });
 
-    console.log("isDirectionsDisabled---", isDirectionsDisabled);
     return isDirectionsDisabled;
   }
   sumByOrNull<T>(
