@@ -107,10 +107,13 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
           this.timingPointsOnly = params.filters.timingPointsOnly ?? false;
           this.minMaxDelay =
             !!params.filters.minDelay || !!params.filters.maxDelay;
-          // deep copy
           this.performanceParams = JSON.parse(JSON.stringify(params));
         }),
         map((params) => removeAdminAreaIds(params)),
+        map((params: PerformanceParams) => ({
+          ...params,
+          filters: { ...params.filters, direction: this.preSelectedDirections },
+        })),
         switchMap((params: PerformanceParams) =>
           this.performanceService.fetchOverviewStats(params),
         ),

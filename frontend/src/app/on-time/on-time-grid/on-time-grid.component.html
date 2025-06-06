@@ -6,11 +6,18 @@
     <div
       [ngClass]="
         isDirectionsDisabled() === true
-          ? 'on-time-grid__controls'
-          : 'on-time-grid__disable-direction-controls'
+          ? 'on-time-grid__disable-direction-controls'
+          : 'on-time-grid__controls'
       "
     >
-      <div *ngIf="showFilter" class="on-time-grid__controls--filter">
+      <div
+        *ngIf="showFilter"
+        [ngClass]="
+          isDirectionsDisabled() === true
+            ? 'on-time-grid__disable-direction-controls--filter'
+            : 'on-time-grid__controls--filter'
+        "
+      >
         <gds-text-input
           [label]="'Search for a ' + noun"
           name="filter"

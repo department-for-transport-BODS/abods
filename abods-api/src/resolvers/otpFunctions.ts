@@ -266,23 +266,41 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
     try {
       const { filters } = args.inputs;
       const {
+        lineIds,
         onTimeMaxMinutes,
         onTimeMinMinutes,
         adminAreaIds,
         startTime,
         endTime,
         operatorIds,
+        direction,
       } = filters || {};
+
+      const isDirectionsDisabled =
+        process.env.ABODS_FLAG_DirectionsDisabled &&
+        process.env.ABODS_FLAG_DirectionsDisabled === "true";
+
+      const inputDirections = Array.isArray(direction) && direction.length > 0;
+
+      if (operatorIds && !isDirectionsDisabled && !inputDirections) {
+        return null;
+      }
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
       }
 
-      const summaryTable =
+      let summaryTable: OTPSummaryTables =
         operatorIds && operatorIds.length > 0
           ? "timetable_summary_service_tz"
           : "timetable_summary_operator_t";
+
+      if (isDirectionsDisabled) {
+        summaryTable = lineIds
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
+      }
 
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
@@ -290,6 +308,10 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         args.inputs,
         userOperatorIds,
       );
+
+      if (Array.isArray(direction) && direction.length > 0) {
+        summarySubQuery = summarySubQuery.where("direction", "in", direction);
+      }
 
       summarySubQuery = kyselyFilterForAdminIds(
         summarySubQuery,
@@ -1763,7 +1785,6 @@ export const getKyselyFiltersForOTPQuery = (
     lineId,
     dayOfWeekFlags,
     matchType,
-    direction,
   } = filters || {};
   const operatorIds = filters?.operatorIds ?? [];
 
@@ -1819,10 +1840,6 @@ export const getKyselyFiltersForOTPQuery = (
 
   if (lines) {
     query = query.where("noc_and_line_and_servicecode", "in", lines);
-  }
-
-  if (direction) {
-    query = query.where("direction", "in", direction);
   }
 
   return query;
