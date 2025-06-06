@@ -56,4 +56,20 @@ export class PerformanceService {
       ),
     });
   }
+
+  fetchOnTimeOverviewStats(
+    params: PerformanceParams,
+  ): Observable<PunctualityOverview | undefined> {
+    return this.onTimeService
+      .fetchOnTimeStats(params)
+      .pipe(catchError(() => of(undefined)));
+  }
+
+  fetchHeadwayOverviewStats(
+    params: PerformanceParams,
+  ): Observable<HeadwayOverviewType | undefined> {
+    return this.headwayService
+      .fetchOverview(params)
+      .pipe(catchError(() => of(undefined)));
+  }
 }

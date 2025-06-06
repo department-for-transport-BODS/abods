@@ -68,6 +68,7 @@ query onTimeServicePerformanceList($params: PerformanceInputType!) {
       onTime
       late
       averageDelay
+      countDelayed
       scheduledDepartures
       actualDepartures
       direction
@@ -102,6 +103,7 @@ query onTimeStopPerformanceList($params: PerformanceInputType!) {
       onTime
       late
       averageDelay
+      countDelayed
       scheduledDepartures
       actualDepartures
       timingPoint

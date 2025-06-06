@@ -24,11 +24,13 @@ import {
   map as _map,
   forEach as _forEach,
   sumBy,
+  sum,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import {
   Direction,
+  FeatureFlag,
   Maybe,
   Scalars,
   ServicePerformanceType,
@@ -36,6 +38,9 @@ import {
 } from "../../../generated/graphql";
 import { OnTimeRatios } from "../on-time.service";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { map } from "rxjs/operators";
 
 type ColumnBase = {
   title: string;
@@ -46,7 +51,7 @@ type ColumnBase = {
 
 type WithPctColumn = {
   columnType: "WithPct";
-  isHideable: true;
+  isHideable: boolean;
   pctField?: string;
   pctValueGetter?: ((params: ValueGetterParams) => any) | string;
 } & ColumnBase;
@@ -72,12 +77,13 @@ type NormalColumn = {
 
 type CamelcaseColumn = {
   columnType: "Camelcase";
-  isHideable: true;
+  isHideable: boolean;
 } & ColumnBase;
 
 type AvDelayColumn = {
   columnType: "AvDelay";
   isHideable: true;
+  positiveOnly?: true;
 } & ColumnBase;
 
 export type ColumnDescription =
@@ -104,6 +110,7 @@ export type BasePerformance = IPunctualityType &
     | "onTimeInSeconds"
     | "lateInSeconds"
     | "earlyInSeconds"
+    | "countDelayed"
   > &
   // direction is partial as its not displayed in the total data or the table header
   Partial<Pick<ServicePerformanceType & StopPerformanceType, "direction">>;
@@ -147,7 +154,11 @@ const column: (
       return [
         {
           ...column,
-          valueFormatter: formatter.averageDelayValueFormatter,
+          valueFormatter: ({ value }: { value: number | undefined }) =>
+            formatter.averageDelayValueFormatter(
+              { value },
+              column.positiveOnly,
+            ),
           hide: !column.isDefaultShown,
         },
       ];
@@ -173,7 +184,7 @@ const column: (
         {
           ...column,
           valueFormatter: ({ value }: { value: number }) =>
-            value.toLocaleString(),
+            value != undefined ? value.toLocaleString() : "-",
           hide: true,
         },
         {
@@ -204,10 +215,11 @@ const column: (
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
-  directionOptions: MultiselectCheckboxOption[] = Object.keys(Direction).map(
-    (key) => ({
+
+  directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction).map(
+    ([key, value]) => ({
+      value: value,
       label: key,
-      value: Direction[key as keyof typeof Direction],
     }),
   );
 
@@ -248,6 +260,18 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     });
   }
 
+  private _preSelectedDirections: Direction[] = [];
+  @Input() get preSelectedDirections(): Direction[] {
+    return this._preSelectedDirections;
+  }
+  set preSelectedDirections(preSelectedDirections: Direction[]) {
+    this._preSelectedDirections = preSelectedDirections;
+    if (!this.isDirectionsDisabled()) {
+      this.directions = preSelectedDirections;
+      this.updateGrid();
+    }
+  }
+
   private _noun?: string;
   @Input() get noun(): string {
     return this._noun ?? "";
@@ -276,7 +300,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       return;
     }
 
-    this.summaryHeaderData = this.returnSummaryTotal(value);
+    this.updateGrid();
   }
 
   get data() {
@@ -289,6 +313,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
   @Output() gridReady = new EventEmitter();
   @Output() cellClicked = new EventEmitter<{ column: string; data: TData }>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   get mode() {
     return this._mode;
@@ -317,10 +342,26 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     private formatter: AgGridFormatterService,
     private ngxSmartModalService: NgxSmartModalService,
     private formBuilder: FormBuilder,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
   ) {
     this._mode = Mode.percent;
   }
 
+  isDirectionsDisabled() {
+    let isDirectionsDisabled = false;
+    this.authUserService.authenticatedUser$
+      .pipe(
+        map((info) =>
+          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
+        ),
+      )
+      .subscribe((value) => {
+        isDirectionsDisabled = value;
+      });
+
+    return isDirectionsDisabled;
+  }
   sumByOrNull<T>(
     array: T[],
     iteratee: (item: T) => number | null | undefined,
@@ -342,15 +383,31 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   returnSummaryTotal(
     value: (StopPerformanceGridType | BasePerformance)[],
   ): (BasePerformance | StopPerformanceGridType)[] {
+    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
+
+    if (value.length === 0) {
+      return summaryArray;
+    }
     const early = sumBy(value, "early");
     const late = sumBy(value, "late");
     const onTime = sumBy(value, "onTime");
     const total = sumBy(value, "total");
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
+    const totalDelay = sum(
+      value.map((stop) => stop.actualDepartures * (stop.averageDelay ?? 0)),
+    );
 
-    const averageDelay = value.some((val) => val.averageDelay != undefined)
-      ? sumBy(value, "averageDelay") / value.length
+    const valueWithDelay = value.filter(
+      (data) => data.averageDelay != undefined,
+    );
+    const averageDelay = valueWithDelay.some(
+      (val) => val.averageDelay != undefined && val.countDelayed != undefined,
+    )
+      ? sumBy(
+          value,
+          (item) => (item.averageDelay ?? 0) * (item.countDelayed ?? 0),
+        ) / sumBy(value, "countDelayed")
       : undefined;
     const onTimeInSeconds = value.some(
       (val) => val.onTimeInSeconds != undefined,
@@ -375,7 +432,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: averageDelay,
+      averageDelay: this.isDirectionsDisabled()
+        ? totalDelay / actual || 0
+        : averageDelay,
       noData: actual - scheduled,
       completedRatio: actual / total || 0,
       total: total,
@@ -383,8 +442,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       earlyInSeconds: earlyInSeconds,
       lateInSeconds: lateInSeconds,
     };
-
-    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
 
     if (isStopGrid) {
       const stopGrid = value.filter((val) => this.isGridTypeStop(val));
@@ -431,7 +488,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       });
     },
   };
-  // autoHeight: true,
 
   defaultColDef: ColDef = {
     resizable: false,
@@ -453,19 +509,32 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   }
 
   isExternalFilterPresent() {
-    return this.directions.length > 0;
+    return (this.data ?? []).length > 0;
   }
 
   doesExternalFilterPass(node: RowNode<TData>) {
+    if (this.directions.length === 0 && !node.data?.direction) {
+      return true;
+    }
     if (!node.data?.direction) {
       return false;
     }
     return this.directions.includes(node.data?.direction);
   }
 
+  updateGrid() {
+    this.onTimeGrid?.gridApi?.onFilterChanged();
+    let filteredData = structuredClone(this.data) ?? [];
+    filteredData =
+      filteredData.filter(
+        (row) => row.direction && this.directions.includes(row.direction),
+      ) ?? [];
+    this.summaryHeaderData = this.returnSummaryTotal(filteredData);
+  }
   onDirectionsChanged($event: string[]) {
     this.directions = $event as Direction[];
-    this.onTimeGrid?.gridApi?.onFilterChanged();
+    this.updateGrid();
+    this.directionsChanged.emit(this.directions);
   }
 
   columnsChanged(): void {

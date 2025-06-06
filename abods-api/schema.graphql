@@ -505,6 +505,7 @@ enum FeatureFlag {
   ServiceMonitoring
   DataMonitoring
   StopAnalysis
+  DirectionsDisabled
 }
 
 type UserType {
@@ -594,6 +595,7 @@ type PunctualityTimeSeriesType {
 type ServicePerformanceType {
   actualDepartures: Int!
   averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
@@ -622,6 +624,7 @@ type ServicePunctualityType {
 type StopPerformanceType {
   actualDepartures: Int!
   averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
@@ -673,7 +676,7 @@ input PerformanceFiltersInputType {
   excludedDates: [Date!]
   excludeItoLineId: String
   granularity: Granularity
-  lineDirection: LineDirection
+  direction: [Direction]
   lineIds: [String!]
   maxDelay: Int
   minDelay: Int
@@ -696,17 +699,9 @@ enum Granularity {
   month
 }
 
-enum LineDirection {
-  All
-  Inbound
-  Outbound
-}
-
 enum Direction {
   inbound
   outbound
-  clockwise
-  anticlockwise
 }
 
 enum StopsSegment {

@@ -271,8 +271,6 @@ export type DelayFrequencyType = {
 };
 
 export enum Direction {
-  Anticlockwise = 'anticlockwise',
-  Clockwise = 'clockwise',
   Inbound = 'inbound',
   Outbound = 'outbound'
 }
@@ -302,6 +300,7 @@ export type EventType = {
 
 export enum FeatureFlag {
   DataMonitoring = 'DataMonitoring',
+  DirectionsDisabled = 'DirectionsDisabled',
   ServiceMonitoring = 'ServiceMonitoring',
   StopAnalysis = 'StopAnalysis'
 }
@@ -468,12 +467,6 @@ export type JourneyResult = {
   avls: Array<AvlPoint>;
   stops: Array<Stop>;
 };
-
-export enum LineDirection {
-  All = 'All',
-  Inbound = 'Inbound',
-  Outbound = 'Outbound'
-}
 
 export type LineType = {
   __typename?: 'LineType';
@@ -746,11 +739,11 @@ export type PerformanceFiltersInputType = {
   addNonTagged?: InputMaybe<Scalars['Boolean']['input']>;
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  direction?: InputMaybe<Array<InputMaybe<Direction>>>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
-  lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
@@ -970,6 +963,7 @@ export type ServicePerformanceType = {
   __typename?: 'ServicePerformanceType';
   actualDepartures: Scalars['Int']['output'];
   averageDelay?: Maybe<Scalars['Float']['output']>;
+  countDelayed?: Maybe<Scalars['Int']['output']>;
   direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
   earlyInSeconds?: Maybe<Scalars['Float']['output']>;
@@ -1051,6 +1045,7 @@ export type StopPerformanceType = {
   averageActual?: Maybe<Scalars['Float']['output']>;
   averageDelay?: Maybe<Scalars['Float']['output']>;
   averageScheduled?: Maybe<Scalars['Float']['output']>;
+  countDelayed?: Maybe<Scalars['Int']['output']>;
   direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
   earlyInSeconds?: Maybe<Scalars['Float']['output']>;
@@ -1269,7 +1264,6 @@ export type ResolversTypes = ResolversObject<{
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
-  LineDirection: ResolverTypeWrapper<Partial<LineDirection>>;
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;
@@ -1891,6 +1885,7 @@ export type ServicePatternTypeResolvers<ContextType = RequestContext, ParentType
 export type ServicePerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePerformanceType'] = ResolversParentTypes['ServicePerformanceType']> = ResolversObject<{
   actualDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -1946,6 +1941,7 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
   averageActual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   averageScheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
