@@ -1478,9 +1478,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               direction: res.direction
                 ? (res.direction.toLowerCase() as Direction)
                 : undefined,
-              direction: res.direction
-                ? (res.direction.toLowerCase() as Direction)
-                : undefined,
               onTimeInSeconds:
                 res.on_time_count == undefined
                   ? undefined
