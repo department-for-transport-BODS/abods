@@ -700,6 +700,7 @@ enum Granularity {
 }
 
 enum Direction {
+  all
   inbound
   outbound
 }

@@ -25,6 +25,7 @@ import {
   forEach as _forEach,
   sumBy,
   sum,
+  isEqual,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
@@ -216,12 +217,12 @@ const column: (
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
 
-  directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction).map(
-    ([key, value]) => ({
+  directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction)
+    .filter(([_, value]) => value !== Direction.All)
+    .map(([key, value]) => ({
       value: value,
       label: key,
-    }),
-  );
+    }));
 
   directions: Direction[] = [];
   private _columnDescriptions: ColumnDescription[] = [];
@@ -509,7 +510,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   }
 
   isExternalFilterPresent() {
-    return (this.data ?? []).length > 0;
+    return (
+      (this.data ?? []).length > 0 && !isEqual(this.directions, [Direction.All])
+    );
   }
 
   doesExternalFilterPass(node: RowNode<TData>) {
@@ -525,15 +528,32 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   updateGrid() {
     this.onTimeGrid?.gridApi?.onFilterChanged();
     let filteredData = structuredClone(this.data) ?? [];
-    filteredData =
-      filteredData.filter(
-        (row) => row.direction && this.directions.includes(row.direction),
-      ) ?? [];
+    if (
+      this.directions.length > 0 &&
+      !this.directions.includes(Direction.All)
+    ) {
+      filteredData =
+        filteredData.filter(
+          (row) => row.direction && this.directions.includes(row.direction),
+        ) ?? [];
+    }
+
     this.summaryHeaderData = this.returnSummaryTotal(filteredData);
   }
+
   onDirectionsChanged($event: string[]) {
     this.directions = $event as Direction[];
-    this.updateGrid();
+
+    if (this.directions.length > 0) {
+      this.directions = this.directions.filter(
+        (value) => value !== Direction.All,
+      );
+      this.updateGrid();
+    }
+
+    if (this.directions.length === 0) {
+      this.directions = [Direction.All];
+    }
     this.directionsChanged.emit(this.directions);
   }
 

@@ -156,7 +156,7 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
             queryParamsGetter: (params: ICellRendererParams) => {
               return {
                 adminAreaId: params.data.adminAreaIds,
-                direction: [Direction.Inbound, Direction.Outbound],
+                direction: [Direction.All],
               };
             },
             bold: true,

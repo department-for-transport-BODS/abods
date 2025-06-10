@@ -280,13 +280,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         process.env.ABODS_FLAG_DirectionsDisabled &&
         process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
-      const inputDirections = Array.isArray(direction) && direction.length > 0;
-
-      // operatorIds is never null for service and stops summary
-      if (operatorIds && !isDirectionsDisabled && !inputDirections) {
-        return null;
-      }
-
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
@@ -310,7 +303,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
-      if (Array.isArray(direction) && direction.length > 0) {
+      if (Array.isArray(direction) && !direction.includes(Direction.All)) {
         summarySubQuery = summarySubQuery.where("direction", "in", direction);
       }
 
@@ -1312,6 +1305,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select(
+              // remove selecting directions when all directions is passed
               isDirectionsDisabled
                 ? [
                     "noc_and_line_and_servicecode",
