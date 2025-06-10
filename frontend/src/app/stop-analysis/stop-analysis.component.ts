@@ -988,19 +988,19 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           let earlyInSeconds = undefined;
           if (acc.earlyInSeconds || cur.earlyInSeconds) {
             earlyInSeconds =
-              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0) / 2;
+              ((acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0)) / 2;
           }
 
           let lateInSeconds = undefined;
           if (acc.lateInSeconds || cur.lateInSeconds) {
             lateInSeconds =
-              (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0) / 2;
+              ((acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0)) / 2;
           }
 
           let onTimeInSeconds = undefined;
           if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
             onTimeInSeconds =
-              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0) / 2;
+              ((acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0)) / 2;
           }
 
           let averageDelay = undefined;
@@ -1077,18 +1077,25 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }
   }
 
+  assignStopData() {
+    if (
+      this.directions.length === 0 ||
+      this.directions.includes(Direction.All)
+    ) {
+      this.calculateStopData();
+      this.rawStopData = this.aggregatedStopData;
+      return;
+    }
+    this.rawStopData = this.backupRawStopData.filter(
+      (stop) =>
+        stop.direction && this.directions.includes(stop.direction as Direction),
+    );
+  }
+
   onDirectionChange(directions: Direction[]) {
     this.directions = directions;
     this.updateQueryParams(undefined);
-    if (directions.length === 0 || directions.includes(Direction.All)) {
-      this.calculateStopData();
-      this.rawStopData = this.aggregatedStopData;
-    } else {
-      this.rawStopData = this.backupRawStopData.filter(
-        (stop) =>
-          stop.direction && directions.includes(stop.direction as Direction),
-      );
-    }
+    this.assignStopData();
     this.processStopData(this.visibleBounds);
   }
 }

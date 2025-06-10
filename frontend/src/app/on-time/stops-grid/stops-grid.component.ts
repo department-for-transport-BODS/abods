@@ -92,19 +92,19 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
           let earlyInSeconds = undefined;
           if (acc.earlyInSeconds || cur.earlyInSeconds) {
             earlyInSeconds =
-              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0) / 2;
+              ((acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0)) / 2;
           }
 
           let lateInSeconds = undefined;
           if (acc.lateInSeconds || cur.lateInSeconds) {
             lateInSeconds =
-              (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0) / 2;
+              ((acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0)) / 2;
           }
 
           let onTimeInSeconds = undefined;
           if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
             onTimeInSeconds =
-              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0) / 2;
+              ((acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0)) / 2;
           }
 
           const total = (acc.total ?? 0) + cur.total;
