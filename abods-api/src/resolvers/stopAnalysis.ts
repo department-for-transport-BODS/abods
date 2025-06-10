@@ -156,7 +156,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("t.early_count").as("early"),
       eb.fn.sum<number>("t.late_count").as("late"),
       eb.fn.sum<number>("t.on_time_count").as("onTime"),
-      eb.fn.sum<number>("t.scheduled").as("scheduledDepartures"),
       eb.fn.sum<number>("t.completed").as("completedDepartures"),
       eb.fn.sum<number>("t.avg_time_difference").as("totalDelay"),
       eb.fn.sum<number>("t.count_delayed").as("countDelayed"),
@@ -191,6 +190,9 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         number | null
       >`SUM(${eb.ref("t.avg_time_difference")}  * ${eb.ref("t.early_count")}) FILTER (WHERE ${eb.ref("t.early_count")} > 0) * 60`.as(
         "earlyInSeconds",
+      ),
+      sql<number>`SUM(${eb.ref("t.scheduled")}) FILTER (WHERE ${eb.ref("t.estimated")} = false)`.as(
+        "scheduledDepartures",
       ),
     ])
     .select((eb) =>

@@ -540,7 +540,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
     this.summaryHeaderData = this.returnSummaryTotal(filteredData);
   }
-
   onDirectionsChanged($event: string[]) {
     this.directions = $event as Direction[];
 

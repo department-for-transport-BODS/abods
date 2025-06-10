@@ -568,10 +568,7 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           ),
         );
 
-        console.log("refresh----", this.aggDataPerService.length);
         this.backupData = this.data;
-        console.log("data----", this.data.length);
-        console.log("backupData----", this.backupData.length);
         if (this.preSelectedDirections.includes(Direction.All)) {
           this.calculateInputData();
           this.data = this.aggDataPerService;
