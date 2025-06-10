@@ -988,19 +988,18 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           let earlyInSeconds = undefined;
           if (acc.earlyInSeconds || cur.earlyInSeconds) {
             earlyInSeconds =
-              ((acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0)) / 2;
+              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0);
           }
 
           let lateInSeconds = undefined;
           if (acc.lateInSeconds || cur.lateInSeconds) {
-            lateInSeconds =
-              ((acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0)) / 2;
+            lateInSeconds = (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0);
           }
 
           let onTimeInSeconds = undefined;
           if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
             onTimeInSeconds =
-              ((acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0)) / 2;
+              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0);
           }
 
           let averageDelay = undefined;
@@ -1018,13 +1017,12 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           let averageScheduled = undefined;
           if (acc.averageScheduled || cur.averageScheduled) {
             averageScheduled =
-              ((acc.averageScheduled ?? 0) + (cur.averageScheduled ?? 0)) / 2;
+              (acc.averageScheduled ?? 0) + (cur.averageScheduled ?? 0);
           }
 
           let averageActual = undefined;
           if (acc.averageActual || cur.averageActual) {
-            averageActual =
-              ((acc.averageActual ?? 0) + (cur.averageActual ?? 0)) / 2;
+            averageActual = (acc.averageActual ?? 0) + (cur.averageActual ?? 0);
           }
 
           let averageScheduledTimingPoint = undefined;
@@ -1033,17 +1031,15 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
             cur.averageScheduledTimingPoint
           ) {
             averageScheduledTimingPoint =
-              ((acc.averageScheduledTimingPoint ?? 0) +
-                (cur.averageScheduledTimingPoint ?? 0)) /
-              2;
+              (acc.averageScheduledTimingPoint ?? 0) +
+              (cur.averageScheduledTimingPoint ?? 0);
           }
 
           let averageActualTimingPoint = undefined;
           if (acc.averageActualTimingPoint || cur.averageActualTimingPoint) {
             averageActualTimingPoint =
-              ((acc.averageActualTimingPoint ?? 0) +
-                (cur.averageActualTimingPoint ?? 0)) /
-              2;
+              (acc.averageActualTimingPoint ?? 0) +
+              (cur.averageActualTimingPoint ?? 0);
           }
           return {
             early,
@@ -1072,7 +1068,30 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           };
         }, {} as StopStatistics);
 
-        this.aggregatedStopData.push(aggStopStat);
+        this.aggregatedStopData.push({
+          ...aggStopStat,
+          earlyInSeconds: aggStopStat.earlyInSeconds
+            ? aggStopStat.earlyInSeconds / stops.length
+            : aggStopStat.earlyInSeconds,
+          lateInSeconds: aggStopStat.lateInSeconds
+            ? aggStopStat.lateInSeconds / stops.length
+            : aggStopStat.lateInSeconds,
+          onTimeInSeconds: aggStopStat.onTimeInSeconds
+            ? aggStopStat.onTimeInSeconds / stops.length
+            : aggStopStat.onTimeInSeconds,
+          averageScheduled: aggStopStat.averageScheduled
+            ? aggStopStat.averageScheduled / stops.length
+            : aggStopStat.averageScheduled,
+          averageActual: aggStopStat.averageActual
+            ? aggStopStat.averageActual / stops.length
+            : aggStopStat.averageActual,
+          averageScheduledTimingPoint: aggStopStat.averageScheduledTimingPoint
+            ? aggStopStat.averageScheduledTimingPoint / stops.length
+            : aggStopStat.averageScheduledTimingPoint,
+          averageActualTimingPoint: aggStopStat.averageActualTimingPoint
+            ? aggStopStat.averageActualTimingPoint / stops.length
+            : aggStopStat.averageActualTimingPoint,
+        });
       }
     }
   }

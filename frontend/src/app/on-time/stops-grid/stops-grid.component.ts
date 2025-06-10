@@ -92,48 +92,46 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
           let earlyInSeconds = undefined;
           if (acc.earlyInSeconds || cur.earlyInSeconds) {
             earlyInSeconds =
-              ((acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0)) / 2;
+              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0);
           }
 
           let lateInSeconds = undefined;
           if (acc.lateInSeconds || cur.lateInSeconds) {
-            lateInSeconds =
-              ((acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0)) / 2;
+            lateInSeconds = (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0);
           }
 
           let onTimeInSeconds = undefined;
           if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
             onTimeInSeconds =
-              ((acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0)) / 2;
+              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0);
           }
 
           const total = (acc.total ?? 0) + cur.total;
 
           let onTimeRatio = null;
           if (acc.onTimeRatio || cur.onTimeRatio) {
-            onTimeRatio = ((acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0)) / 2;
+            onTimeRatio = (acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0);
           }
 
           let earlyRatio = null;
           if (acc.earlyRatio || cur.earlyRatio) {
-            earlyRatio = ((acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0)) / 2;
+            earlyRatio = (acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0);
           }
 
           let lateRatio = null;
           if (acc.lateRatio || cur.lateRatio) {
-            lateRatio = ((acc.lateRatio ?? 0) + (cur.lateRatio ?? 0)) / 2;
+            lateRatio = (acc.lateRatio ?? 0) + (cur.lateRatio ?? 0);
           }
 
           let averageScheduled = undefined;
           if (acc.averageScheduled || cur.averageScheduled) {
             averageScheduled =
-              ((acc.averageScheduled ?? 0) + (cur.averageScheduled ?? 0)) / 2;
+              (acc.averageScheduled ?? 0) + (cur.averageScheduled ?? 0);
           }
 
           let averageActual = undefined;
           if (acc.averageActual || cur.averageActual) {
-            averageActual =
-              ((acc.averageActual ?? 0) + (cur.averageActual ?? 0)) / 2;
+            averageActual = (acc.averageActual ?? 0) + (cur.averageActual ?? 0);
           }
 
           return {
@@ -162,7 +160,33 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
           };
         }, {} as StopPerformance);
 
-        this.aggDataPerStop.push(aggregate);
+        this.aggDataPerStop.push({
+          ...aggregate,
+          earlyInSeconds: aggregate.earlyInSeconds
+            ? aggregate.earlyInSeconds / stops.length
+            : aggregate.earlyInSeconds,
+          lateInSeconds: aggregate.lateInSeconds
+            ? aggregate.lateInSeconds / stops.length
+            : aggregate.lateInSeconds,
+          onTimeInSeconds: aggregate.onTimeInSeconds
+            ? aggregate.onTimeInSeconds / stops.length
+            : aggregate.onTimeInSeconds,
+          onTimeRatio: aggregate.onTimeRatio
+            ? aggregate.onTimeRatio / stops.length
+            : aggregate.onTimeRatio,
+          earlyRatio: aggregate.earlyRatio
+            ? aggregate.earlyRatio / stops.length
+            : aggregate.earlyRatio,
+          lateRatio: aggregate.lateRatio
+            ? aggregate.lateRatio / stops.length
+            : aggregate.lateRatio,
+          averageScheduled: aggregate.averageScheduled
+            ? aggregate.averageScheduled / stops.length
+            : aggregate.averageScheduled,
+          averageActual: aggregate.averageActual
+            ? aggregate.averageActual / stops.length
+            : aggregate.averageActual,
+        });
       }
     }
   }

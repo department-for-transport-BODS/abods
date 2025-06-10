@@ -21,7 +21,8 @@
     "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
     "prepare": "(npm run prisma:generate)",
     "lint": "eslint --ignore-pattern src/kysely.ts --fix --cache --quiet .",
-    "lint:check": "eslint --ignore-pattern src/kysely.ts ."
+    "lint:check": "eslint --ignore-pattern src/kysely.ts .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",

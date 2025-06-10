@@ -459,36 +459,35 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           let earlyInSeconds = undefined;
           if (acc.earlyInSeconds || cur.earlyInSeconds) {
             earlyInSeconds =
-              ((acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0)) / 2;
+              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0);
           }
 
           let lateInSeconds = undefined;
           if (acc.lateInSeconds || cur.lateInSeconds) {
-            lateInSeconds =
-              ((acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0)) / 2;
+            lateInSeconds = (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0);
           }
 
           let onTimeInSeconds = undefined;
           if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
             onTimeInSeconds =
-              ((acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0)) / 2;
+              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0);
           }
 
           const total = (acc.total ?? 0) + cur.total;
 
           let onTimeRatio = null;
           if (acc.onTimeRatio || cur.onTimeRatio) {
-            onTimeRatio = ((acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0)) / 2;
+            onTimeRatio = (acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0);
           }
 
           let earlyRatio = null;
           if (acc.earlyRatio || cur.earlyRatio) {
-            earlyRatio = ((acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0)) / 2;
+            earlyRatio = (acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0);
           }
 
           let lateRatio = null;
           if (acc.lateRatio || cur.lateRatio) {
-            lateRatio = ((acc.lateRatio ?? 0) + (cur.lateRatio ?? 0)) / 2;
+            lateRatio = (acc.lateRatio ?? 0) + (cur.lateRatio ?? 0);
           }
 
           return {
@@ -513,7 +512,27 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           };
         }, {} as ServicePerformance);
 
-        this.aggDataPerService.push(aggregate);
+        this.aggDataPerService.push({
+          ...aggregate,
+          earlyInSeconds: aggregate.earlyInSeconds
+            ? aggregate.earlyInSeconds / services.length
+            : aggregate.earlyInSeconds,
+          lateInSeconds: aggregate.lateInSeconds
+            ? aggregate.lateInSeconds / services.length
+            : aggregate.lateInSeconds,
+          onTimeInSeconds: aggregate.onTimeInSeconds
+            ? aggregate.onTimeInSeconds / services.length
+            : aggregate.onTimeInSeconds,
+          onTimeRatio: aggregate.onTimeRatio
+            ? aggregate.onTimeRatio / services.length
+            : aggregate.onTimeRatio,
+          earlyRatio: aggregate.earlyRatio
+            ? aggregate.earlyRatio / services.length
+            : aggregate.earlyRatio,
+          lateRatio: aggregate.lateRatio
+            ? aggregate.lateRatio / services.length
+            : aggregate.lateRatio,
+        });
       }
     }
   }
