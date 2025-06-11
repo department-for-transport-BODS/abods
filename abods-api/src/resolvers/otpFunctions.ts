@@ -280,13 +280,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         process.env.ABODS_FLAG_DirectionsDisabled &&
         process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
-      const inputDirections = Array.isArray(direction) && direction.length > 0;
-
-      // operatorIds is never null for service and stops summary
-      if (operatorIds && !isDirectionsDisabled && !inputDirections) {
-        return null;
-      }
-
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
@@ -310,7 +303,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
-      if (Array.isArray(direction) && direction.length > 0) {
+      if (Array.isArray(direction) && !direction.includes(Direction.All)) {
         summarySubQuery = summarySubQuery.where("direction", "in", direction);
       }
 
@@ -1097,6 +1090,29 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                       .as("diff_actual_time_to_stop_timing_point"),
                   ],
             )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
+                  ],
+            )
             .select((eb) => [
               sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
@@ -1313,6 +1329,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select(
+              // remove selecting directions when all directions is passed
               isDirectionsDisabled
                 ? [
                     "noc_and_line_and_servicecode",
@@ -1338,6 +1355,29 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                  ],
+            )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
                   ],
             )
             .select((eb) => [

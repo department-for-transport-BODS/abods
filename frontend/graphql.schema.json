@@ -2189,6 +2189,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "all",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inbound",
             "description": null,
             "isDeprecated": false,
