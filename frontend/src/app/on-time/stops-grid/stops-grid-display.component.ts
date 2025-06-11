@@ -264,6 +264,7 @@ export class StopsGridComponentDisplayComponent {
           unSortIcon: true,
           flex: 2,
           maxWidth: 130,
+          cellClass: "govuk-!-padding-left-3",
         },
         {
           title: "Scheduled departures",

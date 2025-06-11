@@ -8,6 +8,7 @@ import {
 import {
   ColDef,
   FilterChangedEvent,
+  GridApi,
   GridOptions,
   RowNode,
   ValueGetterParams,
@@ -217,8 +218,13 @@ const column: (
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
 
+  excludeDirections = [
+    Direction.All,
+    Direction.Clockwise,
+    Direction.Anticlockwise,
+  ];
   directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction)
-    .filter(([_, value]) => value !== Direction.All)
+    .filter(([_, value]) => !this.excludeDirections.includes(value))
     .map(([key, value]) => ({
       value: value,
       label: key,
@@ -597,15 +603,24 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     );
   }
 
+  getRowCount(api: GridApi) {
+    if (this.paginate) {
+      return api.paginationGetRowCount();
+    }
+
+    return api.getDisplayedRowCount();
+  }
+
   filterChanged({ api }: FilterChangedEvent) {
-    const rowCount = api.paginationGetRowCount() ?? 0;
-    if (this.data && this.data.length > 0 && this.paginate && rowCount === 0) {
+    const rowCount = this.getRowCount(api);
+
+    if (rowCount === 0) {
       this.overlayParams.message = `No ${this.noun}s matched the search query`;
       api.showNoRowsOverlay();
-    } else if (rowCount > 0) {
-      api.hideOverlay();
-      this.overlayParams.message = this.initialNoRowsMessage;
+      return;
     }
+    api.hideOverlay();
+    this.overlayParams.message = this.initialNoRowsMessage;
   }
 
   isGridTypeStop(data: AbstractPerformance): data is StopPerformanceGridType {
