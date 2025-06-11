@@ -165,6 +165,12 @@ Resources:
           QUICKSIGHT_ASSUME_ROLE_ARN: !Sub "arn:aws:iam::${BodsAccountId}:role/${ProjectName}-cross-account-quicksight-role"
           QUICKSIGHT_AWS_ACCOUNT_ID: !Ref BodsAccountId
           QUICKSIGHT_ADMIN_DASHBOARD_ID: !Ref QuickSightAdminDashboardId
+          QUICKSIGHT_SUPER_ADMIN_DASHBOARD_ID:
+            !If [
+              IsNotProd,
+              "ea11eeb5-e054-49ab-9203-8220fe706695",
+              "2fe02a69-ddbc-42a8-9213-e2e64a34a94d",
+            ]
           QUICKSIGHT_LTA_DASHBOARD_ID: !Ref QuickSightLtaDashboardId
           QUICKSIGHT_OPERATOR_DASHBOARD_ID: !Ref QuickSightOperatorDashboardId
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"

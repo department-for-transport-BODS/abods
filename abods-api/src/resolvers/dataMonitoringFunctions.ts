@@ -1,6 +1,7 @@
 import { sendDistributionMetric } from "datadog-lambda-js";
 import {
   checkRequiredQuicksightVars,
+  DataDashboardUserType,
   getDashboardId,
   getDashboardUrl,
   getSessionTags,
@@ -16,6 +17,7 @@ import logger from "../logger.js";
 import dayjs from "dayjs";
 import { ExpressionBuilder } from "kysely";
 import { DB } from "../kysely";
+import { accountTypes } from "./userFunctions.js";
 
 const accessAllowedWithinAnHour = Number(
   process.env.QUICKSIGHT_ALLOW_USER_ACCESS_COUNT ?? 10,
@@ -76,15 +78,29 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .filter((user) => user.org_name !== null)
     .map((user) => user.org_name!);
 
+  let userType = DataDashboardUserType.Operator;
+  // accountTypes
+  const isSuperAdmin = userDetails.some(
+    (user) =>
+      user.is_superuser === true && user.account_type === accountTypes.admin,
+  );
+
+  if (isSuperAdmin) userType = DataDashboardUserType.SuperAdmin;
+
   const isAdmin = userDetails.some((user) => user.is_superuser === true);
-  const dashboardId = getDashboardId(isAdmin, localTransportAuthorityNames);
+  if (isAdmin) userType = DataDashboardUserType.Admin;
+
+  if (localTransportAuthorityNames.length > 0)
+    userType = DataDashboardUserType.LTA;
+
+  const dashboardId = getDashboardId(userType);
 
   if (!dashboardId) {
     throw Error("No quicksight dashboard id set in environment variables");
   }
 
   const sessionTags = getSessionTags(
-    isAdmin,
+    isSuperAdmin ? isSuperAdmin : isAdmin,
     localTransportAuthorityNames,
     organisationNames,
   );
