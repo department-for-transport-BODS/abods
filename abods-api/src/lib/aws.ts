@@ -5,6 +5,8 @@ import {
   SessionTag,
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
+import { getUserTypeDetails } from "./operators.js";
+import { accountTypes } from "../resolvers/userFunctions.js";
 
 const region = process.env.AWS_REGION;
 const targetRoleArn = process.env.QUICKSIGHT_ASSUME_ROLE_ARN;
@@ -154,6 +156,25 @@ export const getSessionTags = (
     throw Error("Too many orgs mapped to the user");
   }
   return [...ltaTags, ...orgTags];
+};
+
+export const getDashboardUserType = (
+  userDetails: Awaited<ReturnType<typeof getUserTypeDetails>>,
+) => {
+  const isSuperAdmin = userDetails.some(
+    (user) =>
+      user.is_superuser === true && user.account_type === accountTypes.admin,
+  );
+
+  if (isSuperAdmin) return DataDashboardUserType.SuperAdmin;
+
+  const isAdmin = userDetails.some((user) => user.is_superuser === true);
+  if (!isSuperAdmin && isAdmin) return DataDashboardUserType.Admin;
+
+  const isLta = userDetails.some((user) => user.lta_name !== null);
+  if (isLta) return DataDashboardUserType.LTA;
+
+  return DataDashboardUserType.Operator;
 };
 
 export const getDashboardId = (userType: DataDashboardUserType) => {
