@@ -303,8 +303,25 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
-      if (Array.isArray(direction) && !direction.includes(Direction.All)) {
-        summarySubQuery = summarySubQuery.where("direction", "in", direction);
+      const filterDirections = direction?.filter((value) => value != undefined);
+      if (
+        Array.isArray(filterDirections) &&
+        !filterDirections.includes(Direction.All)
+      ) {
+        if (filterDirections?.includes(Direction.Inbound)) {
+          filterDirections.push(Direction.Anticlockwise);
+        }
+
+        if (filterDirections?.includes(Direction.Outbound)) {
+          filterDirections.push(Direction.Clockwise);
+        }
+        summarySubQuery = summarySubQuery.where((eb) =>
+          eb(
+            eb.fn("lower", [eb.ref("direction")]),
+            "in",
+            filterDirections.map((v) => v.toLocaleLowerCase()),
+          ),
+        );
       }
 
       summarySubQuery = kyselyFilterForAdminIds(

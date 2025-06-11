@@ -703,6 +703,8 @@ enum Direction {
   all
   inbound
   outbound
+  clockwise
+  anticlockwise
 }
 
 enum StopsSegment {
