@@ -80,7 +80,6 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
           ...params,
           filters: { ...params.filters, direction: this.preSelectedDirections },
         })),
-        tap(() => console.log("select----", this.preSelectedDirections)),
         switchMap((params: PerformanceParams) =>
           this.preSelectedDirections && this.preSelectedDirections.length > 0
             ? this.performanceService.fetchOverviewStats(params)
