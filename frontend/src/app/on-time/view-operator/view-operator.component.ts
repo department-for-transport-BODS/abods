@@ -80,6 +80,7 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
           ...params,
           filters: { ...params.filters, direction: this.preSelectedDirections },
         })),
+        tap(() => console.log("select----", this.preSelectedDirections)),
         switchMap((params: PerformanceParams) =>
           this.preSelectedDirections && this.preSelectedDirections.length > 0
             ? this.performanceService.fetchOverviewStats(params)
@@ -128,6 +129,11 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
       .pipe(
         map((paramMap) => paramMap.getAll("direction")),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        map((directions) => {
+          return !directions || directions.length === 0
+            ? [Direction.All]
+            : directions;
+        }),
         tap(
           (directions) =>
             (this.preSelectedDirections = directions as Direction[]),

@@ -227,6 +227,11 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
       .pipe(
         map((paramMap) => paramMap.getAll("direction")),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        map((directions) => {
+          return !directions || directions.length === 0
+            ? [Direction.All]
+            : directions;
+        }),
         tap(
           (directions) =>
             (this.preSelectedDirections = directions as Direction[]),
