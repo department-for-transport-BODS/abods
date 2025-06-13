@@ -21,7 +21,7 @@ import { getUserOrgIds } from "../lib/utils.js";
 import { isLocal } from "../prismaClient.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
-const accountTypes = {
+export const accountTypes = {
   admin: 1,
   orgAdmin: 2,
   orgStaff: 3,

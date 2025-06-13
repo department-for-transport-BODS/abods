@@ -32,6 +32,7 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
       eb.ref("bo.is_abods_global_viewer").as("is_superuser"),
       eb.ref("ul.name").as("lta_name"),
       eb.ref("bo.name").as("org_name"),
+      eb.ref("bu.account_type").as("account_type"),
     ])
     .execute();
 };
