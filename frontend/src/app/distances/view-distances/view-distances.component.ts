@@ -32,6 +32,7 @@ import {
   NoRowsOverlayComponent,
   NoRowsOverlayParams,
 } from "../../shared/components/ag-grid/no-rows-overlay/no-rows-overlay.component";
+import { AgGridFormatterService } from "../../shared/components/ag-grid/ag-grid-formatter.service";
 
 const WHITESPACE_BETWEEN_SINGLE_CHARACTER = /(?<= \w|&|^\w|^) (?=\w |&|\w$|$)/g;
 const INITIAL_NO_ROWS_MESSAGE = "No operator data found";
@@ -50,6 +51,7 @@ export class ViewDistancesComponent implements OnInit {
     dateRangeService: DateRangeService,
     private distanceService: DistancesService,
     private operatorLinesQuery: OperatorLinesGQL,
+    private formatter: AgGridFormatterService,
   ) {
     const { from, to } = dateRangeService.calculatePresetPeriod(
       Preset.Last7,
@@ -139,9 +141,8 @@ export class ViewDistancesComponent implements OnInit {
       field: "avlDistancePercent",
       headerName: "Distance excluding journeys with no AVL (%)",
       valueGetter: ({ data }: { data: Distance }) =>
-        data.distance
-          ? ((data.avlDistance ?? 0) / data.distance).toFixed(2)
-          : "-",
+        data.distance ? (data.avlDistance ?? 0) / data.distance : "-",
+      valueFormatter: this.formatter.percentValueFormatter,
       flex: 1,
       sortable: true,
       unSortIcon: true,
