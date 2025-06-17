@@ -61,7 +61,7 @@ export class ViewDistancesComponent implements OnInit {
     this.to = to;
   }
 
-  private noc$ = new Subject<void>();
+  private operators$ = new Subject<void>();
   private services$ = new Subject<void>();
   private distances$ = new Subject<void>();
   private destroy$ = new Subject<void>();
@@ -74,8 +74,8 @@ export class ViewDistancesComponent implements OnInit {
     .fetchUserOrgs()
     .pipe(finalize(() => (this.orgsLoading = false)));
 
-  nocMultiSelect: MultiselectCheckboxOption[] = [];
-  nocIds: string[] = [];
+  operatorMultiSelect: MultiselectCheckboxOption[] = [];
+  operatorIds: string[] = [];
   serviceIds: string[] = [];
 
   data: Distance[] = [];
@@ -105,6 +105,8 @@ export class ViewDistancesComponent implements OnInit {
       sortable: true,
       unSortIcon: true,
       flex: 1,
+      cellClass: "govuk-!-padding-left-3",
+      headerClass: "govuk-!-padding-left-3 govuk-!-padding-right-0",
     },
     {
       colId: "lineName",
@@ -185,9 +187,9 @@ export class ViewDistancesComponent implements OnInit {
 
   allServices$ = this.services$.pipe(
     mergeMap(() => {
-      if (this.nocIds.length === 0) return of({ data: { lines: [] } });
+      if (this.operatorIds.length === 0) return of({ data: { lines: [] } });
       return this.operatorLinesQuery.fetch({
-        operatorIds: this.nocIds,
+        operatorIds: this.operatorIds,
         inputDate: this.from.toISO(),
         endDate: this.to.toISO(),
       });
@@ -211,12 +213,12 @@ export class ViewDistancesComponent implements OnInit {
     }),
   );
 
-  isNocLoading = false;
+  isOperatorsLoading = false;
   isServicesLoading = false;
   loading = false;
 
   ngOnInit(): void {
-    this.noc$
+    this.operators$
       .pipe(
         filter(() => !!this.selectedOrgId),
         switchMap(() => {
@@ -225,11 +227,11 @@ export class ViewDistancesComponent implements OnInit {
           );
         }),
       )
-      .subscribe((nocs) => {
-        this.isNocLoading = false;
-        this.nocMultiSelect = nocs.map((noc) => ({
-          label: `${noc.name} (${noc.nocCode})`,
-          value: noc.nocCode,
+      .subscribe((operators) => {
+        this.isOperatorsLoading = false;
+        this.operatorMultiSelect = operators.map((operator) => ({
+          label: `${operator.name} (${operator.nocCode})`,
+          value: operator.nocCode,
         }));
       });
 
@@ -239,7 +241,7 @@ export class ViewDistancesComponent implements OnInit {
         switchMap(() => {
           return this.distanceService.fetchDistances({
             orgId: this.selectedOrgId?.toString() ?? "",
-            operatorIds: this.nocIds,
+            operatorIds: this.operatorIds,
             fromTimestamp: this.from.toISO(),
             toTimestamp: this.to.toISO(),
             nocLineAndServiceCodes: this.serviceIds,
@@ -259,14 +261,14 @@ export class ViewDistancesComponent implements OnInit {
 
   onOrgChange(orgId: number) {
     this.selectedOrgId = orgId;
-    this.nocIds = [];
+    this.operatorIds = [];
     this.serviceIds = [];
-    this.isNocLoading = true;
-    this.noc$.next();
+    this.isOperatorsLoading = true;
+    this.operators$.next();
   }
 
-  onNocsChanged($event: string[]) {
-    this.nocIds = $event;
+  onOperatorsChanged($event: string[]) {
+    this.operatorIds = $event;
     this.isServicesLoading = true;
     this.serviceIds = [];
     this.services$.next();

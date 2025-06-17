@@ -31,17 +31,17 @@
         </ng-select>
       </div>
       <div>
-        <label class="govuk-label" for="operators">NOC</label>
+        <label class="govuk-label" for="operators">Operators</label>
         <gds-multiselect-checkbox
-          [options]="nocMultiSelect"
-          [ngModel]="nocIds"
-          (selectedChange)="onNocsChanged($event)"
+          [options]="operatorMultiSelect"
+          [ngModel]="operatorIds"
+          (selectedChange)="onOperatorsChanged($event)"
           [showAll]="true"
-          [isLoading]="isNocLoading"
-          labelForId="noc"
-          showAllLabel="All NOC"
-          placeholderText="NOC"
-          ariaLabel="NOC"
+          [isLoading]="isOperatorsLoading"
+          labelForId="operator"
+          showAllLabel="All Operators"
+          placeholderText="Operator"
+          ariaLabel="Operator"
         />
       </div>
       <div>
