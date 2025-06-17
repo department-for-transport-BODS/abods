@@ -51,6 +51,8 @@ import {
   standalone: false,
 })
 export class ViewCorridorComponent implements OnInit, OnDestroy {
+  CorridorGranularity = CorridorGranularity;
+  granularity = CorridorGranularity.Day;
   dateRange = new FormControl(
     this.dateRangeService.calculatePresetPeriod(Preset.Last7, DateTime.local()),
     {
@@ -316,7 +318,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     stops: CorridorStop[],
     matchType: MatchType,
   ): CorridorStatsViewParams {
-    const granularity =
+    this.granularity =
       Math.abs(to.diff(from, "days").days) < 5
         ? CorridorGranularity.Hour
         : CorridorGranularity.Day;
@@ -324,7 +326,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
       corridorId,
       from,
       to,
-      granularity,
+      granularity: this.granularity,
       stops,
       matchType,
     };

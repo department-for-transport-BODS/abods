@@ -3,6 +3,7 @@ import {
   checkRequiredQuicksightVars,
   getDashboardId,
   getDashboardUrl,
+  getDashboardUserType,
   getSessionTags,
 } from "../lib/aws.js";
 import {
@@ -76,12 +77,15 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     .filter((user) => user.org_name !== null)
     .map((user) => user.org_name!);
 
-  const isAdmin = userDetails.some((user) => user.is_superuser === true);
-  const dashboardId = getDashboardId(isAdmin, localTransportAuthorityNames);
+  const userType = getDashboardUserType(userDetails);
+
+  const dashboardId = getDashboardId(userType);
 
   if (!dashboardId) {
     throw Error("No quicksight dashboard id set in environment variables");
   }
+
+  const isAdmin = userDetails.some((user) => user.is_superuser === true);
 
   const sessionTags = getSessionTags(
     isAdmin,

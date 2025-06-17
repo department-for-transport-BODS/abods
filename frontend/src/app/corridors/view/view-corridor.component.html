@@ -266,7 +266,9 @@
                   isTime ? chartColors.lightPurple : chartColors.brightGreen
                 "
                 xAxisType="date"
-                xAxisTitle="Date"
+                [xAxisTitle]="
+                  granularity === CorridorGranularity.Day ? 'Date' : 'Hour'
+                "
                 xAxisLabelPosition="column"
                 [yAxisType]="isTime ? 'time' : 'value'"
                 [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"
