@@ -128,7 +128,7 @@ export class ViewDistancesComponent implements OnInit {
     {
       colId: "avlDistance",
       field: "avlDistance",
-      headerName: "Distance excluding journeys with no AVL (km)",
+      headerName: "Distance of journeys with AVL (km)",
       sortable: true,
       unSortIcon: true,
       flex: 1,
@@ -139,7 +139,7 @@ export class ViewDistancesComponent implements OnInit {
     {
       colId: "avlDistancePercent",
       field: "avlDistancePercent",
-      headerName: "Distance excluding journeys with no AVL (%)",
+      headerName: "Distance of journeys with AVL (%)",
       valueGetter: ({ data }: { data: Distance }) =>
         data.distance ? (data.avlDistance ?? 0) / data.distance : undefined,
       valueFormatter: this.formatter.percentValueFormatter,
