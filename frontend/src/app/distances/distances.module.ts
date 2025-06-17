@@ -1,27 +1,27 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-import { StopAnalysisRoutingModule } from "./stop-analysis-routing.module";
-import { StopAnalysisComponent } from "./stop-analysis.component";
+import { DistancesRoutingModule } from "./distances-routing.module";
+import { ViewDistancesComponent } from "./view-distances/view-distances.component";
 import { LayoutModule } from "../layout/layout.module";
-import { OnTimeModule } from "../on-time/on-time.module";
-import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { SharedModule } from "../shared/shared.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { RouterModule } from "@angular/router";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { AgGridModule } from "ag-grid-angular";
 
 @NgModule({
-  declarations: [StopAnalysisComponent],
+  declarations: [ViewDistancesComponent],
   imports: [
     CommonModule,
     LayoutModule,
-    StopAnalysisRoutingModule,
-    OnTimeModule,
-    NgxMapboxGLModule,
+    DistancesRoutingModule,
     SharedModule,
     FormsModule,
+    RouterModule,
     NgSelectModule,
     ReactiveFormsModule,
+    AgGridModule,
   ],
 })
-export class StopAnalysisModule {}
+export class DistancesModule {}

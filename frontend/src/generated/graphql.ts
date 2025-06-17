@@ -278,6 +278,24 @@ export enum Direction {
   Outbound = 'outbound'
 }
 
+export type Distance = {
+  __typename?: 'Distance';
+  avlDistance?: Maybe<Scalars['Int']['output']>;
+  distance?: Maybe<Scalars['Int']['output']>;
+  lineName: Scalars['String']['output'];
+  nocLineAndServiceCode: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+};
+
+export type DistancesFilterInput = {
+  fromTimestamp: Scalars['String']['input'];
+  nocLineAndServiceCodes?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
+};
+
 export type EventData = {
   __typename?: 'EventData';
   message: Scalars['String']['output'];
@@ -689,7 +707,8 @@ export type OperatorFeedMonitoring = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds: Array<Scalars['String']['input']>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type OperatorPerformancePage = {
@@ -715,6 +734,12 @@ export type OperatorType = {
   name: Scalars['String']['output'];
   nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
+};
+
+export type Organisation = {
+  __typename?: 'Organisation';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type OrganisationReferenceInput = {
@@ -812,6 +837,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  distances: Array<Distance>;
   embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
@@ -830,6 +856,7 @@ export type Query = {
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
+  userOrgs: Array<Organisation>;
   users?: Maybe<Array<UserType>>;
 };
 
@@ -841,6 +868,11 @@ export type QueryAvlLineLevelStatusArgs = {
 
 export type QueryDashboardVehiclesArgs = {
   operatorId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryDistancesArgs = {
+  filterBy?: InputMaybe<DistancesFilterInput>;
 };
 
 
@@ -1244,6 +1276,25 @@ export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+
+export type UserOrganisationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserOrganisationsQuery = { __typename?: 'Query', userOrgs: Array<{ __typename?: 'Organisation', name: string, id: number }> };
+
+export type OrgOperatorListQueryVariables = Exact<{
+  orgId: Scalars['Int']['input'];
+}>;
+
+
+export type OrgOperatorListQuery = { __typename?: 'Query', operators: Array<{ __typename?: 'OperatorType', name: string, nocCode: string }> };
+
+export type DistancesListQueryVariables = Exact<{
+  filterBy: DistancesFilterInput;
+}>;
+
+
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, distance?: number | null, avlDistance?: number | null }> };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -2094,6 +2145,67 @@ export const DashboadEmbeddedUrlDocument = gql`
   })
   export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
     document = DashboadEmbeddedUrlDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const UserOrganisationsDocument = gql`
+    query userOrganisations {
+  userOrgs {
+    name
+    id
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UserOrganisationsGQL extends Apollo.Query<UserOrganisationsQuery, UserOrganisationsQueryVariables> {
+    document = UserOrganisationsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const OrgOperatorListDocument = gql`
+    query orgOperatorList($orgId: Int!) {
+  operators(filterBy: {orgId: $orgId}) {
+    name
+    nocCode
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class OrgOperatorListGQL extends Apollo.Query<OrgOperatorListQuery, OrgOperatorListQueryVariables> {
+    document = OrgOperatorListDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DistancesListDocument = gql`
+    query distancesList($filterBy: DistancesFilterInput!) {
+  distances(filterBy: $filterBy) {
+    operatorId
+    operatorName
+    nocLineAndServiceCode
+    lineName
+    distance
+    avlDistance
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DistancesListGQL extends Apollo.Query<DistancesListQuery, DistancesListQueryVariables> {
+    document = DistancesListDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

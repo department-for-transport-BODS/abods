@@ -1,0 +1,20 @@
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr) minmax(
+      0,
+      8fr
+    );
+  gap: govuk-spacing(1);
+}
+.ag-header {
+  height: "40px";
+}

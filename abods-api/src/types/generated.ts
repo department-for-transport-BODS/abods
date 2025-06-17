@@ -278,6 +278,24 @@ export enum Direction {
   Outbound = 'outbound'
 }
 
+export type Distance = {
+  __typename?: 'Distance';
+  avlDistance?: Maybe<Scalars['Int']['output']>;
+  distance?: Maybe<Scalars['Int']['output']>;
+  lineName: Scalars['String']['output'];
+  nocLineAndServiceCode: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+};
+
+export type DistancesFilterInput = {
+  fromTimestamp: Scalars['String']['input'];
+  nocLineAndServiceCodes?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
+};
+
 export type EventData = {
   __typename?: 'EventData';
   message: Scalars['String']['output'];
@@ -689,7 +707,8 @@ export type OperatorFeedMonitoring = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds: Array<Scalars['String']['input']>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type OperatorPerformancePage = {
@@ -715,6 +734,12 @@ export type OperatorType = {
   name: Scalars['String']['output'];
   nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
+};
+
+export type Organisation = {
+  __typename?: 'Organisation';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type OrganisationReferenceInput = {
@@ -812,6 +837,7 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  distances: Array<Distance>;
   embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
@@ -830,6 +856,7 @@ export type Query = {
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
+  userOrgs: Array<Organisation>;
   users?: Maybe<Array<UserType>>;
 };
 
@@ -841,6 +868,11 @@ export type QueryAvlLineLevelStatusArgs = {
 
 export type QueryDashboardVehiclesArgs = {
   operatorId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryDistancesArgs = {
+  filterBy?: InputMaybe<DistancesFilterInput>;
 };
 
 
@@ -1242,6 +1274,8 @@ export type ResolversTypes = ResolversObject<{
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
   DelayFrequencyType: ResolverTypeWrapper<Partial<DelayFrequencyType>>;
   Direction: ResolverTypeWrapper<Partial<Direction>>;
+  Distance: ResolverTypeWrapper<Partial<Distance>>;
+  DistancesFilterInput: ResolverTypeWrapper<Partial<DistancesFilterInput>>;
   EventData: ResolverTypeWrapper<Partial<EventData>>;
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
@@ -1281,6 +1315,7 @@ export type ResolversTypes = ResolversObject<{
   OperatorPerformancePage: ResolverTypeWrapper<Partial<OperatorPerformancePage>>;
   OperatorPerformanceType: ResolverTypeWrapper<Partial<OperatorPerformanceType>>;
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
+  Organisation: ResolverTypeWrapper<Partial<Organisation>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
@@ -1350,6 +1385,8 @@ export type ResolversParentTypes = ResolversObject<{
   DateTime: Partial<Scalars['DateTime']['output']>;
   DayOfWeekFlagsInputType: Partial<DayOfWeekFlagsInputType>;
   DelayFrequencyType: Partial<DelayFrequencyType>;
+  Distance: Partial<Distance>;
+  DistancesFilterInput: Partial<DistancesFilterInput>;
   EventData: Partial<EventData>;
   EventResponse: Partial<EventResponse>;
   EventStatsType: Partial<EventStatsType>;
@@ -1386,6 +1423,7 @@ export type ResolversParentTypes = ResolversObject<{
   OperatorPerformancePage: Partial<OperatorPerformancePage>;
   OperatorPerformanceType: Partial<OperatorPerformanceType>;
   OperatorType: Partial<OperatorType>;
+  Organisation: Partial<Organisation>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
@@ -1569,6 +1607,16 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export type DelayFrequencyTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DelayFrequencyType'] = ResolversParentTypes['DelayFrequencyType']> = ResolversObject<{
   bucket?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   frequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type DistanceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Distance'] = ResolversParentTypes['Distance']> = ResolversObject<{
+  avlDistance?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  distance?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nocLineAndServiceCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1793,6 +1841,12 @@ export type OperatorTypeResolvers<ContextType = RequestContext, ParentType exten
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OrganisationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Organisation'] = ResolversParentTypes['Organisation']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type PageInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   next?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1841,6 +1895,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
+  distances?: Resolver<Array<ResolversTypes['Distance']>, ParentType, ContextType, Partial<QueryDistancesArgs>>;
   embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
@@ -1859,6 +1914,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
+  userOrgs?: Resolver<Array<ResolversTypes['Organisation']>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
 }>;
 
@@ -2044,6 +2100,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DelayFrequencyType?: DelayFrequencyTypeResolvers<ContextType>;
+  Distance?: DistanceResolvers<ContextType>;
   EventData?: EventDataResolvers<ContextType>;
   EventResponse?: EventResponseResolvers<ContextType>;
   EventStatsType?: EventStatsTypeResolvers<ContextType>;
@@ -2072,6 +2129,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   OperatorPerformancePage?: OperatorPerformancePageResolvers<ContextType>;
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
+  Organisation?: OrganisationResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;

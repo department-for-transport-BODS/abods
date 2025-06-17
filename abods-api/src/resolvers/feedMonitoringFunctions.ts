@@ -258,7 +258,10 @@ export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
         getUserOperatorIdsQuery(context.kysely, user),
       )
       .innerJoin("all_operators as a", "a.operatorref", "s.operator_noc");
-    if (args.filterBy && (args.filterBy.operatorIds.length ?? 0) > 0) {
+    if (
+      args.filterBy?.operatorIds &&
+      (args.filterBy.operatorIds.length ?? 0) > 0
+    ) {
       query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
     }
     return await query

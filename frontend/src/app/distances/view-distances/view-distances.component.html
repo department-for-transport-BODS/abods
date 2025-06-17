@@ -1,0 +1,95 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-page-header heading="Distances" />
+    <div class="filters govuk-!-margin-bottom-2">
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          [showPreset]="false"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="operator">Organisations</label>
+        <ng-select
+          class="gds-select journey-search__operators"
+          labelForId="organisation"
+          placeholder="Select"
+          [clearable]="false"
+          [loading]="orgsLoading"
+          (change)="onOrgChange($event)"
+        >
+          <ng-template *ngIf="orgsLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template ng-loadingspinner-tmp>
+            <app-spinner size="x-small"></app-spinner>
+          </ng-template>
+          <ng-option *ngFor="let item of orgs$ | async" [value]="item.id">{{
+            item.name
+          }}</ng-option>
+        </ng-select>
+      </div>
+      <div>
+        <label class="govuk-label" for="operators">NOC</label>
+        <gds-multiselect-checkbox
+          [options]="nocMultiSelect"
+          [ngModel]="nocIds"
+          (selectedChange)="onNocsChanged($event)"
+          [showAll]="true"
+          [isLoading]="isNocLoading"
+          labelForId="noc"
+          showAllLabel="All NOC"
+          placeholderText="NOC"
+          ariaLabel="NOC"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <gds-multiselect-checkbox
+          [options]="serviceOptions$ | async"
+          [ngModel]="serviceIds"
+          (selectedChange)="onServicesChanged($event)"
+          [showAll]="true"
+          [isLoading]="isServicesLoading"
+          labelForId="services"
+          showAllLabel="All Services"
+          placeholderText="Services"
+          ariaLabel="Services"
+        />
+      </div>
+    </div>
+
+    <div>
+      <button gdsButton (click)="getDistances()">Generate</button>
+    </div>
+    <div *ngIf="!loading">
+      <ag-grid-angular
+        class="ag-theme-wrapped-header"
+        [rowData]="data"
+        [rowHeight]="80"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        domLayout="autoHeight"
+        [quickFilterText]="normalGridFilter"
+        [pagination]="true"
+        [paginationPageSize]="10"
+        [suppressPaginationPanel]="true"
+        [gridOptions]="gridOptions"
+        (gridReady)="gridReady$.next()"
+        (filterChanged)="filterChanged($event)"
+        (paginationChanged)="
+          paginationChanged$.next($event); paging.paginationChanged($event)
+        "
+        [noRowsOverlayComponent]="overlayComponent"
+        [noRowsOverlayComponentParams]="overlayParams"
+      >
+      </ag-grid-angular>
+      <app-paging-panel #paging noun="operator"></app-paging-panel>
+    </div>
+    <div *ngIf="loading">
+      <app-spinner [vCentre]="true" message="Loading..." size="default">
+      </app-spinner>
+    </div>
+  </ng-container>
+</app-page>

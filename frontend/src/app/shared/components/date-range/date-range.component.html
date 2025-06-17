@@ -1,4 +1,4 @@
-<div class="date-range">
+<div class="date-range" [class.hide-preset]="!showPreset">
   <div (appMouseupOutside)="closeControls()">
     <div class="date-range__input-wrapper">
       <gds-text-input
@@ -31,17 +31,19 @@
       (closeControls)="closeControls()"
     ></app-date-range-controls>
   </div>
-  <gds-select
-    (selected)="selectPresetDateRange($event)"
-    [value]="value.preset"
-    label="Preset"
-    [hideLabel]="true"
-    inputId="date-range-preset"
-  >
-    <option value="last7">Last 7 days</option>
-    <option value="last28">Last 28 days</option>
-    <option value="lastMonth">Last month</option>
-    <option value="monthToDate">Month to date</option>
-    <option *ngIf="value.preset === 'custom'" value="custom">Custom</option>
-  </gds-select>
+  <div *ngIf="showPreset">
+    <gds-select
+      (selected)="selectPresetDateRange($event)"
+      [value]="value.preset"
+      label="Preset"
+      [hideLabel]="true"
+      inputId="date-range-preset"
+    >
+      <option value="last7">Last 7 days</option>
+      <option value="last28">Last 28 days</option>
+      <option value="lastMonth">Last month</option>
+      <option value="monthToDate">Month to date</option>
+      <option *ngIf="value.preset === 'custom'" value="custom">Custom</option>
+    </gds-select>
+  </div>
 </div>

@@ -22,6 +22,7 @@ import { AngularSvgIconModule } from "angular-svg-icon";
 import { PasswordInputComponent } from "./password-input/password-input.component";
 import { AccordionComponent } from "./accordion/accordion.component";
 import { AccordionSectionComponent } from "./accordion/accordion-section/accordion-section.component";
+import { SpinnerComponent } from "./spinner/spinner.component";
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { AccordionSectionComponent } from "./accordion/accordion-section/accordi
     PasswordInputComponent,
     AccordionComponent,
     AccordionSectionComponent,
+    SpinnerComponent,
   ],
   imports: [
     RouterModule,
@@ -53,6 +55,7 @@ import { AccordionSectionComponent } from "./accordion/accordion-section/accordi
     AngularSvgIconModule.forRoot(),
   ],
   exports: [
+    SpinnerComponent,
     FieldsetComponent,
     TextInputComponent,
     ButtonComponent,
