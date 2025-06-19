@@ -54,7 +54,12 @@ export const requireUserSession = async (context: RequestContext) => {
   const bodsUser = await context.db.bods_user.findUnique({
     where: { id: sessionRecord.user_id },
     select: {
-      userOrganisations: { select: { organisation_id: true } },
+      userOrganisations: {
+        select: {
+          organisation_id: true,
+          organisation: { select: { is_abods_global_viewer: true } },
+        },
+      },
       is_active: true,
     },
   });
@@ -77,6 +82,9 @@ export const requireUserSession = async (context: RequestContext) => {
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
     orgIds: orgIds,
+    isGlobalUser: bodsUser.userOrganisations.some(
+      (org) => org.organisation.is_abods_global_viewer,
+    ),
   };
 
   logger.debug({ sessionUser }, "Session user returned");

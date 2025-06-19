@@ -582,6 +582,8 @@ view expected_services {
   date_of_journey              DateTime
   operator_noc                 String
   admin_area_id                Int[] // TODO: fix - Actually an array of nullable integers but that can't be expressed in prisma
+  total_distance               Int
+  avl_true_distance            Int
   expected_operator            expected_operators  @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys            expected_journeys[]
 

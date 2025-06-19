@@ -81,8 +81,18 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       "n.national_operator_code",
       "s.operator_noc",
     );
-  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+  if (args.filterBy?.operatorIds && args.filterBy.operatorIds.length > 0) {
     query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+
+  if (args.filterBy?.orgId) {
+    query = query
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "boo.operatorref",
+        "a.operatorref",
+      )
+      .where("boo.organisation_id", "=", args.filterBy?.orgId);
   }
   return await query
     .groupBy(["a.name", "s.operator_noc"])

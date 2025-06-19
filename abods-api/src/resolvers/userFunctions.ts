@@ -7,6 +7,7 @@ import {
   Maybe,
   MutationResolvers,
   MutationResponseType,
+  Organisation,
   QueryResolvers,
   Resolvers,
   UserType,
@@ -476,12 +477,36 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
   }
 };
 
+const getuserOrgs: QueryResolvers["userOrgs"] = async (
+  _,
+  __,
+  context,
+): Promise<Organisation[]> => {
+  const user = await requireUserSession(context);
+
+  const orgs = context.kysely
+    .selectFrom("bods_organisation")
+    .select(["name", "id", "is_abods_global_viewer"])
+    .where("name", "is not", null);
+  let userOrgs = await orgs.where("id", "in", user.orgIds).execute();
+
+  if (userOrgs.some((org) => org.is_abods_global_viewer)) {
+    userOrgs = await orgs.distinct().execute();
+  }
+
+  return userOrgs.map((org) => ({
+    id: org.id,
+    name: org.name ?? "-",
+  }));
+};
+
 const userResolvers: Resolvers = {
   Query: {
     user: getUser,
     users: getUsers,
     userAlerts: getUserAlerts,
     userAlert: getUserAlert,
+    userOrgs: getuserOrgs,
   },
   Mutation: {
     login: loginUser,

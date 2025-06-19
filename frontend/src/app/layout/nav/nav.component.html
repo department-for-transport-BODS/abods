@@ -79,6 +79,15 @@
             >Stop analysis
           </a>
         </li>
+        <li class="nav__item">
+          <a
+            class="nav__link"
+            [routerLink]="['/distances']"
+            routerLinkActive="nav__link--current"
+            (click)="navService.closeMenu()"
+            >Distances
+          </a>
+        </li>
       </ul>
     </nav>
   </div>
