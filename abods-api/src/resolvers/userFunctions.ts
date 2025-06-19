@@ -259,6 +259,7 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
+        `userId:${user_id}`,
         ...orgIds.map((orgId) => `org:${orgId}`),
       );
       return { success: true, expiresAt: expiryTimestamp };
