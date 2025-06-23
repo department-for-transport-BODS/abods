@@ -34,7 +34,7 @@ export class JourneyInfoComponent {
     return this.vehicleRef ?? "Unknown";
   }
 
-  get serviceDistance(): number | string {
-    return this.distance ?? "Unknown";
+  get serviceDistanceKm(): number | string {
+    return this.distance ? this.distance / 1000 : "Unknown";
   }
 }
