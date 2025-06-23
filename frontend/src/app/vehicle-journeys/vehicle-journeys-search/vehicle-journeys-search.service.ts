@@ -32,13 +32,11 @@ export class VehicleJourneysSearchService {
   getServicePatternDistanceGeom(
     vehicleJourneyId: string,
   ): Observable<{ distance: number; geom: [number, number][] }> {
-    return this.servicePatternDistanceGeomGQL
-      .fetch({ vehicleJourneyId }, { fetchPolicy: "no-cache" })
-      .pipe(
-        map((result) => ({
-          distance: result.data.getServicePatternDistanceGeom.distance,
-          geom: result.data.getServicePatternDistanceGeom.geom,
-        })),
-      );
+    return this.servicePatternDistanceGeomGQL.fetch({ vehicleJourneyId }).pipe(
+      map((result) => ({
+        distance: result.data.getServicePatternDistanceGeom.distance,
+        geom: result.data.getServicePatternDistanceGeom.geom,
+      })),
+    );
   }
 }
