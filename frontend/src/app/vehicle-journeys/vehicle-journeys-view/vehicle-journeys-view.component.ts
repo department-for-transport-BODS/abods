@@ -72,6 +72,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   directionRef: string | null = null;
   currentJourneyIndex = -1;
 
+  servicePatternDistance: number | null = null;
+  servicePatternGeom: [number, number][] | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private service: VehicleJourneysSearchService,
@@ -199,6 +202,28 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
               v.groupId === this.groupId && v.directionRef == this.directionRef,
           );
           this.journeysLoading = false;
+
+          const currentJourney = this.journeys[this.currentJourneyIndex];
+          const vehicleJourneyId = currentJourney?.vehicleJourneyId;
+          if (vehicleJourneyId) {
+            this.service
+              .getServicePatternDistanceGeom(vehicleJourneyId.toString())
+              .pipe(takeUntil(this.onDestroy$))
+              .subscribe({
+                next: ({ distance, geom }) => {
+                  this.servicePatternDistance = distance;
+                  this.servicePatternGeom = geom;
+                },
+                error: (err) => {
+                  console.error(
+                    "Failed to fetch service pattern geometry:",
+                    err,
+                  );
+                  this.servicePatternDistance = null;
+                  this.servicePatternGeom = null;
+                },
+              });
+          }
         },
         error: (err) => {
           console.log(err);
