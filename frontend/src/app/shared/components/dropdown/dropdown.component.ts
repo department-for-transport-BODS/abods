@@ -34,6 +34,10 @@ export class DropdownComponent implements OnInit {
     return this.width + "px";
   }
 
+  get contentWidth(): string {
+    return this.width - dropdownPadding * 2 - dropdownBorder * 2 + "px";
+  }
+
   get isOpen(): boolean {
     return (
       this.ngxTippyService.getInstance(this.identifier)?.state.isMounted ??
