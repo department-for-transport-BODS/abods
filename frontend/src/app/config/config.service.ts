@@ -63,6 +63,7 @@ export interface FreshdeskFolderConfig {
   dataMonitoring: string;
   serviceMonitoring: string;
   stopAnalysis: string;
+  distances: string;
   [key: string]: string;
 }
 
@@ -160,6 +161,7 @@ export class ConfigService {
         dataMonitoring: "",
         serviceMonitoring: "",
         stopAnalysis: "",
+        distances: "",
       },
     };
     return this.loadValue(() => {
