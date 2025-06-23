@@ -1,9 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from "@angular/core";
 import { NgxTippyProps, NgxTippyService } from "ngx-tippy-wrapper";
 
-const dropdownPadding = 10;
-const dropdownBorder = 1;
-
 @Component({
   selector: "app-dropdown",
   templateUrl: "./dropdown.component.html",

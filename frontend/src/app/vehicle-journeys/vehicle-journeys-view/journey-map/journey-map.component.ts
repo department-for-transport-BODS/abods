@@ -103,7 +103,7 @@ export class JourneyMapComponent implements OnChanges {
   timingPoints?: FeatureCollection<Point, VehiclePingStop>;
   line?: FeatureCollection<LineString, LineSegmentProps>;
   scheduledRouteLine?: FeatureCollection<LineString>;
-  showScheduledRoute: boolean = true;
+  showScheduledRoute = true;
 
   pings?: FeatureCollection<Point, VehiclePing>;
 
