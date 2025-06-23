@@ -471,6 +471,12 @@ model feed_monitor_daily_summary {
   availability     Decimal? @db.Decimal
 }
 
+model transmodel_servicepatterndistance {
+  service_pattern_id Int    @id
+  distance           Int?
+  geom               String?
+}
+
 model servicepattern_route {
   distinct_route_id            Int             @unique // TODO: fix - not unique in db
   noc_and_line_and_servicecode String
