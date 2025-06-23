@@ -1,6 +1,7 @@
 scalar DateTime
 scalar Time
 scalar Date
+scalar JSON
 
 type Query {
   user: LoginInfo
@@ -27,6 +28,9 @@ type Query {
   ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
+  getServicePatternDistanceGeom(
+    vehicleJourneyId: ID!
+  ): ServicePatternDistanceResult!
   lines(
     operatorIds: [String!]!
     inputDate: String!
@@ -226,6 +230,7 @@ type Journey {
   serviceNumber: String!
   operatorName: String!
   operatorNoc: String!
+  vehicleJourneyId: Int
 }
 
 type ServiceInfoType {
@@ -798,6 +803,11 @@ enum OtpEnum {
 enum RouteType {
   VALID
   INVALID_NO_ROUTE_POINTS
+}
+
+type ServicePatternDistanceResult {
+  distance: Int!
+  geom: JSON!
 }
 
 # eslint-disable @graphql-eslint/no-unused-fields

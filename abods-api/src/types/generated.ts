@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: Date | string; output: Date | string; }
   DateTime: { input: Date | string; output: Date | string; }
+  JSON: { input: any; output: any; }
   Time: { input: Date | string; output: Date | string; }
 };
 
@@ -482,6 +483,7 @@ export type Journey = {
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
   startTime: Scalars['String']['output'];
+  vehicleJourneyId?: Maybe<Scalars['Int']['output']>;
 };
 
 export type JourneyResult = {
@@ -843,6 +845,7 @@ export type Query = {
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
+  getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
@@ -894,6 +897,11 @@ export type QueryEventsArgs = {
 export type QueryFindJourneysArgs = {
   dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
+};
+
+
+export type QueryGetServicePatternDistanceGeomArgs = {
+  vehicleJourneyId: Scalars['ID']['input'];
 };
 
 
@@ -974,6 +982,12 @@ export type ServiceLinkType = {
   linkRoute?: Maybe<Scalars['String']['output']>;
   routeValidity: RouteType;
   toStop: Scalars['String']['output'];
+};
+
+export type ServicePatternDistanceResult = {
+  __typename?: 'ServicePatternDistanceResult';
+  distance: Scalars['Int']['output'];
+  geom: Scalars['JSON']['output'];
 };
 
 export type ServicePatternType = {
@@ -1296,10 +1310,12 @@ export type ResolversTypes = ResolversObject<{
   HeadwayOverviewType: ResolverTypeWrapper<Partial<HeadwayOverviewType>>;
   HeadwayTimeSeriesType: ResolverTypeWrapper<Partial<HeadwayTimeSeriesType>>;
   HistoricalStatsType: ResolverTypeWrapper<Partial<HistoricalStatsType>>;
+  ID: ResolverTypeWrapper<Partial<Scalars['ID']['output']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']['output']>>;
   InvitationInput: ResolverTypeWrapper<Partial<InvitationInput>>;
   InvitationResponseType: ResolverTypeWrapper<Partial<InvitationResponseType>>;
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
+  JSON: ResolverTypeWrapper<Partial<Scalars['JSON']['output']>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
   LineType: ResolverTypeWrapper<Partial<LineType>>;
@@ -1332,6 +1348,7 @@ export type ResolversTypes = ResolversObject<{
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
+  ServicePatternDistanceResult: ResolverTypeWrapper<Partial<ServicePatternDistanceResult>>;
   ServicePatternType: ResolverTypeWrapper<Partial<ServicePatternType>>;
   ServicePerformanceFiltersInputType: ResolverTypeWrapper<Partial<ServicePerformanceFiltersInputType>>;
   ServicePerformanceInputType: ResolverTypeWrapper<Partial<ServicePerformanceInputType>>;
@@ -1405,10 +1422,12 @@ export type ResolversParentTypes = ResolversObject<{
   HeadwayOverviewType: Partial<HeadwayOverviewType>;
   HeadwayTimeSeriesType: Partial<HeadwayTimeSeriesType>;
   HistoricalStatsType: Partial<HistoricalStatsType>;
+  ID: Partial<Scalars['ID']['output']>;
   Int: Partial<Scalars['Int']['output']>;
   InvitationInput: Partial<InvitationInput>;
   InvitationResponseType: Partial<InvitationResponseType>;
   InvitationType: Partial<InvitationType>;
+  JSON: Partial<Scalars['JSON']['output']>;
   Journey: Partial<Journey>;
   JourneyResult: Partial<JourneyResult>;
   LineType: Partial<LineType>;
@@ -1437,6 +1456,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
+  ServicePatternDistanceResult: Partial<ServicePatternDistanceResult>;
   ServicePatternType: Partial<ServicePatternType>;
   ServicePerformanceFiltersInputType: Partial<ServicePerformanceFiltersInputType>;
   ServicePerformanceInputType: Partial<ServicePerformanceInputType>;
@@ -1712,6 +1732,10 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
+
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
   directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1720,6 +1744,7 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vehicleJourneyId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1901,6 +1926,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
+  getServicePatternDistanceGeom?: Resolver<ResolversTypes['ServicePatternDistanceResult'], ParentType, ContextType, RequireFields<QueryGetServicePatternDistanceGeomArgs, 'vehicleJourneyId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
@@ -1932,6 +1958,12 @@ export type ServiceLinkTypeResolvers<ContextType = RequestContext, ParentType ex
   linkRoute?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   routeValidity?: Resolver<ResolversTypes['RouteType'], ParentType, ContextType>;
   toStop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ServicePatternDistanceResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePatternDistanceResult'] = ResolversParentTypes['ServicePatternDistanceResult']> = ResolversObject<{
+  distance?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  geom?: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -2116,6 +2148,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
   InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
   InvitationType?: InvitationTypeResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   Journey?: JourneyResolvers<ContextType>;
   JourneyResult?: JourneyResultResolvers<ContextType>;
   LineType?: LineTypeResolvers<ContextType>;
@@ -2139,6 +2172,7 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   ServiceInfoType?: ServiceInfoTypeResolvers<ContextType>;
   ServiceLinkType?: ServiceLinkTypeResolvers<ContextType>;
+  ServicePatternDistanceResult?: ServicePatternDistanceResultResolvers<ContextType>;
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;
   ServicePerformanceType?: ServicePerformanceTypeResolvers<ContextType>;
   ServicePunctualityType?: ServicePunctualityTypeResolvers<ContextType>;
