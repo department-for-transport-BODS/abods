@@ -225,7 +225,7 @@ export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDis
       );
     }
     const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
-    const coordinates = parsedGeom["coordinates"];
+    const coordinates = parsedGeom?.coordinates;
 
     return {
       distance: result.distance ?? 0,
