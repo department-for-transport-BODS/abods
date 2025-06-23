@@ -3,8 +3,6 @@
 
 .gds-multiselect-checkbox {
   width: 100%;
-  // white-space: nowrap;
-  // text-overflow: ellipsis;
   &__show-all {
     display: flex;
     align-items: center;
@@ -17,32 +15,6 @@
   &__disabled {
     opacity: 0.5;
   }
-}
-
-.ng-select {
-  height: 2.5rem;
-}
-
-.ng-select .ng-select-container {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  flex-wrap: nowrap;
-}
-
-.ng-select.ng-select-multiple .ng-select-container .ng-value-container {
-  flex-wrap: nowrap;
-  text-overflow: ellipsis;
-}
-
-::ng-deep .ng-select .ng-value {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ng-select.gds-select.gds-multiselect-checkbox {

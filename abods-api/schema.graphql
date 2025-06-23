@@ -531,6 +531,7 @@ enum FeatureFlag {
   DataMonitoring
   StopAnalysis
   DirectionsDisabled
+  Distances
 }
 
 type UserType {
