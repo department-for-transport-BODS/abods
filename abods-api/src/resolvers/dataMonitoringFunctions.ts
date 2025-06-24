@@ -100,6 +100,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
     "function:GraphQlFunction",
     `env:${process.env.PROJECT_ENV}`,
     `abods-db-user-id:${user.id}`,
+    ...user.orgs.map((org) => `org:${org.name}`),
   );
   logger.info("Dashboard enabled for user");
   return { enabled: true, url: url };

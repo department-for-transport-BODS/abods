@@ -2,10 +2,17 @@ import { SessionUser } from "../types/extra";
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
 
-export const getUserOperatorIdsQuery = (db: Kysely<DB>, user: SessionUser) =>
+export const getUserOperatorIdsQuery = (
+  db: Kysely<DB>,
+  sessionUser: SessionUser,
+) =>
   db
     .selectFrom("bods_organisationoperator")
-    .where("organisation_id", "in", user.orgIds)
+    .where(
+      "organisation_id",
+      "in",
+      sessionUser.orgs.map((org) => org.id),
+    )
     .select("operatorref");
 
 export const getUserOperatorIds = async (user: SessionUser, db: Kysely<DB>) =>
