@@ -1,15 +1,18 @@
 import { getFormattedDate, userSelectedDateAsUtc } from "../lib/dayjs.js";
+import { sql } from "kysely";
 import {
   Journey,
   JourneyResult,
   OtpEnum,
   QueryResolvers,
   Resolvers,
+  ServicePatternDistanceResult,
 } from "../types/generated.js";
 import { requireUserSession } from "./helpers.js";
 import dayjs from "dayjs";
 import { GraphQLError } from "graphql";
 import { PrismaClient } from "@prisma/client";
+import { GeoJSONLineString } from "../lib/common.js";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -29,6 +32,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         group_id: true,
         journey_pattern_description: true,
         direction: true,
+        vehicle_journey_id: true,
         expected_services: {
           select: {
             line_name: true,
@@ -55,6 +59,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         operatorName:
           journey.expected_services?.expected_operator.operator_name ??
           "unknown",
+        vehicleJourneyId: journey.vehicle_journey_id,
       })),
     );
 };
@@ -193,10 +198,46 @@ export const getJourney: QueryResolvers["journey"] = async (
   return { stops, avls: avlLists.flat() };
 };
 
+export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDistanceGeom"] =
+  async (_parent, args, context): Promise<ServicePatternDistanceResult> => {
+    const result = await context.kysely
+      .selectFrom("transmodel_vehiclejourney")
+      .innerJoin(
+        "transmodel_servicepatterndistance",
+        "transmodel_vehiclejourney.service_pattern_id",
+        "transmodel_servicepatterndistance.service_pattern_id",
+      )
+      .where("transmodel_vehiclejourney.id", "=", args.vehicleJourneyId)
+      .select([
+        "transmodel_servicepatterndistance.distance",
+        sql<string>`ST_AsGeoJSON(transmodel_servicepatterndistance.geom)`.as(
+          "geom",
+        ),
+      ])
+      .executeTakeFirst();
+
+    if (!result) {
+      throw new GraphQLError(
+        `No service pattern distance found for vehicle journey ID ${args.vehicleJourneyId}`,
+        {
+          extensions: { code: "NOT_FOUND", http: { status: 404 } },
+        },
+      );
+    }
+    const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
+    const coordinates = parsedGeom?.coordinates;
+
+    return {
+      distance: result.distance ?? 0,
+      geom: coordinates,
+    };
+  };
+
 const vehicleJourneyResolvers: Resolvers = {
   Query: {
     journey: getJourney,
     findJourneys: findJourneys,
+    getServicePatternDistanceGeom,
   },
 };
 

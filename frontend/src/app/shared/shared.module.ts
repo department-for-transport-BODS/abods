@@ -60,6 +60,7 @@ import { GeoContextPipe } from "./mapbox/geo-context.pipe";
 import { JoinPipe } from "./pipes/join.pipe";
 import { MapRecentreButtonComponent } from "./components/map-recentre-button/map-recentre-button.component";
 import { MapViewToggleComponent } from "./components/map-view-toggle/map-view-toggle.component";
+import { ScheduledRouteToggleComponent } from "./components/map-view-scheduled-route-toggle/map-view-scheduled-route-toggle.component";
 import { DropdownComponent } from "./components/dropdown/dropdown.component";
 import { InviteUserModalComponent } from "./components/invite-user-modal/invite-user-modal.component";
 import { OtpParamRangeSliderComponent } from "./components/otp-param-range-slider/otp-param-range-slider.component";
@@ -129,6 +130,7 @@ import { DateRangePickerComponent } from "./components/date-range/date-range-pic
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,
@@ -208,6 +210,7 @@ import { DateRangePickerComponent } from "./components/date-range/date-range-pic
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,

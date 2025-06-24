@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: string; output: string; }
   DateTime: { input: string; output: string; }
+  JSON: { input: any; output: any; }
   Time: { input: string; output: string; }
 };
 
@@ -322,6 +323,7 @@ export type EventType = {
 export enum FeatureFlag {
   DataMonitoring = 'DataMonitoring',
   DirectionsDisabled = 'DirectionsDisabled',
+  Distances = 'Distances',
   ServiceMonitoring = 'ServiceMonitoring',
   StopAnalysis = 'StopAnalysis'
 }
@@ -481,6 +483,7 @@ export type Journey = {
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
   startTime: Scalars['String']['output'];
+  vehicleJourneyId?: Maybe<Scalars['Int']['output']>;
 };
 
 export type JourneyResult = {
@@ -842,6 +845,7 @@ export type Query = {
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
+  getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
@@ -893,6 +897,11 @@ export type QueryEventsArgs = {
 export type QueryFindJourneysArgs = {
   dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
+};
+
+
+export type QueryGetServicePatternDistanceGeomArgs = {
+  vehicleJourneyId: Scalars['ID']['input'];
 };
 
 
@@ -973,6 +982,12 @@ export type ServiceLinkType = {
   linkRoute?: Maybe<Scalars['String']['output']>;
   routeValidity: RouteType;
   toStop: Scalars['String']['output'];
+};
+
+export type ServicePatternDistanceResult = {
+  __typename?: 'ServicePatternDistanceResult';
+  distance: Scalars['Int']['output'];
+  geom: Scalars['JSON']['output'];
 };
 
 export type ServicePatternType = {
@@ -1618,7 +1633,14 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null }> };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, vehicleJourneyId?: number | null }> };
+
+export type ServicePatternDistanceGeomQueryVariables = Exact<{
+  vehicleJourneyId: Scalars['ID']['input'];
+}>;
+
+
+export type ServicePatternDistanceGeomQuery = { __typename?: 'Query', getServicePatternDistanceGeom: { __typename?: 'ServicePatternDistanceResult', distance: number, geom: any } };
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3137,6 +3159,7 @@ export const JourneysDocument = gql`
     operatorName
     operatorNoc
     directionRef
+    vehicleJourneyId
   }
 }
     `;
@@ -3146,6 +3169,25 @@ export const JourneysDocument = gql`
   })
   export class JourneysGQL extends Apollo.Query<JourneysQuery, JourneysQueryVariables> {
     document = JourneysDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ServicePatternDistanceGeomDocument = gql`
+    query servicePatternDistanceGeom($vehicleJourneyId: ID!) {
+  getServicePatternDistanceGeom(vehicleJourneyId: $vehicleJourneyId) {
+    distance
+    geom
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ServicePatternDistanceGeomGQL extends Apollo.Query<ServicePatternDistanceGeomQuery, ServicePatternDistanceGeomQueryVariables> {
+    document = ServicePatternDistanceGeomDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

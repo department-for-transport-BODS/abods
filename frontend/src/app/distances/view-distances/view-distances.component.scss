@@ -14,6 +14,46 @@
       8fr
     );
   gap: govuk-spacing(1);
+
+  ::ng-deep .ng-select {
+    ::ng-deep .ng-select-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      ::ng-deep .ng-value-container {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0; // important for ellipsis
+        align-items: center;
+        overflow: hidden;
+        flex-wrap: nowrap;
+
+        .ng-value {
+          flex: 1 1 auto;
+          min-width: 0px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-right: 0px;
+
+          .ng-value-label {
+            padding-left: 0 !important;
+          }
+        }
+
+        ::ng-deep .ng-input {
+          flex-grow: 8;
+          white-space: nowrap;
+          flex-shrink: 0;
+          display: block; /* or block if searchable */
+          input:focus {
+            min-width: 100px;
+          }
+        }
+      }
+    }
+  }
 }
 .ag-header {
   height: "40px";

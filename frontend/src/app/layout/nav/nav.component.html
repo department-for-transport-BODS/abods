@@ -79,7 +79,7 @@
             >Stop analysis
           </a>
         </li>
-        <li class="nav__item">
+        <li *ngIf="canViewDistances | async" class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/distances']"

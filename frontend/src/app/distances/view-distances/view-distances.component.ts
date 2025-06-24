@@ -33,6 +33,7 @@ import {
   NoRowsOverlayParams,
 } from "../../shared/components/ag-grid/no-rows-overlay/no-rows-overlay.component";
 import { AgGridFormatterService } from "../../shared/components/ag-grid/ag-grid-formatter.service";
+import { sumBy } from "lodash-es";
 
 const WHITESPACE_BETWEEN_SINGLE_CHARACTER = /(?<= \w|&|^\w|^) (?=\w |&|\w$|$)/g;
 const INITIAL_NO_ROWS_MESSAGE = "No operator data found";
@@ -79,6 +80,7 @@ export class ViewDistancesComponent implements OnInit {
   serviceIds: string[] = [];
 
   data: Distance[] = [];
+  headerData: Distance[] = [];
   @Input() paginate = false;
   columnDefs: ColDef[] = [
     {
@@ -86,7 +88,7 @@ export class ViewDistancesComponent implements OnInit {
       field: "operatorName",
       headerName: "Operator",
       valueGetter: ({ data }: { data: Distance }) =>
-        `${data.operatorName} (${data.operatorId})`,
+        data.operatorId ? `${data.operatorName} (${data.operatorId})` : "",
       flex: 2,
       maxWidth: 300,
       sortable: true,
@@ -181,6 +183,7 @@ export class ViewDistancesComponent implements OnInit {
 
   gridOptions: GridOptions = {
     headerHeight: 60,
+    getRowHeight: () => 50,
     overlayLoadingTemplate:
       '<div *ngIf="loading"><app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner></div>',
   };
@@ -249,6 +252,19 @@ export class ViewDistancesComponent implements OnInit {
         }),
       )
       .subscribe((data) => {
+        if (data && data.length > 0) {
+          this.headerData = [
+            {
+              lineName: "",
+              nocLineAndServiceCode: "",
+              operatorId: "",
+              operatorName: "",
+              avlDistance: sumBy(data, "avlDistance"),
+              distance: sumBy(data, "distance"),
+            },
+          ];
+        }
+
         this.data = data;
         this.loading = false;
       });
