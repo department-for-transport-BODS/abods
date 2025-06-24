@@ -213,13 +213,15 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   const user = await requireUserSession(context);
   if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
 
+  const orgIds = user.orgs.map((org) => org.id).sort();
+
   const corridor = await context.db.corridor.create({
     data: {
       corridor_name: args.payload.name,
       // Not good. Should be changed later
       // This won't be visible to any other orgs they are assigned to.
       // Visibility will be somewhat random, though consistent because we sort the org numbers
-      organisation_id: user.orgIds[0],
+      organisation_id: orgIds[0],
       user_id: user.id,
     },
     select: {

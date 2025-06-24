@@ -1,6 +1,4 @@
 import { DayOfWeekFlagsInputType } from "../types/generated.js";
-import logger from "../logger.js";
-import { throwUnauthenticatedError } from "../resolvers/helpers.js";
 
 export const getDayOfWeekNumbers = (
   dayOfWeekFlags: DayOfWeekFlagsInputType,
