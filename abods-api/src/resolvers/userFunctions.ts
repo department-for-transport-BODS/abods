@@ -15,10 +15,9 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2";
 import logger from "../logger.js";
-import { requireUserSession } from "./helpers.js";
+import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
-import { getUserOrgIds } from "../lib/utils.js";
 import { isLocal } from "../prismaClient.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
@@ -45,7 +44,7 @@ export const getUsers: QueryResolvers["users"] = async (
         where: {
           userOrganisations: {
             every: {
-              organisation_id: { in: user.orgIds },
+              organisation_id: { in: user.orgs.map((org) => org.id) },
             },
           },
         },
@@ -215,7 +214,12 @@ export const loginUser: MutationResolvers["login"] = async (
       select: {
         id: true,
         password: true,
-        userOrganisations: { select: { organisation_id: true } },
+        userOrganisations: {
+          select: {
+            organisation_id: true,
+            organisation: { select: { name: true } },
+          },
+        },
       },
     });
 
@@ -224,7 +228,15 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const orgIds = getUserOrgIds(bodsUser);
+    if (bodsUser.userOrganisations.length < 1) {
+      logger.error(
+        { userId: bodsUser.id },
+        "User not mapped to an organisation",
+      );
+      throwUnauthenticatedError("User not mapped to any organisation");
+    }
+
+    const orgNames = bodsUser.userOrganisations.map((n) => n.organisation.name);
 
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
@@ -259,8 +271,8 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
-        `userId:${user_id}`,
-        ...orgIds.map((orgId) => `org:${orgId}`),
+        `abods-db-user-id:${user_id}`,
+        ...orgNames.map((name) => `org:${name}`),
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {
@@ -489,7 +501,13 @@ const getuserOrgs: QueryResolvers["userOrgs"] = async (
     .selectFrom("bods_organisation")
     .select(["name", "id", "is_abods_global_viewer"])
     .where("name", "is not", null);
-  let userOrgs = await orgs.where("id", "in", user.orgIds).execute();
+  let userOrgs = await orgs
+    .where(
+      "id",
+      "in",
+      user.orgs.map((org) => org.id),
+    )
+    .execute();
 
   if (userOrgs.some((org) => org.is_abods_global_viewer)) {
     userOrgs = await orgs.distinct().execute();

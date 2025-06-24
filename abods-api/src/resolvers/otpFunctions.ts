@@ -448,7 +448,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
           operatorOrganisations: {
-            some: { organisation_id: { in: user.orgIds } },
+            some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
           },
         },
         select: {

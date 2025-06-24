@@ -21,6 +21,9 @@ export interface RequestContext extends BaseContext {
 
 export interface SessionUser {
   id: number;
-  orgIds: number[];
+  orgs: {
+    id: number;
+    name: string;
+  }[];
   isGlobalUser?: boolean;
 }

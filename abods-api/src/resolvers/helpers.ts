@@ -2,7 +2,6 @@ import { RequestContext, SessionUser } from "../types/extra.js";
 import logger from "../logger.js";
 import { IncomingHttpHeaders } from "http";
 import { GraphQLError } from "graphql";
-import { getUserOrgIds } from "../lib/utils.js";
 
 export function throwUnauthenticatedError(
   message?: string,
@@ -57,7 +56,9 @@ export const requireUserSession = async (context: RequestContext) => {
       userOrganisations: {
         select: {
           organisation_id: true,
-          organisation: { select: { is_abods_global_viewer: true } },
+          organisation: {
+            select: { is_abods_global_viewer: true, name: true },
+          },
         },
       },
       is_active: true,
@@ -74,14 +75,20 @@ export const requireUserSession = async (context: RequestContext) => {
     throwUnauthenticatedError();
   }
 
-  const orgIds = getUserOrgIds({
-    userOrganisations: bodsUser.userOrganisations,
-    id: sessionRecord.user_id,
-  });
+  if (bodsUser.userOrganisations.length < 1) {
+    logger.error(
+      { userId: sessionRecord.user_id },
+      "User not mapped to an organisation",
+    );
+    throwUnauthenticatedError("User not mapped to any organisation");
+  }
 
   const sessionUser: SessionUser = {
     id: sessionRecord.user_id,
-    orgIds: orgIds,
+    orgs: bodsUser.userOrganisations.map((userOrg) => ({
+      id: userOrg.organisation_id,
+      name: userOrg.organisation.name ?? "",
+    })),
     isGlobalUser: bodsUser.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer,
     ),
