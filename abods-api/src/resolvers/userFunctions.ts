@@ -271,7 +271,7 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
-        `abods-db-user-id:${user_id}`,
+        `abodsDbUserId:${user_id}`,
         ...orgNames.map((name) => `org:${name}`),
       );
       return { success: true, expiresAt: expiryTimestamp };
