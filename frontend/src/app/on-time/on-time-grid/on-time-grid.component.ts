@@ -8,6 +8,7 @@ import {
 import {
   ColDef,
   FilterChangedEvent,
+  GridApi,
   GridOptions,
   RowNode,
   ValueGetterParams,
@@ -25,6 +26,7 @@ import {
   forEach as _forEach,
   sumBy,
   sum,
+  isEqual,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
@@ -184,7 +186,7 @@ const column: (
         {
           ...column,
           valueFormatter: ({ value }: { value: number }) =>
-            value.toLocaleString(),
+            value != undefined ? value.toLocaleString() : "-",
           hide: true,
         },
         {
@@ -215,13 +217,20 @@ const column: (
 })
 export class OnTimeGridComponent<TData extends AbstractPerformance> {
   Mode = Mode; // added to expose enum in html
-  uniqueDirection: Direction[] = [
-    ...new Set(this.data?.map((item) => item.direction)),
-  ].filter((direction) => direction != undefined);
 
-  directionOptions: MultiselectCheckboxOption[] = [];
+  excludeDirections = [
+    Direction.All,
+    Direction.Clockwise,
+    Direction.Anticlockwise,
+  ];
+  directionOptions: MultiselectCheckboxOption[] = Object.entries(Direction)
+    .filter(([_, value]) => !this.excludeDirections.includes(value))
+    .map(([key, value]) => ({
+      value: value,
+      label: key,
+    }));
 
-  directions: Direction[] = this.enableDirection() ? [] : [Direction.Inbound];
+  directions: Direction[] = [];
   private _columnDescriptions: ColumnDescription[] = [];
   @Input()
   get columnDescriptions() {
@@ -258,6 +267,18 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     });
   }
 
+  private _preSelectedDirections: Direction[] = [];
+  @Input() get preSelectedDirections(): Direction[] {
+    return this._preSelectedDirections;
+  }
+  set preSelectedDirections(preSelectedDirections: Direction[]) {
+    this._preSelectedDirections = preSelectedDirections;
+    if (!this.isDirectionsDisabled()) {
+      this.directions = preSelectedDirections;
+      this.updateGrid();
+    }
+  }
+
   private _noun?: string;
   @Input() get noun(): string {
     return this._noun ?? "";
@@ -286,17 +307,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       return;
     }
 
-    this.summaryHeaderData = this.returnSummaryTotal(value);
-    this.uniqueDirection = [
-      ...new Set(this.data?.map((item) => item.direction)),
-    ].filter((direction) => direction != undefined);
-
-    this.directionOptions = this.uniqueDirection.map((value: Direction) => ({
-      value: value,
-      label: Object.keys(Direction).find(
-        (key) => Direction[key as keyof typeof Direction] === value,
-      )!,
-    }));
+    this.updateGrid();
   }
 
   get data() {
@@ -309,6 +320,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
 
   @Output() gridReady = new EventEmitter();
   @Output() cellClicked = new EventEmitter<{ column: string; data: TData }>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   get mode() {
     return this._mode;
@@ -343,7 +355,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this._mode = Mode.percent;
   }
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -378,6 +390,11 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   returnSummaryTotal(
     value: (StopPerformanceGridType | BasePerformance)[],
   ): (BasePerformance | StopPerformanceGridType)[] {
+    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
+
+    if (value.length === 0) {
+      return summaryArray;
+    }
     const early = sumBy(value, "early");
     const late = sumBy(value, "late");
     const onTime = sumBy(value, "onTime");
@@ -422,7 +439,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: this.enableDirection()
+      averageDelay: this.isDirectionsDisabled()
         ? totalDelay / actual || 0
         : averageDelay,
       noData: actual - scheduled,
@@ -432,8 +449,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       earlyInSeconds: earlyInSeconds,
       lateInSeconds: lateInSeconds,
     };
-
-    const summaryArray: (StopPerformanceGridType | BasePerformance)[] = [];
 
     if (isStopGrid) {
       const stopGrid = value.filter((val) => this.isGridTypeStop(val));
@@ -480,7 +495,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       });
     },
   };
-  // autoHeight: true,
 
   defaultColDef: ColDef = {
     resizable: false,
@@ -502,19 +516,50 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   }
 
   isExternalFilterPresent() {
-    return this.directions.length > 0;
+    return (
+      (this.data ?? []).length > 0 && !isEqual(this.directions, [Direction.All])
+    );
   }
 
   doesExternalFilterPass(node: RowNode<TData>) {
+    if (this.directions.length === 0 && !node.data?.direction) {
+      return true;
+    }
     if (!node.data?.direction) {
       return false;
     }
     return this.directions.includes(node.data?.direction);
   }
 
+  updateGrid() {
+    this.onTimeGrid?.gridApi?.onFilterChanged();
+    let filteredData = structuredClone(this.data) ?? [];
+    if (
+      this.directions.length > 0 &&
+      !this.directions.includes(Direction.All)
+    ) {
+      filteredData =
+        filteredData.filter(
+          (row) => row.direction && this.directions.includes(row.direction),
+        ) ?? [];
+    }
+
+    this.summaryHeaderData = this.returnSummaryTotal(filteredData);
+  }
   onDirectionsChanged($event: string[]) {
     this.directions = $event as Direction[];
-    this.onTimeGrid?.gridApi?.onFilterChanged();
+
+    if (this.directions.length > 0) {
+      this.directions = this.directions.filter(
+        (value) => value !== Direction.All,
+      );
+      this.updateGrid();
+    }
+
+    if (this.directions.length === 0) {
+      this.directions = [Direction.All];
+    }
+    this.directionsChanged.emit(this.directions);
   }
 
   columnsChanged(): void {
@@ -558,15 +603,24 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     );
   }
 
+  getRowCount(api: GridApi) {
+    if (this.paginate) {
+      return api.paginationGetRowCount();
+    }
+
+    return api.getDisplayedRowCount();
+  }
+
   filterChanged({ api }: FilterChangedEvent) {
-    const rowCount = api.paginationGetRowCount() ?? 0;
-    if (this.data && this.data.length > 0 && this.paginate && rowCount === 0) {
+    const rowCount = this.getRowCount(api);
+
+    if (rowCount === 0) {
       this.overlayParams.message = `No ${this.noun}s matched the search query`;
       api.showNoRowsOverlay();
-    } else if (rowCount > 0) {
-      api.hideOverlay();
-      this.overlayParams.message = this.initialNoRowsMessage;
+      return;
     }
+    api.hideOverlay();
+    this.overlayParams.message = this.initialNoRowsMessage;
   }
 
   isGridTypeStop(data: AbstractPerformance): data is StopPerformanceGridType {

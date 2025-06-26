@@ -31,7 +31,8 @@
       "organisation": "43000590100",
       "dataMonitoring": "43000590101",
       "serviceMonitoring": "43000590102",
-      "stopAnalysis": "43000590103"
+      "stopAnalysis": "43000590103",
+      "distances": "43000590104"
     }
   }
 }

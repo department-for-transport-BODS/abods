@@ -15,26 +15,26 @@
     justify-content: space-between;
     &--filter {
       width: 20%;
-      flex-grow: 2;
       margin-right: govuk-spacing(4);
     }
   }
   &__disable-direction-controls {
     position: relative;
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
     &--filter {
-      flex-grow: 2;
+      justify-content: space-between;
+      flex-grow: 1;
       margin-right: govuk-spacing(4);
     }
   }
   &__dropdown {
     position: relative;
     display: flex;
-    justify-content: space-between;
     align-content: start;
     &--filter {
       flex-grow: 1;
+      justify-content: space-between;
       max-width: 40%;
       margin-right: govuk-spacing(4);
     }

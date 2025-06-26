@@ -1,6 +1,7 @@
 scalar DateTime
 scalar Time
 scalar Date
+scalar JSON
 
 type Query {
   user: LoginInfo
@@ -27,6 +28,9 @@ type Query {
   ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
+  getServicePatternDistanceGeom(
+    vehicleJourneyId: ID!
+  ): ServicePatternDistanceResult!
   lines(
     operatorIds: [String!]!
     inputDate: String!
@@ -36,11 +40,35 @@ type Query {
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
   embeddedUrl: AWSQuicksightUser!
+  userOrgs: [Organisation!]!
+  distances(filterBy: DistancesFilterInput): [Distance!]!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
+}
+
+type Distance {
+  operatorId: String!
+  operatorName: String!
+  nocLineAndServiceCode: String!
+  lineName: String!
+  distance: Int
+  avlDistance: Int
+}
+
+input DistancesFilterInput {
+  orgId: String!
+  operatorIds: [String!]
+  nocLineAndServiceCodes: [String!]
+  fromTimestamp: String!
+  toTimestamp: String!
+}
+
+type Organisation {
+  name: String!
+  id: Int!
 }
 
 type AWSQuicksightUser {
@@ -55,7 +83,8 @@ type DashboardVehicles {
 }
 
 input OperatorFilterInput {
-  operatorIds: [String!]!
+  operatorIds: [String!]
+  orgId: Int
 }
 
 type EventStatsType {
@@ -201,6 +230,7 @@ type Journey {
   serviceNumber: String!
   operatorName: String!
   operatorNoc: String!
+  vehicleJourneyId: Int
 }
 
 type ServiceInfoType {
@@ -506,6 +536,7 @@ enum FeatureFlag {
   DataMonitoring
   StopAnalysis
   DirectionsDisabled
+  Distances
 }
 
 type UserType {
@@ -676,7 +707,7 @@ input PerformanceFiltersInputType {
   excludedDates: [Date!]
   excludeItoLineId: String
   granularity: Granularity
-  lineDirection: LineDirection
+  direction: [Direction]
   lineIds: [String!]
   maxDelay: Int
   minDelay: Int
@@ -699,13 +730,8 @@ enum Granularity {
   month
 }
 
-enum LineDirection {
-  All
-  Inbound
-  Outbound
-}
-
 enum Direction {
+  all
   inbound
   outbound
   clockwise
@@ -777,6 +803,11 @@ enum OtpEnum {
 enum RouteType {
   VALID
   INVALID_NO_ROUTE_POINTS
+}
+
+type ServicePatternDistanceResult {
+  distance: Int!
+  geom: JSON!
 }
 
 # eslint-disable @graphql-eslint/no-unused-fields

@@ -104,6 +104,11 @@ const routes: Routes = [
         (mod) => mod.ServiceMonitoringModule,
       ),
   },
+  {
+    path: "distances",
+    loadChildren: () =>
+      import("./distances/distances.module").then((mod) => mod.DistancesModule),
+  },
   { path: "not-authorised", component: NotAuthorisedComponent },
   { path: "**", component: NotFoundComponent },
 ];
