@@ -3,7 +3,7 @@
     <gds-back-link
       label="All operators"
       [route]="['../']"
-      queryParamsHandling="preserve"
+      [queryParams]="backLinkParams"
     ></gds-back-link>
   </ng-container>
   <ng-container ngProjectAs="content">
@@ -94,7 +94,11 @@
         [loading]="overviewLoading"
         [params$]="params$.asObservable()"
       ></app-overview-stats>
-      <app-service-grid [params]="params$ | async"></app-service-grid>
+      <app-service-grid
+        [params]="params$ | async"
+        [preSelectedDirections]="preSelectedDirections"
+        (directionsChanged)="onDirectionChange($event)"
+      ></app-service-grid>
     </ng-container>
   </ng-container>
 </app-page>

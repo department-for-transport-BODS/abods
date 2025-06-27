@@ -6,7 +6,7 @@ import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
 import { map } from "rxjs/operators";
-import { FeatureFlag } from "../../../generated/graphql";
+import { Direction, FeatureFlag } from "../../../generated/graphql";
 
 @Component({
   selector: "app-stops-grid-display",
@@ -18,7 +18,9 @@ import { FeatureFlag } from "../../../generated/graphql";
     [data]="data"
     [csvFilename]="csvFilename"
     [paginate]="paginate"
+    [preSelectedDirections]="preSelectedDirections"
     (cellClicked)="handleCellClicked($event)"
+    (directionsChanged)="onDirectionChange($event)"
   />`,
   standalone: false,
 })
@@ -28,8 +30,9 @@ export class StopsGridComponentDisplayComponent {
   @Input() errored = false;
   @Input() paginate = false;
   @Input() csvFilename: string | undefined;
+  @Input() preSelectedDirections: Direction[] = [];
 
-  columnDescriptions: ColumnDescription[] = this.enableDirection()
+  columnDescriptions: ColumnDescription[] = this.isDirectionsDisabled()
     ? [
         {
           title: "NAPTAN",
@@ -252,13 +255,16 @@ export class StopsGridComponentDisplayComponent {
           columnType: "Camelcase",
           colId: "direction",
           field: "direction",
+          valueGetter: ({ data }: { data: StopPerformance }) =>
+            data.direction ?? "-",
           isHideable: true,
-          isDefaultShown: false,
+          isDefaultShown: true,
           headerName: "Direction",
           sortable: true,
           unSortIcon: true,
           flex: 2,
           maxWidth: 130,
+          cellClass: "govuk-!-padding-left-3",
         },
         {
           title: "Scheduled departures",
@@ -343,7 +349,11 @@ export class StopsGridComponentDisplayComponent {
           pctField: "onTimeRatio",
           timeField: "onTimeInMins",
           timeValueGetter: ({ data }: { data: StopPerformance }) =>
-            data.onTimeInSeconds,
+            data.actualDepartures ? data.onTimeInSeconds : undefined,
+          valueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.onTime : undefined,
+          pctValueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.onTimeRatio : undefined,
           headerName: "On time",
           sortable: true,
           unSortIcon: true,
@@ -361,7 +371,11 @@ export class StopsGridComponentDisplayComponent {
           pctField: "lateRatio",
           timeField: "lateInMins",
           timeValueGetter: ({ data }: { data: StopPerformance }) =>
-            data.lateInSeconds,
+            data.actualDepartures ? data.lateInSeconds : undefined,
+          valueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.late : undefined,
+          pctValueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.lateRatio : undefined,
           headerName: "Late",
           sortable: true,
           unSortIcon: true,
@@ -379,7 +393,11 @@ export class StopsGridComponentDisplayComponent {
           pctField: "earlyRatio",
           timeField: "earlyInMins",
           timeValueGetter: ({ data }: { data: StopPerformance }) =>
-            data.earlyInSeconds,
+            data.actualDepartures ? data.earlyInSeconds : undefined,
+          valueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.early : undefined,
+          pctValueGetter: ({ data }: { data: StopPerformance }) =>
+            data.actualDepartures ? data.earlyRatio : undefined,
           headerName: "Early",
           sortable: true,
           unSortIcon: true,
@@ -392,6 +410,7 @@ export class StopsGridComponentDisplayComponent {
         },
       ];
   @Output() stopNameClicked = new EventEmitter<StopPerformance>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   handleCellClicked($event: { column: string; data: StopPerformance }) {
     if ($event.column === "stopName") {
@@ -404,7 +423,7 @@ export class StopsGridComponentDisplayComponent {
     private config: ConfigService,
   ) {}
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -417,5 +436,9 @@ export class StopsGridComponentDisplayComponent {
       });
 
     return isDirectionsDisabled;
+  }
+
+  onDirectionChange($event: Direction[]) {
+    this.directionsChanged.emit($event);
   }
 }

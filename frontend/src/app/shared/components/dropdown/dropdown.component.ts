@@ -1,9 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from "@angular/core";
 import { NgxTippyProps, NgxTippyService } from "ngx-tippy-wrapper";
 
-const dropdownPadding = 10;
-const dropdownBorder = 1;
-
 @Component({
   selector: "app-dropdown",
   templateUrl: "./dropdown.component.html",
@@ -32,14 +29,6 @@ export class DropdownComponent implements OnInit {
     offset: [0, -2],
     animation: false,
   };
-
-  get triggerWidth(): string {
-    return this.width + "px";
-  }
-
-  get contentWidth(): string {
-    return this.width - dropdownPadding * 2 - dropdownBorder * 2 + "px";
-  }
 
   get isOpen(): boolean {
     return (

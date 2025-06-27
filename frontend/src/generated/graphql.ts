@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: string; output: string; }
   DateTime: { input: string; output: string; }
+  JSON: { input: any; output: any; }
   Time: { input: string; output: string; }
 };
 
@@ -271,11 +272,30 @@ export type DelayFrequencyType = {
 };
 
 export enum Direction {
+  All = 'all',
   Anticlockwise = 'anticlockwise',
   Clockwise = 'clockwise',
   Inbound = 'inbound',
   Outbound = 'outbound'
 }
+
+export type Distance = {
+  __typename?: 'Distance';
+  avlDistance?: Maybe<Scalars['Int']['output']>;
+  distance?: Maybe<Scalars['Int']['output']>;
+  lineName: Scalars['String']['output'];
+  nocLineAndServiceCode: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+};
+
+export type DistancesFilterInput = {
+  fromTimestamp: Scalars['String']['input'];
+  nocLineAndServiceCodes?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId: Scalars['String']['input'];
+  toTimestamp: Scalars['String']['input'];
+};
 
 export type EventData = {
   __typename?: 'EventData';
@@ -303,6 +323,7 @@ export type EventType = {
 export enum FeatureFlag {
   DataMonitoring = 'DataMonitoring',
   DirectionsDisabled = 'DirectionsDisabled',
+  Distances = 'Distances',
   ServiceMonitoring = 'ServiceMonitoring',
   StopAnalysis = 'StopAnalysis'
 }
@@ -462,6 +483,7 @@ export type Journey = {
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
   startTime: Scalars['String']['output'];
+  vehicleJourneyId?: Maybe<Scalars['Int']['output']>;
 };
 
 export type JourneyResult = {
@@ -469,12 +491,6 @@ export type JourneyResult = {
   avls: Array<AvlPoint>;
   stops: Array<Stop>;
 };
-
-export enum LineDirection {
-  All = 'All',
-  Inbound = 'Inbound',
-  Outbound = 'Outbound'
-}
 
 export type LineType = {
   __typename?: 'LineType';
@@ -694,7 +710,8 @@ export type OperatorFeedMonitoring = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds: Array<Scalars['String']['input']>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type OperatorPerformancePage = {
@@ -722,6 +739,12 @@ export type OperatorType = {
   operatorId: Scalars['String']['output'];
 };
 
+export type Organisation = {
+  __typename?: 'Organisation';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type OrganisationReferenceInput = {
   id: Scalars['String']['input'];
 };
@@ -747,11 +770,11 @@ export type PerformanceFiltersInputType = {
   addNonTagged?: InputMaybe<Scalars['Boolean']['input']>;
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  direction?: InputMaybe<Array<InputMaybe<Direction>>>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
-  lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
@@ -817,10 +840,12 @@ export type Query = {
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  distances: Array<Distance>;
   embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
+  getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
@@ -835,6 +860,7 @@ export type Query = {
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
+  userOrgs: Array<Organisation>;
   users?: Maybe<Array<UserType>>;
 };
 
@@ -846,6 +872,11 @@ export type QueryAvlLineLevelStatusArgs = {
 
 export type QueryDashboardVehiclesArgs = {
   operatorId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryDistancesArgs = {
+  filterBy?: InputMaybe<DistancesFilterInput>;
 };
 
 
@@ -866,6 +897,11 @@ export type QueryEventsArgs = {
 export type QueryFindJourneysArgs = {
   dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
+};
+
+
+export type QueryGetServicePatternDistanceGeomArgs = {
+  vehicleJourneyId: Scalars['ID']['input'];
 };
 
 
@@ -946,6 +982,12 @@ export type ServiceLinkType = {
   linkRoute?: Maybe<Scalars['String']['output']>;
   routeValidity: RouteType;
   toStop: Scalars['String']['output'];
+};
+
+export type ServicePatternDistanceResult = {
+  __typename?: 'ServicePatternDistanceResult';
+  distance: Scalars['Int']['output'];
+  geom: Scalars['JSON']['output'];
 };
 
 export type ServicePatternType = {
@@ -1249,6 +1291,25 @@ export type DashboadEmbeddedUrlQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type DashboadEmbeddedUrlQuery = { __typename?: 'Query', embeddedUrl: { __typename?: 'AWSQuicksightUser', enabled: boolean, url?: string | null } };
+
+export type UserOrganisationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserOrganisationsQuery = { __typename?: 'Query', userOrgs: Array<{ __typename?: 'Organisation', name: string, id: number }> };
+
+export type OrgOperatorListQueryVariables = Exact<{
+  orgId: Scalars['Int']['input'];
+}>;
+
+
+export type OrgOperatorListQuery = { __typename?: 'Query', operators: Array<{ __typename?: 'OperatorType', name: string, nocCode: string }> };
+
+export type DistancesListQueryVariables = Exact<{
+  filterBy: DistancesFilterInput;
+}>;
+
+
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, distance?: number | null, avlDistance?: number | null }> };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -1572,7 +1633,14 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null }> };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, vehicleJourneyId?: number | null }> };
+
+export type ServicePatternDistanceGeomQueryVariables = Exact<{
+  vehicleJourneyId: Scalars['ID']['input'];
+}>;
+
+
+export type ServicePatternDistanceGeomQuery = { __typename?: 'Query', getServicePatternDistanceGeom: { __typename?: 'ServicePatternDistanceResult', distance: number, geom: any } };
 
 export type GetVersionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2099,6 +2167,67 @@ export const DashboadEmbeddedUrlDocument = gql`
   })
   export class DashboadEmbeddedUrlGQL extends Apollo.Query<DashboadEmbeddedUrlQuery, DashboadEmbeddedUrlQueryVariables> {
     document = DashboadEmbeddedUrlDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const UserOrganisationsDocument = gql`
+    query userOrganisations {
+  userOrgs {
+    name
+    id
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UserOrganisationsGQL extends Apollo.Query<UserOrganisationsQuery, UserOrganisationsQueryVariables> {
+    document = UserOrganisationsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const OrgOperatorListDocument = gql`
+    query orgOperatorList($orgId: Int!) {
+  operators(filterBy: {orgId: $orgId}) {
+    name
+    nocCode
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class OrgOperatorListGQL extends Apollo.Query<OrgOperatorListQuery, OrgOperatorListQueryVariables> {
+    document = OrgOperatorListDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DistancesListDocument = gql`
+    query distancesList($filterBy: DistancesFilterInput!) {
+  distances(filterBy: $filterBy) {
+    operatorId
+    operatorName
+    nocLineAndServiceCode
+    lineName
+    distance
+    avlDistance
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DistancesListGQL extends Apollo.Query<DistancesListQuery, DistancesListQueryVariables> {
+    document = DistancesListDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
@@ -3030,6 +3159,7 @@ export const JourneysDocument = gql`
     operatorName
     operatorNoc
     directionRef
+    vehicleJourneyId
   }
 }
     `;
@@ -3039,6 +3169,25 @@ export const JourneysDocument = gql`
   })
   export class JourneysGQL extends Apollo.Query<JourneysQuery, JourneysQueryVariables> {
     document = JourneysDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ServicePatternDistanceGeomDocument = gql`
+    query servicePatternDistanceGeom($vehicleJourneyId: ID!) {
+  getServicePatternDistanceGeom(vehicleJourneyId: $vehicleJourneyId) {
+    distance
+    geom
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ServicePatternDistanceGeomGQL extends Apollo.Query<ServicePatternDistanceGeomQuery, ServicePatternDistanceGeomQueryVariables> {
+    document = ServicePatternDistanceGeomDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

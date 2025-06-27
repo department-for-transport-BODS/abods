@@ -81,8 +81,18 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       "n.national_operator_code",
       "s.operator_noc",
     );
-  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+  if (args.filterBy?.operatorIds && args.filterBy.operatorIds.length > 0) {
     query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+
+  if (args.filterBy?.orgId) {
+    query = query
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "boo.operatorref",
+        "a.operatorref",
+      )
+      .where("boo.organisation_id", "=", args.filterBy?.orgId);
   }
   return await query
     .groupBy(["a.name", "s.operator_noc"])
@@ -272,16 +282,29 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         adminAreaIds,
         startTime,
         endTime,
+        operatorIds,
+        direction,
       } = filters || {};
+
+      const isDirectionsDisabled =
+        process.env.ABODS_FLAG_DirectionsDisabled &&
+        process.env.ABODS_FLAG_DirectionsDisabled === "true";
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
       }
 
-      const summaryTable = lineIds
-        ? "timetable_summary_service_tz"
-        : "timetable_summary_operator_t";
+      let summaryTable: OTPSummaryTables =
+        operatorIds && operatorIds.length > 0
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
+
+      if (isDirectionsDisabled) {
+        summaryTable = lineIds
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
+      }
 
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
@@ -289,6 +312,27 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         args.inputs,
         userOperatorIds,
       );
+
+      const filterDirections = direction?.filter((value) => value != undefined);
+      if (
+        Array.isArray(filterDirections) &&
+        !filterDirections.includes(Direction.All)
+      ) {
+        if (filterDirections?.includes(Direction.Inbound)) {
+          filterDirections.push(Direction.Anticlockwise);
+        }
+
+        if (filterDirections?.includes(Direction.Outbound)) {
+          filterDirections.push(Direction.Clockwise);
+        }
+        summarySubQuery = summarySubQuery.where((eb) =>
+          eb(
+            eb.fn("lower", [eb.ref("direction")]),
+            "in",
+            filterDirections.map((v) => v.toLocaleLowerCase()),
+          ),
+        );
+      }
 
       summarySubQuery = kyselyFilterForAdminIds(
         summarySubQuery,
@@ -404,7 +448,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
           operatorOrganisations: {
-            some: { organisation_id: { in: user.orgIds } },
+            some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
           },
         },
         select: {
@@ -1030,7 +1074,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
                     context.kysely.fn
                       .avg("diff_sched_time_to_stop")
@@ -1052,12 +1095,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                     "stop_id",
                     "common_name",
                     "is_timing_point",
-                    "direction",
                     context.kysely.fn.sum("early_count").as("early_count"),
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
                     context.kysely.fn
                       .avg("avg_time_difference")
@@ -1076,6 +1117,29 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                       .as("diff_actual_time_to_stop_timing_point"),
                   ],
             )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
+                  ],
+            )
             .select((eb) => [
               sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
@@ -1089,7 +1153,33 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
             ])
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
+                  ],
+            )
             .groupBy(
               isDirectionsDisabled
                 ? ["stop_id", "common_name", "is_timing_point", "stop_index"]
@@ -1193,7 +1283,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               countDelayed: Number(res.count_delayed),
               timingPoint: res.is_timing_point ?? false,
               direction: res.direction
-                ? (res.direction.toLowerCase() as Direction)
+                ? (res.direction as Direction)
                 : undefined,
               averageScheduled: averageScheduled,
               averageActual: averageActual,
@@ -1266,6 +1356,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select(
+              // remove selecting directions when all directions is passed
               isDirectionsDisabled
                 ? [
                     "noc_and_line_and_servicecode",
@@ -1274,7 +1365,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
@@ -1288,11 +1378,33 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                     context.kysely.fn.sum("late_count").as("late_count"),
                     context.kysely.fn.sum("on_time_count").as("on_time_count"),
                     context.kysely.fn.sum("completed").as("completed"),
-                    context.kysely.fn.sum("scheduled").as("scheduled"),
                     context.kysely.fn
                       .avg("avg_time_difference")
                       .as("avg_time_difference"),
                     context.kysely.fn.sum("count_delayed").as("count_delayed"),
+                  ],
+            )
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
                   ],
             )
             .select((eb) => [
@@ -1308,7 +1420,33 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
             ])
+            .select((eb) =>
+              isDirectionsDisabled
+                ? []
+                : [
+                    eb
+                      .case()
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "anticlockwise",
+                      )
+                      .then("inbound")
+                      .when(
+                        sql`LOWER(${eb.ref("direction")})`,
+                        "=",
+                        "clockwise",
+                      )
+                      .then("outbound")
+                      .else(eb.ref("direction"))
+                      .end()
+                      .as("direction"),
+                  ],
+            )
             .groupBy(
               isDirectionsDisabled
                 ? ["noc_and_line_and_servicecode", "line_name"]
@@ -1364,9 +1502,9 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                 : Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
                   : undefined,
-              direction: (
-                res.direction ?? Direction.Inbound
-              ).toLowerCase() as Direction,
+              direction: res.direction
+                ? (res.direction.toLowerCase() as Direction)
+                : undefined,
               onTimeInSeconds:
                 res.on_time_count == undefined
                   ? undefined

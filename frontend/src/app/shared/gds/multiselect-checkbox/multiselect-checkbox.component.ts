@@ -40,6 +40,7 @@ export class MultiselectCheckboxComponent implements ControlValueAccessor {
   @Input() labelForId?: string;
   @Input() ariaLabel?: string;
   @Input() selected: string[] = [];
+  @Input() isLoading?: boolean = false;
   @Output() selectedChange = new EventEmitter<string[]>();
 
   readonly checkboxItemInputId = "gds-multiselect-checkbox-checkbox-item-";

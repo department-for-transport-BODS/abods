@@ -11,12 +11,11 @@
     class="govuk-body dropdown__trigger"
     [tippyName]="identifier"
     [tippyProps]="tippyProps"
-    [style.width]="triggerWidth"
   >
     <span>{{ triggerLabel }}</span>
     <span class="dropdown__trigger-icon"></span>
   </button>
-  <div #dropdownContent [style.width]="contentWidth">
+  <div #dropdownContent>
     <ng-content></ng-content>
   </div>
 </div>

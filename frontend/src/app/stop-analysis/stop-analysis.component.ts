@@ -57,6 +57,7 @@ import { featureCollection } from "@turf/helpers";
 import pointOnFeature from "@turf/point-on-feature";
 import bboxClip from "@turf/bbox-clip";
 import { AuthenticatedUserService } from "../authentication/authenticated-user.service";
+import { cloneDeep } from "lodash-es";
 
 @Component({
   selector: "app-stop-analysis",
@@ -80,6 +81,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   to: DateTime;
   from: DateTime;
   private apiFiltersChanged = new Subject();
+  directions: Direction[] = [Direction.Inbound, Direction.Outbound];
 
   map: Map | undefined = undefined;
   mapboxStyle = this.config.mapboxStyle;
@@ -132,6 +134,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   visibleBounds = this.toBoundingBoxInputType(this.initialBounds);
   private rawStopData: StopStatistics[] = [];
   filteredStopData: StopPerformance[] = [];
+  backupRawStopData: StopStatistics[] = [];
+  aggregatedStopData: StopStatistics[] = [];
   selectedStop: StopStatistics | undefined;
   selectedCluster:
     | Record<keyof typeof this.clusterProperties | "point_count", number>
@@ -241,7 +245,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     }),
   );
 
-  enableDirection() {
+  isDirectionsDisabled() {
     let isDirectionsDisabled = false;
     this.authUserService.authenticatedUser$
       .pipe(
@@ -344,6 +348,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       .subscribe(([query, response]) => {
         this.lastBounds = query.boundingBox;
         this.rawStopData = response.data.stopAnalysis;
+        this.backupRawStopData = cloneDeep(this.rawStopData);
         this.processStopData(this.visibleBounds);
         this.isLoading = false;
       });
@@ -372,6 +377,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
         matchType: this.matchType,
         startTime: this.refinedFilters.startTime,
         endTime: this.refinedFilters.endTime,
+        direction: this.directions,
       },
       queryParamsHandling: "merge",
     };
@@ -402,6 +408,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     const maxLatitude = params.get("maxLatitude");
     const dayOfWeek = params.get("dayOfWeek");
     const stopType = params.get("stopType");
+    const directions = params.getAll("direction");
     if (from) this.from = DateTime.fromISO(from);
     if (to) this.to = DateTime.fromISO(to);
     if (stopType) this.stopType = stopType as StopTypeOption;
@@ -411,6 +418,8 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
     if (adminAreaIds) this.onAdminAreasChanged(adminAreaIds);
     if (serviceIds) this.serviceIds = serviceIds;
     if (operatorIds) this.operatorIds = operatorIds;
+    if (directions && directions.length > 0)
+      this.directions = directions as Direction[];
     if (dayOfWeek) {
       const flags = getDefaultDayOfWeekFlags();
       const days = dayOfWeek.split(",") ?? [];
@@ -583,6 +592,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onFilterChanged() {
+    this.aggregatedStopData = [];
     this.apiFiltersChanged.next(undefined);
   }
 
@@ -714,7 +724,7 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: this.enableDirection()
+          averageDelay: this.isDirectionsDisabled()
             ? x.totalDelay / x.completedDepartures || 0
             : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
           total: x.completedDepartures,
@@ -950,5 +960,161 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
 
   destroyFilterPanel() {
     this.panelService.destroy();
+  }
+
+  calculateStopData() {
+    const uniqueStopRows: Record<string, StopStatistics[]> = {};
+
+    if (this.aggregatedStopData.length === 0) {
+      this.backupRawStopData.map((stop) => {
+        const key = `${stop.timingPoint.toString()}${stop.atcoCode}`;
+        const stopStats = uniqueStopRows[key] ?? [];
+        stopStats.push(stop);
+        uniqueStopRows[key] = stopStats;
+      });
+
+      for (const stops of Object.values(uniqueStopRows)) {
+        const aggStopStat: StopStatistics = stops.reduce((acc, cur) => {
+          const early = (acc.early ?? 0) + cur.early;
+          const late = (acc.late ?? 0) + cur.late;
+          const onTime = (acc.onTime ?? 0) + cur.onTime;
+
+          const scheduledDepartures =
+            (acc.scheduledDepartures ?? 0) + cur.scheduledDepartures;
+          const completedDepartures =
+            (acc.completedDepartures ?? 0) + cur.completedDepartures;
+          const totalDelay = (acc.totalDelay ?? 0) + cur.totalDelay;
+
+          let earlyInSeconds = undefined;
+          if (acc.earlyInSeconds || cur.earlyInSeconds) {
+            earlyInSeconds =
+              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0);
+          }
+
+          let lateInSeconds = undefined;
+          if (acc.lateInSeconds || cur.lateInSeconds) {
+            lateInSeconds = (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0);
+          }
+
+          let onTimeInSeconds = undefined;
+          if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
+            onTimeInSeconds =
+              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0);
+          }
+
+          let averageDelay = undefined;
+          let countDelayed = undefined;
+
+          if (acc.countDelayed != undefined || cur.countDelayed != undefined) {
+            countDelayed = (acc.countDelayed ?? 0) + (cur.countDelayed ?? 0);
+            averageDelay = countDelayed
+              ? ((acc.averageDelay ?? 0) * (acc.countDelayed ?? 0) +
+                  (cur.averageDelay ?? 0) * (cur.countDelayed ?? 0)) /
+                countDelayed
+              : undefined;
+          }
+
+          let averageScheduled = undefined;
+          if (acc.averageScheduled || cur.averageScheduled) {
+            averageScheduled =
+              (acc.averageScheduled ?? 0) + (cur.averageScheduled ?? 0);
+          }
+
+          let averageActual = undefined;
+          if (acc.averageActual || cur.averageActual) {
+            averageActual = (acc.averageActual ?? 0) + (cur.averageActual ?? 0);
+          }
+
+          let averageScheduledTimingPoint = undefined;
+          if (
+            acc.averageScheduledTimingPoint ||
+            cur.averageScheduledTimingPoint
+          ) {
+            averageScheduledTimingPoint =
+              (acc.averageScheduledTimingPoint ?? 0) +
+              (cur.averageScheduledTimingPoint ?? 0);
+          }
+
+          let averageActualTimingPoint = undefined;
+          if (acc.averageActualTimingPoint || cur.averageActualTimingPoint) {
+            averageActualTimingPoint =
+              (acc.averageActualTimingPoint ?? 0) +
+              (cur.averageActualTimingPoint ?? 0);
+          }
+          return {
+            early,
+            late,
+            onTime,
+            scheduledDepartures,
+            completedDepartures,
+            totalDelay,
+            earlyInSeconds,
+            lateInSeconds,
+            onTimeInSeconds,
+            averageDelay,
+            countDelayed,
+            averageScheduled,
+            averageActual,
+            averageScheduledTimingPoint,
+            averageActualTimingPoint,
+            atcoCode: cur.atcoCode,
+            stopName: cur.stopName,
+            localityName: cur.localityName,
+            adminAreaName: cur.adminAreaName,
+            timingPoint: cur.timingPoint,
+            latitude: cur.latitude,
+            longitude: cur.longitude,
+            direction: undefined,
+          };
+        }, {} as StopStatistics);
+
+        this.aggregatedStopData.push({
+          ...aggStopStat,
+          earlyInSeconds: aggStopStat.earlyInSeconds
+            ? aggStopStat.earlyInSeconds / stops.length
+            : aggStopStat.earlyInSeconds,
+          lateInSeconds: aggStopStat.lateInSeconds
+            ? aggStopStat.lateInSeconds / stops.length
+            : aggStopStat.lateInSeconds,
+          onTimeInSeconds: aggStopStat.onTimeInSeconds
+            ? aggStopStat.onTimeInSeconds / stops.length
+            : aggStopStat.onTimeInSeconds,
+          averageScheduled: aggStopStat.averageScheduled
+            ? aggStopStat.averageScheduled / stops.length
+            : aggStopStat.averageScheduled,
+          averageActual: aggStopStat.averageActual
+            ? aggStopStat.averageActual / stops.length
+            : aggStopStat.averageActual,
+          averageScheduledTimingPoint: aggStopStat.averageScheduledTimingPoint
+            ? aggStopStat.averageScheduledTimingPoint / stops.length
+            : aggStopStat.averageScheduledTimingPoint,
+          averageActualTimingPoint: aggStopStat.averageActualTimingPoint
+            ? aggStopStat.averageActualTimingPoint / stops.length
+            : aggStopStat.averageActualTimingPoint,
+        });
+      }
+    }
+  }
+
+  assignStopData() {
+    if (
+      this.directions.length === 0 ||
+      this.directions.includes(Direction.All)
+    ) {
+      this.calculateStopData();
+      this.rawStopData = this.aggregatedStopData;
+      return;
+    }
+    this.rawStopData = this.backupRawStopData.filter(
+      (stop) =>
+        stop.direction && this.directions.includes(stop.direction as Direction),
+    );
+  }
+
+  onDirectionChange(directions: Direction[]) {
+    this.directions = directions;
+    this.updateQueryParams(undefined);
+    this.assignStopData();
+    this.processStopData(this.visibleBounds);
   }
 }

@@ -59,6 +59,7 @@
           [vehicleRef]="vehicleRef"
           [loading]="journeysLoading"
           [journey]="journeys[currentJourneyIndex]"
+          [distance]="servicePatternDistance"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
           <app-match-type-segmented-toggle
@@ -98,6 +99,7 @@
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
               [loading]="journeyInfoLoading"
+              [scheduledRoute]="servicePatternGeom"
             ></app-journey-map>
           </div>
         </div>

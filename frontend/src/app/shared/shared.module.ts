@@ -12,7 +12,6 @@ import { PopoverComponent } from "./components/popover/popover.component";
 import { GdsModule } from "./gds/gds.module";
 import { TooltipComponent } from "./components/tooltip/tooltip.component";
 import { BoxComponent } from "./components/box/box.component";
-import { SpinnerComponent } from "./components/spinner/spinner.component";
 import { SkeletonComponent } from "./components/skeleton/skeleton.component";
 import { ModalComponent } from "./components/modal/modal.component";
 import { StackComponent } from "./components/stack/stack.component";
@@ -61,6 +60,7 @@ import { GeoContextPipe } from "./mapbox/geo-context.pipe";
 import { JoinPipe } from "./pipes/join.pipe";
 import { MapRecentreButtonComponent } from "./components/map-recentre-button/map-recentre-button.component";
 import { MapViewToggleComponent } from "./components/map-view-toggle/map-view-toggle.component";
+import { ScheduledRouteToggleComponent } from "./components/map-view-scheduled-route-toggle/map-view-scheduled-route-toggle.component";
 import { DropdownComponent } from "./components/dropdown/dropdown.component";
 import { InviteUserModalComponent } from "./components/invite-user-modal/invite-user-modal.component";
 import { OtpParamRangeSliderComponent } from "./components/otp-param-range-slider/otp-param-range-slider.component";
@@ -74,6 +74,7 @@ import { LocationSearchComponent } from "./components/location-search/location-s
 import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of-week-select.component";
 import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle/match-type-segmented-toggle.component";
 import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/stop-type-segmented-toggle.component";
+import { DateRangePickerComponent } from "./components/date-range/date-range-picker.component";
 
 @NgModule({
   declarations: [
@@ -84,7 +85,6 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     StatComponent,
     TooltipComponent,
     BoxComponent,
-    SpinnerComponent,
     SkeletonComponent,
     ModalComponent,
     StackComponent,
@@ -130,6 +130,7 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,
@@ -141,6 +142,7 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     FreshdeskHtmlFormatterPipe,
     LocationSearchComponent,
     DayOfWeekSelectComponent,
+    DateRangePickerComponent,
   ],
   providers: [PercentPipe],
   imports: [
@@ -169,7 +171,6 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     NoSanitizePipe,
     BrowserTitleComponent,
     SkeletonComponent,
-    SpinnerComponent,
     GdsModule,
     ModalComponent,
     StackComponent,
@@ -209,6 +210,7 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,
@@ -219,6 +221,7 @@ import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/
     MouseupOutsideDirective,
     LocationSearchComponent,
     DayOfWeekSelectComponent,
+    DateRangePickerComponent,
   ],
 })
 export class SharedModule {}
