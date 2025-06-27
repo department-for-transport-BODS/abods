@@ -5,13 +5,29 @@ import {
   SessionTag,
 } from "@aws-sdk/client-quicksight";
 import logger from "../logger.js";
+import { getUserTypeDetails } from "./operators.js";
+import { accountTypes } from "../resolvers/userFunctions.js";
 
 const region = process.env.AWS_REGION;
 const targetRoleArn = process.env.QUICKSIGHT_ASSUME_ROLE_ARN;
 const quickSightAccountId = process.env.QUICKSIGHT_AWS_ACCOUNT_ID;
-const adminDashboardId = process.env.QUICKSIGHT_ADMIN_DASHBOARD_ID;
-const ltaDashboardId = process.env.QUICKSIGHT_LTA_DASHBOARD_ID;
-const operatorDashboardId = process.env.QUICKSIGHT_OPERATOR_DASHBOARD_ID;
+
+export enum DataDashboardUserType {
+  SuperAdmin = "SuperAdmin",
+  Admin = "Admin",
+  LTA = "LTA",
+  Operator = "Operator",
+}
+
+export const userDashboardMap: Record<
+  DataDashboardUserType,
+  string | undefined
+> = {
+  SuperAdmin: process.env.QUICKSIGHT_SUPER_ADMIN_DASHBOARD_ID,
+  Admin: process.env.QUICKSIGHT_ADMIN_DASHBOARD_ID,
+  LTA: process.env.QUICKSIGHT_LTA_DASHBOARD_ID,
+  Operator: process.env.QUICKSIGHT_OPERATOR_DASHBOARD_ID,
+};
 
 export const assumeRole = async (): Promise<Credentials> => {
   try {
@@ -142,26 +158,40 @@ export const getSessionTags = (
   return [...ltaTags, ...orgTags];
 };
 
-export const getDashboardId = (isAdmin: boolean, ltaUsers: string[]) => {
-  if (isAdmin) {
-    return adminDashboardId;
-  }
+export const getDashboardUserType = (
+  userDetails: Awaited<ReturnType<typeof getUserTypeDetails>>,
+) => {
+  const isSuperAdmin = userDetails.some(
+    (user) =>
+      user.is_superuser === true && user.account_type === accountTypes.admin,
+  );
 
-  if (ltaUsers.length > 0) {
-    return ltaDashboardId;
-  }
+  if (isSuperAdmin) return DataDashboardUserType.SuperAdmin;
 
-  return operatorDashboardId;
+  const isAdmin = userDetails.some((user) => user.is_superuser === true);
+  if (!isSuperAdmin && isAdmin) return DataDashboardUserType.Admin;
+
+  const isLta = userDetails.some((user) => user.lta_name !== null);
+  if (isLta) return DataDashboardUserType.LTA;
+
+  return DataDashboardUserType.Operator;
+};
+
+export const getDashboardId = (userType: DataDashboardUserType) => {
+  return userDashboardMap[userType];
 };
 
 export const checkRequiredQuicksightVars = () => {
-  if (
-    !targetRoleArn ||
-    !quickSightAccountId ||
-    !adminDashboardId ||
-    !ltaDashboardId ||
-    !operatorDashboardId
-  ) {
+  if (!targetRoleArn || !quickSightAccountId) {
     throw Error("Required quicksight environment variables not found");
+  }
+
+  for (const dashboardUserType of Object.values(DataDashboardUserType)) {
+    const dashboardId = DataDashboardUserType[dashboardUserType];
+    if (!dashboardId) {
+      throw new Error(
+        `Required quicksight dashboard id is undefined for: ${dashboardUserType}`,
+      );
+    }
   }
 };

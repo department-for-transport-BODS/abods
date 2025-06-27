@@ -1,0 +1,18 @@
+<app-segmented-toggle
+  legend="Scheduled route view"
+  [(ngModel)]="scheduledRouteOption"
+  (ngModelChange)="onScheduledRouteChange($event)"
+>
+  <app-segmented-toggle-item
+    name="scheduled-route-show"
+    identifier="scheduled-route-show"
+    value="show"
+    label="Show"
+  ></app-segmented-toggle-item>
+  <app-segmented-toggle-item
+    name="scheduled-route-hide"
+    identifier="scheduled-route-hide"
+    value="hide"
+    label="Hide"
+  ></app-segmented-toggle-item>
+</app-segmented-toggle>

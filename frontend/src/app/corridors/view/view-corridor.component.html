@@ -119,7 +119,6 @@
             <app-dropdown
               identifier="map-display-menu"
               triggerLabel="Display options"
-              [width]="200"
             >
               <p class="govuk-body govuk-!-margin-bottom-2">
                 <strong>Map view</strong>
@@ -266,7 +265,9 @@
                   isTime ? chartColors.lightPurple : chartColors.brightGreen
                 "
                 xAxisType="date"
-                xAxisTitle="Date"
+                [xAxisTitle]="
+                  granularity === CorridorGranularity.Day ? 'Date' : 'Hour'
+                "
                 xAxisLabelPosition="column"
                 [yAxisType]="isTime ? 'time' : 'value'"
                 [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"

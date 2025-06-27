@@ -21,6 +21,10 @@
   <span>
     <strong *ngIf="!loading; else skeletonInfo">{{ vehicleId }}</strong>
   </span>
+  <span>Scheduled distance (km):</span>
+  <span>
+    <strong *ngIf="!loading; else skeletonInfo">{{ serviceDistanceKm }}</strong>
+  </span>
 </div>
 
 <ng-template #skeletonInfo>

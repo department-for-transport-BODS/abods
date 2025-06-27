@@ -58,7 +58,7 @@ export class ViewMonitorsComponent implements OnInit {
     await context.embedDashboard({
       url: embedUrl,
       container: this.dashboardContainer.nativeElement,
-      height: "1330px",
+      height: "1450px",
       width: "100%",
     });
   }
