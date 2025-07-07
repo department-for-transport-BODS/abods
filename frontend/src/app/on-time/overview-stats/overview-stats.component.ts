@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { map, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
-import { FeatureFlag, HeadwayOverviewType } from "../../../generated/graphql";
+import { HeadwayOverviewType } from "../../../generated/graphql";
 import { Duration } from "luxon";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";

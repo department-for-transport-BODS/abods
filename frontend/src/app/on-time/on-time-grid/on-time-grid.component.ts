@@ -25,14 +25,12 @@ import {
   map as _map,
   forEach as _forEach,
   sumBy,
-  sum,
   isEqual,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import {
   Direction,
-  FeatureFlag,
   Maybe,
   Scalars,
   ServicePerformanceType,
@@ -42,7 +40,6 @@ import { OnTimeRatios } from "../on-time.service";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
-import { map } from "rxjs/operators";
 
 type ColumnBase = {
   title: string;

@@ -11,7 +11,7 @@ import {
 import { ICellRendererParams } from "ag-grid-community";
 import { DateTime } from "luxon";
 import { of, ReplaySubject, Subject } from "rxjs";
-import { catchError, map, switchMap, takeUntil, tap } from "rxjs/operators";
+import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
 import { IconCellRendererComponent } from "src/app/shared/components/ag-grid/icon-cell/icon-cell-renderer.component";
 import { RouterLinkCellRendererComponent } from "src/app/shared/components/ag-grid/router-link-cell/router-link-cell.component";
 import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
@@ -22,7 +22,7 @@ import { EmptyCellComponent } from "../../shared/components/ag-grid/empty-cell/e
 import { ActivatedRoute } from "@angular/router";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
-import { Direction, FeatureFlag } from "../../../generated/graphql";
+import { Direction } from "../../../generated/graphql";
 
 @Component({
   selector: "app-service-grid",

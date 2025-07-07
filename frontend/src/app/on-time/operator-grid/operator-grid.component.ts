@@ -32,11 +32,7 @@ import { SparklineCellRendererComponent } from "./sparkline-cell/sparkline-cell-
 import { SparklineFactoryComponent } from "./sparkline-factory/sparkline-factory.component";
 import { SafeHtml } from "@angular/platform-browser";
 import { DateTime, Interval } from "luxon";
-import {
-  Direction,
-  FeatureFlag,
-  Granularity,
-} from "../../../generated/graphql";
+import { Direction, Granularity } from "../../../generated/graphql";
 import { SelectableTextCellRendererComponent } from "src/app/shared/components/ag-grid/selectable-text-cell/selectable-text-cell.component";
 import { OperatorService } from "../../shared/services/operator.service";
 import { AgGridFormatterService } from "../../shared/components/ag-grid/ag-grid-formatter.service";
