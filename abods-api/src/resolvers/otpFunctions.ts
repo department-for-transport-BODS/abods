@@ -276,7 +276,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
     try {
       const { filters } = args.inputs;
       const {
-        lineIds,
         onTimeMaxMinutes,
         onTimeMinMinutes,
         adminAreaIds,
