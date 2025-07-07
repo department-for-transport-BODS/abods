@@ -5,8 +5,7 @@ import { SelectableTextCellRendererComponent } from "src/app/shared/components/a
 import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
-import { map } from "rxjs/operators";
-import { Direction, FeatureFlag } from "../../../generated/graphql";
+import { Direction } from "../../../generated/graphql";
 
 @Component({
   selector: "app-stops-grid-display",
