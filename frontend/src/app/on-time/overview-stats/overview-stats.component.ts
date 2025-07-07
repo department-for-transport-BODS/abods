@@ -85,19 +85,4 @@ export class OverviewStatsComponent {
   openHelpdesk() {
     this.helpdeskPanelService.open();
   }
-
-  isDirectionsDisabled() {
-    let isDirectionsDisabled = false;
-    this.authUserService.authenticatedUser$
-      .pipe(
-        map((info) =>
-          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
-        ),
-      )
-      .subscribe((value) => {
-        isDirectionsDisabled = value;
-      });
-
-    return isDirectionsDisabled;
-  }
 }

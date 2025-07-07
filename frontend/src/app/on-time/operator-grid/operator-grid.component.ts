@@ -57,174 +57,96 @@ interface AdminAreaParams {
   standalone: false,
 })
 export class OperatorGridComponent implements OnInit, OnDestroy {
-  columnDefs: ColDef[] = this.isDirectionsDisabled()
-    ? [
-        {
-          field: "nocCode",
-          headerName: "NOC",
-          cellRenderer: SelectableTextCellRendererComponent,
-          cellRendererParams: { noWrap: true, textOverflow: "visible" },
-          flex: 1,
-          minWidth: 60,
-          maxWidth: 90,
+  columnDefs: ColDef[] = [
+    {
+      field: "nocCode",
+      headerName: "NOC",
+      cellRenderer: SelectableTextCellRendererComponent,
+      cellRendererParams: { noWrap: true, textOverflow: "visible" },
+      flex: 1,
+      minWidth: 60,
+      maxWidth: 90,
+    },
+    {
+      field: "name",
+      headerName: "Operator",
+      cellRenderer: RouterLinkCellRendererComponent,
+      cellRendererParams: {
+        routerLinkGetter: (params: ICellRendererParams) => [
+          params.data.nocCode,
+        ],
+        queryParamsGetter: (params: ICellRendererParams) => {
+          return {
+            adminAreaId: params.data.adminAreaIds,
+            direction: [Direction.All],
+          };
         },
-        {
-          field: "name",
-          headerName: "Operator",
-          cellRenderer: RouterLinkCellRendererComponent,
-          cellRendererParams: {
-            routerLinkGetter: (params: ICellRendererParams) => [
-              params.data.nocCode,
-            ],
-            queryParamsGetter: (params: ICellRendererParams) => {
-              return {
-                adminAreaId: params.data.adminAreaIds,
-              };
-            },
-            bold: true,
-            queryParamsHandling: "merge",
-          },
-          flex: 2,
-          minWidth: 200,
-          getQuickFilterText: (params) =>
-            (params.value as string).replace(
-              WHITESPACE_BETWEEN_SINGLE_CHARACTER,
-              "",
-            ),
-        },
-        {
-          field: "onTimeRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "On-time",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          maxWidth: 130,
-        },
-        {
-          field: "lateRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "Late",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          flex: 1,
-          maxWidth: 130,
-        },
-        {
-          field: "earlyRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "Early",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          flex: 1,
-          maxWidth: 130,
-        },
-        {
-          colId: "sparkline",
-          valueGetter: ({ data }) => this.sparklines[data.operatorId],
-          flex: 3,
-          minWidth: 350,
-          maxWidth: 500,
-          cellClass: "ag-cell-last",
-          cellRenderer: SparklineCellRendererComponent,
-          cellStyle: { display: "flex", justifyContent: "flex-end" },
-        },
-      ]
-    : [
-        {
-          field: "nocCode",
-          headerName: "NOC",
-          cellRenderer: SelectableTextCellRendererComponent,
-          cellRendererParams: { noWrap: true, textOverflow: "visible" },
-          flex: 1,
-          minWidth: 60,
-          maxWidth: 90,
-        },
-        {
-          field: "name",
-          headerName: "Operator",
-          cellRenderer: RouterLinkCellRendererComponent,
-          cellRendererParams: {
-            routerLinkGetter: (params: ICellRendererParams) => [
-              params.data.nocCode,
-            ],
-            queryParamsGetter: (params: ICellRendererParams) => {
-              return {
-                adminAreaId: params.data.adminAreaIds,
-                direction: [Direction.All],
-              };
-            },
-            bold: true,
-            queryParamsHandling: "merge",
-          },
-          flex: 2,
-          minWidth: 200,
-          getQuickFilterText: (params) =>
-            (params.value as string).replace(
-              WHITESPACE_BETWEEN_SINGLE_CHARACTER,
-              "",
-            ),
-        },
-        {
-          colId: "averageDelay",
-          field: "averageDelay",
-          valueFormatter: ({ value }) =>
-            this.formatter.averageDelayValueFormatter({ value }),
-          headerName: "Av. delay",
-          sortable: true,
-          unSortIcon: true,
-          flex: 1,
-          maxWidth: 130,
-          type: "numericColumn",
-        },
-        {
-          field: "onTimeRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "On-time",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          maxWidth: 130,
-        },
-        {
-          field: "lateRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "Late",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          flex: 1,
-          maxWidth: 130,
-        },
-        {
-          field: "earlyRatio",
-          valueFormatter: ({ value }) =>
-            this.percent.transform(value, "1.0-1") ?? "",
-          headerName: "Early",
-          sortable: true,
-          unSortIcon: true,
-          type: "numericColumn",
-          flex: 1,
-          maxWidth: 130,
-        },
-        {
-          colId: "sparkline",
-          valueGetter: ({ data }) => this.sparklines[data.operatorId],
-          flex: 3,
-          minWidth: 350,
-          maxWidth: 500,
-          cellClass: "ag-cell-last",
-          cellRenderer: SparklineCellRendererComponent,
-          cellStyle: { display: "flex", justifyContent: "flex-end" },
-        },
-      ];
+        bold: true,
+        queryParamsHandling: "merge",
+      },
+      flex: 2,
+      minWidth: 200,
+      getQuickFilterText: (params) =>
+        (params.value as string).replace(
+          WHITESPACE_BETWEEN_SINGLE_CHARACTER,
+          "",
+        ),
+    },
+    {
+      colId: "averageDelay",
+      field: "averageDelay",
+      valueFormatter: ({ value }) =>
+        this.formatter.averageDelayValueFormatter({ value }),
+      headerName: "Av. delay",
+      sortable: true,
+      unSortIcon: true,
+      flex: 1,
+      maxWidth: 130,
+      type: "numericColumn",
+    },
+    {
+      field: "onTimeRatio",
+      valueFormatter: ({ value }) =>
+        this.percent.transform(value, "1.0-1") ?? "",
+      headerName: "On-time",
+      sortable: true,
+      unSortIcon: true,
+      type: "numericColumn",
+      maxWidth: 130,
+    },
+    {
+      field: "lateRatio",
+      valueFormatter: ({ value }) =>
+        this.percent.transform(value, "1.0-1") ?? "",
+      headerName: "Late",
+      sortable: true,
+      unSortIcon: true,
+      type: "numericColumn",
+      flex: 1,
+      maxWidth: 130,
+    },
+    {
+      field: "earlyRatio",
+      valueFormatter: ({ value }) =>
+        this.percent.transform(value, "1.0-1") ?? "",
+      headerName: "Early",
+      sortable: true,
+      unSortIcon: true,
+      type: "numericColumn",
+      flex: 1,
+      maxWidth: 130,
+    },
+    {
+      colId: "sparkline",
+      valueGetter: ({ data }) => this.sparklines[data.operatorId],
+      flex: 3,
+      minWidth: 350,
+      maxWidth: 500,
+      cellClass: "ag-cell-last",
+      cellRenderer: SparklineCellRendererComponent,
+      cellStyle: { display: "flex", justifyContent: "flex-end" },
+    },
+  ];
   defaultColDef = {
     resizable: false,
     minWidth: 100,
@@ -404,20 +326,5 @@ export class OperatorGridComponent implements OnInit, OnDestroy {
       api.hideOverlay();
       this.overlayParams.message = INITIAL_NO_ROWS_MESSAGE;
     }
-  }
-
-  isDirectionsDisabled() {
-    let isDirectionsDisabled = false;
-    this.authUserService.authenticatedUser$
-      .pipe(
-        map((info) =>
-          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
-        ),
-      )
-      .subscribe((value) => {
-        isDirectionsDisabled = value;
-      });
-
-    return isDirectionsDisabled;
   }
 }
