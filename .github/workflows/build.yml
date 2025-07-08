@@ -200,6 +200,7 @@ jobs:
           mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
           mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
           mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
+          analyticsId="${{ vars.ANALYTICS_ID }}"
 
           jq --arg freshdesk_api_url "$freshdesk_api_url" \
              --arg graphql_api_url "$graphql_api_url" \
@@ -207,7 +208,8 @@ jobs:
              --arg mapbox_style "$mapbox_style" \
              --arg mapbox_satellite_style "$mapbox_satellite_style" \
              --arg ENVIRONMENT "$ENVIRONMENT" \
-             '.apiUrl = $graphql_api_url | .analyticsId = "1234" | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .envName = $ENVIRONMENT | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
+             --arg analyticsId "$analyticsId" \
+             '.apiUrl = $graphql_api_url | .analyticsId = $analyticsId | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .envName = $ENVIRONMENT | .freshdesk.apiUrl = $freshdesk_api_url' src/config.json > tmp.json && \
             mv tmp.json src/config.json
 
           npm install
