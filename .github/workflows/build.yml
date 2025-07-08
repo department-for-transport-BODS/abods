@@ -200,7 +200,7 @@ jobs:
           mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
           mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
           mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
-          analytics_id="${{ vars.ANALYTICS_ID }}"
+          analytics_id="${{ secrets.ANALYTICS_ID }}"
 
           jq --arg freshdesk_api_url "$freshdesk_api_url" \
              --arg graphql_api_url "$graphql_api_url" \
