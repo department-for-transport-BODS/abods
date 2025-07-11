@@ -2605,12 +2605,6 @@
             "deprecationReason": null
           },
           {
-            "name": "DirectionsDisabled",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "Distances",
             "description": null,
             "isDeprecated": false,
