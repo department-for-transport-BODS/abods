@@ -18,7 +18,35 @@ query distancesList($filterBy: DistancesFilterInput!) {
     operatorName
     nocLineAndServiceCode
     lineName
+    serviceName
     distance
     avlDistance
+  }
+}
+
+query distancesDropdownInput($startDate: String!, $endDate: String!) {
+  distancesDropdowns(startDate: $startDate, endDate: $endDate) {
+    operators {
+      id
+      name
+      licenses {
+        id
+        services {
+          id
+          name
+          line
+        }
+      }
+    }
+  }
+}
+
+query adminOrgList($startDate: String!, $endDate: String!) {
+  adminOrgMap(startDate: $startDate, endDate: $endDate) {
+    adminAreaId
+    adminName
+    operatorId
+    orgId
+    orgName
   }
 }

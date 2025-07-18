@@ -9,6 +9,7 @@
   [loading]="isLoading"
   [(ngModel)]="selected"
   bindValue="value"
+  virtualScroll="enableVirtualScroll"
   [labelForId]="labelForId ? labelForId : null"
   [inputAttrs]="
     ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}

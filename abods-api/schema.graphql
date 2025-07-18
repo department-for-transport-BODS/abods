@@ -42,6 +42,8 @@ type Query {
   embeddedUrl: AWSQuicksightUser!
   userOrgs: [Organisation!]!
   distances(filterBy: DistancesFilterInput): [Distance!]!
+  distancesDropdowns(startDate: String!, endDate: String!): DistancesDropdown!
+  adminOrgMap(startDate: String!, endDate: String!): [AdminOrgOperatorMap!]!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
@@ -49,17 +51,54 @@ type Query {
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
 }
 
+type AdminOrgOperatorMap {
+  adminAreaId: Int!
+  adminName: String
+  operatorId: String!
+  orgId: Int!
+  orgName: String
+}
+
+type DistancesDropdown {
+  operators: [OperatorForDistances!]
+}
+
+type OperatorForDistances {
+  name: String!
+  id: String!
+  licenses: [LicensesForDistance!]
+}
+
+type LicensesForDistance {
+  id: String!
+  services: [ServiceForDistances!]
+}
+
+type ServiceForDistances {
+  name: String!
+  id: String!
+  line: String!
+}
+
+type SimpleEntity {
+  name: String!
+  id: String!
+}
+
 type Distance {
   operatorId: String!
   operatorName: String!
   nocLineAndServiceCode: String!
   lineName: String!
+  serviceName: String!
   distance: Int
   avlDistance: Int
 }
 
 input DistancesFilterInput {
-  orgId: String!
+  orgId: String
+  licenseIds: [String!]
+  adminAreaIds: [String!]
   operatorIds: [String!]
   nocLineAndServiceCodes: [String!]
   fromTimestamp: String!
