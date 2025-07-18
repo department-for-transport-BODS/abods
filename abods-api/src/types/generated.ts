@@ -1101,12 +1101,6 @@ export type SignupPayloadType = {
   password: Scalars['String']['input'];
 };
 
-export type SimpleEntity = {
-  __typename?: 'SimpleEntity';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
@@ -1417,7 +1411,6 @@ export type ResolversTypes = ResolversObject<{
   ServicePerformanceType: ResolverTypeWrapper<Partial<ServicePerformanceType>>;
   ServicePunctualityType: ResolverTypeWrapper<Partial<ServicePunctualityType>>;
   SignupPayloadType: ResolverTypeWrapper<Partial<SignupPayloadType>>;
-  SimpleEntity: ResolverTypeWrapper<Partial<SimpleEntity>>;
   Stop: ResolverTypeWrapper<Partial<Stop>>;
   StopAnalysisFiltersInput: ResolverTypeWrapper<Partial<StopAnalysisFiltersInput>>;
   StopInfoType: ResolverTypeWrapper<Partial<StopInfoType>>;
@@ -1531,7 +1524,6 @@ export type ResolversParentTypes = ResolversObject<{
   ServicePerformanceType: Partial<ServicePerformanceType>;
   ServicePunctualityType: Partial<ServicePunctualityType>;
   SignupPayloadType: Partial<SignupPayloadType>;
-  SimpleEntity: Partial<SimpleEntity>;
   Stop: Partial<Stop>;
   StopAnalysisFiltersInput: Partial<StopAnalysisFiltersInput>;
   StopInfoType: Partial<StopInfoType>;
@@ -2108,12 +2100,6 @@ export type ServicePunctualityTypeResolvers<ContextType = RequestContext, Parent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type SimpleEntityResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['SimpleEntity'] = ResolversParentTypes['SimpleEntity']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type StopResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Stop'] = ResolversParentTypes['Stop']> = ResolversObject<{
   actualDepartureUtc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   directionRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -2293,7 +2279,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;
   ServicePerformanceType?: ServicePerformanceTypeResolvers<ContextType>;
   ServicePunctualityType?: ServicePunctualityTypeResolvers<ContextType>;
-  SimpleEntity?: SimpleEntityResolvers<ContextType>;
   Stop?: StopResolvers<ContextType>;
   StopInfoType?: StopInfoTypeResolvers<ContextType>;
   StopPerformanceType?: StopPerformanceTypeResolvers<ContextType>;

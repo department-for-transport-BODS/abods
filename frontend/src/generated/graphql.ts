@@ -1101,12 +1101,6 @@ export type SignupPayloadType = {
   password: Scalars['String']['input'];
 };
 
-export type SimpleEntity = {
-  __typename?: 'SimpleEntity';
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export type Stop = {
   __typename?: 'Stop';
   actualDepartureUtc?: Maybe<Scalars['String']['output']>;
