@@ -6,7 +6,6 @@ import {
   Distance,
   DistancesDropdown,
   OperatorForDistances,
-  LicensesForDistance,
   AdminOrgOperatorMap,
 } from "../types/generated";
 import { requireUserSession } from "./helpers.js";
