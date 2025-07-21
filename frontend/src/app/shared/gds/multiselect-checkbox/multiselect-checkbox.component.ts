@@ -69,4 +69,8 @@ export class MultiselectCheckboxComponent implements ControlValueAccessor {
     this.onChange(this.selected);
     this.selectedChange.emit(this.selected);
   }
+
+  get enableVirtualScroll(): boolean {
+    return !!this.options && this.options.length > 500;
+  }
 }
