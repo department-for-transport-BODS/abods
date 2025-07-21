@@ -113,9 +113,9 @@ const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
   args,
   context,
 ): Promise<DistancesDropdown> => {
-  await requireUserSession(context);
+  const user = await requireUserSession(context);
 
-  const servicesQuery = context.kysely
+  let servicesQuery = context.kysely
     .selectFrom("service_details as sd")
     .innerJoin(
       "bods_organisationoperator as boo",
@@ -133,6 +133,14 @@ const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
       "sd.line_name as line_name",
     ])
     .distinct();
+
+  if (!user.isGlobalUser) {
+    servicesQuery = servicesQuery.where(
+      "boo.organisation_id",
+      "in",
+      user.orgs.map((org) => org.id),
+    );
+  }
 
   const results = await servicesQuery.execute();
 
@@ -179,7 +187,7 @@ const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
   args,
   context,
 ): Promise<AdminOrgOperatorMap[]> => {
-  await requireUserSession(context);
+  const user = await requireUserSession(context);
 
   const adminAreaIdsCte = context.kysely.with("admin_areas", (db) =>
     db
@@ -188,6 +196,13 @@ const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
         "bods_organisationoperator as boo",
         "boo.operatorref",
         "sd.operator_noc",
+      )
+      .$if(!user.isGlobalUser, (qb) =>
+        qb.where(
+          "boo.organisation_id",
+          "in",
+          user.orgs.map((org) => org.id),
+        ),
       )
       .select((eb) => [
         sql<number>`unnest(${eb.ref("sd.admin_areas")})`.as("admin_area_id"),
