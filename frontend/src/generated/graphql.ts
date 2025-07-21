@@ -897,12 +897,6 @@ export type Query = {
 };
 
 
-export type QueryAdminOrgMapArgs = {
-  endDate: Scalars['String']['input'];
-  startDate: Scalars['String']['input'];
-};
-
-
 export type QueryAvlLineLevelStatusArgs = {
   filters?: InputMaybe<AvlFiltersInput>;
 };
@@ -915,12 +909,6 @@ export type QueryDashboardVehiclesArgs = {
 
 export type QueryDistancesArgs = {
   filterBy?: InputMaybe<DistancesFilterInput>;
-};
-
-
-export type QueryDistancesDropdownsArgs = {
-  endDate: Scalars['String']['input'];
-  startDate: Scalars['String']['input'];
 };
 
 
@@ -1362,18 +1350,12 @@ export type DistancesListQueryVariables = Exact<{
 
 export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName: string, distance?: number | null, avlDistance?: number | null }> };
 
-export type DistancesDropdownInputQueryVariables = Exact<{
-  startDate: Scalars['String']['input'];
-  endDate: Scalars['String']['input'];
-}>;
+export type DistancesDropdownInputQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type DistancesDropdownInputQuery = { __typename?: 'Query', distancesDropdowns: { __typename?: 'DistancesDropdown', operators?: Array<{ __typename?: 'OperatorForDistances', id: string, name: string, licenses?: Array<{ __typename?: 'LicensesForDistance', id: string, services?: Array<{ __typename?: 'ServiceForDistances', id: string, name: string, line: string }> | null }> | null }> | null } };
 
-export type AdminOrgListQueryVariables = Exact<{
-  startDate: Scalars['String']['input'];
-  endDate: Scalars['String']['input'];
-}>;
+export type AdminOrgListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type AdminOrgListQuery = { __typename?: 'Query', adminOrgMap: Array<{ __typename?: 'AdminOrgOperatorMap', adminAreaId: number, adminName?: string | null, operatorId: string, orgId: number, orgName?: string | null }> };
@@ -2302,8 +2284,8 @@ export const DistancesListDocument = gql`
     }
   }
 export const DistancesDropdownInputDocument = gql`
-    query distancesDropdownInput($startDate: String!, $endDate: String!) {
-  distancesDropdowns(startDate: $startDate, endDate: $endDate) {
+    query distancesDropdownInput {
+  distancesDropdowns {
     operators {
       id
       name
@@ -2331,8 +2313,8 @@ export const DistancesDropdownInputDocument = gql`
     }
   }
 export const AdminOrgListDocument = gql`
-    query adminOrgList($startDate: String!, $endDate: String!) {
-  adminOrgMap(startDate: $startDate, endDate: $endDate) {
+    query adminOrgList {
+  adminOrgMap {
     adminAreaId
     adminName
     operatorId

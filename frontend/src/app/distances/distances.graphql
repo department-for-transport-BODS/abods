@@ -24,8 +24,8 @@ query distancesList($filterBy: DistancesFilterInput!) {
   }
 }
 
-query distancesDropdownInput($startDate: String!, $endDate: String!) {
-  distancesDropdowns(startDate: $startDate, endDate: $endDate) {
+query distancesDropdownInput {
+  distancesDropdowns {
     operators {
       id
       name
@@ -41,8 +41,8 @@ query distancesDropdownInput($startDate: String!, $endDate: String!) {
   }
 }
 
-query adminOrgList($startDate: String!, $endDate: String!) {
-  adminOrgMap(startDate: $startDate, endDate: $endDate) {
+query adminOrgList {
+  adminOrgMap {
     adminAreaId
     adminName
     operatorId

@@ -62,9 +62,7 @@ export class ViewDistancesComponent implements OnInit {
   }
 
   private dateChanged$ = new Subject<void>();
-  private dropdowns$ = new Subject<void>();
   private distances$ = new Subject<void>();
-  private adminAreas$ = new Subject<void>();
 
   gridReady$ = new Subject<void>();
   paginationChanged$ = new Subject<PaginationChangedEvent>();
@@ -204,36 +202,15 @@ export class ViewDistancesComponent implements OnInit {
   loading = false;
 
   ngOnInit(): void {
-    this.dateChanged$.subscribe(() => {
-      this.dropdowns$.next();
-      this.adminAreas$.next();
+    this.distanceService.fetchAdminOrgList().subscribe((adminOrgList) => {
+      this.backupAdminOrgMap = [...adminOrgList];
+
+      this.updateAdminRow(new Set());
+      this.isDropdownLoading = false;
     });
 
-    this.adminAreas$
-      .pipe(
-        switchMap(() =>
-          this.distanceService.fetchAdminOrgList(
-            this.from.toISO(),
-            this.to.toISO(),
-          ),
-        ),
-      )
-      .subscribe((adminOrgList) => {
-        this.backupAdminOrgMap = [...adminOrgList];
-
-        this.updateAdminRow(new Set());
-        this.isDropdownLoading = false;
-      });
-
-    this.dropdowns$
-      .pipe(
-        switchMap(() =>
-          this.distanceService.fetchDistancesDropdows(
-            this.from.toISO(),
-            this.to.toISO(),
-          ),
-        ),
-      )
+    this.distanceService
+      .fetchDistancesDropdows()
       .subscribe((dropdownValues) => {
         this.operatorMultiSelect = [];
         this.allOperatorData = dropdownValues.operators ?? [];
@@ -404,7 +381,7 @@ export class ViewDistancesComponent implements OnInit {
               this.licenses.length === 0 || this.licenses.includes(license.id),
           )
           .forEach((license) => {
-            if (skipDropdown !== DropDowns.license) {
+            if (skipDropdown !== DropDowns.license && license.id) {
               licenseOptions.push({
                 label: license.id,
                 value: license.id,

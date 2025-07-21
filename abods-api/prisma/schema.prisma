@@ -20,6 +20,8 @@ model service_details {
   operator_noc                 String?
   line_name                    String?
   service_name                 String?
+  admin_areas                  Int[]
+  license                      String
   operator                     all_operators? @relation(fields: [operator_noc], references: [operatorref])
 
   @@index([line_name], map: "expected_services_line_name")

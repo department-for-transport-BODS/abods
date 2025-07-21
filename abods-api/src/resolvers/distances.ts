@@ -113,54 +113,24 @@ const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
   args,
   context,
 ): Promise<DistancesDropdown> => {
-  const { startDate, endDate } = args;
+  await requireUserSession(context);
 
-  if (!startDate || !endDate) {
-    throw new Error("Start date and end date are mandatory");
-  }
-
-  const user = await requireUserSession(context);
-
-  const userOperators = context.kysely
-    .selectFrom("bods_organisationoperator")
-    .select("operatorref")
-    .distinct()
-    .where(
-      "organisation_id",
-      "in",
-      user.orgs.map((org) => org.id),
-    );
-
-  const cte_services = context.kysely.with("cte_services", (db) =>
-    db
-      .selectFrom("expected_services")
-      .where("date_of_journey", ">=", userSelectedDateAsUtc(startDate).toDate())
-      .where("date_of_journey", "<", userSelectedDateAsUtc(endDate).toDate())
-      .where("operator_noc", "in", userOperators)
-      .select([
-        "operator_noc",
-        "license",
-        "noc_and_line_and_servicecode",
-        "line_name",
-      ])
-      .distinct(),
-  );
-
-  const servicesQuery = cte_services
-    .selectFrom("cte_services as cs")
+  const servicesQuery = context.kysely
+    .selectFrom("service_details as sd")
     .innerJoin(
-      "service_details as sd",
-      "sd.noc_and_line_and_servicecode",
-      "cs.noc_and_line_and_servicecode",
+      "bods_organisationoperator as boo",
+      "sd.operator_noc",
+      "boo.operatorref",
     )
-    .innerJoin("all_operators as ao", "ao.operatorref", "cs.operator_noc")
+    .innerJoin("all_operators as ao", "ao.operatorref", "sd.operator_noc")
+    .where("sd.operator_noc", "is not", null)
     .select([
       "ao.name as operator_name",
-      "cs.operator_noc as operator_noc",
-      "cs.license as license",
-      "cs.noc_and_line_and_servicecode as service_id",
+      "sd.operator_noc as operator_noc",
+      "sd.license as license",
+      "sd.noc_and_line_and_servicecode as service_id",
       "sd.service_name as service_name",
-      "cs.line_name as line_name",
+      "sd.line_name as line_name",
     ])
     .distinct();
 
@@ -173,13 +143,13 @@ const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
 
   results.forEach((service) => {
     const operator: OperatorForDistances = operators.get(
-      service.operator_noc,
+      service.operator_noc!,
     ) ?? {
       name: service.operator_name ?? "",
-      id: service.operator_noc,
+      id: service.operator_noc!,
       licenses: [],
     };
-    operators.set(service.operator_noc, operator);
+    operators.set(service.operator_noc!, operator);
 
     let license = operator.licenses?.find(
       (license) => license.id === service.license,
@@ -195,7 +165,7 @@ const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
     license.services?.push({
       id: service.service_id,
       name: service.service_name ?? "",
-      line: service.line_name,
+      line: service.line_name ?? "",
     });
   });
 
@@ -209,32 +179,19 @@ const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
   args,
   context,
 ): Promise<AdminOrgOperatorMap[]> => {
-  const { startDate, endDate } = args;
-
-  if (!startDate || !endDate) {
-    throw new Error("Start date and end date are mandatory");
-  }
-
-  const user = await requireUserSession(context);
-  const userOperators = context.kysely
-    .selectFrom("bods_organisationoperator")
-    .select("operatorref")
-    .distinct()
-    .where(
-      "organisation_id",
-      "in",
-      user.orgs.map((org) => org.id),
-    );
+  await requireUserSession(context);
 
   const adminAreaIdsCte = context.kysely.with("admin_areas", (db) =>
     db
-      .selectFrom("expected_services")
-      .where("date_of_journey", ">=", userSelectedDateAsUtc(startDate).toDate())
-      .where("date_of_journey", "<", userSelectedDateAsUtc(endDate).toDate())
-      .where("operator_noc", "in", userOperators)
+      .selectFrom("service_details as sd")
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "boo.operatorref",
+        "sd.operator_noc",
+      )
       .select((eb) => [
-        sql<number>`unnest(${eb.ref("admin_area_id")})`.as("admin_area_id"),
-        "operator_noc",
+        sql<number>`unnest(${eb.ref("sd.admin_areas")})`.as("admin_area_id"),
+        "sd.operator_noc",
       ])
       .distinct(),
   );
@@ -253,7 +210,7 @@ const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
     .select([
       "aa.admin_area_id as adminAreaId",
       "na.name as adminName",
-      "aa.operator_noc as operatorId",
+      sql<string>`COALESCE(aa.operator_noc, '')`.as("operatorId"),
       "boo.organisation_id as orgId",
       "bo.name as orgName",
     ])

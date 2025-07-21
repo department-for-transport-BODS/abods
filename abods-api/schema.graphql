@@ -42,8 +42,8 @@ type Query {
   embeddedUrl: AWSQuicksightUser!
   userOrgs: [Organisation!]!
   distances(filterBy: DistancesFilterInput): [Distance!]!
-  distancesDropdowns(startDate: String!, endDate: String!): DistancesDropdown!
-  adminOrgMap(startDate: String!, endDate: String!): [AdminOrgOperatorMap!]!
+  distancesDropdowns: DistancesDropdown!
+  adminOrgMap: [AdminOrgOperatorMap!]!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52

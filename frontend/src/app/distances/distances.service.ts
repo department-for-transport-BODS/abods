@@ -32,15 +32,15 @@ export class DistancesService {
       .pipe(map((result) => result.data.distances));
   }
 
-  fetchAdminOrgList(startDate: string, endDate: string) {
+  fetchAdminOrgList() {
     return this.adminOrgList
-      .fetch({ startDate, endDate })
+      .fetch({})
       .pipe(map((result) => result.data.adminOrgMap));
   }
 
-  fetchDistancesDropdows(startDate: string, endDate: string) {
+  fetchDistancesDropdows() {
     return this.distancesDropdowns
-      .fetch({ startDate, endDate })
+      .fetch({})
       .pipe(map((result) => result.data.distancesDropdowns));
   }
 

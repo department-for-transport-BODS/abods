@@ -897,12 +897,6 @@ export type Query = {
 };
 
 
-export type QueryAdminOrgMapArgs = {
-  endDate: Scalars['String']['input'];
-  startDate: Scalars['String']['input'];
-};
-
-
 export type QueryAvlLineLevelStatusArgs = {
   filters?: InputMaybe<AvlFiltersInput>;
 };
@@ -915,12 +909,6 @@ export type QueryDashboardVehiclesArgs = {
 
 export type QueryDistancesArgs = {
   filterBy?: InputMaybe<DistancesFilterInput>;
-};
-
-
-export type QueryDistancesDropdownsArgs = {
-  endDate: Scalars['String']['input'];
-  startDate: Scalars['String']['input'];
 };
 
 
@@ -2006,13 +1994,13 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
 
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   adminAreas?: Resolver<Maybe<Array<ResolversTypes['AdminAreasType']>>, ParentType, ContextType>;
-  adminOrgMap?: Resolver<Array<ResolversTypes['AdminOrgOperatorMap']>, ParentType, ContextType, RequireFields<QueryAdminOrgMapArgs, 'endDate' | 'startDate'>>;
+  adminOrgMap?: Resolver<Array<ResolversTypes['AdminOrgOperatorMap']>, ParentType, ContextType>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
   distances?: Resolver<Array<ResolversTypes['Distance']>, ParentType, ContextType, Partial<QueryDistancesArgs>>;
-  distancesDropdowns?: Resolver<ResolversTypes['DistancesDropdown'], ParentType, ContextType, RequireFields<QueryDistancesDropdownsArgs, 'endDate' | 'startDate'>>;
+  distancesDropdowns?: Resolver<ResolversTypes['DistancesDropdown'], ParentType, ContextType>;
   embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
