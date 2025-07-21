@@ -61,7 +61,6 @@ export class ViewDistancesComponent implements OnInit {
     this.to = to;
   }
 
-  private dateChanged$ = new Subject<void>();
   private distances$ = new Subject<void>();
 
   gridReady$ = new Subject<void>();
@@ -251,8 +250,6 @@ export class ViewDistancesComponent implements OnInit {
         this.data = data;
         this.loading = false;
       });
-
-    this.dateChanged$.next();
   }
 
   getOperatorsToFilter() {
@@ -421,7 +418,6 @@ export class ViewDistancesComponent implements OnInit {
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
-    this.dateChanged$.next();
     this.isDropdownLoading = true;
     this.updateFilters();
   }
