@@ -40,7 +40,7 @@
         [statLoaded]="!operatorLoading"
         id="live-stat-status"
       >
-        <ng-template #appStatTemplate let-value="value">
+        <ng-template appStatTemplate let-value="value">
           <app-status [active]="value"></app-status>
         </ng-template>
       </app-stat>

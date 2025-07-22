@@ -20,7 +20,7 @@ export class StatComponent<T> implements AfterViewInit {
   @Input() identifier?: string;
   @Input() statLoaded = true;
   @ContentChild(StatTemplateDirective, { read: TemplateRef })
-  statTemplate?: TemplateRef<T>;
+  statTemplate?: TemplateRef<{ value: T }>;
   @Input() statFormatter?: (t: T) => string;
 
   format(): string {
