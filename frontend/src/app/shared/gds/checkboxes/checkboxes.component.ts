@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ViewEncapsulation } from "@angular/core";
 @Component({
   selector: "gds-checkboxes",
   template: `
@@ -14,13 +14,18 @@ import { Component, Input } from "@angular/core";
         <span *ngIf="error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error:</span> {{ error }}
         </span>
-        <div class="govuk-checkboxes" [ngClass]="checkboxesClasses">
+        <div
+          class="govuk-checkboxes"
+          data-module="govuk-checkboxes"
+          [ngClass]="checkboxesClasses"
+        >
           <ng-content></ng-content>
         </div>
       </fieldset>
     </div>
   `,
   styleUrls: ["checkboxes.component.scss"],
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class CheckboxesComponent {
