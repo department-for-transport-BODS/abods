@@ -6,59 +6,12 @@
   [error]="error"
 >
   <gds-checkboxes-item
-    inputId="monday"
-    name="days"
-    label="Mon"
-    value="Monday"
-    [checked]="value.monday"
-    (checkedChange)="toggle('monday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="tuesday"
-    name="days"
-    label="Tue"
-    value="Tuesday"
-    [checked]="value.tuesday"
-    (checkedChange)="toggle('tuesday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="wednesday"
-    name="days"
-    label="Wed"
-    value="Wednesday"
-    [checked]="value.wednesday"
-    (checkedChange)="toggle('wednesday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="thursday"
-    name="days"
-    label="Thur"
-    value="Thursday"
-    [checked]="value.thursday"
-    (checkedChange)="toggle('thursday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="friday"
-    name="days"
-    label="Fri"
-    value="Friday"
-    [checked]="value.friday"
-    (checkedChange)="toggle('friday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="saturday"
-    name="days"
-    label="Sat"
-    value="Saturday"
-    [checked]="value.saturday"
-    (checkedChange)="toggle('saturday', $event)"
-  />
-  <gds-checkboxes-item
-    inputId="sunday"
-    name="days"
-    label="Sun"
-    value="Sunday"
-    [checked]="value.sunday"
-    (checkedChange)="toggle('sunday', $event)"
+    *ngFor="let day of daysOfWeek"
+    [inputId]="day.key"
+    [name]="'days'"
+    [label]="day.label"
+    [value]="day.key"
+    [checked]="value[day.key]"
+    (checkedChange)="toggle(day.key, $event)"
   />
 </gds-checkboxes>
