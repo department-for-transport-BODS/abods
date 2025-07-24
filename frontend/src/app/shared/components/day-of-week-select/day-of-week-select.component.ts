@@ -29,7 +29,7 @@ export class DayOfWeekSelectComponent {
     this.selectedChange.emit($event);
   }
 
-  toggle(day: string, value: boolean) {
+  toggle(day: keyof DayOfWeekFlagsInputType, value: boolean) {
     if (day in this.value) {
       const newVal = {
         ...this.value,
