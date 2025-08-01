@@ -4,7 +4,8 @@
     "projects/**/*",
     "src/test-support/*",
     "**/*.spec.ts",
-    "**/generated/graphql.ts"
+    "**/generated/graphql.ts",
+    "**/*spec.skip.ts"
   ],
   "plugins": ["jasmine"],
   "overrides": [
