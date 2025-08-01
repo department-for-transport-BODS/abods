@@ -1,11 +1,18 @@
 import { Spectator, createComponentFactory, byText } from "@ngneat/spectator";
 import { DateTime, Settings } from "luxon";
-import { NgxSmartModalService } from "ngx-smart-modal";
+import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
 import {
   OtpThresholdModalData,
   OTP_THRESHOLD_MODAL_ID,
+  OtpThresholdModalComponent,
 } from "../otp-threshold-modal/otp-threshold-modal.component";
 import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link.component";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { SharedModule } from "../../shared/shared.module";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { ReactiveFormsModule } from "@angular/forms";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
 
 describe("OtpThresholdModalLinkComponent", () => {
   let spectator: Spectator<OtpThresholdModalLinkComponent>;
@@ -26,6 +33,15 @@ describe("OtpThresholdModalLinkComponent", () => {
 
   const createComponent = createComponentFactory({
     component: OtpThresholdModalLinkComponent,
+    declarations: [OtpThresholdModalComponent, OtpThresholdFormComponent],
+    imports: [
+      ApolloTestingModule,
+      SharedModule,
+      HttpClientTestingModule,
+      ReactiveFormsModule,
+      NgxSmartModalModule,
+      NgxTippyModule,
+    ],
     mocks: [NgxSmartModalService],
   });
 

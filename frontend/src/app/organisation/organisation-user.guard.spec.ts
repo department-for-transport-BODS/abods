@@ -47,7 +47,11 @@ describe("OrganisationUserGuard", () => {
 
   it("should return true if user is part of organisation", () => {
     spyOn(organisationService, "fetchUser").and.returnValue(
-      of(<UserFragment>{ email: "test@test.con" }),
+      of(<UserFragment>{
+        email: "test@test.con",
+        id: "",
+        username: "test@test.con",
+      }),
     );
 
     guard

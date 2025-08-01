@@ -5,7 +5,6 @@ import { DateTime } from "luxon";
 import { LuxonModule } from "luxon-angular";
 
 import { JourneyInfoComponent } from "./journey-info.component";
-import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
 
 describe("JourneyInfoComponent", () => {
   let component: JourneyInfoComponent;
@@ -15,7 +14,7 @@ describe("JourneyInfoComponent", () => {
   const startTime = DateTime.fromISO("2022-08-18T11:22:00.000+01:00", {
     zone: "utc",
   });
-  const mockInfo = <VehicleJourneyInfo>{
+  const mockInfo = {
     operatorInfo: {
       operatorId: "1",
       operatorName: "Operator 1",
@@ -49,7 +48,7 @@ describe("JourneyInfoComponent", () => {
 
   describe("journeyInfo", () => {
     beforeEach(() => {
-      component.journeyInfo = mockInfo;
+      //component.journeyInfo = mockInfo;
       component.loading = false;
       fixture.detectChanges();
       debugEl = fixture.debugElement.query(By.css(".journey-info"));

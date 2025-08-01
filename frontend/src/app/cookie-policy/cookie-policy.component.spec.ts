@@ -36,6 +36,7 @@ describe("CookiePolicyComponent", () => {
     cookiePolicyService.getAnalyticsPolicy.andReturn({
       analyticsEnabled: false,
       version: 1,
+      userSubmitted: true,
     });
     spectator.detectChanges();
 
@@ -47,6 +48,7 @@ describe("CookiePolicyComponent", () => {
     cookiePolicyService.getAnalyticsPolicy.andReturn({
       analyticsEnabled: true,
       version: 1,
+      userSubmitted: true,
     });
     spectator.detectChanges();
 
@@ -59,6 +61,7 @@ describe("CookiePolicyComponent", () => {
       cookiePolicyService.getAnalyticsPolicy.andReturn({
         analyticsEnabled: true,
         version: 1,
+        userSubmitted: true,
       });
       spectator.detectChanges();
     });

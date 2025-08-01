@@ -39,11 +39,13 @@ describe("AnalyticsService", () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     setAnalyticsPolicy: () => {},
   };
-  const testUser1 = <UserFragment>{
+  const testUser1 = {
+    username: "user1",
     id: "user-id-1",
     organisation: { id: "org-id-1", name: "org-name-1" },
   };
-  const testUser2 = <UserFragment>{
+  const testUser2 = {
+    username: "user1",
     id: "user-id-2",
     organisation: { id: "org-id-2", name: "org-name-2" },
   };

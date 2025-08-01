@@ -39,20 +39,14 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-          ],
-        },
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+        ],
       } as OperatorListQuery,
     });
 
@@ -74,19 +68,13 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operator: {
-          transitModel: {
-            lines: {
-              items: [
-                {
-                  id: "LI12345",
-                  name: "Worksop to Chesterfield",
-                  number: "77",
-                },
-              ],
-            },
+        lines: [
+          {
+            id: "LI12345",
+            name: "Worksop to Chesterfield",
+            number: "77",
           },
-        },
+        ],
       } as OperatorLinesQuery,
     });
 
@@ -105,30 +93,20 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
-            },
-          ],
-        },
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
       } as OperatorListQuery,
     });
 
@@ -147,30 +125,20 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
-            },
-          ],
-        },
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
       } as OperatorListQuery,
     });
 
@@ -191,30 +159,20 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
-            },
-          ],
-        },
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
       } as OperatorListQuery,
     });
 
@@ -233,30 +191,20 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
-            },
-          ],
-        },
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
       } as OperatorListQuery,
     });
 

@@ -1,5 +1,9 @@
 import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
-import { RankingOrder, ServicePunctualityType } from "src/generated/graphql";
+import {
+  RankingOrder,
+  ServiceInfoType,
+  ServicePunctualityType,
+} from "src/generated/graphql";
 import { fakeDashboardServiceRanking } from "src/test-support/faker";
 
 import { PerformanceRankingComponent } from "./ranking-table.component";
@@ -95,10 +99,12 @@ describe("PerformanceRankingComponent", () => {
 
     expect(serviceNames).toEqual(
       jasmine.arrayWithExactContents(
-        services.map(
-          ({ lineInfo: { serviceNumber, serviceName } }) =>
-            `${serviceNumber}: ${serviceName}`,
-        ),
+        services
+          .filter((s): s is { lineInfo: ServiceInfoType } => !!s.lineInfo)
+          .map(
+            ({ lineInfo: { serviceId, serviceName } }) =>
+              `${serviceId}: ${serviceName}`,
+          ),
       ),
     );
   });

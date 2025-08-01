@@ -71,6 +71,7 @@ describe("FeedHistoryComponent", () => {
   it("should load data for nocCode and date", () => {
     spyOn(service, "fetchOperatorHistory").and.returnValue(
       of({
+        operatorId: "AAAA",
         nocCode: "NOCODE",
         name: "no",
         feedMonitoring: {
@@ -172,6 +173,8 @@ describe("FeedHistoryComponent", () => {
 
   it('should show "no data" if operator loaded, but with no stats', () => {
     const operator: OperatorFeedHistoryFragment = {
+      operatorId: "AAAA",
+      name: "",
       nocCode: "NOCODE",
       feedMonitoring: {
         historicalStats: {},
@@ -193,6 +196,8 @@ describe("FeedHistoryComponent", () => {
   it("should set vehicleStats for chart", () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCODE",
+      operatorId: "AAAA",
+      name: "",
       feedMonitoring: {
         historicalStats: {},
         vehicleStats: [
@@ -210,13 +215,15 @@ describe("FeedHistoryComponent", () => {
     spectator.detectChanges();
 
     expect(spectator.component.vehicleStats).toEqual(
-      operator.feedMonitoring.vehicleStats,
+      operator.feedMonitoring?.vehicleStats ?? [],
     );
   });
 
   it(`should show operator update frequency`, () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCNOC",
+      operatorId: "AAAA",
+      name: "",
       feedMonitoring: {
         historicalStats: {
           updateFrequency: 43,
@@ -243,6 +250,8 @@ describe("FeedHistoryComponent", () => {
   it(`should show operator feed availability`, () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCNOC",
+      operatorId: "AAAA",
+      name: "",
       feedMonitoring: {
         historicalStats: {
           availability: 99.99,

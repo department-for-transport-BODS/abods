@@ -11,7 +11,7 @@ import { of } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { AlertTypeEnum, ScopeEnum } from "src/generated/graphql";
+import { AlertTypeEnum } from "src/generated/graphql";
 import { OrganisationModule } from "../../organisation.module";
 import { OrganisationService } from "../../organisation.service";
 
@@ -45,7 +45,6 @@ const adminUser = {
     {
       id: "2",
       name: "Administrator",
-      scope: ScopeEnum.Organisation,
     },
   ],
 };
@@ -53,7 +52,7 @@ const staffUser = {
   id: "14",
   username: "StaffUser",
   email: "other.email@address.com",
-  roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+  roles: [{ id: "4", name: "Staff" }],
 };
 
 const users = [adminUser, staffUser];

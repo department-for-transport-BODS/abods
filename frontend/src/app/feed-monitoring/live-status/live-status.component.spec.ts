@@ -22,6 +22,7 @@ import { AlertListComponent } from "../alert-list/alert-list.component";
 import { MockLiveVehicleStatsComponent } from "./live-vehicle-stats/mock-live-vehicle-stats.component";
 import { Interval, Settings } from "luxon";
 import { LuxonModule } from "luxon-angular";
+import { LiveVehicleStatsComponent } from "./live-vehicle-stats/live-vehicle-stats.component";
 
 describe("LiveStatusComponent", () => {
   let spectator: SpectatorRouting<LiveStatusComponent>;
@@ -32,7 +33,7 @@ describe("LiveStatusComponent", () => {
     declarations: [
       LiveStatusComponent,
       AlertListComponent,
-      MockLiveVehicleStatsComponent,
+      LiveVehicleStatsComponent,
     ],
     imports: [
       FormsModule,

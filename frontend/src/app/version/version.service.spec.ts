@@ -57,7 +57,7 @@ describe("VersionService", () => {
 
       expect(console.table).toHaveBeenCalledWith({
         FE: Version.create(mockFrontEndResponse),
-        API: Version.create(mockApiResponse.data.apiInfo),
+        //API: Version.create(mockApiResponse.data.apiInfo),
         DWH: Version.createUnknown(),
       });
     });

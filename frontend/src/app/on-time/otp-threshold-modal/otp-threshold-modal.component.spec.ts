@@ -79,8 +79,8 @@ describe("OtpThresholdModalComponent", () => {
     spectator.click(byText("Compare"));
 
     const expected: PerformanceParams = {
-      fromTimestamp: modalData.params?.fromTimestamp,
-      toTimestamp: modalData.params?.toTimestamp,
+      fromTimestamp: modalData.params?.fromTimestamp ?? "",
+      toTimestamp: modalData.params?.toTimestamp ?? "",
       filters: {
         ...modalData.params?.filters,
         onTimeMaxMinutes: 6,

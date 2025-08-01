@@ -16,12 +16,22 @@ import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-d
 import { ControlsComponent } from "../controls/controls.component";
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { waitForAsync } from "@angular/core/testing";
+import { OperatorType } from "../../../generated/graphql";
+import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { TimeSeriesChartComponent } from "../time-series-chart/time-series-chart.component";
+import { ServiceGridComponent } from "../service-grid/service-grid.component";
+import { OverviewStatsComponent } from "../overview-stats/overview-stats.component";
+import { DayOfWeekChartComponent } from "../day-of-week-chart/day-of-week-chart.component";
+import { OnTimeGridComponent } from "../on-time-grid/on-time-grid.component";
+import { AgGridAngular, AgGridModule } from "ag-grid-angular";
+import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
+import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
 
 describe("ViewOperatorComponent", () => {
   let spectator: SpectatorRouting<ViewOperatorComponent>;
@@ -29,7 +39,8 @@ describe("ViewOperatorComponent", () => {
   let operatorService: SpyObject<OperatorService>;
   let onTimeService: SpyObject<OnTimeService>;
 
-  const mockOperator: Operator = {
+  const mockOperator: OperatorType = {
+    operatorId: "OP01",
     nocCode: "OP01",
     name: "Operator 1",
     adminAreaIds: [],
@@ -42,6 +53,16 @@ describe("ViewOperatorComponent", () => {
       ChartNoDataWrapperComponent,
       ControlsComponent,
       TabsComponent,
+      FilterChipsComponent,
+      TimeSeriesChartComponent,
+      ServiceGridComponent,
+      OverviewStatsComponent,
+      DayOfWeekChartComponent,
+      OnTimeGridComponent,
+      OtpThresholdModalLinkComponent,
+      OtpThresholdModalComponent,
+      OtpThresholdFormComponent,
+      StackedHistogramChartComponent,
     ],
     imports: [
       LayoutModule,
@@ -49,6 +70,8 @@ describe("ViewOperatorComponent", () => {
       FormsModule,
       ReactiveFormsModule,
       ApolloTestingModule,
+      AgGridModule,
+      NgxTippyModule,
     ],
     mocks: [OperatorService, OnTimeService],
     detectChanges: false,

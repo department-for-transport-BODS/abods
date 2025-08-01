@@ -61,8 +61,8 @@ describe("TimeSeriesChartComponent", () => {
     const to = DateTime.fromISO("2021-01-06T00:00:00+00:00");
 
     component.params = {
-      fromTimestamp: from,
-      toTimestamp: to,
+      fromTimestamp: from.toISO(),
+      toTimestamp: to.toISO(),
       filters: {},
     };
 

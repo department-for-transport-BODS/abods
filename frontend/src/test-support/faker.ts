@@ -2,8 +2,8 @@ import faker from "faker";
 import { DateTime, Interval } from "luxon";
 import {
   EventFragment,
-  OperatorInfoType,
   OperatorLiveStatusFragment,
+  OperatorType,
   ServiceInfoType,
   ServicePerformanceType,
   ServicePunctualityType,
@@ -118,9 +118,6 @@ export function fakeDashboardServiceRanking(
     onTime: overrides?.onTime ?? faker.random.number(1000),
     early: overrides?.early ?? faker.random.number(1000),
     late: overrides?.late ?? faker.random.number(1000),
-    rank:
-      overrides?.rank ??
-      faker.random.number({ min: 1, max: 5, precision: 0.01 }),
     trend:
       overrides?.trend ??
       ({
@@ -141,10 +138,11 @@ export function fakeOnTimeServicePerformance(
   };
   const scheduledDepartures =
     overrides?.scheduledDepartures ?? faker.random.number(3000);
-  const operatorInfo: OperatorInfoType = overrides?.operatorInfo ?? {
+  const operatorInfo: OperatorType = {
     nocCode: faker.random.alpha({ count: 4, upcase: true }),
     operatorId: `OP${faker.random.number(199).toString().padStart(3, "0")}`,
-    operatorName: faker.company.companyName(),
+    name: faker.company.companyName(),
+    adminAreaIds: [],
   };
   return {
     onTime: overrides?.onTime ?? faker.random.number(1000),
@@ -157,6 +155,5 @@ export function fakeOnTimeServicePerformance(
     scheduledDepartures,
     actualDepartures:
       overrides?.actualDepartures ?? faker.random.number(scheduledDepartures),
-    operatorInfo,
   };
 }

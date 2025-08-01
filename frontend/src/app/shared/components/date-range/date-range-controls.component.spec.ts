@@ -18,7 +18,7 @@ describe("DateRangeControlsComponent", () => {
   let component: DateRangeControlsComponent;
   const createComponent = createHostFactory({
     component: DateRangeControlsComponent,
-    imports: [FormsModule, SharedModule, HttpClientTestingModule],
+    imports: [FormsModule, SharedModule],
   });
 
   beforeEach(() => {

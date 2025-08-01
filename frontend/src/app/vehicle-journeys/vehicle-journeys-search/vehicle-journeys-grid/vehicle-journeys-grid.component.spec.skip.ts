@@ -2,9 +2,9 @@ import { DateTime, Settings } from "luxon";
 import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid.component";
 import { Spectator, byText, createComponentFactory } from "@ngneat/spectator";
 import { SimpleChange } from "@angular/core";
-import { VehicleJourney } from "../vehicle-journeys-search.service";
 import { SharedModule } from "../../../shared/shared.module";
 import { RouterTestingModule } from "@angular/router/testing";
+import { Journey } from "../../../../generated/graphql";
 
 describe("VehicleJourneysGridComponent", () => {
   let spectator: Spectator<VehicleJourneysGridComponent>;
@@ -13,41 +13,51 @@ describe("VehicleJourneysGridComponent", () => {
   const toQueryParamFormat = (date: DateTime) =>
     date.toUTC()?.toISO({ format: "basic", suppressSeconds: true });
 
-  const t1 = DateTime.fromISO("2022-08-01T06:45:00");
-  const t2 = DateTime.fromISO("2022-08-01T06:55:00");
-  const t3 = DateTime.fromISO("2022-08-01T07:28:00");
-  const t4 = DateTime.fromISO("2022-08-01T15:38:00");
-  const t5 = DateTime.fromISO("2022-08-01T15:55:00");
-  const journeys: VehicleJourney[] = [
+  const t1 = DateTime.fromISO("2022-08-01T06:45:00").toISO();
+  const t2 = DateTime.fromISO("2022-08-01T06:55:00").toISO();
+  const t3 = DateTime.fromISO("2022-08-01T07:28:00").toISO();
+  const t4 = DateTime.fromISO("2022-08-01T15:38:00").toISO();
+  const t5 = DateTime.fromISO("2022-08-01T15:55:00").toISO();
+  const journeys: Journey[] = [
     {
       groupId: "VJefdb0f42",
       startTime: t1,
-      servicePattern: "St Annes - Blackpool Town Centre",
-      lineNumber: "76",
+      serviceName: "St Annes - Blackpool Town Centre",
+      serviceNumber: "76",
+      operatorName: "",
+      operatorNoc: "",
     },
     {
       groupId: "VJf3c22dad",
       startTime: t2,
-      servicePattern: "Poulton-le-Fylde - St Annes",
-      lineNumber: "76",
+      serviceName: "Poulton-le-Fylde - St Annes",
+      serviceNumber: "76",
+      operatorName: "",
+      operatorNoc: "",
     },
     {
       groupId: "VJa3968321",
       startTime: t3,
-      servicePattern: "Blackpool Town Centre - St Annes",
-      lineNumber: "76",
+      serviceName: "Blackpool Town Centre - St Annes",
+      serviceNumber: "76",
+      operatorName: "",
+      operatorNoc: "",
     },
     {
       groupId: "VJ4aa8804d",
       startTime: t4,
-      servicePattern: "Blackpool Town Centre - St Annes",
-      lineNumber: "76",
+      serviceName: "Blackpool Town Centre - St Annes",
+      serviceNumber: "76",
+      operatorName: "",
+      operatorNoc: "",
     },
     {
       groupId: "VJa921fcb5",
       startTime: t5,
-      servicePattern: "St Annes - Blackpool Town Centre",
-      lineNumber: "76",
+      serviceName: "St Annes - Blackpool Town Centre",
+      serviceNumber: "76",
+      operatorName: "",
+      operatorNoc: "",
     },
   ];
 

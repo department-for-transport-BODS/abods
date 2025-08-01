@@ -6,7 +6,7 @@ import { of } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { AlertFragment, AlertTypeEnum, ScopeEnum } from "src/generated/graphql";
+import { AlertFragment, AlertTypeEnum } from "src/generated/graphql";
 import { OrganisationModule } from "../organisation.module";
 import { OrganisationService } from "../organisation.service";
 
@@ -248,9 +248,7 @@ describe("AlertsComponent", () => {
       of({
         id: "546",
         username: "Starfleet",
-        roles: [
-          { id: "2", name: "Administrator", scope: ScopeEnum.Organisation },
-        ],
+        roles: [{ id: "2", name: "Administrator" }],
       }),
     );
 
@@ -301,7 +299,7 @@ describe("AlertsComponent", () => {
         firstName: "Mr",
         lastName: "Zulu",
         username: "",
-        roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+        roles: [{ id: "4", name: "Staff" }],
       }),
     );
 
@@ -352,7 +350,7 @@ describe("AlertsComponent", () => {
         firstName: "Mr",
         lastName: "Zulu",
         username: "",
-        roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+        roles: [{ id: "4", name: "Staff" }],
       }),
     );
 

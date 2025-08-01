@@ -36,7 +36,6 @@ describe("ServiceGridComponent", () => {
       CommonModule,
       FormsModule,
       AgGridModule,
-      HttpClientTestingModule,
       ApolloTestingModule,
     ],
     detectChanges: false,

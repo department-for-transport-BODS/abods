@@ -13,6 +13,11 @@ import { PunctualityOverview } from "../on-time.service";
 
 import { OverviewStatsComponent } from "./overview-stats.component";
 import { LuxonModule } from "luxon-angular";
+import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
+import { NgxTippyDirective } from "ngx-tippy-wrapper";
+import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
+import { ReactiveFormsModule } from "@angular/forms";
 
 describe("OverviewStatsComponent", () => {
   let spectator: Spectator<OverviewStatsComponent>;
@@ -26,6 +31,13 @@ describe("OverviewStatsComponent", () => {
       ApolloTestingModule,
       RouterTestingModule,
       LuxonModule,
+      ReactiveFormsModule,
+    ],
+    declarations: [
+      OtpThresholdModalLinkComponent,
+      NgxTippyDirective,
+      OtpThresholdModalComponent,
+      OtpThresholdFormComponent,
     ],
     providers: [DecimalPipe],
     detectChanges: false,
@@ -49,6 +61,7 @@ describe("OverviewStatsComponent", () => {
     noData: 9864,
     completed: 500000,
     scheduled: 509864,
+    incomplete: "",
   };
 
   it("should display on-time percentage", () => {
@@ -133,8 +146,6 @@ describe("OverviewStatsComponent", () => {
 
   it("should display excess wait time when specified", () => {
     component.headwayOverview = {
-      actual: 3.5,
-      scheduled: 2,
       excess: 1.5,
     };
     component.loading = false;

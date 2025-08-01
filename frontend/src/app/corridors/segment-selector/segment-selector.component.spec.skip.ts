@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { Stop } from "../corridors.service";
 
 import { SegmentSelectorComponent } from "./segment-selector.component";
+import { Stop } from "../../../generated/graphql";
 
 describe("SegmentSelectorComponent", () => {
   let component: SegmentSelectorComponent;

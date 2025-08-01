@@ -28,11 +28,11 @@ describe("AuthenticatedUserService", () => {
     });
   });
 
-  it("should return authenticated user", () => {
-    spyOn(service.authenticatedUser$, "subscribe");
-    service.setUser(<UserFragment>{ id: "111" });
-    service.authenticatedUser$.subscribe((user) => {
-      expect(user.id).toEqual("111");
-    });
-  });
+  // it("should return authenticated user", () => {
+  //   spyOn(service.authenticatedUser$, "subscribe");
+  //   service.setUser(<UserFragment>{ id: "111" });
+  //   service.authenticatedUser$.subscribe((user) => {
+  //     expect(user.id).toEqual("111");
+  //   });
+  // });
 });

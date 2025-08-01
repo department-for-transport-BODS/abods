@@ -7,7 +7,7 @@ import {
 import { RouterTestingModule } from "@angular/router/testing";
 import { createSpyObject } from "@ngneat/spectator";
 import { of } from "rxjs";
-import { ScopeEnum, UserFragment } from "../../generated/graphql";
+import { UserFragment } from "../../generated/graphql";
 
 import { AuthGuardService } from "./auth-guard.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
@@ -30,7 +30,6 @@ describe("AuthGuardService", () => {
     roles: [
       {
         id: "4",
-        scope: ScopeEnum.Organisation,
         name: "Administrator",
       },
     ],

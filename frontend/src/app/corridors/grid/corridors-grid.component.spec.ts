@@ -13,6 +13,9 @@ import { CorridorsGridComponent } from "./corridors-grid.component";
 import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { AgGridModule } from "ag-grid-angular";
+import { ButtonDirective } from "../../shared/gds/button/button.directive";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { GdsModule } from "../../shared/gds/gds.module";
 
 const queryCell = (spectator: Spectator<CorridorsGridComponent>) =>
   spectator.query(
@@ -34,6 +37,9 @@ describe("CorridorsGridComponent", () => {
       RouterTestingModule,
       ApolloTestingModule,
       AgGridModule,
+      ReactiveFormsModule,
+      FormsModule,
+      GdsModule,
     ],
   });
 

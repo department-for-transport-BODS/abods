@@ -12,11 +12,24 @@ import { SharedModule } from "../../shared/shared.module";
 import { OnTimeService } from "../on-time.service";
 import { of, throwError } from "rxjs";
 import { OperatorService } from "../../shared/services/operator.service";
+import { OperatorGridComponent } from "../operator-grid/operator-grid.component";
+import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { AdminAreaMapComponent } from "../admin-area/admin-area-map.component";
+import { OverviewStatsComponent } from "../overview-stats/overview-stats.component";
+import { PerformanceService } from "../performance.service";
+import { AdminAreaService } from "../admin-area/admin-area.service";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
+import { SparklineFactoryComponent } from "../operator-grid/sparkline-factory/sparkline-factory.component";
+import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
 
 describe("AllOperatorsComponent", () => {
   let spectator: SpectatorRouting<AllOperatorsComponent>;
   let component: AllOperatorsComponent;
-  let operatorService: OperatorService;
+  let performanceService: PerformanceService;
+  let adminAreaService: AdminAreaService;
 
   const createComponent = createRoutingFactory({
     component: AllOperatorsComponent,
@@ -24,6 +37,14 @@ describe("AllOperatorsComponent", () => {
       FiltersComponent,
       ChartNoDataWrapperComponent,
       ControlsComponent,
+      OperatorGridComponent,
+      FilterChipsComponent,
+      AdminAreaMapComponent,
+      OverviewStatsComponent,
+      OtpThresholdModalLinkComponent,
+      SparklineFactoryComponent,
+      OtpThresholdModalComponent,
+      OtpThresholdFormComponent,
     ],
     imports: [
       LayoutModule,
@@ -31,6 +52,8 @@ describe("AllOperatorsComponent", () => {
       FormsModule,
       ReactiveFormsModule,
       ApolloTestingModule,
+      NgxMapboxGLModule,
+      NgxTippyModule,
     ],
     providers: [
       MockProvider(OnTimeService, {
@@ -48,14 +71,8 @@ describe("AllOperatorsComponent", () => {
   beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
-    operatorService = spectator.inject(OperatorService);
-
-    spyOn(operatorService, "fetchOperators").and.returnValue(
-      of([{ nocCode: "OP01", name: "Operator 1", adminAreaIds: [] }]),
-    );
-    spyOn(operatorService, "fetchOperator").and.returnValue(
-      of({ nocCode: "OP01", name: "Operator 1", adminAreaIds: [] }),
-    );
+    performanceService = spectator.inject(PerformanceService);
+    adminAreaService = spectator.inject(AdminAreaService);
   });
 
   it("should create", () => {

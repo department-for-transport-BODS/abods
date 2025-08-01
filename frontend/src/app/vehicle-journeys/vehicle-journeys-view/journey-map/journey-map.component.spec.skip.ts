@@ -2,18 +2,8 @@ import { SimpleChange } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { DateTime } from "luxon";
 import { FeatureIdentifier, Map } from "mapbox-gl";
-import { GpsFeedJourneyStatus } from "../../../../generated/graphql";
 import { ConfigService } from "../../../config/config.service";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
-import {
-  VehicleJourneyView,
-  VehicleJourneyViewParams,
-} from "../vehicle-journey-view.model";
-import {
-  ApolloGpsFeedType,
-  StopDetails,
-} from "../vehicle-journeys-view.service";
-import { VehiclePing } from "../vehicle-ping.model";
 
 import { JourneyMapComponent } from "./journey-map.component";
 

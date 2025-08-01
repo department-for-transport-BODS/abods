@@ -5,20 +5,14 @@ import { AgGridFormatterService } from "./ag-grid-formatter.service";
 import { GridApi, ColumnApi } from "ag-grid-community";
 import { MockProvider } from "ng-mocks";
 
-@Component({
-  template: `<ag-grid-angular appAgGrid></ag-grid-angular>`,
-  standalone: false,
-})
-class HostComponent {}
-
 describe("AgGridDirective", () => {
-  let spectator: SpectatorDirective<AgGridDirective, HostComponent>;
+  let spectator: SpectatorDirective<AgGridDirective>;
   let mockGridApi: GridApi;
   let mockColumnApi: ColumnApi;
 
   const createDirective = createDirectiveFactory({
     directive: AgGridDirective,
-    host: HostComponent,
+    template: `<ag-grid-angular appAgGrid></ag-grid-angular>`,
     providers: [MockProvider(AgGridFormatterService)],
   });
 

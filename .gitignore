@@ -23,3 +23,5 @@ generated_api_secrets/
 .eslintcache
 
 /abods-api/src/kysely.ts
+
+**/coverage/

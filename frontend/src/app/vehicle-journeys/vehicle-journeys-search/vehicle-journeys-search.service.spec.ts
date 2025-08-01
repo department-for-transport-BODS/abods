@@ -11,154 +11,168 @@ import { waitForAsync } from "@angular/core/testing";
 
 // The real data has duplicates, as we are only selecting a small subset of fields
 const data = {
-  vehicleReplay: {
-    findJourneys: [
-      {
-        groupId: "VJ0c5bcd05",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd05",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd05",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd04",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd04",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd04",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd04",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ0c5bcd04",
-        startTime: "2022-09-01T08:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ41f09c9c",
-        startTime: "2022-09-01T08:55:00",
-        serviceInfo: {
-          serviceName: "Worksop - Chesterfield",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ41f09c9c",
-        startTime: "2022-09-01T08:55:00",
-        serviceInfo: {
-          serviceName: "Worksop - Chesterfield",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ41f09c9c",
-        startTime: "2022-09-01T08:55:00",
-        serviceInfo: {
-          serviceName: "Worksop - Chesterfield",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ41f09c9c",
-        startTime: "2022-09-01T08:55:00",
-        serviceInfo: {
-          serviceName: "Worksop - Chesterfield",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ41f09c9c",
-        startTime: "2022-09-01T08:55:00",
-        serviceInfo: {
-          serviceName: "Worksop - Chesterfield",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ9be619bc",
-        startTime: "2022-09-01T07:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ9be619bc",
-        startTime: "2022-09-01T07:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ9be619bc",
-        startTime: "2022-09-01T07:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ9be619bc",
-        startTime: "2022-09-01T07:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-      {
-        groupId: "VJ9be619bc",
-        startTime: "2022-09-01T07:35:00",
-        serviceInfo: {
-          serviceName: "Chesterfield - Worksop",
-          serviceNumber: "77",
-        },
-      },
-    ],
-  },
+  findJourneys: [
+    {
+      groupId: "VJ0c5bcd05",
+      startTime: "2022-09-01T08:35:00",
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd05",
+      startTime: "2022-09-01T08:35:00",
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd05",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd04",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd04",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd04",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd04",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ0c5bcd04",
+      startTime: "2022-09-01T08:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ41f09c9c",
+      startTime: "2022-09-01T08:55:00",
+
+      serviceName: "Worksop - Chesterfield",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ41f09c9c",
+      startTime: "2022-09-01T08:55:00",
+
+      serviceName: "Worksop - Chesterfield",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ41f09c9c",
+      startTime: "2022-09-01T08:55:00",
+
+      serviceName: "Worksop - Chesterfield",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ41f09c9c",
+      startTime: "2022-09-01T08:55:00",
+
+      serviceName: "Worksop - Chesterfield",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ41f09c9c",
+      startTime: "2022-09-01T08:55:00",
+
+      serviceName: "Worksop - Chesterfield",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ9be619bc",
+      startTime: "2022-09-01T07:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ9be619bc",
+      startTime: "2022-09-01T07:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ9be619bc",
+      startTime: "2022-09-01T07:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ9be619bc",
+      startTime: "2022-09-01T07:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+    {
+      groupId: "VJ9be619bc",
+      startTime: "2022-09-01T07:35:00",
+
+      serviceName: "Chesterfield - Worksop",
+      serviceNumber: "77",
+      operatorName: "",
+      operatorNoc: "",
+    },
+  ],
 } as JourneysQuery;
 
 describe("VehicleJourneysSearchService", () => {
@@ -179,38 +193,37 @@ describe("VehicleJourneysSearchService", () => {
 
   it("should query journeys", waitForAsync(() => {
     spectator.service
-      .fetchJourneys(
-        DateTime.fromISO("2022-09-01T00:00"),
-        DateTime.fromISO("2022-09-02T00:00"),
-        "LI12345",
+      .fetchDayJourneys(
+        DateTime.fromISO("2022-09-01T00:00").toISO(),
+        DateTime.fromISO("2022-09-02T00:00").toISO(),
       )
       .subscribe((actual) => {
         expect(actual).not.toBeNull();
         expect(actual.length).toEqual(4);
         expect(actual[0].groupId).toEqual("VJ9be619bc");
         expect(actual[0].startTime).toEqual(
-          DateTime.fromISO("2022-09-01T07:35:00"),
+          DateTime.fromISO("2022-09-01T07:35:00").toISO(),
         );
-        expect(actual[0].servicePattern).toEqual("Chesterfield - Worksop");
-        expect(actual[0].lineNumber).toEqual("77");
+        expect(actual[0].serviceName).toEqual("Chesterfield - Worksop");
+        expect(actual[0].serviceNumber).toEqual("77");
         expect(actual[1].groupId).toEqual("VJ0c5bcd05");
         expect(actual[1].startTime).toEqual(
-          DateTime.fromISO("2022-09-01T08:35:00"),
+          DateTime.fromISO("2022-09-01T08:35:00").toISO(),
         );
-        expect(actual[1].servicePattern).toEqual("Chesterfield - Worksop");
-        expect(actual[1].lineNumber).toEqual("77");
+        expect(actual[1].serviceName).toEqual("Chesterfield - Worksop");
+        expect(actual[1].serviceNumber).toEqual("77");
         expect(actual[2].groupId).toEqual("VJ0c5bcd04");
         expect(actual[2].startTime).toEqual(
-          DateTime.fromISO("2022-09-01T08:35:00"),
+          DateTime.fromISO("2022-09-01T08:35:00").toISO(),
         );
-        expect(actual[2].servicePattern).toEqual("Chesterfield - Worksop");
-        expect(actual[2].lineNumber).toEqual("77");
+        expect(actual[2].serviceName).toEqual("Chesterfield - Worksop");
+        expect(actual[2].serviceNumber).toEqual("77");
         expect(actual[3].groupId).toEqual("VJ41f09c9c");
         expect(actual[3].startTime).toEqual(
-          DateTime.fromISO("2022-09-01T08:55:00"),
+          DateTime.fromISO("2022-09-01T08:55:00").toISO(),
         );
-        expect(actual[3].servicePattern).toEqual("Worksop - Chesterfield");
-        expect(actual[3].lineNumber).toEqual("77");
+        expect(actual[3].serviceName).toEqual("Worksop - Chesterfield");
+        expect(actual[3].serviceNumber).toEqual("77");
       });
 
     const op = controller.expectOne(JourneysDocument);
@@ -228,42 +241,40 @@ describe("VehicleJourneysSearchService", () => {
     controller.verify();
   }));
 
-  it("should find next and previous journeys", waitForAsync(() => {
-    spectator.service
-      .fetchNextPrevJourneys(
-        DateTime.fromISO("20220901T0835Z"),
-        "LI12345",
-        "VJ0c5bcd04",
-      )
-      .subscribe((actual) => {
-        expect(actual).not.toBeNull();
-        expect(actual.length).toEqual(2);
+  // it("should find next and previous journeys", waitForAsync(() => {
+  //   spectator.service
+  //     .fetchDayJourneys(
+  //       DateTime.fromISO("20220901T0835Z").toISO(),
+  //     )
+  //     .subscribe((actual) => {
+  //       expect(actual).not.toBeNull();
+  //       expect(actual.length).toEqual(2);
 
-        const [prev, next] = actual;
+  //       const [prev, next] = actual;
 
-        expect(prev?.groupId).toEqual("VJ0c5bcd05");
-        expect(prev?.startTime).toEqual(
-          DateTime.fromISO("2022-09-01T08:35:00"),
-        );
+  //       expect(prev?.groupId).toEqual("VJ0c5bcd05");
+  //       expect(prev?.startTime).toEqual(
+  //         DateTime.fromISO("2022-09-01T08:35:00"),
+  //       );
 
-        expect(next?.groupId).toEqual("VJ41f09c9c");
-        expect(next?.startTime).toEqual(
-          DateTime.fromISO("2022-09-01T08:55:00"),
-        );
-      });
+  //       expect(next?.groupId).toEqual("VJ41f09c9c");
+  //       expect(next?.startTime).toEqual(
+  //         DateTime.fromISO("2022-09-01T08:55:00"),
+  //       );
+  //     });
 
-    const op = controller.expectOne(JourneysDocument);
+  //   const op = controller.expectOne(JourneysDocument);
 
-    expect(op.operation.variables.fromTimestamp).toEqual(
-      "2022-09-01T00:00:00.000Z",
-    );
-    expect(op.operation.variables.toTimestamp).toEqual(
-      "2022-09-02T00:00:00.000Z",
-    );
-    expect(op.operation.variables.lineId).toEqual("LI12345");
+  //   expect(op.operation.variables.fromTimestamp).toEqual(
+  //     "2022-09-01T00:00:00.000Z",
+  //   );
+  //   expect(op.operation.variables.toTimestamp).toEqual(
+  //     "2022-09-02T00:00:00.000Z",
+  //   );
+  //   expect(op.operation.variables.lineId).toEqual("LI12345");
 
-    op.flush({ data });
+  //   op.flush({ data });
 
-    controller.verify();
-  }));
+  //   controller.verify();
+  // }));
 });

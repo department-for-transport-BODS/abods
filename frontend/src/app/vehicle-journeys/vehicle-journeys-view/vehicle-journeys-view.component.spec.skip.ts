@@ -13,7 +13,7 @@ import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
 import { toUrlDateFormat } from "../../shared/url-helper";
 import { JourneyInfoComponent } from "./journey-info/journey-info.component";
-import { mockVehicleStopPingFactory } from "./stop-list/stop-item/stop-item.component.spec";
+import { mockVehicleStopPingFactory } from "./stop-list/stop-item/stop-item.component.spec.skip";
 import { StopListComponent } from "./stop-list/stop-list.component";
 
 import { VehicleJourneysViewComponent } from "./vehicle-journeys-view.component";

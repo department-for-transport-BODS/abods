@@ -10,7 +10,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import {
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
+  OperatorFeedMonitoring,
 } from "src/generated/graphql";
 import { DashboardComponent } from "./dashboard.component";
 import { DashboardService } from "./dashboard.service";
@@ -77,6 +77,7 @@ describe("DashboardComponent", () => {
   });
 
   const operator2 = {
+    operatorId: "OP02",
     name: "Operator 2",
     nocCode: "OP02",
     feedMonitoring: {
@@ -87,6 +88,7 @@ describe("DashboardComponent", () => {
   };
 
   const operator6 = {
+    operatorId: "OP06",
     name: "Operator 6",
     nocCode: "OP06",
     feedMonitoring: {
@@ -95,15 +97,34 @@ describe("DashboardComponent", () => {
     },
   };
   const operator2VehicleCounts = {
+    operatorId: "OP02",
+    name: "",
     nocCode: "OP02",
-    feedMonitoring: { liveStats: { currentVehicles: 1, expectedVehicles: 2 } },
+    feedMonitoring: {
+      operatorId: "OP02",
+      liveStats: {
+        operatorId: "OP02",
+        currentVehicles: 1,
+        expectedVehicles: 2,
+      },
+    },
   };
   const operator6VehicleCounts = {
+    name: "",
+    operatorId: "OP06",
     nocCode: "OP06",
-    feedMonitoring: { liveStats: { currentVehicles: 0, expectedVehicles: 18 } },
+    feedMonitoring: {
+      operatorId: "OP06",
+      liveStats: {
+        operatorId: "OP06",
+        currentVehicles: 0,
+        expectedVehicles: 18,
+      },
+    },
   };
   const operatorList: OperatorDashboardFragment[] = [
     {
+      operatorId: "OP01",
       name: "Operator 1",
       nocCode: "OP01",
       feedMonitoring: {
@@ -113,6 +134,7 @@ describe("DashboardComponent", () => {
     },
     operator2,
     {
+      operatorId: "OP03",
       name: "Operator 3",
       nocCode: "OP03",
       feedMonitoring: {
@@ -121,6 +143,7 @@ describe("DashboardComponent", () => {
       },
     },
     {
+      operatorId: "OP04",
       name: "Operator 4",
       nocCode: "OP04",
       feedMonitoring: {
@@ -129,6 +152,7 @@ describe("DashboardComponent", () => {
       },
     },
     {
+      operatorId: "OP05",
       name: "Operator 5",
       nocCode: "OP05",
       feedMonitoring: {
@@ -138,30 +162,58 @@ describe("DashboardComponent", () => {
     },
     operator6,
   ];
-  const vehicleCounts: OperatorDashboardVehicleCountsFragment[] = [
+  const vehicleCounts: OperatorFeedMonitoring[] = [
     {
       nocCode: "OP01",
+      name: "",
+      operatorId: "OP01",
       feedMonitoring: {
-        liveStats: { currentVehicles: 44, expectedVehicles: 56 },
+        operatorId: "OP01",
+        liveStats: {
+          operatorId: "OP01",
+          currentVehicles: 44,
+          expectedVehicles: 56,
+        },
       },
     },
     operator2VehicleCounts,
     {
+      name: "",
+      operatorId: "OP03",
       nocCode: "OP03",
       feedMonitoring: {
-        liveStats: { currentVehicles: 12, expectedVehicles: 14 },
+        operatorId: "OP03",
+        liveStats: {
+          operatorId: "OP03",
+          currentVehicles: 12,
+          expectedVehicles: 14,
+        },
       },
     },
     {
+      name: "",
+      operatorId: "OP04",
       nocCode: "OP04",
       feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 11 },
+        operatorId: "OP04",
+        liveStats: {
+          operatorId: "OP04",
+          currentVehicles: 0,
+          expectedVehicles: 11,
+        },
       },
     },
     {
+      name: "",
+      operatorId: "OP05",
       nocCode: "OP05",
       feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 23 },
+        operatorId: "OP05",
+        liveStats: {
+          operatorId: "OP05",
+          currentVehicles: 0,
+          expectedVehicles: 23,
+        },
       },
     },
     operator6VehicleCounts,

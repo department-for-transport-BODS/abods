@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { ChipComponent } from "./chip.component";
+import { SharedModule } from "../../shared.module";
+import { SvgIconComponent, SvgIconRegistryService } from "angular-svg-icon";
 
 describe("ChipComponent", () => {
   let component: ChipComponent;
@@ -11,7 +13,8 @@ describe("ChipComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ChipComponent],
+      imports: [SharedModule],
+      declarations: [ChipComponent, SvgIconComponent],
     }).compileComponents();
   });
 

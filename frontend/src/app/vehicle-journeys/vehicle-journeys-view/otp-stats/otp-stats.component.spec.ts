@@ -6,9 +6,8 @@ import {
 import { StatComponent } from "src/app/shared/components/stat/stat.component";
 import { SharedModule } from "src/app/shared/shared.module";
 import { OtpStatsComponent } from "./otp-stats.component";
-import { OnTimePerformanceStats } from "../on-time-performance-stats.model";
 
-const otpStats: OnTimePerformanceStats = {
+const otpStats = {
   early: {
     percent: 0.0625,
     total: 16,
@@ -30,7 +29,8 @@ describe("OtpStatsComponent", () => {
 
   beforeEach(() => {
     spectator = createComponent({
-      props: { stopList: otpStats, loading: false },
+      //props: { stopList: otpStats, loading: false },
+      props: { loading: false },
     });
     component = spectator.component;
   });

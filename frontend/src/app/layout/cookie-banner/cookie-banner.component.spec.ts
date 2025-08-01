@@ -73,6 +73,8 @@ describe("CookieBannerComponent", () => {
     it("should notify user has accepted analytics cookies", () => {
       spyOn(cookiePolicyService, "getAnalyticsPolicy").and.returnValue({
         analyticsEnabled: true,
+        version: 1,
+        userSubmitted: false,
       });
       spectator.click(byText("Accept analytics cookies"));
       spectator.detectChanges();
@@ -105,6 +107,8 @@ describe("CookieBannerComponent", () => {
     it("should notify user has rejected analytics cookies", () => {
       spyOn(cookiePolicyService, "getAnalyticsPolicy").and.returnValue({
         analyticsEnabled: false,
+        version: 1,
+        userSubmitted: false,
       });
       spectator.click(byText("Reject analytics cookies"));
       spectator.detectChanges();
@@ -137,6 +141,8 @@ describe("CookieBannerComponent", () => {
     it("should hide notification banner", () => {
       spyOn(cookiePolicyService, "getAnalyticsPolicy").and.returnValue({
         analyticsEnabled: false,
+        version: 1,
+        userSubmitted: false,
       });
       spectator.click(byText("Reject analytics cookies"));
       spectator.detectChanges();

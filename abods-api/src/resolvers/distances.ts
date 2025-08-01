@@ -78,7 +78,7 @@ const getDistances: QueryResolvers["distances"] = async (
     ])
     .select(({ fn }) => [
       fn.coalesce("ao.name", sql.lit("")).as("operatorName"),
-      fn.sum<number>("es.total_distance").as("distance"),
+      sql<number>`CAST(SUM(es.total_distance) AS INTEGER)`.as("distance"),
       fn.sum<number>("es.avl_true_distance").as("avlDistance"),
     ]);
 
@@ -105,6 +105,8 @@ const getDistances: QueryResolvers["distances"] = async (
     );
   }
 
+  console.log("query----", query.compile().sql);
+  console.log("param----", query.compile().parameters);
   return query.execute();
 };
 

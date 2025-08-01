@@ -15,15 +15,22 @@ import { LayoutModule } from "../../layout/layout.module";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
 import { DateTime } from "luxon";
 import objectContaining = jasmine.objectContaining;
+import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { DateRangeService } from "../../shared/services/date-range.service";
 
 describe("ControlsComponent", () => {
   let spectator: SpectatorRouting<ControlsComponent>;
   let component: ControlsComponent;
   let panelService: PanelService;
+  let dateRangeService: DateRangeService;
 
   const createComponent = createRoutingFactory({
     component: ControlsComponent,
-    declarations: [FiltersComponent, ChartNoDataWrapperComponent],
+    declarations: [
+      FiltersComponent,
+      ChartNoDataWrapperComponent,
+      FilterChipsComponent,
+    ],
     imports: [
       LayoutModule,
       SharedModule,
@@ -43,6 +50,7 @@ describe("ControlsComponent", () => {
     spectator = createComponent();
     component = spectator.component;
     panelService = spectator.inject(PanelService);
+    dateRangeService = spectator.inject(DateRangeService);
   });
 
   it("should create", () => {
@@ -177,8 +185,8 @@ describe("ControlsComponent", () => {
     spectator.detectChanges();
 
     expect(component.params.emit).toHaveBeenCalledWith({
-      fromTimestamp: from,
-      toTimestamp: to,
+      fromTimestamp: from.toISO(),
+      toTimestamp: to.toISO(),
       filters: {
         operatorIds: [operatorId],
         timingPointsOnly: true,
