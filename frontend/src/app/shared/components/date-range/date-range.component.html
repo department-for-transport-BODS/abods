@@ -9,7 +9,7 @@
         [hideLabel]="true"
         [ngModel]="fromToStr"
         (focussed)="openControls()"
-        (keydowned)="preventKeystroke($event)"
+        [readonly]="true"
         spaceBelow="0"
       ></gds-text-input>
       <button
