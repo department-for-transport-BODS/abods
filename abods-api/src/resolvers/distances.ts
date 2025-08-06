@@ -47,11 +47,6 @@ const getDistances: QueryResolvers["distances"] = async (
     )
     .innerJoin("all_operators as ao", "ao.operatorref", "boo.operatorref")
     .where(
-      "boo.organisation_id",
-      "=",
-      user.orgs.map((org) => org.id),
-    )
-    .where(
       "es.date_of_journey",
       ">=",
       userSelectedDateAsUtc(fromTimestamp).toDate(),
@@ -81,6 +76,10 @@ const getDistances: QueryResolvers["distances"] = async (
       fn.sum<number>("es.total_distance").as("distance"),
       fn.sum<number>("es.avl_true_distance").as("avlDistance"),
     ]);
+
+  if (orgId) {
+    query = query.where("boo.organisation_id", "=", Number(orgId));
+  }
 
   if (operatorIds && operatorIds.length > 0) {
     query = query.where("es.operator_noc", "in", operatorIds);
