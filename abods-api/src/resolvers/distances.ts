@@ -52,7 +52,7 @@ const getDistances: QueryResolvers["distances"] = async (
       "es.operator_noc",
     )
     .innerJoin("all_operators as ao", "ao.operatorref", "boo.operatorref")
-    .where("boo.organisation_id", "=", orgIds)
+    .where("boo.organisation_id", "in", orgIds)
     .where(
       "es.date_of_journey",
       ">=",
