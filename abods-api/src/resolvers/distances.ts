@@ -38,6 +38,12 @@ const getDistances: QueryResolvers["distances"] = async (
     return [];
   }
 
+  let orgIds = user.orgs.map((org) => org.id);
+
+  if (orgId) {
+    orgIds = [Number(orgId)];
+  }
+
   let query = context.kysely
     .selectFrom("expected_services as es")
     .innerJoin(
@@ -46,11 +52,7 @@ const getDistances: QueryResolvers["distances"] = async (
       "es.operator_noc",
     )
     .innerJoin("all_operators as ao", "ao.operatorref", "boo.operatorref")
-    .where(
-      "boo.organisation_id",
-      "=",
-      user.orgs.map((org) => org.id),
-    )
+    .where("boo.organisation_id", "in", orgIds)
     .where(
       "es.date_of_journey",
       ">=",
