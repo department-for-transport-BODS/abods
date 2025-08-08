@@ -931,7 +931,20 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
   async (_, args, context): Promise<ServicePunctualityType[]> => {
     const user = await requireUserSession(context);
     try {
-      const { filters, fromTimestamp, order } = args.inputs;
+      const { filters, fromTimestamp, toTimestamp, order } = args.inputs;
+
+      const from = userSelectedDateAsUtc(fromTimestamp);
+      const to = userSelectedDateAsUtc(toTimestamp);
+
+      const diff = to.diff(from, "days");
+      const daysInMonth = dayjs().daysInMonth();
+
+      const periodTypeMap = {
+        [String(daysInMonth)]: "last_month",
+        "7": "last_7_days",
+        "28": "last_28_days",
+        month_to_date: "month_to_date",
+      };
 
       const timingPointsOnly = filters.timingPointsOnly;
 
@@ -952,6 +965,11 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
           userSelectedDateAsUtc(fromTimestamp).toDate(),
         )
         .where("percentage_change", "is not", null)
+        .where(
+          "period_type",
+          "=",
+          periodTypeMap[diff] ?? periodTypeMap.month_to_date,
+        )
         .orderBy("on_time_percentage", orderFilter)
         .orderBy("percentage_change", orderFilter)
         .limit(3);
