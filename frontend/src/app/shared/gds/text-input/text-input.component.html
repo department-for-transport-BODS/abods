@@ -46,7 +46,7 @@
       spellcheck="spellcheck"
       [name]="inputId"
       [type]="type"
-      attr.aria-describedby="{{ inputId }}-hint {{ inputId }}-error"
+      attr.aria-describedby="ariaDescribedBy"
       [formControl]="control"
       (blur)="onTouch($event); blurred.emit($event)"
       (focus)="focussed.emit($event)"
