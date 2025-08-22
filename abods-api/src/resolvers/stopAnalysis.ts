@@ -111,38 +111,12 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         .where("t.stop_longitude", "<=", args.inputs.boundingBox.maxLongitude)
         .where("t.operator_noc", "in", operatorIds);
 
-      let scheduledCountQuery = context.kysely
-        .selectFrom("timetable_summary_stops_tz as t")
-        .select([
-          "t.stop_id",
-          "t.is_timing_point",
-          "t.direction",
-          sql<number>`SUM(t.scheduled)`.as("scheduled"),
-        ])
-        .where("t.date_of_journey", ">=", week.from)
-        .where("t.date_of_journey", "<", week.to)
-        .where("t.stop_latitude", ">=", args.inputs.boundingBox.minLatitude)
-        .where("t.stop_latitude", "<=", args.inputs.boundingBox.maxLatitude)
-        .where("t.stop_longitude", ">=", args.inputs.boundingBox.minLongitude)
-        .where("t.stop_longitude", "<=", args.inputs.boundingBox.maxLongitude);
-
       if (args.inputs.dayOfWeekFlags) {
         summaryQuery = summaryQuery.where("t.day_of_week", "in", days);
-        scheduledCountQuery = scheduledCountQuery.where(
-          "t.day_of_week",
-          "in",
-          days,
-        );
       }
 
       if (args.inputs.lineIds.length > 0) {
         summaryQuery = summaryQuery.where(
-          "t.noc_and_line_and_servicecode",
-          "in",
-          args.inputs.lineIds,
-        );
-
-        scheduledCountQuery = scheduledCountQuery.where(
           "t.noc_and_line_and_servicecode",
           "in",
           args.inputs.lineIds,
@@ -156,21 +130,19 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     `,
       );
 
-      scheduledCountQuery = scheduledCountQuery.where(
-        (eb) =>
-          sql<boolean>`
-      EXTRACT(HOUR FROM ${eb.ref("t.departure_hour")} AT TIME ZONE ${eb.val("Europe/London")}) 
-      BETWEEN ${eb.val(startDateTime)} AND ${eb.val(endDateTime)}
-    `,
-      );
+      const scheduledCountPromise = summaryQuery
+        .select([
+          "t.stop_id",
+          "t.is_timing_point",
+          "t.direction",
+          sql<number>`SUM(t.scheduled)`.as("scheduled"),
+        ])
+        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"])
+        .execute();
 
       if (args.inputs.matchType === MatchType.Evidenced) {
         summaryQuery = summaryQuery.where("t.estimated", "is", false);
       }
-
-      const scheduledCountPromise = scheduledCountQuery
-        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"])
-        .execute();
 
       const summaryPromise = summaryQuery
         .select(["t.stop_id", "t.is_timing_point as timingPoint"])
