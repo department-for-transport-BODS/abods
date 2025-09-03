@@ -561,6 +561,7 @@ type LoginInfo {
   currentUserId: String!
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
+  canViewDistances: Boolean!
   serviceMonitoringEmbedUrl: String
   flags: [FeatureFlag!]!
 }

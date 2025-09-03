@@ -545,6 +545,7 @@ export type LocalityType = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewDistances: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
   flags: Array<FeatureFlag>;
@@ -1853,6 +1854,7 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canViewDistances?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;

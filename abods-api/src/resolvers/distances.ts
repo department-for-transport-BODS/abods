@@ -31,9 +31,8 @@ const getDistances: QueryResolvers["distances"] = async (
   const user = await requireUserSession(context);
 
   if (
-    orgId &&
-    !user.isGlobalUser &&
-    !user.orgs.map((org) => org.id).includes(Number(orgId))
+    !user.isGlobalUser ||
+    (orgId && !user.orgs.map((org) => org.id).includes(Number(orgId)))
   ) {
     return [];
   }

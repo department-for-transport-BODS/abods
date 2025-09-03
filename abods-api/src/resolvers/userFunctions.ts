@@ -119,6 +119,7 @@ export const getUser: QueryResolvers["user"] = async (
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
       canEditAllAlerts: isAdmin,
+      canViewDistances: isAdmin,
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
