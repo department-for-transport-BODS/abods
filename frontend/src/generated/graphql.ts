@@ -296,7 +296,7 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
 };
 
 export type DistancesDropdown = {
@@ -1348,7 +1348,7 @@ export type DistancesListQueryVariables = Exact<{
 }>;
 
 
-export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName: string, distance?: number | null, avlDistance?: number | null }> };
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName?: string | null, distance?: number | null, avlDistance?: number | null }> };
 
 export type DistancesDropdownInputQueryVariables = Exact<{ [key: string]: never; }>;
 

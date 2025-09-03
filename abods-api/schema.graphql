@@ -85,7 +85,7 @@ type Distance {
   operatorName: String!
   nocLineAndServiceCode: String!
   lineName: String!
-  serviceName: String!
+  serviceName: String
   distance: Int
   avlDistance: Int
 }
