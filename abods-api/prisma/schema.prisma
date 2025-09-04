@@ -20,6 +20,8 @@ model service_details {
   operator_noc                 String?
   line_name                    String?
   service_name                 String?
+  admin_areas                  Int[]
+  license                      String
   operator                     all_operators? @relation(fields: [operator_noc], references: [operatorref])
 
   @@index([line_name], map: "expected_services_line_name")
@@ -590,6 +592,7 @@ view expected_services {
   admin_area_id                Int[] // TODO: fix - Actually an array of nullable integers but that can't be expressed in prisma
   total_distance               Int
   avl_true_distance            Int
+  license                      String?
   expected_operator            expected_operators  @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys            expected_journeys[]
 

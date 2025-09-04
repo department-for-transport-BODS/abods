@@ -40,6 +40,15 @@ export type AdminAreasType = {
   shape: Scalars['String']['output'];
 };
 
+export type AdminOrgOperatorMap = {
+  __typename?: 'AdminOrgOperatorMap';
+  adminAreaId: Scalars['Int']['output'];
+  adminName?: Maybe<Scalars['String']['output']>;
+  operatorId: Scalars['String']['output'];
+  orgId: Scalars['Int']['output'];
+  orgName?: Maybe<Scalars['String']['output']>;
+};
+
 export type AlertInputType = {
   alertType: AlertTypeEnum;
   eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
@@ -287,13 +296,21 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
+};
+
+export type DistancesDropdown = {
+  __typename?: 'DistancesDropdown';
+  operators?: Maybe<Array<OperatorForDistances>>;
 };
 
 export type DistancesFilterInput = {
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   fromTimestamp: Scalars['String']['input'];
+  licenseIds?: InputMaybe<Array<Scalars['String']['input']>>;
   nocLineAndServiceCodes?: InputMaybe<Array<Scalars['String']['input']>>;
   operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  orgId: Scalars['String']['input'];
+  orgId?: InputMaybe<Scalars['String']['input']>;
   toTimestamp: Scalars['String']['input'];
 };
 
@@ -322,7 +339,6 @@ export type EventType = {
 
 export enum FeatureFlag {
   DataMonitoring = 'DataMonitoring',
-  DirectionsDisabled = 'DirectionsDisabled',
   Distances = 'Distances',
   ServiceMonitoring = 'ServiceMonitoring',
   StopAnalysis = 'StopAnalysis'
@@ -492,6 +508,12 @@ export type JourneyResult = {
   stops: Array<Stop>;
 };
 
+export type LicensesForDistance = {
+  __typename?: 'LicensesForDistance';
+  id: Scalars['String']['output'];
+  services?: Maybe<Array<ServiceForDistances>>;
+};
+
 export type LineType = {
   __typename?: 'LineType';
   adminAreaIds: Array<Scalars['Int']['output']>;
@@ -523,6 +545,7 @@ export type LocalityType = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewDistances: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
   flags: Array<FeatureFlag>;
@@ -714,6 +737,13 @@ export type OperatorFilterInput = {
   orgId?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type OperatorForDistances = {
+  __typename?: 'OperatorForDistances';
+  id: Scalars['String']['output'];
+  licenses?: Maybe<Array<LicensesForDistance>>;
+  name: Scalars['String']['output'];
+};
+
 export type OperatorPerformancePage = {
   __typename?: 'OperatorPerformancePage';
   items: Array<OperatorPerformanceType>;
@@ -836,11 +866,13 @@ export type PunctualityTotalsType = {
 export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<AdminAreasType>>;
+  adminOrgMap: Array<AdminOrgOperatorMap>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
   distances: Array<Distance>;
+  distancesDropdowns: DistancesDropdown;
   embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
@@ -967,6 +999,13 @@ export enum RouteType {
   InvalidNoRoutePoints = 'INVALID_NO_ROUTE_POINTS',
   Valid = 'VALID'
 }
+
+export type ServiceForDistances = {
+  __typename?: 'ServiceForDistances';
+  id: Scalars['String']['output'];
+  line: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
 
 export type ServiceInfoType = {
   __typename?: 'ServiceInfoType';
@@ -1200,7 +1239,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, canViewDistances: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1309,7 +1348,17 @@ export type DistancesListQueryVariables = Exact<{
 }>;
 
 
-export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, distance?: number | null, avlDistance?: number | null }> };
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName?: string | null, distance?: number | null, avlDistance?: number | null }> };
+
+export type DistancesDropdownInputQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DistancesDropdownInputQuery = { __typename?: 'Query', distancesDropdowns: { __typename?: 'DistancesDropdown', operators?: Array<{ __typename?: 'OperatorForDistances', id: string, name: string, licenses?: Array<{ __typename?: 'LicensesForDistance', id: string, services?: Array<{ __typename?: 'ServiceForDistances', id: string, name: string, line: string }> | null }> | null }> | null } };
+
+export type AdminOrgListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminOrgListQuery = { __typename?: 'Query', adminOrgMap: Array<{ __typename?: 'AdminOrgOperatorMap', adminAreaId: number, adminName?: string | null, operatorId: string, orgId: number, orgName?: string | null }> };
 
 export type EventFragment = { __typename?: 'EventType', timestamp: string, type: string, data: { __typename?: 'EventData', message: string } };
 
@@ -1802,6 +1851,7 @@ export const UserDocument = gql`
     currentUserId
     canViewServiceMonitoring
     canEditAllAlerts
+    canViewDistances
     serviceMonitoringEmbedUrl
     flags
   }
@@ -2217,6 +2267,7 @@ export const DistancesListDocument = gql`
     operatorName
     nocLineAndServiceCode
     lineName
+    serviceName
     distance
     avlDistance
   }
@@ -2228,6 +2279,57 @@ export const DistancesListDocument = gql`
   })
   export class DistancesListGQL extends Apollo.Query<DistancesListQuery, DistancesListQueryVariables> {
     document = DistancesListDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DistancesDropdownInputDocument = gql`
+    query distancesDropdownInput {
+  distancesDropdowns {
+    operators {
+      id
+      name
+      licenses {
+        id
+        services {
+          id
+          name
+          line
+        }
+      }
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DistancesDropdownInputGQL extends Apollo.Query<DistancesDropdownInputQuery, DistancesDropdownInputQueryVariables> {
+    document = DistancesDropdownInputDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const AdminOrgListDocument = gql`
+    query adminOrgList {
+  adminOrgMap {
+    adminAreaId
+    adminName
+    operatorId
+    orgId
+    orgName
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class AdminOrgListGQL extends Apollo.Query<AdminOrgListQuery, AdminOrgListQueryVariables> {
+    document = AdminOrgListDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

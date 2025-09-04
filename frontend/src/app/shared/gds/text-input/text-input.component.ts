@@ -77,6 +77,14 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
     return this.control.value;
   }
 
+  get ariaDescribedBy(): string | null {
+    if (this.error) {
+      return `${this.inputId}-error`;
+    }
+
+    return this.hint ? `${this.inputId}-hint` : null;
+  }
+
   onTouch: (_: unknown) => void = () => {
     // Do nothing
   };
