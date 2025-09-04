@@ -1,5 +1,7 @@
 import { Injectable } from "@angular/core";
 import {
+  AdminOrgListGQL,
+  DistancesDropdownInputGQL,
   DistancesFilterInput,
   DistancesListGQL,
   OrgOperatorListGQL,
@@ -11,8 +13,10 @@ import { map } from "rxjs";
 export class DistancesService {
   constructor(
     private orgOperatorList: OrgOperatorListGQL,
-    private userOrgs: UserOrganisationsGQL,
     private distances: DistancesListGQL,
+    private adminOrgList: AdminOrgListGQL,
+    private distancesDropdowns: DistancesDropdownInputGQL,
+    private userOrgs: UserOrganisationsGQL,
   ) {}
   fetchOperatorsUsingOrg(orgId: number) {
     return this.orgOperatorList
@@ -22,13 +26,25 @@ export class DistancesService {
       .pipe(map((result) => result.data.operators));
   }
 
-  fetchUserOrgs() {
-    return this.userOrgs.fetch({}).pipe(map((result) => result.data.userOrgs));
-  }
-
   fetchDistances(filterBy: DistancesFilterInput) {
     return this.distances
       .fetch({ filterBy })
       .pipe(map((result) => result.data.distances));
+  }
+
+  fetchAdminOrgList() {
+    return this.adminOrgList
+      .fetch({})
+      .pipe(map((result) => result.data.adminOrgMap));
+  }
+
+  fetchDistancesDropdows() {
+    return this.distancesDropdowns
+      .fetch({})
+      .pipe(map((result) => result.data.distancesDropdowns));
+  }
+
+  fetchUserOrgs() {
+    return this.userOrgs.fetch({}).pipe(map((result) => result.data.userOrgs));
   }
 }

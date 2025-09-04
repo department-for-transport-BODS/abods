@@ -2,20 +2,11 @@ import { Component, Input, OnInit } from "@angular/core";
 import { DateRangeService } from "../../shared/services/date-range.service";
 import { DateTime } from "luxon";
 import { Preset } from "../../shared/components/date-range/date-range.types";
+import { debounceTime, Subject, switchMap } from "rxjs";
 import {
-  debounceTime,
-  filter,
-  finalize,
-  map,
-  mergeMap,
-  Observable,
-  of,
-  Subject,
-  switchMap,
-  tap,
-} from "rxjs";
-import {
+  AdminOrgOperatorMap,
   Distance,
+  OperatorForDistances,
   OperatorLinesGQL,
   Organisation,
 } from "../../../generated/graphql";
@@ -37,6 +28,14 @@ import { sumBy } from "lodash-es";
 
 const WHITESPACE_BETWEEN_SINGLE_CHARACTER = /(?<= \w|&|^\w|^) (?=\w |&|\w$|$)/g;
 const INITIAL_NO_ROWS_MESSAGE = "No operator data found";
+
+enum DropDowns {
+  adminArea,
+  org,
+  operator,
+  license,
+  service,
+}
 
 @Component({
   selector: "app-view-distances",
@@ -62,22 +61,28 @@ export class ViewDistancesComponent implements OnInit {
     this.to = to;
   }
 
-  private operators$ = new Subject<void>();
-  private services$ = new Subject<void>();
   private distances$ = new Subject<void>();
-  private destroy$ = new Subject<void>();
+
   gridReady$ = new Subject<void>();
   paginationChanged$ = new Subject<PaginationChangedEvent>();
 
-  orgsLoading = true;
-  selectedOrgId?: number;
-  orgs$?: Observable<Organisation[]> = this.distanceService
-    .fetchUserOrgs()
-    .pipe(finalize(() => (this.orgsLoading = false)));
+  isDropdownLoading = true;
 
+  selectedOrgId?: number;
+  orgs?: Organisation[] = [];
+
+  adminAreaOptions: MultiselectCheckboxOption[] = [];
+  licenseOptions: MultiselectCheckboxOption[] = [];
+  serviceOptions: MultiselectCheckboxOption[] = [];
   operatorMultiSelect: MultiselectCheckboxOption[] = [];
+
+  licenses: string[] = [];
   operatorIds: string[] = [];
   serviceIds: string[] = [];
+  adminAreaIds: string[] = [];
+
+  allOperatorData: OperatorForDistances[] = [];
+  backupAdminOrgMap: AdminOrgOperatorMap[] = [];
 
   data: Distance[] = [];
   headerData: Distance[] = [];
@@ -89,8 +94,8 @@ export class ViewDistancesComponent implements OnInit {
       headerName: "Operator",
       valueGetter: ({ data }: { data: Distance }) =>
         data.operatorId ? `${data.operatorName} (${data.operatorId})` : "",
-      flex: 2,
-      maxWidth: 300,
+      flex: 3,
+      maxWidth: 350,
       sortable: true,
       unSortIcon: true,
       getQuickFilterText: (params) =>
@@ -106,7 +111,8 @@ export class ViewDistancesComponent implements OnInit {
       headerName: "Service Code",
       sortable: true,
       unSortIcon: true,
-      flex: 1,
+      flex: 2,
+      maxWidth: 230,
       cellClass: "govuk-!-padding-left-3",
       headerClass: "govuk-!-padding-left-3 govuk-!-padding-right-0",
     },
@@ -115,8 +121,10 @@ export class ViewDistancesComponent implements OnInit {
       field: "lineName",
       headerName: "Service",
       sortable: true,
-      flex: 1,
+      flex: 2,
       unSortIcon: true,
+      valueGetter: ({ data }: { data: Distance }) =>
+        data.lineName ? `${data.lineName}-${data.serviceName ?? "NA"}` : "",
     },
     {
       colId: "distance",
@@ -126,7 +134,9 @@ export class ViewDistancesComponent implements OnInit {
       unSortIcon: true,
       flex: 1,
       valueGetter: ({ data }: { data: Distance }) =>
-        data.distance ? data.distance / 1000 : "-",
+        data.distance ? data.distance / 1000 : null,
+      valueFormatter: ({ value }: { value: number | null }) =>
+        value == null || isNaN(value) ? "-" : value.toFixed(2),
       type: "numericColumn",
     },
     {
@@ -136,8 +146,10 @@ export class ViewDistancesComponent implements OnInit {
       sortable: true,
       unSortIcon: true,
       flex: 1,
+      valueFormatter: ({ value }: { value: number | null }) =>
+        value == null || isNaN(value) ? "-" : value.toFixed(2),
       valueGetter: ({ data }: { data: Distance }) =>
-        data.avlDistance ? data.avlDistance / 1000 : "-",
+        data.avlDistance ? data.avlDistance / 1000 : null,
       type: "numericColumn",
     },
     {
@@ -188,54 +200,23 @@ export class ViewDistancesComponent implements OnInit {
       '<div *ngIf="loading"><app-spinner [vCentre]="true" message="Loading..." size="default"></app-spinner></div>',
   };
 
-  allServices$ = this.services$.pipe(
-    mergeMap(() => {
-      if (this.operatorIds.length === 0) return of({ data: { lines: [] } });
-      return this.operatorLinesQuery.fetch({
-        operatorIds: this.operatorIds,
-        inputDate: this.from.toISO(),
-        endDate: this.to.toISO(),
-      });
-    }),
-  );
-
-  serviceOptions$ = this.allServices$.pipe(
-    map((result) =>
-      result.data.lines.map((o) => ({
-        label: `${o.number}: ${o.name}`,
-        value: o.id,
-      })),
-    ),
-    tap((options) => {
-      const available = options.map((o) => o.value);
-      const newIds = this.serviceIds.filter((s) => available.includes(s));
-      this.isServicesLoading = false;
-      if (this.serviceIds.length !== newIds.length) {
-        this.onServicesChanged(newIds);
-      }
-    }),
-  );
-
-  isOperatorsLoading = false;
-  isServicesLoading = false;
   loading = false;
 
   ngOnInit(): void {
-    this.operators$
-      .pipe(
-        filter(() => !!this.selectedOrgId),
-        switchMap(() => {
-          return this.distanceService.fetchOperatorsUsingOrg(
-            this.selectedOrgId!,
-          );
-        }),
-      )
-      .subscribe((operators) => {
-        this.isOperatorsLoading = false;
-        this.operatorMultiSelect = operators.map((operator) => ({
-          label: `${operator.name} (${operator.nocCode})`,
-          value: operator.nocCode,
-        }));
+    this.distanceService.fetchAdminOrgList().subscribe((adminOrgList) => {
+      this.backupAdminOrgMap = [...adminOrgList];
+
+      this.updateAdminRow(new Set());
+      this.isDropdownLoading = false;
+    });
+
+    this.distanceService
+      .fetchDistancesDropdows()
+      .subscribe((dropdownValues) => {
+        this.operatorMultiSelect = [];
+        this.allOperatorData = dropdownValues.operators ?? [];
+
+        this.updateLicenseRow(new Set());
       });
 
     this.distances$
@@ -243,11 +224,13 @@ export class ViewDistancesComponent implements OnInit {
         debounceTime(700),
         switchMap(() => {
           return this.distanceService.fetchDistances({
-            orgId: this.selectedOrgId?.toString() ?? "",
+            orgId: this.selectedOrgId?.toString(),
             operatorIds: this.operatorIds,
             fromTimestamp: this.from.toISO(),
             toTimestamp: this.to.toISO(),
             nocLineAndServiceCodes: this.serviceIds,
+            licenseIds: this.licenses,
+            adminAreaIds: this.adminAreaIds,
           });
         }),
       )
@@ -259,6 +242,7 @@ export class ViewDistancesComponent implements OnInit {
               nocLineAndServiceCode: "",
               operatorId: "",
               operatorName: "",
+              serviceName: "",
               avlDistance: sumBy(data, "avlDistance"),
               distance: sumBy(data, "distance"),
             },
@@ -270,28 +254,205 @@ export class ViewDistancesComponent implements OnInit {
       });
   }
 
+  getOperatorsToFilter() {
+    let orgMap: AdminOrgOperatorMap[] = [];
+
+    if (this.adminAreaIds.length > 0 || this.selectedOrgId) {
+      orgMap = this.backupAdminOrgMap.filter(
+        (data) =>
+          this.adminAreaIds.includes(data.adminAreaId.toString()) ||
+          this.selectedOrgId === data.orgId,
+      );
+    }
+
+    const operatorsInAdminRow = orgMap.map((data) => data.operatorId);
+
+    const operatorsInLicenseRow = this.allOperatorData
+      .filter((operator) =>
+        operator.licenses?.some(
+          (license) =>
+            this.licenses.includes(license.id) ||
+            license.services?.some((service) =>
+              this.serviceIds.includes(service.id),
+            ),
+        ),
+      )
+      .map((operator) => operator.id);
+
+    if (operatorsInAdminRow.length > 0) {
+      return new Set([
+        ...operatorsInAdminRow
+          .filter(
+            (operator) =>
+              operatorsInLicenseRow.length === 0 ||
+              operatorsInLicenseRow.includes(operator),
+          )
+          .filter(
+            (operator) =>
+              this.operatorIds.length === 0 ||
+              this.operatorIds.includes(operator),
+          ),
+        ...this.operatorIds,
+      ]);
+    }
+
+    return new Set([...operatorsInLicenseRow, ...this.operatorIds]);
+  }
+
+  updateFilters(skipDropdown?: DropDowns) {
+    this.isDropdownLoading = true;
+
+    const validOperators = this.getOperatorsToFilter();
+
+    this.updateAdminRow(validOperators, skipDropdown);
+    this.updateLicenseRow(validOperators, skipDropdown);
+    this.isDropdownLoading = false;
+  }
+
+  updateAdminRow(filterOperators: Set<string>, skipDropdown?: DropDowns) {
+    const orgs: Organisation[] = [];
+    const adminAreaOptions: MultiselectCheckboxOption[] = [];
+
+    const adminAreaId = new Set<number>();
+    const orgId = new Set<number>();
+
+    this.backupAdminOrgMap
+      .filter(
+        (data) =>
+          filterOperators.size === 0 ||
+          filterOperators.has(data.operatorId) ||
+          this.adminAreaIds.includes(data.adminAreaId.toString()) ||
+          (this.selectedOrgId && this.selectedOrgId === data.orgId),
+      )
+      .map((data) => {
+        if (
+          !adminAreaId.has(data.adminAreaId) &&
+          skipDropdown !== DropDowns.adminArea
+        ) {
+          adminAreaOptions.push({
+            label: data.adminName ?? "",
+            value: data.adminAreaId.toString(),
+          });
+          adminAreaId.add(data.adminAreaId);
+        }
+
+        if (!orgId.has(data.orgId) && skipDropdown !== DropDowns.org) {
+          orgs?.push({
+            id: data.orgId,
+            name: data.orgName ?? "",
+          });
+          orgId.add(data.orgId);
+        }
+      });
+
+    if (skipDropdown !== DropDowns.adminArea) {
+      this.adminAreaOptions = [...adminAreaOptions].sort((a, b) =>
+        a.label.localeCompare(b.label),
+      );
+    }
+
+    if (skipDropdown !== DropDowns.org) {
+      this.orgs = [...orgs].sort((a, b) => a.name.localeCompare(b.name));
+    }
+  }
+
+  updateLicenseRow(filterOperators: Set<string>, skipDropdown?: DropDowns) {
+    const operatorMultiSelect: MultiselectCheckboxOption[] = [];
+    const licenseOptions: MultiselectCheckboxOption[] = [];
+    const serviceOptions: MultiselectCheckboxOption[] = [];
+
+    this.allOperatorData
+      .filter(
+        (operator) =>
+          filterOperators.size === 0 || filterOperators.has(operator.id),
+      )
+      .forEach((operator) => {
+        if (skipDropdown !== DropDowns.operator) {
+          operatorMultiSelect.push({
+            label: `${operator.name} (${operator.id})`,
+            value: operator.id,
+          });
+        }
+
+        operator.licenses
+          ?.filter(
+            (license) =>
+              this.licenses.length === 0 || this.licenses.includes(license.id),
+          )
+          .forEach((license) => {
+            if (skipDropdown !== DropDowns.license && license.id) {
+              licenseOptions.push({
+                label: license.id,
+                value: license.id,
+              });
+            }
+
+            if (skipDropdown !== DropDowns.service) {
+              license.services?.forEach((service) => {
+                serviceOptions.push({
+                  label: `${service.line}-${service.name}`,
+                  value: service.id,
+                });
+              });
+            }
+          });
+      });
+
+    if (skipDropdown !== DropDowns.license) {
+      this.licenseOptions = [...licenseOptions].sort((a, b) =>
+        a.label.localeCompare(b.label),
+      );
+    }
+
+    if (skipDropdown !== DropDowns.service) {
+      this.serviceOptions = [...serviceOptions].sort((a, b) =>
+        a.label.localeCompare(b.label),
+      );
+    }
+
+    if (skipDropdown !== DropDowns.operator) {
+      this.operatorMultiSelect = [...operatorMultiSelect].sort((a, b) =>
+        a.label.localeCompare(b.label),
+      );
+    }
+  }
+
   onDatePickerChanged($event: { from: DateTime; to: DateTime }) {
     this.from = $event.from;
     this.to = $event.to;
+    this.isDropdownLoading = true;
+    this.updateFilters();
+  }
+
+  onAdminAreaChanged($event: string[]) {
+    this.adminAreaIds = $event;
+    this.updateFilters(DropDowns.adminArea);
   }
 
   onOrgChange(orgId: number) {
     this.selectedOrgId = orgId;
-    this.operatorIds = [];
-    this.serviceIds = [];
-    this.isOperatorsLoading = true;
-    this.operators$.next();
+    this.updateFilters(DropDowns.org);
   }
 
   onOperatorsChanged($event: string[]) {
     this.operatorIds = $event;
-    this.isServicesLoading = true;
     this.serviceIds = [];
-    this.services$.next();
+    this.licenses = [];
+    this.updateFilters(
+      this.operatorIds.length > 0 ? DropDowns.operator : undefined,
+    );
   }
 
   onServicesChanged($event: string[]) {
     this.serviceIds = $event;
+    this.updateFilters(DropDowns.service);
+  }
+
+  onLicensesChanged($event: string[]) {
+    this.licenses = $event;
+    this.serviceIds = [];
+    this.serviceOptions = [];
+    this.updateFilters(DropDowns.license);
   }
 
   getRowCount(api: GridApi) {

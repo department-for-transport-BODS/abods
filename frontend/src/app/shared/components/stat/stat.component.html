@@ -4,7 +4,7 @@
     <ng-container
       *ngIf="statTemplate; else basicStat"
       [ngTemplateOutlet]="statTemplate"
-      [ngTemplateOutletContext]="statValue"
+      [ngTemplateOutletContext]="{ value: statValue }"
     ></ng-container>
   </div>
 </div>

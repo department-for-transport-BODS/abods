@@ -18,7 +18,35 @@ query distancesList($filterBy: DistancesFilterInput!) {
     operatorName
     nocLineAndServiceCode
     lineName
+    serviceName
     distance
     avlDistance
+  }
+}
+
+query distancesDropdownInput {
+  distancesDropdowns {
+    operators {
+      id
+      name
+      licenses {
+        id
+        services {
+          id
+          name
+          line
+        }
+      }
+    }
+  }
+}
+
+query adminOrgList {
+  adminOrgMap {
+    adminAreaId
+    adminName
+    operatorId
+    orgId
+    orgName
   }
 }

@@ -1,6 +1,7 @@
 import { Directive, TemplateRef } from "@angular/core";
 
 @Directive({
+  standalone: false,
   selector: "ng-template[appStatTemplate]",
 })
 export class StatTemplateDirective<T> {

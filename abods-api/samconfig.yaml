@@ -43,6 +43,7 @@ sandbox:
         QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
         QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
         QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
+        QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/superadmin/id'
         VpcId='/abods/sandbox/vpc/id'
         VpcSubnets='/abods/sandbox/vpc/subnets/private'
 
@@ -58,6 +59,7 @@ dev:
         QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
         QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
         QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
+        QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/superadmin/id'
         VpcId='/abods/dev/vpc/id'
         VpcSubnets='/abods/dev/vpc/subnets/private'
 
@@ -73,6 +75,7 @@ test:
         QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/admin/id'
         QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/lta/id'
         QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/operator/id'
+        QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/test/qs/dashboard/superadmin/id'
         VpcId='/abods/test/vpc/id'
         VpcSubnets='/abods/test/vpc/subnets/private'
 
@@ -88,6 +91,7 @@ uat:
         QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/admin/id'
         QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/lta/id'
         QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/operator/id'
+        QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/superadmin/id'
         VpcId='/abods/uat/vpc/id'
         VpcSubnets='/abods/uat/vpc/subnets/private'
 
@@ -106,5 +110,6 @@ prod:
         QuickSightAdminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/admin/id'
         QuickSightLtaDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/lta/id'
         QuickSightOperatorDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/operator/id'
+        QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/superadmin/id'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'

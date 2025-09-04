@@ -18,7 +18,6 @@ import { asBbox, BRITISH_ISLES_BBOX } from "../shared/geo";
 import {
   BoundingBoxInputType,
   Direction,
-  FeatureFlag,
   MatchType,
   Maybe,
   OperatorLinesGQL,
@@ -244,21 +243,6 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
       }
     }),
   );
-
-  isDirectionsDisabled() {
-    let isDirectionsDisabled = false;
-    this.authUserService.authenticatedUser$
-      .pipe(
-        map((info) =>
-          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
-        ),
-      )
-      .subscribe((value) => {
-        isDirectionsDisabled = value;
-      });
-
-    return isDirectionsDisabled;
-  }
 
   constructor(
     private config: ConfigService,
@@ -724,9 +708,10 @@ export class StopAnalysisComponent implements OnInit, OnDestroy {
           actualDepartures: x.completedDepartures,
           early: x.early,
           onTime: x.onTime,
-          averageDelay: this.isDirectionsDisabled()
-            ? x.totalDelay / x.completedDepartures || 0
-            : this.getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
+          averageDelay: this.getDividedValueOrUndefined(
+            x.averageDelay,
+            x.countDelayed,
+          ),
           total: x.completedDepartures,
           onTimeRatio: x.onTime / x.completedDepartures || 0,
           earlyRatio: x.early / x.completedDepartures || 0,
