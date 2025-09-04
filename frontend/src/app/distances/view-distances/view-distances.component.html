@@ -11,6 +11,20 @@
           (valueChanged)="onDatePickerChanged($event)"
         />
       </div>
+      <div>
+        <label class="govuk-label" for="adminAreas">Admin area</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreaOptions"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreaChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="adminAreas"
+          showAllLabel="Admin area"
+          placeholderText="All areas"
+          ariaLabel="Admin area"
+        />
+      </div>
       <div class="govuk-form-group">
         <label class="govuk-label" for="operator">Organisations</label>
         <ng-select
@@ -18,26 +32,32 @@
           labelForId="organisation"
           placeholder="Select"
           [clearable]="false"
-          [loading]="orgsLoading"
+          [loading]="isDropdownLoading"
           (change)="onOrgChange($event)"
         >
-          <ng-template *ngIf="orgsLoading" ng-label-tmp>Loading...</ng-template>
+          <ng-template *ngIf="isDropdownLoading" ng-label-tmp
+            >Loading...</ng-template
+          >
           <ng-template ng-loadingspinner-tmp>
             <app-spinner size="x-small"></app-spinner>
           </ng-template>
-          <ng-option *ngFor="let item of orgs$ | async" [value]="item.id">{{
+          <ng-option *ngFor="let item of orgs" [value]="item.id">{{
             item.name
           }}</ng-option>
         </ng-select>
       </div>
+    </div>
+    <div class="filters govuk-!-margin-bottom-4">
       <div>
-        <label class="govuk-label" for="operators">Operators</label>
+        <label class="govuk-label filters__grow" for="operators"
+          >Operators</label
+        >
         <gds-multiselect-checkbox
           [options]="operatorMultiSelect"
           [ngModel]="operatorIds"
           (selectedChange)="onOperatorsChanged($event)"
           [showAll]="true"
-          [isLoading]="isOperatorsLoading"
+          [isLoading]="isDropdownLoading"
           labelForId="operator"
           showAllLabel="All Operators"
           placeholderText="Operator"
@@ -45,13 +65,27 @@
         />
       </div>
       <div>
+        <label class="govuk-label" for="licenses">Licenses</label>
+        <gds-multiselect-checkbox
+          [options]="licenseOptions"
+          [ngModel]="licenses"
+          (selectedChange)="onLicensesChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="licenses"
+          showAllLabel="All Licenses"
+          placeholderText="Licenses"
+          ariaLabel="Licenses"
+        />
+      </div>
+      <div>
         <label class="govuk-label" for="services">Services</label>
         <gds-multiselect-checkbox
-          [options]="serviceOptions$ | async"
+          [options]="serviceOptions"
           [ngModel]="serviceIds"
           (selectedChange)="onServicesChanged($event)"
           [showAll]="true"
-          [isLoading]="isServicesLoading"
+          [isLoading]="isDropdownLoading"
           labelForId="services"
           showAllLabel="All Services"
           placeholderText="Services"
@@ -59,7 +93,6 @@
         />
       </div>
     </div>
-
     <div>
       <button gdsButton (click)="getDistances()">Generate</button>
     </div>

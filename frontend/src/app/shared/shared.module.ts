@@ -75,6 +75,7 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
 import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle/match-type-segmented-toggle.component";
 import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/stop-type-segmented-toggle.component";
 import { DateRangePickerComponent } from "./components/date-range/date-range-picker.component";
+import { StatTemplateDirective } from "./components/stat/stat.directive";
 
 @NgModule({
   declarations: [
@@ -143,6 +144,7 @@ import { DateRangePickerComponent } from "./components/date-range/date-range-pic
     LocationSearchComponent,
     DayOfWeekSelectComponent,
     DateRangePickerComponent,
+    StatTemplateDirective,
   ],
   providers: [PercentPipe],
   imports: [
@@ -222,6 +224,7 @@ import { DateRangePickerComponent } from "./components/date-range/date-range-pic
     LocationSearchComponent,
     DayOfWeekSelectComponent,
     DateRangePickerComponent,
+    StatTemplateDirective,
   ],
 })
 export class SharedModule {}

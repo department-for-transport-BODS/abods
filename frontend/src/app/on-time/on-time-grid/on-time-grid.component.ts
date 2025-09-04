@@ -25,14 +25,12 @@ import {
   map as _map,
   forEach as _forEach,
   sumBy,
-  sum,
   isEqual,
 } from "lodash-es";
 import { NgxSmartModalService } from "ngx-smart-modal";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import {
   Direction,
-  FeatureFlag,
   Maybe,
   Scalars,
   ServicePerformanceType,
@@ -42,7 +40,6 @@ import { OnTimeRatios } from "../on-time.service";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { ConfigService } from "../../config/config.service";
-import { map } from "rxjs/operators";
 
 type ColumnBase = {
   title: string;
@@ -273,10 +270,8 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
   }
   set preSelectedDirections(preSelectedDirections: Direction[]) {
     this._preSelectedDirections = preSelectedDirections;
-    if (!this.isDirectionsDisabled()) {
-      this.directions = preSelectedDirections;
-      this.updateGrid();
-    }
+    this.directions = preSelectedDirections;
+    this.updateGrid();
   }
 
   private _noun?: string;
@@ -355,20 +350,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     this._mode = Mode.percent;
   }
 
-  isDirectionsDisabled() {
-    let isDirectionsDisabled = false;
-    this.authUserService.authenticatedUser$
-      .pipe(
-        map((info) =>
-          this.config.hasFlag(info, FeatureFlag.DirectionsDisabled),
-        ),
-      )
-      .subscribe((value) => {
-        isDirectionsDisabled = value;
-      });
-
-    return isDirectionsDisabled;
-  }
   sumByOrNull<T>(
     array: T[],
     iteratee: (item: T) => number | null | undefined,
@@ -401,9 +382,6 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const total = sumBy(value, "total");
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
-    const totalDelay = sum(
-      value.map((stop) => stop.actualDepartures * (stop.averageDelay ?? 0)),
-    );
 
     const valueWithDelay = value.filter(
       (data) => data.averageDelay != undefined,
@@ -439,9 +417,7 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       onTimeRatio: onTime / total || 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
-      averageDelay: this.isDirectionsDisabled()
-        ? totalDelay / actual || 0
-        : averageDelay,
+      averageDelay: averageDelay,
       noData: actual - scheduled,
       completedRatio: actual / total || 0,
       total: total,

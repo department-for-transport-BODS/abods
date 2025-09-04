@@ -87,11 +87,6 @@ export class DateRangeComponent implements ControlValueAccessor {
     this.open = !this.open;
   }
 
-  preventKeystroke(event: Event) {
-    event.returnValue = false;
-    event.preventDefault();
-  }
-
   pickDateRange(value: FromTo) {
     this.onChange({ ...value, preset: Preset.Custom });
   }

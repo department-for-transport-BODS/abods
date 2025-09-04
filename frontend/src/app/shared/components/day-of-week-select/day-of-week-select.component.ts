@@ -14,6 +14,16 @@ export class DayOfWeekSelectComponent {
   @Input() error: string | undefined;
   @Output() selectedChange = new EventEmitter<DayOfWeekFlagsInputType>();
 
+  daysOfWeek: { key: keyof DayOfWeekFlagsInputType; label: string }[] = [
+    { key: "monday", label: "Mon" },
+    { key: "tuesday", label: "Tue" },
+    { key: "wednesday", label: "Wed" },
+    { key: "thursday", label: "Thur" },
+    { key: "friday", label: "Fri" },
+    { key: "saturday", label: "Sat" },
+    { key: "sunday", label: "Sun" },
+  ];
+
   onSelect($event: DayOfWeekFlagsInputType) {
     this.value = $event;
     this.selectedChange.emit($event);

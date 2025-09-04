@@ -99,8 +99,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     `,
   );
 
-  const isDirectionsDisabled =
-    process.env.ABODS_FLAG_DirectionsDisabled === "true";
   // todo: throw if the bounding box is too big
   return dbQuery
     .where("t.stop_latitude", ">=", args.inputs.boundingBox.minLatitude)
@@ -108,49 +106,25 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     .where("t.stop_longitude", ">=", args.inputs.boundingBox.minLongitude)
     .where("t.stop_longitude", "<=", args.inputs.boundingBox.maxLongitude)
     .where("t.operator_noc", "in", operatorIds)
-    .groupBy(
-      isDirectionsDisabled
-        ? [
-            "t.stop_id",
-            "t.stop_latitude",
-            "t.stop_longitude",
-            "t.is_timing_point",
-            "n.common_name",
-            "n.atco_code",
-            "l.name",
-            "a.name",
-          ]
-        : [
-            "t.stop_id",
-            "t.stop_latitude",
-            "t.stop_longitude",
-            "t.is_timing_point",
-            "n.common_name",
-            "n.atco_code",
-            "l.name",
-            "a.name",
-            "t.direction",
-          ],
-    )
-    .select(
-      isDirectionsDisabled
-        ? [
-            "t.stop_latitude as latitude",
-            "t.stop_longitude as longitude",
-            "t.is_timing_point as timingPoint",
-            "n.common_name as stopName",
-            "l.name as localityName",
-            "a.name as adminAreaName",
-          ]
-        : [
-            "t.stop_latitude as latitude",
-            "t.stop_longitude as longitude",
-            "t.is_timing_point as timingPoint",
-            "n.common_name as stopName",
-            "l.name as localityName",
-            "a.name as adminAreaName",
-          ],
-    )
+    .groupBy([
+      "t.stop_id",
+      "t.stop_latitude",
+      "t.stop_longitude",
+      "t.is_timing_point",
+      "n.common_name",
+      "n.atco_code",
+      "l.name",
+      "a.name",
+      "t.direction",
+    ])
+    .select([
+      "t.stop_latitude as latitude",
+      "t.stop_longitude as longitude",
+      "t.is_timing_point as timingPoint",
+      "n.common_name as stopName",
+      "l.name as localityName",
+      "a.name as adminAreaName",
+    ])
     .select((eb) => [
       eb.fn.coalesce("n.atco_code", sql.lit("<unknown>")).as("atcoCode"),
       eb.fn.sum<number>("t.early_count").as("early"),
@@ -195,21 +169,17 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         "scheduledDepartures",
       ),
     ])
-    .select((eb) =>
-      isDirectionsDisabled
-        ? []
-        : [
-            eb
-              .case()
-              .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "anticlockwise")
-              .then("inbound")
-              .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "clockwise")
-              .then("outbound")
-              .else(eb.ref("t.direction"))
-              .end()
-              .as("direction"),
-          ],
-    )
+    .select((eb) => [
+      eb
+        .case()
+        .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "anticlockwise")
+        .then("inbound")
+        .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "clockwise")
+        .then("outbound")
+        .else(eb.ref("t.direction"))
+        .end()
+        .as("direction"),
+    ])
     .execute();
 };
 
