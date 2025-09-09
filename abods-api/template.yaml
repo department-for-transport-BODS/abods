@@ -54,10 +54,10 @@ Parameters:
     Default: ""
   VersioningConfiguration:
     Type: String
-    Default: 'Suspended'
+    Default: "Suspended"
   BackupEnabled:
     Type: String
-    Default: 'false'
+    Default: "false"
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, "local"]]
@@ -287,10 +287,10 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       VersioningConfiguration:
-        Status: !Sub '${VersioningConfiguration}'
+        Status: !Sub "${VersioningConfiguration}"
       Tags:
         - Key: backup
-          Value: !Sub '${BackupEnabled}'
+          Value: !Sub "${BackupEnabled}"
         - Key: backup_plan
           Value: bods-backup
 
