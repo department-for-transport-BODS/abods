@@ -113,3 +113,5 @@ prod:
         QuickSightSuperadminDashboardId='arn:aws:ssm:eu-west-2:228266753808:parameter/bodds/prod/qs/dashboard/superadmin/id'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'
+        VersioningConfiguration='Enabled'
+        BackupEnabled='true'
