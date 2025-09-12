@@ -85,7 +85,7 @@ type Distance {
   operatorName: String!
   nocLineAndServiceCode: String!
   lineName: String!
-  serviceName: String!
+  serviceName: String
   distance: Int
   avlDistance: Int
 }
@@ -561,6 +561,7 @@ type LoginInfo {
   currentUserId: String!
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
+  canViewDistances: Boolean!
   serviceMonitoringEmbedUrl: String
   flags: [FeatureFlag!]!
 }

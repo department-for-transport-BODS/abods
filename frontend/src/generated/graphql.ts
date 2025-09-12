@@ -296,7 +296,7 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
 };
 
 export type DistancesDropdown = {
@@ -545,6 +545,7 @@ export type LocalityType = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewDistances: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
   flags: Array<FeatureFlag>;
@@ -1238,7 +1239,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
+export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'LoginInfo', currentUserId: string, canViewServiceMonitoring: boolean, canEditAllAlerts: boolean, canViewDistances: boolean, serviceMonitoringEmbedUrl?: string | null, flags: Array<FeatureFlag> } | null };
 
 export type CorridorsStopSearchQueryVariables = Exact<{
   inputs: AddFirstStopInputType;
@@ -1347,7 +1348,7 @@ export type DistancesListQueryVariables = Exact<{
 }>;
 
 
-export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName: string, distance?: number | null, avlDistance?: number | null }> };
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName?: string | null, distance?: number | null, avlDistance?: number | null }> };
 
 export type DistancesDropdownInputQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1850,6 +1851,7 @@ export const UserDocument = gql`
     currentUserId
     canViewServiceMonitoring
     canEditAllAlerts
+    canViewDistances
     serviceMonitoringEmbedUrl
     flags
   }

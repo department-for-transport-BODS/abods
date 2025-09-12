@@ -296,7 +296,7 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
 };
 
 export type DistancesDropdown = {
@@ -545,6 +545,7 @@ export type LocalityType = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewDistances: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
   flags: Array<FeatureFlag>;
@@ -1695,7 +1696,7 @@ export type DistanceResolvers<ContextType = RequestContext, ParentType extends R
   nocLineAndServiceCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1853,6 +1854,7 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canViewDistances?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
