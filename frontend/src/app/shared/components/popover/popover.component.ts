@@ -14,6 +14,7 @@ import type { Placement } from "tippy.js";
   templateUrl: "./popover.component.html",
   styleUrls: ["./popover.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class PopoverComponent implements OnInit {
   @Input() triggerLabel!: string;

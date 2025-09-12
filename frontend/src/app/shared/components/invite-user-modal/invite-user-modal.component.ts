@@ -17,6 +17,7 @@ import { LoginInfo } from "../../../../generated/graphql";
   selector: "app-invite-user-modal",
   templateUrl: "./invite-user-modal.component.html",
   styleUrls: ["./invite-user-modal.component.scss"],
+  standalone: false,
 })
 export class InviteUserModalComponent implements OnInit, OnDestroy {
   @Input() identifier!: string;

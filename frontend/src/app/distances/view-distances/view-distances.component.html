@@ -1,0 +1,129 @@
+<app-page>
+  <ng-container ngProjectAs="content">
+    <app-page-header heading="Distances" />
+    <div class="filters govuk-!-margin-bottom-2">
+      <div>
+        <label class="govuk-label" for="dateRange">Date Range</label>
+        <app-date-range-picker
+          [from]="from"
+          [to]="to"
+          [showPreset]="false"
+          (valueChanged)="onDatePickerChanged($event)"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="adminAreas">Admin area</label>
+        <gds-multiselect-checkbox
+          [options]="adminAreaOptions"
+          [ngModel]="adminAreaIds"
+          (selectedChange)="onAdminAreaChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="adminAreas"
+          showAllLabel="Admin area"
+          placeholderText="All areas"
+          ariaLabel="Admin area"
+        />
+      </div>
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="operator">Organisations</label>
+        <ng-select
+          class="gds-select journey-search__operators"
+          labelForId="organisation"
+          placeholder="Select"
+          [clearable]="false"
+          [loading]="isDropdownLoading"
+          (change)="onOrgChange($event)"
+        >
+          <ng-template *ngIf="isDropdownLoading" ng-label-tmp
+            >Loading...</ng-template
+          >
+          <ng-template ng-loadingspinner-tmp>
+            <app-spinner size="x-small"></app-spinner>
+          </ng-template>
+          <ng-option *ngFor="let item of orgs" [value]="item.id">{{
+            item.name
+          }}</ng-option>
+        </ng-select>
+      </div>
+    </div>
+    <div class="filters govuk-!-margin-bottom-4">
+      <div>
+        <label class="govuk-label filters__grow" for="operators"
+          >Operators</label
+        >
+        <gds-multiselect-checkbox
+          [options]="operatorMultiSelect"
+          [ngModel]="operatorIds"
+          (selectedChange)="onOperatorsChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="operator"
+          showAllLabel="All Operators"
+          placeholderText="Operator"
+          ariaLabel="Operator"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="licenses">Licenses</label>
+        <gds-multiselect-checkbox
+          [options]="licenseOptions"
+          [ngModel]="licenses"
+          (selectedChange)="onLicensesChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="licenses"
+          showAllLabel="All Licenses"
+          placeholderText="Licenses"
+          ariaLabel="Licenses"
+        />
+      </div>
+      <div>
+        <label class="govuk-label" for="services">Services</label>
+        <gds-multiselect-checkbox
+          [options]="serviceOptions"
+          [ngModel]="serviceIds"
+          (selectedChange)="onServicesChanged($event)"
+          [showAll]="true"
+          [isLoading]="isDropdownLoading"
+          labelForId="services"
+          showAllLabel="All Services"
+          placeholderText="Services"
+          ariaLabel="Services"
+        />
+      </div>
+    </div>
+    <div>
+      <button gdsButton (click)="getDistances()">Generate</button>
+    </div>
+    <div *ngIf="!loading">
+      <ag-grid-angular
+        class="ag-theme-wrapped-header"
+        [rowData]="data"
+        [pinnedTopRowData]="headerData"
+        [rowHeight]="80"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        domLayout="autoHeight"
+        [quickFilterText]="normalGridFilter"
+        [pagination]="true"
+        [paginationPageSize]="10"
+        [suppressPaginationPanel]="true"
+        [gridOptions]="gridOptions"
+        (gridReady)="gridReady$.next()"
+        (filterChanged)="filterChanged($event)"
+        (paginationChanged)="
+          paginationChanged$.next($event); paging.paginationChanged($event)
+        "
+        [noRowsOverlayComponent]="overlayComponent"
+        [noRowsOverlayComponentParams]="overlayParams"
+      >
+      </ag-grid-angular>
+      <app-paging-panel #paging noun="operator"></app-paging-panel>
+    </div>
+    <div *ngIf="loading">
+      <app-spinner [vCentre]="true" message="Loading..." size="default">
+      </app-spinner>
+    </div>
+  </ng-container>
+</app-page>

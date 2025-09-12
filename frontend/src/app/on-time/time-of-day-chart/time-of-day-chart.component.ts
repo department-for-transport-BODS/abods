@@ -15,6 +15,7 @@ import { AsyncStatus, withStatus } from "../pending.model";
     [status$]="status$.asObservable()"
     category="timeOfDay"
   ></app-stacked-histogram-chart>`,
+  standalone: false,
 })
 export class TimeOfDayChartComponent implements OnInit, OnDestroy {
   @Input()

@@ -5,11 +5,13 @@ import {
   Input,
   TemplateRef,
 } from "@angular/core";
+import { StatTemplateDirective } from "./stat.directive";
 
 @Component({
   selector: "app-stat",
   templateUrl: "./stat.component.html",
   styleUrls: ["./stat.component.scss"],
+  standalone: false,
 })
 export class StatComponent<T> implements AfterViewInit {
   @Input() label?: string;
@@ -17,7 +19,8 @@ export class StatComponent<T> implements AfterViewInit {
   @Input() tooltip?: string | TemplateRef<any>;
   @Input() identifier?: string;
   @Input() statLoaded = true;
-  @ContentChild("statTemplate") statTemplate?: TemplateRef<T>;
+  @ContentChild(StatTemplateDirective, { read: TemplateRef })
+  statTemplate?: TemplateRef<{ value: T }>;
   @Input() statFormatter?: (t: T) => string;
 
   format(): string {

@@ -7,6 +7,7 @@ import { NgxSmartModalService } from "ngx-smart-modal";
   selector: "app-user-account",
   templateUrl: "./user-account.component.html",
   styleUrls: ["./user-account.component.scss"],
+  standalone: false,
 })
 export class UserAccountComponent {
   constructor(

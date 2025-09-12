@@ -6,11 +6,13 @@ import { Journey } from "../../../../generated/graphql";
   selector: "app-journey-info",
   templateUrl: "./journey-info.component.html",
   styleUrls: ["./journey-info.component.scss"],
+  standalone: false,
 })
 export class JourneyInfoComponent {
   @Input() loading = false;
   @Input() vehicleRef: string | null = null;
   @Input() journey: Journey | null = null;
+  @Input() distance?: number | null = null;
 
   get operatorName(): string {
     return this.journey?.operatorName ?? "";
@@ -30,5 +32,9 @@ export class JourneyInfoComponent {
 
   get vehicleId(): string {
     return this.vehicleRef ?? "Unknown";
+  }
+
+  get serviceDistanceKm(): number | string {
+    return this.distance ? this.distance / 1000 : "Unknown";
   }
 }

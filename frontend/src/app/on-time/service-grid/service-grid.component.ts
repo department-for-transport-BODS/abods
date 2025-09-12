@@ -1,4 +1,13 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
 import { ICellRendererParams } from "ag-grid-community";
 import { DateTime } from "luxon";
 import { of, ReplaySubject, Subject } from "rxjs";
@@ -11,6 +20,9 @@ import { IconHeaderComponent } from "../../shared/components/ag-grid/icon-header
 import { PerformanceService } from "../performance.service";
 import { EmptyCellComponent } from "../../shared/components/ag-grid/empty-cell/empty-cell.component";
 import { ActivatedRoute } from "@angular/router";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { Direction } from "../../../generated/graphql";
 
 @Component({
   selector: "app-service-grid",
@@ -23,9 +35,12 @@ import { ActivatedRoute } from "@angular/router";
     [csvFilename]="csvFilename"
     [paginate]="true"
     [showFilter]="true"
+    [preSelectedDirections]="preSelectedDirections"
+    (directionsChanged)="onDirectionChange($event)"
   ></app-on-time-grid>`,
+  standalone: false,
 })
-export class ServiceGridComponent implements OnInit, OnDestroy {
+export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
   columnDescriptions: ColumnDescription[] = [
     {
       title: "Frequent service",
@@ -73,7 +88,12 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
       cellRenderer: RouterLinkCellRendererComponent,
       cellRendererParams: {
         routerLinkGetter: (params: ICellRendererParams) => [params.data.lineId],
-        queryParamsHandling: "preserve",
+        queryParamsGetter: (params: ICellRendererParams) => {
+          return {
+            direction: params.data.direction ?? [Direction.All],
+          };
+        },
+        queryParamsHandling: "merge",
       },
       cellRendererSelector: (params) => {
         if (params.node.rowPinned) {
@@ -86,6 +106,20 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
       minWidth: 250,
       flex: 1,
       getQuickFilterText: ({ value }) => value,
+    },
+    {
+      title: "Direction",
+      columnType: "Camelcase",
+      colId: "direction",
+      field: "direction",
+      isHideable: true,
+      isDefaultShown: true,
+      headerName: "Direction",
+      valueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.direction ?? "-",
+      sortable: true,
+      unSortIcon: true,
+      maxWidth: 130,
     },
     {
       title: "Scheduled departures",
@@ -130,12 +164,19 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     },
     {
       title: "On time",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isDefaultShown: true,
       isHideable: true,
       colId: "onTime",
       field: "onTime",
       pctField: "onTimeRatio",
+      timeField: "onTimeInMins",
+      timeValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.onTimeInSeconds : undefined,
+      valueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.onTime : undefined,
+      pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.onTimeRatio : undefined,
       headerName: "On time",
       sortable: true,
       unSortIcon: true,
@@ -144,12 +185,19 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     },
     {
       title: "Late",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isDefaultShown: true,
       isHideable: true,
       colId: "late",
       field: "late",
       pctField: "lateRatio",
+      timeField: "lateInMins",
+      timeValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.lateInSeconds : undefined,
+      valueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.late : undefined,
+      pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.lateRatio : undefined,
       headerName: "Late",
       sortable: true,
       unSortIcon: true,
@@ -158,12 +206,19 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     },
     {
       title: "Early",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isDefaultShown: true,
       isHideable: true,
       colId: "early",
       field: "early",
       pctField: "earlyRatio",
+      timeField: "earlyInMins",
+      timeValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.earlyInSeconds : undefined,
+      valueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.early : undefined,
+      pctValueGetter: ({ data }: { data: ServicePerformance }) =>
+        data.actualDepartures ? data.earlyRatio : undefined,
       headerName: "Early",
       sortable: true,
       unSortIcon: true,
@@ -180,10 +235,20 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
   csvFilename = "Service_Performance";
 
   data: ServicePerformance[] = [];
+  backupData: ServicePerformance[] = [];
+  aggDataPerService: ServicePerformance[] = [];
 
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
+  @Input() preSelectedDirections: Direction[] = [];
+
+  private _params: PerformanceParams | null = null;
   @Input()
+  get params() {
+    return this._params;
+  }
   set params(params: PerformanceParams | null) {
     if (params) {
+      this._params = params ?? null;
       this.params$.next(params);
     }
   }
@@ -192,7 +257,143 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
   constructor(
     private performanceService: PerformanceService,
     private route: ActivatedRoute,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
   ) {}
+
+  calculateInputData(): void {
+    if (this.aggDataPerService.length === 0) {
+      const mapOfServices: Record<string, ServicePerformance[]> = {};
+      this.backupData.map((serviceWithDirection) => {
+        const service =
+          mapOfServices[serviceWithDirection.lineInfo.serviceId] ?? [];
+        service.push({ ...serviceWithDirection, direction: undefined });
+        mapOfServices[serviceWithDirection.lineInfo.serviceId] = service;
+      });
+
+      for (const services of Object.values(mapOfServices)) {
+        const aggregate: ServicePerformance = services.reduce((acc, cur) => {
+          const actualDepartures =
+            (acc.actualDepartures ?? 0) + cur.actualDepartures;
+          let averageDelay = undefined;
+          let countDelayed = undefined;
+
+          if (acc.countDelayed != undefined || cur.countDelayed != undefined) {
+            countDelayed = (acc.countDelayed ?? 0) + (cur.countDelayed ?? 0);
+            averageDelay = countDelayed
+              ? ((acc.averageDelay ?? 0) * (acc.countDelayed ?? 0) +
+                  (cur.averageDelay ?? 0) * (cur.countDelayed ?? 0)) /
+                countDelayed
+              : undefined;
+          }
+
+          const early = (acc.early ?? 0) + cur.early;
+          const late = (acc.late ?? 0) + cur.late;
+          const onTime = (acc.onTime ?? 0) + cur.onTime;
+
+          const scheduledDepartures =
+            (acc.scheduledDepartures ?? 0) + cur.scheduledDepartures;
+
+          let earlyInSeconds = undefined;
+          if (acc.earlyInSeconds || cur.earlyInSeconds) {
+            earlyInSeconds =
+              (acc.earlyInSeconds ?? 0) + (cur.earlyInSeconds ?? 0);
+          }
+
+          let lateInSeconds = undefined;
+          if (acc.lateInSeconds || cur.lateInSeconds) {
+            lateInSeconds = (acc.lateInSeconds ?? 0) + (cur.lateInSeconds ?? 0);
+          }
+
+          let onTimeInSeconds = undefined;
+          if (acc.onTimeInSeconds || cur.onTimeInSeconds) {
+            onTimeInSeconds =
+              (acc.onTimeInSeconds ?? 0) + (cur.onTimeInSeconds ?? 0);
+          }
+
+          const total = (acc.total ?? 0) + cur.total;
+
+          let onTimeRatio = null;
+          if (acc.onTimeRatio || cur.onTimeRatio) {
+            onTimeRatio = (acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0);
+          }
+
+          let earlyRatio = null;
+          if (acc.earlyRatio || cur.earlyRatio) {
+            earlyRatio = (acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0);
+          }
+
+          let lateRatio = null;
+          if (acc.lateRatio || cur.lateRatio) {
+            lateRatio = (acc.lateRatio ?? 0) + (cur.lateRatio ?? 0);
+          }
+
+          return {
+            actualDepartures,
+            averageDelay,
+            countDelayed,
+            early,
+            late,
+            onTime,
+            earlyInSeconds,
+            lateInSeconds,
+            onTimeInSeconds,
+            scheduledDepartures,
+            total,
+            onTimeRatio,
+            earlyRatio,
+            lateRatio,
+            direction: undefined,
+            lineId: cur.lineId,
+            lineInfo: cur.lineInfo,
+            completedRatio: 0,
+          };
+        }, {} as ServicePerformance);
+
+        this.aggDataPerService.push({
+          ...aggregate,
+          earlyInSeconds: aggregate.earlyInSeconds
+            ? aggregate.earlyInSeconds / services.length
+            : aggregate.earlyInSeconds,
+          lateInSeconds: aggregate.lateInSeconds
+            ? aggregate.lateInSeconds / services.length
+            : aggregate.lateInSeconds,
+          onTimeInSeconds: aggregate.onTimeInSeconds
+            ? aggregate.onTimeInSeconds / services.length
+            : aggregate.onTimeInSeconds,
+          onTimeRatio: aggregate.onTimeRatio
+            ? aggregate.onTimeRatio / services.length
+            : aggregate.onTimeRatio,
+          earlyRatio: aggregate.earlyRatio
+            ? aggregate.earlyRatio / services.length
+            : aggregate.earlyRatio,
+          lateRatio: aggregate.lateRatio
+            ? aggregate.lateRatio / services.length
+            : aggregate.lateRatio,
+        });
+      }
+    }
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.preSelectedDirections &&
+      !changes.preSelectedDirections.firstChange
+    ) {
+      const currentDirections = changes.preSelectedDirections
+        .currentValue as Direction[];
+      const previousDirections = changes.preSelectedDirections
+        .previousValue as Direction[];
+
+      if (currentDirections.includes(Direction.All)) {
+        this.calculateInputData();
+        this.data = this.aggDataPerService;
+        return;
+      }
+
+      if (previousDirections.includes(Direction.All))
+        this.data = this.backupData;
+    }
+  }
 
   destroy$ = new Subject<void>();
 
@@ -203,6 +404,7 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
           this.errored = false;
           this.loading = true;
           this.csvFilename = this.calcCsvFilename(ps);
+          this.aggDataPerService = [];
         }),
         switchMap((params: PerformanceParams) =>
           this.performanceService.fetchServicePerformance(params).pipe(
@@ -222,6 +424,12 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
             { numeric: true },
           ),
         );
+
+        this.backupData = this.data;
+        if (this.preSelectedDirections.includes(Direction.All)) {
+          this.calculateInputData();
+          this.data = this.aggDataPerService;
+        }
         this.loading = false;
       });
   }
@@ -237,5 +445,9 @@ export class ServiceGridComponent implements OnInit, OnDestroy {
     return `Service_Performance_${noc}_${DateTime.fromISO(fromTimestamp).toFormat("yy-MM-dd")}_-_${inclusiveTo.toFormat(
       "yy-MM-dd",
     )}`;
+  }
+
+  onDirectionChange($event: Direction[]) {
+    this.directionsChanged.emit($event);
   }
 }

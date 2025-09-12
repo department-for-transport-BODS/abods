@@ -1,4 +1,4 @@
-import { CanActivate, Router } from "@angular/router";
+import { Router } from "@angular/router";
 import { Injectable } from "@angular/core";
 import { map } from "rxjs/operators";
 import { OperatorService } from "../shared/services/operator.service";
@@ -6,7 +6,7 @@ import { OperatorService } from "../shared/services/operator.service";
 @Injectable({
   providedIn: "root",
 })
-export class SingleOperatorGuardService implements CanActivate {
+export class SingleOperatorGuardService {
   constructor(
     private operatorService: OperatorService,
     private router: Router,

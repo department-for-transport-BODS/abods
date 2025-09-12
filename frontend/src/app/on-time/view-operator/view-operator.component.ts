@@ -1,18 +1,32 @@
 import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { ReplaySubject, Subject } from "rxjs";
-import { delay, filter, map, switchMap, takeUntil, tap } from "rxjs/operators";
-import { FrequentServiceInfoType, OperatorType } from "src/generated/graphql";
+import { ActivatedRoute, Params, Router } from "@angular/router";
+import { of, ReplaySubject, Subject } from "rxjs";
+import {
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from "rxjs/operators";
+import {
+  Direction,
+  FrequentServiceInfoType,
+  HeadwayOverviewType,
+  OperatorType,
+} from "src/generated/graphql";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Headway } from "../headway.service";
 import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { OperatorService } from "../../shared/services/operator.service";
+import { isEqual } from "lodash-es";
 
 @Component({
   templateUrl: "view-operator.component.html",
   styleUrls: ["../on-time.component.scss"],
+  standalone: false,
 })
 export class ViewOperatorComponent implements OnInit, OnDestroy {
   allOperators: OperatorType[] = [];
@@ -23,11 +37,15 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
   params$ = new ReplaySubject<PerformanceParams>();
 
   overview?: PunctualityOverview;
-  headwayOverview?: Headway;
+  headwayOverview?: HeadwayOverviewType;
   overviewLoading = true;
 
   frequentServiceInfo?: FrequentServiceInfoType;
   frequentServiceInfoLoading = true;
+
+  preSelectedDirections: Direction[] = [];
+  backLinkParams: Params = {};
+  performanceParams?: PerformanceParams;
 
   @ViewChild(TabsComponent) tabs?: TabsComponent;
 
@@ -53,8 +71,23 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
           this.overview = undefined;
           this.overviewLoading = true;
         }),
+        // deep copy
+        tap(
+          (params) =>
+            (this.performanceParams = JSON.parse(JSON.stringify(params))),
+        ),
+        map((params: PerformanceParams) => ({
+          ...params,
+          filters: { ...params.filters, direction: this.preSelectedDirections },
+        })),
         switchMap((params: PerformanceParams) =>
-          this.performanceService.fetchOverviewStats(params),
+          this.preSelectedDirections && this.preSelectedDirections.length > 0
+            ? this.performanceService.fetchOverviewStats(params)
+            : this.performanceService
+                .fetchHeadwayOverviewStats(params)
+                .pipe(
+                  map((headway) => ({ onTime: undefined, headway: headway })),
+                ),
         ),
         takeUntil(this.destroy$),
       )
@@ -90,6 +123,55 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
       .subscribe((tab) => {
         this.tabs?.openTab(tab, { emit: false });
       });
+
+    this.route.queryParamMap
+      .pipe(
+        map((paramMap) => paramMap.getAll("direction")),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        map((directions) => {
+          return !directions || directions.length === 0
+            ? [Direction.All]
+            : directions;
+        }),
+        tap(
+          (directions) =>
+            (this.preSelectedDirections = directions as Direction[]),
+        ),
+        switchMap((directions) => {
+          this.overview = undefined;
+          this.overviewLoading = true;
+          if (
+            this.performanceParams !== undefined &&
+            directions &&
+            directions.length > 0
+          ) {
+            this.performanceParams.filters.direction =
+              directions as Direction[];
+            return this.performanceService.fetchOnTimeOverviewStats(
+              this.performanceParams,
+            );
+          }
+          return of(null);
+        }),
+      )
+      .subscribe((overview) => {
+        if (overview) this.overview = overview;
+        this.overviewLoading = false;
+      });
+
+    this.route.queryParamMap.subscribe((paramMap) => {
+      const params: Params = {};
+
+      paramMap.keys.forEach((key) => {
+        if (key !== "direction") {
+          const value = paramMap.get(key);
+          if (value !== null) {
+            params[key] = value;
+          }
+        }
+      });
+      this.backLinkParams = params;
+    });
   }
 
   ngOnDestroy(): void {
@@ -120,6 +202,15 @@ export class ViewOperatorComponent implements OnInit, OnDestroy {
     this.router
       .navigate([], {
         queryParams: { overview },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
+  }
+
+  onDirectionChange(direction: Direction[]) {
+    this.router
+      .navigate([], {
+        queryParams: { direction },
         queryParamsHandling: "merge",
       })
       .catch(console.log);

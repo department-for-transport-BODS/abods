@@ -5,6 +5,7 @@ import { NgxSmartModalComponent, NgxSmartModalService } from "ngx-smart-modal";
   selector: "app-modal",
   templateUrl: "./modal.component.html",
   styleUrls: ["./modal.component.scss"],
+  standalone: false,
 })
 export class ModalComponent {
   @Input() modalTitle?: string;

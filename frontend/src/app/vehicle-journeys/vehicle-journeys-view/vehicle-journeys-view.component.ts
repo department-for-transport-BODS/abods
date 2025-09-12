@@ -18,6 +18,7 @@ import {
   MatchType,
   JourneyGQL,
   Stop,
+  StopTypeOption,
 } from "../../../generated/graphql";
 import { DateTime } from "luxon";
 
@@ -43,6 +44,7 @@ const getInitialVehicleRef = (stops: Stop[], avl_list: AvlPoint[]) => {
   selector: "app-vehicle-journeys-view",
   templateUrl: "./vehicle-journeys-view.component.html",
   styleUrls: ["./vehicle-journeys-view.component.scss"],
+  standalone: false,
 })
 export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeyInfo: JourneyInfo | null = null;
@@ -54,7 +56,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   journeysLoading = false;
 
   matchType: MatchType = MatchType.Evidenced;
-  timingPointsOption: "timing-points" | "all-stops" = "timing-points";
+  stopType: StopTypeOption = StopTypeOption.TimingPoints;
+  // Required to check in the template
+  StopTypeOption = StopTypeOption;
 
   selectedStop?: Stop;
   hoveredStop?: StopHoverEvent;
@@ -67,6 +71,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
   vehicleRef: string | null = null;
   directionRef: string | null = null;
   currentJourneyIndex = -1;
+
+  servicePatternDistance: number | null = null;
+  servicePatternGeom: [number, number][] | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -96,7 +103,6 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
         lineId: queryParams.get("service")!,
         operator: queryParams.get("operator"),
         matchType: queryParams.get("match_type") as MatchType | undefined,
-        timingPointsOnly: queryParams.get("timingPointsOnly"),
         allStops: queryParams.get("allStops"),
         direction: queryParams.get("direction"),
       })),
@@ -107,10 +113,10 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           service: urlData.lineId,
         };
         this.matchType = urlData.matchType ?? MatchType.Evidenced;
-        this.timingPointsOption =
-          urlData.timingPointsOnly === "true" || urlData.allStops !== "true"
-            ? "timing-points"
-            : "all-stops";
+        this.stopType =
+          urlData.allStops !== "true"
+            ? StopTypeOption.TimingPoints
+            : StopTypeOption.AllStops;
         this.groupId = urlData.groupId;
         this.directionRef = urlData.direction;
       }),
@@ -136,11 +142,9 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
           // but for now it's quicker to iterate here in local dev
           const direction = this.directionRef?.toLowerCase();
           const stopData = [...result.data.journey.stops];
-          const stops = stopData
-            .filter(
-              (n) => !direction || n.directionRef.toLowerCase() === direction,
-            )
-            .sort((a, b) => a.stopIndex - b.stopIndex);
+          const stops = stopData.filter(
+            (n) => !direction || n.directionRef.toLowerCase() === direction,
+          );
 
           // If there are multiple directions in the timetable, then filter to just avls for the direction query param.
           // The other direction's data will be on another screen.
@@ -198,6 +202,28 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
               v.groupId === this.groupId && v.directionRef == this.directionRef,
           );
           this.journeysLoading = false;
+
+          const currentJourney = this.journeys[this.currentJourneyIndex];
+          const vehicleJourneyId = currentJourney?.vehicleJourneyId;
+          if (vehicleJourneyId) {
+            this.service
+              .getServicePatternDistanceGeom(vehicleJourneyId.toString())
+              .pipe(takeUntil(this.onDestroy$))
+              .subscribe({
+                next: ({ distance, geom }) => {
+                  this.servicePatternDistance = distance;
+                  this.servicePatternGeom = geom;
+                },
+                error: (err) => {
+                  console.error(
+                    "Failed to fetch service pattern geometry:",
+                    err,
+                  );
+                  this.servicePatternDistance = null;
+                  this.servicePatternGeom = null;
+                },
+              });
+          }
         },
         error: (err) => {
           console.log(err);
@@ -214,8 +240,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
     this.onDestroy$.complete();
   }
 
-  onTimingPointsToggleChange() {
-    const allStops = this.timingPointsOption === "all-stops" ? true : null;
+  stopTypeToggleChange(stopType: StopTypeOption) {
+    const allStops = stopType === StopTypeOption.AllStops ? true : null;
     return this.router
       .navigate([], {
         queryParams: { allStops },
@@ -224,8 +250,8 @@ export class VehicleJourneysViewComponent implements OnInit, OnDestroy {
       .catch(console.log);
   }
 
-  onMatchTypeChange() {
-    const matchType = this.matchType;
+  matchTypeToggleChange(matchTypeValue: MatchType) {
+    const matchType = matchTypeValue;
     return this.router
       .navigate([], {
         queryParams: { match_type: matchType },

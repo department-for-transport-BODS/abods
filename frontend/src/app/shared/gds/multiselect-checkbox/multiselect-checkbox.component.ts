@@ -28,6 +28,7 @@ export interface MultiselectCheckboxOption {
     },
   ],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class MultiselectCheckboxComponent implements ControlValueAccessor {
   @Input() options: MultiselectCheckboxOption[] | null = [];
@@ -39,6 +40,7 @@ export class MultiselectCheckboxComponent implements ControlValueAccessor {
   @Input() labelForId?: string;
   @Input() ariaLabel?: string;
   @Input() selected: string[] = [];
+  @Input() isLoading?: boolean = false;
   @Output() selectedChange = new EventEmitter<string[]>();
 
   readonly checkboxItemInputId = "gds-multiselect-checkbox-checkbox-item-";
@@ -66,5 +68,9 @@ export class MultiselectCheckboxComponent implements ControlValueAccessor {
   onOptionChange() {
     this.onChange(this.selected);
     this.selectedChange.emit(this.selected);
+  }
+
+  get enableVirtualScroll(): boolean {
+    return !!this.options && this.options.length > 500;
   }
 }

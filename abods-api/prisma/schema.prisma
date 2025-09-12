@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["views", "strictUndefinedChecks"]
-  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
 }
 
 generator kysely {
@@ -20,6 +20,8 @@ model service_details {
   operator_noc                 String?
   line_name                    String?
   service_name                 String?
+  admin_areas                  Int[]
+  license                      String
   operator                     all_operators? @relation(fields: [operator_noc], references: [operatorref])
 
   @@index([line_name], map: "expected_services_line_name")
@@ -129,6 +131,7 @@ model Timetable {
   departure_day_shift      Boolean?
   siri_vm_position_id      BigInt?
   incomplete_reason        Int?
+  set_down                 Boolean?
   stops                    naptan_stoppoint_latlong @relation(fields: [stop_id], references: [id])
 
   @@id([timetable_id, date_of_journey], map: "timetable_pk_240603")
@@ -270,6 +273,8 @@ model timetable_summary_operator_t {
   admin_areas         Int[]
   estimated           Boolean? @default(false)
   incomplete_reason   Int?
+  count_delayed       Int
+  average_delay       Int
 
   @@index([day_of_week], map: "day_of_week_operatort")
   @@index([departure_hour_only], map: "departure_hour_only_operatort")
@@ -327,8 +332,11 @@ model timetable_summary_service_tz {
   admin_areas                  Int[]
   estimated                    Boolean  @default(false)
   incomplete_reason            Int?
+  direction                    String
+  count_delayed                Int
+  average_delay                Int
 
-  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode]) // TODO: fix - not in db
+  @@id([operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode, direction]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_servicetz")
   @@index([day_of_week], map: "day_of_week_servicetz")
   @@index([departure_hour_only], map: "departure_hour_only_servicetz")
@@ -366,8 +374,16 @@ model timetable_summary_stops_tz {
   avg_time_difference          Decimal? @db.Decimal
   estimated                    Boolean  @default(false)
   incomplete_reason            Int?
+  direction                               String
+  stop_index                              Int
+  count_delayed                           Int
+  average_delay                           Int
+  diff_sched_time_to_stop                 Int
+  diff_sched_time_to_stop_timing_point    Int
+  diff_actual_time_to_stop                Int
+  diff_actual_time_to_stop_timing_point   Int
 
-  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude]) // TODO: fix - not in db
+  @@id([service_code, operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, common_name, stop_id, noc_and_line_and_servicecode, locality_id, stop_latitude, stop_longitude, direction, stop_index]) // TODO: fix - not in db
   @@index([date_of_journey], map: "date_of_journey_stopstz")
   @@index([day_of_week], map: "day_of_week_stopstz")
   @@index([departure_hour_only], map: "departure_hour_only_stopstz")
@@ -457,6 +473,12 @@ model feed_monitor_daily_summary {
   availability     Decimal? @db.Decimal
 }
 
+model transmodel_servicepatterndistance {
+  service_pattern_id Int    @id
+  distance           Int?
+  geom               String?
+}
+
 model servicepattern_route {
   distinct_route_id            Int             @unique // TODO: fix - not unique in db
   noc_and_line_and_servicecode String
@@ -479,9 +501,9 @@ model timetable_frequent_summary_services {
   max_early                    Int
   max_late                     Int
   avg_time_difference          Decimal  @db.Decimal
-  expected_headway             Decimal  @db.Decimal
-  actual_headway               Decimal  @db.Decimal
-  excess_wait_time             Decimal  @db.Decimal
+  expected_headway             Decimal?  @db.Decimal
+  actual_headway               Decimal?  @db.Decimal
+  excess_wait_time             Decimal?  @db.Decimal
   headway_stops_count          Decimal  @db.Decimal
   estimated                    Boolean
   is_timing_point              Boolean?
@@ -568,6 +590,9 @@ view expected_services {
   date_of_journey              DateTime
   operator_noc                 String
   admin_area_id                Int[] // TODO: fix - Actually an array of nullable integers but that can't be expressed in prisma
+  total_distance               Int
+  avl_true_distance            Int
+  license                      String?
   expected_operator            expected_operators  @relation(fields: [operator_noc, date_of_journey], references: [operator_noc, date_of_journey])
   expected_journeys            expected_journeys[]
 
@@ -605,7 +630,7 @@ model transmodel_tracks {
   @@index([from_atco_code, to_atco_code], map: "transmodel_tracks_geometry_idx")
 }
 
-view organisation_organisation_admin_areas {
+view bods_organisation_organisation_admin_areas {
   id              Int  @unique // TODO: fix - nullable in db, not unique
   organisation_id Int?
   adminarea_id    Int?
@@ -624,4 +649,11 @@ model login_details {
   last_login                     DateTime  @db.Timestamp(6)
   data_monitoring_access_count   Int?
   data_monitoring_access_refresh DateTime? @db.Timestamp(6)
+}
+
+model route_to_journeys {
+  id                BigInt    @id @default(autoincrement())
+  group_id          String
+  date_of_journey   DateTime  @db.Date
+  distinct_route_id Int
 }

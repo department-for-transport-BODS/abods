@@ -13,6 +13,7 @@ query journey($groupId: String!, $lineId: String!) {
       otp
       directionRef
       incompleteReason
+      setDown
     }
     avls {
       recordedAtTimeUtc
@@ -33,5 +34,13 @@ query journeys($dateOfJourney: String!, $lineId: String!) {
     operatorName
     operatorNoc
     directionRef
+    vehicleJourneyId
+  }
+}
+
+query servicePatternDistanceGeom($vehicleJourneyId: ID!) {
+  getServicePatternDistanceGeom(vehicleJourneyId: $vehicleJourneyId) {
+    distance
+    geom
   }
 }

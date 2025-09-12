@@ -6,12 +6,23 @@ import { getDefaultDayOfWeekFlags } from "./day-of-week-utils";
   selector: "app-day-of-week-select",
   templateUrl: "./day-of-week-select.component.html",
   styleUrls: ["./day-of-week-select.component.scss"],
+  standalone: false,
 })
 export class DayOfWeekSelectComponent {
   @Input() value = getDefaultDayOfWeekFlags();
   @Input() fieldId = "day-of-week";
   @Input() error: string | undefined;
   @Output() selectedChange = new EventEmitter<DayOfWeekFlagsInputType>();
+
+  daysOfWeek: { key: keyof DayOfWeekFlagsInputType; label: string }[] = [
+    { key: "monday", label: "Mon" },
+    { key: "tuesday", label: "Tue" },
+    { key: "wednesday", label: "Wed" },
+    { key: "thursday", label: "Thur" },
+    { key: "friday", label: "Fri" },
+    { key: "saturday", label: "Sat" },
+    { key: "sunday", label: "Sun" },
+  ];
 
   onSelect($event: DayOfWeekFlagsInputType) {
     this.value = $event;

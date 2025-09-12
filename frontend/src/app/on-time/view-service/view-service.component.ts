@@ -19,7 +19,9 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import {
+  Direction,
   FrequentServiceInfoType,
+  HeadwayOverviewType,
   OperatorType,
   ServiceInfoType,
 } from "src/generated/graphql";
@@ -28,13 +30,13 @@ import {
   PerformanceParams,
   PunctualityOverview,
 } from "../on-time.service";
-import { Headway, HeadwayService } from "../headway.service";
 import { TabsComponent } from "../../shared/components/tabs/tabs.component";
 import { TabComponent } from "../../shared/components/tabs/tab/tab.component";
 import { PerformanceService } from "../performance.service";
 import { nonNullOrUndefined } from "../../shared/rxjs-operators";
 import { OperatorService } from "../../shared/services/operator.service";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, isEqual } from "lodash-es";
+import { HeadwayService } from "../headway.service";
 
 export const removeAdminAreaIds = (params: PerformanceParams) => {
   const paramsWithoutAdminAreas = cloneDeep(params);
@@ -45,6 +47,7 @@ export const removeAdminAreaIds = (params: PerformanceParams) => {
 @Component({
   templateUrl: "view-service.component.html",
   styleUrls: ["../on-time.component.scss"],
+  standalone: false,
 })
 export class ViewServiceComponent implements OnInit, OnDestroy {
   allOperators: OperatorType[] = [];
@@ -57,7 +60,7 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
   params$ = new ReplaySubject<PerformanceParams>();
 
   overview?: PunctualityOverview;
-  headwayOverview?: Headway;
+  headwayOverview?: HeadwayOverviewType;
   overviewLoading = true;
 
   frequentServiceInfo?: FrequentServiceInfoType;
@@ -79,6 +82,8 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
 
   timingPointsOnly = false;
   minMaxDelay = false;
+  preSelectedDirections: Direction[] = [];
+  performanceParams?: PerformanceParams;
 
   constructor(
     private router: Router,
@@ -102,10 +107,21 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
           this.timingPointsOnly = params.filters.timingPointsOnly ?? false;
           this.minMaxDelay =
             !!params.filters.minDelay || !!params.filters.maxDelay;
+          this.performanceParams = JSON.parse(JSON.stringify(params));
         }),
         map((params) => removeAdminAreaIds(params)),
+        map((params: PerformanceParams) => ({
+          ...params,
+          filters: { ...params.filters, direction: this.preSelectedDirections },
+        })),
         switchMap((params: PerformanceParams) =>
-          this.performanceService.fetchOverviewStats(params),
+          this.preSelectedDirections && this.preSelectedDirections.length > 0
+            ? this.performanceService.fetchOverviewStats(params)
+            : this.performanceService
+                .fetchHeadwayOverviewStats(params)
+                .pipe(
+                  map((headway) => ({ onTime: undefined, headway: headway })),
+                ),
         ),
         takeUntil(this.destroy$),
       )
@@ -209,6 +225,41 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
 
     queryParamMap$
       .pipe(
+        map((paramMap) => paramMap.getAll("direction")),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        map((directions) => {
+          return !directions || directions.length === 0
+            ? [Direction.All]
+            : directions;
+        }),
+        tap(
+          (directions) =>
+            (this.preSelectedDirections = directions as Direction[]),
+        ),
+        switchMap((directions) => {
+          this.overview = undefined;
+          this.overviewLoading = true;
+          if (
+            this.performanceParams !== undefined &&
+            directions &&
+            directions.length > 0
+          ) {
+            this.performanceParams.filters.direction =
+              directions as Direction[];
+            return this.performanceService.fetchOnTimeOverviewStats(
+              this.performanceParams,
+            );
+          }
+          return of(null);
+        }),
+      )
+      .subscribe((overview) => {
+        if (overview) this.overview = overview;
+        this.overviewLoading = false;
+      });
+
+    queryParamMap$
+      .pipe(
         filter(
           (paramMap) =>
             paramMap.has("overview") &&
@@ -261,5 +312,14 @@ export class ViewServiceComponent implements OnInit, OnDestroy {
     const ret: Params = { overview: null };
     if (this.mapTab?.active) ret.tab = null;
     return ret;
+  }
+
+  onDirectionChange(direction: Direction[]) {
+    this.router
+      .navigate([], {
+        queryParams: { direction },
+        queryParamsHandling: "merge",
+      })
+      .catch(console.log);
   }
 }

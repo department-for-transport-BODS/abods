@@ -1,22 +1,26 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Headway } from "../headway.service";
 import { Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
+import { HeadwayOverviewType } from "../../../generated/graphql";
+import { Duration } from "luxon";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
 
 @Component({
   selector: "app-overview-stats",
   templateUrl: "./overview-stats.component.html",
   styleUrls: ["./overview-stats.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class OverviewStatsComponent {
   @Input() showTotal = false;
   @Input() showNoData = true;
   @Input() overview?: PunctualityOverview;
   @Input() frequent = false;
-  @Input() headwayOverview?: Headway;
+  @Input() headwayOverview?: HeadwayOverviewType;
   @Input() loading = true;
   @Input() nested = false;
   @Input() params$?: Observable<PerformanceParams>;
@@ -45,8 +49,10 @@ export class OverviewStatsComponent {
     return this.overview?.noData ?? NaN;
   }
 
-  get excess(): number {
-    return (this.headwayOverview?.excess || 0) * 60000;
+  get excess(): number | undefined {
+    return this.headwayOverview?.excess
+      ? this.headwayOverview?.excess * 60000
+      : undefined;
   }
 
   get incompleteSummary() {
@@ -59,7 +65,22 @@ export class OverviewStatsComponent {
     return incompleteConversion(incomplete);
   }
 
-  constructor(private helpdeskPanelService: HelpdeskPanelService) {}
+  get averageDelay() {
+    if (!this.overview?.averageDelay) {
+      return "-";
+    }
+    const seconds = this.overview?.averageDelay;
+    return (
+      "+" +
+      Duration.fromObject({ seconds: Math.abs(seconds) }).toFormat("mm:ss")
+    );
+  }
+
+  constructor(
+    private helpdeskPanelService: HelpdeskPanelService,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
+  ) {}
 
   openHelpdesk() {
     this.helpdeskPanelService.open();

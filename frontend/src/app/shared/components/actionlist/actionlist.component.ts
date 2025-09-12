@@ -4,5 +4,6 @@ import { Component } from "@angular/core";
   selector: "[app-actionlist]",
   template: "<ng-content></ng-content>",
   styleUrls: ["./actionlist.component.scss"],
+  standalone: false,
 })
 export class ActionListComponent {}

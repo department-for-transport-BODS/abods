@@ -5,7 +5,9 @@ import {
   HeadwayFrequentServicesGQL,
   HeadwayInputType,
   HeadwayOverviewGQL,
+  HeadwayOverviewType,
   HeadwayTimeSeriesGQL,
+  HeadwayTimeSeriesType,
 } from "../../generated/graphql";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -13,14 +15,6 @@ import { nonNullishArray, NullishArray } from "../shared/array-operators";
 import { assertNonNullish } from "../shared/rxjs-operators";
 import { pick } from "lodash-es";
 import { PerformanceParams } from "./on-time.service";
-
-export interface Headway {
-  excess: number;
-}
-
-export interface HeadwayTimeSeries extends Headway {
-  ts: string;
-}
 
 export interface FrequentService {
   serviceId: string;
@@ -68,7 +62,7 @@ export class HeadwayService {
     private frequentServiceInfoGQL: HeadwayFrequentServiceInfoGQL,
   ) {}
 
-  fetchTimeSeries(params: HeadwayParams): Observable<HeadwayTimeSeries[]> {
+  fetchTimeSeries(params: HeadwayParams): Observable<HeadwayTimeSeriesType[]> {
     return this.timeSeriesGQL
       .fetch(
         { params: pickHeadwayFilters(params) },
@@ -81,7 +75,7 @@ export class HeadwayService {
       );
   }
 
-  fetchOverview(params: HeadwayParams): Observable<Headway> {
+  fetchOverview(params: HeadwayParams): Observable<HeadwayOverviewType> {
     return this.overviewGQL
       .watch(
         { params: pickHeadwayFilters(params) },

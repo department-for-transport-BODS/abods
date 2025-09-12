@@ -1,6 +1,7 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
+  Direction,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
@@ -41,7 +42,7 @@ import {
   getFrequentServiceActualHours,
   getSummaryStopsTotalHours,
 } from "../lib/otp.js";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import {
@@ -51,7 +52,7 @@ import {
 import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 interface DayCount {
   dayOfWeek: number;
@@ -80,8 +81,18 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       "n.national_operator_code",
       "s.operator_noc",
     );
-  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+  if (args.filterBy?.operatorIds && args.filterBy.operatorIds.length > 0) {
     query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+
+  if (args.filterBy?.orgId) {
+    query = query
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "boo.operatorref",
+        "a.operatorref",
+      )
+      .where("boo.organisation_id", "=", args.filterBy?.orgId);
   }
   return await query
     .groupBy(["a.name", "s.operator_noc"])
@@ -247,44 +258,108 @@ export const getServicePatterns: QueryResolvers["servicePatterns"] = async (
   return result;
 };
 
+export const kyselyFilterForAdminIds = (
+  query: ReturnType<typeof getKyselyFiltersForOTPQuery>,
+  adminAreaIds: string[],
+) => {
+  if (adminAreaIds && adminAreaIds.length > 0) {
+    query = query.where(
+      sql<boolean>`admin_areas && ARRAY[${sql.join(adminAreaIds)}]::int4[]`,
+    );
+  }
+  return query;
+};
+
 export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctualityOverview"] =
   async (_, args, context): Promise<Maybe<PunctualityTotalsType>> => {
     const user = await requireUserSession(context);
     try {
-      // start - performance timer
-      const startTimer = performance.now();
-
       const { filters } = args.inputs;
-      const { lineIds, onTimeMaxMinutes, onTimeMinMinutes } = filters || {};
+      const {
+        onTimeMaxMinutes,
+        onTimeMinMinutes,
+        adminAreaIds,
+        startTime,
+        endTime,
+        operatorIds,
+        direction,
+      } = filters || {};
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
       if (onTimeMinMinutes || onTimeMaxMinutes) {
-        return compareThresholds(args.inputs, userOperatorIds, context.db);
+        return compareThresholds(args.inputs, userOperatorIds, context.kysely);
       }
 
-      const where = {
-        ...getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds),
-        estimated: Prisma.skip,
-      };
-      const _sum = {
-        early_count: true,
-        late_count: true,
-        on_time_count: true,
-        completed: true,
-        scheduled: true,
-      } as const;
+      const summaryTable: OTPSummaryTables =
+        operatorIds && operatorIds.length > 0
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
 
-      const results = lineIds
-        ? await context.db.timetable_summary_service_tz.groupBy({
-            by: ["incomplete_reason", "estimated"],
-            where,
-            _sum,
-          })
-        : await context.db.timetable_summary_operator_t.groupBy({
-            by: ["incomplete_reason", "estimated"],
-            where,
-            _sum,
-          });
+      let summarySubQuery = getKyselyFiltersForOTPQuery(
+        context.kysely,
+        summaryTable,
+        args.inputs,
+        userOperatorIds,
+      );
+
+      const filterDirections = direction?.filter((value) => value != undefined);
+      if (
+        Array.isArray(filterDirections) &&
+        !filterDirections.includes(Direction.All)
+      ) {
+        if (filterDirections?.includes(Direction.Inbound)) {
+          filterDirections.push(Direction.Anticlockwise);
+        }
+
+        if (filterDirections?.includes(Direction.Outbound)) {
+          filterDirections.push(Direction.Clockwise);
+        }
+        summarySubQuery = summarySubQuery.where((eb) =>
+          eb(
+            eb.fn("lower", [eb.ref("direction")]),
+            "in",
+            filterDirections.map((v) => v.toLocaleLowerCase()),
+          ),
+        );
+      }
+
+      summarySubQuery = kyselyFilterForAdminIds(
+        summarySubQuery,
+        adminAreaIds ?? [],
+      );
+
+      // Needs to be aliased separately. Need to find out why
+      const aliasedSubQuery = summarySubQuery.as("summary");
+      let mainQuery = context.kysely
+        .selectFrom(aliasedSubQuery)
+        .select([
+          "incomplete_reason",
+          "estimated",
+          context.kysely.fn.sum("early_count").as("early_count"),
+          context.kysely.fn.sum("late_count").as("late_count"),
+          context.kysely.fn.sum("on_time_count").as("on_time_count"),
+          context.kysely.fn.sum("completed").as("completed"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
+          sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+            "scheduled",
+          ),
+        ])
+        .groupBy(["incomplete_reason", "estimated"]);
+
+      if (startTime || endTime) {
+        const start = Number((startTime ?? "00:00").split(":")[0]);
+        const end = Number((endTime ?? "23:59").split(":")[0]);
+        mainQuery = mainQuery
+          .where("hour", ">=", start)
+          .where("hour", "<=", end);
+      }
+
+      const results = await mainQuery.execute();
 
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
@@ -293,11 +368,14 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         onTime: 0,
         completed: 0,
         averageDeviation: 0,
+        averageDelay: 0,
         incomplete: "{}", // To be replaced
       };
       const incompleteReasons: Record<number, number> = {};
+      let averageDelayed: number | undefined = undefined;
       for (const result of results) {
-        const scheduled = result._sum.scheduled ?? 0;
+        // https://github.com/kysely-org/kysely/issues/749
+        const scheduled = Number(result.scheduled ?? 0);
         const reasonId = result.incomplete_reason ?? 0;
 
         // if the current row is estimated, and the request is to filter estimated,
@@ -306,28 +384,31 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           result.estimated &&
           args.inputs.filters.matchType === MatchType.Evidenced;
 
-        const completed = ignoreEstimated ? 0 : result._sum.completed ?? 0;
-        const early = ignoreEstimated ? 0 : result._sum.early_count ?? 0;
-        const late = ignoreEstimated ? 0 : result._sum.late_count ?? 0;
-        const onTime = ignoreEstimated ? 0 : result._sum.on_time_count ?? 0;
+        // https://github.com/kysely-org/kysely/issues/749
+        const completed = ignoreEstimated ? 0 : Number(result.completed ?? 0);
+        const early = ignoreEstimated ? 0 : Number(result.early_count ?? 0);
+        const late = ignoreEstimated ? 0 : Number(result.late_count ?? 0);
+        const onTime = ignoreEstimated ? 0 : Number(result.on_time_count ?? 0);
 
         returnVal.scheduled += scheduled;
         returnVal.early += early;
         returnVal.late += late;
         returnVal.onTime += onTime;
         returnVal.completed += completed;
-
+        if (
+          result.count_delayed != undefined &&
+          result.average_delay != undefined &&
+          Number(result.count_delayed) > 0
+        ) {
+          averageDelayed =
+            averageDelayed ??
+            0 + Number(result.average_delay) / Number(result.count_delayed);
+        }
         incompleteReasons[reasonId] ??= 0;
         incompleteReasons[reasonId] += scheduled - completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
-      //end - performance timer
-      const endTimer = performance.now();
-
-      logger.debug(
-        { totalTimeMs: endTimer - startTimer },
-        "Call to getPunctualityOverview Finished",
-      );
+      returnVal.averageDelay = averageDelayed;
 
       return returnVal;
     } catch (error) {
@@ -346,7 +427,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
       const opPerformances: OperatorPerformanceType[] = [];
 
       const { filters } = args.inputs;
-      const { adminAreaIds } = filters || {};
+      const { adminAreaIds, startTime, endTime } = filters || {};
 
       // get an array of user's org's operator nocs.
       const operators = await context.db.all_operators.findMany({
@@ -356,7 +437,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
           operatorOrganisations: {
-            some: { organisation_id: { in: user.orgIds } },
+            some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
           },
         },
         select: {
@@ -365,22 +446,47 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         },
       });
 
-      const where = getPrismaFiltersForOTPQuery(
+      let summarySubQuery = getKyselyFiltersForOTPQuery(
+        context.kysely,
+        "timetable_summary_operator_t",
         args.inputs,
         operators.map((o) => o.operatorref),
       );
 
-      const results = await context.db.timetable_summary_operator_t.groupBy({
-        by: ["operator_noc"],
-        where: where,
-        _sum: {
-          early_count: true,
-          late_count: true,
-          on_time_count: true,
-          completed: true,
-          scheduled: true,
-        },
-      });
+      summarySubQuery = kyselyFilterForAdminIds(
+        summarySubQuery,
+        adminAreaIds ?? [],
+      );
+
+      // Needs to be aliased separately. Need to find out why
+      const aliasedSubQuery = summarySubQuery.as("summary");
+      let mainQuery = context.kysely
+        .selectFrom(aliasedSubQuery)
+        .select([
+          "operator_noc",
+          context.kysely.fn.sum("early_count").as("early_count"),
+          context.kysely.fn.sum("late_count").as("late_count"),
+          context.kysely.fn.sum("on_time_count").as("on_time_count"),
+          context.kysely.fn.sum("completed").as("completed"),
+          context.kysely.fn.sum("scheduled").as("scheduled"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
+        ])
+        .groupBy(["operator_noc"]);
+
+      if (startTime || endTime) {
+        const start = Number((startTime ?? "00:00").split(":")[0]);
+        const end = Number((endTime ?? "23:59").split(":")[0]);
+        mainQuery = mainQuery
+          .where("hour", ">=", start)
+          .where("hour", "<=", end);
+      }
+
+      const results = await mainQuery.execute();
 
       for (const item of operators.sort((a, b) =>
         (a.name ?? "").localeCompare(b.name ?? "", undefined, {
@@ -390,24 +496,32 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         const operatorOtpStats = results.find(
           (o) => o.operator_noc == item.operatorref,
         );
-        if (operatorOtpStats && operatorOtpStats._sum) {
-          const totalOntime = operatorOtpStats._sum.on_time_count
-              ? operatorOtpStats._sum.on_time_count
+        if (operatorOtpStats) {
+          const totalOntime = operatorOtpStats.on_time_count
+              ? operatorOtpStats.on_time_count
               : 0,
-            totalEarly = operatorOtpStats._sum.early_count
-              ? operatorOtpStats._sum.early_count
+            totalEarly = operatorOtpStats.early_count
+              ? operatorOtpStats.early_count
               : 0,
-            totalLate = operatorOtpStats._sum.late_count
-              ? operatorOtpStats._sum.late_count
-              : 0;
+            totalLate = operatorOtpStats.late_count
+              ? operatorOtpStats.late_count
+              : 0,
+            averageDelay =
+              operatorOtpStats.average_delay == undefined
+                ? undefined
+                : Number(operatorOtpStats.count_delayed) > 0
+                  ? Number(operatorOtpStats.average_delay) /
+                    Number(operatorOtpStats.count_delayed)
+                  : 0;
 
           const opPerformance: OperatorPerformanceType = {
             nocCode: item.operatorref,
             operatorId: item.operatorref,
             name: item.name,
-            early: totalEarly,
-            late: totalLate,
-            onTime: totalOntime,
+            early: Number(totalEarly),
+            late: Number(totalLate),
+            onTime: Number(totalOntime),
+            averageDelay: averageDelay,
           };
           opPerformances.push(opPerformance);
         }
@@ -440,6 +554,9 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     const user = await requireUserSession(context);
     try {
       const lineIds = args.inputs.filters.lineIds;
+      const startTime = args.inputs.filters.startTime;
+      const endTime = args.inputs.filters.endTime;
+      const adminAreaIds = args.inputs.filters.adminAreaIds;
       const operatorIds = args.inputs.filters.operatorIds ?? [];
 
       // fetch all otp records group by time difference
@@ -449,34 +566,44 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
-          let results;
+          const summaryTable = lineIds
+            ? "timetable_summary_service_tz"
+            : "timetable_summary_operator_t";
 
-          const where = getPrismaFiltersForOTPQuery(
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            summaryTable,
             args.inputs,
             userOperatorIds,
           );
 
-          if (lineIds) {
-            results = await context.db.timetable_summary_service_tz.groupBy({
-              by: ["day_of_week"],
-              where: where,
-              _sum: {
-                early_count: true,
-                late_count: true,
-                on_time_count: true,
-              },
-            });
-          } else {
-            results = await context.db.timetable_summary_operator_t.groupBy({
-              by: ["day_of_week"],
-              where: where,
-              _sum: {
-                early_count: true,
-                late_count: true,
-                on_time_count: true,
-              },
-            });
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
+          );
+
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              "day_of_week",
+              context.kysely.fn.sum("early_count").as("early_count"),
+              context.kysely.fn.sum("late_count").as("late_count"),
+              context.kysely.fn.sum("on_time_count").as("on_time_count"),
+            ])
+            .groupBy(["day_of_week"]);
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
           }
+
+          const results = await mainQuery.execute();
 
           const dayOfWeek: DayCount[] = Array.from({ length: 7 }, (_, i) => ({
             dayOfWeek: i + 1,
@@ -489,15 +616,15 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
             for (let i = 0; i < dayOfWeek.length; i++) {
               const day = dayOfWeek[i];
               const dayRecord = results.find((d) => d.day_of_week == i);
-              if (dayRecord && dayRecord._sum) {
-                day.early += dayRecord._sum.early_count
-                  ? dayRecord._sum.early_count
+              if (dayRecord) {
+                day.early += dayRecord.early_count
+                  ? Number(dayRecord.early_count)
                   : 0;
-                day.onTime += dayRecord._sum.on_time_count
-                  ? dayRecord._sum.on_time_count
+                day.onTime += dayRecord.on_time_count
+                  ? Number(dayRecord.on_time_count)
                   : 0;
-                day.late += dayRecord._sum.late_count
-                  ? dayRecord._sum.late_count
+                day.late += dayRecord.late_count
+                  ? Number(dayRecord.late_count)
                   : 0;
               }
             }
@@ -519,46 +646,6 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
     }
   };
 
-export const timeDiffFilters = (
-  inputs: PerformanceInputType,
-  userOperatorIds: string[],
-) => ({
-  ...getPrismaFiltersForOTPQuery(inputs, userOperatorIds),
-  max_early: Prisma.skip,
-  max_late: Prisma.skip,
-  time_diff_minutes: {
-    not: null,
-    lte: inputs.filters.maxDelay ? inputs.filters.maxDelay : Prisma.skip,
-    gte: inputs.filters.minDelay ? inputs.filters.minDelay : Prisma.skip,
-  },
-});
-
-const getStopsDistribution = async (
-  inputs: PerformanceInputType,
-  userOperatorIds: string[],
-  db: PrismaClient,
-) => {
-  const results = await db.timetable_threshold_summary.groupBy({
-    by: ["time_diff_minutes"],
-    where: timeDiffFilters(inputs, userOperatorIds),
-    _sum: {
-      otp_count: true,
-    },
-  });
-
-  return results
-    .sort((a, b) => {
-      if (a.time_diff_minutes && b.time_diff_minutes)
-        return a.time_diff_minutes - b.time_diff_minutes;
-
-      return 0;
-    })
-    .map((result) => ({
-      bucket: Number(result.time_diff_minutes),
-      frequency: result._sum.otp_count,
-    }));
-};
-
 export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"] =
   async (_, args, context): Promise<Maybe<DelayFrequencyType[]>> => {
     const user = await requireUserSession(context);
@@ -567,9 +654,12 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
       // freq is the count of that difference
 
       const { filters } = args.inputs;
-      let { operatorIds } = filters || {};
-      operatorIds = operatorIds ?? [];
+      const { adminAreaIds, startTime, endTime, maxDelay, minDelay } =
+        filters || {};
+      const operatorIds = filters.operatorIds ?? [];
 
+      args.inputs.filters.maxDelay = 0;
+      args.inputs.filters.minDelay = 0;
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
         logger.debug({ operatorIds }, "getDelayFrequency");
@@ -578,7 +668,72 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
-          return getStopsDistribution(args.inputs, userOperatorIds, context.db);
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            "timetable_threshold_summary",
+            args.inputs,
+            userOperatorIds,
+          );
+
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
+          );
+
+          summarySubQuery = summarySubQuery.where(
+            "time_diff_minutes",
+            "is not",
+            null,
+          );
+
+          if (maxDelay) {
+            summarySubQuery = summarySubQuery.where(
+              "time_diff_minutes",
+              "<=",
+              maxDelay,
+            );
+          }
+
+          if (minDelay) {
+            summarySubQuery = summarySubQuery.where(
+              "time_diff_minutes",
+              ">=",
+              minDelay,
+            );
+          }
+
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              "time_diff_minutes",
+              context.kysely.fn.sum("otp_count").as("otp_count"),
+            ])
+            .groupBy(["time_diff_minutes"]);
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
+          }
+
+          const results = await mainQuery.execute();
+
+          return results
+            .sort((a, b) => {
+              if (a.time_diff_minutes && b.time_diff_minutes)
+                return a.time_diff_minutes - b.time_diff_minutes;
+
+              return 0;
+            })
+            .map((result) => ({
+              bucket: Number(result.time_diff_minutes),
+              frequency: Number(result.otp_count),
+            }));
         }
       }
       return null;
@@ -606,6 +761,9 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
 
       const operatorIds = args.inputs.filters?.operatorIds ?? [];
       const lineIds = args.inputs.filters?.lineIds;
+      const startTime = args.inputs.filters.startTime;
+      const endTime = args.inputs.filters.endTime;
+      const adminAreaIds = args.inputs.filters.adminAreaIds;
 
       // fetch all otp records group by time difference
       if (operatorIds.length == 1) {
@@ -614,51 +772,65 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
-          let results;
+          const summaryTable = lineIds
+            ? "timetable_summary_service_tz"
+            : "timetable_summary_operator_t";
 
-          const where = getPrismaFiltersForOTPQuery(
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            summaryTable,
             args.inputs,
             userOperatorIds,
           );
 
-          if (lineIds) {
-            results =
-              (await context.db.timetable_summary_service_tz.groupBy({
-                by: ["departure_hour_only"],
-                where: where,
-                _sum: {
-                  early_count: true,
-                  late_count: true,
-                  on_time_count: true,
-                },
-              })) ?? [];
-          } else {
-            results =
-              (await context.db.timetable_summary_operator_t.groupBy({
-                by: ["departure_hour_only"],
-                where: where,
-                _sum: {
-                  early_count: true,
-                  late_count: true,
-                  on_time_count: true,
-                },
-              })) ?? [];
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
+          );
+
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              "hour",
+              context.kysely.fn.sum("early_count").as("early_count"),
+              context.kysely.fn.sum("late_count").as("late_count"),
+              context.kysely.fn.sum("on_time_count").as("on_time_count"),
+            ])
+            .groupBy(["hour"]);
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
           }
 
+          const results = await mainQuery.execute();
+
           results.forEach((res) => {
-            if (res.departure_hour_only) {
+            if (res.hour) {
+              const hour = dayjs()
+                .tz("Europe/London")
+                .set("hour", res.hour)
+                .startOf("hour");
               hoursOfDay.push({
-                timeOfDay: res.departure_hour_only,
-                early: res._sum.early_count ?? 0,
-                onTime: res._sum.on_time_count ?? 0,
-                late: res._sum.late_count ?? 0,
+                timeOfDay: hour.format("HH:mm:ssZ"),
+                early: Number(res.early_count ?? 0),
+                onTime: Number(res.on_time_count ?? 0),
+                late: Number(res.late_count ?? 0),
               });
             }
           });
         }
       }
 
-      return hoursOfDay;
+      return hoursOfDay.sort((a, b) =>
+        a.timeOfDay.toString().localeCompare(b.timeOfDay.toString()),
+      );
     } catch (error) {
       logger.error(error, "An error occurred when getting time of day stats");
       return null;
@@ -670,7 +842,8 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
     const user = await requireUserSession(context);
     try {
       const { filters } = args.inputs;
-      const { granularity, lineIds } = filters || {};
+      const { granularity, lineIds, adminAreaIds, startTime, endTime } =
+        filters || {};
       const operatorIds = filters?.operatorIds ?? [];
 
       if (operatorIds.length == 1) {
@@ -683,46 +856,56 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           let summary: PunctualityTimeSeriesType[] = [];
 
-          let results;
-          const where = getPrismaFiltersForOTPQuery(
+          const summaryTable = lineIds
+            ? "timetable_summary_service_tz"
+            : "timetable_summary_operator_t";
+
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            summaryTable,
             args.inputs,
             userOperatorIds,
           );
-          if (lineIds) {
-            results =
-              (await context.db.timetable_summary_service_tz.groupBy({
-                by: isDayGranularity ? ["date_of_journey"] : ["departure_hour"],
-                where: where,
-                _sum: {
-                  early_count: true,
-                  late_count: true,
-                  on_time_count: true,
-                },
-              })) ?? [];
-          } else {
-            results =
-              (await context.db.timetable_summary_operator_t.groupBy({
-                by: isDayGranularity
-                  ? ["date_of_journey"]
-                  : ["date_of_journey", "departure_hour"],
-                where: where,
-                _sum: {
-                  early_count: true,
-                  late_count: true,
-                  on_time_count: true,
-                },
-              })) ?? [];
+
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
+          );
+
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              isDayGranularity ? "date_of_journey" : "departure_hour",
+              context.kysely.fn.sum("early_count").as("early_count"),
+              context.kysely.fn.sum("late_count").as("late_count"),
+              context.kysely.fn.sum("on_time_count").as("on_time_count"),
+            ])
+            .groupBy(
+              isDayGranularity ? ["date_of_journey"] : ["departure_hour"],
+            );
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
           }
 
+          const results = await mainQuery.execute();
+
           results.forEach((result) => {
-            if (result._sum) {
+            if (result) {
               summary.push({
                 ts: isDayGranularity
                   ? getFormattedDate(result.date_of_journey)
                   : getFormattedDate(result.departure_hour),
-                early: result._sum.early_count ?? 0,
-                late: result._sum.late_count ?? 0,
-                onTime: result._sum.on_time_count ?? 0,
+                early: Number(result.early_count ?? 0),
+                late: Number(result.late_count ?? 0),
+                onTime: Number(result.on_time_count ?? 0),
               });
             }
           });
@@ -748,7 +931,20 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
   async (_, args, context): Promise<ServicePunctualityType[]> => {
     const user = await requireUserSession(context);
     try {
-      const { filters, fromTimestamp, order } = args.inputs;
+      const { filters, fromTimestamp, toTimestamp, order } = args.inputs;
+
+      const from = userSelectedDateAsUtc(fromTimestamp);
+      const to = userSelectedDateAsUtc(toTimestamp);
+
+      const diff = to.diff(from, "days");
+      const daysInMonth = dayjs().daysInMonth();
+
+      const periodTypeMap = {
+        [String(daysInMonth)]: "last_month",
+        "7": "last_7_days",
+        "28": "last_28_days",
+        month_to_date: "month_to_date",
+      };
 
       const timingPointsOnly = filters.timingPointsOnly;
 
@@ -769,6 +965,11 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
           userSelectedDateAsUtc(fromTimestamp).toDate(),
         )
         .where("percentage_change", "is not", null)
+        .where(
+          "period_type",
+          "=",
+          periodTypeMap[diff] ?? periodTypeMap.month_to_date,
+        )
         .orderBy("on_time_percentage", orderFilter)
         .orderBy("percentage_change", orderFilter)
         .limit(3);
@@ -836,6 +1037,10 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
       const operatorIds = args.inputs.filters.operatorIds ?? [];
       const lineIds = args.inputs.filters.lineIds ?? [];
+      const startTime = args.inputs.filters.startTime;
+      const endTime = args.inputs.filters.endTime;
+      const adminAreaIds = args.inputs.filters.adminAreaIds;
+      const isTimingPoint = args.inputs.filters.timingPointsOnly;
 
       const stopPerformances: StopPerformanceType[] = [];
 
@@ -847,27 +1052,103 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           // get a sum per day
-          const where = getPrismaFiltersForOTPQuery(
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            "timetable_summary_stops_tz",
             args.inputs,
             userOperatorIds,
           );
 
-          const results = await context.db.timetable_summary_stops_tz.groupBy({
-            by: ["stop_id", "common_name", "is_timing_point"],
-            where: where,
-            _sum: {
-              early_count: true,
-              late_count: true,
-              on_time_count: true,
-              scheduled: true,
-              completed: true,
-            },
-            _avg: {
-              avg_time_difference: true,
-            },
-          });
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
+          );
 
-          const stopIds = results.map((res) => res.stop_id);
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              "stop_id",
+              "common_name",
+              "is_timing_point",
+              context.kysely.fn.sum("early_count").as("early_count"),
+              context.kysely.fn.sum("late_count").as("late_count"),
+              context.kysely.fn.sum("on_time_count").as("on_time_count"),
+              context.kysely.fn.sum("completed").as("completed"),
+              context.kysely.fn.sum("count_delayed").as("count_delayed"),
+              context.kysely.fn
+                .avg("diff_sched_time_to_stop")
+                .as("diff_sched_time_to_stop"),
+              context.kysely.fn
+                .avg("diff_sched_time_to_stop_timing_point")
+                .as("diff_sched_time_to_stop_timing_point"),
+              context.kysely.fn
+                .avg("diff_actual_time_to_stop")
+                .as("diff_actual_time_to_stop"),
+              context.kysely.fn
+                .avg("diff_actual_time_to_stop_timing_point")
+                .as("diff_actual_time_to_stop_timing_point"),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .select((eb) => [
+              sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy([
+              "stop_id",
+              "common_name",
+              "is_timing_point",
+              "direction",
+              "stop_index",
+            ])
+            .orderBy("stop_index", "asc");
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
+          }
+
+          const results = await mainQuery.execute();
+
+          const stopIds = results.map((res) => Number(res.stop_id));
 
           const stops = await context.db.naptan_stoppoint_latlong.findMany({
             where: {
@@ -895,17 +1176,28 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
           });
 
           results.forEach((res) => {
-            // avg delay
-            const timeInSeconds = res._avg?.avg_time_difference
-              ? res._avg.avg_time_difference.toNumber() * 60
-              : 0;
+            const stop = stops.find(
+              (dbStop) => dbStop.id === Number(res.stop_id),
+            );
+            const averageScheduled = isTimingPoint
+              ? Number(res.diff_sched_time_to_stop_timing_point)
+                ? Number(res.diff_sched_time_to_stop_timing_point)
+                : undefined
+              : res.diff_sched_time_to_stop
+                ? Number(res.diff_sched_time_to_stop)
+                : undefined;
+            const averageActual = isTimingPoint
+              ? res.diff_actual_time_to_stop_timing_point
+                ? Number(res.diff_actual_time_to_stop_timing_point)
+                : undefined
+              : res.diff_actual_time_to_stop
+                ? Number(res.diff_actual_time_to_stop)
+                : undefined;
 
-            const stop = stops.find((dbStop) => dbStop.id === res.stop_id);
             stopPerformances.push({
               lineId: lineIds[0],
               stopId: stop?.atco_code ?? "",
               stopInfo: {
-                //stopId: res.stop_id? res.stop_id : 0,
                 stopId: stop?.atco_code ?? "",
                 stopName: res.common_name ? res.common_name : "",
                 stopLocality: {
@@ -920,13 +1212,40 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                   latitude: stop?.latitude ?? 0,
                 },
               },
-              early: res._sum?.early_count ? res._sum.early_count : 0,
-              late: res._sum?.late_count ? res._sum.late_count : 0,
-              onTime: res._sum?.on_time_count ? res._sum.on_time_count : 0,
-              actualDepartures: res._sum?.completed ? res._sum.completed : 0,
-              scheduledDepartures: res._sum?.scheduled ? res._sum.scheduled : 0,
-              averageDelay: timeInSeconds,
-              timingPoint: res.is_timing_point ? res.is_timing_point : false,
+              early: res.early_count ? Number(res.early_count) : 0,
+              late: res.late_count ? Number(res.late_count) : 0,
+              onTime: res.on_time_count ? Number(res.on_time_count) : 0,
+              actualDepartures: res.completed ? Number(res.completed) : 0,
+              scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
+              countDelayed: Number(res.count_delayed),
+              timingPoint: res.is_timing_point ?? false,
+              direction: res.direction
+                ? (res.direction as Direction)
+                : undefined,
+              averageScheduled: averageScheduled,
+              averageActual: averageActual,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
             });
           });
         }
@@ -949,37 +1268,99 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
       const servicePunctualities: ServicePerformanceType[] = [];
 
       const { filters } = args.inputs;
-      let { operatorIds } = filters || {};
-      operatorIds = operatorIds ?? [];
+      const { startTime, endTime, adminAreaIds } = filters || {};
+      const operatorIds = filters.operatorIds ?? [];
 
       if (operatorIds.length == 1) {
         // get an array of user's org's operator nocs.
         const userOperatorIds = await getUserOperatorIds(user, context.kysely);
         const operator_noc_to_filter = operatorIds[0];
-        const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
-          // get a sum per day
-          const results = await context.db.timetable_summary_service_tz.groupBy(
-            {
-              by: ["noc_and_line_and_servicecode", "line_name"],
-              where: where,
-              _sum: {
-                early_count: true,
-                late_count: true,
-                on_time_count: true,
-                scheduled: true,
-                completed: true,
-              },
-              _avg: {
-                avg_time_difference: true,
-              },
-            },
+          let summarySubQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            "timetable_summary_service_tz",
+            args.inputs,
+            userOperatorIds,
           );
 
-          const noc_and_lines = results.map(
-            (result) => result.noc_and_line_and_servicecode,
+          summarySubQuery = kyselyFilterForAdminIds(
+            summarySubQuery,
+            adminAreaIds ?? [],
           );
+
+          // Needs to be aliased separately. Need to find out why
+          const aliasedSubQuery = summarySubQuery.as("summary");
+          let mainQuery = context.kysely
+            .selectFrom(aliasedSubQuery)
+            .select([
+              "noc_and_line_and_servicecode",
+              "line_name",
+              "direction",
+              context.kysely.fn.sum("early_count").as("early_count"),
+              context.kysely.fn.sum("late_count").as("late_count"),
+              context.kysely.fn.sum("on_time_count").as("on_time_count"),
+              context.kysely.fn.sum("completed").as("completed"),
+              context.kysely.fn.sum("count_delayed").as("count_delayed"),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .select((eb) => [
+              sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy([
+              "noc_and_line_and_servicecode",
+              "line_name",
+              "direction",
+            ]);
+
+          if (startTime || endTime) {
+            const start = Number((startTime ?? "00:00").split(":")[0]);
+            const end = Number((endTime ?? "23:59").split(":")[0]);
+            mainQuery = mainQuery
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
+          }
+
+          const results = await mainQuery.execute();
+
+          const noc_and_lines = results
+            .map((result) => result.noc_and_line_and_servicecode)
+            .filter((code) => code !== null);
 
           const services = await context.db.expected_services.findMany({
             where: {
@@ -994,10 +1375,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           });
 
           results.forEach((res) => {
-            const avgDelay = res._avg.avg_time_difference
-              ? res._avg.avg_time_difference.toNumber() * 60
-              : 0;
-
             const service = services.find(
               (serv) =>
                 serv.noc_and_line_and_servicecode ===
@@ -1006,15 +1383,40 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
 
             servicePunctualities.push({
               lineId: res.noc_and_line_and_servicecode,
-              early: res._sum.early_count ? res._sum.early_count : 0,
-              late: res._sum.late_count ? res._sum.late_count : 0,
-              onTime: res._sum.on_time_count ? res._sum.on_time_count : 0,
-              scheduledDepartures: res._sum.scheduled ? res._sum.scheduled : 0,
-              actualDepartures: res._sum.completed ? res._sum.completed : 0,
-              averageDelay: avgDelay,
+              early: res.early_count ? Number(res.early_count) : 0,
+              late: res.late_count ? Number(res.late_count) : 0,
+              onTime: res.on_time_count ? Number(res.on_time_count) : 0,
+              scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
+              actualDepartures: res.completed ? Number(res.completed) : 0,
+              countDelayed: Number(res.count_delayed),
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
+              direction: res.direction
+                ? (res.direction.toLowerCase() as Direction)
+                : undefined,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
               lineInfo: {
-                serviceId: res.noc_and_line_and_servicecode,
-                serviceNumber: res.line_name,
+                serviceId: res.noc_and_line_and_servicecode!,
+                serviceNumber: res.line_name!,
                 serviceName: service?.service_name ?? "",
               },
             });
@@ -1073,8 +1475,12 @@ export const getFrequentServiceInfo: HeadwayMetricsTypeResolvers["frequentServic
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
 
       const [totalHours, actualHours] = await Promise.all([
-        getSummaryStopsTotalHours(context.db, args.inputs, userOperatorIds),
-        getFrequentServiceActualHours(context.db, args.inputs, userOperatorIds),
+        getSummaryStopsTotalHours(context.kysely, args.inputs, userOperatorIds),
+        getFrequentServiceActualHours(
+          context.kysely,
+          args.inputs,
+          userOperatorIds,
+        ),
       ]);
 
       return {
@@ -1094,21 +1500,48 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
   async (_, args, context): Promise<Maybe<HeadwayOverviewType>> => {
     const user = await requireUserSession(context);
     try {
+      const { filters } = args.inputs;
+      const { startTime, endTime } = filters || {};
+
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const summarySubQuery = getKyselyFiltersForOTPQuery(
+        context.kysely,
+        "timetable_frequent_summary_services",
+        args.inputs,
+        userOperatorIds,
+      );
 
-      where.headway_stops_count = {
-        gt: 0,
-      };
+      // Needs to be aliased separately. Need to find out why
+      const aliasedSubQuery = summarySubQuery
+        .where("headway_stops_count", ">", sql.lit("0"))
+        .where("excess_wait_time", "is not", null)
+        .as("summary");
 
-      const results =
-        await context.db.timetable_frequent_summary_services.findMany({
-          where: where,
-          select: {
-            headway_stops_count: true,
-            excess_wait_time: true,
-          },
-        });
+      let mainQuery = context.kysely
+        .selectFrom(aliasedSubQuery)
+        .select(["headway_stops_count", "excess_wait_time"]);
+
+      if (startTime || endTime) {
+        const start = Number((startTime ?? "00:00").split(":")[0]);
+        const end = Number((endTime ?? "23:59").split(":")[0]);
+        mainQuery = mainQuery
+          .where("hour", ">=", start)
+          .where("hour", "<=", end);
+      }
+
+      const results = await mainQuery.execute();
+
+      if (results.length < 1) {
+        return {
+          excess: undefined,
+        };
+      }
+
+      if (results.length < 1) {
+        return {
+          excess: undefined,
+        };
+      }
 
       let headway = {
         excessWaitTime: 0,
@@ -1117,15 +1550,16 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
 
       headway = results.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
-          currentHeadway.excess_wait_time.toNumber() *
-          currentHeadway.headway_stops_count.toNumber();
-        acc.headwayCount += currentHeadway.headway_stops_count.toNumber();
+          // We've filtered out null values in where clause so its fine to assert not null
+          Number(currentHeadway.excess_wait_time) *
+          Number(currentHeadway.headway_stops_count);
+        acc.headwayCount += Number(currentHeadway.headway_stops_count);
 
         return acc;
       }, headway);
 
       return {
-        excessWaitTime: headway.excessWaitTime / headway.headwayCount,
+        excess: headway.excessWaitTime / headway.headwayCount,
       };
     } catch (error) {
       logger.error(error, "An error occurred when getting headway overview");
@@ -1137,25 +1571,45 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
   async (_, args, context): Promise<Maybe<HeadwayTimeSeriesType[]>> => {
     const user = await requireUserSession(context);
     try {
+      const { filters } = args.inputs;
+      const { startTime, endTime } = filters || {};
+
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
-      const where = getPrismaFiltersForOTPQuery(args.inputs, userOperatorIds);
+      const summarySubQuery = getKyselyFiltersForOTPQuery(
+        context.kysely,
+        "timetable_frequent_summary_services",
+        args.inputs,
+        userOperatorIds,
+      );
 
-      where.headway_stops_count = {
-        gt: 0,
-      };
+      // Needs to be aliased separately. Need to find out why
+      const aliasedSubQuery = summarySubQuery
+        .where("headway_stops_count", ">", sql.lit("0"))
+        .where("actual_headway", "is not", null)
+        .where("expected_headway", "is not", null)
+        .where("excess_wait_time", "is not", null)
+        .as("summary");
 
-      const results =
-        await context.db.timetable_frequent_summary_services.findMany({
-          where: where,
-          select: {
-            date_of_journey: true,
-            departure_hour: true,
-            headway_stops_count: true,
-            actual_headway: true,
-            expected_headway: true,
-            excess_wait_time: true,
-          },
-        });
+      let mainQuery = context.kysely
+        .selectFrom(aliasedSubQuery)
+        .select([
+          "date_of_journey",
+          "departure_hour",
+          "headway_stops_count",
+          "actual_headway",
+          "expected_headway",
+          "excess_wait_time",
+        ]);
+
+      if (startTime || endTime) {
+        const start = Number((startTime ?? "00:00").split(":")[0]);
+        const end = Number((endTime ?? "23:59").split(":")[0]);
+        mainQuery = mainQuery
+          .where("hour", ">=", start)
+          .where("hour", "<=", end);
+      }
+
+      const results = await mainQuery.execute();
 
       const headwayMap: Record<
         string,
@@ -1182,16 +1636,17 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
             headway_stops_count: 0,
           });
           headwayData.actual_headway +=
-            result.actual_headway.toNumber() *
-            result.headway_stops_count.toNumber();
+            // We've filtered out null values in where clause so its fine to assert not null
+            Number(result.actual_headway) * Number(result.headway_stops_count);
           headwayData.expected_headway +=
-            result.expected_headway.toNumber() *
-            result.headway_stops_count.toNumber();
+            // We've filtered out null values in where clause so its fine to assert not null
+            Number(result.expected_headway) *
+            Number(result.headway_stops_count);
           headwayData.excess_wait_time +=
-            result.excess_wait_time.toNumber() *
-            result.headway_stops_count.toNumber();
-          headwayData.headway_stops_count +=
-            result.headway_stops_count.toNumber();
+            // We've filtered out null values in where clause so its fine to assert not null
+            Number(result.excess_wait_time) *
+            Number(result.headway_stops_count);
+          headwayData.headway_stops_count += Number(result.headway_stops_count);
         }
       });
 
@@ -1201,11 +1656,9 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
         returnHeadways.push({
           ts: new Date(departure_hour),
           // Prevent confusion on the front end by rounding to the nearest second before converting to number of minutes
-          actualWaitTime: headway.actual_headway / headway.headway_stops_count,
-          scheduledWaitTime:
-            headway.expected_headway / headway.headway_stops_count,
-          excessWaitTime:
-            headway.excess_wait_time / headway.headway_stops_count,
+          actual: headway.actual_headway / headway.headway_stops_count,
+          scheduled: headway.expected_headway / headway.headway_stops_count,
+          excess: headway.excess_wait_time / headway.headway_stops_count,
         });
       }
 
@@ -1266,36 +1719,27 @@ export const getAdminAreas: QueryResolvers["adminAreas"] = async (
   }
 };
 
-export const addUkTime = (date: Dayjs, time: string | null | undefined) => {
-  const timestamp = date;
-  if (!time) {
-    return date.utc();
-  }
-  const [hours, minutes, _] = time.split(":").map(Number);
-  return toUkTime(timestamp)
-    .set("hour", hours)
-    .set("minute", minutes)
-    .startOf("minute")
-    .utc();
-};
+type OTPSummaryTables = keyof Pick<
+  DB,
+  | "timetable_summary_service_tz"
+  | "timetable_summary_operator_t"
+  | "timetable_summary_stops_tz"
+  | "timetable_frequent_summary_services"
+  | "timetable_threshold_summary"
+>;
 
-export const getPrismaFiltersForOTPQuery = (
+export const getKyselyFiltersForOTPQuery = (
+  db: Kysely<DB>,
+  tableName: OTPSummaryTables,
   inputs: PerformanceInputType &
     HeadwayInputType &
     FrequentServiceInfoInputType,
   userOperatorNocList: string[],
-): Prisma.timetable_summary_service_tzWhereInput &
-  Prisma.timetable_summary_operator_tWhereInput &
-  Prisma.timetable_summary_stops_tzWhereInput &
-  Prisma.timetable_threshold_summaryWhereInput &
-  Prisma.timetable_frequent_summary_servicesWhereInput => {
+) => {
   const { fromTimestamp, toTimestamp, filters } = inputs || {};
   const {
     timingPointsOnly,
-    adminAreaIds,
     operatorId,
-    startTime,
-    endTime,
     maxDelay,
     minDelay,
     lineIds,
@@ -1305,100 +1749,61 @@ export const getPrismaFiltersForOTPQuery = (
   } = filters || {};
   const operatorIds = filters?.operatorIds ?? [];
 
-  // filter list of users' nocs to either operator nocs from filter OR full list
-  let nocListToFilter: string[] = [];
-  if (operatorIds && operatorIds.length > 0) {
-    nocListToFilter = userOperatorNocList.filter((o) =>
-      operatorIds.includes(o),
-    );
-  } else if (operatorId && userOperatorNocList.includes(operatorId)) {
-    nocListToFilter = [operatorId];
-  } else {
-    nocListToFilter = userOperatorNocList;
-  }
-
-  let dayOfWeekNumbers: number[] = [];
-  if (dayOfWeekFlags) {
-    dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
-  }
+  const nocListToFilter: string[] = userOperatorNocList
+    .filter((o) => operatorIds.includes(o))
+    .filter((o) => !operatorId || o === operatorId);
 
   const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
   const endDateUtc = userSelectedDateAsUtc(toTimestamp);
-
-  // If start or end time aren't set, use the start and end of the day as default values,
-  // so that we can still use the result in the filters
-  const startDateTimeUtc = addUkTime(startDateUtc, startTime ?? "00:00");
-  const endDateTimeUtc = addUkTime(
-    // end date is the start of the next day, so go back a day for the end time
-    // not clear how to handle this when we have data with a departure day shift
-    endDateUtc.subtract(1, "day"),
-    endTime ?? "23:59",
-  );
 
   // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
   const maxLateNumber = maxDelay ?? 0;
   const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
 
   const isServiceGranularity = lineIds && lineIds.length > 0;
-  const allOperators = operatorIds?.length > 0 || !!operatorId;
 
   const lines = lineId ? [lineId] : lineIds;
 
-  return {
-    operator_noc: { in: nocListToFilter },
-    date_of_journey: { gte: startDateUtc.toDate(), lt: endDateUtc.toDate() },
-    estimated: matchType === MatchType.Evidenced ? false : Prisma.skip,
-    is_timing_point: timingPointsOnly ? true : Prisma.skip,
-    day_of_week: dayOfWeekFlags ? { in: dayOfWeekNumbers } : Prisma.skip,
-    ...(!startTime && !endTime
-      ? {}
-      : startDateTimeUtc.hour() > endDateTimeUtc.hour()
-        ? {
-            // Prisma prevents us from sending the UTC offset in our query, otherwise UK time values would just work as below
-            // Somewhat related: https://github.com/prisma/prisma/issues/7915
-            // (In general prisma will always convert a datetime value to UTC before sending to the database, even manually constructing an ISO-8601 string with offset doesn't work)
-            // However, when converted to UTC, the start time can come after the end time
-            // The result of such a query, comparing to a timetz field (e.g. x >= 23:00:00 && x <= 22:59:00) is an empty set
-            // so in the event that the start time is after the end time, we should use two clauses
-            OR: [
-              {
-                departure_hour_only: {
-                  // get everything from the start time up to the end of the day
-                  gte: startDateTimeUtc.toDate(),
-                  lte: startDateTimeUtc.endOf("day").toDate(),
-                },
-              },
-              {
-                departure_hour_only: {
-                  // get everything from the start of the day up to the end time
-                  gte: endDateTimeUtc.startOf("day").toDate(),
-                  lte: endDateTimeUtc.toDate(),
-                },
-              },
-            ],
-          }
-        : {
-            departure_hour_only: {
-              gte: startDateTimeUtc.toDate(),
-              lte: endDateTimeUtc.toDate(),
-            },
-          }),
-    max_early:
-      maxEarlyNumber > 0 && !isServiceGranularity
-        ? { lte: maxEarlyNumber }
-        : Prisma.skip,
-    max_late:
-      maxLateNumber > 0 && !isServiceGranularity
-        ? { lte: maxLateNumber }
-        : Prisma.skip,
-    noc_and_line_and_servicecode: lines ? { in: lines } : Prisma.skip,
-    admin_areas:
-      adminAreaIds && adminAreaIds.length > 0
-        ? !allOperators
-          ? { hasSome: adminAreaIds.map(Number) }
-          : { hasEvery: adminAreaIds.map(Number) }
-        : Prisma.skip,
-  };
+  let query = db
+    .selectFrom(tableName)
+    .selectAll()
+    .select((eb) =>
+      sql<number>`EXTRACT(HOUR FROM ${eb.ref("departure_hour")} AT TIME ZONE 'Europe/London')`.as(
+        "hour",
+      ),
+    )
+    .where("date_of_journey", ">=", startDateUtc.toDate())
+    .where("date_of_journey", "<", endDateUtc.toDate());
+
+  if (nocListToFilter.length > 0) {
+    query = query.where("operator_noc", "in", nocListToFilter);
+  }
+  if (matchType && matchType === MatchType.Evidenced) {
+    query = query.where("estimated", "=", false);
+  }
+
+  if (timingPointsOnly) {
+    query = query.where("is_timing_point", "=", timingPointsOnly);
+  }
+
+  if (dayOfWeekFlags) {
+    const dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
+    query = query.where("day_of_week", "in", dayOfWeekNumbers);
+  }
+
+  if (maxEarlyNumber > 0 && !isServiceGranularity) {
+    query = query.where("max_early", "<=", maxEarlyNumber);
+  }
+
+  if (maxLateNumber > 0 && !isServiceGranularity) {
+    query = query.where("max_late", "<=", maxLateNumber);
+  }
+
+  if (lines) {
+    query = query.where("noc_and_line_and_servicecode", "in", lines);
+  }
+
+  return query;
 };
 
 const otpResolvers: Resolvers = {

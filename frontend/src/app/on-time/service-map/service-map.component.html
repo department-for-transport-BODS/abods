@@ -5,7 +5,7 @@
   [style]="mapboxStyle"
   [fitBounds]="bounds"
   [fitBoundsOptions]="{ padding: 50, duration: 0 }"
-  (mapLoad)="map = $event"
+  (mapLoad)="map = $event.target"
   [appAutoResizeMap]="map"
 >
   <mgl-geojson-source

@@ -6,6 +6,7 @@ import { Component, Input } from "@angular/core";
     <span class="link__text"><ng-content></ng-content></span>
   </a>`,
   styleUrls: ["./link.component.scss"],
+  standalone: false,
 })
 export class LinkComponent {
   @Input() route?: unknown[] | string;

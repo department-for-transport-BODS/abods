@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
   selector: "app-time-range-slider",
   templateUrl: "./time-range-slider.component.html",
   styleUrls: ["./time-range-slider.component.scss"],
+  standalone: false,
 })
 export class TimeRangeSliderComponent {
   @Input() labelMin?: string;

@@ -12,6 +12,7 @@ import { GDSSpacingSizes } from "src/app/shared/types";
   templateUrl: "./operator-selector.component.html",
   styleUrls: ["./operator-selector.component.scss"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class OperatorSelectorComponent {
   @Input() operator?: {

@@ -7,6 +7,7 @@ import { incompleteConversion } from "../../../shared/incompleteReasonUtils";
   selector: "app-otp-stats",
   templateUrl: "./otp-stats.component.html",
   styleUrls: ["./otp-stats.component.scss"],
+  standalone: false,
 })
 export class OtpStatsComponent {
   @Input() view: JourneyInfo | null = null;
@@ -29,12 +30,14 @@ export class OtpStatsComponent {
     const stopDetails = this.view.stops
       .filter((stop) => stop.isTimingPoint || !this.timingPointsOnly)
       .map((n) => ({
+        ...n,
         otp:
           this.matchType === MatchType.Evidenced && n.estimatedDepartureUtc
             ? null
             : n.otp,
         incompleteReason: n.incompleteReason ?? 0,
-      }));
+      }))
+      .filter((n) => n.otp !== null || !n.setDown);
 
     const total = stopDetails.length;
     const early = stopDetails.filter((n) => n.otp === OtpEnum.Early).length;

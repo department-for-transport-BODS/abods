@@ -6,22 +6,25 @@
   [fitBounds]="bounds"
   [fitBoundsOptions]="{ padding: 50, linear: true, maxZoom: 16 }"
   [cursorStyle]="cursorStyle"
-  (mapLoad)="map = $event"
+  (mapLoad)="map = $event.target"
   (moveStart)="moveCounter = moveCounter + 1"
   class="vehicle-journey__map"
 >
   <mgl-control position="top-left">
-    <app-dropdown
-      identifier="map-display-menu"
-      triggerLabel="Display options"
-      [width]="200"
-    >
+    <app-dropdown identifier="map-display-menu" triggerLabel="Display options">
       <p class="govuk-body govuk-!-margin-bottom-2">
         <strong>Map view</strong>
       </p>
       <app-map-view-toggle
         (mapboxStyle)="mapboxStyle = $event"
       ></app-map-view-toggle>
+      <p class="govuk-body govuk-!-margin-bottom-2 govuk-!-margin-top-2">
+        <strong>Scheduled route view</strong>
+      </p>
+      <app-scheduled-route-toggle
+        [visible]="showScheduledRoute"
+        (visibleChange)="showScheduledRoute = $event"
+      />
     </app-dropdown>
   </mgl-control>
   <ng-container *ngIf="!loading">
@@ -192,6 +195,29 @@
       source="journey-timing-points"
       (layerMouseMove)="onStopMouseEnter($event)"
       (layerMouseLeave)="onStopMouseLeave($event)"
+    ></mgl-layer>
+    <mgl-geojson-source
+      *ngIf="showScheduledRoute && scheduledRouteLine"
+      id="scheduled-route-source"
+      [data]="scheduledRouteLine"
+      type="geojson"
+    ></mgl-geojson-source>
+
+    <mgl-layer
+      *ngIf="showScheduledRoute && scheduledRouteLine"
+      id="scheduled-route-line"
+      source="scheduled-route-source"
+      type="line"
+      [layout]="{
+        'line-join': 'round',
+        'line-cap': 'round'
+      }"
+      [paint]="{
+        'line-color': '#999999',
+        'line-width': 2,
+        'line-dasharray': [0.5, 2],
+        'line-opacity': 0.8
+      }"
     ></mgl-layer>
     <mgl-popup
       *ngIf="tooltipStop"

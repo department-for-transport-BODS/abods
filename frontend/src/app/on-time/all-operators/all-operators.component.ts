@@ -2,22 +2,23 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ReplaySubject, Subject } from "rxjs";
 import { map, switchMap, takeUntil, tap } from "rxjs/operators";
 import { PerformanceParams, PunctualityOverview } from "../on-time.service";
-import { Headway } from "../headway.service";
 import { PerformanceService } from "../performance.service";
 import { MultiselectCheckboxOption } from "../../shared/gds/multiselect-checkbox/multiselect-checkbox.component";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { nonNullishArray } from "../../shared/array-operators";
+import { HeadwayOverviewType } from "../../../generated/graphql";
 
 @Component({
   templateUrl: "all-operators.component.html",
   styleUrls: ["./all-operators.component.scss"],
+  standalone: false,
 })
 export class AllOperatorsComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   params$ = new ReplaySubject<PerformanceParams>();
 
   overview?: PunctualityOverview;
-  headwayOverview?: Headway;
+  headwayOverview?: HeadwayOverviewType;
   overviewLoading = true;
 
   adminAreas = this.adminAreaService

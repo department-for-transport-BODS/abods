@@ -7,6 +7,7 @@ import {
   Maybe,
   MutationResolvers,
   MutationResponseType,
+  Organisation,
   QueryResolvers,
   Resolvers,
   UserType,
@@ -14,14 +15,13 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2";
 import logger from "../logger.js";
-import { requireUserSession } from "./helpers.js";
+import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
-import { getUserOrgIds } from "../lib/utils.js";
 import { isLocal } from "../prismaClient.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
-const accountTypes = {
+export const accountTypes = {
   admin: 1,
   orgAdmin: 2,
   orgStaff: 3,
@@ -44,7 +44,7 @@ export const getUsers: QueryResolvers["users"] = async (
         where: {
           userOrganisations: {
             every: {
-              organisation_id: { in: user.orgIds },
+              organisation_id: { in: user.orgs.map((org) => org.id) },
             },
           },
         },
@@ -75,7 +75,7 @@ const getFeatureFlags = () => {
   for (const key of Object.keys(FeatureFlag)) {
     const envVarName = flagPrefix + key;
     const flag = FeatureFlag[key as FeatureFlag];
-    if (!isLocal()) {
+    if (!isLocal() || process.env.ENABLE_FEATURE_FLAG_LOCAL) {
       if (!(envVarName in process.env)) continue;
       if (process.env[envVarName] !== "true") continue;
     }
@@ -119,6 +119,7 @@ export const getUser: QueryResolvers["user"] = async (
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
       canEditAllAlerts: isAdmin,
+      canViewDistances: isAdmin,
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
         ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
         : null,
@@ -214,7 +215,12 @@ export const loginUser: MutationResolvers["login"] = async (
       select: {
         id: true,
         password: true,
-        userOrganisations: { select: { organisation_id: true } },
+        userOrganisations: {
+          select: {
+            organisation_id: true,
+            organisation: { select: { name: true } },
+          },
+        },
       },
     });
 
@@ -223,7 +229,15 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const orgIds = getUserOrgIds(bodsUser);
+    if (bodsUser.userOrganisations.length < 1) {
+      logger.error(
+        { userId: bodsUser.id },
+        "User not mapped to an organisation",
+      );
+      throwUnauthenticatedError("User not mapped to any organisation");
+    }
+
+    const orgNames = bodsUser.userOrganisations.map((n) => n.organisation.name);
 
     const strippedPassword = bodsUser.password.replace("argon2$", "$");
     if (await argon2.verify(strippedPassword, args.password)) {
@@ -258,7 +272,8 @@ export const loginUser: MutationResolvers["login"] = async (
         1,
         "function:GraphQlFunction",
         `env:${process.env.PROJECT_ENV}`,
-        ...orgIds.map((orgId) => `org:${orgId}`),
+        `abods-db-user-id:${user_id}`,
+        ...orgNames.map((name) => `org:${name}`),
       );
       return { success: true, expiresAt: expiryTimestamp };
     } else {
@@ -476,12 +491,42 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
   }
 };
 
+const getuserOrgs: QueryResolvers["userOrgs"] = async (
+  _,
+  __,
+  context,
+): Promise<Organisation[]> => {
+  const user = await requireUserSession(context);
+
+  const orgs = context.kysely
+    .selectFrom("bods_organisation")
+    .select(["name", "id", "is_abods_global_viewer"])
+    .where("name", "is not", null);
+  let userOrgs = await orgs
+    .where(
+      "id",
+      "in",
+      user.orgs.map((org) => org.id),
+    )
+    .execute();
+
+  if (userOrgs.some((org) => org.is_abods_global_viewer)) {
+    userOrgs = await orgs.distinct().execute();
+  }
+
+  return userOrgs.map((org) => ({
+    id: org.id,
+    name: org.name ?? "-",
+  }));
+};
+
 const userResolvers: Resolvers = {
   Query: {
     user: getUser,
     users: getUsers,
     userAlerts: getUserAlerts,
     userAlert: getUserAlert,
+    userOrgs: getuserOrgs,
   },
   Mutation: {
     login: loginUser,

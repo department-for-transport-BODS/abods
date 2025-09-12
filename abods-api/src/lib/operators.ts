@@ -2,10 +2,17 @@ import { SessionUser } from "../types/extra";
 import { Kysely } from "kysely";
 import { DB } from "../kysely";
 
-export const getUserOperatorIdsQuery = (db: Kysely<DB>, user: SessionUser) =>
+export const getUserOperatorIdsQuery = (
+  db: Kysely<DB>,
+  sessionUser: SessionUser,
+) =>
   db
     .selectFrom("bods_organisationoperator")
-    .where("organisation_id", "in", user.orgIds)
+    .where(
+      "organisation_id",
+      "in",
+      sessionUser.orgs.map((org) => org.id),
+    )
     .select("operatorref");
 
 export const getUserOperatorIds = async (user: SessionUser, db: Kysely<DB>) =>
@@ -17,7 +24,7 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
   return db
     .selectFrom("bods_user as bu")
     .innerJoin("bods_userorganisation as buo", "buo.user_id", "bu.id")
-    .leftJoin("organisation_organisation_admin_areas as ooaa", (join) =>
+    .leftJoin("bods_organisation_organisation_admin_areas as ooaa", (join) =>
       join
         .onRef("buo.organisation_id", "=", "ooaa.organisation_id")
         .on("bu.is_superuser", "=", false),
@@ -32,6 +39,7 @@ export const getUserTypeDetails = async (db: Kysely<DB>, user_id: number) => {
       eb.ref("bo.is_abods_global_viewer").as("is_superuser"),
       eb.ref("ul.name").as("lta_name"),
       eb.ref("bo.name").as("org_name"),
+      eb.ref("bu.account_type").as("account_type"),
     ])
     .execute();
 };

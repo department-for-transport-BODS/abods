@@ -1,5 +1,5 @@
-import { HttpClient } from "@angular/common/http";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import { ApolloQueryResult } from "@apollo/client";
 import { ApolloTestingModule } from "apollo-angular/testing";
@@ -20,23 +20,25 @@ describe("VersionService", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, ApolloTestingModule],
-      providers: [
+    imports: [ApolloTestingModule],
+    providers: [
         {
-          provide: HttpClient,
-          useValue: {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            get: (url: string, options?: any) => of(),
-          },
+            provide: HttpClient,
+            useValue: {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                get: (url: string, options?: any) => of(),
+            },
         },
         {
-          provide: GetVersionGQL,
-          useValue: {
-            fetch: () => of({}),
-          },
+            provide: GetVersionGQL,
+            useValue: {
+                fetch: () => of({}),
+            },
         },
-      ],
-    });
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
     service = TestBed.inject(VersionService);
     http = TestBed.inject(HttpClient);
     versionGQL = TestBed.inject(GetVersionGQL);

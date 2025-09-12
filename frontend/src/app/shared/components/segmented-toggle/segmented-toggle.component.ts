@@ -28,6 +28,7 @@ import {
       useExisting: SegmentedToggleComponent,
     },
   ],
+  standalone: false,
 })
 export class SegmentedToggleComponent
   implements ControlValueAccessor, SegmentedToggleGroup

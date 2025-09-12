@@ -99,6 +99,22 @@
     "
     id="on-time-overview-stat-no-data"
   ></app-stat>
+  <app-stat
+    *ngIf="showNoData"
+    label="Average delay"
+    class="on-time-overview__stat on-time-overview__no-data"
+    [statValue]="averageDelay || 'Unavailable'"
+    [statLoaded]="!loading"
+    [tooltip]="
+      overview && overview.averageDelay
+        ? averageDelayTooltip
+        : noTimetableDataTooltip
+    "
+    id="on-time-overview-stat-no-data"
+  ></app-stat>
+  <ng-template #averageDelayTooltip>
+    Average delay with data displayed in minutes and second format MM:SS.
+  </ng-template>
   <ng-template #noDataTooltip>
     {{ noData | number }} of {{ scheduled | number }} stop departures have
     limited or missing real-time data so we are unable to calculate an accurate

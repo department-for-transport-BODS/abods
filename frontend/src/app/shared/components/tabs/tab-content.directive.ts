@@ -20,6 +20,7 @@ import { TabComponent } from "./tab/tab.component";
  */
 @Directive({
   selector: "[appTabContent]",
+  standalone: false,
 })
 export class TabContentDirective implements OnInit {
   constructor(

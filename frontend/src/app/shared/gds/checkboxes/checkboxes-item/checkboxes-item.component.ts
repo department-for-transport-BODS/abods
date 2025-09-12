@@ -4,6 +4,7 @@ import {
   Output,
   EventEmitter,
   forwardRef,
+  ViewEncapsulation,
 } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 
@@ -38,6 +39,8 @@ let nextUniqueId = 0;
       useExisting: forwardRef(() => CheckboxesItemComponent),
     },
   ],
+  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class CheckboxesItemComponent {
   @Input() inputId = `gds-checkbox-item-${nextUniqueId++}`;

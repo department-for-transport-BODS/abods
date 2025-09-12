@@ -16,13 +16,9 @@ import {
 import { PerformanceParams } from "../on-time.service";
 import { ReplaySubject } from "rxjs";
 import { finalize, map, switchMap, tap } from "rxjs/operators";
-import {
-  HeadwayParams,
-  HeadwayService,
-  HeadwayTimeSeries,
-} from "../headway.service";
+import { HeadwayParams, HeadwayService } from "../headway.service";
 import { DateTime, Interval } from "luxon";
-import { Granularity } from "../../../generated/graphql";
+import { Granularity, HeadwayTimeSeriesType } from "../../../generated/graphql";
 
 const tooltipHtml = (
   dateFormat = "d MMMM yyyy",
@@ -43,11 +39,12 @@ const tooltipHtml = (
   styles: [
     ":host { flex-direction: column; justify-content: space-evenly; } .chart { width: 100%; flex-grow: 1; }",
   ],
+  standalone: false,
 })
 export class ExcessWaitTimeChartComponent implements OnInit, AfterViewInit {
   @ViewChild(XYChart) chart!: XYChart;
 
-  data?: HeadwayTimeSeries[];
+  data?: HeadwayTimeSeriesType[];
   private xAxis?: am4charts.DateAxis;
   private dateRange?: Interval;
   private loadingScreen?: am4core.Container;
@@ -79,7 +76,12 @@ export class ExcessWaitTimeChartComponent implements OnInit, AfterViewInit {
       .subscribe(({ data, params }) => {
         this.data = data.map((headway) => ({
           ...headway,
-          excessSign: headway.excess >= 0 ? "+" : "-",
+          excessSign:
+            headway.excess === null || headway.excess === undefined
+              ? "NA"
+              : headway.excess >= 0
+                ? "+"
+                : "-",
         }));
         if (this.xAxis) {
           const granularity: Granularity =
@@ -104,7 +106,7 @@ export class ExcessWaitTimeChartComponent implements OnInit, AfterViewInit {
             ts: DateTime.fromISO(data[0].ts)
               .plus({ hour: 1 })
               .toISO({ suppressMilliseconds: true }),
-          } as HeadwayTimeSeries);
+          } as HeadwayTimeSeriesType);
         }
       });
   }

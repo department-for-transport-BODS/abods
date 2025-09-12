@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
     </div>
   `,
   styleUrls: ["./tab.component.scss"],
+  standalone: false,
 })
 export class TabComponent {
   @Input() id?: string;

@@ -53,7 +53,13 @@ export type StopPerformance = StopPerformanceType & OnTimeRatios;
 
 export type PunctualityOverview = Pick<
   PunctualityTotalsType,
-  "early" | "onTime" | "late" | "completed" | "scheduled" | "incomplete"
+  | "early"
+  | "onTime"
+  | "late"
+  | "completed"
+  | "scheduled"
+  | "incomplete"
+  | "averageDelay"
 > & {
   noData: number;
 };
@@ -158,7 +164,9 @@ export class OnTimeService {
           this.fillTimeOfDayGaps(
             assert(data?.onTimePerformance?.punctualityTimeOfDay).map(
               (value) => {
-                const time = DateTime.fromISO(value.timeOfDay, { zone: "utc" });
+                const time = DateTime.fromISO(value.timeOfDay, {
+                  zone: "Europe/London",
+                });
                 const timeOfDay = time.toFormat("HH:mm");
                 return {
                   ...OnTimeService.calculateOnTimePcts(value),
@@ -215,11 +223,9 @@ export class OnTimeService {
       .watch({ params }, { fetchPolicy: "no-cache", errorPolicy: "none" })
       .valueChanges.pipe(
         map(({ data }) =>
-          (data?.onTimePerformance?.stopPerformance ?? [])
-            .map(OnTimeService.calculateOnTimePcts)
-            .sort((a, b) =>
-              a.stopInfo.stopName.localeCompare(b.stopInfo.stopName),
-            ),
+          (data?.onTimePerformance?.stopPerformance ?? []).map(
+            OnTimeService.calculateOnTimePcts,
+          ),
         ),
       );
   }

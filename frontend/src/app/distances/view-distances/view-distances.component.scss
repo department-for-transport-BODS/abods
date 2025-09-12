@@ -1,0 +1,82 @@
+@import "src/assets/styles/settings/settings";
+@import "src/assets/styles/helpers/helpers";
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr);
+  gap: govuk-spacing(1);
+  height: 70px;
+
+  //height: 80px;
+  // display: flex;
+  // // grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr) minmax(
+  // //     0,
+  // //     8fr
+  // //   );
+  // flex-direction: row;
+  // gap: govuk-spacing(2);
+
+  // &__org {
+  //   flex-grow: 7
+  // }
+
+  // &__date {
+  //   min-width: 270px
+  // }
+  // &__operator {
+  //   flex-grow: 8
+  // }
+
+  // &__split {
+  //   flex-grow: 1
+  // }
+
+  ::ng-deep .ng-select {
+    ::ng-deep .ng-select-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      ::ng-deep .ng-value-container {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0; // important for ellipsis
+        align-items: center;
+        overflow: hidden;
+        flex-wrap: nowrap;
+
+        .ng-value {
+          flex: 1 1 auto;
+          min-width: 0px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-right: 0px;
+
+          .ng-value-label {
+            padding-left: 0 !important;
+          }
+        }
+
+        ::ng-deep .ng-input {
+          flex-grow: 8;
+          white-space: nowrap;
+          flex-shrink: 0;
+          display: block; /* or block if searchable */
+          input:focus {
+            min-width: 100px;
+          }
+        }
+      }
+    }
+  }
+}
+.ag-header {
+  height: "40px";
+}

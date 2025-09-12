@@ -9,7 +9,9 @@ import {
 import { PanelComponent } from "./panel.component";
 import { PanelService } from "./panel.service";
 
-@Component({})
+@Component({
+  standalone: false,
+})
 class TestDynamicComponent {}
 
 describe("PanelComponent", () => {

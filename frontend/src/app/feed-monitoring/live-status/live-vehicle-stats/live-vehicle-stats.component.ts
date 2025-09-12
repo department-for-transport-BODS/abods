@@ -20,6 +20,7 @@ import { VehicleStatsViewModel } from "../../types";
   selector: "app-live-vehicle-stats",
   templateUrl: "./live-vehicle-stats.component.html",
   styleUrls: ["./live-vehicle-stats.component.scss"],
+  standalone: false,
 })
 export class LiveVehicleStatsComponent
   extends BaseChart

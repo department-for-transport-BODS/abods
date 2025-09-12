@@ -6,6 +6,7 @@ import { GDSSpacingSizes } from "src/app/shared/types";
   template:
     '<div [ngClass]="stackClasses" [style.gridTemplateColumns]="columnSizes"><ng-content></ng-content></div>',
   styleUrls: ["./stack.component.scss"],
+  standalone: false,
 })
 export class StackComponent {
   @Input() childMax?: string;

@@ -28,6 +28,7 @@ let nextUniqueId = 0;
       multi: true,
     },
   ],
+  standalone: false,
 })
 export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
   @Input()
@@ -74,6 +75,14 @@ export class TextInputComponent implements ControlValueAccessor, AfterViewInit {
 
   get value(): string {
     return this.control.value;
+  }
+
+  get ariaDescribedBy(): string | null {
+    if (this.error) {
+      return `${this.inputId}-error`;
+    }
+
+    return this.hint ? `${this.inputId}-hint` : null;
   }
 
   onTouch: (_: unknown) => void = () => {

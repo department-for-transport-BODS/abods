@@ -6,6 +6,7 @@ import { AlertLevel, AlertListViewModel } from "../alert-list-view-model";
   selector: "[app-alert]",
   templateUrl: "./alert.component.html",
   styleUrls: ["./alert.component.scss"],
+  standalone: false,
 })
 export class AlertComponent {
   @Input() alert!: AlertListViewModel;

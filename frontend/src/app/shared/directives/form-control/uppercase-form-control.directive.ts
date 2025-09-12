@@ -4,6 +4,7 @@ import { NgControl } from "@angular/forms";
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: "[formControlName][uppercase]",
+  standalone: false,
 })
 export class UppercaseFormControlDirective {
   constructor(private ngControl: NgControl) {}

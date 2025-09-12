@@ -12,6 +12,7 @@ import { AuthenticatedUserService } from "../../authentication/authenticated-use
   selector: "app-view-service-monitoring-dashboard",
   templateUrl: "./view-service-monitoring-dashboard.component.html",
   styleUrls: ["./view-service-monitoring-dashboard.component.scss"],
+  standalone: false,
 })
 export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
   @ViewChild("iframeContainer", { static: true }) iframeContainer!: ElementRef;
@@ -42,9 +43,10 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
         return;
       }
       this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
+      this.renderer.setStyle(iframe, "border", "none");
       this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
       this.renderer.setAttribute(iframe, "width", "100%");
-      this.renderer.setAttribute(iframe, "height", "550");
+      this.renderer.setAttribute(iframe, "height", "100%");
       this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
       this.errors = [];
     });

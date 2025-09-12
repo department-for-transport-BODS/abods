@@ -21,7 +21,8 @@
     "generate-secrets": "node --loader ts-node/esm src/scripts/generate-api-token.ts",
     "prepare": "(npm run prisma:generate)",
     "lint": "eslint --ignore-pattern src/kysely.ts --fix --cache --quiet .",
-    "lint:check": "eslint --ignore-pattern src/kysely.ts ."
+    "lint:check": "eslint --ignore-pattern src/kysely.ts .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@apollo/server": "^4.10.2",
@@ -29,7 +30,7 @@
     "@aws-sdk/client-quicksight": "^3.744.0",
     "@aws-sdk/client-secrets-manager": "^3.682.0",
     "@aws-sdk/client-sts": "^3.744.0",
-    "@aws-sdk/credential-providers": "^3.577.0",
+    "@aws-sdk/credential-providers": "^3.883.0",
     "@aws-sdk/rds-signer": "^3.577.0",
     "@codegenie/serverless-express": "^4.14.1",
     "@prisma/client": "^5.22.0",
@@ -38,8 +39,8 @@
     "datadog-lambda-js": "^9.119.0",
     "dayjs": "^1.11.11",
     "dayjs-plugin-utc": "^0.1.2",
-    "graphql": "^16.8.1",
-    "graphql-scalars": "^1.23.0",
+    "graphql": "^16.11.0",
+    "graphql-scalars": "^1.24.2",
     "graphql-tag": "^2.12.6",
     "haversine-distance": "^1.2.3",
     "kysely": "^0.27.4",
@@ -54,11 +55,11 @@
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
-    "@types/node": "^22.13.13",
+    "@types/node": "~20.17.28",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.2",
-    "eslint": "^9.23.0",
+    "eslint": "^9.25.1",
     "jest": "^29.7.0",
     "prisma": "^5.22.0",
     "prisma-kysely": "^1.8.0",
@@ -68,5 +69,8 @@
     "ts-jest": "^29.1.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
+  },
+  "overrides": {
+    "cross-spawn": "7.0.5"
   }
 }

@@ -8,6 +8,7 @@ import { SparklineCellTemplateComponent } from "./sparkline-cell-template.compon
   selector: "app-feed-monitoring-sparkline-cell",
   template: '<div class="vehicle-sparkline" [innerHTML]="svg | trustMe"></div>',
   styleUrls: ["./sparkline-cell.component.scss"],
+  standalone: false,
 })
 export class SparklineCellComponent implements AgRendererComponent {
   svg?: string;

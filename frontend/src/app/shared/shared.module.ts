@@ -12,7 +12,6 @@ import { PopoverComponent } from "./components/popover/popover.component";
 import { GdsModule } from "./gds/gds.module";
 import { TooltipComponent } from "./components/tooltip/tooltip.component";
 import { BoxComponent } from "./components/box/box.component";
-import { SpinnerComponent } from "./components/spinner/spinner.component";
 import { SkeletonComponent } from "./components/skeleton/skeleton.component";
 import { ModalComponent } from "./components/modal/modal.component";
 import { StackComponent } from "./components/stack/stack.component";
@@ -61,6 +60,7 @@ import { GeoContextPipe } from "./mapbox/geo-context.pipe";
 import { JoinPipe } from "./pipes/join.pipe";
 import { MapRecentreButtonComponent } from "./components/map-recentre-button/map-recentre-button.component";
 import { MapViewToggleComponent } from "./components/map-view-toggle/map-view-toggle.component";
+import { ScheduledRouteToggleComponent } from "./components/map-view-scheduled-route-toggle/map-view-scheduled-route-toggle.component";
 import { DropdownComponent } from "./components/dropdown/dropdown.component";
 import { InviteUserModalComponent } from "./components/invite-user-modal/invite-user-modal.component";
 import { OtpParamRangeSliderComponent } from "./components/otp-param-range-slider/otp-param-range-slider.component";
@@ -72,6 +72,10 @@ import { MouseupOutsideDirective } from "./directives/mouseup-outside.directive"
 import { FreshdeskHtmlFormatterPipe } from "./components/helpdesk-panel/freshdesk-html-formatter.pipe";
 import { LocationSearchComponent } from "./components/location-search/location-search.component";
 import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of-week-select.component";
+import { MatchTypeSegmentedToggleComponent } from "./components/segmented-toggle/match-type-segmented-toggle.component";
+import { StopTypeSegmentedToggleComponent } from "./components/segmented-toggle/stop-type-segmented-toggle.component";
+import { DateRangePickerComponent } from "./components/date-range/date-range-picker.component";
+import { StatTemplateDirective } from "./components/stat/stat.directive";
 
 @NgModule({
   declarations: [
@@ -82,13 +86,14 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     StatComponent,
     TooltipComponent,
     BoxComponent,
-    SpinnerComponent,
     SkeletonComponent,
     ModalComponent,
     StackComponent,
     OperatorSelectorComponent,
     StatusComponent,
     LinkComponent,
+    MatchTypeSegmentedToggleComponent,
+    StopTypeSegmentedToggleComponent,
     SegmentedToggleComponent,
     SegmentedToggleItemComponent,
     TabsComponent,
@@ -126,6 +131,7 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,
@@ -137,6 +143,8 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     FreshdeskHtmlFormatterPipe,
     LocationSearchComponent,
     DayOfWeekSelectComponent,
+    DateRangePickerComponent,
+    StatTemplateDirective,
   ],
   providers: [PercentPipe],
   imports: [
@@ -165,7 +173,6 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     NoSanitizePipe,
     BrowserTitleComponent,
     SkeletonComponent,
-    SpinnerComponent,
     GdsModule,
     ModalComponent,
     StackComponent,
@@ -178,6 +185,8 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     ChangeComponent,
     DateRangeComponent,
     DateComponent,
+    MatchTypeSegmentedToggleComponent,
+    StopTypeSegmentedToggleComponent,
     SegmentedToggleComponent,
     SegmentedToggleItemComponent,
     PanelComponent,
@@ -203,6 +212,7 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     JoinPipe,
     MapRecentreButtonComponent,
     MapViewToggleComponent,
+    ScheduledRouteToggleComponent,
     DropdownComponent,
     InviteUserModalComponent,
     OtpParamRangeSliderComponent,
@@ -213,6 +223,8 @@ import { DayOfWeekSelectComponent } from "./components/day-of-week-select/day-of
     MouseupOutsideDirective,
     LocationSearchComponent,
     DayOfWeekSelectComponent,
+    DateRangePickerComponent,
+    StatTemplateDirective,
   ],
 })
 export class SharedModule {}
