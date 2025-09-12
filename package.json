@@ -19,7 +19,7 @@
     "@graphql-codegen/introspection": "^4.0.3",
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
-    "@graphql-codegen/typescript-operations": "^4.5.1",
+    "@graphql-codegen/typescript-operations": "^5.0.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.4",
     "concurrently": "^9.1.2",
     "graphql-scalars": "^1.24.2",
