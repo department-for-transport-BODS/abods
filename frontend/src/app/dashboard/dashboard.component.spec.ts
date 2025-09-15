@@ -9,8 +9,8 @@ import { Observable, of } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import {
+  DashboardVehicles,
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
 } from "src/generated/graphql";
 import { DashboardComponent } from "./dashboard.component";
 import { DashboardService } from "./dashboard.service";
@@ -76,9 +76,10 @@ describe("DashboardComponent", () => {
     stubsEnabled: false,
   });
 
-  const operator2 = {
+  const operator2: OperatorDashboardFragment = {
     name: "Operator 2",
     nocCode: "OP02",
+    operatorId: "OP02",
     feedMonitoring: {
       feedStatus: true,
 
@@ -86,26 +87,30 @@ describe("DashboardComponent", () => {
     },
   };
 
-  const operator6 = {
+  const operator6: OperatorDashboardFragment = {
     name: "Operator 6",
     nocCode: "OP06",
+    operatorId: "OP06",
     feedMonitoring: {
       feedStatus: false,
       liveStats: { feedAlerts: 21, feedErrors: 3 },
     },
   };
-  const operator2VehicleCounts = {
-    nocCode: "OP02",
-    feedMonitoring: { liveStats: { currentVehicles: 1, expectedVehicles: 2 } },
+  const operator2VehicleCounts: DashboardVehicles = {
+    operatorId: "OP02",
+    actual: 1,
+    expected: 2,
   };
-  const operator6VehicleCounts = {
-    nocCode: "OP06",
-    feedMonitoring: { liveStats: { currentVehicles: 0, expectedVehicles: 18 } },
+  const operator6VehicleCounts: DashboardVehicles = {
+    operatorId: "OP06",
+    actual: 0,
+    expected: 18,
   };
   const operatorList: OperatorDashboardFragment[] = [
     {
       name: "Operator 1",
       nocCode: "OP01",
+      operatorId: "OP01",
       feedMonitoring: {
         feedStatus: true,
         liveStats: { feedAlerts: 2, feedErrors: 0 },
@@ -115,6 +120,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 3",
       nocCode: "OP03",
+      operatorId: "OP03",
       feedMonitoring: {
         feedStatus: true,
         liveStats: { feedAlerts: 1, feedErrors: 1 },
@@ -123,6 +129,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 4",
       nocCode: "OP04",
+      operatorId: "OP04",
       feedMonitoring: {
         feedStatus: false,
         liveStats: { feedAlerts: 1, feedErrors: 1 },
@@ -131,6 +138,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 5",
       nocCode: "OP05",
+      operatorId: "OP05",
       feedMonitoring: {
         feedStatus: false,
         liveStats: { feedAlerts: 21, feedErrors: 1 },
@@ -138,31 +146,27 @@ describe("DashboardComponent", () => {
     },
     operator6,
   ];
-  const vehicleCounts: OperatorDashboardVehicleCountsFragment[] = [
+  const vehicleCounts: DashboardVehicles[] = [
     {
-      nocCode: "OP01",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 44, expectedVehicles: 56 },
-      },
+      operatorId: "OP01",
+      actual: 44,
+      expected: 56,
     },
     operator2VehicleCounts,
     {
-      nocCode: "OP03",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 12, expectedVehicles: 14 },
-      },
+      operatorId: "OP03",
+      actual: 12,
+      expected: 14,
     },
     {
-      nocCode: "OP04",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 11 },
-      },
+      operatorId: "OP04",
+      actual: 0,
+      expected: 11,
     },
     {
-      nocCode: "OP05",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 23 },
-      },
+      operatorId: "OP05",
+      actual: 0,
+      expected: 23,
     },
     operator6VehicleCounts,
   ];
@@ -369,12 +373,16 @@ describe("DashboardComponent", () => {
     expect(
       op6statusRow?.querySelector(".feed-status-summary__count--alerts")
         ?.textContent,
-    ).toMatch(operator6.feedMonitoring.liveStats.feedAlerts.toString());
+    ).toMatch(
+      operator6.feedMonitoring?.liveStats?.feedAlerts?.toString() ?? "",
+    );
 
     expect(
       op6statusRow?.querySelector(".feed-status-summary__count--errors")
         ?.textContent,
-    ).toMatch(operator6.feedMonitoring.liveStats.feedErrors.toString());
+    ).toMatch(
+      operator6.feedMonitoring?.liveStats?.feedErrors?.toString() ?? "",
+    );
 
     const op2statusRow = spectator.query(
       byTextContent(/Operator 2/, {
@@ -398,12 +406,16 @@ describe("DashboardComponent", () => {
     expect(
       op2statusRow?.querySelector(".feed-status-summary__count--alerts")
         ?.textContent,
-    ).toMatch(operator2.feedMonitoring.liveStats.feedAlerts.toString());
+    ).toMatch(
+      operator2.feedMonitoring?.liveStats?.feedAlerts?.toString() ?? "",
+    );
 
     expect(
       op2statusRow?.querySelector(".feed-status-summary__count--errors")
         ?.textContent,
-    ).toMatch(operator2.feedMonitoring.liveStats.feedErrors.toString());
+    ).toMatch(
+      operator2.feedMonitoring?.liveStats?.feedErrors?.toString() ?? "",
+    );
   });
 
   it("should set nocCode on punctuality component", () => {

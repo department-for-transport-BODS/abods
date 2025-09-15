@@ -11,7 +11,7 @@ import { ServiceGridComponent } from "./service-grid.component";
 import { CommonModule, PercentPipe } from "@angular/common";
 import { OnTimeModule } from "../on-time.module";
 import { onTimeInputParams } from "../on-time.test-constants";
-import {} from "@angular/common/http/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import {
   FrequentServicePerformance,
   PerformanceService,

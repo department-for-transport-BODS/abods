@@ -79,8 +79,8 @@ describe("OtpThresholdModalComponent", () => {
     spectator.click(byText("Compare"));
 
     const expected: PerformanceParams = {
-      fromTimestamp: modalData.params?.fromTimestamp,
-      toTimestamp: modalData.params?.toTimestamp,
+      fromTimestamp: modalData.params?.fromTimestamp!,
+      toTimestamp: modalData.params?.toTimestamp!,
       filters: {
         ...modalData.params?.filters,
         onTimeMaxMinutes: 6,
@@ -93,7 +93,16 @@ describe("OtpThresholdModalComponent", () => {
 
   it("should display comparison values", () => {
     onTimeService.fetchOnTimeStats.and.returnValue(
-      of({ early: 35, late: 5, onTime: 60, completed: 100 }),
+      of({
+        early: 35,
+        late: 5,
+        onTime: 60,
+        completed: 100,
+        scheduled: 100,
+        incomplete: "0",
+        averageDelay: 0,
+        noData: 0,
+      }),
     );
     spectator.click(byText("Compare"));
     spectator.detectChanges();

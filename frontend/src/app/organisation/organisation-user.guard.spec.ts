@@ -47,12 +47,12 @@ describe("OrganisationUserGuard", () => {
 
   it("should return true if user is part of organisation", () => {
     spyOn(organisationService, "fetchUser").and.returnValue(
-      of(<UserFragment>{ email: "test@test.con" }),
+      of(<UserFragment>{ id: "user-2", username: "test@test.con" }),
     );
 
     guard
       .canActivate(<ActivatedRouteSnapshot>{
-        paramMap: convertToParamMap({ email: "test@test.con" }),
+        paramMap: convertToParamMap({ id: "user-2", email: "test@test.con" }),
       })
       .subscribe((value) => {
         expect(value).toBeTrue();

@@ -1,8 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ButtonComponent } from "../../shared/gds/button/button.component";
-import { Corridor } from "../corridors.service";
 
 import { DeleteCorridorModalComponent } from "./delete-corridor-modal.component";
+import { Corridor } from "../types";
+import { ModalComponent } from "../../shared/components/modal/modal.component";
+import { NgxSmartModalModule } from "ngx-smart-modal";
+import { SharedModule } from "../../shared/shared.module";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 
 describe("DeleteCorridorModalComponent", () => {
   let component: DeleteCorridorModalComponent;
@@ -10,7 +14,16 @@ describe("DeleteCorridorModalComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DeleteCorridorModalComponent, ButtonComponent],
+      declarations: [
+        DeleteCorridorModalComponent,
+        ButtonComponent,
+        ModalComponent,
+      ],
+      imports: [
+        NgxSmartModalModule.forRoot(),
+        SharedModule,
+        HttpClientTestingModule,
+      ],
     }).compileComponents();
   });
 

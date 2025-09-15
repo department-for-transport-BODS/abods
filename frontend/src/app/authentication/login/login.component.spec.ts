@@ -61,15 +61,15 @@ describe("LoginComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   describe("ngOnInit", () => {
     it("should redirect to returnUrl if user is authenticated", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
-      spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl");
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -77,11 +77,11 @@ describe("LoginComponent", () => {
       ).and.returnValue(of(true));
       component.ngOnInit();
 
-      expect(router.navigateByUrl).toHaveBeenCalledWith(returnUrl);
+      expect(navigateSpy).toHaveBeenCalledWith(returnUrl);
     });
 
     it('should redirect to "/" if user is authenticated and returnUrl not set', () => {
-      spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl");
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -89,13 +89,13 @@ describe("LoginComponent", () => {
       ).and.returnValue(of(true));
       component.ngOnInit();
 
-      expect(router.navigateByUrl).toHaveBeenCalledWith("/");
+      expect(navigateSpy).toHaveBeenCalledWith("/");
     });
 
     it("should not redirect to returnUrl if user is not authenticated", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
-      spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl");
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -103,10 +103,10 @@ describe("LoginComponent", () => {
       ).and.returnValue(of(false));
       component.ngOnInit();
 
-      expect(router.navigateByUrl).not.toHaveBeenCalledWith(returnUrl);
+      expect(navigateSpy).not.toHaveBeenCalledWith(returnUrl);
     });
 
-    it("should not show error message if user is not authenticated and form not submitted", () => {
+    it("should not show error message if user is not authenticated and form not submitted", async () => {
       component.submitted = false;
       spyOn(router, "navigateByUrl");
       spyOnProperty(
@@ -116,10 +116,10 @@ describe("LoginComponent", () => {
       ).and.returnValue(of(false));
       component.ngOnInit();
 
-      expect(component.errors).toEqual([]);
+      await expect(component.errors).toEqual([]);
     });
 
-    it("should show error message if user is not authenticated and form submitted", () => {
+    it("should show error message if user is not authenticated and form submitted", async () => {
       component.submitted = true;
       spyOn(router, "navigateByUrl");
       spyOnProperty(
@@ -129,7 +129,7 @@ describe("LoginComponent", () => {
       ).and.returnValue(of(false));
       component.ngOnInit();
 
-      expect(component.errors).toEqual([
+      await expect(component.errors).toEqual([
         {
           error: "Sign in failed, check username and password.",
           label: "login-username",
@@ -144,10 +144,8 @@ describe("LoginComponent", () => {
       component.f.password.setValue("testpass");
       component.onSubmit();
 
-      expect(authenticationService.login).toHaveBeenCalledWith(
-        "test@test.com",
-        "testpass",
-      );
+      const loginSpy = spyOn(authenticationService, "login");
+      expect(loginSpy).toHaveBeenCalledWith("test@test.com", "testpass");
     });
 
     it("should not call login with username and password if username is empty string", () => {
@@ -155,10 +153,8 @@ describe("LoginComponent", () => {
       component.f.password.setValue("testpass");
       component.onSubmit();
 
-      expect(authenticationService.login).not.toHaveBeenCalledWith(
-        "",
-        "testpass",
-      );
+      const loginSpy = spyOn(authenticationService, "login");
+      expect(loginSpy).not.toHaveBeenCalledWith("", "testpass");
     });
 
     it("should not call login with username and password if password is empty string", () => {
@@ -166,62 +162,60 @@ describe("LoginComponent", () => {
       component.f.password.setValue("");
       component.onSubmit();
 
-      expect(authenticationService.login).not.toHaveBeenCalledWith(
-        "test@test.com",
-        "",
-      );
+      const loginSpy = spyOn(authenticationService, "login");
+      expect(loginSpy).not.toHaveBeenCalledWith("test@test.com", "");
     });
   });
 
   describe("getError", () => {
     const requiredErrorMsg = "This field is required.";
 
-    it("should return error if username is invalid and dirty", () => {
+    it("should return error if username is invalid and dirty", async () => {
       component.f.username.markAsDirty();
 
-      expect(component.getError("username")).toEqual(requiredErrorMsg);
+      await expect(component.getError("username")).toEqual(requiredErrorMsg);
     });
 
-    it("should return error if username is invalid and touched", () => {
+    it("should return error if username is invalid and touched", async () => {
       component.f.username.markAsTouched();
 
-      expect(component.getError("username")).toEqual(requiredErrorMsg);
+      await expect(component.getError("username")).toEqual(requiredErrorMsg);
     });
 
-    it("should not return error if username is pristine", () => {
+    it("should not return error if username is pristine", async () => {
       component.f.username.markAsPristine();
 
-      expect(component.getError("username")).toBeUndefined();
+      await expect(component.getError("username")).toBeUndefined();
     });
 
-    it("should not return error if username is valid", () => {
+    it("should not return error if username is valid", async () => {
       component.f.username.setValue("test@test.com");
 
-      expect(component.getError("username")).toBeUndefined();
+      await expect(component.getError("username")).toBeUndefined();
     });
 
-    it("should return error if password is invalid and dirty", () => {
+    it("should return error if password is invalid and dirty", async () => {
       component.f.password.markAsDirty();
 
-      expect(component.getError("password")).toEqual(requiredErrorMsg);
+      await expect(component.getError("password")).toEqual(requiredErrorMsg);
     });
 
-    it("should return error if password is invalid and touched", () => {
+    it("should return error if password is invalid and touched", async () => {
       component.f.password.markAsTouched();
 
-      expect(component.getError("password")).toEqual(requiredErrorMsg);
+      await expect(component.getError("password")).toEqual(requiredErrorMsg);
     });
 
-    it("should not return error if password is pristine", () => {
+    it("should not return error if password is pristine", async () => {
       component.f.password.markAsPristine();
 
-      expect(component.getError("password")).toBeUndefined();
+      await expect(component.getError("password")).toBeUndefined();
     });
 
-    it("should not return error if password is valid", () => {
+    it("should not return error if password is valid", async () => {
       component.f.password.setValue("testpass");
 
-      expect(component.getError("password")).toBeUndefined();
+      await expect(component.getError("password")).toBeUndefined();
     });
   });
 });

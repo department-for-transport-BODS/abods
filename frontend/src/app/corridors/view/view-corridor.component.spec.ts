@@ -14,18 +14,22 @@ import { of } from "rxjs";
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { ViewCorridorComponent } from "./view-corridor.component";
 import { DateTime, Settings } from "luxon";
-import { CorridorGranularity, MatchType } from "../../../generated/graphql";
+import {
+  CorridorGranularity,
+  MatchType,
+  RouteType,
+} from "../../../generated/graphql";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { AgGridModule } from "ag-grid-angular";
 import { LuxonModule } from "luxon-angular";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
-import {} from "@angular/common/http/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { SegmentSelectorComponent } from "../segment-selector/segment-selector.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
 import { Custom } from "src/app/shared/components/date-range/date-range.types";
 import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
-import { MapComponent } from "ngx-mapbox-gl";
+import { MapComponent, NgxMapboxGLModule } from "ngx-mapbox-gl";
 import {
   EventEmitter,
   Input,
@@ -39,6 +43,9 @@ import bbox from "@turf/bbox";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { lineString } from "@turf/helpers";
 import { CorridorStatsViewParams } from "../types";
+import { NgxSmartModalModule } from "ngx-smart-modal";
+import { GdsModule } from "../../shared/gds/gds.module";
+import { BoxPlotChartComponent } from "./box-plot-chart/box-plot-chart.component";
 
 const corridor = {
   id: 123,
@@ -126,8 +133,11 @@ describe("ViewCorridorComponent", () => {
         RouterTestingModule,
         AgGridModule,
         HttpClientTestingModule,
+        NgxSmartModalModule,
+        GdsModule,
+        NgxMapboxGLModule,
       ],
-      declarations: [SegmentSelectorComponent, StubMapComponent],
+      declarations: [SegmentSelectorComponent, BoxPlotChartComponent],
       providers: [CorridorsService],
       detectChanges: true,
     });
@@ -385,7 +395,7 @@ describe("ViewCorridorComponent", () => {
               fromStop: "ST1234",
               toStop: "ST2345",
               distance: 360,
-              routeValidity: "VALID",
+              routeValidity: RouteType.Valid,
               linkRoute: "[[1, 0], [2, 0], [3, 0]]",
             },
           ],

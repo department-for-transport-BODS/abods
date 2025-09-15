@@ -8,6 +8,7 @@ import {
 
 import { PanelComponent } from "./panel.component";
 import { PanelService } from "./panel.service";
+import { SharedModule } from "../../shared.module";
 
 @Component({
   standalone: false,
@@ -19,16 +20,17 @@ describe("PanelComponent", () => {
   let fixture: ComponentFixture<PanelComponent>;
   let panelService: PanelService;
 
-  const dynamicComponent = <DynamicComponent>{
+  const dynamicComponent = {
     component: TestDynamicComponent,
     inputs: [],
     outputs: [],
-  };
+  } as DynamicComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [PanelComponent, DynamicPanelComponentHostDirective],
       providers: [PanelService, DynamicPanelComponentLoaderService],
+      imports: [SharedModule],
     }).compileComponents();
   });
 

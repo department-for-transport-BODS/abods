@@ -73,7 +73,7 @@ describe("VehicleJourneysSearchComponent", () => {
           ]),
       }),
       mockProvider(VehicleJourneysSearchService, {
-        fetchJourneys: () =>
+        fetchDayJourneys: () =>
           of([
             {
               groupId: "VJefdb0f42",
@@ -319,7 +319,7 @@ describe("VehicleJourneysSearchComponent", () => {
   });
 
   it("should show no journeys found message", async () => {
-    spyOn(vehicleJourneysSearchService, "fetchJourneys").and.returnValue(
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
       of([]),
     );
 
@@ -335,7 +335,7 @@ describe("VehicleJourneysSearchComponent", () => {
   });
 
   it("should show error message", async () => {
-    spyOn(vehicleJourneysSearchService, "fetchJourneys").and.returnValue(
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
       throwError(() => "error"),
     );
 

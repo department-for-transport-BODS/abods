@@ -40,10 +40,12 @@ describe("AnalyticsService", () => {
     setAnalyticsPolicy: () => {},
   };
   const testUser1 = <UserFragment>{
+    username: "user1",
     id: "user-id-1",
     organisation: { id: "org-id-1", name: "org-name-1" },
   };
   const testUser2 = <UserFragment>{
+    username: "user2",
     id: "user-id-2",
     organisation: { id: "org-id-2", name: "org-name-2" },
   };
@@ -82,7 +84,7 @@ describe("AnalyticsService", () => {
     it("should add user data to tag manager service ", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -99,15 +101,13 @@ describe("AnalyticsService", () => {
       expect(tagManagerService.getDataLayer()[0]).toEqual({
         event: "userData",
         abodUserId: testUser1.id,
-        abodOrgId: testUser1.organisation?.id,
-        abodOrgName: testUser1.organisation?.name,
       });
     });
 
     it("should push subsequent user changes to tag manager service", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -125,15 +125,13 @@ describe("AnalyticsService", () => {
       expect(tagManagerService.pushTag).toHaveBeenCalledOnceWith({
         event: "userData",
         abodUserId: testUser2.id,
-        abodOrgId: testUser2.organisation?.id,
-        abodOrgName: testUser2.organisation?.name,
       });
     });
 
     it("should push urlAfterRedirects to tag manager service on navigation end event", fakeAsync(() => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -188,7 +186,7 @@ describe("AnalyticsService", () => {
     it("should not add user data to tag manager service ", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -207,7 +205,7 @@ describe("AnalyticsService", () => {
     it("should not push subsequent user changes to tag manager service", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -228,7 +226,7 @@ describe("AnalyticsService", () => {
     it("should not push urlAfterRedirects to tag manager service on navigation end event", fakeAsync(() => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),

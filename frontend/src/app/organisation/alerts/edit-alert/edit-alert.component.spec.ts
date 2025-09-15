@@ -11,7 +11,7 @@ import { of } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { AlertTypeEnum, ScopeEnum } from "src/generated/graphql";
+import { AlertTypeEnum } from "src/generated/graphql";
 import { OrganisationModule } from "../../organisation.module";
 import { OrganisationService } from "../../organisation.service";
 
@@ -38,22 +38,27 @@ const vehicleDisparityAlert = {
 };
 
 const adminUser = {
-  id: "13",
+  id: "12",
   username: "AdminUser",
   email: "email@address.com",
-  roles: [
-    {
-      id: "2",
-      name: "Administrator",
-      scope: ScopeEnum.Organisation,
-    },
-  ],
+  canEditAllAlerts: true,
+  canViewDistances: true,
+  canViewServiceMonitoring: true,
+  currentUserId: "user-1",
+  flags: [],
+  serviceMonitoringEmbedUrl: null,
 };
+
 const staffUser = {
-  id: "14",
-  username: "StaffUser",
-  email: "other.email@address.com",
-  roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+  id: "user-1",
+  username: "staff@example.com",
+  email: "staff@example.com",
+  canEditAllAlerts: false,
+  canViewDistances: false,
+  canViewServiceMonitoring: false,
+  currentUserId: "user-1",
+  flags: [],
+  serviceMonitoringEmbedUrl: null,
 };
 
 const users = [adminUser, staffUser];

@@ -19,11 +19,9 @@ import {
 import { of, throwError } from "rxjs";
 import { OnTimeModule } from "../on-time.module";
 import { DateTime, Settings } from "luxon";
-import {
-  Operator,
-  OperatorService,
-} from "../../shared/services/operator.service";
+import { OperatorService } from "../../shared/services/operator.service";
 import { LayoutModule } from "../../layout/layout.module";
+import { OperatorType } from "../../../generated/graphql";
 
 describe("OperatorGridComponent", () => {
   let spectator: Spectator<OperatorGridComponent>;
@@ -31,21 +29,24 @@ describe("OperatorGridComponent", () => {
   let onTimeService: SpyObject<OnTimeService>;
   let operatorService: SpyObject<OperatorService>;
 
-  const mockOperators: Operator[] = [
+  const mockOperators: OperatorType[] = [
     {
       name: "A A Williams",
       nocCode: "OP1",
       adminAreaIds: ["AA1", "AA2"],
+      operatorId: "OP1-ID",
     },
     {
       name: "First Leeds",
       nocCode: "OP2",
       adminAreaIds: ["AA3"],
+      operatorId: "OP2-ID",
     },
     {
       name: "D & G Buses",
       nocCode: "OP3",
       adminAreaIds: [],
+      operatorId: "OP3-ID",
     },
   ];
   const mockOperatorOTP: OperatorPerformance[] = [
@@ -106,8 +107,8 @@ describe("OperatorGridComponent", () => {
     Settings.defaultZone = "Europe/London";
     Settings.now = () => 1664578800; // 2022-10-01 GMT+01:00, i.e. during BST
     mockParams = {
-      fromTimestamp: DateTime.now(),
-      toTimestamp: DateTime.now().plus({ days: 7 }),
+      fromTimestamp: DateTime.now().toISO(),
+      toTimestamp: DateTime.now().plus({ days: 7 }).toISO(),
       filters: { adminAreaIds: [] },
     };
 

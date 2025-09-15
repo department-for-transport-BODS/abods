@@ -4,14 +4,19 @@ import { DateTime } from "luxon";
 import { of } from "rxjs";
 import {
   DashboardOperatorListGQL,
+  DashboardOperatorListQuery,
   DashboardOperatorVehicleCountsListGQL,
+  DashboardOperatorVehicleCountsListQuery,
   DashboardPerformanceStatsGQL,
+  DashboardPerformanceStatsQuery,
   DashboardServiceRankingGQL,
+  DashboardServiceRankingQuery,
+  DashboardVehicles,
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
   RankingOrder,
 } from "../../generated/graphql";
 import { DashboardService } from "./dashboard.service";
+import { ApolloQueryResult } from "@apollo/client";
 
 describe("DashboardService", () => {
   let spectator: SpectatorService<DashboardService>;
@@ -45,7 +50,12 @@ describe("DashboardService", () => {
       ];
       const query = spectator.inject(DashboardOperatorListGQL);
       query.fetch.and.returnValue(
-        of({ data: { operators: { items: mockResponse } } }),
+        of({
+          data: { operatorsFeedMonitoring: mockResponse },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        }),
       );
 
       service.listOperators.subscribe((ops) => {
@@ -57,7 +67,9 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardOperatorListGQL and return empty array", () => {
       const query = spectator.inject(DashboardOperatorListGQL);
-      query.fetch.and.returnValue(of({}));
+      query.fetch.and.returnValue(
+        of({} as ApolloQueryResult<DashboardOperatorListQuery>),
+      );
 
       service.listOperators.subscribe((ops) => {
         expect(ops).toEqual([]);
@@ -70,22 +82,33 @@ describe("DashboardService", () => {
   describe("listOperatorVehicleCounts", () => {
     it("should call fetch on DashboardOperatorVehicleCountsListGQL and return list of counts", () => {
       const mockResponse = [
-        <OperatorDashboardVehicleCountsFragment>{
+        <DashboardVehicles>{
           nocCode: "OP1",
           feedMonitoring: {
             liveStats: { currentVehicles: 3, expectedVehicles: 3 },
           },
+          actual: 3,
+          expected: 3,
+          operatorId: "OP1",
         },
-        <OperatorDashboardVehicleCountsFragment>{
+        <DashboardVehicles>{
           nocCode: "OP2",
           feedMonitoring: {
             liveStats: { currentVehicles: 0, expectedVehicles: 5 },
           },
+          actual: 0,
+          expected: 5,
+          operatorId: "OP2",
         },
       ];
       const query = spectator.inject(DashboardOperatorVehicleCountsListGQL);
       query.fetch.and.returnValue(
-        of({ data: { operators: { items: mockResponse } } }),
+        of({
+          data: { dashboardVehicles: mockResponse },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        } as ApolloQueryResult<DashboardOperatorVehicleCountsListQuery>),
       );
 
       service.listOperatorVehicleCounts.subscribe((ops) => {
@@ -97,7 +120,9 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardOperatorVehicleCountsListGQL and return empty array", () => {
       const query = spectator.inject(DashboardOperatorVehicleCountsListGQL);
-      query.fetch.and.returnValue(of({}));
+      query.fetch.and.returnValue(
+        of({} as ApolloQueryResult<DashboardOperatorVehicleCountsListQuery>),
+      );
 
       service.listOperatorVehicleCounts.subscribe((ops) => {
         expect(ops).toEqual([]);
@@ -118,7 +143,10 @@ describe("DashboardService", () => {
       query.fetch.and.returnValue(
         of({
           data: { onTimePerformance: { punctualityOverview: mockResponse } },
-        }),
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        } as ApolloQueryResult<DashboardPerformanceStatsQuery>),
       );
 
       const filters = {
@@ -134,8 +162,8 @@ describe("DashboardService", () => {
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             filters,
           },
         },
@@ -145,7 +173,16 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardPerformanceStatsGQL and return null", () => {
       const query = spectator.inject(DashboardPerformanceStatsGQL);
-      query.fetch.and.returnValue(of({ errors: [{ message: "error" }] }));
+      query.fetch.and.returnValue(
+        of({
+          data: {
+            onTimePerformance: { punctualityOverview: undefined },
+          },
+          loading: false,
+          networkStatus: 7,
+          errors: [{ message: "error" }],
+        } as ApolloQueryResult<DashboardPerformanceStatsQuery>),
+      );
 
       const filters = {
         nocCodes: ["OP1"],
@@ -160,8 +197,8 @@ describe("DashboardService", () => {
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             filters,
           },
         },
@@ -212,6 +249,9 @@ describe("DashboardService", () => {
       query.fetch.and.returnValue(
         of({
           data: { onTimePerformance: { servicePunctuality: mockResponse } },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
         }),
       );
 
@@ -233,13 +273,13 @@ describe("DashboardService", () => {
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             order,
             filters,
           },
-          trendFrom: trendFrom.toJSDate(),
-          trendTo: trendTo.toJSDate(),
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
         },
         { fetchPolicy: "no-cache" },
       );
@@ -247,7 +287,14 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardPerformanceStatsGQL and return undefined", () => {
       const query = spectator.inject(DashboardServiceRankingGQL);
-      query.fetch.and.returnValue(of({ errors: [{ message: "error" }] }));
+      query.fetch.and.returnValue(
+        of({
+          data: {},
+          loading: false,
+          networkStatus: 7,
+          errors: [{ message: "error" }],
+        } as ApolloQueryResult<DashboardServiceRankingQuery>),
+      );
 
       const filters = {
         nocCodes: ["OP1"],
@@ -267,13 +314,13 @@ describe("DashboardService", () => {
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             order,
             filters,
           },
-          trendFrom: trendFrom.toJSDate(),
-          trendTo: trendTo.toJSDate(),
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
         },
         { fetchPolicy: "no-cache" },
       );

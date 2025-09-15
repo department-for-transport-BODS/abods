@@ -12,7 +12,7 @@ import {
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import { RouterTestingModule } from "@angular/router/testing";
-import { Corridor, CorridorsService } from "../corridors.service";
+import { CorridorsService } from "../corridors.service";
 import { EMPTY, of, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
@@ -34,6 +34,9 @@ import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
 import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
 import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
+import { Corridor } from "../types";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
 
 const testStop1 = {
   stopId: "ST012345",
@@ -124,6 +127,8 @@ describe("CreateCorridorComponent", () => {
         NgSelectModule,
         FormsModule,
         ReactiveFormsModule,
+        NgxMapboxGLModule,
+        NgxSmartModalModule,
       ],
       declarations: [
         CorridorMapComponent,
@@ -142,6 +147,20 @@ describe("CreateCorridorComponent", () => {
   const createComponentWithCorridorNotFound = createComponent({
     corridor: new CorridorNotFoundView(),
   });
+
+  const geocodingResult = (
+    coordinates: Position,
+    bbox: BBox2d,
+    text: string,
+    context: GeocodingContext[] = [],
+  ) => {
+    const result = featureCollection([
+      point(coordinates, {}, { bbox }),
+    ]) as GeocodingResult;
+    result.features[0].text = text;
+    result.features[0].context = context;
+    return result;
+  };
 
   describe("create new corridor", () => {
     beforeEach(() => {
@@ -313,7 +332,13 @@ describe("CreateCorridorComponent", () => {
 
     it("should look up locations using geocoding service", async () => {
       const spy = geocodingService.forward.and.returnValue(
-        of(points([[53.397, -1.407]])),
+        of(
+          geocodingResult(
+            [53.397, -1.407],
+            [53.397, -1.407, 53.397, -1.407],
+            "Some Place",
+          ),
+        ),
       );
 
       // Wait for the mode selector to init
@@ -331,7 +356,7 @@ describe("CreateCorridorComponent", () => {
 
       expect(spy).toHaveBeenCalledWith("arundel gate", {
         excludeTypes: ["poi", "region", "country"],
-        proximity: null,
+        proximity: undefined,
       });
     });
 

@@ -1,6 +1,6 @@
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { FormsModule } from "@angular/forms";
-import { byText, createHostFactory, Spectator } from "@ngneat/spectator";
+import { byText, createHostFactory, SpectatorHost } from "@ngneat/spectator";
 import { DateTime, Settings } from "luxon";
 import { dateTimeEqualityMatcher } from "src/test-support/equality";
 import { SharedModule } from "../../shared.module";
@@ -14,11 +14,11 @@ import {
 } from "@angular/common/http";
 
 describe("DateRangeControlsComponent", () => {
-  let spectator: Spectator<DateRangeControlsComponent>;
+  let spectator: SpectatorHost<DateRangeControlsComponent>;
   let component: DateRangeControlsComponent;
   const createComponent = createHostFactory({
     component: DateRangeControlsComponent,
-    imports: [FormsModule, SharedModule, HttpClientTestingModule],
+    imports: [FormsModule, SharedModule],
   });
 
   beforeEach(() => {

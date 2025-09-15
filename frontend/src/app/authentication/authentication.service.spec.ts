@@ -10,7 +10,6 @@ import {
   LoginGQL,
   LoginMutation,
   LogoutGQL,
-  LogoutMutation,
   UserGQL,
   UserQuery,
 } from "../../generated/graphql";
@@ -68,57 +67,57 @@ describe("AuthenticationService", () => {
     service.clearSession();
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   describe("constructor", () => {
     it("should call userQuery if user is authenticated", () => {
-      spyOn(userQuery, "fetch").and.returnValue(
-        of(<ApolloQueryResult<UserQuery>>{}),
+      const spyUserQuery = spyOn(userQuery, "fetch").and.returnValue(
+        of({} as ApolloQueryResult<UserQuery>),
       );
       userService.authenticateUser();
 
-      expect(userQuery.fetch).toHaveBeenCalledWith();
+      expect(spyUserQuery).toHaveBeenCalledWith();
     });
 
-    it("should not call userQuery if user is not authenticated", () => {
-      spyOn(userQuery, "fetch").and.returnValue(
-        of(<ApolloQueryResult<UserQuery>>{}),
+    it("should not call userQuery if user is not authenticated", async () => {
+      const spyUserQuery = spyOn(userQuery, "fetch").and.returnValue(
+        of({} as ApolloQueryResult<UserQuery>),
       );
       userService.deauthenticateUser();
 
-      expect(userQuery.fetch).not.toHaveBeenCalled();
+      await expect(spyUserQuery).not.toHaveBeenCalled();
     });
   });
 
   describe("login", () => {
     it("should call loginMutation.mutate with username and password", () => {
-      spyOn(loginMutation, "mutate").and.returnValue(
-        of(<ApolloQueryResult<LoginMutation>>{}),
+      const spyLoginMutation = spyOn(loginMutation, "mutate").and.returnValue(
+        of({} as ApolloQueryResult<LoginMutation>),
       );
       service.login(username, password);
 
-      expect(loginMutation.mutate).toHaveBeenCalledWith({ username, password });
+      expect(spyLoginMutation).toHaveBeenCalledWith({ username, password });
     });
 
     describe("on successful login", () => {
       beforeEach(() => {
         spyOn(loginMutation, "mutate").and.returnValue(
-          of(<ApolloQueryResult<LoginMutation>>{
+          of({
             data: {
               login: {
                 success: true,
                 expiresAt: "2022-08-01T12:48:48.672212+00:00",
               },
             },
-          }),
+          } as ApolloQueryResult<LoginMutation>),
         );
         service.login(username, password);
       });
 
-      it("should set session expiry date", () => {
-        expect(service.getSession()).toEqual(
+      it("should set session expiry date", async () => {
+        await expect(service.getSession()).toEqual(
           '{"expiresAt":"2022-08-01T12:48:48.672212+00:00"}',
         );
       });
@@ -133,15 +132,15 @@ describe("AuthenticationService", () => {
     describe("on unsuccessful login", () => {
       beforeEach(() => {
         spyOn(loginMutation, "mutate").and.returnValue(
-          of(<ApolloQueryResult<LoginMutation>>{
+          of({
             data: { login: { success: false } },
-          }),
+          } as ApolloQueryResult<LoginMutation>),
         );
         service.login(username, password);
       });
 
-      it("should not set session expiry on unsuccessful login", () => {
-        expect(service.getSession()).toBeNull();
+      it("should not set session expiry on unsuccessful login", async () => {
+        await expect(service.getSession()).toBeNull();
       });
 
       it("should set isAuthenticatedSubject to false on unsuccessful login", () => {
@@ -155,7 +154,7 @@ describe("AuthenticationService", () => {
   describe("logout", () => {
     beforeEach(() => {
       spyOn(loginMutation, "mutate").and.returnValue(
-        of(<ApolloQueryResult<LoginMutation>>{
+        of({
           data: {
             login: {
               success: true,
@@ -168,18 +167,16 @@ describe("AuthenticationService", () => {
     });
 
     it("should call logoutMutation.mutate", () => {
-      spyOn(logoutMutation, "mutate").and.returnValue(
-        of(<ApolloQueryResult<LogoutMutation>>{}),
-      );
+      const spyLogout = spyOn(logoutMutation, "mutate").and.returnValue(of({}));
       service.logout();
 
-      expect(logoutMutation.mutate).toHaveBeenCalledWith();
+      expect(spyLogout).toHaveBeenCalledWith();
     });
 
     describe("on successful logout", () => {
       beforeEach(() => {
         spyOn(logoutMutation, "mutate").and.returnValue(
-          of(<ApolloQueryResult<LogoutMutation>>{ data: { logout: true } }),
+          of({ data: { logout: true } }),
         );
         spyOn(router, "navigate");
         service.logout();
@@ -191,8 +188,8 @@ describe("AuthenticationService", () => {
         });
       });
 
-      it("should clear session on successful logout", () => {
-        expect(service.getSession()).toBeNull();
+      it("should clear session on successful logout", async () => {
+        await expect(service.getSession()).toBeNull();
       });
 
       it("should navigate to login on successful logout", () => {
@@ -203,7 +200,7 @@ describe("AuthenticationService", () => {
     describe("on unsuccessful logout", () => {
       beforeEach(() => {
         spyOn(logoutMutation, "mutate").and.returnValue(
-          of(<ApolloQueryResult<LogoutMutation>>{ data: { logout: false } }),
+          of({ data: { logout: false } }),
         );
         spyOn(router, "navigate");
         service.logout();
@@ -215,8 +212,8 @@ describe("AuthenticationService", () => {
         });
       });
 
-      it("should clear session on unsuccessful logout", () => {
-        expect(service.getSession()).toBeNull();
+      it("should clear session on unsuccessful logout", async () => {
+        await expect(service.getSession()).toBeNull();
       });
 
       it("should navigate to login on unsuccessful logout", () => {

@@ -3,7 +3,6 @@
   "ignorePatterns": [
     "projects/**/*",
     "src/test-support/*",
-    "**/*.spec.ts",
     "**/generated/graphql.ts"
   ],
   "plugins": ["jasmine"],
@@ -98,6 +97,13 @@
       },
       "rules": {
         "@graphql-eslint/naming-convention": "off"
+      }
+    },
+    {
+      "files": ["*.spec.ts"],
+      "rules": {
+        "@typescript-eslint/unbound-method": "warn",
+        "@typescript-eslint/no-floating-promises":"warn"
       }
     }
   ]

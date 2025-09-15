@@ -6,15 +6,19 @@ import { mockProvider } from "@ngneat/spectator";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { of } from "rxjs";
 import { polygon } from "@turf/helpers";
+import { SharedModule } from "../../shared/shared.module";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { ChipComponent } from "../../shared/components/chip/chip.component";
 
 describe("FilterChipsComponent", () => {
   let component: FilterChipsComponent;
   let fixture: ComponentFixture<FilterChipsComponent>;
+  let adminAreaService: AdminAreaService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ApolloTestingModule],
-      declarations: [FilterChipsComponent],
+      imports: [ApolloTestingModule, SharedModule, HttpClientTestingModule],
+      declarations: [FilterChipsComponent, ChipComponent],
       providers: [
         mockProvider(AdminAreaService, {
           fetchAdminAreas: () =>
@@ -45,6 +49,7 @@ describe("FilterChipsComponent", () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FilterChipsComponent);
+    adminAreaService = TestBed.inject(AdminAreaService);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

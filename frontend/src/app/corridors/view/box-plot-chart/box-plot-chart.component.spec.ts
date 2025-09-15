@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { XYChartComponent } from "../../../shared/components/amcharts/xy-chart.component";
 
 import { BoxPlotChartComponent } from "./box-plot-chart.component";
-import { CorridorStatsViewParams } from "../../corridors.service";
 import { SimpleChange } from "@angular/core";
 import { DateTime } from "luxon";
 import { CorridorGranularity } from "../../../../generated/graphql";
 import { chartColors } from "../../../shared/components/amcharts/chart.service";
 import { CategoryAxis, DateAxis, XYChart } from "@amcharts/amcharts4/charts";
+import { CorridorStatsViewParams } from "../../types";
 
 describe("BoxPlotGraphComponent", () => {
   let component: BoxPlotChartComponent;
@@ -23,6 +23,7 @@ describe("BoxPlotGraphComponent", () => {
     to: toDate,
     granularity: granularity,
     stops: [],
+    matchType: undefined as any, // Replace 'undefined as any' with a valid MatchType if available
   };
 
   beforeEach(async () => {

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { LiveVehicleStatsComponent } from "./live-vehicle-stats.component";
+import { MockLiveVehicleStatsComponent } from "./mock-live-vehicle-stats.component";
 
 describe("LiveVehicleStatsComponent", () => {
   let component: LiveVehicleStatsComponent;
@@ -8,7 +9,7 @@ describe("LiveVehicleStatsComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LiveVehicleStatsComponent],
+      declarations: [LiveVehicleStatsComponent, MockLiveVehicleStatsComponent],
     }).compileComponents();
   });
 

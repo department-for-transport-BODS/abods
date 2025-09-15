@@ -45,15 +45,11 @@ describe("OperatorService", () => {
               name: "Stagecoach East Midlands",
               nocCode: "SCEM",
               operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
+              adminAreaIds: ["AA280"],
             },
           ],
         },
-      } as OperatorListQuery,
+      } as unknown as OperatorListQuery,
     });
 
     controller.verify();
@@ -87,7 +83,7 @@ describe("OperatorService", () => {
             },
           },
         },
-      } as OperatorLinesQuery,
+      } as unknown as OperatorLinesQuery,
     });
 
     controller.verify();
@@ -111,25 +107,17 @@ describe("OperatorService", () => {
               name: "Stagecoach East Midlands",
               nocCode: "SCEM",
               operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
+              adminAreaIds: ["AA270"],
             },
             {
               name: "D & G Bus",
               nocCode: "DAGC",
               operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
+              adminAreaIds: ["AA280"],
             },
           ],
         },
-      } as OperatorListQuery,
+      } as unknown as OperatorListQuery,
     });
 
     controller.verify();
@@ -153,25 +141,17 @@ describe("OperatorService", () => {
               name: "Stagecoach East Midlands",
               nocCode: "SCEM",
               operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
+              adminAreaIds: ["AA270"],
             },
             {
               name: "D & G Bus",
               nocCode: "DAGC",
               operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
+              adminAreaIds: ["AA280"],
             },
           ],
         },
-      } as OperatorListQuery,
+      } as unknown as OperatorListQuery,
     });
 
     controller.verify();
@@ -197,25 +177,17 @@ describe("OperatorService", () => {
               name: "Stagecoach East Midlands",
               nocCode: "SCEM",
               operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
+              adminAreaIds: ["AA270"],
             },
             {
               name: "D & G Bus",
               nocCode: "DAGC",
               operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
+              adminAreaIds: ["AA280"],
             },
           ],
         },
-      } as OperatorListQuery,
+      } as unknown as OperatorListQuery,
     });
 
     controller.verify();
@@ -257,7 +229,7 @@ describe("OperatorService", () => {
             },
           ],
         },
-      } as OperatorListQuery,
+      } as unknown as OperatorListQuery,
     });
 
     controller.verify();

@@ -33,18 +33,22 @@ describe("JourneyNavComponent", () => {
     Settings.now = () => 1659312000000; // 2022-08-01
 
     spectator = createComponent();
-    spectator.component.prevNext = [
+    spectator.component.journeys = [
       {
         groupId: "VJ001",
-        startTime: DateTime.fromISO("2022-08-01T08:45:00.000"),
-        servicePattern: "Chesterfield - Worksop",
-        lineNumber: "77",
+        startTime: DateTime.fromISO("2022-08-01T08:45:00.000").toISO(),
+        operatorName: "OP01",
+        operatorNoc: "OP01",
+        serviceName: "SN1",
+        serviceNumber: "1",
       },
       {
         groupId: "VJ003",
-        startTime: DateTime.fromISO("2022-08-01T09:05:00.000"),
-        servicePattern: "Worksop - Chesterfield",
-        lineNumber: "77",
+        startTime: DateTime.fromISO("2022-08-01T09:05:00.000").toISO(),
+        operatorName: "OP01",
+        operatorNoc: "OP01",
+        serviceName: "SN1",
+        serviceNumber: "1",
       },
     ];
     spectator.detectChanges();
@@ -83,7 +87,7 @@ describe("JourneyNavComponent", () => {
   }));
 
   it("should show a disabled link when no next journey is available", () => {
-    spectator.component.next = null;
+    spectator.component.journeys = [];
     spectator.detectChanges();
 
     expect(".journey-nav__link--disabled").toBeVisible();

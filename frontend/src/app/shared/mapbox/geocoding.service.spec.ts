@@ -1,5 +1,8 @@
 import { TestBed } from "@angular/core/testing";
-import { HttpTestingController } from "@angular/common/http/testing";
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from "@angular/common/http/testing";
 import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
 import { GeocodingService } from "./geocoding.service";
 import { MAPBOX_API_KEY } from "ngx-mapbox-gl";

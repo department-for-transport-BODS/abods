@@ -28,7 +28,9 @@ describe("OtpThresholdFormComponent", () => {
     spectator = createComponent();
     component = spectator.component;
     modalService = spectator.inject(NgxSmartModalService);
-    modalService.getModal.and.returnValue({ onOpen: new EventEmitter<void>() });
+    modalService.getModal.and.returnValue({
+      onOpen: new EventEmitter<void>(),
+    } as any);
 
     spectator.detectChanges();
   });
