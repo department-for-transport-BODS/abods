@@ -159,7 +159,7 @@ describe("FeedHistoryComponent", () => {
     expect(spectator.query(byText(/Not found/))).toBeTruthy();
   });
 
-  it('should show not "not found" if operator not loaded, but with errors', async () => {
+  it('should show not "not found" if operator not loaded, but with errors', () => {
     spyOn(service, "fetchOperatorHistory").and.throwError("Some error");
 
     spectator.setRouteParam("nocCode", "NOCODE");

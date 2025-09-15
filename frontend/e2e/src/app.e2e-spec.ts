@@ -8,14 +8,15 @@ describe("workspace-project App", () => {
     page = new AppPage();
   });
 
-  it("should display welcome message", () => {
-    page.navigateTo();
-    expect(page.getTitleText()).toEqual("raa-client app is running!");
+  it("should display welcome message", async () => {
+    await page.navigateTo();
+    await expect(page.getTitleText()).toEqual("raa-client app is running!");
   });
 
   afterEach(async () => {
     // Assert that there are no errors emitted from the browser
     const logs = await browser.manage().logs().get(logging.Type.BROWSER);
+    // eslint-disable-next-line jasmine/no-expect-in-setup-teardown, @typescript-eslint/no-floating-promises
     expect(logs).not.toContain(
       jasmine.objectContaining({
         level: logging.Level.SEVERE,

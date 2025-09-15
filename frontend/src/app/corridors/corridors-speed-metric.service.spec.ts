@@ -9,7 +9,7 @@ import {
 
 import { CorridorsSpeedMetricService } from "./corridors-speed-metric.service";
 import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
-import { CorridorStats, CorridorStatsViewParams, CorridorStop } from "./types";
+import { CorridorStats, CorridorStatsViewParams } from "./types";
 
 describe("CorridorsSpeedMetricService", () => {
   let service: CorridorsSpeedMetricService;

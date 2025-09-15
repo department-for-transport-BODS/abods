@@ -285,7 +285,7 @@ describe("AlertsComponent", () => {
 
       expect(editAlertComponent).toBeTruthy();
 
-      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId as string);
+      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId);
     }
   });
 
@@ -341,7 +341,7 @@ describe("AlertsComponent", () => {
 
       expect(editAlertComponent).toBeTruthy();
 
-      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId as string);
+      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId);
     }
   });
 

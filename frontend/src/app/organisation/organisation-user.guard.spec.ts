@@ -8,7 +8,6 @@ import {
 import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
-import { UserFragment } from "src/generated/graphql";
 
 import { OrganisationUserGuard } from "./organisation-user.guard";
 import { OrganisationService } from "./organisation.service";
