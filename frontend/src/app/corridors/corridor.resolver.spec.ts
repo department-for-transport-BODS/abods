@@ -12,10 +12,10 @@ import { Corridor } from "./types";
 describe("CorridorResolver", () => {
   let resolver: CorridorResolver;
   let service: CorridorsService;
-  const route = <ActivatedRouteSnapshot>{
+  const route: ActivatedRouteSnapshot = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    paramMap: <ParamMap>{ get: (name: string) => "123" },
-  };
+    paramMap: { get: (name: string) => "123" },
+  } as ActivatedRouteSnapshot;
   const testStop1 = {
     stopId: "ST012345",
     naptan: "012345",
@@ -32,7 +32,7 @@ describe("CorridorResolver", () => {
     lon: 0,
     intId: 1,
   };
-  const corridor = <Corridor>{
+  const corridor: Corridor = {
     name: "test corridor",
     id: 123,
     stops: [testStop1, testStop2],

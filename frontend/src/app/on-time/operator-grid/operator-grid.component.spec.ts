@@ -103,7 +103,7 @@ describe("OperatorGridComponent", () => {
     detectChanges: false,
   });
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Settings.defaultZone = "Europe/London";
     Settings.now = () => 1664578800; // 2022-10-01 GMT+01:00, i.e. during BST
     mockParams = {

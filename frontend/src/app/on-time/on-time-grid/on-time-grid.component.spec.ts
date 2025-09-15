@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import {
   OnTimeGridComponent,
-  ColumnDescription,
   Mode,
   AbstractPerformance,
 } from "./on-time-grid.component";
@@ -14,7 +13,7 @@ import { Direction } from "../../../generated/graphql";
 describe("OnTimeGridComponent", () => {
   let component: OnTimeGridComponent<any>;
   let fixture: ComponentFixture<OnTimeGridComponent<any>>;
-  let formatter: AgGridFormatterService;
+  let _formatter: AgGridFormatterService;
 
   const mockFormatter = {
     toCamelcase: jasmine
@@ -66,7 +65,7 @@ describe("OnTimeGridComponent", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(OnTimeGridComponent);
     component = fixture.componentInstance;
-    formatter = TestBed.inject(AgGridFormatterService);
+    _formatter = TestBed.inject(AgGridFormatterService);
     fixture.detectChanges();
   });
 
@@ -163,7 +162,7 @@ describe("OnTimeGridComponent", () => {
       new FormBuilder().control(false),
     );
     component.selectAllColumns();
-    expect(component.displayOptionsForm.value["col1"]).toBeTrue();
+    expect(component.displayOptionsForm.value.col1).toBeTrue();
   });
 
   it("should set selectedColumns and call columnsChanged", () => {

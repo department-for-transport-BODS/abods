@@ -23,16 +23,16 @@ describe("HelpdeskPanelComponent", () => {
   const mockData: HelpdeskData = {
     title: "Test title",
     articles: [
-      <FreshdeskArticle>{
+      {
         title: "Title 1",
         description: "<p>Description 1</p>",
         seo_data: { meta_description: "" },
-      },
-      <FreshdeskArticle>{
+      } as FreshdeskArticle,
+      {
         title: "Title 2",
         description: "<p>Description 2</p>",
         seo_data: { meta_description: "" },
-      },
+      } as FreshdeskArticle,
     ],
   };
 

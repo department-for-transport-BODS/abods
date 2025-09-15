@@ -45,8 +45,8 @@ describe("DashboardService", () => {
   describe("listOperators", () => {
     it("should call fetch on DashboardOperatorListGQL and return list of operators", () => {
       const mockResponse = [
-        <OperatorDashboardFragment>{ name: "op1", nocCode: "OP1" },
-        <OperatorDashboardFragment>{ name: "op2", nocCode: "OP1" },
+        { name: "op1", nocCode: "OP1" } as OperatorDashboardFragment,
+        { name: "op2", nocCode: "OP1" } as OperatorDashboardFragment,
       ];
       const query = spectator.inject(DashboardOperatorListGQL);
       query.fetch.and.returnValue(
@@ -82,7 +82,7 @@ describe("DashboardService", () => {
   describe("listOperatorVehicleCounts", () => {
     it("should call fetch on DashboardOperatorVehicleCountsListGQL and return list of counts", () => {
       const mockResponse = [
-        <DashboardVehicles>{
+        {
           nocCode: "OP1",
           feedMonitoring: {
             liveStats: { currentVehicles: 3, expectedVehicles: 3 },
@@ -90,8 +90,8 @@ describe("DashboardService", () => {
           actual: 3,
           expected: 3,
           operatorId: "OP1",
-        },
-        <DashboardVehicles>{
+        } as DashboardVehicles,
+        {
           nocCode: "OP2",
           feedMonitoring: {
             liveStats: { currentVehicles: 0, expectedVehicles: 5 },
@@ -99,7 +99,7 @@ describe("DashboardService", () => {
           actual: 0,
           expected: 5,
           operatorId: "OP2",
-        },
+        } as DashboardVehicles,
       ];
       const query = spectator.inject(DashboardOperatorVehicleCountsListGQL);
       query.fetch.and.returnValue(

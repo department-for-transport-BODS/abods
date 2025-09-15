@@ -65,7 +65,7 @@ describe("ControlsComponent", () => {
     expect(filters?.timingPointsOnly).toBeTrue();
   });
 
-  it("should allow the user to switch between all stops and timing points only", async () => {
+  it("should allow the user to switch between all stops and timing points only", () => {
     spyOn(spectator.router, "navigate");
     spectator.setRouteParam("nocCode", "OP01");
 

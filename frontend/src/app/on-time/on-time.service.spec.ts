@@ -1,13 +1,7 @@
 import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import {
-  OnTimeRatios,
-  OnTimeService,
-  ServicePerformance,
-  TimeOfDayData,
-} from "./on-time.service";
+import { OnTimeService, TimeOfDayData } from "./on-time.service";
 import objectContaining = jasmine.objectContaining;
-import { AbstractPerformance } from "./on-time-grid/on-time-grid.component";
 import { ControlsComponent } from "./controls/controls.component";
 import { OtpThresholdModalComponent } from "./otp-threshold-modal/otp-threshold-modal.component";
 

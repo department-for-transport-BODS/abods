@@ -6,12 +6,7 @@ import { LuxonModule } from "luxon-angular";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { SharedModule } from "../../../../shared/shared.module";
 import { StopItemComponent } from "./stop-item.component";
-import {
-  Direction,
-  MatchType,
-  OtpEnum,
-  Stop,
-} from "../../../../../generated/graphql";
+import { Direction, OtpEnum, Stop } from "../../../../../generated/graphql";
 import {
   provideHttpClient,
   withInterceptorsFromDi,

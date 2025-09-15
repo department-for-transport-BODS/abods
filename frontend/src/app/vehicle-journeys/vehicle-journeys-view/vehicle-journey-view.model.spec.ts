@@ -1,5 +1,5 @@
-import { DateTime, Settings } from "luxon";
-import { Stop, AvlPoint, MatchType } from "../../../generated/graphql";
+import { Settings } from "luxon";
+import { Stop, AvlPoint } from "../../../generated/graphql";
 
 describe("JourneyInfo Model", () => {
   const t1 = "2022-08-18T11:20:00.000+01:00";

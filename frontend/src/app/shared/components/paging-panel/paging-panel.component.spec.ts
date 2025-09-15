@@ -31,7 +31,7 @@ describe("PagingPanelComponent", () => {
       paginationGetRowCount: () => rowCount,
     } as GridApi;
 
-    const event = { api: api as GridApi } as PaginationChangedEvent;
+    const event = { api: api } as PaginationChangedEvent;
     component.paginationChanged(event);
 
     expect(component.rowCount).toEqual(78);

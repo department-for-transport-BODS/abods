@@ -33,8 +33,8 @@ describe("HistogramGraphComponent", () => {
         chartFillcolor: new SimpleChange(previous, next, false),
       });
 
-      expect(component["columnSeries"].stroke).toEqual(next);
-      expect(component["columnSeries"].fill).toEqual(next);
+      expect((component as any).columnSeries.stroke).toEqual(next);
+      expect((component as any).columnSeries.fill).toEqual(next);
     });
 
     it("should not update fill and stroke color", () => {
@@ -44,8 +44,8 @@ describe("HistogramGraphComponent", () => {
         anotherProp: new SimpleChange(previous, next, false),
       });
 
-      expect(component["columnSeries"].stroke).toBeUndefined();
-      expect(component["columnSeries"].fill).toBeUndefined();
+      expect((component as any).columnSeries.stroke).toBeUndefined();
+      expect((component as any).columnSeries.fill).toBeUndefined();
     });
   });
 });

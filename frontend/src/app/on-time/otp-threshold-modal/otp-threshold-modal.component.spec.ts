@@ -26,13 +26,10 @@ describe("OtpThresholdModalComponent", () => {
   let ngxSmartModalService: NgxSmartModalService;
   let onTimeService: SpyObject<OnTimeService>;
 
-  const modalData = <OtpThresholdModalData>{
+  const modalData: OtpThresholdModalData = {
     params: {
-      fromTimestamp: DateTime.now().toISO().toString() as string,
-      toTimestamp: DateTime.now()
-        .plus({ days: 1 })
-        .toISO()
-        .toString() as string,
+      fromTimestamp: DateTime.now().toISO().toString(),
+      toTimestamp: DateTime.now().plus({ days: 1 }).toISO().toString(),
       filters: {},
     },
     defaultValues: {
@@ -41,7 +38,7 @@ describe("OtpThresholdModalComponent", () => {
       onTime: 70,
       completed: 100,
     },
-  };
+  } as OtpThresholdModalData;
 
   const createComponent = createComponentFactory({
     component: OtpThresholdModalComponent,
@@ -79,8 +76,8 @@ describe("OtpThresholdModalComponent", () => {
     spectator.click(byText("Compare"));
 
     const expected: PerformanceParams = {
-      fromTimestamp: modalData.params?.fromTimestamp!,
-      toTimestamp: modalData.params?.toTimestamp!,
+      fromTimestamp: modalData.params?.fromTimestamp ?? "",
+      toTimestamp: modalData.params?.toTimestamp ?? "",
       filters: {
         ...modalData.params?.filters,
         onTimeMaxMinutes: 6,

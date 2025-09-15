@@ -17,7 +17,7 @@ import { EMPTY, of, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { GeocodingService } from "../../shared/mapbox/geocoding.service";
-import { featureCollection, point, points, Position } from "@turf/helpers";
+import { featureCollection, point, Position } from "@turf/helpers";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -71,24 +71,10 @@ const testStop4 = {
   intId: 3,
 };
 
-const corridor = <Corridor>{
+const corridor: Corridor = {
   name: "test corridor",
   id: 123,
   stops: [testStop1, testStop2, testStop3],
-};
-
-const geocodingResult = (
-  coordinates: Position,
-  bbox: BBox2d,
-  text: string,
-  context: GeocodingContext[] = [],
-) => {
-  const result = featureCollection([
-    point(coordinates, {}, { bbox }),
-  ]) as GeocodingResult;
-  result.features[0].text = text;
-  result.features[0].context = context;
-  return result;
 };
 
 class StubMapComponent {
@@ -507,10 +493,7 @@ describe("CreateCorridorComponent", () => {
     });
 
     it("setMapBounds() should call fitBounds() if value passed is of type array", () => {
-      const spy = spyOn(
-        spectator.component.corridorMap?.map as Map,
-        "fitBounds",
-      );
+      const spy = spyOn(spectator.component.corridorMap.map!, "fitBounds");
       const bbox = [1, 2, 3, 4] as BBox2d;
       const FIT_BOUNDS_OPTIONS = { padding: 50, maxZoom: 16, duration: 0 };
       spectator.component.setMapBounds(bbox, FIT_BOUNDS_OPTIONS);

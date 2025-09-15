@@ -3,7 +3,7 @@ import { AgGridAngular, AgGridModule } from "ag-grid-angular";
 import { AgGridDomService } from "./ag-grid-dom.service";
 import { ColDef } from "ag-grid-community";
 import { Subject } from "rxjs";
-import { OperatorType, ServicePerformanceType } from "src/generated/graphql";
+import { ServicePerformanceType } from "../../../../generated/graphql";
 
 describe("AgGridDomService", () => {
   let spectator: SpectatorHost<AgGridAngular>;

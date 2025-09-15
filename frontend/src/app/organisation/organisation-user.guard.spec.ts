@@ -31,7 +31,7 @@ describe("OrganisationUserGuard", () => {
         {
           provide: Router,
           useValue: {
-            parseUrl: () => <UrlTree>{ toString: () => "" },
+            parseUrl: () => ({ toString: () => "" }),
           },
         },
       ],
@@ -47,13 +47,13 @@ describe("OrganisationUserGuard", () => {
 
   it("should return true if user is part of organisation", () => {
     spyOn(organisationService, "fetchUser").and.returnValue(
-      of(<UserFragment>{ id: "user-2", username: "test@test.con" }),
+      of({ id: "user-2", username: "test@test.con" }),
     );
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{
+      .canActivate({
         paramMap: convertToParamMap({ id: "user-2", email: "test@test.con" }),
-      })
+      } as ActivatedRouteSnapshot)
       .subscribe((value) => {
         expect(value).toBeTrue();
       });
@@ -61,14 +61,14 @@ describe("OrganisationUserGuard", () => {
 
   it("should return organisation/user-not-found if user is not part of organisation", () => {
     spyOn(organisationService, "fetchUser").and.returnValue(of(undefined));
-    spyOn(router, "parseUrl").and.returnValue(<UrlTree>{
+    spyOn(router, "parseUrl").and.returnValue({
       toString: () => "organisation/user-not-found",
-    });
+    } as UrlTree);
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{
+      .canActivate({
         paramMap: convertToParamMap({ email: "test@test.con" }),
-      })
+      } as ActivatedRouteSnapshot)
       .subscribe((value) => {
         expect(value.toString()).toEqual("organisation/user-not-found");
       });

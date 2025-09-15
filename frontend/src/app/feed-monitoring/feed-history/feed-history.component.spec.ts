@@ -233,7 +233,7 @@ describe("FeedHistoryComponent", () => {
     };
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
     spectator.setRouteQueryParam("date", "2020-05-04");
 
     spectator.detectChanges();
@@ -262,7 +262,7 @@ describe("FeedHistoryComponent", () => {
 
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
     spectator.setRouteQueryParam("date", "2020-05-04");
 
     spectator.detectChanges();

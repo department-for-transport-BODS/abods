@@ -21,7 +21,6 @@ import {
   Stop,
   AvlPoint,
   Journey,
-  MatchType,
   StopTypeOption,
 } from "../../../generated/graphql";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
@@ -108,11 +107,6 @@ describe("VehicleJourneysViewComponent", () => {
     },
   ];
 
-  const mockJourneyInfo = {
-    stops: mockStops,
-    avls: mockAvls,
-  };
-
   const mockJourneys: Journey[] = [
     mockPrevJourney,
     mockJourney,
@@ -151,7 +145,7 @@ describe("VehicleJourneysViewComponent", () => {
       }),
     );
     // Mock journeyGQL.fetch to return journeyInfo
-    spectator.component["journeyGQL"] = {
+    (spectator.component as any).journeyGQL = {
       fetch: () =>
         of({
           data: {
@@ -195,9 +189,9 @@ describe("VehicleJourneysViewComponent", () => {
   });
 
   it("should display error message when journeyGQL.fetch throws an error", () => {
-    spectator.component["journeyGQL"] = {
+    (spectator.component as any).journeyGQL = {
       fetch: () => throwError(() => new Error("Not found")),
-    } as any;
+    };
     spectator.setRouteParam("journeyId", journeyId);
     spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
     spectator.detectChanges();

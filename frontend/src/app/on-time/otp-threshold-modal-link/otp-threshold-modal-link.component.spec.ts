@@ -19,7 +19,7 @@ describe("OtpThresholdModalLinkComponent", () => {
   let component: OtpThresholdModalLinkComponent;
   let service: NgxSmartModalService;
 
-  const modalData = <OtpThresholdModalData>{
+  const modalData: OtpThresholdModalData = {
     params: {
       fromTimestamp: DateTime.now().toISO(),
       toTimestamp: DateTime.now().plus({ days: 1 }).toISO(),
@@ -29,7 +29,7 @@ describe("OtpThresholdModalLinkComponent", () => {
       late: 20,
       onTime: 70,
     },
-  };
+  } as OtpThresholdModalData;
 
   const createComponent = createComponentFactory({
     component: OtpThresholdModalLinkComponent,

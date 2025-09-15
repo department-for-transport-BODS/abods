@@ -1,7 +1,6 @@
 import { DateTime, Settings } from "luxon";
 import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid.component";
 import { Spectator, byText, createComponentFactory } from "@ngneat/spectator";
-import { SimpleChange } from "@angular/core";
 import { SharedModule } from "../../../shared/shared.module";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Journey } from "../../../../generated/graphql";

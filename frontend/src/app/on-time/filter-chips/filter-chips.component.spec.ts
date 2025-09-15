@@ -13,7 +13,7 @@ import { ChipComponent } from "../../shared/components/chip/chip.component";
 describe("FilterChipsComponent", () => {
   let component: FilterChipsComponent;
   let fixture: ComponentFixture<FilterChipsComponent>;
-  let adminAreaService: AdminAreaService;
+  let _adminAreaService: AdminAreaService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -49,7 +49,7 @@ describe("FilterChipsComponent", () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FilterChipsComponent);
-    adminAreaService = TestBed.inject(AdminAreaService);
+    _adminAreaService = TestBed.inject(AdminAreaService);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -196,7 +196,7 @@ describe("FilterChipsComponent", () => {
   });
 
   describe("adminAreas", () => {
-    it("should show admin area names", async () => {
+    it("should show admin area names", () => {
       component.filters = {
         adminAreaIds: ["AA100"],
       };

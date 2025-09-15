@@ -42,7 +42,7 @@ describe("CorridorsGridComponent", () => {
     ],
   });
 
-  beforeEach(async () => {
+  beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
     service = spectator.inject(CorridorsService);

@@ -16,8 +16,8 @@ describe("BoxPlotGraphComponent", () => {
   const fromDate = DateTime.fromISO("2022-04-15T00:00:00.000+01:00");
   const toDate = DateTime.fromISO("2022-05-13T00:00:00.000+01:00");
   let granularity: CorridorGranularity = CorridorGranularity.Day;
-  const previous = <CorridorStatsViewParams>{};
-  const next = <CorridorStatsViewParams>{
+  const previous: CorridorStatsViewParams = {} as CorridorStatsViewParams;
+  const next: CorridorStatsViewParams = {
     corridorId: "1618",
     from: fromDate,
     to: toDate,
@@ -86,7 +86,7 @@ describe("BoxPlotGraphComponent", () => {
     });
 
     describe("whiskerFillColor change", () => {
-      it("should update whiskerSeries fill to blue", () => {
+      it("should update whiskerSeries fill to blue", async () => {
         component.ngOnChanges({
           whiskerFillColor: new SimpleChange(
             undefined,
@@ -95,7 +95,9 @@ describe("BoxPlotGraphComponent", () => {
           ),
         });
 
-        expect(component["whiskerSeries"].fill).toEqual(chartColors.blue);
+        await expect((component as any).whiskerSeries.fill).toEqual(
+          chartColors.blue,
+        );
       });
 
       it("should update meanSeries fill to red", () => {
@@ -103,49 +105,51 @@ describe("BoxPlotGraphComponent", () => {
           whiskerFillColor: new SimpleChange(undefined, chartColors.red, false),
         });
 
-        expect(component["meanSeries"].fill).toEqual(chartColors.red);
+        expect((component as any).meanSeries.fill).toEqual(chartColors.red);
       });
     });
 
     describe("boxFillColor change", () => {
-      it("should update boxSeries fill to green", () => {
+      it("should update boxSeries fill to green", async () => {
         component.ngOnChanges({
           boxFillColor: new SimpleChange(undefined, chartColors.green, false),
         });
 
-        expect(component["boxSeries"].fill).toEqual(chartColors.green);
+        await expect((component as any).boxSeries.fill).toEqual(
+          chartColors.green,
+        );
       });
     });
 
     describe("yAxisType change", () => {
       it("should hide yAxis2 and show yAxis if time", () => {
-        spyOn(component["yAxis2"], "hide");
-        spyOn(component["yAxis2"], "show");
-        spyOn(component["yAxis"], "hide");
-        spyOn(component["yAxis"], "show");
+        spyOn((component as any).yAxis2, "hide");
+        spyOn((component as any).yAxis2, "show");
+        spyOn((component as any).yAxis, "hide");
+        spyOn((component as any).yAxis, "show");
         component.ngOnChanges({
           yAxisType: new SimpleChange(undefined, "time", false),
         });
 
-        expect(component["yAxis2"].hide).toHaveBeenCalledWith();
-        expect(component["yAxis2"].show).not.toHaveBeenCalledWith();
-        expect(component.yAxis.hide).not.toHaveBeenCalledWith();
-        expect(component.yAxis.show).toHaveBeenCalledWith();
+        expect((component as any).yAxis2.hide).toHaveBeenCalledWith();
+        expect((component as any).yAxis2.show).not.toHaveBeenCalledWith();
+        expect((component as any).yAxis.hide).not.toHaveBeenCalledWith();
+        expect((component as any).yAxis.show).toHaveBeenCalledWith();
       });
 
       it("should show yAxis2 and hide yAxis if value", () => {
-        spyOn(component["yAxis2"], "hide");
-        spyOn(component["yAxis2"], "show");
-        spyOn(component["yAxis"], "hide");
-        spyOn(component["yAxis"], "show");
+        spyOn((component as any).yAxis2, "hide");
+        spyOn((component as any).yAxis2, "show");
+        spyOn((component as any).yAxis, "hide");
+        spyOn((component as any).yAxis, "show");
         component.ngOnChanges({
           yAxisType: new SimpleChange(undefined, "value", false),
         });
 
-        expect(component["yAxis2"].hide).not.toHaveBeenCalledWith();
-        expect(component["yAxis2"].show).toHaveBeenCalledWith();
-        expect(component.yAxis.hide).toHaveBeenCalledWith();
-        expect(component.yAxis.show).not.toHaveBeenCalledWith();
+        expect((component as any).yAxis2.hide).not.toHaveBeenCalledWith();
+        expect((component as any).yAxis2.show).toHaveBeenCalledWith();
+        expect((component as any).yAxis.hide).toHaveBeenCalledWith();
+        expect((component as any).yAxis.show).not.toHaveBeenCalledWith();
       });
     });
   });
@@ -183,10 +187,10 @@ describe("BoxPlotGraphComponent", () => {
 
   describe("hide outliers", () => {
     beforeEach(() => {
-      component.chart = <XYChart>{
+      component.chart = {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         validateData: () => {},
-      };
+      } as XYChart;
       component.data = [
         {
           yAxisMinValue: 5,

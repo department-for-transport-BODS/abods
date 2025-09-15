@@ -30,9 +30,9 @@ describe("DeleteCorridorModalComponent", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DeleteCorridorModalComponent);
     component = fixture.componentInstance;
-    component.corridor = <Corridor>{
+    component.corridor = {
       name: "Test Corridor",
-    };
+    } as Corridor;
     fixture.detectChanges();
   });
 

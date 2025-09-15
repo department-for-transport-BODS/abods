@@ -15,8 +15,7 @@ describe("JourneyInfoComponent", () => {
   const startTime = DateTime.fromISO("2022-08-18T11:22:00.000+01:00", {
     zone: "utc",
   });
-  const mockInfo = <Journey>{
-    id: "1",
+  const mockInfo: Journey = {
     groupId: "GP1",
     operatorName: "OP01",
     operatorNoc: "OP01",

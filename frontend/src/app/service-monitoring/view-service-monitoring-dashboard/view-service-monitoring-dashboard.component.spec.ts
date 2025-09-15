@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ViewServiceMonitoringDashboardComponent } from "./view-service-monitoring-dashboard.component";
 import { Renderer2 } from "@angular/core";
-import { of, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { By } from "@angular/platform-browser";
 import { LayoutModule } from "../../layout/layout.module";

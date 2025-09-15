@@ -144,7 +144,7 @@ describe("CorridorsSpeedMetricService", () => {
       xAxisLabel: "4:00 - 4:59",
     },
   ];
-  const stats = <CorridorStats>{
+  const stats: CorridorStats = {
     transitTimeTimeOfDayStats: journeyTimeTimeOfDay,
     transitTimeDayOfWeekStats: journeyTimeDayOfWeek,
     transitTimeHistogram: journeyTimeHist,
@@ -153,7 +153,7 @@ describe("CorridorsSpeedMetricService", () => {
     summaryStats: {
       averageTransitTime: 240,
     },
-  };
+  } as CorridorStats;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -221,16 +221,16 @@ describe("CorridorsSpeedMetricService", () => {
     });
 
     it("should set average speed for corridor section if params passed", () => {
-      const params = <CorridorStatsViewParams>{
+      const params: CorridorStatsViewParams = {
         stops: [
-          <CorridorStop>{
+          {
             stopId: "ST0100BRP90312",
           },
-          <CorridorStop>{
+          {
             stopId: "ST0100BRA10796",
           },
         ],
-      };
+      } as CorridorStatsViewParams;
       const expectedMph = 1;
       const result = service.generateSpeedStats(stats, params);
 

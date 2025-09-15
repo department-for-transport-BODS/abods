@@ -21,7 +21,7 @@ import { ApolloTestingModule } from "apollo-angular/testing";
 
 describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
-  let onTimeService: OnTimeService;
+  let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;
   const listSubj = new BehaviorSubject<FrequentServicePerformance[]>([]);
 
@@ -88,7 +88,7 @@ describe("ServiceGridComponent", () => {
   beforeEach(() => {
     spectator = createComponent();
 
-    onTimeService = spectator.inject(OnTimeService);
+    _onTimeService = spectator.inject(OnTimeService);
     performanceService = spectator.inject(PerformanceService);
     spyOn(performanceService, "fetchServicePerformance").and.returnValue(
       listSubj.asObservable(),

@@ -28,7 +28,7 @@ describe("JourneyNavComponent", () => {
     ],
   });
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Settings.defaultZone = "utc";
     Settings.now = () => 1659312000000; // 2022-08-01
 
