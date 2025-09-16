@@ -2,6 +2,9 @@
 @import "src/assets/styles/helpers/helpers";
 
 .filters {
+  &__select-width {
+    min-width: 9.375rem;
+  }
   &__heading {
     display: flex;
     justify-content: space-between;

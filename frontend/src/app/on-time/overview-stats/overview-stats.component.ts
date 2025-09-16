@@ -4,6 +4,9 @@ import { Observable } from "rxjs";
 import { HelpdeskPanelService } from "../../shared/components/helpdesk-panel/helpdesk-panel.service";
 import { incompleteConversion } from "../../shared/incompleteReasonUtils";
 import { HeadwayOverviewType } from "../../../generated/graphql";
+import { Duration } from "luxon";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
 
 @Component({
   selector: "app-overview-stats",
@@ -62,7 +65,22 @@ export class OverviewStatsComponent {
     return incompleteConversion(incomplete);
   }
 
-  constructor(private helpdeskPanelService: HelpdeskPanelService) {}
+  get averageDelay() {
+    if (!this.overview?.averageDelay) {
+      return "-";
+    }
+    const seconds = this.overview?.averageDelay;
+    return (
+      "+" +
+      Duration.fromObject({ seconds: Math.abs(seconds) }).toFormat("mm:ss")
+    );
+  }
+
+  constructor(
+    private helpdeskPanelService: HelpdeskPanelService,
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
+  ) {}
 
   openHelpdesk() {
     this.helpdeskPanelService.open();

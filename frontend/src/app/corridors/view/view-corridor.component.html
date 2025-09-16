@@ -15,23 +15,9 @@
       ></app-page-header>
       <div class="corridor__date-wrapper">
         <app-date-range [formControl]="dateRange"></app-date-range>
-        <app-segmented-toggle
-          [(ngModel)]="matchTypeToggle"
-          (ngModelChange)="onMatchTypeToggleChange()"
-        >
-          <app-segmented-toggle-item
-            name="match-type"
-            identifier="estimated"
-            value="estimated"
-            label="Estimated"
-          ></app-segmented-toggle-item>
-          <app-segmented-toggle-item
-            name="match-type"
-            identifier="evidenced"
-            value="evidenced"
-            label="Evidenced"
-          ></app-segmented-toggle-item>
-        </app-segmented-toggle>
+        <app-match-type-segmented-toggle
+          (toggleChange)="matchTypeToggleChange($event)"
+        />
         <gds-button
           [routerLink]="['/corridors/edit/', corridor?.id]"
           text="Edit corridor"
@@ -133,7 +119,6 @@
             <app-dropdown
               identifier="map-display-menu"
               triggerLabel="Display options"
-              [width]="200"
             >
               <p class="govuk-body govuk-!-margin-bottom-2">
                 <strong>Map view</strong>
@@ -280,7 +265,9 @@
                   isTime ? chartColors.lightPurple : chartColors.brightGreen
                 "
                 xAxisType="date"
-                xAxisTitle="Date"
+                [xAxisTitle]="
+                  granularity === CorridorGranularity.Day ? 'Date' : 'Hour'
+                "
                 xAxisLabelPosition="column"
                 [yAxisType]="isTime ? 'time' : 'value'"
                 [yAxisTitle]="isTime ? 'Journey time' : 'Speed (mph)'"

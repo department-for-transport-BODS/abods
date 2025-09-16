@@ -10,7 +10,7 @@ import {
   HeadwayTimeSeriesType,
 } from "../../generated/graphql";
 import { Observable } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { nonNullishArray, NullishArray } from "../shared/array-operators";
 import { assertNonNullish } from "../shared/rxjs-operators";
 import { pick } from "lodash-es";
@@ -69,7 +69,6 @@ export class HeadwayService {
         { fetchPolicy: "no-cache" },
       )
       .pipe(
-        tap((result) => console.log(result)),
         map((result) =>
           nonNullishArray(result.data?.headwayMetrics?.headwayTimeSeries),
         ),

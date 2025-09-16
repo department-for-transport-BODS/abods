@@ -6,8 +6,10 @@
   [closeOnSelect]="false"
   [clearSearchOnAdd]="true"
   [placeholder]="placeholderText"
+  [loading]="isLoading"
   [(ngModel)]="selected"
   bindValue="value"
+  virtualScroll="enableVirtualScroll"
   [labelForId]="labelForId ? labelForId : null"
   [inputAttrs]="
     ariaLabel ? { 'aria-label': ariaLabel, autocomplete: 'off' } : {}
@@ -16,6 +18,10 @@
   [class.gds-multiselect-checkbox__disabled]="disabled"
   (change)="onOptionChange()"
 >
+  <ng-template *ngIf="isLoading" ng-label-tmp>Loading...</ng-template>
+  <ng-template ng-loadingspinner-tmp>
+    <app-spinner size="x-small"></app-spinner>
+  </ng-template>
   <ng-template ng-multi-label-tmp let-items="items">
     <div class="ng-value" [ngSwitch]="items?.length || 0">
       <span class="ng-value-label" *ngSwitchCase="0">{{

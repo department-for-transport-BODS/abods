@@ -13,16 +13,38 @@
     position: relative;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    &--filter {
+      width: 20%;
+      margin-right: govuk-spacing(4);
+    }
+  }
+  &__disable-direction-controls {
+    position: relative;
+    display: flex;
+    justify-content: end;
+    &--filter {
+      justify-content: space-between;
+      flex-grow: 1;
+      margin-right: govuk-spacing(4);
+    }
+  }
+  &__dropdown {
+    position: relative;
+    display: flex;
+    align-content: start;
     &--filter {
       flex-grow: 1;
+      justify-content: space-between;
+      max-width: 40%;
       margin-right: govuk-spacing(4);
     }
   }
   &__options {
     display: grid;
+    align-content: flex-end;
     grid-template-columns: repeat(2, auto);
     grid-column-gap: govuk-spacing(5);
+    margin-top: 25px;
   }
   &__display-options-btn {
     @include govuk-font($size: 19);

@@ -1,6 +1,7 @@
 scalar DateTime
 scalar Time
 scalar Date
+scalar JSON
 
 type Query {
   user: LoginInfo
@@ -27,6 +28,9 @@ type Query {
   ): [EventStatsType!]!
   journey(groupId: String!, lineId: String!): JourneyResult!
   findJourneys(lineId: String!, dateOfJourney: String!): [Journey!]!
+  getServicePatternDistanceGeom(
+    vehicleJourneyId: ID!
+  ): ServicePatternDistanceResult!
   lines(
     operatorIds: [String!]!
     inputDate: String!
@@ -36,11 +40,69 @@ type Query {
   stopAnalysis(inputs: StopAnalysisFiltersInput!): [StopStatistics!]!
   dashboardVehicles(operatorId: String): [DashboardVehicles!]!
   embeddedUrl: AWSQuicksightUser!
+  userOrgs: [Organisation!]!
+  distances(filterBy: DistancesFilterInput): [Distance!]!
+  distancesDropdowns: DistancesDropdown!
+  adminOrgMap: [AdminOrgOperatorMap!]!
 
   # Used by an external service, take care with changes
   # https://github.com/department-for-transport-BODS/bods/blob/dev/transit_odp/avl/require_attention/abods/registery.py#L52
   # eslint-disable-next-line @graphql-eslint/no-unused-fields
   avlLineLevelStatus(filters: AvlFiltersInput): [AvlLineLevelStatus!]!
+}
+
+type AdminOrgOperatorMap {
+  adminAreaId: Int!
+  adminName: String
+  operatorId: String!
+  orgId: Int!
+  orgName: String
+}
+
+type DistancesDropdown {
+  operators: [OperatorForDistances!]
+}
+
+type OperatorForDistances {
+  name: String!
+  id: String!
+  licenses: [LicensesForDistance!]
+}
+
+type LicensesForDistance {
+  id: String!
+  services: [ServiceForDistances!]
+}
+
+type ServiceForDistances {
+  name: String!
+  id: String!
+  line: String!
+}
+
+type Distance {
+  operatorId: String!
+  operatorName: String!
+  nocLineAndServiceCode: String!
+  lineName: String!
+  serviceName: String
+  distance: Int
+  avlDistance: Int
+}
+
+input DistancesFilterInput {
+  orgId: String
+  licenseIds: [String!]
+  adminAreaIds: [String!]
+  operatorIds: [String!]
+  nocLineAndServiceCodes: [String!]
+  fromTimestamp: String!
+  toTimestamp: String!
+}
+
+type Organisation {
+  name: String!
+  id: Int!
 }
 
 type AWSQuicksightUser {
@@ -55,7 +117,8 @@ type DashboardVehicles {
 }
 
 input OperatorFilterInput {
-  operatorIds: [String!]!
+  operatorIds: [String!]
+  orgId: Int
 }
 
 type EventStatsType {
@@ -128,6 +191,11 @@ enum MatchType {
   evidenced
 }
 
+enum StopTypeOption { # eslint-disable-line @graphql-eslint/no-unreachable-types
+  timing_points
+  all_stops
+}
+
 type CorridorSummaryStatsType {
   averageTransitTime: Int
   numberOfServices: Int
@@ -197,6 +265,7 @@ type Journey {
   operatorName: String!
   operatorNoc: String!
   isCancelled: Boolean!
+  vehicleJourneyId: Int
 }
 
 type ServiceInfoType {
@@ -493,6 +562,7 @@ type LoginInfo {
   currentUserId: String!
   canViewServiceMonitoring: Boolean!
   canEditAllAlerts: Boolean!
+  canViewDistances: Boolean!
   serviceMonitoringEmbedUrl: String
   flags: [FeatureFlag!]!
 }
@@ -501,6 +571,7 @@ enum FeatureFlag {
   ServiceMonitoring
   DataMonitoring
   StopAnalysis
+  Distances
 }
 
 type UserType {
@@ -547,6 +618,7 @@ type OperatorPerformanceType {
   nocCode: String
   onTime: Int!
   operatorId: String
+  averageDelay: Float
 }
 
 type PageInfo {
@@ -563,6 +635,7 @@ type PunctualityDayOfWeekType {
 
 type PunctualityTotalsType {
   averageDeviation: Float
+  averageDelay: Float
   completed: Int!
   early: Int!
   late: Int!
@@ -587,13 +660,18 @@ type PunctualityTimeSeriesType {
 
 type ServicePerformanceType {
   actualDepartures: Int!
-  averageDelay: Float!
+  averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
   onTime: Int!
   scheduledDepartures: Int!
   lineInfo: ServiceInfoType!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  direction: Direction
 }
 
 type ServicePunctualityType {
@@ -611,7 +689,8 @@ type ServicePunctualityType {
 
 type StopPerformanceType {
   actualDepartures: Int!
-  averageDelay: Float!
+  averageDelay: Float
+  countDelayed: Int
   early: Int!
   late: Int!
   lineId: String
@@ -620,6 +699,12 @@ type StopPerformanceType {
   stopId: String!
   stopInfo: StopInfoType!
   timingPoint: Boolean!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  direction: Direction
+  averageScheduled: Float
+  averageActual: Float
 }
 
 type StopInfoType {
@@ -657,7 +742,7 @@ input PerformanceFiltersInputType {
   excludedDates: [Date!]
   excludeItoLineId: String
   granularity: Granularity
-  lineDirection: LineDirection
+  direction: [Direction]
   lineIds: [String!]
   maxDelay: Int
   minDelay: Int
@@ -680,10 +765,12 @@ enum Granularity {
   month
 }
 
-enum LineDirection {
-  All
-  Inbound
-  Outbound
+enum Direction {
+  all
+  inbound
+  outbound
+  clockwise
+  anticlockwise
 }
 
 enum StopsSegment {
@@ -753,6 +840,11 @@ enum RouteType {
   INVALID_NO_ROUTE_POINTS
 }
 
+type ServicePatternDistanceResult {
+  distance: Int!
+  geom: JSON!
+}
+
 # eslint-disable @graphql-eslint/no-unused-fields
 
 input StopAnalysisFiltersInput {
@@ -782,6 +874,16 @@ type StopStatistics {
   scheduledDepartures: Int!
   completedDepartures: Int!
   totalDelay: Float!
+  earlyInSeconds: Float
+  lateInSeconds: Float
+  onTimeInSeconds: Float
+  averageDelay: Int
+  direction: String
+  countDelayed: Int
+  averageScheduled: Float
+  averageScheduledTimingPoint: Float
+  averageActual: Float
+  averageActualTimingPoint: Float
 }
 """
 Filters for AvlLineLevelStatus

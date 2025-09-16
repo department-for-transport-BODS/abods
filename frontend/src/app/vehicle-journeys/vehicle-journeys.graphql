@@ -35,5 +35,13 @@ query journeys($dateOfJourney: String!, $lineId: String!) {
     operatorNoc
     directionRef
     isCancelled
+    vehicleJourneyId
+  }
+}
+
+query servicePatternDistanceGeom($vehicleJourneyId: ID!) {
+  getServicePatternDistanceGeom(vehicleJourneyId: $vehicleJourneyId) {
+    distance
+    geom
   }
 }

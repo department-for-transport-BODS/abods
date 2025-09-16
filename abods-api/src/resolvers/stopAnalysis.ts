@@ -115,6 +115,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       "n.atco_code",
       "l.name",
       "a.name",
+      "t.direction",
     ])
     .select([
       "t.stop_latitude as latitude",
@@ -129,9 +130,55 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
       eb.fn.sum<number>("t.early_count").as("early"),
       eb.fn.sum<number>("t.late_count").as("late"),
       eb.fn.sum<number>("t.on_time_count").as("onTime"),
-      eb.fn.sum<number>("t.scheduled").as("scheduledDepartures"),
       eb.fn.sum<number>("t.completed").as("completedDepartures"),
       eb.fn.sum<number>("t.avg_time_difference").as("totalDelay"),
+      eb.fn.sum<number>("t.count_delayed").as("countDelayed"),
+      eb.fn
+        .sum<number>(
+          sql`(${eb.ref("t.count_delayed")} * ${eb.ref("t.average_delay")})`,
+        )
+        .as("averageDelay"),
+      eb.fn
+        .avg<number | null>("t.diff_sched_time_to_stop")
+        .as("averageScheduled"),
+      eb.fn
+        .avg<number | null>("t.diff_sched_time_to_stop_timing_point")
+        .as("averageScheduledTimingPoint"),
+      eb.fn
+        .avg<number | null>("t.diff_actual_time_to_stop")
+        .as("averageActual"),
+      eb.fn
+        .avg<number | null>("t.diff_actual_time_to_stop_timing_point")
+        .as("averageActualTimingPoint"),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")} * ${eb.ref("t.on_time_count")}) FILTER (WHERE ${eb.ref("t.on_time_count")} > 0) * 60`.as(
+        "onTimeInSeconds",
+      ),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")} * ${eb.ref("t.late_count")}) FILTER (WHERE ${eb.ref("t.late_count")} > 0) * 60`.as(
+        "lateInSeconds",
+      ),
+      sql<
+        number | null
+      >`SUM(${eb.ref("t.avg_time_difference")}  * ${eb.ref("t.early_count")}) FILTER (WHERE ${eb.ref("t.early_count")} > 0) * 60`.as(
+        "earlyInSeconds",
+      ),
+      sql<number>`SUM(${eb.ref("t.scheduled")}) FILTER (WHERE ${eb.ref("t.estimated")} = false)`.as(
+        "scheduledDepartures",
+      ),
+    ])
+    .select((eb) => [
+      eb
+        .case()
+        .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "anticlockwise")
+        .then("inbound")
+        .when(sql`LOWER(${eb.ref("t.direction")})`, "=", "clockwise")
+        .then("outbound")
+        .else(eb.ref("t.direction"))
+        .end()
+        .as("direction"),
     ])
     .execute();
 };

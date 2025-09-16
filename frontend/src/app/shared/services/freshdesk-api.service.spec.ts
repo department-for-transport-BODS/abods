@@ -27,6 +27,7 @@ describe("FreshdeskApiService", () => {
       dataMonitoring: "43000590077",
       serviceMonitoring: "43000590078",
       stopAnalysis: "43000590079",
+      distances: "43000590080",
     },
   };
 

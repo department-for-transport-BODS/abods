@@ -39,6 +39,7 @@
               This will not change performance data.
             </p>
             <app-segmented-toggle
+              legend="Other journeys for the service are"
               [(ngModel)]="vehicleRef"
               (ngModelChange)="onVehicleChange()"
             >
@@ -73,42 +74,16 @@
           [vehicleRef]="vehicleRef"
           [loading]="journeysLoading"
           [journey]="journeys[currentJourneyIndex]"
+          [distance]="servicePatternDistance"
         ></app-journey-info>
         <div class="vehicle-journeys__controls">
-          <app-segmented-toggle
-            [(ngModel)]="matchType"
-            (ngModelChange)="onMatchTypeChange()"
-          >
-            <app-segmented-toggle-item
-              name="match-type"
-              identifier="estimated"
-              value="estimated"
-              label="Estimated"
-            ></app-segmented-toggle-item>
-            <app-segmented-toggle-item
-              name="match-type"
-              identifier="evidenced"
-              value="evidenced"
-              label="Evidenced"
-            ></app-segmented-toggle-item>
-          </app-segmented-toggle>
-          <app-segmented-toggle
-            [(ngModel)]="timingPointsOption"
-            (ngModelChange)="onTimingPointsToggleChange()"
-          >
-            <app-segmented-toggle-item
-              name="stops-filter"
-              identifier="all-stops"
-              value="all-stops"
-              label="All stops"
-            ></app-segmented-toggle-item>
-            <app-segmented-toggle-item
-              name="stops-filter"
-              identifier="timing-points"
-              value="timing-points"
-              label="Timing points"
-            ></app-segmented-toggle-item>
-          </app-segmented-toggle>
+          <app-match-type-segmented-toggle
+            (toggleChange)="matchTypeToggleChange($event)"
+          />
+          <app-stop-type-segmented-toggle
+            [stopType]="stopType"
+            (toggleChange)="stopTypeToggleChange($event)"
+          />
           <app-journey-nav
             [journeys]="journeys"
             [loading]="journeysLoading"
@@ -119,7 +94,7 @@
       <div class="vehicle-journeys__stop-map-grid">
         <app-stop-list
           [view]="journeyInfo"
-          [timingPointsOnly]="timingPointsOption === 'timing-points'"
+          [timingPointsOnly]="stopType === StopTypeOption.TimingPoints"
           [matchType]="matchType"
           [loading]="journeyInfoLoading"
           (stopSelected)="onStopSelected($event)"
@@ -131,7 +106,7 @@
               [view]="journeyInfo"
               [loading]="journeyInfoLoading"
               [matchType]="matchType"
-              [timingPointsOnly]="timingPointsOption === 'timing-points'"
+              [timingPointsOnly]="stopType === StopTypeOption.TimingPoints"
             ></app-otp-stats>
             <app-journey-map
               [view]="journeyInfo"
@@ -139,6 +114,7 @@
               [selectedStop]="selectedStop"
               [hoveredStop]="hoveredStop"
               [loading]="journeyInfoLoading"
+              [scheduledRoute]="servicePatternGeom"
             ></app-journey-map>
           </div>
         </div>

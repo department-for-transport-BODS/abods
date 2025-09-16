@@ -4,6 +4,7 @@ import {
   Component,
   forwardRef,
   HostListener,
+  Input,
 } from "@angular/core";
 import { FromTo, FromToPreset, Period, Preset } from "./date-range.types";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -27,6 +28,8 @@ import { DateRangeService } from "../../services/date-range.service";
 export class DateRangeComponent implements ControlValueAccessor {
   value: FromToPreset;
   open = false;
+
+  @Input() showPreset = true;
 
   get fromTo(): FromTo {
     return this.value;
@@ -82,11 +85,6 @@ export class DateRangeComponent implements ControlValueAccessor {
   toggleControls(event: Event) {
     event.preventDefault();
     this.open = !this.open;
-  }
-
-  preventKeystroke(event: Event) {
-    event.returnValue = false;
-    event.preventDefault();
   }
 
   pickDateRange(value: FromTo) {

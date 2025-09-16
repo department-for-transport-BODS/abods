@@ -17,7 +17,6 @@ import { mockVehicleStopPingFactory } from "./stop-list/stop-item/stop-item.comp
 import { StopListComponent } from "./stop-list/stop-list.component";
 
 import { VehicleJourneysViewComponent } from "./vehicle-journeys-view.component";
-import { VehicleJourneysViewService } from "./vehicle-journeys-view.service";
 import {
   VehicleJourneyInfo,
   VehicleJourneyView,

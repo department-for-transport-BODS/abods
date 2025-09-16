@@ -1,6 +1,7 @@
 import {
   AdminAreasType,
   DelayFrequencyType,
+  Direction,
   FrequentServiceInfoInputType,
   FrequentServiceInfoType,
   FrequentServiceType,
@@ -80,8 +81,18 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       "n.national_operator_code",
       "s.operator_noc",
     );
-  if (args.filterBy && args.filterBy.operatorIds.length > 0) {
+  if (args.filterBy?.operatorIds && args.filterBy.operatorIds.length > 0) {
     query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
+  }
+
+  if (args.filterBy?.orgId) {
+    query = query
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "boo.operatorref",
+        "a.operatorref",
+      )
+      .where("boo.organisation_id", "=", args.filterBy?.orgId);
   }
   return await query
     .groupBy(["a.name", "s.operator_noc"])
@@ -265,12 +276,13 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
     try {
       const { filters } = args.inputs;
       const {
-        lineIds,
         onTimeMaxMinutes,
         onTimeMinMinutes,
         adminAreaIds,
         startTime,
         endTime,
+        operatorIds,
+        direction,
       } = filters || {};
 
       const userOperatorIds = await getUserOperatorIds(user, context.kysely);
@@ -278,9 +290,10 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         return compareThresholds(args.inputs, userOperatorIds, context.kysely);
       }
 
-      const summaryTable = lineIds
-        ? "timetable_summary_service_tz"
-        : "timetable_summary_operator_t";
+      const summaryTable: OTPSummaryTables =
+        operatorIds && operatorIds.length > 0
+          ? "timetable_summary_service_tz"
+          : "timetable_summary_operator_t";
 
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
@@ -288,6 +301,27 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         args.inputs,
         userOperatorIds,
       );
+
+      const filterDirections = direction?.filter((value) => value != undefined);
+      if (
+        Array.isArray(filterDirections) &&
+        !filterDirections.includes(Direction.All)
+      ) {
+        if (filterDirections?.includes(Direction.Inbound)) {
+          filterDirections.push(Direction.Anticlockwise);
+        }
+
+        if (filterDirections?.includes(Direction.Outbound)) {
+          filterDirections.push(Direction.Clockwise);
+        }
+        summarySubQuery = summarySubQuery.where((eb) =>
+          eb(
+            eb.fn("lower", [eb.ref("direction")]),
+            "in",
+            filterDirections.map((v) => v.toLocaleLowerCase()),
+          ),
+        );
+      }
 
       summarySubQuery = kyselyFilterForAdminIds(
         summarySubQuery,
@@ -305,7 +339,15 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           context.kysely.fn.sum("late_count").as("late_count"),
           context.kysely.fn.sum("on_time_count").as("on_time_count"),
           context.kysely.fn.sum("completed").as("completed"),
-          context.kysely.fn.sum("scheduled").as("scheduled"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
+          sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+            "scheduled",
+          ),
         ])
         .groupBy(["incomplete_reason", "estimated"]);
 
@@ -326,9 +368,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         onTime: 0,
         completed: 0,
         averageDeviation: 0,
+        averageDelay: 0,
         incomplete: "{}", // To be replaced
       };
       const incompleteReasons: Record<number, number> = {};
+      let averageDelayed: number | undefined = undefined;
       for (const result of results) {
         // https://github.com/kysely-org/kysely/issues/749
         const scheduled = Number(result.scheduled ?? 0);
@@ -351,11 +395,20 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         returnVal.late += late;
         returnVal.onTime += onTime;
         returnVal.completed += completed;
-
+        if (
+          result.count_delayed != undefined &&
+          result.average_delay != undefined &&
+          Number(result.count_delayed) > 0
+        ) {
+          averageDelayed =
+            averageDelayed ??
+            0 + Number(result.average_delay) / Number(result.count_delayed);
+        }
         incompleteReasons[reasonId] ??= 0;
         incompleteReasons[reasonId] += scheduled - completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
+      returnVal.averageDelay = averageDelayed;
 
       return returnVal;
     } catch (error) {
@@ -384,7 +437,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
               : Prisma.skip,
           operatorOrganisations: {
-            some: { organisation_id: { in: user.orgIds } },
+            some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
           },
         },
         select: {
@@ -416,6 +469,12 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           context.kysely.fn.sum("on_time_count").as("on_time_count"),
           context.kysely.fn.sum("completed").as("completed"),
           context.kysely.fn.sum("scheduled").as("scheduled"),
+          context.kysely.fn.sum("count_delayed").as("count_delayed"),
+        ])
+        .select((eb) => [
+          sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+            "average_delay",
+          ),
         ])
         .groupBy(["operator_noc"]);
 
@@ -446,7 +505,14 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
               : 0,
             totalLate = operatorOtpStats.late_count
               ? operatorOtpStats.late_count
-              : 0;
+              : 0,
+            averageDelay =
+              operatorOtpStats.average_delay == undefined
+                ? undefined
+                : Number(operatorOtpStats.count_delayed) > 0
+                  ? Number(operatorOtpStats.average_delay) /
+                    Number(operatorOtpStats.count_delayed)
+                  : 0;
 
           const opPerformance: OperatorPerformanceType = {
             nocCode: item.operatorref,
@@ -455,6 +521,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
             early: Number(totalEarly),
             late: Number(totalLate),
             onTime: Number(totalOntime),
+            averageDelay: averageDelay,
           };
           opPerformances.push(opPerformance);
         }
@@ -864,7 +931,20 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
   async (_, args, context): Promise<ServicePunctualityType[]> => {
     const user = await requireUserSession(context);
     try {
-      const { filters, fromTimestamp, order } = args.inputs;
+      const { filters, fromTimestamp, toTimestamp, order } = args.inputs;
+
+      const from = userSelectedDateAsUtc(fromTimestamp);
+      const to = userSelectedDateAsUtc(toTimestamp);
+
+      const diff = to.diff(from, "days");
+      const daysInMonth = dayjs().daysInMonth();
+
+      const periodTypeMap = {
+        [String(daysInMonth)]: "last_month",
+        "7": "last_7_days",
+        "28": "last_28_days",
+        month_to_date: "month_to_date",
+      };
 
       const timingPointsOnly = filters.timingPointsOnly;
 
@@ -885,6 +965,11 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
           userSelectedDateAsUtc(fromTimestamp).toDate(),
         )
         .where("percentage_change", "is not", null)
+        .where(
+          "period_type",
+          "=",
+          periodTypeMap[diff] ?? periodTypeMap.month_to_date,
+        )
         .orderBy("on_time_percentage", orderFilter)
         .orderBy("percentage_change", orderFilter)
         .limit(3);
@@ -955,6 +1040,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
       const startTime = args.inputs.filters.startTime;
       const endTime = args.inputs.filters.endTime;
       const adminAreaIds = args.inputs.filters.adminAreaIds;
+      const isTimingPoint = args.inputs.filters.timingPointsOnly;
 
       const stopPerformances: StopPerformanceType[] = [];
 
@@ -990,12 +1076,67 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               context.kysely.fn.sum("late_count").as("late_count"),
               context.kysely.fn.sum("on_time_count").as("on_time_count"),
               context.kysely.fn.sum("completed").as("completed"),
-              context.kysely.fn.sum("scheduled").as("scheduled"),
+              context.kysely.fn.sum("count_delayed").as("count_delayed"),
               context.kysely.fn
-                .avg("avg_time_difference")
-                .as("avg_time_difference"),
+                .avg("diff_sched_time_to_stop")
+                .as("diff_sched_time_to_stop"),
+              context.kysely.fn
+                .avg("diff_sched_time_to_stop_timing_point")
+                .as("diff_sched_time_to_stop_timing_point"),
+              context.kysely.fn
+                .avg("diff_actual_time_to_stop")
+                .as("diff_actual_time_to_stop"),
+              context.kysely.fn
+                .avg("diff_actual_time_to_stop_timing_point")
+                .as("diff_actual_time_to_stop_timing_point"),
             ])
-            .groupBy(["stop_id", "common_name", "is_timing_point"]);
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .select((eb) => [
+              sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy([
+              "stop_id",
+              "common_name",
+              "is_timing_point",
+              "direction",
+              "stop_index",
+            ])
+            .orderBy("stop_index", "asc");
 
           if (startTime || endTime) {
             const start = Number((startTime ?? "00:00").split(":")[0]);
@@ -1035,19 +1176,28 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
           });
 
           results.forEach((res) => {
-            // avg delay
-            const timeInSeconds = res.avg_time_difference
-              ? Number(res.avg_time_difference) * 60
-              : 0;
-
             const stop = stops.find(
               (dbStop) => dbStop.id === Number(res.stop_id),
             );
+            const averageScheduled = isTimingPoint
+              ? Number(res.diff_sched_time_to_stop_timing_point)
+                ? Number(res.diff_sched_time_to_stop_timing_point)
+                : undefined
+              : res.diff_sched_time_to_stop
+                ? Number(res.diff_sched_time_to_stop)
+                : undefined;
+            const averageActual = isTimingPoint
+              ? res.diff_actual_time_to_stop_timing_point
+                ? Number(res.diff_actual_time_to_stop_timing_point)
+                : undefined
+              : res.diff_actual_time_to_stop
+                ? Number(res.diff_actual_time_to_stop)
+                : undefined;
+
             stopPerformances.push({
               lineId: lineIds[0],
               stopId: stop?.atco_code ?? "",
               stopInfo: {
-                //stopId: res.stop_id? res.stop_id : 0,
                 stopId: stop?.atco_code ?? "",
                 stopName: res.common_name ? res.common_name : "",
                 stopLocality: {
@@ -1067,8 +1217,35 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
-              averageDelay: timeInSeconds,
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
+              countDelayed: Number(res.count_delayed),
               timingPoint: res.is_timing_point ?? false,
+              direction: res.direction
+                ? (res.direction as Direction)
+                : undefined,
+              averageScheduled: averageScheduled,
+              averageActual: averageActual,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
             });
           });
         }
@@ -1119,16 +1296,57 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             .select([
               "noc_and_line_and_servicecode",
               "line_name",
+              "direction",
               context.kysely.fn.sum("early_count").as("early_count"),
               context.kysely.fn.sum("late_count").as("late_count"),
               context.kysely.fn.sum("on_time_count").as("on_time_count"),
               context.kysely.fn.sum("completed").as("completed"),
-              context.kysely.fn.sum("scheduled").as("scheduled"),
-              context.kysely.fn
-                .avg("avg_time_difference")
-                .as("avg_time_difference"),
+              context.kysely.fn.sum("count_delayed").as("count_delayed"),
             ])
-            .groupBy(["noc_and_line_and_servicecode", "line_name"]);
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .select((eb) => [
+              sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+                "average_delay",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+                "on_time_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+                "late_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+                "early_in_seconds",
+              ),
+              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
+                "scheduled",
+              ),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy([
+              "noc_and_line_and_servicecode",
+              "line_name",
+              "direction",
+            ]);
 
           if (startTime || endTime) {
             const start = Number((startTime ?? "00:00").split(":")[0]);
@@ -1157,10 +1375,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
           });
 
           results.forEach((res) => {
-            const avgDelay = res.avg_time_difference
-              ? Number(res.avg_time_difference) * 60
-              : 0;
-
             const service = services.find(
               (serv) =>
                 serv.noc_and_line_and_servicecode ===
@@ -1174,7 +1388,32 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
-              averageDelay: avgDelay,
+              countDelayed: Number(res.count_delayed),
+              averageDelay:
+                Number(res.count_delayed) > 0
+                  ? Number(res.average_delay) / Number(res.count_delayed)
+                  : undefined,
+              direction: res.direction
+                ? (res.direction.toLowerCase() as Direction)
+                : undefined,
+              onTimeInSeconds:
+                res.on_time_count == undefined
+                  ? undefined
+                  : Number(res.on_time_count) > 0
+                    ? Number(res.on_time_in_seconds) / Number(res.on_time_count)
+                    : 0,
+              earlyInSeconds:
+                res.early_count == undefined
+                  ? undefined
+                  : Number(res.early_count) > 0
+                    ? Number(res.early_in_seconds) / Number(res.early_count)
+                    : 0,
+              lateInSeconds:
+                res.late_count == undefined
+                  ? undefined
+                  : Number(res.late_count) > 0
+                    ? Number(res.late_in_seconds) / Number(res.late_count)
+                    : 0,
               lineInfo: {
                 serviceId: res.noc_and_line_and_servicecode!,
                 serviceNumber: res.line_name!,
@@ -1291,6 +1530,12 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
       }
 
       const results = await mainQuery.execute();
+
+      if (results.length < 1) {
+        return {
+          excess: undefined,
+        };
+      }
 
       if (results.length < 1) {
         return {

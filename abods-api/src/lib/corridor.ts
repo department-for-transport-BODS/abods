@@ -79,7 +79,7 @@ export const returnCorridorType = (
 export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
   return db.corridor.findMany({
     where: {
-      organisation_id: { in: sessionUser.orgIds },
+      organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
     include: {
       corridor_stops: true,
@@ -96,7 +96,7 @@ export const getCorridor = (
   return db.corridor.findUnique({
     where: {
       corridor_id: corridorId,
-      organisation_id: { in: sessionUser.orgIds },
+      organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
     include: {
       bods_user: true,
@@ -150,13 +150,13 @@ export const updateCorridorDb = (
 
 export const isCorridorMappedToUserOrg = async (
   corridorId: number,
-  user: SessionUser,
+  sessionUser: SessionUser,
   db: PrismaClient,
 ): Promise<boolean> => {
   const result = await db.corridor.findFirst({
     where: {
       corridor_id: corridorId,
-      organisation_id: { in: user.orgIds },
+      organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
   });
 
@@ -173,10 +173,13 @@ export const distinctRoutes = (db: PrismaClient, stopsPattern: string) => {
   });
 };
 
-export const getOrgAdminAreas = async (db: PrismaClient, user: SessionUser) => {
+export const getOrgAdminAreas = async (
+  db: PrismaClient,
+  sessionUser: SessionUser,
+) => {
   const orgOperators = await db.bods_organisationoperator.findMany({
     where: {
-      organisation_id: { in: user.orgIds },
+      organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
     select: {
       operatorref: true,

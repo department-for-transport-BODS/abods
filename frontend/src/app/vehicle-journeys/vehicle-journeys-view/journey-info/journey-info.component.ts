@@ -12,6 +12,7 @@ export class JourneyInfoComponent {
   @Input() loading = false;
   @Input() vehicleRef: string | null = null;
   @Input() journey: Journey | null = null;
+  @Input() distance?: number | null = null;
 
   get operatorName(): string {
     return this.journey?.operatorName ?? "";
@@ -31,5 +32,9 @@ export class JourneyInfoComponent {
 
   get vehicleId(): string {
     return this.vehicleRef ?? "Unknown";
+  }
+
+  get serviceDistanceKm(): number | string {
+    return this.distance ? this.distance / 1000 : "Unknown";
   }
 }

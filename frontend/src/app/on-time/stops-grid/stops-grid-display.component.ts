@@ -3,6 +3,9 @@ import { StopPerformance } from "../on-time.service";
 import { TimingRendererComponent } from "./timing-renderer/timing-renderer.component";
 import { SelectableTextCellRendererComponent } from "src/app/shared/components/ag-grid/selectable-text-cell/selectable-text-cell.component";
 import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { Direction } from "../../../generated/graphql";
 
 @Component({
   selector: "app-stops-grid-display",
@@ -14,7 +17,9 @@ import { ColumnDescription } from "../on-time-grid/on-time-grid.component";
     [data]="data"
     [csvFilename]="csvFilename"
     [paginate]="paginate"
+    [preSelectedDirections]="preSelectedDirections"
     (cellClicked)="handleCellClicked($event)"
+    (directionsChanged)="onDirectionChange($event)"
   />`,
   standalone: false,
 })
@@ -24,6 +29,7 @@ export class StopsGridComponentDisplayComponent {
   @Input() errored = false;
   @Input() paginate = false;
   @Input() csvFilename: string | undefined;
+  @Input() preSelectedDirections: Direction[] = [];
 
   columnDescriptions: ColumnDescription[] = [
     {
@@ -83,6 +89,22 @@ export class StopsGridComponentDisplayComponent {
       getQuickFilterText: ({ value }) => value,
     },
     {
+      title: "Direction",
+      columnType: "Camelcase",
+      colId: "direction",
+      field: "direction",
+      valueGetter: ({ data }: { data: StopPerformance }) =>
+        data.direction ?? "-",
+      isHideable: true,
+      isDefaultShown: true,
+      headerName: "Direction",
+      sortable: true,
+      unSortIcon: true,
+      flex: 2,
+      maxWidth: 130,
+      cellClass: "govuk-!-padding-left-3",
+    },
+    {
       title: "Scheduled departures",
       columnType: "Normal",
       isHideable: true,
@@ -113,10 +135,39 @@ export class StopsGridComponentDisplayComponent {
       type: "numericColumn",
     },
     {
+      title: "Average scheduled",
+      columnType: "AvDelay",
+      colId: "averageScheduled",
+      field: "averageScheduled",
+      isHideable: true,
+      isDefaultShown: true,
+      headerName: "Av. Scheduled Travel Time",
+      sortable: true,
+      unSortIcon: true,
+      flex: 2,
+      maxWidth: 130,
+      type: "numericColumn",
+    },
+    {
+      title: "Average actual",
+      columnType: "AvDelay",
+      colId: "averageActual",
+      field: "averageActual",
+      isHideable: true,
+      isDefaultShown: true,
+      headerName: "Av. Actual Travel Time",
+      sortable: true,
+      unSortIcon: true,
+      flex: 2,
+      maxWidth: 130,
+      type: "numericColumn",
+    },
+    {
       title: "Average delay",
       columnType: "AvDelay",
       colId: "averageDelay",
       field: "averageDelay",
+      positiveOnly: true,
       isHideable: true,
       isDefaultShown: true,
       headerName: "Av. delay",
@@ -126,15 +177,21 @@ export class StopsGridComponentDisplayComponent {
       maxWidth: 130,
       type: "numericColumn",
     },
-
     {
       title: "On time",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isHideable: true,
       isDefaultShown: true,
       colId: "onTime",
       field: "onTime",
       pctField: "onTimeRatio",
+      timeField: "onTimeInMins",
+      timeValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.onTimeInSeconds : undefined,
+      valueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.onTime : undefined,
+      pctValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.onTimeRatio : undefined,
       headerName: "On time",
       sortable: true,
       unSortIcon: true,
@@ -144,12 +201,19 @@ export class StopsGridComponentDisplayComponent {
     },
     {
       title: "Late",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isHideable: true,
       isDefaultShown: true,
       colId: "late",
       field: "late",
       pctField: "lateRatio",
+      timeField: "lateInMins",
+      timeValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.lateInSeconds : undefined,
+      valueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.late : undefined,
+      pctValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.lateRatio : undefined,
       headerName: "Late",
       sortable: true,
       unSortIcon: true,
@@ -159,12 +223,19 @@ export class StopsGridComponentDisplayComponent {
     },
     {
       title: "Early",
-      columnType: "WithPct",
+      columnType: "WithPctTime",
       isHideable: true,
       isDefaultShown: true,
       colId: "early",
       field: "early",
       pctField: "earlyRatio",
+      timeField: "earlyInMins",
+      timeValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.earlyInSeconds : undefined,
+      valueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.early : undefined,
+      pctValueGetter: ({ data }: { data: StopPerformance }) =>
+        data.actualDepartures ? data.earlyRatio : undefined,
       headerName: "Early",
       sortable: true,
       unSortIcon: true,
@@ -177,10 +248,20 @@ export class StopsGridComponentDisplayComponent {
     },
   ];
   @Output() stopNameClicked = new EventEmitter<StopPerformance>();
+  @Output() directionsChanged = new EventEmitter<Direction[]>();
 
   handleCellClicked($event: { column: string; data: StopPerformance }) {
     if ($event.column === "stopName") {
       this.stopNameClicked.emit($event.data);
     }
+  }
+
+  constructor(
+    private authUserService: AuthenticatedUserService,
+    private config: ConfigService,
+  ) {}
+
+  onDirectionChange($event: Direction[]) {
+    this.directionsChanged.emit($event);
   }
 }

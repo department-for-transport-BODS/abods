@@ -90,6 +90,7 @@ export class JourneyMapComponent implements OnChanges {
   @Input() hoveredStop?: StopHoverEvent;
   @Input() loading = false;
   @Input() matchType = MatchType.Evidenced;
+  @Input() scheduledRoute?: [number, number][] | null = null;
 
   map!: Map;
   enableScaleControl = false;
@@ -101,6 +102,9 @@ export class JourneyMapComponent implements OnChanges {
   stops?: FeatureCollection<Point, VehiclePingStop>;
   timingPoints?: FeatureCollection<Point, VehiclePingStop>;
   line?: FeatureCollection<LineString, LineSegmentProps>;
+  scheduledRouteLine?: FeatureCollection<LineString>;
+  showScheduledRoute = true;
+
   pings?: FeatureCollection<Point, VehiclePing>;
 
   tooltipStop?: VehiclePingStop;
@@ -153,6 +157,15 @@ export class JourneyMapComponent implements OnChanges {
     }
     if (this.loading) {
       this.moveCounter = 0;
+    }
+
+    if (changes.scheduledRoute?.currentValue) {
+      const coords = changes.scheduledRoute.currentValue;
+      if (coords && coords.length >= 2) {
+        this.scheduledRouteLine = featureCollection([lineString(coords)]);
+      } else {
+        this.scheduledRouteLine = undefined;
+      }
     }
   }
 

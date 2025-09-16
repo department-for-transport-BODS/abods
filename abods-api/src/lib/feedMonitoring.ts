@@ -32,6 +32,7 @@ export const getVehicleCounts = (
     .distinct()
     .select("operator_noc")
     .select("group_id")
+    .select("direction")
     .select((eb) => [
       eb
         .exists(
@@ -47,6 +48,11 @@ export const getVehicleCounts = (
               "SiriVMPositions.operator_ref",
               "=",
               "expected_journeys.operator_noc",
+            )
+            .whereRef(
+              "SiriVMPositions.direction_ref",
+              "=",
+              "expected_journeys.direction",
             )
             .where("SiriVMPositions.recorded_at_time", ">=", startTime)
             .where("SiriVMPositions.recorded_at_time", "<", endTime),

@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: Date | string; output: Date | string; }
   DateTime: { input: Date | string; output: Date | string; }
+  JSON: { input: any; output: any; }
   Time: { input: Date | string; output: Date | string; }
 };
 
@@ -37,6 +38,15 @@ export type AdminAreasType = {
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   shape: Scalars['String']['output'];
+};
+
+export type AdminOrgOperatorMap = {
+  __typename?: 'AdminOrgOperatorMap';
+  adminAreaId: Scalars['Int']['output'];
+  adminName?: Maybe<Scalars['String']['output']>;
+  operatorId: Scalars['String']['output'];
+  orgId: Scalars['Int']['output'];
+  orgName?: Maybe<Scalars['String']['output']>;
 };
 
 export type AlertInputType = {
@@ -270,6 +280,40 @@ export type DelayFrequencyType = {
   frequency?: Maybe<Scalars['Int']['output']>;
 };
 
+export enum Direction {
+  All = 'all',
+  Anticlockwise = 'anticlockwise',
+  Clockwise = 'clockwise',
+  Inbound = 'inbound',
+  Outbound = 'outbound'
+}
+
+export type Distance = {
+  __typename?: 'Distance';
+  avlDistance?: Maybe<Scalars['Int']['output']>;
+  distance?: Maybe<Scalars['Int']['output']>;
+  lineName: Scalars['String']['output'];
+  nocLineAndServiceCode: Scalars['String']['output'];
+  operatorId: Scalars['String']['output'];
+  operatorName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
+};
+
+export type DistancesDropdown = {
+  __typename?: 'DistancesDropdown';
+  operators?: Maybe<Array<OperatorForDistances>>;
+};
+
+export type DistancesFilterInput = {
+  adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  fromTimestamp: Scalars['String']['input'];
+  licenseIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  nocLineAndServiceCodes?: InputMaybe<Array<Scalars['String']['input']>>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId?: InputMaybe<Scalars['String']['input']>;
+  toTimestamp: Scalars['String']['input'];
+};
+
 export type EventData = {
   __typename?: 'EventData';
   message: Scalars['String']['output'];
@@ -295,6 +339,7 @@ export type EventType = {
 
 export enum FeatureFlag {
   DataMonitoring = 'DataMonitoring',
+  Distances = 'Distances',
   ServiceMonitoring = 'ServiceMonitoring',
   StopAnalysis = 'StopAnalysis'
 }
@@ -455,6 +500,7 @@ export type Journey = {
   serviceName: Scalars['String']['output'];
   serviceNumber: Scalars['String']['output'];
   startTime: Scalars['String']['output'];
+  vehicleJourneyId?: Maybe<Scalars['Int']['output']>;
 };
 
 export type JourneyResult = {
@@ -463,11 +509,11 @@ export type JourneyResult = {
   stops: Array<Stop>;
 };
 
-export enum LineDirection {
-  All = 'All',
-  Inbound = 'Inbound',
-  Outbound = 'Outbound'
-}
+export type LicensesForDistance = {
+  __typename?: 'LicensesForDistance';
+  id: Scalars['String']['output'];
+  services?: Maybe<Array<ServiceForDistances>>;
+};
 
 export type LineType = {
   __typename?: 'LineType';
@@ -500,6 +546,7 @@ export type LocalityType = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   canEditAllAlerts: Scalars['Boolean']['output'];
+  canViewDistances: Scalars['Boolean']['output'];
   canViewServiceMonitoring: Scalars['Boolean']['output'];
   currentUserId: Scalars['String']['output'];
   flags: Array<FeatureFlag>;
@@ -687,7 +734,15 @@ export type OperatorFeedMonitoring = {
 };
 
 export type OperatorFilterInput = {
-  operatorIds: Array<Scalars['String']['input']>;
+  operatorIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  orgId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type OperatorForDistances = {
+  __typename?: 'OperatorForDistances';
+  id: Scalars['String']['output'];
+  licenses?: Maybe<Array<LicensesForDistance>>;
+  name: Scalars['String']['output'];
 };
 
 export type OperatorPerformancePage = {
@@ -698,6 +753,7 @@ export type OperatorPerformancePage = {
 
 export type OperatorPerformanceType = {
   __typename?: 'OperatorPerformanceType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   early: Scalars['Int']['output'];
   late: Scalars['Int']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -712,6 +768,12 @@ export type OperatorType = {
   name: Scalars['String']['output'];
   nocCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
+};
+
+export type Organisation = {
+  __typename?: 'Organisation';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type OrganisationReferenceInput = {
@@ -739,11 +801,11 @@ export type PerformanceFiltersInputType = {
   addNonTagged?: InputMaybe<Scalars['Boolean']['input']>;
   adminAreaIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dayOfWeekFlags?: InputMaybe<DayOfWeekFlagsInputType>;
+  direction?: InputMaybe<Array<InputMaybe<Direction>>>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   excludeItoLineId?: InputMaybe<Scalars['String']['input']>;
   excludedDates?: InputMaybe<Array<Scalars['Date']['input']>>;
   granularity?: InputMaybe<Granularity>;
-  lineDirection?: InputMaybe<LineDirection>;
   lineIds?: InputMaybe<Array<Scalars['String']['input']>>;
   matchType?: InputMaybe<MatchType>;
   maxDelay?: InputMaybe<Scalars['Int']['input']>;
@@ -792,6 +854,7 @@ export type PunctualityTimeSeriesType = {
 
 export type PunctualityTotalsType = {
   __typename?: 'PunctualityTotalsType';
+  averageDelay?: Maybe<Scalars['Float']['output']>;
   averageDeviation?: Maybe<Scalars['Float']['output']>;
   completed: Scalars['Int']['output'];
   early: Scalars['Int']['output'];
@@ -804,14 +867,18 @@ export type PunctualityTotalsType = {
 export type Query = {
   __typename?: 'Query';
   adminAreas?: Maybe<Array<AdminAreasType>>;
+  adminOrgMap: Array<AdminOrgOperatorMap>;
   apiInfo?: Maybe<ApiInfoType>;
   avlLineLevelStatus: Array<AvlLineLevelStatus>;
   corridor?: Maybe<CorridorNamespace>;
   dashboardVehicles: Array<DashboardVehicles>;
+  distances: Array<Distance>;
+  distancesDropdowns: DistancesDropdown;
   embeddedUrl: AwsQuicksightUser;
   eventStats: Array<EventStatsType>;
   events?: Maybe<EventResponse>;
   findJourneys: Array<Journey>;
+  getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
   invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
@@ -826,6 +893,7 @@ export type Query = {
   user?: Maybe<LoginInfo>;
   userAlert?: Maybe<AlertType>;
   userAlerts?: Maybe<Array<AlertType>>;
+  userOrgs: Array<Organisation>;
   users?: Maybe<Array<UserType>>;
 };
 
@@ -837,6 +905,11 @@ export type QueryAvlLineLevelStatusArgs = {
 
 export type QueryDashboardVehiclesArgs = {
   operatorId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryDistancesArgs = {
+  filterBy?: InputMaybe<DistancesFilterInput>;
 };
 
 
@@ -857,6 +930,11 @@ export type QueryEventsArgs = {
 export type QueryFindJourneysArgs = {
   dateOfJourney: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
+};
+
+
+export type QueryGetServicePatternDistanceGeomArgs = {
+  vehicleJourneyId: Scalars['ID']['input'];
 };
 
 
@@ -923,6 +1001,13 @@ export enum RouteType {
   Valid = 'VALID'
 }
 
+export type ServiceForDistances = {
+  __typename?: 'ServiceForDistances';
+  id: Scalars['String']['output'];
+  line: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type ServiceInfoType = {
   __typename?: 'ServiceInfoType';
   serviceId: Scalars['String']['output'];
@@ -937,6 +1022,12 @@ export type ServiceLinkType = {
   linkRoute?: Maybe<Scalars['String']['output']>;
   routeValidity: RouteType;
   toStop: Scalars['String']['output'];
+};
+
+export type ServicePatternDistanceResult = {
+  __typename?: 'ServicePatternDistanceResult';
+  distance: Scalars['Int']['output'];
+  geom: Scalars['JSON']['output'];
 };
 
 export type ServicePatternType = {
@@ -961,12 +1052,17 @@ export type ServicePerformanceInputType = {
 export type ServicePerformanceType = {
   __typename?: 'ServicePerformanceType';
   actualDepartures: Scalars['Int']['output'];
-  averageDelay: Scalars['Float']['output'];
+  averageDelay?: Maybe<Scalars['Float']['output']>;
+  countDelayed?: Maybe<Scalars['Int']['output']>;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   lineId?: Maybe<Scalars['String']['output']>;
   lineInfo: ServiceInfoType;
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
 };
 
@@ -1036,11 +1132,18 @@ export type StopInfoType = {
 export type StopPerformanceType = {
   __typename?: 'StopPerformanceType';
   actualDepartures: Scalars['Int']['output'];
-  averageDelay: Scalars['Float']['output'];
+  averageActual?: Maybe<Scalars['Float']['output']>;
+  averageDelay?: Maybe<Scalars['Float']['output']>;
+  averageScheduled?: Maybe<Scalars['Float']['output']>;
+  countDelayed?: Maybe<Scalars['Int']['output']>;
+  direction?: Maybe<Direction>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   lineId?: Maybe<Scalars['String']['output']>;
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
   stopId: Scalars['String']['output'];
   stopInfo: StopInfoType;
@@ -1051,13 +1154,23 @@ export type StopStatistics = {
   __typename?: 'StopStatistics';
   adminAreaName: Scalars['String']['output'];
   atcoCode: Scalars['String']['output'];
+  averageActual?: Maybe<Scalars['Float']['output']>;
+  averageActualTimingPoint?: Maybe<Scalars['Float']['output']>;
+  averageDelay?: Maybe<Scalars['Int']['output']>;
+  averageScheduled?: Maybe<Scalars['Float']['output']>;
+  averageScheduledTimingPoint?: Maybe<Scalars['Float']['output']>;
   completedDepartures: Scalars['Int']['output'];
+  countDelayed?: Maybe<Scalars['Int']['output']>;
+  direction?: Maybe<Scalars['String']['output']>;
   early: Scalars['Int']['output'];
+  earlyInSeconds?: Maybe<Scalars['Float']['output']>;
   late: Scalars['Int']['output'];
+  lateInSeconds?: Maybe<Scalars['Float']['output']>;
   latitude: Scalars['Float']['output'];
   localityName: Scalars['String']['output'];
   longitude: Scalars['Float']['output'];
   onTime: Scalars['Int']['output'];
+  onTimeInSeconds?: Maybe<Scalars['Float']['output']>;
   scheduledDepartures: Scalars['Int']['output'];
   stopName: Scalars['String']['output'];
   timingPoint: Scalars['Boolean']['output'];
@@ -1074,6 +1187,11 @@ export type StopType = {
   stopId: Scalars['String']['output'];
   stopName: Scalars['String']['output'];
 };
+
+export enum StopTypeOption {
+  AllStops = 'all_stops',
+  TimingPoints = 'timing_points'
+}
 
 export enum StopsSegment {
   First = 'First',
@@ -1181,6 +1299,7 @@ export type ResolversTypes = ResolversObject<{
   AWSQuicksightUser: ResolverTypeWrapper<Partial<AwsQuicksightUser>>;
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
+  AdminOrgOperatorMap: ResolverTypeWrapper<Partial<AdminOrgOperatorMap>>;
   AlertInputType: ResolverTypeWrapper<Partial<AlertInputType>>;
   AlertReferenceInput: ResolverTypeWrapper<Partial<AlertReferenceInput>>;
   AlertType: ResolverTypeWrapper<Partial<AlertType>>;
@@ -1210,6 +1329,10 @@ export type ResolversTypes = ResolversObject<{
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
   DayOfWeekFlagsInputType: ResolverTypeWrapper<Partial<DayOfWeekFlagsInputType>>;
   DelayFrequencyType: ResolverTypeWrapper<Partial<DelayFrequencyType>>;
+  Direction: ResolverTypeWrapper<Partial<Direction>>;
+  Distance: ResolverTypeWrapper<Partial<Distance>>;
+  DistancesDropdown: ResolverTypeWrapper<Partial<DistancesDropdown>>;
+  DistancesFilterInput: ResolverTypeWrapper<Partial<DistancesFilterInput>>;
   EventData: ResolverTypeWrapper<Partial<EventData>>;
   EventResponse: ResolverTypeWrapper<Partial<EventResponse>>;
   EventStatsType: ResolverTypeWrapper<Partial<EventStatsType>>;
@@ -1229,13 +1352,15 @@ export type ResolversTypes = ResolversObject<{
   HeadwayOverviewType: ResolverTypeWrapper<Partial<HeadwayOverviewType>>;
   HeadwayTimeSeriesType: ResolverTypeWrapper<Partial<HeadwayTimeSeriesType>>;
   HistoricalStatsType: ResolverTypeWrapper<Partial<HistoricalStatsType>>;
+  ID: ResolverTypeWrapper<Partial<Scalars['ID']['output']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']['output']>>;
   InvitationInput: ResolverTypeWrapper<Partial<InvitationInput>>;
   InvitationResponseType: ResolverTypeWrapper<Partial<InvitationResponseType>>;
   InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
+  JSON: ResolverTypeWrapper<Partial<Scalars['JSON']['output']>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
-  LineDirection: ResolverTypeWrapper<Partial<LineDirection>>;
+  LicensesForDistance: ResolverTypeWrapper<Partial<LicensesForDistance>>;
   LineType: ResolverTypeWrapper<Partial<LineType>>;
   LiveStatsType: ResolverTypeWrapper<Partial<LiveStatsType>>;
   LocalityType: ResolverTypeWrapper<Partial<LocalityType>>;
@@ -1247,9 +1372,11 @@ export type ResolversTypes = ResolversObject<{
   OnTimePerformanceType: ResolverTypeWrapper<Partial<OnTimePerformanceType>>;
   OperatorFeedMonitoring: ResolverTypeWrapper<Partial<OperatorFeedMonitoring>>;
   OperatorFilterInput: ResolverTypeWrapper<Partial<OperatorFilterInput>>;
+  OperatorForDistances: ResolverTypeWrapper<Partial<OperatorForDistances>>;
   OperatorPerformancePage: ResolverTypeWrapper<Partial<OperatorPerformancePage>>;
   OperatorPerformanceType: ResolverTypeWrapper<Partial<OperatorPerformanceType>>;
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
+  Organisation: ResolverTypeWrapper<Partial<Organisation>>;
   OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
@@ -1263,8 +1390,10 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
+  ServiceForDistances: ResolverTypeWrapper<Partial<ServiceForDistances>>;
   ServiceInfoType: ResolverTypeWrapper<Partial<ServiceInfoType>>;
   ServiceLinkType: ResolverTypeWrapper<Partial<ServiceLinkType>>;
+  ServicePatternDistanceResult: ResolverTypeWrapper<Partial<ServicePatternDistanceResult>>;
   ServicePatternType: ResolverTypeWrapper<Partial<ServicePatternType>>;
   ServicePerformanceFiltersInputType: ResolverTypeWrapper<Partial<ServicePerformanceFiltersInputType>>;
   ServicePerformanceInputType: ResolverTypeWrapper<Partial<ServicePerformanceInputType>>;
@@ -1277,6 +1406,7 @@ export type ResolversTypes = ResolversObject<{
   StopPerformanceType: ResolverTypeWrapper<Partial<StopPerformanceType>>;
   StopStatistics: ResolverTypeWrapper<Partial<StopStatistics>>;
   StopType: ResolverTypeWrapper<Partial<StopType>>;
+  StopTypeOption: ResolverTypeWrapper<Partial<StopTypeOption>>;
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
   Time: ResolverTypeWrapper<Partial<Scalars['Time']['output']>>;
@@ -1291,6 +1421,7 @@ export type ResolversParentTypes = ResolversObject<{
   AWSQuicksightUser: Partial<AwsQuicksightUser>;
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
   AdminAreasType: Partial<AdminAreasType>;
+  AdminOrgOperatorMap: Partial<AdminOrgOperatorMap>;
   AlertInputType: Partial<AlertInputType>;
   AlertReferenceInput: Partial<AlertReferenceInput>;
   AlertType: Partial<AlertType>;
@@ -1318,6 +1449,9 @@ export type ResolversParentTypes = ResolversObject<{
   DateTime: Partial<Scalars['DateTime']['output']>;
   DayOfWeekFlagsInputType: Partial<DayOfWeekFlagsInputType>;
   DelayFrequencyType: Partial<DelayFrequencyType>;
+  Distance: Partial<Distance>;
+  DistancesDropdown: Partial<DistancesDropdown>;
+  DistancesFilterInput: Partial<DistancesFilterInput>;
   EventData: Partial<EventData>;
   EventResponse: Partial<EventResponse>;
   EventStatsType: Partial<EventStatsType>;
@@ -1335,12 +1469,15 @@ export type ResolversParentTypes = ResolversObject<{
   HeadwayOverviewType: Partial<HeadwayOverviewType>;
   HeadwayTimeSeriesType: Partial<HeadwayTimeSeriesType>;
   HistoricalStatsType: Partial<HistoricalStatsType>;
+  ID: Partial<Scalars['ID']['output']>;
   Int: Partial<Scalars['Int']['output']>;
   InvitationInput: Partial<InvitationInput>;
   InvitationResponseType: Partial<InvitationResponseType>;
   InvitationType: Partial<InvitationType>;
+  JSON: Partial<Scalars['JSON']['output']>;
   Journey: Partial<Journey>;
   JourneyResult: Partial<JourneyResult>;
+  LicensesForDistance: Partial<LicensesForDistance>;
   LineType: Partial<LineType>;
   LiveStatsType: Partial<LiveStatsType>;
   LocalityType: Partial<LocalityType>;
@@ -1351,9 +1488,11 @@ export type ResolversParentTypes = ResolversObject<{
   OnTimePerformanceType: Partial<OnTimePerformanceType>;
   OperatorFeedMonitoring: Partial<OperatorFeedMonitoring>;
   OperatorFilterInput: Partial<OperatorFilterInput>;
+  OperatorForDistances: Partial<OperatorForDistances>;
   OperatorPerformancePage: Partial<OperatorPerformancePage>;
   OperatorPerformanceType: Partial<OperatorPerformanceType>;
   OperatorType: Partial<OperatorType>;
+  Organisation: Partial<Organisation>;
   OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
@@ -1364,8 +1503,10 @@ export type ResolversParentTypes = ResolversObject<{
   PunctualityTimeSeriesType: Partial<PunctualityTimeSeriesType>;
   PunctualityTotalsType: Partial<PunctualityTotalsType>;
   Query: {};
+  ServiceForDistances: Partial<ServiceForDistances>;
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
+  ServicePatternDistanceResult: Partial<ServicePatternDistanceResult>;
   ServicePatternType: Partial<ServicePatternType>;
   ServicePerformanceFiltersInputType: Partial<ServicePerformanceFiltersInputType>;
   ServicePerformanceInputType: Partial<ServicePerformanceInputType>;
@@ -1396,6 +1537,15 @@ export type AdminAreasTypeResolvers<ContextType = RequestContext, ParentType ext
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   shape?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type AdminOrgOperatorMapResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminOrgOperatorMap'] = ResolversParentTypes['AdminOrgOperatorMap']> = ResolversObject<{
+  adminAreaId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  adminName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  orgId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  orgName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1540,6 +1690,22 @@ export type DelayFrequencyTypeResolvers<ContextType = RequestContext, ParentType
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type DistanceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Distance'] = ResolversParentTypes['Distance']> = ResolversObject<{
+  avlDistance?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  distance?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nocLineAndServiceCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type DistancesDropdownResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DistancesDropdown'] = ResolversParentTypes['DistancesDropdown']> = ResolversObject<{
+  operators?: Resolver<Maybe<Array<ResolversTypes['OperatorForDistances']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type EventDataResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventData'] = ResolversParentTypes['EventData']> = ResolversObject<{
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1631,6 +1797,10 @@ export type InvitationTypeResolvers<ContextType = RequestContext, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
+
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
   directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1640,12 +1810,19 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vehicleJourneyId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type JourneyResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyResult'] = ResolversParentTypes['JourneyResult']> = ResolversObject<{
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type LicensesForDistanceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LicensesForDistance'] = ResolversParentTypes['LicensesForDistance']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  services?: Resolver<Maybe<Array<ResolversTypes['ServiceForDistances']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1679,6 +1856,7 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
   canEditAllAlerts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canViewDistances?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   canViewServiceMonitoring?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
@@ -1737,6 +1915,13 @@ export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, Parent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OperatorForDistancesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorForDistances'] = ResolversParentTypes['OperatorForDistances']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  licenses?: Resolver<Maybe<Array<ResolversTypes['LicensesForDistance']>>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type OperatorPerformancePageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformancePage'] = ResolversParentTypes['OperatorPerformancePage']> = ResolversObject<{
   items?: Resolver<Array<ResolversTypes['OperatorPerformanceType']>, ParentType, ContextType>;
   pageInfo?: Resolver<Maybe<ResolversTypes['PageInfo']>, ParentType, ContextType>;
@@ -1744,6 +1929,7 @@ export type OperatorPerformancePageResolvers<ContextType = RequestContext, Paren
 }>;
 
 export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformanceType'] = ResolversParentTypes['OperatorPerformanceType']> = ResolversObject<{
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1758,6 +1944,12 @@ export type OperatorTypeResolvers<ContextType = RequestContext, ParentType exten
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   nocCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type OrganisationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Organisation'] = ResolversParentTypes['Organisation']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1792,6 +1984,7 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
 }>;
 
 export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTotalsType'] = ResolversParentTypes['PunctualityTotalsType']> = ResolversObject<{
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   averageDeviation?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1804,14 +1997,18 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
 
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   adminAreas?: Resolver<Maybe<Array<ResolversTypes['AdminAreasType']>>, ParentType, ContextType>;
+  adminOrgMap?: Resolver<Array<ResolversTypes['AdminOrgOperatorMap']>, ParentType, ContextType>;
   apiInfo?: Resolver<Maybe<ResolversTypes['ApiInfoType']>, ParentType, ContextType>;
   avlLineLevelStatus?: Resolver<Array<ResolversTypes['AvlLineLevelStatus']>, ParentType, ContextType, Partial<QueryAvlLineLevelStatusArgs>>;
   corridor?: Resolver<Maybe<ResolversTypes['CorridorNamespace']>, ParentType, ContextType>;
   dashboardVehicles?: Resolver<Array<ResolversTypes['DashboardVehicles']>, ParentType, ContextType, Partial<QueryDashboardVehiclesArgs>>;
+  distances?: Resolver<Array<ResolversTypes['Distance']>, ParentType, ContextType, Partial<QueryDistancesArgs>>;
+  distancesDropdowns?: Resolver<ResolversTypes['DistancesDropdown'], ParentType, ContextType>;
   embeddedUrl?: Resolver<ResolversTypes['AWSQuicksightUser'], ParentType, ContextType>;
   eventStats?: Resolver<Array<ResolversTypes['EventStatsType']>, ParentType, ContextType, RequireFields<QueryEventStatsArgs, 'end' | 'operatorId' | 'start'>>;
   events?: Resolver<Maybe<ResolversTypes['EventResponse']>, ParentType, ContextType, RequireFields<QueryEventsArgs, 'end' | 'operatorId' | 'start'>>;
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
+  getServicePatternDistanceGeom?: Resolver<ResolversTypes['ServicePatternDistanceResult'], ParentType, ContextType, RequireFields<QueryGetServicePatternDistanceGeomArgs, 'vehicleJourneyId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
@@ -1826,7 +2023,15 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
   userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
   userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
+  userOrgs?: Resolver<Array<ResolversTypes['Organisation']>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
+}>;
+
+export type ServiceForDistancesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceForDistances'] = ResolversParentTypes['ServiceForDistances']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  line?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceInfoType'] = ResolversParentTypes['ServiceInfoType']> = ResolversObject<{
@@ -1845,6 +2050,12 @@ export type ServiceLinkTypeResolvers<ContextType = RequestContext, ParentType ex
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type ServicePatternDistanceResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePatternDistanceResult'] = ResolversParentTypes['ServicePatternDistanceResult']> = ResolversObject<{
+  distance?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  geom?: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type ServicePatternTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePatternType'] = ResolversParentTypes['ServicePatternType']> = ResolversObject<{
   serviceLinks?: Resolver<Array<ResolversTypes['ServiceLinkType']>, ParentType, ContextType>;
   servicePatternId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1854,12 +2065,17 @@ export type ServicePatternTypeResolvers<ContextType = RequestContext, ParentType
 
 export type ServicePerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePerformanceType'] = ResolversParentTypes['ServicePerformanceType']> = ResolversObject<{
   actualDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   lineInfo?: Resolver<ResolversTypes['ServiceInfoType'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -1903,11 +2119,18 @@ export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType exten
 
 export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopPerformanceType'] = ResolversParentTypes['StopPerformanceType']> = ResolversObject<{
   actualDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  averageDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  averageActual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageScheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['Direction']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lineId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
@@ -1918,13 +2141,23 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
 export type StopStatisticsResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopStatistics'] = ResolversParentTypes['StopStatistics']> = ResolversObject<{
   adminAreaName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   atcoCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  averageActual?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageActualTimingPoint?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageDelay?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  averageScheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  averageScheduledTimingPoint?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   completedDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  countDelayed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  direction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  earlyInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lateInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   localityName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -1971,6 +2204,7 @@ export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType e
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
+  AdminOrgOperatorMap?: AdminOrgOperatorMapResolvers<ContextType>;
   AlertType?: AlertTypeResolvers<ContextType>;
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
   AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
@@ -1989,6 +2223,8 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   DelayFrequencyType?: DelayFrequencyTypeResolvers<ContextType>;
+  Distance?: DistanceResolvers<ContextType>;
+  DistancesDropdown?: DistancesDropdownResolvers<ContextType>;
   EventData?: EventDataResolvers<ContextType>;
   EventResponse?: EventResponseResolvers<ContextType>;
   EventStatsType?: EventStatsTypeResolvers<ContextType>;
@@ -2003,8 +2239,10 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
   InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
   InvitationType?: InvitationTypeResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   Journey?: JourneyResolvers<ContextType>;
   JourneyResult?: JourneyResultResolvers<ContextType>;
+  LicensesForDistance?: LicensesForDistanceResolvers<ContextType>;
   LineType?: LineTypeResolvers<ContextType>;
   LiveStatsType?: LiveStatsTypeResolvers<ContextType>;
   LocalityType?: LocalityTypeResolvers<ContextType>;
@@ -2014,17 +2252,21 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   MutationResponseType?: MutationResponseTypeResolvers<ContextType>;
   OnTimePerformanceType?: OnTimePerformanceTypeResolvers<ContextType>;
   OperatorFeedMonitoring?: OperatorFeedMonitoringResolvers<ContextType>;
+  OperatorForDistances?: OperatorForDistancesResolvers<ContextType>;
   OperatorPerformancePage?: OperatorPerformancePageResolvers<ContextType>;
   OperatorPerformanceType?: OperatorPerformanceTypeResolvers<ContextType>;
   OperatorType?: OperatorTypeResolvers<ContextType>;
+  Organisation?: OrganisationResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PunctualityDayOfWeekType?: PunctualityDayOfWeekTypeResolvers<ContextType>;
   PunctualityTimeOfDayType?: PunctualityTimeOfDayTypeResolvers<ContextType>;
   PunctualityTimeSeriesType?: PunctualityTimeSeriesTypeResolvers<ContextType>;
   PunctualityTotalsType?: PunctualityTotalsTypeResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  ServiceForDistances?: ServiceForDistancesResolvers<ContextType>;
   ServiceInfoType?: ServiceInfoTypeResolvers<ContextType>;
   ServiceLinkType?: ServiceLinkTypeResolvers<ContextType>;
+  ServicePatternDistanceResult?: ServicePatternDistanceResultResolvers<ContextType>;
   ServicePatternType?: ServicePatternTypeResolvers<ContextType>;
   ServicePerformanceType?: ServicePerformanceTypeResolvers<ContextType>;
   ServicePunctualityType?: ServicePunctualityTypeResolvers<ContextType>;
