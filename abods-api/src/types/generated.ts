@@ -1232,7 +1232,7 @@ export type ResolverTypeWrapper<T> = Promise<T> | T;
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -1269,27 +1269,29 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+export type SubscriptionResolver<TResult, TKey extends string, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
-export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+export type TypeResolveFn<TTypes, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
   parent: TParent,
   context: TContext,
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
   context: TContext,
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
+
+
 
 
 
@@ -1366,7 +1368,7 @@ export type ResolversTypes = ResolversObject<{
   LoginInfo: ResolverTypeWrapper<Partial<LoginInfo>>;
   LoginResponse: ResolverTypeWrapper<Partial<LoginResponse>>;
   MatchType: ResolverTypeWrapper<Partial<MatchType>>;
-  Mutation: ResolverTypeWrapper<{}>;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   MutationResponseType: ResolverTypeWrapper<Partial<MutationResponseType>>;
   OnTimePerformanceType: ResolverTypeWrapper<Partial<OnTimePerformanceType>>;
   OperatorFeedMonitoring: ResolverTypeWrapper<Partial<OperatorFeedMonitoring>>;
@@ -1386,7 +1388,7 @@ export type ResolversTypes = ResolversObject<{
   PunctualityTimeOfDayType: ResolverTypeWrapper<Partial<PunctualityTimeOfDayType>>;
   PunctualityTimeSeriesType: ResolverTypeWrapper<Partial<PunctualityTimeSeriesType>>;
   PunctualityTotalsType: ResolverTypeWrapper<Partial<PunctualityTotalsType>>;
-  Query: ResolverTypeWrapper<{}>;
+  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   RankingOrder: ResolverTypeWrapper<Partial<RankingOrder>>;
   RouteType: ResolverTypeWrapper<Partial<RouteType>>;
   ServiceForDistances: ResolverTypeWrapper<Partial<ServiceForDistances>>;
@@ -1482,7 +1484,7 @@ export type ResolversParentTypes = ResolversObject<{
   LocalityType: Partial<LocalityType>;
   LoginInfo: Partial<LoginInfo>;
   LoginResponse: Partial<LoginResponse>;
-  Mutation: {};
+  Mutation: Record<PropertyKey, never>;
   MutationResponseType: Partial<MutationResponseType>;
   OnTimePerformanceType: Partial<OnTimePerformanceType>;
   OperatorFeedMonitoring: Partial<OperatorFeedMonitoring>;
@@ -1501,7 +1503,7 @@ export type ResolversParentTypes = ResolversObject<{
   PunctualityTimeOfDayType: Partial<PunctualityTimeOfDayType>;
   PunctualityTimeSeriesType: Partial<PunctualityTimeSeriesType>;
   PunctualityTotalsType: Partial<PunctualityTotalsType>;
-  Query: {};
+  Query: Record<PropertyKey, never>;
   ServiceForDistances: Partial<ServiceForDistances>;
   ServiceInfoType: Partial<ServiceInfoType>;
   ServiceLinkType: Partial<ServiceLinkType>;
@@ -1529,14 +1531,12 @@ export type ResolversParentTypes = ResolversObject<{
 export type AwsQuicksightUserResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AWSQuicksightUser'] = ResolversParentTypes['AWSQuicksightUser']> = ResolversObject<{
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AdminAreasTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminAreasType'] = ResolversParentTypes['AdminAreasType']> = ResolversObject<{
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   shape?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AdminOrgOperatorMapResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AdminOrgOperatorMap'] = ResolversParentTypes['AdminOrgOperatorMap']> = ResolversObject<{
@@ -1545,7 +1545,6 @@ export type AdminOrgOperatorMapResolvers<ContextType = RequestContext, ParentTyp
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   orgId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   orgName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AlertTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AlertType'] = ResolversParentTypes['AlertType']> = ResolversObject<{
@@ -1555,20 +1554,17 @@ export type AlertTypeResolvers<ContextType = RequestContext, ParentType extends 
   eventHysterisis?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   eventThreshold?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   sendTo?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ApiInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ApiInfoType'] = ResolversParentTypes['ApiInfoType']> = ResolversObject<{
   buildNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AvlLineLevelStatusResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AvlLineLevelStatus'] = ResolversParentTypes['AvlLineLevelStatus']> = ResolversObject<{
   lastRecordedAtTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   lineName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AvlPointResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AvlPoint'] = ResolversParentTypes['AvlPoint']> = ResolversObject<{
@@ -1577,13 +1573,11 @@ export type AvlPointResolvers<ContextType = RequestContext, ParentType extends R
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   recordedAtTimeUtc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   vehicleRef?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorHistogramTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorHistogramType'] = ResolversParentTypes['CorridorHistogramType']> = ResolversObject<{
   bin?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   freq?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorNamespace'] = ResolversParentTypes['CorridorNamespace']> = ResolversObject<{
@@ -1592,7 +1586,6 @@ export type CorridorNamespaceResolvers<ContextType = RequestContext, ParentType 
   corridorList?: Resolver<Array<ResolversTypes['CorridorType']>, ParentType, ContextType>;
   getCorridor?: Resolver<Maybe<ResolversTypes['CorridorType']>, ParentType, ContextType, RequireFields<CorridorNamespaceGetCorridorArgs, 'corridorId'>>;
   stats?: Resolver<Maybe<ResolversTypes['CorridorStatsType']>, ParentType, ContextType, RequireFields<CorridorNamespaceStatsArgs, 'inputs'>>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorStatsDayOfWeekTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsDayOfWeekType'] = ResolversParentTypes['CorridorStatsDayOfWeekType']> = ResolversObject<{
@@ -1602,13 +1595,11 @@ export type CorridorStatsDayOfWeekTypeResolvers<ContextType = RequestContext, Pa
   minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorStatsHistogramTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsHistogramType'] = ResolversParentTypes['CorridorStatsHistogramType']> = ResolversObject<{
   hist?: Resolver<Array<ResolversTypes['CorridorHistogramType']>, ParentType, ContextType>;
   ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorStatsPerServiceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsPerServiceType'] = ResolversParentTypes['CorridorStatsPerServiceType']> = ResolversObject<{
@@ -1619,7 +1610,6 @@ export type CorridorStatsPerServiceTypeResolvers<ContextType = RequestContext, P
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   servicePatternName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   totalTransitTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorStatsTimeOfDayTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsTimeOfDayType'] = ResolversParentTypes['CorridorStatsTimeOfDayType']> = ResolversObject<{
@@ -1629,7 +1619,6 @@ export type CorridorStatsTimeOfDayTypeResolvers<ContextType = RequestContext, Pa
   minTransitTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorStatsType'] = ResolversParentTypes['CorridorStatsType']> = ResolversObject<{
@@ -1640,7 +1629,6 @@ export type CorridorStatsTypeResolvers<ContextType = RequestContext, ParentType 
   transitTimePerServiceStats?: Resolver<Array<ResolversTypes['CorridorStatsPerServiceType']>, ParentType, ContextType>;
   transitTimeStats?: Resolver<Array<ResolversTypes['CorridorTransitTimeStatsType']>, ParentType, ContextType>;
   transitTimeTimeOfDayStats?: Resolver<Array<ResolversTypes['CorridorStatsTimeOfDayType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorSummaryStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorSummaryStatsType'] = ResolversParentTypes['CorridorSummaryStatsType']> = ResolversObject<{
@@ -1648,7 +1636,6 @@ export type CorridorSummaryStatsTypeResolvers<ContextType = RequestContext, Pare
   numberOfServices?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   scheduledTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalTransits?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorTransitTimeStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorTransitTimeStatsType'] = ResolversParentTypes['CorridorTransitTimeStatsType']> = ResolversObject<{
@@ -1658,21 +1645,18 @@ export type CorridorTransitTimeStatsTypeResolvers<ContextType = RequestContext, 
   percentile25?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   percentile75?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type CorridorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['CorridorType'] = ResolversParentTypes['CorridorType']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['StopInfoType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type DashboardVehiclesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DashboardVehicles'] = ResolversParentTypes['DashboardVehicles']> = ResolversObject<{
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -1686,7 +1670,6 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export type DelayFrequencyTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DelayFrequencyType'] = ResolversParentTypes['DelayFrequencyType']> = ResolversObject<{
   bucket?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   frequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type DistanceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Distance'] = ResolversParentTypes['Distance']> = ResolversObject<{
@@ -1697,35 +1680,29 @@ export type DistanceResolvers<ContextType = RequestContext, ParentType extends R
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type DistancesDropdownResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['DistancesDropdown'] = ResolversParentTypes['DistancesDropdown']> = ResolversObject<{
   operators?: Resolver<Maybe<Array<ResolversTypes['OperatorForDistances']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type EventDataResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventData'] = ResolversParentTypes['EventData']> = ResolversObject<{
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type EventResponseResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventResponse'] = ResolversParentTypes['EventResponse']> = ResolversObject<{
   items?: Resolver<Array<ResolversTypes['EventType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type EventStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventStatsType'] = ResolversParentTypes['EventStatsType']> = ResolversObject<{
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   day?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type EventTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['EventType'] = ResolversParentTypes['EventType']> = ResolversObject<{
   data?: Resolver<ResolversTypes['EventData'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FeedMonitoringType'] = ResolversParentTypes['FeedMonitoringType']> = ResolversObject<{
@@ -1737,24 +1714,20 @@ export type FeedMonitoringTypeResolvers<ContextType = RequestContext, ParentType
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableSince?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   vehicleStats?: Resolver<Maybe<Array<ResolversTypes['VehicleStatsType']>>, ParentType, ContextType, RequireFields<FeedMonitoringTypeVehicleStatsArgs, 'end' | 'granularity' | 'start'>>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type FrequentServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FrequentServiceInfoType'] = ResolversParentTypes['FrequentServiceInfoType']> = ResolversObject<{
   numHours?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalHours?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type FrequentServiceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['FrequentServiceType'] = ResolversParentTypes['FrequentServiceType']> = ResolversObject<{
   serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type GpsPointTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['GpsPointType'] = ResolversParentTypes['GpsPointType']> = ResolversObject<{
   latitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   longitude?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayMetricsType'] = ResolversParentTypes['HeadwayMetricsType']> = ResolversObject<{
@@ -1762,12 +1735,10 @@ export type HeadwayMetricsTypeResolvers<ContextType = RequestContext, ParentType
   frequentServices?: Resolver<Maybe<Array<ResolversTypes['FrequentServiceType']>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeFrequentServicesArgs, 'fromTimestamp' | 'operatorId' | 'toTimestamp'>>;
   headwayOverview?: Resolver<Maybe<ResolversTypes['HeadwayOverviewType']>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayOverviewArgs, 'inputs'>>;
   headwayTimeSeries?: Resolver<Maybe<Array<ResolversTypes['HeadwayTimeSeriesType']>>, ParentType, ContextType, RequireFields<HeadwayMetricsTypeHeadwayTimeSeriesArgs, 'inputs'>>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayOverviewTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayOverviewType'] = ResolversParentTypes['HeadwayOverviewType']> = ResolversObject<{
   excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HeadwayTimeSeriesType'] = ResolversParentTypes['HeadwayTimeSeriesType']> = ResolversObject<{
@@ -1775,25 +1746,21 @@ export type HeadwayTimeSeriesTypeResolvers<ContextType = RequestContext, ParentT
   excess?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduled?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type HistoricalStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['HistoricalStatsType'] = ResolversParentTypes['HistoricalStatsType']> = ResolversObject<{
   availability?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   updateFrequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type InvitationResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['InvitationResponseType'] = ResolversParentTypes['InvitationResponseType']> = ResolversObject<{
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type InvitationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['InvitationType'] = ResolversParentTypes['InvitationType']> = ResolversObject<{
   accepted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
@@ -1809,19 +1776,16 @@ export type JourneyResolvers<ContextType = RequestContext, ParentType extends Re
   serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   vehicleJourneyId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type JourneyResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['JourneyResult'] = ResolversParentTypes['JourneyResult']> = ResolversObject<{
   avls?: Resolver<Array<ResolversTypes['AvlPoint']>, ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['Stop']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LicensesForDistanceResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LicensesForDistance'] = ResolversParentTypes['LicensesForDistance']> = ResolversObject<{
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   services?: Resolver<Maybe<Array<ResolversTypes['ServiceForDistances']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LineTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LineType'] = ResolversParentTypes['LineType']> = ResolversObject<{
@@ -1829,7 +1793,6 @@ export type LineTypeResolvers<ContextType = RequestContext, ParentType extends R
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LiveStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LiveStatsType'] = ResolversParentTypes['LiveStatsType']> = ResolversObject<{
@@ -1841,7 +1804,6 @@ export type LiveStatsTypeResolvers<ContextType = RequestContext, ParentType exte
   last24Hours?: Resolver<Maybe<Array<ResolversTypes['VehicleStatsType']>>, ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateFrequency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LocalityTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LocalityType'] = ResolversParentTypes['LocalityType']> = ResolversObject<{
@@ -1849,7 +1811,6 @@ export type LocalityTypeResolvers<ContextType = RequestContext, ParentType exten
   localityAreaName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   localityId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   localityName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginInfo'] = ResolversParentTypes['LoginInfo']> = ResolversObject<{
@@ -1859,13 +1820,11 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
   currentUserId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   flags?: Resolver<Array<ResolversTypes['FeatureFlag']>, ParentType, ContextType>;
   serviceMonitoringEmbedUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type LoginResponseResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
   expiresAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type MutationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
@@ -1889,7 +1848,6 @@ export type MutationResolvers<ContextType = RequestContext, ParentType extends R
 export type MutationResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['MutationResponseType'] = ResolversParentTypes['MutationResponseType']> = ResolversObject<{
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OnTimePerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OnTimePerformanceType'] = ResolversParentTypes['OnTimePerformanceType']> = ResolversObject<{
@@ -1902,7 +1860,6 @@ export type OnTimePerformanceTypeResolvers<ContextType = RequestContext, ParentT
   servicePerformance?: Resolver<Maybe<Array<ResolversTypes['ServicePerformanceType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeServicePerformanceArgs, 'inputs'>>;
   servicePunctuality?: Resolver<Array<ResolversTypes['ServicePunctualityType']>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeServicePunctualityArgs, 'inputs'>>;
   stopPerformance?: Resolver<Maybe<Array<ResolversTypes['StopPerformanceType']>>, ParentType, ContextType, RequireFields<OnTimePerformanceTypeStopPerformanceArgs, 'inputs'>>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorFeedMonitoring'] = ResolversParentTypes['OperatorFeedMonitoring']> = ResolversObject<{
@@ -1910,20 +1867,17 @@ export type OperatorFeedMonitoringResolvers<ContextType = RequestContext, Parent
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   nocCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OperatorForDistancesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorForDistances'] = ResolversParentTypes['OperatorForDistances']> = ResolversObject<{
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   licenses?: Resolver<Maybe<Array<ResolversTypes['LicensesForDistance']>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OperatorPerformancePageResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformancePage'] = ResolversParentTypes['OperatorPerformancePage']> = ResolversObject<{
   items?: Resolver<Array<ResolversTypes['OperatorPerformanceType']>, ParentType, ContextType>;
   pageInfo?: Resolver<Maybe<ResolversTypes['PageInfo']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorPerformanceType'] = ResolversParentTypes['OperatorPerformanceType']> = ResolversObject<{
@@ -1934,7 +1888,6 @@ export type OperatorPerformanceTypeResolvers<ContextType = RequestContext, Paren
   nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   operatorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OperatorTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['OperatorType'] = ResolversParentTypes['OperatorType']> = ResolversObject<{
@@ -1942,19 +1895,16 @@ export type OperatorTypeResolvers<ContextType = RequestContext, ParentType exten
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   nocCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OrganisationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Organisation'] = ResolversParentTypes['Organisation']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PageInfoResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   next?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PunctualityDayOfWeekTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityDayOfWeekType'] = ResolversParentTypes['PunctualityDayOfWeekType']> = ResolversObject<{
@@ -1962,7 +1912,6 @@ export type PunctualityDayOfWeekTypeResolvers<ContextType = RequestContext, Pare
   early?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PunctualityTimeOfDayTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTimeOfDayType'] = ResolversParentTypes['PunctualityTimeOfDayType']> = ResolversObject<{
@@ -1970,7 +1919,6 @@ export type PunctualityTimeOfDayTypeResolvers<ContextType = RequestContext, Pare
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   timeOfDay?: Resolver<ResolversTypes['Time'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTimeSeriesType'] = ResolversParentTypes['PunctualityTimeSeriesType']> = ResolversObject<{
@@ -1978,7 +1926,6 @@ export type PunctualityTimeSeriesTypeResolvers<ContextType = RequestContext, Par
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   ts?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['PunctualityTotalsType'] = ResolversParentTypes['PunctualityTotalsType']> = ResolversObject<{
@@ -1990,7 +1937,6 @@ export type PunctualityTotalsTypeResolvers<ContextType = RequestContext, ParentT
   late?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   scheduled?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type QueryResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
@@ -2029,14 +1975,12 @@ export type ServiceForDistancesResolvers<ContextType = RequestContext, ParentTyp
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   line?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceInfoType'] = ResolversParentTypes['ServiceInfoType']> = ResolversObject<{
   serviceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServiceLinkTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceLinkType'] = ResolversParentTypes['ServiceLinkType']> = ResolversObject<{
@@ -2045,20 +1989,17 @@ export type ServiceLinkTypeResolvers<ContextType = RequestContext, ParentType ex
   linkRoute?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   routeValidity?: Resolver<ResolversTypes['RouteType'], ParentType, ContextType>;
   toStop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServicePatternDistanceResultResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePatternDistanceResult'] = ResolversParentTypes['ServicePatternDistanceResult']> = ResolversObject<{
   distance?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   geom?: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServicePatternTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePatternType'] = ResolversParentTypes['ServicePatternType']> = ResolversObject<{
   serviceLinks?: Resolver<Array<ResolversTypes['ServiceLinkType']>, ParentType, ContextType>;
   servicePatternId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stops?: Resolver<Array<ResolversTypes['StopType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServicePerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePerformanceType'] = ResolversParentTypes['ServicePerformanceType']> = ResolversObject<{
@@ -2075,7 +2016,6 @@ export type ServicePerformanceTypeResolvers<ContextType = RequestContext, Parent
   onTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   onTimeInSeconds?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   scheduledDepartures?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ServicePunctualityTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServicePunctualityType'] = ResolversParentTypes['ServicePunctualityType']> = ResolversObject<{
@@ -2086,7 +2026,6 @@ export type ServicePunctualityTypeResolvers<ContextType = RequestContext, Parent
   nocCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   onTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   trend?: Resolver<Maybe<ResolversTypes['ServicePunctualityType']>, ParentType, ContextType, RequireFields<ServicePunctualityTypeTrendArgs, 'fromTimestamp' | 'toTimestamp'>>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StopResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Stop'] = ResolversParentTypes['Stop']> = ResolversObject<{
@@ -2103,7 +2042,6 @@ export type StopResolvers<ContextType = RequestContext, ParentType extends Resol
   stopId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopInfoType'] = ResolversParentTypes['StopInfoType']> = ResolversObject<{
@@ -2112,7 +2050,6 @@ export type StopInfoTypeResolvers<ContextType = RequestContext, ParentType exten
   stopLocality?: Resolver<ResolversTypes['LocalityType'], ParentType, ContextType>;
   stopLocation?: Resolver<ResolversTypes['GpsPointType'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopPerformanceType'] = ResolversParentTypes['StopPerformanceType']> = ResolversObject<{
@@ -2133,7 +2070,6 @@ export type StopPerformanceTypeResolvers<ContextType = RequestContext, ParentTyp
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopInfo?: Resolver<ResolversTypes['StopInfoType'], ParentType, ContextType>;
   timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StopStatisticsResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopStatistics'] = ResolversParentTypes['StopStatistics']> = ResolversObject<{
@@ -2160,7 +2096,6 @@ export type StopStatisticsResolvers<ContextType = RequestContext, ParentType ext
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timingPoint?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   totalDelay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type StopTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['StopType'] = ResolversParentTypes['StopType']> = ResolversObject<{
@@ -2171,7 +2106,6 @@ export type StopTypeResolvers<ContextType = RequestContext, ParentType extends R
   sourceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stopId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stopName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Time'], any> {
@@ -2183,20 +2117,17 @@ export type UserTypeResolvers<ContextType = RequestContext, ParentType extends R
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type UserUpdateResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserUpdateResponseType'] = ResolversParentTypes['UserUpdateResponseType']> = ResolversObject<{
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = RequestContext> = ResolversObject<{
