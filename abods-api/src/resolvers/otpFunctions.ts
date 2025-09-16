@@ -49,7 +49,7 @@ import {
   getUserOperatorIds,
   getUserOperatorIdsQuery,
 } from "../lib/operators.js";
-import { Kysely, sql } from "kysely";
+import { Kysely, SelectQueryBuilder, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs from "dayjs";
@@ -359,7 +359,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           .where("hour", "<=", end);
       }
 
-      const results = await mainQuery.execute();
+      const results = await executeQuery(mainQuery);
 
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
@@ -416,6 +416,12 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       return null;
     }
   };
+
+export async function executeQuery<T>(
+  query: SelectQueryBuilder<DB, never, T>,
+): Promise<T[]> {
+  return await query.execute();
+}
 
 export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPerformance"] =
   async (_, args, context): Promise<Maybe<OperatorPerformancePage>> => {
