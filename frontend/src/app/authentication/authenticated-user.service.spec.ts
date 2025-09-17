@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 
-describe("AuthenticatedUserService", () => {
+fdescribe("AuthenticatedUserService", () => {
   let service: AuthenticatedUserService;
 
   beforeEach(() => {

@@ -275,7 +275,7 @@ export const loginUser: MutationResolvers["login"] = async (
         `abods-db-user-id:${user_id}`,
         ...orgNames.map((name) => `org:${name}`),
       );
-      return { success: true, expiresAt: expiryTimestamp };
+      return { success: true, expiresAt: expires.toISOString() };
     } else {
       logger.debug("Invalid password entered");
       throw "Invalid username or password";

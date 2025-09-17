@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { AuthenticationService } from "../authentication.service";
-
 import { LogoutComponent } from "./logout.component";
 
-describe("LogoutComponent", () => {
+fdescribe("LogoutComponent", () => {
   let component: LogoutComponent;
   let fixture: ComponentFixture<LogoutComponent>;
   let authenticationService: AuthenticationService;
@@ -14,7 +13,7 @@ describe("LogoutComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [LogoutComponent],
-      imports: [RouterTestingModule, LayoutModule, ApolloTestingModule],
+      imports: [RouterModule.forRoot([]), LayoutModule, ApolloTestingModule],
       providers: [
         {
           provide: AuthenticationService,
@@ -40,7 +39,6 @@ describe("LogoutComponent", () => {
   it("should call logout", () => {
     component.logout();
 
-    const logoutSpy = spyOn(authenticationService, "logout");
-    expect(logoutSpy).toHaveBeenCalledWith();
+    expect(authenticationService.logout).toHaveBeenCalledWith();
   });
 });

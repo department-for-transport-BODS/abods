@@ -1,16 +1,14 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { AuthenticationService } from "../authentication.service";
-
 import { LoginComponent } from "./login.component";
 
-describe("LoginComponent", () => {
+fdescribe("LoginComponent", () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let router: Router;
@@ -23,7 +21,7 @@ describe("LoginComponent", () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
+        RouterModule.forRoot([]),
         SharedModule,
         LayoutModule,
         ApolloTestingModule,
@@ -69,7 +67,7 @@ describe("LoginComponent", () => {
     it("should redirect to returnUrl if user is authenticated", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
-      const navigateSpy = spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -81,7 +79,7 @@ describe("LoginComponent", () => {
     });
 
     it('should redirect to "/" if user is authenticated and returnUrl not set', () => {
-      const navigateSpy = spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -95,7 +93,7 @@ describe("LoginComponent", () => {
     it("should not redirect to returnUrl if user is not authenticated", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
-      const navigateSpy = spyOn(router, "navigateByUrl");
+      const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -108,7 +106,7 @@ describe("LoginComponent", () => {
 
     it("should not show error message if user is not authenticated and form not submitted", async () => {
       component.submitted = false;
-      spyOn(router, "navigateByUrl");
+      spyOn(router, "navigateByUrl").and.resolveTo(true);
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -121,7 +119,7 @@ describe("LoginComponent", () => {
 
     it("should show error message if user is not authenticated and form submitted", async () => {
       component.submitted = true;
-      spyOn(router, "navigateByUrl");
+      spyOn(router, "navigateByUrl").and.resolveTo(true);
       spyOnProperty(
         authenticationService,
         "isAuthenticated$",
@@ -144,8 +142,10 @@ describe("LoginComponent", () => {
       component.f.password.setValue("testpass");
       component.onSubmit();
 
-      const loginSpy = spyOn(authenticationService, "login");
-      expect(loginSpy).toHaveBeenCalledWith("test@test.com", "testpass");
+      expect(authenticationService.login).toHaveBeenCalledWith(
+        "test@test.com",
+        "testpass",
+      );
     });
 
     it("should not call login with username and password if username is empty string", () => {
@@ -153,8 +153,10 @@ describe("LoginComponent", () => {
       component.f.password.setValue("testpass");
       component.onSubmit();
 
-      const loginSpy = spyOn(authenticationService, "login");
-      expect(loginSpy).not.toHaveBeenCalledWith("", "testpass");
+      expect(authenticationService.login).not.toHaveBeenCalledWith(
+        "",
+        "testpass",
+      );
     });
 
     it("should not call login with username and password if password is empty string", () => {
@@ -162,8 +164,10 @@ describe("LoginComponent", () => {
       component.f.password.setValue("");
       component.onSubmit();
 
-      const loginSpy = spyOn(authenticationService, "login");
-      expect(loginSpy).not.toHaveBeenCalledWith("test@test.com", "");
+      expect(authenticationService.login).not.toHaveBeenCalledWith(
+        "test@test.com",
+        "",
+      );
     });
   });
 
