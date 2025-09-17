@@ -263,7 +263,7 @@ describe("VehicleJourneysViewComponent", () => {
   });
 
   it("should display cancellation warning if selected journey is marked as cancelled", () => {
-    spyOn(viewService, "getVehicleJourneyView").and.returnValue(of(mockView));
+    spyOn(viewService, "getVehicleJourneyView").and.returnValue(of(true));
     spectator.setRouteParam("journeyId", journeyId);
     spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
 

@@ -12,7 +12,9 @@ dist
 .build
 .angular
 
+# IDEs
 .idea
+.vscode
 
 # System Files
 .DS_Store
@@ -23,3 +25,4 @@ generated_api_secrets/
 .eslintcache
 
 /abods-api/src/kysely.ts
+/frontend/coverage/

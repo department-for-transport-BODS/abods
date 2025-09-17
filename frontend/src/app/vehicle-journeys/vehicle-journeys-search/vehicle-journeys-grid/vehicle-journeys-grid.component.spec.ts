@@ -25,6 +25,7 @@ describe("VehicleJourneysGridComponent", () => {
       operatorNoc: "OP01",
       serviceName: "OP1",
       serviceNumber: "1",
+      isCancelled: false,
     },
     {
       groupId: "VJf3c22dad",
@@ -33,6 +34,7 @@ describe("VehicleJourneysGridComponent", () => {
       operatorNoc: "OP02",
       serviceName: "OP2",
       serviceNumber: "2",
+      isCancelled: false,
     },
     {
       groupId: "VJa3968321",
@@ -41,6 +43,7 @@ describe("VehicleJourneysGridComponent", () => {
       operatorNoc: "OP03",
       serviceName: "OP3",
       serviceNumber: "3",
+      isCancelled: false,
     },
     {
       groupId: "VJ4aa8804d",
@@ -49,6 +52,7 @@ describe("VehicleJourneysGridComponent", () => {
       operatorNoc: "OP04",
       serviceName: "OP4",
       serviceNumber: "4",
+      isCancelled: false,
     },
     {
       groupId: "VJa921fcb5",
@@ -57,6 +61,7 @@ describe("VehicleJourneysGridComponent", () => {
       operatorNoc: "OP05",
       serviceName: "OP5",
       serviceNumber: "5",
+      isCancelled: false,
     },
   ];
 

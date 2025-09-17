@@ -22,6 +22,7 @@ describe("JourneyInfoComponent", () => {
     serviceName: "SN1",
     serviceNumber: "1",
     startTime: startTime.toISO(),
+    isCancelled: false,
   };
 
   beforeEach(async () => {

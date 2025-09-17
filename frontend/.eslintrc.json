@@ -5,13 +5,17 @@
     "src/test-support/*",
     "**/generated/graphql.ts"
   ],
-  "plugins": ["jasmine"],
+  "plugins": [
+    "jasmine"
+  ],
   "overrides": [
     {
       "files": [
         "*.ts"
       ],
-      "plugins": ["jasmine"],
+      "plugins": [
+        "jasmine"
+      ],
       "parserOptions": {
         "project": [
           "**/tsconfig.json"
@@ -87,7 +91,9 @@
       ]
     },
     {
-      "files": ["*.graphql"],
+      "files": [
+        "*.graphql"
+      ],
       "extends": "plugin:@graphql-eslint/operations-recommended",
       "parserOptions": {
         "graphQLConfig": {
@@ -100,10 +106,12 @@
       }
     },
     {
-      "files": ["*.spec.ts"],
+      "files": [
+        "*.spec.ts"
+      ],
       "rules": {
         "@typescript-eslint/unbound-method": "warn",
-        "@typescript-eslint/no-floating-promises":"warn"
+        "@typescript-eslint/no-floating-promises": "warn"
       }
     }
   ]

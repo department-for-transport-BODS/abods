@@ -41,6 +41,7 @@ describe("JourneyNavComponent", () => {
         operatorNoc: "OP01",
         serviceName: "SN1",
         serviceNumber: "1",
+        isCancelled: false,
       },
       {
         groupId: "VJ003",
@@ -49,6 +50,7 @@ describe("JourneyNavComponent", () => {
         operatorNoc: "OP01",
         serviceName: "SN1",
         serviceNumber: "1",
+        isCancelled: false,
       },
     ];
     spectator.detectChanges();
