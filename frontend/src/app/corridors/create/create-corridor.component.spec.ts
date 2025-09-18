@@ -1,4 +1,9 @@
-import { CreateCorridorComponent } from "./create-corridor.component";
+import { CommonModule } from "@angular/common";
+import { EventEmitter, Input, Output } from "@angular/core";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Router } from "@angular/router";
+import { RouterTestingModule } from "@angular/router/testing";
+import { NgSelectModule } from "@ng-select/ng-select";
 import {
   byLabel,
   byText,
@@ -9,34 +14,29 @@ import {
   SpectatorRouting,
   SpyObject,
 } from "@ngneat/spectator";
-import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
-import { RouterTestingModule } from "@angular/router/testing";
-import { CorridorsService } from "../corridors.service";
-import { EMPTY, of, throwError } from "rxjs";
-import { Router } from "@angular/router";
-import { ApolloTestingModule } from "apollo-angular/testing";
-import { GeocodingService } from "../../shared/mapbox/geocoding.service";
 import { featureCollection, point, Position } from "@turf/helpers";
-import { NgSelectModule } from "@ng-select/ng-select";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { ApolloTestingModule } from "apollo-angular/testing";
 import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { EventEmitter, Input, Output } from "@angular/core";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
+import { EMPTY, of, throwError } from "rxjs";
+import { LayoutModule } from "../../layout/layout.module";
+import { GeocodingService } from "../../shared/mapbox/geocoding.service";
 import {
   GeocodingContext,
   GeocodingFeature,
   GeocodingResult,
 } from "../../shared/mapbox/geocoding.types";
-import { CommonModule } from "@angular/common";
-import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
-import { StopSearchListComponent } from "./stop-search-list/stop-search-list.component";
-import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
-import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
-import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
+import { SharedModule } from "../../shared/shared.module";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
+import { CorridorsService } from "../corridors.service";
+import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
 import { Corridor } from "../types";
-import { NgxMapboxGLModule } from "ngx-mapbox-gl";
-import { NgxSmartModalModule } from "ngx-smart-modal";
+import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
+import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
+import { CreateCorridorComponent } from "./create-corridor.component";
+import { StopSearchListComponent } from "./stop-search-list/stop-search-list.component";
 
 const testStop1 = {
   stopId: "ST012345",
@@ -507,7 +507,7 @@ describe("CreateCorridorComponent", () => {
       spectator.component.setMapBounds(geocodingFeature);
       spectator.detectChanges();
 
-      expect(spectator.component.corridorMap?.map?.flyTo).toHaveBeenCalledWith({
+      expect(spectator.component.corridorMap.map!.flyTo).toHaveBeenCalledWith({
         duration: 0,
         zoom: 15,
       });
