@@ -33,13 +33,14 @@ describe("LogoutComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   it("should call logout", () => {
     component.logout();
 
-    expect(authenticationService.logout).toHaveBeenCalledWith();
+    const logoutSpy = spyOn(authenticationService, "logout");
+    expect(logoutSpy).toHaveBeenCalledWith();
   });
 });

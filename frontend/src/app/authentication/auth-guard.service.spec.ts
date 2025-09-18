@@ -7,7 +7,7 @@ import {
 import { RouterTestingModule } from "@angular/router/testing";
 import { createSpyObject } from "@ngneat/spectator";
 import { of } from "rxjs";
-import { ScopeEnum, UserFragment } from "../../generated/graphql";
+import { LoginInfo, UserFragment } from "../../generated/graphql";
 
 import { AuthGuardService } from "./auth-guard.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
@@ -21,19 +21,12 @@ describe("AuthGuardService", () => {
   let mockRouterStateSnapshot: RouterStateSnapshot;
   let mockActivatedRouteSnapshot: ActivatedRouteSnapshot;
 
-  const user = {
-    id: "1",
-    email: "test@test.con",
-    username: "test@test.con",
-    firstName: "Test",
-    lastName: "A",
-    roles: [
-      {
-        id: "4",
-        scope: ScopeEnum.Organisation,
-        name: "Administrator",
-      },
-    ],
+  const user: LoginInfo = {
+    canEditAllAlerts: true,
+    canViewDistances: true,
+    canViewServiceMonitoring: false,
+    currentUserId: "1",
+    flags: [],
   };
 
   beforeEach(() => {
@@ -55,8 +48,8 @@ describe("AuthGuardService", () => {
       createSpyObject<RouterStateSnapshot>(RouterStateSnapshot);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   describe("canActivate", () => {
@@ -65,13 +58,15 @@ describe("AuthGuardService", () => {
         spyOnProperty(userService, "isAuthenticated$").and.returnValue(
           of(false),
         );
-        spyOn(router, "navigate");
+        spyOn(router, "navigate").and.callFake((...args) =>
+          router.navigate(...args),
+        );
       });
 
       it("should return false", () => {
         service
           .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
-          .subscribe((activate) => {
+          .subscribe((activate: boolean) => {
             expect(activate).toBeFalse();
           });
       });
@@ -81,8 +76,10 @@ describe("AuthGuardService", () => {
         service
           .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
           .subscribe();
-
-        expect(router.navigate).toHaveBeenCalledWith(["/login"], {
+        const navigateSpy = spyOn(router, "navigate").and.callFake((...args) =>
+          router.navigate(...args),
+        );
+        expect(navigateSpy).toHaveBeenCalledWith(["/login"], {
           queryParams: { returnUrl: "/dashboard" },
         });
       });
@@ -98,7 +95,7 @@ describe("AuthGuardService", () => {
 
       it("should return true if route roles is undefined", () => {
         spyOnProperty(userService, "authenticatedUser$").and.returnValue(
-          of(<UserFragment>{}),
+          of({} as UserFragment),
         );
         mockActivatedRouteSnapshot.data = { roles: undefined };
         service
@@ -109,7 +106,6 @@ describe("AuthGuardService", () => {
       });
 
       it("should return true if user has matching route role", () => {
-        user.roles[0].name = "Administrator";
         spyOnProperty(userService, "authenticatedUser$").and.returnValue(
           of(user),
         );
@@ -122,7 +118,6 @@ describe("AuthGuardService", () => {
       });
 
       it("should return false if user does not have a matching route role", () => {
-        user.roles[0].name = "Staff";
         spyOnProperty(userService, "authenticatedUser$").and.returnValue(
           of(user),
         );

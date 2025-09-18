@@ -21,11 +21,15 @@ import {
   LngLatLike,
   Map,
 } from "mapbox-gl";
-import { MapComponent } from "ngx-mapbox-gl";
+import { MapComponent, NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { EMPTY } from "rxjs";
 import { ConfigService } from "../../../config/config.service";
-import { CorridorsService, Stop } from "../../corridors.service";
+import { CorridorsService } from "../../corridors.service";
 import { CorridorMapComponent } from "./corridor-map.component";
+import { CorridorStop } from "../../types";
+import { SharedModule } from "../../../shared/shared.module";
+import { GdsModule } from "../../../shared/gds/gds.module";
+import { NgxSmartModalModule } from "ngx-smart-modal";
 
 /**
  * A bare-minimum stub for ngx-mapbox-gl
@@ -56,11 +60,6 @@ export class StubMapComponent implements OnInit {
     this.bounds = new LngLatBounds(sw, ne);
     this.moveEnd.emit();
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  setFeatureState = (
-    feature: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
-    state: { [key: string]: any },
-  ) => {};
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -73,32 +72,51 @@ describe("CorridorMapComponent", () => {
   let spectator: Spectator<CorridorMapComponent>;
   let corridorsService: SpyObject<CorridorsService>;
 
-  const mockPointFeatureCollection = <FeatureCollection<Point, Stop>>{
+  const mockPointFeatureCollection: FeatureCollection<Point, CorridorStop> = {
     type: "FeatureCollection",
     features: [
-      <Feature<Point, Stop>>{
+      {
+        type: "Feature",
         geometry: {
           type: "Point",
           coordinates: [-1.47, 53.37],
         },
+        properties: {
+          stopId: "test-stop",
+          stopName: "Test Stop",
+        } as CorridorStop,
+        id: "test-stop",
       },
     ],
   };
-  const mockLineStringFeatureCollection = <FeatureCollection<LineString>>{
+  const mockLineStringFeatureCollection: FeatureCollection<LineString> = {
     type: "FeatureCollection",
     features: [
-      <Feature<LineString>>{
+      {
         geometry: {
           type: "LineString",
           coordinates: [[-1.47, 53.37]],
         },
       },
     ],
+  } as FeatureCollection<LineString>;
+
+  const mockStop: Feature<Point, CorridorStop> = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [-1.47, 53.37],
+    },
+    properties: {
+      stopId: "test-stop",
+      stopName: "Test Stop",
+    } as CorridorStop,
+    id: "test",
   };
-  const mockStop = <Feature<Point, Stop>>{ id: "test" };
 
   const createComponent = createComponentFactory({
     component: CorridorMapComponent,
+    imports: [SharedModule, GdsModule, NgxMapboxGLModule, NgxSmartModalModule],
     declarations: [StubMapComponent],
     mocks: [CorridorsService, ConfigService],
     detectChanges: true,
@@ -199,17 +217,19 @@ describe("CorridorMapComponent", () => {
   });
 
   it("should clear hover state", () => {
-    const mockMap = <Map>{
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    const mockMap = {
       getFeatureState: (
-        feature: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
-      ): any => {},
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+        _feature: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
+      ): any => {
+        return undefined;
+      },
       removeFeatureState: (
-        target: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
-        key?: string,
-      ) => {},
-    };
+        _target: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
+        _key?: string,
+      ) => {
+        return undefined;
+      },
+    } as Map;
     spyOn(mockMap, "getFeatureState").and.returnValue({ hover: true });
     spyOn(mockMap, "removeFeatureState");
 

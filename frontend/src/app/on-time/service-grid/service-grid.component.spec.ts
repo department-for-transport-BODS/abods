@@ -11,7 +11,7 @@ import { ServiceGridComponent } from "./service-grid.component";
 import { CommonModule, PercentPipe } from "@angular/common";
 import { OnTimeModule } from "../on-time.module";
 import { onTimeInputParams } from "../on-time.test-constants";
-import {} from "@angular/common/http/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import {
   FrequentServicePerformance,
   PerformanceService,
@@ -21,7 +21,7 @@ import { ApolloTestingModule } from "apollo-angular/testing";
 
 describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
-  let onTimeService: OnTimeService;
+  let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;
   const listSubj = new BehaviorSubject<FrequentServicePerformance[]>([]);
 
@@ -88,7 +88,7 @@ describe("ServiceGridComponent", () => {
   beforeEach(() => {
     spectator = createComponent();
 
-    onTimeService = spectator.inject(OnTimeService);
+    _onTimeService = spectator.inject(OnTimeService);
     performanceService = spectator.inject(PerformanceService);
     spyOn(performanceService, "fetchServicePerformance").and.returnValue(
       listSubj.asObservable(),

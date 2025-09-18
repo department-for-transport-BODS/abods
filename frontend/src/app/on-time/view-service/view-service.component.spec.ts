@@ -27,6 +27,19 @@ import { OperatorService } from "../../shared/services/operator.service";
 import { waitForAsync } from "@angular/core/testing";
 import { PerformanceService } from "../performance.service";
 import { cloneDeep } from "lodash-es";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { DayOfWeekChartComponent } from "../day-of-week-chart/day-of-week-chart.component";
+import { ExcessWaitTimeChartComponent } from "../excess-wait-time-chart/excess-wait-time-chart.component";
+import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { OnTimeModule } from "../on-time.module";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
+import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
+import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OverviewStatsComponent } from "../overview-stats/overview-stats.component";
+import { ServiceGridComponent } from "../service-grid/service-grid.component";
+import { ServiceMapComponent } from "../service-map/service-map.component";
+import { StopsGridComponent } from "../stops-grid/stops-grid.component";
+import { TimeSeriesChartComponent } from "../time-series-chart/time-series-chart.component";
 
 describe("ViewServiceComponent", () => {
   let spectator: SpectatorRouting<ViewServiceComponent>;
@@ -42,6 +55,19 @@ describe("ViewServiceComponent", () => {
       FiltersComponent,
       ChartNoDataWrapperComponent,
       ControlsComponent,
+      TimeSeriesChartComponent,
+      ServiceMapComponent,
+      FilterChipsComponent,
+      StopsGridComponent,
+      OverviewStatsComponent,
+      OtpThresholdModalComponent,
+      ServiceGridComponent,
+      TimeSeriesChartComponent,
+      DayOfWeekChartComponent,
+      OtpThresholdModalComponent,
+      OtpThresholdModalLinkComponent,
+      ExcessWaitTimeChartComponent,
+      OtpThresholdFormComponent,
     ],
     imports: [
       LayoutModule,
@@ -49,6 +75,8 @@ describe("ViewServiceComponent", () => {
       FormsModule,
       ReactiveFormsModule,
       ApolloTestingModule,
+      NgxTippyModule,
+      OnTimeModule,
     ],
     providers: [
       MockProvider(OnTimeService, {
@@ -65,6 +93,7 @@ describe("ViewServiceComponent", () => {
 
   beforeEach(() => {
     spectator = createComponent();
+    spectator.fixture.detectChanges();
     component = spectator.component;
     operatorService = spectator.inject(OperatorService);
     onTimeService = spectator.inject(OnTimeService);
@@ -127,8 +156,8 @@ describe("ViewServiceComponent", () => {
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     });
 
     await spectator.fixture.whenStable();
@@ -154,8 +183,8 @@ describe("ViewServiceComponent", () => {
       filters: {
         operatorIds: ["OP01"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     });
     component.tabs?.openTab("distribution");
 
@@ -208,8 +237,8 @@ describe("ViewServiceComponent", () => {
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     };
 
     const spy = spyOn(
@@ -260,8 +289,8 @@ describe("ViewServiceComponent", () => {
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     };
 
     component.params$.next(params);
@@ -296,8 +325,8 @@ describe("ViewServiceComponent", () => {
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     });
 
     await spectator.fixture.whenRenderingDone();
@@ -330,8 +359,8 @@ describe("ViewServiceComponent", () => {
         lineIds: ["LN12345"],
         adminAreaIds: ["AA050"],
       },
-      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toJSDate(),
-      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toJSDate(),
+      fromTimestamp: DateTime.fromISO("2021-01-01T00:00:00").toISO(),
+      toTimestamp: DateTime.fromISO("2021-02-01T00:00:00").toISO(),
     };
     const expectedParams = cloneDeep(params);
     delete expectedParams.filters.adminAreaIds;

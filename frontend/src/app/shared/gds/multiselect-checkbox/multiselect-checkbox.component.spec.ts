@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { MultiselectCheckboxComponent } from "./multiselect-checkbox.component";
+import { SharedModule } from "../../shared.module";
 
 describe("MultiselectCheckboxComponent", () => {
   let component: MultiselectCheckboxComponent;
@@ -8,7 +9,7 @@ describe("MultiselectCheckboxComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MultiselectCheckboxComponent],
+      declarations: [MultiselectCheckboxComponent, SharedModule],
     }).compileComponents();
   });
 

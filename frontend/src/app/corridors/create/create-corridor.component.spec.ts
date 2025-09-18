@@ -12,12 +12,12 @@ import {
 import { SharedModule } from "../../shared/shared.module";
 import { LayoutModule } from "../../layout/layout.module";
 import { RouterTestingModule } from "@angular/router/testing";
-import { Corridor, CorridorsService } from "../corridors.service";
+import { CorridorsService } from "../corridors.service";
 import { EMPTY, of, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { GeocodingService } from "../../shared/mapbox/geocoding.service";
-import { featureCollection, point, points, Position } from "@turf/helpers";
+import { featureCollection, point, Position } from "@turf/helpers";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -34,6 +34,9 @@ import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
 import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
 import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
+import { Corridor } from "../types";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
 
 const testStop1 = {
   stopId: "ST012345",
@@ -68,24 +71,10 @@ const testStop4 = {
   intId: 3,
 };
 
-const corridor = <Corridor>{
+const corridor: Corridor = {
   name: "test corridor",
   id: 123,
   stops: [testStop1, testStop2, testStop3],
-};
-
-const geocodingResult = (
-  coordinates: Position,
-  bbox: BBox2d,
-  text: string,
-  context: GeocodingContext[] = [],
-) => {
-  const result = featureCollection([
-    point(coordinates, {}, { bbox }),
-  ]) as GeocodingResult;
-  result.features[0].text = text;
-  result.features[0].context = context;
-  return result;
 };
 
 class StubMapComponent {
@@ -124,6 +113,8 @@ describe("CreateCorridorComponent", () => {
         NgSelectModule,
         FormsModule,
         ReactiveFormsModule,
+        NgxMapboxGLModule,
+        NgxSmartModalModule,
       ],
       declarations: [
         CorridorMapComponent,
@@ -142,6 +133,20 @@ describe("CreateCorridorComponent", () => {
   const createComponentWithCorridorNotFound = createComponent({
     corridor: new CorridorNotFoundView(),
   });
+
+  const geocodingResult = (
+    coordinates: Position,
+    bbox: BBox2d,
+    text: string,
+    context: GeocodingContext[] = [],
+  ) => {
+    const result = featureCollection([
+      point(coordinates, {}, { bbox }),
+    ]) as GeocodingResult;
+    result.features[0].text = text;
+    result.features[0].context = context;
+    return result;
+  };
 
   describe("create new corridor", () => {
     beforeEach(() => {
@@ -313,7 +318,13 @@ describe("CreateCorridorComponent", () => {
 
     it("should look up locations using geocoding service", async () => {
       const spy = geocodingService.forward.and.returnValue(
-        of(points([[53.397, -1.407]])),
+        of(
+          geocodingResult(
+            [53.397, -1.407],
+            [53.397, -1.407, 53.397, -1.407],
+            "Some Place",
+          ),
+        ),
       );
 
       // Wait for the mode selector to init
@@ -331,7 +342,7 @@ describe("CreateCorridorComponent", () => {
 
       expect(spy).toHaveBeenCalledWith("arundel gate", {
         excludeTypes: ["poi", "region", "country"],
-        proximity: null,
+        proximity: undefined,
       });
     });
 
@@ -482,10 +493,7 @@ describe("CreateCorridorComponent", () => {
     });
 
     it("setMapBounds() should call fitBounds() if value passed is of type array", () => {
-      const spy = spyOn(
-        spectator.component.corridorMap?.map as Map,
-        "fitBounds",
-      );
+      const spy = spyOn(spectator.component.corridorMap.map!, "fitBounds");
       const bbox = [1, 2, 3, 4] as BBox2d;
       const FIT_BOUNDS_OPTIONS = { padding: 50, maxZoom: 16, duration: 0 };
       spectator.component.setMapBounds(bbox, FIT_BOUNDS_OPTIONS);

@@ -4,11 +4,12 @@ import {
   CorridorStatsDayOfWeekType,
   CorridorStatsTimeOfDayType,
   ServiceLinkType,
+  RouteType,
 } from "../../generated/graphql";
 
 import { CorridorsSpeedMetricService } from "./corridors-speed-metric.service";
 import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
-import { CorridorStats, CorridorStatsViewParams, CorridorStop } from "./types";
+import { CorridorStats, CorridorStatsViewParams } from "./types";
 
 describe("CorridorsSpeedMetricService", () => {
   let service: CorridorsSpeedMetricService;
@@ -17,31 +18,31 @@ describe("CorridorsSpeedMetricService", () => {
       fromStop: "ST0100BRP90312",
       toStop: "ST0100BRA10796",
       distance: 100,
-      routeValidity: "",
+      routeValidity: RouteType.Valid,
     },
     {
       fromStop: "ST0100BRA10796",
       toStop: "ST0100BRA10807",
       distance: 200,
-      routeValidity: "",
+      routeValidity: RouteType.Valid,
     },
     {
       fromStop: "ST0100BRA10807",
       toStop: "ST0100BRP90340",
       distance: 300,
-      routeValidity: "",
+      routeValidity: RouteType.Valid,
     },
     {
       fromStop: "ST0100BRP90340",
       toStop: "ST0100BRP90345",
       distance: 400,
-      routeValidity: "",
+      routeValidity: RouteType.Valid,
     },
     {
       fromStop: "ST0100BRP90345",
       toStop: "ST0100BRP90003",
       distance: 500,
-      routeValidity: "",
+      routeValidity: RouteType.Valid,
     },
   ];
   const totalDistance = 1500;
@@ -143,7 +144,7 @@ describe("CorridorsSpeedMetricService", () => {
       xAxisLabel: "4:00 - 4:59",
     },
   ];
-  const stats = <CorridorStats>{
+  const stats: CorridorStats = {
     transitTimeTimeOfDayStats: journeyTimeTimeOfDay,
     transitTimeDayOfWeekStats: journeyTimeDayOfWeek,
     transitTimeHistogram: journeyTimeHist,
@@ -152,7 +153,7 @@ describe("CorridorsSpeedMetricService", () => {
     summaryStats: {
       averageTransitTime: 240,
     },
-  };
+  } as CorridorStats;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -220,16 +221,16 @@ describe("CorridorsSpeedMetricService", () => {
     });
 
     it("should set average speed for corridor section if params passed", () => {
-      const params = <CorridorStatsViewParams>{
+      const params: CorridorStatsViewParams = {
         stops: [
-          <CorridorStop>{
+          {
             stopId: "ST0100BRP90312",
           },
-          <CorridorStop>{
+          {
             stopId: "ST0100BRA10796",
           },
         ],
-      };
+      } as CorridorStatsViewParams;
       const expectedMph = 1;
       const result = service.generateSpeedStats(stats, params);
 

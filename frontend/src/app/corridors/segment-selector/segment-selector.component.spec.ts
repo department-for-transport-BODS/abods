@@ -1,83 +1,30 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { Stop } from "../corridors.service";
-
 import { SegmentSelectorComponent } from "./segment-selector.component";
+import { CorridorStop } from "../types";
+import { RouteType, ServiceLinkType } from "../../../generated/graphql";
 
 describe("SegmentSelectorComponent", () => {
   let component: SegmentSelectorComponent;
   let fixture: ComponentFixture<SegmentSelectorComponent>;
 
-  const segment0 = <[Stop, Stop]>[
-    {
-      stopId: "0",
-    },
-    {
-      stopId: "1",
-    },
-  ];
+  const stop = (id: string): CorridorStop =>
+    ({
+      stopId: id,
+      stopName: `Stop ${id}`,
+      lon: 0,
+      lat: 0,
+      localityName: `Locality ${id}`,
+      adminAreaId: `AdminArea${id}`,
+      sourceId: `Source${id}`,
+    }) as CorridorStop;
 
-  const segment1 = <[Stop, Stop]>[
-    {
-      stopId: "1",
-    },
-    {
-      stopId: "2",
-    },
-  ];
+  const segment0: [CorridorStop, CorridorStop] = [stop("0"), stop("1")];
+  const segment1: [CorridorStop, CorridorStop] = [stop("1"), stop("2")];
+  const segment2: [CorridorStop, CorridorStop] = [stop("2"), stop("3")];
+  const segment3: [CorridorStop, CorridorStop] = [stop("3"), stop("4")];
+  const segment4: [CorridorStop, CorridorStop] = [stop("4"), stop("5")];
 
-  const segment2 = <[Stop, Stop]>[
-    {
-      stopId: "2",
-    },
-    {
-      stopId: "3",
-    },
-  ];
-
-  const segment3 = <[Stop, Stop]>[
-    {
-      stopId: "3",
-    },
-    {
-      stopId: "4",
-    },
-  ];
-
-  const segment4 = <[Stop, Stop]>[
-    {
-      stopId: "4",
-    },
-    {
-      stopId: "5",
-    },
-  ];
-
-  const serviceLinks = [
-    {
-      fromStop: "0",
-      toStop: "1",
-      distance: 0,
-      routeValidity: "VALID",
-    },
-    {
-      fromStop: "1",
-      toStop: "2",
-      distance: 10,
-      routeValidity: "VALID",
-    },
-    {
-      fromStop: "2",
-      toStop: "3",
-      distance: 200,
-      routeValidity: "INVALID_NO_ROUTE_POINTS",
-    },
-    {
-      fromStop: "3",
-      toStop: "4",
-      distance: 300,
-      routeValidity: "VALID",
-    },
-  ];
+  let serviceLinks: ServiceLinkType[];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -89,6 +36,33 @@ describe("SegmentSelectorComponent", () => {
     fixture = TestBed.createComponent(SegmentSelectorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    serviceLinks = [
+      {
+        fromStop: "0",
+        toStop: "1",
+        distance: 0,
+        routeValidity: "VALID",
+      },
+      {
+        fromStop: "1",
+        toStop: "2",
+        distance: 10,
+        routeValidity: "VALID",
+      },
+      {
+        fromStop: "2",
+        toStop: "3",
+        distance: 200,
+        routeValidity: "INVALID_NO_ROUTE_POINTS",
+      },
+      {
+        fromStop: "3",
+        toStop: "4",
+        distance: 300,
+        routeValidity: "VALID",
+      },
+    ] as any; // Cast as any if ServiceLinkType is stricter
   });
 
   it("should create", () => {
@@ -97,13 +71,7 @@ describe("SegmentSelectorComponent", () => {
 
   describe("ngOnChanges", () => {
     it("should pair up stops into segments", () => {
-      component.stops = [
-        <Stop>{ stopId: "1" },
-        <Stop>{ stopId: "2" },
-        <Stop>{ stopId: "3" },
-        <Stop>{ stopId: "4" },
-        <Stop>{ stopId: "5" },
-      ];
+      component.stops = [stop("1"), stop("2"), stop("3"), stop("4"), stop("5")];
       component.ngOnChanges();
 
       expect(component.segments).toEqual([
@@ -123,7 +91,7 @@ describe("SegmentSelectorComponent", () => {
   });
 
   describe("onSelect", () => {
-    it("should set segement as selected", () => {
+    it("should set segment as selected", () => {
       component.onSelect(segment1);
 
       expect(component.selected).toEqual(segment1);
@@ -259,7 +227,7 @@ describe("SegmentSelectorComponent", () => {
     });
 
     it("should return false if all serviceLinks are VALID", () => {
-      serviceLinks[2].routeValidity = "VALID";
+      serviceLinks[2].routeValidity = RouteType.Valid;
       component.serviceLinks = serviceLinks;
       component.segments = [segment1, segment2, segment3];
 
@@ -267,7 +235,7 @@ describe("SegmentSelectorComponent", () => {
     });
 
     afterEach(() => {
-      serviceLinks[2].routeValidity = "INVALID_NO_ROUTE_POINTS";
+      serviceLinks[2].routeValidity = RouteType.InvalidNoRoutePoints;
     });
   });
 });

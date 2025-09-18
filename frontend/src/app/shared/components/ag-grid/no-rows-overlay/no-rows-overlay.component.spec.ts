@@ -18,7 +18,7 @@ describe("NoRowsOverlayComponent", () => {
   });
 
   it("should show no matches message when mode set", () => {
-    component.agInit(<NoRowsOverlayParams>{ message: "Computer says no" });
+    component.agInit({ message: "Computer says no" } as NoRowsOverlayParams);
     spectator.detectChanges();
 
     expect(spectator.query(byText("Computer says no"))).toBeVisible();

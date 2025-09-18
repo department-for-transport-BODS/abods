@@ -73,7 +73,7 @@ describe("VehicleJourneysSearchComponent", () => {
           ]),
       }),
       mockProvider(VehicleJourneysSearchService, {
-        fetchJourneys: () =>
+        fetchDayJourneys: () =>
           of([
             {
               groupId: "VJefdb0f42",
@@ -111,7 +111,7 @@ describe("VehicleJourneysSearchComponent", () => {
     mocks: [SvgIconRegistryService],
   });
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Settings.defaultZone = "utc";
     Settings.now = () => 1659312000000; // 2022-08-01
 
@@ -141,7 +141,7 @@ describe("VehicleJourneysSearchComponent", () => {
     spectator.fixture.detectChanges();
 
     expect(spectator.component.date?.invalid).toBeTrue();
-    expect(spectator.component.date?.errors?.["dateWithinRange"]).toBeTrue();
+    expect(spectator.component.date?.errors?.dateWithinRange).toBeTrue();
   });
 
   it("should accept operator input", async () => {
@@ -319,7 +319,7 @@ describe("VehicleJourneysSearchComponent", () => {
   });
 
   it("should show no journeys found message", async () => {
-    spyOn(vehicleJourneysSearchService, "fetchJourneys").and.returnValue(
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
       of([]),
     );
 
@@ -335,7 +335,7 @@ describe("VehicleJourneysSearchComponent", () => {
   });
 
   it("should show error message", async () => {
-    spyOn(vehicleJourneysSearchService, "fetchJourneys").and.returnValue(
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
       throwError(() => "error"),
     );
 

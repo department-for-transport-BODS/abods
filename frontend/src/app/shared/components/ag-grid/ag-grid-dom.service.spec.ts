@@ -3,10 +3,7 @@ import { AgGridAngular, AgGridModule } from "ag-grid-angular";
 import { AgGridDomService } from "./ag-grid-dom.service";
 import { ColDef } from "ag-grid-community";
 import { Subject } from "rxjs";
-import {
-  OperatorInfoType,
-  ServicePerformanceType,
-} from "src/generated/graphql";
+import { ServicePerformanceType } from "../../../../generated/graphql";
 
 describe("AgGridDomService", () => {
   let spectator: SpectatorHost<AgGridAngular>;
@@ -18,11 +15,6 @@ describe("AgGridDomService", () => {
   let service: AgGridDomService;
   const ready$ = new Subject<void>();
 
-  const operatorInfo: OperatorInfoType = {
-    nocCode: "ABCD",
-    operatorId: "OP001",
-    operatorName: "Bus Company",
-  };
   const data: ServicePerformanceType[] = [
     {
       lineId: "M5P",
@@ -37,7 +29,6 @@ describe("AgGridDomService", () => {
       early: 15,
       late: 20,
       averageDelay: 12,
-      operatorInfo,
     },
     {
       lineId: "TH",
@@ -52,7 +43,6 @@ describe("AgGridDomService", () => {
       early: 5,
       late: 6,
       averageDelay: 35,
-      operatorInfo,
     },
   ];
   const cols: ColDef[] = [

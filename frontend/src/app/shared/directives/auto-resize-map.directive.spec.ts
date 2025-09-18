@@ -4,6 +4,7 @@ import { By } from "@angular/platform-browser";
 import { AutoResizeMapDirective } from "./auto-resize-map.directive";
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: "mgl-map",
   standalone: false,
 }) // eslint-disable-line

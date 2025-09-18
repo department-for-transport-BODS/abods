@@ -94,7 +94,7 @@ describe("InviteUserModalComponent", () => {
     );
   });
 
-  it("should not allow org staff to invite a new user", async () => {
+  it("should not allow org staff to invite a new user", () => {
     const inviteButton = spectator.query(
       byText("Invite a new user", { selector: "button" }),
     );
@@ -102,7 +102,7 @@ describe("InviteUserModalComponent", () => {
     expect(inviteButton).toBeFalsy();
   });
 
-  it("should validate invite email", async () => {
+  it("should validate invite email", () => {
     const inviteUserSpy = spyOn(service, "inviteUser$").and.returnValue(
       of({ success: true }),
     );
@@ -120,7 +120,7 @@ describe("InviteUserModalComponent", () => {
     expect(spectator.query(byText(/valid email address/))).toBeTruthy();
   });
 
-  it("should require invite email", async () => {
+  it("should require invite email", () => {
     const inviteUserSpy = spyOn(service, "inviteUser$").and.returnValue(
       of({ success: true }),
     );
@@ -132,7 +132,7 @@ describe("InviteUserModalComponent", () => {
     expect(spectator.query(byText("This field is required."))).toBeTruthy();
   });
 
-  it("should require invite role", async () => {
+  it("should require invite role", () => {
     const inviteUserSpy = spyOn(service, "inviteUser$").and.returnValue(
       of({ success: true }),
     );
@@ -145,7 +145,7 @@ describe("InviteUserModalComponent", () => {
     expect(spectator.query(byText("This field is required."))).toBeTruthy();
   });
 
-  it("should show error if invite fails", async () => {
+  it("should show error if invite fails", () => {
     const errorMessage = "Invite failed error";
 
     spectator.typeInElement("email@address.com", byLabel("Email address"));

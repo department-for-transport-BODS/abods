@@ -16,6 +16,7 @@ import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { OnTimeModule } from "../on-time.module";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { Direction } from "../../../generated/graphql";
+import { StopsGridComponentDisplayComponent } from "./stops-grid-display.component";
 
 describe("StopsGridComponent", () => {
   let spectator: Spectator<StopsGridComponent>;
@@ -23,7 +24,7 @@ describe("StopsGridComponent", () => {
 
   const createComponent = createComponentFactory({
     component: StopsGridComponent,
-    declarations: [TimingRendererComponent],
+    declarations: [TimingRendererComponent, StopsGridComponentDisplayComponent],
     providers: [PercentPipe],
     imports: [
       SharedModule,

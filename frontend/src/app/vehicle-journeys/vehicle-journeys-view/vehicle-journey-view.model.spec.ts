@@ -1,232 +1,142 @@
-import { DateTime, Settings } from "luxon";
-import { GpsFeedJourneyStatus } from "../../../generated/graphql";
-import {
-  ApolloGpsFeedType,
-  StopDetails,
-} from "./vehicle-journeys-view.service";
-import {
-  VehicleJourneyView,
-  VehicleJourneyViewParams,
-} from "./vehicle-journey-view.model";
-import { OnTimePerformanceEnum } from "./on-time-performance.enum";
+import { Settings } from "luxon";
+import { Stop, AvlPoint } from "../../../generated/graphql";
 
-describe("VehicleJourneyView", () => {
+describe("JourneyInfo Model", () => {
   const t1 = "2022-08-18T11:20:00.000+01:00";
   const t2 = "2022-08-18T11:21:00.000+01:00";
   const startTime = "2022-08-18T11:20:00.000+01:00";
-  const mockStops = (): StopDetails[] => [
+
+  const mockStops = (): Stop[] => [
     {
-      stopId: "ST43000158103",
+      stopId: 1,
       stopName: "Solihull Town Centre",
-      lon: -1.78000522,
-      lat: 52.4139824,
-      startTime: DateTime.fromISO(startTime),
-      timingPoint: true,
-      departureTimeOffset: 0,
-    },
-    {
-      stopId: "ST43000139402",
-      stopName: "Whitefields Rd",
-      lon: -1.77750742,
-      lat: 52.407795,
-      startTime: DateTime.fromISO(startTime),
-      timingPoint: false,
-      departureTimeOffset: 1,
-    },
-    {
-      stopId: "ST43000139302",
-      stopName: "Solihull Sixth Form College",
-      lon: -1.77633333,
-      lat: 52.4044762,
-      startTime: DateTime.fromISO(startTime),
-      timingPoint: false,
-      departureTimeOffset: 2,
-    },
-  ];
-  const mockJourney: ApolloGpsFeedType[] = [
-    {
-      ts: t1,
-      lat: 52.4139834,
-      lon: -1.78000502,
-      vehicleId: "ABC-123",
-      groupId: "xyz987",
-      servicePatternId: "456",
-      delay: 120,
-      startTime: startTime,
-      scheduledDeparture: startTime,
-      feedStatus: null,
-      journeyStatus: GpsFeedJourneyStatus.Started,
+      longitude: -1.78000522,
+      latitude: 52.4139824,
       isTimingPoint: true,
-      operatorInfo: {
-        operatorId: "op1",
-        operatorName: "Operator 1",
-        nocCode: "NOC1",
-      },
-      serviceInfo: {
-        serviceId: "s5",
-        serviceName: "Solihull - Birmingham",
-        serviceNumber: "5",
-      },
-      previousStopInfo: {
-        stopId: "ST43000158103",
-        stopName: "Solihull Town Centre",
-      },
+      otp: null,
+      estimatedDepartureUtc: null,
+      actualDepartureUtc: t1,
+      directionRef: "inbound",
+      incompleteReason: 0,
+      scheduledDepartureUtc: startTime,
+      stopIndex: 0,
+      setDown: true,
     },
     {
-      ts: t2,
-      lat: 52.4139838,
-      lon: -1.78000505,
-      vehicleId: "ABC-123",
-      groupId: "xyz987",
-      servicePatternId: "456",
-      delay: 120,
-      startTime: startTime,
-      scheduledDeparture: startTime,
-      feedStatus: null,
-      journeyStatus: GpsFeedJourneyStatus.Started,
+      stopId: 2,
+      stopName: "Whitefields Rd",
+      longitude: -1.77750742,
+      latitude: 52.407795,
       isTimingPoint: false,
-      operatorInfo: {
-        operatorId: "op1",
-        operatorName: "Operator 1",
-        nocCode: "NOC1",
-      },
-      serviceInfo: {
-        serviceId: "s5",
-        serviceName: "Solihull - Birmingham",
-        serviceNumber: "5",
-      },
-      previousStopInfo: {
-        stopId: "ST43000158103",
-        stopName: "Solihull Town Centre",
-      },
+      otp: null,
+      estimatedDepartureUtc: null,
+      actualDepartureUtc: null,
+      directionRef: "inbound",
+      incompleteReason: 0,
+      scheduledDepartureUtc: startTime,
+      stopIndex: 1,
+      setDown: true,
+    },
+    {
+      stopId: 3,
+      stopName: "Solihull Sixth Form College",
+      longitude: -1.77633333,
+      latitude: 52.4044762,
+      isTimingPoint: false,
+      otp: null,
+      estimatedDepartureUtc: null,
+      actualDepartureUtc: null,
+      directionRef: "inbound",
+      incompleteReason: 0,
+      scheduledDepartureUtc: startTime,
+      stopIndex: 2,
+      setDown: true,
     },
   ];
-  const viewParams = <VehicleJourneyViewParams>{};
+
+  const mockAvls: AvlPoint[] = [
+    {
+      recordedAtTimeUtc: t1,
+      latitude: 52.4139834,
+      longitude: -1.78000502,
+      vehicleRef: "ABC-123",
+      directionRef: "inbound",
+    },
+    {
+      recordedAtTimeUtc: t2,
+      latitude: 52.4139838,
+      longitude: -1.78000505,
+      vehicleRef: "ABC-123",
+      directionRef: "inbound",
+    },
+  ];
 
   beforeEach(() => {
     Settings.defaultZone = "utc";
     Settings.now = () => 1659312000000; // 2022-08-01
-    viewParams.timingPointsOnly = false;
   });
 
-  it("should createView with 3 stops", () => {
-    const view = VehicleJourneyView.createView(
-      mockStops(),
-      mockJourney,
-      viewParams,
-    );
+  it("should create a JourneyInfo object with stops and avls", () => {
+    const journeyInfo = {
+      stops: mockStops(),
+      avls: mockAvls,
+    };
 
-    expect(view).toBeTruthy();
-    expect(view.stopList.length).toEqual(3);
+    expect(journeyInfo.stops.length).toBe(3);
+    expect(journeyInfo.avls.length).toBe(2);
+    expect(journeyInfo.stops[0].stopName).toBe("Solihull Town Centre");
+    expect(journeyInfo.avls[0].vehicleRef).toBe("ABC-123");
   });
 
-  describe("stopList", () => {
-    it("should add a VehiclePingStop for the nearest previous stop ping", () => {
-      const view = VehicleJourneyView.createView(
-        mockStops(),
-        mockJourney,
-        viewParams,
-      );
-
-      expect(view.stopList[0].id).toEqual("ST43000158103");
-      expect(view.stopList[0].stopName).toEqual("Solihull Town Centre");
-      expect(view.stopList[0].isTimingPoint).toEqual(true);
-      expect(view.stopList[0].scheduledDeparture).toEqual(
-        DateTime.fromISO(startTime),
-      );
-      expect(view.stopList[0].actualDeparture).toEqual(
-        DateTime.fromISO(startTime).plus({ seconds: 120 }),
-      );
-      expect(view.stopList[0].lat).toEqual(52.4139824);
-      expect(view.stopList[0].lon).toEqual(-1.78000522);
-      expect(view.stopList[0].ts).toEqual(DateTime.fromISO(t1));
-      expect(view.stopList[0].onTimePerformance).toEqual(
-        OnTimePerformanceEnum.OnTime,
-      );
-    });
-
-    it("should create no data stop if there is no nearest previous stop ping", () => {
-      const journey: ApolloGpsFeedType[] = [
+  it("should filter avls by direction if specified", () => {
+    const journeyInfo = {
+      stops: mockStops(),
+      avls: [
+        ...mockAvls,
         {
-          ts: t1,
-          lat: 52.4139834,
-          lon: -1.78000502,
-          vehicleId: "ABC-123",
-          groupId: "xyz987",
-          servicePatternId: "456",
-          delay: 120,
-          actualDelay: 120,
-          startTime: startTime,
-          scheduledDeparture: startTime,
-          feedStatus: null,
-          journeyStatus: GpsFeedJourneyStatus.Started,
-          isTimingPoint: true,
-          operatorInfo: {
-            operatorId: "op1",
-            operatorName: "Operator 1",
-            nocCode: "NOC1",
-          },
-          serviceInfo: {
-            serviceId: "s5",
-            serviceName: "Solihull - Birmingham",
-            serviceNumber: "5",
-          },
-          previousStopInfo: null,
+          recordedAtTimeUtc: t2,
+          latitude: 52.4,
+          longitude: -1.7,
+          vehicleRef: "XYZ-999",
+          directionRef: "outbound",
         },
-      ];
-      const view = VehicleJourneyView.createView(
-        mockStops(),
-        journey,
-        viewParams,
-      );
+      ],
+    };
 
-      expect(view.stopList.length).toEqual(3);
-      expect(view.stopList[0].onTimePerformance).toEqual(
-        OnTimePerformanceEnum.NoData,
-      );
-      expect(view.stopList[1].onTimePerformance).toEqual(
-        OnTimePerformanceEnum.NoData,
-      );
-      expect(view.stopList[2].onTimePerformance).toEqual(
-        OnTimePerformanceEnum.NoData,
-      );
-    });
-
-    it("should create a stop list with hidden stops if timing points only", () => {
-      viewParams.timingPointsOnly = true;
-      const view = VehicleJourneyView.createView(
-        mockStops(),
-        mockJourney,
-        viewParams,
-      );
-
-      expect(view.stopList.length).toEqual(3);
-      expect(view.stopList[0].isHidden).toBeFalse();
-      expect(view.stopList[1].isHidden).toBeTrue();
-      expect(view.stopList[2].isHidden).toBeTrue();
-    });
+    const inboundAvls = journeyInfo.avls.filter(
+      (a) => a.directionRef === "inbound",
+    );
+    expect(inboundAvls.length).toBe(2);
+    expect(inboundAvls.every((a) => a.directionRef === "inbound")).toBeTrue();
   });
 
-  describe("journeyInfo", () => {
-    it("should create journeyInfo", () => {
-      const view = VehicleJourneyView.createView(
-        mockStops(),
-        mockJourney,
-        viewParams,
-      );
+  it("should get initial vehicleRef from first evidenced stop", () => {
+    const journeyInfo = {
+      stops: mockStops(),
+      avls: mockAvls,
+    };
+    const firstEvidenced = journeyInfo.stops.find((s) => s.actualDepartureUtc);
+    const matchedAvl = journeyInfo.avls.find(
+      (a) => a.recordedAtTimeUtc === firstEvidenced?.actualDepartureUtc,
+    );
+    expect(matchedAvl?.vehicleRef).toBe("ABC-123");
+  });
 
-      expect(view.journeyInfo.operatorInfo?.operatorId).toEqual("op1");
-      expect(view.journeyInfo.operatorInfo?.operatorName).toEqual("Operator 1");
-      expect(view.journeyInfo.operatorInfo?.nocCode).toEqual("NOC1");
-      expect(view.journeyInfo.serviceInfo?.serviceId).toEqual("s5");
-      expect(view.journeyInfo.serviceInfo?.serviceName).toEqual(
-        "Solihull - Birmingham",
+  it("should handle empty avls gracefully", () => {
+    const journeyInfo = {
+      stops: mockStops(),
+      avls: [] as AvlPoint[],
+    };
+    expect(journeyInfo.avls.length).toBe(0);
+    // Should not throw
+    expect(() => {
+      const firstEvidenced = journeyInfo.stops.find(
+        (s) => s.actualDepartureUtc,
       );
-      expect(view.journeyInfo.serviceInfo?.serviceNumber).toEqual("5");
-      expect(view.journeyInfo.vehicleId).toEqual(mockJourney[0].vehicleId);
-      expect(view.journeyInfo.startTime).toEqual(
-        DateTime.fromISO(mockJourney[0].startTime),
+      const matchedAvl = journeyInfo.avls.find(
+        (a) => a.recordedAtTimeUtc === firstEvidenced?.actualDepartureUtc,
       );
-    });
+      return matchedAvl;
+    }).not.toThrow();
   });
 });

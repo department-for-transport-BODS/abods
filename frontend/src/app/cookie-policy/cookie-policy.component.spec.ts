@@ -12,6 +12,7 @@ import { CookiePolicyService } from "../shared/services/cookie-policy.service";
 import { SharedModule } from "../shared/shared.module";
 
 import { CookiePolicyComponent } from "./cookie-policy.component";
+import { CookiePolicy } from "../config/config.service";
 
 describe("CookiePolicyComponent", () => {
   let spectator: Spectator<CookiePolicyComponent>;
@@ -24,6 +25,12 @@ describe("CookiePolicyComponent", () => {
     imports: [LayoutModule, SharedModule, FormsModule, RouterTestingModule],
   });
 
+  const policy: CookiePolicy = {
+    analyticsEnabled: false,
+    version: 1,
+    userSubmitted: true,
+  };
+
   beforeEach(() => {
     spectator = createComponent({ detectChanges: false });
     analyticsService = spectator.inject(AnalyticsService);
@@ -33,10 +40,7 @@ describe("CookiePolicyComponent", () => {
   });
 
   it("should create with policy set to rejected", () => {
-    cookiePolicyService.getAnalyticsPolicy.andReturn({
-      analyticsEnabled: false,
-      version: 1,
-    });
+    cookiePolicyService.getAnalyticsPolicy.andReturn(policy);
     spectator.detectChanges();
 
     expect(spectator.component).toBeTruthy();
@@ -44,10 +48,7 @@ describe("CookiePolicyComponent", () => {
   });
 
   it("should create with policy set to accepted", () => {
-    cookiePolicyService.getAnalyticsPolicy.andReturn({
-      analyticsEnabled: true,
-      version: 1,
-    });
+    cookiePolicyService.getAnalyticsPolicy.andReturn(policy);
     spectator.detectChanges();
 
     expect(spectator.component).toBeTruthy();
@@ -56,10 +57,7 @@ describe("CookiePolicyComponent", () => {
 
   describe("accept and reject cookies", () => {
     beforeEach(() => {
-      cookiePolicyService.getAnalyticsPolicy.andReturn({
-        analyticsEnabled: true,
-        version: 1,
-      });
+      cookiePolicyService.getAnalyticsPolicy.andReturn(policy);
       spectator.detectChanges();
     });
 

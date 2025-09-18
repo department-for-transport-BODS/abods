@@ -3,6 +3,7 @@ import { RouterTestingModule } from "@angular/router/testing";
 import { LayoutModule } from "../layout/layout.module";
 
 import { CorridorsComponent } from "./corridors.component";
+import { CorridorsGridComponent } from "./grid/corridors-grid.component";
 
 describe("CorridorsComponent", () => {
   let component: CorridorsComponent;
@@ -10,7 +11,7 @@ describe("CorridorsComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CorridorsComponent],
+      declarations: [CorridorsGridComponent],
       imports: [LayoutModule, RouterTestingModule],
     }).compileComponents();
   });

@@ -69,7 +69,7 @@
     "@angular/language-service": "^19.2.4",
     "@eslint/js": "^9.13.0",
     "@graphql-eslint/eslint-plugin": "^4.4.0",
-    "@ngneat/spectator": "^10.0.1",
+    "@ngneat/spectator": "^20.0.0",
     "@types/faker": "^5.1.4",
     "@types/geojson": "^7946.0.7",
     "@types/jasmine": "~3.6.0",

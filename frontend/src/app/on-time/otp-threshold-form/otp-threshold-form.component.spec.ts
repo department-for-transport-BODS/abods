@@ -28,7 +28,9 @@ describe("OtpThresholdFormComponent", () => {
     spectator = createComponent();
     component = spectator.component;
     modalService = spectator.inject(NgxSmartModalService);
-    modalService.getModal.and.returnValue({ onOpen: new EventEmitter<void>() });
+    modalService.getModal.and.returnValue({
+      onOpen: new EventEmitter<void>(),
+    } as any);
 
     spectator.detectChanges();
   });
@@ -38,8 +40,8 @@ describe("OtpThresholdFormComponent", () => {
   });
 
   it("should show error message when early value is empty and form submitted", () => {
-    const input = spectator.query(byLabel("Early")) as HTMLInputElement;
-    spectator.typeInElement("", input);
+    const input = spectator.query(byLabel("Early"));
+    spectator.typeInElement("", input!);
     spectator.click(byText("Compare"));
 
     spectator.detectChanges();
@@ -50,8 +52,8 @@ describe("OtpThresholdFormComponent", () => {
   });
 
   it("should show error message when late value is empty and form submitted", () => {
-    const input = spectator.query(byLabel("Late")) as HTMLInputElement;
-    spectator.typeInElement("", input);
+    const input = spectator.query(byLabel("Late"));
+    spectator.typeInElement("", input!);
     spectator.click(byText("Compare"));
 
     spectator.detectChanges();
@@ -63,24 +65,24 @@ describe("OtpThresholdFormComponent", () => {
 
   it("should update early form control on slider value change", () => {
     component.early = 5;
-    const input = spectator.query(byLabel("Early")) as HTMLInputElement;
+    const input = spectator.query(byLabel("Early"));
 
-    expect(input.value).toEqual("5");
+    expect(input!).toEqual("5");
     expect(component.form.value.early).toEqual(5);
   });
 
   it("should update late form control on slider value change", () => {
     component.late = 5;
-    const input = spectator.query(byLabel("Late")) as HTMLInputElement;
+    const input = spectator.query(byLabel("Late"));
 
-    expect(input.value).toEqual("5");
+    expect(input!).toEqual("5");
     expect(component.form.value.late).toEqual(5);
   });
 
   it("should not emit if there is an error", () => {
     spyOn(component.compare, "emit");
-    const input = spectator.query(byLabel("Late")) as HTMLInputElement;
-    spectator.typeInElement("", input);
+    const input = spectator.query(byLabel("Late"));
+    spectator.typeInElement("", input!);
     spectator.click(byText("Compare"));
 
     spectator.detectChanges();
@@ -90,11 +92,11 @@ describe("OtpThresholdFormComponent", () => {
 
   it("should emit if there is not an error", () => {
     spyOn(component.compare, "emit");
-    const inputEarly = spectator.query(byLabel("Early")) as HTMLInputElement;
-    const inputLate = spectator.query(byLabel("Late")) as HTMLInputElement;
+    const inputEarly = spectator.query(byLabel("Early"));
+    const inputLate = spectator.query(byLabel("Late"));
 
-    spectator.typeInElement("5", inputEarly);
-    spectator.typeInElement("15", inputLate);
+    spectator.typeInElement("5", inputEarly!);
+    spectator.typeInElement("15", inputLate!);
     spectator.click(byText("Compare"));
 
     spectator.detectChanges();
