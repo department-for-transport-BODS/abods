@@ -40,19 +40,20 @@ import {
 import {
   compareThresholds,
   getFrequentServiceActualHours,
+  getOperatorsForUser,
   getSummaryStopsTotalHours,
 } from "../lib/otp.js";
-import { Prisma } from "@prisma/client";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { emptyResolver, requireUserSession } from "./helpers.js";
 import {
   getUserOperatorIds,
   getUserOperatorIdsQuery,
 } from "../lib/operators.js";
-import { Kysely, SelectQueryBuilder, sql } from "kysely";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
 import { listServiceLinks } from "../lib/common.js";
 import dayjs from "dayjs";
+import { executeQuery } from "../lib/kysely.js";
 
 interface DayCount {
   dayOfWeek: number;
@@ -360,7 +361,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       }
 
       const results = await executeQuery(mainQuery);
-
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
         early: 0,
@@ -417,40 +417,21 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
     }
   };
 
-export async function executeQuery<T>(
-  query: SelectQueryBuilder<DB, never, T>,
-): Promise<T[]> {
-  return await query.execute();
-}
-
 export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPerformance"] =
   async (_, args, context): Promise<Maybe<OperatorPerformancePage>> => {
     const user = await requireUserSession(context);
     try {
-      // start - performance timer
-      const startTimer = performance.now();
-
       const opPerformances: OperatorPerformanceType[] = [];
 
       const { filters } = args.inputs;
       const { adminAreaIds, startTime, endTime } = filters || {};
 
       // get an array of user's org's operator nocs.
-      const operators = await context.db.all_operators.findMany({
-        where: {
-          noc_adminarea:
-            adminAreaIds && adminAreaIds.length > 0
-              ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
-              : Prisma.skip,
-          operatorOrganisations: {
-            some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
-          },
-        },
-        select: {
-          operatorref: true,
-          name: true,
-        },
-      });
+      const operators = await getOperatorsForUser(
+        context.db,
+        user,
+        adminAreaIds,
+      );
 
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
@@ -492,7 +473,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           .where("hour", "<=", end);
       }
 
-      const results = await mainQuery.execute();
+      const results = await executeQuery(mainQuery);
 
       for (const item of operators.sort((a, b) =>
         (a.name ?? "").localeCompare(b.name ?? "", undefined, {
@@ -540,13 +521,6 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
           totalCount: opPerformances.length,
         },
       };
-
-      //end - performance timer
-      const endTimer = performance.now();
-      logger.debug(
-        { totalTimeMs: endTimer - startTimer },
-        "Call to getOperatorPerformance finished",
-      );
 
       return ret;
     } catch (error) {

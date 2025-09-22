@@ -54,7 +54,7 @@
     "@graphql-eslint/eslint-plugin": "^4.0.0",
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/node": "~20.17.28",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
@@ -66,7 +66,7 @@
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.9.0",
     "serverless-plugin-typescript": "^2.1.5",
-    "ts-jest": "^29.1.2",
+    "ts-jest": "^29.4.3",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
   },

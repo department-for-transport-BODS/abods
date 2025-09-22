@@ -1,5 +1,6 @@
 import {
   FrequentServiceInfoInputType,
+  InputMaybe,
   OtpEnum,
   PerformanceInputType,
   PunctualityTotalsType,
@@ -10,6 +11,8 @@ import {
 } from "../resolvers/otpFunctions.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
+import { executeQueryTakeFirst } from "./kysely.js";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const getThresholds = async (
   db: Kysely<DB>,
@@ -72,7 +75,7 @@ const getThresholds = async (
     mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
   }
 
-  return mainQuery.executeTakeFirst();
+  return executeQueryTakeFirst(mainQuery);
 };
 
 export const compareThresholds = async (
@@ -169,4 +172,26 @@ export const getFrequentServiceActualHours = async (
   const results = await mainQuery.execute();
 
   return results.length;
+};
+
+export const getOperatorsForUser = async (
+  db: PrismaClient,
+  user: { orgs: { id: number }[] },
+  adminAreaIds?: InputMaybe<string[]>,
+) => {
+  return db.all_operators.findMany({
+    where: {
+      noc_adminarea:
+        adminAreaIds && adminAreaIds.length > 0
+          ? { some: { adminarea_id: { in: adminAreaIds.map(Number) } } }
+          : Prisma.skip,
+      operatorOrganisations: {
+        some: { organisation_id: { in: user.orgs.map((org) => org.id) } },
+      },
+    },
+    select: {
+      operatorref: true,
+      name: true,
+    },
+  });
 };
