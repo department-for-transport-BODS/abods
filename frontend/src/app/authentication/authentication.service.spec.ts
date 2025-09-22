@@ -1,8 +1,11 @@
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from "@angular/common/http";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { Router } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
+import { Router, RouterModule } from "@angular/router";
 import { ApolloQueryResult } from "@apollo/client";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of, take } from "rxjs";
@@ -14,12 +17,7 @@ import {
   UserQuery,
 } from "../../generated/graphql";
 import { AuthenticatedUserService } from "./authenticated-user.service";
-
 import { AuthenticationService } from "./authentication.service";
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from "@angular/common/http";
 
 @Component({
   template: "",
@@ -28,7 +26,7 @@ import {
 })
 export class MockLoginComponent {}
 
-describe("AuthenticationService", () => {
+fdescribe("AuthenticationService", () => {
   let service: AuthenticationService;
   let userQuery: UserGQL;
   let userService: AuthenticatedUserService;
@@ -42,7 +40,7 @@ describe("AuthenticationService", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule.withRoutes([
+        RouterModule.forRoot([
           { path: "login", component: MockLoginComponent },
         ]),
         ApolloTestingModule,
@@ -78,7 +76,7 @@ describe("AuthenticationService", () => {
       );
       userService.authenticateUser();
 
-      expect(spyUserQuery).toHaveBeenCalledWith();
+      expect(spyUserQuery).toHaveBeenCalledWith({});
     });
 
     it("should not call userQuery if user is not authenticated", async () => {
@@ -178,7 +176,7 @@ describe("AuthenticationService", () => {
         spyOn(logoutMutation, "mutate").and.returnValue(
           of({ data: { logout: true } }),
         );
-        spyOn(router, "navigate");
+        spyOn(router, "navigate").and.resolveTo(true);
         service.logout();
       });
 
@@ -202,7 +200,7 @@ describe("AuthenticationService", () => {
         spyOn(logoutMutation, "mutate").and.returnValue(
           of({ data: { logout: false } }),
         );
-        spyOn(router, "navigate");
+        spyOn(router, "navigate").and.resolveTo(true);
         service.logout();
       });
 

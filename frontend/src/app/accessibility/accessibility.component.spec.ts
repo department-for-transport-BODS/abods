@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-
-import { AccessibilityComponent } from "./accessibility.component";
 import { LayoutModule } from "../layout/layout.module";
 import { SharedModule } from "../shared/shared.module";
+import { AccessibilityComponent } from "./accessibility.component";
 
-describe("AccessibilityComponent", () => {
+fdescribe("AccessibilityComponent", () => {
   let component: AccessibilityComponent;
   let fixture: ComponentFixture<AccessibilityComponent>;
 

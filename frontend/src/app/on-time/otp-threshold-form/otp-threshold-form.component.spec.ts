@@ -67,7 +67,7 @@ describe("OtpThresholdFormComponent", () => {
     component.early = 5;
     const input = spectator.query(byLabel("Early"));
 
-    expect(input!).toEqual("5");
+    expect(input?.textContent).toEqual("5");
     expect(component.form.value.early).toEqual(5);
   });
 
@@ -75,7 +75,7 @@ describe("OtpThresholdFormComponent", () => {
     component.late = 5;
     const input = spectator.query(byLabel("Late"));
 
-    expect(input!).toEqual("5");
+    expect(input?.textContent).toEqual("5");
     expect(component.form.value.late).toEqual(5);
   });
 
