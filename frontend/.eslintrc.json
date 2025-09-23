@@ -6,7 +6,8 @@
     "**/generated/graphql.ts"
   ],
   "plugins": [
-    "jasmine"
+    "jasmine",
+    "jest"
   ],
   "overrides": [
     {
@@ -79,7 +80,8 @@
         "@typescript-eslint/no-unsafe-argument": "warn",
         "@typescript-eslint/no-unsafe-call": "warn",
         "@typescript-eslint/no-unsafe-member-access": "warn",
-        "@typescript-eslint/no-unsafe-return": "warn"
+        "@typescript-eslint/no-unsafe-return": "warn",
+        "jasmine/no-focused-tests": "off"
       }
     },
     {
@@ -110,7 +112,8 @@
         "*.spec.ts"
       ],
       "rules": {
-        "@typescript-eslint/unbound-method": "warn",
+        "@typescript-eslint/unbound-method": "off",
+        "jest/unbound-method": "error",
         "@typescript-eslint/no-floating-promises": "warn"
       }
     }

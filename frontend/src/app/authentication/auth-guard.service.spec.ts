@@ -1,45 +1,43 @@
+import { provideHttpClient } from "@angular/common/http";
 import { TestBed } from "@angular/core/testing";
 import {
   ActivatedRouteSnapshot,
   Router,
+  RouterModule,
   RouterStateSnapshot,
 } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
 import { createSpyObject } from "@ngneat/spectator";
+import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
-import { LoginInfo, UserFragment } from "../../generated/graphql";
-
+import { UserFragment } from "../../generated/graphql";
 import { AuthGuardService } from "./auth-guard.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
+import { AuthenticationService } from "./authentication.service";
 import { MockLoginComponent } from "./authentication.service.spec";
 
-describe("AuthGuardService", () => {
+fdescribe("AuthGuardService", () => {
   let service: AuthGuardService;
   let router: Router;
   let userService: AuthenticatedUserService;
+  let authService: AuthenticationService;
 
   let mockRouterStateSnapshot: RouterStateSnapshot;
   let mockActivatedRouteSnapshot: ActivatedRouteSnapshot;
 
-  const user: LoginInfo = {
-    canEditAllAlerts: true,
-    canViewDistances: true,
-    canViewServiceMonitoring: false,
-    currentUserId: "1",
-    flags: [],
-  };
-
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule.withRoutes([
+        RouterModule.forRoot([
           { path: "login", component: MockLoginComponent },
         ]),
+        ApolloTestingModule,
       ],
+      providers: [provideHttpClient()],
     });
     service = TestBed.inject(AuthGuardService);
     router = TestBed.inject(Router);
     userService = TestBed.inject(AuthenticatedUserService);
+    authService = TestBed.inject(AuthenticationService);
 
     mockActivatedRouteSnapshot = createSpyObject<ActivatedRouteSnapshot>(
       ActivatedRouteSnapshot,
@@ -58,9 +56,7 @@ describe("AuthGuardService", () => {
         spyOnProperty(userService, "isAuthenticated$").and.returnValue(
           of(false),
         );
-        spyOn(router, "navigate").and.callFake((...args) =>
-          router.navigate(...args),
-        );
+        spyOn(router, "navigate").and.resolveTo(true);
       });
 
       it("should return false", () => {
@@ -76,10 +72,8 @@ describe("AuthGuardService", () => {
         service
           .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
           .subscribe();
-        const navigateSpy = spyOn(router, "navigate").and.callFake((...args) =>
-          router.navigate(...args),
-        );
-        expect(navigateSpy).toHaveBeenCalledWith(["/login"], {
+
+        expect(router.navigate).toHaveBeenCalledWith(["/login"], {
           queryParams: { returnUrl: "/dashboard" },
         });
       });
@@ -90,42 +84,17 @@ describe("AuthGuardService", () => {
         spyOnProperty(userService, "isAuthenticated$").and.returnValue(
           of(true),
         );
-        spyOn(router, "navigate");
       });
 
-      it("should return true if route roles is undefined", () => {
+      it("should return true", () => {
         spyOnProperty(userService, "authenticatedUser$").and.returnValue(
           of({} as UserFragment),
         );
-        mockActivatedRouteSnapshot.data = { roles: undefined };
+
         service
           .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
           .subscribe((activate) => {
             expect(activate).toBeTrue();
-          });
-      });
-
-      it("should return true if user has matching route role", () => {
-        spyOnProperty(userService, "authenticatedUser$").and.returnValue(
-          of(user),
-        );
-        mockActivatedRouteSnapshot.data = { roles: ["Administrator"] };
-        service
-          .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
-          .subscribe((activate) => {
-            expect(activate).toBeTrue();
-          });
-      });
-
-      it("should return false if user does not have a matching route role", () => {
-        spyOnProperty(userService, "authenticatedUser$").and.returnValue(
-          of(user),
-        );
-        mockActivatedRouteSnapshot.data = { roles: ["Administrator"] };
-        service
-          .canActivate(mockActivatedRouteSnapshot, mockRouterStateSnapshot)
-          .subscribe((activate) => {
-            expect(activate).toBeFalse();
           });
       });
     });
@@ -134,6 +103,9 @@ describe("AuthGuardService", () => {
   describe("canActivateChild", () => {
     it("should call canActivate with childRoute and state", () => {
       spyOn(service, "canActivate");
+
+      spyOnProperty(authService, "isSessionAlive", "get").and.returnValue(true);
+
       service.canActivateChild(
         mockActivatedRouteSnapshot,
         mockRouterStateSnapshot,

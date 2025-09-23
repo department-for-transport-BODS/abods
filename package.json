@@ -12,7 +12,8 @@
     "lint": "(cd abods-api && npm run lint) && (cd frontend && npm run lint)",
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check)",
     "prepare": "(npm run codegen) && husky",
-    "type-check": "(cd abods-api && npm run type-check)"
+    "type-check": "(cd abods-api && npm run type-check) && (cd frontend && npm run type-check)",
+    "test:ci": "(cd frontend && npm run test:ci)"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",

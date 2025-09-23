@@ -105,7 +105,7 @@ export class AuthenticationService {
       return false;
     }
     const session = JSON.parse(storage);
-    const now = new Date().getTime();
+    const now = new Date().toISOString();
     if (now > session.expiresAt) {
       return false;
     }

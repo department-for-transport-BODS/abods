@@ -22,14 +22,14 @@ import {
   Map,
 } from "mapbox-gl";
 import { MapComponent, NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
 import { EMPTY } from "rxjs";
 import { ConfigService } from "../../../config/config.service";
-import { CorridorsService } from "../../corridors.service";
-import { CorridorMapComponent } from "./corridor-map.component";
-import { CorridorStop } from "../../types";
-import { SharedModule } from "../../../shared/shared.module";
 import { GdsModule } from "../../../shared/gds/gds.module";
-import { NgxSmartModalModule } from "ngx-smart-modal";
+import { SharedModule } from "../../../shared/shared.module";
+import { CorridorsService } from "../../corridors.service";
+import { CorridorStop } from "../../types";
+import { CorridorMapComponent } from "./corridor-map.component";
 
 /**
  * A bare-minimum stub for ngx-mapbox-gl
@@ -185,12 +185,12 @@ describe("CorridorMapComponent", () => {
     spectator.component.matchingStopLines = mockLineStringFeatureCollection;
     spectator.component.mapSetHover(mockStop, true);
 
-    expect(spectator.component.map?.setFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map!.setFeatureState).toHaveBeenCalledWith(
       { source: "matching-stops", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.map?.setFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map!.setFeatureState).toHaveBeenCalledWith(
       { source: "matching-stop-lines", id: mockStop.id },
       { hover: true },
     );
@@ -203,12 +203,12 @@ describe("CorridorMapComponent", () => {
     spectator.component.matchingStopLines = mockLineStringFeatureCollection;
     spectator.component.mapSetHover(mockStop);
 
-    expect(spectator.component.map?.setFeatureState).not.toHaveBeenCalledWith(
+    expect(spectator.component.map!.setFeatureState).not.toHaveBeenCalledWith(
       { source: "matching-stops", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.map?.setFeatureState).not.toHaveBeenCalledWith(
+    expect(spectator.component.map!.setFeatureState).not.toHaveBeenCalledWith(
       { source: "matching-stop-lines", id: mockStop.id },
       { hover: true },
     );
@@ -239,12 +239,12 @@ describe("CorridorMapComponent", () => {
     spectator.component.map = mockMap;
     spectator.component.mapClearHover();
 
-    expect(spectator.component.map?.removeFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map.removeFeatureState).toHaveBeenCalledWith(
       { source: "matching-stops", id: mockStop.id },
       "hover",
     );
 
-    expect(spectator.component.map?.removeFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map.removeFeatureState).toHaveBeenCalledWith(
       { source: "matching-stop-lines", id: mockStop.id },
       "hover",
     );
