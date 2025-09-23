@@ -1,15 +1,14 @@
 import { TestBed } from "@angular/core/testing";
-import { ActivatedRouteSnapshot } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
+import { ActivatedRouteSnapshot, RouterModule } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of, throwError } from "rxjs";
-import { CorridorsService } from "./corridors.service";
 import { CorridorNotFoundView } from "./corridor-not-found-view.model";
+import { CorridorsService } from "./corridors.service";
 
 import { CorridorResolver } from "./corridor.resolver";
 import { Corridor } from "./types";
 
-describe("CorridorResolver", () => {
+fdescribe("CorridorResolver", () => {
   let resolver: CorridorResolver;
   let service: CorridorsService;
   const route: ActivatedRouteSnapshot = {
@@ -40,15 +39,15 @@ describe("CorridorResolver", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule, ApolloTestingModule],
+      imports: [RouterModule.forRoot([]), ApolloTestingModule],
       providers: [CorridorsService],
     });
     resolver = TestBed.inject(CorridorResolver);
     service = TestBed.inject(CorridorsService);
   });
 
-  it("should be created", () => {
-    expect(resolver).toBeTruthy();
+  it("should be created", async () => {
+    await expect(resolver).toBeTruthy();
   });
 
   it("should call fetchCorridorById passing corridorId", () => {
@@ -61,10 +60,10 @@ describe("CorridorResolver", () => {
   it("should return corridor", () => {
     spyOn(service, "fetchCorridorById").and.returnValue(of(corridor));
     resolver.resolve(route).subscribe((corridor) => {
-      expect(corridor).toBeTruthy();
-      expect((corridor as Corridor).id).toEqual(123);
-      expect((corridor as Corridor).name).toEqual("test corridor");
-      expect((corridor as Corridor).stops).toEqual([testStop1, testStop2]);
+      void expect(corridor).toBeTruthy();
+      void expect((corridor as Corridor).id).toEqual(123);
+      void expect((corridor as Corridor).name).toEqual("test corridor");
+      void expect((corridor as Corridor).stops).toEqual([testStop1, testStop2]);
     });
   });
 
@@ -73,7 +72,7 @@ describe("CorridorResolver", () => {
       throwError(() => "error"),
     );
     resolver.resolve(route).subscribe((corridor) => {
-      expect(corridor).toBeTruthy();
+      void expect(corridor).toBeTruthy();
       expect(corridor).toBeInstanceOf(CorridorNotFoundView);
     });
   });

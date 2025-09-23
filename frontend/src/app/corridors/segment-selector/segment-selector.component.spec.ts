@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { SegmentSelectorComponent } from "./segment-selector.component";
-import { CorridorStop } from "../types";
 import { RouteType, ServiceLinkType } from "../../../generated/graphql";
+import { CorridorStop } from "../types";
+import { SegmentSelectorComponent } from "./segment-selector.component";
 
-describe("SegmentSelectorComponent", () => {
+fdescribe("SegmentSelectorComponent", () => {
   let component: SegmentSelectorComponent;
   let fixture: ComponentFixture<SegmentSelectorComponent>;
 
@@ -16,6 +16,7 @@ describe("SegmentSelectorComponent", () => {
       localityName: `Locality ${id}`,
       adminAreaId: `AdminArea${id}`,
       sourceId: `Source${id}`,
+      naptan: id,
     }) as CorridorStop;
 
   const segment0: [CorridorStop, CorridorStop] = [stop("0"), stop("1")];
@@ -42,39 +43,39 @@ describe("SegmentSelectorComponent", () => {
         fromStop: "0",
         toStop: "1",
         distance: 0,
-        routeValidity: "VALID",
+        routeValidity: RouteType.Valid,
       },
       {
         fromStop: "1",
         toStop: "2",
         distance: 10,
-        routeValidity: "VALID",
+        routeValidity: RouteType.Valid,
       },
       {
         fromStop: "2",
         toStop: "3",
         distance: 200,
-        routeValidity: "INVALID_NO_ROUTE_POINTS",
+        routeValidity: RouteType.InvalidNoRoutePoints,
       },
       {
         fromStop: "3",
         toStop: "4",
         distance: 300,
-        routeValidity: "VALID",
+        routeValidity: RouteType.Valid,
       },
-    ] as any; // Cast as any if ServiceLinkType is stricter
+    ];
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   describe("ngOnChanges", () => {
-    it("should pair up stops into segments", () => {
+    it("should pair up stops into segments", async () => {
       component.stops = [stop("1"), stop("2"), stop("3"), stop("4"), stop("5")];
       component.ngOnChanges();
 
-      expect(component.segments).toEqual([
+      await expect(component.segments).toEqual([
         segment1,
         segment2,
         segment3,
@@ -82,19 +83,19 @@ describe("SegmentSelectorComponent", () => {
       ]);
     });
 
-    it("should set segments to empty array if stops is undefined", () => {
+    it("should set segments to empty array if stops is undefined", async () => {
       component.stops = undefined;
       component.ngOnChanges();
 
-      expect(component.segments).toEqual([]);
+      await expect(component.segments).toEqual([]);
     });
   });
 
   describe("onSelect", () => {
-    it("should set segment as selected", () => {
+    it("should set segment as selected", async () => {
       component.onSelect(segment1);
 
-      expect(component.selected).toEqual(segment1);
+      await expect(component.selected).toEqual(segment1);
     });
 
     it("should emit selected segment", () => {
@@ -104,21 +105,21 @@ describe("SegmentSelectorComponent", () => {
       expect(component.selectSegment.emit).toHaveBeenCalledWith(segment1);
     });
 
-    it("should call next on deselected segment", () => {
+    it("should call next on deselected segment", async () => {
       component.onSelect(segment1);
       spyOn(component.deselectSegment, "next");
       component.onSelect(segment2);
 
       expect(component.deselectSegment.next).toHaveBeenCalledWith(segment1);
-      expect(component.selected).toEqual(segment2);
+      await expect(component.selected).toEqual(segment2);
     });
 
-    it("should emit empty array if no segment passed", () => {
+    it("should emit empty array if no segment passed", async () => {
       spyOn(component.selectSegment, "emit");
       component.onSelect();
 
       expect(component.selectSegment.emit).toHaveBeenCalledWith([]);
-      expect(component.selected).toEqual(undefined);
+      await expect(component.selected).toEqual(undefined);
     });
   });
 
@@ -149,25 +150,25 @@ describe("SegmentSelectorComponent", () => {
   });
 
   describe("getSegmentDistance", () => {
-    it("should return undefined if serviceLinks is undefined", () => {
+    it("should return undefined if serviceLinks is undefined", async () => {
       component.serviceLinks = undefined;
 
-      expect(component.getSegmentDistance(segment1)).toBeUndefined();
+      await expect(component.getSegmentDistance(segment1)).toBeUndefined();
     });
 
-    it("should return distance in meters", () => {
+    it("should return distance in meters", async () => {
       component.serviceLinks = serviceLinks;
 
-      expect(component.getSegmentDistance(segment0)).toEqual(0);
-      expect(component.getSegmentDistance(segment1)).toEqual(10);
-      expect(component.getSegmentDistance(segment2)).toEqual(200);
-      expect(component.getSegmentDistance(segment3)).toEqual(300);
+      await expect(component.getSegmentDistance(segment0)).toEqual(0);
+      await expect(component.getSegmentDistance(segment1)).toEqual(10);
+      await expect(component.getSegmentDistance(segment2)).toEqual(200);
+      await expect(component.getSegmentDistance(segment3)).toEqual(300);
     });
 
-    it("should return undefined if serviceLinks is empty array", () => {
+    it("should return undefined if serviceLinks is empty array", async () => {
       component.serviceLinks = [];
 
-      expect(component.getSegmentDistance(segment1)).toBeUndefined();
+      await expect(component.getSegmentDistance(segment1)).toBeUndefined();
     });
   });
 

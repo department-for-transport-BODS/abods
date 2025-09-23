@@ -7,7 +7,7 @@
     "build": "ng build",
     "build:production": "ng build -c production",
     "test": "ng test",
-    "test:ci": "ng test --source-map=false --browsers=ChromeHeadless --watch=false",
+    "test:ci": "ng test --source-map=false --browsers=ChromeHeadlessCI --watch=false",
     "coverage": "ng test --code-coverage=true",
     "lint": "ng lint --fix --quiet --cache",
     "lint:check": "ng lint",

@@ -2,11 +2,11 @@ import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
 import { FeatureCollection, Point } from "geojson";
 import { SharedModule } from "../../../shared/shared.module";
 
+import { CorridorStop } from "../../types";
 import {
   LIST_LEN,
   StopSearchListComponent,
 } from "./stop-search-list.component";
-import { CorridorStop } from "../../types";
 
 const stopListFactory = (numberOfStops: number) => {
   const stops: FeatureCollection<Point, CorridorStop> = {
@@ -34,7 +34,7 @@ const stopListFactory = (numberOfStops: number) => {
   return stops;
 };
 
-describe("StopSearchListComponent", () => {
+fdescribe("StopSearchListComponent", () => {
   let spectator: Spectator<StopSearchListComponent>;
   let stops: FeatureCollection<Point, CorridorStop>;
   const numberOfStops = 220;

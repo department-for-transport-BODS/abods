@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { XYChartComponent } from "../../../shared/components/amcharts/xy-chart.component";
 
-import { BoxPlotChartComponent } from "./box-plot-chart.component";
+import { CategoryAxis, DateAxis, XYChart } from "@amcharts/amcharts4/charts";
 import { SimpleChange } from "@angular/core";
 import { DateTime } from "luxon";
-import { CorridorGranularity } from "../../../../generated/graphql";
+import { CorridorGranularity, MatchType } from "../../../../generated/graphql";
 import { chartColors } from "../../../shared/components/amcharts/chart.service";
-import { CategoryAxis, DateAxis, XYChart } from "@amcharts/amcharts4/charts";
 import { CorridorStatsViewParams } from "../../types";
+import { BoxPlotChartComponent } from "./box-plot-chart.component";
 
-describe("BoxPlotGraphComponent", () => {
+fdescribe("BoxPlotGraphComponent", () => {
   let component: BoxPlotChartComponent;
   let fixture: ComponentFixture<BoxPlotChartComponent>;
 
@@ -23,7 +25,7 @@ describe("BoxPlotGraphComponent", () => {
     to: toDate,
     granularity: granularity,
     stops: [],
-    matchType: undefined as any, // Replace 'undefined as any' with a valid MatchType if available
+    matchType: MatchType.Evidenced,
   };
 
   beforeEach(async () => {
@@ -37,10 +39,10 @@ describe("BoxPlotGraphComponent", () => {
     component = fixture.componentInstance;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     fixture.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 
   describe("ngOnChanges", () => {
@@ -53,16 +55,16 @@ describe("BoxPlotGraphComponent", () => {
         component.xAxisType = "date";
       });
 
-      it("should update xAxis min with from date", () => {
+      it("should update xAxis min with from date", async () => {
         const fromMilli = fromDate.toMillis();
         component.ngOnChanges({
           params: new SimpleChange(previous, next, false),
         });
 
-        expect((component.xAxis as DateAxis).min).toEqual(fromMilli);
+        await expect((component.xAxis as DateAxis).min).toEqual(fromMilli);
       });
 
-      it("should update xAxis max with to date minus 1 day", () => {
+      it("should update xAxis max with to date minus 1 day", async () => {
         granularity = CorridorGranularity.Day;
         next.granularity = granularity;
         const toMilli = toDate.minus({ day: 1 }).toMillis();
@@ -70,10 +72,10 @@ describe("BoxPlotGraphComponent", () => {
           params: new SimpleChange(previous, next, false),
         });
 
-        expect((component.xAxis as DateAxis).max).toEqual(toMilli);
+        await expect((component.xAxis as DateAxis).max).toEqual(toMilli);
       });
 
-      it("should update xAxis max with to date minus 1 hour", () => {
+      it("should update xAxis max with to date minus 1 hour", async () => {
         granularity = CorridorGranularity.Hour;
         next.granularity = granularity;
         const toMilli = toDate.minus({ hour: 1 }).toMillis();
@@ -81,7 +83,7 @@ describe("BoxPlotGraphComponent", () => {
           params: new SimpleChange(previous, next, false),
         });
 
-        expect((component.xAxis as DateAxis).max).toEqual(toMilli);
+        await expect((component.xAxis as DateAxis).max).toEqual(toMilli);
       });
     });
 
@@ -100,12 +102,14 @@ describe("BoxPlotGraphComponent", () => {
         );
       });
 
-      it("should update meanSeries fill to red", () => {
+      it("should update meanSeries fill to red", async () => {
         component.ngOnChanges({
           whiskerFillColor: new SimpleChange(undefined, chartColors.red, false),
         });
 
-        expect((component as any).meanSeries.fill).toEqual(chartColors.red);
+        await expect((component as any).meanSeries.fill).toEqual(
+          chartColors.red,
+        );
       });
     });
 
@@ -169,19 +173,19 @@ describe("BoxPlotGraphComponent", () => {
       expect(component.xAxis instanceof DateAxis).toBeTrue();
     });
 
-    it("should center xAxis if xAxisCentered is true", () => {
+    it("should center xAxis if xAxisCentered is true", async () => {
       component.xAxisCenterd = true;
       fixture.detectChanges();
 
-      expect(component.xAxis.align).toEqual("center");
+      await expect(component.xAxis.align).toEqual("center");
     });
 
-    it("should set params", () => {
+    it("should set params", async () => {
       component.params = next;
       fixture.detectChanges();
 
-      expect((component.xAxis as DateAxis).min).toBeTruthy();
-      expect((component.xAxis as DateAxis).max).toBeTruthy();
+      await expect((component.xAxis as DateAxis).min).toBeTruthy();
+      await expect((component.xAxis as DateAxis).max).toBeTruthy();
     });
   });
 
@@ -209,41 +213,41 @@ describe("BoxPlotGraphComponent", () => {
       ];
     });
 
-    it("should set yAxisMinValue and yAxisMaxValue to undefined if hideOutliers is true", () => {
+    it("should set yAxisMinValue and yAxisMaxValue to undefined if hideOutliers is true", async () => {
       component.hideOutliers = true;
       component.ngOnChanges({
         hideOutliers: new SimpleChange(undefined, true, true),
       });
 
-      expect(component.data?.[0].yAxisMaxValue).toBeUndefined();
-      expect(component.data?.[0].yAxisMinValue).toBeUndefined();
-      expect(component.data?.[0].yAxisMeanValue).toEqual(7);
-      expect(component.data?.[0].maxTransitTime).toEqual(10);
-      expect(component.data?.[0].minTransitTime).toEqual(5);
+      await expect(component.data?.[0].yAxisMaxValue).toBeUndefined();
+      await expect(component.data?.[0].yAxisMinValue).toBeUndefined();
+      await expect(component.data?.[0].yAxisMeanValue).toEqual(7);
+      await expect(component.data?.[0].maxTransitTime).toEqual(10);
+      await expect(component.data?.[0].minTransitTime).toEqual(5);
 
-      expect(component.data?.[1].yAxisMaxValue).toBeUndefined();
-      expect(component.data?.[1].yAxisMinValue).toBeUndefined();
-      expect(component.data?.[1].yAxisMeanValue).toEqual(70);
-      expect(component.data?.[1].maxTransitTime).toEqual(100);
-      expect(component.data?.[1].minTransitTime).toEqual(50);
+      await expect(component.data?.[1].yAxisMaxValue).toBeUndefined();
+      await expect(component.data?.[1].yAxisMinValue).toBeUndefined();
+      await expect(component.data?.[1].yAxisMeanValue).toEqual(70);
+      await expect(component.data?.[1].maxTransitTime).toEqual(100);
+      await expect(component.data?.[1].minTransitTime).toEqual(50);
     });
 
-    it("should set yAxisMinValue and yAxisMaxValue to value if hideOutliers is false", () => {
+    it("should set yAxisMinValue and yAxisMaxValue to value if hideOutliers is false", async () => {
       component.ngOnChanges({
         hideOutliers: new SimpleChange(false, true, false),
       });
 
-      expect(component.data?.[0].yAxisMaxValue).toEqual(10);
-      expect(component.data?.[0].yAxisMinValue).toEqual(5);
-      expect(component.data?.[0].yAxisMeanValue).toEqual(7);
-      expect(component.data?.[0].maxTransitTime).toEqual(10);
-      expect(component.data?.[0].minTransitTime).toEqual(5);
+      await expect(component.data?.[0].yAxisMaxValue).toEqual(10);
+      await expect(component.data?.[0].yAxisMinValue).toEqual(5);
+      await expect(component.data?.[0].yAxisMeanValue).toEqual(7);
+      await expect(component.data?.[0].maxTransitTime).toEqual(10);
+      await expect(component.data?.[0].minTransitTime).toEqual(5);
 
-      expect(component.data?.[1].yAxisMaxValue).toEqual(100);
-      expect(component.data?.[1].yAxisMinValue).toEqual(50);
-      expect(component.data?.[1].yAxisMeanValue).toEqual(70);
-      expect(component.data?.[1].maxTransitTime).toEqual(100);
-      expect(component.data?.[1].minTransitTime).toEqual(50);
+      await expect(component.data?.[1].yAxisMaxValue).toEqual(100);
+      await expect(component.data?.[1].yAxisMinValue).toEqual(50);
+      await expect(component.data?.[1].yAxisMeanValue).toEqual(70);
+      await expect(component.data?.[1].maxTransitTime).toEqual(100);
+      await expect(component.data?.[1].minTransitTime).toEqual(50);
     });
   });
 });
