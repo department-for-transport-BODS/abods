@@ -583,7 +583,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           const dayOfWeek: DayCount[] = Array.from({ length: 7 }, (_, i) => ({
             dayOfWeek: i + 1,
@@ -701,11 +701,14 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           return results
             .sort((a, b) => {
-              if (a.time_diff_minutes && b.time_diff_minutes)
+              if (
+                a.time_diff_minutes != undefined &&
+                b.time_diff_minutes != undefined
+              )
                 return a.time_diff_minutes - b.time_diff_minutes;
 
               return 0;
@@ -789,7 +792,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           results.forEach((res) => {
             if (res.hour) {
@@ -875,7 +878,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           results.forEach((result) => {
             if (result) {
@@ -917,13 +920,14 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
       const to = userSelectedDateAsUtc(toTimestamp);
 
       const diff = to.diff(from, "days");
-      const daysInMonth = dayjs().daysInMonth();
 
-      const periodTypeMap = {
-        [String(daysInMonth)]: "last_month",
-        "7": "last_7_days",
-        "28": "last_28_days",
-        month_to_date: "month_to_date",
+      const fromMonth = from.month();
+      const currentMonth = dayjs().month();
+
+      const getPeriodType = (days: number) => {
+        if (days === 7) return "last_7_days";
+        if (days === 28) return "last_28_days";
+        return fromMonth === currentMonth ? "month_to_date" : "last_month";
       };
 
       const timingPointsOnly = filters.timingPointsOnly;
@@ -932,6 +936,8 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
       const operatorNocs = userOperatorIds.filter(
         (n) => !filters.operatorIds || filters.operatorIds.includes(n),
       );
+
+      if (operatorNocs.length === 0) return [];
 
       const orderFilter = order === RankingOrder.Ascending ? "asc" : "desc";
 
@@ -945,11 +951,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
           userSelectedDateAsUtc(fromTimestamp).toDate(),
         )
         .where("percentage_change", "is not", null)
-        .where(
-          "period_type",
-          "=",
-          periodTypeMap[diff] ?? periodTypeMap.month_to_date,
-        )
+        .where("period_type", "=", getPeriodType(diff))
         .orderBy("on_time_percentage", orderFilter)
         .orderBy("percentage_change", orderFilter)
         .limit(3);
@@ -962,7 +964,7 @@ export const getServicePunctuality: OnTimePerformanceTypeResolvers["servicePunct
         );
       }
 
-      const performanceMetrics = await performanceMetricsQuery.execute();
+      const performanceMetrics = await executeQuery(performanceMetricsQuery);
 
       const services = await context.db.expected_services.findMany({
         where: {
@@ -1126,7 +1128,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           const stopIds = results.map((res) => Number(res.stop_id));
 
@@ -1336,7 +1338,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               .where("hour", "<=", end);
           }
 
-          const results = await mainQuery.execute();
+          const results = await executeQuery(mainQuery);
 
           const noc_and_lines = results
             .map((result) => result.noc_and_line_and_servicecode)
@@ -1509,13 +1511,7 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
           .where("hour", "<=", end);
       }
 
-      const results = await mainQuery.execute();
-
-      if (results.length < 1) {
-        return {
-          excess: undefined,
-        };
-      }
+      const results = await executeQuery(mainQuery);
 
       if (results.length < 1) {
         return {
@@ -1530,7 +1526,6 @@ export const getHeadwayOverview: HeadwayMetricsTypeResolvers["headwayOverview"] 
 
       headway = results.reduce((acc, currentHeadway) => {
         acc.excessWaitTime +=
-          // We've filtered out null values in where clause so its fine to assert not null
           Number(currentHeadway.excess_wait_time) *
           Number(currentHeadway.headway_stops_count);
         acc.headwayCount += Number(currentHeadway.headway_stops_count);
@@ -1589,7 +1584,7 @@ export const getHeadwayTimeSeries: HeadwayMetricsTypeResolvers["headwayTimeSerie
           .where("hour", "<=", end);
       }
 
-      const results = await mainQuery.execute();
+      const results = await executeQuery(mainQuery);
 
       const headwayMap: Record<
         string,

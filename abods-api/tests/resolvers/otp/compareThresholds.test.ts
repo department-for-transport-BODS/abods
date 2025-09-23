@@ -46,7 +46,7 @@ beforeEach(() => {
     .mockImplementationOnce(async () => ({ otp_count: 12 })); // OnTime
 });
 
-fdescribe("compareThresholds", () => {
+describe("compareThresholds", () => {
   it("compares the thresholds correctly", async () => {
     const args: RequireFields<
       OnTimePerformanceTypePunctualityOverviewArgs,

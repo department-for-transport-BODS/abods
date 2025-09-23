@@ -13,7 +13,6 @@ import {
   MatchType,
   RequireFields,
   OnTimePerformanceTypeOperatorPerformanceArgs,
-  OperatorPerformanceType,
 } from "../../../src/types/generated";
 import { DB } from "../../../src/kysely";
 

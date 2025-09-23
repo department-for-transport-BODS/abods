@@ -195,7 +195,7 @@ const dummyKysely = new Kysely<DB>({
 
 jest.spyOn(kysely, "executeQuery").mockResolvedValue(mockExecuteQueryResults);
 
-fdescribe("getPunctualityOverview", () => {
+describe("getPunctualityOverview", () => {
   it("returns calculated for timing points and evidenced", async () => {
     const args: RequireFields<
       OnTimePerformanceTypePunctualityOverviewArgs,

@@ -11,7 +11,7 @@ import {
 } from "../resolvers/otpFunctions.js";
 import { Kysely } from "kysely";
 import { DB } from "../kysely.js";
-import { executeQueryTakeFirst } from "./kysely.js";
+import { executeQuery, executeQueryTakeFirst } from "./kysely.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 
 const getThresholds = async (
@@ -134,7 +134,7 @@ export const getSummaryStopsTotalHours = async (
     mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
   }
 
-  const results = await mainQuery.execute();
+  const results = await executeQuery(mainQuery);
 
   return results.length;
 };
@@ -169,7 +169,7 @@ export const getFrequentServiceActualHours = async (
     mainQuery = mainQuery.where("hour", ">=", start).where("hour", "<=", end);
   }
 
-  const results = await mainQuery.execute();
+  const results = await executeQuery(mainQuery);
 
   return results.length;
 };
