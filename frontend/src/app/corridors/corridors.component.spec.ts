@@ -7,7 +7,7 @@ import { ApolloTestingModule } from "apollo-angular/testing";
 import { CorridorsComponent } from "./corridors.component";
 import { CorridorsGridComponent } from "./grid/corridors-grid.component";
 
-fdescribe("CorridorsComponent", () => {
+describe("CorridorsComponent", () => {
   let component: CorridorsComponent;
   let fixture: ComponentFixture<CorridorsComponent>;
 

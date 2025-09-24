@@ -93,7 +93,7 @@ class StubMapComponent {
   };
 }
 
-fdescribe("CreateCorridorComponent", () => {
+describe("CreateCorridorComponent", () => {
   let spectator: SpectatorRouting<CreateCorridorComponent>;
   let corridorsService: CorridorsService;
   let geocodingService: SpyObject<GeocodingService>;

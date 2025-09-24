@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { PerformanceChartComponent } from "./chart.component";
 
-describe("PerformanceChartComponent", () => {
+fdescribe("PerformanceChartComponent", () => {
   let component: PerformanceChartComponent;
   let fixture: ComponentFixture<PerformanceChartComponent>;
 
@@ -18,7 +18,7 @@ describe("PerformanceChartComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

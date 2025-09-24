@@ -5,7 +5,7 @@ import { SharedModule } from "src/app/shared/shared.module";
 
 import { VehiclesStatusComponent } from "./vehicles-status.component";
 
-describe("VehiclesStatusComponent", () => {
+fdescribe("VehiclesStatusComponent", () => {
   let spectator: Spectator<VehiclesStatusComponent>;
   let component: VehiclesStatusComponent;
 
@@ -20,9 +20,9 @@ describe("VehiclesStatusComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 });

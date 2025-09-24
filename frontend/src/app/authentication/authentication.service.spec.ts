@@ -26,7 +26,7 @@ import { AuthenticationService } from "./authentication.service";
 })
 export class MockLoginComponent {}
 
-fdescribe("AuthenticationService", () => {
+describe("AuthenticationService", () => {
   let service: AuthenticationService;
   let userQuery: UserGQL;
   let userService: AuthenticatedUserService;

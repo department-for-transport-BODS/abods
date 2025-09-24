@@ -11,7 +11,7 @@ import { chartColors } from "../../../shared/components/amcharts/chart.service";
 import { CorridorStatsViewParams } from "../../types";
 import { BoxPlotChartComponent } from "./box-plot-chart.component";
 
-fdescribe("BoxPlotGraphComponent", () => {
+describe("BoxPlotGraphComponent", () => {
   let component: BoxPlotChartComponent;
   let fixture: ComponentFixture<BoxPlotChartComponent>;
 
