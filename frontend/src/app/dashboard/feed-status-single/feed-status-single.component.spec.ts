@@ -4,7 +4,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { FeedStatusSingleComponent } from "./feed-status-single.component";
 
-fdescribe("FeedStatusComponent", () => {
+describe("FeedStatusComponent", () => {
   let spectator: Spectator<FeedStatusSingleComponent>;
   let component: FeedStatusSingleComponent;
 

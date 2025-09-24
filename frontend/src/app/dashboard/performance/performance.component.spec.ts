@@ -24,7 +24,7 @@ import { MockPerformanceChartComponent } from "./chart/mock-chart.component";
 import { PerformanceComponent } from "./performance.component";
 import { PerformanceRankingComponent } from "./ranking-table/ranking-table.component";
 
-fdescribe("PerformanceComponent", () => {
+describe("PerformanceComponent", () => {
   let spectator: Spectator<PerformanceComponent>;
   let component: PerformanceComponent;
   let service: DashboardService;

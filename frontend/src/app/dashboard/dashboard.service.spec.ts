@@ -20,7 +20,7 @@ import {
 } from "../../generated/graphql";
 import { DashboardService } from "./dashboard.service";
 
-fdescribe("DashboardService", () => {
+describe("DashboardService", () => {
   let spectator: SpectatorService<DashboardService>;
   let service: DashboardService;
   let operatorVehicleCountGql: SpyObject<DashboardOperatorVehicleCountsListGQL>;

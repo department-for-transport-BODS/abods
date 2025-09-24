@@ -11,7 +11,7 @@ import { Period } from "src/app/shared/components/date-range/date-range.types";
 import { SharedModule } from "src/app/shared/shared.module";
 import { PerformanceRankingComponent } from "./ranking-table.component";
 
-fdescribe("PerformanceRankingComponent", () => {
+describe("PerformanceRankingComponent", () => {
   let spectator: Spectator<PerformanceRankingComponent>;
   let component: PerformanceRankingComponent;
 

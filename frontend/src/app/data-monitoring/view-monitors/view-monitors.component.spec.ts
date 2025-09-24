@@ -1,43 +1,40 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ViewMonitorsComponent } from "./view-monitors.component";
-import { DashboadEmbeddedUrlGQL } from "../../../generated/graphql";
+import {
+  createComponentFactory,
+  Spectator,
+  SpyObject,
+} from "@ngneat/spectator";
+import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
-import { ElementRef } from "@angular/core";
-import { SharedModule } from "../../shared/shared.module";
-import { GdsModule } from "../../shared/gds/gds.module";
+import { DashboadEmbeddedUrlGQL } from "../../../generated/graphql";
 import { LayoutModule } from "../../layout/layout.module";
+import { GdsModule } from "../../shared/gds/gds.module";
+import { SharedModule } from "../../shared/shared.module";
+import { ViewMonitorsComponent } from "./view-monitors.component";
 
-describe("ViewMonitorsComponent", () => {
+fdescribe("ViewMonitorsComponent", () => {
+  let spectator: Spectator<ViewMonitorsComponent>;
   let component: ViewMonitorsComponent;
-  let fixture: ComponentFixture<ViewMonitorsComponent>;
-  let embeddedUrlQuerySpy: jasmine.SpyObj<DashboadEmbeddedUrlGQL>;
+  let embeddedUrlQuerySpy: SpyObject<DashboadEmbeddedUrlGQL>;
 
-  beforeEach(async () => {
-    embeddedUrlQuerySpy = jasmine.createSpyObj("DashboadEmbeddedUrlGQL", [
-      "fetch",
-    ]);
-
-    await TestBed.configureTestingModule({
-      declarations: [ViewMonitorsComponent],
-      imports: [SharedModule, GdsModule, LayoutModule],
-      providers: [
-        { provide: DashboadEmbeddedUrlGQL, useValue: embeddedUrlQuerySpy },
-      ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(ViewMonitorsComponent);
-    component = fixture.componentInstance;
-    component.dashboardContainer = new ElementRef(
-      document.createElement("div"),
-    );
+  const createComponent = createComponentFactory({
+    component: ViewMonitorsComponent,
+    imports: [SharedModule, GdsModule, LayoutModule, ApolloTestingModule],
+    detectChanges: false,
+    mocks: [DashboadEmbeddedUrlGQL],
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  beforeEach(() => {
+    spectator = createComponent();
+    component = spectator.component;
+    embeddedUrlQuerySpy = spectator.inject(DashboadEmbeddedUrlGQL);
+  });
+
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   it("should set loading to false and clear errors on successful embed", async () => {
-    spyOn(component, "embedDashboard").and.returnValue(Promise.resolve());
+    spyOn(component, "embedDashboard").and.resolveTo();
     embeddedUrlQuerySpy.fetch.and.returnValue(
       of({
         data: {
@@ -54,10 +51,10 @@ describe("ViewMonitorsComponent", () => {
 
     component.ngOnInit();
     // Wait for async mergeMap and subscribe to resolve
-    await fixture.whenStable();
+    await spectator.fixture.whenStable();
 
     expect(component.loading).toBeFalse();
-    expect(component.errors).toEqual([]);
+    await expect(component.errors).toEqual([]);
     expect(component.embedDashboard).toHaveBeenCalledWith(
       "https://test-embed-url",
     );
@@ -79,11 +76,13 @@ describe("ViewMonitorsComponent", () => {
     );
 
     component.ngOnInit();
-    await fixture.whenStable();
+    await spectator.fixture.whenStable();
 
     expect(component.loading).toBeFalse();
-    expect(component.errors.length).toBe(1);
-    expect(component.errors[0].error).toContain("Unable to load dashboad");
+    await expect(component.errors.length).toBe(1);
+    await expect(component.errors[0].error).toContain(
+      "Unable to load dashboad",
+    );
   });
 
   it("should set error if embeddedUrl.url is missing", async () => {
@@ -102,11 +101,13 @@ describe("ViewMonitorsComponent", () => {
     );
 
     component.ngOnInit();
-    await fixture.whenStable();
+    await spectator.fixture.whenStable();
 
     expect(component.loading).toBeFalse();
-    expect(component.errors.length).toBe(1);
-    expect(component.errors[0].error).toContain("Unable to load dashboad");
+    await expect(component.errors.length).toBe(1);
+    await expect(component.errors[0].error).toContain(
+      "Unable to load dashboad",
+    );
   });
 
   it("should set error if embedDashboard throws", async () => {
@@ -128,10 +129,12 @@ describe("ViewMonitorsComponent", () => {
     );
 
     component.ngOnInit();
-    await fixture.whenStable();
+    await spectator.fixture.whenStable();
 
     expect(component.loading).toBeFalse();
-    expect(component.errors.length).toBe(1);
-    expect(component.errors[0].error).toContain("Unable to load dashboad");
+    await expect(component.errors.length).toBe(1);
+    await expect(component.errors[0].error).toContain(
+      "Unable to load dashboad",
+    );
   });
 });

@@ -5,7 +5,7 @@ import { SharedModule } from "src/app/shared/shared.module";
 
 import { VehiclesStatusComponent } from "./vehicles-status.component";
 
-fdescribe("VehiclesStatusComponent", () => {
+describe("VehiclesStatusComponent", () => {
   let spectator: Spectator<VehiclesStatusComponent>;
   let component: VehiclesStatusComponent;
 
