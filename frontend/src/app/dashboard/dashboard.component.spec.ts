@@ -7,7 +7,7 @@ import {
 } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import {
   byTextContent,
   createRoutingFactory,
@@ -62,7 +62,7 @@ describe("DashboardComponent", () => {
     imports: [
       LayoutModule,
       SharedModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       ApolloTestingModule,
     ],
     providers: [
