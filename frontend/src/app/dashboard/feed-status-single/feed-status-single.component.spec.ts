@@ -1,4 +1,4 @@
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
@@ -10,7 +10,7 @@ fdescribe("FeedStatusComponent", () => {
 
   const createComponent = createComponentFactory({
     component: FeedStatusSingleComponent,
-    imports: [LayoutModule, SharedModule, RouterTestingModule],
+    imports: [LayoutModule, SharedModule, RouterModule.forRoot([])],
     detectChanges: false,
   });
 
