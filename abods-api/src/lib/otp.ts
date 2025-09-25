@@ -1,18 +1,19 @@
 import {
   FrequentServiceInfoInputType,
+  HeadwayInputType,
   InputMaybe,
+  MatchType,
   OtpEnum,
   PerformanceInputType,
   PunctualityTotalsType,
 } from "../types/generated.js";
-import {
-  getKyselyFiltersForOTPQuery,
-  kyselyFilterForAdminIds,
-} from "../resolvers/otpFunctions.js";
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely.js";
-import { executeQuery, executeQueryTakeFirst } from "./kysely.js";
+import { executeQuery, executeQueryTakeFirst } from "./dbKysely.js";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { userSelectedDateAsUtc } from "./dayjs.js";
+import { getDayOfWeekNumbers } from "./utils.js";
+import { OTPSummaryTables } from "../types/extra.js";
 
 const getThresholds = async (
   db: Kysely<DB>,
@@ -194,4 +195,94 @@ export const getOperatorsForUser = async (
       name: true,
     },
   });
+};
+
+export const getKyselyFiltersForOTPQuery = (
+  db: Kysely<DB>,
+  tableName: OTPSummaryTables,
+  inputs: PerformanceInputType &
+    HeadwayInputType &
+    FrequentServiceInfoInputType,
+  userOperatorNocList: string[],
+) => {
+  const { fromTimestamp, toTimestamp, filters } = inputs || {};
+  const {
+    timingPointsOnly,
+    operatorId,
+    maxDelay,
+    minDelay,
+    lineIds,
+    lineId,
+    dayOfWeekFlags,
+    matchType,
+  } = filters || {};
+  const operatorIds = filters?.operatorIds ?? [];
+
+  const nocListToFilter: string[] = userOperatorNocList
+    .filter((o) => operatorIds.includes(o))
+    .filter((o) => !operatorId || o === operatorId);
+
+  const startDateUtc = userSelectedDateAsUtc(fromTimestamp);
+  const endDateUtc = userSelectedDateAsUtc(toTimestamp);
+
+  // assign maxlate and maxearly filters (maxearly switched to positive for db condition)
+  const maxLateNumber = maxDelay ?? 0;
+  const maxEarlyNumber = minDelay ? Math.abs(minDelay) : 0;
+
+  const isServiceGranularity = lineIds && lineIds.length > 0;
+
+  const lines = lineId ? [lineId] : lineIds;
+
+  let query = db
+    .selectFrom(tableName)
+    .selectAll()
+    .select((eb) =>
+      sql<number>`EXTRACT(HOUR FROM ${eb.ref("departure_hour")} AT TIME ZONE 'Europe/London')`.as(
+        "hour",
+      ),
+    )
+    .where("date_of_journey", ">=", startDateUtc.toDate())
+    .where("date_of_journey", "<", endDateUtc.toDate());
+
+  if (nocListToFilter.length > 0) {
+    query = query.where("operator_noc", "in", nocListToFilter);
+  }
+  if (matchType && matchType === MatchType.Evidenced) {
+    query = query.where("estimated", "=", false);
+  }
+
+  if (timingPointsOnly) {
+    query = query.where("is_timing_point", "=", timingPointsOnly);
+  }
+
+  if (dayOfWeekFlags) {
+    const dayOfWeekNumbers = getDayOfWeekNumbers(dayOfWeekFlags);
+    query = query.where("day_of_week", "in", dayOfWeekNumbers);
+  }
+
+  if (maxEarlyNumber > 0 && !isServiceGranularity) {
+    query = query.where("max_early", "<=", maxEarlyNumber);
+  }
+
+  if (maxLateNumber > 0 && !isServiceGranularity) {
+    query = query.where("max_late", "<=", maxLateNumber);
+  }
+
+  if (lines) {
+    query = query.where("noc_and_line_and_servicecode", "in", lines);
+  }
+
+  return query;
+};
+
+export const kyselyFilterForAdminIds = (
+  query: ReturnType<typeof getKyselyFiltersForOTPQuery>,
+  adminAreaIds: string[],
+) => {
+  if (adminAreaIds && adminAreaIds.length > 0) {
+    query = query.where(
+      sql<boolean>`admin_areas && ARRAY[${sql.join(adminAreaIds)}]::int4[]`,
+    );
+  }
+  return query;
 };
