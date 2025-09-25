@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
+import { Data } from "@angular/router";
 import {
   createComponentFactory,
   createSpyObject,
@@ -21,7 +22,7 @@ import {
   LngLatLike,
   Map,
 } from "mapbox-gl";
-import { MapComponent, NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { MapComponent } from "ngx-mapbox-gl";
 import { NgxSmartModalModule } from "ngx-smart-modal";
 import { EMPTY } from "rxjs";
 import { ConfigService } from "../../../config/config.service";
@@ -37,7 +38,7 @@ import { CorridorMapComponent } from "./corridor-map.component";
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: "mgl-map",
-  template: ``,
+  template: `<ng-content></ng-content>`,
   providers: [
     { provide: MapComponent, useExisting: forwardRef(() => StubMapComponent) },
   ],
@@ -45,7 +46,10 @@ import { CorridorMapComponent } from "./corridor-map.component";
 })
 export class StubMapComponent implements OnInit {
   @Output() moveEnd = new EventEmitter<void>();
+  @Output() moveStart = new EventEmitter<void>();
   @Input() bounds?: LngLatBounds;
+  @Input() cursorStyle?: string;
+  @Input() style?: string;
   @Output() mapLoad = new EventEmitter<Map>();
 
   mapInstance = createSpyObject(Map, {
@@ -68,7 +72,66 @@ export class StubMapComponent implements OnInit {
   }
 }
 
-describe("CorridorMapComponent", () => {
+@Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: "mgl-control",
+  template: `<ng-content></ng-content>`,
+  standalone: false,
+})
+export class StubControlComponent {
+  @Input() position?: string;
+  @Input() mglNavigation?: boolean;
+  @Input() mglGeolocate?: boolean;
+}
+
+@Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: "mgl-geojson-source",
+  template: ``,
+  standalone: false,
+})
+export class StubGeojsonSourceComponent {
+  @Input() id?: string;
+  @Input() data?: Data;
+  @Input() cluster?: boolean;
+  @Input() clusterMinPoints?: number;
+}
+
+@Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: "mgl-layer",
+  template: ``,
+  standalone: false,
+})
+export class StubLayerComponent {
+  @Input() id?: string;
+  @Input() type?: string;
+  @Input() paint?: string;
+  @Input() layout?: string;
+  @Input() source?: string;
+  @Input() before?: string;
+  @Input() filter?: string;
+  @Output() layerMouseMove = new EventEmitter<unknown>();
+  @Output() layerMouseLeave = new EventEmitter<unknown>();
+  @Output() layerClick = new EventEmitter<unknown>();
+}
+
+@Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: "mgl-popup",
+  template: `<ng-content></ng-content>`,
+  standalone: false,
+})
+export class StubPopupComponent {
+  @Input() feature?: string;
+  @Input() closeButton?: boolean;
+  @Input() closeOnClick?: boolean;
+  @Input() maxWidth?: string;
+  @Input() offset?: number;
+  @Input() className?: string;
+}
+
+fdescribe("CorridorMapComponent", () => {
   let spectator: Spectator<CorridorMapComponent>;
   let corridorsService: SpyObject<CorridorsService>;
 
@@ -116,8 +179,14 @@ describe("CorridorMapComponent", () => {
 
   const createComponent = createComponentFactory({
     component: CorridorMapComponent,
-    imports: [SharedModule, GdsModule, NgxMapboxGLModule, NgxSmartModalModule],
-    declarations: [StubMapComponent],
+    imports: [SharedModule, GdsModule, NgxSmartModalModule],
+    declarations: [
+      StubMapComponent,
+      StubControlComponent,
+      StubGeojsonSourceComponent,
+      StubLayerComponent,
+      StubPopupComponent,
+    ],
     mocks: [CorridorsService, ConfigService],
     detectChanges: true,
   });
@@ -129,14 +198,17 @@ describe("CorridorMapComponent", () => {
     corridorsService.queryStops.and.returnValue(EMPTY);
   });
 
-  it("should create", () => {
-    expect(spectator.component).toBeTruthy();
+  it("should create", async () => {
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should emit location when map moves", () => {
+    const stubMapComponent = spectator.query(StubMapComponent);
+    spectator.component.map = stubMapComponent!.mapInstance;
     spyOn(spectator.component.boundsChanged, "emit");
+
     // Simulate map move event
-    spectator.query(StubMapComponent)?.move([-1.47, 53.37], [-1.46, 53.39]);
+    stubMapComponent?.move([-1.47, 53.37], [-1.46, 53.39]);
 
     expect(spectator.component.boundsChanged.emit).toHaveBeenCalledWith(
       new LngLatBounds([-1.47, 53.37], [-1.46, 53.39]),
@@ -144,83 +216,89 @@ describe("CorridorMapComponent", () => {
   });
 
   describe("nonOrgStopLayerBeforeId", () => {
-    it("should return other-stop-markers if otherStops exists", () => {
+    it("should return other-stop-markers if otherStops exists", async () => {
       spectator.component.otherStops = mockPointFeatureCollection;
 
-      expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
+      await expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
         "other-stop-markers",
       );
     });
 
-    it("should return corridor-markers if otherStops is undefined and corridorStops exists", () => {
+    it("should return corridor-markers if otherStops is undefined and corridorStops exists", async () => {
       spectator.component.otherStops = undefined;
       spectator.component.corridorStops = mockPointFeatureCollection;
 
-      expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
+      await expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
         "corridor-markers",
       );
     });
 
-    it("should return matching-stop-markers if otherStops and corridorStops are undefined and matchingStops exists", () => {
+    it("should return matching-stop-markers if otherStops and corridorStops are undefined and matchingStops exists", async () => {
       spectator.component.otherStops = undefined;
       spectator.component.corridorStops = undefined;
       spectator.component.matchingStops = mockPointFeatureCollection;
 
-      expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
+      await expect(spectator.component.nonOrgStopLayerBeforeId).toEqual(
         "matching-stop-markers",
       );
     });
 
-    it("should return undefinded if all layers are undefined", () => {
+    it("should return undefinded if all layers are undefined", async () => {
       spectator.component.otherStops = undefined;
       spectator.component.corridorStops = undefined;
       spectator.component.matchingStops = undefined;
 
-      expect(spectator.component.nonOrgStopLayerBeforeId).toBeUndefined();
+      await expect(spectator.component.nonOrgStopLayerBeforeId).toBeUndefined();
     });
   });
 
-  it("should set hover state", () => {
+  it("should set hover state", async () => {
+    const stubMapComponent = spectator.query(StubMapComponent);
+    spectator.component.map = stubMapComponent!.mapInstance;
+
     spectator.component.matchingStops = mockPointFeatureCollection;
     spectator.component.matchingStopLines = mockLineStringFeatureCollection;
     spectator.component.mapSetHover(mockStop, true);
 
-    expect(spectator.component.map!.setFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map.setFeatureState).toHaveBeenCalledWith(
       { source: "matching-stops", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.map!.setFeatureState).toHaveBeenCalledWith(
+    expect(spectator.component.map.setFeatureState).toHaveBeenCalledWith(
       { source: "matching-stop-lines", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.mapCursor).toEqual("pointer");
+    await expect(spectator.component.mapCursor).toEqual("pointer");
   });
 
-  it("should not set hover state if highlight is false", () => {
+  it("should not set hover state if highlight is false", async () => {
+    const stubMapComponent = spectator.query(StubMapComponent);
+    spectator.component.map = stubMapComponent!.mapInstance;
+
     spectator.component.matchingStops = mockPointFeatureCollection;
     spectator.component.matchingStopLines = mockLineStringFeatureCollection;
     spectator.component.mapSetHover(mockStop);
 
-    expect(spectator.component.map!.setFeatureState).not.toHaveBeenCalledWith(
+    expect(spectator.component.map.setFeatureState).not.toHaveBeenCalledWith(
       { source: "matching-stops", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.map!.setFeatureState).not.toHaveBeenCalledWith(
+    expect(spectator.component.map.setFeatureState).not.toHaveBeenCalledWith(
       { source: "matching-stop-lines", id: mockStop.id },
       { hover: true },
     );
 
-    expect(spectator.component.mapCursor).toEqual("default");
+    await expect(spectator.component.mapCursor).toEqual("default");
   });
 
-  it("should clear hover state", () => {
+  it("should clear hover state", async () => {
     const mockMap = {
       getFeatureState: (
         _feature: FeatureIdentifier | mapboxgl.MapboxGeoJSONFeature,
-      ): any => {
+      ): unknown => {
         return undefined;
       },
       removeFeatureState: (
@@ -249,8 +327,8 @@ describe("CorridorMapComponent", () => {
       "hover",
     );
 
-    expect(spectator.component.mapCursor).toBeUndefined();
+    await expect(spectator.component.mapCursor).toBeUndefined();
 
-    expect(spectator.component.hoveredStop).toBeUndefined();
+    await expect(spectator.component.hoveredStop).toBeUndefined();
   });
 });

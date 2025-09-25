@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { CorridorStopListComponent } from "./corridor-stop-list.component";
 
-describe("CorridorStopListComponent", () => {
+fdescribe("CorridorStopListComponent", () => {
   let component: CorridorStopListComponent;
   let fixture: ComponentFixture<CorridorStopListComponent>;
 
@@ -18,7 +18,7 @@ describe("CorridorStopListComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

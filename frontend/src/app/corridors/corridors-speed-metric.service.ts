@@ -1,26 +1,30 @@
 import { Injectable } from "@angular/core";
 import { Maybe } from "graphql/jsutils/Maybe";
-import { cloneDeep } from "lodash-es";
+import {
+  max as _max,
+  min as _min,
+  range as _range,
+  cloneDeep,
+} from "lodash-es";
 import {
   CorridorHistogramType,
-  CorridorTransitTimeStatsType,
   CorridorStatsDayOfWeekType,
   CorridorStatsTimeOfDayType,
+  CorridorTransitTimeStatsType,
   ServiceLinkType,
 } from "../../generated/graphql";
+import { isNotNullOrUndefined } from "../shared/rxjs-operators";
 import {
   fillGaps,
   filterServiceLinksByStopsOrReturnServiceLinks,
 } from "./corridors.service";
-import { max as _max, min as _min, range as _range } from "lodash-es";
-import { HistogramChartDataItem } from "./view/histogram-chart/histogram-chart.component";
-import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
-import { isNotNullOrUndefined } from "../shared/rxjs-operators";
 import {
   CorridorStats,
   CorridorStatsViewParams,
   ICorridortransitTimeStats,
 } from "./types";
+import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
+import { HistogramChartDataItem } from "./view/histogram-chart/histogram-chart.component";
 
 export interface SpeedStats {
   averageSpeed: string;

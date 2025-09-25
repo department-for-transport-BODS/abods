@@ -1,3 +1,4 @@
+/* eslint-disable jasmine/new-line-before-expect */
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import {
   ChangeDetectorRef,
@@ -10,6 +11,7 @@ import {
 } from "@angular/core";
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Data } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import {
   byLabel,
@@ -118,7 +120,7 @@ describe("ViewCorridorComponent", () => {
   let spectator: SpectatorRouting<ViewCorridorComponent>;
   let service: CorridorsService;
 
-  const createComponent = (data?: any) =>
+  const createComponent = (data?: Data) =>
     createRoutingFactory({
       component: ViewCorridorComponent,
       data: data,
@@ -377,7 +379,7 @@ describe("ViewCorridorComponent", () => {
         '[role="row"][row-index="0"] [role="gridcell"][col-id="0"]',
       )?.textContent;
 
-      expect(cellContent).toEqual("53: Sheffield to Mansfield");
+      void expect(cellContent).toEqual("53: Sheffield to Mansfield");
       flush();
     }));
 
@@ -408,7 +410,7 @@ describe("ViewCorridorComponent", () => {
 
       const result = spectator.component.setCoordinates(corridor.stops);
 
-      expect(result).toEqual([
+      void expect(result).toEqual([
         [1, 0],
         [2, 0],
         [3, 0],
@@ -419,7 +421,7 @@ describe("ViewCorridorComponent", () => {
     it("should set coordinates if service link data unavailable", () => {
       const result = spectator.component.setCoordinates(corridor.stops);
 
-      expect(result).toEqual([
+      void expect(result).toEqual([
         [0, 50],
         [0, 50],
       ]);
@@ -463,7 +465,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.onSelectSegment([]);
       spectator.detectChanges();
 
-      expect(spectator.component.selectAll).toEqual(true);
+      void expect(spectator.component.selectAll).toEqual(true);
     }));
 
     it("clearMapSelectedState() should clear map selected state", () => {
@@ -488,7 +490,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.clearMapSelectedState([]);
       spectator.detectChanges();
 
-      expect(spectator.component.selectAll).toEqual(false);
+      void expect(spectator.component.selectAll).toEqual(false);
     });
 
     it("setMapHoverState() should set map hover state", () => {
@@ -536,7 +538,7 @@ describe("ViewCorridorComponent", () => {
 
       spectator.component.centreMapBounds();
 
-      expect(spectator.component.bounds).toEqual(
+      void expect(spectator.component.bounds).toEqual(
         bbox(spectator.component.corridorLine) as BBox2d,
       );
       flush();
@@ -568,7 +570,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.centreMapBounds();
       spectator.detectChanges();
 
-      expect(spectator.component.bounds).toEqual(
+      void expect(spectator.component.bounds).toEqual(
         bbox(
           lineString([
             [corridor.stops[0].lon, corridor.stops[0].lat],
@@ -590,7 +592,7 @@ describe("ViewCorridorComponent", () => {
 
     it("should show error message if no corridor is found", () => {
       expect(spectator.query(byText("Not found"))).toBeVisible();
-      expect(spectator.query(".govuk-body")?.innerHTML).toContain(
+      void expect(spectator.query(".govuk-body")?.innerHTML).toContain(
         "Corridor not found, or you do not have permission to view.",
       );
     });
