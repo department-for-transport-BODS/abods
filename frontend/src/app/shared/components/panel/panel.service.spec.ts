@@ -14,7 +14,7 @@ class TestDynamicComponent {}
 describe("PanelService", () => {
   let service: PanelService;
 
-  const dynamicComponent = <DynamicComponent>{
+  const dynamicComponent: DynamicComponent = {
     component: TestDynamicComponent,
     inputs: [],
     outputs: [],
@@ -33,10 +33,10 @@ describe("PanelService", () => {
 
   describe("setComponent", () => {
     it("should call next on componentSubject with component", () => {
-      spyOn(service["componentSubject"], "next");
+      spyOn((service as any).componentSubject, "next");
       service.setComponent(dynamicComponent);
 
-      expect(service["componentSubject"].next).toHaveBeenCalledOnceWith(
+      expect((service as any).componentSubject.next).toHaveBeenCalledOnceWith(
         dynamicComponent,
       );
     });
@@ -67,11 +67,13 @@ describe("PanelService", () => {
   describe("destroy", () => {
     it("should call close and next on componentSubject with null", () => {
       service.setComponent(dynamicComponent);
-      spyOn(service["componentSubject"], "next");
+      spyOn((service as any).componentSubject, "next");
       spyOn(service, "close");
       service.destroy();
 
-      expect(service["componentSubject"].next).toHaveBeenCalledOnceWith(null);
+      expect((service as any).componentSubject.next).toHaveBeenCalledOnceWith(
+        null,
+      );
       expect(service.close).toHaveBeenCalledWith();
     });
   });

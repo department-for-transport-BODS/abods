@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SimpleChange } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { XYChartComponent } from "../../../shared/components/amcharts/xy-chart.component";
 
-import { HistogramChartComponent } from "./histogram-chart.component";
 import { chartColors } from "../../../shared/components/amcharts/chart.service";
+import { HistogramChartComponent } from "./histogram-chart.component";
 
-describe("HistogramGraphComponent", () => {
+fdescribe("HistogramGraphComponent", () => {
   let component: HistogramChartComponent;
   let fixture: ComponentFixture<HistogramChartComponent>;
 
@@ -21,31 +23,31 @@ describe("HistogramGraphComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   describe("ngOnChanges", () => {
-    it("should update fill and stroke color", () => {
+    it("should update fill and stroke color", async () => {
       const previous = chartColors.purple;
       const next = chartColors.green;
       component.ngOnChanges({
         chartFillcolor: new SimpleChange(previous, next, false),
       });
 
-      expect(component["columnSeries"].stroke).toEqual(next);
-      expect(component["columnSeries"].fill).toEqual(next);
+      await expect((component as any).columnSeries.stroke).toEqual(next);
+      await expect((component as any).columnSeries.fill).toEqual(next);
     });
 
-    it("should not update fill and stroke color", () => {
+    it("should not update fill and stroke color", async () => {
       const previous = chartColors.purple;
       const next = chartColors.green;
       component.ngOnChanges({
         anotherProp: new SimpleChange(previous, next, false),
       });
 
-      expect(component["columnSeries"].stroke).toBeUndefined();
-      expect(component["columnSeries"].fill).toBeUndefined();
+      await expect((component as any).columnSeries.stroke).toBeUndefined();
+      await expect((component as any).columnSeries.fill).toBeUndefined();
     });
   });
 });

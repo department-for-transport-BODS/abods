@@ -16,7 +16,7 @@ export class ButtonDirective {
   @Input() spaceBelow?: GDSSpacingSizes;
   @Input() spaceAbove?: GDSSpacingSizes;
 
-  @HostBinding("data-module")
+  @HostBinding("attr.data-module")
   module = "govuk-button";
 
   @HostBinding("class")

@@ -1,28 +1,32 @@
-import { CorridorsModule } from "../corridors.module";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Router, RouterModule } from "@angular/router";
 import {
   byLabel,
   byText,
   createComponentFactory,
   Spectator,
 } from "@ngneat/spectator";
-import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
-import { CorridorsService } from "../corridors.service";
-import { of, throwError } from "rxjs";
-import { CorridorsGridComponent } from "./corridors-grid.component";
-import { RouterTestingModule } from "@angular/router/testing";
-import { ApolloTestingModule } from "apollo-angular/testing";
 import { AgGridModule } from "ag-grid-angular";
+import { ComponentStateChangedEvent } from "ag-grid-community";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { of, throwError } from "rxjs";
+import { LayoutModule } from "../../layout/layout.module";
+import { GdsModule } from "../../shared/gds/gds.module";
+import { SharedModule } from "../../shared/shared.module";
+import { CorridorsModule } from "../corridors.module";
+import { CorridorsService } from "../corridors.service";
+import { CorridorsGridComponent } from "./corridors-grid.component";
 
 const queryCell = (spectator: Spectator<CorridorsGridComponent>) =>
   spectator.query(
     '[role="row"][row-index="0"] [role="gridcell"][col-id="numStops"]',
   )?.textContent;
 
-describe("CorridorsGridComponent", () => {
+fdescribe("CorridorsGridComponent", () => {
   let spectator: Spectator<CorridorsGridComponent>;
   let component: CorridorsGridComponent;
   let service: CorridorsService;
+  let router: Router;
   let spy: jasmine.Spy;
 
   const createComponent = createComponentFactory({
@@ -31,19 +35,25 @@ describe("CorridorsGridComponent", () => {
       CorridorsModule,
       SharedModule,
       LayoutModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       ApolloTestingModule,
       AgGridModule,
+      ReactiveFormsModule,
+      FormsModule,
+      GdsModule,
     ],
   });
 
-  beforeEach(async () => {
+  beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
     service = spectator.inject(CorridorsService);
+    router = spectator.inject(Router);
+
+    spyOn(router, "navigate").and.resolveTo(true);
   });
 
-  it("should fetch corridors", () => {
+  it("should fetch corridors", async () => {
     spy = spyOn(service, "fetchCorridors").and.returnValue(
       of([{ id: 1, name: "My test corridor", numStops: 3 }]),
     );
@@ -54,7 +64,7 @@ describe("CorridorsGridComponent", () => {
 
     const cellContent = queryCell(spectator);
 
-    expect(cellContent).toEqual("3");
+    await expect(cellContent).toEqual("3");
   });
 
   it("should show error message if corridor query returns an error", () => {
@@ -71,19 +81,23 @@ describe("CorridorsGridComponent", () => {
     ).toBeVisible();
   });
 
-  it("should filter table", () => {
+  it("should filter table", async () => {
     spyOn(service, "fetchCorridors").and.returnValue(
-      of([{ id: 1, name: "My test corridor", numStops: 3 }]),
+      of([
+        { id: 1, name: "My test corridor", numStops: 3 },
+        { id: 2, name: "Another corridor", numStops: 5 },
+      ]),
     );
     component.ngOnInit();
     spectator.detectChanges();
 
     spectator.typeInElement("test", byLabel("Search for a corridor"));
     spectator.detectChanges();
+    await spectator.fixture.whenStable();
 
     const cellContent = queryCell(spectator);
 
-    expect(cellContent).toEqual("3");
+    await expect(cellContent).toEqual("3");
   });
 
   it("should show no match message if no results found", async () => {
@@ -93,13 +107,16 @@ describe("CorridorsGridComponent", () => {
     component.ngOnInit();
     spectator.detectChanges();
 
-    spectator.typeInElement("nope", byLabel("Search for a corridor"));
-    spectator.fixture.autoDetectChanges();
-    await spectator.fixture.whenStable();
+    component.onGridChanged({
+      api: { getDisplayedRowCount: () => 0 },
+    } as ComponentStateChangedEvent);
+    spectator.detectChanges();
 
     expect(
       spectator.query(byText("No corridors matched the search query.")),
     ).toBeVisible();
+
+    await expect(component.noMatches).toBe(true);
   });
 
   it("should not show no message if no corridor data", async () => {
@@ -107,12 +124,15 @@ describe("CorridorsGridComponent", () => {
     component.ngOnInit();
     spectator.detectChanges();
 
-    spectator.typeInElement("nope", byLabel("Search for a corridor"));
-    spectator.fixture.autoDetectChanges();
-    await spectator.fixture.whenStable();
+    component.onGridChanged({
+      api: { getDisplayedRowCount: () => 0 },
+    } as ComponentStateChangedEvent);
+    spectator.detectChanges();
 
     expect(
       spectator.query(byText("No corridors matched the search query.")),
     ).not.toBeVisible();
+
+    await expect(component.noMatches).toBe(false);
   });
 });

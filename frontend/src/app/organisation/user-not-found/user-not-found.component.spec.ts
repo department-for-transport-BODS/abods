@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { UserNotFoundComponent } from "./user-not-found.component";
+import { LayoutModule } from "../../layout/layout.module";
 
 describe("UserNotFoundComponent", () => {
   let component: UserNotFoundComponent;
@@ -9,6 +10,7 @@ describe("UserNotFoundComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [UserNotFoundComponent],
+      imports: [LayoutModule],
     }).compileComponents();
   });
 

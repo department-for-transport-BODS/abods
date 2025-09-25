@@ -88,8 +88,7 @@ describe("CookiePolicyService", () => {
     expect(cookieService.set).toHaveBeenCalledWith(
       COOKIE_POLICY_NAME,
       '{"analyticsEnabled":true,"version":1,"userSubmitted":true}',
-      DateTime.local().plus({ year: 1 }).toJSDate(),
-      "/",
+      { expires: DateTime.local().plus({ year: 1 }).toJSDate() },
     );
   });
 

@@ -32,6 +32,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         group_id: true,
         journey_pattern_description: true,
         direction: true,
+        is_cancelled: true,
         vehicle_journey_id: true,
         expected_services: {
           select: {
@@ -53,6 +54,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         startTime: getFormattedDate(journey.expected_journey_start),
         serviceName: journey.journey_pattern_description,
         serviceNumber: journey.expected_services?.line_name ?? "unknown",
+        isCancelled: journey.is_cancelled ?? false,
         operatorNoc:
           journey.expected_services?.expected_operator.operator_noc ??
           "unknown",

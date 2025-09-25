@@ -6,7 +6,7 @@ import { of } from "rxjs";
 import { AuthenticatedUserService } from "src/app/authentication/authenticated-user.service";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { AlertFragment, AlertTypeEnum, ScopeEnum } from "src/generated/graphql";
+import { AlertFragment, AlertTypeEnum } from "src/generated/graphql";
 import { OrganisationModule } from "../organisation.module";
 import { OrganisationService } from "../organisation.service";
 
@@ -248,9 +248,12 @@ describe("AlertsComponent", () => {
       of({
         id: "546",
         username: "Starfleet",
-        roles: [
-          { id: "2", name: "Administrator", scope: ScopeEnum.Organisation },
-        ],
+        canEditAllAlerts: true,
+        canViewDistances: true,
+        canViewServiceMonitoring: true,
+        currentUserId: "user-1",
+        flags: [],
+        serviceMonitoringEmbedUrl: null,
       }),
     );
 
@@ -282,7 +285,7 @@ describe("AlertsComponent", () => {
 
       expect(editAlertComponent).toBeTruthy();
 
-      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId as string);
+      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId);
     }
   });
 
@@ -301,7 +304,12 @@ describe("AlertsComponent", () => {
         firstName: "Mr",
         lastName: "Zulu",
         username: "",
-        roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+        canEditAllAlerts: true,
+        canViewDistances: true,
+        canViewServiceMonitoring: true,
+        currentUserId: "user-1",
+        flags: [],
+        serviceMonitoringEmbedUrl: null,
       }),
     );
 
@@ -333,7 +341,7 @@ describe("AlertsComponent", () => {
 
       expect(editAlertComponent).toBeTruthy();
 
-      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId as string);
+      expect(fetchUserAlertSpy).toHaveBeenCalledWith(alert.alertId);
     }
   });
 
@@ -352,7 +360,12 @@ describe("AlertsComponent", () => {
         firstName: "Mr",
         lastName: "Zulu",
         username: "",
-        roles: [{ id: "4", name: "Staff", scope: ScopeEnum.Organisation }],
+        canEditAllAlerts: true,
+        canViewDistances: true,
+        canViewServiceMonitoring: true,
+        currentUserId: "user-1",
+        flags: [],
+        serviceMonitoringEmbedUrl: null,
       }),
     );
 

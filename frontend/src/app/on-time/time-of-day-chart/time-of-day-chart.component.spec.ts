@@ -13,6 +13,7 @@ import {
   onTimeInputParamsTimingPointFalse,
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
+import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
 
 describe("TimeOfDayChartComponent", () => {
   let spectator: Spectator<TimeOfDayChartComponent>;
@@ -21,6 +22,7 @@ describe("TimeOfDayChartComponent", () => {
 
   const createComponent = createComponentFactory({
     component: TimeOfDayChartComponent,
+    declarations: [StackedHistogramChartComponent],
     imports: [LayoutModule, SharedModule, ApolloTestingModule],
     detectChanges: false,
   });

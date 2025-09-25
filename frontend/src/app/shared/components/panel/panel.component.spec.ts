@@ -8,6 +8,7 @@ import {
 
 import { PanelComponent } from "./panel.component";
 import { PanelService } from "./panel.service";
+import { SharedModule } from "../../shared.module";
 
 @Component({
   standalone: false,
@@ -19,16 +20,17 @@ describe("PanelComponent", () => {
   let fixture: ComponentFixture<PanelComponent>;
   let panelService: PanelService;
 
-  const dynamicComponent = <DynamicComponent>{
+  const dynamicComponent = {
     component: TestDynamicComponent,
     inputs: [],
     outputs: [],
-  };
+  } as DynamicComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [PanelComponent, DynamicPanelComponentHostDirective],
       providers: [PanelService, DynamicPanelComponentLoaderService],
+      imports: [SharedModule],
     }).compileComponents();
   });
 
@@ -46,25 +48,25 @@ describe("PanelComponent", () => {
   describe("ngAfterViewInit", () => {
     it("should call loadComponent if component returned from panelService", () => {
       panelService.setComponent(dynamicComponent);
-      spyOn(component["dynamicComponentLoaderService"], "loadComponent");
+      spyOn((component as any).dynamicComponentLoaderService, "loadComponent");
       component.ngAfterViewInit();
 
       expect(
-        component["dynamicComponentLoaderService"].loadComponent,
+        (component as any).dynamicComponentLoaderService.loadComponent,
       ).toHaveBeenCalledWith(
         dynamicComponent,
         component.dynamicComponentHost.viewContainerRef,
-        component["destroy$"],
+        (component as any).destroy$,
       );
     });
   });
 
   describe("close", () => {
     it("should call close", () => {
-      spyOn(component["panelService"], "close");
+      spyOn((component as any).panelService, "close");
       component.close();
 
-      expect(component["panelService"].close).toHaveBeenCalledWith();
+      expect((component as any).panelService.close).toHaveBeenCalledWith();
     });
   });
 });

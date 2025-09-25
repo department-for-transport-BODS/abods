@@ -25,7 +25,7 @@ describe("DatenavComponent", () => {
     { heat: 6, date: DateTime.fromISO("2020-11-25T00:00Z", { zone: "utc" }) },
   ];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Settings.defaultZone = "utc";
     Settings.now = () => 1606780800000; // 2020-12-01
 

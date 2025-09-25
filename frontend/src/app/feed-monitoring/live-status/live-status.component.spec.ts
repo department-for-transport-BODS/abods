@@ -19,9 +19,9 @@ import { OperatorLiveStatusFragment } from "src/generated/graphql";
 import { NgSelectComponent, NgSelectModule } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
 import { AlertListComponent } from "../alert-list/alert-list.component";
-import { MockLiveVehicleStatsComponent } from "./live-vehicle-stats/mock-live-vehicle-stats.component";
 import { Interval, Settings } from "luxon";
 import { LuxonModule } from "luxon-angular";
+import { LiveVehicleStatsComponent } from "./live-vehicle-stats/live-vehicle-stats.component";
 
 describe("LiveStatusComponent", () => {
   let spectator: SpectatorRouting<LiveStatusComponent>;
@@ -32,7 +32,7 @@ describe("LiveStatusComponent", () => {
     declarations: [
       LiveStatusComponent,
       AlertListComponent,
-      MockLiveVehicleStatsComponent,
+      LiveVehicleStatsComponent,
     ],
     imports: [
       FormsModule,
@@ -54,7 +54,7 @@ describe("LiveStatusComponent", () => {
     service = spectator.inject(FeedMonitoringService);
   });
 
-  beforeAll(async () => {
+  beforeAll(() => {
     Faker.seed(534534);
   });
 
@@ -64,13 +64,11 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
-    expect(service.fetchOperator).toHaveBeenCalledWith(
-      operator.operatorId as string,
-    );
+    expect(service.fetchOperator).toHaveBeenCalledWith(operator.operatorId);
 
     expect(spectator.component.operator).toEqual(operator);
   });
@@ -81,12 +79,12 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
     const operatorName = spectator.query(
-      byTextContent(`${operator.name} (${operator.nocCode as string})`, {
+      byTextContent(`${operator.name} (${operator.nocCode})`, {
         selector: ".govuk-caption-l",
       }),
     );
@@ -100,7 +98,7 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
@@ -123,7 +121,7 @@ describe("LiveStatusComponent", () => {
 
       await spectator.fixture.whenStable();
 
-      spectator.setRouteParam("nocCode", theoperator.nocCode as string);
+      spectator.setRouteParam("nocCode", theoperator.nocCode);
 
       spectator.detectChanges();
       await spectator.fixture.whenStable();
@@ -158,7 +156,7 @@ describe("LiveStatusComponent", () => {
 
     await spectator.fixture.whenStable();
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
     await spectator.fixture.whenStable();
@@ -197,7 +195,7 @@ describe("LiveStatusComponent", () => {
       spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
       spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-      spectator.setRouteParam("nocCode", operator.nocCode as string);
+      spectator.setRouteParam("nocCode", operator.nocCode);
 
       spectator.detectChanges();
 
@@ -220,7 +218,7 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
@@ -242,7 +240,7 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
@@ -263,7 +261,7 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 
@@ -325,7 +323,7 @@ describe("LiveStatusComponent", () => {
     spyOnProperty(service, "listOperators").and.returnValue(of([operator]));
     spyOn(service, "fetchOperator").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
 
     spectator.detectChanges();
 

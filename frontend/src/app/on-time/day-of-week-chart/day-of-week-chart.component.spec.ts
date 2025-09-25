@@ -14,6 +14,8 @@ import {
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
 import { cloneDeep } from "lodash-es";
+import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.component";
+import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
 
 describe("DayOfWeekChartComponent", () => {
   let spectator: Spectator<DayOfWeekChartComponent>;
@@ -22,6 +24,7 @@ describe("DayOfWeekChartComponent", () => {
 
   const createComponent = createComponentFactory({
     component: DayOfWeekChartComponent,
+    declarations: [TimeOfDayChartComponent, StackedHistogramChartComponent],
     imports: [LayoutModule, SharedModule, ApolloTestingModule],
     detectChanges: false,
   });
@@ -83,8 +86,12 @@ describe("DayOfWeekChartComponent", () => {
     spy.calls.reset();
 
     const inputParams = cloneDeep(onTimeInputParams);
-    inputParams.fromTimestamp = DateTime.fromISO("2021-02-01T00:00:00+00:00");
-    inputParams.toTimestamp = DateTime.fromISO("2021-02-07T23:59:59.999+00:00");
+    inputParams.fromTimestamp = DateTime.fromISO(
+      "2021-02-01T00:00:00+00:00",
+    ).toISO();
+    inputParams.toTimestamp = DateTime.fromISO(
+      "2021-02-07T23:59:59.999+00:00",
+    ).toISO();
 
     component.params = inputParams;
 

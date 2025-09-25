@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import {
   ColDef,
   ComponentStateChangedEvent,
   ICellRendererParams,
 } from "ag-grid-community";
+import { Subject } from "rxjs";
+import { distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
 import { RouterLinkCellRendererComponent } from "../../shared/components/ag-grid/router-link-cell/router-link-cell.component";
 import { CorridorsService } from "../corridors.service";
-import { distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Subject } from "rxjs";
 import { Corridor, CorridorSummary } from "../types";
 
 @Component({

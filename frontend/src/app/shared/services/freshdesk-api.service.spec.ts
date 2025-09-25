@@ -32,22 +32,22 @@ describe("FreshdeskApiService", () => {
   };
 
   const mockArticles: FreshdeskArticle[] = [
-    <FreshdeskArticle>{
+    {
       status: FreshdeskArticleStatus.PUBLISHED,
       title: "Published 1",
-    },
-    <FreshdeskArticle>{
+    } as FreshdeskArticle,
+    {
       status: FreshdeskArticleStatus.PUBLISHED,
       title: "Published 2",
-    },
-    <FreshdeskArticle>{
+    } as FreshdeskArticle,
+    {
       status: FreshdeskArticleStatus.DRAFT,
       title: "Draft 1",
-    },
-    <FreshdeskArticle>{
+    } as FreshdeskArticle,
+    {
       status: FreshdeskArticleStatus.DRAFT,
       title: "Draft 2",
-    },
+    } as FreshdeskArticle,
   ];
 
   const createHttp = createHttpFactory({

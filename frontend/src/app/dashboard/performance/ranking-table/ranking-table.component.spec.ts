@@ -96,8 +96,8 @@ describe("PerformanceRankingComponent", () => {
     expect(serviceNames).toEqual(
       jasmine.arrayWithExactContents(
         services.map(
-          ({ lineInfo: { serviceNumber, serviceName } }) =>
-            `${serviceNumber}: ${serviceName}`,
+          ({ lineInfo }) =>
+            `${lineInfo?.serviceNumber ?? ""}: ${lineInfo?.serviceName ?? ""}`,
         ),
       ),
     );

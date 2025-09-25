@@ -119,7 +119,7 @@ export type StopPerformanceGridType = BasePerformance &
 
 export type AbstractPerformance = BasePerformance | StopPerformanceGridType;
 
-enum Mode {
+export enum Mode {
   percent = "percent",
   count = "count",
   time = "time",

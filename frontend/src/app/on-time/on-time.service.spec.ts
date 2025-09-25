@@ -1,34 +1,36 @@
 import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import {
-  OnTimeService,
-  ServicePerformance,
-  TimeOfDayData,
-} from "./on-time.service";
+import { OnTimeService, TimeOfDayData } from "./on-time.service";
 import objectContaining = jasmine.objectContaining;
+import { ControlsComponent } from "./controls/controls.component";
+import { OtpThresholdModalComponent } from "./otp-threshold-modal/otp-threshold-modal.component";
 
 const performance = (
-  early: number,
-  late: number,
-  onTime: number,
   scheduledDepartures: number,
   actualDepartures: number,
   averageDelay: number,
-) =>
-  ({
-    early,
-    late,
-    onTime,
-    total: early + late + onTime,
-    scheduledDepartures,
-    actualDepartures,
-    averageDelay,
-  }) as ServicePerformance;
+  early?: number,
+  late?: number,
+  onTime?: number,
+) => ({
+  early,
+  late,
+  onTime,
+  total: early ?? 0 + (late ?? 0) + (onTime ?? 0),
+  scheduledDepartures,
+  actualDepartures,
+  averageDelay,
+  earlyRatio: 0,
+  lateRatio: 0,
+  onTimeRatio: 0,
+  completedRatio: 0,
+});
 
 describe("OnTimeService", () => {
   let spectator: SpectatorService<OnTimeService>;
   const createService = createServiceFactory({
     service: OnTimeService,
+    declarations: [ControlsComponent, OtpThresholdModalComponent],
     imports: [ApolloTestingModule],
   });
 
@@ -160,46 +162,26 @@ describe("OnTimeService", () => {
   });
 
   it("should calculate sum and average total values", () => {
-    const data = [
-      performance(10, 30, 60, 222, 200, 40),
-      performance(15, 15, 70, 110, 100, 15),
-      performance(5, 40, 55, 52, 50, 70),
-      performance(15, 20, 65, 155, 150, 50),
-    ];
+    const perf = performance(222, 200, 40, 10, 30, 60);
+    const actual = OnTimeService.calculateOnTimePcts(perf);
 
-    const actual = spectator.service.calculateTotals(data);
-
-    expect(actual.length).toEqual(1);
-    expect(actual[0].early).toEqual(45);
-    expect(actual[0].late).toEqual(105);
-    expect(actual[0].onTime).toEqual(250);
-    expect(actual[0].earlyRatio).toEqual(0.1125);
-    expect(actual[0].lateRatio).toEqual(0.2625);
-    expect(actual[0].onTimeRatio).toEqual(0.625);
-    expect(actual[0].scheduledDepartures).toEqual(539);
-    expect(actual[0].actualDepartures).toEqual(500);
-    expect(actual[0].averageDelay).toEqual(41);
+    expect(actual.early).toBe(10);
+    expect(actual.late).toBe(30);
+    expect(actual.onTime).toBe(60);
+    expect(actual.scheduledDepartures).toBe(222);
+    expect(actual.actualDepartures).toBe(200);
+    expect(actual.averageDelay).toBe(40);
   });
 
   it("should cope with zeroes when calculating sum and average total values", () => {
-    const data = [
-      performance(0, 0, 0, 0, 0, 0),
-      performance(0, 0, 0, 0, 0, 0),
-      performance(0, 0, 0, 0, 0, 0),
-      performance(0, 0, 0, 0, 0, 0),
-    ];
+    const perf = performance(0, 0, 0, 0, 0, 0);
+    const actual = OnTimeService.calculateOnTimePcts(perf);
 
-    const actual = spectator.service.calculateTotals(data);
-
-    expect(actual.length).toEqual(1);
-    expect(actual[0].early).toEqual(0);
-    expect(actual[0].late).toEqual(0);
-    expect(actual[0].onTime).toEqual(0);
-    expect(actual[0].earlyRatio).toEqual(0);
-    expect(actual[0].lateRatio).toEqual(0);
-    expect(actual[0].onTimeRatio).toEqual(0);
-    expect(actual[0].scheduledDepartures).toEqual(0);
-    expect(actual[0].actualDepartures).toEqual(0);
-    expect(actual[0].averageDelay).toEqual(0);
+    expect(actual.early).toBe(0);
+    expect(actual.late).toBe(0);
+    expect(actual.onTime).toBe(0);
+    expect(actual.scheduledDepartures).toBe(0);
+    expect(actual.actualDepartures).toBe(0);
+    expect(actual.averageDelay).toBe(0);
   });
 });

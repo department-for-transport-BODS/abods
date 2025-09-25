@@ -50,7 +50,7 @@ describe("FeedMonitoringComponent", () => {
     expect(component).toBeTruthy();
   });
 
-  it("should fetch", async () => {
+  it("should fetch", () => {
     spyOn(service, "fetchFeedMonitoringList").and.returnValue(of([]));
 
     fixture.detectChanges();
@@ -58,7 +58,7 @@ describe("FeedMonitoringComponent", () => {
     expect(service.fetchFeedMonitoringList).toHaveBeenCalledWith();
   });
 
-  it("should display inactive operator table", async () => {
+  it("should display inactive operator table", () => {
     const data = inactiveOperators;
 
     const ops = cold("--a", {
@@ -90,7 +90,7 @@ describe("FeedMonitoringComponent", () => {
     );
   });
 
-  it("should display data in inactive operator table", async () => {
+  it("should display data in inactive operator table", () => {
     const data = inactiveOperators;
 
     const ops = cold("--a", {
@@ -120,7 +120,7 @@ describe("FeedMonitoringComponent", () => {
     expect(row2).toBeFalsy();
   });
 
-  it("should not display inactive operator table if none inactive", async () => {
+  it("should not display inactive operator table if none inactive", () => {
     const data: OperatorLiveStatusFragment[] = activeOperators;
 
     const ops = cold("--a", {
@@ -139,7 +139,7 @@ describe("FeedMonitoringComponent", () => {
     expect(inactiveGrid).toBeFalsy();
   });
 
-  it("should display active operator table", async () => {
+  it("should display active operator table", () => {
     const data: OperatorLiveStatusFragment[] = activeOperators;
 
     const ops = cold("--a", {
@@ -171,7 +171,7 @@ describe("FeedMonitoringComponent", () => {
     );
   });
 
-  it("should display data in active operator table", async () => {
+  it("should display data in active operator table", () => {
     const data = activeOperators;
 
     const ops = cold("--a", {

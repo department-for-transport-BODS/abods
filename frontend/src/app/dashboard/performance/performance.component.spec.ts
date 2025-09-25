@@ -30,7 +30,7 @@ describe("PerformanceComponent", () => {
   let service: DashboardService;
   let dateRange: DateRangeService;
 
-  const filters = <PerformanceFiltersInputType>{};
+  const filters: PerformanceFiltersInputType = {};
 
   const createComponent = createComponentFactory({
     component: PerformanceComponent,
