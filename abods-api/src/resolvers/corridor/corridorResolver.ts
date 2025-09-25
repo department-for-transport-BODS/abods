@@ -20,6 +20,7 @@ import {
 import { userSelectedDateAsUtc } from "../../lib/dayjs.js";
 import { emptyResolver, requireUserSession } from "../helpers.js";
 import { TimetableType } from "../../types/extra.js";
+import { executeQuery } from "../../lib/dbKysely.js";
 
 export const listCorridors: CorridorNamespaceResolvers["corridorList"] = async (
   _,
@@ -187,13 +188,13 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   const user = await requireUserSession(context);
 
   if (stopList.length < 1) {
-    throw "No stop array passed for corridor stats";
+    throw new Error("No stop array passed for corridor stats");
   }
 
   if (
     !(await isCorridorMappedToUserOrg(Number(corridorId), user, context.db))
   ) {
-    throw "Not Authorized";
+    throw new Error("Not Authorized");
   }
 
   const timetables = context.kysely
@@ -254,7 +255,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
       "t.date_of_journey",
     ]);
 
-  const results: TimetableType[] = await timetables.execute();
+  const results: TimetableType[] = await executeQuery(timetables);
 
   const corridorTransits = extractCorridorTransits(results, stopList);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain

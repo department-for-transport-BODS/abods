@@ -1,6 +1,12 @@
-import { getCorridors, getSubsequentStops } from "./corridorResolver";
+import { getCorridors, getStats, getSubsequentStops } from "./corridorResolver";
 import { jest } from "@jest/globals";
-import { CorridorType, StopType } from "../../types/generated";
+import {
+  CorridorGranularity,
+  CorridorStatsType,
+  CorridorType,
+  MatchType,
+  StopType,
+} from "../../types/generated";
 import * as corridor from "../../lib/corridor";
 import { CorridorResultsType } from "../../lib/corridor";
 import { PrismaClient } from "@prisma/client";
@@ -17,6 +23,8 @@ import { createResponse, createRequest } from "node-mocks-http";
 import { DB } from "../../kysely";
 import { RequestContext } from "../../types/extra";
 import { GraphQLResolveInfo } from "graphql";
+import * as kyselyLib from "../../lib/dbKysely";
+import * as corridorLib from "../../lib/corridor";
 
 const mockUser = { id: 1, orgs: [{ id: 10 }] };
 
@@ -31,16 +39,10 @@ jest.mock("../../../src/lib/corridor", () => {
     distinctRoutes: jest.fn(),
     getOrgAdminAreas: jest.fn(),
     getCorridor: jest.fn(),
+    isCorridorMappedToUserOrg: jest.fn(() => Promise.resolve(true)),
   };
 });
-// const mockDb = {
-//   naptan_stoppoint_latlong: {
-//     findMany: jest.fn(),
-//   },
-//   corridor: {
-//     findUnique: jest.fn(),
-//   },
-// };
+
 const dummyDialect: Dialect = {
   createDriver: () => new DummyDriver(),
   createQueryCompiler: () => new PostgresQueryCompiler(),
@@ -247,8 +249,6 @@ describe("getSubsequentStops", () => {
       )) as Partial<StopType>[];
     }
 
-    console.log(result);
-
     expect(result).toEqual([
       {
         adminAreaId: "1",
@@ -325,5 +325,128 @@ describe("getSubsequentStops", () => {
     expect(corridor.getOrgAdminAreas).toHaveBeenCalled();
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockDb.naptan_stoppoint_latlong.findMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("getStats", () => {
+  it("returns corridor stats for valid input", async () => {
+    // Arrange
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: ["101", "102", "103"],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    // Mock executeQuery to return timetable data
+    const mockTimetableResults = [
+      {
+        atco_code: "101",
+        stop_index: 0,
+        actual_departure_time: "2025-09-01T08:00:00.000Z",
+        expected_departure_time: "2025-09-01T08:05:00.000Z",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        line_name: "Line 1",
+        vehiclejourney_id: "VJ1",
+        group_id: "G1",
+        date_of_journey: "2025-09-01",
+      },
+      {
+        atco_code: "102",
+        stop_index: 1,
+        actual_departure_time: "2025-09-01T08:10:00.000Z",
+        expected_departure_time: "2025-09-01T08:15:00.000Z",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        line_name: "Line 1",
+        vehiclejourney_id: "VJ1",
+        group_id: "G1",
+        date_of_journey: "2025-09-01",
+      },
+      {
+        atco_code: "103",
+        stop_index: 2,
+        actual_departure_time: "2025-09-01T08:20:00.000Z",
+        expected_departure_time: "2025-09-01T08:25:00.000Z",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        line_name: "Line 1",
+        vehiclejourney_id: "VJ1",
+        group_id: "G1",
+        date_of_journey: "2025-09-01",
+      },
+    ];
+
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue(mockTimetableResults);
+
+    let result: Partial<CorridorStatsType> | null = null;
+    if (typeof getStats === "function") {
+      result = await getStats({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    // Assert
+    expect(result).toHaveProperty("inputs", args.inputs);
+    expect(result).toHaveProperty("corridorTransits");
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+    expect(corridorLib.isCorridorMappedToUserOrg).toHaveBeenCalledWith(
+      Number(args.inputs.corridorId),
+      mockUser,
+      mockDb,
+    );
+  });
+
+  it("throws error if stopList is empty", async () => {
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: [],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    if (typeof getStats === "function") {
+      await expect(
+        getStats({}, args, context, {} as GraphQLResolveInfo),
+      ).rejects.toThrow("No stop array passed for corridor stats");
+      return;
+    }
+
+    fail("No error thrown when stopList is empty");
+  });
+
+  it("throws error if corridor is not mapped to user org", async () => {
+    (corridorLib.isCorridorMappedToUserOrg as jest.Mock).mockResolvedValue(
+      false as never,
+    );
+
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: ["101", "102"],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    if (typeof getStats === "function") {
+      await expect(
+        getStats({}, args, context, {} as GraphQLResolveInfo),
+      ).rejects.toThrow("Not Authorized");
+      return;
+    }
+
+    fail("No error thrown when corridor is not mapped to user org");
   });
 });

@@ -2245,7 +2245,7 @@ describe("compareThresholds", () => {
 
     const queryArg = (kyselyLib.executeQueryTakeFirst as unknown as jest.Mock)
       .mock.calls[0] as SelectQueryBuilder<DB, never, unknown>[];
-    console.log(queryArg);
+
     const compiled = queryArg[0].compile();
 
     expect(result).not.toBeNull();
