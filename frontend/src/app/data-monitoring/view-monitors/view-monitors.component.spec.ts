@@ -11,7 +11,7 @@ import { GdsModule } from "../../shared/gds/gds.module";
 import { SharedModule } from "../../shared/shared.module";
 import { ViewMonitorsComponent } from "./view-monitors.component";
 
-fdescribe("ViewMonitorsComponent", () => {
+describe("ViewMonitorsComponent", () => {
   let spectator: Spectator<ViewMonitorsComponent>;
   let component: ViewMonitorsComponent;
   let embeddedUrlQuerySpy: SpyObject<DashboadEmbeddedUrlGQL>;
