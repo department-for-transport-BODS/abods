@@ -15,7 +15,7 @@ import { AuthenticatedUserService } from "./authenticated-user.service";
 import { AuthenticationService } from "./authentication.service";
 import { MockLoginComponent } from "./authentication.service.spec";
 
-fdescribe("AuthGuardService", () => {
+describe("AuthGuardService", () => {
   let service: AuthGuardService;
   let router: Router;
   let userService: AuthenticatedUserService;

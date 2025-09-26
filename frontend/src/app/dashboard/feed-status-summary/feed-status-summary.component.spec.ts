@@ -1,4 +1,4 @@
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
@@ -10,7 +10,7 @@ describe("FeedStatusSummaryComponent", () => {
 
   const createComponent = createComponentFactory({
     component: FeedStatusSummaryComponent,
-    imports: [LayoutModule, SharedModule, RouterTestingModule],
+    imports: [LayoutModule, SharedModule, RouterModule.forRoot([])],
     detectChanges: false,
   });
 
@@ -19,9 +19,9 @@ describe("FeedStatusSummaryComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 });

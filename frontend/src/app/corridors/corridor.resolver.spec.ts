@@ -8,7 +8,7 @@ import { CorridorsService } from "./corridors.service";
 import { CorridorResolver } from "./corridor.resolver";
 import { Corridor } from "./types";
 
-fdescribe("CorridorResolver", () => {
+describe("CorridorResolver", () => {
   let resolver: CorridorResolver;
   let service: CorridorsService;
   const route: ActivatedRouteSnapshot = {

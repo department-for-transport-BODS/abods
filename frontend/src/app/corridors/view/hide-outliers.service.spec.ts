@@ -2,7 +2,7 @@ import { TestBed } from "@angular/core/testing";
 
 import { HideOutliersService } from "./hide-outliers.service";
 
-fdescribe("HideOutliersService", () => {
+describe("HideOutliersService", () => {
   let service: HideOutliersService;
 
   beforeEach(() => {

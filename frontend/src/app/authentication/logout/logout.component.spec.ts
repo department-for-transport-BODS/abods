@@ -5,7 +5,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { AuthenticationService } from "../authentication.service";
 import { LogoutComponent } from "./logout.component";
 
-fdescribe("LogoutComponent", () => {
+describe("LogoutComponent", () => {
   let component: LogoutComponent;
   let fixture: ComponentFixture<LogoutComponent>;
   let authenticationService: AuthenticationService;

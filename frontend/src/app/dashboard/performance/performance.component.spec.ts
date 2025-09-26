@@ -1,28 +1,28 @@
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { DateTime } from "luxon";
-import { LayoutModule } from "src/app/layout/layout.module";
-import { SharedModule } from "src/app/shared/shared.module";
-import { DashboardService } from "../dashboard.service";
-import { MockPerformanceChartComponent } from "./chart/mock-chart.component";
-import { PerformanceComponent } from "./performance.component";
 import * as faker from "faker";
 import { cold, getTestScheduler } from "jasmine-marbles";
-import { PerformanceRankingComponent } from "./ranking-table/ranking-table.component";
+import { DateTime } from "luxon";
+import { BehaviorSubject } from "rxjs";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { Period } from "src/app/shared/components/date-range/date-range.types";
+import { DateRangeService } from "src/app/shared/services/date-range.service";
+import { SharedModule } from "src/app/shared/shared.module";
 import {
   PerformanceFiltersInputType,
   RankingOrder,
   ServicePunctualityType,
 } from "src/generated/graphql";
+import { dateTimeCloseEnoughToEqualityMatcher } from "src/test-support/equality";
 import {
   fakeDashboardPunctualityStats,
   fakeDashboardServiceRanking,
 } from "src/test-support/faker";
-import { DateRangeService } from "src/app/shared/services/date-range.service";
-import { dateTimeCloseEnoughToEqualityMatcher } from "src/test-support/equality";
-import { Period } from "src/app/shared/components/date-range/date-range.types";
-import { BehaviorSubject } from "rxjs";
+import { DashboardService } from "../dashboard.service";
+import { MockPerformanceChartComponent } from "./chart/mock-chart.component";
+import { PerformanceComponent } from "./performance.component";
+import { PerformanceRankingComponent } from "./ranking-table/ranking-table.component";
 
 describe("PerformanceComponent", () => {
   let spectator: Spectator<PerformanceComponent>;
@@ -38,7 +38,7 @@ describe("PerformanceComponent", () => {
     imports: [
       LayoutModule,
       SharedModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       ApolloTestingModule,
     ],
     detectChanges: false,
@@ -178,7 +178,7 @@ describe("PerformanceComponent", () => {
     );
   });
 
-  it("should pass stats to chart component", () => {
+  it("should pass stats to chart component", async () => {
     const stats = fakeDashboardPunctualityStats();
     spyOn(service, "getPunctualityStats").and.returnValue(
       cold("-a", { a: { success: true, result: stats } }),
@@ -193,10 +193,10 @@ describe("PerformanceComponent", () => {
 
     expect(mockChart).toExist();
 
-    expect(mockChart?.sourceData).toEqual(stats);
+    await expect(mockChart?.sourceData).toEqual(stats);
   });
 
-  it("should pass ranking to ranking component", () => {
+  it("should pass ranking to ranking component", async () => {
     const ranking: ServicePunctualityType[] = [
       fakeDashboardServiceRanking(),
       fakeDashboardServiceRanking(),
@@ -219,6 +219,6 @@ describe("PerformanceComponent", () => {
 
     expect(rankingComponent).toExist();
 
-    expect(rankingComponent?.services).toEqual(ranking);
+    await expect(rankingComponent?.services).toEqual(ranking);
   });
 });

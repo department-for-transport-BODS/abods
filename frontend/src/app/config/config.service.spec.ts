@@ -6,7 +6,7 @@ import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import { ConfigService } from "./config.service";
 
-fdescribe("ConfigService", () => {
+describe("ConfigService", () => {
   let service: ConfigService;
 
   beforeEach(() => {

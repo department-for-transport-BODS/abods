@@ -13,7 +13,7 @@ import { CookiePolicyService } from "../shared/services/cookie-policy.service";
 import { SharedModule } from "../shared/shared.module";
 import { CookiePolicyComponent } from "./cookie-policy.component";
 
-fdescribe("CookiePolicyComponent", () => {
+describe("CookiePolicyComponent", () => {
   let spectator: Spectator<CookiePolicyComponent>;
   let analyticsService: SpyObject<AnalyticsService>;
   let cookiePolicyService: SpyObject<CookiePolicyService>;
