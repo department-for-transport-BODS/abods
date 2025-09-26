@@ -7,7 +7,7 @@ import { XYChartComponent } from "../../../shared/components/amcharts/xy-chart.c
 import { chartColors } from "../../../shared/components/amcharts/chart.service";
 import { HistogramChartComponent } from "./histogram-chart.component";
 
-fdescribe("HistogramGraphComponent", () => {
+describe("HistogramGraphComponent", () => {
   let component: HistogramChartComponent;
   let fixture: ComponentFixture<HistogramChartComponent>;
 

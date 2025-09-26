@@ -131,7 +131,7 @@ export class StubPopupComponent {
   @Input() className?: string;
 }
 
-fdescribe("CorridorMapComponent", () => {
+describe("CorridorMapComponent", () => {
   let spectator: Spectator<CorridorMapComponent>;
   let corridorsService: SpyObject<CorridorsService>;
 

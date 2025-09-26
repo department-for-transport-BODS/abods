@@ -3,7 +3,7 @@ import { LayoutModule } from "../layout/layout.module";
 import { SharedModule } from "../shared/shared.module";
 import { AccessibilityComponent } from "./accessibility.component";
 
-fdescribe("AccessibilityComponent", () => {
+describe("AccessibilityComponent", () => {
   let component: AccessibilityComponent;
   let fixture: ComponentFixture<AccessibilityComponent>;
 

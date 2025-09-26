@@ -162,7 +162,7 @@ const paramStopsNotFound = [
   },
 ];
 
-fdescribe("CorridorsService", () => {
+describe("CorridorsService", () => {
   let spectator: SpectatorService<CorridorsService>;
   let controller: ApolloTestingController;
   let opService: SpyObject<OperatorService>;

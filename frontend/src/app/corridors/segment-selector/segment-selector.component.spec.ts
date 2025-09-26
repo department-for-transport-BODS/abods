@@ -3,7 +3,7 @@ import { RouteType, ServiceLinkType } from "../../../generated/graphql";
 import { CorridorStop } from "../types";
 import { SegmentSelectorComponent } from "./segment-selector.component";
 
-fdescribe("SegmentSelectorComponent", () => {
+describe("SegmentSelectorComponent", () => {
   let component: SegmentSelectorComponent;
   let fixture: ComponentFixture<SegmentSelectorComponent>;
 

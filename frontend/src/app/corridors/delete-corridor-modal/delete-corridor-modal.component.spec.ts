@@ -8,7 +8,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { Corridor } from "../types";
 import { DeleteCorridorModalComponent } from "./delete-corridor-modal.component";
 
-fdescribe("DeleteCorridorModalComponent", () => {
+describe("DeleteCorridorModalComponent", () => {
   let component: DeleteCorridorModalComponent;
   let fixture: ComponentFixture<DeleteCorridorModalComponent>;
   let modalService: NgxSmartModalService;

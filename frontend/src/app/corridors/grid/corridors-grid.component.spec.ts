@@ -22,7 +22,7 @@ const queryCell = (spectator: Spectator<CorridorsGridComponent>) =>
     '[role="row"][row-index="0"] [role="gridcell"][col-id="numStops"]',
   )?.textContent;
 
-fdescribe("CorridorsGridComponent", () => {
+describe("CorridorsGridComponent", () => {
   let spectator: Spectator<CorridorsGridComponent>;
   let component: CorridorsGridComponent;
   let service: CorridorsService;

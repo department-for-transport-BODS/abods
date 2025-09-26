@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { CorridorStopListComponent } from "./corridor-stop-list.component";
 
-fdescribe("CorridorStopListComponent", () => {
+describe("CorridorStopListComponent", () => {
   let component: CorridorStopListComponent;
   let fixture: ComponentFixture<CorridorStopListComponent>;
 

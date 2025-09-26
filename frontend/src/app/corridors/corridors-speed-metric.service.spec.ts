@@ -11,7 +11,7 @@ import { CorridorsSpeedMetricService } from "./corridors-speed-metric.service";
 import { CorridorStats, CorridorStatsViewParams } from "./types";
 import { BoxPlotChartDataItem } from "./view/box-plot-chart/box-plot-chart.component";
 
-fdescribe("CorridorsSpeedMetricService", () => {
+describe("CorridorsSpeedMetricService", () => {
   let service: CorridorsSpeedMetricService;
   const serviceLinks: ServiceLinkType[] = [
     {
