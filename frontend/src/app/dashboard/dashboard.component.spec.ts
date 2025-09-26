@@ -44,7 +44,7 @@ class SkipHttpRequestInterceptor implements HttpInterceptor {
   }
 }
 
-fdescribe("DashboardComponent", () => {
+describe("DashboardComponent", () => {
   let spectator: SpectatorRouting<DashboardComponent>;
   let component: DashboardComponent;
   let service: DashboardService;
