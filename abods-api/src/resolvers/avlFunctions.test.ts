@@ -22,12 +22,6 @@ const mockAvlData = [
   },
 ];
 
-// const mockDb = {
-//   avl_line_level_monitoring: {
-//     findMany: jest.fn(),
-//   },
-// };
-
 let mockDb: DeepMockProxy<PrismaClient>;
 let context: RequestContext;
 beforeEach(() => {
