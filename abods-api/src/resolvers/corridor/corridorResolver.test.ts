@@ -2,7 +2,6 @@ import { getCorridors, getStats, getSubsequentStops } from "./corridorResolver";
 import { jest } from "@jest/globals";
 import {
   CorridorGranularity,
-  CorridorStatsType,
   CorridorType,
   MatchType,
   StopType,
@@ -21,7 +20,7 @@ import {
 } from "kysely";
 import { createResponse, createRequest } from "node-mocks-http";
 import { DB } from "../../kysely";
-import { RequestContext } from "../../types/extra";
+import { RequestContext, TimetableType } from "../../types/extra";
 import { GraphQLResolveInfo } from "graphql";
 import * as kyselyLib from "../../lib/dbKysely";
 import * as corridorLib from "../../lib/corridor";
@@ -330,70 +329,49 @@ describe("getSubsequentStops", () => {
 
 describe("getStats", () => {
   it("returns corridor stats for valid input", async () => {
-    // Arrange
+    const stop = ["101", "102", "103"];
     const args = {
       inputs: {
         corridorId: "1",
         fromTimestamp: "2025-09-01T00:00:00.000Z",
         toTimestamp: "2025-09-02T00:00:00.000Z",
-        stopList: ["101", "102", "103"],
+        stopList: stop,
         granularity: CorridorGranularity.Hour,
         matchType: MatchType.Estimated,
       },
     };
 
-    // Mock executeQuery to return timetable data
-    const mockTimetableResults = [
-      {
-        atco_code: "101",
-        stop_index: 0,
-        actual_departure_time: "2025-09-01T08:00:00.000Z",
-        expected_departure_time: "2025-09-01T08:05:00.000Z",
-        operator_noc: "OP1",
-        service_code: "SC1",
-        line_name: "Line 1",
-        vehiclejourney_id: "VJ1",
-        group_id: "G1",
-        date_of_journey: "2025-09-01",
-      },
-      {
-        atco_code: "102",
-        stop_index: 1,
-        actual_departure_time: "2025-09-01T08:10:00.000Z",
-        expected_departure_time: "2025-09-01T08:15:00.000Z",
-        operator_noc: "OP1",
-        service_code: "SC1",
-        line_name: "Line 1",
-        vehiclejourney_id: "VJ1",
-        group_id: "G1",
-        date_of_journey: "2025-09-01",
-      },
-      {
-        atco_code: "103",
-        stop_index: 2,
-        actual_departure_time: "2025-09-01T08:20:00.000Z",
-        expected_departure_time: "2025-09-01T08:25:00.000Z",
-        operator_noc: "OP1",
-        service_code: "SC1",
-        line_name: "Line 1",
-        vehiclejourney_id: "VJ1",
-        group_id: "G1",
-        date_of_journey: "2025-09-01",
-      },
-    ];
+    const mockTimetableResults = stop.map((atco_code: string, idx: number) => ({
+      atco_code,
+      stop_index: idx,
+      actual_departure_time: `2025-09-01T08:${idx * 10}:00.000Z`,
+      expected_departure_time: `2025-09-01T08:${idx * 10 + 5}:00.000Z`,
+      operator_noc: "OP1",
+      service_code: "SC1",
+      line_name: "Line 1",
+      vehiclejourney_id: "VJ1",
+      group_id: "G1",
+      date_of_journey: "2025-09-01",
+    }));
 
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockTimetableResults);
+      .mockResolvedValue(mockTimetableResults as never);
 
-    let result: Partial<CorridorStatsType> | null = null;
+    let result: { corridorTransits: TimetableType[][] } | null = null;
     if (typeof getStats === "function") {
-      result = await getStats({}, args, context, {} as GraphQLResolveInfo);
+      result = (await getStats(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as { corridorTransits: TimetableType[][] };
     }
 
-    // Assert
-    expect(result).toHaveProperty("inputs", args.inputs);
     expect(result).toHaveProperty("corridorTransits");
+    expect(result?.corridorTransits[0].length).toEqual(3);
+    expect(result?.corridorTransits[0][0].atco_code).toEqual("101");
+    expect(result?.corridorTransits[0][2].atco_code).toEqual("103");
     expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
     expect(corridorLib.isCorridorMappedToUserOrg).toHaveBeenCalledWith(
       Number(args.inputs.corridorId),
@@ -425,7 +403,7 @@ describe("getStats", () => {
   });
 
   it("throws error if corridor is not mapped to user org", async () => {
-    (corridorLib.isCorridorMappedToUserOrg as jest.Mock).mockResolvedValue(
+    (corridorLib.isCorridorMappedToUserOrg as jest.Mock).mockResolvedValueOnce(
       false as never,
     );
 
@@ -448,5 +426,148 @@ describe("getStats", () => {
     }
 
     fail("No error thrown when corridor is not mapped to user org");
+  });
+
+  it("does not return corridor stats for journeys not matching stop order", async () => {
+    // Arrange
+    const stop = ["101", "104", "103", "102"];
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: ["101", "102", "103"],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    const mockTimetableResults = stop.map((atco_code: string, idx: number) => ({
+      atco_code,
+      stop_index: idx,
+      actual_departure_time: `2025-09-01T08:${idx * 10}:00.000Z`,
+      expected_departure_time: `2025-09-01T08:${idx * 10 + 5}:00.000Z`,
+      operator_noc: "OP1",
+      service_code: "SC1",
+      line_name: "Line 1",
+      vehiclejourney_id: "VJ1",
+      group_id: "G1",
+      date_of_journey: "2025-09-01",
+    }));
+
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue(mockTimetableResults as never);
+
+    let result: { corridorTransits: TimetableType[][] } | null = null;
+    if (typeof getStats === "function") {
+      result = (await getStats(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as { corridorTransits: TimetableType[][] };
+    }
+
+    expect(result).toHaveProperty("corridorTransits");
+    expect(result?.corridorTransits.length).toEqual(0);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns journeys when the direction of stops matches stopList", async () => {
+    // Arrange
+    const stop = ["101", "104", "102", "103"];
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: ["101", "102", "103"],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    const mockTimetableResults = stop.map((atco_code: string, idx: number) => ({
+      atco_code,
+      stop_index: idx,
+      actual_departure_time: `2025-09-01T08:${idx * 10}:00.000Z`,
+      expected_departure_time: `2025-09-01T08:${idx * 10 + 5}:00.000Z`,
+      operator_noc: "OP1",
+      service_code: "SC1",
+      line_name: "Line 1",
+      vehiclejourney_id: "VJ1",
+      group_id: "G1",
+      date_of_journey: "2025-09-01",
+    }));
+
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue(mockTimetableResults as never);
+
+    let result: { corridorTransits: TimetableType[][] } | null = null;
+    if (typeof getStats === "function") {
+      result = (await getStats(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as { corridorTransits: TimetableType[][] };
+    }
+
+    expect(result).toHaveProperty("corridorTransits");
+    expect(result?.corridorTransits[0].length).toEqual(3);
+    expect(result?.corridorTransits[0][0].atco_code).toEqual("101");
+    expect(result?.corridorTransits[0][2].atco_code).toEqual("103");
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns stops for cyclic journeys", async () => {
+    const stop = ["101", "102", "104", "101", "102"];
+    const args = {
+      inputs: {
+        corridorId: "1",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        stopList: ["101", "102"],
+        granularity: CorridorGranularity.Hour,
+        matchType: MatchType.Estimated,
+      },
+    };
+
+    const mockTimetableResults = stop.map((atco_code: string, idx: number) => ({
+      atco_code,
+      stop_index: idx,
+      actual_departure_time: `2025-09-01T08:${idx * 10}:00.000Z`,
+      expected_departure_time: `2025-09-01T08:${idx * 10 + 5}:00.000Z`,
+      operator_noc: "OP1",
+      service_code: "SC1",
+      line_name: "Line 1",
+      vehiclejourney_id: "VJ1",
+      group_id: "G1",
+      date_of_journey: "2025-09-01",
+    }));
+
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue(mockTimetableResults as never);
+
+    let result: { corridorTransits: TimetableType[][] } | null = null;
+    if (typeof getStats === "function") {
+      result = (await getStats(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as { corridorTransits: TimetableType[][] };
+    }
+
+    expect(result).toHaveProperty("corridorTransits");
+    expect(result?.corridorTransits.length).toEqual(2);
+    expect(result?.corridorTransits[0].length).toEqual(2);
+    expect(result?.corridorTransits[1].length).toEqual(2);
+    expect(result?.corridorTransits[0][0].atco_code).toEqual("101");
+    expect(result?.corridorTransits[1][1].atco_code).toEqual("102");
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
   });
 });
