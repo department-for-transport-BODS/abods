@@ -22,13 +22,18 @@
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
     "@graphql-codegen/typescript-operations": "^5.0.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.4",
+    "@types/express": "^5.0.3",
     "concurrently": "^9.1.2",
     "graphql-scalars": "^1.24.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
+    "node-mocks-http": "^1.17.2",
     "prettier": "3.2.5"
   },
   "lint-staged": {
     "**/*": "prettier --write"
+  },
+  "dependencies": {
+    "jest": "^30.1.3"
   }
 }

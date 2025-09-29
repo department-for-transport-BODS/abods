@@ -1,9 +1,9 @@
 import userResolvers from "./userFunctions.js";
 import sharedResolvers from "./sharedFunctions.js";
 import { mergeResolvers } from "@graphql-tools/merge";
-import otpResolvers from "./otpFunctions.js";
+import otpResolvers from "./otp/onTimePerformance.js";
 import vehicleJourneyResolvers from "./vehicleJourneyFunctions.js";
-import corridorResolvers from "./corridorFunctions.js";
+import corridorResolvers from "./corridor/corridorResolver.js";
 import feedMonitoringResolvers from "./feedMonitoringFunctions.js";
 import avlResolvers from "./avlFunctions.js";
 import { Resolvers } from "../types/generated.js";
@@ -16,6 +16,11 @@ import {
 import stopAnalysisResolvers from "./stopAnalysis.js";
 import dataMonitoringResolvers from "./dataMonitoringFunctions.js";
 import distancesResolver from "./distances.js";
+import otpQuery from "./otp/query.js";
+import headwayMetricsResolvers from "./otp/headway.js";
+import onTimePerformanceResolvers from "./otp/onTimePerformance.js";
+import corridorMutations from "./corridor/mutation.js";
+import corridorStats from "./corridor/stats.js";
 
 export const customScalarResolvers: Resolvers = {
   Date: DateResolver,
@@ -36,6 +41,11 @@ const resolversArray = [
   stopAnalysisResolvers,
   dataMonitoringResolvers,
   distancesResolver,
+  otpQuery,
+  headwayMetricsResolvers,
+  onTimePerformanceResolvers,
+  corridorMutations,
+  corridorStats,
 ];
 const resolvers = mergeResolvers(resolversArray);
 
