@@ -6,8 +6,9 @@
     <nav class="datenav__controls">
       <button
         class="datenav__button unbuttoned"
+        [attr.aria-disabled]="first"
         [disabled]="first"
-        (click)="dateSelected.emit(date?.minus({ day: 1 }))"
+        (click)="!first && dateSelected.emit(date?.minus({ day: 1 }))"
       >
         <svg-icon
           class="datenav__icon"
@@ -21,7 +22,7 @@
         aria-label="Show next date"
         [attr.aria-disabled]="last"
         [disabled]="last"
-        (click)="dateSelected.emit(date?.plus({ day: 1 }))"
+        (click)="!last && dateSelected.emit(date?.plus({ day: 1 }))"
       >
         <span class="datenav__label">Next</span>
         <svg-icon

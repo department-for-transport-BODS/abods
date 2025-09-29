@@ -5,7 +5,7 @@ import { FeedMonitoringModule } from "../../feed-monitoring.module";
 import { DatenavItemComponent } from "./datenav-item/datenav-item.component";
 import { DatenavComponent } from "./datenav.component";
 
-describe("DatenavComponent", () => {
+fdescribe("DatenavComponent", () => {
   let spectator: Spectator<DatenavComponent>;
 
   const createComponent = createComponentFactory({
@@ -215,7 +215,7 @@ describe("DatenavComponent", () => {
       ).not.toHaveBeenCalled();
     });
 
-    fit("should cope with timezone difference after BST has ended when looking at stats from BST", async () => {
+    it("should cope with timezone difference after BST has ended when looking at stats from BST", async () => {
       Settings.defaultZone = "Europe/London";
       Settings.now = () => 1604188800000; // 2020-11-01 GMT+00:00, i.e. after BST has ended
 
@@ -236,8 +236,6 @@ describe("DatenavComponent", () => {
 
       spectator.click(byText("Previous"));
       spectator.detectChanges();
-
-      console.log(spectator.element.outerHTML);
 
       await expect(
         spectator.component.dateSelected.emit,

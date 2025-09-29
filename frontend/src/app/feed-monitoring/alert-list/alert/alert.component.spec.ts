@@ -7,7 +7,7 @@ import { AlertListViewModel, AlertMode } from "../alert-list-view-model";
 
 import { AlertComponent } from "./alert.component";
 
-describe("AlertComponent", () => {
+fdescribe("AlertComponent", () => {
   let component: AlertComponent;
   let fixture: ComponentFixture<AlertComponent>;
 

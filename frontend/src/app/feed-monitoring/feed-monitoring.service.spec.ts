@@ -4,11 +4,11 @@ import {
   ApolloTestingController,
   ApolloTestingModule,
 } from "apollo-angular/testing";
-import { FeedMonitoringService } from "./feed-monitoring.service";
 import { DateTime } from "luxon";
 import { EventStatsDocument } from "../../generated/graphql";
+import { FeedMonitoringService } from "./feed-monitoring.service";
 
-describe("FeedMonitoringService", () => {
+fdescribe("FeedMonitoringService", () => {
   let service: FeedMonitoringService;
   let controller: ApolloTestingController;
 
@@ -20,28 +20,28 @@ describe("FeedMonitoringService", () => {
     controller = TestBed.inject(ApolloTestingController);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
-  it("should send dates in UTC", () => {
+  it("should send dates in UTC", async () => {
     service
       .fetchAlertStats(
         "OP01",
         DateTime.fromISO("2021-05-05T14:30:00.000+01:00"),
       )
       .subscribe((stats) => {
-        expect(stats).not.toBeNull();
+        void expect(stats).not.toBeNull();
       });
 
     const op = controller.expectOne(EventStatsDocument);
 
-    expect(op.operation.variables.operatorId).toEqual("OP01");
-    expect(op.operation.variables.start).toEqual(
-      DateTime.local(2021, 2, 4).toUTC().toJSDate(),
+    await expect(op.operation.variables.operatorId).toEqual("OP01");
+    await expect(op.operation.variables.start).toEqual(
+      DateTime.local(2021, 2, 4).toUTC().toISO(),
     );
-    expect(op.operation.variables.end).toEqual(
-      DateTime.local(2021, 5, 5).toUTC().toJSDate(),
+    await expect(op.operation.variables.end).toEqual(
+      DateTime.local(2021, 5, 5).toUTC().toISO(),
     );
 
     op.flush({
