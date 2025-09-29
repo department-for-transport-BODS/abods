@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { fakeEvent } from "src/test-support/faker";
-import { AlertMode, AlertListViewModel } from "../alert-list-view-model";
+import { AlertListViewModel, AlertMode } from "../alert-list-view-model";
 
 import { AlertComponent } from "./alert.component";
 
@@ -23,7 +23,7 @@ describe("AlertComponent", () => {
     component = fixture.componentInstance;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     component.alert = new AlertListViewModel(
       fakeEvent({
         start: DateTime.local().minus({ hour: 1 }),
@@ -33,6 +33,6 @@ describe("AlertComponent", () => {
     );
     fixture.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 });

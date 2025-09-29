@@ -6,7 +6,6 @@
     <nav class="datenav__controls">
       <button
         class="datenav__button unbuttoned"
-        [attr.aria-disabled]="first"
         [disabled]="first"
         (click)="dateSelected.emit(date?.minus({ day: 1 }))"
       >
