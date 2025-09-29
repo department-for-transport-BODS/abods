@@ -8,8 +8,7 @@ import {
   PrismaClient,
 } from "@prisma/client";
 import { CorridorType, MatchType } from "../types/generated.js";
-import { SessionUser } from "../types/extra.js";
-import { TimetableType } from "../resolvers/corridorFunctions.js";
+import { SessionUser, TimetableType } from "../types/extra.js";
 
 export enum CorridorTransitStatsOption {
   day,
@@ -205,4 +204,30 @@ export const getStopDepartureTime = (
     stop.actual_departure_time ??
     (matchType === MatchType.Estimated ? stop.timestamp_after_estimate : null)
   );
+};
+
+export const insertCorridorStops = async (
+  corridor_id: number,
+  stopIds: string[],
+  db: PrismaClient,
+) => {
+  const numberStopsList = stopIds.map(Number);
+
+  const records: {
+    corridor_id: number;
+    corridor_index: number;
+    stop_id: number;
+  }[] = [];
+
+  numberStopsList.map((stop, index) => {
+    records.push({
+      corridor_id: Number(corridor_id),
+      corridor_index: index,
+      stop_id: stop,
+    });
+  });
+
+  await db.corridor_stops.createMany({
+    data: records,
+  });
 };
