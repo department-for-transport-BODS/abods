@@ -264,7 +264,7 @@ export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
     ) {
       query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
     }
-    return await query
+    return query
       .groupBy(["a.name", "s.operator_noc"])
       .select("name")
       .select("operator_noc")

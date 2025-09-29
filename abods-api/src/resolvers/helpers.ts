@@ -107,10 +107,11 @@ export function getHeader(
   );
 }
 
-const parseCookie = (str: string | string[]) =>
+export const parseCookie = (str: string | string[]) =>
   (typeof str === "string" ? str.split(";") : str)
     .map((v) => v.split("="))
-    .reduce((acc: Record<string, string>, v) => {
+    .reduce((acc: Record<string, string>, v: string[] | undefined) => {
+      if (!v?.[0]) return acc;
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
       return acc;
     }, {});

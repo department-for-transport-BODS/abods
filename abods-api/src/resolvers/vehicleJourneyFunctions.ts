@@ -66,7 +66,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     );
 };
 
-const getAvlData = (
+export const getAvlData = (
   db: PrismaClient,
   dateString: string,
   newGroupId: string,
@@ -188,7 +188,7 @@ export const getJourney: QueryResolvers["journey"] = async (
   const avlPromises = [];
   let currentDay = minRange.startOf("day");
   while (currentDay.isSameOrBefore(maxRange.startOf("day"))) {
-    const dateString = currentDay.toISOString().substring(0, 10);
+    const dateString = currentDay.format("YYYY-MM-DD");
     // Some of the avl data has the wrong group id when running overnight, so we construct a new one
     const newGroupId = groupIdPrefix + "|" + dateString;
     avlPromises.push(

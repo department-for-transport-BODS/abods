@@ -53,10 +53,7 @@ describe("requireApiToken", () => {
       apiKeyAuth: { allowedTokenHash: "hashed-token", Hmac: "hmac-secret" },
       headers: { Authorization: "Bearer invalid-token" },
     };
-    jest
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      .spyOn(api, "hashApiKey")
-      .mockImplementation(() => "wrong-hash");
+    jest.spyOn(api, "hashApiKey").mockImplementation(() => "wrong-hash");
 
     const result = api.requireApiToken(context as never);
     expect(api.hashApiKey).toHaveBeenCalledWith("invalid-token", "hmac-secret");
