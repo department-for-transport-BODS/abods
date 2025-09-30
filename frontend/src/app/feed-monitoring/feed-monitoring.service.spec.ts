@@ -8,7 +8,7 @@ import { DateTime } from "luxon";
 import { EventStatsDocument } from "../../generated/graphql";
 import { FeedMonitoringService } from "./feed-monitoring.service";
 
-fdescribe("FeedMonitoringService", () => {
+describe("FeedMonitoringService", () => {
   let service: FeedMonitoringService;
   let controller: ApolloTestingController;
 

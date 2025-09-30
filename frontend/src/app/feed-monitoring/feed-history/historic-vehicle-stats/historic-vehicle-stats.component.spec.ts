@@ -3,7 +3,7 @@ import { SharedModule } from "src/app/shared/shared.module";
 
 import { HistoricVehicleStatsComponent } from "./historic-vehicle-stats.component";
 
-fdescribe("HistoricVehicleStatsComponent", () => {
+describe("HistoricVehicleStatsComponent", () => {
   let spectator: Spectator<HistoricVehicleStatsComponent>;
   const createComponent = createComponentFactory({
     component: HistoricVehicleStatsComponent,

@@ -3,7 +3,7 @@ import { NgxTippyModule } from "ngx-tippy-wrapper";
 
 import { DatenavItemComponent } from "./datenav-item.component";
 
-fdescribe("DatenavItemComponent", () => {
+describe("DatenavItemComponent", () => {
   let component: DatenavItemComponent;
   let fixture: ComponentFixture<DatenavItemComponent>;
 

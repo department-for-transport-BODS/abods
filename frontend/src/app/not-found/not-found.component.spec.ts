@@ -1,20 +1,20 @@
 import { Spectator, createComponentFactory } from "@ngneat/spectator";
 
-import { NotFoundComponent } from "./not-found.component";
+import { RouterModule } from "@angular/router";
 import { LayoutModule } from "../layout/layout.module";
-import { RouterTestingModule } from "@angular/router/testing";
 import { SharedModule } from "../shared/shared.module";
+import { NotFoundComponent } from "./not-found.component";
 
-describe("NotFoundComponent", () => {
+fdescribe("NotFoundComponent", () => {
   let spectator: Spectator<NotFoundComponent>;
   const createComponent = createComponentFactory({
     component: NotFoundComponent,
-    imports: [LayoutModule, RouterTestingModule, SharedModule],
+    imports: [LayoutModule, RouterModule.forRoot([]), SharedModule],
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator = createComponent();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 });

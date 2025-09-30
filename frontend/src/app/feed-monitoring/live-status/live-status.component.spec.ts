@@ -22,7 +22,7 @@ import { OperatorLiveStatusFragment } from "src/generated/graphql";
 import { AlertListComponent } from "../alert-list/alert-list.component";
 import { LiveVehicleStatsComponent } from "./live-vehicle-stats/live-vehicle-stats.component";
 
-fdescribe("LiveStatusComponent", () => {
+describe("LiveStatusComponent", () => {
   let spectator: SpectatorRouting<LiveStatusComponent>;
   let service: FeedMonitoringService;
 
