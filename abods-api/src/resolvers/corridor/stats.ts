@@ -22,6 +22,7 @@ import {
 } from "../../types/generated";
 
 import { StatsCache, TimetableType } from "../../types/extra.js";
+import { executeQuery } from "../../lib/dbKysely";
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   parent,
@@ -303,7 +304,7 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
     // Data was cached in the output of getStats, and will be removed later
     const data = parent as StatsCache;
 
-    const results = await context.kysely
+    const query = context.kysely
       .selectFrom("corridor_stops")
       .innerJoin(
         "naptan_stoppoint_latlong",
@@ -316,16 +317,16 @@ export const getServiceLinks: CorridorStatsTypeResolvers["serviceLinks"] =
         "naptan_stoppoint_latlong.atco_code",
         "naptan_stoppoint_latlong.latitude",
         "naptan_stoppoint_latlong.longitude",
-      ])
-      .execute()
-      .then((result) =>
-        result.map((x) => ({
-          corridorIndex: x.corridor_index,
-          stopId: x.atco_code ?? "",
-          lat: x.latitude ?? 0,
-          lon: x.longitude ?? 0,
-        })),
-      );
+      ]);
+
+    const results = await executeQuery(query).then((result) =>
+      result.map((x) => ({
+        corridorIndex: x.corridor_index,
+        stopId: x.atco_code ?? "",
+        lat: x.latitude ?? 0,
+        lon: x.longitude ?? 0,
+      })),
+    );
 
     results.sort((a, b) => a.corridorIndex - b.corridorIndex);
 

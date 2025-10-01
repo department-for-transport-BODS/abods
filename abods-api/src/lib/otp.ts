@@ -15,7 +15,7 @@ import { userSelectedDateAsUtc } from "./dayjs.js";
 import { getDayOfWeekNumbers } from "./utils.js";
 import { OTPSummaryTables } from "../types/extra.js";
 
-const getThresholds = async (
+export const getThresholds = async (
   db: Kysely<DB>,
   inputs: PerformanceInputType,
   userOperatorIds: string[],
