@@ -18,6 +18,7 @@ import logger from "../../logger.js";
 import { userSelectedDateAsUtc } from "../../lib/dayjs.js";
 import { DB } from "../../kysely.js";
 import { listServiceLinks } from "../../lib/common.js";
+import { executeQuery } from "../../lib/dbKysely.js";
 
 export const getOperatorList: QueryResolvers["operators"] = async (
   _,
@@ -52,8 +53,9 @@ export const getOperatorList: QueryResolvers["operators"] = async (
       )
       .where("boo.organisation_id", "=", args.filterBy?.orgId);
   }
-  return await query
-    .groupBy(["a.name", "s.operator_noc"])
+
+  // creating a new variable as return types were not infered when reusing query variable
+  const mainQuery = query
     .select((eb) => [
       eb.fn.coalesce("name", sql.lit("<unknown>")).as("name"),
       eb.fn.coalesce("operator_noc", sql.lit("<unknown>")).as("operatorId"),
@@ -61,16 +63,17 @@ export const getOperatorList: QueryResolvers["operators"] = async (
         "adminAreaIds",
       ),
     ])
-    .orderBy("name")
-    .execute()
-    .then((x) =>
-      x.map((o) => ({
-        name: o.name,
-        operatorId: o.operatorId,
-        nocCode: o.operatorId,
-        adminAreaIds: o.adminAreaIds.split(","),
-      })),
-    );
+    .groupBy(["a.name", "s.operator_noc"])
+    .orderBy("name");
+
+  return executeQuery(mainQuery).then((x) =>
+    x.map((o) => ({
+      name: o.name,
+      operatorId: o.operatorId,
+      nocCode: o.operatorId,
+      adminAreaIds: o.adminAreaIds.split(","),
+    })),
+  );
 };
 
 export const getServiceInfo: QueryResolvers["serviceInfo"] = async (
@@ -180,13 +183,14 @@ export const getLines: QueryResolvers["lines"] = async (
     query = query.where("date_of_journey", "=", inputDate);
   }
 
-  return query
+  const mainQuery = query
     .select("noc_and_line_and_servicecode as id")
     .select("service_name as name")
     .select("line_name as number")
     .select("admin_area_id as adminAreaIds")
-    .distinctOn("noc_and_line_and_servicecode")
-    .execute();
+    .distinctOn("noc_and_line_and_servicecode");
+
+  return executeQuery(mainQuery);
 };
 
 const getOtpServiceLinks = (

@@ -7,7 +7,9 @@ import {
   getFeatureFlags,
   getUser,
   getuserOrgs,
+  getUsers,
   loginUser,
+  logoutUser,
 } from "./userFunctions";
 import * as helpers from "./helpers";
 import { GraphQLResolveInfo } from "graphql";
@@ -28,6 +30,8 @@ import {
 } from "kysely";
 import { DB } from "../kysely";
 import * as kyselyLib from "../lib/dbKysely.js";
+import { User } from "@aws-sdk/client-quicksight";
+import logger from "../logger";
 
 jest.mock("./helpers", () => ({
   requireUserSession: jest.fn(),
@@ -59,6 +63,7 @@ let context: RequestContext;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.spyOn(logger, "error").mockResolvedValue({} as never);
   mockDb = mockDeep<PrismaClient>();
   context = {
     db: mockDb,
@@ -426,5 +431,101 @@ describe("getuserOrgs", () => {
 
     expect(result).toEqual([{ id: 20, name: "Org B" }]);
     expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getUsers", () => {
+  it("returns mapped users for valid orgId", async () => {
+    mockDb.bods_user.findMany.mockResolvedValue([
+      {
+        id: 1,
+        username: "user1@dft.gov.uk",
+        first_name: "User",
+        last_name: "One",
+      },
+      {
+        id: 2,
+        username: "user2@otherdomain.com",
+        first_name: "User",
+        last_name: "Two",
+      },
+    ] as never);
+
+    const args = { orgId: 10 };
+    let result: User[] | null = null;
+    if (typeof getUsers === "function") {
+      result = (await getUsers(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as User[];
+    }
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      id: "1",
+      username: "user1@dft.gov.uk",
+      firstName: "User",
+      lastName: "One",
+    });
+    expect(result?.[1]).toEqual({
+      id: "2",
+      username: "user2@otherdomain.com",
+      firstName: "User",
+      lastName: "Two",
+    });
+  });
+
+  it("returns empty array when no users found", async () => {
+    mockDb.bods_user.findMany.mockResolvedValue([] as never);
+    const args = { orgId: 10 };
+    let result: User[] | null = null;
+    if (typeof getUsers === "function") {
+      result = (await getUsers(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as User[];
+    }
+    expect(result).toEqual([]);
+  });
+});
+
+describe("logoutUser", () => {
+  it("deletes user token and returns true", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 123,
+      orgs: [{ id: 10 }],
+    });
+    mockDb.tokens.delete.mockResolvedValue({} as never);
+
+    let result: boolean | null = null;
+    if (typeof logoutUser === "function") {
+      result = await logoutUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result).toBe(true);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockDb.tokens.delete).toHaveBeenCalledWith({
+      where: { user_id: 123 },
+    });
+  });
+
+  it("returns false and logs error if token deletion fails", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 123,
+      orgs: [{ id: 10 }],
+    });
+    mockDb.tokens.delete.mockRejectedValue(new Error("DB error"));
+
+    let result: boolean | null = null;
+    if (typeof logoutUser === "function") {
+      result = await logoutUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result).toBe(false);
   });
 });

@@ -1,4 +1,10 @@
-import { getCorridors, getStats, getSubsequentStops } from "./corridorResolver";
+import {
+  getCorridors,
+  getStats,
+  getStops,
+  getSubsequentStops,
+  listCorridors,
+} from "./corridorResolver";
 import { jest } from "@jest/globals";
 import {
   CorridorGranularity,
@@ -37,10 +43,16 @@ jest.mock("../../../src/lib/corridor", () => {
     ...(actual as Record<string, unknown>),
     distinctRoutes: jest.fn(),
     getOrgAdminAreas: jest.fn(),
+    getCorridorList: jest.fn(),
+    returnCorridorType: jest.fn(),
     getCorridor: jest.fn(),
     isCorridorMappedToUserOrg: jest.fn(() => Promise.resolve(true)),
   };
 });
+
+jest
+  .spyOn(corridorLib, "getOrgAdminAreas")
+  .mockResolvedValue([{ adminarea_id: 101 }, { adminarea_id: 102 }]);
 
 const dummyDialect: Dialect = {
   createDriver: () => new DummyDriver(),
@@ -273,6 +285,80 @@ describe("getSubsequentStops", () => {
     expect(corridor.getOrgAdminAreas).toHaveBeenCalled();
   });
 
+  it("returns subsequent stops when routes has stops later in the list", async () => {
+    jest
+      .spyOn(corridor, "distinctRoutes")
+      .mockResolvedValueOnce([
+        { route: "F,A,B,C,D" },
+        { route: "A,B,C,E" },
+      ] as never);
+    jest
+      .spyOn(corridor, "getOrgAdminAreas")
+      .mockResolvedValueOnce([
+        { adminarea_id: 1 },
+        { adminarea_id: 2 },
+      ] as never);
+
+    mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([
+      {
+        id: 201,
+        admin_area_id: 1,
+        atco_code: "C",
+        common_name: "Stop C",
+        longitude: -0.1,
+        latitude: 51.5,
+        locality: { name: "Loc C" },
+        locality_id: 301,
+      },
+      {
+        id: 202,
+        admin_area_id: 2,
+        atco_code: "D",
+        common_name: "Stop D",
+        longitude: -0.2,
+        latitude: 51.6,
+        locality: { name: "Loc D" },
+        locality_id: 302,
+      },
+    ] as never);
+
+    const args = { stopList: ["A", "B"] };
+
+    let result: Partial<StopType>[] | null = null;
+    if (typeof getSubsequentStops === "function") {
+      result = (await getSubsequentStops(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<StopType>[];
+    }
+
+    expect(result).toEqual([
+      {
+        adminAreaId: "1",
+        stopId: "201",
+        stopName: "Stop C",
+        lon: -0.1,
+        lat: 51.5,
+        localityName: "Loc C",
+        sourceId: "C",
+      },
+      {
+        adminAreaId: "2",
+        stopId: "202",
+        stopName: "Stop D",
+        lon: -0.2,
+        lat: 51.6,
+        localityName: "Loc D",
+        sourceId: "D",
+      },
+    ] as StopType[]);
+
+    expect(corridor.distinctRoutes).toHaveBeenCalled();
+    expect(corridor.getOrgAdminAreas).toHaveBeenCalled();
+  });
+
   it("returns empty array if stops does not match a route", async () => {
     jest.spyOn(corridor, "distinctRoutes").mockResolvedValueOnce([] as never);
     jest
@@ -324,6 +410,21 @@ describe("getSubsequentStops", () => {
     expect(corridor.getOrgAdminAreas).toHaveBeenCalled();
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockDb.naptan_stoppoint_latlong.findMany).not.toHaveBeenCalled();
+  });
+
+  it("throws error if stoplist are missing", async () => {
+    const args = {};
+
+    if (typeof getSubsequentStops === "function") {
+      await expect(
+        getSubsequentStops(
+          {},
+          args as never,
+          context,
+          {} as GraphQLResolveInfo,
+        ),
+      ).rejects.toThrow("No stops passed to obtain distinct routes");
+    }
   });
 });
 
@@ -569,5 +670,247 @@ describe("getStats", () => {
     expect(result?.corridorTransits[0][0].atco_code).toEqual("101");
     expect(result?.corridorTransits[1][1].atco_code).toEqual("102");
     expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getStops", () => {
+  it("returns stops filtered by searchString", async () => {
+    mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([
+      {
+        id: 1,
+        common_name: "Stop A",
+        latitude: 51.5,
+        longitude: -0.1,
+        admin_area_id: 101,
+        atco_code: "SRC101",
+        locality: { name: "LocA" },
+      },
+      {
+        id: 2,
+        common_name: "Stop B",
+        latitude: 51.6,
+        longitude: -0.2,
+        admin_area_id: 102,
+        atco_code: "SRC102",
+        locality: { name: "LocB" },
+      },
+    ] as never);
+
+    const args = {
+      inputs: {
+        searchString: "Stop",
+      },
+    };
+
+    let result: StopType[] | null = null;
+    if (typeof getStops === "function") {
+      result = (await getStops(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as StopType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      stopId: "1",
+      stopName: "Stop A",
+      lat: 51.5,
+      lon: -0.1,
+      localityName: "LocA",
+      adminAreaId: "101",
+      sourceId: "SRC101",
+    });
+    expect(result?.[1]).toEqual({
+      stopId: "2",
+      stopName: "Stop B",
+      lat: 51.6,
+      lon: -0.2,
+      localityName: "LocB",
+      adminAreaId: "102",
+      sourceId: "SRC102",
+    });
+  });
+
+  it("returns stops filtered by boundingBox", async () => {
+    mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([
+      {
+        id: 3,
+        common_name: "Stop C",
+        latitude: 51.7,
+        longitude: -0.3,
+        admin_area_id: 101,
+        atco_code: "SRC103",
+        locality: { name: "LocC" },
+      },
+    ] as never);
+
+    const args = {
+      inputs: {
+        boundingBox: {
+          minLatitude: 51.6,
+          maxLatitude: 51.8,
+          minLongitude: -0.4,
+          maxLongitude: -0.2,
+        },
+      },
+    };
+
+    let result: StopType[] | null = null;
+    if (typeof getStops === "function") {
+      result = (await getStops(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as StopType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      stopId: "3",
+      stopName: "Stop C",
+      lat: 51.7,
+      lon: -0.3,
+      localityName: "LocC",
+      adminAreaId: "101",
+      sourceId: "SRC103",
+    });
+  });
+
+  it("throws error if inputs are missing", async () => {
+    const args = {};
+
+    if (typeof getStops === "function") {
+      await expect(
+        getStops({}, args as never, context, {} as GraphQLResolveInfo),
+      ).rejects.toThrow("Invalid inputs");
+    }
+  });
+
+  it("returns stops with correct admin area filtering", async () => {
+    mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([
+      {
+        id: 4,
+        common_name: "Stop D",
+        latitude: 51.8,
+        longitude: -0.4,
+        admin_area_id: 101,
+        atco_code: "SRC104",
+        locality: { name: "LocD" },
+      },
+    ] as never);
+
+    const args = {
+      inputs: {
+        searchString: "D",
+      },
+    };
+
+    let result: StopType[] | null = null;
+    if (typeof getStops === "function") {
+      result = (await getStops(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as StopType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      stopId: "4",
+      stopName: "Stop D",
+      lat: 51.8,
+      lon: -0.4,
+      localityName: "LocD",
+      adminAreaId: "101",
+      sourceId: "SRC104",
+    });
+  });
+});
+
+describe("listCorridors", () => {
+  (corridorLib.getCorridorList as jest.Mock).mockResolvedValue([
+    {
+      corridor_id: 1,
+      corridor_name: "Corridor 1",
+      organisation_id: 123,
+      user_id: 1,
+      corridor_stops: [],
+    },
+    {
+      corridor_id: 2,
+      corridor_name: "Corridor 2",
+      organisation_id: 123,
+      user_id: 1,
+      corridor_stops: [],
+    },
+  ] as never);
+
+  jest.spyOn(corridorLib, "returnCorridorType").mockImplementation((results) =>
+    results.map((r) => ({
+      id: r.corridor_id,
+      name: r.corridor_name,
+      stops: [],
+    })),
+  );
+  it("returns corridor list for user", async () => {
+    let result: CorridorType[] | null = null;
+    if (typeof listCorridors === "function") {
+      result = (await listCorridors(
+        {},
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as CorridorType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      id: 1,
+      name: "Corridor 1",
+      stops: [],
+    });
+    expect(result?.[1]).toEqual({
+      id: 2,
+      name: "Corridor 2",
+      stops: [],
+    });
+
+    expect(corridorLib.getCorridorList).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ id: 1 }),
+    );
+    expect(corridorLib.returnCorridorType).toHaveBeenCalled();
+  });
+
+  it("returns empty array when no corridors found", async () => {
+    (corridorLib.getCorridorList as jest.Mock).mockResolvedValueOnce(
+      [] as never,
+    );
+
+    let result: CorridorType[] | null = null;
+    if (typeof listCorridors === "function") {
+      result = (await listCorridors(
+        {},
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as CorridorType[];
+    }
+
+    expect(result).toEqual([]);
+    expect(corridorLib.getCorridorList).toHaveBeenCalled();
+    expect(corridorLib.returnCorridorType).toHaveBeenCalledWith([]);
   });
 });

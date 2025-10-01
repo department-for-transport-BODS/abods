@@ -3,6 +3,7 @@ import {
   getSummaryStats,
   getTransitDayOfWeekStats,
   getTransitStatsHistogram,
+  getTransitStatsPerService,
   getTransitTimeOfDayStats,
   getTransitTimeStats,
 } from "./stats";
@@ -11,6 +12,7 @@ import {
   CorridorStatsDayOfWeekType,
   CorridorStatsHistogramType,
   CorridorStatsInputType,
+  CorridorStatsPerServiceType,
   CorridorStatsTimeOfDayType,
   CorridorStatsType,
   CorridorSummaryStatsType,
@@ -1351,5 +1353,203 @@ describe("getServiceLinks", () => {
         : [];
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("getTransitStatsPerService", () => {
+  let mockDb: DeepMockProxy<PrismaClient>;
+  let context: RequestContext;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDb = mockDeep<PrismaClient>();
+    context = {
+      req: createRequest(),
+      res: createResponse(),
+      headers: {},
+      db: mockDb,
+      kysely: {} as never,
+    };
+  });
+
+  it("returns stats per service with correct mapping", async () => {
+    const corridorTransits: TimetableType[][] = [
+      [
+        {
+          operator_noc: "OP1",
+          service_code: "SC1",
+          line_name: "Line 1",
+          actual_departure_time: new Date("2025-09-01T08:00:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T08:05:00.000Z"),
+        },
+        {
+          operator_noc: "OP1",
+          service_code: "SC1",
+          line_name: "Line 1",
+          actual_departure_time: new Date("2025-09-01T08:10:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T08:15:00.000Z"),
+        },
+      ],
+      [
+        {
+          operator_noc: "OP2",
+          service_code: "SC2",
+          line_name: "Line 2",
+          actual_departure_time: new Date("2025-09-01T09:00:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T09:05:00.000Z"),
+        },
+        {
+          operator_noc: "OP2",
+          service_code: "SC2",
+          line_name: "Line 2",
+          actual_departure_time: new Date("2025-09-01T09:10:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T09:15:00.000Z"),
+        },
+      ],
+    ] as TimetableType[][];
+
+    const parent: StatsCache = {
+      corridorTransits,
+      inputs: {
+        matchType: MatchType.Estimated,
+        corridorId: "test-corridor",
+        fromTimestamp: "2025-09-01T00:00:00.000Z",
+        toTimestamp: "2025-09-02T00:00:00.000Z",
+        granularity: CorridorGranularity.Hour,
+        stopList: ["101", "102"],
+      },
+    };
+
+    mockDb.service_details.findMany.mockResolvedValue([
+      {
+        noc_and_line_and_servicecode: "OP1-Line 1-SC1",
+        line_name: "Line 1",
+        operator_noc: "OP1",
+        service_name: "Service 1",
+        operator: { name: "Operator One" },
+      },
+      {
+        noc_and_line_and_servicecode: "OP2-Line 2-SC2",
+        line_name: "Line 2",
+        operator_noc: "OP2",
+        service_name: "Service 2",
+        operator: { name: "Operator Two" },
+      },
+    ] as never);
+
+    let result: Partial<CorridorStatsPerServiceType>[] | null = null;
+    if (typeof getTransitStatsPerService === "function") {
+      result = (await getTransitStatsPerService(
+        parent as Partial<CorridorStatsType>,
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<CorridorStatsPerServiceType>[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      lineName: "Line 1",
+      operatorName: "Operator One",
+      noc: "OP1",
+      servicePatternName: "Service 1",
+      recordedTransits: 1,
+      totalTransitTime: 600,
+      scheduledTransits: 1,
+    });
+
+    expect(result?.[1]).toEqual({
+      lineName: "Line 2",
+      operatorName: "Operator Two",
+      noc: "OP2",
+      servicePatternName: "Service 2",
+      recordedTransits: 1,
+      totalTransitTime: 600,
+      scheduledTransits: 1,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockDb.service_details.findMany).toHaveBeenCalledWith({
+      where: {
+        noc_and_line_and_servicecode: {
+          in: ["OP1-Line 1-SC1", "OP2-Line 2-SC2"],
+        },
+      },
+      include: {
+        operator: true,
+      },
+    });
+  });
+
+  it("returns empty array when no transit stats", async () => {
+    const parent: StatsCache = {
+      corridorTransits: [],
+      inputs: {} as CorridorStatsInputType,
+    };
+
+    let result: Partial<CorridorStatsPerServiceType>[] | null = null;
+    if (typeof getTransitStatsPerService === "function") {
+      result = (await getTransitStatsPerService(
+        parent as Partial<CorridorStatsType>,
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<CorridorStatsPerServiceType>[];
+    }
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns stats with default values when service details missing", async () => {
+    const corridorTransits: TimetableType[][] = [
+      [
+        {
+          operator_noc: "OP3",
+          service_code: "SC3",
+          line_name: "Line 3",
+          actual_departure_time: new Date("2025-09-01T10:00:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T10:05:00.000Z"),
+        },
+        {
+          operator_noc: "OP3",
+          service_code: "SC3",
+          line_name: "Line 3",
+          actual_departure_time: new Date("2025-09-01T10:20:00.000Z"),
+          expected_departure_time: new Date("2025-09-01T10:25:00.000Z"),
+        },
+      ],
+    ] as TimetableType[][];
+
+    const parent: StatsCache = {
+      corridorTransits,
+      inputs: {} as CorridorStatsInputType,
+    };
+
+    mockDb.service_details.findMany.mockResolvedValue([] as never);
+
+    let result: Partial<CorridorStatsPerServiceType>[] | null = null;
+    if (typeof getTransitStatsPerService === "function") {
+      result = (await getTransitStatsPerService(
+        parent as Partial<CorridorStatsType>,
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<CorridorStatsPerServiceType>[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      lineName: "",
+      operatorName: "NA",
+      noc: undefined,
+      servicePatternName: "",
+      recordedTransits: 1,
+      totalTransitTime: 1200,
+      scheduledTransits: 1,
+    });
   });
 });

@@ -1,11 +1,27 @@
-import { getAdminAreas, getServicePatterns } from "./query";
+import {
+  getAdminAreas,
+  getLines,
+  getOperatorList,
+  getServiceInfo,
+  getServicePatterns,
+} from "./query";
 import { jest } from "@jest/globals";
 import {
   AdminAreasType,
+  LineType,
+  OperatorType,
   RouteType,
+  ServiceInfoType,
   ServicePatternType,
 } from "../../../src/types/generated";
-import { Kysely } from "kysely";
+import {
+  Dialect,
+  DummyDriver,
+  Kysely,
+  PostgresAdapter,
+  PostgresIntrospector,
+  PostgresQueryCompiler,
+} from "kysely";
 import { RequestContext } from "../../types/extra.js";
 import { GraphQLResolveInfo } from "graphql";
 import { createRequest, createResponse } from "node-mocks-http";
@@ -13,16 +29,18 @@ import { createRequest, createResponse } from "node-mocks-http";
 import { PrismaClient } from "@prisma/client";
 import { DB } from "../../kysely";
 import { DeepMockProxy, mockDeep } from "jest-mock-extended";
-import * as common from "../../../src/lib/common";
+import * as common from "../../lib/common";
+import * as kyselyLib from "../../lib/dbKysely.js";
+import * as operatorLib from "../../lib/operators.js";
+import logger from "../../logger";
 
-jest.mock("../../../src/resolvers/helpers", () => ({
+jest.mock("../../resolvers/helpers", () => ({
   requireUserSession: jest.fn(() =>
     Promise.resolve({ id: 1, orgs: [{ id: 10 }] }),
   ),
 }));
-jest.mock("../../../src/lib/operators", () => ({
-  getUserOperatorIds: jest.fn(() => Promise.resolve(["OP1", "OP2"])),
-}));
+
+jest.spyOn(operatorLib, "getUserOperatorIds").mockResolvedValue(["OP1", "OP2"]);
 
 const mockAdminAreaRecords = [
   { national_operator_code: "OP1", adminarea_id: 101 },
@@ -36,6 +54,18 @@ const mockAdminAreas = [
 
 let mockDb: DeepMockProxy<PrismaClient>;
 let context: RequestContext;
+
+const dummyDialect: Dialect = {
+  createDriver: () => new DummyDriver(),
+  createQueryCompiler: () => new PostgresQueryCompiler(),
+  createAdapter: () => new PostgresAdapter(),
+  createIntrospector: (db) => new PostgresIntrospector(db),
+};
+
+const dummyKysely = new Kysely<DB>({
+  dialect: dummyDialect,
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockDb = mockDeep<PrismaClient>();
@@ -44,7 +74,7 @@ beforeEach(() => {
     req: createRequest(),
     headers: {},
     db: mockDb,
-    kysely: {} as unknown as Kysely<DB>,
+    kysely: dummyKysely,
   };
 });
 
@@ -311,6 +341,358 @@ describe("getServicePatterns", () => {
         {} as GraphQLResolveInfo,
       )) as Partial<ServicePatternType>[];
     }
+    expect(result?.length).toBe(0);
+  });
+});
+
+describe("getOperatorList", () => {
+  it("returns mapped operator list", async () => {
+    const mockResults = [
+      {
+        name: "Operator One",
+        operatorId: "OP1",
+        adminAreaIds: "101,102",
+      },
+      {
+        name: "Operator Two",
+        operatorId: "OP2",
+        adminAreaIds: "103,104",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    const args = { filterBy: {} };
+    let result: OperatorType[] | null = null;
+    if (typeof getOperatorList === "function") {
+      result = (await getOperatorList(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as OperatorType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      name: "Operator One",
+      operatorId: "OP1",
+      nocCode: "OP1",
+      adminAreaIds: ["101", "102"],
+    });
+    expect(result?.[1]).toEqual({
+      name: "Operator Two",
+      operatorId: "OP2",
+      nocCode: "OP2",
+      adminAreaIds: ["103", "104"],
+    });
+
+    // Ensure executeQuery was called with a SelectQueryBuilder
+    expect(
+      (kyselyLib.executeQuery as jest.Mock).mock.calls[0][0],
+    ).toBeDefined();
+  });
+
+  it("returns filtered operator list by operatorIds", async () => {
+    const mockResults = [
+      {
+        name: "Operator One",
+        operatorId: "OP1",
+        adminAreaIds: "101,102",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    const args = { filterBy: { operatorIds: ["OP1"] } };
+    let result: OperatorType[] | null = null;
+    if (typeof getOperatorList === "function") {
+      result = (await getOperatorList(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as OperatorType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      name: "Operator One",
+      operatorId: "OP1",
+      nocCode: "OP1",
+      adminAreaIds: ["101", "102"],
+    });
+  });
+
+  it("returns filtered operator list by orgId", async () => {
+    const mockResults = [
+      {
+        name: "Operator Two",
+        operatorId: "OP2",
+        adminAreaIds: "103,104",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    const args = { filterBy: { orgId: 10 } };
+    let result: OperatorType[] | null = null;
+    if (typeof getOperatorList === "function") {
+      result = (await getOperatorList(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as OperatorType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      name: "Operator Two",
+      operatorId: "OP2",
+      nocCode: "OP2",
+      adminAreaIds: ["103", "104"],
+    });
+  });
+
+  it("returns empty array when no operators found", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+
+    const args = { filterBy: {} };
+    let result: OperatorType[] | null = null;
+    if (typeof getOperatorList === "function") {
+      result = (await getOperatorList(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as OperatorType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(0);
+  });
+});
+
+describe("getServiceInfo", () => {
+  it("returns service info when user has access", async () => {
+    const mockService = {
+      operator_noc: "OP1",
+      line_name: "Line 1",
+      service_name: "Service 1",
+    };
+    mockDb.expected_services.findFirst.mockResolvedValue(mockService as never);
+
+    const args = { serviceId: "OP1-L1-S1" };
+    let result: ServiceInfoType | null = null;
+    if (typeof getServiceInfo === "function") {
+      result = (await getServiceInfo(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as ServiceInfoType;
+    }
+
+    expect(result).not.toBeNull();
+    expect(result).toEqual({
+      serviceId: "OP1-L1-S1",
+      serviceNumber: "Line 1",
+      serviceName: "Service 1",
+    });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockDb.expected_services.findFirst).toHaveBeenCalledWith({
+      where: { noc_and_line_and_servicecode: "OP1-L1-S1" },
+      select: {
+        operator_noc: true,
+        line_name: true,
+        service_name: true,
+      },
+    });
+  });
+
+  it("returns null and logs error when service not found", async () => {
+    mockDb.expected_services.findFirst.mockResolvedValue(null);
+
+    const args = { serviceId: "OP1-L1-S1" };
+    const loggerSpy = jest.spyOn(logger, "error").mockImplementation(jest.fn());
+
+    let result: ServiceInfoType | null = null;
+    if (typeof getServiceInfo === "function") {
+      result = (await getServiceInfo(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as ServiceInfoType;
+    }
+
+    expect(result).toBeNull();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.any(Error),
+      "An error occurred when getting service info",
+    );
+  });
+
+  it("returns null and logs error when user does not have access", async () => {
+    const mockService = {
+      operator_noc: "OP3",
+      line_name: "Line 3",
+      service_name: "Service 3",
+    };
+    mockDb.expected_services.findFirst.mockResolvedValue(mockService as never);
+
+    const args = { serviceId: "OP3-L3-S3" };
+    const loggerSpy = jest.spyOn(logger, "error").mockImplementation(jest.fn());
+
+    let result: ServiceInfoType | null = null;
+    if (typeof getServiceInfo === "function") {
+      result = (await getServiceInfo(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as ServiceInfoType;
+    }
+
+    expect(result).toBeNull();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.any(Error),
+      "An error occurred when getting service info",
+    );
+  });
+});
+
+describe("getLines", () => {
+  it("returns mapped lines for valid operatorIds", async () => {
+    const mockResults = [
+      {
+        id: "OP1-L1-S1",
+        name: "Service 1",
+        number: "Line 1",
+        adminAreaIds: "101,102",
+      },
+      {
+        id: "OP2-L2-S2",
+        name: "Service 2",
+        number: "Line 2",
+        adminAreaIds: "103,104",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    const args = {
+      operatorIds: ["OP1", "OP2"],
+      inputDate: "2025-09-30",
+    };
+    let result: LineType[] | null = null;
+    if (typeof getLines === "function") {
+      result = (await getLines(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as LineType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      id: "OP1-L1-S1",
+      name: "Service 1",
+      number: "Line 1",
+      adminAreaIds: "101,102",
+    });
+    expect(result?.[1]).toEqual({
+      id: "OP2-L2-S2",
+      name: "Service 2",
+      number: "Line 2",
+      adminAreaIds: "103,104",
+    });
+
+    // Ensure executeQuery was called with a SelectQueryBuilder
+    expect(
+      (kyselyLib.executeQuery as jest.Mock).mock.calls[0][0],
+    ).toBeDefined();
+  });
+
+  it("returns empty array when operatorIds is empty", async () => {
+    const args = {
+      operatorIds: [],
+      inputDate: "2025-09-30",
+    };
+    let result: LineType[] | null = null;
+    if (typeof getLines === "function") {
+      result = (await getLines(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as LineType[];
+    }
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns mapped lines for date range", async () => {
+    const mockResults = [
+      {
+        id: "OP1-L1-S1",
+        name: "Service 1",
+        number: "Line 1",
+        adminAreaIds: "101,102",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    const args = {
+      operatorIds: ["OP1"],
+      inputDate: "2025-09-01",
+      endDate: "2025-09-30",
+    };
+    let result: LineType[] | null = null;
+    if (typeof getLines === "function") {
+      result = (await getLines(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as LineType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+
+    expect(result?.[0]).toEqual({
+      id: "OP1-L1-S1",
+      name: "Service 1",
+      number: "Line 1",
+      adminAreaIds: "101,102",
+    });
+  });
+
+  it("returns empty array when no lines found", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+
+    const args = {
+      operatorIds: ["OP1"],
+      inputDate: "2025-09-30",
+    };
+    let result: LineType[] | null = null;
+    if (typeof getLines === "function") {
+      result = (await getLines(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as LineType[];
+    }
+
+    expect(result).not.toBeNull();
     expect(result?.length).toBe(0);
   });
 });

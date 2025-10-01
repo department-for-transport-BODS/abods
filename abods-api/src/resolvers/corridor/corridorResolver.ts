@@ -59,7 +59,7 @@ export const getStops: CorridorNamespaceResolvers["addFirstStop"] = async (
   const user = await requireUserSession(context);
 
   if (!args.inputs) {
-    throw "Invalid inputs";
+    throw Error("Invalid inputs");
   }
   const { boundingBox, searchString } = args.inputs;
 

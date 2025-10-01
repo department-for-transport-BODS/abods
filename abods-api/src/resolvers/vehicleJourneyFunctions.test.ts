@@ -4,9 +4,23 @@ import { PrismaClient } from "@prisma/client";
 import { createRequest, createResponse } from "node-mocks-http";
 import { RequestContext } from "../types/extra";
 import * as helpers from "./helpers";
-import { JourneyResult } from "../types/generated";
+import {
+  Journey,
+  JourneyResult,
+  ServicePatternDistanceResult,
+} from "../types/generated";
 import { GraphQLResolveInfo } from "graphql";
 import dayjs from "dayjs";
+import {
+  Dialect,
+  DummyDriver,
+  PostgresQueryCompiler,
+  PostgresAdapter,
+  PostgresIntrospector,
+  Kysely,
+} from "kysely";
+import { DB } from "../kysely";
+import * as kyselyLib from "../lib/dbKysely";
 
 // Mock stops data (simulate what your resolver would fetch)
 const stopsData = [
@@ -46,6 +60,17 @@ jest.mock("./helpers", () => ({
   requireUserSession: jest.fn(),
 }));
 
+const dummyDialect: Dialect = {
+  createDriver: () => new DummyDriver(),
+  createQueryCompiler: () => new PostgresQueryCompiler(),
+  createAdapter: () => new PostgresAdapter(),
+  createIntrospector: (db) => new PostgresIntrospector(db),
+};
+
+const dummyKysely = new Kysely<DB>({
+  dialect: dummyDialect,
+});
+
 let mockDb: DeepMockProxy<PrismaClient>;
 let context: RequestContext;
 
@@ -58,8 +83,129 @@ beforeEach(() => {
     req: createRequest(),
     res: createResponse(),
     headers: {},
-    kysely: {} as never,
+    kysely: dummyKysely,
   };
+});
+
+describe("getAvlData", () => {
+  const mockResults = [
+    {
+      latitude: 51.5,
+      longitude: -0.1,
+      recorded_at_time: new Date("2025-09-30T08:00:00.000Z"),
+      vehicle_ref: "V1",
+      direction_ref: "inbound",
+    },
+    {
+      latitude: 51.6,
+      longitude: -0.2,
+      recorded_at_time: new Date("2025-09-30T08:10:00.000Z"),
+      vehicle_ref: "V2",
+      direction_ref: "outbound",
+    },
+  ];
+  beforeEach(() => {
+    jest.clearAllMocks();
+    //jest.spyOn(prismaMockDb.siriVMPositions, "findMany").mockResolvedValue(mockResults as never);
+  });
+  it("returns mapped AVL data for valid input", async () => {
+    jest
+      .spyOn(mockDb.siriVMPositions, "findMany")
+      .mockResolvedValue(mockResults as never);
+
+    const dateString = "2025-09-30";
+    const newGroupId = "G1|2025-09-30";
+    const minRange = dayjs("2025-09-30T07:00:00.000Z");
+    const maxRange = dayjs("2025-09-30T09:00:00.000Z");
+
+    let result: unknown[] | null = null;
+    if (typeof journey.getAvlData === "function") {
+      result = await journey.getAvlData(
+        mockDb,
+        dateString,
+        newGroupId,
+        minRange,
+        maxRange,
+      );
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      latitude: 51.5,
+      longitude: -0.1,
+      recordedAtTimeUtc: "2025-09-30T08:00:00.000Z",
+      vehicleRef: "V1",
+      directionRef: "inbound",
+    });
+    expect(result?.[1]).toEqual({
+      latitude: 51.6,
+      longitude: -0.2,
+      recordedAtTimeUtc: "2025-09-30T08:10:00.000Z",
+      vehicleRef: "V2",
+      directionRef: "outbound",
+    });
+  });
+
+  it("returns empty array when no AVL data found", async () => {
+    mockDb.siriVMPositions.findMany.mockResolvedValue([] as never);
+
+    const dateString = "2025-09-30";
+    const newGroupId = "G1|2025-09-30";
+    const minRange = dayjs("2025-09-30T07:00:00.000Z");
+    const maxRange = dayjs("2025-09-30T09:00:00.000Z");
+
+    let result: unknown[] | null = null;
+    if (typeof journey.getAvlData === "function") {
+      result = await journey.getAvlData(
+        mockDb,
+        dateString,
+        newGroupId,
+        minRange,
+        maxRange,
+      );
+    }
+
+    expect(result).toEqual([]);
+  });
+
+  it("maps null latitude/longitude to 0", async () => {
+    const mockResults = [
+      {
+        latitude: null,
+        longitude: null,
+        recorded_at_time: new Date("2025-09-30T08:00:00.000Z"),
+        vehicle_ref: "V1",
+        direction_ref: null,
+      },
+    ];
+    mockDb.siriVMPositions.findMany.mockResolvedValue(mockResults as never);
+
+    const dateString = "2025-09-30";
+    const newGroupId = "G1|2025-09-30";
+    const minRange = dayjs("2025-09-30T07:00:00.000Z");
+    const maxRange = dayjs("2025-09-30T09:00:00.000Z");
+
+    let result: unknown[] | null = null;
+    if (typeof journey.getAvlData === "function") {
+      result = await journey.getAvlData(
+        mockDb,
+        dateString,
+        newGroupId,
+        minRange,
+        maxRange,
+      );
+    }
+
+    expect(result?.[0]).toEqual({
+      latitude: 0,
+      longitude: 0,
+      recordedAtTimeUtc: "2025-09-30T08:00:00.000Z",
+      vehicleRef: "V1",
+      directionRef: "unknown",
+    });
+  });
 });
 
 describe("getJourney", () => {
@@ -96,7 +242,7 @@ describe("getJourney", () => {
     // Only mock db.siriVMPositions.findMany inside getAvlData
     jest
       .spyOn(mockDb.siriVMPositions, "findMany")
-      .mockResolvedValue(avlData as never);
+      .mockResolvedValueOnce(avlData as never);
 
     // You may need to mock how stopsData is fetched if getJourney does a DB call for stops
     // For this example, assume getJourney uses stopsData and avlData as above
@@ -132,7 +278,7 @@ describe("getJourney", () => {
       id: 123,
       orgs: [{ id: 10 }],
     });
-    jest.spyOn(mockDb.siriVMPositions, "findMany").mockResolvedValue([]);
+    jest.spyOn(mockDb.siriVMPositions, "findMany").mockResolvedValueOnce([]);
 
     const args = {
       groupId: "G1|L1|2025-09-01",
@@ -397,5 +543,209 @@ describe("getJourney", () => {
       minRange,
       maxRange,
     );
+  });
+});
+
+describe("findJourneys", () => {
+  it("returns mapped journeys for valid lineId and dateOfJourney", async () => {
+    mockDb.expected_journeys.findMany.mockResolvedValue([
+      {
+        expected_journey_start: new Date("2025-09-30T08:00:00.000Z"),
+        group_id: "G1",
+        journey_pattern_description: "Service Pattern 1",
+        direction: "inbound",
+        is_cancelled: false,
+        vehicle_journey_id: "VJ1",
+        expected_services: {
+          line_name: "Line 1",
+          expected_operator: {
+            operator_noc: "OP1",
+            operator_name: "Operator One",
+          },
+        },
+      },
+      {
+        expected_journey_start: new Date("2025-09-30T09:00:00.000Z"),
+        group_id: "G2",
+        journey_pattern_description: "Service Pattern 2",
+        direction: "outbound",
+        is_cancelled: true,
+        vehicle_journey_id: "VJ2",
+        expected_services: {
+          line_name: "Line 2",
+          expected_operator: {
+            operator_noc: "OP2",
+            operator_name: "Operator Two",
+          },
+        },
+      },
+    ] as never);
+
+    const args = {
+      lineId: "OP1-L1-S1",
+      dateOfJourney: "2025-09-30",
+    };
+
+    let result: Journey[] | null = null;
+    if (typeof journey.findJourneys === "function") {
+      result = (await journey.findJourneys(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Journey[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    expect(result?.[0]).toEqual({
+      groupId: "G1",
+      directionRef: "inbound",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      startTime: expect.any(String),
+      serviceName: "Service Pattern 1",
+      serviceNumber: "Line 1",
+      isCancelled: false,
+      operatorNoc: "OP1",
+      operatorName: "Operator One",
+      vehicleJourneyId: "VJ1",
+    });
+
+    expect(result?.[1]).toEqual({
+      groupId: "G2",
+      directionRef: "outbound",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      startTime: expect.any(String),
+      serviceName: "Service Pattern 2",
+      serviceNumber: "Line 2",
+      isCancelled: true,
+      operatorNoc: "OP2",
+      operatorName: "Operator Two",
+      vehicleJourneyId: "VJ2",
+    });
+
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockDb.expected_journeys.findMany).toHaveBeenCalledWith({
+      where: {
+        noc_and_line_and_servicecode: "OP1-L1-S1",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        date_of_journey: expect.any(Date),
+      },
+      select: {
+        expected_journey_start: true,
+        group_id: true,
+        journey_pattern_description: true,
+        direction: true,
+        is_cancelled: true,
+        vehicle_journey_id: true,
+        expected_services: {
+          select: {
+            line_name: true,
+            expected_operator: {
+              select: {
+                operator_noc: true,
+                operator_name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("returns empty array when no journeys found", async () => {
+    mockDb.expected_journeys.findMany.mockResolvedValue([] as never);
+
+    const args = {
+      lineId: "OP1-L1-S1",
+      dateOfJourney: "2025-09-30",
+    };
+
+    let result: Journey[] | null = null;
+    if (typeof journey.findJourneys === "function") {
+      result = (await journey.findJourneys(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Journey[];
+    }
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe("getServicePatternDistanceGeom", () => {
+  it("returns distance and geometry when found", async () => {
+    const mockResult = {
+      distance: 1234,
+      geom: '{"type":"LineString","coordinates":[[1.1,2.2],[3.3,4.4]]}',
+    };
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue(mockResult);
+
+    const args = { vehicleJourneyId: "VJ1" };
+    let result: Partial<ServicePatternDistanceResult> | null = null;
+    if (typeof journey.getServicePatternDistanceGeom === "function") {
+      result = await journey.getServicePatternDistanceGeom(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      );
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.distance).toBe(1234);
+    expect(result?.geom).toEqual([
+      [1.1, 2.2],
+      [3.3, 4.4],
+    ]);
+  });
+
+  it("throws error when no result found", async () => {
+    jest.spyOn(kyselyLib, "executeQueryTakeFirst").mockResolvedValue(null);
+
+    const args = { vehicleJourneyId: "VJ2" };
+
+    if (typeof journey.getServicePatternDistanceGeom === "function") {
+      await expect(
+        journey.getServicePatternDistanceGeom(
+          {},
+          args,
+          context,
+          {} as GraphQLResolveInfo,
+        ),
+      ).rejects.toThrow(
+        "No service pattern distance found for vehicle journey ID VJ2",
+      );
+    }
+  });
+
+  it("parses empty geometry as undefined coordinates", async () => {
+    const mockResult = {
+      distance: 567,
+      geom: "",
+    };
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue(mockResult);
+
+    const args = { vehicleJourneyId: "VJ3" };
+    let result: Partial<ServicePatternDistanceResult> | null = null;
+    if (typeof journey.getServicePatternDistanceGeom === "function") {
+      result = await journey.getServicePatternDistanceGeom(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      );
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.distance).toBe(567);
+    expect((result?.geom as number[][]).length).toBe(0);
   });
 });

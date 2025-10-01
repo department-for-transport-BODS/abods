@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { GraphQLError } from "graphql";
 import { PrismaClient } from "@prisma/client";
 import { GeoJSONLineString } from "../lib/common.js";
+import { executeQueryTakeFirst } from "../lib/dbKysely.js";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -202,7 +203,7 @@ export const getJourney: QueryResolvers["journey"] = async (
 
 export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDistanceGeom"] =
   async (_parent, args, context): Promise<ServicePatternDistanceResult> => {
-    const result = await context.kysely
+    const query = context.kysely
       .selectFrom("transmodel_vehiclejourney")
       .innerJoin(
         "transmodel_servicepatterndistance",
@@ -215,8 +216,9 @@ export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDis
         sql<string>`ST_AsGeoJSON(transmodel_servicepatterndistance.geom)`.as(
           "geom",
         ),
-      ])
-      .executeTakeFirst();
+      ]);
+
+    const result = await executeQueryTakeFirst(query);
 
     if (!result) {
       throw new GraphQLError(
@@ -226,8 +228,14 @@ export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDis
         },
       );
     }
-    const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
-    const coordinates = parsedGeom?.coordinates;
+
+    let coordinates: number[][] = [];
+    if (result.geom) {
+      const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
+      if (parsedGeom?.coordinates) {
+        coordinates = parsedGeom?.coordinates;
+      }
+    }
 
     return {
       distance: result.distance ?? 0,

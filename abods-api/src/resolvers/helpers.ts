@@ -103,7 +103,7 @@ export function getHeader(
   name: string,
 ): string | string[] | undefined {
   return (
-    headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name]
+    headers[name.toLowerCase()] ?? headers[name.toUpperCase()] ?? headers[name]
   );
 }
 

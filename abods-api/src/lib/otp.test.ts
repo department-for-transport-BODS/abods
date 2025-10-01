@@ -1,4 +1,10 @@
-import { getKyselyFiltersForOTPQuery, kyselyFilterForAdminIds } from "./otp";
+import {
+  getFrequentServiceActualHours,
+  getKyselyFiltersForOTPQuery,
+  getSummaryStopsTotalHours,
+  getThresholds,
+  kyselyFilterForAdminIds,
+} from "./otp";
 import {
   Dialect,
   DummyDriver,
@@ -8,7 +14,8 @@ import {
   PostgresQueryCompiler,
 } from "kysely";
 import { DB } from "../kysely";
-import { MatchType } from "../types/generated";
+import { MatchType, OtpEnum, PerformanceInputType } from "../types/generated";
+import * as kyselyLib from "./dbKysely";
 
 const dummyDialect: Dialect = {
   createDriver: () => new DummyDriver(),
@@ -238,5 +245,302 @@ describe("getKyselyFiltersForOTPQuery", () => {
     expect(compiled.sql).toContain("max_late");
     expect(compiled.parameters[3]).toEqual(3);
     expect(compiled.parameters[4]).toEqual(5);
+  });
+});
+
+describe("getSummaryStopsTotalHours", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns the count of distinct hours from query results", async () => {
+    // Mock the executeQuery to return 5 distinct hours
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue([
+        { departure_hour: "08:00" },
+        { departure_hour: "09:00" },
+        { departure_hour: "10:00" },
+        { departure_hour: "11:00" },
+        { departure_hour: "12:00" },
+      ] as never);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {},
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getSummaryStopsTotalHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(5);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 0 when no results are found", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {},
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getSummaryStopsTotalHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(0);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies startTime and endTime filters if provided", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue([
+        { departure_hour: "10:00" },
+        { departure_hour: "11:00" },
+      ]);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        startTime: "10:00",
+        endTime: "11:59",
+      },
+    };
+    const userOperatorIds = ["OP1"];
+
+    const result = await getSummaryStopsTotalHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(2);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getFrequentServiceActualHours", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns the count of distinct hours from query results", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue([
+        { departure_hour: "08:00" },
+        { departure_hour: "09:00" },
+        { departure_hour: "10:00" },
+      ]);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {},
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getFrequentServiceActualHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(3);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 0 when no results are found", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {},
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getFrequentServiceActualHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(0);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies startTime and endTime filters if provided", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValue([
+        { departure_hour: "10:00" },
+        { departure_hour: "11:00" },
+      ]);
+
+    const inputs = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        startTime: "10:00",
+        endTime: "11:59",
+      },
+    };
+    const userOperatorIds = ["OP1"];
+
+    const result = await getFrequentServiceActualHours(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+    );
+
+    expect(result).toBe(2);
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getThresholds", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns the sum of otp_count for OtpEnum.OnTime", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue({ otp_count: 12 });
+
+    const inputs: PerformanceInputType = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        onTimeMinMinutes: 1,
+        onTimeMaxMinutes: 10,
+      },
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getThresholds(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+      OtpEnum.OnTime,
+    );
+
+    expect(result).toEqual({ otp_count: 12 });
+    expect(kyselyLib.executeQueryTakeFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 0 when no results are found", async () => {
+    jest.spyOn(kyselyLib, "executeQueryTakeFirst").mockResolvedValue(undefined);
+
+    const inputs: PerformanceInputType = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        onTimeMinMinutes: 1,
+        onTimeMaxMinutes: 10,
+      },
+    };
+    const userOperatorIds = ["OP1", "OP2"];
+
+    const result = await getThresholds(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+      OtpEnum.OnTime,
+    );
+
+    expect(result).toBeUndefined();
+    expect(kyselyLib.executeQueryTakeFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies startTime and endTime filters if provided", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue({ otp_count: 5 });
+
+    const inputs: PerformanceInputType = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        onTimeMinMinutes: 1,
+        onTimeMaxMinutes: 10,
+        startTime: "10:00",
+        endTime: "11:59",
+      },
+    };
+    const userOperatorIds = ["OP1"];
+
+    const result = await getThresholds(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+      OtpEnum.OnTime,
+    );
+
+    expect(result).toEqual({ otp_count: 5 });
+    expect(kyselyLib.executeQueryTakeFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies correct filters for OtpEnum.Early", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue({ otp_count: 2 });
+
+    const inputs: PerformanceInputType = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        onTimeMinMinutes: 5,
+      },
+    };
+    const userOperatorIds = ["OP1"];
+
+    const result = await getThresholds(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+      OtpEnum.Early,
+    );
+
+    expect(result).toEqual({ otp_count: 2 });
+    expect(kyselyLib.executeQueryTakeFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies correct filters for OtpEnum.Late", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue({ otp_count: 3 });
+
+    const inputs: PerformanceInputType = {
+      fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+      toTimestamp: "2025-09-12T00:00:00.000+01:00",
+      filters: {
+        onTimeMaxMinutes: 15,
+      },
+    };
+    const userOperatorIds = ["OP1"];
+
+    const result = await getThresholds(
+      dummyKysely,
+      inputs,
+      userOperatorIds,
+      OtpEnum.Late,
+    );
+
+    expect(result).toEqual({ otp_count: 3 });
+    expect(kyselyLib.executeQueryTakeFirst).toHaveBeenCalledTimes(1);
   });
 });
