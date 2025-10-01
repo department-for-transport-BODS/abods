@@ -16,7 +16,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { DistancesService } from "../distances.service";
 import { ViewDistancesComponent } from "./view-distances.component";
 
-fdescribe("ViewDistancesComponent", () => {
+describe("ViewDistancesComponent", () => {
   let spectator: Spectator<ViewDistancesComponent>;
   let component: ViewDistancesComponent;
   let distancesServiceSpy: SpyObject<DistancesService>;

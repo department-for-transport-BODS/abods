@@ -6,20 +6,20 @@ import {
   SpyObject,
 } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { of } from "rxjs";
-import { fakeEvent } from "src/test-support/faker";
-import { FeedMonitoringModule } from "../feed-monitoring.module";
-import { FeedMonitoringService } from "../feed-monitoring.service";
-import { AlertListComponent } from "./alert-list.component";
 import * as Faker from "faker";
 import { DateTime } from "luxon";
-import { AlertMode } from "./alert-list-view-model";
+import { of } from "rxjs";
 import { SharedModule } from "src/app/shared/shared.module";
-import { AlertComponent } from "./alert/alert.component";
 import { dateTimeCloseEnoughToEqualityMatcher } from "src/test-support/equality";
+import { fakeEvent } from "src/test-support/faker";
 import { AlertTypeEnum } from "../../../generated/graphql";
+import { FeedMonitoringModule } from "../feed-monitoring.module";
+import { FeedMonitoringService } from "../feed-monitoring.service";
+import { AlertMode } from "./alert-list-view-model";
+import { AlertListComponent } from "./alert-list.component";
+import { AlertComponent } from "./alert/alert.component";
 
-describe("AlertListComponent", () => {
+fdescribe("AlertListComponent", () => {
   let spectator: Spectator<AlertListComponent>;
   let service: SpyObject<FeedMonitoringService>;
 
@@ -39,8 +39,8 @@ describe("AlertListComponent", () => {
 
   beforeAll(() => Faker.seed(434));
 
-  it("should create", () => {
-    expect(spectator.component).toBeTruthy();
+  it("should create", async () => {
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should fetch recent events", () => {
@@ -78,7 +78,7 @@ describe("AlertListComponent", () => {
     );
   });
 
-  it("should show message", () => {
+  it("should show message", async () => {
     spectator.component.mode = AlertMode.LiveStatus;
 
     const message = "This text should be there";
@@ -96,34 +96,58 @@ describe("AlertListComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.query(byText(message))).toBeTruthy();
+    await expect(spectator.query(byText(message))).toBeTruthy();
   });
 
-  const typeTestCases = [
-    {
-      type: AlertTypeEnum.FeedUnavailableEvent,
-      title: "Feed data unavailable",
-    },
-    {
-      type: AlertTypeEnum.VehicleCountDisparityEvent,
-      title: "Vehicle count disparity",
-    },
-    { type: AlertTypeEnum.FeedAvailableEvent, title: "Feed data available" },
-  ];
+  it("should show event type for FeedUnavailableEvent", async () => {
+    spectator.component.mode = AlertMode.LiveStatus;
 
-  typeTestCases.forEach(({ type, title }) =>
-    it(`should show event type for ${type}`, () => {
-      spectator.component.mode = AlertMode.LiveStatus;
+    service.fetchAlerts.and.callFake((_, start, end) =>
+      of([fakeEvent({ type: AlertTypeEnum.FeedUnavailableEvent, start, end })]),
+    );
 
-      service.fetchAlerts.and.callFake((_, start, end) =>
-        of([fakeEvent({ type, start, end })]),
-      );
+    spectator.detectChanges();
 
-      spectator.detectChanges();
+    await expect(spectator.query(byText("Feed data unavailable"))).toBeTruthy();
+  });
 
-      expect(spectator.query(byText(title))).toBeTruthy();
-    }),
-  );
+  it("should show event type for VehicleCountDisparityEvent", async () => {
+    spectator.component.mode = AlertMode.LiveStatus;
+
+    service.fetchAlerts.and.callFake((_, start, end) =>
+      of([
+        fakeEvent({
+          type: AlertTypeEnum.VehicleCountDisparityEvent,
+          start,
+          end,
+        }),
+      ]),
+    );
+
+    spectator.detectChanges();
+
+    await expect(
+      spectator.query(byText("Vehicle count disparity")),
+    ).toBeTruthy();
+  });
+
+  it("should show event type for FeedAvailableEvent", async () => {
+    spectator.component.mode = AlertMode.LiveStatus;
+
+    service.fetchAlerts.and.callFake((_, start, end) =>
+      of([
+        fakeEvent({
+          type: AlertTypeEnum.FeedAvailableEvent,
+          start,
+          end,
+        }),
+      ]),
+    );
+
+    spectator.detectChanges();
+
+    await expect(spectator.query(byText("Feed data available"))).toBeTruthy();
+  });
 
   it("should update when date changed", () => {
     spectator.component.mode = AlertMode.FeedHistory;
@@ -144,7 +168,7 @@ describe("AlertListComponent", () => {
     );
   });
 
-  it("should show no alerts message", () => {
+  it("should show no alerts message", async () => {
     spectator.component.mode = AlertMode.LiveStatus;
 
     service = spectator.inject(FeedMonitoringService);
@@ -153,7 +177,7 @@ describe("AlertListComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byText(
           "No events have been observed in the feed for this time period.",
@@ -162,7 +186,7 @@ describe("AlertListComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should display feed history alerts in ascending chronological order", () => {
+  it("should display feed history alerts in ascending chronological order", async () => {
     spectator.component.mode = AlertMode.FeedHistory;
 
     service.fetchAlerts.and.callFake((_) =>
@@ -177,7 +201,7 @@ describe("AlertListComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byText("10:50", {
           selector: ".alert-list__items li:nth-child(1) .alert__timestamp",
@@ -185,7 +209,7 @@ describe("AlertListComponent", () => {
       ),
     ).toBeTruthy();
 
-    expect(
+    await expect(
       spectator.query(
         byText("10:52", {
           selector: ".alert-list__items li:nth-child(3) .alert__timestamp",
@@ -194,7 +218,7 @@ describe("AlertListComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should display live status alerts in descending chronological order", () => {
+  it("should display live status alerts in descending chronological order", async () => {
     spectator.component.mode = AlertMode.LiveStatus;
 
     const now = DateTime.local();
@@ -212,7 +236,7 @@ describe("AlertListComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(new RegExp(time1.toFormat("HH:mm")), {
           selector: ".alert-list__items li:nth-child(1) .alert__timestamp",
@@ -220,7 +244,7 @@ describe("AlertListComponent", () => {
       ),
     ).toBeTruthy();
 
-    expect(
+    await expect(
       spectator.query(
         byText(new RegExp(time3.toFormat("HH:mm")), {
           selector: ".alert-list__items li:nth-child(3) .alert__timestamp",
