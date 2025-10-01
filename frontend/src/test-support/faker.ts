@@ -12,10 +12,11 @@ export function fakeOperatorLiveStatus(
   feedStatus: boolean,
 ): OperatorLiveStatusFragment {
   const name = faker.company.companyName();
+  const noc = faker.random.alphaNumeric(5);
   return {
     name,
-    nocCode: faker.random.alphaNumeric(5),
-    operatorId: faker.random.alphaNumeric(4),
+    nocCode: noc,
+    operatorId: noc,
     feedMonitoring: {
       feedStatus,
       availability: faker.random.float({
