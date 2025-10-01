@@ -1,4 +1,8 @@
-import { getDistances, getDistancesDropdowns } from "./distances";
+import {
+  getAdminOrgMaps,
+  getDistances,
+  getDistancesDropdowns,
+} from "./distances";
 import * as kyselyLib from "../lib/dbKysely";
 import {
   Dialect,
@@ -14,6 +18,7 @@ import { createRequest, createResponse } from "node-mocks-http";
 import { RequestContext } from "../types/extra";
 import { GraphQLResolveInfo } from "graphql";
 import {
+  AdminOrgOperatorMap,
   Distance,
   DistancesDropdown,
   QueryDistancesArgs,
@@ -282,5 +287,108 @@ describe("getDistancesDropdowns", () => {
 
     expect(compiled.sql).not.toContain('"boo"."organisation_id" in');
     expect(compiled.parameters).not.toContain("99");
+  });
+});
+
+describe("getAdminOrgMaps", () => {
+  it("calls executeQuery and returns mapped admin org operator maps", async () => {
+    const mockResults = [
+      {
+        adminAreaId: 101,
+        adminName: "Area 1",
+        operatorId: "OP1",
+        orgId: 10,
+        orgName: "Org 10",
+      },
+      {
+        adminAreaId: 102,
+        adminName: "Area 2",
+        operatorId: "OP2",
+        orgId: 20,
+        orgName: "Org 20",
+      },
+    ];
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockResults);
+
+    let result: AdminOrgOperatorMap[] | null = null;
+    if (typeof getAdminOrgMaps === "function") {
+      result = (await getAdminOrgMaps(
+        {},
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as AdminOrgOperatorMap[];
+    }
+
+    expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+    expect(result?.[0]).toEqual({
+      adminAreaId: 101,
+      adminName: "Area 1",
+      operatorId: "OP1",
+      orgId: 10,
+      orgName: "Org 10",
+    });
+    expect(result?.[1]).toEqual({
+      adminAreaId: 102,
+      adminName: "Area 2",
+      operatorId: "OP2",
+      orgId: 20,
+      orgName: "Org 20",
+    });
+  });
+
+  it("returns empty array when no admin org operator maps found", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+
+    let result: AdminOrgOperatorMap[] | null = null;
+    if (typeof getAdminOrgMaps === "function") {
+      result = (await getAdminOrgMaps(
+        {},
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as AdminOrgOperatorMap[];
+    }
+
+    expect(result).toEqual([]);
+  });
+
+  it("applies org filter for non-global user", async () => {
+    jest.spyOn(helpers, "requireUserSession").mockResolvedValue({
+      id: 2,
+      isGlobalUser: false,
+      orgs: [{ id: 30, name: "Org 30" }],
+    });
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        adminAreaId: 201,
+        adminName: "Area X",
+        operatorId: "OPX",
+        orgId: 30,
+        orgName: "Org 30",
+      },
+    ]);
+
+    let result: AdminOrgOperatorMap[] | null = null;
+    if (typeof getAdminOrgMaps === "function") {
+      result = (await getAdminOrgMaps(
+        {},
+        {},
+        context,
+        {} as GraphQLResolveInfo,
+      )) as AdminOrgOperatorMap[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(1);
+    expect(result?.[0]).toEqual({
+      adminAreaId: 201,
+      adminName: "Area X",
+      operatorId: "OPX",
+      orgId: 30,
+      orgName: "Org 30",
+    });
   });
 });
