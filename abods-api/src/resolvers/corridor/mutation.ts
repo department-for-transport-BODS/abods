@@ -4,13 +4,13 @@ import {
   deleteCorridorStops,
   deleteCorridorDb,
   insertCorridorStops,
-} from "../../lib/corridor";
+} from "../../lib/corridor.js";
 import {
   MutationResolvers,
   MutationResponseType,
   Resolvers,
-} from "../../types/generated";
-import { requireUserSession } from "../helpers";
+} from "../../types/generated.js";
+import { requireUserSession } from "../helpers.js";
 
 export const createCorridor: MutationResolvers["createCorridor"] = async (
   _,
