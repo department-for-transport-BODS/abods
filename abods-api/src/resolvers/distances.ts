@@ -9,8 +9,9 @@ import {
   AdminOrgOperatorMap,
 } from "../types/generated";
 import { requireUserSession } from "./helpers.js";
+import { executeQuery } from "../lib/dbKysely.js";
 
-const getDistances: QueryResolvers["distances"] = async (
+export const getDistances: QueryResolvers["distances"] = async (
   _,
   args,
   context,
@@ -106,82 +107,79 @@ const getDistances: QueryResolvers["distances"] = async (
     );
   }
 
-  return query.execute();
+  return executeQuery(query);
 };
 
-const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] = async (
-  _,
-  args,
-  context,
-): Promise<DistancesDropdown> => {
-  const user = await requireUserSession(context);
+export const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] =
+  async (_, args, context): Promise<DistancesDropdown> => {
+    const user = await requireUserSession(context);
 
-  let servicesQuery = context.kysely
-    .selectFrom("service_details as sd")
-    .innerJoin(
-      "bods_organisationoperator as boo",
-      "sd.operator_noc",
-      "boo.operatorref",
-    )
-    .innerJoin("all_operators as ao", "ao.operatorref", "sd.operator_noc")
-    .where("sd.operator_noc", "is not", null)
-    .select([
-      "ao.name as operator_name",
-      "sd.operator_noc as operator_noc",
-      "sd.license as license",
-      "sd.noc_and_line_and_servicecode as service_id",
-      "sd.service_name as service_name",
-      "sd.line_name as line_name",
-    ])
-    .distinct();
+    let servicesQuery = context.kysely
+      .selectFrom("service_details as sd")
+      .innerJoin(
+        "bods_organisationoperator as boo",
+        "sd.operator_noc",
+        "boo.operatorref",
+      )
+      .innerJoin("all_operators as ao", "ao.operatorref", "sd.operator_noc")
+      .where("sd.operator_noc", "is not", null)
+      .select([
+        "ao.name as operator_name",
+        "sd.operator_noc as operator_noc",
+        "sd.license as license",
+        "sd.noc_and_line_and_servicecode as service_id",
+        "sd.service_name as service_name",
+        "sd.line_name as line_name",
+      ])
+      .distinct();
 
-  if (!user.isGlobalUser) {
-    servicesQuery = servicesQuery.where(
-      "boo.organisation_id",
-      "in",
-      user.orgs.map((org) => org.id),
-    );
-  }
-
-  const results = await servicesQuery.execute();
-
-  const operators: Map<string, OperatorForDistances> = new Map<
-    string,
-    OperatorForDistances
-  >();
-
-  results.forEach((service) => {
-    const operator: OperatorForDistances = operators.get(
-      service.operator_noc!,
-    ) ?? {
-      name: service.operator_name ?? "",
-      id: service.operator_noc!,
-      licenses: [],
-    };
-    operators.set(service.operator_noc!, operator);
-
-    let license = operator.licenses?.find(
-      (license) => license.id === service.license,
-    );
-    if (!license) {
-      license = {
-        id: service.license ?? "",
-        services: [],
-      };
-      operator.licenses?.push(license);
+    if (!user.isGlobalUser) {
+      servicesQuery = servicesQuery.where(
+        "boo.organisation_id",
+        "in",
+        user.orgs.map((org) => org.id),
+      );
     }
 
-    license.services?.push({
-      id: service.service_id,
-      name: service.service_name ?? "",
-      line: service.line_name ?? "",
-    });
-  });
+    const results = await executeQuery(servicesQuery);
 
-  return {
-    operators: Array.from(operators.values()),
+    const operators: Map<string, OperatorForDistances> = new Map<
+      string,
+      OperatorForDistances
+    >();
+
+    results.forEach((service) => {
+      const operator: OperatorForDistances = operators.get(
+        service.operator_noc!,
+      ) ?? {
+        name: service.operator_name ?? "",
+        id: service.operator_noc!,
+        licenses: [],
+      };
+      operators.set(service.operator_noc!, operator);
+
+      let license = operator.licenses?.find(
+        (license) => license.id === service.license,
+      );
+      if (!license) {
+        license = {
+          id: service.license ?? "",
+          services: [],
+        };
+        operator.licenses?.push(license);
+      }
+
+      license.services?.push({
+        id: service.service_id,
+        name: service.service_name ?? "",
+        line: service.line_name ?? "",
+      });
+    });
+
+    return {
+      operators: Array.from(operators.values()),
+    };
   };
-};
 
 const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
   _,

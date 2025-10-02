@@ -11,6 +11,7 @@ import { GraphQLError } from "graphql";
 import dayjs from "dayjs";
 import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
+import { executeQuery } from "../lib/dbKysely.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -100,7 +101,8 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   );
 
   // todo: throw if the bounding box is too big
-  return dbQuery
+  // reassigned due to issues with mapping return types
+  const query = dbQuery
     .where("t.stop_latitude", ">=", args.inputs.boundingBox.minLatitude)
     .where("t.stop_latitude", "<=", args.inputs.boundingBox.maxLatitude)
     .where("t.stop_longitude", ">=", args.inputs.boundingBox.minLongitude)
@@ -179,8 +181,9 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         .else(eb.ref("t.direction"))
         .end()
         .as("direction"),
-    ])
-    .execute();
+    ]);
+
+  return executeQuery(query);
 };
 
 const stopAnalysisResolvers: Resolvers = {

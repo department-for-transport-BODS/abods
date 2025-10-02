@@ -4,13 +4,13 @@ import {
   deleteCorridorStops,
   deleteCorridorDb,
   insertCorridorStops,
-} from "../../lib/corridor";
+} from "../../lib/corridor.js";
 import {
   MutationResolvers,
   MutationResponseType,
   Resolvers,
-} from "../../types/generated";
-import { requireUserSession } from "../helpers";
+} from "../../types/generated.js";
+import { requireUserSession } from "../helpers.js";
 
 export const createCorridor: MutationResolvers["createCorridor"] = async (
   _,
@@ -18,7 +18,8 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
   context,
 ): Promise<MutationResponseType> => {
   const user = await requireUserSession(context);
-  if (!args.payload?.name || !args.payload.stopIds) throw "Bad Request";
+  if (!args.payload?.name || !args.payload.stopIds)
+    throw new Error("Bad Request");
 
   const orgIds = user.orgs.map((org) => org.id).sort();
 
@@ -52,16 +53,14 @@ export const updateCorridor: MutationResolvers["updateCorridor"] = async (
   args,
   context,
 ): Promise<MutationResponseType> => {
-  if (!args.inputs) throw "Bad Request";
+  if (!args.inputs?.id || !args.inputs?.name || !args.inputs?.stopList)
+    throw new Error("Bad Request");
   const user = await requireUserSession(context);
   if (
     !(await isCorridorMappedToUserOrg(Number(args.inputs.id), user, context.db))
   ) {
-    throw "Not Authorized";
+    throw new Error("Not Authorized");
   }
-
-  if (!args.inputs.id || !args.inputs.name || !args.inputs.stopList)
-    throw "Bad Request";
 
   await Promise.all([
     updateCorridorDb(args.inputs.id, args.inputs.name, context.db),
@@ -92,10 +91,10 @@ export const deleteCorridor: MutationResolvers["deleteCorridor"] = async (
       context.db,
     ))
   ) {
-    throw "Not Authorized";
+    throw new Error("Not Authorized");
   }
 
-  if (!args.corridorId) throw "Bad Request";
+  if (!args.corridorId) throw new Error("Bad Request");
 
   await Promise.all([
     deleteCorridorDb(args.corridorId, context.db),

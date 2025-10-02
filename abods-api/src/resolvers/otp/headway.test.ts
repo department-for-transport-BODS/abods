@@ -15,12 +15,25 @@ import {
   Granularity,
   HeadwayMetricsTypeHeadwayTimeSeriesArgs,
   HeadwayTimeSeriesType,
+  FrequentServiceType,
+  FrequentServiceInfoType,
+  FrequentServiceInfoInputType,
 } from "../../types/generated";
-import { getHeadwayOverview, getHeadwayTimeSeries } from "./headway";
+import {
+  getFrequentServiceInfo,
+  getFrequentServices,
+  getHeadwayOverview,
+  getHeadwayTimeSeries,
+} from "./headway";
 import * as kyselyLib from "../../lib/dbKysely.js";
 import { RequestContext } from "../../types/extra";
 import { GraphQLResolveInfo } from "graphql";
 import dayjs from "dayjs";
+import logger from "../../logger";
+import { PrismaClient } from "@prisma/client";
+import { DeepMockProxy, mockDeep } from "jest-mock-extended";
+import { createResponse, createRequest } from "node-mocks-http";
+import * as otpLib from "../../lib/otp.js";
 
 jest.mock("../../../src/resolvers/helpers", () => ({
   requireUserSession: jest.fn(() =>
@@ -42,11 +55,18 @@ const dummyKysely = new Kysely<DB>({
   dialect: dummyDialect,
 });
 
+let mockDb: DeepMockProxy<PrismaClient>;
 let context: RequestContext;
-
 beforeEach(() => {
   jest.clearAllMocks();
-  context = { kysely: dummyKysely } as RequestContext;
+  mockDb = mockDeep<PrismaClient>();
+  context = {
+    res: createResponse(),
+    req: createRequest(),
+    headers: {},
+    db: mockDb,
+    kysely: dummyKysely,
+  };
 });
 
 describe("getHeadwayOverview", () => {
@@ -343,5 +363,158 @@ describe("getHeadwayTimeSeries", () => {
     expect(
       dayjs(result?.[2].ts).isSame(dayjs("2025-09-11T15:00:00.000Z")),
     ).toBe(true);
+  });
+});
+
+describe("getFrequentServices", () => {
+  it("returns frequent services when user has access to operator", async () => {
+    const mockResults = [
+      { noc_and_line_and_servicecode: "OP1-L1-S1" },
+      { noc_and_line_and_servicecode: "OP1-L2-S2" },
+    ];
+    mockDb.timetable_frequent_summary_services.findMany.mockResolvedValue(
+      mockResults as never,
+    );
+
+    const args = {
+      operatorId: "OP1",
+      fromTimestamp: "2025-09-01",
+      toTimestamp: "2025-09-30",
+    };
+
+    let result: FrequentServiceType[] | null = null;
+    if (typeof getFrequentServices === "function") {
+      result = (await getFrequentServices(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as FrequentServiceType[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+    expect(result?.[0]).toEqual({ serviceId: "OP1-L1-S1" });
+    expect(result?.[1]).toEqual({ serviceId: "OP1-L2-S2" });
+  });
+
+  it("returns empty array when user does not have access to operator", async () => {
+    const args = {
+      operatorId: "OP3",
+      fromTimestamp: "2025-09-01",
+      toTimestamp: "2025-09-30",
+    };
+
+    let result: FrequentServiceType[] | null = null;
+    if (typeof getFrequentServices === "function") {
+      result = (await getFrequentServices(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as FrequentServiceType[];
+    }
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns null and logs error on exception", async () => {
+    mockDb.timetable_frequent_summary_services.findMany.mockRejectedValue(
+      new Error("DB error"),
+    );
+    const loggerSpy = jest.spyOn(logger, "error").mockImplementation(jest.fn());
+
+    const args = {
+      operatorId: "OP1",
+      fromTimestamp: "2025-09-01",
+      toTimestamp: "2025-09-30",
+    };
+
+    let result: FrequentServiceType[] | null = null;
+    if (typeof getFrequentServices === "function") {
+      result = (await getFrequentServices(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as FrequentServiceType[];
+    }
+
+    expect(result).toBeNull();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.any(Error),
+      "An error occurred when getting frequent services",
+    );
+  });
+});
+
+describe("getFrequentServiceInfo", () => {
+  it("returns frequent service info with correct hours", async () => {
+    jest.spyOn(otpLib, "getSummaryStopsTotalHours").mockResolvedValue(100);
+    jest.spyOn(otpLib, "getFrequentServiceActualHours").mockResolvedValue(80);
+
+    const args = {
+      inputs: {
+        operatorId: "OP1",
+        serviceId: "OP1-L1-S1",
+      } as unknown as FrequentServiceInfoInputType,
+    };
+
+    let result: FrequentServiceInfoType | null = null;
+    if (typeof getFrequentServiceInfo === "function") {
+      result = (await getFrequentServiceInfo(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as FrequentServiceInfoType;
+    }
+
+    expect(result).not.toBeNull();
+    expect(result).toEqual({
+      numHours: 80,
+      totalHours: 100,
+    });
+
+    expect(otpLib.getSummaryStopsTotalHours).toHaveBeenCalledWith(
+      context.kysely,
+      args.inputs,
+      ["OP1", "OP2"],
+    );
+    expect(otpLib.getFrequentServiceActualHours).toHaveBeenCalledWith(
+      context.kysely,
+      args.inputs,
+      ["OP1", "OP2"],
+    );
+  });
+
+  it("returns null and logs error on exception", async () => {
+    jest
+      .spyOn(otpLib, "getSummaryStopsTotalHours")
+      .mockRejectedValue(new Error("DB error"));
+    const loggerSpy = jest.spyOn(logger, "error").mockImplementation(jest.fn());
+
+    const args = {
+      inputs: {
+        operatorId: "OP1",
+        serviceId: "OP1-L1-S1",
+      } as unknown as FrequentServiceInfoInputType,
+    };
+
+    let result: FrequentServiceInfoType | null = null;
+    if (typeof getFrequentServiceInfo === "function") {
+      result = (await getFrequentServiceInfo(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as FrequentServiceInfoType;
+    }
+
+    expect(result).toBeNull();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.any(Error),
+      "An error occurred when getting frequent service info",
+    );
   });
 });

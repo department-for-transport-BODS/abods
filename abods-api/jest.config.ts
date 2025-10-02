@@ -17,6 +17,18 @@ const jestConfig: JestConfigWithTsJest = {
       },
     ],
   },
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "src/resolvers/**/*.ts",
+    "src/lib/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!src/types/**",
+    "!src/scripts/**",
+    "!src/kysely*.ts",
+  ],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov", "html"],
 };
 
 export default jestConfig;

@@ -19,6 +19,7 @@ import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
 import { PrismaClient } from "@prisma/client";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { isLocal } from "../prismaClient.js";
+import { executeQuery } from "../lib/dbKysely.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 export const accountTypes = {
@@ -69,7 +70,7 @@ export const getUsers: QueryResolvers["users"] = async (
   }
 };
 
-const getFeatureFlags = () => {
+export const getFeatureFlags = () => {
   const flags: FeatureFlag[] = [];
   const flagPrefix = "ABODS_FLAG_";
   for (const key of Object.keys(FeatureFlag)) {
@@ -115,6 +116,7 @@ export const getUser: QueryResolvers["user"] = async (
     const isAdmin = userDetails.userOrganisations.some(
       (org) => org.organisation.is_abods_global_viewer === true,
     );
+
     return {
       currentUserId: user.id.toString(),
       canViewServiceMonitoring: canViewServiceMonitoring,
@@ -491,7 +493,7 @@ export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
   }
 };
 
-const getuserOrgs: QueryResolvers["userOrgs"] = async (
+export const getuserOrgs: QueryResolvers["userOrgs"] = async (
   _,
   __,
   context,
@@ -502,16 +504,15 @@ const getuserOrgs: QueryResolvers["userOrgs"] = async (
     .selectFrom("bods_organisation")
     .select(["name", "id", "is_abods_global_viewer"])
     .where("name", "is not", null);
-  let userOrgs = await orgs
-    .where(
+  let userOrgs = await executeQuery(
+    orgs.where(
       "id",
       "in",
       user.orgs.map((org) => org.id),
-    )
-    .execute();
-
+    ),
+  );
   if (userOrgs.some((org) => org.is_abods_global_viewer)) {
-    userOrgs = await orgs.distinct().execute();
+    userOrgs = await executeQuery(orgs.distinct());
   }
 
   return userOrgs.map((org) => ({
