@@ -1,12 +1,12 @@
 import dayjs from "dayjs";
-import { listServiceLinks } from "../../lib/common";
+import { listServiceLinks } from "../../lib/common.js";
 import {
   getStopDepartureTime,
   CorridorTransitStatsOption,
   CorridorTransitServiceStatsType,
-} from "../../lib/corridor";
-import { standardFormat, toUkTime } from "../../lib/dayjs";
-import { getPercentile } from "../../lib/utils";
+} from "../../lib/corridor.js";
+import { standardFormat, toUkTime } from "../../lib/dayjs.js";
+import { getPercentile } from "../../lib/utils.js";
 import {
   CorridorStatsTypeResolvers,
   CorridorSummaryStatsType,
@@ -19,10 +19,10 @@ import {
   CorridorStatsHistogramType,
   ServiceLinkType,
   Resolvers,
-} from "../../types/generated";
+} from "../../types/generated.js";
 
 import { StatsCache, TimetableType } from "../../types/extra.js";
-import { executeQuery } from "../../lib/dbKysely";
+import { executeQuery } from "../../lib/dbKysely.js";
 
 export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
   parent,
