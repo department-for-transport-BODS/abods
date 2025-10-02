@@ -98,7 +98,7 @@ export const getDashboardUrl = async (
   }
 };
 
-const groupStrings = (
+export const groupStrings = (
   values: string[],
   maxStringLength = 256,
   delimiter = ",",

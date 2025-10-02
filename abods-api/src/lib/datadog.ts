@@ -69,8 +69,10 @@ const datadogMetricsPlugin: ApolloServerPlugin = {
       },
 
       didEncounterSubsequentErrors: ({ errors }) => {
+        console.log("errors:", errors);
         if (!errors) return Promise.resolve();
         for (const error of errors) {
+          console.log("Subsequent error:", error);
           sendErrorMetric(error);
         }
         return Promise.resolve();
