@@ -206,12 +206,7 @@ describe("EditUserComponent", () => {
     spectator.click(byText("Save changes"));
 
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(
-      username,
-      firstName,
-      lastName,
-      role?.id ?? "",
-    );
+    expect(spy).toHaveBeenCalledWith(username, firstName, lastName);
   });
 
   it("should navigate back to list on cancel", async () => {
@@ -295,7 +290,6 @@ describe("EditUserComponent", () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith(
       username,
-      jasmine.anything(),
       jasmine.anything(),
       jasmine.anything(),
     );

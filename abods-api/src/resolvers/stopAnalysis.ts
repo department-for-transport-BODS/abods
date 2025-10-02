@@ -10,6 +10,7 @@ import { sql } from "kysely";
 import { GraphQLError } from "graphql";
 import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
+import { executeQuery } from "../lib/dbKysely.js";
 
 const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
@@ -137,8 +138,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
           "t.direction",
           sql<number>`SUM(t.scheduled)`.as("scheduled"),
         ])
-        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"])
-        .execute();
+        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"]);
 
       if (args.inputs.matchType === MatchType.Evidenced) {
         summaryQuery = summaryQuery.where("t.estimated", "is", false);
@@ -199,13 +199,11 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
             .else(eb.ref("t.direction"))
             .end()
             .as("direction"),
-        ])
-        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"])
-        .execute();
+        ]);
 
       const [summaryResults, scheduledCountResults] = await Promise.all([
-        summaryPromise,
-        scheduledCountPromise,
+        executeQuery(summaryPromise),
+        executeQuery(scheduledCountPromise),
       ]);
       return { summaryResults, scheduledCountResults };
     }),

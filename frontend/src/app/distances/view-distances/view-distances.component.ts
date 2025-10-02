@@ -124,7 +124,7 @@ export class ViewDistancesComponent implements OnInit {
       flex: 2,
       unSortIcon: true,
       valueGetter: ({ data }: { data: Distance }) =>
-        data.lineName ? `${data.lineName}-${data.serviceName}` : "",
+        data.lineName ? `${data.lineName}-${data.serviceName ?? "NA"}` : "",
     },
     {
       colId: "distance",
@@ -133,9 +133,10 @@ export class ViewDistancesComponent implements OnInit {
       sortable: true,
       unSortIcon: true,
       flex: 1,
-      valueFormatter: ({ value }) => (isNaN(value) ? value : value.toFixed(2)),
       valueGetter: ({ data }: { data: Distance }) =>
-        data.distance ? data.distance / 1000 : "-",
+        data.distance ? data.distance / 1000 : null,
+      valueFormatter: ({ value }: { value: number | null }) =>
+        value == null || isNaN(value) ? "-" : value.toFixed(2),
       type: "numericColumn",
     },
     {
@@ -145,9 +146,10 @@ export class ViewDistancesComponent implements OnInit {
       sortable: true,
       unSortIcon: true,
       flex: 1,
-      valueFormatter: ({ value }) => (isNaN(value) ? value : value.toFixed(2)),
+      valueFormatter: ({ value }: { value: number | null }) =>
+        value == null || isNaN(value) ? "-" : value.toFixed(2),
       valueGetter: ({ data }: { data: Distance }) =>
-        data.avlDistance ? data.avlDistance / 1000 : "-",
+        data.avlDistance ? data.avlDistance / 1000 : null,
       type: "numericColumn",
     },
     {

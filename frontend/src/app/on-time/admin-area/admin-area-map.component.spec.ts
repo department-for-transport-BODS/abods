@@ -7,11 +7,13 @@ import { featureCollection } from "@turf/helpers";
 import { FeatureCollection, Polygon } from "geojson";
 import { BRITISH_ISLES_BBOX } from "src/app/shared/geo";
 import { AdminArea } from "./admin-area.service";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 
 describe("AdminAreaMapComponent", () => {
   let spectator: Spectator<AdminAreaMapComponent>;
   const createComponent = createComponentFactory({
     component: AdminAreaMapComponent,
+    declarations: [NgxMapboxGLModule],
     providers: [
       {
         provide: AdminAreaService,

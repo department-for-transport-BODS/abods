@@ -296,7 +296,7 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
 };
 
 export type DistancesDropdown = {
@@ -494,6 +494,7 @@ export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
+  isCancelled: Scalars['Boolean']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -1348,7 +1349,7 @@ export type DistancesListQueryVariables = Exact<{
 }>;
 
 
-export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName: string, distance?: number | null, avlDistance?: number | null }> };
+export type DistancesListQuery = { __typename?: 'Query', distances: Array<{ __typename?: 'Distance', operatorId: string, operatorName: string, nocLineAndServiceCode: string, lineName: string, serviceName?: string | null, distance?: number | null, avlDistance?: number | null }> };
 
 export type DistancesDropdownInputQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1682,7 +1683,7 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, vehicleJourneyId?: number | null }> };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, isCancelled: boolean, vehicleJourneyId?: number | null }> };
 
 export type ServicePatternDistanceGeomQueryVariables = Exact<{
   vehicleJourneyId: Scalars['ID']['input'];
@@ -3261,6 +3262,7 @@ export const JourneysDocument = gql`
     operatorName
     operatorNoc
     directionRef
+    isCancelled
     vehicleJourneyId
   }
 }

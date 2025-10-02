@@ -296,7 +296,7 @@ export type Distance = {
   nocLineAndServiceCode: Scalars['String']['output'];
   operatorId: Scalars['String']['output'];
   operatorName: Scalars['String']['output'];
-  serviceName: Scalars['String']['output'];
+  serviceName?: Maybe<Scalars['String']['output']>;
 };
 
 export type DistancesDropdown = {
@@ -494,6 +494,7 @@ export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
+  isCancelled: Scalars['Boolean']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -1696,7 +1697,7 @@ export type DistanceResolvers<ContextType = RequestContext, ParentType extends R
   nocLineAndServiceCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serviceName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1803,6 +1804,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
   directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isCancelled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

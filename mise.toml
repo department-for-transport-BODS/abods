@@ -1,82 +1,80 @@
+[tools]
+awscli = "latest"
+granted = "latest"
+usage = "latest"
+jq = "latest"
+serverless = "3.39.0"
+
+[env]
+REGION = "eu-west-2"
+
 [settings]
 asdf_compat = true
 experimental = true
 legacy_version_file = true
 
-[tools]
-granted = "0.35.1"
-serverless = "3.39.0"
-jq = "1.7.1"
-
 [tasks."setup:api"]
+alias="setup"
 description = "Setup task for the API"
 dir = "abods-api"
 run = "assume --exec -- ./setup.sh"
 
-[tasks."setup:frontend"]
-description = "Setup task for the front end"
-dir = "frontend"
-run = "npm install"
-
-[tasks.db]
-description = "Run a proxy to the sandbox DB using AWS SSM. You will be prompted for an AWS profile with access"
+[tasks."db:sandbox"]
+alias="db"
+description = "Run a proxy to the sandbox DB using AWS SSM"
 dir = "scripts"
 run = "assume --exec -- ./db_connect.sh sandbox"
 
 [tasks."db:dev"]
+description = "Run a proxy to the dev DB using AWS SSM"
 dir = "scripts"
 run = "assume --exec -- ./db_connect.sh dev"
 
 [tasks."db:test"]
+description = "Run a proxy to the test DB using AWS SSM"
 dir = "scripts"
 run = "assume --exec -- ./db_connect.sh test"
 
 [tasks."db:uat"]
+description = "Run a proxy to the UAT DB using AWS SSM"
 dir = "scripts"
 run = "assume --exec -- ./db_connect.sh uat"
 
-[tasks.db-creds]
-description = "Print read only connection info for the sandbox db"
-dir = "scripts"
-run = "assume --exec -- ./get_readonly_db_creds.sh"
-
-[tasks.api]
-depends = ["setup:api"]
-description = "Run the API in a dev server. Expects a local DB proxy to be running. In another terminal run the db task"
-dir = "abods-api"
-run = "serverless offline"
+[tasks.app]
+depends = ["build:frontend"]
+description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
+dir = "frontend"
+run = "npm start"
 
 [tasks."app:sandbox"]
-depends = ["setup:frontend"]
+depends = ["build:frontend"]
 description = "Run the front end in a dev server. Connects to the deployed API in the sandbox environment"
 dir = "frontend"
 run = "npm start -- --proxy-config src/proxy.sandbox.conf.json"
 
 [tasks."app:uat"]
-depends = ["setup:frontend"]
+description = "Run the front end in a dev server. Connects to the deployed API in the UAT environment. You must update your .env file"
 dir = "frontend"
 run = "npm start -- --proxy-config src/proxy.uat.conf.json"
 
-[tasks.app]
-depends = ["setup:frontend"]
-description = "Run the front end in a dev server. Expects a local API to be running. In another terminal run the api task"
-dir = "frontend"
-run = "npm start"
-
 [tasks.codegen]
+description = "Perform code generation"
 run = "npm run codegen"
 
 [tasks."build:frontend"]
+description = "Build front end"
 depends = ["codegen"]
 dir = "frontend"
 run = "npm run build"
 
 [tasks."build:backend"]
+description = "Build API"
 depends = ["codegen"]
 dir = "abods-api"
 run = "npm run build"
 
 [tasks.build]
+description = "Build all projects"
 depends = ["build:frontend", "build:backend"]
 
 [tasks.start]

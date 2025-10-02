@@ -48,7 +48,7 @@ describe("DynamicPanelComponentLoaderService", () => {
 
   const destroy$ = new Subject<void>();
   const createDynamicComponent = (): DynamicComponent => {
-    return <DynamicComponent>{
+    return {
       component: TestDynamicComponent,
       inputs: [
         {
@@ -140,10 +140,10 @@ describe("DynamicPanelComponentLoaderService", () => {
   describe("ngOnDestroy", () => {
     it("should call destory on componentRef", () => {
       service.loadComponent(dynamicComponent, ref, destroy$);
-      spyOn(service["componentRef"], "destroy");
+      spyOn((service as any).componentRef, "destroy");
       service.ngOnDestroy();
 
-      expect(service["componentRef"].destroy).toHaveBeenCalledWith();
+      expect((service as any).componentRef.destroy).toHaveBeenCalledWith();
     });
   });
 });

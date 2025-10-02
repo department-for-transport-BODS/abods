@@ -85,7 +85,7 @@ type Distance {
   operatorName: String!
   nocLineAndServiceCode: String!
   lineName: String!
-  serviceName: String!
+  serviceName: String
   distance: Int
   avlDistance: Int
 }
@@ -264,6 +264,7 @@ type Journey {
   serviceNumber: String!
   operatorName: String!
   operatorNoc: String!
+  isCancelled: Boolean!
   vehicleJourneyId: Int
 }
 

@@ -33,6 +33,10 @@ module.exports = function (config) {
         base: "Chrome",
         flags: ["--remote-debugging-port=9333"],
       },
+      ChromeHeadlessCI: {
+        base: "ChromeHeadless",
+        flags: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader"],
+      },
     },
   });
 };

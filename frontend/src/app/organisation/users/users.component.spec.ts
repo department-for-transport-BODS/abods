@@ -18,18 +18,6 @@ import { OrganisationService } from "../organisation.service";
 
 import { UsersComponent } from "./users.component";
 
-const orgRoles = [
-  {
-    id: "2",
-    name: "Administrator",
-  },
-
-  {
-    id: "4",
-    name: "Staff",
-  },
-];
-
 describe("UsersComponent", () => {
   let spectator: SpectatorHost<UsersComponent>;
   const createHost = createHostFactory({

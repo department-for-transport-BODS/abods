@@ -14,9 +14,9 @@ describe("VersionService", () => {
   let versionGQL: GetVersionGQL;
 
   const mockFrontEndResponse = { version: "v1.7.0", buildNumber: "11111" };
-  const mockApiResponse = <ApolloQueryResult<GetVersionQuery>>{
+  const mockApiResponse = {
     data: { apiInfo: { version: "v1.9.0", buildNumber: "22222" } },
-  };
+  } as ApolloQueryResult<GetVersionQuery>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -57,7 +57,7 @@ describe("VersionService", () => {
 
       expect(console.table).toHaveBeenCalledWith({
         FE: Version.create(mockFrontEndResponse),
-        API: Version.create(mockApiResponse.data.apiInfo),
+        API: Version.create(mockApiResponse.data.apiInfo ??  Version.createUnknown()),
         DWH: Version.createUnknown(),
       });
     });

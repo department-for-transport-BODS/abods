@@ -5,7 +5,7 @@ import { FeedMonitoringModule } from "../../feed-monitoring.module";
 import { DatenavItemComponent } from "./datenav-item/datenav-item.component";
 import { DatenavComponent } from "./datenav.component";
 
-describe("DatenavComponent", () => {
+fdescribe("DatenavComponent", () => {
   let spectator: Spectator<DatenavComponent>;
 
   const createComponent = createComponentFactory({
@@ -25,15 +25,15 @@ describe("DatenavComponent", () => {
     { heat: 6, date: DateTime.fromISO("2020-11-25T00:00Z", { zone: "utc" }) },
   ];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Settings.defaultZone = "utc";
     Settings.now = () => 1606780800000; // 2020-12-01
 
     spectator = createComponent();
   });
 
-  it("should create", () => {
-    expect(spectator.component).toBeTruthy();
+  it("should create", async () => {
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should display buttons for each item in map", () => {
@@ -46,9 +46,9 @@ describe("DatenavComponent", () => {
     expect(navitems).toHaveLength(7);
 
     items.forEach(({ heat, date }, inx) => {
-      expect(navitems[inx].heat).toEqual(heat);
-      expect(navitems[inx].date).toEqual(date);
-      expect(navitems[inx].active).toEqual(false);
+      void expect(navitems[inx].heat).toEqual(heat);
+      void expect(navitems[inx].date).toEqual(date);
+      void expect(navitems[inx].active).toEqual(false);
     });
   });
 
@@ -69,7 +69,7 @@ describe("DatenavComponent", () => {
     expect(selectedItem?.active).toBeTrue();
   });
 
-  it("should emit date on click", () => {
+  it("should emit date on click", async () => {
     const spy = spyOn(spectator.component.dateSelected, "emit");
 
     spectator.component.stats = items;
@@ -77,27 +77,27 @@ describe("DatenavComponent", () => {
 
     spectator.click(byText("20 November"));
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    await expect(spy).toHaveBeenCalledTimes(1);
     expect(spectator.component.dateSelected.emit).toHaveBeenCalledWith(
       DateTime.fromISO("2020-11-20"),
     );
   });
 
-  it("should show next and previous buttons", () => {
+  it("should show next and previous buttons", async () => {
     spectator.component.stats = items;
     spectator.component.date = DateTime.fromISO("2020-11-22T00:00Z");
     spectator.detectChanges();
 
     const prev = spectator.query(byText("Previous"));
 
-    expect(prev).toBeTruthy();
+    await expect(prev).toBeTruthy();
 
     const next = spectator.query(byText("Next"));
 
-    expect(next).toBeTruthy();
+    await expect(next).toBeTruthy();
   });
 
-  it("should emit event on previous click", () => {
+  it("should emit event on previous click", async () => {
     spyOn(spectator.component.dateSelected, "emit");
     const selectedDate = DateTime.fromISO("2020-11-22T00:00Z");
     const expectedDate = DateTime.fromISO("2020-11-21T00:00Z");
@@ -108,13 +108,15 @@ describe("DatenavComponent", () => {
 
     spectator.click(byText("Previous"));
 
-    expect(spectator.component.dateSelected.emit).toHaveBeenCalledTimes(1);
+    await expect(spectator.component.dateSelected.emit).toHaveBeenCalledTimes(
+      1,
+    );
     expect(spectator.component.dateSelected.emit).toHaveBeenCalledWith(
       expectedDate,
     );
   });
 
-  it("should emit event on next click", () => {
+  it("should emit event on next click", async () => {
     spyOn(spectator.component.dateSelected, "emit");
     const selectedDate = DateTime.fromISO("2020-11-22T00:00Z");
     const expectedDate = DateTime.fromISO("2020-11-23T00:00Z");
@@ -125,13 +127,15 @@ describe("DatenavComponent", () => {
 
     spectator.click(byText("Next"));
 
-    expect(spectator.component.dateSelected.emit).toHaveBeenCalledTimes(1);
+    await expect(spectator.component.dateSelected.emit).toHaveBeenCalledTimes(
+      1,
+    );
     expect(spectator.component.dateSelected.emit).toHaveBeenCalledWith(
       expectedDate,
     );
   });
 
-  it("should not emit event on next click if at end of range", () => {
+  it("should not emit event on next click if at end of range", async () => {
     spyOn(spectator.component.dateSelected, "emit");
     const selectedDate = DateTime.fromISO("2020-11-25T00:00Z");
 
@@ -141,10 +145,10 @@ describe("DatenavComponent", () => {
 
     spectator.click(byText("Next"));
 
-    expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
+    await expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
   });
 
-  it("should not emit event on prev click if at end of range", () => {
+  it("should not emit event on prev click if at end of range", async () => {
     spyOn(spectator.component.dateSelected, "emit");
     const selectedDate = DateTime.fromISO("2020-11-19T00:00Z");
 
@@ -155,11 +159,11 @@ describe("DatenavComponent", () => {
     spectator.click(byText("Previous"));
     spectator.detectChanges();
 
-    expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
+    await expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
   });
 
   describe("timezones", () => {
-    it("should cope with BST", () => {
+    it("should cope with BST", async () => {
       Settings.defaultZone = "Europe/London";
       Settings.now = () => 1598914800000; // 2020-09-01 GMT+01:00, i.e. during BST
 
@@ -178,13 +182,13 @@ describe("DatenavComponent", () => {
 
       spectator.click(byText("27 August"));
 
-      expect(spy).toHaveBeenCalledTimes(1);
+      await expect(spy).toHaveBeenCalledTimes(1);
       expect(spectator.component.dateSelected.emit).toHaveBeenCalledWith(
         DateTime.fromISO("2020-08-27T00:00:00.000+01:00"),
       );
     });
 
-    it("should cope with timezone difference during BST and when looking at stats from before BST started", () => {
+    it("should cope with timezone difference during BST and when looking at stats from before BST started", async () => {
       Settings.defaultZone = "Europe/London";
       Settings.now = () => 1585695600000; // 2020-04-01 GMT+01:00, i.e. during BST
 
@@ -206,10 +210,12 @@ describe("DatenavComponent", () => {
       spectator.click(byText("Next"));
       spectator.detectChanges();
 
-      expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
+      await expect(
+        spectator.component.dateSelected.emit,
+      ).not.toHaveBeenCalled();
     });
 
-    it("should cope with timezone difference after BST has ended when looking at stats from BST", () => {
+    it("should cope with timezone difference after BST has ended when looking at stats from BST", async () => {
       Settings.defaultZone = "Europe/London";
       Settings.now = () => 1604188800000; // 2020-11-01 GMT+00:00, i.e. after BST has ended
 
@@ -231,7 +237,9 @@ describe("DatenavComponent", () => {
       spectator.click(byText("Previous"));
       spectator.detectChanges();
 
-      expect(spectator.component.dateSelected.emit).not.toHaveBeenCalled();
+      await expect(
+        spectator.component.dateSelected.emit,
+      ).not.toHaveBeenCalled();
     });
   });
 });

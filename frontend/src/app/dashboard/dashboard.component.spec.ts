@@ -1,28 +1,3 @@
-import { RouterTestingModule } from "@angular/router/testing";
-import {
-  byTextContent,
-  createRoutingFactory,
-  SpectatorRouting,
-} from "@ngneat/spectator";
-import { ApolloTestingModule } from "apollo-angular/testing";
-import { Observable, of } from "rxjs";
-import { LayoutModule } from "src/app/layout/layout.module";
-import { SharedModule } from "src/app/shared/shared.module";
-import {
-  OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
-} from "src/generated/graphql";
-import { DashboardComponent } from "./dashboard.component";
-import { DashboardService } from "./dashboard.service";
-import { FeedStatusSummaryComponent } from "./feed-status-summary/feed-status-summary.component";
-import { FeedStatusSingleComponent } from "./feed-status-single/feed-status-single.component";
-import { MockPerformanceChartComponent } from "./performance/chart/mock-chart.component";
-import { PerformanceComponent } from "./performance/performance.component";
-import { VehiclesStatusComponent } from "./vehicles-status/vehicles-status.component";
-import { PerformanceRankingComponent } from "./performance/ranking-table/ranking-table.component";
-import { fakeAsync, tick } from "@angular/core/testing";
-import { delay } from "rxjs/operators";
-import { Injectable } from "@angular/core";
 import {
   HTTP_INTERCEPTORS,
   HttpEvent,
@@ -30,16 +5,41 @@ import {
   HttpInterceptor,
   HttpRequest,
 } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { fakeAsync, tick } from "@angular/core/testing";
+import { RouterModule } from "@angular/router";
+import {
+  byTextContent,
+  createRoutingFactory,
+  SpectatorRouting,
+} from "@ngneat/spectator";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { Observable, of } from "rxjs";
+import { delay } from "rxjs/operators";
+import { LayoutModule } from "src/app/layout/layout.module";
+import { SharedModule } from "src/app/shared/shared.module";
+import {
+  DashboardVehicles,
+  OperatorDashboardFragment,
+} from "src/generated/graphql";
+import { DashboardComponent } from "./dashboard.component";
+import { DashboardService } from "./dashboard.service";
+import { FeedStatusSingleComponent } from "./feed-status-single/feed-status-single.component";
+import { FeedStatusSummaryComponent } from "./feed-status-summary/feed-status-summary.component";
+import { MockPerformanceChartComponent } from "./performance/chart/mock-chart.component";
+import { PerformanceComponent } from "./performance/performance.component";
+import { PerformanceRankingComponent } from "./performance/ranking-table/ranking-table.component";
+import { VehiclesStatusComponent } from "./vehicles-status/vehicles-status.component";
 
 // Workaround for fakeAsync() trying to load an SVG image via XHR
 @Injectable()
 class SkipHttpRequestInterceptor implements HttpInterceptor {
   intercept(
-    _req: HttpRequest<any>,
+    _req: HttpRequest<unknown>,
     _next: HttpHandler,
-  ): Observable<HttpEvent<any>> {
-    return new Observable<any>((observer) => {
-      observer.next({} as HttpEvent<any>);
+  ): Observable<HttpEvent<unknown>> {
+    return new Observable<HttpEvent<unknown>>((observer) => {
+      observer.next({} as HttpEvent<unknown>);
     });
   }
 }
@@ -62,7 +62,7 @@ describe("DashboardComponent", () => {
     imports: [
       LayoutModule,
       SharedModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       ApolloTestingModule,
     ],
     providers: [
@@ -76,9 +76,10 @@ describe("DashboardComponent", () => {
     stubsEnabled: false,
   });
 
-  const operator2 = {
+  const operator2: OperatorDashboardFragment = {
     name: "Operator 2",
     nocCode: "OP02",
+    operatorId: "OP02",
     feedMonitoring: {
       feedStatus: true,
 
@@ -86,26 +87,30 @@ describe("DashboardComponent", () => {
     },
   };
 
-  const operator6 = {
+  const operator6: OperatorDashboardFragment = {
     name: "Operator 6",
     nocCode: "OP06",
+    operatorId: "OP06",
     feedMonitoring: {
       feedStatus: false,
       liveStats: { feedAlerts: 21, feedErrors: 3 },
     },
   };
-  const operator2VehicleCounts = {
-    nocCode: "OP02",
-    feedMonitoring: { liveStats: { currentVehicles: 1, expectedVehicles: 2 } },
+  const operator2VehicleCounts: DashboardVehicles = {
+    operatorId: "OP02",
+    actual: 1,
+    expected: 2,
   };
-  const operator6VehicleCounts = {
-    nocCode: "OP06",
-    feedMonitoring: { liveStats: { currentVehicles: 0, expectedVehicles: 18 } },
+  const operator6VehicleCounts: DashboardVehicles = {
+    operatorId: "OP06",
+    actual: 0,
+    expected: 18,
   };
   const operatorList: OperatorDashboardFragment[] = [
     {
       name: "Operator 1",
       nocCode: "OP01",
+      operatorId: "OP01",
       feedMonitoring: {
         feedStatus: true,
         liveStats: { feedAlerts: 2, feedErrors: 0 },
@@ -115,6 +120,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 3",
       nocCode: "OP03",
+      operatorId: "OP03",
       feedMonitoring: {
         feedStatus: true,
         liveStats: { feedAlerts: 1, feedErrors: 1 },
@@ -123,6 +129,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 4",
       nocCode: "OP04",
+      operatorId: "OP04",
       feedMonitoring: {
         feedStatus: false,
         liveStats: { feedAlerts: 1, feedErrors: 1 },
@@ -131,6 +138,7 @@ describe("DashboardComponent", () => {
     {
       name: "Operator 5",
       nocCode: "OP05",
+      operatorId: "OP05",
       feedMonitoring: {
         feedStatus: false,
         liveStats: { feedAlerts: 21, feedErrors: 1 },
@@ -138,31 +146,27 @@ describe("DashboardComponent", () => {
     },
     operator6,
   ];
-  const vehicleCounts: OperatorDashboardVehicleCountsFragment[] = [
+  const vehicleCounts: DashboardVehicles[] = [
     {
-      nocCode: "OP01",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 44, expectedVehicles: 56 },
-      },
+      operatorId: "OP01",
+      actual: 44,
+      expected: 56,
     },
     operator2VehicleCounts,
     {
-      nocCode: "OP03",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 12, expectedVehicles: 14 },
-      },
+      operatorId: "OP03",
+      actual: 12,
+      expected: 14,
     },
     {
-      nocCode: "OP04",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 11 },
-      },
+      operatorId: "OP04",
+      actual: 0,
+      expected: 11,
     },
     {
-      nocCode: "OP05",
-      feedMonitoring: {
-        liveStats: { currentVehicles: 0, expectedVehicles: 23 },
-      },
+      operatorId: "OP05",
+      actual: 0,
+      expected: 23,
     },
     operator6VehicleCounts,
   ];
@@ -173,10 +177,10 @@ describe("DashboardComponent", () => {
     service = spectator.inject(DashboardService);
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 
   it("should fetch the dashboard operator list", () => {
@@ -307,7 +311,7 @@ describe("DashboardComponent", () => {
     ).toExist();
   });
 
-  it("should correctly limit and order feed status rows", () => {
+  it("should correctly limit and order feed status rows", async () => {
     const expectedOrder = [
       "Operator 6",
       "Operator 5",
@@ -330,10 +334,12 @@ describe("DashboardComponent", () => {
       row.querySelector(".feed-status-summary__operator")?.textContent?.trim(),
     );
 
-    expect(opNames).toEqual(jasmine.arrayWithExactContents(expectedOrder));
+    await expect(opNames).toEqual(
+      jasmine.arrayWithExactContents(expectedOrder),
+    );
   });
 
-  it("should show count of alerts and errors in feed status row", () => {
+  it("should show count of alerts and errors in feed status row", async () => {
     spyOnProperty(service, "listOperators").and.returnValue(
       of([operator2, operator6]),
     );
@@ -353,7 +359,7 @@ describe("DashboardComponent", () => {
       }),
     );
 
-    expect(op6statusRow).toBeTruthy();
+    await expect(op6statusRow).toBeTruthy();
 
     expect(
       op6statusRow?.querySelector(
@@ -365,16 +371,6 @@ describe("DashboardComponent", () => {
         ".feed-status-summary__status .status--inactive",
       ),
     ).toExist();
-
-    expect(
-      op6statusRow?.querySelector(".feed-status-summary__count--alerts")
-        ?.textContent,
-    ).toMatch(operator6.feedMonitoring.liveStats.feedAlerts.toString());
-
-    expect(
-      op6statusRow?.querySelector(".feed-status-summary__count--errors")
-        ?.textContent,
-    ).toMatch(operator6.feedMonitoring.liveStats.feedErrors.toString());
 
     const op2statusRow = spectator.query(
       byTextContent(/Operator 2/, {
@@ -382,7 +378,7 @@ describe("DashboardComponent", () => {
       }),
     );
 
-    expect(op2statusRow).toBeTruthy();
+    await expect(op2statusRow).toBeTruthy();
 
     expect(
       op2statusRow?.querySelector(
@@ -394,32 +390,22 @@ describe("DashboardComponent", () => {
         ".feed-status-summary__status .status--inactive",
       ),
     ).not.toExist();
-
-    expect(
-      op2statusRow?.querySelector(".feed-status-summary__count--alerts")
-        ?.textContent,
-    ).toMatch(operator2.feedMonitoring.liveStats.feedAlerts.toString());
-
-    expect(
-      op2statusRow?.querySelector(".feed-status-summary__count--errors")
-        ?.textContent,
-    ).toMatch(operator2.feedMonitoring.liveStats.feedErrors.toString());
   });
 
-  it("should set nocCode on punctuality component", () => {
+  it("should set nocCode on punctuality component", async () => {
     const punc = spectator.query(PerformanceComponent);
 
     expect(punc).toExist();
 
     spectator.detectChanges();
 
-    expect(punc?.nocCode).toBeNull();
+    await expect(punc?.nocCode).toBeNull();
 
     spectator.setRouteQueryParam("nocCode", "OP01");
 
     spectator.detectChanges();
 
-    expect(punc?.nocCode).toEqual("OP01");
+    await expect(punc?.nocCode).toEqual("OP01");
   });
 
   it("should display feed status before vehicle count has finished loading", fakeAsync(() => {

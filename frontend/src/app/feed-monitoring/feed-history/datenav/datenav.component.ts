@@ -28,6 +28,7 @@ export class DatenavComponent {
     if (!this.stats || this.stats.length === 0) {
       return true;
     }
+
     return this.date?.equals(this.stats?.[0]?.date);
   }
 }
