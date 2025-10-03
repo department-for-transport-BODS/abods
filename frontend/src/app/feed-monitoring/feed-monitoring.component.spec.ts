@@ -11,7 +11,7 @@ import { FeedMonitoringComponent } from "./feed-monitoring.component";
 import { FeedMonitoringModule } from "./feed-monitoring.module";
 import { FeedMonitoringService } from "./feed-monitoring.service";
 
-fdescribe("FeedMonitoringComponent", () => {
+describe("FeedMonitoringComponent", () => {
   const inactiveOperators = [
     fakeOperatorLiveStatus(false),
     fakeOperatorLiveStatus(false),

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { InnerComponent } from "./inner.component";
 
-describe("InnerComponent", () => {
+fdescribe("InnerComponent", () => {
   let component: InnerComponent;
   let fixture: ComponentFixture<InnerComponent>;
 
@@ -18,7 +18,7 @@ describe("InnerComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

@@ -12,7 +12,7 @@ import { SharedModule } from "../../shared/shared.module";
 
 import { CookieBannerComponent } from "./cookie-banner.component";
 
-describe("CookieBannerComponent", () => {
+fdescribe("CookieBannerComponent", () => {
   let spectator: Spectator<CookieBannerComponent>;
   let cookiePolicyService: SpyObject<CookiePolicyService>;
 
