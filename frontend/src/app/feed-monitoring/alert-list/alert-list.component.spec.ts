@@ -19,7 +19,7 @@ import { AlertMode } from "./alert-list-view-model";
 import { AlertListComponent } from "./alert-list.component";
 import { AlertComponent } from "./alert/alert.component";
 
-fdescribe("AlertListComponent", () => {
+describe("AlertListComponent", () => {
   let spectator: Spectator<AlertListComponent>;
   let service: SpyObject<FeedMonitoringService>;
 

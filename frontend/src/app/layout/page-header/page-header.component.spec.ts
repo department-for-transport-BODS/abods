@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { PageHeaderComponent } from "./page-header.component";
 
-describe("PageHeaderComponent", () => {
+fdescribe("PageHeaderComponent", () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
 
@@ -18,7 +18,7 @@ describe("PageHeaderComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

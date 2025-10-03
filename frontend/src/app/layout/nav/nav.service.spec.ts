@@ -1,7 +1,7 @@
 import { SpectatorService, createServiceFactory } from "@ngneat/spectator";
 import { NavService } from "./nav.service";
 
-describe("NavService", () => {
+fdescribe("NavService", () => {
   let spectator: SpectatorService<NavService>;
   const createService = createServiceFactory(NavService);
 
@@ -9,27 +9,27 @@ describe("NavService", () => {
     spectator = createService();
   });
 
-  it("should create the service", () => {
-    expect(spectator.service).toBeTruthy();
+  it("should create the service", async () => {
+    await expect(spectator.service).toBeTruthy();
   });
 
-  it("should toggle the menu and update isOpen", () => {
-    expect(spectator.service.isOpen).toBe(false);
+  it("should toggle the menu and update isOpen", async () => {
+    await expect(spectator.service.isOpen).toBe(false);
 
     spectator.service.toggleMenu();
 
-    expect(spectator.service.isOpen).toBe(true);
+    await expect(spectator.service.isOpen).toBe(true);
   });
 
-  it("should close the menu and update isOpen", () => {
+  it("should close the menu and update isOpen", async () => {
     spectator.service.isOpen = true;
 
     spectator.service.closeMenu();
 
-    expect(spectator.service.isOpen).toBe(false);
+    await expect(spectator.service.isOpen).toBe(false);
   });
 
-  it('should toggle the menu when selected element is not "nav-toggle" and isOpen is true', () => {
+  it('should toggle the menu when selected element is not "nav-toggle" and isOpen is true', async () => {
     spectator.service.isOpen = true;
 
     const selectedEl = document.createElement("div");
@@ -37,10 +37,10 @@ describe("NavService", () => {
 
     spectator.service.navClickOutside(selectedEl);
 
-    expect(spectator.service.isOpen).toBe(false);
+    await expect(spectator.service.isOpen).toBe(false);
   });
 
-  it('should not toggle the menu when selected element is "nav-toggle"', () => {
+  it('should not toggle the menu when selected element is "nav-toggle"', async () => {
     spectator.service.isOpen = true;
 
     const selectedEl = document.createElement("div");
@@ -48,10 +48,10 @@ describe("NavService", () => {
 
     spectator.service.navClickOutside(selectedEl);
 
-    expect(spectator.service.isOpen).toBe(true);
+    await expect(spectator.service.isOpen).toBe(true);
   });
 
-  it("should not toggle the menu when isOpen is false", () => {
+  it("should not toggle the menu when isOpen is false", async () => {
     spectator.service.isOpen = false;
 
     const selectedEl = document.createElement("div");
@@ -59,6 +59,6 @@ describe("NavService", () => {
 
     spectator.service.navClickOutside(selectedEl);
 
-    expect(spectator.service.isOpen).toBe(false);
+    await expect(spectator.service.isOpen).toBe(false);
   });
 });
