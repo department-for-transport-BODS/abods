@@ -9,7 +9,6 @@ import {
 import { createSpyObject } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
-import { UserFragment } from "../../generated/graphql";
 import { AuthGuardService } from "./auth-guard.service";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 import { AuthenticationService } from "./authentication.service";
@@ -88,7 +87,7 @@ describe("AuthGuardService", () => {
 
       it("should return true", () => {
         spyOnProperty(userService, "authenticatedUser$").and.returnValue(
-          of({} as UserFragment),
+          of({}),
         );
 
         service

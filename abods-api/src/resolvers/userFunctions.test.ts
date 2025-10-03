@@ -1,25 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { DeepMockProxy, mockDeep } from "jest-mock-extended";
-import { createRequest, createResponse } from "node-mocks-http";
-import * as prismaClient from "../prismaClient";
-import { RequestContext } from "../types/extra";
-import {
-  getFeatureFlags,
-  getUser,
-  getuserOrgs,
-  getUsers,
-  loginUser,
-  logoutUser,
-} from "./userFunctions";
-import * as helpers from "./helpers";
-import { GraphQLResolveInfo } from "graphql";
-import {
-  FeatureFlag,
-  LoginInfo,
-  LoginResponse,
-  Organisation,
-} from "../types/generated";
 import argon2 from "argon2";
+import { GraphQLResolveInfo } from "graphql";
+import { DeepMockProxy, mockDeep } from "jest-mock-extended";
 import {
   Dialect,
   DummyDriver,
@@ -28,10 +10,26 @@ import {
   PostgresIntrospector,
   PostgresQueryCompiler,
 } from "kysely";
+import { createRequest, createResponse } from "node-mocks-http";
 import { DB } from "../kysely";
 import * as kyselyLib from "../lib/dbKysely.js";
-import { User } from "@aws-sdk/client-quicksight";
 import logger from "../logger";
+import * as prismaClient from "../prismaClient";
+import { RequestContext } from "../types/extra";
+import {
+  FeatureFlag,
+  LoginInfo,
+  LoginResponse,
+  Organisation,
+} from "../types/generated";
+import * as helpers from "./helpers";
+import {
+  getFeatureFlags,
+  getUser,
+  getUserOrgs,
+  loginUser,
+  logoutUser,
+} from "./userFunctions";
 
 jest.mock("./helpers", () => ({
   requireUserSession: jest.fn(),
@@ -366,7 +364,7 @@ describe("loginUser", () => {
   });
 });
 
-describe("getuserOrgs", () => {
+describe("getUserOrgs", () => {
   it("returns all orgs when user is global admin", async () => {
     // User with global admin org
     const user = { id: 1, orgs: [{ id: 10 }, { id: 20 }] };
@@ -389,8 +387,8 @@ describe("getuserOrgs", () => {
     jest.spyOn(helpers, "requireUserSession").mockResolvedValue(user as never);
 
     let result: Partial<Organisation>[] = [];
-    if (typeof getuserOrgs === "function") {
-      result = (await getuserOrgs(
+    if (typeof getUserOrgs === "function") {
+      result = (await getUserOrgs(
         {},
         {},
         context,
@@ -420,8 +418,8 @@ describe("getuserOrgs", () => {
     jest.spyOn(helpers, "requireUserSession").mockResolvedValue(user as never);
 
     let result: Partial<Organisation>[] = [];
-    if (typeof getuserOrgs === "function") {
-      result = (await getuserOrgs(
+    if (typeof getUserOrgs === "function") {
+      result = (await getUserOrgs(
         {},
         {},
         context,
@@ -431,66 +429,6 @@ describe("getuserOrgs", () => {
 
     expect(result).toEqual([{ id: 20, name: "Org B" }]);
     expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("getUsers", () => {
-  it("returns mapped users for valid orgId", async () => {
-    mockDb.bods_user.findMany.mockResolvedValue([
-      {
-        id: 1,
-        username: "user1@dft.gov.uk",
-        first_name: "User",
-        last_name: "One",
-      },
-      {
-        id: 2,
-        username: "user2@otherdomain.com",
-        first_name: "User",
-        last_name: "Two",
-      },
-    ] as never);
-
-    const args = { orgId: 10 };
-    let result: User[] | null = null;
-    if (typeof getUsers === "function") {
-      result = (await getUsers(
-        {},
-        args,
-        context,
-        {} as GraphQLResolveInfo,
-      )) as User[];
-    }
-    expect(result).not.toBeNull();
-    expect(result?.length).toBe(2);
-
-    expect(result?.[0]).toEqual({
-      id: "1",
-      username: "user1@dft.gov.uk",
-      firstName: "User",
-      lastName: "One",
-    });
-    expect(result?.[1]).toEqual({
-      id: "2",
-      username: "user2@otherdomain.com",
-      firstName: "User",
-      lastName: "Two",
-    });
-  });
-
-  it("returns empty array when no users found", async () => {
-    mockDb.bods_user.findMany.mockResolvedValue([] as never);
-    const args = { orgId: 10 };
-    let result: User[] | null = null;
-    if (typeof getUsers === "function") {
-      result = (await getUsers(
-        {},
-        args,
-        context,
-        {} as GraphQLResolveInfo,
-      )) as User[];
-    }
-    expect(result).toEqual([]);
   });
 });
 

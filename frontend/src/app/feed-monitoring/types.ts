@@ -1,4 +1,4 @@
-import { Pattern, Color } from "@amcharts/amcharts4/core";
+import { Color, Pattern } from "@amcharts/amcharts4/core";
 import { DateTime } from "luxon";
 
 export interface VehicleStatsViewModel {

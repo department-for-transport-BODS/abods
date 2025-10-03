@@ -5,7 +5,7 @@ import { LayoutModule } from "../layout/layout.module";
 import { SharedModule } from "../shared/shared.module";
 import { NotAuthorisedComponent } from "./not-authorised.component";
 
-fdescribe("NotAuthorisedComponent", () => {
+describe("NotAuthorisedComponent", () => {
   let spectator: Spectator<NotAuthorisedComponent>;
   const createComponent = createComponentFactory({
     component: NotAuthorisedComponent,
