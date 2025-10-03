@@ -2,14 +2,13 @@ import { fakeAsync, tick } from "@angular/core/testing";
 import { NavigationEnd, Router } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import {
-  SpectatorService,
   createServiceFactory,
+  SpectatorService,
   SpyObject,
 } from "@ngneat/spectator";
 import { GoogleTagManagerService } from "angular-google-tag-manager";
 import { MockProvider } from "ng-mocks";
 import { BehaviorSubject, firstValueFrom, of } from "rxjs";
-import { UserFragment } from "../../../generated/graphql";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { AnalyticsService } from "./analytics.service";
 import { CookiePolicyService } from "./cookie-policy.service";
@@ -39,11 +38,11 @@ describe("AnalyticsService", () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     setAnalyticsPolicy: () => {},
   };
-  const testUser1: UserFragment = {
+  const testUser1 = {
     username: "user1",
     id: "user-id-1",
   };
-  const testUser2: UserFragment = {
+  const testUser2 = {
     username: "user2",
     id: "user-id-2",
   };

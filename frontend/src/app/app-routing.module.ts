@@ -1,12 +1,12 @@
 import { NgModule } from "@angular/core";
-import { Routes, RouterModule, ExtraOptions } from "@angular/router";
+import { ExtraOptions, RouterModule, Routes } from "@angular/router";
+import { AccessibilityComponent } from "./accessibility/accessibility.component";
 import { LoginComponent } from "./authentication/login/login.component";
 import { CookiePolicyComponent } from "./cookie-policy/cookie-policy.component";
 import { NotAuthorisedComponent } from "./not-authorised/not-authorised.component";
 import { NotFoundComponent } from "./not-found/not-found.component";
 import { PrivacyPolicyComponent } from "./privacy-policy/privacy-policy.component";
 import { HelpdeskResolver } from "./shared/resolvers/helpdesk.resolver";
-import { AccessibilityComponent } from "./accessibility/accessibility.component";
 
 const routerOptions: ExtraOptions = {
   anchorScrolling: "enabled",
@@ -54,13 +54,6 @@ const routes: Routes = [
     path: "dashboard",
     loadChildren: () =>
       import("./dashboard/dashboard.module").then((mod) => mod.DashboardModule),
-  },
-  {
-    path: "organisation",
-    loadChildren: () =>
-      import("./organisation/organisation.module").then(
-        (mod) => mod.OrganisationModule,
-      ),
   },
   {
     path: "on-time",

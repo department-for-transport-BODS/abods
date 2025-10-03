@@ -1,25 +1,20 @@
+import argon2 from "argon2";
+import { sendDistributionMetric } from "datadog-lambda-js";
+import { v4 as uuidv4 } from "uuid";
+import { executeQuery } from "../lib/dbKysely.js";
+import logger from "../logger.js";
+import { isLocal } from "../prismaClient.js";
 import {
-  AlertType,
-  AlertTypeEnum,
   FeatureFlag,
   LoginInfo,
   LoginResponse,
   Maybe,
   MutationResolvers,
-  MutationResponseType,
   Organisation,
   QueryResolvers,
   Resolvers,
-  UserType,
 } from "../types/generated.js";
-import { v4 as uuidv4 } from "uuid";
-import argon2 from "argon2";
-import logger from "../logger.js";
 import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
-import { PrismaClient } from "@prisma/client";
-import { sendDistributionMetric } from "datadog-lambda-js";
-import { isLocal } from "../prismaClient.js";
-import { executeQuery } from "../lib/dbKysely.js";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 export const accountTypes = {
@@ -32,43 +27,6 @@ export const accountTypes = {
 
 const supportUserEmailDomain = "@kpmg.co.uk";
 const dftUserEmailDomain = "@dft.gov.uk";
-// Summary: fetch all users
-export const getUsers: QueryResolvers["users"] = async (
-  _,
-  __,
-  context,
-): Promise<Maybe<UserType[]>> => {
-  const user = await requireUserSession(context);
-  try {
-    return await context.db.bods_user
-      .findMany({
-        where: {
-          userOrganisations: {
-            every: {
-              organisation_id: { in: user.orgs.map((org) => org.id) },
-            },
-          },
-        },
-        select: {
-          id: true,
-          username: true,
-          first_name: true,
-          last_name: true,
-        },
-      })
-      .then((x) =>
-        x.map((thisUser) => ({
-          id: String(thisUser.id),
-          username: thisUser.username,
-          firstName: thisUser.first_name,
-          lastName: thisUser.last_name,
-        })),
-      );
-  } catch (error) {
-    logger.error(error, "An error occurred when getting users");
-    return null;
-  }
-};
 
 export const getFeatureFlags = () => {
   const flags: FeatureFlag[] = [];
@@ -129,70 +87,6 @@ export const getUser: QueryResolvers["user"] = async (
     };
   } catch (error) {
     logger.error(error, "An error occurred when getting user info");
-    return null;
-  }
-};
-
-// Summary: fetch all user alerts
-export const getUserAlerts: QueryResolvers["userAlerts"] = async (
-  _,
-  args,
-  context,
-): Promise<Maybe<AlertType[]>> => {
-  const user = await requireUserSession(context);
-  try {
-    // fetch alerts ONLY if user is creator or recipient
-    const alerts = await context.db.alert.findMany({
-      where: {
-        OR: [
-          {
-            created_by: {
-              equals: user.id,
-            },
-          },
-          {
-            send_to: {
-              equals: user.id,
-            },
-          },
-        ],
-      },
-      include: {
-        created_by_user: true,
-        send_to_user: true,
-      },
-    });
-
-    if (!alerts) {
-      throw new Error("Alerts not found");
-    }
-
-    return alerts.map((alert) => {
-      return {
-        alertId: alert.id,
-        alertType: alert.alert?.trim() as AlertTypeEnum,
-        eventHysterisis: alert.event_hysterisis?.toNumber(),
-        eventThreshold: alert.event_threshold?.toNumber(),
-        createdBy: alert.created_by_user
-          ? {
-              id: String(alert.created_by_user.id),
-              username: alert.created_by_user.username,
-              firstName: alert.created_by_user.first_name,
-              lastName: alert.created_by_user.last_name,
-            }
-          : null,
-        sendTo: alert.send_to_user
-          ? {
-              id: String(alert.send_to_user.id),
-              username: alert.send_to_user.username,
-              firstName: alert.send_to_user.first_name,
-              lastName: alert.send_to_user.last_name,
-            }
-          : null,
-      };
-    });
-  } catch (error) {
-    logger.error(error, "An error occurred when getting user alerts");
     return null;
   }
 };
@@ -308,192 +202,7 @@ export const logoutUser: MutationResolvers["logout"] = async (
   }
 };
 
-export const getUserAlert: QueryResolvers["userAlert"] = async (
-  _,
-  args,
-  context,
-): Promise<Maybe<AlertType>> => {
-  const user = await requireUserSession(context);
-  try {
-    if (!args.alertId) {
-      throw new Error("Alert id required");
-    }
-
-    return getUserAlertFromDb(args.alertId, user.id, context.db);
-  } catch (error) {
-    logger.error(error, "An error occurred when getting user alert info");
-    return null;
-  }
-};
-
-async function getUserAlertFromDb(
-  alertId: string,
-  userId: number,
-  db: PrismaClient,
-) {
-  // fetch alert by id and ONLY if user is creator or recipient
-  const alert = await db.alert.findUnique({
-    where: {
-      id: alertId,
-      AND: {
-        OR: [
-          {
-            created_by: {
-              equals: userId,
-            },
-          },
-          {
-            send_to: {
-              equals: userId,
-            },
-          },
-        ],
-      },
-    },
-    include: {
-      created_by_user: true,
-      send_to_user: true,
-    },
-  });
-
-  if (!alert) {
-    throw new Error("Alert not found");
-  }
-
-  return {
-    alertId: alert.id,
-    alertType: alert.alert?.trim() as AlertTypeEnum,
-    eventHysterisis: alert.event_hysterisis?.toNumber(),
-    eventThreshold: alert.event_threshold?.toNumber(),
-    createdBy: alert.created_by_user
-      ? {
-          id: alert.created_by_user.id.toString(),
-          username: alert.created_by_user.username,
-          firstName: alert.created_by_user.first_name,
-          lastName: alert.created_by_user.last_name,
-        }
-      : null,
-    sendTo: alert.send_to_user
-      ? {
-          id: alert.send_to_user.id.toString(),
-          username: alert.send_to_user.username,
-          firstName: alert.send_to_user.first_name,
-          lastName: alert.send_to_user.last_name,
-        }
-      : null,
-  };
-}
-
-export const addUserAlert: MutationResolvers["addUserAlert"] = async (
-  _,
-  args,
-  context,
-): Promise<MutationResponseType> => {
-  const user = await requireUserSession(context);
-  try {
-    const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
-
-    // TODO: check if sendto user id is in one of the same organisations as created_by user
-    await context.db.alert.create({
-      data: {
-        alert: alertType,
-        event_hysterisis: eventHysterisis,
-        event_threshold: eventThreshold,
-        send_to: Number(sendTo.id),
-        created_by: user.id,
-      },
-    });
-
-    return {
-      error: null,
-      success: true,
-    };
-  } catch (error) {
-    logger.error(error, "An error occurred when adding user alert");
-    return {
-      error: error instanceof Error ? error.message : String(error),
-      success: false,
-    };
-  }
-};
-
-const updateUserAlert: MutationResolvers["updateUserAlert"] = async (
-  _,
-  args,
-  context,
-): Promise<MutationResponseType> => {
-  const user = await requireUserSession(context);
-  try {
-    const { alertType, eventHysterisis, eventThreshold, sendTo } = args.payload;
-
-    if (!args.alertId) {
-      throw new Error("AlertId is required");
-    }
-
-    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
-
-    if (!alert) {
-      throw new Error("Alert not found");
-    }
-
-    await context.db.alert.update({
-      where: {
-        id: alert.alertId,
-      },
-      data: {
-        alert: alertType,
-        event_hysterisis: eventHysterisis,
-        event_threshold: eventThreshold,
-        send_to: sendTo ? Number(sendTo.id) : null,
-      },
-    });
-
-    return {
-      error: null,
-      success: true,
-    };
-  } catch (error) {
-    logger.error(error, "An error occurred when updating user alert");
-    return {
-      error: error instanceof Error ? error.message : String(error),
-      success: false,
-    };
-  }
-};
-
-export const deleteUserAlert: MutationResolvers["deleteUserAlert"] = async (
-  _,
-  args,
-  context,
-): Promise<MutationResponseType> => {
-  const user = await requireUserSession(context);
-  try {
-    if (!args.alertId) {
-      throw new Error("AlertId is required");
-    }
-
-    const alert = await getUserAlertFromDb(args.alertId, user.id, context.db);
-
-    if (alert) {
-      await context.db.alert.delete({ where: { id: args.alertId } });
-    } else {
-      throw "Not Authorized";
-    }
-
-    return {
-      error: null,
-      success: true,
-    };
-  } catch (error) {
-    logger.error(error, "An error occurred when deleting user alert");
-    return {
-      error: error instanceof Error ? error.message : String(error),
-      success: false,
-    };
-  }
-};
-
-export const getuserOrgs: QueryResolvers["userOrgs"] = async (
+export const getUserOrgs: QueryResolvers["userOrgs"] = async (
   _,
   __,
   context,
@@ -524,17 +233,11 @@ export const getuserOrgs: QueryResolvers["userOrgs"] = async (
 const userResolvers: Resolvers = {
   Query: {
     user: getUser,
-    users: getUsers,
-    userAlerts: getUserAlerts,
-    userAlert: getUserAlert,
-    userOrgs: getuserOrgs,
+    userOrgs: getUserOrgs,
   },
   Mutation: {
     login: loginUser,
     logout: logoutUser,
-    addUserAlert: addUserAlert,
-    updateUserAlert: updateUserAlert,
-    deleteUserAlert: deleteUserAlert,
   },
 };
 

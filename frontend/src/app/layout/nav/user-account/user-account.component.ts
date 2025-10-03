@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
-import { AuthenticationService } from "src/app/authentication/authentication.service";
 import { NgxTippyService } from "ngx-tippy-wrapper";
-import { NgxSmartModalService } from "ngx-smart-modal";
+import { AuthenticationService } from "src/app/authentication/authentication.service";
 
 @Component({
   selector: "app-user-account",
@@ -13,15 +12,10 @@ export class UserAccountComponent {
   constructor(
     private authService: AuthenticationService,
     public tippyService: NgxTippyService,
-    private ngxSmartModalService: NgxSmartModalService,
   ) {}
 
   logout(event: Event) {
     event.preventDefault();
     this.authService.logout();
-  }
-
-  openModal(): void {
-    this.ngxSmartModalService.getModal("inviteUserFromNav").open();
   }
 }
