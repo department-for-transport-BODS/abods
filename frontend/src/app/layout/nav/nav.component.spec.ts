@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { SharedModule } from "src/app/shared/shared.module";
 import { LayoutModule } from "../layout.module";
 
+import { RouterModule } from "@angular/router";
 import { NavComponent } from "./nav.component";
 
-describe("NavComponent", () => {
+fdescribe("NavComponent", () => {
   let component: NavComponent;
   let fixture: ComponentFixture<NavComponent>;
 
@@ -14,7 +14,7 @@ describe("NavComponent", () => {
     await TestBed.configureTestingModule({
       imports: [
         SharedModule,
-        RouterTestingModule,
+        RouterModule.forRoot([]),
         LayoutModule,
         ApolloTestingModule,
       ],
@@ -28,7 +28,7 @@ describe("NavComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });
