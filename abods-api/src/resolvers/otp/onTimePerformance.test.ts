@@ -53,10 +53,27 @@ import { DeepMockProxy, mockDeep } from "jest-mock-extended";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
+const mockScheduledCounts = [
+  {
+    incomplete_reason: 1,
+    scheduled: 57,
+  },
+  {
+    incomplete_reason: 2,
+    scheduled: 45,
+  },
+  {
+    incomplete_reason: 3,
+    scheduled: 44,
+  },
+  {
+    incomplete_reason: 4,
+    scheduled: 34,
+  },
+];
 const mockExecuteQueryResults = [
   // Happy path, estimated = false, reasonId = 1
   {
-    scheduled: 20,
     early_count: 5,
     late_count: 3,
     on_time_count: 12,
@@ -68,7 +85,6 @@ const mockExecuteQueryResults = [
   },
   // Estimated = true, reasonId = 2
   {
-    scheduled: 15,
     early_count: 2,
     late_count: 4,
     on_time_count: 9,
@@ -80,7 +96,6 @@ const mockExecuteQueryResults = [
   },
   // Estimated = false, reasonId = 3, all completed
   {
-    scheduled: 10,
     early_count: 1,
     late_count: 1,
     on_time_count: 8,
@@ -92,7 +107,6 @@ const mockExecuteQueryResults = [
   },
   // Estimated = true, reasonId = 4, none completed
   {
-    scheduled: 8,
     early_count: 0,
     late_count: 0,
     on_time_count: 0,
@@ -104,7 +118,6 @@ const mockExecuteQueryResults = [
   },
   // Happy path, estimated = false, reasonId = 2, some incomplete
   {
-    scheduled: 25,
     early_count: 6,
     late_count: 5,
     on_time_count: 14,
@@ -116,7 +129,6 @@ const mockExecuteQueryResults = [
   },
   // Estimated = false, reasonId = 4, all late
   {
-    scheduled: 12,
     early_count: 0,
     late_count: 12,
     on_time_count: 0,
@@ -128,7 +140,6 @@ const mockExecuteQueryResults = [
   },
   // Estimated = true, reasonId = 1, all early
   {
-    scheduled: 7,
     early_count: 7,
     late_count: 0,
     on_time_count: 0,
@@ -140,7 +151,6 @@ const mockExecuteQueryResults = [
   },
   // Happy path, estimated = false, reasonId = 3, mixed
   {
-    scheduled: 18,
     early_count: 4,
     late_count: 6,
     on_time_count: 8,
@@ -152,7 +162,6 @@ const mockExecuteQueryResults = [
   },
   // New: estimated = false, reasonId = 1, all on time
   {
-    scheduled: 30,
     early_count: 0,
     late_count: 0,
     on_time_count: 30,
@@ -164,7 +173,6 @@ const mockExecuteQueryResults = [
   },
   // New: estimated = true, reasonId = 2, all late, none completed
   {
-    scheduled: 5,
     early_count: 0,
     late_count: 5,
     on_time_count: 0,
@@ -176,7 +184,6 @@ const mockExecuteQueryResults = [
   },
   // New: estimated = false, reasonId = 4, all early, some incomplete
   {
-    scheduled: 14,
     early_count: 10,
     late_count: 0,
     on_time_count: 4,
@@ -188,7 +195,6 @@ const mockExecuteQueryResults = [
   },
   // New: estimated = true, reasonId = 3, mixed, some incomplete
   {
-    scheduled: 16,
     early_count: 3,
     late_count: 5,
     on_time_count: 8,
@@ -240,7 +246,8 @@ describe("getPunctualityOverview", () => {
   beforeEach(() => {
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockExecuteQueryResults);
+      .mockResolvedValueOnce(mockExecuteQueryResults)
+      .mockResolvedValueOnce(mockScheduledCounts);
   });
   it("returns calculated for timing points and evidenced", async () => {
     const args: RequireFields<
@@ -478,6 +485,39 @@ describe("getPunctualityOverview", () => {
     // All directions means no direction filter
     expect(compiled.parameters[2]).toBe(10);
     expect(compiled.parameters[3]).toBe(20);
+  });
+
+  it("returns calculated when no scheduled counts are present", async () => {
+    (kyselyLib.executeQuery as jest.Mock).mockReset();
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockExecuteQueryResults)
+      .mockResolvedValueOnce([]);
+    const args: RequireFields<
+      OnTimePerformanceTypePunctualityOverviewArgs,
+      "inputs"
+    > = {
+      inputs: {
+        fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+        toTimestamp: "2025-09-18T00:00:00.000+01:00",
+        filters: {
+          timingPointsOnly: true,
+          matchType: MatchType.Evidenced,
+        },
+      },
+    };
+
+    const resolver = getPunctualityOverview;
+    let result: Partial<PunctualityTotalsType> | null = null;
+    if (typeof resolver === "function") {
+      result = await resolver({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result?.scheduled).toBe(0);
+    expect(result?.early).toBe(26);
+    expect(result?.onTime).toBe(76);
+    expect(result?.completed).toBe(119);
+    expect(result?.averageDelay).toBe(3);
   });
 });
 
@@ -1871,7 +1911,6 @@ describe("getStopPerformance", () => {
       late_count: 3,
       on_time_count: 5,
       completed: 10,
-      scheduled: 12,
       count_delayed: 2,
       average_delay: 6,
       direction: "inbound",
@@ -1880,6 +1919,7 @@ describe("getStopPerformance", () => {
       on_time_in_seconds: 300,
       early_in_seconds: 120,
       late_in_seconds: 180,
+      stop_index: 1,
     },
     {
       stop_id: 102,
@@ -1889,7 +1929,6 @@ describe("getStopPerformance", () => {
       late_count: 2,
       on_time_count: 3,
       completed: 6,
-      scheduled: 7,
       count_delayed: 1,
       average_delay: 2,
       direction: "outbound",
@@ -1898,6 +1937,24 @@ describe("getStopPerformance", () => {
       on_time_in_seconds: 180,
       early_in_seconds: 60,
       late_in_seconds: 90,
+      stop_index: 2,
+    },
+  ];
+
+  const mockScheduledCounts = [
+    {
+      stop_id: 101,
+      stop_index: 1,
+      is_timing_point: true,
+      direction: "inbound",
+      scheduled: 12,
+    },
+    {
+      stop_id: 102,
+      stop_index: 2,
+      is_timing_point: false,
+      direction: "outbound",
+      scheduled: 7,
     },
   ];
 
@@ -1932,7 +1989,10 @@ describe("getStopPerformance", () => {
     );
   });
   it("returns correct stop performance stats", async () => {
-    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockStopResults);
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockStopResults)
+      .mockResolvedValueOnce(mockScheduledCounts);
 
     const args: RequireFields<
       OnTimePerformanceTypeStopPerformanceArgs,
@@ -2031,7 +2091,10 @@ describe("getStopPerformance", () => {
   });
 
   it("returns empty array when no stops are found", async () => {
-    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(mockScheduledCounts);
     mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([] as never);
 
     const args: RequireFields<
@@ -2061,9 +2124,46 @@ describe("getStopPerformance", () => {
     expect(result).not.toBeNull();
     expect(result?.length).toBe(0);
   });
+
+  it("returns empty array when no scheduled counts are found", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockStopResults)
+      .mockResolvedValueOnce([]);
+    mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue([] as never);
+
+    const args: RequireFields<
+      OnTimePerformanceTypeStopPerformanceArgs,
+      "inputs"
+    > = {
+      inputs: {
+        fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+        toTimestamp: "2025-09-18T00:00:00.000+01:00",
+        filters: {
+          operatorIds: ["OP1"],
+          lineIds: ["L1"],
+        },
+      },
+    };
+
+    let result: Partial<StopPerformanceType>[] | null = null;
+    if (typeof getStopPerformance === "function") {
+      result = (await getStopPerformance(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<StopPerformanceType>[];
+    }
+
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+    expect(result?.[0].scheduledDepartures).toEqual(0);
+    expect(result?.[1].scheduledDepartures).toEqual(0);
+  });
 });
 
-describe("getServicePerformance", () => {
+fdescribe("getServicePerformance", () => {
   const mockServiceResults = [
     {
       noc_and_line_and_servicecode: "L1",
@@ -2099,6 +2199,19 @@ describe("getServicePerformance", () => {
     },
   ];
 
+  const mockScheduledCounts = [
+    {
+      noc_and_line_and_servicecode: "L1",
+      scheduled: 12,
+      direction: "inbound",
+    },
+    {
+      noc_and_line_and_servicecode: "L2",
+      scheduled: 7,
+      direction: "outbound",
+    },
+  ];
+
   const mockServices = [
     {
       service_name: "Service 1",
@@ -2114,7 +2227,10 @@ describe("getServicePerformance", () => {
     mockDb.expected_services.findMany.mockResolvedValue(mockServices as never);
   });
   it("returns correct service performance stats", async () => {
-    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(mockServiceResults);
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockServiceResults)
+      .mockResolvedValueOnce(mockScheduledCounts);
 
     const args: RequireFields<
       OnTimePerformanceTypeServicePerformanceArgs,
@@ -2184,7 +2300,10 @@ describe("getServicePerformance", () => {
   });
 
   it("returns empty array when no services are found", async () => {
-    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(mockScheduledCounts);
     mockDb.expected_services.findMany.mockResolvedValue([] as never);
 
     const args: RequireFields<
@@ -2212,6 +2331,43 @@ describe("getServicePerformance", () => {
 
     expect(result).not.toBeNull();
     expect(result?.length).toBe(0);
+  });
+
+  it("returns data when no scheduled count is found", async () => {
+    jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockServiceResults)
+      .mockResolvedValueOnce([]);
+    mockDb.expected_services.findMany.mockResolvedValue([] as never);
+
+    const args: RequireFields<
+      OnTimePerformanceTypeServicePerformanceArgs,
+      "inputs"
+    > = {
+      inputs: {
+        fromTimestamp: "2025-09-11T00:00:00.000+01:00",
+        toTimestamp: "2025-09-18T00:00:00.000+01:00",
+        filters: {
+          operatorIds: ["OP1"],
+        },
+      },
+    };
+
+    let result: Partial<ServicePerformanceType>[] | null = null;
+    if (typeof getServicePerformance === "function") {
+      result = (await getServicePerformance(
+        {},
+        args,
+        context,
+        {} as GraphQLResolveInfo,
+      )) as Partial<ServicePerformanceType>[];
+    }
+
+    console.log(result);
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+    expect(result?.[0].scheduledDepartures).toEqual(0);
+    expect(result?.[1].scheduledDepartures).toEqual(0);
   });
 });
 

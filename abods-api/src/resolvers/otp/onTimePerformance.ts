@@ -167,6 +167,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         executeQuery(scheduledCount),
       ]);
 
+      console.log({ results, scheduledCounts });
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
         early: 0,
@@ -213,8 +214,8 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
             averageDelayed ??
             0 + Number(result.average_delay) / Number(result.count_delayed);
         }
-        incompleteReasons[reasonId] ??= 0;
-        incompleteReasons[reasonId] += scheduled - completed;
+        incompleteReasons[reasonId] ??= scheduled;
+        incompleteReasons[reasonId] -= completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
       returnVal.averageDelay = averageDelayed;
@@ -1152,7 +1153,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             .selectFrom(aliasedScheduleCountQuery)
             .select([
               "noc_and_line_and_servicecode",
-              "direction",
               context.kysely.fn.sum("scheduled").as("scheduled"),
             ])
             .select((eb) => [
