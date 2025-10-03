@@ -16,7 +16,7 @@ import { FeedMonitoringService } from "../feed-monitoring.service";
 import { DatenavItemComponent } from "./datenav/datenav-item/datenav-item.component";
 import { FeedHistoryComponent } from "./feed-history.component";
 
-fdescribe("FeedHistoryComponent", () => {
+describe("FeedHistoryComponent", () => {
   let spectator: SpectatorRouting<FeedHistoryComponent>;
 
   const createComponent = createRoutingFactory({

@@ -5,7 +5,7 @@ import { FeedMonitoringModule } from "../../feed-monitoring.module";
 import { DatenavItemComponent } from "./datenav-item/datenav-item.component";
 import { DatenavComponent } from "./datenav.component";
 
-fdescribe("DatenavComponent", () => {
+describe("DatenavComponent", () => {
   let spectator: Spectator<DatenavComponent>;
 
   const createComponent = createComponentFactory({
