@@ -12,10 +12,9 @@ import { of } from "rxjs";
 import { SharedModule } from "src/app/shared/shared.module";
 import { dateTimeCloseEnoughToEqualityMatcher } from "src/test-support/equality";
 import { fakeEvent } from "src/test-support/faker";
-import { AlertTypeEnum } from "../../../generated/graphql";
 import { FeedMonitoringModule } from "../feed-monitoring.module";
 import { FeedMonitoringService } from "../feed-monitoring.service";
-import { AlertMode } from "./alert-list-view-model";
+import { AlertMode, AlertType } from "./alert-list-view-model";
 import { AlertListComponent } from "./alert-list.component";
 import { AlertComponent } from "./alert/alert.component";
 
@@ -89,7 +88,7 @@ describe("AlertListComponent", () => {
           message,
           start,
           end,
-          type: AlertTypeEnum.VehicleCountDisparityEvent,
+          type: AlertType.VehicleCountDisparityEvent,
         }),
       ]),
     );
@@ -103,7 +102,7 @@ describe("AlertListComponent", () => {
     spectator.component.mode = AlertMode.LiveStatus;
 
     service.fetchAlerts.and.callFake((_, start, end) =>
-      of([fakeEvent({ type: AlertTypeEnum.FeedUnavailableEvent, start, end })]),
+      of([fakeEvent({ type: AlertType.FeedUnavailableEvent, start, end })]),
     );
 
     spectator.detectChanges();
@@ -117,7 +116,7 @@ describe("AlertListComponent", () => {
     service.fetchAlerts.and.callFake((_, start, end) =>
       of([
         fakeEvent({
-          type: AlertTypeEnum.VehicleCountDisparityEvent,
+          type: AlertType.VehicleCountDisparityEvent,
           start,
           end,
         }),
@@ -137,7 +136,7 @@ describe("AlertListComponent", () => {
     service.fetchAlerts.and.callFake((_, start, end) =>
       of([
         fakeEvent({
-          type: AlertTypeEnum.FeedAvailableEvent,
+          type: AlertType.FeedAvailableEvent,
           start,
           end,
         }),

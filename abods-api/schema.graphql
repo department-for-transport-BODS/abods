@@ -5,10 +5,7 @@ scalar JSON
 
 type Query {
   user: LoginInfo
-  users: [UserType!]
   apiInfo: ApiInfoType
-  userAlerts: [AlertType!]
-  userAlert(alertId: String!): AlertType
   operatorFeedMonitoring(operatorId: String!): OperatorFeedMonitoring
   operatorsFeedMonitoring(
     filterBy: OperatorFilterInput
@@ -277,12 +274,6 @@ type ServiceInfoType {
 type Mutation {
   login(username: String!, password: String!): LoginResponse
   logout: Boolean!
-  addUserAlert(payload: AlertInputType!): MutationResponseType!
-  updateUserAlert(
-    alertId: String!
-    payload: AlertInputType!
-  ): MutationResponseType!
-  deleteUserAlert(alertId: String!): MutationResponseType!
   createCorridor(payload: CorridorInputType!): MutationResponseType!
   updateCorridor(inputs: CorridorUpdateInputType!): MutationResponseType!
   deleteCorridor(corridorId: Int!): MutationResponseType!
@@ -295,12 +286,6 @@ type Mutation {
   ): MutationResponseType!
   verifyResetPasswordToken(uid: String!, token: String!): Boolean!
   signUp(payload: SignupPayloadType!): MutationResponseType!
-  updateUser(
-    username: String!
-    payload: UserUpdateInput!
-  ): UserUpdateResponseType!
-  deleteUser(username: String!): MutationResponseType!
-  inviteUser(payload: InvitationInput!): InvitationResponseType!
 }
 
 input SignupPayloadType {
@@ -485,67 +470,14 @@ type LiveStatsType {
   updateFrequency: Int
 }
 
-input UserUpdateInput {
-  firstName: String!
-  lastName: String!
-}
-
-type UserUpdateResponseType {
-  error: String
-  user: UserType
-}
-
 type MutationResponseType {
   error: String
   success: Boolean!
 }
 
-type InvitationResponseType {
-  error: String
-  invitation: InvitationType
-}
-
 type InvitationType {
   accepted: Boolean!
   email: String!
-}
-
-input InvitationInput {
-  email: String!
-  organisation: OrganisationReferenceInput!
-}
-
-input OrganisationReferenceInput {
-  id: String!
-}
-
-input AlertReferenceInput {
-  id: String!
-}
-
-input AlertInputType {
-  alertType: AlertTypeEnum!
-  sendTo: AlertReferenceInput!
-  eventHysterisis: Int
-  eventThreshold: Int
-}
-
-type AlertType {
-  alertId: String!
-  alertType: AlertTypeEnum
-  createdBy: UserType
-  eventHysterisis: Int
-  eventThreshold: Int
-  sendTo: UserType
-}
-
-enum AlertTypeEnum {
-  FeedComplianceFailure
-  FeedFailure
-  VehicleCountDisparity
-  VehicleCountDisparityEvent
-  FeedUnavailableEvent
-  FeedAvailableEvent
 }
 
 type ApiInfoType {
@@ -572,13 +504,6 @@ enum FeatureFlag {
   DataMonitoring
   StopAnalysis
   Distances
-}
-
-type UserType {
-  id: String!
-  username: String!
-  firstName: String
-  lastName: String
 }
 
 type OnTimePerformanceType {
