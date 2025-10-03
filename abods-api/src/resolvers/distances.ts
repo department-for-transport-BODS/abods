@@ -181,7 +181,7 @@ export const getDistancesDropdowns: QueryResolvers["distancesDropdowns"] =
     };
   };
 
-const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
+export const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
   _,
   args,
   context,
@@ -230,7 +230,7 @@ const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
     ])
     .distinct();
 
-  return query.execute();
+  return executeQuery(query);
 };
 
 const distancesResolver: Resolvers = {
