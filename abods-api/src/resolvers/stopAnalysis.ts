@@ -12,13 +12,13 @@ import { userSelectedDateAsUtc } from "../lib/dayjs.js";
 import { getDayOfWeekNumbers } from "../lib/utils.js";
 import { executeQuery } from "../lib/dbKysely.js";
 
-const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
+export const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   _,
   args,
   context,
 ): Promise<StopStatistics[]> => {
   const user = await requireUserSession(context);
-  const summaryStart = Date.now();
+
   let naptanQuery = context.kysely
     .selectFrom("naptan_stoppoint_latlong as n")
     .innerJoin("naptan_locality as l", "n.locality_id", "l.gazetteer_id")
@@ -45,8 +45,8 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
     );
   }
 
-  const naptanStops = await naptanQuery.execute();
-  console.log(`naptanQuery took ${Date.now() - summaryStart} ms`);
+  const naptanStops = await executeQuery(naptanQuery);
+
   const stopInfoMap = new Map<number, (typeof naptanStops)[0]>();
   for (const stop of naptanStops) {
     stopInfoMap.set(stop.stop_id, stop);
@@ -185,9 +185,6 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
           >`SUM(${eb.ref("t.avg_time_difference")}  * ${eb.ref("t.early_count")}) FILTER (WHERE ${eb.ref("t.early_count")} > 0) * 60`.as(
             "earlyInSeconds",
           ),
-          sql<number>`SUM(${eb.ref("t.scheduled")}) FILTER (WHERE ${eb.ref("t.estimated")} = false)`.as(
-            "scheduledDepartures",
-          ),
         ])
         .select((eb) => [
           eb
@@ -205,6 +202,7 @@ const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
         executeQuery(summaryPromise),
         executeQuery(scheduledCountPromise),
       ]);
+
       return { summaryResults, scheduledCountResults };
     }),
   );
