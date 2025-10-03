@@ -26,6 +26,7 @@ const jestConfig: JestConfigWithTsJest = {
     "!src/types/**",
     "!src/scripts/**",
     "!src/kysely*.ts",
+    "!src/resolvers/index.ts",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
