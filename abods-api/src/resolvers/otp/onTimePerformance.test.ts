@@ -2363,7 +2363,6 @@ fdescribe("getServicePerformance", () => {
       )) as Partial<ServicePerformanceType>[];
     }
 
-    console.log(result);
     expect(result).not.toBeNull();
     expect(result?.length).toBe(2);
     expect(result?.[0].scheduledDepartures).toEqual(0);
