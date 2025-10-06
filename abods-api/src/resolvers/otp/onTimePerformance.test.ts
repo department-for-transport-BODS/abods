@@ -2163,7 +2163,7 @@ describe("getStopPerformance", () => {
   });
 });
 
-fdescribe("getServicePerformance", () => {
+describe("getServicePerformance", () => {
   const mockServiceResults = [
     {
       noc_and_line_and_servicecode: "L1",

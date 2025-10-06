@@ -319,51 +319,88 @@ describe("getStopAnalysis", () => {
     expect(executeQueryMock).toHaveBeenCalledTimes(9);
   });
 
-  it.skip("includes default start and end time if not provided", async () => {
-    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
-    const args = {
-      inputs: {
-        fromTimestamp: "2025-09-01T00:00:00.000+01:00",
-        toTimestamp: "2025-09-10T00:00:00.000+01:00",
-        dayOfWeekFlags: {
-          monday: true,
-          tuesday: false,
-          wednesday: true,
-          thursday: false,
-          friday: false,
-          saturday: false,
-          sunday: false,
-        },
-        operatorIds: ["OP1"],
-        lineIds: [],
-        adminAreaIds: [],
-        matchType: MatchType.Evidenced,
-        // startTime and endTime omitted
-        boundingBox: {
-          minLatitude: 51.0,
-          maxLatitude: 52.0,
-          minLongitude: -1.0,
-          maxLongitude: 0.0,
-        },
-      },
-    };
+  it("returns stop statistics for multiple weeks", async () => {
+    const executeQueryMock = jest
+      .spyOn(kyselyLib, "executeQuery")
+      .mockResolvedValueOnce(mockNaptanStops) // naptanQuery
+      .mockResolvedValueOnce(mockSummaryResults) // summaryPromise
+      .mockResolvedValueOnce(mockScheduledCounts)
+      .mockResolvedValueOnce(mockSummaryResults) // summaryPromise
+      .mockResolvedValueOnce(mockScheduledCounts); // scheduledCountPromise
 
+    let result: Partial<StopStatistics>[] | null = null;
     if (typeof getStopAnalysis === "function") {
-      const _ = await getStopAnalysis(
+      result = (await getStopAnalysis(
         {},
-        args,
+        {
+          ...args,
+          inputs: {
+            ...args.inputs,
+            fromTimestamp: "2025-09-01T00:00:00.000+01:00",
+            toTimestamp: "2025-09-10T00:00:00.000+01:00",
+          },
+        },
         context,
         {} as GraphQLResolveInfo,
-      );
+      )) as StopStatistics[];
     }
 
-    const queryArg = (kyselyLib.executeQuery as unknown as jest.Mock).mock
-      .calls[0] as SelectQueryBuilder<DB, never, unknown>[];
-    const compiled = queryArg[0].compile();
+    expect(executeQueryMock).toHaveBeenCalledTimes(5);
 
-    // Should use 0 and 23 as default hour range
-    expect(compiled.sql).toContain("EXTRACT(HOUR");
-    expect(compiled.parameters).toContain(0);
-    expect(compiled.parameters).toContain(23);
+    // Check result shape
+    expect(result).toHaveLength(2);
+    expect(result?.[0]).toMatchObject({
+      stop_id: 101,
+      timingPoint: true,
+      early: 4,
+      late: 6,
+      onTime: 10,
+      completedDepartures: 20,
+      totalDelay: 40,
+      countDelayed: 4,
+      averageDelay: 12,
+      averageScheduled: 1.5,
+      averageScheduledTimingPoint: 1.2,
+      averageActual: 2.5,
+      averageActualTimingPoint: 2.2,
+      onTimeInSeconds: 120,
+      lateInSeconds: 120,
+      earlyInSeconds: 120,
+      direction: "inbound",
+      scheduledDepartures: 24,
+      stopName: "Stop A",
+      localityName: "Loc1",
+      adminAreaName: "Area1",
+      atcoCode: "A",
+      latitude: 1.1,
+      longitude: 2.2,
+    });
+
+    expect(result?.[1]).toMatchObject({
+      stop_id: 102,
+      timingPoint: false,
+      early: 2,
+      late: 4,
+      onTime: 6,
+      completedDepartures: 12,
+      totalDelay: 24,
+      countDelayed: 2,
+      averageDelay: 4,
+      averageScheduled: 1.2,
+      averageScheduledTimingPoint: 1.1,
+      averageActual: 2.2,
+      averageActualTimingPoint: 2.1,
+      onTimeInSeconds: 120,
+      lateInSeconds: 90,
+      earlyInSeconds: 120,
+      direction: "outbound",
+      scheduledDepartures: 14,
+      stopName: "Stop B",
+      localityName: "Loc2",
+      adminAreaName: "Area2",
+      atcoCode: "B",
+      latitude: 3.3,
+      longitude: 4.4,
+    });
   });
 });

@@ -167,7 +167,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         executeQuery(scheduledCount),
       ]);
 
-      console.log({ results, scheduledCounts });
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
         early: 0,
