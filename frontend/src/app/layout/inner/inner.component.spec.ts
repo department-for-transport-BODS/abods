@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { InnerComponent } from "./inner.component";
 
-fdescribe("InnerComponent", () => {
+describe("InnerComponent", () => {
   let component: InnerComponent;
   let fixture: ComponentFixture<InnerComponent>;
 
