@@ -6,7 +6,7 @@ import { LayoutModule } from "../layout.module";
 import { RouterModule } from "@angular/router";
 import { NavComponent } from "./nav.component";
 
-fdescribe("NavComponent", () => {
+describe("NavComponent", () => {
   let component: NavComponent;
   let fixture: ComponentFixture<NavComponent>;
 
