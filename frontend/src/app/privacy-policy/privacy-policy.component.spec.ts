@@ -4,7 +4,7 @@ import { LayoutModule } from "../layout/layout.module";
 import { SharedModule } from "../shared/shared.module";
 import { PrivacyPolicyComponent } from "./privacy-policy.component";
 
-fdescribe("PrivacyPolicyComponent", () => {
+describe("PrivacyPolicyComponent", () => {
   let component: PrivacyPolicyComponent;
   let fixture: ComponentFixture<PrivacyPolicyComponent>;
 

@@ -34,7 +34,7 @@ const stopListFactory = (numberOfStops: number) => {
   return stops;
 };
 
-describe("StopSearchListComponent", () => {
+fdescribe("StopSearchListComponent", () => {
   let spectator: Spectator<StopSearchListComponent>;
   let stops: FeatureCollection<Point, CorridorStop>;
   const numberOfStops = 220;

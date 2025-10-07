@@ -1,9 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { ReactiveFormsModule } from "@angular/forms";
 import {
-  Spectator,
-  createComponentFactory,
   byText,
+  createComponentFactory,
+  Spectator,
   SpyObject,
 } from "@ngneat/spectator";
 import { SvgIconRegistryService } from "angular-svg-icon";
@@ -15,12 +15,12 @@ import { SharedModule } from "../../shared/shared.module";
 import { OnTimeService, PerformanceParams } from "../on-time.service";
 import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
 import {
+  OTP_THRESHOLD_MODAL_ID,
   OtpThresholdModalComponent,
   OtpThresholdModalData,
-  OTP_THRESHOLD_MODAL_ID,
 } from "./otp-threshold-modal.component";
 
-describe("OtpThresholdModalComponent", () => {
+fdescribe("OtpThresholdModalComponent", () => {
   let spectator: Spectator<OtpThresholdModalComponent>;
   let component: OtpThresholdModalComponent;
   let ngxSmartModalService: NgxSmartModalService;
@@ -59,14 +59,14 @@ describe("OtpThresholdModalComponent", () => {
     spectator.detectChanges();
   });
 
-  it("should create the component", () => {
-    expect(component).toBeTruthy();
+  it("should create the component", async () => {
+    await expect(component).toBeTruthy();
   });
 
-  it("should show default percentages on modal opening", () => {
-    expect(component.tableData.onTime.defaultValue).toEqual(0.7);
-    expect(component.tableData.early.defaultValue).toEqual(0.1);
-    expect(component.tableData.late.defaultValue).toEqual(0.2);
+  it("should show default percentages on modal opening", async () => {
+    await expect(component.tableData.onTime.defaultValue).toEqual(0.7);
+    await expect(component.tableData.early.defaultValue).toEqual(0.1);
+    await expect(component.tableData.late.defaultValue).toEqual(0.2);
     expect(spectator.query(byText("70%"))).toBeVisible();
     expect(spectator.query(byText("20%"))).toBeVisible();
     expect(spectator.query(byText("10%"))).toBeVisible();
@@ -88,7 +88,7 @@ describe("OtpThresholdModalComponent", () => {
     expect(onTimeService.fetchOnTimeStats).toHaveBeenCalledWith(expected);
   });
 
-  it("should display comparison values", () => {
+  it("should display comparison values", async () => {
     onTimeService.fetchOnTimeStats.and.returnValue(
       of({
         early: 35,
@@ -104,9 +104,9 @@ describe("OtpThresholdModalComponent", () => {
     spectator.click(byText("Compare"));
     spectator.detectChanges();
 
-    expect(component.tableData.onTime.comparisonValue).toEqual(0.6);
-    expect(component.tableData.early.comparisonValue).toEqual(0.35);
-    expect(component.tableData.late.comparisonValue).toEqual(0.05);
+    await expect(component.tableData.onTime.comparisonValue).toEqual(0.6);
+    await expect(component.tableData.early.comparisonValue).toEqual(0.35);
+    await expect(component.tableData.late.comparisonValue).toEqual(0.05);
     expect(spectator.query(byText("60%"))).toBeVisible();
     expect(spectator.query(byText("35%"))).toBeVisible();
     expect(spectator.query(byText("5%"))).toBeVisible();
