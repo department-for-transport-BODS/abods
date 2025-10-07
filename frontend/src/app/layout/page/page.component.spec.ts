@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { RouterModule } from "@angular/router";
 import { PageComponent } from "./page.component";
 
-fdescribe("PageComponent", () => {
+describe("PageComponent", () => {
   let component: PageComponent;
   let fixture: ComponentFixture<PageComponent>;
 

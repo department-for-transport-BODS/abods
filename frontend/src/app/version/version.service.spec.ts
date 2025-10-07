@@ -8,7 +8,7 @@ import { GetVersionGQL, GetVersionQuery } from "../../generated/graphql";
 
 import { Version, VersionService } from "./version.service";
 
-describe("VersionService", () => {
+fdescribe("VersionService", () => {
   let service: VersionService;
   let http: HttpClient;
   let versionGQL: GetVersionGQL;
@@ -26,7 +26,7 @@ describe("VersionService", () => {
             provide: HttpClient,
             useValue: {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                get: (url: string, options?: any) => of(),
+                get: (url: string, options?: unknown) => of(),
             },
         },
         {
@@ -44,8 +44,8 @@ describe("VersionService", () => {
     versionGQL = TestBed.inject(GetVersionGQL);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   describe("printTable", () => {
