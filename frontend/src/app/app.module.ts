@@ -1,32 +1,31 @@
-import { BrowserModule } from "@angular/platform-browser";
 import { NgModule, inject, provideAppInitializer } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
 
-import { AppRoutingModule } from "./app-routing.module";
-import { AppComponent } from "./app.component";
-import { GraphQLModule } from "./graphql.module";
+import { PercentPipe, ViewportScroller } from "@angular/common";
 import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from "@angular/common/http";
-import { SharedModule } from "./shared/shared.module";
-import { LayoutModule } from "./layout/layout.module";
-import { ConfigService } from "./config/config.service";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { AuthenticationModule } from "./authentication/authentication.module";
-import { PercentPipe, ViewportScroller } from "@angular/common";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { Event, EventType, Router, Scroll } from "@angular/router";
 import { filter, pairwise } from "rxjs/operators";
-import { UserModule } from "./user/user.module";
+import { AppRoutingModule } from "./app-routing.module";
+import { AppComponent } from "./app.component";
+import { AuthenticationModule } from "./authentication/authentication.module";
+import { ConfigService } from "./config/config.service";
+import { GraphQLModule } from "./graphql.module";
+import { LayoutModule } from "./layout/layout.module";
+import { SharedModule } from "./shared/shared.module";
 
-import { NotFoundComponent } from "./not-found/not-found.component";
-import { NotAuthorisedComponent } from "./not-authorised/not-authorised.component";
-import { MAPBOX_API_KEY, NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { GoogleTagManagerModule } from "angular-google-tag-manager";
-import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
-import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
 import { CookieService } from "ngx-cookie-service";
+import { MAPBOX_API_KEY, NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { AccessibilityModule } from "./accessibility/accessibility.module";
+import { CookiePolicyModule } from "./cookie-policy/cookie-policy.module";
+import { NotAuthorisedComponent } from "./not-authorised/not-authorised.component";
+import { NotFoundComponent } from "./not-found/not-found.component";
+import { PrivacyPolicyModule } from "./privacy-policy/privacy-policy.module";
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent, NotAuthorisedComponent],
@@ -40,7 +39,6 @@ import { AccessibilityModule } from "./accessibility/accessibility.module";
     FormsModule,
     ReactiveFormsModule,
     AuthenticationModule,
-    UserModule,
     AppRoutingModule,
     NgxMapboxGLModule,
     GoogleTagManagerModule,
