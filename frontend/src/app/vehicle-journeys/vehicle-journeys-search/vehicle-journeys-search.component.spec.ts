@@ -17,11 +17,8 @@ import { Observable, of, throwError } from "rxjs";
 import { VehicleJourneysSearchService } from "./vehicle-journeys-search.service";
 import { LuxonModule } from "luxon-angular";
 import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid/vehicle-journeys-grid.component";
-import { RouterTestingModule } from "@angular/router/testing";
 import { Journey, LineType, OperatorType } from "../../../generated/graphql";
-import { By } from "@angular/platform-browser";
-import { fakeAsync, flush, tick } from "@angular/core/testing";
-import { provideRouter, Router, RouterModule } from "@angular/router";
+import { RouterModule } from "@angular/router";
 
 fdescribe("VehicleJourneysSearchComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysSearchComponent>;
@@ -327,80 +324,80 @@ fdescribe("VehicleJourneysSearchComponent", () => {
     await expect(spectator.component.service.value).toEqual("LI4728");
   });
 
-  // it("should load journeys from route query params", async () => {
-  //   spectator.fixture.autoDetectChanges();
+  it("should load journeys from route query params", async () => {
+    spectator.fixture.autoDetectChanges();
 
-  //   spectator.setRouteQueryParam("date", "20220801T2300Z");
-  //   spectator.setRouteQueryParam("operator", "OP03");
-  //   spectator.setRouteQueryParam("service", "LI4728");
+    spectator.setRouteQueryParam("date", "20220801T2300Z");
+    spectator.setRouteQueryParam("operator", "OP03");
+    spectator.setRouteQueryParam("service", "LI4728");
 
-  //   await spectator.fixture.whenStable();
+    await spectator.fixture.whenStable();
 
-  //   expect(
-  //     spectator.query(byText("76: St Annes - Blackpool Town Centre")),
-  //   ).toBeVisible();
-  //   expect(spectator.query(byText("06:45"))).toBeVisible();
-  //   expect(spectator.query(byText("15:55"))).toBeVisible();
-  //   expect(
-  //     spectator.query(byText("76: Poulton-le-Fylde - St Annes")),
-  //   ).toBeVisible();
-  //   expect(spectator.query(byText("06:55"))).toBeVisible();
-  //   expect(
-  //     spectator.query(byText("76: Blackpool Town Centre - St Annes")),
-  //   ).toBeVisible();
-  //   expect(spectator.query(byText("07:28"))).toBeVisible();
-  //   expect(spectator.query(byText("15:38"))).toBeVisible();
-  // });
+    expect(
+      spectator.query(byText("76: St Annes - Blackpool Town Centre")),
+    ).toBeVisible();
+    expect(spectator.query(byText("06:45"))).toBeVisible();
+    expect(spectator.query(byText("15:55"))).toBeVisible();
+    expect(
+      spectator.query(byText("76: Poulton-le-Fylde - St Annes")),
+    ).toBeVisible();
+    expect(spectator.query(byText("06:55"))).toBeVisible();
+    expect(
+      spectator.query(byText("76: Blackpool Town Centre - St Annes")),
+    ).toBeVisible();
+    expect(spectator.query(byText("07:28"))).toBeVisible();
+    expect(spectator.query(byText("15:38"))).toBeVisible();
+  });
 
-  // it("should show no journeys found message", async () => {
-  //   spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
-  //     of([]),
-  //   );
+  it("should show no journeys found message", async () => {
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
+      of([]),
+    );
 
-  //   spectator.fixture.autoDetectChanges();
+    spectator.fixture.autoDetectChanges();
 
-  //   spectator.setRouteQueryParam("date", "20220801T2300Z");
-  //   spectator.setRouteQueryParam("operator", "OP03");
-  //   spectator.setRouteQueryParam("service", "LI4728");
+    spectator.setRouteQueryParam("date", "20220801T2300Z");
+    spectator.setRouteQueryParam("operator", "OP03");
+    spectator.setRouteQueryParam("service", "LI4728");
 
-  //   await spectator.fixture.whenStable();
+    await spectator.fixture.whenStable();
 
-  //   expect(spectator.query(byText("No journeys found"))).toBeVisible();
-  // });
+    expect(spectator.query(byText("No journeys found"))).toBeVisible();
+  });
 
-  // it("should show error message", async () => {
-  //   spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
-  //     throwError(() => "error"),
-  //   );
+  it("should show error message", async () => {
+    spyOn(vehicleJourneysSearchService, "fetchDayJourneys").and.returnValue(
+      throwError(() => "error"),
+    );
 
-  //   spectator.fixture.autoDetectChanges();
+    spectator.fixture.autoDetectChanges();
 
-  //   spectator.setRouteQueryParam("date", "20220801T2300Z");
-  //   spectator.setRouteQueryParam("operator", "OP03");
-  //   spectator.setRouteQueryParam("service", "LI4728");
+    spectator.setRouteQueryParam("date", "20220801T2300Z");
+    spectator.setRouteQueryParam("operator", "OP03");
+    spectator.setRouteQueryParam("service", "LI4728");
 
-  //   await spectator.fixture.whenStable();
+    await spectator.fixture.whenStable();
 
-  //   expect(
-  //     spectator.query(
-  //       byText(
-  //         "Sorry, there is a problem finding vehicle journeys. Please try again.",
-  //       ),
-  //     ),
-  //   ).toBeVisible();
-  // });
+    expect(
+      spectator.query(
+        byText(
+          "Sorry, there is a problem finding vehicle journeys. Please try again.",
+        ),
+      ),
+    ).toBeVisible();
+  });
 
-  // it("should accept enable service on date change", async () => {
-  //   await spectator.fixture.whenStable();
-  //   spectator.typeInElement("2024-10-24", byLabel("Date"));
-  //   spectator.typeInElement("Stagecoach", byLabel("Operator"));
-  //   spectator.click(byText("Stagecoach East (SCCM)"));
-  //   spectator.fixture.detectChanges();
+  it("should accept enable service on date change", async () => {
+    await spectator.fixture.whenStable();
+    spectator.typeInElement("2024-10-24", byLabel("Date"));
+    spectator.typeInElement("Stagecoach", byLabel("Operator"));
+    spectator.click(byText("Stagecoach East (SCCM)"));
+    spectator.fixture.detectChanges();
 
-  //   expect(spectator.component.form.get("operator")?.value).toEqual("OP02");
-  //   spectator.typeInElement("2024-10-23", byLabel("Date"));
-  //   spectator.fixture.detectChanges();
+    expect(spectator.component.form.get("operator")?.value).toEqual("OP02");
+    spectator.typeInElement("2024-10-23", byLabel("Date"));
+    spectator.fixture.detectChanges();
 
-  //   expect("#service").toBeVisible();
-  // });
+    expect("#service").toBeVisible();
+  });
 });
