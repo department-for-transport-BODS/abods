@@ -9,7 +9,7 @@ import {
 import { RouterModule } from "@angular/router";
 import { HeaderComponent } from "./header.component";
 
-fdescribe("HeaderComponent", () => {
+describe("HeaderComponent", () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
