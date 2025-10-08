@@ -6,7 +6,7 @@ import { LayoutModule } from "../../layout.module";
 import { RouterModule } from "@angular/router";
 import { UserAccountComponent } from "./user-account.component";
 
-fdescribe("UserAccountComponent", () => {
+describe("UserAccountComponent", () => {
   let component: UserAccountComponent;
   let fixture: ComponentFixture<UserAccountComponent>;
 

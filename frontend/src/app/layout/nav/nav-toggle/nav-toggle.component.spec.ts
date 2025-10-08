@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { NavToggleComponent } from "./nav-toggle.component";
 
-fdescribe("NavToggleComponent", () => {
+describe("NavToggleComponent", () => {
   let component: NavToggleComponent;
   let fixture: ComponentFixture<NavToggleComponent>;
 

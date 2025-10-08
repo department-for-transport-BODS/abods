@@ -443,12 +443,6 @@ export type HistoricalStatsType = {
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
-export type InvitationType = {
-  __typename?: 'InvitationType';
-  accepted: Scalars['Boolean']['output'];
-  email: Scalars['String']['output'];
-};
-
 export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
@@ -529,11 +523,7 @@ export type Mutation = {
   deleteCorridor: MutationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
-  requestResetPassword: MutationResponseType;
-  resetPassword: MutationResponseType;
-  signUp: MutationResponseType;
   updateCorridor: MutationResponseType;
-  verifyResetPasswordToken: Scalars['Boolean']['output'];
 };
 
 
@@ -553,32 +543,8 @@ export type MutationLoginArgs = {
 };
 
 
-export type MutationRequestResetPasswordArgs = {
-  email: Scalars['String']['input'];
-};
-
-
-export type MutationResetPasswordArgs = {
-  confirmPassword: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
-};
-
-
-export type MutationSignUpArgs = {
-  payload: SignupPayloadType;
-};
-
-
 export type MutationUpdateCorridorArgs = {
   inputs: CorridorUpdateInputType;
-};
-
-
-export type MutationVerifyResetPasswordTokenArgs = {
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
 };
 
 export type MutationResponseType = {
@@ -797,7 +763,6 @@ export type Query = {
   findJourneys: Array<Journey>;
   getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
-  invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
@@ -849,11 +814,6 @@ export type QueryFindJourneysArgs = {
 
 export type QueryGetServicePatternDistanceGeomArgs = {
   vehicleJourneyId: Scalars['ID']['input'];
-};
-
-
-export type QueryInvitationArgs = {
-  key: Scalars['String']['input'];
 };
 
 
@@ -990,13 +950,6 @@ export type ServicePunctualityType = {
 export type ServicePunctualityTypeTrendArgs = {
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type SignupPayloadType = {
-  firstName: Scalars['String']['input'];
-  key: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
 };
 
 export type Stop = {
@@ -1443,48 +1396,6 @@ export type StopAnalysisQueryVariables = Exact<{
 
 
 export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, averageDelay?: number | null, direction?: string | null, countDelayed?: number | null, averageScheduled?: number | null, averageScheduledTimingPoint?: number | null, averageActual?: number | null, averageActualTimingPoint?: number | null }> };
-
-export type RequestResetPasswordMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-
-export type RequestResetPasswordMutation = { __typename?: 'Mutation', requestResetPassword: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type ResetPasswordMutationVariables = Exact<{
-  uid: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  confirmPassword: Scalars['String']['input'];
-}>;
-
-
-export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type VerifyResetPasswordTokenMutationVariables = Exact<{
-  uid: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-}>;
-
-
-export type VerifyResetPasswordTokenMutation = { __typename?: 'Mutation', verifyResetPasswordToken: boolean };
-
-export type SignUpMutationVariables = Exact<{
-  key: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-}>;
-
-
-export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type InvitationQueryVariables = Exact<{
-  key: Scalars['String']['input'];
-}>;
-
-
-export type InvitationQuery = { __typename?: 'Query', invitation?: { __typename?: 'InvitationType', email: string, accepted: boolean } | null };
 
 export type JourneyQueryVariables = Exact<{
   groupId: Scalars['String']['input'];
@@ -2717,105 +2628,6 @@ export const StopAnalysisDocument = gql`
   })
   export class StopAnalysisGQL extends Apollo.Query<StopAnalysisQuery, StopAnalysisQueryVariables> {
     document = StopAnalysisDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const RequestResetPasswordDocument = gql`
-    mutation requestResetPassword($email: String!) {
-  requestResetPassword(email: $email) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class RequestResetPasswordGQL extends Apollo.Mutation<RequestResetPasswordMutation, RequestResetPasswordMutationVariables> {
-    document = RequestResetPasswordDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const ResetPasswordDocument = gql`
-    mutation resetPassword($uid: String!, $token: String!, $password: String!, $confirmPassword: String!) {
-  resetPassword(
-    uid: $uid
-    token: $token
-    password: $password
-    confirmPassword: $confirmPassword
-  ) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ResetPasswordGQL extends Apollo.Mutation<ResetPasswordMutation, ResetPasswordMutationVariables> {
-    document = ResetPasswordDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const VerifyResetPasswordTokenDocument = gql`
-    mutation verifyResetPasswordToken($uid: String!, $token: String!) {
-  verifyResetPasswordToken(uid: $uid, token: $token)
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class VerifyResetPasswordTokenGQL extends Apollo.Mutation<VerifyResetPasswordTokenMutation, VerifyResetPasswordTokenMutationVariables> {
-    document = VerifyResetPasswordTokenDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const SignUpDocument = gql`
-    mutation signUp($key: String!, $password: String!, $firstName: String!, $lastName: String!) {
-  signUp(
-    payload: {key: $key, password: $password, firstName: $firstName, lastName: $lastName}
-  ) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class SignUpGQL extends Apollo.Mutation<SignUpMutation, SignUpMutationVariables> {
-    document = SignUpDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const InvitationDocument = gql`
-    query Invitation($key: String!) {
-  invitation(key: $key) {
-    email
-    accepted
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class InvitationGQL extends Apollo.Query<InvitationQuery, InvitationQueryVariables> {
-    document = InvitationDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
