@@ -43,7 +43,7 @@ fdescribe("OtpThresholdModalComponent", () => {
   const createComponent = createComponentFactory({
     component: OtpThresholdModalComponent,
     declarations: [OtpThresholdFormComponent],
-    mocks: [OnTimeService, SvgIconRegistryService, HttpClient],
+    mocks: [SvgIconRegistryService, HttpClient, OnTimeService],
     providers: [ConfigService],
     imports: [NgxSmartModalModule, SharedModule, ReactiveFormsModule],
   });
@@ -53,6 +53,17 @@ fdescribe("OtpThresholdModalComponent", () => {
     component = spectator.component;
     ngxSmartModalService = spectator.inject(NgxSmartModalService);
     onTimeService = spectator.inject(OnTimeService);
+    onTimeService.fetchOnTimeStats.and.returnValue(
+      of({
+        completed: 10,
+        early: 10,
+        incomplete: "5",
+        late: 20,
+        onTime: 6,
+        scheduled: 40,
+        noData: 7,
+      }),
+    );
     Settings.now = () => 1630494000000; // 2021-09-01T12:00:00
     ngxSmartModalService.setModalData(modalData, OTP_THRESHOLD_MODAL_ID, true);
     ngxSmartModalService.open(OTP_THRESHOLD_MODAL_ID);

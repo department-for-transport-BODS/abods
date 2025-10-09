@@ -1,19 +1,15 @@
 import { provideHttpClient } from "@angular/common/http";
-import { EventEmitter } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import {
-  Spectator,
-  SpyObject,
   byText,
   createComponentFactory,
+  Spectator,
+  SpyObject,
 } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { DateTime, Settings } from "luxon";
-import {
-  NgxSmartModalComponent,
-  NgxSmartModalModule,
-  NgxSmartModalService,
-} from "ngx-smart-modal";
+import { MockComponents } from "ng-mocks";
+import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { SharedModule } from "../../shared/shared.module";
 import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
@@ -43,7 +39,9 @@ fdescribe("OtpThresholdModalLinkComponent", () => {
 
   const createComponent = createComponentFactory({
     component: OtpThresholdModalLinkComponent,
-    declarations: [OtpThresholdModalComponent, OtpThresholdFormComponent],
+    declarations: [
+      MockComponents(OtpThresholdModalComponent, OtpThresholdFormComponent),
+    ],
     imports: [
       ApolloTestingModule,
       SharedModule,
@@ -56,24 +54,7 @@ fdescribe("OtpThresholdModalLinkComponent", () => {
   });
 
   beforeEach(() => {
-    const mockModal = {
-      onOpen: new EventEmitter<NgxSmartModalComponent>(),
-      onAnyCloseEvent: new EventEmitter<void>(),
-      getData: jasmine.createSpy("getData").and.returnValue(modalData),
-    } as unknown as NgxSmartModalComponent;
-
-    spectator = createComponent({
-      providers: [
-        {
-          provide: NgxSmartModalService,
-          useValue: {
-            getModal: jasmine.createSpy("getModal").and.returnValue(mockModal),
-            setModalData: jasmine.createSpy("setModalData"),
-            open: jasmine.createSpy("open"),
-          },
-        },
-      ],
-    });
+    spectator = createComponent();
     component = spectator.component;
     modalService = spectator.inject(NgxSmartModalService);
     Settings.now = () => 1630494000000; // 2021-09-01T12:00:00

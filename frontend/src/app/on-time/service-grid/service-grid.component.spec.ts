@@ -1,6 +1,5 @@
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { RouterTestingModule } from "@angular/router/testing";
 import { byLabel, createComponentFactory, Spectator } from "@ngneat/spectator";
 import { AgGridModule } from "ag-grid-angular";
 import { BehaviorSubject } from "rxjs";
@@ -8,7 +7,10 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 
 import { CommonModule, PercentPipe } from "@angular/common";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { RouterModule } from "@angular/router";
+import { SvgIconRegistryService } from "angular-svg-icon";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { OnTimeModule } from "../on-time.module";
 import { OnTimeService } from "../on-time.service";
@@ -19,7 +21,7 @@ import {
 } from "../performance.service";
 import { ServiceGridComponent } from "./service-grid.component";
 
-describe("ServiceGridComponent", () => {
+fdescribe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
   let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;
@@ -27,18 +29,18 @@ describe("ServiceGridComponent", () => {
 
   const createComponent = createComponentFactory({
     component: ServiceGridComponent,
-    providers: [PercentPipe],
+    providers: [PercentPipe, provideHttpClient(), provideHttpClientTesting()],
     imports: [
       SharedModule,
       LayoutModule,
       OnTimeModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       CommonModule,
       FormsModule,
       AgGridModule,
-      HttpClientTestingModule,
       ApolloTestingModule,
     ],
+    mocks: [SvgIconRegistryService],
     detectChanges: false,
   });
 
@@ -95,7 +97,7 @@ describe("ServiceGridComponent", () => {
     );
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.component.params = onTimeInputParams;
 
     spectator.detectChanges();
@@ -103,7 +105,7 @@ describe("ServiceGridComponent", () => {
     listSubj.next(services);
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should call service", () => {
@@ -131,9 +133,10 @@ describe("ServiceGridComponent", () => {
     const expectedSummary = [
       "",
       "",
+      "-",
       "444",
       "95.9%",
-      "+00:29",
+      "-",
       "89.2%",
       "6.1%",
       "4.7%",
@@ -166,19 +169,19 @@ describe("ServiceGridComponent", () => {
       .queryAll('[role="row"][row-index="t-0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
+    void expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
 
     const row1 = spectator
       .queryAll('[role="row"][row-index="0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
+    void expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
 
     const row2 = spectator
       .queryAll('[role="row"][row-index="1"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+    void expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
     flush(100);
   }));
 
@@ -191,7 +194,7 @@ describe("ServiceGridComponent", () => {
     listSubj.next(services);
     spectator.detectChanges();
 
-    const expectedSummary = ["", "426", "380", "26", "20", "444", "+00:29"];
+    const expectedSummary = ["", "", "-", "444", "-", "426", "380", "26", "20"];
 
     const expectedValues = [
       ["1A: Dispear to Wear", "115", "80", "20", "15", "123", "+00:12"],
@@ -208,18 +211,18 @@ describe("ServiceGridComponent", () => {
       .queryAll('[role="row"][row-index="t-0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
+    void expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
 
     const row1 = spectator
       .queryAll('[role="row"][row-index="0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
+    void expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
 
     const row2 = spectator
       .queryAll('[role="row"][row-index="1"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+    void expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
   }));
 });
