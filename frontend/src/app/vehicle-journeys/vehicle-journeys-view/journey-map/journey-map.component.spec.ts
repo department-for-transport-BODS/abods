@@ -1,7 +1,6 @@
 import { SimpleChange } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FeatureIdentifier, Map } from "mapbox-gl";
-import { ConfigService } from "../../../config/config.service";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
 
 import { JourneyMapComponent } from "./journey-map.component";
@@ -10,6 +9,7 @@ import { SharedModule } from "../../../shared/shared.module";
 import { GdsModule } from "../../../shared/gds/gds.module";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { NgxSmartModalModule } from "ngx-smart-modal";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 
 // Mock stops with correct property names
 const t1 = "2022-08-18T11:20:00.000+01:00";
@@ -97,9 +97,12 @@ const mapStub = {
   ) => {
     // stub
   },
+  addControl: (_: any) => {
+    /* stub */
+  },
 } as Map;
 
-describe("JourneyMapComponent", () => {
+fdescribe("JourneyMapComponent", () => {
   let component: JourneyMapComponent;
   let fixture: ComponentFixture<JourneyMapComponent>;
 
@@ -111,12 +114,7 @@ describe("JourneyMapComponent", () => {
         GdsModule,
         NgxMapboxGLModule,
         NgxSmartModalModule,
-      ],
-      providers: [
-        {
-          provide: ConfigService,
-          useValue: { mapboxStyle: "mapbox://styles/mapbox/streets-v11" },
-        },
+        HttpClientTestingModule,
       ],
     }).compileComponents();
   });

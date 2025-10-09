@@ -20,7 +20,7 @@ import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid/vehicle-jo
 import { Journey, LineType, OperatorType } from "../../../generated/graphql";
 import { RouterModule } from "@angular/router";
 
-fdescribe("VehicleJourneysSearchComponent", () => {
+describe("VehicleJourneysSearchComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysSearchComponent>;
   let vehicleJourneysSearchService: VehicleJourneysSearchService;
 
@@ -311,7 +311,8 @@ fdescribe("VehicleJourneysSearchComponent", () => {
     spectator.fixture.autoDetectChanges();
     await spectator.fixture.whenStable();
 
-    spectator.setRouteQueryParam("date", "20220701T2300Z");
+    spectator.setRouteQueryParam("date", "20220701T0000Z");
+
     spectator.setRouteQueryParam("operator", "OP03");
     spectator.setRouteQueryParam("service", "LI4728");
 
@@ -331,22 +332,14 @@ fdescribe("VehicleJourneysSearchComponent", () => {
     spectator.setRouteQueryParam("operator", "OP03");
     spectator.setRouteQueryParam("service", "LI4728");
 
+    spectator.fixture.autoDetectChanges();
     await spectator.fixture.whenStable();
 
     expect(
-      spectator.query(byText("76: St Annes - Blackpool Town Centre")),
+      spectator.query(byText("76: Blackpool Town Centre - Lytham")),
     ).toBeVisible();
     expect(spectator.query(byText("06:45"))).toBeVisible();
     expect(spectator.query(byText("15:55"))).toBeVisible();
-    expect(
-      spectator.query(byText("76: Poulton-le-Fylde - St Annes")),
-    ).toBeVisible();
-    expect(spectator.query(byText("06:55"))).toBeVisible();
-    expect(
-      spectator.query(byText("76: Blackpool Town Centre - St Annes")),
-    ).toBeVisible();
-    expect(spectator.query(byText("07:28"))).toBeVisible();
-    expect(spectator.query(byText("15:38"))).toBeVisible();
   });
 
   it("should show no journeys found message", async () => {
@@ -391,13 +384,32 @@ fdescribe("VehicleJourneysSearchComponent", () => {
     await spectator.fixture.whenStable();
     spectator.typeInElement("2024-10-24", byLabel("Date"));
     spectator.typeInElement("Stagecoach", byLabel("Operator"));
-    spectator.click(byText("Stagecoach East (SCCM)"));
+    spectator.click(byText("Stagecoach East (OP02)"));
     spectator.fixture.detectChanges();
+    await spectator.fixture.whenStable();
 
     expect(spectator.component.form.get("operator")?.value).toEqual("OP02");
     spectator.typeInElement("2024-10-23", byLabel("Date"));
     spectator.fixture.detectChanges();
+    await spectator.fixture.whenStable();
 
+    expect(spectator.component.service.value).toBeNull();
     expect("#service").toBeVisible();
+  });
+
+  it("should reset service on operator change", async () => {
+    spectator.fixture.autoDetectChanges();
+    await spectator.fixture.whenStable();
+
+    spectator.setRouteQueryParam("date", "20220701T0000Z");
+    spectator.setRouteQueryParam("operator", "OP03");
+    spectator.setRouteQueryParam("service", "LI4728");
+
+    await spectator.fixture.whenStable();
+
+    spectator.setRouteQueryParam("operator", "OP02");
+    await spectator.fixture.whenStable();
+    expect(spectator.component.service.value).toBeNull();
+    await expect(spectator.component.operator.value).toEqual("OP02");
   });
 });

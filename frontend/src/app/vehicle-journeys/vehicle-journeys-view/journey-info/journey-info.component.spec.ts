@@ -17,7 +17,7 @@ describe("JourneyInfoComponent", () => {
   });
   const mockInfo: Journey = {
     groupId: "GP1",
-    operatorName: "OP01",
+    operatorName: "Operator",
     operatorNoc: "OP01",
     serviceName: "SN1",
     serviceNumber: "1",
@@ -45,22 +45,26 @@ describe("JourneyInfoComponent", () => {
   describe("journeyInfo", () => {
     beforeEach(() => {
       component.journey = mockInfo;
+      component.vehicleRef = "ABC-123";
       component.loading = false;
       fixture.detectChanges();
       debugEl = fixture.debugElement.query(By.css(".journey-info"));
     });
 
     it("should show operator name and noc", () => {
-      expect(debugEl.nativeElement.innerHTML).toContain("Operator 1 (NO1)");
+      expect(debugEl.nativeElement.innerHTML).toContain("Operator (OP01)");
     });
 
     it("should show service pattern name", () => {
-      expect(debugEl.nativeElement.innerHTML).toContain("Bristol to Bath");
+      expect(debugEl.nativeElement.innerHTML).toContain("SN1");
     });
 
     it("should date and time", () => {
+      const londonTime = startTime.setZone("Europe/London", {
+        keepLocalTime: false,
+      });
       expect(debugEl.nativeElement.innerHTML).toContain(
-        startTime.toFormat("dd MMM yyyy, hh:mm"),
+        londonTime.toFormat("dd MMM yyyy, hh:mm"),
       );
     });
 

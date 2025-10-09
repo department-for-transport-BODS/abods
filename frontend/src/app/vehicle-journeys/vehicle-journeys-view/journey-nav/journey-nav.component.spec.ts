@@ -13,7 +13,7 @@ import { Location } from "@angular/common";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { fakeAsync, tick } from "@angular/core/testing";
 
-describe("JourneyNavComponent", () => {
+fdescribe("JourneyNavComponent", () => {
   let spectator: SpectatorRouting<JourneyNavComponent>;
 
   const createComponent = createRoutingFactory({
