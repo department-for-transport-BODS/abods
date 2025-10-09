@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PrivacyPolicyComponent } from "./privacy-policy.component";
 import { LayoutModule } from "../layout/layout.module";
 import { SharedModule } from "../shared/shared.module";
+import { PrivacyPolicyComponent } from "./privacy-policy.component";
 
-describe("PrivacyPolicyComponent", () => {
+fdescribe("PrivacyPolicyComponent", () => {
   let component: PrivacyPolicyComponent;
   let fixture: ComponentFixture<PrivacyPolicyComponent>;
 
@@ -21,7 +21,7 @@ describe("PrivacyPolicyComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

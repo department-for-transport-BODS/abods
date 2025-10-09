@@ -16,7 +16,6 @@ type Query {
   headwayMetrics: HeadwayMetricsType
   serviceInfo(serviceId: String!): ServiceInfoType
   corridor: CorridorNamespace
-  invitation(key: String!): InvitationType
   events(operatorId: String!, start: DateTime!, end: DateTime!): EventResponse
   eventStats(
     operatorId: String!
@@ -277,22 +276,6 @@ type Mutation {
   createCorridor(payload: CorridorInputType!): MutationResponseType!
   updateCorridor(inputs: CorridorUpdateInputType!): MutationResponseType!
   deleteCorridor(corridorId: Int!): MutationResponseType!
-  requestResetPassword(email: String!): MutationResponseType!
-  resetPassword(
-    uid: String!
-    token: String!
-    password: String!
-    confirmPassword: String!
-  ): MutationResponseType!
-  verifyResetPasswordToken(uid: String!, token: String!): Boolean!
-  signUp(payload: SignupPayloadType!): MutationResponseType!
-}
-
-input SignupPayloadType {
-  key: String!
-  password: String!
-  firstName: String!
-  lastName: String!
 }
 
 type HeadwayMetricsType {
@@ -473,11 +456,6 @@ type LiveStatsType {
 type MutationResponseType {
   error: String
   success: Boolean!
-}
-
-type InvitationType {
-  accepted: Boolean!
-  email: String!
 }
 
 type ApiInfoType {
