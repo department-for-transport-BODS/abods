@@ -146,6 +146,7 @@ export const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
 
       const summaryPromise = summaryQuery
         .select(["t.stop_id", "t.is_timing_point as timingPoint"])
+        .groupBy(["t.stop_id", "t.is_timing_point", "t.direction"])
         .select((eb) => [
           eb.fn.sum<number>("t.early_count").as("early"),
           eb.fn.sum<number>("t.late_count").as("late"),
