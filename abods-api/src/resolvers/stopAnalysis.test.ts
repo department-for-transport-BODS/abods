@@ -184,12 +184,14 @@ describe("getStopAnalysis", () => {
       .calls[1] as SelectQueryBuilder<DB, never, unknown>[];
     const summaryCompiled = summaryQueryArg[0].compile();
     expect(summaryCompiled.sql).toBeDefined();
+    expect(summaryCompiled.sql).toContain('group by "t"."stop_id"');
 
     // 3rd call: scheduledCountPromise
     const scheduledQueryArg = (executeQueryMock as jest.Mock).mock
       .calls[2] as SelectQueryBuilder<DB, never, unknown>[];
     const scheduledCompiled = scheduledQueryArg[0].compile();
     expect(scheduledCompiled.sql).toBeDefined();
+    expect(scheduledCompiled.sql).toContain('group by "t"."stop_id"');
 
     // Check result shape
     expect(result).toHaveLength(2);
