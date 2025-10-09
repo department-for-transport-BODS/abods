@@ -5,7 +5,7 @@ import { SharedModule } from "../../../shared/shared.module";
 import { Journey } from "../../../../generated/graphql";
 import { RouterModule } from "@angular/router";
 
-fdescribe("VehicleJourneysGridComponent", () => {
+describe("VehicleJourneysGridComponent", () => {
   let spectator: Spectator<VehicleJourneysGridComponent>;
   let component: VehicleJourneysGridComponent;
 

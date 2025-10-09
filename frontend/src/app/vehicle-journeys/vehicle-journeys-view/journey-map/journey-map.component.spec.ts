@@ -102,7 +102,7 @@ const mapStub = {
   },
 } as Map;
 
-fdescribe("JourneyMapComponent", () => {
+describe("JourneyMapComponent", () => {
   let component: JourneyMapComponent;
   let fixture: ComponentFixture<JourneyMapComponent>;
 
