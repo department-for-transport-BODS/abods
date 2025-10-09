@@ -35,7 +35,7 @@ const mockView = {
   avls: [],
 };
 
-fdescribe("OtpStatsComponent", () => {
+describe("OtpStatsComponent", () => {
   let spectator: Spectator<OtpStatsComponent>;
   let component: OtpStatsComponent;
 
