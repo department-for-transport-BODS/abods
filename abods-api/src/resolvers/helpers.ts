@@ -103,14 +103,15 @@ export function getHeader(
   name: string,
 ): string | string[] | undefined {
   return (
-    headers[name.toLowerCase()] || headers[name.toUpperCase()] || headers[name]
+    headers[name.toLowerCase()] ?? headers[name.toUpperCase()] ?? headers[name]
   );
 }
 
-const parseCookie = (str: string | string[]) =>
+export const parseCookie = (str: string | string[]) =>
   (typeof str === "string" ? str.split(";") : str)
     .map((v) => v.split("="))
-    .reduce((acc: Record<string, string>, v) => {
+    .reduce((acc: Record<string, string>, v: string[] | undefined) => {
+      if (!v?.[0]) return acc;
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
       return acc;
     }, {});

@@ -4,7 +4,7 @@ import { DynamicPanelComponentHostDirective } from "./dynamic-panel-component-ho
 describe("DynamicPanelComponentHostDirective", () => {
   it("should create an instance", () => {
     const directive = new DynamicPanelComponentHostDirective(
-      <ViewContainerRef>{},
+      {} as ViewContainerRef,
     );
 
     expect(directive).toBeTruthy();

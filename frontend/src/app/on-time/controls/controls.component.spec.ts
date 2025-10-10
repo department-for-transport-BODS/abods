@@ -15,6 +15,7 @@ import { LayoutModule } from "../../layout/layout.module";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
 import { DateTime } from "luxon";
 import objectContaining = jasmine.objectContaining;
+import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
 
 describe("ControlsComponent", () => {
   let spectator: SpectatorRouting<ControlsComponent>;
@@ -23,7 +24,11 @@ describe("ControlsComponent", () => {
 
   const createComponent = createRoutingFactory({
     component: ControlsComponent,
-    declarations: [FiltersComponent, ChartNoDataWrapperComponent],
+    declarations: [
+      FiltersComponent,
+      ChartNoDataWrapperComponent,
+      FilterChipsComponent,
+    ],
     imports: [
       LayoutModule,
       SharedModule,
@@ -60,7 +65,7 @@ describe("ControlsComponent", () => {
     expect(filters?.timingPointsOnly).toBeTrue();
   });
 
-  it("should allow the user to switch between all stops and timing points only", async () => {
+  it("should allow the user to switch between all stops and timing points only", () => {
     spyOn(spectator.router, "navigate");
     spectator.setRouteParam("nocCode", "OP01");
 
@@ -177,8 +182,8 @@ describe("ControlsComponent", () => {
     spectator.detectChanges();
 
     expect(component.params.emit).toHaveBeenCalledWith({
-      fromTimestamp: from,
-      toTimestamp: to,
+      fromTimestamp: from.toISO(),
+      toTimestamp: to.toISO(),
       filters: {
         operatorIds: [operatorId],
         timingPointsOnly: true,

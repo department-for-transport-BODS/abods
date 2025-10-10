@@ -1,3 +1,18 @@
+/* eslint-disable jasmine/new-line-before-expect */
+import { HttpClientTestingModule } from "@angular/common/http/testing";
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnInit,
+  Output,
+} from "@angular/core";
+import { fakeAsync, flush, tick } from "@angular/core/testing";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Data } from "@angular/router";
+import { RouterTestingModule } from "@angular/router/testing";
 import {
   byLabel,
   byText,
@@ -6,39 +21,33 @@ import {
   createSpyObject,
   SpectatorRouting,
 } from "@ngneat/spectator";
-import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
-import { RouterTestingModule } from "@angular/router/testing";
-import { CorridorsService } from "../corridors.service";
-import { of } from "rxjs";
-import { fakeAsync, flush, tick } from "@angular/core/testing";
-import { ViewCorridorComponent } from "./view-corridor.component";
-import { DateTime, Settings } from "luxon";
-import { CorridorGranularity, MatchType } from "../../../generated/graphql";
-import { ApolloTestingModule } from "apollo-angular/testing";
-import { AgGridModule } from "ag-grid-angular";
-import { LuxonModule } from "luxon-angular";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { NgxTippyModule } from "ngx-tippy-wrapper";
-import {} from "@angular/common/http/testing";
-import { SegmentSelectorComponent } from "../segment-selector/segment-selector.component";
-import { CorridorNotFoundView } from "../corridor-not-found-view.model";
-import { Custom } from "src/app/shared/components/date-range/date-range.types";
-import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
-import { MapComponent } from "ngx-mapbox-gl";
-import {
-  EventEmitter,
-  Input,
-  Output,
-  OnInit,
-  Component,
-  forwardRef,
-  ChangeDetectorRef,
-} from "@angular/core";
 import bbox from "@turf/bbox";
-import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { lineString } from "@turf/helpers";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { AgGridModule } from "ag-grid-angular";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { DateTime, Settings } from "luxon";
+import { LuxonModule } from "luxon-angular";
+import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
+import { MapComponent, NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { of } from "rxjs";
+import { Custom } from "src/app/shared/components/date-range/date-range.types";
+import {
+  CorridorGranularity,
+  MatchType,
+  RouteType,
+} from "../../../generated/graphql";
+import { LayoutModule } from "../../layout/layout.module";
+import { GdsModule } from "../../shared/gds/gds.module";
+import { SharedModule } from "../../shared/shared.module";
+import { CorridorNotFoundView } from "../corridor-not-found-view.model";
+import { CorridorsService } from "../corridors.service";
+import { SegmentSelectorComponent } from "../segment-selector/segment-selector.component";
 import { CorridorStatsViewParams } from "../types";
+import { BoxPlotChartComponent } from "./box-plot-chart/box-plot-chart.component";
+import { ViewCorridorComponent } from "./view-corridor.component";
 
 const corridor = {
   id: 123,
@@ -111,7 +120,7 @@ describe("ViewCorridorComponent", () => {
   let spectator: SpectatorRouting<ViewCorridorComponent>;
   let service: CorridorsService;
 
-  const createComponent = (data?: any) =>
+  const createComponent = (data?: Data) =>
     createRoutingFactory({
       component: ViewCorridorComponent,
       data: data,
@@ -126,8 +135,11 @@ describe("ViewCorridorComponent", () => {
         RouterTestingModule,
         AgGridModule,
         HttpClientTestingModule,
+        NgxSmartModalModule,
+        GdsModule,
+        NgxMapboxGLModule,
       ],
-      declarations: [SegmentSelectorComponent, StubMapComponent],
+      declarations: [SegmentSelectorComponent, BoxPlotChartComponent],
       providers: [CorridorsService],
       detectChanges: true,
     });
@@ -367,7 +379,7 @@ describe("ViewCorridorComponent", () => {
         '[role="row"][row-index="0"] [role="gridcell"][col-id="0"]',
       )?.textContent;
 
-      expect(cellContent).toEqual("53: Sheffield to Mansfield");
+      void expect(cellContent).toEqual("53: Sheffield to Mansfield");
       flush();
     }));
 
@@ -385,7 +397,7 @@ describe("ViewCorridorComponent", () => {
               fromStop: "ST1234",
               toStop: "ST2345",
               distance: 360,
-              routeValidity: "VALID",
+              routeValidity: RouteType.Valid,
               linkRoute: "[[1, 0], [2, 0], [3, 0]]",
             },
           ],
@@ -398,7 +410,7 @@ describe("ViewCorridorComponent", () => {
 
       const result = spectator.component.setCoordinates(corridor.stops);
 
-      expect(result).toEqual([
+      void expect(result).toEqual([
         [1, 0],
         [2, 0],
         [3, 0],
@@ -409,7 +421,7 @@ describe("ViewCorridorComponent", () => {
     it("should set coordinates if service link data unavailable", () => {
       const result = spectator.component.setCoordinates(corridor.stops);
 
-      expect(result).toEqual([
+      void expect(result).toEqual([
         [0, 50],
         [0, 50],
       ]);
@@ -423,7 +435,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map?.mapInstance.setFeatureState,
+        spectator.component.map!.mapInstance.setFeatureState,
       ).toHaveBeenCalledWith(
         {
           source: "corridor-line",
@@ -453,7 +465,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.onSelectSegment([]);
       spectator.detectChanges();
 
-      expect(spectator.component.selectAll).toEqual(true);
+      void expect(spectator.component.selectAll).toEqual(true);
     }));
 
     it("clearMapSelectedState() should clear map selected state", () => {
@@ -464,7 +476,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map?.mapInstance.removeFeatureState,
+        spectator.component.map!.mapInstance.removeFeatureState,
       ).toHaveBeenCalledWith(
         {
           source: "corridor-line",
@@ -478,7 +490,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.clearMapSelectedState([]);
       spectator.detectChanges();
 
-      expect(spectator.component.selectAll).toEqual(false);
+      void expect(spectator.component.selectAll).toEqual(false);
     });
 
     it("setMapHoverState() should set map hover state", () => {
@@ -487,7 +499,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map?.mapInstance.setFeatureState,
+        spectator.component.map!.mapInstance.setFeatureState,
       ).toHaveBeenCalledWith(
         { source: "corridor-stops", id: corridor.stops[0].stopId },
         { hover: true },
@@ -500,7 +512,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map?.mapInstance.removeFeatureState,
+        spectator.component.map!.mapInstance.removeFeatureState,
       ).toHaveBeenCalledWith(
         { source: "corridor-stops", id: corridor.stops[0].stopId },
         "hover",
@@ -526,7 +538,7 @@ describe("ViewCorridorComponent", () => {
 
       spectator.component.centreMapBounds();
 
-      expect(spectator.component.bounds).toEqual(
+      void expect(spectator.component.bounds).toEqual(
         bbox(spectator.component.corridorLine) as BBox2d,
       );
       flush();
@@ -558,7 +570,7 @@ describe("ViewCorridorComponent", () => {
       spectator.component.centreMapBounds();
       spectator.detectChanges();
 
-      expect(spectator.component.bounds).toEqual(
+      void expect(spectator.component.bounds).toEqual(
         bbox(
           lineString([
             [corridor.stops[0].lon, corridor.stops[0].lat],
@@ -580,7 +592,7 @@ describe("ViewCorridorComponent", () => {
 
     it("should show error message if no corridor is found", () => {
       expect(spectator.query(byText("Not found"))).toBeVisible();
-      expect(spectator.query(".govuk-body")?.innerHTML).toContain(
+      void expect(spectator.query(".govuk-body")?.innerHTML).toContain(
         "Corridor not found, or you do not have permission to view.",
       );
     });

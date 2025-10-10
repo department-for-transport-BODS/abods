@@ -17,6 +17,7 @@ import logger from "../logger.js";
 import dayjs from "dayjs";
 import { ExpressionBuilder } from "kysely";
 import { DB } from "../kysely";
+import { updateQueryTakeFirst } from "../lib/dbKysely.js";
 
 const accessAllowedWithinAnHour = Number(
   process.env.QUICKSIGHT_ALLOW_USER_ACCESS_COUNT ?? 10,
@@ -40,7 +41,7 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
   const withinAllowedAccess = (eb: ExpressionBuilder<DB, "login_details">) =>
     eb.or([eb("data_monitoring_access_count", "<", accessAllowedWithinAnHour)]);
 
-  const result = await context.kysely
+  const query = context.kysely
     .updateTable("login_details")
     .where("user_id", "=", user.id)
     .where((eb) => eb.or([pastRefreshTime(eb), withinAllowedAccess(eb)]))
@@ -57,10 +58,11 @@ export const getEmbeddedUrl: QueryResolvers["embeddedUrl"] = async (
         .then(now.add(1, "hour").toDate())
         .else(eb.ref("data_monitoring_access_refresh"))
         .end(),
-    }))
-    .executeTakeFirst();
+    }));
 
-  if (Number(result.numUpdatedRows) < 1) {
+  const result = await updateQueryTakeFirst(query);
+
+  if (Number(result?.numUpdatedRows) < 1) {
     logger.debug("Throttled access to data monitoring");
     return { enabled: false };
   }

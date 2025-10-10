@@ -12,7 +12,7 @@ import { MockProvider } from "ng-mocks";
 class HostComponent {}
 
 describe("AgGridDirective", () => {
-  let spectator: SpectatorDirective<AgGridDirective, HostComponent>;
+  let spectator: SpectatorDirective<AgGridDirective>;
   let mockGridApi: GridApi;
   let mockColumnApi: ColumnApi;
 

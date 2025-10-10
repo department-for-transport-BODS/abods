@@ -1,10 +1,9 @@
 import { DateTime, Settings } from "luxon";
 import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid.component";
 import { Spectator, byText, createComponentFactory } from "@ngneat/spectator";
-import { SimpleChange } from "@angular/core";
-import { VehicleJourney } from "../vehicle-journeys-search.service";
 import { SharedModule } from "../../../shared/shared.module";
 import { RouterTestingModule } from "@angular/router/testing";
+import { Journey } from "../../../../generated/graphql";
 
 describe("VehicleJourneysGridComponent", () => {
   let spectator: Spectator<VehicleJourneysGridComponent>;
@@ -18,36 +17,51 @@ describe("VehicleJourneysGridComponent", () => {
   const t3 = DateTime.fromISO("2022-08-01T07:28:00");
   const t4 = DateTime.fromISO("2022-08-01T15:38:00");
   const t5 = DateTime.fromISO("2022-08-01T15:55:00");
-  const journeys: VehicleJourney[] = [
+  const journeys: Journey[] = [
     {
       groupId: "VJefdb0f42",
-      startTime: t1,
-      servicePattern: "St Annes - Blackpool Town Centre",
-      lineNumber: "76",
+      startTime: t1.toISO(),
+      operatorName: "OP01",
+      operatorNoc: "OP01",
+      serviceName: "OP1",
+      serviceNumber: "1",
+      isCancelled: false,
     },
     {
       groupId: "VJf3c22dad",
-      startTime: t2,
-      servicePattern: "Poulton-le-Fylde - St Annes",
-      lineNumber: "76",
+      startTime: t2.toISO(),
+      operatorName: "OP02",
+      operatorNoc: "OP02",
+      serviceName: "OP2",
+      serviceNumber: "2",
+      isCancelled: false,
     },
     {
       groupId: "VJa3968321",
-      startTime: t3,
-      servicePattern: "Blackpool Town Centre - St Annes",
-      lineNumber: "76",
+      startTime: t3.toISO(),
+      operatorName: "OP03",
+      operatorNoc: "OP03",
+      serviceName: "OP3",
+      serviceNumber: "3",
+      isCancelled: false,
     },
     {
       groupId: "VJ4aa8804d",
-      startTime: t4,
-      servicePattern: "Blackpool Town Centre - St Annes",
-      lineNumber: "76",
+      startTime: t4.toISO(),
+      operatorName: "OP04",
+      operatorNoc: "OP04",
+      serviceName: "OP4",
+      serviceNumber: "4",
+      isCancelled: false,
     },
     {
       groupId: "VJa921fcb5",
-      startTime: t5,
-      servicePattern: "St Annes - Blackpool Town Centre",
-      lineNumber: "76",
+      startTime: t5.toISO(),
+      operatorName: "OP05",
+      operatorNoc: "OP05",
+      serviceName: "OP5",
+      serviceNumber: "5",
+      isCancelled: false,
     },
   ];
 
@@ -69,7 +83,7 @@ describe("VehicleJourneysGridComponent", () => {
   });
 
   it("should group start times by service patterns", async () => {
-    component.ngOnChanges({ data: <SimpleChange>{ currentValue: journeys } });
+    component.data = journeys;
 
     spectator.fixture.detectChanges();
     await spectator.fixture.whenStable();
@@ -95,7 +109,7 @@ describe("VehicleJourneysGridComponent", () => {
   it("should add routerLink to start times with groupId and query params", async () => {
     component.operatorId = "OP3";
     component.serviceId = "LI4728";
-    component.ngOnChanges({ data: <SimpleChange>{ currentValue: journeys } });
+    component.data = journeys;
 
     spectator.fixture.detectChanges();
     await spectator.fixture.whenStable();

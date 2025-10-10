@@ -1,16 +1,16 @@
 import { FormsModule } from "@angular/forms";
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import {
   byText,
   createComponentFactory,
   Spectator,
   SpyObject,
 } from "@ngneat/spectator";
+import { CookiePolicy } from "../config/config.service";
 import { LayoutModule } from "../layout/layout.module";
 import { AnalyticsService } from "../shared/services/analytics.service";
 import { CookiePolicyService } from "../shared/services/cookie-policy.service";
 import { SharedModule } from "../shared/shared.module";
-
 import { CookiePolicyComponent } from "./cookie-policy.component";
 
 describe("CookiePolicyComponent", () => {
@@ -21,8 +21,19 @@ describe("CookiePolicyComponent", () => {
   const createComponent = createComponentFactory({
     component: CookiePolicyComponent,
     mocks: [AnalyticsService, CookiePolicyService],
-    imports: [LayoutModule, SharedModule, FormsModule, RouterTestingModule],
+    imports: [
+      LayoutModule,
+      SharedModule,
+      FormsModule,
+      RouterModule.forRoot([]),
+    ],
   });
+
+  const policy: CookiePolicy = {
+    analyticsEnabled: false,
+    version: 1,
+    userSubmitted: true,
+  };
 
   beforeEach(() => {
     spectator = createComponent({ detectChanges: false });
@@ -32,34 +43,28 @@ describe("CookiePolicyComponent", () => {
     spectator.component.reloadPage = () => {};
   });
 
-  it("should create with policy set to rejected", () => {
-    cookiePolicyService.getAnalyticsPolicy.andReturn({
-      analyticsEnabled: false,
-      version: 1,
-    });
+  it("should create with policy set to rejected", async () => {
+    cookiePolicyService.getAnalyticsPolicy.andReturn(policy);
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
-    expect(spectator.component.acceptCookies).toEqual("no");
+    await expect(spectator.component).toBeTruthy();
+    await expect(spectator.component.acceptCookies).toEqual("no");
   });
 
-  it("should create with policy set to accepted", () => {
+  it("should create with policy set to accepted", async () => {
     cookiePolicyService.getAnalyticsPolicy.andReturn({
+      ...policy,
       analyticsEnabled: true,
-      version: 1,
     });
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
-    expect(spectator.component.acceptCookies).toEqual("yes");
+    await expect(spectator.component).toBeTruthy();
+    await expect(spectator.component.acceptCookies).toEqual("yes");
   });
 
   describe("accept and reject cookies", () => {
     beforeEach(() => {
-      cookiePolicyService.getAnalyticsPolicy.andReturn({
-        analyticsEnabled: true,
-        version: 1,
-      });
+      cookiePolicyService.getAnalyticsPolicy.andReturn(policy);
       spectator.detectChanges();
     });
 

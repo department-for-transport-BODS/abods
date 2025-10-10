@@ -1,5 +1,4 @@
 import { TestBed } from "@angular/core/testing";
-import { UserFragment } from "../../generated/graphql";
 import { AuthenticatedUserService } from "./authenticated-user.service";
 
 describe("AuthenticatedUserService", () => {
@@ -10,8 +9,8 @@ describe("AuthenticatedUserService", () => {
     service = TestBed.inject(AuthenticatedUserService);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   it("should return true if authenticated", () => {
@@ -30,9 +29,17 @@ describe("AuthenticatedUserService", () => {
 
   it("should return authenticated user", () => {
     spyOn(service.authenticatedUser$, "subscribe");
-    service.setUser(<UserFragment>{ id: "111" });
+    service.setUser({
+      canEditAllAlerts: true,
+      canViewDistances: true,
+      canViewServiceMonitoring: false,
+      currentUserId: "111",
+      flags: [],
+    });
     service.authenticatedUser$.subscribe((user) => {
-      expect(user.id).toEqual("111");
+      expect(user.canEditAllAlerts).toBeTrue();
+      expect(user.canViewDistances).toBeTrue();
+      expect(user.canViewServiceMonitoring).toBeFalse();
     });
   });
 });

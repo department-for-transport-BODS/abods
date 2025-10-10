@@ -8,15 +8,16 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import { AlertTypeEnum, VehicleStatsType } from "src/generated/graphql";
 import { ChartService } from "src/app/shared/components/amcharts/chart.service";
+import { VehicleStatsType } from "src/generated/graphql";
 
-import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
+import * as am4core from "@amcharts/amcharts4/core";
 import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
 import { DateTime, Interval } from "luxon";
-import { VehicleStatsViewModel } from "../../types";
 import { BaseChart } from "src/app/shared/components/amcharts/base-chart";
+import { AlertType } from "../../alert-list/alert-list-view-model";
+import { VehicleStatsViewModel } from "../../types";
 
 @Component({
   selector: "app-historic-vehicle-stats",
@@ -34,7 +35,7 @@ export class HistoricVehicleStatsComponent
 
   @Input() alertsDataSource?: {
     timestamp: DateTime;
-    type: AlertTypeEnum;
+    type: AlertType;
     id: string;
   }[];
 
@@ -116,20 +117,19 @@ export class HistoricVehicleStatsComponent
     this.screens.loadingScreen?.hide();
   }
 
-  get bulletFills(): Record<AlertTypeEnum, am4core.Color> {
+  get bulletFills(): Record<AlertType, am4core.Color> {
     return {
-      [AlertTypeEnum.FeedAvailableEvent]: this.chartService.colorMap.green,
-      [AlertTypeEnum.FeedUnavailableEvent]: this.chartService.colorMap.red,
-      [AlertTypeEnum.VehicleCountDisparityEvent]:
-        this.chartService.colorMap.orange,
-      [AlertTypeEnum.VehicleCountDisparity]: this.chartService.colorMap.orange,
-      [AlertTypeEnum.FeedFailure]: this.chartService.colorMap.red,
-      [AlertTypeEnum.FeedComplianceFailure]: this.chartService.colorMap.orange,
+      [AlertType.FeedAvailableEvent]: this.chartService.colorMap.green,
+      [AlertType.FeedUnavailableEvent]: this.chartService.colorMap.red,
+      [AlertType.VehicleCountDisparityEvent]: this.chartService.colorMap.orange,
+      [AlertType.VehicleCountDisparity]: this.chartService.colorMap.orange,
+      [AlertType.FeedFailure]: this.chartService.colorMap.red,
+      [AlertType.FeedComplianceFailure]: this.chartService.colorMap.orange,
     };
   }
 
   setTimelineData(
-    data: { timestamp: DateTime; type: AlertTypeEnum; id: string }[],
+    data: { timestamp: DateTime; type: AlertType; id: string }[],
   ) {
     if (!this.timelineSeries) {
       return;

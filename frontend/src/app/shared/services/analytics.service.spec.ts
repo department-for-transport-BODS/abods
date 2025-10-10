@@ -2,14 +2,13 @@ import { fakeAsync, tick } from "@angular/core/testing";
 import { NavigationEnd, Router } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import {
-  SpectatorService,
   createServiceFactory,
+  SpectatorService,
   SpyObject,
 } from "@ngneat/spectator";
 import { GoogleTagManagerService } from "angular-google-tag-manager";
 import { MockProvider } from "ng-mocks";
 import { BehaviorSubject, firstValueFrom, of } from "rxjs";
-import { UserFragment } from "../../../generated/graphql";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { AnalyticsService } from "./analytics.service";
 import { CookiePolicyService } from "./cookie-policy.service";
@@ -39,13 +38,13 @@ describe("AnalyticsService", () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     setAnalyticsPolicy: () => {},
   };
-  const testUser1 = <UserFragment>{
+  const testUser1 = {
+    username: "user1",
     id: "user-id-1",
-    organisation: { id: "org-id-1", name: "org-name-1" },
   };
-  const testUser2 = <UserFragment>{
+  const testUser2 = {
+    username: "user2",
     id: "user-id-2",
-    organisation: { id: "org-id-2", name: "org-name-2" },
   };
   const testUserSubject$ = new BehaviorSubject(testUser1);
 
@@ -76,13 +75,13 @@ describe("AnalyticsService", () => {
     });
 
     it("should enable analytics if cookie policy accepted", () => {
-      expect(service["analyticsEnabled$"].value).toBeTrue();
+      expect((service as any).analyticsEnabled$.value).toBeTrue();
     });
 
     it("should add user data to tag manager service ", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -99,15 +98,13 @@ describe("AnalyticsService", () => {
       expect(tagManagerService.getDataLayer()[0]).toEqual({
         event: "userData",
         abodUserId: testUser1.id,
-        abodOrgId: testUser1.organisation?.id,
-        abodOrgName: testUser1.organisation?.name,
       });
     });
 
     it("should push subsequent user changes to tag manager service", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -125,15 +122,13 @@ describe("AnalyticsService", () => {
       expect(tagManagerService.pushTag).toHaveBeenCalledOnceWith({
         event: "userData",
         abodUserId: testUser2.id,
-        abodOrgId: testUser2.organisation?.id,
-        abodOrgName: testUser2.organisation?.name,
       });
     });
 
     it("should push urlAfterRedirects to tag manager service on navigation end event", fakeAsync(() => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -182,13 +177,13 @@ describe("AnalyticsService", () => {
     });
 
     it("should disable analytics if cookie policy rejected", () => {
-      expect(service["analyticsEnabled$"].value).toBeFalse();
+      expect((service as any).analyticsEnabled$.value).toBeFalse();
     });
 
     it("should not add user data to tag manager service ", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -207,7 +202,7 @@ describe("AnalyticsService", () => {
     it("should not push subsequent user changes to tag manager service", () => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),
@@ -228,7 +223,7 @@ describe("AnalyticsService", () => {
     it("should not push urlAfterRedirects to tag manager service on navigation end event", fakeAsync(() => {
       spyOn(tagManagerService, "getDataLayer").and.returnValue([]);
       spyOn(tagManagerService, "pushTag").and.returnValue(
-        firstValueFrom(of([])),
+        firstValueFrom(of(undefined)),
       );
       spyOn(tagManagerService, "addGtmToDom").and.returnValue(
         firstValueFrom(of(true)),

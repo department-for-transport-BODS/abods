@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { GraphQLError } from "graphql";
 import { PrismaClient } from "@prisma/client";
 import { GeoJSONLineString } from "../lib/common.js";
+import { executeQueryTakeFirst } from "../lib/dbKysely.js";
 
 export const findJourneys: QueryResolvers["findJourneys"] = async (
   _,
@@ -32,6 +33,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         group_id: true,
         journey_pattern_description: true,
         direction: true,
+        is_cancelled: true,
         vehicle_journey_id: true,
         expected_services: {
           select: {
@@ -53,6 +55,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
         startTime: getFormattedDate(journey.expected_journey_start),
         serviceName: journey.journey_pattern_description,
         serviceNumber: journey.expected_services?.line_name ?? "unknown",
+        isCancelled: journey.is_cancelled ?? false,
         operatorNoc:
           journey.expected_services?.expected_operator.operator_noc ??
           "unknown",
@@ -64,7 +67,7 @@ export const findJourneys: QueryResolvers["findJourneys"] = async (
     );
 };
 
-const getAvlData = (
+export const getAvlData = (
   db: PrismaClient,
   dateString: string,
   newGroupId: string,
@@ -186,7 +189,7 @@ export const getJourney: QueryResolvers["journey"] = async (
   const avlPromises = [];
   let currentDay = minRange.startOf("day");
   while (currentDay.isSameOrBefore(maxRange.startOf("day"))) {
-    const dateString = currentDay.toISOString().substring(0, 10);
+    const dateString = currentDay.format("YYYY-MM-DD");
     // Some of the avl data has the wrong group id when running overnight, so we construct a new one
     const newGroupId = groupIdPrefix + "|" + dateString;
     avlPromises.push(
@@ -200,7 +203,7 @@ export const getJourney: QueryResolvers["journey"] = async (
 
 export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDistanceGeom"] =
   async (_parent, args, context): Promise<ServicePatternDistanceResult> => {
-    const result = await context.kysely
+    const query = context.kysely
       .selectFrom("transmodel_vehiclejourney")
       .innerJoin(
         "transmodel_servicepatterndistance",
@@ -213,8 +216,9 @@ export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDis
         sql<string>`ST_AsGeoJSON(transmodel_servicepatterndistance.geom)`.as(
           "geom",
         ),
-      ])
-      .executeTakeFirst();
+      ]);
+
+    const result = await executeQueryTakeFirst(query);
 
     if (!result) {
       throw new GraphQLError(
@@ -224,8 +228,14 @@ export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDis
         },
       );
     }
-    const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
-    const coordinates = parsedGeom?.coordinates;
+
+    let coordinates: number[][] = [];
+    if (result.geom) {
+      const parsedGeom = JSON.parse(result.geom ?? "") as GeoJSONLineString;
+      if (parsedGeom?.coordinates) {
+        coordinates = parsedGeom?.coordinates;
+      }
+    }
 
     return {
       distance: result.distance ?? 0,
