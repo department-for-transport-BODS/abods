@@ -21,7 +21,7 @@ export class InactivityService {
     const events = ["keypress", "click", "wheel", "mousemove", "ontouchstart"];
     this.$onInactive = from(events.map((e) => fromEvent(document, e))).pipe(
       mergeAll(),
-      timeout({ each: this.timeoutDelay, with: () => of(undefined as any) }),
+      timeout({ each: this.timeoutDelay, with: () => of(undefined) }),
       filter((a) => !a),
       repeat(),
     );

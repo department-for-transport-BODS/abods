@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { AuthenticationService } from "../authentication.service";
-
 import { LogoutComponent } from "./logout.component";
 
 describe("LogoutComponent", () => {
@@ -14,7 +13,7 @@ describe("LogoutComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [LogoutComponent],
-      imports: [RouterTestingModule, LayoutModule, ApolloTestingModule],
+      imports: [RouterModule.forRoot([]), LayoutModule, ApolloTestingModule],
       providers: [
         {
           provide: AuthenticationService,
@@ -33,8 +32,8 @@ describe("LogoutComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   it("should call logout", () => {

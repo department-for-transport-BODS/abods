@@ -5,7 +5,11 @@ import { OnTimeModule } from "../on-time.module";
 import { ServiceMapComponent } from "./service-map.component";
 import { ServicePattern, TransitModelService } from "../transit-model.service";
 import { of } from "rxjs";
-import { ServiceLinkType, StopType } from "../../../generated/graphql";
+import {
+  RouteType,
+  ServiceLinkType,
+  StopType,
+} from "../../../generated/graphql";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { MockModule } from "ng-mocks";
 import { DateTime } from "luxon";
@@ -22,7 +26,13 @@ describe("ServiceMapComponent", () => {
 
   const createComponent = createComponentFactory({
     component: ServiceMapComponent,
-    imports: [OnTimeModule, SharedModule, LayoutModule, ApolloTestingModule],
+    imports: [
+      OnTimeModule,
+      SharedModule,
+      LayoutModule,
+      ApolloTestingModule,
+      NgxMapboxGLModule,
+    ],
     overrideModules: [
       [
         OnTimeModule,
@@ -48,14 +58,14 @@ describe("ServiceMapComponent", () => {
       fromStop: "ST0000001",
       toStop: "ST0000002",
       distance: 100,
-      routeValidity: "VALID",
+      routeValidity: RouteType.Valid,
       linkRoute: "[[1.1987, 53.1472],[-1.466667, 53.383331],[-1.2, 53.4231]]",
     },
     {
       fromStop: "ST0000002",
       toStop: "ST0000001",
       distance: 100,
-      routeValidity: "INVALID_NO_ROUTE_POINTS",
+      routeValidity: RouteType.InvalidNoRoutePoints,
       linkRoute: "[[-1.466667, 53.383331],[1.1987, 53.1472]]",
     },
   ];
@@ -63,13 +73,11 @@ describe("ServiceMapComponent", () => {
     {
       serviceLinks: [serviceLinks[0]],
       servicePatternId: "SVC0000000001",
-      name: "Mansfield to Sheffield",
       stops,
     },
     {
       serviceLinks: [serviceLinks[1]],
       servicePatternId: "SVC0000000002",
-      name: "Sheffield to Mansfield",
       stops: stops.slice().reverse(),
     },
   ];
@@ -95,8 +103,8 @@ describe("ServiceMapComponent", () => {
       "fetchStopPerformanceList",
     ).and.returnValue(of([]));
 
-    const fromTimestamp = DateTime.fromISO("2021-07-01T00:00:00Z");
-    const toTimestamp = DateTime.fromISO("2021-07-31T23:59:59.999Z");
+    const fromTimestamp = DateTime.fromISO("2021-07-01T00:00:00Z").toISO();
+    const toTimestamp = DateTime.fromISO("2021-07-31T23:59:59.999Z").toISO();
     component.params = {
       fromTimestamp,
       toTimestamp,

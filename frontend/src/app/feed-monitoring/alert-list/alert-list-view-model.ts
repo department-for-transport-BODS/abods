@@ -1,5 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { AlertTypeEnum, EventFragment } from "src/generated/graphql";
+import { EventFragment } from "src/generated/graphql";
 
 export enum AlertMode {
   LiveStatus,
@@ -12,14 +12,23 @@ export enum AlertLevel {
   Success = "success",
 }
 
+export enum AlertType {
+  FeedComplianceFailure = "FeedComplianceFailure",
+  FeedFailure = "FeedFailure",
+  VehicleCountDisparity = "VehicleCountDisparity",
+  VehicleCountDisparityEvent = "VehicleCountDisparityEvent",
+  FeedUnavailableEvent = "FeedUnavailableEvent",
+  FeedAvailableEvent = "FeedAvailableEvent",
+}
+
 export class AlertListViewModel {
-  type: AlertTypeEnum;
+  type: AlertType;
   message: string;
   timestamp: DateTime;
   mode: AlertMode;
 
   constructor(event: EventFragment, mode: AlertMode) {
-    this.type = event.type as AlertTypeEnum;
+    this.type = event.type as AlertType;
     this.message = event.data?.message;
     this.timestamp = DateTime.fromISO(event.timestamp, {
       zone: "utc",
@@ -29,11 +38,11 @@ export class AlertListViewModel {
 
   get level(): AlertLevel {
     switch (this.type) {
-      case AlertTypeEnum.VehicleCountDisparityEvent:
+      case AlertType.VehicleCountDisparityEvent:
         return AlertLevel.Warning;
-      case AlertTypeEnum.FeedUnavailableEvent:
+      case AlertType.FeedUnavailableEvent:
         return AlertLevel.Error;
-      case AlertTypeEnum.FeedAvailableEvent:
+      case AlertType.FeedAvailableEvent:
         return AlertLevel.Success;
       default:
         return AlertLevel.Success;
@@ -42,11 +51,11 @@ export class AlertListViewModel {
 
   get icon(): string {
     switch (this.type) {
-      case AlertTypeEnum.VehicleCountDisparityEvent:
+      case AlertType.VehicleCountDisparityEvent:
         return "exclamation-in-circle";
-      case AlertTypeEnum.FeedUnavailableEvent:
+      case AlertType.FeedUnavailableEvent:
         return "cross-in-circle-solid";
-      case AlertTypeEnum.FeedAvailableEvent:
+      case AlertType.FeedAvailableEvent:
         return "check-in-circle-solid";
       default:
         return "check-in-circle-solid";
@@ -55,11 +64,11 @@ export class AlertListViewModel {
 
   get typeLabel() {
     switch (this.type) {
-      case AlertTypeEnum.VehicleCountDisparityEvent:
+      case AlertType.VehicleCountDisparityEvent:
         return "Vehicle count disparity";
-      case AlertTypeEnum.FeedUnavailableEvent:
+      case AlertType.FeedUnavailableEvent:
         return "Feed data unavailable";
-      case AlertTypeEnum.FeedAvailableEvent:
+      case AlertType.FeedAvailableEvent:
         return "Feed data available";
       default:
         return "Feed data available";
@@ -68,11 +77,11 @@ export class AlertListViewModel {
 
   get displayMessage(): string {
     switch (this.type) {
-      case AlertTypeEnum.VehicleCountDisparityEvent:
+      case AlertType.VehicleCountDisparityEvent:
         return this.message;
-      case AlertTypeEnum.FeedUnavailableEvent:
+      case AlertType.FeedUnavailableEvent:
         return "We are expecting to receive data but the feed is not active";
-      case AlertTypeEnum.FeedAvailableEvent:
+      case AlertType.FeedAvailableEvent:
         return "Vehicle data is now being received from an active feed";
       default:
         return "Vehicle data is now being received from an active feed";

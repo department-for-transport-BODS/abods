@@ -1,7 +1,10 @@
-import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import { XYChart } from "@amcharts/amcharts4/charts";
+import * as am4core from "@amcharts/amcharts4/core";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
+import am4themes_microchart from "@amcharts/amcharts4/themes/microchart";
+import { isPlatformBrowser } from "@angular/common";
 import {
   Component,
   ElementRef,
@@ -13,9 +16,6 @@ import {
   OnInit,
   PLATFORM_ID,
 } from "@angular/core";
-import { isPlatformBrowser } from "@angular/common";
-import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
-import am4themes_microchart from "@amcharts/amcharts4/themes/microchart";
 import { ReplaySubject } from "rxjs";
 import { isNotNullOrUndefined } from "../../rxjs-operators";
 
@@ -79,7 +79,9 @@ export class XYChartComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.browserOnly(() => {
-      this.chart.dispose();
+      if (this.chart) {
+        this.chart.dispose();
+      }
     });
     this.data$.complete();
   }

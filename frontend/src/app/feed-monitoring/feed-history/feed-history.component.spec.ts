@@ -3,6 +3,7 @@ import {
   byTextContent,
   createRoutingFactory,
   SpectatorRouting,
+  SpyObject,
 } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { DateTime } from "luxon";
@@ -17,6 +18,7 @@ import { FeedHistoryComponent } from "./feed-history.component";
 
 describe("FeedHistoryComponent", () => {
   let spectator: SpectatorRouting<FeedHistoryComponent>;
+
   const createComponent = createRoutingFactory({
     component: FeedHistoryComponent,
     imports: [
@@ -28,22 +30,24 @@ describe("FeedHistoryComponent", () => {
     detectChanges: false,
   });
   let component: FeedHistoryComponent;
-  let service: FeedMonitoringService;
+  let service: SpyObject<FeedMonitoringService>;
 
   beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
     service = spectator.inject(FeedMonitoringService);
 
+    (spectator.router.navigate as jasmine.Spy).and.resolveTo(true);
+
     spyOnProperty(service, "listOperators", "get").and.returnValue(
-      of([{ nocCode: "NOCODE", operatorId: "OP01" }]),
+      of([{ nocCode: "NOCODE", operatorId: "NOCODE" }]),
     );
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should default date to yesterday", () => {
@@ -60,18 +64,19 @@ describe("FeedHistoryComponent", () => {
     );
   });
 
-  it("should take date from query string", () => {
+  it("should take date from query string", async () => {
     spectator.setRouteParam("nocCode", "NOCODE");
     spectator.setRouteQueryParam("date", "2020-05-04");
     spectator.detectChanges();
 
-    expect(component.date).toEqual(DateTime.local(2020, 5, 4));
+    await expect(component.date).toEqual(DateTime.local(2020, 5, 4));
   });
 
-  it("should load data for nocCode and date", () => {
+  it("should load data for nocCode and date", async () => {
     spyOn(service, "fetchOperatorHistory").and.returnValue(
       of({
         nocCode: "NOCODE",
+        operatorId: "NOCODE",
         name: "no",
         feedMonitoring: {
           historicalStats: {},
@@ -85,14 +90,14 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(service.fetchOperatorHistory).toHaveBeenCalledTimes(1);
+    await expect(service.fetchOperatorHistory).toHaveBeenCalledTimes(1);
     expect(service.fetchOperatorHistory).toHaveBeenCalledWith(
-      "OP01",
+      "NOCODE",
       DateTime.local(2020, 5, 4),
     );
   });
 
-  it("should show selected date", () => {
+  it("should show selected date", async () => {
     spyOn(service, "fetchAlertStats").and.returnValue(
       of([
         { count: 3, day: "2020-11-23" },
@@ -105,10 +110,10 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.query(byText("4 May 2020"))).toBeTruthy();
+    await expect(spectator.query(byText("4 May 2020"))).toBeTruthy();
   });
 
-  it("should show heatmap date nav and be interactive", () => {
+  it("should show heatmap date nav and be interactive", async () => {
     spyOn(service, "fetchAlertStats").and.returnValue(
       of([
         { count: 8, day: "2020-11-19" },
@@ -130,10 +135,10 @@ describe("FeedHistoryComponent", () => {
 
     expect(navitems).toHaveLength(7);
 
-    expect(navitems[5].heat).toBe(0);
+    await expect(navitems[5].heat).toBe(0);
 
-    expect(navitems[1].heat).toBe(6);
-    expect(navitems[1].date).toEqual(DateTime.local(2020, 11, 20));
+    await expect(navitems[1].heat).toBe(6);
+    await expect(navitems[1].date).toEqual(DateTime.local(2020, 11, 20));
 
     spectator.click(byText("20 November"));
 
@@ -147,7 +152,7 @@ describe("FeedHistoryComponent", () => {
     );
   });
 
-  it('should show "not found" if operator not loaded', () => {
+  it('should show "not found" if operator not loaded', async () => {
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(null));
 
     spectator.setRouteParam("nocCode", "NOCODE");
@@ -155,7 +160,7 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.query(byText(/Not found/))).toBeTruthy();
+    await expect(spectator.query(byText(/Not found/))).toBeTruthy();
   });
 
   it('should show not "not found" if operator not loaded, but with errors', async () => {
@@ -166,18 +171,21 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.query(byText(/Not found/))).toBeFalsy();
-    expect(spectator.query(byText(/There was an error/))).toBeTruthy();
+    await expect(spectator.query(byText(/Not found/))).toBeFalsy();
+    await expect(spectator.query(byText(/There was an error/))).toBeTruthy();
   });
 
-  it('should show "no data" if operator loaded, but with no stats', () => {
+  it('should show "no data" if operator loaded, but with no stats', async () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCODE",
+      operatorId: "OP01",
+      name: "no",
       feedMonitoring: {
         historicalStats: {},
         vehicleStats: [],
       },
     };
+
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(operator));
 
     spectator.setRouteParam("nocCode", "NOCODE");
@@ -185,14 +193,16 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.query(byText(/Not found/))).toBeFalsy();
-    expect(spectator.query(byText(/There was an error/))).toBeFalsy();
-    expect(spectator.query(byText(/No data/))).toBeTruthy();
+    await expect(spectator.query(byText(/Not found/))).toBeFalsy();
+    await expect(spectator.query(byText(/There was an error/))).toBeFalsy();
+    await expect(spectator.query(byText(/No data/))).toBeTruthy();
   });
 
-  it("should set vehicleStats for chart", () => {
+  it("should set vehicleStats for chart", async () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCODE",
+      operatorId: "OP01",
+      name: "no",
       feedMonitoring: {
         historicalStats: {},
         vehicleStats: [
@@ -209,14 +219,16 @@ describe("FeedHistoryComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spectator.component.vehicleStats).toEqual(
-      operator.feedMonitoring.vehicleStats,
+    await expect(spectator.component.vehicleStats).toEqual(
+      operator.feedMonitoring?.vehicleStats ?? undefined,
     );
   });
 
-  it(`should show operator update frequency`, () => {
+  it(`should show operator update frequency`, async () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCNOC",
+      operatorId: "OP01",
+      name: "no",
       feedMonitoring: {
         historicalStats: {
           updateFrequency: 43,
@@ -226,12 +238,12 @@ describe("FeedHistoryComponent", () => {
     };
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
     spectator.setRouteQueryParam("date", "2020-05-04");
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(/^43s$/, {
           selector: "#historic-stat-frequency .stat__value",
@@ -240,12 +252,14 @@ describe("FeedHistoryComponent", () => {
     ).toBeTruthy();
   });
 
-  it(`should show operator feed availability`, () => {
+  it(`should show operator feed availability`, async () => {
     const operator: OperatorFeedHistoryFragment = {
       nocCode: "NOCNOC",
+      operatorId: "OP01",
+      name: "no",
       feedMonitoring: {
         historicalStats: {
-          availability: 99.99,
+          availability: 0.9999,
         },
         vehicleStats: [],
       },
@@ -253,12 +267,12 @@ describe("FeedHistoryComponent", () => {
 
     spyOn(service, "fetchOperatorHistory").and.returnValue(of(operator));
 
-    spectator.setRouteParam("nocCode", operator.nocCode as string);
+    spectator.setRouteParam("nocCode", operator.nocCode);
     spectator.setRouteQueryParam("date", "2020-05-04");
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(/^99.99%$/, {
           selector: "#historic-stat-availability .stat__value",

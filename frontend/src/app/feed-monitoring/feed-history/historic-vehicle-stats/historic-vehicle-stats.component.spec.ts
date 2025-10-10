@@ -10,9 +10,9 @@ describe("HistoricVehicleStatsComponent", () => {
     imports: [SharedModule],
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator = createComponent();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 });

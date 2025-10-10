@@ -5,12 +5,8 @@ import { SharedModule } from "../../shared.module";
 import { MapViewToggleComponent } from "./map-view-toggle.component";
 
 class MockConfig {
-  get mapboxStyle() {
-    return "style1";
-  }
-  get mapboxSatelliteStyle() {
-    return "style2";
-  }
+  readonly mapboxStyle = "style1";
+  readonly mapboxSatelliteStyle = "style2";
 }
 
 describe("MapViewToggleComponent", () => {

@@ -13,10 +13,10 @@ describe("HelpdeskDataService", () => {
   let freshdeskApiService: SpyObject<FreshdeskApiService>;
 
   const mockArticles: FreshdeskArticle[] = [
-    <FreshdeskArticle>{
+    {
       title: "Title 1",
       description: "Description 1",
-    },
+    } as FreshdeskArticle,
   ];
 
   const createService = createServiceFactory({

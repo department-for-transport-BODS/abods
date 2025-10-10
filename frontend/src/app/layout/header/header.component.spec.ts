@@ -1,13 +1,13 @@
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 
-import { HeaderComponent } from "./header.component";
 import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from "@angular/common/http";
+import { RouterModule } from "@angular/router";
+import { HeaderComponent } from "./header.component";
 
 describe("HeaderComponent", () => {
   let component: HeaderComponent;
@@ -16,7 +16,7 @@ describe("HeaderComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HeaderComponent],
-      imports: [RouterTestingModule, ApolloTestingModule],
+      imports: [RouterModule.forRoot([]), ApolloTestingModule],
       providers: [
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
@@ -30,7 +30,7 @@ describe("HeaderComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

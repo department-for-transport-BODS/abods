@@ -23,7 +23,7 @@ describe("DateRangeComponent", () => {
 
     const to = DateTime.local().startOf("day");
     const from = to.minus({ days: 28 });
-    const last28 = <FromToPreset>{ from, to, preset: Preset.Last28 };
+    const last28: FromToPreset = { from, to, preset: Preset.Last28 };
     formControl = new FormControl(last28);
 
     spectator = createHost(
@@ -34,7 +34,7 @@ describe("DateRangeComponent", () => {
     );
   });
 
-  it("should allow user to select preset date range", async () => {
+  it("should allow user to select preset date range", () => {
     spectator.selectOption("#date-range-preset", "last7");
 
     const value = formControl.value;
@@ -44,7 +44,7 @@ describe("DateRangeComponent", () => {
     expect(value.preset).toEqual(Preset.Last7);
   });
 
-  it("should allow user to select custom date range", async () => {
+  it("should allow user to select custom date range", () => {
     spectator.focus("#dateRange");
 
     spectator.click(
@@ -69,7 +69,7 @@ describe("DateRangeComponent", () => {
     expect(value.preset).toEqual(Preset.Custom);
   });
 
-  it("should discard changes if user clicks cancel", async () => {
+  it("should discard changes if user clicks cancel", () => {
     spectator.focus("#dateRange");
 
     spectator.click(

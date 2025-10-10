@@ -57,8 +57,8 @@ describe("TimeSeriesChartComponent", () => {
   });
 
   it("should request hour granularity data if time period short enough", () => {
-    const from = DateTime.fromISO("2021-01-01T00:00:00+00:00");
-    const to = DateTime.fromISO("2021-01-06T00:00:00+00:00");
+    const from = DateTime.fromISO("2021-01-01T00:00:00+00:00").toISO();
+    const to = DateTime.fromISO("2021-01-06T00:00:00+00:00").toISO();
 
     component.params = {
       fromTimestamp: from,

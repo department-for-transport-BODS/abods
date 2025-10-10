@@ -10,8 +10,8 @@ describe("HideOutliersService", () => {
     service = TestBed.inject(HideOutliersService);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   it("should set all outliers to false on init", () => {
