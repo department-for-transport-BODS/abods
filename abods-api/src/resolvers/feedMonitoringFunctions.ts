@@ -24,6 +24,7 @@ import { requireUserSession } from "./helpers.js";
 import { getUserOperatorIdsQuery } from "../lib/operators.js";
 import dayjs from "dayjs";
 import logger from "../logger.js";
+import { executeQuery } from "../lib/dbKysely.js";
 
 export const getEventStats: QueryResolvers["eventStats"] =
   (): EventStatsType[] => {
@@ -64,7 +65,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
   _,
   context,
 ): Promise<VehicleStatsType[]> => {
-  if (!parent.operatorId) throw "Invalid data";
+  if (!parent.operatorId) throw Error("Invalid data");
   const result = await context.db.feed_monitor_hourly_summary.findMany({
     where: {
       operator_noc: parent.operatorId,
@@ -88,7 +89,7 @@ export const getLast24Hours: LiveStatsTypeResolvers["last24Hours"] = async (
 
 export const getVehicleStatsByMin: FeedMonitoringTypeResolvers["vehicleStats"] =
   async (parent, args, context): Promise<VehicleStatsType[]> => {
-    if (!parent.operatorId) throw "Invalid data";
+    if (!parent.operatorId) throw Error("Invalid data");
     const result = await context.db.feed_monitor_minute_summary.findMany({
       where: {
         operator_noc: parent.operatorId,
@@ -115,7 +116,7 @@ const getEvents: QueryResolvers["events"] = (): EventResponse => ({
 
 export const getFeedMonitoringList: OperatorFeedMonitoringResolvers["feedMonitoring"] =
   async (parent, _, context): Promise<FeedMonitoringType> => {
-    if (!parent.operatorId) throw "Parent data not set";
+    if (!parent.operatorId) throw Error("Parent data not set");
     const feed_summary: feed_monitor_summary | null = await getOperatorWithFeed(
       context.db,
       parent.operatorId,
@@ -264,19 +265,19 @@ export const getOperatorList: QueryResolvers["operatorsFeedMonitoring"] =
     ) {
       query = query.where("s.operator_noc", "in", args.filterBy.operatorIds);
     }
-    return await query
+    const mainQuery = query
       .groupBy(["a.name", "s.operator_noc"])
       .select("name")
       .select("operator_noc")
-      .orderBy("name")
-      .execute()
-      .then((x) =>
-        x.map((o) => ({
-          name: o.name ?? "",
-          operatorId: o.operator_noc ?? "",
-          nocCode: o.operator_noc ?? "",
-        })),
-      );
+      .orderBy("name");
+
+    return executeQuery(mainQuery).then((x) =>
+      x.map((o) => ({
+        name: o.name ?? "",
+        operatorId: o.operator_noc ?? "",
+        nocCode: o.operator_noc ?? "",
+      })),
+    );
   };
 
 const feedMonitoringResolvers: Resolvers = {

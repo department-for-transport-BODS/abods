@@ -3,6 +3,7 @@ import { Spectator, createComponentFactory } from "@ngneat/spectator";
 import { NouisliderModule } from "ng2-nouislider";
 
 import { RangeSliderComponent } from "./range-slider.component";
+import { FormsModule } from "@angular/forms";
 
 describe("SliderComponent", () => {
   let spectator: Spectator<RangeSliderComponent>;
@@ -10,7 +11,7 @@ describe("SliderComponent", () => {
 
   const createComponent = createComponentFactory({
     component: RangeSliderComponent,
-    imports: [NouisliderModule],
+    imports: [NouisliderModule, FormsModule],
     detectChanges: false,
   });
 

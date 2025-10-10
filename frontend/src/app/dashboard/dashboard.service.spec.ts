@@ -1,4 +1,9 @@
-import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
+import { ApolloQueryResult } from "@apollo/client";
+import {
+  createServiceFactory,
+  SpectatorService,
+  SpyObject,
+} from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { DateTime } from "luxon";
 import { of } from "rxjs";
@@ -6,9 +11,11 @@ import {
   DashboardOperatorListGQL,
   DashboardOperatorVehicleCountsListGQL,
   DashboardPerformanceStatsGQL,
+  DashboardPerformanceStatsQuery,
   DashboardServiceRankingGQL,
+  DashboardServiceRankingQuery,
+  DashboardVehicles,
   OperatorDashboardFragment,
-  OperatorDashboardVehicleCountsFragment,
   RankingOrder,
 } from "../../generated/graphql";
 import { DashboardService } from "./dashboard.service";
@@ -16,6 +23,8 @@ import { DashboardService } from "./dashboard.service";
 describe("DashboardService", () => {
   let spectator: SpectatorService<DashboardService>;
   let service: DashboardService;
+  let operatorVehicleCountGql: SpyObject<DashboardOperatorVehicleCountsListGQL>;
+  let operatorListGql: SpyObject<DashboardOperatorListGQL>;
 
   const createService = createServiceFactory({
     service: DashboardService,
@@ -31,79 +40,126 @@ describe("DashboardService", () => {
   beforeEach(() => {
     spectator = createService();
     service = spectator.service;
+    operatorVehicleCountGql = spectator.inject(
+      DashboardOperatorVehicleCountsListGQL,
+    );
+    operatorVehicleCountGql.fetch.and.returnValue(
+      of({
+        data: { dashboardVehicles: [] },
+        loading: false,
+        networkStatus: 7,
+        errors: undefined,
+      }),
+    );
+
+    operatorListGql = spectator.inject(DashboardOperatorListGQL);
+    operatorListGql.fetch.and.returnValue(
+      of({
+        data: { operatorsFeedMonitoring: [] },
+        loading: false,
+        networkStatus: 7,
+        errors: undefined,
+      }),
+    );
   });
 
-  it("should be created", () => {
-    expect(spectator.service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(spectator.service).toBeTruthy();
   });
 
   describe("listOperators", () => {
     it("should call fetch on DashboardOperatorListGQL and return list of operators", () => {
       const mockResponse = [
-        <OperatorDashboardFragment>{ name: "op1", nocCode: "OP1" },
-        <OperatorDashboardFragment>{ name: "op2", nocCode: "OP1" },
+        { name: "op1", nocCode: "OP1" } as OperatorDashboardFragment,
+        { name: "op2", nocCode: "OP1" } as OperatorDashboardFragment,
       ];
-      const query = spectator.inject(DashboardOperatorListGQL);
-      query.fetch.and.returnValue(
-        of({ data: { operators: { items: mockResponse } } }),
+      operatorListGql.fetch.and.returnValue(
+        of({
+          data: { operatorsFeedMonitoring: mockResponse },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        }),
       );
 
       service.listOperators.subscribe((ops) => {
-        expect(ops).toEqual(mockResponse);
+        void expect(ops).toEqual(mockResponse);
       });
 
-      expect(query.fetch).toHaveBeenCalledWith();
+      expect(operatorListGql.fetch).toHaveBeenCalledWith({});
     });
 
     it("should call fetch on DashboardOperatorListGQL and return empty array", () => {
-      const query = spectator.inject(DashboardOperatorListGQL);
-      query.fetch.and.returnValue(of({}));
+      operatorListGql.fetch.and.returnValue(
+        of({
+          data: { operatorsFeedMonitoring: [] },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        }),
+      );
 
       service.listOperators.subscribe((ops) => {
-        expect(ops).toEqual([]);
+        void expect(ops).toEqual([]);
       });
 
-      expect(query.fetch).toHaveBeenCalledWith();
+      expect(operatorListGql.fetch).toHaveBeenCalledWith({});
     });
   });
 
   describe("listOperatorVehicleCounts", () => {
     it("should call fetch on DashboardOperatorVehicleCountsListGQL and return list of counts", () => {
       const mockResponse = [
-        <OperatorDashboardVehicleCountsFragment>{
+        {
           nocCode: "OP1",
           feedMonitoring: {
             liveStats: { currentVehicles: 3, expectedVehicles: 3 },
           },
-        },
-        <OperatorDashboardVehicleCountsFragment>{
+          actual: 3,
+          expected: 3,
+          operatorId: "OP1",
+        } as DashboardVehicles,
+        {
           nocCode: "OP2",
           feedMonitoring: {
             liveStats: { currentVehicles: 0, expectedVehicles: 5 },
           },
-        },
+          actual: 0,
+          expected: 5,
+          operatorId: "OP2",
+        } as DashboardVehicles,
       ];
       const query = spectator.inject(DashboardOperatorVehicleCountsListGQL);
       query.fetch.and.returnValue(
-        of({ data: { operators: { items: mockResponse } } }),
+        of({
+          data: { dashboardVehicles: mockResponse },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        }),
       );
 
       service.listOperatorVehicleCounts.subscribe((ops) => {
-        expect(ops).toEqual(mockResponse);
+        void expect(ops).toEqual(mockResponse);
       });
 
-      expect(query.fetch).toHaveBeenCalledWith();
+      expect(query.fetch).toHaveBeenCalledWith({});
     });
 
     it("should call fetch on DashboardOperatorVehicleCountsListGQL and return empty array", () => {
-      const query = spectator.inject(DashboardOperatorVehicleCountsListGQL);
-      query.fetch.and.returnValue(of({}));
+      operatorVehicleCountGql.fetch.and.returnValue(
+        of({
+          data: { dashboardVehicles: [] },
+          loading: false,
+          networkStatus: 7,
+        }),
+      );
 
       service.listOperatorVehicleCounts.subscribe((ops) => {
-        expect(ops).toEqual([]);
+        void expect(ops).toEqual([]);
       });
 
-      expect(query.fetch).toHaveBeenCalledWith();
+      expect(operatorVehicleCountGql.fetch).toHaveBeenCalledWith({});
     });
   });
 
@@ -118,7 +174,10 @@ describe("DashboardService", () => {
       query.fetch.and.returnValue(
         of({
           data: { onTimePerformance: { punctualityOverview: mockResponse } },
-        }),
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
+        } as ApolloQueryResult<DashboardPerformanceStatsQuery>),
       );
 
       const filters = {
@@ -128,14 +187,14 @@ describe("DashboardService", () => {
       const from = DateTime.now().toUTC();
       const to = DateTime.now().plus({ days: 28 }).toUTC();
       service.getPunctualityStats(filters, from, to).subscribe((ops) => {
-        expect(ops).toEqual({ result: mockResponse, success: true });
+        void expect(ops).toEqual({ result: mockResponse, success: true });
       });
 
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             filters,
           },
         },
@@ -145,7 +204,16 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardPerformanceStatsGQL and return null", () => {
       const query = spectator.inject(DashboardPerformanceStatsGQL);
-      query.fetch.and.returnValue(of({ errors: [{ message: "error" }] }));
+      query.fetch.and.returnValue(
+        of({
+          data: {
+            onTimePerformance: { punctualityOverview: undefined },
+          },
+          loading: false,
+          networkStatus: 7,
+          errors: [{ message: "error" }],
+        } as ApolloQueryResult<DashboardPerformanceStatsQuery>),
+      );
 
       const filters = {
         nocCodes: ["OP1"],
@@ -154,14 +222,14 @@ describe("DashboardService", () => {
       const from = DateTime.now().toUTC();
       const to = DateTime.now().plus({ days: 28 }).toUTC();
       service.getPunctualityStats(filters, from, to).subscribe((ops) => {
-        expect(ops).toEqual({ result: null, success: false });
+        void expect(ops).toEqual({ result: null, success: false });
       });
 
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             filters,
           },
         },
@@ -212,6 +280,9 @@ describe("DashboardService", () => {
       query.fetch.and.returnValue(
         of({
           data: { onTimePerformance: { servicePunctuality: mockResponse } },
+          loading: false,
+          networkStatus: 7,
+          errors: undefined,
         }),
       );
 
@@ -227,19 +298,19 @@ describe("DashboardService", () => {
       service
         .getServiceRanking(filters, from, to, order, trendFrom, trendTo)
         .subscribe((ops) => {
-          expect(ops).toEqual(mockResponse);
+          void expect(ops).toEqual(mockResponse);
         });
 
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             order,
             filters,
           },
-          trendFrom: trendFrom.toJSDate(),
-          trendTo: trendTo.toJSDate(),
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
         },
         { fetchPolicy: "no-cache" },
       );
@@ -247,7 +318,14 @@ describe("DashboardService", () => {
 
     it("should call fetch on DashboardPerformanceStatsGQL and return undefined", () => {
       const query = spectator.inject(DashboardServiceRankingGQL);
-      query.fetch.and.returnValue(of({ errors: [{ message: "error" }] }));
+      query.fetch.and.returnValue(
+        of({
+          data: {},
+          loading: false,
+          networkStatus: 7,
+          errors: [{ message: "error" }],
+        } as ApolloQueryResult<DashboardServiceRankingQuery>),
+      );
 
       const filters = {
         nocCodes: ["OP1"],
@@ -261,19 +339,19 @@ describe("DashboardService", () => {
       service
         .getServiceRanking(filters, from, to, order, trendFrom, trendTo)
         .subscribe((ops) => {
-          expect(ops).toEqual(undefined);
+          void expect(ops).toEqual(undefined);
         });
 
       expect(query.fetch).toHaveBeenCalledWith(
         {
           params: {
-            fromTimestamp: from.toJSDate(),
-            toTimestamp: to.toJSDate(),
+            fromTimestamp: from.toISO(),
+            toTimestamp: to.toISO(),
             order,
             filters,
           },
-          trendFrom: trendFrom.toJSDate(),
-          trendTo: trendTo.toJSDate(),
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
         },
         { fetchPolicy: "no-cache" },
       );

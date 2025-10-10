@@ -49,36 +49,6 @@ export type AdminOrgOperatorMap = {
   orgName?: Maybe<Scalars['String']['output']>;
 };
 
-export type AlertInputType = {
-  alertType: AlertTypeEnum;
-  eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
-  eventThreshold?: InputMaybe<Scalars['Int']['input']>;
-  sendTo: AlertReferenceInput;
-};
-
-export type AlertReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type AlertType = {
-  __typename?: 'AlertType';
-  alertId: Scalars['String']['output'];
-  alertType?: Maybe<AlertTypeEnum>;
-  createdBy?: Maybe<UserType>;
-  eventHysterisis?: Maybe<Scalars['Int']['output']>;
-  eventThreshold?: Maybe<Scalars['Int']['output']>;
-  sendTo?: Maybe<UserType>;
-};
-
-export enum AlertTypeEnum {
-  FeedAvailableEvent = 'FeedAvailableEvent',
-  FeedComplianceFailure = 'FeedComplianceFailure',
-  FeedFailure = 'FeedFailure',
-  FeedUnavailableEvent = 'FeedUnavailableEvent',
-  VehicleCountDisparity = 'VehicleCountDisparity',
-  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent'
-}
-
 export type ApiInfoType = {
   __typename?: 'ApiInfoType';
   buildNumber: Scalars['String']['output'];
@@ -473,27 +443,11 @@ export type HistoricalStatsType = {
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
-export type InvitationInput = {
-  email: Scalars['String']['input'];
-  organisation: OrganisationReferenceInput;
-};
-
-export type InvitationResponseType = {
-  __typename?: 'InvitationResponseType';
-  error?: Maybe<Scalars['String']['output']>;
-  invitation?: Maybe<InvitationType>;
-};
-
-export type InvitationType = {
-  __typename?: 'InvitationType';
-  accepted: Scalars['Boolean']['output'];
-  email: Scalars['String']['output'];
-};
-
 export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
+  isCancelled: Scalars['Boolean']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -565,26 +519,11 @@ export enum MatchType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addUserAlert: MutationResponseType;
   createCorridor: MutationResponseType;
   deleteCorridor: MutationResponseType;
-  deleteUser: MutationResponseType;
-  deleteUserAlert: MutationResponseType;
-  inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
-  requestResetPassword: MutationResponseType;
-  resetPassword: MutationResponseType;
-  signUp: MutationResponseType;
   updateCorridor: MutationResponseType;
-  updateUser: UserUpdateResponseType;
-  updateUserAlert: MutationResponseType;
-  verifyResetPasswordToken: Scalars['Boolean']['output'];
-};
-
-
-export type MutationAddUserAlertArgs = {
-  payload: AlertInputType;
 };
 
 
@@ -598,65 +537,14 @@ export type MutationDeleteCorridorArgs = {
 };
 
 
-export type MutationDeleteUserArgs = {
-  username: Scalars['String']['input'];
-};
-
-
-export type MutationDeleteUserAlertArgs = {
-  alertId: Scalars['String']['input'];
-};
-
-
-export type MutationInviteUserArgs = {
-  payload: InvitationInput;
-};
-
-
 export type MutationLoginArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
 };
 
 
-export type MutationRequestResetPasswordArgs = {
-  email: Scalars['String']['input'];
-};
-
-
-export type MutationResetPasswordArgs = {
-  confirmPassword: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
-};
-
-
-export type MutationSignUpArgs = {
-  payload: SignupPayloadType;
-};
-
-
 export type MutationUpdateCorridorArgs = {
   inputs: CorridorUpdateInputType;
-};
-
-
-export type MutationUpdateUserArgs = {
-  payload: UserUpdateInput;
-  username: Scalars['String']['input'];
-};
-
-
-export type MutationUpdateUserAlertArgs = {
-  alertId: Scalars['String']['input'];
-  payload: AlertInputType;
-};
-
-
-export type MutationVerifyResetPasswordTokenArgs = {
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
 };
 
 export type MutationResponseType = {
@@ -775,10 +663,6 @@ export type Organisation = {
   name: Scalars['String']['output'];
 };
 
-export type OrganisationReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -879,7 +763,6 @@ export type Query = {
   findJourneys: Array<Journey>;
   getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
-  invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
@@ -890,10 +773,7 @@ export type Query = {
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<StopStatistics>;
   user?: Maybe<LoginInfo>;
-  userAlert?: Maybe<AlertType>;
-  userAlerts?: Maybe<Array<AlertType>>;
   userOrgs: Array<Organisation>;
-  users?: Maybe<Array<UserType>>;
 };
 
 
@@ -934,11 +814,6 @@ export type QueryFindJourneysArgs = {
 
 export type QueryGetServicePatternDistanceGeomArgs = {
   vehicleJourneyId: Scalars['ID']['input'];
-};
-
-
-export type QueryInvitationArgs = {
-  key: Scalars['String']['input'];
 };
 
 
@@ -983,11 +858,6 @@ export type QueryServicePatternsArgs = {
 
 export type QueryStopAnalysisArgs = {
   inputs: StopAnalysisFiltersInput;
-};
-
-
-export type QueryUserAlertArgs = {
-  alertId: Scalars['String']['input'];
 };
 
 export enum RankingOrder {
@@ -1080,13 +950,6 @@ export type ServicePunctualityType = {
 export type ServicePunctualityTypeTrendArgs = {
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type SignupPayloadType = {
-  firstName: Scalars['String']['input'];
-  key: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
 };
 
 export type Stop = {
@@ -1197,25 +1060,6 @@ export enum StopsSegment {
   Intermediate = 'Intermediate'
 }
 
-export type UserType = {
-  __typename?: 'UserType';
-  firstName?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
-  username: Scalars['String']['output'];
-};
-
-export type UserUpdateInput = {
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-};
-
-export type UserUpdateResponseType = {
-  __typename?: 'UserUpdateResponseType';
-  error?: Maybe<Scalars['String']['output']>;
-  user?: Maybe<UserType>;
-};
-
 export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
   actual: Scalars['Int']['output'];
@@ -1299,10 +1143,6 @@ export type ResolversTypes = ResolversObject<{
   AddFirstStopInputType: ResolverTypeWrapper<Partial<AddFirstStopInputType>>;
   AdminAreasType: ResolverTypeWrapper<Partial<AdminAreasType>>;
   AdminOrgOperatorMap: ResolverTypeWrapper<Partial<AdminOrgOperatorMap>>;
-  AlertInputType: ResolverTypeWrapper<Partial<AlertInputType>>;
-  AlertReferenceInput: ResolverTypeWrapper<Partial<AlertReferenceInput>>;
-  AlertType: ResolverTypeWrapper<Partial<AlertType>>;
-  AlertTypeEnum: ResolverTypeWrapper<Partial<AlertTypeEnum>>;
   ApiInfoType: ResolverTypeWrapper<Partial<ApiInfoType>>;
   AvlFiltersInput: ResolverTypeWrapper<Partial<AvlFiltersInput>>;
   AvlLineLevelStatus: ResolverTypeWrapper<Partial<AvlLineLevelStatus>>;
@@ -1353,9 +1193,6 @@ export type ResolversTypes = ResolversObject<{
   HistoricalStatsType: ResolverTypeWrapper<Partial<HistoricalStatsType>>;
   ID: ResolverTypeWrapper<Partial<Scalars['ID']['output']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']['output']>>;
-  InvitationInput: ResolverTypeWrapper<Partial<InvitationInput>>;
-  InvitationResponseType: ResolverTypeWrapper<Partial<InvitationResponseType>>;
-  InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
   JSON: ResolverTypeWrapper<Partial<Scalars['JSON']['output']>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
@@ -1376,7 +1213,6 @@ export type ResolversTypes = ResolversObject<{
   OperatorPerformanceType: ResolverTypeWrapper<Partial<OperatorPerformanceType>>;
   OperatorType: ResolverTypeWrapper<Partial<OperatorType>>;
   Organisation: ResolverTypeWrapper<Partial<Organisation>>;
-  OrganisationReferenceInput: ResolverTypeWrapper<Partial<OrganisationReferenceInput>>;
   OtpEnum: ResolverTypeWrapper<Partial<OtpEnum>>;
   PageInfo: ResolverTypeWrapper<Partial<PageInfo>>;
   PagingInputType: ResolverTypeWrapper<Partial<PagingInputType>>;
@@ -1398,7 +1234,6 @@ export type ResolversTypes = ResolversObject<{
   ServicePerformanceInputType: ResolverTypeWrapper<Partial<ServicePerformanceInputType>>;
   ServicePerformanceType: ResolverTypeWrapper<Partial<ServicePerformanceType>>;
   ServicePunctualityType: ResolverTypeWrapper<Partial<ServicePunctualityType>>;
-  SignupPayloadType: ResolverTypeWrapper<Partial<SignupPayloadType>>;
   Stop: ResolverTypeWrapper<Partial<Stop>>;
   StopAnalysisFiltersInput: ResolverTypeWrapper<Partial<StopAnalysisFiltersInput>>;
   StopInfoType: ResolverTypeWrapper<Partial<StopInfoType>>;
@@ -1409,9 +1244,6 @@ export type ResolversTypes = ResolversObject<{
   StopsSegment: ResolverTypeWrapper<Partial<StopsSegment>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
   Time: ResolverTypeWrapper<Partial<Scalars['Time']['output']>>;
-  UserType: ResolverTypeWrapper<Partial<UserType>>;
-  UserUpdateInput: ResolverTypeWrapper<Partial<UserUpdateInput>>;
-  UserUpdateResponseType: ResolverTypeWrapper<Partial<UserUpdateResponseType>>;
   VehicleStatsType: ResolverTypeWrapper<Partial<VehicleStatsType>>;
 }>;
 
@@ -1421,9 +1253,6 @@ export type ResolversParentTypes = ResolversObject<{
   AddFirstStopInputType: Partial<AddFirstStopInputType>;
   AdminAreasType: Partial<AdminAreasType>;
   AdminOrgOperatorMap: Partial<AdminOrgOperatorMap>;
-  AlertInputType: Partial<AlertInputType>;
-  AlertReferenceInput: Partial<AlertReferenceInput>;
-  AlertType: Partial<AlertType>;
   ApiInfoType: Partial<ApiInfoType>;
   AvlFiltersInput: Partial<AvlFiltersInput>;
   AvlLineLevelStatus: Partial<AvlLineLevelStatus>;
@@ -1470,9 +1299,6 @@ export type ResolversParentTypes = ResolversObject<{
   HistoricalStatsType: Partial<HistoricalStatsType>;
   ID: Partial<Scalars['ID']['output']>;
   Int: Partial<Scalars['Int']['output']>;
-  InvitationInput: Partial<InvitationInput>;
-  InvitationResponseType: Partial<InvitationResponseType>;
-  InvitationType: Partial<InvitationType>;
   JSON: Partial<Scalars['JSON']['output']>;
   Journey: Partial<Journey>;
   JourneyResult: Partial<JourneyResult>;
@@ -1492,7 +1318,6 @@ export type ResolversParentTypes = ResolversObject<{
   OperatorPerformanceType: Partial<OperatorPerformanceType>;
   OperatorType: Partial<OperatorType>;
   Organisation: Partial<Organisation>;
-  OrganisationReferenceInput: Partial<OrganisationReferenceInput>;
   PageInfo: Partial<PageInfo>;
   PagingInputType: Partial<PagingInputType>;
   PerformanceFiltersInputType: Partial<PerformanceFiltersInputType>;
@@ -1511,7 +1336,6 @@ export type ResolversParentTypes = ResolversObject<{
   ServicePerformanceInputType: Partial<ServicePerformanceInputType>;
   ServicePerformanceType: Partial<ServicePerformanceType>;
   ServicePunctualityType: Partial<ServicePunctualityType>;
-  SignupPayloadType: Partial<SignupPayloadType>;
   Stop: Partial<Stop>;
   StopAnalysisFiltersInput: Partial<StopAnalysisFiltersInput>;
   StopInfoType: Partial<StopInfoType>;
@@ -1520,9 +1344,6 @@ export type ResolversParentTypes = ResolversObject<{
   StopType: Partial<StopType>;
   String: Partial<Scalars['String']['output']>;
   Time: Partial<Scalars['Time']['output']>;
-  UserType: Partial<UserType>;
-  UserUpdateInput: Partial<UserUpdateInput>;
-  UserUpdateResponseType: Partial<UserUpdateResponseType>;
   VehicleStatsType: Partial<VehicleStatsType>;
 }>;
 
@@ -1545,16 +1366,6 @@ export type AdminOrgOperatorMapResolvers<ContextType = RequestContext, ParentTyp
   operatorId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   orgId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   orgName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type AlertTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['AlertType'] = ResolversParentTypes['AlertType']> = ResolversObject<{
-  alertId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  alertType?: Resolver<Maybe<ResolversTypes['AlertTypeEnum']>, ParentType, ContextType>;
-  createdBy?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
-  eventHysterisis?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  eventThreshold?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  sendTo?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1784,18 +1595,6 @@ export type HistoricalStatsTypeResolvers<ContextType = RequestContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type InvitationResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['InvitationResponseType'] = ResolversParentTypes['InvitationResponseType']> = ResolversObject<{
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type InvitationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['InvitationType'] = ResolversParentTypes['InvitationType']> = ResolversObject<{
-  accepted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
   name: 'JSON';
 }
@@ -1803,6 +1602,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type JourneyResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Journey'] = ResolversParentTypes['Journey']> = ResolversObject<{
   directionRef?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   groupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isCancelled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   operatorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operatorNoc?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   serviceName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1869,21 +1669,11 @@ export type LoginResponseResolvers<ContextType = RequestContext, ParentType exte
 }>;
 
 export type MutationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  addUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationAddUserAlertArgs, 'payload'>>;
   createCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationCreateCorridorArgs, 'payload'>>;
   deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteCorridorArgs, 'corridorId'>>;
-  deleteUser?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'username'>>;
-  deleteUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteUserAlertArgs, 'alertId'>>;
-  inviteUser?: Resolver<ResolversTypes['InvitationResponseType'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'payload'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginResponse']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'password' | 'username'>>;
   logout?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  requestResetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationRequestResetPasswordArgs, 'email'>>;
-  resetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'confirmPassword' | 'password' | 'token' | 'uid'>>;
-  signUp?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'payload'>>;
   updateCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationUpdateCorridorArgs, 'inputs'>>;
-  updateUser?: Resolver<ResolversTypes['UserUpdateResponseType'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'payload' | 'username'>>;
-  updateUserAlert?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationUpdateUserAlertArgs, 'alertId' | 'payload'>>;
-  verifyResetPasswordToken?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationVerifyResetPasswordTokenArgs, 'token' | 'uid'>>;
 }>;
 
 export type MutationResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['MutationResponseType'] = ResolversParentTypes['MutationResponseType']> = ResolversObject<{
@@ -2008,7 +1798,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   getServicePatternDistanceGeom?: Resolver<ResolversTypes['ServicePatternDistanceResult'], ParentType, ContextType, RequireFields<QueryGetServicePatternDistanceGeomArgs, 'vehicleJourneyId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
-  invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'inputDate' | 'operatorIds'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
@@ -2019,10 +1808,7 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   servicePatterns?: Resolver<Array<ResolversTypes['ServicePatternType']>, ParentType, ContextType, RequireFields<QueryServicePatternsArgs, 'lineId' | 'operatorId'>>;
   stopAnalysis?: Resolver<Array<ResolversTypes['StopStatistics']>, ParentType, ContextType, RequireFields<QueryStopAnalysisArgs, 'inputs'>>;
   user?: Resolver<Maybe<ResolversTypes['LoginInfo']>, ParentType, ContextType>;
-  userAlert?: Resolver<Maybe<ResolversTypes['AlertType']>, ParentType, ContextType, RequireFields<QueryUserAlertArgs, 'alertId'>>;
-  userAlerts?: Resolver<Maybe<Array<ResolversTypes['AlertType']>>, ParentType, ContextType>;
   userOrgs?: Resolver<Array<ResolversTypes['Organisation']>, ParentType, ContextType>;
-  users?: Resolver<Maybe<Array<ResolversTypes['UserType']>>, ParentType, ContextType>;
 }>;
 
 export type ServiceForDistancesResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['ServiceForDistances'] = ResolversParentTypes['ServiceForDistances']> = ResolversObject<{
@@ -2178,20 +1964,6 @@ export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Time';
 }
 
-export type UserTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserType'] = ResolversParentTypes['UserType']> = ResolversObject<{
-  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type UserUpdateResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['UserUpdateResponseType'] = ResolversParentTypes['UserUpdateResponseType']> = ResolversObject<{
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  user?: Resolver<Maybe<ResolversTypes['UserType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type VehicleStatsTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['VehicleStatsType'] = ResolversParentTypes['VehicleStatsType']> = ResolversObject<{
   actual?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   expected?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -2203,7 +1975,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   AWSQuicksightUser?: AwsQuicksightUserResolvers<ContextType>;
   AdminAreasType?: AdminAreasTypeResolvers<ContextType>;
   AdminOrgOperatorMap?: AdminOrgOperatorMapResolvers<ContextType>;
-  AlertType?: AlertTypeResolvers<ContextType>;
   ApiInfoType?: ApiInfoTypeResolvers<ContextType>;
   AvlLineLevelStatus?: AvlLineLevelStatusResolvers<ContextType>;
   AvlPoint?: AvlPointResolvers<ContextType>;
@@ -2235,8 +2006,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HeadwayOverviewType?: HeadwayOverviewTypeResolvers<ContextType>;
   HeadwayTimeSeriesType?: HeadwayTimeSeriesTypeResolvers<ContextType>;
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
-  InvitationResponseType?: InvitationResponseTypeResolvers<ContextType>;
-  InvitationType?: InvitationTypeResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   Journey?: JourneyResolvers<ContextType>;
   JourneyResult?: JourneyResultResolvers<ContextType>;
@@ -2274,8 +2043,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   StopStatistics?: StopStatisticsResolvers<ContextType>;
   StopType?: StopTypeResolvers<ContextType>;
   Time?: GraphQLScalarType;
-  UserType?: UserTypeResolvers<ContextType>;
-  UserUpdateResponseType?: UserUpdateResponseTypeResolvers<ContextType>;
   VehicleStatsType?: VehicleStatsTypeResolvers<ContextType>;
 }>;
 

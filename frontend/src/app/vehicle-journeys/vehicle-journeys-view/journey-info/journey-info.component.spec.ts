@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { LuxonModule } from "luxon-angular";
 
 import { JourneyInfoComponent } from "./journey-info.component";
-import { VehicleJourneyInfo } from "../vehicle-journey-info.model";
+import { Journey } from "../../../../generated/graphql";
 
 describe("JourneyInfoComponent", () => {
   let component: JourneyInfoComponent;
@@ -15,19 +15,14 @@ describe("JourneyInfoComponent", () => {
   const startTime = DateTime.fromISO("2022-08-18T11:22:00.000+01:00", {
     zone: "utc",
   });
-  const mockInfo = <VehicleJourneyInfo>{
-    operatorInfo: {
-      operatorId: "1",
-      operatorName: "Operator 1",
-      nocCode: "NO1",
-    },
-    serviceInfo: {
-      serviceId: "5",
-      serviceName: "Bristol to Bath",
-      serviceNumber: "5",
-    },
-    startTime: startTime,
-    vehicleId: "ABC-123",
+  const mockInfo: Journey = {
+    groupId: "GP1",
+    operatorName: "OP01",
+    operatorNoc: "OP01",
+    serviceName: "SN1",
+    serviceNumber: "1",
+    startTime: startTime.toISO(),
+    isCancelled: false,
   };
 
   beforeEach(async () => {
@@ -49,7 +44,7 @@ describe("JourneyInfoComponent", () => {
 
   describe("journeyInfo", () => {
     beforeEach(() => {
-      component.journeyInfo = mockInfo;
+      component.journey = mockInfo;
       component.loading = false;
       fixture.detectChanges();
       debugEl = fixture.debugElement.query(By.css(".journey-info"));

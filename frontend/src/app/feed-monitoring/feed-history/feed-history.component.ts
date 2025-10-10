@@ -14,7 +14,6 @@ import {
   tap,
 } from "rxjs/operators";
 import {
-  AlertTypeEnum,
   OperatorFeedHistoryFragment,
   VehicleStatsType,
 } from "src/generated/graphql";
@@ -22,6 +21,7 @@ import { nonNullishArray } from "../../shared/array-operators";
 import {
   AlertListViewModel,
   AlertMode,
+  AlertType,
 } from "../alert-list/alert-list-view-model";
 import { EventStats, FeedMonitoringService } from "../feed-monitoring.service";
 import { IHeatmap } from "./datenav/datenav.component";
@@ -61,7 +61,7 @@ export class FeedHistoryComponent implements OnInit, OnDestroy {
 
   vehicleStats?: VehicleStatsType[];
 
-  alerts: { timestamp: DateTime; type: AlertTypeEnum; id: string }[] = [];
+  alerts: { timestamp: DateTime; type: AlertType; id: string }[] = [];
 
   private destroy$ = new Subject<void>();
 

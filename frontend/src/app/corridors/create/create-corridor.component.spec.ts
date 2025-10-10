@@ -1,4 +1,8 @@
-import { CreateCorridorComponent } from "./create-corridor.component";
+import { CommonModule } from "@angular/common";
+import { EventEmitter, Input, Output } from "@angular/core";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Data, Router } from "@angular/router";
+import { NgSelectModule } from "@ng-select/ng-select";
 import {
   byLabel,
   byText,
@@ -9,31 +13,29 @@ import {
   SpectatorRouting,
   SpyObject,
 } from "@ngneat/spectator";
-import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
-import { RouterTestingModule } from "@angular/router/testing";
-import { Corridor, CorridorsService } from "../corridors.service";
-import { EMPTY, of, throwError } from "rxjs";
-import { Router } from "@angular/router";
+import { featureCollection, point, Position } from "@turf/helpers";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { GeocodingService } from "../../shared/mapbox/geocoding.service";
-import { featureCollection, point, points, Position } from "@turf/helpers";
-import { NgSelectModule } from "@ng-select/ng-select";
 import { LngLatBounds, LngLatBoundsLike, LngLatLike, Map } from "mapbox-gl";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { EventEmitter, Input, Output } from "@angular/core";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxSmartModalModule } from "ngx-smart-modal";
+import { EMPTY, of, throwError } from "rxjs";
+import { LayoutModule } from "../../layout/layout.module";
+import { GeocodingService } from "../../shared/mapbox/geocoding.service";
 import {
   GeocodingContext,
   GeocodingFeature,
   GeocodingResult,
 } from "../../shared/mapbox/geocoding.types";
-import { CommonModule } from "@angular/common";
-import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
-import { StopSearchListComponent } from "./stop-search-list/stop-search-list.component";
-import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
-import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
-import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
+import { SharedModule } from "../../shared/shared.module";
 import { CorridorNotFoundView } from "../corridor-not-found-view.model";
+import { CorridorsService } from "../corridors.service";
+import { DeleteCorridorModalComponent } from "../delete-corridor-modal/delete-corridor-modal.component";
+import { Corridor } from "../types";
+import { CorridorMapComponent } from "./corridor-map/corridor-map.component";
+import { CorridorStopListComponent } from "./corridor-stop-list/corridor-stop-list.component";
+import { CreateCorridorComponent } from "./create-corridor.component";
+import { StopSearchListComponent } from "./stop-search-list/stop-search-list.component";
 
 const testStop1 = {
   stopId: "ST012345",
@@ -68,24 +70,10 @@ const testStop4 = {
   intId: 3,
 };
 
-const corridor = <Corridor>{
+const corridor: Corridor = {
   name: "test corridor",
   id: 123,
   stops: [testStop1, testStop2, testStop3],
-};
-
-const geocodingResult = (
-  coordinates: Position,
-  bbox: BBox2d,
-  text: string,
-  context: GeocodingContext[] = [],
-) => {
-  const result = featureCollection([
-    point(coordinates, {}, { bbox }),
-  ]) as GeocodingResult;
-  result.features[0].text = text;
-  result.features[0].context = context;
-  return result;
 };
 
 class StubMapComponent {
@@ -111,7 +99,7 @@ describe("CreateCorridorComponent", () => {
   let geocodingService: SpyObject<GeocodingService>;
   let router: Router;
 
-  const createComponent = (data?: any) =>
+  const createComponent = (data?: Data) =>
     createRoutingFactory({
       component: CreateCorridorComponent,
       data: data,
@@ -119,11 +107,12 @@ describe("CreateCorridorComponent", () => {
         SharedModule,
         CommonModule,
         LayoutModule,
-        RouterTestingModule,
         ApolloTestingModule,
         NgSelectModule,
         FormsModule,
         ReactiveFormsModule,
+        NgxMapboxGLModule,
+        NgxSmartModalModule,
       ],
       declarations: [
         CorridorMapComponent,
@@ -143,12 +132,27 @@ describe("CreateCorridorComponent", () => {
     corridor: new CorridorNotFoundView(),
   });
 
+  const geocodingResult = (
+    coordinates: Position,
+    bbox: BBox2d,
+    text: string,
+    context: GeocodingContext[] = [],
+  ) => {
+    const result = featureCollection([
+      point(coordinates, {}, { bbox }),
+    ]) as GeocodingResult;
+    result.features[0].text = text;
+    result.features[0].context = context;
+    return result;
+  };
+
   describe("create new corridor", () => {
     beforeEach(() => {
       spectator = createComponentWithNoData();
       corridorsService = spectator.inject(CorridorsService);
       geocodingService = spectator.inject(GeocodingService);
       router = spectator.inject(Router);
+      (router.navigate as jasmine.Spy).and.resolveTo(true);
       spectator.component.corridorMap.map = new StubMapComponent().mapInstance;
       spectator.detectChanges();
     });
@@ -173,7 +177,10 @@ describe("CreateCorridorComponent", () => {
       spectator.fixture.detectChanges();
 
       expect(spy).toHaveBeenCalledWith("station", undefined);
-      expect(spectator.component.matchingStops?.features?.length).toEqual(1);
+      await expect(spectator.component.matchingStops?.features?.length).toEqual(
+        1,
+      );
+
       expect(spectator.query(byText("Station Road"))).toBeVisible();
     });
 
@@ -209,8 +216,11 @@ describe("CreateCorridorComponent", () => {
       spectator.component.setStopList([testStop1]);
       spectator.fixture.detectChanges();
 
-      expect(spy).toHaveBeenCalledWith(["ST012345"]);
-      expect(spectator.component.matchingStops?.features?.length).toEqual(1);
+      expect(spy).toHaveBeenCalledWith(["012345"]);
+      await expect(spectator.component.matchingStops?.features?.length).toEqual(
+        1,
+      );
+
       expect(spectator.query(byText("High Street"))).toBeVisible();
     });
 
@@ -237,6 +247,7 @@ describe("CreateCorridorComponent", () => {
         "ST012345",
         "ST023456",
       ]);
+
       expect(router.navigate).toHaveBeenCalledWith(["/corridors"]);
     });
 
@@ -264,7 +275,8 @@ describe("CreateCorridorComponent", () => {
         "ST012345",
         "ST023456",
       ]);
-      expect(router.navigate).toHaveBeenCalledTimes(1);
+
+      await expect(router.navigate).toHaveBeenCalledTimes(1);
     });
 
     it("should show empty list if user deletes search query", async () => {
@@ -280,8 +292,11 @@ describe("CreateCorridorComponent", () => {
       await spectator.fixture.whenRenderingDone();
 
       expect(spy).not.toHaveBeenCalledWith("");
-      expect(spectator.component.matchingStops?.features?.length).toBeFalsy();
-      expect(spectator.query(".create_corridor__stop")).toBeNull();
+      await expect(
+        spectator.component.matchingStops?.features?.length,
+      ).toBeFalsy();
+
+      await expect(spectator.query(".create_corridor__stop")).toBeNull();
     });
 
     it("should not search if 3 or less characters", async () => {
@@ -293,8 +308,11 @@ describe("CreateCorridorComponent", () => {
       await spectator.fixture.whenRenderingDone();
 
       expect(spy).not.toHaveBeenCalledWith("");
-      expect(spectator.component.matchingStops?.features?.length).toBeFalsy();
-      expect(spectator.query(".create_corridor__stop")).toBeNull();
+      await expect(
+        spectator.component.matchingStops?.features?.length,
+      ).toBeFalsy();
+
+      await expect(spectator.query(".create_corridor__stop")).toBeNull();
     });
 
     it("should display custom error message if submit call errors", () => {
@@ -313,7 +331,13 @@ describe("CreateCorridorComponent", () => {
 
     it("should look up locations using geocoding service", async () => {
       const spy = geocodingService.forward.and.returnValue(
-        of(points([[53.397, -1.407]])),
+        of(
+          geocodingResult(
+            [53.397, -1.407],
+            [53.397, -1.407, 53.397, -1.407],
+            "Some Place",
+          ),
+        ),
       );
 
       // Wait for the mode selector to init
@@ -331,7 +355,7 @@ describe("CreateCorridorComponent", () => {
 
       expect(spy).toHaveBeenCalledWith("arundel gate", {
         excludeTypes: ["poi", "region", "country"],
-        proximity: null,
+        proximity: undefined,
       });
     });
 
@@ -418,7 +442,11 @@ describe("CreateCorridorComponent", () => {
         undefined,
         new LngLatBounds([-1.47, 53.37], [-1.46, 53.39]),
       );
-      expect(spectator.component.matchingStops?.features?.length).toEqual(1);
+
+      await expect(spectator.component.matchingStops?.features?.length).toEqual(
+        1,
+      );
+
       expect(spectator.query(byText("Sheffield Interchange/A1"))).toBeVisible();
     });
 
@@ -442,7 +470,7 @@ describe("CreateCorridorComponent", () => {
       await spectator.fixture.whenStable();
       spectator.fixture.detectChanges();
 
-      expect(spectator.component.corridorMap.hoveredStop).toBeUndefined();
+      await expect(spectator.component.corridorMap.hoveredStop).toBeUndefined();
     });
 
     it("should not load stops in location mode when zoomed out too far", async () => {
@@ -473,7 +501,7 @@ describe("CreateCorridorComponent", () => {
       await spectator.fixture.whenStable();
       spectator.detectChanges();
 
-      expect(spy).not.toHaveBeenCalled();
+      await expect(spy).not.toHaveBeenCalled();
       expect(
         spectator.query(
           byText("Search area too large, please zoom in to show stops"),
@@ -482,10 +510,7 @@ describe("CreateCorridorComponent", () => {
     });
 
     it("setMapBounds() should call fitBounds() if value passed is of type array", () => {
-      const spy = spyOn(
-        spectator.component.corridorMap?.map as Map,
-        "fitBounds",
-      );
+      const spy = spyOn(spectator.component.corridorMap.map!, "fitBounds");
       const bbox = [1, 2, 3, 4] as BBox2d;
       const FIT_BOUNDS_OPTIONS = { padding: 50, maxZoom: 16, duration: 0 };
       spectator.component.setMapBounds(bbox, FIT_BOUNDS_OPTIONS);
@@ -499,7 +524,7 @@ describe("CreateCorridorComponent", () => {
       spectator.component.setMapBounds(geocodingFeature);
       spectator.detectChanges();
 
-      expect(spectator.component.corridorMap?.map?.flyTo).toHaveBeenCalledWith({
+      expect(spectator.component.corridorMap.map!.flyTo).toHaveBeenCalledWith({
         duration: 0,
         zoom: 15,
       });
@@ -519,11 +544,11 @@ describe("CreateCorridorComponent", () => {
       );
     });
 
-    it("centreMapBounds() should resolve to null if no currentBounds are present", () => {
+    it("centreMapBounds() should resolve to null if no currentBounds are present", async () => {
       spectator.component.centreMapBounds();
       spectator.detectChanges();
 
-      expect(spectator.component.centreMapBounds()).toEqual(null);
+      await expect(spectator.component.centreMapBounds()).toEqual(null);
     });
   });
 
@@ -537,9 +562,9 @@ describe("CreateCorridorComponent", () => {
       spectator.detectChanges();
     });
 
-    it("should show error message if no corridor is found", () => {
+    it("should show error message if no corridor is found", async () => {
       expect(spectator.query(byText("Not found"))).toBeVisible();
-      expect(spectator.query(".govuk-body")?.innerHTML).toContain(
+      await expect(spectator.query(".govuk-body")?.innerHTML).toContain(
         "Corridor not found, or you do not have permission to view.",
       );
     });
@@ -551,6 +576,7 @@ describe("CreateCorridorComponent", () => {
       corridorsService = spectator.inject(CorridorsService);
       geocodingService = spectator.inject(GeocodingService);
       router = spectator.inject(Router);
+      (router.navigate as jasmine.Spy).and.resolveTo(true);
       spectator.component.corridorMap.map = new StubMapComponent().mapInstance;
       spyOn(corridorsService, "fetchSubsequentStops").and.returnValue(
         of([testStop4]),
@@ -578,6 +604,7 @@ describe("CreateCorridorComponent", () => {
     });
 
     it("should save corridor as new", () => {
+      const router = spectator.inject(Router);
       const serviceSpy = spyOn(
         corridorsService,
         "createCorridor",
@@ -590,6 +617,7 @@ describe("CreateCorridorComponent", () => {
         "ST023456",
         "ST987654",
       ]);
+
       expect(router.navigate).toHaveBeenCalledWith(["/corridors"]);
     });
 
@@ -599,12 +627,14 @@ describe("CreateCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(spectator.query(byText("Delete corridor?"))).toBeVisible();
-      expect(spectator.query("#delete-modal-body")?.innerHTML).toContain(
+
+      await expect(spectator.query("#delete-modal-body")?.innerHTML).toContain(
         "Are you sure you want to delete the corridor <strong>test corridor</strong>? This operation cannot be undone.",
       );
     });
 
     it("should delete corridor", async () => {
+      const router = spectator.inject(Router);
       spyOn(corridorsService, "deleteCorridor").and.returnValue(of(undefined));
 
       spectator.click(byText("Delete this corridor"));
@@ -627,8 +657,8 @@ describe("CreateCorridorComponent", () => {
 
       spectator.click(byText("Delete corridor"));
 
-      expect(corridorsService.deleteCorridor).not.toHaveBeenCalled();
-      expect(router.navigate).not.toHaveBeenCalled();
+      await expect(corridorsService.deleteCorridor).not.toHaveBeenCalled();
+      await expect(router.navigate).not.toHaveBeenCalled();
     });
 
     it("should show error message if delete corridor errored", async () => {
@@ -672,8 +702,9 @@ describe("CreateCorridorComponent", () => {
     });
 
     it("navigateToPreviousView() should navigate to previous view", async () => {
-      spectator.router.navigate(["/corridors/1000"]);
-      spectator.router.navigate(["/corridors/edit/1000"]);
+      const router = spectator.inject(Router);
+      await router.navigate(["/corridors/1000"]);
+      await router.navigate(["/corridors/edit/1000"]);
 
       spectator.component.navigateToPreviousView();
 

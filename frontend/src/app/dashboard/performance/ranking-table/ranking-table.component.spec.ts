@@ -2,14 +2,14 @@ import { byText, createComponentFactory, Spectator } from "@ngneat/spectator";
 import { RankingOrder, ServicePunctualityType } from "src/generated/graphql";
 import { fakeDashboardServiceRanking } from "src/test-support/faker";
 
-import { PerformanceRankingComponent } from "./ranking-table.component";
+import { RouterModule } from "@angular/router";
 import * as faker from "faker";
 import { DateTime } from "luxon";
-import { ChangeComponent } from "src/app/shared/components/change/change.component";
-import { SharedModule } from "src/app/shared/shared.module";
 import { LayoutModule } from "src/app/layout/layout.module";
-import { RouterTestingModule } from "@angular/router/testing";
+import { ChangeComponent } from "src/app/shared/components/change/change.component";
 import { Period } from "src/app/shared/components/date-range/date-range.types";
+import { SharedModule } from "src/app/shared/shared.module";
+import { PerformanceRankingComponent } from "./ranking-table.component";
 
 describe("PerformanceRankingComponent", () => {
   let spectator: Spectator<PerformanceRankingComponent>;
@@ -18,7 +18,7 @@ describe("PerformanceRankingComponent", () => {
   const createComponent = createComponentFactory({
     component: PerformanceRankingComponent,
     declarations: [ChangeComponent],
-    imports: [SharedModule, LayoutModule, RouterTestingModule],
+    imports: [SharedModule, LayoutModule, RouterModule.forRoot([])],
     detectChanges: false,
   });
 
@@ -64,10 +64,10 @@ describe("PerformanceRankingComponent", () => {
     };
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 
   it("should emit change order events", () => {
@@ -86,31 +86,31 @@ describe("PerformanceRankingComponent", () => {
     expect(outputSpy).toHaveBeenCalledWith(RankingOrder.Descending);
   });
 
-  it("should display service name and line in table", () => {
+  it("should display service name and line in table", async () => {
     spectator.detectChanges();
 
     const serviceNames = spectator
       .queryAll(".ranking-table__service")
       .map((r) => r.textContent);
 
-    expect(serviceNames).toEqual(
+    await expect(serviceNames).toEqual(
       jasmine.arrayWithExactContents(
         services.map(
-          ({ lineInfo: { serviceNumber, serviceName } }) =>
-            `${serviceNumber}: ${serviceName}`,
+          ({ lineInfo }) =>
+            `${lineInfo?.serviceNumber ?? ""}: ${lineInfo?.serviceName ?? ""}`,
         ),
       ),
     );
   });
 
-  it("should display operator name in table", () => {
+  it("should display operator name in table", async () => {
     spectator.detectChanges();
 
     const operatorCodes = spectator
       .queryAll(".ranking-table__operator")
       .map((r) => r.textContent);
 
-    expect(operatorCodes).toEqual(
+    await expect(operatorCodes).toEqual(
       jasmine.arrayWithExactContents([
         "Operator 1",
         "Operator 2",

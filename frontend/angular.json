@@ -27,12 +27,25 @@
               "base": "dist/raa-client"
             },
             "index": "src/index.html",
-            "polyfills": ["zone.js", "@angular/localize/init"],
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
-            "assets": ["src/assets", "src/freshdesk", "src/favicon.ico", "src/config.json", "src/version.json"],
-            "styles": ["src/styles.scss"],
-            "scripts": ["node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js"],
+            "assets": [
+              "src/assets",
+              "src/freshdesk",
+              "src/favicon.ico",
+              "src/config.json",
+              "src/version.json"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": [
+              "node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js"
+            ],
             "allowedCommonJsDependencies": [
               "@babel/runtime",
               "amazon-quicksight-embedding-sdk",
@@ -47,7 +60,11 @@
             "browser": "src/main.ts",
             "stylePreprocessorOptions": {
               "sass": {
-                "silenceDeprecations": ["mixed-decls", "import", "global-builtin"]
+                "silenceDeprecations": [
+                  "mixed-decls",
+                  "import",
+                  "global-builtin"
+                ]
               },
               "includePaths": [
                 "."
@@ -115,30 +132,31 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": ["zone.js", "@angular/localize/init"],
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": ["src/favicon.ico", "src/assets", "src/config.json"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              "src/config.json"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html", "src/**/*.graphql"]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "raa-client:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "raa-client:serve:production"
-            }
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html",
+              "src/**/*.graphql"
+            ]
           }
         }
       }
@@ -146,6 +164,8 @@
   },
   "cli": {
     "analytics": false,
-    "schematicCollections": ["@angular-eslint/schematics"]
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }

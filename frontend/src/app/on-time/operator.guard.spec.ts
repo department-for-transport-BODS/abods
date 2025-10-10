@@ -8,9 +8,10 @@ import {
 import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
-import { Operator, OperatorService } from "../shared/services/operator.service";
+import { OperatorService } from "../shared/services/operator.service";
 
 import { OperatorGuard } from "./operator.guard";
+import { OperatorType } from "../../generated/graphql";
 
 describe("OperatorGuard", () => {
   let guard: OperatorGuard;
@@ -30,7 +31,7 @@ describe("OperatorGuard", () => {
         {
           provide: Router,
           useValue: {
-            parseUrl: () => <UrlTree>{ toString: () => "" },
+            parseUrl: () => ({ toString: () => "" }),
           },
         },
       ],
@@ -46,17 +47,17 @@ describe("OperatorGuard", () => {
 
   it("should return true if organisation can access operator", () => {
     spyOn(operatorService, "fetchOperator").and.returnValue(
-      of(<Operator>{
+      of({
         name: "ABC Buses",
         nocCode: "ABC",
         adminAreaIds: ["123"],
-      }),
+      } as OperatorType),
     );
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{
+      .canActivate({
         paramMap: convertToParamMap({ nocCode: "ABC" }),
-      })
+      } as ActivatedRouteSnapshot)
       .subscribe((value) => {
         expect(value).toBeTrue();
       });
@@ -64,14 +65,14 @@ describe("OperatorGuard", () => {
 
   it("should return on-time/operator-not-found if organisation cannot access operator", () => {
     spyOn(operatorService, "fetchOperator").and.returnValue(of(undefined));
-    spyOn(router, "parseUrl").and.returnValue(<UrlTree>{
+    spyOn(router, "parseUrl").and.returnValue({
       toString: () => "on-time/operator-not-found",
-    });
+    } as UrlTree);
 
     guard
-      .canActivate(<ActivatedRouteSnapshot>{
+      .canActivate({
         paramMap: convertToParamMap({ nocCode: "ABC" }),
-      })
+      } as ActivatedRouteSnapshot)
       .subscribe((value) => {
         expect(value.toString()).toEqual("on-time/operator-not-found");
       });

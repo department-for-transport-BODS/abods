@@ -49,36 +49,6 @@ export type AdminOrgOperatorMap = {
   orgName?: Maybe<Scalars['String']['output']>;
 };
 
-export type AlertInputType = {
-  alertType: AlertTypeEnum;
-  eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
-  eventThreshold?: InputMaybe<Scalars['Int']['input']>;
-  sendTo: AlertReferenceInput;
-};
-
-export type AlertReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
-export type AlertType = {
-  __typename?: 'AlertType';
-  alertId: Scalars['String']['output'];
-  alertType?: Maybe<AlertTypeEnum>;
-  createdBy?: Maybe<UserType>;
-  eventHysterisis?: Maybe<Scalars['Int']['output']>;
-  eventThreshold?: Maybe<Scalars['Int']['output']>;
-  sendTo?: Maybe<UserType>;
-};
-
-export enum AlertTypeEnum {
-  FeedAvailableEvent = 'FeedAvailableEvent',
-  FeedComplianceFailure = 'FeedComplianceFailure',
-  FeedFailure = 'FeedFailure',
-  FeedUnavailableEvent = 'FeedUnavailableEvent',
-  VehicleCountDisparity = 'VehicleCountDisparity',
-  VehicleCountDisparityEvent = 'VehicleCountDisparityEvent'
-}
-
 export type ApiInfoType = {
   __typename?: 'ApiInfoType';
   buildNumber: Scalars['String']['output'];
@@ -473,27 +443,11 @@ export type HistoricalStatsType = {
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
-export type InvitationInput = {
-  email: Scalars['String']['input'];
-  organisation: OrganisationReferenceInput;
-};
-
-export type InvitationResponseType = {
-  __typename?: 'InvitationResponseType';
-  error?: Maybe<Scalars['String']['output']>;
-  invitation?: Maybe<InvitationType>;
-};
-
-export type InvitationType = {
-  __typename?: 'InvitationType';
-  accepted: Scalars['Boolean']['output'];
-  email: Scalars['String']['output'];
-};
-
 export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
   groupId: Scalars['String']['output'];
+  isCancelled: Scalars['Boolean']['output'];
   operatorName: Scalars['String']['output'];
   operatorNoc: Scalars['String']['output'];
   serviceName: Scalars['String']['output'];
@@ -565,26 +519,11 @@ export enum MatchType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addUserAlert: MutationResponseType;
   createCorridor: MutationResponseType;
   deleteCorridor: MutationResponseType;
-  deleteUser: MutationResponseType;
-  deleteUserAlert: MutationResponseType;
-  inviteUser: InvitationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
-  requestResetPassword: MutationResponseType;
-  resetPassword: MutationResponseType;
-  signUp: MutationResponseType;
   updateCorridor: MutationResponseType;
-  updateUser: UserUpdateResponseType;
-  updateUserAlert: MutationResponseType;
-  verifyResetPasswordToken: Scalars['Boolean']['output'];
-};
-
-
-export type MutationAddUserAlertArgs = {
-  payload: AlertInputType;
 };
 
 
@@ -598,65 +537,14 @@ export type MutationDeleteCorridorArgs = {
 };
 
 
-export type MutationDeleteUserArgs = {
-  username: Scalars['String']['input'];
-};
-
-
-export type MutationDeleteUserAlertArgs = {
-  alertId: Scalars['String']['input'];
-};
-
-
-export type MutationInviteUserArgs = {
-  payload: InvitationInput;
-};
-
-
 export type MutationLoginArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
 };
 
 
-export type MutationRequestResetPasswordArgs = {
-  email: Scalars['String']['input'];
-};
-
-
-export type MutationResetPasswordArgs = {
-  confirmPassword: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
-};
-
-
-export type MutationSignUpArgs = {
-  payload: SignupPayloadType;
-};
-
-
 export type MutationUpdateCorridorArgs = {
   inputs: CorridorUpdateInputType;
-};
-
-
-export type MutationUpdateUserArgs = {
-  payload: UserUpdateInput;
-  username: Scalars['String']['input'];
-};
-
-
-export type MutationUpdateUserAlertArgs = {
-  alertId: Scalars['String']['input'];
-  payload: AlertInputType;
-};
-
-
-export type MutationVerifyResetPasswordTokenArgs = {
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
 };
 
 export type MutationResponseType = {
@@ -775,10 +663,6 @@ export type Organisation = {
   name: Scalars['String']['output'];
 };
 
-export type OrganisationReferenceInput = {
-  id: Scalars['String']['input'];
-};
-
 export enum OtpEnum {
   Early = 'Early',
   Late = 'Late',
@@ -879,7 +763,6 @@ export type Query = {
   findJourneys: Array<Journey>;
   getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
-  invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
@@ -890,10 +773,7 @@ export type Query = {
   servicePatterns: Array<ServicePatternType>;
   stopAnalysis: Array<StopStatistics>;
   user?: Maybe<LoginInfo>;
-  userAlert?: Maybe<AlertType>;
-  userAlerts?: Maybe<Array<AlertType>>;
   userOrgs: Array<Organisation>;
-  users?: Maybe<Array<UserType>>;
 };
 
 
@@ -934,11 +814,6 @@ export type QueryFindJourneysArgs = {
 
 export type QueryGetServicePatternDistanceGeomArgs = {
   vehicleJourneyId: Scalars['ID']['input'];
-};
-
-
-export type QueryInvitationArgs = {
-  key: Scalars['String']['input'];
 };
 
 
@@ -983,11 +858,6 @@ export type QueryServicePatternsArgs = {
 
 export type QueryStopAnalysisArgs = {
   inputs: StopAnalysisFiltersInput;
-};
-
-
-export type QueryUserAlertArgs = {
-  alertId: Scalars['String']['input'];
 };
 
 export enum RankingOrder {
@@ -1080,13 +950,6 @@ export type ServicePunctualityType = {
 export type ServicePunctualityTypeTrendArgs = {
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type SignupPayloadType = {
-  firstName: Scalars['String']['input'];
-  key: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
 };
 
 export type Stop = {
@@ -1196,25 +1059,6 @@ export enum StopsSegment {
   First = 'First',
   Intermediate = 'Intermediate'
 }
-
-export type UserType = {
-  __typename?: 'UserType';
-  firstName?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
-  username: Scalars['String']['output'];
-};
-
-export type UserUpdateInput = {
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-};
-
-export type UserUpdateResponseType = {
-  __typename?: 'UserUpdateResponseType';
-  error?: Maybe<Scalars['String']['output']>;
-  user?: Maybe<UserType>;
-};
 
 export type VehicleStatsType = {
   __typename?: 'VehicleStatsType';
@@ -1523,79 +1367,6 @@ export type TransitModelServicePatternStopsQueryVariables = Exact<{
 
 export type TransitModelServicePatternStopsQuery = { __typename?: 'Query', servicePatterns: Array<{ __typename?: 'ServicePatternType', servicePatternId: string, stops: Array<{ __typename?: 'StopType', stopId: string, stopName: string, lon: number, lat: number }>, serviceLinks: Array<{ __typename?: 'ServiceLinkType', fromStop: string, toStop: string, distance: number, routeValidity: RouteType, linkRoute?: string | null }> }> };
 
-export type UserFragment = { __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null };
-
-export type AlertFragment = { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null };
-
-export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListUsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null }> | null };
-
-export type ListUserAlertsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListUserAlertsQuery = { __typename?: 'Query', userAlerts?: Array<{ __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null }> | null };
-
-export type FetchUserAlertQueryVariables = Exact<{
-  alertId: Scalars['String']['input'];
-}>;
-
-
-export type FetchUserAlertQuery = { __typename?: 'Query', userAlert?: { __typename?: 'AlertType', alertId: string, alertType?: AlertTypeEnum | null, eventHysterisis?: number | null, eventThreshold?: number | null, createdBy?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null, sendTo?: { __typename?: 'UserType', id: string, firstName?: string | null, lastName?: string | null, username: string } | null } | null };
-
-export type EditUserMutationVariables = Exact<{
-  username: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-}>;
-
-
-export type EditUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserUpdateResponseType', error?: string | null, user?: { __typename?: 'UserType', id: string, username: string, firstName?: string | null, lastName?: string | null } | null } };
-
-export type RemoveUserMutationVariables = Exact<{
-  username: Scalars['String']['input'];
-}>;
-
-
-export type RemoveUserMutation = { __typename?: 'Mutation', deleteUser: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
-
-export type InviteUserMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-  organisationId: Scalars['String']['input'];
-}>;
-
-
-export type InviteUserMutation = { __typename?: 'Mutation', inviteUser: { __typename?: 'InvitationResponseType', error?: string | null, invitation?: { __typename?: 'InvitationType', email: string, accepted: boolean } | null } };
-
-export type UpdateUserAlertMutationVariables = Exact<{
-  alertId: Scalars['String']['input'];
-  alertType: AlertTypeEnum;
-  sendToId: Scalars['String']['input'];
-  eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
-  eventThreshold?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type UpdateUserAlertMutation = { __typename?: 'Mutation', updateUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
-
-export type CreateUserAlertMutationVariables = Exact<{
-  alertType: AlertTypeEnum;
-  sendToId: Scalars['String']['input'];
-  eventHysterisis?: InputMaybe<Scalars['Int']['input']>;
-  eventThreshold?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type CreateUserAlertMutation = { __typename?: 'Mutation', addUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
-
-export type DeleteUserAlertMutationVariables = Exact<{
-  alertId: Scalars['String']['input'];
-}>;
-
-
-export type DeleteUserAlertMutation = { __typename?: 'Mutation', deleteUserAlert: { __typename?: 'MutationResponseType', success: boolean, error?: string | null } };
-
 export type OperatorListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1626,48 +1397,6 @@ export type StopAnalysisQueryVariables = Exact<{
 
 export type StopAnalysisQuery = { __typename?: 'Query', stopAnalysis: Array<{ __typename?: 'StopStatistics', atcoCode: string, stopName: string, localityName: string, adminAreaName: string, timingPoint: boolean, latitude: number, longitude: number, early: number, late: number, onTime: number, scheduledDepartures: number, completedDepartures: number, totalDelay: number, onTimeInSeconds?: number | null, earlyInSeconds?: number | null, lateInSeconds?: number | null, averageDelay?: number | null, direction?: string | null, countDelayed?: number | null, averageScheduled?: number | null, averageScheduledTimingPoint?: number | null, averageActual?: number | null, averageActualTimingPoint?: number | null }> };
 
-export type RequestResetPasswordMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-
-export type RequestResetPasswordMutation = { __typename?: 'Mutation', requestResetPassword: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type ResetPasswordMutationVariables = Exact<{
-  uid: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  confirmPassword: Scalars['String']['input'];
-}>;
-
-
-export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type VerifyResetPasswordTokenMutationVariables = Exact<{
-  uid: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-}>;
-
-
-export type VerifyResetPasswordTokenMutation = { __typename?: 'Mutation', verifyResetPasswordToken: boolean };
-
-export type SignUpMutationVariables = Exact<{
-  key: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-}>;
-
-
-export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: 'MutationResponseType', error?: string | null, success: boolean } };
-
-export type InvitationQueryVariables = Exact<{
-  key: Scalars['String']['input'];
-}>;
-
-
-export type InvitationQuery = { __typename?: 'Query', invitation?: { __typename?: 'InvitationType', email: string, accepted: boolean } | null };
-
 export type JourneyQueryVariables = Exact<{
   groupId: Scalars['String']['input'];
   lineId: Scalars['String']['input'];
@@ -1682,7 +1411,7 @@ export type JourneysQueryVariables = Exact<{
 }>;
 
 
-export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, vehicleJourneyId?: number | null }> };
+export type JourneysQuery = { __typename?: 'Query', findJourneys: Array<{ __typename?: 'Journey', groupId: string, startTime: string, serviceName: string, serviceNumber: string, operatorName: string, operatorNoc: string, directionRef?: string | null, isCancelled: boolean, vehicleJourneyId?: number | null }> };
 
 export type ServicePatternDistanceGeomQueryVariables = Exact<{
   vehicleJourneyId: Scalars['ID']['input'];
@@ -1782,34 +1511,6 @@ export const OperatorFeedHistoryFragmentDoc = gql`
   }
 }
     ${VehicleStatFragmentDoc}`;
-export const UserFragmentDoc = gql`
-    fragment User on UserType {
-  id
-  username
-  firstName
-  lastName
-}
-    `;
-export const AlertFragmentDoc = gql`
-    fragment Alert on AlertType {
-  alertId
-  alertType
-  createdBy {
-    id
-    firstName
-    lastName
-    username
-  }
-  sendTo {
-    id
-    firstName
-    lastName
-    username
-  }
-  eventHysterisis
-  eventThreshold
-}
-    `;
 export const LoginDocument = gql`
     mutation login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
@@ -2848,187 +2549,6 @@ export const TransitModelServicePatternStopsDocument = gql`
       super(apollo);
     }
   }
-export const ListUsersDocument = gql`
-    query listUsers {
-  users {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ListUsersGQL extends Apollo.Query<ListUsersQuery, ListUsersQueryVariables> {
-    document = ListUsersDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const ListUserAlertsDocument = gql`
-    query listUserAlerts {
-  userAlerts {
-    ...Alert
-  }
-}
-    ${AlertFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ListUserAlertsGQL extends Apollo.Query<ListUserAlertsQuery, ListUserAlertsQueryVariables> {
-    document = ListUserAlertsDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const FetchUserAlertDocument = gql`
-    query fetchUserAlert($alertId: String!) {
-  userAlert(alertId: $alertId) {
-    ...Alert
-  }
-}
-    ${AlertFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class FetchUserAlertGQL extends Apollo.Query<FetchUserAlertQuery, FetchUserAlertQueryVariables> {
-    document = FetchUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const EditUserDocument = gql`
-    mutation editUser($username: String!, $firstName: String!, $lastName: String!) {
-  updateUser(
-    username: $username
-    payload: {firstName: $firstName, lastName: $lastName}
-  ) {
-    error
-    user {
-      ...User
-    }
-  }
-}
-    ${UserFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class EditUserGQL extends Apollo.Mutation<EditUserMutation, EditUserMutationVariables> {
-    document = EditUserDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const RemoveUserDocument = gql`
-    mutation removeUser($username: String!) {
-  deleteUser(username: $username) {
-    success
-    error
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class RemoveUserGQL extends Apollo.Mutation<RemoveUserMutation, RemoveUserMutationVariables> {
-    document = RemoveUserDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const InviteUserDocument = gql`
-    mutation inviteUser($email: String!, $organisationId: String!) {
-  inviteUser(payload: {email: $email, organisation: {id: $organisationId}}) {
-    invitation {
-      email
-      accepted
-    }
-    error
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class InviteUserGQL extends Apollo.Mutation<InviteUserMutation, InviteUserMutationVariables> {
-    document = InviteUserDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const UpdateUserAlertDocument = gql`
-    mutation updateUserAlert($alertId: String!, $alertType: AlertTypeEnum!, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
-  updateUserAlert(
-    alertId: $alertId
-    payload: {alertType: $alertType, sendTo: {id: $sendToId}, eventHysterisis: $eventHysterisis, eventThreshold: $eventThreshold}
-  ) {
-    success
-    error
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class UpdateUserAlertGQL extends Apollo.Mutation<UpdateUserAlertMutation, UpdateUserAlertMutationVariables> {
-    document = UpdateUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const CreateUserAlertDocument = gql`
-    mutation createUserAlert($alertType: AlertTypeEnum!, $sendToId: String!, $eventHysterisis: Int, $eventThreshold: Int) {
-  addUserAlert(
-    payload: {alertType: $alertType, sendTo: {id: $sendToId}, eventHysterisis: $eventHysterisis, eventThreshold: $eventThreshold}
-  ) {
-    success
-    error
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class CreateUserAlertGQL extends Apollo.Mutation<CreateUserAlertMutation, CreateUserAlertMutationVariables> {
-    document = CreateUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const DeleteUserAlertDocument = gql`
-    mutation deleteUserAlert($alertId: String!) {
-  deleteUserAlert(alertId: $alertId) {
-    success
-    error
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class DeleteUserAlertGQL extends Apollo.Mutation<DeleteUserAlertMutation, DeleteUserAlertMutationVariables> {
-    document = DeleteUserAlertDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
 export const OperatorListDocument = gql`
     query operatorList {
   operators {
@@ -3113,105 +2633,6 @@ export const StopAnalysisDocument = gql`
       super(apollo);
     }
   }
-export const RequestResetPasswordDocument = gql`
-    mutation requestResetPassword($email: String!) {
-  requestResetPassword(email: $email) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class RequestResetPasswordGQL extends Apollo.Mutation<RequestResetPasswordMutation, RequestResetPasswordMutationVariables> {
-    document = RequestResetPasswordDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const ResetPasswordDocument = gql`
-    mutation resetPassword($uid: String!, $token: String!, $password: String!, $confirmPassword: String!) {
-  resetPassword(
-    uid: $uid
-    token: $token
-    password: $password
-    confirmPassword: $confirmPassword
-  ) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ResetPasswordGQL extends Apollo.Mutation<ResetPasswordMutation, ResetPasswordMutationVariables> {
-    document = ResetPasswordDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const VerifyResetPasswordTokenDocument = gql`
-    mutation verifyResetPasswordToken($uid: String!, $token: String!) {
-  verifyResetPasswordToken(uid: $uid, token: $token)
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class VerifyResetPasswordTokenGQL extends Apollo.Mutation<VerifyResetPasswordTokenMutation, VerifyResetPasswordTokenMutationVariables> {
-    document = VerifyResetPasswordTokenDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const SignUpDocument = gql`
-    mutation signUp($key: String!, $password: String!, $firstName: String!, $lastName: String!) {
-  signUp(
-    payload: {key: $key, password: $password, firstName: $firstName, lastName: $lastName}
-  ) {
-    error
-    success
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class SignUpGQL extends Apollo.Mutation<SignUpMutation, SignUpMutationVariables> {
-    document = SignUpDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const InvitationDocument = gql`
-    query Invitation($key: String!) {
-  invitation(key: $key) {
-    email
-    accepted
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class InvitationGQL extends Apollo.Query<InvitationQuery, InvitationQueryVariables> {
-    document = InvitationDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
 export const JourneyDocument = gql`
     query journey($groupId: String!, $lineId: String!) {
   journey(groupId: $groupId, lineId: $lineId) {
@@ -3261,6 +2682,7 @@ export const JourneysDocument = gql`
     operatorName
     operatorNoc
     directionRef
+    isCancelled
     vehicleJourneyId
   }
 }

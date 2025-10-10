@@ -7,21 +7,21 @@ import { BehaviorSubject } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 
-import { ServiceGridComponent } from "./service-grid.component";
 import { CommonModule, PercentPipe } from "@angular/common";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { ApolloTestingModule } from "apollo-angular/testing";
 import { OnTimeModule } from "../on-time.module";
+import { OnTimeService } from "../on-time.service";
 import { onTimeInputParams } from "../on-time.test-constants";
-import {} from "@angular/common/http/testing";
 import {
   FrequentServicePerformance,
   PerformanceService,
 } from "../performance.service";
-import { OnTimeService } from "../on-time.service";
-import { ApolloTestingModule } from "apollo-angular/testing";
+import { ServiceGridComponent } from "./service-grid.component";
 
 describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
-  let onTimeService: OnTimeService;
+  let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;
   const listSubj = new BehaviorSubject<FrequentServicePerformance[]>([]);
 
@@ -88,7 +88,7 @@ describe("ServiceGridComponent", () => {
   beforeEach(() => {
     spectator = createComponent();
 
-    onTimeService = spectator.inject(OnTimeService);
+    _onTimeService = spectator.inject(OnTimeService);
     performanceService = spectator.inject(PerformanceService);
     spyOn(performanceService, "fetchServicePerformance").and.returnValue(
       listSubj.asObservable(),
@@ -122,7 +122,9 @@ describe("ServiceGridComponent", () => {
   it("should display some data", fakeAsync(() => {
     spectator.component.params = onTimeInputParams;
 
-    listSubj.next(services.map(OnTimeService.calculateOnTimePcts));
+    listSubj.next(
+      services.map((service) => OnTimeService.calculateOnTimePcts(service)),
+    );
     spectator.detectChanges();
     tick(100);
 

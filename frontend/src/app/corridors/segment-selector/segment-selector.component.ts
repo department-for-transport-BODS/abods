@@ -11,10 +11,10 @@ import {
 } from "@angular/core";
 
 import { NgxTippyProps } from "ngx-tippy-wrapper";
-import { filterServiceLinksByStops } from "../corridors.service";
 import { RouteType, ServiceLinkType } from "../../../generated/graphql";
-import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
 import { pairwise } from "../../shared/array-operators";
+import { isNotNullOrUndefined } from "../../shared/rxjs-operators";
+import { filterServiceLinksByStops } from "../corridors.service";
 import { CorridorStop } from "../types";
 
 export const enum ServiceLinkValidity {

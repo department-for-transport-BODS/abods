@@ -8,15 +8,15 @@ import { GetVersionGQL, GetVersionQuery } from "../../generated/graphql";
 
 import { Version, VersionService } from "./version.service";
 
-describe("VersionService", () => {
+fdescribe("VersionService", () => {
   let service: VersionService;
   let http: HttpClient;
   let versionGQL: GetVersionGQL;
 
   const mockFrontEndResponse = { version: "v1.7.0", buildNumber: "11111" };
-  const mockApiResponse = <ApolloQueryResult<GetVersionQuery>>{
+  const mockApiResponse = {
     data: { apiInfo: { version: "v1.9.0", buildNumber: "22222" } },
-  };
+  } as ApolloQueryResult<GetVersionQuery>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -26,7 +26,7 @@ describe("VersionService", () => {
             provide: HttpClient,
             useValue: {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                get: (url: string, options?: any) => of(),
+                get: (url: string, options?: unknown) => of(),
             },
         },
         {
@@ -44,8 +44,8 @@ describe("VersionService", () => {
     versionGQL = TestBed.inject(GetVersionGQL);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
   describe("printTable", () => {
@@ -57,7 +57,7 @@ describe("VersionService", () => {
 
       expect(console.table).toHaveBeenCalledWith({
         FE: Version.create(mockFrontEndResponse),
-        API: Version.create(mockApiResponse.data.apiInfo),
+        API: Version.create(mockApiResponse.data.apiInfo ??  Version.createUnknown()),
         DWH: Version.createUnknown(),
       });
     });

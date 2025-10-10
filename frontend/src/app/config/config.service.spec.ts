@@ -1,11 +1,10 @@
-import { TestBed } from "@angular/core/testing";
-
-import { ConfigService } from "./config.service";
-import { provideHttpClientTesting } from "@angular/common/http/testing";
 import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { TestBed } from "@angular/core/testing";
+import { ConfigService } from "./config.service";
 
 describe("ConfigService", () => {
   let service: ConfigService;
@@ -21,7 +20,7 @@ describe("ConfigService", () => {
     service = TestBed.inject(ConfigService);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 });

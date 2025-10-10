@@ -4,7 +4,6 @@ import {
   byText,
   createComponentFactory,
   Spectator,
-  SpyObject,
 } from "@ngneat/spectator";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
@@ -12,12 +11,11 @@ import { SharedModule } from "src/app/shared/shared.module";
 import { FiltersComponent } from "./filters.component";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { of } from "rxjs";
+import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-select/day-of-week-utils";
 
 describe("FiltersComponent", () => {
   let spectator: Spectator<FiltersComponent>;
   let component: FiltersComponent;
-  let adminAreaService: SpyObject<AdminAreaService>;
-  const mockAdminAreas = [{ id: "AA110", name: "Derbyshire" }];
 
   const createComponent = createComponentFactory({
     component: FiltersComponent,
@@ -29,7 +27,6 @@ describe("FiltersComponent", () => {
   beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
-    adminAreaService = spectator.inject(AdminAreaService);
 
     component.filters = {};
     spectator.detectChanges();
@@ -86,14 +83,8 @@ describe("FiltersComponent", () => {
     spectator.click(byLabel("Sat"));
     spectator.click(byLabel("Sun"));
 
-    spectator.typeInElement(
-      "07",
-      spectator.query(byLabel("Start time")) as Element,
-    );
-    spectator.typeInElement(
-      "20",
-      spectator.query(byLabel("End time")) as Element,
-    );
+    spectator.typeInElement("07", spectator.query(byLabel("Start time"))!);
+    spectator.typeInElement("20", spectator.query(byLabel("End time"))!);
 
     component.minDelayStr = "-20";
     component.maxDelayStr = "30";
@@ -149,41 +140,147 @@ describe("FiltersComponent", () => {
     expect(spy.calls.mostRecent().args[0]?.maxDelay).toBeUndefined();
   });
 
-  describe("setAdminAreaDropdown", () => {
-    it("should not call fetchAdminAreasForOperator if new operatorId is the same as operatorId", () => {
-      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
-        of(mockAdminAreas),
-      );
-      component.oldFilters = { operatorIds: ["AAA"] };
-      component.setAdminAreaDropdown({ operatorIds: ["AAA"] });
+  describe("setSelectedAdminAreaIds", () => {
+    it("should set adminAreaIds to only those present in adminAreas$", (done) => {
+      const mockAreas = [
+        { label: "Area 1", value: "AA110" },
+        { label: "Area 2", value: "AA120" },
+      ];
+      component.adminAreas$ = of(mockAreas);
 
-      expect(
-        adminAreaService.fetchAdminAreasForOperator,
-      ).not.toHaveBeenCalledWith("AAA");
-    });
-
-    it("should call fetchAdminAreasForOperator with new operatorId if new operatorId is not the same as operatorId", () => {
-      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
-        of(mockAdminAreas),
-      );
-      component.oldFilters = { operatorIds: ["AAA"] };
-      component.setAdminAreaDropdown({ operatorIds: ["BBB"] });
-
-      expect(adminAreaService.fetchAdminAreasForOperator).toHaveBeenCalledWith(
-        "BBB",
-      );
-    });
-
-    it("should set label to name and value to id", () => {
-      adminAreaService.fetchAdminAreasForOperator.and.returnValue(
-        of(mockAdminAreas),
-      );
-      component.oldFilters = { operatorIds: ["AAA"] };
-      component.setAdminAreaDropdown({ operatorIds: ["AA110"] });
-      component.adminAreas$.subscribe((data) => {
-        expect(data[0].label).toEqual(mockAdminAreas[0].name);
-        expect(data[0].value).toEqual(mockAdminAreas[0].id);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      component["setSelectedAdminAreaIds"](["AA110", "ZZ999"]);
+      setTimeout(() => {
+        expect(component.adminAreaIds).toEqual(["AA110"]);
+        done();
       });
+    });
+
+    it("should set adminAreaIds to empty if none match adminAreas$", (done) => {
+      component.adminAreas$ = of([{ label: "Area 1", value: "AA110" }]);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      component["setSelectedAdminAreaIds"](["ZZ999"]);
+      setTimeout(() => {
+        expect(component.adminAreaIds).toEqual([]);
+        done();
+      });
+    });
+  });
+
+  describe("apply", () => {
+    it("should emit filtersChange with correct filters when valid", () => {
+      const spy = spyOn(component.filtersChange, "emit");
+      component.dayOfWeekFlags = {
+        ...getDefaultDayOfWeekFlags(),
+        monday: false,
+      };
+      component.startTime = "07:00";
+      component.endTime = "20:59";
+      component.minDelay = -10;
+      component.maxDelay = 30;
+      component.excludeItoLineId = "ABC";
+      component.adminAreaIds = ["AA110"];
+      component.showAdminAreas = true;
+
+      component.apply();
+
+      expect(spy).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          dayOfWeekFlags: jasmine.any(Object),
+          startTime: "07:00",
+          endTime: "20:59",
+          minDelay: -10,
+          maxDelay: 30,
+          excludeItoLineId: "ABC",
+          adminAreaIds: ["AA110"],
+        }),
+      );
+    });
+
+    it("should not emit filtersChange if validation fails", () => {
+      const spy = spyOn(component.filtersChange, "emit");
+      component.startTime = "25:00"; // Invalid time
+      component.endTime = "20:00";
+      component.apply();
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it("should emit filtersChange with adminAreaIds from oldFilters if showAdminAreas is false", () => {
+      const spy = spyOn(component.filtersChange, "emit");
+      component.showAdminAreas = false;
+      component.oldFilters = { adminAreaIds: ["AA110"] };
+      component.apply();
+      expect(spy).toHaveBeenCalledWith(
+        jasmine.objectContaining({ adminAreaIds: ["AA110"] }),
+      );
+    });
+  });
+
+  describe("resetToDefault", () => {
+    it("should reset filters to default values", () => {
+      component.dayOfWeekFlags = {
+        ...getDefaultDayOfWeekFlags(),
+        monday: false,
+      };
+      component.startTime = "07:00";
+      component.endTime = "20:59";
+      component.minDelay = -10;
+      component.maxDelay = 30;
+      component.excludeItoLineId = "ABC";
+      component.adminAreaIds = ["AA110"];
+
+      component.resetToDefault();
+
+      expect(component.dayOfWeekFlags).toEqual(getDefaultDayOfWeekFlags());
+      expect(component.startTime).toBe("00:00");
+      expect(component.endTime).toBe("23:59");
+      expect(component.minDelay).toBeNull();
+      expect(component.maxDelay).toBeNull();
+      expect(component.excludeItoLineId).toBe("");
+      expect(component.adminAreaIds).toEqual([]);
+    });
+  });
+
+  describe("cancel", () => {
+    it("should emit closeFilters", () => {
+      const spy = spyOn(component.closeFilters, "emit");
+      component.cancel();
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe("validate", () => {
+    it("should return error if no dayOfWeekFlags are selected", () => {
+      component.dayOfWeekFlags = {
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false,
+      };
+      const errors = component.validate();
+      expect(errors.dayOfWeekFlags).toBe("Please select at least one day.");
+    });
+
+    it("should return error if startTime is invalid", () => {
+      component.startTime = "25:00";
+      const errors = component.validate();
+      expect(errors.startTime).toContain("Start time must be between");
+    });
+
+    it("should return error if endTime is invalid", () => {
+      component.endTime = "99:99";
+      const errors = component.validate();
+      expect(errors.endTime).toContain("End time must be between");
+    });
+
+    it("should return error if startTime is after endTime", () => {
+      component.startTime = "20:00";
+      component.endTime = "10:00";
+      const errors = component.validate();
+      expect(errors.startEndTime).toBe("Start time must be before end time.");
     });
   });
 });

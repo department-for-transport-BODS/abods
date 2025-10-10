@@ -119,7 +119,7 @@ export type StopPerformanceGridType = BasePerformance &
 
 export type AbstractPerformance = BasePerformance | StopPerformanceGridType;
 
-enum Mode {
+export enum Mode {
   percent = "percent",
   count = "count",
   time = "time",
@@ -383,6 +383,10 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
 
+    const earlyRatio = sumBy(value, "earlyRatio");
+    const lateRatio = sumBy(value, "lateRatio");
+    const onTimeRatio = sumBy(value, "onTimeRatio");
+
     const valueWithDelay = value.filter(
       (data) => data.averageDelay != undefined,
     );
@@ -412,9 +416,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       early: early,
       late: late,
       onTime: onTime,
-      earlyRatio: early / total || 0,
-      lateRatio: late / total || 0,
-      onTimeRatio: onTime / total || 0,
+      earlyRatio: earlyRatio,
+      lateRatio: lateRatio,
+      onTimeRatio: onTimeRatio,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
       averageDelay: averageDelay,
