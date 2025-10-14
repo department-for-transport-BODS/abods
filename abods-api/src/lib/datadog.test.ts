@@ -7,6 +7,11 @@ jest.mock("datadog-lambda-js", () => ({
   sendDistributionMetric: jest.fn(),
 }));
 
+jest.mock("../logger", () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
+
 describe("sendErrorMetric", () => {
   const OLD_ENV = process.env;
 

@@ -443,12 +443,6 @@ export type HistoricalStatsType = {
   updateFrequency?: Maybe<Scalars['Int']['output']>;
 };
 
-export type InvitationType = {
-  __typename?: 'InvitationType';
-  accepted: Scalars['Boolean']['output'];
-  email: Scalars['String']['output'];
-};
-
 export type Journey = {
   __typename?: 'Journey';
   directionRef?: Maybe<Scalars['String']['output']>;
@@ -529,11 +523,7 @@ export type Mutation = {
   deleteCorridor: MutationResponseType;
   login?: Maybe<LoginResponse>;
   logout: Scalars['Boolean']['output'];
-  requestResetPassword: MutationResponseType;
-  resetPassword: MutationResponseType;
-  signUp: MutationResponseType;
   updateCorridor: MutationResponseType;
-  verifyResetPasswordToken: Scalars['Boolean']['output'];
 };
 
 
@@ -553,32 +543,8 @@ export type MutationLoginArgs = {
 };
 
 
-export type MutationRequestResetPasswordArgs = {
-  email: Scalars['String']['input'];
-};
-
-
-export type MutationResetPasswordArgs = {
-  confirmPassword: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
-};
-
-
-export type MutationSignUpArgs = {
-  payload: SignupPayloadType;
-};
-
-
 export type MutationUpdateCorridorArgs = {
   inputs: CorridorUpdateInputType;
-};
-
-
-export type MutationVerifyResetPasswordTokenArgs = {
-  token: Scalars['String']['input'];
-  uid: Scalars['String']['input'];
 };
 
 export type MutationResponseType = {
@@ -797,7 +763,6 @@ export type Query = {
   findJourneys: Array<Journey>;
   getServicePatternDistanceGeom: ServicePatternDistanceResult;
   headwayMetrics?: Maybe<HeadwayMetricsType>;
-  invitation?: Maybe<InvitationType>;
   journey: JourneyResult;
   lines: Array<LineType>;
   onTimePerformance?: Maybe<OnTimePerformanceType>;
@@ -849,11 +814,6 @@ export type QueryFindJourneysArgs = {
 
 export type QueryGetServicePatternDistanceGeomArgs = {
   vehicleJourneyId: Scalars['ID']['input'];
-};
-
-
-export type QueryInvitationArgs = {
-  key: Scalars['String']['input'];
 };
 
 
@@ -990,13 +950,6 @@ export type ServicePunctualityType = {
 export type ServicePunctualityTypeTrendArgs = {
   fromTimestamp: Scalars['DateTime']['input'];
   toTimestamp: Scalars['DateTime']['input'];
-};
-
-export type SignupPayloadType = {
-  firstName: Scalars['String']['input'];
-  key: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
 };
 
 export type Stop = {
@@ -1240,7 +1193,6 @@ export type ResolversTypes = ResolversObject<{
   HistoricalStatsType: ResolverTypeWrapper<Partial<HistoricalStatsType>>;
   ID: ResolverTypeWrapper<Partial<Scalars['ID']['output']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']['output']>>;
-  InvitationType: ResolverTypeWrapper<Partial<InvitationType>>;
   JSON: ResolverTypeWrapper<Partial<Scalars['JSON']['output']>>;
   Journey: ResolverTypeWrapper<Partial<Journey>>;
   JourneyResult: ResolverTypeWrapper<Partial<JourneyResult>>;
@@ -1282,7 +1234,6 @@ export type ResolversTypes = ResolversObject<{
   ServicePerformanceInputType: ResolverTypeWrapper<Partial<ServicePerformanceInputType>>;
   ServicePerformanceType: ResolverTypeWrapper<Partial<ServicePerformanceType>>;
   ServicePunctualityType: ResolverTypeWrapper<Partial<ServicePunctualityType>>;
-  SignupPayloadType: ResolverTypeWrapper<Partial<SignupPayloadType>>;
   Stop: ResolverTypeWrapper<Partial<Stop>>;
   StopAnalysisFiltersInput: ResolverTypeWrapper<Partial<StopAnalysisFiltersInput>>;
   StopInfoType: ResolverTypeWrapper<Partial<StopInfoType>>;
@@ -1348,7 +1299,6 @@ export type ResolversParentTypes = ResolversObject<{
   HistoricalStatsType: Partial<HistoricalStatsType>;
   ID: Partial<Scalars['ID']['output']>;
   Int: Partial<Scalars['Int']['output']>;
-  InvitationType: Partial<InvitationType>;
   JSON: Partial<Scalars['JSON']['output']>;
   Journey: Partial<Journey>;
   JourneyResult: Partial<JourneyResult>;
@@ -1386,7 +1336,6 @@ export type ResolversParentTypes = ResolversObject<{
   ServicePerformanceInputType: Partial<ServicePerformanceInputType>;
   ServicePerformanceType: Partial<ServicePerformanceType>;
   ServicePunctualityType: Partial<ServicePunctualityType>;
-  SignupPayloadType: Partial<SignupPayloadType>;
   Stop: Partial<Stop>;
   StopAnalysisFiltersInput: Partial<StopAnalysisFiltersInput>;
   StopInfoType: Partial<StopInfoType>;
@@ -1646,12 +1595,6 @@ export type HistoricalStatsTypeResolvers<ContextType = RequestContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type InvitationTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['InvitationType'] = ResolversParentTypes['InvitationType']> = ResolversObject<{
-  accepted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
   name: 'JSON';
 }
@@ -1730,11 +1673,7 @@ export type MutationResolvers<ContextType = RequestContext, ParentType extends R
   deleteCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationDeleteCorridorArgs, 'corridorId'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginResponse']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'password' | 'username'>>;
   logout?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  requestResetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationRequestResetPasswordArgs, 'email'>>;
-  resetPassword?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'confirmPassword' | 'password' | 'token' | 'uid'>>;
-  signUp?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'payload'>>;
   updateCorridor?: Resolver<ResolversTypes['MutationResponseType'], ParentType, ContextType, RequireFields<MutationUpdateCorridorArgs, 'inputs'>>;
-  verifyResetPasswordToken?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationVerifyResetPasswordTokenArgs, 'token' | 'uid'>>;
 }>;
 
 export type MutationResponseTypeResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['MutationResponseType'] = ResolversParentTypes['MutationResponseType']> = ResolversObject<{
@@ -1859,7 +1798,6 @@ export type QueryResolvers<ContextType = RequestContext, ParentType extends Reso
   findJourneys?: Resolver<Array<ResolversTypes['Journey']>, ParentType, ContextType, RequireFields<QueryFindJourneysArgs, 'dateOfJourney' | 'lineId'>>;
   getServicePatternDistanceGeom?: Resolver<ResolversTypes['ServicePatternDistanceResult'], ParentType, ContextType, RequireFields<QueryGetServicePatternDistanceGeomArgs, 'vehicleJourneyId'>>;
   headwayMetrics?: Resolver<Maybe<ResolversTypes['HeadwayMetricsType']>, ParentType, ContextType>;
-  invitation?: Resolver<Maybe<ResolversTypes['InvitationType']>, ParentType, ContextType, RequireFields<QueryInvitationArgs, 'key'>>;
   journey?: Resolver<ResolversTypes['JourneyResult'], ParentType, ContextType, RequireFields<QueryJourneyArgs, 'groupId' | 'lineId'>>;
   lines?: Resolver<Array<ResolversTypes['LineType']>, ParentType, ContextType, RequireFields<QueryLinesArgs, 'inputDate' | 'operatorIds'>>;
   onTimePerformance?: Resolver<Maybe<ResolversTypes['OnTimePerformanceType']>, ParentType, ContextType>;
@@ -2068,7 +2006,6 @@ export type Resolvers<ContextType = RequestContext> = ResolversObject<{
   HeadwayOverviewType?: HeadwayOverviewTypeResolvers<ContextType>;
   HeadwayTimeSeriesType?: HeadwayTimeSeriesTypeResolvers<ContextType>;
   HistoricalStatsType?: HistoricalStatsTypeResolvers<ContextType>;
-  InvitationType?: InvitationTypeResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   Journey?: JourneyResolvers<ContextType>;
   JourneyResult?: JourneyResultResolvers<ContextType>;

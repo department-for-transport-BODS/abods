@@ -7,7 +7,7 @@ import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
 import { ViewServiceMonitoringDashboardComponent } from "./view-service-monitoring-dashboard.component";
 
-fdescribe("ViewServiceMonitoringDashboardComponent", () => {
+describe("ViewServiceMonitoringDashboardComponent", () => {
   let spectator: Spectator<ViewServiceMonitoringDashboardComponent>;
   let component: ViewServiceMonitoringDashboardComponent;
   let userSubject: Subject<unknown>;
