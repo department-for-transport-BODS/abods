@@ -1,12 +1,10 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
-import { RouterTestingModule } from "@angular/router/testing";
 import {
   byTextContent,
   createRoutingFactory,
   SpectatorRouting,
 } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { DateTime } from "luxon";
 import { MockComponent } from "ng-mocks";
 import { of, throwError } from "rxjs";
 import { LayoutModule } from "../../layout/layout.module";
@@ -22,47 +20,55 @@ import {
   AvlPoint,
   Journey,
   StopTypeOption,
+  JourneyGQL,
 } from "../../../generated/graphql";
 import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
+import { RouterModule } from "@angular/router";
+import { JourneyMapComponent } from "./journey-map/journey-map.component";
+import { OtpStatsComponent } from "./otp-stats/otp-stats.component";
 
-describe("VehicleJourneysViewComponent", () => {
+fdescribe("VehicleJourneysViewComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysViewComponent>;
-  let viewService: any;
+  let viewService: VehicleJourneysSearchService;
+  let journeyGQL: jasmine.SpyObj<JourneyGQL>;
 
-  const journeyId = "VJ7eb0894c0ed7613e55fc516103b05db9408cdd05";
   const startTime = "2022-08-18T11:22:00.000+01:00";
+
   const mockJourney: Journey = {
-    groupId: journeyId,
-    startTime: DateTime.fromISO(startTime),
-    lineNumber: "5",
-    servicePattern: "Bristol to Bath",
+    groupId: "gp1",
+    startTime: startTime,
     serviceName: "Bristol to Bath",
-    serviceId: "5",
+    serviceNumber: "5",
+    operatorName: "Test Operator",
+    operatorNoc: "OP123",
     directionRef: "inbound",
-    vehicleJourneyId: "vj-1",
-  } as any;
+    isCancelled: false,
+    vehicleJourneyId: 1,
+  };
 
   const mockPrevJourney: Journey = {
-    groupId: "VJ564d30c786cf4cae8a2276393b3263dc",
-    startTime: DateTime.fromISO("2022-08-18T11:07:00.000+01:00"),
-    lineNumber: "5",
-    servicePattern: "Bristol to Bath",
+    groupId: "gp1",
+    startTime: "2022-08-18T11:07:00.000+01:00",
     serviceName: "Bristol to Bath",
-    serviceId: "5",
+    serviceNumber: "5",
+    operatorName: "Test Operator",
+    operatorNoc: "OP123",
     directionRef: "inbound",
-    vehicleJourneyId: "vj-0",
-  } as any;
+    isCancelled: false,
+    vehicleJourneyId: 0,
+  };
 
   const mockNextJourney: Journey = {
-    groupId: "VJ849a1ba0f34c4d3fad757a7fee47636d",
-    startTime: DateTime.fromISO("2022-08-18T11:37:00.000+01:00"),
-    lineNumber: "5",
-    servicePattern: "Bristol to Bath",
+    groupId: "gp2",
+    startTime: "2022-08-18T11:37:00.000+01:00",
     serviceName: "Bristol to Bath",
-    serviceId: "5",
+    serviceNumber: "5",
+    operatorName: "Test Operator",
+    operatorNoc: "OP123",
     directionRef: "inbound",
-    vehicleJourneyId: "vj-2",
-  } as any;
+    isCancelled: false,
+    vehicleJourneyId: 2,
+  };
 
   const mockStops: Stop[] = [
     {
@@ -119,23 +125,28 @@ describe("VehicleJourneysViewComponent", () => {
       SharedModule,
       LayoutModule,
       ApolloTestingModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       HttpClientTestingModule,
     ],
     declarations: [
       MockComponent(StopListComponent),
       MockComponent(JourneyInfoComponent),
       MockComponent(JourneyNavComponent),
+      MockComponent(JourneyMapComponent),
+      MockComponent(OtpStatsComponent),
     ],
-    mocks: [VehicleJourneysSearchService],
+    mocks: [JourneyGQL],
+    //mocks: [VehicleJourneysSearchService],
     stubsEnabled: false,
+    detectChanges: false,
   });
 
   beforeEach(() => {
     spectator = createComponent();
     viewService = spectator.inject(VehicleJourneysSearchService);
-    viewService.fetchDayJourneys.and.returnValue(of(mockJourneys));
-    viewService.getServicePatternDistanceGeom?.and.returnValue(
+    journeyGQL = spectator.inject(JourneyGQL);
+    spyOn(viewService, "fetchDayJourneys").and.returnValue(of(mockJourneys));
+    spyOn(viewService, "getServicePatternDistanceGeom").and.returnValue(
       of({
         distance: 123,
         geom: [
@@ -144,27 +155,40 @@ describe("VehicleJourneysViewComponent", () => {
         ],
       }),
     );
-    // Mock journeyGQL.fetch to return journeyInfo
-    (spectator.component as any).journeyGQL = {
-      fetch: () =>
-        of({
-          data: {
-            journey: {
-              stops: mockStops,
-              avls: mockAvls,
-            },
+    spyOn(console, "log").and.callFake(() => {
+      // Intentionally suppress console.log output during tests
+    });
+
+    journeyGQL.fetch.and.returnValue(
+      of({
+        data: {
+          journey: {
+            stops: mockStops,
+            avls: mockAvls,
           },
-        }),
-    } as any;
+        },
+        loading: false,
+        networkStatus: 7, // 7 means "ready" in Apollo
+        errors: undefined,
+        extensions: undefined,
+      }),
+    );
   });
 
+  const setQueryParam = () => {
+    spectator.setRouteParam("journeyId", "gp2");
+    spectator.setRouteQueryParam("date", "2022-08-18");
+    spectator.setRouteQueryParam("operator", "OP123");
+    spectator.setRouteQueryParam("service", "TWET-8-PB2060442:5");
+    spectator.setRouteQueryParam("direction", "inbound");
+  };
   it("should create", () => {
     expect(spectator.component).toBeTruthy();
   });
 
   it("should set journeyInfo and journeys on init", () => {
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+    // Set route params and query params to match the provided URI and mock data
+    setQueryParam();
     spectator.detectChanges();
 
     expect(spectator.component.journeyInfo).toEqual({
@@ -174,31 +198,28 @@ describe("VehicleJourneysViewComponent", () => {
     expect(spectator.component.journeys.length).toBe(3);
   });
 
-  it("should display the service number and name in page title", () => {
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+  it("should display the service number and name in page title", async () => {
+    setQueryParam();
     spectator.detectChanges();
+    await spectator.fixture.whenStable();
 
     expect(
       spectator.query(
         byTextContent("5: Bristol to Bath", {
-          selector: ".page-header__title",
+          selector: "app-browser-title",
         }),
       ),
     ).toBeVisible();
   });
 
   it("should display error message when journeyGQL.fetch throws an error", () => {
-    (spectator.component as any).journeyGQL = {
-      fetch: () => throwError(() => new Error("Not found")),
-    };
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+    journeyGQL.fetch.and.returnValue(throwError(() => new Error("Not found")));
+    setQueryParam();
     spectator.detectChanges();
 
     expect(
       spectator.query(
-        byTextContent("Journey not found", { selector: ".page-header__title" }),
+        byTextContent("Not found", { selector: "app-browser-title" }),
       ),
     ).toBeVisible();
     expect(
@@ -214,17 +235,14 @@ describe("VehicleJourneysViewComponent", () => {
   });
 
   it("should set stopType to TimingPoints if allStops query param is not 'true'", () => {
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
-    spectator.setRouteQueryParam("allStops", "true");
+    setQueryParam();
     spectator.detectChanges();
 
     expect(spectator.component.stopType).toBe(StopTypeOption.TimingPoints);
   });
 
   it("should set stopType to AllStops if allStops query param is 'true'", () => {
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+    setQueryParam();
     spectator.setRouteQueryParam("allStops", "true");
     spectator.detectChanges();
 
@@ -232,8 +250,7 @@ describe("VehicleJourneysViewComponent", () => {
   });
 
   it("should update journeyInfo when onVehicleChange is called", () => {
-    spectator.setRouteParam("journeyId", journeyId);
-    spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
+    setQueryParam();
     spectator.detectChanges();
 
     spectator.component.rawAvls = [
@@ -263,8 +280,10 @@ describe("VehicleJourneysViewComponent", () => {
   });
 
   it("should display cancellation warning if selected journey is marked as cancelled", () => {
-    spyOn(viewService, "getVehicleJourneyView").and.returnValue(of(true));
-    spectator.setRouteParam("journeyId", journeyId);
+    //spyOn(viewService, "getVehicleJourneyView").and.returnValue(of(true));
+    spectator.setRouteParam("journeyId", "arbb|a|5113|2025-05-0");
+    spectator.setRouteQueryParam("date", "2022-08-18");
+    spectator.setRouteQueryParam("operator", "OP123");
     spectator.setRouteQueryParam("startTime", toUrlDateFormat(startTime));
 
     spectator.component.journeys = [

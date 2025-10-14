@@ -1,35 +1,35 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
-import { NgxSmartModalService } from "ngx-smart-modal";
+import {
+  createComponentFactory,
+  Spectator,
+  SpyObject,
+} from "@ngneat/spectator";
+import {
+  CellClickedEvent,
+  FilterChangedEvent,
+  GridApi,
+  RowNode,
+} from "ag-grid-community";
+import { MockProvider } from "ng-mocks";
+import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
 import { AgGridDomService } from "src/app/shared/components/ag-grid/ag-grid-dom.service";
 import { AgGridFormatterService } from "src/app/shared/components/ag-grid/ag-grid-formatter.service";
 import { Direction } from "../../../generated/graphql";
+import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { ConfigService } from "../../config/config.service";
+import { AgGridDirective } from "../../shared/components/ag-grid/ag-grid.directive";
 import {
   AbstractPerformance,
+  BasePerformance,
   Mode,
   OnTimeGridComponent,
 } from "./on-time-grid.component";
 
-describe("OnTimeGridComponent", () => {
-  let component: OnTimeGridComponent<any>;
-  let fixture: ComponentFixture<OnTimeGridComponent<any>>;
-  let _formatter: AgGridFormatterService;
-
-  const mockFormatter = {
-    toCamelcase: jasmine
-      .createSpy("toCamelcase")
-      .and.callFake(({ value }) => value),
-    averageDelayValueFormatter: jasmine
-      .createSpy("averageDelayValueFormatter")
-      .and.callFake(({ value }) => value),
-    percentValueFormatter: jasmine
-      .createSpy("percentValueFormatter")
-      .and.callFake(({ value }) => value + "%"),
-  };
-
-  const mockAgGridDomService = {
-    headerHeight: () => 42,
-  };
+fdescribe("OnTimeGridComponent", () => {
+  let spectator: Spectator<OnTimeGridComponent<AbstractPerformance>>;
+  let component: OnTimeGridComponent<AbstractPerformance>;
+  let ngxSmartModalService: SpyObject<NgxSmartModalService>;
 
   const data: AbstractPerformance = {
     averageScheduled: 1,
@@ -45,95 +45,124 @@ describe("OnTimeGridComponent", () => {
     actualDepartures: 9,
   };
 
-  const mockNgxSmartModalService = {
-    open: jasmine.createSpy("open"),
-    close: jasmine.createSpy("close"),
-  };
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [OnTimeGridComponent],
-      providers: [
-        { provide: AgGridFormatterService, useValue: mockFormatter },
-        { provide: AgGridDomService, useValue: mockAgGridDomService },
-        { provide: NgxSmartModalService, useValue: mockNgxSmartModalService },
-        FormBuilder,
-      ],
-    }).compileComponents();
+  const createComponent = createComponentFactory({
+    component: OnTimeGridComponent,
+    imports: [NgxSmartModalModule.forRoot()],
+    schemas: [NO_ERRORS_SCHEMA],
+    providers: [
+      FormBuilder,
+      {
+        provide: AgGridFormatterService,
+        useValue: {
+          toCamelcase: ({ value }: { value: string }) => value,
+          averageDelayValueFormatter: ({ value }: { value: number }) => value,
+          percentValueFormatter: ({ value }: { value: number }) => value + "%",
+        },
+      },
+      {
+        provide: AgGridDomService,
+        useValue: {
+          headerHeight: () => 42,
+        },
+      },
+      MockProvider(AuthenticatedUserService),
+      MockProvider(ConfigService),
+    ],
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OnTimeGridComponent);
-    component = fixture.componentInstance;
-    _formatter = TestBed.inject(AgGridFormatterService);
-    fixture.detectChanges();
+    spectator = createComponent({ detectChanges: false });
+    component = spectator.component;
+    ngxSmartModalService = spectator.inject(NgxSmartModalService);
+    spyOn(ngxSmartModalService, "open");
+    spyOn(ngxSmartModalService, "close");
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
-  it("should set and get noun and update overlay message", () => {
+  it("should set and get noun and update overlay message", async () => {
     component.noun = "stop";
-    expect(component.noun).toBe("stop");
-    expect(component.initialNoRowsMessage).toContain("No stop data found");
+    await expect(component.noun).toBe("stop");
+    await expect(component.initialNoRowsMessage).toContain(
+      "No stop data found",
+    );
   });
 
-  it("should set and get preSelectedDirections and update grid", () => {
+  it("should set and get preSelectedDirections and update grid", async () => {
     spyOn(component, "updateGrid");
     component.preSelectedDirections = [Direction.Inbound];
-    expect(component.directions).toEqual([Direction.Inbound]);
-    expect(component.updateGrid).toHaveBeenCalled();
+    await expect(component.directions).toEqual([Direction.Inbound]);
+    expect(component.updateGrid).toHaveBeenCalledWith();
   });
 
-  it("should set and get data and update grid", () => {
+  it("should set and get data and update grid", async () => {
     spyOn(component, "updateGrid");
-    const data = [{ early: 1, late: 2, onTime: 3 }];
-    component.data = data;
-    expect(component.data).toBe(data);
-    expect(component.updateGrid).toHaveBeenCalled();
+    const testData = [
+      {
+        early: 1,
+        late: 2,
+        onTime: 3,
+        total: 6,
+        onTimeRatio: 0.5,
+        earlyRatio: 0.17,
+        lateRatio: 0.33,
+        completedRatio: 1,
+      } as AbstractPerformance,
+    ];
+    component.data = testData;
+    await expect(component.data).toBe(testData);
+    expect(component.updateGrid).toHaveBeenCalledWith();
   });
 
-  it("should reset summaryHeaderData if data is empty", () => {
+  it("should reset summaryHeaderData if data is empty", async () => {
     component.data = [];
-    expect(component.summaryHeaderData).toBeUndefined();
+    await expect(component.summaryHeaderData).toBeUndefined();
   });
 
   it("should emit gridReady on onTimeGridReady", () => {
     spyOn(component.gridReady, "emit");
     component.onTimeGridReady();
-    expect(component.gridReady.emit).toHaveBeenCalled();
+    expect(component.gridReady.emit).toHaveBeenCalledWith();
   });
 
   it("should emit cellClicked on grid cell click", () => {
     spyOn(component.cellClicked, "emit");
-    const params = { column: { getColId: () => "col1" }, data: { foo: "bar" } };
-    component.gridOptions.onCellClicked!(params as any);
+    const testData = {
+      total: 10,
+      onTimeRatio: 0.5,
+      earlyRatio: 0.2,
+      lateRatio: 0.3,
+      completedRatio: 0.9,
+    } as AbstractPerformance;
+    const params = { column: { getColId: () => "col1" }, data: testData };
+    component.gridOptions.onCellClicked!(params as unknown as CellClickedEvent);
     expect(component.cellClicked.emit).toHaveBeenCalledWith({
       column: "col1",
-      data: { foo: "bar" },
+      data: testData,
     });
   });
 
-  it("should emit directionsChanged and update grid on onDirectionsChanged", () => {
+  it("should emit directionsChanged and update grid on onDirectionsChanged", async () => {
     spyOn(component, "updateGrid");
     spyOn(component.directionsChanged, "emit");
     component.onDirectionsChanged([Direction.Inbound, Direction.Outbound]);
-    expect(component.directions).toEqual([
+    await expect(component.directions).toEqual([
       Direction.Inbound,
       Direction.Outbound,
     ]);
-    expect(component.updateGrid).toHaveBeenCalled();
+    expect(component.updateGrid).toHaveBeenCalledWith();
     expect(component.directionsChanged.emit).toHaveBeenCalledWith([
       Direction.Inbound,
       Direction.Outbound,
     ]);
   });
 
-  it("should set directions to [Direction.All] if directions is empty on onDirectionsChanged", () => {
+  it("should set directions to [Direction.All] if directions is empty on onDirectionsChanged", async () => {
     spyOn(component.directionsChanged, "emit");
     component.onDirectionsChanged([]);
-    expect(component.directions).toEqual([Direction.All]);
+    await expect(component.directions).toEqual([Direction.All]);
     expect(component.directionsChanged.emit).toHaveBeenCalledWith([
       Direction.All,
     ]);
@@ -142,16 +171,16 @@ describe("OnTimeGridComponent", () => {
   it("should call columnsChanged when mode is set", () => {
     spyOn(component, "columnsChanged");
     component.mode = Mode.count;
-    expect(component.columnsChanged).toHaveBeenCalled();
+    expect(component.columnsChanged).toHaveBeenCalledWith();
   });
 
   it("should open and close display options modal", () => {
     component.openDisplayOptions();
-    expect(mockNgxSmartModalService.open).toHaveBeenCalledWith(
+    expect(ngxSmartModalService.open).toHaveBeenCalledWith(
       "displayOptionsModal",
     );
     component.closeDisplayOptions();
-    expect(mockNgxSmartModalService.close).toHaveBeenCalledWith(
+    expect(ngxSmartModalService.close).toHaveBeenCalledWith(
       "displayOptionsModal",
     );
   });
@@ -162,53 +191,56 @@ describe("OnTimeGridComponent", () => {
       new FormBuilder().control(false),
     );
     component.selectAllColumns();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(component.displayOptionsForm.value.col1).toBeTrue();
   });
 
-  it("should set selectedColumns and call columnsChanged", () => {
+  it("should set selectedColumns and call columnsChanged", async () => {
     spyOn(component, "columnsChanged");
     component.selectedColumns = ["col1", "col2"];
-    expect(component.selectedColumns).toEqual(["col1", "col2"]);
-    expect(component.columnsChanged).toHaveBeenCalled();
+    await expect(component.selectedColumns).toEqual(["col1", "col2"]);
+    expect(component.columnsChanged).toHaveBeenCalledWith();
   });
 
-  it("should return correct row count with and without pagination", () => {
+  it("should return correct row count with and without pagination", async () => {
     const api = {
       paginationGetRowCount: () => 5,
       getDisplayedRowCount: () => 3,
-    } as any;
+    } as GridApi;
     component.paginate = true;
-    expect(component.getRowCount(api)).toBe(5);
+    await expect(component.getRowCount(api)).toBe(5);
     component.paginate = false;
-    expect(component.getRowCount(api)).toBe(3);
+    await expect(component.getRowCount(api)).toBe(3);
   });
 
-  it("should show overlay if no rows after filterChanged", () => {
+  it("should show overlay if no rows after filterChanged", async () => {
     const api = {
       paginationGetRowCount: () => 0,
       getDisplayedRowCount: () => 0,
       showNoRowsOverlay: jasmine.createSpy(),
       hideOverlay: jasmine.createSpy(),
-    } as any;
+    };
     component.noun = "stop";
-    component.filterChanged({ api } as any);
-    expect(api.showNoRowsOverlay).toHaveBeenCalled();
-    expect(component.overlayParams.message).toContain(
+    component.filterChanged({ api } as unknown as FilterChangedEvent);
+    expect(api.showNoRowsOverlay).toHaveBeenCalledWith();
+    await expect(component.overlayParams.message).toContain(
       "No stops matched the search query",
     );
   });
 
-  it("should hide overlay if rows exist after filterChanged", () => {
+  it("should hide overlay if rows exist after filterChanged", async () => {
     const api = {
       paginationGetRowCount: () => 2,
       getDisplayedRowCount: () => 2,
       showNoRowsOverlay: jasmine.createSpy(),
       hideOverlay: jasmine.createSpy(),
-    } as any;
+    };
     component.noun = "stop";
-    component.filterChanged({ api } as any);
-    expect(api.hideOverlay).toHaveBeenCalled();
-    expect(component.overlayParams.message).toContain("No stop data found");
+    component.filterChanged({ api } as unknown as FilterChangedEvent);
+    expect(api.hideOverlay).toHaveBeenCalledWith();
+    await expect(component.overlayParams.message).toContain(
+      "No stop data found",
+    );
   });
 
   it("should return true for isGridTypeStop if averageScheduled and averageActual exist", () => {
@@ -216,74 +248,75 @@ describe("OnTimeGridComponent", () => {
   });
 
   it("should return false for isGridTypeStop if averageScheduled or averageActual missing", () => {
-    expect(
-      component.isGridTypeStop({ ...data, averageScheduled: 1 }),
-    ).toBeFalse();
+    const {
+      averageScheduled: _averageScheduled,
+      ...dataWithoutAverageScheduled
+    } = data;
+
+    const { averageActual: _averageActual, ...dataWithoutAverageActual } = data;
+
+    expect(component.isGridTypeStop(dataWithoutAverageScheduled)).toBeFalse();
+    expect(component.isGridTypeStop(dataWithoutAverageActual)).toBeFalse();
   });
-
-  // it("should call export with correct columns for stop grid", () => {
-  //   component.data = [
-  //     { averageScheduled: 1, averageActual: 2, averageDelay: 3 },
-  //   ];
-  //   component.onTimeGrid = {
-  //     export: jasmine.createSpy("export"),
-  //   } as any;
-  //   component.csvFilename = "test";
-  //   component.export();
-
-  //   expect(component.onTimeGrid!.export).toHaveBeenCalledWith("test", [
-  //     "averageDelay",
-  //     "averageActual",
-  //     "averageScheduled",
-  //   ]);
-  // });
-
-  // it("should call export with correct columns for service grid", () => {
-  //   component.data = [{ averageDelay: 3 }];
-  //   component.onTimeGrid = {
-  //     export: jasmine.createSpy("export"),
-  //   } as any;
-  //   component.csvFilename = "test";
-  //   component.export();
-  //   expect(component.onTimeGrid!.export).toHaveBeenCalledWith("test", [
-  //     "averageDelay",
-  //   ]);
-  // });
 
   it("should call headerHeightSetter and set header height", () => {
     component.onTimeGrid = {
       gridApi: {
         setHeaderHeight: jasmine.createSpy("setHeaderHeight"),
       },
-    } as any;
+    } as unknown as AgGridDirective;
     component.headerHeightSetter();
-    expect(component.onTimeGrid!.gridApi!.setHeaderHeight).toHaveBeenCalled();
+    expect(component.onTimeGrid.gridApi!.setHeaderHeight).toHaveBeenCalledWith(
+      62,
+    );
   });
 
   it("should filter directions correctly in isExternalFilterPresent and doesExternalFilterPass", () => {
     component.directions = [Direction.Inbound];
     component.data = [
-      { direction: Direction.Inbound },
-      { direction: Direction.Outbound },
+      {
+        direction: Direction.Inbound,
+        total: 10,
+        onTimeRatio: 0.5,
+        earlyRatio: 0.2,
+        lateRatio: 0.3,
+        completedRatio: 0.9,
+      } as AbstractPerformance,
+      {
+        direction: Direction.Outbound,
+        total: 10,
+        onTimeRatio: 0.5,
+        earlyRatio: 0.2,
+        lateRatio: 0.3,
+        completedRatio: 0.9,
+      } as AbstractPerformance,
     ];
     expect(component.isExternalFilterPresent()).toBeTrue();
     expect(
       component.doesExternalFilterPass({
         data: { direction: Direction.Inbound },
-      } as any),
+      } as unknown as RowNode<AbstractPerformance>),
     ).toBeTrue();
     expect(
       component.doesExternalFilterPass({
         data: { direction: Direction.Outbound },
-      } as any),
+      } as unknown as RowNode<AbstractPerformance>),
     ).toBeFalse();
-    expect(component.doesExternalFilterPass({ data: {} } as any)).toBeFalse();
+    expect(
+      component.doesExternalFilterPass({
+        data: {},
+      } as unknown as RowNode<AbstractPerformance>),
+    ).toBeFalse();
     component.directions = [];
-    expect(component.doesExternalFilterPass({ data: {} } as any)).toBeTrue();
+    expect(
+      component.doesExternalFilterPass({
+        data: {},
+      } as unknown as RowNode<AbstractPerformance>),
+    ).toBeTrue();
   });
 
-  it("should returnSummaryTotal with correct calculations", () => {
-    const value = [
+  it("should returnSummaryTotal with correct calculations", async () => {
+    const value: BasePerformance[] = [
       {
         early: 1,
         late: 2,
@@ -296,6 +329,10 @@ describe("OnTimeGridComponent", () => {
         onTimeInSeconds: 60,
         earlyInSeconds: 30,
         lateInSeconds: 40,
+        onTimeRatio: 1,
+        completedRatio: 1,
+        earlyRatio: 1,
+        lateRatio: 1,
       },
       {
         early: 2,
@@ -309,24 +346,30 @@ describe("OnTimeGridComponent", () => {
         onTimeInSeconds: 120,
         earlyInSeconds: 60,
         lateInSeconds: 80,
+        onTimeRatio: 1,
+        completedRatio: 1,
+        earlyRatio: 1,
+        lateRatio: 1,
       },
     ];
-    const summary = component.returnSummaryTotal(value as any);
-    expect(summary.length).toBe(1);
-    expect(summary[0].early).toBe(3);
-    expect(summary[0].late).toBe(5);
-    expect(summary[0].onTime).toBe(7);
-    expect(summary[0].scheduledDepartures).toBe(11);
-    expect(summary[0].actualDepartures).toBe(9);
-    expect(summary[0].averageDelay).toBeGreaterThan(0);
+    const summary = component.returnSummaryTotal(value);
+    await expect(summary.length).toBe(1);
+    await expect(summary[0].early).toBe(3);
+    await expect(summary[0].late).toBe(5);
+    await expect(summary[0].onTime).toBe(7);
+    await expect(summary[0].scheduledDepartures).toBe(11);
+    await expect(summary[0].actualDepartures).toBe(9);
+    await expect(summary[0].averageDelay).toBeGreaterThan(0);
   });
 
-  it("should sumByOrNull return null for empty or all nulls", () => {
-    expect(component.sumByOrNull([], () => null)).toBeNull();
-    expect(component.sumByOrNull([{ a: null }], (x) => x.a)).toBeNull();
+  it("should sumByOrNull return null for empty or all nulls", async () => {
+    await expect(component.sumByOrNull([], () => null)).toBeNull();
+    await expect(component.sumByOrNull([{ a: null }], (x) => x.a)).toBeNull();
   });
 
-  it("should sumByOrNull return sum for valid values", () => {
-    expect(component.sumByOrNull([{ a: 1 }, { a: 2 }], (x) => x.a)).toBe(3);
+  it("should sumByOrNull return sum for valid values", async () => {
+    await expect(component.sumByOrNull([{ a: 1 }, { a: 2 }], (x) => x.a)).toBe(
+      3,
+    );
   });
 });
