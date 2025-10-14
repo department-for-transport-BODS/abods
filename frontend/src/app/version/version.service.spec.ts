@@ -8,7 +8,7 @@ import { GetVersionGQL, GetVersionQuery } from "../../generated/graphql";
 
 import { Version, VersionService } from "./version.service";
 
-fdescribe("VersionService", () => {
+describe("VersionService", () => {
   let service: VersionService;
   let http: HttpClient;
   let versionGQL: GetVersionGQL;

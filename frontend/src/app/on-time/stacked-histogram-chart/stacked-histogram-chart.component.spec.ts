@@ -4,7 +4,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { StackedHistogramChartComponent } from "./stacked-histogram-chart.component";
 
-describe("TimeOfDayChartComponent", () => {
+fdescribe("TimeOfDayChartComponent", () => {
   let spectator: Spectator<StackedHistogramChartComponent>;
   let component: StackedHistogramChartComponent;
 
@@ -19,10 +19,10 @@ describe("TimeOfDayChartComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     component.category = "param";
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 });

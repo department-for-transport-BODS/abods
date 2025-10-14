@@ -1,23 +1,29 @@
-import { Spectator, createComponentFactory, byText } from "@ngneat/spectator";
-import { DateTime, Settings } from "luxon";
-import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
-import {
-  OtpThresholdModalData,
-  OTP_THRESHOLD_MODAL_ID,
-  OtpThresholdModalComponent,
-} from "../otp-threshold-modal/otp-threshold-modal.component";
-import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link.component";
-import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClient } from "@angular/common/http";
 import { ReactiveFormsModule } from "@angular/forms";
+import {
+  byText,
+  createComponentFactory,
+  Spectator,
+  SpyObject,
+} from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
+import { DateTime, Settings } from "luxon";
+import { MockComponents } from "ng-mocks";
+import { NgxSmartModalModule, NgxSmartModalService } from "ngx-smart-modal";
 import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { SharedModule } from "../../shared/shared.module";
+import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
+import {
+  OTP_THRESHOLD_MODAL_ID,
+  OtpThresholdModalComponent,
+  OtpThresholdModalData,
+} from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link.component";
 
-describe("OtpThresholdModalLinkComponent", () => {
+fdescribe("OtpThresholdModalLinkComponent", () => {
   let spectator: Spectator<OtpThresholdModalLinkComponent>;
   let component: OtpThresholdModalLinkComponent;
-  let service: NgxSmartModalService;
+  let modalService: SpyObject<NgxSmartModalService>;
 
   const modalData: OtpThresholdModalData = {
     params: {
@@ -33,27 +39,29 @@ describe("OtpThresholdModalLinkComponent", () => {
 
   const createComponent = createComponentFactory({
     component: OtpThresholdModalLinkComponent,
-    declarations: [OtpThresholdModalComponent, OtpThresholdFormComponent],
+    declarations: [
+      MockComponents(OtpThresholdModalComponent, OtpThresholdFormComponent),
+    ],
     imports: [
       ApolloTestingModule,
       SharedModule,
-      HttpClientTestingModule,
       ReactiveFormsModule,
       NgxSmartModalModule,
       NgxTippyModule,
     ],
+    providers: [provideHttpClient()],
     mocks: [NgxSmartModalService],
   });
 
   beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
-    service = spectator.inject(NgxSmartModalService);
+    modalService = spectator.inject(NgxSmartModalService);
     Settings.now = () => 1630494000000; // 2021-09-01T12:00:00
   });
 
-  it("should create the component", () => {
-    expect(component).toBeTruthy();
+  it("should create the component", async () => {
+    await expect(component).toBeTruthy();
   });
 
   it("should set modal data on open", () => {
@@ -61,7 +69,7 @@ describe("OtpThresholdModalLinkComponent", () => {
 
     spectator.click(byText("Compare thresholds"));
 
-    expect(service.setModalData).toHaveBeenCalledWith(
+    expect(modalService.setModalData).toHaveBeenCalledWith(
       modalData,
       OTP_THRESHOLD_MODAL_ID,
       true,
@@ -73,6 +81,6 @@ describe("OtpThresholdModalLinkComponent", () => {
 
     spectator.click(byText("Compare thresholds"));
 
-    expect(service.open).toHaveBeenCalledWith(OTP_THRESHOLD_MODAL_ID);
+    expect(modalService.open).toHaveBeenCalledWith(OTP_THRESHOLD_MODAL_ID);
   });
 });

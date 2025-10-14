@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { ChartNoDataWrapperComponent } from "./chart-no-data-wrapper.component";
 
-describe("ChartNoDataWrapperComponent", () => {
+fdescribe("ChartNoDataWrapperComponent", () => {
   let component: ChartNoDataWrapperComponent;
   let fixture: ComponentFixture<ChartNoDataWrapperComponent>;
 
@@ -18,7 +18,7 @@ describe("ChartNoDataWrapperComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });
