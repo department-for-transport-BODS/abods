@@ -130,38 +130,18 @@ fdescribe("ServiceGridComponent", () => {
     spectator.detectChanges();
     tick(100);
 
-    const expectedSummary = [
-      "",
-      "",
-      "-",
-      "444",
-      "95.9%",
-      "-",
-      "89.2%",
-      "6.1%",
-      "4.7%",
-    ];
+    const expectedSummary = ["", "", "-", "444", "95.9%", "-", "166%"];
 
     const expectedValues = [
-      [
-        "",
-        "1A: Dispear to Wear",
-        "123",
-        "93.5%",
-        "+00:12",
-        "69.6%",
-        "17.4%",
-        "13%",
-      ],
+      ["", "1A: Dispear to Wear", "-", "123", "93.5%", "+00:12", "69.6%"],
       [
         "Frequent service",
         "2A: Roade to Nowerre",
+        "-",
         "321",
         "96.9%",
         "+00:35",
         "96.5%",
-        "1.9%",
-        "1.6%",
       ],
     ];
 
@@ -194,11 +174,19 @@ fdescribe("ServiceGridComponent", () => {
     listSubj.next(services);
     spectator.detectChanges();
 
-    const expectedSummary = ["", "", "-", "444", "-", "426", "380", "26", "20"];
+    const expectedSummary = ["", "", "-", "444", "-", "426", "380"];
 
     const expectedValues = [
-      ["1A: Dispear to Wear", "115", "80", "20", "15", "123", "+00:12"],
-      ["2A: Roade to Nowerre", "311", "300", "6", "5", "321", "+00:35"],
+      ["", "1A: Dispear to Wear", "-", "123", "+00:12", "115", "80"],
+      [
+        "Frequent service",
+        "2A: Roade to Nowerre",
+        "-",
+        "321",
+        "+00:35",
+        "311",
+        "300",
+      ],
     ];
 
     spectator.click(byLabel("Count"));
