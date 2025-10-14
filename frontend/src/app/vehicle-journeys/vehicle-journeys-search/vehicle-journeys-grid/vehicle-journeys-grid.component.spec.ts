@@ -2,15 +2,12 @@ import { DateTime, Settings } from "luxon";
 import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid.component";
 import { Spectator, byText, createComponentFactory } from "@ngneat/spectator";
 import { SharedModule } from "../../../shared/shared.module";
-import { RouterTestingModule } from "@angular/router/testing";
 import { Journey } from "../../../../generated/graphql";
+import { RouterModule } from "@angular/router";
 
 describe("VehicleJourneysGridComponent", () => {
   let spectator: Spectator<VehicleJourneysGridComponent>;
   let component: VehicleJourneysGridComponent;
-
-  const toQueryParamFormat = (date: DateTime) =>
-    date.toUTC()?.toISO({ format: "basic", suppressSeconds: true });
 
   const t1 = DateTime.fromISO("2022-08-01T06:45:00");
   const t2 = DateTime.fromISO("2022-08-01T06:55:00");
@@ -48,26 +45,26 @@ describe("VehicleJourneysGridComponent", () => {
     {
       groupId: "VJ4aa8804d",
       startTime: t4.toISO(),
-      operatorName: "OP04",
-      operatorNoc: "OP04",
-      serviceName: "OP4",
-      serviceNumber: "4",
+      operatorName: "OP03",
+      operatorNoc: "OP03",
+      serviceName: "OP3",
+      serviceNumber: "3",
       isCancelled: false,
     },
     {
       groupId: "VJa921fcb5",
       startTime: t5.toISO(),
-      operatorName: "OP05",
-      operatorNoc: "OP05",
-      serviceName: "OP5",
-      serviceNumber: "5",
+      operatorName: "OP01",
+      operatorNoc: "OP01",
+      serviceName: "OP1",
+      serviceNumber: "1",
       isCancelled: false,
     },
   ];
 
   const createComponent = createComponentFactory({
     component: VehicleJourneysGridComponent,
-    imports: [SharedModule, RouterTestingModule],
+    imports: [SharedModule, RouterModule.forRoot([])],
   });
 
   beforeEach(() => {
@@ -90,18 +87,12 @@ describe("VehicleJourneysGridComponent", () => {
 
     const gridEls = spectator.queryAll(".journey-search-grid");
 
-    expect(
-      spectator.query(byText("76: St Annes - Blackpool Town Centre")),
-    ).toBeVisible();
+    expect(spectator.query(byText("1: OP1"))).toBeVisible();
     expect(gridEls[0].textContent).toContain("06:45");
     expect(gridEls[0].textContent).toContain("15:55");
-    expect(
-      spectator.query(byText("76: Poulton-le-Fylde - St Annes")),
-    ).toBeVisible();
+    expect(spectator.query(byText("2: OP2"))).toBeVisible();
     expect(gridEls[1].textContent).toContain("06:55");
-    expect(
-      spectator.query(byText("76: Blackpool Town Centre - St Annes")),
-    ).toBeVisible();
+    expect(spectator.query(byText("3: OP3"))).toBeVisible();
     expect(gridEls[2].textContent).toContain("07:28");
     expect(gridEls[2].textContent).toContain("15:38");
   });
@@ -115,11 +106,11 @@ describe("VehicleJourneysGridComponent", () => {
     await spectator.fixture.whenStable();
 
     const linksEls = spectator.queryAll(".journey-search-grid__time");
-    const link1 = `/vehicle-journeys/VJefdb0f42?startTime=${toQueryParamFormat(t1)}&operator=OP3&service=LI4728`;
-    const link2 = `/vehicle-journeys/VJa921fcb5?startTime=${toQueryParamFormat(t5)}&operator=OP3&service=LI4728`;
-    const link3 = `/vehicle-journeys/VJf3c22dad?startTime=${toQueryParamFormat(t2)}&operator=OP3&service=LI4728`;
-    const link4 = `/vehicle-journeys/VJa3968321?startTime=${toQueryParamFormat(t3)}&operator=OP3&service=LI4728`;
-    const link5 = `/vehicle-journeys/VJ4aa8804d?startTime=${toQueryParamFormat(t4)}&operator=OP3&service=LI4728`;
+    const link1 = `/vehicle-journeys/VJefdb0f42?operator=OP3&service=LI4728`;
+    const link2 = `/vehicle-journeys/VJa921fcb5?operator=OP3&service=LI4728`;
+    const link3 = `/vehicle-journeys/VJf3c22dad?operator=OP3&service=LI4728`;
+    const link4 = `/vehicle-journeys/VJa3968321?operator=OP3&service=LI4728`;
+    const link5 = `/vehicle-journeys/VJ4aa8804d?operator=OP3&service=LI4728`;
 
     expect(linksEls.length).toEqual(5);
     expect(linksEls[0].getAttribute("href")).toEqual(link1);

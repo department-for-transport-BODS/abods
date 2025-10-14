@@ -3,8 +3,12 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { StopListComponent } from "./stop-list.component";
 import { Direction, Stop } from "../../../../generated/graphql";
-import { MockComponent } from "ng-mocks";
 import { CommonModule } from "@angular/common";
+import { StopItemComponent } from "./stop-item/stop-item.component";
+import { SharedModule } from "../../../shared/shared.module";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { LuxonModule } from "luxon-angular";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 
 function mockVehicleStopPingFactory(): Stop {
   return {
@@ -31,8 +35,14 @@ describe("StopListComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MockComponent(StopListComponent)],
-      imports: [CommonModule],
+      declarations: [StopListComponent, StopItemComponent],
+      imports: [
+        CommonModule,
+        SharedModule,
+        NgxTippyModule,
+        LuxonModule,
+        HttpClientTestingModule,
+      ],
     }).compileComponents();
   });
 
@@ -42,44 +52,41 @@ describe("StopListComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
-  it('should show "No stops available" if view is null', () => {
+  it('should show "No stops available" if view is null', async () => {
     component.view = null;
     fixture.detectChanges();
     debugEl = fixture.debugElement.query(By.css(".no-stops"));
-    expect(debugEl).toBeTruthy();
-    expect(debugEl.nativeElement.innerHTML).toContain("No stops available");
+    await expect(debugEl).toBeTruthy();
+    await expect(debugEl.nativeElement.innerHTML).toContain(
+      "No stops available",
+    );
   });
 
-  it('should show "No stops available" if view.stops is undefined', () => {
-    component.view = {} as any;
+  it('should show "No stops available" if view.stops is an empty array', async () => {
+    component.view = { stops: [], avls: [] };
     fixture.detectChanges();
     debugEl = fixture.debugElement.query(By.css(".no-stops"));
-    expect(debugEl).toBeTruthy();
-    expect(debugEl.nativeElement.innerHTML).toContain("No stops available");
+    await expect(debugEl).toBeTruthy();
+    await expect(debugEl.nativeElement.innerHTML).toContain(
+      "No stops available",
+    );
   });
 
-  it('should show "No stops available" if view.stops is empty array', () => {
-    component.view = { stops: [] } as any;
-    fixture.detectChanges();
-    debugEl = fixture.debugElement.query(By.css(".no-stops"));
-    expect(debugEl).toBeTruthy();
-    expect(debugEl.nativeElement.innerHTML).toContain("No stops available");
-  });
-
-  it('should not show "No stops available" if view.stops contains stops', () => {
+  it('should not show "No stops available" if view.stops contains stops', async () => {
     component.view = {
       stops: [
         mockVehicleStopPingFactory(),
         mockVehicleStopPingFactory(),
         mockVehicleStopPingFactory(),
       ],
-    } as any;
+      avls: [],
+    };
     fixture.detectChanges();
     debugEl = fixture.debugElement.query(By.css(".no-stops"));
-    expect(debugEl).toBeFalsy();
+    await expect(debugEl).toBeFalsy();
   });
 });
