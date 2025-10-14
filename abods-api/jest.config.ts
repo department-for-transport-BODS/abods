@@ -17,6 +17,7 @@ const jestConfig: JestConfigWithTsJest = {
       },
     ],
   },
+  testPathIgnorePatterns: ["/node_modules/", "/.build/"],
   collectCoverage: true,
   collectCoverageFrom: [
     "src/resolvers/**/*.ts",

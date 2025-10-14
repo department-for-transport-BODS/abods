@@ -71,6 +71,16 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
+      let scheduledCountQuery = getKyselyFiltersForOTPQuery(
+        context.kysely,
+        summaryTable,
+        {
+          ...args.inputs,
+          filters: { ...args.inputs.filters, matchType: undefined },
+        },
+        userOperatorIds,
+      );
+
       const filterDirections = direction?.filter((value) => value != undefined);
       if (
         Array.isArray(filterDirections) &&
@@ -90,6 +100,14 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
             filterDirections.map((v) => v.toLocaleLowerCase()),
           ),
         );
+
+        scheduledCountQuery = scheduledCountQuery.where((eb) =>
+          eb(
+            eb.fn("lower", [eb.ref("direction")]),
+            "in",
+            filterDirections.map((v) => v.toLocaleLowerCase()),
+          ),
+        );
       }
 
       summarySubQuery = kyselyFilterForAdminIds(
@@ -97,8 +115,15 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         adminAreaIds ?? [],
       );
 
+      scheduledCountQuery = kyselyFilterForAdminIds(
+        scheduledCountQuery,
+        adminAreaIds ?? [],
+      );
+
       // Needs to be aliased separately. Need to find out why
       const aliasedSubQuery = summarySubQuery.as("summary");
+      const aliasedScheduleCountQuery = scheduledCountQuery.as("schedule");
+
       let mainQuery = context.kysely
         .selectFrom(aliasedSubQuery)
         .select([
@@ -114,11 +139,16 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
             "average_delay",
           ),
-          sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
-            "scheduled",
-          ),
         ])
         .groupBy(["incomplete_reason", "estimated"]);
+
+      let scheduledCount = context.kysely
+        .selectFrom(aliasedScheduleCountQuery)
+        .select([
+          "incomplete_reason",
+          context.kysely.fn.sum("scheduled").as("scheduled"),
+        ])
+        .groupBy(["incomplete_reason"]);
 
       if (startTime || endTime) {
         const start = Number((startTime ?? "00:00").split(":")[0]);
@@ -126,9 +156,17 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         mainQuery = mainQuery
           .where("hour", ">=", start)
           .where("hour", "<=", end);
+
+        scheduledCount = scheduledCount
+          .where("hour", ">=", start)
+          .where("hour", "<=", end);
       }
 
-      const results = await executeQuery(mainQuery);
+      const [results, scheduledCounts] = await Promise.all([
+        executeQuery(mainQuery),
+        executeQuery(scheduledCount),
+      ]);
+
       const returnVal: PunctualityTotalsType = {
         scheduled: 0,
         early: 0,
@@ -143,7 +181,11 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
       let averageDelayed: number | undefined = undefined;
       for (const result of results) {
         // https://github.com/kysely-org/kysely/issues/749
-        const scheduled = Number(result.scheduled ?? 0);
+        const scheduled = Number(
+          scheduledCounts.find(
+            (sc) => sc.incomplete_reason === result.incomplete_reason,
+          )?.scheduled ?? 0,
+        );
         const reasonId = result.incomplete_reason ?? 0;
 
         // if the current row is estimated, and the request is to filter estimated,
@@ -158,7 +200,6 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         const late = ignoreEstimated ? 0 : Number(result.late_count ?? 0);
         const onTime = ignoreEstimated ? 0 : Number(result.on_time_count ?? 0);
 
-        returnVal.scheduled += scheduled;
         returnVal.early += early;
         returnVal.late += late;
         returnVal.onTime += onTime;
@@ -172,13 +213,19 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
             averageDelayed ??
             0 + Number(result.average_delay) / Number(result.count_delayed);
         }
-        incompleteReasons[reasonId] ??= 0;
-        incompleteReasons[reasonId] += scheduled - completed;
+        incompleteReasons[reasonId] ??= scheduled;
+        incompleteReasons[reasonId] -= completed;
       }
       returnVal.incomplete = JSON.stringify(incompleteReasons);
       returnVal.averageDelay = averageDelayed;
 
-      return returnVal;
+      return {
+        ...returnVal,
+        scheduled: scheduledCounts.reduce(
+          (sum, sc) => sum + Number(sc.scheduled),
+          0,
+        ),
+      };
     } catch (error) {
       logger.error(error, "An error occurred when getting punctuality stats");
       return null;
@@ -809,19 +856,58 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             userOperatorIds,
           );
 
+          let scheduledCountQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            "timetable_summary_stops_tz",
+            {
+              ...args.inputs,
+              filters: { ...args.inputs.filters, matchType: undefined },
+            },
+            userOperatorIds,
+          );
+
           summarySubQuery = kyselyFilterForAdminIds(
             summarySubQuery,
             adminAreaIds ?? [],
           );
 
+          scheduledCountQuery = kyselyFilterForAdminIds(
+            scheduledCountQuery,
+            adminAreaIds ?? [],
+          );
+
           // Needs to be aliased separately. Need to find out why
           const aliasedSubQuery = summarySubQuery.as("summary");
+          const aliasedScheduleCountQuery = scheduledCountQuery.as("schedule");
+
+          let scheduledCount = context.kysely
+            .selectFrom(aliasedScheduleCountQuery)
+            .select([
+              "stop_id",
+              "is_timing_point",
+              "stop_index",
+              context.kysely.fn.sum("scheduled").as("scheduled"),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy(["stop_id", "is_timing_point", "direction", "stop_index"]);
+
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select([
               "stop_id",
               "common_name",
               "is_timing_point",
+              "stop_index",
               context.kysely.fn.sum("early_count").as("early_count"),
               context.kysely.fn.sum("late_count").as("late_count"),
               context.kysely.fn.sum("on_time_count").as("on_time_count"),
@@ -868,17 +954,6 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 "scheduled",
               ),
             ])
-            .select((eb) => [
-              eb
-                .case()
-                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
-                .then("inbound")
-                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
-                .then("outbound")
-                .else(eb.ref("direction"))
-                .end()
-                .as("direction"),
-            ])
             .groupBy([
               "stop_id",
               "common_name",
@@ -894,9 +969,16 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             mainQuery = mainQuery
               .where("hour", ">=", start)
               .where("hour", "<=", end);
+
+            scheduledCount = scheduledCount
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
           }
 
-          const results = await executeQuery(mainQuery);
+          const [results, scheduledCounts] = await Promise.all([
+            executeQuery(mainQuery),
+            executeQuery(scheduledCount),
+          ]);
 
           const stopIds = results.map((res) => Number(res.stop_id));
 
@@ -944,6 +1026,14 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 ? Number(res.diff_actual_time_to_stop)
                 : undefined;
 
+            const schedule = scheduledCounts.find(
+              (sc) =>
+                sc.stop_id === res.stop_id &&
+                sc.stop_index === res.stop_index &&
+                sc.is_timing_point === res.is_timing_point &&
+                sc.direction === res.direction,
+            )?.scheduled;
+
             stopPerformances.push({
               lineId: lineIds[0],
               stopId: stop?.atco_code ?? "",
@@ -966,7 +1056,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
               late: res.late_count ? Number(res.late_count) : 0,
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
-              scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
+              scheduledDepartures: schedule ? Number(schedule) : 0,
               averageDelay:
                 Number(res.count_delayed) > 0
                   ? Number(res.average_delay) / Number(res.count_delayed)
@@ -1034,13 +1124,49 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             userOperatorIds,
           );
 
+          let scheduledCountQuery = getKyselyFiltersForOTPQuery(
+            context.kysely,
+            "timetable_summary_service_tz",
+            {
+              ...args.inputs,
+              filters: { ...args.inputs.filters, matchType: undefined },
+            },
+            userOperatorIds,
+          );
+
           summarySubQuery = kyselyFilterForAdminIds(
             summarySubQuery,
             adminAreaIds ?? [],
           );
 
+          scheduledCountQuery = kyselyFilterForAdminIds(
+            scheduledCountQuery,
+            adminAreaIds ?? [],
+          );
+
           // Needs to be aliased separately. Need to find out why
           const aliasedSubQuery = summarySubQuery.as("summary");
+          const aliasedScheduleCountQuery = scheduledCountQuery.as("schedule");
+
+          let scheduledCount = context.kysely
+            .selectFrom(aliasedScheduleCountQuery)
+            .select([
+              "noc_and_line_and_servicecode",
+              context.kysely.fn.sum("scheduled").as("scheduled"),
+            ])
+            .select((eb) => [
+              eb
+                .case()
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
+                .then("inbound")
+                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
+                .then("outbound")
+                .else(eb.ref("direction"))
+                .end()
+                .as("direction"),
+            ])
+            .groupBy(["noc_and_line_and_servicecode", "direction"]);
+
           let mainQuery = context.kysely
             .selectFrom(aliasedSubQuery)
             .select([
@@ -1054,17 +1180,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               context.kysely.fn.sum("count_delayed").as("count_delayed"),
             ])
             .select((eb) => [
-              eb
-                .case()
-                .when(sql`LOWER(${eb.ref("direction")})`, "=", "anticlockwise")
-                .then("inbound")
-                .when(sql`LOWER(${eb.ref("direction")})`, "=", "clockwise")
-                .then("outbound")
-                .else(eb.ref("direction"))
-                .end()
-                .as("direction"),
-            ])
-            .select((eb) => [
               sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
                 "average_delay",
               ),
@@ -1076,9 +1191,6 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               ),
               sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
-              ),
-              sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
-                "scheduled",
               ),
             ])
             .select((eb) => [
@@ -1104,9 +1216,16 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             mainQuery = mainQuery
               .where("hour", ">=", start)
               .where("hour", "<=", end);
+
+            scheduledCount = scheduledCount
+              .where("hour", ">=", start)
+              .where("hour", "<=", end);
           }
 
-          const results = await executeQuery(mainQuery);
+          const [results, scheduledCounts] = await Promise.all([
+            executeQuery(mainQuery),
+            executeQuery(scheduledCount),
+          ]);
 
           const noc_and_lines = results
             .map((result) => result.noc_and_line_and_servicecode)
@@ -1131,12 +1250,19 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
                 res.noc_and_line_and_servicecode,
             );
 
+            const schedule = scheduledCounts.find(
+              (sc) =>
+                sc.noc_and_line_and_servicecode ===
+                  res.noc_and_line_and_servicecode &&
+                sc.direction === res.direction,
+            )?.scheduled;
+
             servicePunctualities.push({
               lineId: res.noc_and_line_and_servicecode,
               early: res.early_count ? Number(res.early_count) : 0,
               late: res.late_count ? Number(res.late_count) : 0,
               onTime: res.on_time_count ? Number(res.on_time_count) : 0,
-              scheduledDepartures: res.scheduled ? Number(res.scheduled) : 0,
+              scheduledDepartures: schedule ? Number(schedule) : 0,
               actualDepartures: res.completed ? Number(res.completed) : 0,
               countDelayed: Number(res.count_delayed),
               averageDelay:
