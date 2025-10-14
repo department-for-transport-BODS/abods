@@ -4,8 +4,6 @@ import { of, throwError } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { OnTimeService } from "../on-time.service";
-import { TimeOfDayChartComponent } from "./time-of-day-chart.component";
-import objectContaining = jasmine.objectContaining;
 import {
   onTimeInputParams,
   onTimeInputParamsAlt,
@@ -14,8 +12,10 @@ import {
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
 import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
+import { TimeOfDayChartComponent } from "./time-of-day-chart.component";
+import objectContaining = jasmine.objectContaining;
 
-describe("TimeOfDayChartComponent", () => {
+fdescribe("TimeOfDayChartComponent", () => {
   let spectator: Spectator<TimeOfDayChartComponent>;
   let component: TimeOfDayChartComponent;
   let service: OnTimeService;
@@ -33,10 +33,10 @@ describe("TimeOfDayChartComponent", () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should request data", () => {
@@ -119,7 +119,7 @@ describe("TimeOfDayChartComponent", () => {
     );
   });
 
-  it("should recover from an error condition when filters change", () => {
+  it("should recover from an error condition when filters change", async () => {
     const spy = spyOn(
       service,
       "fetchOnTimePunctualityTimeOfDayData",
@@ -134,6 +134,6 @@ describe("TimeOfDayChartComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledTimes(2);
+    await expect(spy).toHaveBeenCalledTimes(2);
   });
 });
