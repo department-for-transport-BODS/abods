@@ -6,7 +6,7 @@ import { ChipComponent } from "./chip.component";
 import { SharedModule } from "../../shared.module";
 import { provideHttpClient } from "@angular/common/http";
 
-fdescribe("ChipComponent", () => {
+describe("ChipComponent", () => {
   let component: ChipComponent;
   let fixture: ComponentFixture<ChipComponent>;
   let buttonEl: DebugElement;

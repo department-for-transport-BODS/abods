@@ -13,7 +13,7 @@ import { OperatorService } from "../shared/services/operator.service";
 import { OperatorType } from "../../generated/graphql";
 import { OperatorGuard } from "./operator.guard";
 
-fdescribe("OperatorGuard", () => {
+describe("OperatorGuard", () => {
   let guard: OperatorGuard;
   let operatorService: OperatorService;
   let router: Router;

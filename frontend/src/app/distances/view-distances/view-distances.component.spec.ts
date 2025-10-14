@@ -15,6 +15,9 @@ import { DateRangeService } from "../../shared/services/date-range.service";
 import { SharedModule } from "../../shared/shared.module";
 import { DistancesService } from "../distances.service";
 import { ViewDistancesComponent } from "./view-distances.component";
+import { AgGridModule } from "ag-grid-angular";
+import { FormsModule } from "@angular/forms";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 describe("ViewDistancesComponent", () => {
   let spectator: Spectator<ViewDistancesComponent>;
@@ -23,7 +26,15 @@ describe("ViewDistancesComponent", () => {
 
   const createComponent = createComponentFactory({
     component: ViewDistancesComponent,
-    imports: [SharedModule, GdsModule, LayoutModule, ApolloTestingModule],
+    imports: [
+      SharedModule,
+      GdsModule,
+      LayoutModule,
+      ApolloTestingModule,
+      AgGridModule,
+      FormsModule,
+      NgSelectModule,
+    ],
     detectChanges: false,
     mocks: [OperatorLinesGQL, DistancesService],
   });

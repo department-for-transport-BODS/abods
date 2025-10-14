@@ -20,7 +20,7 @@ import {
 } from "../otp-threshold-modal/otp-threshold-modal.component";
 import { OtpThresholdModalLinkComponent } from "./otp-threshold-modal-link.component";
 
-fdescribe("OtpThresholdModalLinkComponent", () => {
+describe("OtpThresholdModalLinkComponent", () => {
   let spectator: Spectator<OtpThresholdModalLinkComponent>;
   let component: OtpThresholdModalLinkComponent;
   let modalService: SpyObject<NgxSmartModalService>;

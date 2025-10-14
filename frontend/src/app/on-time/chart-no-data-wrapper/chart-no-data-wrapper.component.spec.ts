@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { ChartNoDataWrapperComponent } from "./chart-no-data-wrapper.component";
 
-fdescribe("ChartNoDataWrapperComponent", () => {
+describe("ChartNoDataWrapperComponent", () => {
   let component: ChartNoDataWrapperComponent;
   let fixture: ComponentFixture<ChartNoDataWrapperComponent>;
 

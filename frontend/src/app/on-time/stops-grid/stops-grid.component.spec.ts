@@ -20,7 +20,7 @@ import { StopsGridComponentDisplayComponent } from "./stops-grid-display.compone
 import { StopsGridComponent } from "./stops-grid.component";
 import { TimingRendererComponent } from "./timing-renderer/timing-renderer.component";
 
-fdescribe("StopsGridComponent", () => {
+describe("StopsGridComponent", () => {
   let spectator: Spectator<StopsGridComponent>;
   let service: OnTimeService;
 

@@ -12,7 +12,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { OtpThresholdDefaultsService } from "./otp-threshold-defaults.service";
 import { OtpThresholdFormComponent } from "./otp-threshold-form.component";
 
-fdescribe("OtpThresholdFormComponent", () => {
+describe("OtpThresholdFormComponent", () => {
   let spectator: Spectator<OtpThresholdFormComponent>;
   let component: OtpThresholdFormComponent;
   let modalService: SpyObject<NgxSmartModalService>;

@@ -4,7 +4,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { StackedHistogramChartComponent } from "./stacked-histogram-chart.component";
 
-fdescribe("TimeOfDayChartComponent", () => {
+describe("TimeOfDayChartComponent", () => {
   let spectator: Spectator<StackedHistogramChartComponent>;
   let component: StackedHistogramChartComponent;
 

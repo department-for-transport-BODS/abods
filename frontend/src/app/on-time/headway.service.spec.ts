@@ -16,7 +16,7 @@ import { HeadwayParams, HeadwayService } from "./headway.service";
 import { PerformanceParams } from "./on-time.service";
 import objectContaining = jasmine.objectContaining;
 
-fdescribe("HeadwayService", () => {
+describe("HeadwayService", () => {
   let spectator: SpectatorService<HeadwayService>;
   let controller: ApolloTestingController;
   const serviceFactory = createServiceFactory({

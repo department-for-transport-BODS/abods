@@ -10,7 +10,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { FilterChipsComponent } from "./filter-chips.component";
 
-fdescribe("FilterChipsComponent", () => {
+describe("FilterChipsComponent", () => {
   let component: FilterChipsComponent;
   let fixture: ComponentFixture<FilterChipsComponent>;
 

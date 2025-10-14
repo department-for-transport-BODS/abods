@@ -26,7 +26,7 @@ const performance = (
   completedRatio: 0,
 });
 
-fdescribe("OnTimeService", () => {
+describe("OnTimeService", () => {
   let spectator: SpectatorService<OnTimeService>;
   const createService = createServiceFactory({
     service: OnTimeService,

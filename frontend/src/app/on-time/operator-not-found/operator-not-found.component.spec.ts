@@ -5,7 +5,7 @@ import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
 import { OperatorNotFoundComponent } from "./operator-not-found.component";
 
-fdescribe("OperatorNotFoundComponent", () => {
+describe("OperatorNotFoundComponent", () => {
   let component: OperatorNotFoundComponent;
   let fixture: ComponentFixture<OperatorNotFoundComponent>;
 

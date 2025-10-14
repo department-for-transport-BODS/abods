@@ -17,7 +17,7 @@ import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.
 import { DayOfWeekChartComponent } from "./day-of-week-chart.component";
 import objectContaining = jasmine.objectContaining;
 
-fdescribe("DayOfWeekChartComponent", () => {
+describe("DayOfWeekChartComponent", () => {
   let spectator: Spectator<DayOfWeekChartComponent>;
   let component: DayOfWeekChartComponent;
   let service: OnTimeService;

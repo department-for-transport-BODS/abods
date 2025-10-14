@@ -10,7 +10,7 @@ import {
 } from "../../generated/graphql";
 import { TransitModelService } from "./transit-model.service";
 
-fdescribe("TransitModelService", () => {
+describe("TransitModelService", () => {
   let spectator: SpectatorService<TransitModelService>;
   let controller: ApolloTestingController;
   const serviceFactory = createServiceFactory({

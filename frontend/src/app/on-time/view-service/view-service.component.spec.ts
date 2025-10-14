@@ -34,7 +34,7 @@ import { StopsGridComponent } from "../stops-grid/stops-grid.component";
 import { TimeSeriesChartComponent } from "../time-series-chart/time-series-chart.component";
 import { ViewServiceComponent } from "./view-service.component";
 
-fdescribe("ViewServiceComponent", () => {
+describe("ViewServiceComponent", () => {
   let spectator: SpectatorRouting<ViewServiceComponent>;
   let component: ViewServiceComponent;
   let onTimeService: OnTimeService;

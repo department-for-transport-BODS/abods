@@ -23,7 +23,7 @@ import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold
 import { OverviewStatsComponent } from "../overview-stats/overview-stats.component";
 import { AllOperatorsComponent } from "./all-operators.component";
 
-fdescribe("AllOperatorsComponent", () => {
+describe("AllOperatorsComponent", () => {
   let spectator: SpectatorRouting<AllOperatorsComponent>;
   let component: AllOperatorsComponent;
   let operatorService: OperatorService;

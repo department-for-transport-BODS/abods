@@ -16,7 +16,7 @@ import {
 } from "../on-time.test-constants";
 import { TimeSeriesChartComponent } from "./time-series-chart.component";
 
-fdescribe("TimeSeriesChartComponent", () => {
+describe("TimeSeriesChartComponent", () => {
   let spectator: Spectator<TimeSeriesChartComponent>;
   let component: TimeSeriesChartComponent;
   let service: OnTimeService;

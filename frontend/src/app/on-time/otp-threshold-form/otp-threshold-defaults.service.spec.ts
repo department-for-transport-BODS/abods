@@ -7,7 +7,7 @@ import { ConfigService } from "../../config/config.service";
 
 import { OtpThresholdDefaultsService } from "./otp-threshold-defaults.service";
 
-fdescribe("OtpThresholdFormService", () => {
+describe("OtpThresholdFormService", () => {
   let service: OtpThresholdDefaultsService;
 
   beforeEach(() => {

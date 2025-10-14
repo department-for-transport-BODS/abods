@@ -26,7 +26,7 @@ import {
 } from "../on-time.service";
 import { OperatorGridComponent } from "./operator-grid.component";
 
-fdescribe("OperatorGridComponent", () => {
+describe("OperatorGridComponent", () => {
   let spectator: Spectator<OperatorGridComponent>;
   let component: OperatorGridComponent;
   let onTimeService: SpyObject<OnTimeService>;

@@ -17,7 +17,7 @@ import { FiltersComponent } from "../filters/filters.component";
 import { ControlsComponent } from "./controls.component";
 import objectContaining = jasmine.objectContaining;
 
-fdescribe("ControlsComponent", () => {
+describe("ControlsComponent", () => {
   let spectator: SpectatorRouting<ControlsComponent>;
   let component: ControlsComponent;
   let panelService: PanelService;
