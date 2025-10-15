@@ -9,11 +9,11 @@ describe("VehicleJourneysGridComponent", () => {
   let spectator: Spectator<VehicleJourneysGridComponent>;
   let component: VehicleJourneysGridComponent;
 
-  const t1 = DateTime.fromISO("2022-08-01T06:45:00");
-  const t2 = DateTime.fromISO("2022-08-01T06:55:00");
-  const t3 = DateTime.fromISO("2022-08-01T07:28:00");
-  const t4 = DateTime.fromISO("2022-08-01T15:38:00");
-  const t5 = DateTime.fromISO("2022-08-01T15:55:00");
+  const t1 = DateTime.fromISO("2022-08-01T06:45:00+01:00");
+  const t2 = DateTime.fromISO("2022-08-01T06:55:00+01:00");
+  const t3 = DateTime.fromISO("2022-08-01T07:28:00+01:00");
+  const t4 = DateTime.fromISO("2022-08-01T15:38:00+01:00");
+  const t5 = DateTime.fromISO("2022-08-01T15:55:00+01:00");
   const journeys: Journey[] = [
     {
       groupId: "VJefdb0f42",
