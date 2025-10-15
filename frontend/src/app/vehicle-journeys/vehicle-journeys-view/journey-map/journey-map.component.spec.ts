@@ -3,13 +3,13 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FeatureIdentifier, Map } from "mapbox-gl";
 import { StopHoverEvent } from "../stop-list/stop-item/stop-item.component";
 
-import { JourneyMapComponent } from "./journey-map.component";
-import { Stop, OtpEnum, Direction } from "../../../../generated/graphql";
-import { SharedModule } from "../../../shared/shared.module";
-import { GdsModule } from "../../../shared/gds/gds.module";
+import { provideHttpClient } from "@angular/common/http";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { NgxSmartModalModule } from "ngx-smart-modal";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { Direction, OtpEnum, Stop } from "../../../../generated/graphql";
+import { GdsModule } from "../../../shared/gds/gds.module";
+import { SharedModule } from "../../../shared/shared.module";
+import { JourneyMapComponent } from "./journey-map.component";
 
 // Mock stops with correct property names
 const t1 = "2022-08-18T11:20:00.000+01:00";
@@ -114,8 +114,8 @@ describe("JourneyMapComponent", () => {
         GdsModule,
         NgxMapboxGLModule,
         NgxSmartModalModule,
-        HttpClientTestingModule,
       ],
+      providers: [provideHttpClient()],
     }).compileComponents();
   });
 
