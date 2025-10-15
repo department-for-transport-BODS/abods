@@ -1,6 +1,5 @@
 import { fakeAsync, tick } from "@angular/core/testing";
-import { NavigationEnd, Router } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
+import { NavigationEnd, Router, RouterModule } from "@angular/router";
 import {
   createServiceFactory,
   SpectatorService,
@@ -49,7 +48,7 @@ describe("AnalyticsService", () => {
   describe("enabled", () => {
     const serviceFactory = createServiceFactory({
       service: AnalyticsService,
-      imports: [RouterTestingModule],
+      imports: [RouterModule.forRoot([])],
       providers: [
         MockProvider(CookiePolicyService, mockCookiePolicyServiceEnabled),
         MockProvider(GoogleTagManagerService, {
@@ -152,7 +151,7 @@ describe("AnalyticsService", () => {
   describe("disabled", () => {
     const serviceFactory = createServiceFactory({
       service: AnalyticsService,
-      imports: [RouterTestingModule],
+      imports: [RouterModule.forRoot([])],
       providers: [
         MockProvider(CookiePolicyService, mockCookiePolicyServiceDisabled),
         MockProvider(GoogleTagManagerService, {

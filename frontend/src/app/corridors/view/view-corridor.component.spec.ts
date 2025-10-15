@@ -1,5 +1,5 @@
-/* eslint-disable jasmine/new-line-before-expect */
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import {
   ChangeDetectorRef,
   Component,
@@ -11,8 +11,7 @@ import {
 } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { Data } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
+import { Data, RouterModule } from "@angular/router";
 import {
   byLabel,
   byText,
@@ -132,15 +131,18 @@ describe("ViewCorridorComponent", () => {
         FormsModule,
         ReactiveFormsModule,
         ApolloTestingModule,
-        RouterTestingModule,
+        RouterModule.forRoot([]),
         AgGridModule,
-        HttpClientTestingModule,
         NgxSmartModalModule,
         GdsModule,
         NgxMapboxGLModule,
       ],
       declarations: [SegmentSelectorComponent, BoxPlotChartComponent],
-      providers: [CorridorsService],
+      providers: [
+        CorridorsService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
       detectChanges: true,
     });
 
