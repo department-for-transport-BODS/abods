@@ -26,7 +26,7 @@ import {
   OnTimeGridComponent,
 } from "./on-time-grid.component";
 
-fdescribe("OnTimeGridComponent", () => {
+describe("OnTimeGridComponent", () => {
   let spectator: Spectator<OnTimeGridComponent<AbstractPerformance>>;
   let component: OnTimeGridComponent<AbstractPerformance>;
   let ngxSmartModalService: SpyObject<NgxSmartModalService>;

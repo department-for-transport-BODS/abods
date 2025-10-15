@@ -27,11 +27,20 @@ export class DateRangeControlsComponent implements OnInit {
 
   @Output() closeControls = new EventEmitter();
 
+  readonly placeholder = "dd/mm/yyyy";
+  startInputType: "text" | "date" = "text";
+  endInputType: "text" | "date" = "text";
+  startPlaceholder = this.placeholder;
+  endPlaceholder = this.placeholder;
   get ending(): string {
     return this.end?.isValid ? this.end.toFormat("yyyy-MM-dd") : "";
   }
   set ending(value: string) {
     this.end = DateTime.fromFormat(value, "yyyy-MM-dd").startOf("day");
+    void Promise.resolve().then(() => {
+      this.endInputType = this.end?.isValid ? "date" : "text";
+      this.endPlaceholder = this.end?.isValid ? "" : this.placeholder;
+    });
   }
 
   get starting(): string {
@@ -39,6 +48,10 @@ export class DateRangeControlsComponent implements OnInit {
   }
   set starting(value: string) {
     this.start = DateTime.fromFormat(value, "yyyy-MM-dd").startOf("day");
+    void Promise.resolve().then(() => {
+      this.startInputType = this.start?.isValid ? "date" : "text";
+      this.startPlaceholder = this.start?.isValid ? "" : this.placeholder;
+    });
   }
 
   start?: DateTime;
@@ -53,7 +66,6 @@ export class DateRangeControlsComponent implements OnInit {
   handlingBlur = false;
   startFocused = false;
   endFocused = false;
-  readonly placeholder = "dd/mm/yyyy";
 
   get invalidDates(): boolean {
     if (!this.end?.isValid) {

@@ -19,7 +19,7 @@ import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-
 import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
 import { OverviewStatsComponent } from "./overview-stats.component";
 
-fdescribe("OverviewStatsComponent", () => {
+describe("OverviewStatsComponent", () => {
   let spectator: Spectator<OverviewStatsComponent>;
   let component: OverviewStatsComponent;
 

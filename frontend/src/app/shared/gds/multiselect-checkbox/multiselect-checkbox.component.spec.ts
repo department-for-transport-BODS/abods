@@ -9,11 +9,10 @@ describe("MultiselectCheckboxComponent", () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MultiselectCheckboxComponent, SharedModule],
+      declarations: [MultiselectCheckboxComponent],
+      imports: [SharedModule],
     }).compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MultiselectCheckboxComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

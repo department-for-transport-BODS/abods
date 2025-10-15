@@ -36,7 +36,7 @@ import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.
 import { TimeSeriesChartComponent } from "../time-series-chart/time-series-chart.component";
 import { ViewOperatorComponent } from "./view-operator.component";
 
-fdescribe("ViewOperatorComponent", () => {
+describe("ViewOperatorComponent", () => {
   let spectator: SpectatorRouting<ViewOperatorComponent>;
   let component: ViewOperatorComponent;
   let operatorService: SpyObject<OperatorService>;
@@ -128,7 +128,7 @@ fdescribe("ViewOperatorComponent", () => {
     performanceService.fetchServicePerformance.and.returnValue(of([]));
   });
 
-  fdescribe("Operator 1", () => {
+  describe("Operator 1", () => {
     it("should create", async () => {
       spectator.setRouteParam("nocCode", "OP01");
 
@@ -200,7 +200,7 @@ fdescribe("ViewOperatorComponent", () => {
     });
   });
 
-  fdescribe("tabs", () => {
+  describe("tabs", () => {
     beforeEach(() => {
       spectator.setRouteParam("nocCode", "OP01");
       spectator.detectChanges();

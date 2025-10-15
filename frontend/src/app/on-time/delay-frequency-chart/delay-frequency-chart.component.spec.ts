@@ -14,7 +14,7 @@ import {
 } from "../on-time.test-constants";
 import { DelayFrequencyChartComponent } from "./delay-frequency-chart.component";
 
-fdescribe("DelayFrequencyChartComponent", () => {
+describe("DelayFrequencyChartComponent", () => {
   let spectator: Spectator<DelayFrequencyChartComponent>;
   let component: DelayFrequencyChartComponent;
   let service: OnTimeService;

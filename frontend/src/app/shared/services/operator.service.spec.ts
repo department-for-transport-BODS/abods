@@ -39,17 +39,15 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreaIds: ["AA280"],
-            },
-          ],
-        },
-      } as unknown as OperatorListQuery,
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA280"],
+          },
+        ],
+      } as OperatorListQuery,
     });
 
     controller.verify();
@@ -66,24 +64,18 @@ describe("OperatorService", () => {
 
     const op = controller.expectOne(OperatorLinesDocument);
 
-    expect(op.operation.variables.operatorId).toEqual("OP01");
+    expect(op.operation.variables.operatorIds).toEqual(["OP01"]);
 
     op.flush({
       data: {
-        operator: {
-          transitModel: {
-            lines: {
-              items: [
-                {
-                  id: "LI12345",
-                  name: "Worksop to Chesterfield",
-                  number: "77",
-                },
-              ],
-            },
+        lines: [
+          {
+            id: "LI12345",
+            name: "Worksop to Chesterfield",
+            number: "77",
           },
-        },
-      } as unknown as OperatorLinesQuery,
+        ],
+      } as OperatorLinesQuery,
     });
 
     controller.verify();
@@ -101,30 +93,28 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreaIds: ["AA270"],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreaIds: ["AA280"],
-            },
-          ],
-        },
-      } as unknown as OperatorListQuery,
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
+      } as OperatorListQuery,
     });
 
     controller.verify();
   }));
 
   it("should filter operators by noc", waitForAsync(() => {
-    spectator.service.searchOperators("SCEM").subscribe((actual) => {
+    spectator.service.searchOperators("OP01").subscribe((actual) => {
       expect(actual).not.toBeNull();
       expect(actual.length).toEqual(1);
       expect(actual[0].nocCode).toEqual("SCEM");
@@ -135,23 +125,21 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreaIds: ["AA270"],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreaIds: ["AA280"],
-            },
-          ],
-        },
-      } as unknown as OperatorListQuery,
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
+      } as OperatorListQuery,
     });
 
     controller.verify();
@@ -171,23 +159,21 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreaIds: ["AA270"],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreaIds: ["AA280"],
-            },
-          ],
-        },
-      } as unknown as OperatorListQuery,
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
+      } as OperatorListQuery,
     });
 
     controller.verify();
@@ -205,31 +191,21 @@ describe("OperatorService", () => {
 
     op.flush({
       data: {
-        operators: {
-          items: [
-            {
-              name: "Stagecoach East Midlands",
-              nocCode: "SCEM",
-              operatorId: "OP01",
-              adminAreas: [
-                {
-                  adminAreaId: "AA270",
-                },
-              ],
-            },
-            {
-              name: "D & G Bus",
-              nocCode: "DAGC",
-              operatorId: "OP02",
-              adminAreas: [
-                {
-                  adminAreaId: "AA280",
-                },
-              ],
-            },
-          ],
-        },
-      } as unknown as OperatorListQuery,
+        operators: [
+          {
+            name: "Stagecoach East Midlands",
+            nocCode: "SCEM",
+            operatorId: "OP01",
+            adminAreaIds: ["AA270"],
+          },
+          {
+            name: "D & G Bus",
+            nocCode: "DAGC",
+            operatorId: "OP02",
+            adminAreaIds: ["AA280"],
+          },
+        ],
+      } as OperatorListQuery,
     });
 
     controller.verify();

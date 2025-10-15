@@ -20,7 +20,7 @@ import {
   OtpThresholdModalData,
 } from "./otp-threshold-modal.component";
 
-fdescribe("OtpThresholdModalComponent", () => {
+describe("OtpThresholdModalComponent", () => {
   let spectator: Spectator<OtpThresholdModalComponent>;
   let component: OtpThresholdModalComponent;
   let ngxSmartModalService: NgxSmartModalService;

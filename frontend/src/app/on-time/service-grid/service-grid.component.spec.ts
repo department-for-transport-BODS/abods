@@ -21,7 +21,7 @@ import {
 } from "../performance.service";
 import { ServiceGridComponent } from "./service-grid.component";
 
-fdescribe("ServiceGridComponent", () => {
+describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
   let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;

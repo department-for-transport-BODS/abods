@@ -8,7 +8,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { HeadwayService } from "../headway.service";
 import { ExcessWaitTimeChartComponent } from "./excess-wait-time-chart.component";
 
-fdescribe("ExcessWaitTimeChartComponent", () => {
+describe("ExcessWaitTimeChartComponent", () => {
   let spectator: Spectator<ExcessWaitTimeChartComponent>;
   let headwayService: HeadwayService;
 

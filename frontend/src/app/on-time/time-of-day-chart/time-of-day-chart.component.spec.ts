@@ -15,7 +15,7 @@ import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stack
 import { TimeOfDayChartComponent } from "./time-of-day-chart.component";
 import objectContaining = jasmine.objectContaining;
 
-fdescribe("TimeOfDayChartComponent", () => {
+describe("TimeOfDayChartComponent", () => {
   let spectator: Spectator<TimeOfDayChartComponent>;
   let component: TimeOfDayChartComponent;
   let service: OnTimeService;

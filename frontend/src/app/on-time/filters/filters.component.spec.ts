@@ -14,7 +14,7 @@ import { getDefaultDayOfWeekFlags } from "../../shared/components/day-of-week-se
 import { AdminAreaService } from "../admin-area/admin-area.service";
 import { FiltersComponent } from "./filters.component";
 
-fdescribe("FiltersComponent", () => {
+describe("FiltersComponent", () => {
   let spectator: Spectator<FiltersComponent>;
   let component: FiltersComponent;
 

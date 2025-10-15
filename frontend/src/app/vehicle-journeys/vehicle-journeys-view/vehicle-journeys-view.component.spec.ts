@@ -27,7 +27,7 @@ import { RouterModule } from "@angular/router";
 import { JourneyMapComponent } from "./journey-map/journey-map.component";
 import { OtpStatsComponent } from "./otp-stats/otp-stats.component";
 
-fdescribe("VehicleJourneysViewComponent", () => {
+describe("VehicleJourneysViewComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysViewComponent>;
   let viewService: VehicleJourneysSearchService;
   let journeyGQL: jasmine.SpyObj<JourneyGQL>;

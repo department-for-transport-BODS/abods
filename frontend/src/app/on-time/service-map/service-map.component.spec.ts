@@ -18,7 +18,7 @@ import { OnTimeService } from "../on-time.service";
 import { ServicePattern, TransitModelService } from "../transit-model.service";
 import { ServiceMapComponent } from "./service-map.component";
 
-fdescribe("ServiceMapComponent", () => {
+describe("ServiceMapComponent", () => {
   let spectator: Spectator<ServiceMapComponent>;
   let component: ServiceMapComponent;
   let transitModelService: TransitModelService;

@@ -46,7 +46,7 @@ const stopPerf = (
   onTimeInSeconds: 60,
 });
 
-fdescribe("StopPerformanceService", () => {
+describe("StopPerformanceService", () => {
   let spectator: SpectatorService<StopPerformanceService>;
   const serviceFactory = createServiceFactory(StopPerformanceService);
 

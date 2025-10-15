@@ -39,12 +39,10 @@ describe("AnalyticsService", () => {
     setAnalyticsPolicy: () => {},
   };
   const testUser1 = {
-    username: "user1",
-    id: "user-id-1",
+    currentUserId: "user1",
   };
   const testUser2 = {
-    username: "user2",
-    id: "user-id-2",
+    currentUserId: "user2",
   };
   const testUserSubject$ = new BehaviorSubject(testUser1);
 
@@ -95,10 +93,9 @@ describe("AnalyticsService", () => {
 
       expect(tagManagerService.getDataLayer).toHaveBeenCalledWith();
       expect(tagManagerService.addGtmToDom).toHaveBeenCalledOnceWith();
-      expect(tagManagerService.getDataLayer()[0]).toEqual({
-        event: "userData",
-        abodUserId: testUser1.id,
-      });
+
+      expect(tagManagerService.getDataLayer()[0].event).toEqual("userData");
+      expect(tagManagerService.getDataLayer()[0].abodUserId).toEqual("user1");
     });
 
     it("should push subsequent user changes to tag manager service", () => {
@@ -121,7 +118,9 @@ describe("AnalyticsService", () => {
       expect(tagManagerService.addGtmToDom).toHaveBeenCalledOnceWith();
       expect(tagManagerService.pushTag).toHaveBeenCalledOnceWith({
         event: "userData",
-        abodUserId: testUser2.id,
+        abodUserId: "user2",
+        abodOrgId: undefined,
+        abodOrgName: undefined,
       });
     });
 

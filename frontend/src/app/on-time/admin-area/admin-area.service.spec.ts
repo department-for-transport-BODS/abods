@@ -29,7 +29,7 @@ const DERBYSHIRE_BOUNDARY_SHAPE = [
   [53.3680458, -2.02690601],
 ];
 
-fdescribe("AdminAreaService", () => {
+describe("AdminAreaService", () => {
   let spectator: SpectatorService<AdminAreaService>;
   let adminAreaGqlSpy: SpyObject<GetAdminAreasGQL>;
 

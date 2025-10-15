@@ -9,7 +9,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { fakeAsync, flush, tick } from "@angular/core/testing";
+import { fakeAsync, tick } from "@angular/core/testing";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Data } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
@@ -157,7 +157,6 @@ describe("ViewCorridorComponent", () => {
 
       spectator = createComponentWithCorridorData();
       service = spectator.inject(CorridorsService);
-      spectator.component.ngOnInit();
       spectator.detectChanges();
     });
 
@@ -197,26 +196,45 @@ describe("ViewCorridorComponent", () => {
       };
 
       expect(spy).toHaveBeenCalledWith(expectedParams);
+
       expect(
         spectator.query(
-          byTextContent("Total transits90", { selector: ".stat" }),
+          byTextContent("Recorded transits", { selector: ".stat__label" }),
         ),
       ).toBeVisible();
 
       expect(
-        spectator.query(byTextContent("Services5", { selector: ".stat" })),
+        spectator.query(byTextContent("90", { selector: ".stat__value" })),
       ).toBeVisible();
 
       expect(
         spectator.query(
-          byTextContent("Average journey time01:30", { selector: ".stat" }),
+          byTextContent("Services", { selector: ".stat__label" }),
         ),
       ).toBeVisible();
 
       expect(
+        spectator.query(byTextContent("5", { selector: ".stat__value" })),
+      ).toBeVisible();
+
+      expect(
         spectator.query(
-          byTextContent("Missing transits10", { selector: ".stat" }),
+          byTextContent("Average journey time", { selector: ".stat__label" }),
         ),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(byTextContent("01:30", { selector: ".stat__value" })),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(
+          byTextContent("Missing transits", { selector: ".stat__label" }),
+        ),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(byTextContent("10", { selector: ".stat__value" })),
       ).toBeVisible();
     });
 
@@ -262,24 +280,42 @@ describe("ViewCorridorComponent", () => {
       expect(spy).toHaveBeenCalledWith(expectedParams);
       expect(
         spectator.query(
-          byTextContent("Total transits90", { selector: ".stat" }),
+          byTextContent("Recorded transits", { selector: ".stat__label" }),
         ),
       ).toBeVisible();
 
       expect(
-        spectator.query(byTextContent("Services5", { selector: ".stat" })),
-      ).toBeVisible();
-
-      expect(
-        spectator.query(
-          byTextContent("Average journey time01:30", { selector: ".stat" }),
-        ),
+        spectator.query(byTextContent("90", { selector: ".stat__value" })),
       ).toBeVisible();
 
       expect(
         spectator.query(
-          byTextContent("Missing transits10", { selector: ".stat" }),
+          byTextContent("Services", { selector: ".stat__label" }),
         ),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(byTextContent("5", { selector: ".stat__value" })),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(
+          byTextContent("Average journey time", { selector: ".stat__label" }),
+        ),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(byTextContent("01:30", { selector: ".stat__value" })),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(
+          byTextContent("Missing transits", { selector: ".stat__label" }),
+        ),
+      ).toBeVisible();
+
+      expect(
+        spectator.query(byTextContent("10", { selector: ".stat__value" })),
       ).toBeVisible();
     });
 
@@ -380,7 +416,6 @@ describe("ViewCorridorComponent", () => {
       )?.textContent;
 
       void expect(cellContent).toEqual("53: Sheffield to Mansfield");
-      flush();
     }));
 
     it("should set coordinates using service link data", fakeAsync(() => {
@@ -394,8 +429,8 @@ describe("ViewCorridorComponent", () => {
           transitTimeTimeOfDayStats: [],
           serviceLinks: [
             {
-              fromStop: "ST1234",
-              toStop: "ST2345",
+              fromStop: "1234",
+              toStop: "2345",
               distance: 360,
               routeValidity: RouteType.Valid,
               linkRoute: "[[1, 0], [2, 0], [3, 0]]",
@@ -415,7 +450,6 @@ describe("ViewCorridorComponent", () => {
         [2, 0],
         [3, 0],
       ]);
-      flush();
     }));
 
     it("should set coordinates if service link data unavailable", () => {
@@ -428,6 +462,9 @@ describe("ViewCorridorComponent", () => {
     });
 
     it("onSelectSegment() should set map selected state", () => {
+      const stubMap = new StubMapComponent({} as ChangeDetectorRef);
+      spectator.component.map = stubMap as unknown as MapComponent;
+
       spectator.component.onSelectSegment([
         corridor.stops[0],
         corridor.stops[1],
@@ -435,7 +472,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map!.mapInstance.setFeatureState,
+        spectator.component.map.mapInstance.setFeatureState,
       ).toHaveBeenCalledWith(
         {
           source: "corridor-line",
@@ -469,6 +506,9 @@ describe("ViewCorridorComponent", () => {
     }));
 
     it("clearMapSelectedState() should clear map selected state", () => {
+      const stubMap = new StubMapComponent({} as ChangeDetectorRef);
+      spectator.component.map = stubMap as unknown as MapComponent;
+
       spectator.component.clearMapSelectedState([
         corridor.stops[0],
         corridor.stops[1],
@@ -476,7 +516,7 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
 
       expect(
-        spectator.component.map!.mapInstance.removeFeatureState,
+        spectator.component.map.mapInstance.removeFeatureState,
       ).toHaveBeenCalledWith(
         {
           source: "corridor-line",
@@ -494,12 +534,15 @@ describe("ViewCorridorComponent", () => {
     });
 
     it("setMapHoverState() should set map hover state", () => {
+      const stubMap = new StubMapComponent({} as ChangeDetectorRef);
+      spectator.component.map = stubMap as unknown as MapComponent;
+
       spectator.component.loadingStats = false;
       spectator.component.setMapHoverState(corridor.stops[0]);
       spectator.detectChanges();
 
       expect(
-        spectator.component.map!.mapInstance.setFeatureState,
+        spectator.component.map.mapInstance.setFeatureState,
       ).toHaveBeenCalledWith(
         { source: "corridor-stops", id: corridor.stops[0].stopId },
         { hover: true },
@@ -507,12 +550,15 @@ describe("ViewCorridorComponent", () => {
     });
 
     it("clearMapHoverState() should clear map hover state", () => {
+      const stubMap = new StubMapComponent({} as ChangeDetectorRef);
+      spectator.component.map = stubMap as unknown as MapComponent;
+
       spectator.component.loadingStats = false;
       spectator.component.clearMapHoverState(corridor.stops[0]);
       spectator.detectChanges();
 
       expect(
-        spectator.component.map!.mapInstance.removeFeatureState,
+        spectator.component.map.mapInstance.removeFeatureState,
       ).toHaveBeenCalledWith(
         { source: "corridor-stops", id: corridor.stops[0].stopId },
         "hover",
@@ -541,7 +587,6 @@ describe("ViewCorridorComponent", () => {
       void expect(spectator.component.bounds).toEqual(
         bbox(spectator.component.corridorLine) as BBox2d,
       );
-      flush();
     }));
 
     it("centreMapBounds() should set bounds value based on currently selected segment", fakeAsync(() => {
@@ -561,6 +606,9 @@ describe("ViewCorridorComponent", () => {
       spectator.detectChanges();
       tick(100);
 
+      const stubMap = new StubMapComponent({} as ChangeDetectorRef);
+      spectator.component.map = stubMap as unknown as MapComponent;
+
       spectator.component.onSelectSegment([
         corridor.stops[0],
         corridor.stops[1],
@@ -578,7 +626,6 @@ describe("ViewCorridorComponent", () => {
           ]),
         ) as BBox2d,
       );
-      flush();
     }));
   });
 
@@ -586,7 +633,6 @@ describe("ViewCorridorComponent", () => {
     beforeEach(() => {
       spectator = createComponentWithCorridorNotFound();
       service = spectator.inject(CorridorsService);
-      spectator.component.ngOnInit();
       spectator.detectChanges();
     });
 
