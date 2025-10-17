@@ -64,7 +64,6 @@ app.use(
         const { event } = getCurrentInvoke();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         const headers: IncomingHttpHeaders = event.headers;
-        logger.info("headers---", headers);
         logger.debug("Server started and within context block");
         const retry = dayjs().isAfter(startTime.add(10, "minute"));
         if (!db || !kysely || retry) {
