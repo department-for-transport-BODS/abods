@@ -10,7 +10,7 @@ import { resolve } from "path";
 import resolvers from "./resolvers/index.js";
 import fs from "fs";
 import { createContext } from "./context.js";
-import { RequestContext } from "./types/extra.js";
+import { AuthContext, RequestContext } from "./types/extra.js";
 import logger from "./logger.js";
 import { getAPITokenHash } from "./lib/apiauth.js";
 import { IncomingHttpHeaders } from "http";
@@ -31,9 +31,13 @@ let db:
   | PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
   | undefined = undefined;
 let startTime = dayjs();
-const apiKeyAuth = await getAPITokenHash();
+// https://github.com/kulshekhar/ts-jest/issues/4223
+let apiKeyAuth: AuthContext | undefined;
+void (async () => {
+  apiKeyAuth = await getAPITokenHash();
+})();
 
-const typeDefs = gql`
+export const typeDefs = gql`
   ${fs.readFileSync(resolve("schema.graphql"), "utf8")}
 `;
 
@@ -60,6 +64,7 @@ app.use(
         const { event } = getCurrentInvoke();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         const headers: IncomingHttpHeaders = event.headers;
+        logger.info("headers---", headers);
         logger.debug("Server started and within context block");
         const retry = dayjs().isAfter(startTime.add(10, "minute"));
         if (!db || !kysely || retry) {
