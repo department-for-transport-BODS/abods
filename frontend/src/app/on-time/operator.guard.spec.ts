@@ -3,9 +3,9 @@ import {
   ActivatedRouteSnapshot,
   convertToParamMap,
   Router,
+  RouterModule,
   UrlTree,
 } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
 import { OperatorService } from "../shared/services/operator.service";
@@ -20,7 +20,7 @@ describe("OperatorGuard", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ApolloTestingModule, RouterTestingModule],
+      imports: [ApolloTestingModule, RouterModule.forRoot([])],
       providers: [
         {
           provide: OperatorService,

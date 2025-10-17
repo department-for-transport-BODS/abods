@@ -1,4 +1,5 @@
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClient } from "@angular/common/http";
+import { RouterModule } from "@angular/router";
 import {
   byTextContent,
   createRoutingFactory,
@@ -7,25 +8,24 @@ import {
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { MockComponent } from "ng-mocks";
 import { of, throwError } from "rxjs";
+import {
+  AvlPoint,
+  Journey,
+  JourneyGQL,
+  Stop,
+  StopTypeOption,
+} from "../../../generated/graphql";
 import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
 import { toUrlDateFormat } from "../../shared/url-helper";
+import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
 import { JourneyInfoComponent } from "./journey-info/journey-info.component";
+import { JourneyMapComponent } from "./journey-map/journey-map.component";
+import { JourneyNavComponent } from "./journey-nav/journey-nav.component";
+import { OtpStatsComponent } from "./otp-stats/otp-stats.component";
+import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
 import { StopListComponent } from "./stop-list/stop-list.component";
 import { VehicleJourneysViewComponent } from "./vehicle-journeys-view.component";
-import { JourneyNavComponent } from "./journey-nav/journey-nav.component";
-import { VehicleJourneysSearchService } from "../vehicle-journeys-search/vehicle-journeys-search.service";
-import {
-  Stop,
-  AvlPoint,
-  Journey,
-  StopTypeOption,
-  JourneyGQL,
-} from "../../../generated/graphql";
-import { StopHoverEvent } from "./stop-list/stop-item/stop-item.component";
-import { RouterModule } from "@angular/router";
-import { JourneyMapComponent } from "./journey-map/journey-map.component";
-import { OtpStatsComponent } from "./otp-stats/otp-stats.component";
 
 describe("VehicleJourneysViewComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysViewComponent>;
@@ -126,8 +126,8 @@ describe("VehicleJourneysViewComponent", () => {
       LayoutModule,
       ApolloTestingModule,
       RouterModule.forRoot([]),
-      HttpClientTestingModule,
     ],
+    providers: [provideHttpClient()],
     declarations: [
       MockComponent(StopListComponent),
       MockComponent(JourneyInfoComponent),

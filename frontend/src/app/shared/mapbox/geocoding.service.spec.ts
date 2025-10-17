@@ -1,12 +1,13 @@
-import { TestBed } from "@angular/core/testing";
+import { provideHttpClient } from "@angular/common/http";
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from "@angular/common/http/testing";
+import { TestBed } from "@angular/core/testing";
 import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
-import { GeocodingService } from "./geocoding.service";
-import { MAPBOX_API_KEY } from "ngx-mapbox-gl";
 import { LngLat } from "mapbox-gl";
+import { MAPBOX_API_KEY } from "ngx-mapbox-gl";
+import { GeocodingService } from "./geocoding.service";
 import { Coordinates, ForwardParams, ReverseParams } from "./geocoding.types";
 
 describe("GeocodingService", () => {
@@ -16,12 +17,13 @@ describe("GeocodingService", () => {
 
   const createService = createServiceFactory({
     service: GeocodingService,
-    imports: [HttpClientTestingModule],
     providers: [
       {
         provide: MAPBOX_API_KEY,
         useValue: "test-key",
       },
+      provideHttpClient(),
+      provideHttpClientTesting(),
     ],
   });
 

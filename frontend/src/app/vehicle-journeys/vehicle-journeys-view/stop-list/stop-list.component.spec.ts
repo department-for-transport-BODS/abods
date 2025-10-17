@@ -1,14 +1,14 @@
+import { CommonModule } from "@angular/common";
+import { provideHttpClient } from "@angular/common/http";
 import { DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { StopListComponent } from "./stop-list.component";
-import { Direction, Stop } from "../../../../generated/graphql";
-import { CommonModule } from "@angular/common";
-import { StopItemComponent } from "./stop-item/stop-item.component";
-import { SharedModule } from "../../../shared/shared.module";
-import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { LuxonModule } from "luxon-angular";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
+import { Direction, Stop } from "../../../../generated/graphql";
+import { SharedModule } from "../../../shared/shared.module";
+import { StopItemComponent } from "./stop-item/stop-item.component";
+import { StopListComponent } from "./stop-list.component";
 
 function mockVehicleStopPingFactory(): Stop {
   return {
@@ -36,13 +36,8 @@ describe("StopListComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [StopListComponent, StopItemComponent],
-      imports: [
-        CommonModule,
-        SharedModule,
-        NgxTippyModule,
-        LuxonModule,
-        HttpClientTestingModule,
-      ],
+      imports: [CommonModule, SharedModule, NgxTippyModule, LuxonModule],
+      providers: [provideHttpClient()],
     }).compileComponents();
   });
 
