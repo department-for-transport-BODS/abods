@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import { DB } from "../kysely";
 import { getKyselyClient } from "../kyselyClient";
 import { initialisePrismaClient } from "../prismaClient";
@@ -151,6 +151,10 @@ export const createCorridorTablesAndData = async (dbKysely: Kysely<DB>) => {
       ])
       .execute(),
   ]);
+
+  await sql`SELECT setval(pg_get_serial_sequence('corridor', 'corridor_id'), (SELECT MAX(corridor_id) FROM corridor))`.execute(
+    dbKysely,
+  );
 };
 
 export const createTimetableTablesAndData = async (dbKysely: Kysely<DB>) => {
