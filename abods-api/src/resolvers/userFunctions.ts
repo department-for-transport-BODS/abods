@@ -40,8 +40,10 @@ export const getFeatureFlags = () => {
       if (!(envVarName in process.env)) continue;
       if (process.env[envVarName] !== "true") continue;
     }
+    console.log("flags----", flags);
     flags.push(flag);
   }
+  console.log("flags2222----", flags);
   return flags;
 };
 

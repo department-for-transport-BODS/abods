@@ -1441,17 +1441,17 @@ describe("getPunctualityTimeSeries", () => {
     expect(
       dayjs(result?.[0].ts)
         .tz("Europe/London")
-        .isSame(dayjs("2025-09-11").hour(6)),
+        .isSame(dayjs("2025-09-11").hour(6).tz("Europe/London")),
     ).toBe(true);
     expect(
       dayjs(result?.[1].ts)
         .tz("Europe/London")
-        .isSame(dayjs("2025-09-11").hour(9)),
+        .isSame(dayjs("2025-09-11").hour(9).tz("Europe/London")),
     ).toBe(true);
     expect(
       dayjs(result?.[2].ts)
         .tz("Europe/London")
-        .isSame(dayjs("2025-09-11").hour(16)),
+        .isSame(dayjs("2025-09-11").hour(16).tz("Europe/London")),
     ).toBe(true);
   });
 
