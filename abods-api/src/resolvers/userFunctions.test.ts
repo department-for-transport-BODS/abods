@@ -119,7 +119,7 @@ describe("getFeatureFlags", () => {
   });
 });
 
-fdescribe("getUser", () => {
+describe("getUser", () => {
   it("returns user info with correct flags and permissions", async () => {
     // Mock session user
     (helpers.requireUserSession as jest.Mock).mockResolvedValue({
@@ -155,7 +155,6 @@ fdescribe("getUser", () => {
     expect(result?.serviceMonitoringEmbedUrl).toBe(
       "https://dashboard.example.com",
     );
-    console.log("result----", result);
     expect(result?.flags).toEqual(
       expect.arrayContaining([
         FeatureFlag.DataMonitoring,
@@ -166,105 +165,105 @@ fdescribe("getUser", () => {
     expect(result?.flags).not.toContain(FeatureFlag.ServiceMonitoring);
   });
 
-  // it("returns null and logs error if prisma throws", async () => {
-  //   (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-  //     id: 123,
-  //     orgs: [{ id: 10 }],
-  //   });
+  it("returns null and logs error if prisma throws", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 123,
+      orgs: [{ id: 10 }],
+    });
 
-  //   mockDb.bods_user.findUniqueOrThrow.mockRejectedValue(new Error("DB error"));
+    mockDb.bods_user.findUniqueOrThrow.mockRejectedValue(new Error("DB error"));
 
-  //   let result: Partial<LoginInfo> | null = null;
-  //   if (typeof getUser === "function") {
-  //     result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-  //   }
+    let result: Partial<LoginInfo> | null = null;
+    if (typeof getUser === "function") {
+      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
 
-  //   expect(result).toBeNull();
-  // });
+    expect(result).toBeNull();
+  });
 
-  // it("returns correct permissions for non-admin user", async () => {
-  //   (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-  //     id: 456,
-  //     orgs: [{ id: 20 }],
-  //   });
+  it("returns correct permissions for non-admin user", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 456,
+      orgs: [{ id: 20 }],
+    });
 
-  //   mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
-  //     userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-  //     email: "user@otherdomain.com",
-  //     account_type: 3,
-  //   } as never);
+    mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
+      userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
+      email: "user@otherdomain.com",
+      account_type: 3,
+    } as never);
 
-  //   process.env.ABODS_FLAG_DataMonitoring = "true";
-  //   process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
-  //     "https://dashboard.example.com";
+    process.env.ABODS_FLAG_DataMonitoring = "true";
+    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
+      "https://dashboard.example.com";
 
-  //   let result: Partial<LoginInfo> | null = null;
-  //   if (typeof getUser === "function") {
-  //     result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-  //   }
+    let result: Partial<LoginInfo> | null = null;
+    if (typeof getUser === "function") {
+      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
 
-  //   expect(result).not.toBeNull();
-  //   expect(result?.currentUserId).toBe("456");
-  //   expect(result?.canViewServiceMonitoring).toBe(false);
-  //   expect(result?.canEditAllAlerts).toBe(false);
-  //   expect(result?.canViewDistances).toBe(false);
-  //   expect(result?.serviceMonitoringEmbedUrl).toBeNull();
-  //   expect(result?.flags).toContain(FeatureFlag.DataMonitoring);
-  // });
+    expect(result).not.toBeNull();
+    expect(result?.currentUserId).toBe("456");
+    expect(result?.canViewServiceMonitoring).toBe(false);
+    expect(result?.canEditAllAlerts).toBe(false);
+    expect(result?.canViewDistances).toBe(false);
+    expect(result?.serviceMonitoringEmbedUrl).toBeNull();
+    expect(result?.flags).toContain(FeatureFlag.DataMonitoring);
+  });
 
-  // it("can view service monitoring url for users with support email domain", async () => {
-  //   (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-  //     id: 456,
-  //     orgs: [{ id: 20 }],
-  //   });
+  it("can view service monitoring url for users with support email domain", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 456,
+      orgs: [{ id: 20 }],
+    });
 
-  //   mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
-  //     userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-  //     email: "user@kpmg.co.uk",
-  //     account_type: 3,
-  //   } as never);
+    mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
+      userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
+      email: "user@kpmg.co.uk",
+      account_type: 3,
+    } as never);
 
-  //   process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
-  //     "https://dashboard.example.com";
+    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
+      "https://dashboard.example.com";
 
-  //   let result: Partial<LoginInfo> | null = null;
-  //   if (typeof getUser === "function") {
-  //     result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-  //   }
+    let result: Partial<LoginInfo> | null = null;
+    if (typeof getUser === "function") {
+      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
 
-  //   expect(result).not.toBeNull();
-  //   expect(result?.canViewServiceMonitoring).toBe(true);
-  //   expect(result?.serviceMonitoringEmbedUrl).toBe(
-  //     "https://dashboard.example.com",
-  //   );
-  // });
+    expect(result).not.toBeNull();
+    expect(result?.canViewServiceMonitoring).toBe(true);
+    expect(result?.serviceMonitoringEmbedUrl).toBe(
+      "https://dashboard.example.com",
+    );
+  });
 
-  // it("can view service monitoring url for dft admin user", async () => {
-  //   (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-  //     id: 456,
-  //     orgs: [{ id: 20 }],
-  //   });
+  it("can view service monitoring url for dft admin user", async () => {
+    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
+      id: 456,
+      orgs: [{ id: 20 }],
+    });
 
-  //   mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
-  //     userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-  //     email: "user@dft.gov.uk",
-  //     account_type: 1,
-  //   } as never);
+    mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
+      userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
+      email: "user@dft.gov.uk",
+      account_type: 1,
+    } as never);
 
-  //   process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
-  //     "https://dashboard.example.com";
+    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
+      "https://dashboard.example.com";
 
-  //   let result: Partial<LoginInfo> | null = null;
-  //   if (typeof getUser === "function") {
-  //     result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-  //   }
+    let result: Partial<LoginInfo> | null = null;
+    if (typeof getUser === "function") {
+      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
+    }
 
-  //   expect(result).not.toBeNull();
-  //   expect(result?.canViewServiceMonitoring).toBe(true);
-  //   expect(result?.serviceMonitoringEmbedUrl).toBe(
-  //     "https://dashboard.example.com",
-  //   );
-  // });
+    expect(result).not.toBeNull();
+    expect(result?.canViewServiceMonitoring).toBe(true);
+    expect(result?.serviceMonitoringEmbedUrl).toBe(
+      "https://dashboard.example.com",
+    );
+  });
 });
 
 describe("loginUser", () => {

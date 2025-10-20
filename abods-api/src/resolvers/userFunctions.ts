@@ -35,19 +35,11 @@ export const getFeatureFlags = () => {
     const envVarName = flagPrefix + key;
     const flag = FeatureFlag[key as FeatureFlag];
     if (!isLocal() || process.env.ENABLE_FEATURE_FLAG_LOCAL) {
-      console.log("envVarName----", envVarName);
-      console.log("process.env[envVarName]----", process.env[envVarName]);
       if (!(envVarName in process.env)) continue;
       if (process.env[envVarName] !== "true") continue;
     }
-    console.log("in env----", !(envVarName in process.env));
-    console.log("envVarName----", envVarName);
-    console.log("process.env[envVarName]2222----", process.env[envVarName]);
-    console.log("process.env check----", process.env[envVarName] !== "true");
-    console.log("flags----", flags);
     flags.push(flag);
   }
-  console.log("flags2222----", flags);
   return flags;
 };
 
