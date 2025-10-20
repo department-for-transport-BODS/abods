@@ -41,6 +41,7 @@ export const getFeatureFlags = () => {
       if (process.env[envVarName] !== "true") continue;
     }
     console.log("in env----", !(envVarName in process.env));
+    console.log("process.env[envVarName]2222----", process.env[envVarName]);
     console.log("process.env check----", process.env[envVarName] !== "true");
     console.log("flags----", flags);
     flags.push(flag);
