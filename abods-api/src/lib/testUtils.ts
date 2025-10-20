@@ -5,6 +5,7 @@ import { DB } from "../kysely";
 import { getKyselyClient } from "../kyselyClient";
 import { initialisePrismaClient } from "../prismaClient";
 import {
+  createAllOperatorsTable,
   createBodsOrganisationOperatorTable,
   createBodsOrganisationTable,
   createBodsUserOrganisationTable,
@@ -18,8 +19,12 @@ import {
   createNaptanStoppointLatlongTable,
   createNocAdminareaTable,
   createRouteToJourneysTable,
+  createServiceDetailsTable,
+  createTimetableFrequentSummaryServicesTable,
+  createTimetableSummaryStopsTzTable,
   createTimetableTable,
   createTokensTable,
+  createTransmodelTracksTable,
 } from "./dbKysely";
 import argon2 from "argon2";
 import { GraphQLResponse } from "@apollo/server";
@@ -119,6 +124,37 @@ export const createUserTablesAndData = async (dbKysely: Kysely<DB>) => {
   ]);
 };
 
+export const createOperatorsAndServiceDetails = async (
+  dbKysely: Kysely<DB>,
+) => {
+  await Promise.all([
+    createServiceDetailsTable(dbKysely),
+    createAllOperatorsTable(dbKysely),
+  ]);
+  await Promise.all([
+    dbKysely
+      .insertInto("service_details")
+      .values([
+        {
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+          operator_noc: "OP1",
+          line_name: "L1",
+          service_name: "Operator One",
+          admin_areas: [10], // matches admin_area_id in Timetable data
+          license: "Standard License",
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("all_operators")
+      .values({
+        operatorid: 1,
+        operatorref: "OP1",
+        name: "Operator One",
+      })
+      .execute(),
+  ]);
+};
 export const createCorridorTablesAndData = async (dbKysely: Kysely<DB>) => {
   await Promise.all([
     createCorridorTable(dbKysely),
@@ -164,11 +200,11 @@ export const createTimetableTablesAndData = async (dbKysely: Kysely<DB>) => {
     .insertInto("Timetable")
     .values([
       {
-        timetable_id: "tt1",
+        timetable_id: "100",
         operator_noc: "OP1",
         operator_name: "Operator One",
-        service_code: "SVC1",
-        line_name: "Line 1",
+        service_code: "SC1",
+        line_name: "L1",
         xml_file_name: "file1.xml",
         journey_code: "JCODE1",
         date_of_journey: new Date("2025-10-17T08:00:00Z"),
@@ -204,11 +240,11 @@ export const createTimetableTablesAndData = async (dbKysely: Kysely<DB>) => {
         set_down: false,
       },
       {
-        timetable_id: "tt2",
+        timetable_id: "101",
         operator_noc: "OP1",
         operator_name: "Operator One",
-        service_code: "SVC1",
-        line_name: "Line 1",
+        service_code: "SC1",
+        line_name: "L1",
         xml_file_name: "file1.xml",
         journey_code: "JCODE1",
         date_of_journey: new Date("2025-10-17T08:00:00Z"),
@@ -252,6 +288,7 @@ export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
     createNocAdminareaTable(dbKysely),
     createDistinctRoutesTable(dbKysely),
     createRouteToJourneysTable(dbKysely),
+    createTransmodelTracksTable(dbKysely),
   ]);
   await Promise.all([
     dbKysely
@@ -290,6 +327,50 @@ export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
           group_id: "groupA",
           date_of_journey: new Date("2025-10-18T08:00:00Z"),
           distinct_route_id: 1,
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("transmodel_tracks")
+      .values([
+        {
+          id: "track1",
+          from_atco_code: "12345", // Main Street Stop
+          to_atco_code: "12346", // Another Street Stop
+          geometry: JSON.stringify({
+            type: "LineString",
+            coordinates: [
+              [-0.12345, 51.54321],
+              [-0.12345, 51.54321],
+            ],
+          }),
+          distance: 1000,
+        },
+        {
+          id: "track2",
+          from_atco_code: "12346",
+          to_atco_code: "12347",
+          geometry: JSON.stringify({
+            type: "LineString",
+            coordinates: [
+              [-0.12345, 51.54321],
+              [-0.12345, 51.54321],
+            ],
+          }),
+          distance: 800,
+        },
+        {
+          id: "track3",
+          from_atco_code: "12345",
+          to_atco_code: "12348",
+          geometry: JSON.stringify({
+            type: "LineString",
+            coordinates: [
+              [-0.12345, 51.54321],
+              [-0.12345, 51.54321],
+            ],
+          }),
+          distance: 1200,
         },
       ])
       .execute(),
@@ -361,6 +442,141 @@ export const createNaptanTablesAndData = async (dbKysely: Kysely<DB>) => {
       })
       .execute(),
   ]);
+};
+
+export const createTimetableSummaryStopsTableAndData = async (
+  dbKysely: Kysely<DB>,
+) => {
+  await createTimetableSummaryStopsTzTable(dbKysely);
+
+  // Insert test data matching operator, noc_and_line_and_servicecode, stops, and date
+  await dbKysely
+    .insertInto("timetable_summary_stops_tz")
+    .values([
+      {
+        timetable_id: "200",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        noc_and_line_and_servicecode: "OP1-L1-SC1",
+        stop_id: 1,
+        locality_id: "LOC001",
+        line_name: "Line 1",
+        stop_latitude: 51.54321,
+        stop_longitude: -0.12345,
+        date_of_journey: new Date("2025-10-20T08:00:00Z"),
+        departure_hour: new Date("2025-10-20T08:00:00Z"),
+        departure_hour_only: new Date("2025-10-20T08:00:00Z"),
+        day_of_week: 1,
+        on_time_count: 3,
+        early_count: 1,
+        late_count: 1,
+        completed: 5,
+        scheduled: 5,
+        common_name: "Main Street Stop",
+        is_timing_point: true,
+        max_early: 2,
+        max_late: 5,
+        avg_time_difference: "3",
+        estimated: false,
+        incomplete_reason: null,
+        direction: "outbound",
+        stop_index: 0,
+        count_delayed: 1,
+        average_delay: 2,
+        diff_sched_time_to_stop: 0,
+        diff_sched_time_to_stop_timing_point: 0,
+        diff_actual_time_to_stop: 0,
+        diff_actual_time_to_stop_timing_point: 0,
+      },
+      {
+        timetable_id: "201",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        noc_and_line_and_servicecode: "OP1-L1-SC1",
+        stop_id: 2,
+        locality_id: "LOC001",
+        line_name: "Line 1",
+        stop_latitude: 51.54321,
+        stop_longitude: -0.12345,
+        date_of_journey: new Date("2025-10-20T08:00:00Z"),
+        departure_hour: new Date("2025-10-20T08:00:00Z"),
+        departure_hour_only: new Date("2025-10-20T08:00:00Z"),
+        day_of_week: 1,
+        on_time_count: 2,
+        early_count: 0,
+        late_count: 2,
+        completed: 4,
+        scheduled: 4,
+        common_name: "Another Street Stop",
+        is_timing_point: true,
+        max_early: 2,
+        max_late: 5,
+        avg_time_difference: "3",
+        estimated: false,
+        incomplete_reason: null,
+        direction: "outbound",
+        stop_index: 1,
+        count_delayed: 1,
+        average_delay: 2,
+        diff_sched_time_to_stop: 0,
+        diff_sched_time_to_stop_timing_point: 0,
+        diff_actual_time_to_stop: 0,
+        diff_actual_time_to_stop_timing_point: 0,
+      },
+    ])
+    .execute();
+};
+
+export const createFrequentSummariesTableAndData = async (
+  dbKysely: Kysely<DB>,
+) => {
+  await createTimetableFrequentSummaryServicesTable(dbKysely);
+
+  await dbKysely
+    .insertInto("timetable_frequent_summary_services")
+    .values([
+      {
+        timetable_id: "200",
+        operator_noc: "OP1",
+        service_code: "SC1",
+        noc_and_line_and_servicecode: "OP1-L1-SC1",
+        line_name: "Line 1",
+        date_of_journey: new Date("2025-10-20T08:00:00Z"),
+        departure_hour: new Date("2025-10-20T08:00:00Z"),
+        departure_hour_only: new Date("2025-10-20T08:00:00Z"),
+        day_of_week: 1,
+        max_early: 2,
+        max_late: 5,
+        avg_time_difference: "3",
+        expected_headway: "10",
+        actual_headway: "12",
+        excess_wait_time: "2",
+        headway_stops_count: "5",
+        estimated: false,
+        is_timing_point: true,
+      },
+      {
+        timetable_id: "201",
+        operator_noc: "OP2",
+        service_code: "SC2",
+        noc_and_line_and_servicecode: "OP2-L2-SC2",
+        line_name: "Line 2",
+        date_of_journey: new Date("2025-10-21T09:00:00Z"),
+        departure_hour: new Date("2025-10-21T09:00:00Z"),
+        departure_hour_only: new Date("2025-10-21T09:00:00Z"),
+        day_of_week: 2,
+        max_early: 1,
+        max_late: 4,
+        avg_time_difference: "2",
+        expected_headway: "8",
+        actual_headway: "9",
+        excess_wait_time: "1",
+        headway_stops_count: "4",
+        estimated: true,
+        is_timing_point: false,
+      },
+    ])
+    .execute();
 };
 
 export const getContext = (
