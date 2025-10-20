@@ -154,6 +154,7 @@ describe("getUser", () => {
     expect(result?.serviceMonitoringEmbedUrl).toBe(
       "https://dashboard.example.com",
     );
+    console.log("result----", result);
     expect(result?.flags).toEqual(
       expect.arrayContaining([
         FeatureFlag.DataMonitoring,

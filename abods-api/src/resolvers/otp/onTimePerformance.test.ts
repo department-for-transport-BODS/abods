@@ -1439,13 +1439,19 @@ describe("getPunctualityTimeSeries", () => {
 
     console.log("result-----", result);
     expect(
-      dayjs(result?.[0].ts).utc().isSame(dayjs("2025-09-11").hour(6)),
+      dayjs(result?.[0].ts)
+        .tz("Europe/London")
+        .isSame(dayjs("2025-09-11").hour(6)),
     ).toBe(true);
     expect(
-      dayjs(result?.[1].ts).utc().isSame(dayjs("2025-09-11").hour(9)),
+      dayjs(result?.[1].ts)
+        .tz("Europe/London")
+        .isSame(dayjs("2025-09-11").hour(9)),
     ).toBe(true);
     expect(
-      dayjs(result?.[2].ts).utc().isSame(dayjs("2025-09-11").hour(16)),
+      dayjs(result?.[2].ts)
+        .tz("Europe/London")
+        .isSame(dayjs("2025-09-11").hour(16)),
     ).toBe(true);
   });
 

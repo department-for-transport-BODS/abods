@@ -35,6 +35,8 @@ export const getFeatureFlags = () => {
     const envVarName = flagPrefix + key;
     const flag = FeatureFlag[key as FeatureFlag];
     if (!isLocal() || process.env.ENABLE_FEATURE_FLAG_LOCAL) {
+      console.log("envVarName----", envVarName);
+      console.log("process.env[envVarName]----", process.env[envVarName]);
       if (!(envVarName in process.env)) continue;
       if (process.env[envVarName] !== "true") continue;
     }
