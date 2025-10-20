@@ -1270,7 +1270,9 @@ describe("getPunctualityTimeSeries", () => {
       onTime: 5,
     });
     expect(result?.[1]).toEqual({
-      ts: dayjs("2025-09-11T09:00:00.000Z").format("YYYY-MM-DDTHH:mm:ssZ"),
+      ts: dayjs("2025-09-11T09:00:00.000Z")
+        .tz("Europe/London")
+        .format("YYYY-MM-DDTHH:mm:ssZ"),
       early: 0,
       late: 3,
       onTime: 2,
@@ -1435,6 +1437,7 @@ describe("getPunctualityTimeSeries", () => {
     expect(result).not.toBeNull();
     expect(result?.length).toBe(3);
 
+    console.log("result-----", result);
     expect(
       dayjs(result?.[0].ts).utc().isSame(dayjs("2025-09-11").hour(6)),
     ).toBe(true);

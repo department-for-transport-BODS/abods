@@ -137,7 +137,7 @@ describe("getUser", () => {
     process.env.ABODS_FLAG_StopAnalysis = "true";
     process.env.ABODS_FLAG_Distances = "true";
     process.env.ABODS_FLAG_DataMonitoring = "true";
-    delete process.env.ABODS_FLAG_ServiceMonitoring;
+    process.env.ABODS_FLAG_ServiceMonitoring = "false";
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
 
