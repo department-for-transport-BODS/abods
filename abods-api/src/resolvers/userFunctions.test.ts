@@ -134,6 +134,7 @@ fdescribe("getUser", () => {
       account_type: 1,
     } as never);
 
+    process.env.ENABLE_FEATURE_FLAG_LOCAL = "true";
     process.env.ABODS_FLAG_StopAnalysis = "true";
     process.env.ABODS_FLAG_Distances = "true";
     process.env.ABODS_FLAG_DataMonitoring = "true";
