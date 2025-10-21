@@ -44,6 +44,10 @@ beforeAll(async () => {
     createTimetableTablesAndData(kysely),
   ]);
 
+  console.log(
+    "Connecting prisma client---",
+    await kysely.selectFrom("corridor").selectAll().execute(),
+  );
   prisma = await connectPrisma(prisma);
 }, 120000);
 
