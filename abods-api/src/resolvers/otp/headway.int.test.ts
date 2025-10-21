@@ -24,7 +24,6 @@ import {
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
 } from "../../types/generated";
-import { apolloLogger } from "../../apolloLogger";
 import resolvers from "../index";
 
 let container: StartedPostgreSqlContainer;
@@ -74,7 +73,6 @@ describe("Headway resolver integration", () => {
       typeDefs,
       resolvers: resolvers,
       logger,
-      plugins: [apolloLogger],
     });
 
     const variables = {
