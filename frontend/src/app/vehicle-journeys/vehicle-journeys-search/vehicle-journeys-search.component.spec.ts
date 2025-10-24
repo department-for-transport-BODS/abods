@@ -20,7 +20,7 @@ import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid/vehicle-jo
 import { Journey, LineType, OperatorType } from "../../../generated/graphql";
 import { RouterModule } from "@angular/router";
 
-fdescribe("VehicleJourneysSearchComponent", () => {
+describe("VehicleJourneysSearchComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysSearchComponent>;
   let vehicleJourneysSearchService: VehicleJourneysSearchService;
 
