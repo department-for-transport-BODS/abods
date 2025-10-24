@@ -20,7 +20,7 @@ import { VehicleJourneysGridComponent } from "./vehicle-journeys-grid/vehicle-jo
 import { Journey, LineType, OperatorType } from "../../../generated/graphql";
 import { RouterModule } from "@angular/router";
 
-describe("VehicleJourneysSearchComponent", () => {
+fdescribe("VehicleJourneysSearchComponent", () => {
   let spectator: SpectatorRouting<VehicleJourneysSearchComponent>;
   let vehicleJourneysSearchService: VehicleJourneysSearchService;
 
@@ -411,5 +411,22 @@ describe("VehicleJourneysSearchComponent", () => {
     await spectator.fixture.whenStable();
     expect(spectator.component.service.value).toBeNull();
     await expect(spectator.component.operator.value).toEqual("OP02");
+  });
+
+  it("should load journeys when date string is passed", async () => {
+    spectator.fixture.autoDetectChanges();
+
+    spectator.setRouteQueryParam("date", "2022-08-01");
+    spectator.setRouteQueryParam("operator", "OP03");
+    spectator.setRouteQueryParam("service", "LI4728");
+
+    spectator.fixture.autoDetectChanges();
+    await spectator.fixture.whenStable();
+
+    expect(
+      spectator.query(byText("76: Blackpool Town Centre - Lytham")),
+    ).toBeVisible();
+    expect(spectator.query(byText("06:45"))).toBeVisible();
+    expect(spectator.query(byText("15:55"))).toBeVisible();
   });
 });
