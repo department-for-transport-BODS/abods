@@ -17,11 +17,11 @@ import {
   getContext,
   getSingleResultData,
   setEnvVariables,
-} from "../lib/testUtils";
+} from "../lib/test/utils";
 import {
   createTransmodelServicepatterndistanceTable,
   createTransmodelVehiclejourneyTable,
-} from "../lib/dbKysely";
+} from "../lib/test/db";
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;

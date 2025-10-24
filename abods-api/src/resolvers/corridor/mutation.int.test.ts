@@ -19,7 +19,7 @@ import {
   createUserTablesAndData,
   createCorridorTablesAndData,
   createNaptanTablesAndData,
-} from "../../lib/testUtils";
+} from "../../lib/test/utils";
 import { MutationResponseType } from "../../types/generated";
 
 let container: StartedPostgreSqlContainer;

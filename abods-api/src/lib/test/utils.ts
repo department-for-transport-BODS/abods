@@ -1,9 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { Kysely, sql } from "kysely";
-import { DB } from "../kysely";
-import { getKyselyClient } from "../kyselyClient";
-import { initialisePrismaClient } from "../prismaClient";
+import { DB } from "../../kysely";
+import { getKyselyClient } from "../../kyselyClient";
+import { initialisePrismaClient } from "../../prismaClient";
+
+import argon2 from "argon2";
+import { GraphQLResponse } from "@apollo/server";
+import { createRequest, createResponse } from "node-mocks-http";
+import { RequestContext } from "../../types/extra";
 import {
   createAllOperatorsTable,
   createBodsOrganisationOperatorTable,
@@ -25,11 +30,7 @@ import {
   createTimetableTable,
   createTokensTable,
   createTransmodelTracksTable,
-} from "./dbKysely";
-import argon2 from "argon2";
-import { GraphQLResponse } from "@apollo/server";
-import { createRequest, createResponse } from "node-mocks-http";
-import { RequestContext } from "../types/extra";
+} from "./db";
 
 export const setEnvVariables = (container: StartedPostgreSqlContainer) => {
   process.env.DB_HOST = container.getHost();

@@ -17,7 +17,7 @@ import {
   createUserTablesAndData,
   createFrequentSummariesTableAndData,
   createTimetableSummaryStopsTableAndData,
-} from "../../lib/testUtils";
+} from "../../lib/test/utils";
 import {
   FrequentServiceInfoType,
   FrequentServiceType,

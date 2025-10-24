@@ -17,7 +17,7 @@ import {
   getContext,
   getSingleResultData,
   setEnvVariables,
-} from "../../lib/testUtils";
+} from "../../lib/test/utils";
 import { ApolloServer } from "@apollo/server";
 import logger from "../../logger";
 import { CorridorStatsType, MatchType } from "../../types/generated";

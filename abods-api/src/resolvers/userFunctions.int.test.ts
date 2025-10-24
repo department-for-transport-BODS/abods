@@ -17,7 +17,7 @@ import {
   getContext,
   getSingleResultData,
   setEnvVariables,
-} from "../lib/testUtils";
+} from "../lib/test/utils";
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;

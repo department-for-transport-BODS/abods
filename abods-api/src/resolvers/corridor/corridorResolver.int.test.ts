@@ -21,7 +21,7 @@ import {
   createNaptanTablesAndData,
   createRouteTablesAndData,
   createTimetableTablesAndData,
-} from "../../lib/testUtils";
+} from "../../lib/test/utils";
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;
