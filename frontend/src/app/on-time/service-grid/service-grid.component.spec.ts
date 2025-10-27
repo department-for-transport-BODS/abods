@@ -22,7 +22,7 @@ import {
 import { ServiceGridComponent } from "./service-grid.component";
 import { Direction } from "../../../generated/graphql";
 
-fdescribe("ServiceGridComponent", () => {
+describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
   let _onTimeService: OnTimeService;
   let performanceService: PerformanceService;
