@@ -308,10 +308,7 @@ export type EventType = {
 };
 
 export enum FeatureFlag {
-  DataMonitoring = 'DataMonitoring',
-  Distances = 'Distances',
-  ServiceMonitoring = 'ServiceMonitoring',
-  StopAnalysis = 'StopAnalysis'
+  ServiceMonitoring = 'ServiceMonitoring'
 }
 
 export type FeedMonitoringType = {

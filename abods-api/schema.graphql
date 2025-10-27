@@ -479,9 +479,6 @@ type LoginInfo {
 
 enum FeatureFlag {
   ServiceMonitoring
-  DataMonitoring
-  StopAnalysis
-  Distances
 }
 
 type OnTimePerformanceType {
