@@ -160,6 +160,11 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
           };
         }, {} as StopPerformance);
 
+        const totalRatio =
+          (aggregate.onTimeRatio ?? 0) +
+          (aggregate.earlyRatio ?? 0) +
+          (aggregate.lateRatio ?? 0);
+
         this.aggDataPerStop.push({
           ...aggregate,
           earlyInSeconds: aggregate.earlyInSeconds
@@ -172,13 +177,13 @@ export class StopsGridComponent implements OnInit, OnChanges, OnDestroy {
             ? aggregate.onTimeInSeconds / stops.length
             : aggregate.onTimeInSeconds,
           onTimeRatio: aggregate.onTimeRatio
-            ? aggregate.onTimeRatio / stops.length
+            ? aggregate.onTimeRatio / totalRatio
             : aggregate.onTimeRatio,
           earlyRatio: aggregate.earlyRatio
-            ? aggregate.earlyRatio / stops.length
+            ? aggregate.earlyRatio / totalRatio
             : aggregate.earlyRatio,
           lateRatio: aggregate.lateRatio
-            ? aggregate.lateRatio / stops.length
+            ? aggregate.lateRatio / totalRatio
             : aggregate.lateRatio,
           averageScheduled: aggregate.averageScheduled
             ? aggregate.averageScheduled / stops.length
