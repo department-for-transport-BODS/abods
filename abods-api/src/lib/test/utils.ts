@@ -18,13 +18,16 @@ import {
   createCorridorStopsTable,
   createCorridorTable,
   createDistinctRoutesTable,
+  createExpectedServicesTable,
   createLoginDetailsTable,
   createNaptanAdminareaTable,
+  createNaptanAdminareaWithShapeTable,
   createNaptanLocalityTable,
   createNaptanStoppointLatlongTable,
   createNocAdminareaTable,
   createRouteToJourneysTable,
   createServiceDetailsTable,
+  createServicepatternRouteTable,
   createTimetableFrequentSummaryServicesTable,
   createTimetableSummaryStopsTzTable,
   createTimetableTable,
@@ -284,12 +287,56 @@ export const createTimetableTablesAndData = async (dbKysely: Kysely<DB>) => {
     .execute();
 };
 
+export const createExpectedTablesAndData = async (dbKysely: Kysely<DB>) => {
+  await createExpectedServicesTable(dbKysely);
+
+  await dbKysely
+    .insertInto("expected_services")
+    .values([
+      {
+        line_name: "L1",
+        noc_and_line_and_servicecode: "OP1-L1-SC1",
+        service_name: "Operator One",
+        date_of_journey: new Date("2025-10-17T08:00:00Z"),
+        operator_noc: "OP1",
+        admin_area_id: [10], // matches admin_area_id in Timetable data
+        total_distance: 2000,
+        avl_true_distance: 1950,
+        license: "Standard License",
+      },
+      {
+        line_name: "L1",
+        noc_and_line_and_servicecode: "OP1-L1-SC1",
+        service_name: "Operator One",
+        date_of_journey: new Date("2025-10-18T08:00:00Z"),
+        operator_noc: "OP1",
+        admin_area_id: [10],
+        total_distance: 2100,
+        avl_true_distance: 2050,
+        license: "Standard License",
+      },
+      {
+        line_name: "L2",
+        noc_and_line_and_servicecode: "OP2-L2-SC2",
+        service_name: "Operator Two",
+        date_of_journey: new Date("2025-10-21T09:00:00Z"),
+        operator_noc: "OP2",
+        admin_area_id: [20],
+        total_distance: 1800,
+        avl_true_distance: 1750,
+        license: "Premium License",
+      },
+    ])
+    .execute();
+};
+
 export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
   await Promise.all([
     createNocAdminareaTable(dbKysely),
     createDistinctRoutesTable(dbKysely),
     createRouteToJourneysTable(dbKysely),
     createTransmodelTracksTable(dbKysely),
+    createServicepatternRouteTable(dbKysely),
   ]);
   await Promise.all([
     dbKysely
@@ -375,6 +422,23 @@ export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
         },
       ])
       .execute(),
+    dbKysely
+      .insertInto("servicepattern_route")
+      .values([
+        {
+          distinct_route_id: 1,
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+        },
+        {
+          distinct_route_id: 2,
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+        },
+        {
+          distinct_route_id: 3,
+          noc_and_line_and_servicecode: "OP2-L2-SC2",
+        },
+      ])
+      .execute(),
   ]);
 };
 
@@ -383,6 +447,7 @@ export const createNaptanTablesAndData = async (dbKysely: Kysely<DB>) => {
     createNaptanStoppointLatlongTable(dbKysely),
     createNaptanLocalityTable(dbKysely),
     createNaptanAdminareaTable(dbKysely),
+    createNaptanAdminareaWithShapeTable(dbKysely),
   ]);
 
   await Promise.all([
@@ -441,6 +506,32 @@ export const createNaptanTablesAndData = async (dbKysely: Kysely<DB>) => {
         atco_code: "ATCO10",
         ui_lta_id: 100,
       })
+      .execute(),
+    dbKysely
+      .insertInto("naptan_adminarea_with_shape")
+      .values([
+        {
+          id: 10,
+          name: "Central City",
+          atco_code: "ATCO1",
+          st_asgeojson:
+            '{"type":"Polygon","coordinates":[[[0,0],[1,0],[1,1],[0,1],[0,0]]]}',
+        },
+        {
+          id: 20,
+          name: "North District",
+          atco_code: "ATCO2",
+          st_asgeojson:
+            '{"type":"Polygon","coordinates":[[[2,2],[3,2],[3,3],[2,3],[2,2]]]}',
+        },
+        {
+          id: 30,
+          name: "South Borough",
+          atco_code: "ATCO3",
+          st_asgeojson:
+            '{"type":"Polygon","coordinates":[[[4,4],[5,4],[5,5],[4,5],[4,4]]]}',
+        },
+      ])
       .execute(),
   ]);
 };
