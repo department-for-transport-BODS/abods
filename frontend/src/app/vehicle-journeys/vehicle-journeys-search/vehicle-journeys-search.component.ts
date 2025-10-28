@@ -136,9 +136,7 @@ export class VehicleJourneysSearchComponent
       .pipe(
         skip(1),
         distinctUntilChanged((a: DateTime, b: DateTime) => a.equals(b)),
-        map((date) =>
-          date.toUTC().toISO({ format: "basic", suppressSeconds: true }),
-        ),
+        map((date) => date.toISODate()),
         tap(() => {
           if (this.operator.value) {
             this.servicesLoading = true;
