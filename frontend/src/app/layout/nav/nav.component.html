@@ -61,7 +61,7 @@
             >Service monitoring
           </a>
         </li>
-        <li class="nav__item" *ngIf="canViewDataMonitoring | async">
+        <li class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/data-monitoring']"
@@ -70,7 +70,7 @@
             >Data monitoring
           </a>
         </li>
-        <li class="nav__item" *ngIf="canViewStopAnalysis | async">
+        <li class="nav__item">
           <a
             class="nav__link"
             [routerLink]="['/stop-analysis']"
