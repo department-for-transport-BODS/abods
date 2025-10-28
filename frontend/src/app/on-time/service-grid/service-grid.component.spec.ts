@@ -20,6 +20,7 @@ import {
   PerformanceService,
 } from "../performance.service";
 import { ServiceGridComponent } from "./service-grid.component";
+import { Direction } from "../../../generated/graphql";
 
 describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
@@ -212,5 +213,69 @@ describe("ServiceGridComponent", () => {
       .map((e) => e.textContent);
 
     void expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+  }));
+
+  it("should set frequent field in aggDataPerService based on input data", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    // Mock two services with different 'frequent' values
+    const mockServices: FrequentServicePerformance[] = [
+      {
+        lineId: "A1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Alpha",
+          serviceNumber: "100",
+        },
+        scheduledDepartures: 10,
+        actualDepartures: 10,
+        onTime: 8,
+        early: 1,
+        late: 1,
+        averageDelay: 5,
+        total: 10,
+        onTimeRatio: 0.8,
+        lateRatio: 0.1,
+        earlyRatio: 0.1,
+        completedRatio: 0,
+        frequent: true,
+      },
+      {
+        lineId: "A1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Alpha",
+          serviceNumber: "100",
+        },
+        scheduledDepartures: 5,
+        actualDepartures: 5,
+        onTime: 4,
+        early: 0,
+        late: 1,
+        averageDelay: 3,
+        total: 5,
+        onTimeRatio: 0.8,
+        lateRatio: 0.2,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+      },
+    ];
+
+    // Set preSelectedDirections to include Direction.All to trigger aggregation
+    spectator.component.preSelectedDirections = [Direction.All];
+
+    listSubj.next(mockServices);
+    spectator.detectChanges();
+    tick(100);
+
+    // Trigger calculation and aggregation
+    spectator.component.calculateInputData();
+
+    // aggDataPerService should have one entry for serviceId "1"
+    expect(spectator.component.aggDataPerService.length).toBe(1);
+
+    // The frequent field should be true if any of the aggregated items is frequent
+    expect(spectator.component.aggDataPerService[0].frequent).toBeTrue();
   }));
 });
