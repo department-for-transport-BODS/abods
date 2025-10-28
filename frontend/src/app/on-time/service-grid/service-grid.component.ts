@@ -362,6 +362,11 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           {} as FrequentServicePerformance,
         );
 
+        const totalRatio =
+          (aggregate.onTimeRatio ?? 0) +
+          (aggregate.earlyRatio ?? 0) +
+          (aggregate.lateRatio ?? 0);
+
         this.aggDataPerService.push({
           ...aggregate,
           earlyInSeconds: aggregate.earlyInSeconds
@@ -374,13 +379,13 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
             ? aggregate.onTimeInSeconds / services.length
             : aggregate.onTimeInSeconds,
           onTimeRatio: aggregate.onTimeRatio
-            ? aggregate.onTimeRatio / services.length
+            ? aggregate.onTimeRatio / totalRatio
             : aggregate.onTimeRatio,
           earlyRatio: aggregate.earlyRatio
-            ? aggregate.earlyRatio / services.length
+            ? aggregate.earlyRatio / totalRatio
             : aggregate.earlyRatio,
           lateRatio: aggregate.lateRatio
-            ? aggregate.lateRatio / services.length
+            ? aggregate.lateRatio / totalRatio
             : aggregate.lateRatio,
         });
       }
