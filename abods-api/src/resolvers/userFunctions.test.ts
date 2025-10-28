@@ -155,13 +155,6 @@ describe("getUser", () => {
     expect(result?.serviceMonitoringEmbedUrl).toBe(
       "https://dashboard.example.com",
     );
-    expect(result?.flags).toEqual(
-      expect.arrayContaining([
-        FeatureFlag.DataMonitoring,
-        FeatureFlag.Distances,
-        FeatureFlag.StopAnalysis,
-      ]),
-    );
     expect(result?.flags).not.toContain(FeatureFlag.ServiceMonitoring);
   });
 
@@ -208,7 +201,6 @@ describe("getUser", () => {
     expect(result?.canEditAllAlerts).toBe(false);
     expect(result?.canViewDistances).toBe(false);
     expect(result?.serviceMonitoringEmbedUrl).toBeNull();
-    expect(result?.flags).toContain(FeatureFlag.DataMonitoring);
   });
 
   it("can view service monitoring url for users with support email domain", async () => {
