@@ -28,18 +28,8 @@ export class NavComponent implements OnInit {
         this.config.hasFlag(info, FeatureFlag.ServiceMonitoring),
     ),
   );
-  canViewDataMonitoring = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.config.hasFlag(info, FeatureFlag.DataMonitoring)),
-  );
-  canViewStopAnalysis = this.authUserService.authenticatedUser$.pipe(
-    map((info) => this.config.hasFlag(info, FeatureFlag.StopAnalysis)),
-  );
   canViewDistances = this.authUserService.authenticatedUser$.pipe(
-    map(
-      (info) =>
-        info.canViewDistances &&
-        this.config.hasFlag(info, FeatureFlag.Distances),
-    ),
+    map((info) => info.canViewDistances),
   );
 
   ngOnInit(): void {
