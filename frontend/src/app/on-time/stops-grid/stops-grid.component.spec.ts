@@ -313,7 +313,7 @@ describe("StopsGridComponent", () => {
         earlyInSeconds: 60,
       },
     ];
-    const spy = spyOn(service, "fetchStopPerformanceList").and.returnValue(
+    spyOn(service, "fetchStopPerformanceList").and.returnValue(
       of(stopsWithRatios),
     );
 
