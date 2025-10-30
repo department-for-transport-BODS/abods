@@ -938,16 +938,16 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
                 .as("direction"),
             ])
             .select((eb) => [
-              sql<number>`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+              sql<number>`SUM(${eb.ref("count_delayed")} * CAST(${eb.ref("average_delay")} AS numeric))`.as(
                 "average_delay",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
                 "on_time_in_seconds",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
                 "late_in_seconds",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
               sql<number>`SUM(${eb.ref("scheduled")}) FILTER (WHERE ${eb.ref("estimated")} = false)`.as(
@@ -1180,16 +1180,16 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
               context.kysely.fn.sum("count_delayed").as("count_delayed"),
             ])
             .select((eb) => [
-              sql`SUM(${eb.ref("count_delayed")} * ${eb.ref("average_delay")})`.as(
+              sql<number>`SUM(${eb.ref("count_delayed")} * CAST(${eb.ref("average_delay")} AS numeric))`.as(
                 "average_delay",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("on_time_count")}) FILTER (WHERE ${eb.ref("on_time_count")} > 0) * 60`.as(
                 "on_time_in_seconds",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")} * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("late_count")}) FILTER (WHERE ${eb.ref("late_count")} > 0) * 60`.as(
                 "late_in_seconds",
               ),
-              sql<number>`SUM(${eb.ref("avg_time_difference")}  * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
+              sql<number>`SUM(CAST(${eb.ref("avg_time_difference")} AS numeric) * ${eb.ref("early_count")}) FILTER (WHERE ${eb.ref("early_count")} > 0) * 60`.as(
                 "early_in_seconds",
               ),
             ])

@@ -322,17 +322,17 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
             const total = (acc.total ?? 0) + cur.total;
 
             let onTimeRatio = null;
-            if (acc.onTimeRatio || cur.onTimeRatio) {
+            if (acc.onTimeRatio != null || cur.onTimeRatio != null) {
               onTimeRatio = (acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0);
             }
 
             let earlyRatio = null;
-            if (acc.earlyRatio || cur.earlyRatio) {
+            if (acc.earlyRatio != null || cur.earlyRatio != null) {
               earlyRatio = (acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0);
             }
 
             let lateRatio = null;
-            if (acc.lateRatio || cur.lateRatio) {
+            if (acc.lateRatio != null || cur.lateRatio != null) {
               lateRatio = (acc.lateRatio ?? 0) + (cur.lateRatio ?? 0);
             }
             const frequent = cur.frequent || acc.frequent;
@@ -362,6 +362,11 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
           {} as FrequentServicePerformance,
         );
 
+        const totalRatio =
+          (aggregate.onTimeRatio ?? 0) +
+          (aggregate.earlyRatio ?? 0) +
+          (aggregate.lateRatio ?? 0);
+
         this.aggDataPerService.push({
           ...aggregate,
           earlyInSeconds: aggregate.earlyInSeconds
@@ -374,13 +379,13 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
             ? aggregate.onTimeInSeconds / services.length
             : aggregate.onTimeInSeconds,
           onTimeRatio: aggregate.onTimeRatio
-            ? aggregate.onTimeRatio / services.length
+            ? aggregate.onTimeRatio / totalRatio
             : aggregate.onTimeRatio,
           earlyRatio: aggregate.earlyRatio
-            ? aggregate.earlyRatio / services.length
+            ? aggregate.earlyRatio / totalRatio
             : aggregate.earlyRatio,
           lateRatio: aggregate.lateRatio
-            ? aggregate.lateRatio / services.length
+            ? aggregate.lateRatio / totalRatio
             : aggregate.lateRatio,
         });
       }

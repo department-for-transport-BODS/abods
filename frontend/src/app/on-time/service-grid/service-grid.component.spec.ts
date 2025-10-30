@@ -166,6 +166,172 @@ describe("ServiceGridComponent", () => {
     flush(100);
   }));
 
+  it("should display expected ratios", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "M5P",
+        lineInfo: {
+          serviceId: "6",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "1A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "M5P",
+    );
+
+    expect(ratios?.onTimeRatio).toBeCloseTo(0.746);
+    expect(ratios?.lateRatio).toBeCloseTo(0.1449);
+    expect(ratios?.earlyRatio).toBeCloseTo(0.108);
+  }));
+
+  it("should display expected ratios as expected when a ratio is zero", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "MK1",
+    );
+
+    expect(ratios?.lateRatio).toEqual(0);
+    expect(ratios?.earlyRatio).toEqual(0);
+  }));
+
+  it("should display expected ratios as expected when a ratio is null", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: null,
+        earlyRatio: null,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: null,
+        earlyRatio: null,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "MK1",
+    );
+
+    expect(ratios?.lateRatio).toEqual(null);
+    expect(ratios?.earlyRatio).toEqual(null);
+  }));
+
   it("should display raw data if required", fakeAsync(() => {
     spectator.component.params = onTimeInputParams;
 
