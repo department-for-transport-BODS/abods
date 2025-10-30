@@ -200,15 +200,11 @@ describe("getDistancesDropdowns", () => {
       },
     ]);
 
-    const args = {
-      orgId: "10",
-    };
-
     let result: Partial<DistancesDropdown> | null = null;
     if (typeof getDistancesDropdowns === "function") {
       result = (await getDistancesDropdowns(
         {},
-        args,
+        {},
         context,
         {} as GraphQLResolveInfo,
       )) as DistancesDropdown;
@@ -236,15 +232,11 @@ describe("getDistancesDropdowns", () => {
     });
     jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
 
-    const args = {
-      orgId: "99",
-    };
-
     let result: Partial<DistancesDropdown> | null = null;
     if (typeof getDistancesDropdowns === "function") {
       result = (await getDistancesDropdowns(
         {},
-        args,
+        {},
         context,
         {} as GraphQLResolveInfo,
       )) as DistancesDropdown;
@@ -267,14 +259,10 @@ describe("getDistancesDropdowns", () => {
     });
     jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([]);
 
-    const args = {
-      orgId: "99",
-    };
-
     if (typeof getDistancesDropdowns === "function") {
       (await getDistancesDropdowns(
         {},
-        args,
+        {},
         context,
         {} as GraphQLResolveInfo,
       )) as DistancesDropdown;

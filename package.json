@@ -8,7 +8,7 @@
     "start:api": "(cd abods-api && npm run start:local)",
     "start:app": "(cd frontend && npm start)",
     "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",
-    "pre-push": "(npm run lint:check)",
+    "pre-push": "(npm run lint:check) && (npm run type-check)",
     "lint": "(cd abods-api && npm run lint) && (cd frontend && npm run lint)",
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check)",
     "prepare": "(npm run codegen) && husky",
