@@ -55,6 +55,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@graphql-eslint/eslint-plugin": "^4.0.0",
+    "@testcontainers/postgresql": "^11.7.1",
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.14",
@@ -69,6 +70,7 @@
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.9.0",
     "serverless-plugin-typescript": "^2.1.5",
+    "testcontainers": "^11.7.1",
     "ts-jest": "^29.4.4",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
