@@ -13,7 +13,7 @@
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check)",
     "prepare": "(npm run codegen) && husky",
     "type-check": "(cd abods-api && npm run type-check) && (cd frontend && npm run type-check)",
-    "test:ci": "(cd frontend && npm run test:ci)"
+    "test:ci": "(cd abods-api && npm run test) && (cd frontend && npm run test:ci)"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
@@ -23,7 +23,7 @@
     "@graphql-codegen/typescript-operations": "^5.0.0",
     "@graphql-codegen/typescript-resolvers": "^5.1.0",
     "@types/express": "^5.0.3",
-    "concurrently": "^9.1.2",
+    "concurrently": "^9.2.1",
     "graphql-scalars": "^1.24.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
@@ -34,6 +34,6 @@
     "**/*": "prettier --write"
   },
   "dependencies": {
-    "jest": "^30.1.3"
+    "jest": "^30.2.0"
   }
 }

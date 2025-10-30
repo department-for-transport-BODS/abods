@@ -167,6 +167,178 @@ describe("StopsGridComponent", () => {
     discardPeriodicTasks();
   }));
 
+  it("should calculate ratios as expected", fakeAsync(async () => {
+    const stopsWithRatios: StopPerformance[] = [
+      ...stops,
+      {
+        lineId: "LI00001",
+        stopId: "ST000000000001",
+        stopInfo: {
+          sourceId: "",
+          stopName: "Something road",
+          stopId: "ST000000000001",
+          stopLocation: { latitude: 56.7686, longitude: 0.4567 },
+          stopLocality: {
+            localityId: "L1",
+            localityAreaId: "LA1",
+            localityName: "Somewhere",
+            localityAreaName: "Some Town",
+          },
+        },
+        scheduledDepartures: 10,
+        actualDepartures: 0,
+        completedRatio: 0,
+        onTime: 0,
+        early: 0,
+        late: 0,
+        total: 0,
+        onTimeRatio: 0,
+        earlyRatio: 0,
+        lateRatio: 0,
+        averageDelay: 0,
+        timingPoint: false,
+        direction: Direction.Inbound,
+        averageScheduled: 60,
+        averageActual: 60,
+        onTimeInSeconds: 60,
+        lateInSeconds: 60,
+        earlyInSeconds: 60,
+      },
+    ];
+    const spy = spyOn(service, "fetchStopPerformanceList").and.returnValue(
+      of(stopsWithRatios),
+    );
+
+    spectator.component.params = {
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
+      filters: { nocCodes: ["NOC1"] },
+    };
+
+    spectator.detectChanges();
+    tick(1000);
+
+    expect(spy).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+        toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
+        filters: { nocCodes: ["NOC1"] },
+      }),
+    );
+
+    spectator.component.calculateInputData();
+    await expect(spectator.component.data).toEqual(stopsWithRatios);
+    await expect(spectator.component.loading).toBe(false);
+    await expect(spectator.component.errored).toBe(false);
+
+    const componentStop = spectator.component.aggDataPerStop.filter(
+      (stop) => stop.stopId === "ST000000000001",
+    );
+
+    await expect(componentStop[0].onTimeRatio).toBeCloseTo(0.933);
+    await expect(componentStop[0].earlyRatio).toBeCloseTo(0.0666);
+    await expect(componentStop[0].lateRatio).toBe(0);
+    discardPeriodicTasks();
+  }));
+
+  it("should calculate ratios as expected when a ratio is undefined", fakeAsync(async () => {
+    const stopsWithRatios: StopPerformance[] = [
+      ...stops,
+      {
+        lineId: "LI00003",
+        stopId: "ST000000000003",
+        stopInfo: {
+          sourceId: "",
+          stopName: "Something road",
+          stopId: "ST000000000003",
+          stopLocation: { latitude: 56.7686, longitude: 0.4567 },
+          stopLocality: {
+            localityId: "L1",
+            localityAreaId: "LA1",
+            localityName: "Somewhere",
+            localityAreaName: "Some Town",
+          },
+        },
+        scheduledDepartures: 10,
+        actualDepartures: 0,
+        completedRatio: 0,
+        onTime: 0,
+        early: 0,
+        late: 0,
+        total: 0,
+        onTimeRatio: 0,
+        earlyRatio: 0,
+        lateRatio: null,
+        averageDelay: 0,
+        timingPoint: false,
+        direction: Direction.Inbound,
+        averageScheduled: 60,
+        averageActual: 60,
+        onTimeInSeconds: 60,
+        lateInSeconds: 60,
+        earlyInSeconds: 60,
+      },
+      {
+        lineId: "LI00003",
+        stopId: "ST000000000003",
+        stopInfo: {
+          sourceId: "",
+          stopName: "Something road",
+          stopId: "ST000000000003",
+          stopLocation: { latitude: 56.7686, longitude: 0.4567 },
+          stopLocality: {
+            localityId: "L1",
+            localityAreaId: "LA1",
+            localityName: "Somewhere",
+            localityAreaName: "Some Town",
+          },
+        },
+        scheduledDepartures: 10,
+        actualDepartures: 0,
+        completedRatio: 0,
+        onTime: 0,
+        early: 0,
+        late: 0,
+        total: 0,
+        onTimeRatio: 0,
+        earlyRatio: 0,
+        lateRatio: null,
+        averageDelay: 0,
+        timingPoint: false,
+        direction: Direction.Inbound,
+        averageScheduled: 60,
+        averageActual: 60,
+        onTimeInSeconds: 60,
+        lateInSeconds: 60,
+        earlyInSeconds: 60,
+      },
+    ];
+    spyOn(service, "fetchStopPerformanceList").and.returnValue(
+      of(stopsWithRatios),
+    );
+
+    spectator.component.params = {
+      fromTimestamp: DateTime.fromISO("2021-02-01T00:00:00Z").toISO(),
+      toTimestamp: DateTime.fromISO("2021-03-01T00:00:00Z").toISO(),
+      filters: { nocCodes: ["NOC1"] },
+    };
+
+    spectator.detectChanges();
+    tick(1000);
+
+    spectator.component.calculateInputData();
+    await expect(spectator.component.data).toEqual(stopsWithRatios);
+    await expect(spectator.component.loading).toBe(false);
+    await expect(spectator.component.errored).toBe(false);
+
+    const componentStop = spectator.component.aggDataPerStop.filter(
+      (stop) => stop.stopId === "ST000000000003",
+    );
+
+    await expect(componentStop[0].lateRatio).toBe(null);
+    discardPeriodicTasks();
+  }));
+
   it("should aggregate data by stop when Direction.All is selected", fakeAsync(async () => {
     const stopsWithDuplicateStopIds: StopPerformance[] = [
       {

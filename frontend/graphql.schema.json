@@ -2531,25 +2531,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "DataMonitoring",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "Distances",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ServiceMonitoring",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "StopAnalysis",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

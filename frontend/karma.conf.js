@@ -35,7 +35,12 @@ module.exports = function (config) {
       },
       ChromeHeadlessCI: {
         base: "ChromeHeadless",
-        flags: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader"],
+        flags: [
+          "--no-sandbox",
+          "--use-gl=angle",
+          "--use-angle=swiftshader",
+          '--js-flags="--max-old-space-size=1024"',
+        ],
       },
     },
   });
