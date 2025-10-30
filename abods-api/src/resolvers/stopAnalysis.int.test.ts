@@ -78,7 +78,7 @@ afterAll(async () => {
   if (container) await container.stop();
 });
 
-it("Should return logged in user information", async () => {
+it("Should return information about stops", async () => {
   const query = `
     query($vehicleJourneyId: ID!) {
       getServicePatternDistanceGeom(vehicleJourneyId: $vehicleJourneyId) {
