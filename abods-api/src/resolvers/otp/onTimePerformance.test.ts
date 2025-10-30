@@ -1262,13 +1262,17 @@ describe("getPunctualityTimeSeries", () => {
     expect(result?.length).toBe(2);
 
     expect(result?.[0]).toEqual({
-      ts: dayjs("2025-09-11T08:00:00.000Z").format("YYYY-MM-DDTHH:mm:ssZ"),
+      ts: dayjs("2025-09-11T08:00:00.000Z")
+        .tz("Europe/London")
+        .format("YYYY-MM-DDTHH:mm:ssZ"),
       early: 2,
       late: 1,
       onTime: 5,
     });
     expect(result?.[1]).toEqual({
-      ts: dayjs("2025-09-11T09:00:00.000Z").format("YYYY-MM-DDTHH:mm:ssZ"),
+      ts: dayjs("2025-09-11T09:00:00.000Z")
+        .tz("Europe/London")
+        .format("YYYY-MM-DDTHH:mm:ssZ"),
       early: 0,
       late: 3,
       onTime: 2,
@@ -1433,15 +1437,9 @@ describe("getPunctualityTimeSeries", () => {
     expect(result).not.toBeNull();
     expect(result?.length).toBe(3);
 
-    expect(dayjs(result?.[0].ts).isSame(dayjs("2025-09-11").hour(6))).toBe(
-      true,
-    );
-    expect(dayjs(result?.[1].ts).isSame(dayjs("2025-09-11").hour(9))).toBe(
-      true,
-    );
-    expect(dayjs(result?.[2].ts).isSame(dayjs("2025-09-11").hour(16))).toBe(
-      true,
-    );
+    expect(result?.[0].ts).toEqual("2025-09-11T06:00:00+01:00");
+    expect(result?.[1].ts).toEqual("2025-09-11T09:00:00+01:00");
+    expect(result?.[2].ts).toEqual("2025-09-11T16:00:00+01:00");
   });
 
   it("returns null when user does not have access to operator", async () => {
