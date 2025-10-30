@@ -322,17 +322,17 @@ export class ServiceGridComponent implements OnInit, OnChanges, OnDestroy {
             const total = (acc.total ?? 0) + cur.total;
 
             let onTimeRatio = null;
-            if (acc.onTimeRatio || cur.onTimeRatio) {
+            if (acc.onTimeRatio != null || cur.onTimeRatio != null) {
               onTimeRatio = (acc.onTimeRatio ?? 0) + (cur.onTimeRatio ?? 0);
             }
 
             let earlyRatio = null;
-            if (acc.earlyRatio || cur.earlyRatio) {
+            if (acc.earlyRatio != null || cur.earlyRatio != null) {
               earlyRatio = (acc.earlyRatio ?? 0) + (cur.earlyRatio ?? 0);
             }
 
             let lateRatio = null;
-            if (acc.lateRatio || cur.lateRatio) {
+            if (acc.lateRatio != null || cur.lateRatio != null) {
               lateRatio = (acc.lateRatio ?? 0) + (cur.lateRatio ?? 0);
             }
             const frequent = cur.frequent || acc.frequent;
