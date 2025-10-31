@@ -383,11 +383,11 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
     const scheduled = sumBy(value, "scheduledDepartures");
     const actual = sumBy(value, "actualDepartures");
 
-    const earlyRatio = sumBy(value, "earlyRatio");
-    const lateRatio = sumBy(value, "lateRatio");
-    const onTimeRatio = sumBy(value, "onTimeRatio");
+    const earlyRatioSum = sumBy(value, "earlyRatio");
+    const lateRatioSum = sumBy(value, "lateRatio");
+    const onTimeRatioSum = sumBy(value, "onTimeRatio");
 
-    const totalRatio = earlyRatio + lateRatio + onTimeRatio;
+    const totalRatio = earlyRatioSum + lateRatioSum + onTimeRatioSum;
     const valueWithDelay = value.filter(
       (data) => data.averageDelay != undefined,
     );
@@ -417,9 +417,9 @@ export class OnTimeGridComponent<TData extends AbstractPerformance> {
       early: early,
       late: late,
       onTime: onTime,
-      earlyRatio: totalRatio ? earlyRatio / totalRatio : 0,
-      lateRatio: totalRatio ? lateRatio / totalRatio : 0,
-      onTimeRatio: totalRatio ? onTimeRatio / totalRatio : 0,
+      earlyRatio: totalRatio ? earlyRatioSum / totalRatio : 0,
+      lateRatio: totalRatio ? lateRatioSum / totalRatio : 0,
+      onTimeRatio: totalRatio ? onTimeRatioSum / totalRatio : 0,
       scheduledDepartures: scheduled,
       actualDepartures: actual,
       averageDelay: averageDelay,
