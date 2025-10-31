@@ -27,7 +27,7 @@ module.exports = function (config) {
     autoWatch: false,
     browsers: ["Chrome"],
     browserNoActivityTimeout: 60000,
-    browserDisconnectTimeout: 20000,
+    browserDisconnectTimeout: 60000,
     concurrency: 1,
     browserDisconnectTolerance: 3,
     singleRun: false,
