@@ -131,7 +131,7 @@ describe("ServiceGridComponent", () => {
     spectator.detectChanges();
     tick(100);
 
-    const expectedSummary = ["", "", "-", "444", "95.9%", "-", "166%"];
+    const expectedSummary = ["", "", "-", "444", "95.9%", "-", "83%"];
 
     const expectedValues = [
       ["", "1A: Dispear to Wear", "-", "123", "93.5%", "+00:12", "69.6%"],

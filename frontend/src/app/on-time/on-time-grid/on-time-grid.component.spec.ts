@@ -354,6 +354,9 @@ describe("OnTimeGridComponent", () => {
     ];
     const summary = component.returnSummaryTotal(value);
     await expect(summary.length).toBe(1);
+    await expect(summary[0].earlyRatio).toBeCloseTo(0.33);
+    await expect(summary[0].lateRatio).toBeCloseTo(0.33);
+    await expect(summary[0].onTimeRatio).toBeCloseTo(0.33);
     await expect(summary[0].early).toBe(3);
     await expect(summary[0].late).toBe(5);
     await expect(summary[0].onTime).toBe(7);
