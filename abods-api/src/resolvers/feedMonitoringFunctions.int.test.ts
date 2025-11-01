@@ -10,8 +10,6 @@ import {
   connectKysely,
   createUserTablesAndData,
   createOperatorsAndServiceDetails,
-  createSummaryTablesAndData,
-  createTimetableSummaryStopsTableAndData,
   createFrequentSummariesTableAndData,
   createExpectedTablesAndData,
   createNaptanTablesAndData,
