@@ -102,7 +102,7 @@ export async function createSiriVMPositionsTable(db: Kysely<DB>) {
     .addColumn("line_name", "varchar", (col) => col.notNull())
     .addColumn("journey_ref", "varchar", (col) => col.notNull())
     .addColumn("direction_ref", "varchar")
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("latitude", "double precision")
     .addColumn("longitude", "double precision")
     .addColumn("vehicle_ref", "varchar", (col) => col.notNull())
@@ -127,7 +127,7 @@ export async function createTimetableTable(db: Kysely<DB>) {
     .addColumn("line_name", "varchar")
     .addColumn("xml_file_name", "varchar")
     .addColumn("journey_code", "varchar")
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("day_of_week", "integer")
     .addColumn("common_name", "varchar")
     .addColumn("atco_code", "varchar")
@@ -173,7 +173,7 @@ export async function createTimetableFrequentSummaryServicesTable(
       col.notNull(),
     )
     .addColumn("line_name", "varchar", (col) => col.notNull())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("departure_hour", "timestamptz", (col) => col.notNull())
     .addColumn("departure_hour_only", "timestamptz", (col) => col.notNull())
     .addColumn("day_of_week", "integer", (col) => col.notNull())
@@ -194,7 +194,7 @@ export async function createTimetableSummaryOperatorTTable(db: Kysely<DB>) {
     .createTable("timetable_summary_operator_t")
     .addColumn("timetable_id", "varchar", (col) => col.primaryKey())
     .addColumn("operator_noc", "varchar", (col) => col.notNull())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("departure_hour", "timestamptz", (col) => col.notNull())
     .addColumn("departure_hour_only", "timestamptz", (col) => col.notNull())
     .addColumn("day_of_week", "integer", (col) => col.notNull())
@@ -224,7 +224,7 @@ export async function createTimetableSummaryServiceTzTable(db: Kysely<DB>) {
     .addColumn("noc_and_line_and_servicecode", "varchar", (col) =>
       col.notNull(),
     )
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("departure_hour", "timestamptz", (col) => col.notNull())
     .addColumn("departure_hour_only", "timestamptz", (col) => col.notNull())
     .addColumn("day_of_week", "integer", (col) => col.notNull())
@@ -260,7 +260,7 @@ export async function createTimetableSummaryStopsTzTable(db: Kysely<DB>) {
     .addColumn("line_name", "varchar", (col) => col.notNull())
     .addColumn("stop_latitude", "double precision", (col) => col.notNull())
     .addColumn("stop_longitude", "double precision", (col) => col.notNull())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("departure_hour", "timestamptz", (col) => col.notNull())
     .addColumn("departure_hour_only", "timestamptz", (col) => col.notNull())
     .addColumn("day_of_week", "integer", (col) => col.notNull())
@@ -299,7 +299,7 @@ export async function createTimetableThresholdSummaryTable(db: Kysely<DB>) {
     .addColumn("line_name", "varchar")
     .addColumn("noc_and_line_and_servicecode", "varchar")
     .addColumn("service_name", "varchar")
-    .addColumn("date_of_journey", "timestamptz")
+    .addColumn("date_of_journey", "date")
     .addColumn("is_timing_point", "boolean")
     .addColumn("time_diff_minutes", "integer")
     .addColumn("departure_hour", "timestamptz")
@@ -375,10 +375,10 @@ export async function createFeedMonitorDailySummaryTable(db: Kysely<DB>) {
   await db.schema
     .createTable("feed_monitor_daily_summary")
     .addColumn("id", "varchar", (col) => col.primaryKey())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("operator_noc", "varchar", (col) => col.notNull())
     .addColumn("update_frequency", "integer")
-    .addColumn("availability", "varchar")
+    .addColumn("availability", "decimal")
     .execute();
 }
 
@@ -397,7 +397,7 @@ export async function createFeedMonitorMinuteSummaryTable(db: Kysely<DB>) {
   await db.schema
     .createTable("feed_monitor_minute_summary")
     .addColumn("id", "varchar", (col) => col.primaryKey())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("operator_noc", "varchar", (col) => col.notNull())
     .addColumn("received_interval", "timestamptz", (col) => col.notNull())
     .addColumn("expected", "integer", (col) => col.notNull())
@@ -414,14 +414,14 @@ export async function createFeedMonitorSummaryTable(db: Kysely<DB>) {
     .addColumn("last_outage", "timestamptz")
     .addColumn("unavailable_since", "timestamptz")
     .addColumn("update_frequency", "integer")
-    .addColumn("availability", "varchar")
+    .addColumn("availability", "decimal")
     .execute();
 }
 
 export async function createExpectedJourneysTable(db: Kysely<DB>) {
   await db.schema
     .createTable("expected_journeys")
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("operator_noc", "varchar")
     .addColumn("line_name", "varchar")
     .addColumn("noc_and_line_and_servicecode", "varchar", (col) =>
@@ -444,7 +444,7 @@ export async function createExpectedJourneysTable(db: Kysely<DB>) {
 export async function createExpectedOperatorsTable(db: Kysely<DB>) {
   await db.schema
     .createTable("expected_operators")
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("operator_noc", "varchar", (col) => col.notNull())
     .addColumn("operator_name", "varchar")
     .execute();
@@ -458,7 +458,7 @@ export async function createExpectedServicesTable(db: Kysely<DB>) {
       col.notNull(),
     )
     .addColumn("service_name", "varchar", (col) => col.notNull())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("operator_noc", "varchar", (col) => col.notNull())
     .addColumn("admin_area_id", sql`integer[]`, (col) => col.notNull())
     .addColumn("total_distance", "integer", (col) => col.notNull())
@@ -499,7 +499,7 @@ export async function createRouteToJourneysTable(db: Kysely<DB>) {
     .createTable("route_to_journeys")
     .addColumn("id", "varchar", (col) => col.primaryKey())
     .addColumn("group_id", "varchar", (col) => col.notNull())
-    .addColumn("date_of_journey", "timestamptz", (col) => col.notNull())
+    .addColumn("date_of_journey", "date", (col) => col.notNull())
     .addColumn("distinct_route_id", "integer", (col) => col.notNull())
     .execute();
 }
