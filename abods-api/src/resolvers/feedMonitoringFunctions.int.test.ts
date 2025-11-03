@@ -1,34 +1,34 @@
+import { ApolloServer } from "@apollo/server";
 import { PrismaClient } from "@prisma/client";
 import {
-  StartedPostgreSqlContainer,
   PostgreSqlContainer,
+  StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
+import dayjs from "dayjs";
 import { Kysely } from "kysely";
+import resolvers from ".";
+import { typeDefs } from "..";
 import { DB } from "../kysely";
 import {
-  setEnvVariables,
   connectKysely,
-  createUserTablesAndData,
-  createOperatorsAndServiceDetails,
-  createFrequentSummariesTableAndData,
-  createExpectedTablesAndData,
-  createNaptanTablesAndData,
   connectPrisma,
+  createExpectedTablesAndData,
+  createFeedMonitoringTablesAndData,
+  createFrequentSummariesTableAndData,
+  createNaptanTablesAndData,
+  createOperatorsAndServiceDetails,
   createTimetableTablesAndData,
+  createUserTablesAndData,
   getContext,
   getSingleResultData,
-  createFeedMonitoringTablesAndData,
+  setEnvVariables,
 } from "../lib/test/utils";
-import { ApolloServer } from "@apollo/server";
-import { typeDefs } from "..";
-import resolvers from ".";
 import logger from "../logger";
 import {
   HistoricalStatsType,
   OperatorFeedMonitoring,
   VehicleStatsType,
 } from "../types/generated";
-import dayjs from "dayjs";
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;
@@ -63,7 +63,7 @@ afterAll(async () => {
 });
 
 describe("FeedMonitoring queries", () => {
-  it.skip("Should return dashboard vehicle counts for an operator", async () => {
+  it("Should return dashboard vehicle counts for an operator", async () => {
     const query = `
       query dashboardOperatorVehicleCountsList($operatorId: String) {
         dashboardVehicles(operatorId: $operatorId) {
@@ -105,7 +105,7 @@ describe("FeedMonitoring queries", () => {
     expect(typeof vehicle?.actual).toBe("number");
   });
 
-  it.skip("Should return operatorFeedMonitoring details for an operator", async () => {
+  it("Should return operatorFeedMonitoring details for an operator", async () => {
     const query = `
     query operatorFeedMonitoring($operatorId: String!) {
       operatorFeedMonitoring(operatorId: $operatorId) {
@@ -329,7 +329,7 @@ describe("FeedMonitoring queries", () => {
     ).toBe(20);
   });
 
-  it.skip("Should return historicalStats for an operator and date", async () => {
+  it("Should return historicalStats for an operator and date", async () => {
     const query = `
         query operatorFeedHistory($operatorId: String!, $date: Date!) {
         operatorFeedMonitoring(operatorId: $operatorId) {
@@ -388,7 +388,7 @@ describe("FeedMonitoring queries", () => {
     ).toBeCloseTo(0.1);
   });
 
-  it.skip("Should return vehicleStats by minute for an operator and time range", async () => {
+  it("Should return vehicleStats by minute for an operator and time range", async () => {
     const query = `
         query operatorHistoricStats($operatorId: String!, $date: Date!, $start: DateTime!, $end: DateTime!) {
           operatorFeedMonitoring(operatorId: $operatorId) {

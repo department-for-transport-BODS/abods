@@ -5,8 +5,8 @@ import { DB } from "../../kysely";
 import { getKyselyClient } from "../../kyselyClient";
 import { initialisePrismaClient } from "../../prismaClient";
 
-import argon2 from "argon2";
 import { GraphQLResponse } from "@apollo/server";
+import argon2 from "argon2";
 import { createRequest, createResponse } from "node-mocks-http";
 import { RequestContext } from "../../types/extra";
 import {
