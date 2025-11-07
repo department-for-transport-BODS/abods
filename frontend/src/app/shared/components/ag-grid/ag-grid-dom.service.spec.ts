@@ -1,17 +1,11 @@
-import { createHostFactory, SpectatorHost } from "@ngneat/spectator";
 import { AgGridAngular, AgGridModule } from "ag-grid-angular";
 import { AgGridDomService } from "./ag-grid-dom.service";
 import { ColDef } from "ag-grid-community";
 import { Subject } from "rxjs";
 import { ServicePerformanceType } from "../../../../generated/graphql";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 describe("AgGridDomService", () => {
-  let spectator: SpectatorHost<AgGridAngular>;
-  const createHost = createHostFactory({
-    component: AgGridAngular,
-    providers: [AgGridDomService],
-    imports: [AgGridModule],
-  });
   let service: AgGridDomService;
   const ready$ = new Subject<void>();
 
@@ -45,32 +39,36 @@ describe("AgGridDomService", () => {
       averageDelay: 35,
     },
   ];
+
   const cols: ColDef[] = [
     { field: "lineId" },
     { field: "scheduledDepartures" },
     { field: "actualDepartures" },
   ];
 
-  beforeEach(() => {
-    spectator = createHost(
-      `<ag-grid-angular [rowData]="data" [columnDefs]='cols' domLayout="autoHeight" (gridReady)='ready$.next()'></ag-grid-angular>`,
-      {
-        hostProps: { data, cols, ready$ },
-      },
-    );
-    service = spectator.inject(AgGridDomService);
+  let fixture: ComponentFixture<AgGridAngular>;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AgGridModule],
+      providers: [AgGridDomService],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AgGridAngular);
+    fixture.componentInstance.rowData = data;
+    fixture.componentInstance.columnDefs = cols;
+    fixture.componentInstance.domLayout = "autoHeight";
+    fixture.componentInstance.gridReady.subscribe((event: any) => {
+      ready$.next(event);
+    });
+    service = TestBed.inject(AgGridDomService);
+    fixture.detectChanges();
   });
 
   it("should get the viewport height", () => {
-    spectator.detectChanges();
-
-    // TODO {root:true} is a bit of a hack. Why the heck cant spectator see the element???
-    expect(spectator.query(".ag-body-viewport", { root: true })).toExist();
-
+    fixture.detectChanges();
+    const viewport = fixture.nativeElement.querySelector(".ag-body-viewport");
+    expect(viewport).toBeTruthy();
     const actual = service.viewportHeight();
-
-    expect(actual).toEqual(
-      spectator.queryHost(".ag-body-viewport", { root: true })?.clientHeight,
-    );
+    expect(actual).toEqual(viewport?.clientHeight);
   });
 });

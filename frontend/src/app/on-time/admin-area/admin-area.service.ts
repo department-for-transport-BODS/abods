@@ -1,20 +1,20 @@
 import { Injectable } from "@angular/core";
-import { combineLatestWith, Observable } from "rxjs";
-import { map, shareReplay } from "rxjs/operators";
-import { FeatureCollection, Polygon } from "geojson";
-import { GetAdminAreasGQL, OperatorType } from "../../../generated/graphql";
-import { feature, featureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import flip from "@turf/flip";
-import { combineBounds } from "../../shared/geo";
+import { feature, featureCollection } from "@turf/helpers";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { FeatureCollection, Polygon } from "geojson";
 import {
   flatMap as _flatMap,
   sortBy as _sortBy,
   uniq as _uniq,
 } from "lodash-es";
-import { OperatorService } from "../../shared/services/operator.service";
+import { combineLatestWith, Observable } from "rxjs";
+import { map, shareReplay } from "rxjs/operators";
+import { GetAdminAreasGQL, OperatorType } from "../../../generated/graphql";
 import { nonNullishArray } from "../../shared/array-operators";
+import { combineBounds } from "../../shared/geo";
+import { OperatorService } from "../../shared/services/operator.service";
 
 export interface AdminArea {
   id: string;
@@ -71,11 +71,13 @@ export class AdminAreaService {
   }
 
   fetchAdminAreasForOperator(operatorId: string): Observable<AdminArea[]> {
-    return this._fetchAdminAreasByOperators(
+    const test = this._fetchAdminAreasByOperators(
       (operators) =>
         operators.find((operator) => operator?.operatorId === operatorId)
           ?.adminAreaIds ?? [],
     );
+
+    return test;
   }
 
   fetchAdminAreaBoundaries(): Observable<

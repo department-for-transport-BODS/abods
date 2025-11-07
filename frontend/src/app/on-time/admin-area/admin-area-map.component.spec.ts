@@ -1,30 +1,45 @@
 import { Spectator, createComponentFactory } from "@ngneat/spectator";
 import { AdminAreaMapComponent } from "./admin-area-map.component";
 import { AdminAreaService } from "./admin-area.service";
-import { ConfigService } from "../../config/config.service";
 import { of } from "rxjs";
 import { featureCollection } from "@turf/helpers";
 import { FeatureCollection, Polygon } from "geojson";
 import { BRITISH_ISLES_BBOX } from "src/app/shared/geo";
 import { AdminArea } from "./admin-area.service";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { SharedModule } from "../../shared/shared.module";
+import { provideHttpClient } from "@angular/common/http";
+
+const mapStub = {
+  getBounds: () => ({
+    getWest: () => 0,
+    getSouth: () => 0,
+    getEast: () => 1,
+    getNorth: () => 1,
+    toArray: () => [
+      [0, 0],
+      [1, 1],
+    ],
+  }),
+  setFeatureState: () => {
+    /* stub */
+  },
+  removeFeatureState: () => {
+    /* stub */
+  },
+};
 
 describe("AdminAreaMapComponent", () => {
   let spectator: Spectator<AdminAreaMapComponent>;
   const createComponent = createComponentFactory({
     component: AdminAreaMapComponent,
-    declarations: [NgxMapboxGLModule],
+    imports: [SharedModule, NgxMapboxGLModule],
     providers: [
+      provideHttpClient(),
       {
         provide: AdminAreaService,
         useValue: {
           fetchAdminAreaBoundaries: () => of(featureCollection([])),
-        },
-      },
-      {
-        provide: ConfigService,
-        useValue: {
-          mapboxStyle: "your-mapbox-style",
         },
       },
     ],
@@ -32,6 +47,7 @@ describe("AdminAreaMapComponent", () => {
 
   beforeEach(() => {
     spectator = createComponent();
+    spectator.component.map = { mapInstance: mapStub } as any;
   });
 
   it("should fetch admin area boundaries on initialization", () => {
@@ -98,7 +114,15 @@ describe("AdminAreaMapComponent", () => {
           },
           geometry: {
             type: "Polygon",
-            coordinates: [],
+            coordinates: [
+              [
+                [0, 0],
+                [1, 0],
+                [1, 1],
+                [0, 1],
+                [0, 0], // Closed ring
+              ],
+            ],
           },
           layer: {
             id: "admin-area-boundaries",

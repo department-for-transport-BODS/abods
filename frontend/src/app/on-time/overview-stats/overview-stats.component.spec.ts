@@ -1,5 +1,4 @@
 import { DecimalPipe } from "@angular/common";
-import { RouterTestingModule } from "@angular/router/testing";
 import {
   byText,
   byTextContent,
@@ -11,13 +10,14 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { PunctualityOverview } from "../on-time.service";
 
-import { OverviewStatsComponent } from "./overview-stats.component";
-import { LuxonModule } from "luxon-angular";
 import { ReactiveFormsModule } from "@angular/forms";
+import { RouterModule } from "@angular/router";
+import { LuxonModule } from "luxon-angular";
 import { NgxTippyDirective } from "ngx-tippy-wrapper";
 import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
 import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
 import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
+import { OverviewStatsComponent } from "./overview-stats.component";
 
 describe("OverviewStatsComponent", () => {
   let spectator: Spectator<OverviewStatsComponent>;
@@ -29,7 +29,7 @@ describe("OverviewStatsComponent", () => {
       SharedModule,
       LayoutModule,
       ApolloTestingModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       LuxonModule,
       ReactiveFormsModule,
     ],
@@ -48,10 +48,10 @@ describe("OverviewStatsComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(component).toBeTruthy();
+    await expect(component).toBeTruthy();
   });
 
   const stats: PunctualityOverview = {
@@ -65,7 +65,7 @@ describe("OverviewStatsComponent", () => {
     averageDelay: 5.25,
   };
 
-  it("should display on-time percentage", () => {
+  it("should display on-time percentage", async () => {
     const expected = "56.65%";
 
     component.overview = stats;
@@ -73,7 +73,7 @@ describe("OverviewStatsComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(expected, {
           selector: "#on-time-overview-stat-on-time .stat__value",
@@ -82,7 +82,7 @@ describe("OverviewStatsComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should display late percentage", () => {
+  it("should display late percentage", async () => {
     const expected = "30.75%";
 
     component.overview = stats;
@@ -90,7 +90,7 @@ describe("OverviewStatsComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(expected, {
           selector: "#on-time-overview-stat-late .stat__value",
@@ -99,7 +99,7 @@ describe("OverviewStatsComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should display early percentage", () => {
+  it("should display early percentage", async () => {
     const expected = "12.6%";
 
     component.overview = stats;
@@ -107,7 +107,7 @@ describe("OverviewStatsComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(expected, {
           selector: "#on-time-overview-stat-early .stat__value",
@@ -116,7 +116,7 @@ describe("OverviewStatsComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should display no-data percentage", () => {
+  it("should display no-data percentage", async () => {
     const expected = "1.93%";
 
     component.overview = stats;
@@ -124,7 +124,7 @@ describe("OverviewStatsComponent", () => {
 
     spectator.detectChanges();
 
-    expect(
+    await expect(
       spectator.query(
         byTextContent(expected, {
           selector: "#on-time-overview-stat-no-data .stat__value",

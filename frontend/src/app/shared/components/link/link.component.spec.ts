@@ -1,4 +1,4 @@
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { LinkComponent } from "./link.component";
 
@@ -8,7 +8,7 @@ describe("LinkComponent", () => {
 
   const createComponent = createComponentFactory({
     component: LinkComponent,
-    imports: [RouterTestingModule],
+    imports: [RouterModule.forRoot([])],
     detectChanges: false,
   });
 

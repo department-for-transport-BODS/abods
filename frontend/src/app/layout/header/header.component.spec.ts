@@ -8,6 +8,7 @@ import {
 } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
 import { HeaderComponent } from "./header.component";
+import { LayoutModule } from "../layout.module";
 
 describe("HeaderComponent", () => {
   let component: HeaderComponent;
@@ -16,7 +17,7 @@ describe("HeaderComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HeaderComponent],
-      imports: [RouterModule.forRoot([]), ApolloTestingModule],
+      imports: [RouterModule.forRoot([]), ApolloTestingModule, LayoutModule],
       providers: [
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),

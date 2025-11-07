@@ -1,22 +1,22 @@
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { LineString } from "@turf/helpers";
+import { ApolloTestingModule } from "apollo-angular/testing";
+import { Feature } from "geojson";
+import { DateTime } from "luxon";
+import { MockModule } from "ng-mocks";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { of } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
-import { OnTimeModule } from "../on-time.module";
-import { ServiceMapComponent } from "./service-map.component";
-import { ServicePattern, TransitModelService } from "../transit-model.service";
-import { of } from "rxjs";
 import {
   RouteType,
   ServiceLinkType,
   StopType,
 } from "../../../generated/graphql";
-import { NgxMapboxGLModule } from "ngx-mapbox-gl";
-import { MockModule } from "ng-mocks";
-import { DateTime } from "luxon";
+import { OnTimeModule } from "../on-time.module";
 import { OnTimeService } from "../on-time.service";
-import { ApolloTestingModule } from "apollo-angular/testing";
-import { Feature } from "geojson";
-import { LineString } from "@turf/helpers";
+import { ServicePattern, TransitModelService } from "../transit-model.service";
+import { ServiceMapComponent } from "./service-map.component";
 
 describe("ServiceMapComponent", () => {
   let spectator: Spectator<ServiceMapComponent>;
@@ -89,11 +89,11 @@ describe("ServiceMapComponent", () => {
     onTimeService = spectator.inject(OnTimeService);
   });
 
-  it("should create", () => {
-    expect(spectator.component).toBeTruthy();
+  it("should create", async () => {
+    await expect(spectator.component).toBeTruthy();
   });
 
-  it("should generate service patterns feature", () => {
+  it("should generate service patterns feature", async () => {
     const tmSpy = spyOn(
       transitModelService,
       "fetchServicePatternStops",
@@ -126,12 +126,14 @@ describe("ServiceMapComponent", () => {
       },
     });
 
-    expect(spectator.component.servicePatterns).toBeTruthy();
-    expect(spectator.component.servicePatterns?.type).toEqual(
+    await expect(spectator.component.servicePatterns).toBeTruthy();
+    await expect(spectator.component.servicePatterns?.type).toEqual(
       "FeatureCollection",
     );
-    expect(spectator.component.servicePatterns?.features?.length).toEqual(2);
-    expect(
+    await expect(spectator.component.servicePatterns?.features?.length).toEqual(
+      2,
+    );
+    await expect(
       spectator.component.servicePatterns?.features?.[0].geometry?.coordinates,
     ).toEqual([
       [1.1987, 53.1472],
@@ -139,37 +141,37 @@ describe("ServiceMapComponent", () => {
       [-1.2, 53.4231],
     ]);
 
-    expect(
+    await expect(
       spectator.component.servicePatterns?.features?.[1].geometry?.coordinates,
     ).toEqual([
       [-1.466667, 53.383331],
       [1.1987, 53.1472],
     ]);
 
-    expect(spectator.component.stops).toBeTruthy();
-    expect(spectator.component.stops?.type).toEqual("FeatureCollection");
-    expect(spectator.component.stops?.features?.length).toEqual(2);
-    expect(
+    await expect(spectator.component.stops).toBeTruthy();
+    await expect(spectator.component.stops?.type).toEqual("FeatureCollection");
+    await expect(spectator.component.stops?.features?.length).toEqual(2);
+    await expect(
       spectator.component.stops?.features?.[0].geometry?.coordinates,
     ).toEqual([1.1987, 53.1472]);
-    expect(spectator.component.stops?.features?.[0].properties?.naptan).toEqual(
-      "0000001",
-    );
-    expect(
+    await expect(
+      spectator.component.stops?.features?.[0].properties?.naptan,
+    ).toEqual("ST0000001");
+    await expect(
       spectator.component.stops?.features?.[0].properties?.stopName,
     ).toEqual("Mansfield");
-    expect(
+    await expect(
       spectator.component.stops?.features?.[1].geometry?.coordinates,
     ).toEqual([-1.466667, 53.383331]);
-    expect(spectator.component.stops?.features?.[1].properties?.naptan).toEqual(
-      "0000002",
-    );
-    expect(
+    await expect(
+      spectator.component.stops?.features?.[1].properties?.naptan,
+    ).toEqual("ST0000002");
+    await expect(
       spectator.component.stops?.features?.[1].properties?.stopName,
     ).toEqual("Sheffield");
   });
 
-  it("setCoordinates() should set coordinates using service link data", () => {
+  it("setCoordinates() should set coordinates using service link data", async () => {
     const features: Feature<LineString>[] = [];
     const result = spectator.component.setCoordinates(
       stops,
@@ -177,14 +179,14 @@ describe("ServiceMapComponent", () => {
       features,
     );
 
-    expect(result).toEqual([
+    await expect(result).toEqual([
       [1.1987, 53.1472],
       [-1.466667, 53.383331],
       [-1.2, 53.4231],
     ]);
   });
 
-  it("setCoordinates() should return undefined when serviceLink is not available and feature is already present", () => {
+  it("setCoordinates() should return undefined when serviceLink is not available and feature is already present", async () => {
     const features: Feature<LineString>[] = [
       {
         type: "Feature",
@@ -198,6 +200,6 @@ describe("ServiceMapComponent", () => {
     ];
     const result = spectator.component.setCoordinates(stops, [], features);
 
-    expect(result).toEqual(undefined);
+    await expect(result).toEqual(undefined);
   });
 });

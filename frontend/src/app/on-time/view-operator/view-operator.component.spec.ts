@@ -1,3 +1,4 @@
+import { fakeAsync, tick } from "@angular/core/testing";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
   byRole,
@@ -6,38 +7,41 @@ import {
   SpectatorRouting,
   SpyObject,
 } from "@ngneat/spectator";
+import { AgGridModule } from "ag-grid-angular";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { dateTimeEqualityMatcher } from "src/test-support/equality";
+import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { of } from "rxjs";
-import { ViewOperatorComponent } from "./view-operator.component";
-import { OnTimeService, PunctualityOverview } from "../on-time.service";
-import { FiltersComponent } from "../filters/filters.component";
+import { dateTimeEqualityMatcher } from "src/test-support/equality";
+import { OperatorType } from "../../../generated/graphql";
+import { LayoutModule } from "../../layout/layout.module";
+import { TabsComponent } from "../../shared/components/tabs/tabs.component";
+import { OperatorService } from "../../shared/services/operator.service";
+import { SharedModule } from "../../shared/shared.module";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
 import { ControlsComponent } from "../controls/controls.component";
-import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
-import { OperatorService } from "../../shared/services/operator.service";
-import { TabsComponent } from "../../shared/components/tabs/tabs.component";
-import { waitForAsync } from "@angular/core/testing";
-import { OperatorType } from "../../../generated/graphql";
-import { AgGridModule } from "ag-grid-angular";
-import { NgxTippyModule } from "ngx-tippy-wrapper";
 import { DayOfWeekChartComponent } from "../day-of-week-chart/day-of-week-chart.component";
+import { DelayFrequencyChartComponent } from "../delay-frequency-chart/delay-frequency-chart.component";
 import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { FiltersComponent } from "../filters/filters.component";
 import { OnTimeGridComponent } from "../on-time-grid/on-time-grid.component";
+import { OnTimeService, PunctualityOverview } from "../on-time.service";
 import { OtpThresholdFormComponent } from "../otp-threshold-form/otp-threshold-form.component";
 import { OtpThresholdModalLinkComponent } from "../otp-threshold-modal-link/otp-threshold-modal-link.component";
 import { OtpThresholdModalComponent } from "../otp-threshold-modal/otp-threshold-modal.component";
 import { OverviewStatsComponent } from "../overview-stats/overview-stats.component";
+import { PerformanceService } from "../performance.service";
 import { ServiceGridComponent } from "../service-grid/service-grid.component";
 import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
+import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.component";
 import { TimeSeriesChartComponent } from "../time-series-chart/time-series-chart.component";
+import { ViewOperatorComponent } from "./view-operator.component";
 
 describe("ViewOperatorComponent", () => {
   let spectator: SpectatorRouting<ViewOperatorComponent>;
   let component: ViewOperatorComponent;
   let operatorService: SpyObject<OperatorService>;
   let onTimeService: SpyObject<OnTimeService>;
+  let performanceService: SpyObject<PerformanceService>;
 
   const mockOperator: OperatorType = {
     nocCode: "OP01",
@@ -58,6 +62,8 @@ describe("ViewOperatorComponent", () => {
       ServiceGridComponent,
       OverviewStatsComponent,
       DayOfWeekChartComponent,
+      DelayFrequencyChartComponent,
+      TimeOfDayChartComponent,
       OnTimeGridComponent,
       OtpThresholdModalLinkComponent,
       OtpThresholdModalComponent,
@@ -73,7 +79,7 @@ describe("ViewOperatorComponent", () => {
       AgGridModule,
       NgxTippyModule,
     ],
-    mocks: [OperatorService, OnTimeService],
+    mocks: [OperatorService, OnTimeService, PerformanceService],
     detectChanges: false,
     stubsEnabled: false,
   });
@@ -87,6 +93,7 @@ describe("ViewOperatorComponent", () => {
     component = spectator.component;
     operatorService = spectator.inject(OperatorService);
     onTimeService = spectator.inject(OnTimeService);
+    performanceService = spectator.inject(PerformanceService);
 
     operatorService.fetchOperators.and.returnValue(of([mockOperator]));
     operatorService.fetchOperator.and.returnValue(of(mockOperator));
@@ -94,15 +101,38 @@ describe("ViewOperatorComponent", () => {
       of({
         completed: 0,
         scheduled: 100,
+        incomplete: "{}",
       } as PunctualityOverview),
     );
+    onTimeService.fetchOnTimeDelayFrequencyData.and.returnValue(of([]));
+    onTimeService.fetchOnTimePunctualityTimeOfDayData.and.returnValue(of([]));
+    onTimeService.fetchOnTimePunctualityDayOfWeekData.and.returnValue(of([]));
+    onTimeService.fetchOnTimeTimeSeriesData.and.returnValue(of([]));
+    performanceService.fetchOverviewStats.and.returnValue(
+      of({
+        onTime: {
+          completed: 0,
+          scheduled: 100,
+          incomplete: "{}",
+        } as PunctualityOverview,
+      }),
+    );
+    performanceService.fetchHeadwayOverviewStats.and.returnValue(of({}));
+    performanceService.fetchOnTimeOverviewStats.and.returnValue(
+      of({
+        completed: 0,
+        scheduled: 100,
+        incomplete: "{}",
+      } as PunctualityOverview),
+    );
+    performanceService.fetchServicePerformance.and.returnValue(of([]));
   });
 
   describe("Operator 1", () => {
-    it("should create", () => {
+    it("should create", async () => {
       spectator.setRouteParam("nocCode", "OP01");
 
-      expect(component).toBeTruthy();
+      await expect(component).toBeTruthy();
     });
 
     it("should show operator selector on service list page", () => {
@@ -120,11 +150,14 @@ describe("ViewOperatorComponent", () => {
     });
 
     it("should display no timetabled error message", () => {
-      onTimeService.fetchOnTimeStats.and.returnValue(
+      performanceService.fetchOverviewStats.and.returnValue(
         of({
-          completed: 0,
-          scheduled: 0,
-        } as PunctualityOverview),
+          onTime: {
+            completed: 0,
+            scheduled: 0,
+            incomplete: "{}",
+          } as PunctualityOverview,
+        }),
       );
 
       const nocCode = "OP01";
@@ -147,6 +180,7 @@ describe("ViewOperatorComponent", () => {
         of({
           completed: 0,
           scheduled: 100,
+          incomplete: "{}",
         } as PunctualityOverview),
       );
 
@@ -172,19 +206,18 @@ describe("ViewOperatorComponent", () => {
       spectator.detectChanges();
     });
 
-    it("should default to Timeline tab if no tab queryParam passed", () => {
-      expect(spectator.query(".on-time__otp-chart")).toBeTruthy();
-      expect(spectator.query(".on-time__dow-chart")).toBeFalsy();
+    it("should default to Timeline tab if no tab queryParam passed", async () => {
+      await expect(spectator.query(".on-time__otp-chart")).toBeTruthy();
+      await expect(spectator.query(".on-time__dow-chart")).toBeFalsy();
     });
 
-    it("should show tab that passed by queryParam", waitForAsync(() => {
+    it("should show tab that passed by queryParam", fakeAsync(async () => {
       spectator.setRouteQueryParam("tab", "day-of-week");
-      spectator.fixture.whenStable().then(() => {
-        spectator.detectChanges();
+      tick(1);
+      spectator.detectChanges();
 
-        expect(spectator.query(".on-time__dow-chart")).toBeTruthy();
-        expect(spectator.query(".on-time__otp-chart")).toBeFalsy();
-      });
+      await expect(spectator.query(".on-time__dow-chart")).toBeTruthy();
+      await expect(spectator.query(".on-time__otp-chart")).toBeFalsy();
     }));
   });
 });

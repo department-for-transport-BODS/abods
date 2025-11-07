@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { waitForAsync } from "@angular/core/testing";
+import { createServiceFactory } from "@ngneat/spectator";
 import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
 import {
   ApolloTestingController,
   ApolloTestingModule,
 } from "apollo-angular/testing";
-import { createServiceFactory } from "@ngneat/spectator";
 import {
   HeadwayFrequentServiceInfoDocument,
   HeadwayFrequentServicesDocument,
@@ -12,7 +14,6 @@ import {
 } from "../../generated/graphql";
 import { HeadwayParams, HeadwayService } from "./headway.service";
 import { PerformanceParams } from "./on-time.service";
-import { waitForAsync } from "@angular/core/testing";
 import objectContaining = jasmine.objectContaining;
 
 describe("HeadwayService", () => {
@@ -28,7 +29,7 @@ describe("HeadwayService", () => {
     controller = spectator.inject(ApolloTestingController);
   });
 
-  it("should query headway performance", () => {
+  it("should query headway performance", async () => {
     const params: HeadwayParams = {
       fromTimestamp: "2022-01-31T00:00:00",
       toTimestamp: "2022-02-04T23:59:59",
@@ -38,23 +39,23 @@ describe("HeadwayService", () => {
       },
     };
     spectator.service.fetchTimeSeries(params).subscribe((actual) => {
-      expect(actual).not.toBeNull();
-      expect(actual.length).toEqual(1);
-      expect(actual[0].ts).toEqual("2022-02-04T12:00:00");
-      expect(actual[0].actual).toEqual(90);
-      expect(actual[0].scheduled).toEqual(80);
-      expect(actual[0].excess).toEqual(10);
+      void expect(actual).not.toBeNull();
+      void expect(actual.length).toEqual(1);
+      void expect(actual[0].ts).toEqual("2022-02-04T12:00:00");
+      void expect(actual[0].actual).toEqual(90);
+      void expect(actual[0].scheduled).toEqual(80);
+      void expect(actual[0].excess).toEqual(10);
     });
 
     const op = controller.expectOne(HeadwayTimeSeriesDocument);
 
-    expect(op.operation.variables.params.fromTimestamp).toEqual(
+    await expect(op.operation.variables.params.fromTimestamp).toEqual(
       "2022-01-31T00:00:00",
     );
-    expect(op.operation.variables.params.toTimestamp).toEqual(
+    await expect(op.operation.variables.params.toTimestamp).toEqual(
       "2022-02-04T23:59:59",
     );
-    expect(op.operation.variables.params.filters).toEqual(
+    await expect(op.operation.variables.params.filters).toEqual(
       objectContaining({
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
@@ -79,7 +80,7 @@ describe("HeadwayService", () => {
     controller.verify();
   });
 
-  it("should query headway overview stats", () => {
+  it("should query headway overview stats", async () => {
     const params: HeadwayParams = {
       fromTimestamp: "2022-02-08T00:00:00",
       toTimestamp: "2022-03-07T23:59:59",
@@ -89,19 +90,19 @@ describe("HeadwayService", () => {
       },
     };
     spectator.service.fetchOverview(params).subscribe((actual) => {
-      expect(actual).not.toBeNull();
-      expect(actual.excess).toEqual(20);
+      void expect(actual).not.toBeNull();
+      void expect(actual.excess).toEqual(20);
     });
 
     const op = controller.expectOne(HeadwayOverviewDocument);
 
-    expect(op.operation.variables.params.fromTimestamp).toEqual(
+    await expect(op.operation.variables.params.fromTimestamp).toEqual(
       "2022-02-08T00:00:00",
     );
-    expect(op.operation.variables.params.toTimestamp).toEqual(
+    await expect(op.operation.variables.params.toTimestamp).toEqual(
       "2022-03-07T23:59:59",
     );
-    expect(op.operation.variables.params.filters).toEqual(
+    await expect(op.operation.variables.params.filters).toEqual(
       objectContaining({
         operatorIds: ["OP01"],
         lineIds: ["LN12345"],
@@ -123,7 +124,7 @@ describe("HeadwayService", () => {
     controller.verify();
   });
 
-  it("should fetch frequent services", () => {
+  it("should fetch frequent services", async () => {
     const params = {
       fromTimestamp: "2022-02-08T00:00:00",
       toTimestamp: "2022-03-07T23:59:59",
@@ -132,16 +133,20 @@ describe("HeadwayService", () => {
       },
     };
     spectator.service.fetchFrequentServices(params).subscribe((actual) => {
-      expect(actual).not.toBeNull();
-      expect(actual.length).toEqual(3);
-      expect(actual[0].serviceId).toEqual("LN12345");
+      void expect(actual).not.toBeNull();
+      void expect(actual.length).toEqual(3);
+      void expect(actual[0].serviceId).toEqual("LN12345");
     });
 
     const op = controller.expectOne(HeadwayFrequentServicesDocument);
 
-    expect(op.operation.variables.operatorId).toEqual("OP01");
-    expect(op.operation.variables.fromTimestamp).toEqual("2022-02-08T00:00:00");
-    expect(op.operation.variables.toTimestamp).toEqual("2022-03-07T23:59:59");
+    await expect(op.operation.variables.operatorId).toEqual("OP01");
+    await expect(op.operation.variables.fromTimestamp).toEqual(
+      "2022-02-08T00:00:00",
+    );
+    await expect(op.operation.variables.toTimestamp).toEqual(
+      "2022-03-07T23:59:59",
+    );
 
     op.flush({
       data: {
@@ -158,7 +163,7 @@ describe("HeadwayService", () => {
     controller.verify();
   });
 
-  it("should fetch frequent service info", () => {
+  it("should fetch frequent service info", async () => {
     const params = {
       fromTimestamp: "2022-02-08T00:00:00",
       toTimestamp: "2022-03-07T23:59:59",
@@ -168,19 +173,23 @@ describe("HeadwayService", () => {
       },
     };
     spectator.service.fetchFrequentServiceInfo(params).subscribe((actual) => {
-      expect(actual).not.toBeNull();
-      expect(actual.numHours).toEqual(85);
-      expect(actual.totalHours).toEqual(100);
+      void expect(actual).not.toBeNull();
+      void expect(actual.numHours).toEqual(85);
+      void expect(actual.totalHours).toEqual(100);
     });
 
     const op = controller.expectOne(HeadwayFrequentServiceInfoDocument);
 
-    expect(op.operation.variables.inputs.filters.operatorId).toEqual("OP01");
-    expect(op.operation.variables.inputs.filters.lineId).toEqual("LN12345");
-    expect(op.operation.variables.inputs.fromTimestamp).toEqual(
+    await expect(op.operation.variables.inputs.filters.operatorId).toEqual(
+      "OP01",
+    );
+    await expect(op.operation.variables.inputs.filters.lineId).toEqual(
+      "LN12345",
+    );
+    await expect(op.operation.variables.inputs.fromTimestamp).toEqual(
       "2022-02-08T00:00:00",
     );
-    expect(op.operation.variables.inputs.toTimestamp).toEqual(
+    await expect(op.operation.variables.inputs.toTimestamp).toEqual(
       "2022-03-07T23:59:59",
     );
 
@@ -196,7 +205,7 @@ describe("HeadwayService", () => {
   });
 
   // ABOD-487
-  it("should exclude unsupported properties", waitForAsync(() => {
+  it("should exclude unsupported properties", waitForAsync(async () => {
     const params: PerformanceParams = {
       fromTimestamp: "2022-01-31T00:00:00",
       toTimestamp: "2022-02-04T23:59:59",
@@ -208,15 +217,15 @@ describe("HeadwayService", () => {
       },
     };
     spectator.service.fetchTimeSeries(params).subscribe((actual) => {
-      expect(actual).not.toBeNull();
+      void expect(actual).not.toBeNull();
     });
 
     const op = controller.expectOne(HeadwayTimeSeriesDocument);
 
-    expect(
+    await expect(
       op.operation.variables.params.filters.timingPointsOnly,
     ).not.toBeDefined();
-    expect(
+    await expect(
       op.operation.variables.params.filters.adminAreaIds,
     ).not.toBeDefined();
 

@@ -1,10 +1,10 @@
-import { RouterTestingModule } from "@angular/router/testing";
+import { RouterModule } from "@angular/router";
+import { createComponentFactory, Spectator } from "@ngneat/spectator";
+import { GoogleTagManagerService } from "angular-google-tag-manager";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { AppComponent } from "./app.component";
 import { LayoutModule } from "./layout/layout.module";
 import { SharedModule } from "./shared/shared.module";
-import { createComponentFactory, Spectator } from "@ngneat/spectator";
-import { GoogleTagManagerService } from "angular-google-tag-manager";
 
 describe("AppComponent", () => {
   let spectator: Spectator<AppComponent>;
@@ -12,7 +12,7 @@ describe("AppComponent", () => {
   const createComponent = createComponentFactory({
     component: AppComponent,
     imports: [
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       SharedModule,
       LayoutModule,
       ApolloTestingModule,

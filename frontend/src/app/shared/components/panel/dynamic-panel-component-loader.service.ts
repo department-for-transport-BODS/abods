@@ -58,7 +58,9 @@ export class DynamicPanelComponentLoaderService implements OnDestroy {
   }
 
   destroyComponent() {
-    this.componentRef.destroy();
+    if (this.componentRef) {
+      this.componentRef.destroy();
+    }
   }
 
   getComponentInstance<T>(): ComponentRef<T> {

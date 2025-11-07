@@ -1,9 +1,9 @@
 import { createServiceFactory, SpectatorService } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { OnTimeService, TimeOfDayData } from "./on-time.service";
-import objectContaining = jasmine.objectContaining;
 import { ControlsComponent } from "./controls/controls.component";
+import { OnTimeService, TimeOfDayData } from "./on-time.service";
 import { OtpThresholdModalComponent } from "./otp-threshold-modal/otp-threshold-modal.component";
+import objectContaining = jasmine.objectContaining;
 
 const performance = (
   scheduledDepartures: number,
@@ -36,14 +36,14 @@ describe("OnTimeService", () => {
 
   beforeEach(() => (spectator = createService()));
 
-  it("should leave empty on-time performance histogram data empty", () => {
+  it("should leave empty on-time performance histogram data empty", async () => {
     const actual = spectator.service.fillDelayFrequencyGaps([]);
 
-    expect(actual.length).toEqual(0);
+    await expect(actual.length).toEqual(0);
   });
 
-  it("should fill gaps in on-time performance histogram", () => {
-    expect(spectator.service).toBeTruthy();
+  it("should fill gaps in on-time performance histogram", async () => {
+    await expect(spectator.service).toBeTruthy();
     const incompleteData = [
       { bucket: -5, frequency: 100 },
       { bucket: -3, frequency: 500 },
@@ -63,17 +63,17 @@ describe("OnTimeService", () => {
 
     const actual = spectator.service.fillDelayFrequencyGaps(incompleteData);
 
-    expect(actual.length).toEqual(21);
-    expect(actual).toContain({ bucket: -4, frequency: 0 });
-    expect(actual).toContain({ bucket: 7, frequency: 0 });
-    expect(actual).toContain({ bucket: 9, frequency: 0 });
-    expect(actual).toContain({ bucket: 10, frequency: 0 });
-    expect(actual).toContain({ bucket: 12, frequency: 0 });
-    expect(actual).toContain({ bucket: 13, frequency: 0 });
-    expect(actual).toContain({ bucket: 14, frequency: 0 });
+    await expect(actual.length).toEqual(21);
+    await expect(actual).toContain({ bucket: -4, frequency: 0 });
+    await expect(actual).toContain({ bucket: 7, frequency: 0 });
+    await expect(actual).toContain({ bucket: 9, frequency: 0 });
+    await expect(actual).toContain({ bucket: 10, frequency: 0 });
+    await expect(actual).toContain({ bucket: 12, frequency: 0 });
+    await expect(actual).toContain({ bucket: 13, frequency: 0 });
+    await expect(actual).toContain({ bucket: 14, frequency: 0 });
   });
 
-  it("should not fill gaps in complete on-time performance histogram data", () => {
+  it("should not fill gaps in complete on-time performance histogram data", async () => {
     const completeData = [
       { bucket: -5, frequency: 100 },
       { bucket: -4, frequency: 200 },
@@ -90,17 +90,17 @@ describe("OnTimeService", () => {
 
     const actual = spectator.service.fillDelayFrequencyGaps(completeData);
 
-    expect(actual.length).toEqual(11);
-    expect(actual).toEqual(completeData);
+    await expect(actual.length).toEqual(11);
+    await expect(actual).toEqual(completeData);
   });
 
-  it("should leave empty time-of-day-data empty", () => {
+  it("should leave empty time-of-day-data empty", async () => {
     const actual = spectator.service.fillTimeOfDayGaps([]);
 
-    expect(actual.length).toEqual(0);
+    await expect(actual.length).toEqual(0);
   });
 
-  it("should fill gaps in time-of-day punctuality data", () => {
+  it("should fill gaps in time-of-day punctuality data", async () => {
     const etc = {
       early: 100,
       onTime: 100,
@@ -131,7 +131,7 @@ describe("OnTimeService", () => {
 
     const actual = spectator.service.fillTimeOfDayGaps(incompleteData);
 
-    expect(actual.length).toEqual(24);
+    await expect(actual.length).toEqual(24);
     expect(actual).toContain(
       objectContaining({ timeOfDay: "01:00", noData: 1 }),
     );
@@ -161,27 +161,27 @@ describe("OnTimeService", () => {
     );
   });
 
-  it("should calculate sum and average total values", () => {
+  it("should calculate sum and average total values", async () => {
     const perf = performance(222, 200, 40, 10, 30, 60);
     const actual = OnTimeService.calculateOnTimePcts(perf);
 
-    expect(actual.early).toBe(10);
-    expect(actual.late).toBe(30);
-    expect(actual.onTime).toBe(60);
-    expect(actual.scheduledDepartures).toBe(222);
-    expect(actual.actualDepartures).toBe(200);
-    expect(actual.averageDelay).toBe(40);
+    await expect(actual.early).toBe(10);
+    await expect(actual.late).toBe(30);
+    await expect(actual.onTime).toBe(60);
+    await expect(actual.scheduledDepartures).toBe(222);
+    await expect(actual.actualDepartures).toBe(200);
+    await expect(actual.averageDelay).toBe(40);
   });
 
-  it("should cope with zeroes when calculating sum and average total values", () => {
+  it("should cope with zeroes when calculating sum and average total values", async () => {
     const perf = performance(0, 0, 0, 0, 0, 0);
     const actual = OnTimeService.calculateOnTimePcts(perf);
 
-    expect(actual.early).toBe(0);
-    expect(actual.late).toBe(0);
-    expect(actual.onTime).toBe(0);
-    expect(actual.scheduledDepartures).toBe(0);
-    expect(actual.actualDepartures).toBe(0);
-    expect(actual.averageDelay).toBe(0);
+    await expect(actual.early).toBe(0);
+    await expect(actual.late).toBe(0);
+    await expect(actual.onTime).toBe(0);
+    await expect(actual.scheduledDepartures).toBe(0);
+    await expect(actual.actualDepartures).toBe(0);
+    await expect(actual.averageDelay).toBe(0);
   });
 });

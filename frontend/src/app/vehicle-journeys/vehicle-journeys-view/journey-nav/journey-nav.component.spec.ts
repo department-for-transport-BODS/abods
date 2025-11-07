@@ -44,8 +44,17 @@ describe("JourneyNavComponent", () => {
         isCancelled: false,
       },
       {
+        groupId: "VJ002",
+        startTime: DateTime.fromISO("2022-08-01T09:15:00.000").toISO(),
+        operatorName: "OP01",
+        operatorNoc: "OP01",
+        serviceName: "SN1",
+        serviceNumber: "1",
+        isCancelled: false,
+      },
+      {
         groupId: "VJ003",
-        startTime: DateTime.fromISO("2022-08-01T09:05:00.000").toISO(),
+        startTime: DateTime.fromISO("2022-08-01T10:05:00.000").toISO(),
         operatorName: "OP01",
         operatorNoc: "OP01",
         serviceName: "SN1",
@@ -53,6 +62,7 @@ describe("JourneyNavComponent", () => {
         isCancelled: false,
       },
     ];
+    spectator.component.currentIndex = 1; // Pointing to VJ002
     spectator.detectChanges();
   });
 
@@ -62,29 +72,23 @@ describe("JourneyNavComponent", () => {
 
   it("should navigate to previous journey", fakeAsync(() => {
     spectator.router.initialNavigation();
-    spectator.router.navigateByUrl(
-      "/vehicle-journeys/VJ002?startTime=20220801T0855Z",
-    );
     tick();
-    spectator.click(byText("08:45"));
+    spectator.click(byText("09:45"));
     tick();
 
     expect(spectator.inject(Location).path()).toEqual(
-      "/vehicle-journeys/VJ001?startTime=20220801T0845Z",
+      "/vehicle-journeys/VJ001?startTime=2022-08-01T08:45:00.000Z",
     );
   }));
 
   it("should navigate to next journey", fakeAsync(() => {
     spectator.router.initialNavigation();
-    spectator.router.navigateByUrl(
-      "/vehicle-journeys/VJ002?startTime=20220801T0855Z",
-    );
     tick();
-    spectator.click(byText("09:05"));
+    spectator.click(byText("11:05"));
     tick();
 
     expect(spectator.inject(Location).path()).toEqual(
-      "/vehicle-journeys/VJ003?startTime=20220801T0905Z",
+      "/vehicle-journeys/VJ003?startTime=2022-08-01T10:05:00.000Z",
     );
   }));
 
