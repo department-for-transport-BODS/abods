@@ -85,10 +85,13 @@ describe("CookiePolicyService", () => {
   it("should set policy cookie for 1 year", () => {
     spectator.service.setAnalyticsPolicy(true, true);
 
-    expect(cookieService.set).toHaveBeenCalledWith(
-      COOKIE_POLICY_NAME,
+    const [name, value, expires] = cookieService.set.calls.mostRecent().args;
+    expect(name).toBe(COOKIE_POLICY_NAME);
+    expect(value).toBe(
       '{"analyticsEnabled":true,"version":1,"userSubmitted":true}',
-      { expires: DateTime.local().plus({ year: 1 }).toJSDate() },
+    );
+    expect((expires as Date).toISOString()).toEqual(
+      DateTime.local().plus({ year: 1 }).toUTC().toISO(),
     );
   });
 

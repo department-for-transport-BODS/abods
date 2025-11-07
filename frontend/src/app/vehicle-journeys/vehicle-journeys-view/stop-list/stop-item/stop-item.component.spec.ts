@@ -54,6 +54,7 @@ describe("StopItemComponent", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StopItemComponent);
     component = fixture.componentInstance;
+    component.stop = mockStop();
     fixture.detectChanges();
   });
 

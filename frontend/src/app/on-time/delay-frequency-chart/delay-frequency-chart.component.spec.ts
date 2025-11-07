@@ -1,10 +1,10 @@
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
+import { PerformanceCategories } from "src/app/dashboard/dashboard.types";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { OnTimeService } from "../on-time.service";
-import { DelayFrequencyChartComponent } from "./delay-frequency-chart.component";
 import {
   onTimeInputParams,
   onTimeInputParamsAlt,
@@ -12,7 +12,7 @@ import {
   onTimeInputParamsTimingPointFalse,
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
-import { PerformanceCategories } from "src/app/dashboard/dashboard.types";
+import { DelayFrequencyChartComponent } from "./delay-frequency-chart.component";
 
 describe("DelayFrequencyChartComponent", () => {
   let spectator: Spectator<DelayFrequencyChartComponent>;
@@ -31,10 +31,10 @@ describe("DelayFrequencyChartComponent", () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should request data", () => {
@@ -120,14 +120,14 @@ describe("DelayFrequencyChartComponent", () => {
     );
   });
 
-  it("should return correct category based on heuristic function", () => {
-    expect(spectator.component.heuristic(-2)).toEqual(
+  it("should return correct category based on heuristic function", async () => {
+    await expect(spectator.component.heuristic(-2)).toEqual(
       PerformanceCategories.Early,
     );
-    expect(spectator.component.heuristic(0)).toEqual(
+    await expect(spectator.component.heuristic(0)).toEqual(
       PerformanceCategories.OnTime,
     );
-    expect(spectator.component.heuristic(6)).toEqual(
+    await expect(spectator.component.heuristic(6)).toEqual(
       PerformanceCategories.Late,
     );
   });

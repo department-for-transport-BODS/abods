@@ -6,7 +6,7 @@ import { SharedModule } from "src/app/shared/shared.module";
 import { Granularity } from "src/generated/graphql";
 import { OnTimeService } from "../on-time.service";
 
-import { TimeSeriesChartComponent } from "./time-series-chart.component";
+import { DateTime } from "luxon";
 import {
   onTimeInputParams,
   onTimeInputParamsAlt,
@@ -14,7 +14,7 @@ import {
   onTimeInputParamsTimingPointFalse,
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
-import { DateTime } from "luxon";
+import { TimeSeriesChartComponent } from "./time-series-chart.component";
 
 describe("TimeSeriesChartComponent", () => {
   let spectator: Spectator<TimeSeriesChartComponent>;
@@ -33,10 +33,10 @@ describe("TimeSeriesChartComponent", () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should request data", () => {

@@ -5,17 +5,17 @@ import {
   SpectatorRouting,
 } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
-import { PerformanceFiltersInputType } from "src/generated/graphql";
+import { DateTime } from "luxon";
+import { MatchType, PerformanceFiltersInputType } from "src/generated/graphql";
 import { dateTimeEqualityMatcher } from "src/test-support/equality";
-import { ControlsComponent } from "./controls.component";
-import { FiltersComponent } from "../filters/filters.component";
+import { LayoutModule } from "../../layout/layout.module";
 import { PanelService } from "../../shared/components/panel/panel.service";
 import { SharedModule } from "../../shared/shared.module";
-import { LayoutModule } from "../../layout/layout.module";
 import { ChartNoDataWrapperComponent } from "../chart-no-data-wrapper/chart-no-data-wrapper.component";
-import { DateTime } from "luxon";
-import objectContaining = jasmine.objectContaining;
 import { FilterChipsComponent } from "../filter-chips/filter-chips.component";
+import { FiltersComponent } from "../filters/filters.component";
+import { ControlsComponent } from "./controls.component";
+import objectContaining = jasmine.objectContaining;
 
 describe("ControlsComponent", () => {
   let spectator: SpectatorRouting<ControlsComponent>;
@@ -37,7 +37,6 @@ describe("ControlsComponent", () => {
       ApolloTestingModule,
     ],
     detectChanges: false,
-    stubsEnabled: false,
   });
 
   beforeEach(() => {
@@ -48,25 +47,26 @@ describe("ControlsComponent", () => {
     spectator = createComponent();
     component = spectator.component;
     panelService = spectator.inject(PanelService);
+
+    (spectator.router.navigate as jasmine.Spy).and.resolveTo(true);
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
-  it('should default to "timing points"', () => {
+  it('should default to "timing points"', async () => {
     let filters: PerformanceFiltersInputType | undefined;
 
     component.filtersSubject.subscribe((f) => (filters = f));
 
     spectator.setRouteParam("nocCode", "OP01");
 
-    expect(filters).toBeDefined();
+    await expect(filters).toBeDefined();
     expect(filters?.timingPointsOnly).toBeTrue();
   });
 
   it("should allow the user to switch between all stops and timing points only", () => {
-    spyOn(spectator.router, "navigate");
     spectator.setRouteParam("nocCode", "OP01");
 
     spectator.click(byText("All stops"));
@@ -78,7 +78,7 @@ describe("ControlsComponent", () => {
     });
   });
 
-  it("it should apply timing points filter from query string", () => {
+  it("it should apply timing points filter from query string", async () => {
     const spy = spyOn(component.params, "emit");
 
     spectator.setRouteParam("nocCode", "OP01");
@@ -87,12 +87,12 @@ describe("ControlsComponent", () => {
     spectator.detectChanges();
 
     // eslint-disable-next-line jasmine/prefer-toHaveBeenCalledWith
-    expect(spy).toHaveBeenCalled();
+    await expect(spy).toHaveBeenCalled();
 
     const actual = spy.calls.mostRecent().args[0];
 
-    expect(actual).toBeDefined();
-    expect(actual?.filters?.timingPointsOnly).toBeUndefined();
+    await expect(actual).toBeDefined();
+    await expect(actual?.filters?.timingPointsOnly).toBeUndefined();
   });
 
   it("should allow you to open the more filters panel", () => {
@@ -105,8 +105,6 @@ describe("ControlsComponent", () => {
   });
 
   it("should apply more filters correctly to query string", () => {
-    spyOn(spectator.router, "navigate");
-
     spectator.setRouteParam("nocCode", "OP01");
 
     const newFilters: PerformanceFiltersInputType = {
@@ -187,6 +185,7 @@ describe("ControlsComponent", () => {
       filters: {
         operatorIds: [operatorId],
         timingPointsOnly: true,
+        matchType: MatchType.Evidenced,
       },
     });
   });

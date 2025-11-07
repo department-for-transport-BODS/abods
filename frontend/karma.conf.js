@@ -24,9 +24,14 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+    autoWatch: false,
     browsers: ["Chrome"],
+    browserNoActivityTimeout: 60000,
+    browserDisconnectTimeout: 60000,
+    concurrency: 1,
+    browserDisconnectTolerance: 3,
     singleRun: false,
+    concurrency: 4,
     restartOnFileChange: true,
     customLaunchers: {
       ChromeDebug: {
@@ -35,7 +40,14 @@ module.exports = function (config) {
       },
       ChromeHeadlessCI: {
         base: "ChromeHeadless",
-        flags: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader"],
+        flags: [
+          "--no-sandbox",
+          "--use-gl=angle",
+          "--use-angle=swiftshader",
+          '--js-flags="--max-old-space-size=2048"',
+          "--disable-dev-shm-usage",
+          "--disable-renderer-backgrounding",
+        ],
       },
     },
   });

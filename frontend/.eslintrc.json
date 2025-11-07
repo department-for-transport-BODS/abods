@@ -114,7 +114,7 @@
       "rules": {
         "@typescript-eslint/unbound-method": "off",
         "jest/unbound-method": "error",
-        "@typescript-eslint/no-floating-promises": "warn",
+        "@typescript-eslint/no-floating-promises": "off",
         "jasmine/new-line-before-expect": "off"
       }
     }

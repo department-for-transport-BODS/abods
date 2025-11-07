@@ -1,10 +1,10 @@
 import { createServiceFactory } from "@ngneat/spectator";
+import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
+import { Direction } from "../../generated/graphql";
 import { StopPerformance } from "./on-time.service";
 import { StopPerformanceService } from "./stop-performance.service";
-import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
 import { ServicePattern } from "./transit-model.service";
 import objectContaining = jasmine.objectContaining;
-import { Direction } from "../../generated/graphql";
 
 const stopPerf = (
   early: number,
@@ -52,7 +52,7 @@ describe("StopPerformanceService", () => {
 
   beforeEach(() => (spectator = serviceFactory()));
 
-  it("should merge OTP and transit model data", () => {
+  it("should merge OTP and transit model data", async () => {
     const otpModel: StopPerformance[] = [
       stopPerf(2, 1, 3, "ST00001"),
       stopPerf(4, 5, 6, "ST00002"),
@@ -73,12 +73,12 @@ describe("StopPerformanceService", () => {
 
     const actual = spectator.service.mergeStops(otpModel, transitModel);
 
-    expect(actual?.length).toBeDefined();
+    await expect(actual?.length).toBeDefined();
 
     const stop1 = actual.find((stop) => stop.stopId === "ST00001");
 
-    expect(stop1).toBeDefined();
-    expect(stop1).toEqual(
+    await expect(stop1).toBeDefined();
+    await expect(stop1).toEqual(
       objectContaining({
         stopId: "ST00001",
         lat: 50,
@@ -90,13 +90,13 @@ describe("StopPerformanceService", () => {
 
     const unknownStop = actual.find((stop) => stop.stopId === "ST09999");
 
-    expect(unknownStop).toBeDefined();
-    expect(unknownStop).toEqual(
+    await expect(unknownStop).toBeDefined();
+    await expect(unknownStop).toEqual(
       objectContaining({ stopId: "ST09999", lat: 54, lon: 0, noData: true }),
     );
   });
 
-  it("should produce normalized values", () => {
+  it("should produce normalized values", async () => {
     const stopPerformance: StopPerformance[] = [
       stopPerf(2, 1, 7),
       stopPerf(1, 7, 2),
@@ -105,15 +105,15 @@ describe("StopPerformanceService", () => {
 
     const actual = spectator.service.normalize(stopPerformance);
 
-    expect(actual).toBeDefined();
-    expect(actual.length).toEqual(3);
-    expect(actual[0].earlyNorm).toEqual(0);
-    expect(actual[1].earlyNorm).toBeLessThan(0);
-    expect(actual[2].earlyNorm).toBeGreaterThan(0);
-    expect(actual[0].lateNorm).toBeGreaterThan(1);
+    await expect(actual).toBeDefined();
+    await expect(actual.length).toEqual(3);
+    await expect(actual[0].earlyNorm).toEqual(0);
+    await expect(actual[1].earlyNorm).toBeLessThan(0);
+    await expect(actual[2].earlyNorm).toBeGreaterThan(0);
+    await expect(actual[0].lateNorm).toBeGreaterThan(1);
   });
 
-  it("should not produce normalized value of NaN when there is zero total lateness", () => {
+  it("should not produce normalized value of NaN when there is zero total lateness", async () => {
     const stopPerformance: StopPerformance[] = [
       stopPerf(3, 7, 0),
       stopPerf(1, 9, 0),
@@ -122,14 +122,14 @@ describe("StopPerformanceService", () => {
 
     const actual = spectator.service.normalize(stopPerformance);
 
-    expect(actual).toBeDefined();
-    expect(actual.length).toEqual(3);
-    expect(actual[0].lateNorm).not.toBeNaN();
-    expect(actual[1].lateNorm).not.toBeNaN();
-    expect(actual[2].lateNorm).not.toBeNaN();
+    await expect(actual).toBeDefined();
+    await expect(actual.length).toEqual(3);
+    await expect(actual[0].lateNorm).not.toBeNaN();
+    await expect(actual[1].lateNorm).not.toBeNaN();
+    await expect(actual[2].lateNorm).not.toBeNaN();
   });
 
-  it("should not produce normalized value of NaN when a stop is 100% early or late", () => {
+  it("should not produce normalized value of NaN when a stop is 100% early or late", async () => {
     const stopPerformance: StopPerformance[] = [
       stopPerf(3, 0, 0),
       stopPerf(0, 0, 2),
@@ -137,13 +137,13 @@ describe("StopPerformanceService", () => {
 
     const actual = spectator.service.normalize(stopPerformance);
 
-    expect(actual).toBeDefined();
-    expect(actual.length).toEqual(2);
-    expect(actual[0].earlyNorm).not.toBeNaN();
-    expect(actual[1].lateNorm).not.toBeNaN();
+    await expect(actual).toBeDefined();
+    await expect(actual.length).toEqual(2);
+    await expect(actual[0].earlyNorm).not.toBeNaN();
+    await expect(actual[1].lateNorm).not.toBeNaN();
   });
 
-  it("should tolerate zeroes in on-time performance data", () => {
+  it("should tolerate zeroes in on-time performance data", async () => {
     const stopPerformance: StopPerformance[] = [
       stopPerf(1, 0, 0, "ST00001"),
       stopPerf(0, 1, 0, "ST00002"),
@@ -163,8 +163,8 @@ describe("StopPerformanceService", () => {
 
     const actual = spectator.service.mergeStops(stopPerformance, transitModel);
 
-    expect(actual).toBeDefined();
-    expect(actual.length).toEqual(3);
+    await expect(actual).toBeDefined();
+    await expect(actual.length).toEqual(3);
     expect(actual[0].noData).toBeFalse();
     expect(actual[1].noData).toBeFalse();
     expect(actual[2].noData).toBeFalse();

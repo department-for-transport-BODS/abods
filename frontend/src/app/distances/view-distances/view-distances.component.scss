@@ -13,30 +13,6 @@
   gap: govuk-spacing(1);
   height: 70px;
 
-  //height: 80px;
-  // display: flex;
-  // // grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr) minmax(
-  // //     0,
-  // //     8fr
-  // //   );
-  // flex-direction: row;
-  // gap: govuk-spacing(2);
-
-  // &__org {
-  //   flex-grow: 7
-  // }
-
-  // &__date {
-  //   min-width: 270px
-  // }
-  // &__operator {
-  //   flex-grow: 8
-  // }
-
-  // &__split {
-  //   flex-grow: 1
-  // }
-
   ::ng-deep .ng-select {
     ::ng-deep .ng-select-container {
       display: flex;

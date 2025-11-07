@@ -18,25 +18,25 @@ describe("OtpThresholdFormService", () => {
     service = TestBed.inject(OtpThresholdDefaultsService);
   });
 
-  it("should be created", () => {
-    expect(service).toBeTruthy();
+  it("should be created", async () => {
+    await expect(service).toBeTruthy();
   });
 
-  it("should return deafults from config service", () => {
-    expect(service.early).toEqual(1);
-    expect(service.late).toEqual(6);
+  it("should return deafults from config service", async () => {
+    await expect(service.early).toEqual(1);
+    await expect(service.late).toEqual(6);
   });
 
-  it("should reset all to false", () => {
+  it("should reset all to false", async () => {
     service.early = 10;
     service.late = 20;
 
-    expect(service.early).toEqual(10);
-    expect(service.late).toEqual(20);
+    await expect(service.early).toEqual(10);
+    await expect(service.late).toEqual(20);
 
     service.resetAll();
 
-    expect(service.early).toEqual(1);
-    expect(service.late).toEqual(6);
+    await expect(service.early).toEqual(1);
+    await expect(service.late).toEqual(6);
   });
 });

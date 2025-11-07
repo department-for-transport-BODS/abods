@@ -19,6 +19,7 @@ describe("DateRangeControlsComponent", () => {
   const createComponent = createHostFactory({
     component: DateRangeControlsComponent,
     imports: [FormsModule, SharedModule],
+    providers: [provideHttpClient()],
   });
 
   beforeEach(() => {
@@ -35,17 +36,17 @@ describe("DateRangeControlsComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
-    spectator.detectChanges();
+  it("should create", async () => {
+    spectator.fixture.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should allow valid dates to be applied", () => {
     const fromToValue = spyOn(component.fromToChange, "emit");
     const closeControls = spyOn(component.closeControls, "emit");
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     spectator.click(
       byText("4", {
@@ -63,7 +64,7 @@ describe("DateRangeControlsComponent", () => {
 
     spectator.click(byText("Apply"));
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     expect(closeControls).toHaveBeenCalledWith();
     expect(fromToValue).toHaveBeenCalledWith(
@@ -75,25 +76,25 @@ describe("DateRangeControlsComponent", () => {
     );
   });
 
-  it("should not allow no dates to be applied", () => {
+  it("should not allow no dates to be applied", async () => {
     const fromToValue = spyOn(component.fromToChange, "emit");
     const closeControls = spyOn(component.closeControls, "emit");
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     spectator.click(byText("Apply"));
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
-    expect(closeControls).not.toHaveBeenCalled();
-    expect(fromToValue).not.toHaveBeenCalled();
+    await expect(closeControls).not.toHaveBeenCalled();
+    await expect(fromToValue).not.toHaveBeenCalled();
   });
 
   it("should allow a single date to be applied", () => {
     const fromToValue = spyOn(component.fromToChange, "emit");
     const closeControls = spyOn(component.closeControls, "emit");
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     spectator.click(
       byText("4", {
@@ -104,7 +105,7 @@ describe("DateRangeControlsComponent", () => {
 
     spectator.click(byText("Apply"));
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     expect(closeControls).toHaveBeenCalledWith();
     expect(fromToValue).toHaveBeenCalledWith(
@@ -116,11 +117,11 @@ describe("DateRangeControlsComponent", () => {
     );
   });
 
-  it("should not emit dates if cancelled", () => {
+  it("should not emit dates if cancelled", async () => {
     const fromToValue = spyOn(component.fromToChange, "emit");
     const closeControls = spyOn(component.closeControls, "emit");
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     spectator.click(
       byText("4", {
@@ -138,25 +139,25 @@ describe("DateRangeControlsComponent", () => {
 
     spectator.click(byText("Cancel"));
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     expect(closeControls).toHaveBeenCalledWith();
-    expect(fromToValue).not.toHaveBeenCalled();
+    await expect(fromToValue).not.toHaveBeenCalled();
   });
 
-  it("should not allow an invalid date to be applied DRA-816", () => {
+  it("should not allow an invalid date to be applied DRA-816", async () => {
     const fromToValue = spyOn(component.fromToChange, "emit");
     const closeControls = spyOn(component.closeControls, "emit");
 
     component.start = DateTime.fromISO("2021-02-01T00:00:00.000Z");
     component.end = DateTime.fromISO("Invalid date");
 
-    spectator.detectChanges();
+    spectator.fixture.detectChanges();
 
     spectator.click(byText("Apply"));
 
-    expect(closeControls).not.toHaveBeenCalled();
-    expect(fromToValue).not.toHaveBeenCalled();
+    await expect(closeControls).not.toHaveBeenCalled();
+    await expect(fromToValue).not.toHaveBeenCalled();
   });
 });
 
@@ -175,6 +176,7 @@ describe("DateRangeControlsComponent (Angular)", () => {
       ],
     });
     fixture = TestBed.createComponent(DateRangeControlsComponent);
+    fixture.componentInstance.fromTo = null;
   });
 
   it("should handle dates manually typed in the wrong order DRA-931", () => {

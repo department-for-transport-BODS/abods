@@ -22,6 +22,8 @@ import {
   filter,
   finalize,
   map,
+  pairwise,
+  skip,
   startWith,
   take,
   takeUntil,
@@ -132,14 +134,12 @@ export class VehicleJourneysSearchComponent
   ngOnInit(): void {
     this.date.valueChanges
       .pipe(
+        skip(1),
         distinctUntilChanged((a: DateTime, b: DateTime) => a.equals(b)),
-        map((date) =>
-          date.toUTC().toISO({ format: "basic", suppressSeconds: true }),
-        ),
+        map((date) => date.toISODate()),
         tap(() => {
           if (this.operator.value) {
             this.servicesLoading = true;
-            this.service.reset();
           }
         }),
         takeUntil(this.destroy$),
@@ -163,21 +163,25 @@ export class VehicleJourneysSearchComponent
           } else {
             this.service.disable();
           }
-          this.service.reset();
         }),
         takeUntil(this.destroy$),
       )
       .subscribe((operator) => {
         this.router
           .navigate([], {
-            queryParams: { operator: operator, service: null },
+            queryParams: { operator: operator },
             queryParamsHandling: "merge",
           })
           .catch(console.log);
       });
 
     this.service.valueChanges
-      .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
+      .pipe(
+        skip(1),
+        distinctUntilChanged(),
+        debounceTime(100),
+        takeUntil(this.destroy$),
+      )
       .subscribe((service) => {
         this.router
           .navigate([], {
@@ -197,30 +201,49 @@ export class VehicleJourneysSearchComponent
       .subscribe((date) => this.date.setValue(date));
 
     const service$ = this.route.queryParamMap.pipe(
+      map((queryParams) => queryParams.get("service")),
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get("service")!),
       takeUntil(this.destroy$),
     );
 
     const date$: Observable<string> = this.route.queryParamMap.pipe(
-      distinctUntilChanged(),
       map((queryParams) => queryParams.get("date")!),
-      takeUntil(this.destroy$),
-    );
-
-    const operator$: Observable<string> = this.route.queryParamMap.pipe(
       distinctUntilChanged(),
-      map((queryParams) => queryParams.get("operator")!),
       takeUntil(this.destroy$),
     );
-    operator$.subscribe((operator) => this.operator.setValue(operator));
 
-    combineLatest({ operator: operator$, service: service$ })
+    const operator$: Observable<string | null> = this.route.queryParamMap.pipe(
+      map((queryParams) => queryParams.get("operator")),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$),
+    );
+    operator$.subscribe((operator) => {
+      if (!operator) this.operator.reset();
+      this.operator.setValue(operator!);
+    });
+
+    combineLatest({ date: date$, operator: operator$, service: service$ })
       .pipe(
         filter(({ operator }) => operator !== null),
+        startWith({ date: null, operator: null, service: null }),
+        pairwise(),
         takeUntil(this.destroy$),
       )
-      .subscribe(({ service }) => this.service.setValue(service));
+      .subscribe(([prev, curr]) => {
+        if (!curr.service || (prev.date && prev.date !== curr.date)) {
+          this.service.reset();
+          return;
+        }
+        if (prev.operator !== curr.operator) {
+          if (prev.service === curr.service) {
+            this.service.reset();
+            return;
+          }
+          this.service.setValue(curr.service);
+          return;
+        }
+        this.service.setValue(curr.service);
+      });
 
     this.operators$ = this.operatorInputTerm$.pipe(
       startWith(""),
@@ -241,7 +264,7 @@ export class VehicleJourneysSearchComponent
         },
       ),
       switchMap(([operatorId, _]) =>
-        this.operatorService.fetchLines(operatorId, this.date.value).pipe(
+        this.operatorService.fetchLines(operatorId!, this.date.value).pipe(
           take(1),
           startWith([]),
           finalize(() => (this.servicesLoading = false)),
@@ -260,10 +283,8 @@ export class VehicleJourneysSearchComponent
           this.journeysLoading = true;
         }),
         debounceTime(200),
+        filter(({ date, service }) => !!date?.isValid && !!service),
         switchMap(({ date, service }) => {
-          if (!date?.isValid || !service) {
-            return of([]);
-          }
           return this.vehicleJourneysSearchService
             .fetchDayJourneys(date.toISO(), service)
             .pipe(
@@ -277,7 +298,7 @@ export class VehicleJourneysSearchComponent
         takeUntil(this.destroy$),
       )
       .subscribe((journeys) => {
-        this.vehicleJourneys = journeys;
+        this.vehicleJourneys = journeys as Journey[];
         this.journeysLoading = false;
       });
   }

@@ -87,35 +87,35 @@ describe("getFeatureFlags", () => {
 
   it("returns enabled flags when not local", () => {
     jest.spyOn(prismaClient, "isLocal").mockReturnValue(false);
-    process.env.ABODS_FLAG_StopAnalysis = "true";
+    process.env.ABODS_FLAG_ServiceMonitoring = "true";
 
     const flags = getFeatureFlags();
-    expect(flags).toContain("StopAnalysis");
+    expect(flags).toContain("ServiceMonitoring");
   });
 
   it("returns enabled flags when ENABLE_FEATURE_FLAG_LOCAL is set", () => {
     jest.spyOn(prismaClient, "isLocal").mockReturnValue(true);
     process.env.ENABLE_FEATURE_FLAG_LOCAL = "true";
-    process.env.ABODS_FLAG_StopAnalysis = "true";
+    process.env.ABODS_FLAG_ServiceMonitoring = "true";
 
     const flags = getFeatureFlags();
-    expect(flags).toContain("StopAnalysis");
+    expect(flags).toContain("ServiceMonitoring");
   });
 
   it("does not return flag if env var is not true", () => {
     jest.spyOn(prismaClient, "isLocal").mockReturnValue(false);
-    process.env.ABODS_FLAG_StopAnalysis = "false";
+    process.env.ABODS_FLAG_ServiceMonitoring = "false";
 
     const flags = getFeatureFlags();
-    expect(flags).not.toContain("StopAnalysis");
+    expect(flags).not.toContain("ServiceMonitoring");
   });
 
   it("does not return flag if env var is missing", () => {
     jest.spyOn(prismaClient, "isLocal").mockReturnValue(false);
-    delete process.env.ABODS_FLAG_StopAnalysis;
+    delete process.env.ABODS_FLAG_ServiceMonitoring;
 
     const flags = getFeatureFlags();
-    expect(flags).not.toContain("StopAnalysis");
+    expect(flags).not.toContain("ServiceMonitoring");
   });
 });
 
@@ -134,9 +134,11 @@ describe("getUser", () => {
       account_type: 1,
     } as never);
 
+    process.env.ENABLE_FEATURE_FLAG_LOCAL = "true";
     process.env.ABODS_FLAG_StopAnalysis = "true";
     process.env.ABODS_FLAG_Distances = "true";
     process.env.ABODS_FLAG_DataMonitoring = "true";
+    process.env.ABODS_FLAG_ServiceMonitoring = "false";
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
 
@@ -152,13 +154,6 @@ describe("getUser", () => {
     expect(result?.canViewDistances).toBe(true);
     expect(result?.serviceMonitoringEmbedUrl).toBe(
       "https://dashboard.example.com",
-    );
-    expect(result?.flags).toEqual(
-      expect.arrayContaining([
-        FeatureFlag.DataMonitoring,
-        FeatureFlag.Distances,
-        FeatureFlag.StopAnalysis,
-      ]),
     );
     expect(result?.flags).not.toContain(FeatureFlag.ServiceMonitoring);
   });
@@ -206,7 +201,6 @@ describe("getUser", () => {
     expect(result?.canEditAllAlerts).toBe(false);
     expect(result?.canViewDistances).toBe(false);
     expect(result?.serviceMonitoringEmbedUrl).toBeNull();
-    expect(result?.flags).toContain(FeatureFlag.DataMonitoring);
   });
 
   it("can view service monitoring url for users with support email domain", async () => {

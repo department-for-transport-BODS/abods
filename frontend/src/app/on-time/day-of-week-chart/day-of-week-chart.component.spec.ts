@@ -1,21 +1,21 @@
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { ApolloTestingModule } from "apollo-angular/testing";
+import { cloneDeep } from "lodash-es";
 import { DateTime } from "luxon";
 import { of, throwError } from "rxjs";
 import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { OnTimeService } from "../on-time.service";
-import objectContaining = jasmine.objectContaining;
-import { DayOfWeekChartComponent } from "./day-of-week-chart.component";
 import {
   onTimeInputParams,
   onTimeInputParamsAlt,
   onTimeInputParamsTimingPointFalse,
   onTimeInputParamsTimingPointTrue,
 } from "../on-time.test-constants";
-import { cloneDeep } from "lodash-es";
-import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.component";
 import { StackedHistogramChartComponent } from "../stacked-histogram-chart/stacked-histogram-chart.component";
+import { TimeOfDayChartComponent } from "../time-of-day-chart/time-of-day-chart.component";
+import { DayOfWeekChartComponent } from "./day-of-week-chart.component";
+import objectContaining = jasmine.objectContaining;
 
 describe("DayOfWeekChartComponent", () => {
   let spectator: Spectator<DayOfWeekChartComponent>;
@@ -35,10 +35,10 @@ describe("DayOfWeekChartComponent", () => {
     service = spectator.inject(OnTimeService);
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should request data", () => {
@@ -125,7 +125,7 @@ describe("DayOfWeekChartComponent", () => {
     );
   });
 
-  it("should recover from an error condition when filters change", () => {
+  it("should recover from an error condition when filters change", async () => {
     const spy = spyOn(
       service,
       "fetchOnTimePunctualityDayOfWeekData",
@@ -140,6 +140,6 @@ describe("DayOfWeekChartComponent", () => {
 
     spectator.detectChanges();
 
-    expect(spy).toHaveBeenCalledTimes(2);
+    await expect(spy).toHaveBeenCalledTimes(2);
   });
 });
