@@ -1,7 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { StatusComponent } from "./status.component";
-import { SvgIconRegistryService } from "angular-svg-icon";
+import {
+  AngularSvgIconModule,
+  SvgIconRegistryService,
+  SvgLoader,
+} from "angular-svg-icon";
+import { of } from "rxjs";
 
 describe("StatusComponent", () => {
   let component: StatusComponent;
@@ -10,7 +15,11 @@ describe("StatusComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [StatusComponent],
-      imports: [SvgIconRegistryService],
+      imports: [AngularSvgIconModule],
+      providers: [
+        SvgIconRegistryService,
+        { provide: SvgLoader, useValue: { getSvg: () => of("") } }, // simple mock
+      ],
     }).compileComponents();
   });
 

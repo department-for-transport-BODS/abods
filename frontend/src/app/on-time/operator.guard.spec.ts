@@ -3,15 +3,15 @@ import {
   ActivatedRouteSnapshot,
   convertToParamMap,
   Router,
+  RouterModule,
   UrlTree,
 } from "@angular/router";
-import { RouterTestingModule } from "@angular/router/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { of } from "rxjs";
 import { OperatorService } from "../shared/services/operator.service";
 
-import { OperatorGuard } from "./operator.guard";
 import { OperatorType } from "../../generated/graphql";
+import { OperatorGuard } from "./operator.guard";
 
 describe("OperatorGuard", () => {
   let guard: OperatorGuard;
@@ -20,7 +20,7 @@ describe("OperatorGuard", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ApolloTestingModule, RouterTestingModule],
+      imports: [ApolloTestingModule, RouterModule.forRoot([])],
       providers: [
         {
           provide: OperatorService,
@@ -41,8 +41,8 @@ describe("OperatorGuard", () => {
     router = TestBed.inject(Router);
   });
 
-  it("should be created", () => {
-    expect(guard).toBeTruthy();
+  it("should be created", async () => {
+    await expect(guard).toBeTruthy();
   });
 
   it("should return true if organisation can access operator", () => {
@@ -74,7 +74,7 @@ describe("OperatorGuard", () => {
         paramMap: convertToParamMap({ nocCode: "ABC" }),
       } as ActivatedRouteSnapshot)
       .subscribe((value) => {
-        expect(value.toString()).toEqual("on-time/operator-not-found");
+        void expect(value.toString()).toEqual("on-time/operator-not-found");
       });
   });
 });

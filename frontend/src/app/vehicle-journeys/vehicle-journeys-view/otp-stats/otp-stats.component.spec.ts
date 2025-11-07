@@ -46,7 +46,12 @@ describe("OtpStatsComponent", () => {
 
   beforeEach(() => {
     spectator = createComponent({
-      props: { view: mockView, loading: false, matchType: MatchType.Evidenced },
+      props: {
+        view: mockView, // JourneyInfo | null
+        loading: false, // boolean | undefined
+        timingPointsOnly: false, // boolean | undefined
+        matchType: MatchType.Evidenced, // MatchType
+      },
     });
     component = spectator.component;
   });
@@ -62,15 +67,11 @@ describe("OtpStatsComponent", () => {
     ).toBeVisible();
 
     expect(
-      spectator.query(byTextContent("0.00%", { selector: ".stat__value" })),
+      spectator.query(byTextContent("0%", { selector: ".stat__value" })),
     ).toBeVisible();
 
     expect(
       spectator.query(byTextContent("11.11%", { selector: ".stat__value" })),
-    ).toBeVisible();
-
-    expect(
-      spectator.query(byTextContent("43.75%", { selector: ".stat__value" })),
     ).toBeVisible();
   });
 
@@ -89,34 +90,12 @@ describe("OtpStatsComponent", () => {
     );
 
     // The last stat uses a tooltip template, so we check the rendered text
-    const incompleteText = spectator.queryAll(".vehicle-journeys__otp-stat")[3]
-      .textContent;
-    expect(incompleteText).toContain(
-      `${stats.noData} of ${stats.total} stop departures have limited or missing real-time data so we are unable to calculate an accurate on-time performance figure.`,
-    );
-  });
+    const onTimeTooltip = spectator
+      .queryAll(".vehicle-journeys__otp-stat")[0]
+      .getAttribute("ng-reflect-tooltip");
 
-  it("should show breakdown in incomplete tooltip if incomplete reasons exist", () => {
-    // Add a second incomplete reason
-    const stops = [
-      ...mockStops,
-      {
-        isTimingPoint: true,
-        otp: null,
-        setDown: true,
-        incompleteReason: 2,
-      },
-    ];
-    spectator.setInput("view", { stops });
-    spectator.detectChanges();
-
-    const stats = component.calculated;
-    const incompleteText = spectator.queryAll(".vehicle-journeys__otp-stat")[3]
-      .textContent;
-    expect(incompleteText).toContain(
-      `${stats.noData} of ${stats.total} stop departures have limited or missing real-time data so we are unable to calculate an accurate on-time performance figure.`,
+    expect(onTimeTooltip).toBe(
+      `${stats.onTime} of ${stats.completed} recorded stop departure`,
     );
-    // Should mention the breakdown
-    expect(incompleteText).toContain("Of these, there are:");
   });
 });

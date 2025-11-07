@@ -1,6 +1,5 @@
 import { fakeAsync, flush, tick } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { RouterTestingModule } from "@angular/router/testing";
 import { byLabel, createComponentFactory, Spectator } from "@ngneat/spectator";
 import { AgGridModule } from "ag-grid-angular";
 import { BehaviorSubject } from "rxjs";
@@ -8,7 +7,10 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 
 import { CommonModule, PercentPipe } from "@angular/common";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { RouterModule } from "@angular/router";
+import { SvgIconRegistryService } from "angular-svg-icon";
 import { ApolloTestingModule } from "apollo-angular/testing";
 import { OnTimeModule } from "../on-time.module";
 import { OnTimeService } from "../on-time.service";
@@ -18,6 +20,7 @@ import {
   PerformanceService,
 } from "../performance.service";
 import { ServiceGridComponent } from "./service-grid.component";
+import { Direction } from "../../../generated/graphql";
 
 describe("ServiceGridComponent", () => {
   let spectator: Spectator<ServiceGridComponent>;
@@ -27,18 +30,18 @@ describe("ServiceGridComponent", () => {
 
   const createComponent = createComponentFactory({
     component: ServiceGridComponent,
-    providers: [PercentPipe],
+    providers: [PercentPipe, provideHttpClient(), provideHttpClientTesting()],
     imports: [
       SharedModule,
       LayoutModule,
       OnTimeModule,
-      RouterTestingModule,
+      RouterModule.forRoot([]),
       CommonModule,
       FormsModule,
       AgGridModule,
-      HttpClientTestingModule,
       ApolloTestingModule,
     ],
+    mocks: [SvgIconRegistryService],
     detectChanges: false,
   });
 
@@ -95,7 +98,7 @@ describe("ServiceGridComponent", () => {
     );
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     spectator.component.params = onTimeInputParams;
 
     spectator.detectChanges();
@@ -103,7 +106,7 @@ describe("ServiceGridComponent", () => {
     listSubj.next(services);
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 
   it("should call service", () => {
@@ -128,37 +131,18 @@ describe("ServiceGridComponent", () => {
     spectator.detectChanges();
     tick(100);
 
-    const expectedSummary = [
-      "",
-      "",
-      "444",
-      "95.9%",
-      "+00:29",
-      "89.2%",
-      "6.1%",
-      "4.7%",
-    ];
+    const expectedSummary = ["", "", "-", "444", "95.9%", "-", "83%"];
 
     const expectedValues = [
-      [
-        "",
-        "1A: Dispear to Wear",
-        "123",
-        "93.5%",
-        "+00:12",
-        "69.6%",
-        "17.4%",
-        "13%",
-      ],
+      ["", "1A: Dispear to Wear", "-", "123", "93.5%", "+00:12", "69.6%"],
       [
         "Frequent service",
         "2A: Roade to Nowerre",
+        "-",
         "321",
         "96.9%",
         "+00:35",
         "96.5%",
-        "1.9%",
-        "1.6%",
       ],
     ];
 
@@ -166,20 +150,186 @@ describe("ServiceGridComponent", () => {
       .queryAll('[role="row"][row-index="t-0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
+    void expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
 
     const row1 = spectator
       .queryAll('[role="row"][row-index="0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
+    void expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
 
     const row2 = spectator
       .queryAll('[role="row"][row-index="1"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+    void expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
     flush(100);
+  }));
+
+  it("should display expected ratios", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "M5P",
+        lineInfo: {
+          serviceId: "6",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "1A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "M5P",
+    );
+
+    expect(ratios?.onTimeRatio).toBeCloseTo(0.746);
+    expect(ratios?.lateRatio).toBeCloseTo(0.1449);
+    expect(ratios?.earlyRatio).toBeCloseTo(0.108);
+  }));
+
+  it("should display expected ratios as expected when a ratio is zero", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: 0,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "MK1",
+    );
+
+    expect(ratios?.lateRatio).toEqual(0);
+    expect(ratios?.earlyRatio).toEqual(0);
+  }));
+
+  it("should display expected ratios as expected when a ratio is null", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    spectator.detectChanges();
+    flush(100);
+
+    listSubj.next([
+      ...services,
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: null,
+        earlyRatio: null,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+      {
+        lineId: "MK1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Dispear to Wear",
+          serviceNumber: "11A",
+        },
+        scheduledDepartures: 123,
+        actualDepartures: 115,
+        onTime: 80,
+        early: 15,
+        late: 20,
+        averageDelay: 12,
+        total: 115,
+        onTimeRatio: 0.2,
+        lateRatio: null,
+        earlyRatio: null,
+        completedRatio: 0,
+        frequent: false,
+        direction: Direction.Outbound,
+      },
+    ]);
+    spectator.detectChanges();
+    spectator.component.calculateInputData();
+
+    const ratios = spectator.component.aggDataPerService.find(
+      (s) => s.lineId === "MK1",
+    );
+
+    expect(ratios?.lateRatio).toEqual(null);
+    expect(ratios?.earlyRatio).toEqual(null);
   }));
 
   it("should display raw data if required", fakeAsync(() => {
@@ -191,11 +341,19 @@ describe("ServiceGridComponent", () => {
     listSubj.next(services);
     spectator.detectChanges();
 
-    const expectedSummary = ["", "426", "380", "26", "20", "444", "+00:29"];
+    const expectedSummary = ["", "", "-", "444", "-", "426", "380"];
 
     const expectedValues = [
-      ["1A: Dispear to Wear", "115", "80", "20", "15", "123", "+00:12"],
-      ["2A: Roade to Nowerre", "311", "300", "6", "5", "321", "+00:35"],
+      ["", "1A: Dispear to Wear", "-", "123", "+00:12", "115", "80"],
+      [
+        "Frequent service",
+        "2A: Roade to Nowerre",
+        "-",
+        "321",
+        "+00:35",
+        "311",
+        "300",
+      ],
     ];
 
     spectator.click(byLabel("Count"));
@@ -208,18 +366,82 @@ describe("ServiceGridComponent", () => {
       .queryAll('[role="row"][row-index="t-0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
+    void expect(summary).toEqual(jasmine.arrayContaining(expectedSummary));
 
     const row1 = spectator
       .queryAll('[role="row"][row-index="0"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
+    void expect(row1).toEqual(jasmine.arrayContaining(expectedValues[0]));
 
     const row2 = spectator
       .queryAll('[role="row"][row-index="1"] [role="gridcell"]')
       .map((e) => e.textContent);
 
-    expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+    void expect(row2).toEqual(jasmine.arrayContaining(expectedValues[1]));
+  }));
+
+  it("should set frequent field in aggDataPerService based on input data", fakeAsync(() => {
+    spectator.component.params = onTimeInputParams;
+
+    // Mock two services with different 'frequent' values
+    const mockServices: FrequentServicePerformance[] = [
+      {
+        lineId: "A1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Alpha",
+          serviceNumber: "100",
+        },
+        scheduledDepartures: 10,
+        actualDepartures: 10,
+        onTime: 8,
+        early: 1,
+        late: 1,
+        averageDelay: 5,
+        total: 10,
+        onTimeRatio: 0.8,
+        lateRatio: 0.1,
+        earlyRatio: 0.1,
+        completedRatio: 0,
+        frequent: true,
+      },
+      {
+        lineId: "A1",
+        lineInfo: {
+          serviceId: "1",
+          serviceName: "Alpha",
+          serviceNumber: "100",
+        },
+        scheduledDepartures: 5,
+        actualDepartures: 5,
+        onTime: 4,
+        early: 0,
+        late: 1,
+        averageDelay: 3,
+        total: 5,
+        onTimeRatio: 0.8,
+        lateRatio: 0.2,
+        earlyRatio: 0,
+        completedRatio: 0,
+        frequent: false,
+      },
+    ];
+
+    // Set preSelectedDirections to include Direction.All to trigger aggregation
+    spectator.component.preSelectedDirections = [Direction.All];
+
+    listSubj.next(mockServices);
+    spectator.detectChanges();
+    tick(100);
+
+    // Trigger calculation and aggregation
+    spectator.component.calculateInputData();
+
+    // aggDataPerService should have one entry for serviceId "1"
+    expect(spectator.component.aggDataPerService.length).toBe(1);
+
+    // The frequent field should be true if any of the aggregated items is frequent
+    expect(spectator.component.aggDataPerService[0].frequent).toBeTrue();
   }));
 });

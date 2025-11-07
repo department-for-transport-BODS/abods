@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { OperatorNotFoundComponent } from "./operator-not-found.component";
-import { LayoutModule } from "../../layout/layout.module";
 import { ActivatedRoute, RouterModule } from "@angular/router";
+import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
+import { OperatorNotFoundComponent } from "./operator-not-found.component";
 
 describe("OperatorNotFoundComponent", () => {
   let component: OperatorNotFoundComponent;
@@ -33,7 +33,7 @@ describe("OperatorNotFoundComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 });

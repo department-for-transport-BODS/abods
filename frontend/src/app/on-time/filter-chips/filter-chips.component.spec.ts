@@ -1,25 +1,25 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ApolloTestingModule } from "apollo-angular/testing";
 
-import { FilterChipsComponent } from "./filter-chips.component";
+import { provideHttpClient } from "@angular/common/http";
 import { mockProvider } from "@ngneat/spectator";
-import { AdminAreaService } from "../admin-area/admin-area.service";
-import { of } from "rxjs";
 import { polygon } from "@turf/helpers";
-import { SharedModule } from "../../shared/shared.module";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { of } from "rxjs";
 import { ChipComponent } from "../../shared/components/chip/chip.component";
+import { SharedModule } from "../../shared/shared.module";
+import { AdminAreaService } from "../admin-area/admin-area.service";
+import { FilterChipsComponent } from "./filter-chips.component";
 
 describe("FilterChipsComponent", () => {
   let component: FilterChipsComponent;
   let fixture: ComponentFixture<FilterChipsComponent>;
-  let _adminAreaService: AdminAreaService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ApolloTestingModule, SharedModule, HttpClientTestingModule],
+      imports: [ApolloTestingModule, SharedModule],
       declarations: [FilterChipsComponent, ChipComponent],
       providers: [
+        provideHttpClient(),
         mockProvider(AdminAreaService, {
           fetchAdminAreas: () =>
             of([
@@ -49,17 +49,16 @@ describe("FilterChipsComponent", () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FilterChipsComponent);
-    _adminAreaService = TestBed.inject(AdminAreaService);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it("should create", () => {
-    expect(component).toBeTruthy();
+  it("should create", async () => {
+    await expect(component).toBeTruthy();
   });
 
   describe("dayOfWeekValues", () => {
-    it('should return "Mon, Tue, Wed"', () => {
+    it('should return "Mon, Tue, Wed"', async () => {
       component.filters = {
         dayOfWeekFlags: {
           monday: true,
@@ -73,68 +72,68 @@ describe("FilterChipsComponent", () => {
       };
       fixture.detectChanges();
 
-      expect(component.dayOfWeekValues).toBe("Mon, Tue, Wed");
+      await expect(component.dayOfWeekValues).toBe("Mon, Tue, Wed");
       expect(component.isDayOfWeek).toBeTrue();
     });
 
-    it("should return empty string if no flags", () => {
+    it("should return empty string if no flags", async () => {
       component.filters = {};
       fixture.detectChanges();
 
-      expect(component.dayOfWeekValues).toBe("");
+      await expect(component.dayOfWeekValues).toBe("");
       expect(component.isDayOfWeek).toBeFalse();
     });
   });
 
   describe("timeRange", () => {
-    it("should return start and end time", () => {
+    it("should return start and end time", async () => {
       component.filters = {
         startTime: "09:00",
         endTime: "16:59",
       };
       fixture.detectChanges();
 
-      expect(component.timeRange).toBe("09:00 - 16:59");
+      await expect(component.timeRange).toBe("09:00 - 16:59");
       expect(component.isTimeRange).toBeTrue();
     });
   });
 
   describe("minDelay", () => {
-    it("should return min delay as positive int", () => {
+    it("should return min delay as positive int", async () => {
       component.filters = {
         minDelay: -10,
       };
       fixture.detectChanges();
 
-      expect(component.minDelay).toBe("10 minutes");
+      await expect(component.minDelay).toBe("10 minutes");
       expect(component.isMinDelay).toBeTrue();
     });
 
-    it("should return empty string if undefined", () => {
+    it("should return empty string if undefined", async () => {
       component.filters = {
         minDelay: undefined,
       };
       fixture.detectChanges();
 
-      expect(component.minDelay).toBe("");
+      await expect(component.minDelay).toBe("");
       expect(component.isMinDelay).toBeFalse();
     });
   });
 
   describe("maxDelay", () => {
-    it("should return max delay", () => {
+    it("should return max delay", async () => {
       component.filters = {
         maxDelay: 10,
       };
       fixture.detectChanges();
 
-      expect(component.maxDelay).toBe("10 minutes");
+      await expect(component.maxDelay).toBe("10 minutes");
       expect(component.isMaxDelay).toBeTrue();
     });
   });
 
   describe("onClearDayOfWeekFilter", () => {
-    it("should delete dayOfWeekFlags property", () => {
+    it("should delete dayOfWeekFlags property", async () => {
       component.filters = {
         dayOfWeekFlags: {
           monday: true,
@@ -149,13 +148,13 @@ describe("FilterChipsComponent", () => {
       fixture.detectChanges();
       component.onClearDayOfWeekFilter();
 
-      expect(component.filters.dayOfWeekFlags).toBeUndefined();
+      await expect(component.filters.dayOfWeekFlags).toBeUndefined();
       expect(component.isDayOfWeek).toBeFalse();
     });
   });
 
   describe("onClearTimeRangeFilter", () => {
-    it("should delete startTime and endTime properties", () => {
+    it("should delete startTime and endTime properties", async () => {
       component.filters = {
         startTime: "09:00",
         endTime: "16:59",
@@ -163,40 +162,40 @@ describe("FilterChipsComponent", () => {
       fixture.detectChanges();
       component.onClearTimeRangeFilter();
 
-      expect(component.filters.startTime).toBeUndefined();
-      expect(component.filters.endTime).toBeUndefined();
+      await expect(component.filters.startTime).toBeUndefined();
+      await expect(component.filters.endTime).toBeUndefined();
       expect(component.isTimeRange).toBeFalse();
     });
   });
 
   describe("onClearMinDelayFilter", () => {
-    it("should delete minDelay property", () => {
+    it("should delete minDelay property", async () => {
       component.filters = {
         minDelay: -10,
       };
       fixture.detectChanges();
       component.onClearMinDelayFilter();
 
-      expect(component.filters.minDelay).toBeUndefined();
+      await expect(component.filters.minDelay).toBeUndefined();
       expect(component.isMinDelay).toBeFalse();
     });
   });
 
   describe("onClearMaxDelayFilter", () => {
-    it("should delete maxDelay property", () => {
+    it("should delete maxDelay property", async () => {
       component.filters = {
         maxDelay: 10,
       };
       fixture.detectChanges();
       component.onClearMaxDelayFilter();
 
-      expect(component.filters.maxDelay).toBeUndefined();
+      await expect(component.filters.maxDelay).toBeUndefined();
       expect(component.isMaxDelay).toBeFalse();
     });
   });
 
   describe("adminAreas", () => {
-    it("should show admin area names", () => {
+    it("should show admin area names", async () => {
       component.filters = {
         adminAreaIds: ["AA100"],
       };
@@ -204,12 +203,12 @@ describe("FilterChipsComponent", () => {
       component.ngOnChanges();
       fixture.detectChanges();
 
-      expect(component.adminAreas.length).toEqual(1);
-      expect(component.adminAreas[0].id).toEqual("AA100");
-      expect(component.adminAreas[0].name).toEqual("Derbyshire");
+      await expect(component.adminAreas.length).toEqual(1);
+      await expect(component.adminAreas[0].id).toEqual("AA100");
+      await expect(component.adminAreas[0].name).toEqual("Derbyshire");
     });
 
-    it("should hide admin areas that are unavailable to the current operator", () => {
+    it("should hide admin areas that are unavailable to the current operator", async () => {
       component.filters = {
         nocCodes: ["OP152"],
         adminAreaIds: ["AA100", "AA370"],
@@ -217,27 +216,27 @@ describe("FilterChipsComponent", () => {
       component.ngOnChanges();
       fixture.detectChanges();
 
-      expect(component.adminAreas.length).toEqual(1);
-      expect(component.adminAreas[0].id).toEqual("AA370");
-      expect(component.adminAreas[0].name).toEqual("South Yorkshire");
+      await expect(component.adminAreas.length).toEqual(1);
+      await expect(component.adminAreas[0].id).toEqual("AA370");
+      await expect(component.adminAreas[0].name).toEqual("South Yorkshire");
     });
 
-    it("should clear admin areas", () => {
+    it("should clear admin areas", async () => {
       component.filters = {
         adminAreaIds: ["AA100", "AA370"],
       };
       component.ngOnChanges();
       fixture.detectChanges();
 
-      expect(component.adminAreas.length).toEqual(2);
+      await expect(component.adminAreas.length).toEqual(2);
 
       component.clearAdminAreaFilter("AA100");
       component.ngOnChanges();
       fixture.detectChanges();
 
-      expect(component.adminAreas.length).toEqual(1);
-      expect(component.adminAreas[0].id).toEqual("AA370");
-      expect(component.adminAreas[0].name).toEqual("South Yorkshire");
+      await expect(component.adminAreas.length).toEqual(1);
+      await expect(component.adminAreas[0].id).toEqual("AA370");
+      await expect(component.adminAreas[0].name).toEqual("South Yorkshire");
     });
   });
 });

@@ -1,6 +1,5 @@
 import { createServiceFactory } from "@ngneat/spectator";
 import { SpectatorService } from "@ngneat/spectator/lib/spectator-service/spectator-service";
-import { TransitModelService } from "./transit-model.service";
 import {
   ApolloTestingController,
   ApolloTestingModule,
@@ -9,8 +8,9 @@ import {
   ServicePatternType,
   TransitModelServicePatternStopsDocument,
 } from "../../generated/graphql";
+import { TransitModelService } from "./transit-model.service";
 
-describe("StopPerformanceService", () => {
+describe("TransitModelService", () => {
   let spectator: SpectatorService<TransitModelService>;
   let controller: ApolloTestingController;
   const serviceFactory = createServiceFactory({
@@ -23,7 +23,11 @@ describe("StopPerformanceService", () => {
     controller = spectator.inject(ApolloTestingController);
   });
 
-  it("should fetch transit model data", () => {
+  afterEach(() => {
+    controller.verify();
+  });
+
+  it("should fetch transit model data", (done: DoneFn) => {
     const expected: ServicePatternType = {
       servicePatternId: "123",
       serviceLinks: [],
@@ -34,48 +38,45 @@ describe("StopPerformanceService", () => {
 
     spectator.service
       .fetchServicePatternStops("OP1", "LI12345")
-      .subscribe(([actual]) => {
-        expect(actual).not.toBeNull();
-        expect(actual.servicePatternId).toEqual("123");
-        expect(actual.stops[0]).toEqual(
+      .subscribe((actual) => {
+        void expect(actual).toHaveSize(1);
+        void expect(actual[0]).not.toBeNull();
+        void expect(actual[0].servicePatternId).toEqual("123");
+        void expect(actual[0].stops[0]).toEqual(
           jasmine.objectContaining({ ...expected.stops[0] }),
         );
+        done();
       });
 
     const op = controller.expectOne(TransitModelServicePatternStopsDocument);
 
-    expect(op.operation.variables.operatorId).toEqual("OP1");
-    expect(op.operation.variables.lineId).toEqual("LI12345");
+    void expect(op.operation.variables.operatorId).toEqual("OP1");
+    void expect(op.operation.variables.lineId).toEqual("LI12345");
 
     op.flush({
       data: {
-        operator: {
-          transitModel: { lines: { items: [{ servicePatterns: [expected] }] } },
-        },
+        servicePatterns: [expected],
       },
     });
-
-    controller.verify();
   });
 
-  it("should cope with empty array in graphql response", () => {
+  it("should cope with empty array in graphql response", (done: DoneFn) => {
     spectator.service
       .fetchServicePatternStops("OP2", "LI34567")
       .subscribe((actual) => {
-        expect(actual).toHaveSize(0);
+        void expect(actual).toHaveSize(0);
+        done();
       });
 
     const op = controller.expectOne(TransitModelServicePatternStopsDocument);
 
-    expect(op.operation.variables.operatorId).toEqual("OP2");
-    expect(op.operation.variables.lineId).toEqual("LI34567");
+    void expect(op.operation.variables.operatorId).toEqual("OP2");
+    void expect(op.operation.variables.lineId).toEqual("LI34567");
 
     op.flush({
       data: {
-        operator: { transitModel: { lines: { items: [] } } },
+        servicePatterns: [],
       },
     });
-
-    controller.verify();
   });
 });

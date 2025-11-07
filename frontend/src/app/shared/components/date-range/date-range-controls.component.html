@@ -5,8 +5,8 @@
         <app-stack childMin="322px">
           <gds-text-input
             inputId="dateRangeStart"
-            [type]="start?.isValid || startFocused ? 'date' : 'text'"
-            [placeholder]="start?.isValid || startFocused ? '' : placeholder"
+            [type]="startInputType"
+            [placeholder]="startPlaceholder"
             label="Starting"
             [(ngModel)]="starting"
             [ngModelOptions]="{ standalone: true }"
@@ -18,9 +18,8 @@
           ></gds-text-input>
           <gds-text-input
             inputId="dateRangeEnd"
-            [type]="end?.isValid || endFocused ? 'date' : 'text'"
-            [placeholder]="end?.isValid || endFocused ? '' : placeholder"
-            type="date"
+            [type]="endInputType"
+            [placeholder]="endPlaceholder"
             label="Ending"
             [(ngModel)]="ending"
             [ngModelOptions]="{ standalone: true }"

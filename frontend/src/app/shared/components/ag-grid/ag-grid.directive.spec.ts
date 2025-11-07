@@ -25,6 +25,8 @@ describe("AgGridDirective", () => {
   beforeEach(() => {
     mockGridApi = {
       exportDataAsCsv: jasmine.createSpy(),
+      getPinnedTopRow: jasmine.createSpy().and.returnValue({ data: {} }),
+      setPinnedTopRowData: jasmine.createSpy(),
     } as unknown as GridApi;
     mockColumnApi = {} as ColumnApi;
 

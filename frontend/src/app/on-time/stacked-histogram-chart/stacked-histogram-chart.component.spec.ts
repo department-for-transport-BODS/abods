@@ -19,10 +19,10 @@ describe("TimeOfDayChartComponent", () => {
     component = spectator.component;
   });
 
-  it("should create", () => {
+  it("should create", async () => {
     component.category = "param";
     spectator.detectChanges();
 
-    expect(spectator.component).toBeTruthy();
+    await expect(spectator.component).toBeTruthy();
   });
 });
