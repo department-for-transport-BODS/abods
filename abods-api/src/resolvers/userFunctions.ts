@@ -25,7 +25,6 @@ export const accountTypes = {
   agentUser: 5,
 };
 
-const supportUserEmailDomain = "@kpmg.co.uk";
 const dftUserEmailDomain = "@dft.gov.uk";
 
 export const getFeatureFlags = () => {
@@ -64,10 +63,16 @@ export const getUser: QueryResolvers["user"] = async (
     });
 
     const email = userDetails.email.toLowerCase();
+    const supportUserEmailDomains = (
+      process.env.SUPPORT_USER_EMAIL_DOMAINS || ""
+    )
+      .split(",")
+      .map((domain) => domain.trim().toLowerCase())
+      .filter(Boolean);
 
-    // Allow access to users with dft.gov.uk and site admins (account_type = 1)
+    // Allow access to users with any support domain or site admins (account_type = 1)
     const canViewServiceMonitoring =
-      email.endsWith(supportUserEmailDomain) ||
+      supportUserEmailDomains.some((domain) => email.endsWith(domain)) ||
       (userDetails.account_type === accountTypes.admin &&
         email.endsWith(dftUserEmailDomain));
 
