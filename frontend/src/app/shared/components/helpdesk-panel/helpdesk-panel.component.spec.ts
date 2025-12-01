@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { HelpdeskPanelComponent } from "./helpdesk-panel.component";
 import {
   Spectator,
@@ -38,7 +39,7 @@ describe("HelpdeskPanelComponent", () => {
 
   const createComponent = createComponentFactory({
     component: HelpdeskPanelComponent,
-    imports: [SharedModule],
+    imports: [SharedModule, HttpClientTestingModule],
     mocks: [HelpdeskPanelService, HelpdeskDataService],
     detectChanges: false,
   });
