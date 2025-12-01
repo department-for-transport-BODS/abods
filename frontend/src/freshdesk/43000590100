@@ -9,8 +9,8 @@
     "folder_id": 43000590100,
     "title": "Users and Permissions",
     "updated_at": "2025-02-17T13:07:00Z",
-    "description": "<p dir=\"ltr\">If you are an organisation admin, you can invite new users within your organisation to use ABODS.</p><p dir=\"ltr\">To do this, navigate to 'Invite New User' at the bottom left of your screen and enter their email address.</p><p dir=\"ltr\">If you need to invite someone outside your organisation, please contact our customer success team at <a href=\"mailto:bodshelpdesk@kpmg.co.uk\">bodshelpdesk@kpmg.co.uk</a>.</p>",
-    "description_text": "If you are an organisation admin, you can invite new users within your organisation to use ABODS. To do this, navigate to 'Invite New User' at the bottom left of your screen and enter their email address. If you need to invite someone outside your organisation, please contact our customer success team at bodshelpdesk@kpmg.co.uk.",
+    "description": "<p dir=\"ltr\">If you are an organisation admin, you can invite new users within your organisation to use ABODS.</p><p dir=\"ltr\">To do this, navigate to 'Invite New User' at the bottom left of your screen and enter their email address.</p><p dir=\"ltr\">If you need to invite someone outside your organisation, please contact our customer success team at <a href=\"mailto:{{SUPPORT_EMAIL}}\">{{SUPPORT_EMAIL}}</a>.</p>",
+    "description_text": "If you are an organisation admin, you can invite new users within your organisation to use ABODS. To do this, navigate to 'Invite New User' at the bottom left of your screen and enter their email address. If you need to invite someone outside your organisation, please contact our customer success team at {{SUPPORT_EMAIL}}.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
