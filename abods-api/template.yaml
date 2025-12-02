@@ -180,6 +180,7 @@ Resources:
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
           ABODS_FLAG_ServiceMonitoring: !If [IsNotProd, "true", "false"]
+          SUPPORT_USER_EMAIL_DOMAINS: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/support_user_email_domains}}"
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
