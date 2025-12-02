@@ -6,6 +6,7 @@ import {
   SpyObject,
   createServiceFactory,
 } from "@ngneat/spectator";
+import { ConfigService } from "../../config/config.service";
 
 describe("HelpdeskDataService", () => {
   let spectator: SpectatorService<HelpdeskDataService>;
@@ -22,6 +23,12 @@ describe("HelpdeskDataService", () => {
   const createService = createServiceFactory({
     service: HelpdeskDataService,
     mocks: [FreshdeskApiService],
+    providers: [
+      {
+        provide: ConfigService,
+        useValue: { supportEmail: "test@example.com" },
+      },
+    ],
   });
 
   beforeEach(() => {
