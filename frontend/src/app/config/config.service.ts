@@ -16,6 +16,7 @@ export interface ConfigObject {
   otp: OtpConfig;
   defaultCookiePolicy: CookiePolicy;
   freshdesk: FreshdeskConfig;
+  supportEmail?: string;
 }
 
 export interface VehicleJourneysConfig {
@@ -108,6 +109,10 @@ export class ConfigService {
 
   get mapboxSatelliteStyle() {
     return this.loadStringValue("mapboxSatelliteStyle", "");
+  }
+
+  get supportEmail(): string {
+    return this.loadStringValue("supportEmail", "");
   }
 
   get vehicleJourneys(): VehicleJourneysConfig {
