@@ -17,3 +17,4 @@ echo 'DB_NAME=abods' >> .env
 echo 'TZ=UTC' >> .env
 echo 'LOG_LEVEL=debug' >> .env
 echo "DATABASE_URL=postgresql://abods_proxy_rw:${DB_PASSWORD//@/%40}@localhost:15432/abods?schema=public&connection_limit=50&gssencmode=disable&sslmode=prefer&ssl=true" >> .env
+echo "SUPPORT_USER_EMAIL_DOMAINS=kainos.com, arup.com, kpmg.co.uk" >> .env
