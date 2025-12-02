@@ -40,9 +40,9 @@
         If you have any questions or would like to leave feedback please email
         <a
           class="govuk-link"
-          href="mailto:bodshelpdesk@kpmg.co.uk"
+          [href]="'mailto:' + config.supportEmail"
           target="_blank"
-          >bodshelpdesk&#64;kpmg.co.uk</a
+          >{{ config.supportEmail }}</a
         >
       </p>
     </div>

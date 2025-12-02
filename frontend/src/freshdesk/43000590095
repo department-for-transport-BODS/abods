@@ -9,8 +9,8 @@
     "folder_id": 43000590095,
     "title": "Welcome!",
     "updated_at": "2025-02-17T13:07:00Z",
-    "description": "<p data-renderer-start-pos=\"12\">Welcome to Analyse Bus Open Data Service (ABODS!)</p><p data-renderer-start-pos=\"54\">The dashboard is where you will find a snapshot of your analytics. If you want further information about a particular page or topic, just click on that page and then open the help section!</p><p data-renderer-start-pos=\"244\" dir=\"ltr\">If you have any suggestions for topics, definitions or things we can explain please drop us an email at bodshelpdesk@kpmg.co.uk.</p>",
-    "description_text": "Welcome to Analyse Bus Open Data Service (ABODS!). The dashboard is where you will find a snapshot of your analytics. If you want further information about a particular page or topic, just click on that page and then open the help section! If you have any suggestions for topics, definitions or things we can explain please drop us an email at bodshelpdesk@kpmg.co.uk.",
+    "description": "<p data-renderer-start-pos=\"12\">Welcome to Analyse Bus Open Data Service (ABODS!)</p><p data-renderer-start-pos=\"54\">The dashboard is where you will find a snapshot of your analytics. If you want further information about a particular page or topic, just click on that page and then open the help section!</p><p data-renderer-start-pos=\"244\" dir=\"ltr\">If you have any suggestions for topics, definitions or things we can explain please drop us an email at {{SUPPORT_EMAIL}}.</p>",
+    "description_text": "Welcome to Analyse Bus Open Data Service (ABODS!). The dashboard is where you will find a snapshot of your analytics. If you want further information about a particular page or topic, just click on that page and then open the help section! If you have any suggestions for topics, definitions or things we can explain please drop us an email at {{SUPPORT_EMAIL}}.",
     "seo_data": {
       "meta_title": "",
       "meta_description": ""
