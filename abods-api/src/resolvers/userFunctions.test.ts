@@ -141,6 +141,7 @@ describe("getUser", () => {
     process.env.ABODS_FLAG_ServiceMonitoring = "false";
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
+    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk,dft.gov.uk";
 
     let result: Partial<LoginInfo> | null = null;
     if (typeof getUser === "function") {
@@ -211,12 +212,14 @@ describe("getUser", () => {
 
     mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
       userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-      email: "user@kpmg.co.uk",
+      email: "user@example.co.uk",
       account_type: 3,
     } as never);
 
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
+
+    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk";
 
     let result: Partial<LoginInfo> | null = null;
     if (typeof getUser === "function") {
