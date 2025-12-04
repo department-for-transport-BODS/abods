@@ -5,8 +5,8 @@ import { DB } from "../../kysely";
 import { getKyselyClient } from "../../kyselyClient";
 import { initialisePrismaClient } from "../../prismaClient";
 
-import argon2 from "argon2";
 import { GraphQLResponse } from "@apollo/server";
+import argon2 from "argon2";
 import { createRequest, createResponse } from "node-mocks-http";
 import { RequestContext } from "../../types/extra";
 import {
@@ -18,7 +18,13 @@ import {
   createCorridorStopsTable,
   createCorridorTable,
   createDistinctRoutesTable,
+  createExpectedJourneysTable,
+  createExpectedOperatorsTable,
   createExpectedServicesTable,
+  createFeedMonitorDailySummaryTable,
+  createFeedMonitorHourlySummaryTable,
+  createFeedMonitorMinuteSummaryTable,
+  createFeedMonitorSummaryTable,
   createLoginDetailsTable,
   createNaptanAdminareaTable,
   createNaptanAdminareaWithShapeTable,
@@ -29,6 +35,7 @@ import {
   createRouteToJourneysTable,
   createServiceDetailsTable,
   createServicepatternRouteTable,
+  createSiriVMPositionsTable,
   createTimetableFrequentSummaryServicesTable,
   createTimetableSummaryOperatorTTable,
   createTimetableSummaryServiceTzTable,
@@ -36,7 +43,9 @@ import {
   createTimetableTable,
   createTimetableThresholdSummaryTable,
   createTokensTable,
+  createTransmodelServicepatterndistanceTable,
   createTransmodelTracksTable,
+  createTransmodelVehiclejourneyTable,
 } from "./db";
 
 export const setEnvVariables = (container: StartedPostgreSqlContainer) => {
@@ -469,136 +478,306 @@ export const createCorridorTablesAndData = async (dbKysely: Kysely<DB>) => {
 };
 
 export const createTimetableTablesAndData = async (dbKysely: Kysely<DB>) => {
-  await Promise.all([createTimetableTable(dbKysely)]);
+  await Promise.all([
+    createTimetableTable(dbKysely),
+    createSiriVMPositionsTable(dbKysely),
+  ]);
 
-  await dbKysely
-    .insertInto("Timetable")
-    .values([
-      {
-        timetable_id: "100",
-        operator_noc: "OP1",
-        operator_name: "Operator One",
-        service_code: "SC1",
-        line_name: "L1",
-        xml_file_name: "file1.xml",
-        journey_code: "JCODE1",
-        date_of_journey: new Date("2025-10-17T08:00:00Z"),
-        day_of_week: 5,
-        common_name: "Main Street Stop",
-        atco_code: "12345",
-        stop_type: "bus",
-        stop_index: 0,
-        stop_latitude: 51.54321,
-        stop_longitude: -0.12345,
-        locality_id: "LOC001",
-        expected_departure_time: new Date("2025-10-17T08:05:00Z"),
-        actual_departure_time: new Date("2025-10-17T08:06:00Z"),
-        is_timing_point: true,
-        group_id: "groupA",
-        previous_group_id: null,
-        otp_state: null,
-        expected_headway: null,
-        actual_headway: null,
-        headway_time_difference: null,
-        time_difference: null,
-        stop_id: 1,
-        load_time_stamp: null,
-        off_set: null,
-        servicepattern_id: null,
-        vehiclejourney_id: 101,
-        admin_area_id: 10,
-        timestamp_after_estimate: null,
-        direction: "outbound",
-        departure_day_shift: false,
-        siri_vm_position_id: null,
-        incomplete_reason: null,
-        set_down: false,
-      },
-      {
-        timetable_id: "101",
-        operator_noc: "OP1",
-        operator_name: "Operator One",
-        service_code: "SC1",
-        line_name: "L1",
-        xml_file_name: "file1.xml",
-        journey_code: "JCODE1",
-        date_of_journey: new Date("2025-10-17T08:00:00Z"),
-        day_of_week: 5,
-        common_name: "Another Street Stop",
-        atco_code: "12346",
-        stop_type: "bus",
-        stop_index: 1,
-        stop_latitude: 51.54321,
-        stop_longitude: -0.12345,
-        locality_id: "LOC001",
-        expected_departure_time: new Date("2025-10-17T08:10:00Z"),
-        actual_departure_time: new Date("2025-10-17T08:11:00Z"),
-        is_timing_point: true,
-        group_id: "groupA",
-        previous_group_id: null,
-        otp_state: null,
-        expected_headway: null,
-        actual_headway: null,
-        headway_time_difference: null,
-        time_difference: null,
-        stop_id: 2,
-        load_time_stamp: null,
-        off_set: null,
-        servicepattern_id: null,
-        vehiclejourney_id: 101,
-        admin_area_id: 10,
-        timestamp_after_estimate: null,
-        direction: "outbound",
-        departure_day_shift: false,
-        siri_vm_position_id: null,
-        incomplete_reason: null,
-        set_down: false,
-      },
-    ])
-    .execute();
+  await Promise.all([
+    dbKysely
+      .insertInto("SiriVMPositions")
+      .values([
+        {
+          siri_vm_positions_id: "vmpos-1",
+          operator_ref: "OP1",
+          line_name: "L1",
+          journey_ref: "JCODE1",
+          direction_ref: "outbound",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          latitude: 51.54321,
+          longitude: -0.12345,
+          vehicle_ref: "VEH1",
+          batch_id: "batchA",
+          recorded_at_time: new Date("2025-10-17T08:05:00Z"),
+          response_time_stamp: new Date("2025-10-17T08:05:10Z"),
+          load_time_stamp: new Date("2025-10-17T08:05:20Z"),
+          group_id: "op1|L1|SC1|2025-10-17",
+          origin_ref: "12345",
+          destination_ref: "12346",
+          departure_time: new Date("2025-10-17T08:05:00Z"),
+        },
+        {
+          siri_vm_positions_id: "vmpos-2",
+          operator_ref: "OP1",
+          line_name: "L1",
+          journey_ref: "JCODE1",
+          direction_ref: "outbound",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          latitude: 51.54321,
+          longitude: -0.12345,
+          vehicle_ref: "VEH1",
+          batch_id: "batchA",
+          recorded_at_time: new Date("2025-10-17T08:10:00Z"),
+          response_time_stamp: new Date("2025-10-17T08:10:10Z"),
+          load_time_stamp: new Date("2025-10-17T08:10:20Z"),
+          group_id: "op1|L1|SC1|2025-10-17",
+          origin_ref: "12346",
+          destination_ref: "12345",
+          departure_time: new Date("2025-10-17T08:10:00Z"),
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("Timetable")
+      .values([
+        {
+          timetable_id: "100",
+          operator_noc: "OP1",
+          operator_name: "Operator One",
+          service_code: "SC1",
+          line_name: "L1",
+          xml_file_name: "file1.xml",
+          journey_code: "JCODE1",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          day_of_week: 5,
+          common_name: "Main Street Stop",
+          atco_code: "12345",
+          stop_type: "bus",
+          stop_index: 0,
+          stop_latitude: 51.54321,
+          stop_longitude: -0.12345,
+          locality_id: "LOC001",
+          expected_departure_time: new Date("2025-10-17T08:05:00Z"),
+          actual_departure_time: new Date("2025-10-17T08:06:00Z"),
+          is_timing_point: true,
+          group_id: "op1|L1|SC1|2025-10-17",
+          previous_group_id: null,
+          otp_state: null,
+          expected_headway: null,
+          actual_headway: null,
+          headway_time_difference: null,
+          time_difference: null,
+          stop_id: 1,
+          load_time_stamp: null,
+          off_set: null,
+          servicepattern_id: null,
+          vehiclejourney_id: 101,
+          admin_area_id: 10,
+          timestamp_after_estimate: null,
+          direction: "outbound",
+          departure_day_shift: false,
+          siri_vm_position_id: null,
+          incomplete_reason: null,
+          set_down: false,
+        },
+        {
+          timetable_id: "101",
+          operator_noc: "OP1",
+          operator_name: "Operator One",
+          service_code: "SC1",
+          line_name: "L1",
+          xml_file_name: "file1.xml",
+          journey_code: "JCODE1",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          day_of_week: 5,
+          common_name: "Another Street Stop",
+          atco_code: "12346",
+          stop_type: "bus",
+          stop_index: 1,
+          stop_latitude: 51.54321,
+          stop_longitude: -0.12345,
+          locality_id: "LOC001",
+          expected_departure_time: new Date("2025-10-17T08:10:00Z"),
+          actual_departure_time: new Date("2025-10-17T08:11:00Z"),
+          is_timing_point: true,
+          group_id: "op1|L1|SC1|2025-10-17",
+          previous_group_id: null,
+          otp_state: null,
+          expected_headway: null,
+          actual_headway: null,
+          headway_time_difference: null,
+          time_difference: null,
+          stop_id: 2,
+          load_time_stamp: null,
+          off_set: null,
+          servicepattern_id: null,
+          vehiclejourney_id: 101,
+          admin_area_id: 10,
+          timestamp_after_estimate: null,
+          direction: "outbound",
+          departure_day_shift: false,
+          siri_vm_position_id: null,
+          incomplete_reason: null,
+          set_down: false,
+        },
+        {
+          timetable_id: "201",
+          operator_noc: "OP1",
+          operator_name: "Operator One",
+          service_code: "SC1",
+          line_name: "L1",
+          xml_file_name: "file1.xml",
+          journey_code: "JCODE1",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          day_of_week: 5,
+          common_name: "Another Street Stop",
+          atco_code: "12346",
+          stop_type: "bus",
+          stop_index: 1,
+          stop_latitude: 51.54321,
+          stop_longitude: -0.12345,
+          locality_id: "LOC001",
+          expected_departure_time: new Date("2025-10-17T08:10:00Z"),
+          actual_departure_time: new Date("2025-10-17T08:11:00Z"),
+          is_timing_point: true,
+          group_id: "op1|L1|SC1|2025-10-18",
+          previous_group_id: null,
+          otp_state: null,
+          expected_headway: null,
+          actual_headway: null,
+          headway_time_difference: null,
+          time_difference: null,
+          stop_id: 2,
+          load_time_stamp: null,
+          off_set: null,
+          servicepattern_id: null,
+          vehiclejourney_id: 101,
+          admin_area_id: 10,
+          timestamp_after_estimate: null,
+          direction: "outbound",
+          departure_day_shift: false,
+          siri_vm_position_id: null,
+          incomplete_reason: null,
+          set_down: false,
+        },
+      ])
+      .execute(),
+  ]);
 };
 
 export const createExpectedTablesAndData = async (dbKysely: Kysely<DB>) => {
-  await createExpectedServicesTable(dbKysely);
+  await Promise.all([
+    createExpectedServicesTable(dbKysely),
+    createExpectedJourneysTable(dbKysely),
+    createExpectedOperatorsTable(dbKysely),
+  ]);
 
-  await dbKysely
-    .insertInto("expected_services")
-    .values([
-      {
-        line_name: "L1",
-        noc_and_line_and_servicecode: "OP1-L1-SC1",
-        service_name: "Operator One",
-        date_of_journey: new Date("2025-10-17T08:00:00Z"),
-        operator_noc: "OP1",
-        admin_area_id: [10], // matches admin_area_id in Timetable data
-        total_distance: 2000,
-        avl_true_distance: 1950,
-        license: "Standard License",
-      },
-      {
-        line_name: "L1",
-        noc_and_line_and_servicecode: "OP1-L1-SC1",
-        service_name: "Operator One",
-        date_of_journey: new Date("2025-10-18T08:00:00Z"),
-        operator_noc: "OP1",
-        admin_area_id: [10],
-        total_distance: 2100,
-        avl_true_distance: 2050,
-        license: "Standard License",
-      },
-      {
-        line_name: "L2",
-        noc_and_line_and_servicecode: "OP2-L2-SC2",
-        service_name: "Operator Two",
-        date_of_journey: new Date("2025-10-21T09:00:00Z"),
-        operator_noc: "OP2",
-        admin_area_id: [20],
-        total_distance: 1800,
-        avl_true_distance: 1750,
-        license: "Premium License",
-      },
-    ])
-    .execute();
+  await Promise.all([
+    dbKysely
+      .insertInto("expected_services")
+      .values([
+        {
+          line_name: "L1",
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+          service_name: "Operator One",
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          operator_noc: "OP1",
+          admin_area_id: [10], // matches admin_area_id in Timetable data
+          total_distance: 2000,
+          avl_true_distance: 1950,
+          license: "Standard License",
+        },
+        {
+          line_name: "L1",
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+          service_name: "Operator One",
+          date_of_journey: new Date("2025-10-18T08:00:00Z"),
+          operator_noc: "OP1",
+          admin_area_id: [10],
+          total_distance: 2100,
+          avl_true_distance: 2050,
+          license: "Standard License",
+        },
+        {
+          line_name: "L2",
+          noc_and_line_and_servicecode: "OP2-L2-SC2",
+          service_name: "Operator Two",
+          date_of_journey: new Date("2025-10-21T09:00:00Z"),
+          operator_noc: "OP2",
+          admin_area_id: [20],
+          total_distance: 1800,
+          avl_true_distance: 1750,
+          license: "Premium License",
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("expected_journeys")
+      .values([
+        {
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          operator_noc: "OP1",
+          line_name: "L1",
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+          journey_code: "JCODE1",
+          group_id: "groupA",
+          stop_count: 2,
+          expected_journey_start: new Date("2025-10-17T08:05:00Z"),
+          journey_pattern_description: "Main Street to Another Street",
+          vehicle_journey_id: 101,
+          day_of_week: 5,
+          admin_area_id: [10],
+          expected_journey_end: new Date("2025-10-17T08:10:00Z"),
+          direction: "outbound",
+          is_cancelled: false,
+        },
+        {
+          date_of_journey: new Date("2025-10-18T08:00:00Z"),
+          operator_noc: "OP1",
+          line_name: "L1",
+          noc_and_line_and_servicecode: "OP1-L1-SC1",
+          journey_code: "JCODE1",
+          group_id: "groupA",
+          stop_count: 2,
+          expected_journey_start: new Date("2025-10-18T08:05:00Z"),
+          journey_pattern_description: "Main Street to Another Street",
+          vehicle_journey_id: 101,
+          day_of_week: 6,
+          admin_area_id: [10],
+          expected_journey_end: new Date("2025-10-18T08:10:00Z"),
+          direction: "outbound",
+          is_cancelled: false,
+        },
+        {
+          date_of_journey: new Date("2025-10-21T09:00:00Z"),
+          operator_noc: "OP2",
+          line_name: "L2",
+          noc_and_line_and_servicecode: "OP2-L2-SC2",
+          journey_code: "JCODE2",
+          group_id: "groupB",
+          stop_count: 3,
+          expected_journey_start: new Date("2025-10-21T09:05:00Z"),
+          journey_pattern_description: "North District Route",
+          vehicle_journey_id: 201,
+          day_of_week: 2,
+          admin_area_id: [20],
+          expected_journey_end: new Date("2025-10-21T09:20:00Z"),
+          direction: "inbound",
+          is_cancelled: false,
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("expected_operators")
+      .values([
+        {
+          date_of_journey: new Date("2025-10-17T08:00:00Z"),
+          operator_noc: "OP1",
+          operator_name: "Operator One",
+        },
+        {
+          date_of_journey: new Date("2025-10-18T08:00:00Z"),
+          operator_noc: "OP1",
+          operator_name: "Operator One",
+        },
+        {
+          date_of_journey: new Date("2025-10-21T09:00:00Z"),
+          operator_noc: "OP2",
+          operator_name: "Operator Two",
+        },
+      ])
+      .execute(),
+  ]);
 };
 
 export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
@@ -631,19 +810,19 @@ export const createRouteTablesAndData = async (dbKysely: Kysely<DB>) => {
       .values([
         {
           id: "journey1",
-          group_id: "groupA",
+          group_id: "op1|L1|SC1|2025-10-17",
           date_of_journey: new Date("2025-10-17T08:00:00Z"),
           distinct_route_id: 1,
         },
         {
           id: "journey2",
-          group_id: "groupB",
+          group_id: "op1|L1|SC1|2025-10-18",
           date_of_journey: new Date("2025-10-17T09:00:00Z"),
           distinct_route_id: 2,
         },
         {
           id: "journey3",
-          group_id: "groupA",
+          group_id: "op1|L1|SC1|2025-10-17",
           date_of_journey: new Date("2025-10-18T08:00:00Z"),
           distinct_route_id: 1,
         },
@@ -942,6 +1121,182 @@ export const createFrequentSummariesTableAndData = async (
     .execute();
 };
 
+export const createTransmodelTablesAndData = async (dbKysely: Kysely<DB>) => {
+  await Promise.all([
+    createTransmodelVehiclejourneyTable(dbKysely),
+    createTransmodelServicepatterndistanceTable(dbKysely),
+  ]);
+
+  await Promise.all([
+    dbKysely
+      .insertInto("transmodel_vehiclejourney")
+      .values([
+        {
+          id: "101",
+          start_time: new Date("2025-10-17T08:05:00Z"),
+          direction: "outbound",
+          journey_code: "JCODE1",
+          line_ref: "L1",
+          departure_day_shift: false,
+          service_pattern_id: 1001,
+          block_number: "blockA",
+        },
+        {
+          id: "201",
+          start_time: new Date("2025-10-21T09:05:00Z"),
+          direction: "inbound",
+          journey_code: "JCODE2",
+          line_ref: "L2",
+          departure_day_shift: false,
+          service_pattern_id: 2001,
+          block_number: "blockB",
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("transmodel_servicepatterndistance")
+      .values([
+        {
+          service_pattern_id: 1001,
+          distance: 1500,
+          geom: '{"type":"LineString","coordinates":[[-0.12345,51.54321],[-0.12350,51.54325]]}',
+        },
+        {
+          service_pattern_id: 2001,
+          distance: 2200,
+          geom: '{"type":"LineString","coordinates":[[-0.22345,51.64321],[-0.22350,51.64325]]}',
+        },
+      ])
+      .execute(),
+  ]);
+};
+
+export const createFeedMonitoringTablesAndData = async (
+  dbKysely: Kysely<DB>,
+) => {
+  await Promise.all([
+    createFeedMonitorDailySummaryTable(dbKysely),
+    createFeedMonitorSummaryTable(dbKysely),
+    createFeedMonitorHourlySummaryTable(dbKysely),
+    createFeedMonitorMinuteSummaryTable(dbKysely),
+  ]);
+
+  await Promise.all([
+    dbKysely
+      .insertInto("feed_monitor_summary")
+      .values([
+        {
+          id: "1",
+          operator_noc: "OP1",
+          last_outage: new Date("2025-10-15T12:00:00Z"),
+          unavailable_since: new Date("2025-10-15T11:30:00Z"),
+          update_frequency: 15,
+          availability: "0.1",
+        },
+        {
+          id: "2",
+          operator_noc: "OP2",
+          last_outage: new Date("2025-10-16T14:00:00Z"),
+          unavailable_since: new Date("2025-10-16T13:45:00Z"),
+          update_frequency: 10,
+          availability: "0.2",
+        },
+        {
+          id: "3",
+          operator_noc: "OP3",
+          last_outage: new Date("2025-10-17T09:00:00Z"),
+          unavailable_since: new Date("2025-10-17T08:50:00Z"),
+          update_frequency: 20,
+          availability: "0.3",
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("feed_monitor_daily_summary")
+      .values([
+        {
+          id: "1",
+          date_of_journey: new Date("2025-10-17T00:00:00Z"),
+          operator_noc: "OP1",
+          update_frequency: 15,
+          availability: "0.1",
+        },
+        {
+          id: "2",
+          date_of_journey: new Date("2025-10-18T00:00:00Z"),
+          operator_noc: "OP2",
+          update_frequency: 10,
+          availability: "0.2",
+        },
+        {
+          id: "3",
+          date_of_journey: new Date("2025-10-19T00:00:00Z"),
+          operator_noc: "OP3",
+          update_frequency: 20,
+          availability: "0.3",
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("feed_monitor_hourly_summary")
+      .values([
+        {
+          id: "1",
+          operator_noc: "OP1",
+          received_interval: new Date("2025-10-17T08:00:00Z"),
+          expected: 12,
+          actual: 12,
+        },
+        {
+          id: "2",
+          operator_noc: "OP2",
+          received_interval: new Date("2025-10-17T09:00:00Z"),
+          expected: 10,
+          actual: 9,
+        },
+        {
+          id: "3",
+          operator_noc: "OP3",
+          received_interval: new Date("2025-10-17T10:00:00Z"),
+          expected: 15,
+          actual: 15,
+        },
+      ])
+      .execute(),
+    dbKysely
+      .insertInto("feed_monitor_minute_summary")
+      .values([
+        {
+          id: "1",
+          date_of_journey: new Date(),
+          operator_noc: "OP1",
+          received_interval: new Date(),
+          expected: 2,
+          actual: 2,
+          live_locations: 2,
+        },
+        {
+          id: "2",
+          date_of_journey: new Date(),
+          operator_noc: "OP2",
+          received_interval: new Date(),
+          expected: 3,
+          actual: 2,
+          live_locations: 2,
+        },
+        {
+          id: "3",
+          date_of_journey: new Date(),
+          operator_noc: "OP3",
+          received_interval: new Date(),
+          expected: 1,
+          actual: 1,
+          live_locations: 1,
+        },
+      ])
+      .execute(),
+  ]);
+};
 export const getContext = (
   dbPrisma: PrismaClient,
   dbKysely: Kysely<DB>,

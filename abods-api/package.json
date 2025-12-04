@@ -9,7 +9,7 @@
     "watch": "tsc --watch",
     "test": "jest --no-coverage",
     "coverage": "jest --coverage",
-    "test:ci": "jest --ci",
+    "test:ci": "jest --runInBand --ci",
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
     "prisma:migrate": "prisma migrate dev --name init",

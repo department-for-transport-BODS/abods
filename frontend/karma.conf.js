@@ -30,8 +30,7 @@ module.exports = function (config) {
     browserDisconnectTimeout: 60000,
     concurrency: 1,
     browserDisconnectTolerance: 3,
-    singleRun: false,
-    concurrency: 4,
+    singleRun: true,
     restartOnFileChange: true,
     customLaunchers: {
       ChromeDebug: {
