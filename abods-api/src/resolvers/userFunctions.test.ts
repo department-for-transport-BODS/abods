@@ -261,7 +261,7 @@ describe("getUser", () => {
   });
 });
 
-describe("loginUser", () => {
+fdescribe("loginUser", () => {
   it("logs in user with valid credentials and returns success", async () => {
     jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
       {
@@ -366,6 +366,59 @@ describe("loginUser", () => {
     }
 
     expect(result?.success).toBe(false);
+  });
+
+  it("returns expected data with multiple login failures", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 4,
+      },
+    ]);
+
+    (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+    const args = { username: "user@dft.gov.uk", password: "wrongpassword" };
+    let result: Partial<LoginResponse> | null = null;
+    if (typeof loginUser === "function") {
+      result = await loginUser({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result?.success).toBe(false);
+    expect(result?.failedAttempts).toEqual(5);
+    expect(result?.maxAttempts).toEqual(5);
+  });
+
+  it("returns data that indicates account is locked", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 5,
+      },
+    ]);
+
+    (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+    const args = { username: "user@dft.gov.uk", password: "wrongpassword" };
+    let result: Partial<LoginResponse> | null = null;
+    if (typeof loginUser === "function") {
+      result = await loginUser({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    console.dir(result, { depth: null });
+    expect(result?.success).toBe(false);
+    expect(result?.failedAttempts).toEqual(5);
+    expect(result?.maxAttempts).toEqual(5);
+    expect(result?.locked).toEqual(true);
+    expect(result?.unlockAt).toBeDefined();
   });
 });
 

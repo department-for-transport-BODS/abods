@@ -125,6 +125,7 @@ describe("User function resolvers", () => {
         login(username: $username, password: $password) {
           success
           expiresAt
+          maxAttempts
         }
       }
     `;
@@ -149,6 +150,7 @@ describe("User function resolvers", () => {
 
     expect(data?.login).toBeDefined();
     expect(data?.login?.success).toBe(true);
+    expect(data?.login?.maxAttempts).toBeDefined();
     expect(
       typeof data?.login?.expiresAt === "string" ||
         data?.login?.expiresAt === null,
