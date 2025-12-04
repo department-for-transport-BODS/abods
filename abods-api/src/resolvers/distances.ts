@@ -188,6 +188,7 @@ export const getAdminOrgMaps: QueryResolvers["adminOrgMap"] = async (
 ): Promise<AdminOrgOperatorMap[]> => {
   const user = await requireUserSession(context);
 
+  // CTE to unnest admin area ids per operator
   const adminAreaIdsCte = context.kysely.with("admin_areas", (db) =>
     db
       .selectFrom("service_details as sd")

@@ -64,6 +64,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
           ? "timetable_summary_service_tz"
           : "timetable_summary_operator_t";
 
+      // CTE to extract hour from departure hour so that we can filter by hour if passed
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
         summaryTable,
@@ -71,6 +72,7 @@ export const getPunctualityOverview: OnTimePerformanceTypeResolvers["punctuality
         userOperatorIds,
       );
 
+      // CTE to extract hour from departure hour so that we can filter by hour if passed
       let scheduledCountQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
         summaryTable,
@@ -248,6 +250,7 @@ export const getOperatorPerformance: OnTimePerformanceTypeResolvers["operatorPer
         adminAreaIds,
       );
 
+      // CTE to extract hour from departure hour so that we can filter by hour if passed
       let summarySubQuery = getKyselyFiltersForOTPQuery(
         context.kysely,
         "timetable_summary_operator_t",
@@ -365,6 +368,7 @@ export const getPunctualityDayOfWeek: OnTimePerformanceTypeResolvers["punctualit
             ? "timetable_summary_service_tz"
             : "timetable_summary_operator_t";
 
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             summaryTable,
@@ -463,6 +467,7 @@ export const getDelayFrequency: OnTimePerformanceTypeResolvers["delayFrequency"]
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             "timetable_threshold_summary",
@@ -574,6 +579,7 @@ export const getPunctualityTimeOfDay: OnTimePerformanceTypeResolvers["punctualit
             ? "timetable_summary_service_tz"
             : "timetable_summary_operator_t";
 
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             summaryTable,
@@ -658,6 +664,7 @@ export const getPunctualityTimeSeries: OnTimePerformanceTypeResolvers["punctuali
             ? "timetable_summary_service_tz"
             : "timetable_summary_operator_t";
 
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             summaryTable,
@@ -849,6 +856,7 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
           // get a sum per day
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             "timetable_summary_stops_tz",
@@ -856,6 +864,8 @@ export const getStopPerformance: OnTimePerformanceTypeResolvers["stopPerformance
             userOperatorIds,
           );
 
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
+          // Scheduled count of stops includes all stops regardless of whether they are estimated or not
           let scheduledCountQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             "timetable_summary_stops_tz",
@@ -1117,6 +1127,7 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
         const operator_noc_to_filter = operatorIds[0];
 
         if (userOperatorIds.includes(operator_noc_to_filter)) {
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
           let summarySubQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             "timetable_summary_service_tz",
@@ -1124,6 +1135,8 @@ export const getServicePerformance: OnTimePerformanceTypeResolvers["servicePerfo
             userOperatorIds,
           );
 
+          // CTE to extract hour from departure hour so that we can filter by hour if passed
+          // Scheduled count of stops includes all stops regardless of whether they are estimated or not
           let scheduledCountQuery = getKyselyFiltersForOTPQuery(
             context.kysely,
             "timetable_summary_service_tz",

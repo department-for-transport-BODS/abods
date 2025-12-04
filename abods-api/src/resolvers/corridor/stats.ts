@@ -44,6 +44,7 @@ export const getSummaryStats: CorridorStatsTypeResolvers["summaryStats"] = (
       data.inputs.matchType,
     );
 
+    // Calculate only if both departures are available and journeys last departure is matched
     if (firstDeparture && lastDeparture) {
       totalTransits += 1;
       totalTransitTime +=
@@ -132,6 +133,7 @@ const getTransitStats = (
       matchType,
     );
 
+    // Calculate only if both departures are available and journeys last departure is matched
     if (firstStopDeparture && lastDeparture) {
       let dateKey = "";
       switch (inputType) {
@@ -221,6 +223,7 @@ export const getTransitStatsPerService: CorridorStatsTypeResolvers["transitTimeP
         serviceCode: firstDeparture.service_code,
       };
       transitTime.scheduledTransits += 1;
+      // Calculate only if both departures are available and journeys last departure is matched
       if (firstStopDeparture && lastDeparture) {
         transitTime.totalTransitTime +=
           (lastDeparture.getTime() - firstStopDeparture.getTime()) / 1000;
@@ -275,6 +278,7 @@ export const getTransitStatsHistogram: CorridorStatsTypeResolvers["transitTimeHi
         transit[transit.length - 1],
         data.inputs.matchType,
       );
+      // Calculate only if both departures are available and journeys last departure is matched
       if (firstStopDeparture && lastDeparture) {
         const totalTransitTime = Math.floor(
           (lastDeparture.getTime() - firstStopDeparture.getTime()) /
