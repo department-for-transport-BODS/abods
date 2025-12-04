@@ -180,6 +180,8 @@ Resources:
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
           ABODS_FLAG_ServiceMonitoring: !If [IsNotProd, "true", "false"]
+          INCORRECT_LOGIN_MAX_ATTEMPTS: 5
+          LOGIN_LOCKOUT_MINS: 15
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
 
