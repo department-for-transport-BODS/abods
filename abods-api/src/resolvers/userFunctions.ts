@@ -243,11 +243,10 @@ export const loginUser: MutationResolvers["login"] = async (
     return {
       success: true,
       expiresAt: expires.toISOString(),
-      maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
     };
   } catch (error) {
     logger.error(error);
-    return { success: false, maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS };
+    return { success: false };
   }
 };
 

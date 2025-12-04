@@ -75,7 +75,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     this.errors.push({
-      error: `Invalid username or password. You have ${loginResponse.maxAttempts - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`,
+      error: `Invalid username or password. You have ${(loginResponse.maxAttempts ?? 5) - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`,
       label: "login-username",
     });
     return;

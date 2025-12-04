@@ -508,7 +508,7 @@ export type LoginResponse = {
   expiresAt?: Maybe<Scalars['String']['output']>;
   failedAttempts?: Maybe<Scalars['Int']['output']>;
   locked?: Maybe<Scalars['Boolean']['output']>;
-  maxAttempts: Scalars['Int']['output'];
+  maxAttempts?: Maybe<Scalars['Int']['output']>;
   success: Scalars['Boolean']['output'];
   unlockAt?: Maybe<Scalars['String']['output']>;
 };
@@ -1630,7 +1630,7 @@ export type LoginResponseResolvers<ContextType = RequestContext, ParentType exte
   expiresAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   failedAttempts?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   locked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  maxAttempts?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  maxAttempts?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   unlockAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 }>;

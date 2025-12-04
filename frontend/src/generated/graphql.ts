@@ -508,7 +508,7 @@ export type LoginResponse = {
   expiresAt?: Maybe<Scalars['String']['output']>;
   failedAttempts?: Maybe<Scalars['Int']['output']>;
   locked?: Maybe<Scalars['Boolean']['output']>;
-  maxAttempts: Scalars['Int']['output'];
+  maxAttempts?: Maybe<Scalars['Int']['output']>;
   success: Scalars['Boolean']['output'];
   unlockAt?: Maybe<Scalars['String']['output']>;
 };
@@ -1074,7 +1074,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', success: boolean, expiresAt?: string | null, maxAttempts: number, unlockAt?: string | null, failedAttempts?: number | null, locked?: boolean | null } | null };
+export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', success: boolean, expiresAt?: string | null, maxAttempts?: number | null, unlockAt?: string | null, failedAttempts?: number | null, locked?: boolean | null } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 

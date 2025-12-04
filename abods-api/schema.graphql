@@ -468,7 +468,7 @@ type LoginResponse {
   expiresAt: String
   unlockAt: String
   failedAttempts: Int
-  maxAttempts: Int!
+  maxAttempts: Int
   locked: Boolean
 }
 
