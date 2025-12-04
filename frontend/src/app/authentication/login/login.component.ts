@@ -9,6 +9,8 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { FormErrors } from "src/app/shared/gds/error-summary/error-summary.component";
 import { AuthenticationService } from "../authentication.service";
+import { AuthenticatedUserService } from "../authenticated-user.service";
+import { LoginResponse } from "../../../generated/graphql";
 
 @Component({
   selector: "app-auth-login",
@@ -28,6 +30,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthenticationService,
+    private userService: AuthenticatedUserService,
   ) {
     this.loginForm = this.formBuilder.group({
       username: ["", Validators.required],
@@ -40,22 +43,42 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.resetForm();
     });
     const postLoginLink = this.route.snapshot.queryParams.returnUrl ?? "/";
-    this.authenticationService.isAuthenticated$
+    //this.authenticationService.isAuthenticated$
+    this.userService.loginResponse$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((isAuth) => {
-        if (!isAuth) {
+      .subscribe((loginResponse) => {
+        if (!loginResponse?.success) {
           if (!this.submitted) {
             return;
           }
-          this.errors.push({
-            error: "Sign in failed, check username and password.",
-            label: "login-username",
-          });
+          this.setErrorMessages(loginResponse);
           return;
         }
         this.loading = false;
         this.router.navigateByUrl(postLoginLink).catch(console.log);
       });
+  }
+
+  setErrorMessages(loginResponse: LoginResponse) {
+    if (loginResponse.locked && loginResponse.unlockAt) {
+      const unlockDate = new Date(loginResponse.unlockAt);
+      const now = new Date();
+      const diffMs = unlockDate.getTime() - now.getTime();
+      const diffMins = Math.max(Math.ceil(diffMs / 60000), 0);
+
+      this.errors.push({
+        error: `Your account is locked for ${diffMins} minutes.`,
+        label: "login-username",
+      });
+
+      return;
+    }
+
+    this.errors.push({
+      error: `Invalid username or password. You have ${loginResponse.maxAttempts - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`,
+      label: "login-username",
+    });
+    return;
   }
 
   ngOnDestroy() {

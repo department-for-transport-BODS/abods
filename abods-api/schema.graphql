@@ -466,6 +466,10 @@ type ApiInfoType {
 type LoginResponse {
   success: Boolean!
   expiresAt: String
+  unlockAt: String
+  failedAttempts: Int
+  maxAttempts: Int!
+  locked: Boolean
 }
 
 type LoginInfo {

@@ -506,7 +506,11 @@ export type LoginInfo = {
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   expiresAt?: Maybe<Scalars['String']['output']>;
+  failedAttempts?: Maybe<Scalars['Int']['output']>;
+  locked?: Maybe<Scalars['Boolean']['output']>;
+  maxAttempts: Scalars['Int']['output'];
   success: Scalars['Boolean']['output'];
+  unlockAt?: Maybe<Scalars['String']['output']>;
 };
 
 export enum MatchType {
@@ -1070,7 +1074,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', success: boolean, expiresAt?: string | null } | null };
+export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', success: boolean, expiresAt?: string | null, maxAttempts: number, unlockAt?: string | null, failedAttempts?: number | null, locked?: boolean | null } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1513,6 +1517,10 @@ export const LoginDocument = gql`
   login(username: $username, password: $password) {
     success
     expiresAt
+    maxAttempts
+    unlockAt
+    failedAttempts
+    locked
   }
 }
     `;

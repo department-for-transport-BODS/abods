@@ -141,6 +141,7 @@ describe("getUser", () => {
     process.env.ABODS_FLAG_ServiceMonitoring = "false";
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
+    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk,dft.gov.uk";
 
     let result: Partial<LoginInfo> | null = null;
     if (typeof getUser === "function") {
@@ -211,12 +212,14 @@ describe("getUser", () => {
 
     mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
       userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-      email: "user@kpmg.co.uk",
+      email: "user@example.co.uk",
       account_type: 3,
     } as never);
 
     process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
       "https://dashboard.example.com";
+
+    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk";
 
     let result: Partial<LoginInfo> | null = null;
     if (typeof getUser === "function") {
@@ -260,14 +263,16 @@ describe("getUser", () => {
 
 describe("loginUser", () => {
   it("logs in user with valid credentials and returns success", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword",
-      is_active: true,
-      userOrganisations: [
-        { organisation_id: 10, organisation: { name: "Org1" } },
-      ],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     (argon2.verify as jest.Mock).mockResolvedValue(true);
 
@@ -306,7 +311,7 @@ describe("loginUser", () => {
   });
 
   it("returns failure if user not found", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue(null);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(null as never);
 
     const args = { username: "user@dft.gov.uk", password: "password" };
     let result: Partial<LoginResponse> | null = null;
@@ -318,12 +323,16 @@ describe("loginUser", () => {
   });
 
   it("returns failure if user is not mapped to any organisation", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword2",
-      is_active: true,
-      userOrganisations: [],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: null,
+        name: null,
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     const args = { username: "user@dft.gov.uk", password: "password" };
 
@@ -337,14 +346,16 @@ describe("loginUser", () => {
   });
 
   it("returns failure if password does not match", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword",
-      is_active: true,
-      userOrganisations: [
-        { organisation_id: 10, organisation: { name: "Org1" } },
-      ],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     (argon2.verify as jest.Mock).mockResolvedValue(false);
 

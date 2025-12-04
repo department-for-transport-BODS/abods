@@ -506,7 +506,11 @@ export type LoginInfo = {
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   expiresAt?: Maybe<Scalars['String']['output']>;
+  failedAttempts?: Maybe<Scalars['Int']['output']>;
+  locked?: Maybe<Scalars['Boolean']['output']>;
+  maxAttempts: Scalars['Int']['output'];
   success: Scalars['Boolean']['output'];
+  unlockAt?: Maybe<Scalars['String']['output']>;
 };
 
 export enum MatchType {
@@ -1624,7 +1628,11 @@ export type LoginInfoResolvers<ContextType = RequestContext, ParentType extends 
 
 export type LoginResponseResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
   expiresAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  failedAttempts?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  locked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  maxAttempts?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  unlockAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 }>;
 
 export type MutationResolvers<ContextType = RequestContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{

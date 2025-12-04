@@ -26,13 +26,14 @@ export const accountTypes = {
   agentUser: 5,
 };
 
-const supportUserEmailDomain = "@kpmg.co.uk";
 const dftUserEmailDomain = "@dft.gov.uk";
 
 const INCORRECT_LOGIN_MAX_ATTEMPTS = parseInt(
   process.env.INCORRECT_LOGIN_MAX_ATTEMPTS ?? "5",
 );
-const LOGIN_LOCKOUT_MINS = parseInt(process.env.LOGIN_LOCKOUT_MINS ?? "15");
+const FAILED_LOGIN_LOCKOUT_MINS = parseInt(
+  process.env.FAILED_LOGIN_LOCKOUT_MINS ?? "15",
+);
 
 export const getFeatureFlags = () => {
   const flags: FeatureFlag[] = [];
@@ -70,10 +71,16 @@ export const getUser: QueryResolvers["user"] = async (
     });
 
     const email = userDetails.email.toLowerCase();
+    const supportUserEmailDomains = (
+      process.env.SUPPORT_USER_EMAIL_DOMAINS || ""
+    )
+      .split(",")
+      .map((domain) => domain.trim().toLowerCase())
+      .filter(Boolean);
 
-    // Allow access to users with dft.gov.uk and site admins (account_type = 1)
+    // Allow access to users with any support domain or site admins (account_type = 1)
     const canViewServiceMonitoring =
-      email.endsWith(supportUserEmailDomain) ||
+      supportUserEmailDomains.some((domain) => email.endsWith(domain)) ||
       (userDetails.account_type === accountTypes.admin &&
         email.endsWith(dftUserEmailDomain));
 
@@ -110,7 +117,7 @@ export const loginUser: MutationResolvers["login"] = async (
       throw "Invalid username or password";
     }
 
-    const bodsUser = await context.kysely
+    const query = context.kysely
       .selectFrom("bods_user")
       .innerJoin(
         "bods_userorganisation",
@@ -133,15 +140,16 @@ export const loginUser: MutationResolvers["login"] = async (
         "bods_organisation.name",
         "login_details.last_login as lastLogin",
         "login_details.failed_attempts as failedAttempts",
-      ])
-      .execute();
+      ]);
+
+    const bodsUser = await executeQuery(query);
 
     if (!bodsUser || bodsUser.length < 1) {
       logger.debug("User not found in bods user table");
       throw "Invalid username or password";
     }
 
-    const orgNames = bodsUser.map((n) => n.name);
+    const orgNames = bodsUser.filter((n) => n.name != null).map((n) => n.name);
     if (orgNames.length < 1) {
       logger.error(
         { userId: bodsUser[0].id },
@@ -152,7 +160,7 @@ export const loginUser: MutationResolvers["login"] = async (
 
     const now = dayjs();
     const unlockAt = dayjs(bodsUser[0].lastLogin).add(
-      LOGIN_LOCKOUT_MINS,
+      FAILED_LOGIN_LOCKOUT_MINS,
       "minute",
     );
 
@@ -173,7 +181,6 @@ export const loginUser: MutationResolvers["login"] = async (
     const validPassword = await argon2.verify(strippedPassword, args.password);
     const user_id = bodsUser[0].id;
 
-    console.log("Valid password:::::", validPassword);
     if (!validPassword) {
       const failedAttempts =
         bodsUser[0].failedAttempts === INCORRECT_LOGIN_MAX_ATTEMPTS
@@ -190,7 +197,6 @@ export const loginUser: MutationResolvers["login"] = async (
         update: loginDetails,
       });
 
-      console.log("Failed attempts:::::", failedAttempts);
       return {
         success: false,
         failedAttempts: failedAttempts,
