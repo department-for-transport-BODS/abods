@@ -261,7 +261,7 @@ describe("getUser", () => {
   });
 });
 
-fdescribe("loginUser", () => {
+describe("loginUser", () => {
   it("logs in user with valid credentials and returns success", async () => {
     jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
       {
