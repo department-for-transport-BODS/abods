@@ -147,7 +147,6 @@ export const getLiveStats: FeedMonitoringTypeResolvers["liveStats"] = async (
   if (queryName === "operatorLiveStatus") {
     const finalEndTime = dayjs().startOf("minute");
     const promises: Promise<VehicleStatsType>[] = [];
-    // Get minute by minute data for the last 20 minutes
     for (let offset = 0; offset < 20; offset++) {
       const endTime = finalEndTime.subtract(offset, "minute");
       const startTime = endTime.subtract(1, "minute").toDate();
