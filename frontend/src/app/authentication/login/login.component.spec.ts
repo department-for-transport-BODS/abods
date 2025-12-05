@@ -171,7 +171,8 @@ describe("LoginComponent", () => {
 
       await expect(component.errors).toEqual([
         {
-          error: "Your account is locked for 15 minutes.",
+          error:
+            "Your account is locked for 15 minutes due to multiple failed attempts. Please try again later or reset your password if required.",
           label: "login-username",
         },
       ]);

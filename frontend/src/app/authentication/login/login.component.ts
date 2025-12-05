@@ -67,7 +67,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       const diffMins = Math.max(Math.ceil(diffMs / 60000), 0);
 
       this.errors.push({
-        error: `Your account is locked for ${diffMins} minutes.`,
+        error: `Your account is locked for ${diffMins} minutes due to multiple failed attempts. Please try again later or reset your password if required.`,
         label: "login-username",
       });
 
