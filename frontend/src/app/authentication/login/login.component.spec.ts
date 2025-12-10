@@ -177,6 +177,27 @@ describe("LoginComponent", () => {
         },
       ]);
     });
+
+    it("should show error message if user is not found", async () => {
+      component.submitted = true;
+      spyOn(router, "navigateByUrl").and.resolveTo(true);
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: null,
+          maxAttempts: null,
+          failedAttempts: null,
+        }),
+      );
+      component.ngOnInit();
+
+      await expect(component.errors).toEqual([
+        {
+          error: "Invalid username or password.",
+          label: "login-username",
+        },
+      ]);
+    });
   });
 
   describe("onSubmit", () => {

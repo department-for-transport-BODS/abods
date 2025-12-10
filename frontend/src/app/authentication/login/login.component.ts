@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.resetForm();
     });
     const postLoginLink = this.route.snapshot.queryParams.returnUrl ?? "/";
-    //this.authenticationService.isAuthenticated$
+
     this.userService.loginResponse$
       .pipe(takeUntil(this.destroy$))
       .subscribe((loginResponse) => {
@@ -51,7 +51,10 @@ export class LoginComponent implements OnInit, OnDestroy {
           if (!this.submitted) {
             return;
           }
-          this.setErrorMessages(loginResponse);
+          this.errors.push({
+            error: this.getErrorMessages(loginResponse),
+            label: "login-username",
+          });
           return;
         }
         this.loading = false;
@@ -59,26 +62,24 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
-  setErrorMessages(loginResponse: LoginResponse) {
+  getErrorMessages(loginResponse: LoginResponse) {
     if (loginResponse.locked && loginResponse.unlockAt) {
       const unlockDate = new Date(loginResponse.unlockAt);
       const now = new Date();
       const diffMs = unlockDate.getTime() - now.getTime();
       const diffMins = Math.max(Math.ceil(diffMs / 60000), 0);
 
-      this.errors.push({
-        error: `Your account is locked for ${diffMins} minutes due to multiple failed attempts. Please try again later or reset your password if required.`,
-        label: "login-username",
-      });
-
-      return;
+      return `Your account is locked for ${diffMins} minutes due to multiple failed attempts. Please try again later or reset your password if required.`;
     }
 
-    this.errors.push({
-      error: `Invalid username or password. You have ${(loginResponse.maxAttempts ?? 5) - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`,
-      label: "login-username",
-    });
-    return;
+    let errorMessage = "Invalid username or password.";
+
+    if (loginResponse.maxAttempts != null) {
+      // All registered users will have maxAttempts.
+      errorMessage = `${errorMessage} You have ${loginResponse.maxAttempts - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`;
+    }
+
+    return errorMessage;
   }
 
   ngOnDestroy() {
