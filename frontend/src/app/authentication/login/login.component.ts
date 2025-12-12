@@ -76,7 +76,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (loginResponse.maxAttempts != null) {
       // All registered users will have maxAttempts.
-      errorMessage = `${errorMessage} You have ${loginResponse.maxAttempts - (loginResponse.failedAttempts ?? 0)} attempts remaining before your account is locked.`;
+      errorMessage = `${errorMessage} You have ${loginResponse.maxAttempts - (loginResponse.failedAttempts ?? 0)} more attempts remaining before your account is locked.`;
     }
 
     return errorMessage;
