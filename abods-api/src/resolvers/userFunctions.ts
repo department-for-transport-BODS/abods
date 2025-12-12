@@ -182,10 +182,13 @@ export const loginUser: MutationResolvers["login"] = async (
     const user_id = bodsUser[0].id;
 
     if (!validPassword) {
-      const failedAttempts =
-        bodsUser[0].failedAttempts === INCORRECT_LOGIN_MAX_ATTEMPTS
-          ? 1
-          : bodsUser[0].failedAttempts + 1;
+      let failedAttempts = bodsUser[0].failedAttempts + 1;
+      if (
+        failedAttempts > INCORRECT_LOGIN_MAX_ATTEMPTS ||
+        unlockAt.isBefore(now)
+      ) {
+        failedAttempts = 1;
+      }
       const loginDetails = {
         user_id,
         last_login: now.toDate(),
@@ -201,6 +204,11 @@ export const loginUser: MutationResolvers["login"] = async (
         success: false,
         failedAttempts: failedAttempts,
         maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
+        locked: failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS ? true : false,
+        unlockAt:
+          failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS
+            ? now.add(FAILED_LOGIN_LOCKOUT_MINS, "minute").toISOString()
+            : undefined,
       };
     }
 

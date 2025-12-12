@@ -148,7 +148,7 @@ describe("LoginComponent", () => {
       await expect(component.errors).toEqual([
         {
           error:
-            "Invalid username or password. You have 4 attempts remaining before your account is locked.",
+            "Invalid username or password. You have 4 more attempts remaining before your account is locked.",
           label: "login-username",
         },
       ]);
