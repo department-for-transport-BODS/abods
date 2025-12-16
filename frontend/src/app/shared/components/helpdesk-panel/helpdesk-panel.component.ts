@@ -5,6 +5,7 @@ import {
   HelpdeskDataService,
 } from "../../services/helpdesk-data.service";
 import { HelpdeskPanelService } from "./helpdesk-panel.service";
+import { ConfigService } from "src/app/config/config.service";
 
 @Component({
   selector: "app-helpdesk-panel",
@@ -22,6 +23,7 @@ export class HelpdeskPanelComponent implements OnInit, OnDestroy {
   constructor(
     private helpdeskPanelService: HelpdeskPanelService,
     private helpdeskDataService: HelpdeskDataService,
+    public config: ConfigService,
   ) {}
 
   private destroy$ = new Subject<void>();

@@ -1,6 +1,9 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { BehaviorSubject, map, Observable, Subject, takeUntil } from "rxjs";
-import { FreshdeskFolderConfig } from "../../config/config.service";
+import {
+  ConfigService,
+  FreshdeskFolderConfig,
+} from "../../config/config.service";
 import { FreshdeskApiService, FreshdeskArticle } from "./freshdesk-api.service";
 
 export interface HelpdeskData {
@@ -12,7 +15,10 @@ export interface HelpdeskData {
   providedIn: "root",
 })
 export class HelpdeskDataService implements OnDestroy {
-  constructor(private freshdeskApiService: FreshdeskApiService) {}
+  constructor(
+    private freshdeskApiService: FreshdeskApiService,
+    private configService: ConfigService,
+  ) {}
 
   private currentHelpdeskData$ = new BehaviorSubject<HelpdeskData | null>(null);
   private destroy$ = new Subject<void>();
@@ -30,7 +36,16 @@ export class HelpdeskDataService implements OnDestroy {
     this.freshdeskApiService
       .getFolder(folder)
       .pipe(
-        map((data) => ({ title: title, articles: data })),
+        map((data) => ({
+          title: title,
+          articles: data.map((article) => ({
+            ...article,
+            description: article.description.replace(
+              /\{\{SUPPORT_EMAIL\}\}/g,
+              this.configService.supportEmail,
+            ),
+          })),
+        })),
         takeUntil(this.destroy$),
       )
       .subscribe((data) => {

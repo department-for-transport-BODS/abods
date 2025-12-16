@@ -46,9 +46,9 @@
           For feedback email
           <a
             class="govuk-footer__link"
-            href="mailto:bodshelpdesk@kpmg.co.uk"
+            [href]="'mailto:' + config.supportEmail"
             target="_blank"
-            >bodshelpdesk&#64;kpmg.co.uk</a
+            >{{ config.supportEmail }}</a
           >
         </div>
         <svg
