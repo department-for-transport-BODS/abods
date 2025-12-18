@@ -45,7 +45,7 @@ Parameters:
     Default: 5432
   ServiceMonitoringDashboardUrl:
     Type: String
-    Default: "https://p.datadoghq.eu/sb/embed/e2f4b96a-30e0-11ec-a6fa-da7ad0900005-e3c4b6e999216c5bdb39edf1633a2848"
+    Default: "https://p.datadoghq.eu/sb/embed/a3871eef-a4e7-11f0-bd80-b23d5f4281cc-a7e031ac5f5b2f8fc35cae5618c17ef7"
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
     Default: ""
@@ -179,7 +179,7 @@ Resources:
           QUICKSIGHT_SUPER_ADMIN_DASHBOARD_ID: !Ref QuickSightSuperadminDashboardId
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"
           DATADOG_SERVICE_MONITORING_DASHBOARD: !Ref ServiceMonitoringDashboardUrl
-          ABODS_FLAG_ServiceMonitoring: !If [IsNotProd, "true", "false"]
+          ABODS_FLAG_ServiceMonitoring: true
           SUPPORT_USER_EMAIL_DOMAINS: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/support_user_email_domains}}"
       LoggingConfig:
         LogGroup: !Ref GraphQlFunctionLogGroup
