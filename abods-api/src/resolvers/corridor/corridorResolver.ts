@@ -135,15 +135,18 @@ export const getSubsequentStops: CorridorNamespaceResolvers["addSubsequentStops"
     routes.map((data) => {
       const stopIndex = data.route.indexOf(stopsPattern);
       let matchStopPattern = stopsPattern;
+      // Add comma if not first stop
       if (stopIndex > 0) {
         matchStopPattern = `,${matchStopPattern}`;
       }
       const matches = data.route.match(matchStopPattern.concat("(.*)"));
       if (matches?.[1]) {
         const commaIndex = matches[1].indexOf(",");
+        // Get next stop after the matched pattern
         const nextStop =
           commaIndex !== -1 ? matches[1].substring(0, commaIndex) : matches[1];
 
+        // Add to list if not already present
         if (!newStopList.includes(nextStop)) {
           newStopList.push(nextStop);
         }
@@ -198,6 +201,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
   }
 
   const timetables = context.kysely
+    // CTE to get journeys based on group ids that travel along the corridor
     .with("corridor_journeys", (db) =>
       db
         .selectFrom("route_to_journeys as rj")
@@ -226,6 +230,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
     )
     .selectFrom("Timetable as t")
     .innerJoin("naptan_stops as n", "n.naptan_id", "t.stop_id")
+    // Return only journeys that are in the corridor journeys CTE
     .innerJoin("corridor_journeys as cj", (join) =>
       join
         .onRef("cj.group_id", "=", "t.group_id")
@@ -257,6 +262,7 @@ export const getStats: CorridorNamespaceResolvers["stats"] = async (
 
   const results: TimetableType[] = await executeQuery(timetables);
 
+  // Filter results to only those that fully traverse the corridor
   const corridorTransits = extractCorridorTransits(results, stopList);
   // Not actually returning this type, but intended to stash this data we get for the next resolvers in the chain
   return {

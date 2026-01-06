@@ -93,6 +93,7 @@ export const getStopAnalysis: QueryResolvers["stopAnalysis"] = async (
   while (current.isBefore(endDateUtc)) {
     const weekStart = current;
     const weekEnd = current.add(1, "week");
+    // Utilise database pruning by querying week by week
     weekRanges.push({
       from: weekStart.toDate(),
       to: weekEnd.isBefore(endDateUtc) ? weekEnd.toDate() : endDateUtc.toDate(),
