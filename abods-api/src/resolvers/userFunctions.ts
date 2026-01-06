@@ -15,6 +15,7 @@ import {
   Resolvers,
 } from "../types/generated.js";
 import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
+import dayjs from "dayjs";
 
 const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
 export const accountTypes = {
@@ -26,6 +27,13 @@ export const accountTypes = {
 };
 
 const dftUserEmailDomain = "@dft.gov.uk";
+
+const INCORRECT_LOGIN_MAX_ATTEMPTS = parseInt(
+  process.env.INCORRECT_LOGIN_MAX_ATTEMPTS ?? "5",
+);
+const FAILED_LOGIN_LOCKOUT_MINS = parseInt(
+  process.env.FAILED_LOGIN_LOCKOUT_MINS ?? "15",
+);
 
 export const getFeatureFlags = () => {
   const flags: FeatureFlag[] = [];
@@ -103,84 +111,147 @@ export const loginUser: MutationResolvers["login"] = async (
   context,
 ): Promise<LoginResponse> => {
   logger.debug({ username: args.username }, "Logging in user");
+
   try {
     if (!args.username || !args.password) {
       throw "Invalid username or password";
     }
 
-    const bodsUser = await context.db.bods_user.findFirst({
-      where: {
-        email: { equals: args.username, mode: "insensitive" },
-        is_active: true,
-      },
-      select: {
-        id: true,
-        password: true,
-        userOrganisations: {
-          select: {
-            organisation_id: true,
-            organisation: { select: { name: true } },
-          },
-        },
-      },
-    });
+    const query = context.kysely
+      .selectFrom("bods_user")
+      .innerJoin(
+        "bods_userorganisation",
+        "bods_userorganisation.user_id",
+        "bods_user.id",
+      )
+      .innerJoin(
+        "bods_organisation",
+        "bods_organisation.id",
+        "bods_userorganisation.organisation_id",
+      )
+      .innerJoin("login_details", "login_details.user_id", "bods_user.id")
+      .where("bods_user.email", "=", args.username)
+      .where("bods_user.is_active", "=", true)
+      .distinctOn(["bods_user.id", "bods_user.password"])
+      .select([
+        "bods_user.id",
+        "bods_user.password",
+        "bods_userorganisation.organisation_id",
+        "bods_organisation.name",
+        "login_details.last_login as lastLogin",
+        "login_details.failed_attempts as failedAttempts",
+      ]);
 
-    if (!bodsUser) {
+    const bodsUser = await executeQuery(query);
+
+    if (!bodsUser || bodsUser.length < 1) {
       logger.debug("User not found in bods user table");
       throw "Invalid username or password";
     }
 
-    if (bodsUser.userOrganisations.length < 1) {
+    const orgNames = bodsUser.filter((n) => n.name != null).map((n) => n.name);
+    if (orgNames.length < 1) {
       logger.error(
-        { userId: bodsUser.id },
+        { userId: bodsUser[0].id },
         "User not mapped to an organisation",
       );
       throwUnauthenticatedError("User not mapped to any organisation");
     }
 
-    const orgNames = bodsUser.userOrganisations.map((n) => n.organisation.name);
+    const now = dayjs();
+    const unlockAt = dayjs(bodsUser[0].lastLogin).add(
+      FAILED_LOGIN_LOCKOUT_MINS,
+      "minute",
+    );
 
-    const strippedPassword = bodsUser.password.replace("argon2$", "$");
-    if (await argon2.verify(strippedPassword, args.password)) {
-      const token = uuidv4();
-      const expiryTimeMilliseconds = SESSION_EXPIRY_TIME_IN_SECONDS * 1000;
-      const now = new Date();
-      const expires = new Date(Date.now() + expiryTimeMilliseconds);
-      const user_id = bodsUser.id;
-      const tokenRecord = { user_id, token, expires };
-      const loginDetails = { user_id, last_login: now };
-      await Promise.all([
-        context.db.tokens.upsert({
-          where: { user_id },
-          create: tokenRecord,
-          update: tokenRecord,
-        }),
-        context.db.login_details.upsert({
-          where: { user_id },
-          create: loginDetails,
-          update: loginDetails,
-        }),
-      ]);
-      const expiryTimestamp = expires.toUTCString();
-
-      context.res.setHeader(
-        "Set-Cookie",
-        `abods_sessionid=${token}; expires=${expiryTimestamp}; HttpOnly; Max-Age=${SESSION_EXPIRY_TIME_IN_SECONDS}; Path=/; SameSite=None; Secure`,
-      );
-
-      sendDistributionMetric(
-        "abods.graphql.login.count",
-        1,
-        "function:GraphQlFunction",
-        `env:${process.env.PROJECT_ENV}`,
-        `abods-db-user-id:${user_id}`,
-        ...orgNames.map((name) => `org:${name}`),
-      );
-      return { success: true, expiresAt: expires.toISOString() };
-    } else {
-      logger.debug("Invalid password entered");
-      throw "Invalid username or password";
+    if (
+      bodsUser[0].failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
+      unlockAt.isAfter(now)
+    ) {
+      return {
+        success: false,
+        unlockAt: unlockAt.toISOString(),
+        failedAttempts: bodsUser[0].failedAttempts,
+        locked: true,
+        maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
+      };
     }
+
+    const strippedPassword = bodsUser[0].password.replace("argon2$", "$");
+    const validPassword = await argon2.verify(strippedPassword, args.password);
+    const user_id = bodsUser[0].id;
+
+    if (!validPassword) {
+      let failedAttempts = bodsUser[0].failedAttempts + 1;
+      if (
+        failedAttempts > INCORRECT_LOGIN_MAX_ATTEMPTS ||
+        unlockAt.isBefore(now)
+      ) {
+        failedAttempts = 1;
+      }
+      const loginDetails = {
+        user_id,
+        last_login: now.toDate(),
+        failed_attempts: failedAttempts,
+      };
+      await context.db.login_details.upsert({
+        where: { user_id },
+        create: loginDetails,
+        update: loginDetails,
+      });
+
+      return {
+        success: false,
+        failedAttempts: failedAttempts,
+        maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
+        locked: failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS ? true : false,
+        unlockAt:
+          failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS
+            ? now.add(FAILED_LOGIN_LOCKOUT_MINS, "minute").toISOString()
+            : undefined,
+      };
+    }
+
+    const token = uuidv4();
+    const expiryTimeMilliseconds = SESSION_EXPIRY_TIME_IN_SECONDS * 1000;
+    const expires = new Date(Date.now() + expiryTimeMilliseconds);
+    const tokenRecord = { user_id, token, expires };
+    const loginDetails = {
+      user_id,
+      last_login: now.toDate(),
+      failed_attempts: 0,
+    };
+    await Promise.all([
+      context.db.tokens.upsert({
+        where: { user_id },
+        create: tokenRecord,
+        update: tokenRecord,
+      }),
+      context.db.login_details.upsert({
+        where: { user_id },
+        create: loginDetails,
+        update: loginDetails,
+      }),
+    ]);
+    const expiryTimestamp = expires.toUTCString();
+
+    context.res.setHeader(
+      "Set-Cookie",
+      `abods_sessionid=${token}; expires=${expiryTimestamp}; HttpOnly; Max-Age=${SESSION_EXPIRY_TIME_IN_SECONDS}; Path=/; SameSite=None; Secure`,
+    );
+
+    sendDistributionMetric(
+      "abods.graphql.login.count",
+      1,
+      "function:GraphQlFunction",
+      `env:${process.env.PROJECT_ENV}`,
+      `abods-db-user-id:${user_id}`,
+      ...orgNames.map((name) => `org:${name}`),
+    );
+    return {
+      success: true,
+      expiresAt: expires.toISOString(),
+    };
   } catch (error) {
     logger.error(error);
     return { success: false };
