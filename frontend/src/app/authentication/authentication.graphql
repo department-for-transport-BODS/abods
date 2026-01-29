@@ -2,6 +2,10 @@ mutation login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
     success
     expiresAt
+    maxAttempts
+    unlockAt
+    failedAttempts
+    locked
   }
 }
 

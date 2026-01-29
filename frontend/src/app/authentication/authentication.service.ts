@@ -67,6 +67,7 @@ export class AuthenticationService {
       .mutate({ username, password })
       .pipe(first())
       .subscribe((res) => {
+        this.userService.setLoginResponse(res.data?.login ?? null);
         if (res?.data?.login?.success) {
           this.userService.authenticateUser();
           this.setSession(
