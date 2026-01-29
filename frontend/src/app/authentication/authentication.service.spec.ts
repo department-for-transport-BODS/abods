@@ -157,6 +157,7 @@ describe("AuthenticationService", () => {
             login: {
               success: true,
               expiresAt: "2022-08-01T12:48:48.672212+00:00",
+              maxAttempts: 5,
             },
           },
         }),

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable, ReplaySubject } from "rxjs";
 import { filter, map } from "rxjs/operators";
-import { LoginInfo } from "../../generated/graphql";
+import { LoginInfo, LoginResponse } from "../../generated/graphql";
 
 @Injectable({
   providedIn: "root",
@@ -9,6 +9,7 @@ import { LoginInfo } from "../../generated/graphql";
 export class AuthenticatedUserService {
   private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
   private userSubject = new ReplaySubject<LoginInfo | null>(1);
+  private loginResponseSubject = new ReplaySubject<LoginResponse | null>(1);
 
   get isAuthenticated$(): Observable<boolean> {
     return this.isAuthenticatedSubject.asObservable();
@@ -21,8 +22,19 @@ export class AuthenticatedUserService {
     );
   }
 
+  get loginResponse$(): Observable<LoginResponse> {
+    return this.loginResponseSubject.pipe(
+      filter((r) => r !== null),
+      map((r) => r),
+    );
+  }
+
   setUser(user: LoginInfo | null) {
     this.userSubject.next(user);
+  }
+
+  setLoginResponse(response: LoginResponse | null) {
+    this.loginResponseSubject.next(response);
   }
 
   authenticateUser() {
