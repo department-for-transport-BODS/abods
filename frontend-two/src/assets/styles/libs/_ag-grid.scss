@@ -1,0 +1,262 @@
+@import "../settings/settings.scss";
+@import "../helpers/helpers.scss";
+@import "ag-grid-community/styles/ag-grid.css";
+// @import 'ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine.scss';
+
+// adds space above 'no rows' display so it doesn't overlap the header
+
+.ag-overlay-no-rows-center {
+  padding-top: 46px;
+}
+
+//
+// HEADER ROW
+//
+//////////////
+
+.ag-header {
+  border-bottom: 1px solid $govuk-border-colour;
+}
+
+.ag-header-row {
+  display: flex;
+  align-items: center;
+}
+
+//
+// HEADER CELL
+//
+//////////////
+
+.ag-header-cell {
+  box-sizing: border-box;
+  padding-right: govuk-spacing(4);
+  height: auto;
+  &:focus {
+    outline: 0;
+  }
+}
+
+.ag-header-cell-label {
+  font-weight: $govuk-font-weight-bold;
+  font-size: $font-size-default;
+}
+
+.ag-header-cell-last {
+  padding-right: 0;
+}
+.ag-header-cell-text {
+  .ag-right-aligned-header & {
+    text-align: right;
+  }
+}
+
+// sorting controls
+.ag-header-cell-sortable {
+  color: $govuk-link-colour;
+  &.ag-header-active {
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
+  }
+  &:hover:not(:focus-visible) {
+    color: $govuk-link-colour;
+    box-shadow: none;
+    background-color: transparent;
+    .ag-header-cell-text {
+      text-decoration: underline;
+    }
+  }
+}
+
+.ag-icon-asc,
+.ag-icon-desc {
+  &:before {
+    font-size: rem(14);
+    margin-left: 4px;
+  }
+}
+
+// styling for sorting controls
+.ag-icon-none {
+  position: relative;
+  margin-left: 8px;
+  width: 10px;
+  color: govuk-colour("mid-grey");
+  &:before,
+  &:after {
+    position: absolute;
+    font-size: rem(8);
+  }
+  &:before {
+    content: "\25b2";
+    top: 50%;
+    transform: translateY(-100%);
+  }
+  &:after {
+    content: "\25bc";
+    top: 50%;
+    transform: translateY(-2px);
+  }
+  .ag-header-active & {
+    color: $govuk-focus-text-colour;
+  }
+}
+
+.ag-icon-asc {
+  &:before {
+    content: "\25b2"; //arrow up
+  }
+}
+
+.ag-icon-desc {
+  &:before {
+    content: "\25bc"; //arrow down
+  }
+}
+
+//
+// ROW
+//
+//////////////
+
+.ag-row {
+  display: flex;
+  align-items: center;
+
+  border-bottom: 1px solid $govuk-border-colour;
+  &.ag-row-pinned {
+    border-top: 1px solid $govuk-border-colour;
+    border-bottom: 2px solid $govuk-border-colour;
+    .ag-cell {
+      font-weight: $govuk-font-weight-bold;
+    }
+  }
+}
+
+.ag-header ~ .ag-row.ag-row-pinned {
+  border-top: 0;
+}
+
+//
+// ROW CELL
+//
+//////////////
+
+.ag-cell {
+  padding-right: govuk-spacing(4);
+  @include govuk-font(
+    19,
+    $weight: "regular",
+    $tabular: true,
+    $line-height: false
+  );
+  display: grid;
+  align-items: center;
+  &.ag-cell-error {
+    color: govuk-colour("red");
+    font-weight: $govuk-font-weight-bold;
+  }
+  &.ag-right-aligned-cell {
+    text-align: right;
+  }
+  &:focus {
+    outline: 0;
+  }
+}
+
+.ag-cell {
+  &:focus-visible .govuk-link {
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
+  }
+  &:focus-visible .button-link {
+    outline: 0;
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow: 0 4px $govuk-focus-text-colour;
+  }
+}
+.ag-cell-last {
+  padding-right: 0;
+}
+
+.ag-cell-wrap-text {
+  word-break: break-word;
+}
+
+.ag-cell-value:not(.ag-cell-wrap-text) > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ag-cell-active-icon {
+  padding-right: 0;
+}
+
+.ag-right-aligned-header {
+  .ag-header-cell-label {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+// Column pinning
+
+.ag-body-horizontal-scroll-viewport,
+.ag-horizontal-left-spacer,
+.ag-horizontal-right-spacer {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: govuk-colour("mid-grey");
+    border-radius: 3px;
+    border: none;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  scrollbar-width: thin;
+  scrollbar-color: govuk-colour("mid-grey") transparent;
+}
+
+.ag-center-cols-clipper {
+  min-height: rem(57);
+}
+
+//
+// PAGING
+//
+//////////////
+
+.ag-root-wrapper {
+  padding-bottom: govuk-spacing(
+    1
+  ); // added so that paging focus styles don't get cropped
+}
+
+//styling for a more compact grid with smaller type
+.ag-theme-compact {
+  .ag-row {
+    min-height: rem(45);
+  }
+  .ag-cell {
+    min-height: rem(45);
+    @include govuk-font(16, $weight: "regular", $tabular: true);
+  }
+}
+// allows line-wrapping on headers for grids of this type
+.ag-theme-wrapped-header {
+  .ag-header-cell-text {
+    white-space: normal;
+  }
+}

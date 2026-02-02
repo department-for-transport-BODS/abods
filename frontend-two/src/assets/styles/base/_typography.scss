@@ -1,0 +1,45 @@
+@import "src/assets/styles/settings/settings.scss";
+@import "src/assets/styles/helpers/helpers.scss";
+// Base typography styles
+
+html {
+  font-size: 100%;
+  box-sizing: border-box;
+}
+//inherits box-sizing  https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  color: $font-color-default;
+  font-family: $font-family-default;
+  font-weight: $font-weight-default;
+  line-height: $line-height-default;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  padding: 0;
+  &.js-panel-open {
+    position: fixed;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  &.helpdesk-open {
+    overflow-y: hidden;
+  }
+}
+@include bp($to-desktop) {
+  body {
+    &.js-nav-open {
+      position: fixed;
+      overflow-x: hidden;
+      width: 100%;
+    }
+  }
+}
