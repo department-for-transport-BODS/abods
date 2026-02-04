@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { HelpdeskPanel } from "@/components/layout/HelpdeskPanel";
 import { Nav } from "@/components/layout/Nav";
 import { Panel } from "@/components/layout/Panel";
 import { SkipLinks } from "@/components/layout/SkipLinks";
@@ -51,7 +50,6 @@ export const BaseLayout = ({
           </main>
           {isAuthenticated ? <Panel /> : null}
         </div>
-        <HelpdeskPanel />
         <Footer />
       </div>
     </>

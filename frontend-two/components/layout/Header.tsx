@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 
 export const Header = ({ serviceName }: { serviceName: string }) => {
   const { isAuthenticated } = useAuth();
+  const { open: openHelpdesk } = useHelpdesk();
 
   return (
     <header
@@ -26,6 +28,7 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
           <button
             className="govuk-header__link unbuttoned govuk__link header__help-link"
             type="button"
+            onClick={openHelpdesk}
           >
             <span className="govuk-visually-hidden">Help</span>
             <img
