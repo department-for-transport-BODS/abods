@@ -7,6 +7,7 @@ import { LayoutModule } from "src/app/layout/layout.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { AuthenticationService } from "../authentication.service";
 import { LoginComponent } from "./login.component";
+import { AuthenticatedUserService } from "../authenticated-user.service";
 
 describe("LoginComponent", () => {
   let component: LoginComponent;
@@ -14,6 +15,7 @@ describe("LoginComponent", () => {
   let router: Router;
   let authenticationService: AuthenticationService;
   let route: ActivatedRoute;
+  let userService: AuthenticatedUserService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -46,11 +48,27 @@ describe("LoginComponent", () => {
             },
           },
         },
+        {
+          provide: AuthenticatedUserService,
+          useValue: {
+            get loginResponse$() {
+              return of({
+                success: true,
+                expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+                maxAttempts: 5,
+                unlockAt: null,
+                failedAttempts: null,
+                locked: null,
+              });
+            },
+          },
+        },
       ],
     }).compileComponents();
     router = TestBed.inject(Router);
     route = TestBed.inject(ActivatedRoute);
     authenticationService = TestBed.inject(AuthenticationService);
+    userService = TestBed.inject(AuthenticatedUserService);
   });
 
   beforeEach(() => {
@@ -68,11 +86,6 @@ describe("LoginComponent", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
       const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
-      spyOnProperty(
-        authenticationService,
-        "isAuthenticated$",
-        "get",
-      ).and.returnValue(of(true));
       component.ngOnInit();
 
       expect(navigateSpy).toHaveBeenCalledWith(returnUrl);
@@ -80,11 +93,7 @@ describe("LoginComponent", () => {
 
     it('should redirect to "/" if user is authenticated and returnUrl not set', () => {
       const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
-      spyOnProperty(
-        authenticationService,
-        "isAuthenticated$",
-        "get",
-      ).and.returnValue(of(true));
+
       component.ngOnInit();
 
       expect(navigateSpy).toHaveBeenCalledWith("/");
@@ -94,11 +103,14 @@ describe("LoginComponent", () => {
       const returnUrl = "test-url";
       route.snapshot.queryParams.returnUrl = returnUrl;
       const navigateSpy = spyOn(router, "navigateByUrl").and.resolveTo(true);
-      spyOnProperty(
-        authenticationService,
-        "isAuthenticated$",
-        "get",
-      ).and.returnValue(of(false));
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: "2025-12-18T12:32:23.488Z",
+          maxAttempts: 5,
+          failedAttempts: 1,
+        }),
+      );
       component.ngOnInit();
 
       expect(navigateSpy).not.toHaveBeenCalledWith(returnUrl);
@@ -107,11 +119,14 @@ describe("LoginComponent", () => {
     it("should not show error message if user is not authenticated and form not submitted", async () => {
       component.submitted = false;
       spyOn(router, "navigateByUrl").and.resolveTo(true);
-      spyOnProperty(
-        authenticationService,
-        "isAuthenticated$",
-        "get",
-      ).and.returnValue(of(false));
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: "2025-12-18T12:32:23.488Z",
+          maxAttempts: 5,
+          failedAttempts: 1,
+        }),
+      );
       component.ngOnInit();
 
       await expect(component.errors).toEqual([]);
@@ -120,16 +135,65 @@ describe("LoginComponent", () => {
     it("should show error message if user is not authenticated and form submitted", async () => {
       component.submitted = true;
       spyOn(router, "navigateByUrl").and.resolveTo(true);
-      spyOnProperty(
-        authenticationService,
-        "isAuthenticated$",
-        "get",
-      ).and.returnValue(of(false));
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: "2025-12-18T12:32:23.488Z",
+          maxAttempts: 5,
+          failedAttempts: 1,
+        }),
+      );
       component.ngOnInit();
 
       await expect(component.errors).toEqual([
         {
-          error: "Sign in failed, check username and password.",
+          error:
+            "Invalid username or password. You have 4 more attempts remaining before your account is locked.",
+          label: "login-username",
+        },
+      ]);
+    });
+
+    it("should show error message if user is locked", async () => {
+      component.submitted = true;
+      spyOn(router, "navigateByUrl").and.resolveTo(true);
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: "2025-12-18T12:32:23.488Z",
+          unlockAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+          maxAttempts: 5,
+          failedAttempts: 5,
+          locked: true,
+        }),
+      );
+      component.ngOnInit();
+
+      await expect(component.errors).toEqual([
+        {
+          error:
+            "Your account is locked for 15 minutes due to multiple failed attempts. Please try again later or reset your password if required.",
+          label: "login-username",
+        },
+      ]);
+    });
+
+    it("should show error message if user is not found", async () => {
+      component.submitted = true;
+      spyOn(router, "navigateByUrl").and.resolveTo(true);
+      spyOnProperty(userService, "loginResponse$", "get").and.returnValue(
+        of({
+          success: false,
+          expiresAt: null,
+          maxAttempts: null,
+          failedAttempts: null,
+        }),
+      );
+      component.ngOnInit();
+
+      await expect(component.errors).toEqual([
+        {
+          error: "Invalid username or password.",
           label: "login-username",
         },
       ]);

@@ -30,6 +30,7 @@ import {
   loginUser,
   logoutUser,
 } from "./userFunctions";
+import dayjs from "dayjs";
 
 jest.mock("./helpers", () => ({
   requireUserSession: jest.fn(),
@@ -263,14 +264,16 @@ describe("getUser", () => {
 
 describe("loginUser", () => {
   it("logs in user with valid credentials and returns success", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword",
-      is_active: true,
-      userOrganisations: [
-        { organisation_id: 10, organisation: { name: "Org1" } },
-      ],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     (argon2.verify as jest.Mock).mockResolvedValue(true);
 
@@ -309,7 +312,7 @@ describe("loginUser", () => {
   });
 
   it("returns failure if user not found", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue(null);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(null as never);
 
     const args = { username: "user@dft.gov.uk", password: "password" };
     let result: Partial<LoginResponse> | null = null;
@@ -321,12 +324,16 @@ describe("loginUser", () => {
   });
 
   it("returns failure if user is not mapped to any organisation", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword2",
-      is_active: true,
-      userOrganisations: [],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: null,
+        name: null,
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     const args = { username: "user@dft.gov.uk", password: "password" };
 
@@ -340,14 +347,16 @@ describe("loginUser", () => {
   });
 
   it("returns failure if password does not match", async () => {
-    mockDb.bods_user.findFirst.mockResolvedValue({
-      id: 123,
-      password: "argon2$hashedpassword",
-      is_active: true,
-      userOrganisations: [
-        { organisation_id: 10, organisation: { name: "Org1" } },
-      ],
-    } as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 0,
+      },
+    ]);
 
     (argon2.verify as jest.Mock).mockResolvedValue(false);
 
@@ -358,6 +367,82 @@ describe("loginUser", () => {
     }
 
     expect(result?.success).toBe(false);
+  });
+
+  it("returns expected data with multiple login failures", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 4,
+      },
+    ]);
+
+    (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+    const args = { username: "user@dft.gov.uk", password: "wrongpassword" };
+    let result: Partial<LoginResponse> | null = null;
+    if (typeof loginUser === "function") {
+      result = await loginUser({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result?.success).toBe(false);
+    expect(result?.failedAttempts).toEqual(5);
+    expect(result?.maxAttempts).toEqual(5);
+  });
+
+  it("returns data that indicates account is locked", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: new Date().toISOString(),
+        failedAttempts: 5,
+      },
+    ]);
+
+    (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+    const args = { username: "user@dft.gov.uk", password: "wrongpassword" };
+    let result: Partial<LoginResponse> | null = null;
+    if (typeof loginUser === "function") {
+      result = await loginUser({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result?.success).toBe(false);
+    expect(result?.failedAttempts).toEqual(5);
+    expect(result?.maxAttempts).toEqual(5);
+    expect(result?.locked).toEqual(true);
+    expect(result?.unlockAt).toBeDefined();
+  });
+
+  it("failed attempts is reset if incorrect password is entered after lockout period", async () => {
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue([
+      {
+        id: 123,
+        password: "argon2$hashedpassword",
+        organisation_id: 10,
+        name: "Org1",
+        lastLogin: dayjs().subtract(20, "minute").toISOString(),
+        failedAttempts: 3,
+      },
+    ]);
+
+    (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+    const args = { username: "user@dft.gov.uk", password: "wrongpassword" };
+    let result: Partial<LoginResponse> | null = null;
+    if (typeof loginUser === "function") {
+      result = await loginUser({}, args, context, {} as GraphQLResolveInfo);
+    }
+
+    expect(result?.success).toBe(false);
+    expect(result?.failedAttempts).toEqual(1);
   });
 });
 

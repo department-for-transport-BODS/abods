@@ -21,6 +21,7 @@ export async function createLoginDetailsTable(db: Kysely<DB>) {
     .addColumn("last_login", "timestamptz", (col) => col.notNull())
     .addColumn("data_monitoring_access_count", "integer")
     .addColumn("data_monitoring_access_refresh", "timestamptz")
+    .addColumn("failed_attempts", "integer", (col) => col.notNull())
     .execute();
 }
 

@@ -386,6 +386,7 @@ export const createUserTablesAndData = async (dbKysely: Kysely<DB>) => {
         last_login: new Date(),
         data_monitoring_access_count: 0,
         data_monitoring_access_refresh: new Date(),
+        failed_attempts: 0,
       })
       .execute(),
     dbKysely
