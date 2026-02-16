@@ -1,9 +1,14 @@
+import { usePanel } from '@/contexts/PanelContext';
+
 export const Panel = () => {
+  const { isOpen, content } = usePanel();
+
   return (
-    <aside className="app__panel" aria-live="polite">
-      <div className="govuk-width-container">
-        <p className="govuk-body-s">Panel content will be migrated here.</p>
-      </div>
-    </aside>
+    <div
+      id="panel"
+      className={`panel ${isOpen ? 'panel--open' : ''}`}
+    >
+      {content}
+    </div>
   );
 };

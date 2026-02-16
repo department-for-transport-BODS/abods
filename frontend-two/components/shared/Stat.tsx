@@ -6,10 +6,11 @@ interface StatProps {
   value: ReactNode;
   tooltip?: string;
   id?: string;
+  className?: string;
 }
 
-export const Stat = ({ label, value, tooltip, id }: StatProps) => (
-  <div className="stat" id={id}>
+export const Stat = ({ label, value, tooltip, id, className }: StatProps) => (
+  <div className={`stat ${className ?? ""}`.trim()} id={id}>
     <span className="stat__label">{label}</span>
     {tooltip ? (
       <Tooltip message={tooltip} underline>

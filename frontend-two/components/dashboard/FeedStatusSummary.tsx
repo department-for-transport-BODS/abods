@@ -9,7 +9,7 @@ interface FeedStatusSummaryProps {
 }
 
 export const FeedStatusSummary = ({ operators }: FeedStatusSummaryProps) => (
-  <Box>
+  <Box className="app-feed-status-summary">
     <h2 className="govuk-heading-m">Feed status</h2>
     <table className="feed-status-summary">
       <thead>
