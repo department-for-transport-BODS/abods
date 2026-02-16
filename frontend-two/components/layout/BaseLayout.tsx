@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { ReactNode } from "react";
+import { useRouter } from "next/router";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -23,7 +24,10 @@ export const BaseLayout = ({
   children,
   errors,
 }: BaseLayoutProps) => {
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const showAuthenticatedLayout =
+    isAuthenticated && router.pathname !== "/login";
   const pageTitle = buildTitle(errors, title);
 
   return (
@@ -36,19 +40,19 @@ export const BaseLayout = ({
       <CookieBanner />
       <div className="app">
         <Header serviceName="Analyse Bus Open Data" />
-        <div className="app__body govuk-width-container">
-          {isAuthenticated ? <Nav /> : null}
+        <div className="app__body">
+          {showAuthenticatedLayout ? <Nav /> : null}
           <main
             id="content"
             className={
-              isAuthenticated
+              showAuthenticatedLayout
                 ? "app__content"
                 : "app__content app__content--narrow"
             }
           >
             {children}
           </main>
-          {isAuthenticated ? <Panel /> : null}
+          {showAuthenticatedLayout ? <Panel /> : null}
         </div>
         <Footer />
       </div>
