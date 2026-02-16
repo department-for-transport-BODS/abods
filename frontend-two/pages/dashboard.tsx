@@ -11,7 +11,6 @@ import { dashboardService } from "@/services/dashboard/dashboard.service";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { DashboardVehicles, OperatorDashboard, PerformanceFiltersInputType, StopTypeOption } from "@/types/dashboard";
-import { isApiBypassed } from "@/utils/runtime";
 
 const DashboardPage = () => {
   useRequireAuth();
@@ -34,20 +33,18 @@ const DashboardPage = () => {
   );
 
   useEffect(() => {
-    const bypassApi = isApiBypassed();
-    if (!config?.apiUrl && !bypassApi) {
+    if (!config?.apiUrl) {
       setOperators([]);
       setVehicleCounts([]);
       setIsLoading(false);
       return;
     }
-    const apiUrl = config?.apiUrl ?? "";
     const load = async () => {
       setIsLoading(true);
       try {
         const [ops, counts] = await Promise.all([
-          dashboardService.fetchOperators(apiUrl),
-          dashboardService.fetchVehicleCounts(apiUrl, nocCode),
+          dashboardService.fetchOperators(config.apiUrl),
+          dashboardService.fetchVehicleCounts(config.apiUrl, nocCode),
         ]);
         setOperators(ops);
         setVehicleCounts(counts);
@@ -59,7 +56,7 @@ const DashboardPage = () => {
       }
     };
     load();
-  }, [config?.apiUrl, nocCode]);
+  }, [config, nocCode]);
 
   const currentVehicles = useMemo(
     () => vehicleCounts.reduce((total, item) => total + item.actual, 0),

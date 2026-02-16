@@ -13,7 +13,6 @@ import {
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
-import { isApiBypassed } from "@/utils/runtime";
 
 interface PerformanceWidgetProps {
   filters: PerformanceFiltersInputType;
@@ -55,20 +54,18 @@ export const PerformanceWidget = ({
   );
 
   useEffect(() => {
-    const bypassApi = isApiBypassed();
-    if (!config?.apiUrl && !bypassApi) {
+    if (!config?.apiUrl) {
       setStats(null);
       setErrored(false);
       setLoaded(true);
       return;
     }
-    const apiUrl = config?.apiUrl ?? "";
     const load = async () => {
       setLoaded(false);
       setErrored(false);
       try {
         const result = await dashboardService.fetchPunctualityStats(
-          apiUrl,
+          config.apiUrl,
           filters,
           window.from,
           window.to,
@@ -86,21 +83,19 @@ export const PerformanceWidget = ({
       }
     };
     load();
-  }, [config?.apiUrl, filters, window.from, window.to]);
+  }, [config, filters, window.from, window.to]);
 
   useEffect(() => {
-    const bypassApi = isApiBypassed();
-    if (!config?.apiUrl && !bypassApi) {
+    if (!config?.apiUrl) {
       setServices([]);
       setServicesLoaded(true);
       return;
     }
-    const apiUrl = config?.apiUrl ?? "";
     const load = async () => {
       setServicesLoaded(false);
       try {
         const result = await dashboardService.fetchServiceRanking(
-          apiUrl,
+          config.apiUrl,
           filters,
           window.from,
           window.to,
@@ -116,15 +111,7 @@ export const PerformanceWidget = ({
       }
     };
     load();
-  }, [
-    config?.apiUrl,
-    filters,
-    window.from,
-    window.to,
-    window.trendFrom,
-    window.trendTo,
-    order,
-  ]);
+  }, [config, filters, window.from, window.to, window.trendFrom, window.trendTo, order]);
 
   return (
     <div className="performance app-performance">
