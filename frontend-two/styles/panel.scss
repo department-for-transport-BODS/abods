@@ -1,0 +1,33 @@
+@import "../src/assets/styles/settings/settings";
+@import "../src/assets/styles/helpers/helpers";
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  height: 100%;
+  width: 0px;
+  border: none;
+  padding: 0px;
+  background: govuk-colour("white");
+  z-index: $z-modal;
+  animation: slidein 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  
+  &--open {
+    width: 380px;
+    padding: govuk-spacing(4);
+    border-left: 1px solid $govuk-border-colour;
+    visibility: visible;
+  }
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

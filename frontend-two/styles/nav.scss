@@ -1,0 +1,230 @@
+@import "../src/assets/styles/settings/settings";
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #b1b4b6;
+  width: 220px;
+  box-sizing: border-box;
+  padding: 0 16px 16px 16px;
+  margin-left: 16px;
+  margin-right: 30px;
+  background-color: #ffffff;
+
+  &__block {
+    flex: 1 1 auto;
+    padding-top: govuk-spacing(7);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  &__item {
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  &__link {
+    display: block;
+    color: #1d70b8;
+    text-decoration: none;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 13px;
+    font-size: 19px;
+    line-height: 1.3157894737;
+
+    &--current {
+      font-weight: 700;
+      position: relative;
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #1d70b8;
+      }
+    }
+
+    &:hover:not(:focus) {
+      text-decoration: underline;
+    }
+
+    &:focus {
+      outline: 0;
+      color: #0b0c0c;
+      background-color: #ffdd00;
+      box-shadow: 0 4px #0b0c0c;
+    }
+  }
+
+  &__menu-bottom {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding-top: 16px;
+    background-color: #ffffff;
+
+    &__action-item {
+      display: inline-flex;
+      width: 100%;
+      font-size: 19px;
+      line-height: 1.3157894737;
+      padding: 5px 5px 5px 13px;
+      align-items: center;
+      
+      svg {
+        display: inline-flex;
+        color: #1d70b8;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
+      
+      &:focus {
+        svg {
+          color: #0b0c0c;
+        }
+      }
+    }
+  }
+}
+
+.user-account {
+  &__invite-button {
+    display: inline-flex;
+    width: 100%;
+    font-size: 19px;
+    line-height: 1.3157894737;
+    padding: 5px 5px 5px 13px;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    div {
+      display: inline-flex;
+      
+      svg {
+        color: #1d70b8;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
+    }
+    
+    &:focus {
+      svg {
+        color: #0b0c0c;
+      }
+    }
+  }
+
+  &__menu-container {
+    position: relative;
+  }
+
+  &__trigger {
+    display: inline-flex;
+    width: 100%;
+    font-size: 19px;
+    line-height: 1.3157894737;
+    padding: 5px 5px 5px 13px;
+    align-items: center;
+    
+    svg {
+      color: #1d70b8;
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+    
+    &:focus {
+      svg {
+        color: #0b0c0c;
+      }
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #b1b4b6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    z-index: 100;
+
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      list-style: none;
+      
+      button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 10px 15px;
+        font-size: 19px;
+        line-height: 1.3157894737;
+        color: #1d70b8;
+        
+        &:hover {
+          background-color: #f3f2f1;
+        }
+        
+        &:focus {
+          outline: 3px solid #ffdd00;
+          outline-offset: 0;
+          color: #0b0c0c;
+          background-color: #ffdd00;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    position: static;
+    min-height: auto;
+    max-height: none;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 20px 15px;
+    border-right: 0;
+    border-bottom: 1px solid #b1b4b6;
+  }
+}
+
+.button-link {
+  background: none;
+  border: none;
+  color: #1d70b8;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+    color: #0b0c0c;
+    background-color: #ffdd00;
+    box-shadow: 0 4px #0b0c0c;
+  }
+}
