@@ -1,30 +1,9 @@
 import { graphqlRequest } from "@/services/api";
-
-const LOGIN_MUTATION = `mutation login($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
-    success
-    expiresAt
-    maxAttempts
-    unlockAt
-    failedAttempts
-    locked
-  }
-}`;
-
-const LOGOUT_MUTATION = `mutation logout {
-  logout
-}`;
-
-const USER_QUERY = `query user {
-  user {
-    currentUserId
-    canViewServiceMonitoring
-    canEditAllAlerts
-    canViewDistances
-    serviceMonitoringEmbedUrl
-    flags
-  }
-}`;
+import {
+  LOGIN_MUTATION,
+  LOGOUT_MUTATION,
+  USER_QUERY,
+} from "@/services/auth/auth.operations";
 
 export interface LoginResult {
   success: boolean;
@@ -42,7 +21,6 @@ export const authService = {
       password,
     });
     if (!result.login) {
-      console.log(result)
       throw new Error("Login failed");
     }
     return result.login;
