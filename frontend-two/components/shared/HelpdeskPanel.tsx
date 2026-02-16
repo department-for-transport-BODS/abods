@@ -7,6 +7,10 @@ const HelpdeskPanel: React.FC = () => {
   const { config } = useConfig();
   const panelRef = useRef<HTMLDivElement>(null);
 
+  if (!isOpen) {
+    return null;
+  }
+
   useEffect(() => {
     if (!isOpen) return;
 
