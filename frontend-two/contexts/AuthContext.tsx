@@ -17,6 +17,7 @@ import {
   setUser,
 } from "@/utils/storage";
 import { useConfig } from "@/contexts/ConfigContext";
+import { isApiBypassed } from "@/utils/runtime";
 
 interface AuthContextValue {
   user: LoginInfo | null;
@@ -24,17 +25,35 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  clearUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { config } = useConfig();
+  const bypassApi = isApiBypassed();
   const [user, setUserState] = useState<LoginInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const offlineUser = useMemo<LoginInfo>(
+    () => ({
+      currentUserId: "offline-user",
+      canViewServiceMonitoring: true,
+      canEditAllAlerts: true,
+      canViewDistances: true,
+      serviceMonitoringEmbedUrl: null,
+      flags: [],
+    }),
+    [],
+  );
+
   const fetchUser = useCallback(async () => {
+    if (bypassApi) {
+      setUserState(offlineUser);
+      return offlineUser;
+    }
     if (!config?.apiUrl) return null;
     try {
       const result = await authService.getUser(config.apiUrl);
@@ -44,10 +63,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserState(null);
       return null;
     }
-  }, [config?.apiUrl]);
+  }, [bypassApi, config?.apiUrl, offlineUser]);
 
   const logout = useCallback(async () => {
-    if (!config?.apiUrl) {
+    if (bypassApi || !config?.apiUrl) {
       clearSession();
       clearUser();
       setIsAuthenticated(false);
@@ -59,10 +78,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearUser();
     setIsAuthenticated(false);
     setUserState(null);
-  }, [config?.apiUrl]);
+  }, [bypassApi, config?.apiUrl]);
+
+  const clearUserState = useCallback(() => {
+    clearSession();
+    clearUser();
+    setIsAuthenticated(false);
+    setUserState(null);
+  }, []);
 
   useEffect(() => {
     const init = async () => {
+      if (bypassApi) {
+        setIsAuthenticated(true);
+        setUserState(offlineUser);
+        setIsLoading(false);
+        return;
+      }
       const alive = isSessionAlive();
       setIsAuthenticated(alive);
       if (alive) {
@@ -71,7 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     };
     init();
-  }, [fetchUser]);
+  }, [bypassApi, fetchUser, offlineUser]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -117,6 +149,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(
     async (username: string, password: string) => {
+      if (bypassApi) {
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString();
+        setSession({ expiresAt });
+        setUser({ username });
+        setUserState({ ...offlineUser, currentUserId: username });
+        setIsAuthenticated(true);
+        return;
+      }
       if (!config?.apiUrl) {
         throw new Error("API URL not configured");
       }
@@ -129,12 +169,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await fetchUser();
       setIsAuthenticated(true);
     },
-    [config?.apiUrl, fetchUser],
+    [bypassApi, config?.apiUrl, fetchUser, offlineUser],
   );
 
   const value = useMemo(
-    () => ({ user, isAuthenticated, isLoading, login, logout }),
-    [user, isAuthenticated, isLoading, login, logout],
+    () => ({ user, isAuthenticated, isLoading, login, logout, clearUser: clearUserState }),
+    [user, isAuthenticated, isLoading, login, logout, clearUserState],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

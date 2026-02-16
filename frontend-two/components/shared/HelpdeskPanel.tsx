@@ -7,6 +7,10 @@ const HelpdeskPanel: React.FC = () => {
   const { config } = useConfig();
   const panelRef = useRef<HTMLDivElement>(null);
 
+  if (!isOpen) {
+    return null;
+  }
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -38,13 +42,8 @@ const HelpdeskPanel: React.FC = () => {
 
   return (
     <>
-      <div
-        className={`helpdesk-overlay ${isOpen ? "helpdesk-overlay--open" : ""}`}
-      />
-      <div
-        ref={panelRef}
-        className={`helpdesk-panel ${isOpen ? "helpdesk-panel--open" : ""}`}
-      >
+      <div className="helpdesk-overlay helpdesk-overlay--open" />
+      <div ref={panelRef} className="helpdesk-panel helpdesk-panel--open">
         <div className="helpdesk-panel__heading">
           <h2 className="govuk-heading-l">{data?.title}</h2>
           <button

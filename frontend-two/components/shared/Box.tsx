@@ -8,7 +8,7 @@ interface BoxProps {
 
 export const Box = ({ children, minHeight, className }: BoxProps) => (
   <div
-    className={`box ${className ?? ""}`}
+    className={`box app-box ${className ?? ""}`}
     style={minHeight ? { minHeight } : undefined}
   >
     {children}

@@ -18,19 +18,21 @@ export const VehiclesStatus = ({
     : "/feed-monitoring";
 
   return (
-    <Box>
+    <Box className="app-vehicles-status">
       <h2 className="govuk-heading-m">Vehicle count</h2>
       <div className="vehicles-status__stats">
         <Stat
           label="Current"
           value={actual}
           id="vehicle-status-current"
+          className="vehicles-status__current-stat"
           tooltip="Current number of vehicles running that we can match to the schedules that have been provided"
         />
         <Stat
           label="Expected"
           value={expected}
           id="vehicle-status-expected"
+          className="vehicles-status__expected-stat"
           tooltip="The number of vehicles that should be running now according to the timetables provided"
         />
       </div>

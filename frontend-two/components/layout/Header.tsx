@@ -1,46 +1,64 @@
-import Link from "next/link";
+import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 
+const KainosGovukHeader = dynamic(
+  () =>
+    import("kainossoftwareltd-govuk-react-kainos").then(
+      (module) => module.Header,
+    ),
+  { ssr: false },
+);
+
 export const Header = ({ serviceName }: { serviceName: string }) => {
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { open: openHelpdesk } = useHelpdesk();
+  const showHelp = isAuthenticated && router.pathname !== "/login";
 
   return (
-    <header
-      className="govuk-header header"
-      role="banner"
-      data-module="govuk-header"
-    >
-      <div className="govuk-header__container header__container govuk-width-container">
-        <div className="govuk-header__logo header__logo">
-          <Link
-            href="/"
-            className="govuk-header__link govuk-header__link--homepage"
-          >
-            <span className="govuk-header__logotype">
-              <span className="govuk-header__logotype-text">GOV.UK</span>
-            </span>
-            <span className="govuk-header__product-name">{serviceName}</span>
-          </Link>
-        </div>
-        {isAuthenticated ? (
+    <div className="header-shell">
+      <KainosGovukHeader
+        className="header"
+        serviceName={serviceName}
+        serviceUrl="/"
+        showNavigation={false}
+        rebrand
+      />
+      {showHelp ? (
+        <div className="header__help-overlay govuk-width-container">
           <button
             className="govuk-header__link unbuttoned govuk__link header__help-link"
             type="button"
             onClick={openHelpdesk}
           >
-            <span className="govuk-visually-hidden">Help</span>
-            <img
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
               className="header__help-icon"
-              src="/assets/icons/question-in-circle.svg"
+              viewBox="0 0 24 24"
               alt=""
               aria-hidden="true"
-            />
+              focusable="false"
+            >
+              <circle
+                cx="12.024"
+                cy="12.07"
+                r="10.632"
+                stroke="currentColor"
+                strokeWidth="1.737"
+                fill="none"
+              />
+              <path
+                fill="currentColor"
+                d="M13.791 14.096q-.14.446-.152 1.383h-3.164q.07-1.98.375-2.73.304-.762 1.57-1.746l.855-.668q.422-.317.68-.692.469-.644.469-1.418 0-.89-.528-1.617-.515-.738-1.898-.738-1.36 0-1.934.902-.562.902-.562 1.875H6.115q.14-3.34 2.332-4.734 1.383-.89 3.399-.89 2.648 0 4.394 1.265 1.758 1.265 1.758 3.75 0 1.523-.762 2.566-.445.633-1.71 1.617l-.833.645q-.68.527-.902 1.23zm.094 6.375h-3.492v-3.386h3.492z"
+                transform="translate(1.66 1.972) scale(.85964)"
+              />
+            </svg>
             Help
           </button>
-        ) : null}
-      </div>
-    </header>
+        </div>
+      ) : null}
+    </div>
   );
 };
