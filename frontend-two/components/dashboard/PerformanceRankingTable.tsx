@@ -70,7 +70,7 @@ export const PerformanceRankingTable = ({
       : `Change in on-time percentage from ${periodLabel}`;
 
   return (
-    <div>
+    <div className="app-performance-ranking">
       <div className="tabs">
         <ul className="tabs__list">
           <li

@@ -13,6 +13,7 @@ import {
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
+import { isApiBypassed } from "@/utils/runtime";
 
 interface PerformanceWidgetProps {
   filters: PerformanceFiltersInputType;
@@ -54,13 +55,20 @@ export const PerformanceWidget = ({
   );
 
   useEffect(() => {
-    if (!config?.apiUrl) return;
+    const bypassApi = isApiBypassed();
+    if (!config?.apiUrl && !bypassApi) {
+      setStats(null);
+      setErrored(false);
+      setLoaded(true);
+      return;
+    }
+    const apiUrl = config?.apiUrl ?? "";
     const load = async () => {
       setLoaded(false);
       setErrored(false);
       try {
         const result = await dashboardService.fetchPunctualityStats(
-          config.apiUrl,
+          apiUrl,
           filters,
           window.from,
           window.to,
@@ -81,12 +89,18 @@ export const PerformanceWidget = ({
   }, [config?.apiUrl, filters, window.from, window.to]);
 
   useEffect(() => {
-    if (!config?.apiUrl) return;
+    const bypassApi = isApiBypassed();
+    if (!config?.apiUrl && !bypassApi) {
+      setServices([]);
+      setServicesLoaded(true);
+      return;
+    }
+    const apiUrl = config?.apiUrl ?? "";
     const load = async () => {
       setServicesLoaded(false);
       try {
         const result = await dashboardService.fetchServiceRanking(
-          config.apiUrl,
+          apiUrl,
           filters,
           window.from,
           window.to,
@@ -95,6 +109,8 @@ export const PerformanceWidget = ({
           window.trendTo,
         );
         setServices(result);
+      } catch {
+        setServices([]);
       } finally {
         setServicesLoaded(true);
       }
@@ -111,7 +127,7 @@ export const PerformanceWidget = ({
   ]);
 
   return (
-    <div>
+    <div className="performance app-performance">
       {!loaded ? (
         <div className="performance__no-data">
           <span className="govuk-body">Loading...</span>
@@ -130,7 +146,10 @@ export const PerformanceWidget = ({
         </div>
       ) : (
         <div className="performance__chart">
-          <PerformanceChart data={stats ?? { onTime: 0, early: 0, late: 0 }} />
+          <PerformanceChart
+            data={stats ?? { onTime: 0, early: 0, late: 0 }}
+            chartId="performance-chart"
+          />
         </div>
       )}
 
