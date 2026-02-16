@@ -50,12 +50,14 @@ const server = new ApolloServer<RequestContext>({
 
 logger.info("Starting server in the background");
 server.startInBackgroundHandlingStartupErrorsByLoggingAndFailingAllRequests();
-const corsOrigin = process.env.CORS_ORIGIN;
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : undefined;
 const app = express();
 const env = process.env.PROJECT_ENV ?? "local";
 
 app.use(
-  cors<cors.CorsRequest>({ origin: corsOrigin, credentials: true }),
+  cors<cors.CorsRequest>({ origin: corsOrigin && corsOrigin.length === 1 ? corsOrigin[0] : corsOrigin, credentials: true }),
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
