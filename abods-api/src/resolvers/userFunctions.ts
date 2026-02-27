@@ -171,8 +171,7 @@ export const loginUser: MutationResolvers["login"] = async (
 
     if (
       currentFailedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
-      unlockAt != null &&
-      unlockAt.isAfter(now)
+      unlockAt?.isAfter(now)
     ) {
       return {
         success: false,
@@ -191,7 +190,7 @@ export const loginUser: MutationResolvers["login"] = async (
       let failedAttempts = currentFailedAttempts + 1;
       if (
         failedAttempts > INCORRECT_LOGIN_MAX_ATTEMPTS ||
-        (unlockAt != null && unlockAt.isBefore(now))
+        unlockAt?.isBefore(now)
       ) {
         failedAttempts = 1;
       }
