@@ -130,7 +130,11 @@ export const loginUser: MutationResolvers["login"] = async (
         "bods_userorganisation.organisation_id",
       )
       .innerJoin("login_details", "login_details.user_id", "bods_user.id")
-      .where("bods_user.email", "=", args.username)
+      .where(
+        (eb) => eb.fn("lower", [eb.ref("bods_user.email")]),
+        "=",
+        args.username.toLowerCase(),
+      )
       .where("bods_user.is_active", "=", true)
       .distinctOn(["bods_user.id", "bods_user.password"])
       .select([
