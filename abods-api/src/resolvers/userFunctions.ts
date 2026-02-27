@@ -161,25 +161,26 @@ export const loginUser: MutationResolvers["login"] = async (
       );
       throwUnauthenticatedError("User not mapped to any organisation");
     }
-    if(bodsUser[0].lastLogin != null) {
-      const now = dayjs();
-      const unlockAt = dayjs(bodsUser[0].lastLogin).add(
-        FAILED_LOGIN_LOCKOUT_MINS,
-        "minute",
-      );
 
-      if (
-        bodsUser[0].failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
-        unlockAt.isAfter(now)
-      ) {
-        return {
-          success: false,
-          unlockAt: unlockAt.toISOString(),
-          failedAttempts: bodsUser[0].failedAttempts,
-          locked: true,
-          maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
-        };
-      }
+    const now = dayjs();
+    const currentFailedAttempts = bodsUser[0].failedAttempts ?? 0;
+    const unlockAt =
+      bodsUser[0].lastLogin != null
+        ? dayjs(bodsUser[0].lastLogin).add(FAILED_LOGIN_LOCKOUT_MINS, "minute")
+        : null;
+
+    if (
+      currentFailedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
+      unlockAt != null &&
+      unlockAt.isAfter(now)
+    ) {
+      return {
+        success: false,
+        unlockAt: unlockAt.toISOString(),
+        failedAttempts: currentFailedAttempts,
+        locked: true,
+        maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
+      };
     }
 
     const strippedPassword = bodsUser[0].password.replace("argon2$", "$");
@@ -187,10 +188,10 @@ export const loginUser: MutationResolvers["login"] = async (
     const user_id = bodsUser[0].id;
 
     if (!validPassword) {
-      let failedAttempts = bodsUser[0].failedAttempts + 1;
+      let failedAttempts = currentFailedAttempts + 1;
       if (
         failedAttempts > INCORRECT_LOGIN_MAX_ATTEMPTS ||
-        unlockAt.isBefore(now)
+        (unlockAt != null && unlockAt.isBefore(now))
       ) {
         failedAttempts = 1;
       }
