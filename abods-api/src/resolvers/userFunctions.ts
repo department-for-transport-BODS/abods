@@ -119,17 +119,17 @@ export const loginUser: MutationResolvers["login"] = async (
 
     const query = context.kysely
       .selectFrom("bods_user")
-      .innerJoin(
+      .leftJoin(
         "bods_userorganisation",
         "bods_userorganisation.user_id",
         "bods_user.id",
       )
-      .innerJoin(
+      .leftJoin(
         "bods_organisation",
         "bods_organisation.id",
         "bods_userorganisation.organisation_id",
       )
-      .innerJoin("login_details", "login_details.user_id", "bods_user.id")
+      .leftJoin("login_details", "login_details.user_id", "bods_user.id")
       .where(
         (eb) => eb.fn("lower", [eb.ref("bods_user.email")]),
         "=",
