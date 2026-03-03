@@ -119,18 +119,22 @@ export const loginUser: MutationResolvers["login"] = async (
 
     const query = context.kysely
       .selectFrom("bods_user")
-      .innerJoin(
+      .leftJoin(
         "bods_userorganisation",
         "bods_userorganisation.user_id",
         "bods_user.id",
       )
-      .innerJoin(
+      .leftJoin(
         "bods_organisation",
         "bods_organisation.id",
         "bods_userorganisation.organisation_id",
       )
-      .innerJoin("login_details", "login_details.user_id", "bods_user.id")
-      .where("bods_user.email", "=", args.username)
+      .leftJoin("login_details", "login_details.user_id", "bods_user.id")
+      .where(
+        (eb) => eb.fn("lower", [eb.ref("bods_user.email")]),
+        "=",
+        args.username.toLowerCase(),
+      )
       .where("bods_user.is_active", "=", true)
       .distinctOn(["bods_user.id", "bods_user.password"])
       .select([
@@ -159,19 +163,20 @@ export const loginUser: MutationResolvers["login"] = async (
     }
 
     const now = dayjs();
-    const unlockAt = dayjs(bodsUser[0].lastLogin).add(
-      FAILED_LOGIN_LOCKOUT_MINS,
-      "minute",
-    );
+    const currentFailedAttempts = bodsUser[0].failedAttempts ?? 0;
+    const unlockAt =
+      bodsUser[0].lastLogin != null
+        ? dayjs(bodsUser[0].lastLogin).add(FAILED_LOGIN_LOCKOUT_MINS, "minute")
+        : null;
 
     if (
-      bodsUser[0].failedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
-      unlockAt.isAfter(now)
+      currentFailedAttempts >= INCORRECT_LOGIN_MAX_ATTEMPTS &&
+      unlockAt?.isAfter(now)
     ) {
       return {
         success: false,
         unlockAt: unlockAt.toISOString(),
-        failedAttempts: bodsUser[0].failedAttempts,
+        failedAttempts: currentFailedAttempts,
         locked: true,
         maxAttempts: INCORRECT_LOGIN_MAX_ATTEMPTS,
       };
@@ -182,10 +187,10 @@ export const loginUser: MutationResolvers["login"] = async (
     const user_id = bodsUser[0].id;
 
     if (!validPassword) {
-      let failedAttempts = bodsUser[0].failedAttempts + 1;
+      let failedAttempts = currentFailedAttempts + 1;
       if (
         failedAttempts > INCORRECT_LOGIN_MAX_ATTEMPTS ||
-        unlockAt.isBefore(now)
+        unlockAt?.isBefore(now)
       ) {
         failedAttempts = 1;
       }
