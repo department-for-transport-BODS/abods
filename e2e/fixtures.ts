@@ -1,25 +1,32 @@
-import { test as base } from '@playwright/test';
-import {
-  startCoverage,
-  stopCoverage,
-  generateReports,
-  loadAllRoutes,
-} from './utils/coverage';
+import { test as base, Page } from '@playwright/test';
+
+const APP_ROUTES = [
+  '/',
+  '/dashboard',
+  '/login',
+  '/privacy-policy',
+  '/cookies',
+  '/accessibility',
+  '/feed-monitoring',
+  '/on-time',
+  '/corridors',
+  '/vehicle-journeys',
+  '/data-monitoring',
+  '/stop-analysis',
+  '/service-monitoring',
+];
+
+async function loadAllRoutes(page: Page): Promise<void> {
+  for (const route of APP_ROUTES) {
+    await page.goto(route);
+    await page.waitForLoadState('networkidle');
+  }
+}
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    // Start coverage before test
-    await startCoverage(page);
-
-    // Load all routes to trigger lazy-loaded modules - gives better covg accuracy
     await loadAllRoutes(page);
-
-    // Run the test
     await use(page);
-
-    // Stop coverage and generate reports after test
-    const coverageMap = await stopCoverage(page);
-    generateReports(coverageMap);
   },
 });
 

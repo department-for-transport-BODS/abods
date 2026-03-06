@@ -37,7 +37,6 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
               xmlns="http://www.w3.org/2000/svg"
               className="header__help-icon"
               viewBox="0 0 24 24"
-              alt=""
               aria-hidden="true"
               focusable="false"
             >

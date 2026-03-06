@@ -94,11 +94,11 @@ const HelpdeskPanel: React.FC = () => {
                 email{" "}
                 <a
                   className="govuk-link"
-                  href={`mailto:${config?.supportEmail || ""}`}
+                  href={`mailto:${config?.supportEmail || "Please Contact Support"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {config?.supportEmail || ""}
+                  {config?.supportEmail || " Please Contact Support"}
                 </a>
               </p>
             </div>

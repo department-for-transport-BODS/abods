@@ -45,6 +45,7 @@ export const PerformanceWidget = ({
   const [services, setServices] = useState<ServicePunctuality[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [servicesLoaded, setServicesLoaded] = useState(false);
+  const [servicesErrored, setServicesErrored] = useState(false);
   const [errored, setErrored] = useState(false);
   const [order, setOrder] = useState<RankingOrder>("descending");
 
@@ -88,11 +89,13 @@ export const PerformanceWidget = ({
   useEffect(() => {
     if (!config?.apiUrl) {
       setServices([]);
+      setServicesErrored(false);
       setServicesLoaded(true);
       return;
     }
     const load = async () => {
       setServicesLoaded(false);
+      setServicesErrored(false);
       try {
         const result = await dashboardService.fetchServiceRanking(
           config.apiUrl,
@@ -106,6 +109,7 @@ export const PerformanceWidget = ({
         setServices(result);
       } catch {
         setServices([]);
+        setServicesErrored(true);
       } finally {
         setServicesLoaded(true);
       }
@@ -143,6 +147,7 @@ export const PerformanceWidget = ({
       <PerformanceRankingTable
         services={services}
         loaded={servicesLoaded}
+        errored={servicesErrored}
         nocCode={nocCode}
         operators={operators}
         order={order}

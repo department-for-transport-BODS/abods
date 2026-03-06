@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { useConfig } from "@/contexts/ConfigContext";
 
 const PrivacyPolicyPage = () => {
   const { isAuthenticated } = useAuth();
+  const { config } = useConfig();
 
   return (
     <BaseLayout title="Privacy - Analyse Bus Open Data">
@@ -28,7 +30,7 @@ const PrivacyPolicyPage = () => {
           <h2 className="govuk-heading-m">What data we collect from you</h2>
           <p className="govuk-body">
             Our main purpose is providing analysis of the bus services contributing to the{" "}
-            <a className="govuk-link" href="https://www.bus-data.dft.gov.uk/">
+            <a className="govuk-link" href={`${config?.bodsBaseUrl}/`}>
               Bus Open Data Service
             </a>
             . Local bus services data across England is in the public domain and utilised responsibly.

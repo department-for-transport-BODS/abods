@@ -35,9 +35,7 @@ export const TextInput = <T,>({
 
   return (
     <div
-      className={
-        error ? "govuk-form-group govuk-form-group--error" : "govuk-form-group"
-      }
+      className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`}
     >
       <label
         className={`govuk-label${required ? " text-input__label--required" : ""}`}

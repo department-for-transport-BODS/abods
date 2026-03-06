@@ -9,6 +9,7 @@ import {
 interface PerformanceRankingTableProps {
   services: ServicePunctuality[];
   loaded: boolean;
+  errored: boolean;
   nocCode: string | null;
   operators: OperatorDashboard[];
   order: RankingOrder;
@@ -44,7 +45,7 @@ const calculateTrend = (service: ServicePunctuality) => {
   const diff = currentPct - lastPct;
   return {
     diff: diff.toFixed(2),
-    direction: diff >= 0 ? "increase" : "decrease",
+    direction: diff <= 0 ? "decrease" : "increase",
   };
 };
 
@@ -56,6 +57,7 @@ const getOperatorName = (
 export const PerformanceRankingTable = ({
   services,
   loaded,
+  errored,
   nocCode,
   operators,
   order,
@@ -105,6 +107,12 @@ export const PerformanceRankingTable = ({
       {!loaded ? (
         <div className="ranking-table__loading">
           <p className="govuk-body">Loading...</p>
+        </div>
+      ) : errored ? (
+        <div className="ranking-table__no-data">
+          <span className="govuk-body">
+            There was an error fetching the service data
+          </span>
         </div>
       ) : services.length === 0 ? (
         <div className="ranking-table__no-data">

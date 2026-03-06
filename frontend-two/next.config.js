@@ -9,8 +9,11 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
 ];
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack(config) {
+    config.module.rules.push({ test: /\.svg$/, use: ["@svgr/webpack"] });
+    return config;
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   trailingSlash: true,

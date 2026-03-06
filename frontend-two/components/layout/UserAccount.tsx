@@ -37,26 +37,23 @@ export const UserAccount = () => {
     event.preventDefault();
     if (!config?.apiUrl) {
       clearUser();
-      router.push("/login");
+      console.error("API URL is not configured. Cannot perform logout.");
+      router.push("/500");
       return;
     }
     try {
       await authService.logout(config.apiUrl);
-      clearUser();
-      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Still clear local state and redirect
+    }
+    finally {
       clearUser();
       router.push("/login");
     }
   };
 
   const handleInviteClick = () => {
-    window.open(
-      "https://publish.bus-data.dft.gov.uk/account/manage/invite/",
-      "_blank"
-    );
+    window.open(`${config?.bodsBaseUrl}/account/manage/invite/`, "_blank");
   };
 
   return (

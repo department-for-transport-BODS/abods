@@ -3,7 +3,7 @@ import { useConfig } from "@/contexts/ConfigContext";
 
 export const Footer = () => {
   const { config } = useConfig();
-  const supportEmail = config?.supportEmail ?? "support@example.com";
+  const supportEmail = config?.supportEmail;
 
   return (
     <footer className="govuk-footer footer" role="contentinfo">
