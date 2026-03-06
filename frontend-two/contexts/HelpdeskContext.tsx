@@ -71,7 +71,7 @@ export const HelpdeskProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const loadData = useCallback(async (folder: string, title: string) => {
     try {
-      // TODO: For now, set empt data - API later. For now enpty fine (ptl ticket? + cleanup here)
+      // TODO: For now, set empty data - API later. For now empty is  fine (potential follow on ticket + cleanup)
       setData({
         title,
         articles: [],

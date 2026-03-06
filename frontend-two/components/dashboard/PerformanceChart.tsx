@@ -76,89 +76,90 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         chart.padding(0, 0, 0, 0);
         chart.margin(0, 0, 0, 0);
 
-      const categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-      categoryAxis.dataFields.category = "category";
-      categoryAxis.renderer.grid.template.disabled = true;
-      categoryAxis.renderer.labels.template.disabled = true;
+        const categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "category";
+        categoryAxis.renderer.grid.template.disabled = true;
+        categoryAxis.renderer.labels.template.disabled = true;
 
-      const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-      valueAxis.renderer.labels.template.fontSize = 13;
-      valueAxis.min = 0;
-      valueAxis.max = 100;
-      valueAxis.paddingBottom = 30;
-      valueAxis.renderer.minGridDistance = 30;
-      valueAxis.renderer.grid.template.adapter.add(
-        "disabled",
-        (disabled: boolean, target: any) =>
-          (target.dataItem as any)?.value === 100 || disabled,
-      );
-      valueAxis.renderer.labels.template.fill = am4core.color("#505a5f");
-      valueAxis.renderer.labels.template.adapter.add(
-        "text",
-        (text: string) => `${text}%`,
-      );
-      valueAxis.renderer.minLabelPosition = 0.01;
-      valueAxis.renderer.maxLabelPosition = 0.99;
+        const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.renderer.labels.template.fontSize = 13;
+        valueAxis.min = 0;
+        valueAxis.max = 100;
+        valueAxis.paddingBottom = 30;
+        valueAxis.renderer.minGridDistance = 30;
+        valueAxis.renderer.grid.template.adapter.add(
+          "disabled",
+          (disabled: boolean, target: any) =>
+            (target.dataItem as any)?.value === 100 || disabled,
+        );
+        valueAxis.renderer.labels.template.fill = am4core.color("#505a5f");
+        valueAxis.renderer.labels.template.adapter.add(
+          "text",
+          (text: string) => `${text}%`,
+        );
+        valueAxis.renderer.minLabelPosition = 0.01;
+        valueAxis.renderer.maxLabelPosition = 0.99;
 
-      const series = chart.series.push(new am4charts.ColumnSeries());
-      series.dataFields.valueY = "value";
-      series.dataFields.categoryX = "category";
-      series.columns.template.adapter.add("fill", (fill: any, target: any) => {
-        const category = (target.dataItem as any)?.categoryX as PerformanceCategories;
-        return category ? am4core.color(categoryColours[category]) : fill;
-      });
-      series.strokeWidth = 0;
-
-      const label = series.bullets.push(new am4charts.LabelBullet());
-      label.locationY = 1;
-      label.dy = 20;
-      label.label.text = "{valueY}%";
-      label.label.hideOversized = false;
-      label.label.fontWeight = "bold";
-      label.label.fontSize = 19;
-      chart.maskBullets = false;
-
-      series.columns.template.adapter.add(
-        "readerDescription",
-        (value: string, target: any) => {
+        const series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "category";
+        series.columns.template.adapter.add("fill", (fill: any, target: any) => {
           const category = (target.dataItem as any)?.categoryX as PerformanceCategories;
-          return category ? `${labels[category]} bar value is {valueY}%` : value;
-        },
-      );
+          return category ? am4core.color(categoryColours[category]) : fill;
+        });
+        series.strokeWidth = 0;
 
-      const legend = (chart.legend = new am4charts.Legend());
-      legend.position = "right";
-      legend.valign = "middle";
-      legend.marginLeft = 40;
-      legend.itemContainers.template.togglable = false;
-      legend.itemContainers.template.paddingTop = 0;
-      legend.itemContainers.template.paddingBottom = 6;
-      legend.useDefaultMarker = false;
-      legend.clickable = false;
-      legend.itemContainers.template.cursorOverStyle =
-        am4core.MouseCursorStyle.default;
-      legend.labels.template.adapter.add("text", (text: string, target: any) => {
-        const category = target.dataItem?.dataContext?.name as PerformanceCategories;
-        if (!category) return text;
-        return `[bold]${labels[category]}[/] [#505a5f]${hints[category]}[/]`;
-      });
+        const label = series.bullets.push(new am4charts.LabelBullet());
+        label.locationY = 1;
+        label.dy = 20;
+        label.label.text = "{valueY}%";
+        label.label.hideOversized = false;
+        label.label.fontWeight = "bold";
+        label.label.fontSize = 19;
+        chart.maskBullets = false;
 
-      const marker = legend.markers.template.children.getIndex(0) as any;
-      if (marker) {
-        marker.cornerRadius(0, 0, 0, 0);
-        marker.height = 15;
-        marker.width = 15;
-        marker.valign = "middle";
-      }
+        series.columns.template.adapter.add(
+          "readerDescription",
+          (value: string, target: any) => {
+            const category = (target.dataItem as any)?.categoryX as PerformanceCategories;
+            return category ? `${labels[category]} bar value is {valueY}%` : value;
+          },
+        );
 
-      legend.data = categories.map((category) => ({
-        name: category,
-        fill: am4core.color(categoryColours[category]),
-      }));
+        const legend = (chart.legend = new am4charts.Legend());
+        legend.position = "right";
+        legend.valign = "middle";
+        legend.marginLeft = 40;
+        legend.itemContainers.template.togglable = false;
+        legend.itemContainers.template.paddingTop = 0;
+        legend.itemContainers.template.paddingBottom = 6;
+        legend.useDefaultMarker = false;
+        legend.clickable = false;
+        legend.itemContainers.template.cursorOverStyle =
+          am4core.MouseCursorStyle.default;
+        legend.labels.template.adapter.add("text", (text: string, target: any) => {
+          const category = target.dataItem?.dataContext?.name as PerformanceCategories;
+          if (!category) return text;
+          return `[bold]${labels[category]}[/] [#505a5f]${hints[category]}[/]`;
+        });
+
+        const marker = legend.markers.template.children.getIndex(0) as any;
+        if (marker) {
+          marker.cornerRadius(0, 0, 0, 0);
+          marker.height = 15;
+          marker.width = 15;
+          marker.valign = "middle";
+        }
+
+        legend.data = categories.map((category) => ({
+          name: category,
+          fill: am4core.color(categoryColours[category]),
+        }));
 
         chart.data = chartData;
         setLoadFailed(false);
       } catch {
+        console.error("Failed to load charting library");
         setLoadFailed(true);
       }
     };

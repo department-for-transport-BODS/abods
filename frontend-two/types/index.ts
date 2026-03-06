@@ -5,6 +5,7 @@ export interface ErrorInfo {
 
 export interface ConfigObject {
   apiUrl: string;
+  bodsBaseUrl: string;
   envName: string;
   analyticsId: string;
   mapboxToken: string;
@@ -29,7 +30,7 @@ export interface ConfigObject {
     apiUrl: string;
     folders: Record<string, string>;
   };
-  supportEmail?: string;
+  supportEmail: string;
 }
 
 export interface LoginInfo {

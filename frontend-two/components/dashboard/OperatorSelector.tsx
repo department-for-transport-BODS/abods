@@ -12,6 +12,8 @@ import {
 } from "react";
 import { OperatorDashboard } from "@/types/dashboard";
 
+const ALL_OPERATORS_OPTION = { value: "all", label: "All operators", aliases: ["all"] };
+
 interface OperatorSelectorProps {
   operators: OperatorDashboard[];
   selectedOperatorId: string | null;
@@ -35,7 +37,7 @@ export const OperatorSelector = ({
 
   const options = useMemo(
     () => [
-      { value: "all", label: "All operators", aliases: ["all"] },
+      ALL_OPERATORS_OPTION,
       ...operators.map((operator) => {
         const value = operator.nocCode ?? operator.operatorId;
         const label = `${operator.name}${operator.nocCode ? ` (${operator.nocCode})` : ""}`;
@@ -51,11 +53,8 @@ export const OperatorSelector = ({
   const selectedValueFromQuery = selectedOperatorId ?? "all";
   const selectedOption =
     options.find((option) => option.value === selectedValueFromQuery) ??
-    options.find((option) => option.aliases.includes(selectedValueFromQuery)) ?? {
-    value: "all",
-    label: "All operators",
-    aliases: ["all"],
-  };
+    options.find((option) => option.aliases.includes(selectedValueFromQuery)) ??
+    ALL_OPERATORS_OPTION;
   const selectedValue = selectedOption.value;
   const hasSearchTerm = searchTerm.trim().length > 0;
 

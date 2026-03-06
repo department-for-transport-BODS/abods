@@ -7,16 +7,12 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { LoginInfo, User } from "@/types";
+import { LoginInfo } from "@/types";
 import { authService } from "@/services/auth.service";
-import {
-  clearSession,
-  clearUser,
-  isSessionAlive,
-  setSession,
-  setUser,
-} from "@/utils/storage";
+import { sessionStore, userStore } from "@/utils/storage";
 import { useConfig } from "@/contexts/ConfigContext";
+
+const IDLE_TIMEOUT = 1000 * 60 * 60 * 12; // 12 hours
 
 interface AuthContextValue {
   user: LoginInfo | null;
@@ -47,35 +43,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [config?.apiUrl]);
 
-  const logout = useCallback(async () => {
-    if (!config?.apiUrl) {
-      clearSession();
-      clearUser();
-      setIsAuthenticated(false);
-      setUserState(null);
-      return;
-    }
-    await authService.logout(config.apiUrl).catch(() => undefined);
-    clearSession();
-    clearUser();
-    setIsAuthenticated(false);
-    setUserState(null);
-  }, [config?.apiUrl]);
-
-  const clearUserState = useCallback(() => {
-    clearSession();
-    clearUser();
+  const resetState = useCallback(() => {
+    sessionStore.clear();
+    userStore.clear();
     setIsAuthenticated(false);
     setUserState(null);
   }, []);
 
+  const logout = useCallback(async () => {
+    if (config?.apiUrl) {
+      await authService.logout(config.apiUrl).catch(() => undefined);
+    }
+    resetState();
+  }, [config?.apiUrl, resetState]);
+
   useEffect(() => {
     const init = async () => {
-      const alive = isSessionAlive();
+      const alive = sessionStore.isAlive();
       setIsAuthenticated(alive);
-      if (alive) {
-        await fetchUser();
-      }
+      if (alive) await fetchUser();
       setIsLoading(false);
     };
     init();
@@ -85,30 +71,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === "undefined") return;
     const onStorage = (event: StorageEvent) => {
       if (event.key !== "session") return;
-      const alive = isSessionAlive();
-      setIsAuthenticated(alive);
-      if (alive) {
-        fetchUser().catch(() => undefined);
+      if (sessionStore.isAlive()) {
+        setIsAuthenticated(true);
+        fetchUser();
       } else {
-        setUserState(null);
+        resetState();
       }
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, [fetchUser]);
+  }, [fetchUser, resetState]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const timeoutDelay = 1000 * 60 * 60 * 12; // 12 hours
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const resetTimer = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        if (isSessionAlive()) {
-          logout().catch(() => undefined);
-        }
-      }, timeoutDelay);
+        if (sessionStore.isAlive()) logout().catch(() => undefined);
+      }, IDLE_TIMEOUT);
     };
 
     const events = ["keypress", "click", "wheel", "mousemove", "touchstart"];
@@ -117,23 +99,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
-      events.forEach((event) =>
-        document.removeEventListener(event, resetTimer),
-      );
+      events.forEach((event) => document.removeEventListener(event, resetTimer));
     };
   }, [logout]);
 
   const login = useCallback(
     async (username: string, password: string) => {
-      if (!config?.apiUrl) {
-        throw new Error("API URL not configured");
-      }
+      if (!config?.apiUrl) throw new Error("API URL not configured");
       const result = await authService.login(config.apiUrl, username, password);
-      if (!result.success || !result.expiresAt) {
-        throw new Error("Login failed");
-      }
-      setSession({ expiresAt: result.expiresAt });
-      setUser({ username });
+      if (!result.success || !result.expiresAt) throw new Error("Login failed");
+      sessionStore.set({ expiresAt: result.expiresAt });
+      userStore.set({ username });
       await fetchUser();
       setIsAuthenticated(true);
     },
@@ -141,8 +117,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const value = useMemo(
-    () => ({ user, isAuthenticated, isLoading, login, logout, clearUser: clearUserState }),
-    [user, isAuthenticated, isLoading, login, logout, clearUserState],
+    () => ({ user, isAuthenticated, isLoading, login, logout, clearUser: resetState }),
+    [user, isAuthenticated, isLoading, login, logout, resetState],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -7,10 +7,12 @@ import { PasswordInput } from "@/components/form/PasswordInput";
 import { loginSchema, LoginSchema } from "@/schemas/login.schema";
 import { ErrorInfo } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useConfig } from "@/contexts/ConfigContext";
 
 const LoginPage = () => {
   const router = useRouter();
   const { login } = useAuth();
+  const { config } = useConfig();
   const [formData, setFormData] = useState<Partial<LoginSchema>>({
     username: "",
     password: "",
@@ -115,7 +117,7 @@ const LoginPage = () => {
               <h2 className="govuk-heading-m">Forgot your password?</h2>
               <a 
                 className="govuk-link" 
-                href="https://publish.bus-data.dft.gov.uk/account/password/reset/"
+                href={`${config?.bodsBaseUrl}/account/password/reset/`}
               >
                 Reset your password
               </a>

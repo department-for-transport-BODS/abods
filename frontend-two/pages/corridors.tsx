@@ -3,7 +3,7 @@ import { SectionPlaceholder } from "@/components/layout/SectionPlaceholder";
 const CorridorsPage = () => (
   <SectionPlaceholder
     title="Corridors"
-    description="TODO: Corridors content Migratio"
+    description="TODO: Corridors content Migration"
   />
 );
 
