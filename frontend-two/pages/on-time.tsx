@@ -3,7 +3,7 @@ import { SectionPlaceholder } from "@/components/layout/SectionPlaceholder";
 const OnTimePage = () => (
   <SectionPlaceholder
     title="On-time"
-    description="TODO: On-time content Migratio"
+    description="TODO: On-time content Migration"
   />
 );
 
