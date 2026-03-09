@@ -35,7 +35,7 @@ export async function getDatabaseUrl(): Promise<string> {
   } else {
     const token = await generateRdsIamToken(region, hostname, port, username);
     const encodedToken = encodeURIComponent(token);
-    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&sslmode=prefer&ssl=true`;
+    return `postgresql://${username}:${encodedToken}@${hostname}:${port}/${dbName}?schema=public&connection_limit=50&sslmode=require&ssl=true`;
   }
 }
 
