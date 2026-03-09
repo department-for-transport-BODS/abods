@@ -46,7 +46,7 @@ env:
 jobs:
   validation:
     runs-on: ubuntu-latest
-    environment: ${{ env.RC_ENV }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'dev' && 'dev' || 'sandbox') }}
     outputs:
       VERSION: ${{ steps.validate.outputs.VERSION }}
 
@@ -112,7 +112,7 @@ jobs:
 
   backend:
     runs-on: ubuntu-latest
-    environment: ${{ env.RC_ENV }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'dev' && 'dev' || 'sandbox') }}
     needs: validation
     defaults:
       run:
