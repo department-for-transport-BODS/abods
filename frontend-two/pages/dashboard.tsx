@@ -21,8 +21,7 @@ const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const nocCode = typeof router.query.nocCode === "string" ? router.query.nocCode : null;
-  const allStops = router.query.allStops === "true";
-  const stopType: StopTypeOption = allStops ? "AllStops" : "TimingPoints";
+  const stopType: StopTypeOption = router.query.stopType === "AllStops" ? "AllStops" : "TimingPoints";
 
   const performanceFilters: PerformanceFiltersInputType = useMemo(
     () => ({
@@ -99,7 +98,7 @@ const DashboardPage = () => {
     router.replace(
       {
         pathname: router.pathname,
-        query: { ...router.query, allStops: value === "AllStops" ? "true" : undefined },
+        query: { ...router.query, stopType: value === "TimingPoints" ? undefined : value },
       },
       undefined,
       { shallow: true },
