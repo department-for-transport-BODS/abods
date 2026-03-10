@@ -1,12 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright configuration with coverage support for Angular app migration testing.
- * 
- * IMPORTANT: For accurate coverage with source maps, ensure Angular is running
- * in development mode with source maps enabled:
- *   cd frontend && ng serve --configuration=development
- * 
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({

@@ -18,7 +18,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "coverage:e2e-report": "open coverage/e2e/index.html || xdg-open coverage/e2e/index.html"
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
@@ -29,24 +29,15 @@
     "@graphql-codegen/typescript-resolvers": "^5.1.0",
     "@playwright/test": "^1.49.0",
     "@types/express": "^5.0.3",
-    "@types/istanbul-lib-coverage": "^2.0.6",
-    "@types/istanbul-lib-report": "^3.0.3",
-    "@types/istanbul-reports": "^3.0.4",
     "@types/node": "^22.10.5",
-    "c8": "^10.1.3",
     "concurrently": "^9.2.1",
     "graphql-scalars": "^1.25.0",
     "husky": "^9.1.7",
-    "istanbul-lib-coverage": "^3.2.2",
-    "istanbul-lib-report": "^3.0.1",
-    "istanbul-reports": "^3.1.7",
     "lint-staged": "^16.1.6",
     "node-mocks-http": "^1.17.2",
-    "nyc": "^17.1.0",
     "prettier": "3.2.5",
     "source-map": "^0.7.6",
-    "typescript": "^5.9.3",
-    "v8-to-istanbul": "^9.3.0"
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "**/*": "prettier --write"

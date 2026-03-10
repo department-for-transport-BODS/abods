@@ -7,7 +7,7 @@
     "build": "next build",
     "export": "next build && next export",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -28,15 +28,18 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^15.0.7",
     "@testing-library/user-event": "^14.5.2",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^22.13.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@types/luxon": "^3.4.2",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.41",
     "sass": "^1.77.8",
