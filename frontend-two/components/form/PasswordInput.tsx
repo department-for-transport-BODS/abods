@@ -58,7 +58,8 @@ export const PasswordInput = <T,>({
       </label>
       {error ? (
         <p id={`${inputId}-error`} className="govuk-error-message">
-          <span className="govuk-visually-hidden">Error:</span> {error.errorMessage}
+          <span className="govuk-visually-hidden">Error:</span>{" "}
+          {error.errorMessage}
         </p>
       ) : null}
       <div className="govuk-input__wrapper">

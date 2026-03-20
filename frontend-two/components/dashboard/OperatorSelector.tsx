@@ -12,7 +12,11 @@ import {
 } from "react";
 import { OperatorDashboard } from "@/types/dashboard";
 
-const ALL_OPERATORS_OPTION = { value: "all", label: "All operators", aliases: ["all"] };
+const ALL_OPERATORS_OPTION = {
+  value: "all",
+  label: "All operators",
+  aliases: ["all"],
+};
 
 interface OperatorSelectorProps {
   operators: OperatorDashboard[];
@@ -61,7 +65,9 @@ export const OperatorSelector = ({
   const filteredOptions = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return options;
-    return options.filter((option) => option.label.toLowerCase().includes(term));
+    return options.filter((option) =>
+      option.label.toLowerCase().includes(term),
+    );
   }, [options, searchTerm]);
 
   const selectedIndexInFiltered = Math.max(
@@ -308,7 +314,10 @@ export const OperatorSelector = ({
               aria-label="Options List"
               style={{ opacity: 1 }}
             >
-              <div role="listbox" className="ng-dropdown-panel-items scroll-host">
+              <div
+                role="listbox"
+                className="ng-dropdown-panel-items scroll-host"
+              >
                 {filteredOptions.map((option, index) => (
                   <div
                     key={option.value}

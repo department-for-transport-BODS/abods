@@ -16,7 +16,12 @@ export const Status = ({
 
   return (
     <div className={`status status--${status} status--${size}`}>
-      <svg className="status__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <svg
+        className="status__icon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false"
+      >
         <path d={iconPath} fill="currentColor" />
       </svg>
       {label ? (

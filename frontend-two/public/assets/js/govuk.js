@@ -1,11 +1,11 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined'
+  typeof exports === "object" && typeof module !== "undefined"
     ? factory(exports)
-    : typeof define === 'function' && define.amd
-    ? define('GOVUKFrontend', ['exports'], factory)
-    : factory((global.GOVUKFrontend = {}));
+    : typeof define === "function" && define.amd
+      ? define("GOVUKFrontend", ["exports"], factory)
+      : factory((global.GOVUKFrontend = {}));
 })(this, function (exports) {
-  'use strict';
+  "use strict";
 
   /**
    * TODO: Ideally this would be a NodeList.prototype.forEach polyfill
@@ -26,14 +26,20 @@
   // https://stackoverflow.com/a/8809472
   function generateUniqueID() {
     var d = new Date().getTime();
-    if (typeof window.performance !== 'undefined' && typeof window.performance.now === 'function') {
+    if (
+      typeof window.performance !== "undefined" &&
+      typeof window.performance.now === "function"
+    ) {
       d += window.performance.now(); // use high-precision timer if available
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-    });
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      },
+    );
   }
 
   (function (undefined) {
@@ -41,11 +47,11 @@
     var detect =
       // In IE8, defineProperty could only act on DOM elements, so full support
       // for the feature requires the ability to set a property on an arbitrary object
-      'defineProperty' in Object &&
+      "defineProperty" in Object &&
       (function () {
         try {
           var a = {};
-          Object.defineProperty(a, 'test', { value: 42 });
+          Object.defineProperty(a, "test", { value: 42 });
           return true;
         } catch (e) {
           return false;
@@ -56,36 +62,50 @@
 
     // Polyfill from https://cdn.polyfill.io/v2/polyfill.js?features=Object.defineProperty&flags=always
     (function (nativeDefineProperty) {
-      var supportsAccessors = Object.prototype.hasOwnProperty('__defineGetter__');
-      var ERR_ACCESSORS_NOT_SUPPORTED = 'Getters & setters cannot be defined on this javascript engine';
-      var ERR_VALUE_ACCESSORS = 'A property cannot both have accessors and be writable or have a value';
+      var supportsAccessors =
+        Object.prototype.hasOwnProperty("__defineGetter__");
+      var ERR_ACCESSORS_NOT_SUPPORTED =
+        "Getters & setters cannot be defined on this javascript engine";
+      var ERR_VALUE_ACCESSORS =
+        "A property cannot both have accessors and be writable or have a value";
 
-      Object.defineProperty = function defineProperty(object, property, descriptor) {
+      Object.defineProperty = function defineProperty(
+        object,
+        property,
+        descriptor,
+      ) {
         // Where native support exists, assume it
         if (
           nativeDefineProperty &&
-          (object === window || object === document || object === Element.prototype || object instanceof Element)
+          (object === window ||
+            object === document ||
+            object === Element.prototype ||
+            object instanceof Element)
         ) {
           return nativeDefineProperty(object, property, descriptor);
         }
 
-        if (object === null || !(object instanceof Object || typeof object === 'object')) {
-          throw new TypeError('Object.defineProperty called on non-object');
+        if (
+          object === null ||
+          !(object instanceof Object || typeof object === "object")
+        ) {
+          throw new TypeError("Object.defineProperty called on non-object");
         }
 
         if (!(descriptor instanceof Object)) {
-          throw new TypeError('Property description must be an object');
+          throw new TypeError("Property description must be an object");
         }
 
         var propertyString = String(property);
-        var hasValueOrWritable = 'value' in descriptor || 'writable' in descriptor;
-        var getterType = 'get' in descriptor && typeof descriptor.get;
-        var setterType = 'set' in descriptor && typeof descriptor.set;
+        var hasValueOrWritable =
+          "value" in descriptor || "writable" in descriptor;
+        var getterType = "get" in descriptor && typeof descriptor.get;
+        var setterType = "set" in descriptor && typeof descriptor.set;
 
         // handle descriptor.get
         if (getterType) {
-          if (getterType !== 'function') {
-            throw new TypeError('Getter must be a function');
+          if (getterType !== "function") {
+            throw new TypeError("Getter must be a function");
           }
           if (!supportsAccessors) {
             throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
@@ -100,8 +120,8 @@
 
         // handle descriptor.set
         if (setterType) {
-          if (setterType !== 'function') {
-            throw new TypeError('Setter must be a function');
+          if (setterType !== "function") {
+            throw new TypeError("Setter must be a function");
           }
           if (!supportsAccessors) {
             throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
@@ -113,28 +133,28 @@
         }
 
         // OK to define value unconditionally - if a getter has been specified as well, an error would be thrown above
-        if ('value' in descriptor) {
+        if ("value" in descriptor) {
           object[propertyString] = descriptor.value;
         }
 
         return object;
       };
     })(Object.defineProperty);
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://github.com/Financial-Times/polyfill-service/blob/master/packages/polyfill-library/polyfills/Function/prototype/bind/detect.js
-    var detect = 'bind' in Function.prototype;
+    var detect = "bind" in Function.prototype;
 
     if (detect) return;
 
     // Polyfill from https://cdn.polyfill.io/v2/polyfill.js?features=Function.prototype.bind&flags=always
-    Object.defineProperty(Function.prototype, 'bind', {
+    Object.defineProperty(Function.prototype, "bind", {
       value: function bind(that) {
         // .length is 1
         // add necessary es5-shim utilities
@@ -144,9 +164,12 @@
         var ArrayPrototype = $Array.prototype;
         var Empty = function Empty() {};
         var to_string = ObjectPrototype.toString;
-        var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
+        var hasToStringTag =
+          typeof Symbol === "function" &&
+          typeof Symbol.toStringTag === "symbol";
         var isCallable;
-        /* inlined from https://npmjs.com/is-callable */ var fnToStr = Function.prototype.toString,
+        /* inlined from https://npmjs.com/is-callable */ var fnToStr =
+            Function.prototype.toString,
           tryFunctionObject = function tryFunctionObject(value) {
             try {
               fnToStr.call(value);
@@ -155,10 +178,10 @@
               return false;
             }
           },
-          fnClass = '[object Function]',
-          genClass = '[object GeneratorFunction]';
+          fnClass = "[object Function]",
+          genClass = "[object GeneratorFunction]";
         isCallable = function isCallable(value) {
-          if (typeof value !== 'function') {
+          if (typeof value !== "function") {
             return false;
           }
           if (hasToStringTag) {
@@ -177,7 +200,9 @@
         var target = this;
         // 2. If IsCallable(Target) is false, throw a TypeError exception.
         if (!isCallable(target)) {
-          throw new TypeError('Function.prototype.bind called on incompatible ' + target);
+          throw new TypeError(
+            "Function.prototype.bind called on incompatible " + target,
+          );
         }
         // 3. Let A be a new (possibly empty) internal list of all of the
         //   argument values provided after thisArg (arg1, arg2 etc), in order.
@@ -211,7 +236,10 @@
             // 5. Return the result of calling the [[Construct]] internal
             //   method of target providing args as the arguments.
 
-            var result = target.apply(this, array_concat.call(args, array_slice.call(arguments)));
+            var result = target.apply(
+              this,
+              array_concat.call(args, array_slice.call(arguments)),
+            );
             if ($Object(result) === result) {
               return result;
             }
@@ -236,7 +264,10 @@
             //   providing args as the arguments.
 
             // equiv: target.call(this, ...boundArgs, ...args)
-            return target.apply(that, array_concat.call(args, array_slice.call(arguments)));
+            return target.apply(
+              that,
+              array_concat.call(args, array_slice.call(arguments)),
+            );
           }
         };
 
@@ -252,7 +283,7 @@
         //   specified in 15.3.5.1.
         var boundArgs = [];
         for (var i = 0; i < boundLength; i++) {
-          array_push.call(boundArgs, '$' + i);
+          array_push.call(boundArgs, "$" + i);
         }
 
         // XXX Build a dynamic function with desired amount of arguments is the only
@@ -262,8 +293,10 @@
         // However in all of these environments Function.prototype.bind exists
         // and so this code will never be executed.
         bound = Function(
-          'binder',
-          'return function (' + boundArgs.join(',') + '){ return binder.apply(this, arguments); }'
+          "binder",
+          "return function (" +
+            boundArgs.join(",") +
+            "){ return binder.apply(this, arguments); }",
         )(binder);
 
         if (target.prototype) {
@@ -297,32 +330,37 @@
         return bound;
       },
     });
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-service/master/packages/polyfill-library/polyfills/DOMTokenList/detect.js
     var detect =
-      'DOMTokenList' in this &&
+      "DOMTokenList" in this &&
       (function (x) {
-        return 'classList' in x ? !x.classList.toggle('x', false) && !x.className : true;
-      })(document.createElement('x'));
+        return "classList" in x
+          ? !x.classList.toggle("x", false) && !x.className
+          : true;
+      })(document.createElement("x"));
 
     if (detect) return;
 
     // Polyfill from https://raw.githubusercontent.com/Financial-Times/polyfill-service/master/packages/polyfill-library/polyfills/DOMTokenList/polyfill.js
     (function (global) {
-      var nativeImpl = 'DOMTokenList' in global && global.DOMTokenList;
+      var nativeImpl = "DOMTokenList" in global && global.DOMTokenList;
 
       if (
         !nativeImpl ||
         (!!document.createElementNS &&
-          !!document.createElementNS('http://www.w3.org/2000/svg', 'svg') &&
-          !(document.createElementNS('http://www.w3.org/2000/svg', 'svg').classList instanceof DOMTokenList))
+          !!document.createElementNS("http://www.w3.org/2000/svg", "svg") &&
+          !(
+            document.createElementNS("http://www.w3.org/2000/svg", "svg")
+              .classList instanceof DOMTokenList
+          ))
       ) {
         global.DOMTokenList = (function () {
           // eslint-disable-line no-unused-vars
@@ -338,7 +376,7 @@
 
           /** Ensure the browser allows Object.defineProperty to be used on native JavaScript objects. */
           try {
-            defineGetter({}, 'support');
+            defineGetter({}, "support");
           } catch (e) {
             dpSupport = false;
           }
@@ -357,7 +395,7 @@
                   preop();
                   return tokens[i];
                 },
-                false
+                false,
               );
             };
             var reindex = function () {
@@ -379,21 +417,31 @@
               if (args.length)
                 for (i = 0; i < args.length; ++i)
                   if (rSpace.test(args[i])) {
-                    error = new SyntaxError('String "' + args[i] + '" ' + 'contains' + ' an invalid character');
+                    error = new SyntaxError(
+                      'String "' +
+                        args[i] +
+                        '" ' +
+                        "contains" +
+                        " an invalid character",
+                    );
                     error.code = 5;
-                    error.name = 'InvalidCharacterError';
+                    error.name = "InvalidCharacterError";
                     throw error;
                   }
 
               /** Split the new value apart by whitespace*/
-              if (typeof el[prop] === 'object') {
-                tokens = ('' + el[prop].baseVal).replace(/^\s+|\s+$/g, '').split(rSpace);
+              if (typeof el[prop] === "object") {
+                tokens = ("" + el[prop].baseVal)
+                  .replace(/^\s+|\s+$/g, "")
+                  .split(rSpace);
               } else {
-                tokens = ('' + el[prop]).replace(/^\s+|\s+$/g, '').split(rSpace);
+                tokens = ("" + el[prop])
+                  .replace(/^\s+|\s+$/g, "")
+                  .split(rSpace);
               }
 
               /** Avoid treating blank strings as single-item token lists */
-              if ('' === tokens[0]) tokens = [];
+              if ("" === tokens[0]) tokens = [];
 
               /** Repopulate the internal token lists */
               tokenMap = {};
@@ -406,7 +454,7 @@
             preop();
 
             /** Return the number of tokens in the underlying string. Read-only. */
-            defineGetter(that, 'length', function () {
+            defineGetter(that, "length", function () {
               preop();
               return length;
             });
@@ -414,7 +462,7 @@
             /** Override the default toString/toLocaleString methods to return a space-delimited list of tokens when typecast. */
             that.toLocaleString = that.toString = function () {
               preop();
-              return tokens.join(' ');
+              return tokens.join(" ");
             };
 
             that.item = function (idx) {
@@ -441,10 +489,10 @@
               /** Update the targeted attribute of the attached element if the token list's changed. */
               if (length !== tokens.length) {
                 length = tokens.length >>> 0;
-                if (typeof el[prop] === 'object') {
-                  el[prop].baseVal = tokens.join(' ');
+                if (typeof el[prop] === "object") {
+                  el[prop].baseVal = tokens.join(" ");
                 } else {
-                  el[prop] = tokens.join(' ');
+                  el[prop] = tokens.join(" ");
                 }
                 reindex();
               }
@@ -460,16 +508,17 @@
               }
 
               /** Run through our tokens list and reassign only those that aren't defined in the hash declared above. */
-              for (i = 0; i < tokens.length; ++i) if (!ignore[tokens[i]]) t.push(tokens[i]);
+              for (i = 0; i < tokens.length; ++i)
+                if (!ignore[tokens[i]]) t.push(tokens[i]);
 
               tokens = t;
               length = t.length >>> 0;
 
               /** Update the targeted attribute of the attached element. */
-              if (typeof el[prop] === 'object') {
-                el[prop].baseVal = tokens.join(' ');
+              if (typeof el[prop] === "object") {
+                el[prop].baseVal = tokens.join(" ");
               } else {
-                el[prop] = tokens.join(' ');
+                el[prop] = tokens.join(" ");
               }
               reindex();
             };
@@ -508,29 +557,31 @@
 
       // Add second argument to native DOMTokenList.toggle() if necessary
       (function () {
-        var e = document.createElement('span');
-        if (!('classList' in e)) return;
-        e.classList.toggle('x', false);
-        if (!e.classList.contains('x')) return;
-        e.classList.constructor.prototype.toggle = function toggle(token /*, force*/) {
+        var e = document.createElement("span");
+        if (!("classList" in e)) return;
+        e.classList.toggle("x", false);
+        if (!e.classList.contains("x")) return;
+        e.classList.constructor.prototype.toggle = function toggle(
+          token /*, force*/,
+        ) {
           var force = arguments[1];
           if (force === undefined) {
             var add = !this.contains(token);
-            this[add ? 'add' : 'remove'](token);
+            this[add ? "add" : "remove"](token);
             return add;
           }
           force = !!force;
-          this[force ? 'add' : 'remove'](token);
+          this[force ? "add" : "remove"](token);
           return force;
         };
       })();
 
       // Add multiple arguments to native DOMTokenList.add() if necessary
       (function () {
-        var e = document.createElement('span');
-        if (!('classList' in e)) return;
-        e.classList.add('a', 'b');
-        if (e.classList.contains('b')) return;
+        var e = document.createElement("span");
+        if (!("classList" in e)) return;
+        e.classList.add("a", "b");
+        if (e.classList.contains("b")) return;
         var native = e.classList.constructor.prototype.add;
         e.classList.constructor.prototype.add = function () {
           var args = arguments;
@@ -543,12 +594,12 @@
 
       // Add multiple arguments to native DOMTokenList.remove() if necessary
       (function () {
-        var e = document.createElement('span');
-        if (!('classList' in e)) return;
-        e.classList.add('a');
-        e.classList.add('b');
-        e.classList.remove('a', 'b');
-        if (!e.classList.contains('b')) return;
+        var e = document.createElement("span");
+        if (!("classList" in e)) return;
+        e.classList.add("a");
+        e.classList.add("b");
+        e.classList.remove("a", "b");
+        if (!e.classList.contains("b")) return;
         var native = e.classList.constructor.prototype.remove;
         e.classList.constructor.prototype.remove = function () {
           var args = arguments;
@@ -559,21 +610,24 @@
         };
       })();
     })(this);
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://github.com/Financial-Times/polyfill-service/blob/master/packages/polyfill-library/polyfills/Document/detect.js
-    var detect = 'Document' in this;
+    var detect = "Document" in this;
 
     if (detect) return;
 
     // Polyfill from https://cdn.polyfill.io/v2/polyfill.js?features=Document&flags=always
-    if (typeof WorkerGlobalScope === 'undefined' && typeof importScripts !== 'function') {
+    if (
+      typeof WorkerGlobalScope === "undefined" &&
+      typeof importScripts !== "function"
+    ) {
       if (this.HTMLDocument) {
         // IE8
 
@@ -581,20 +635,23 @@
         this.Document = this.HTMLDocument;
       } else {
         // Create an empty function to act as the missing constructor for the document object, attach the document object as its prototype.  The function needs to be anonymous else it is hoisted and causes the feature detect to prematurely pass, preventing the assignments below being made.
-        this.Document = this.HTMLDocument = document.constructor = new Function('return function Document() {}')();
+        this.Document =
+          this.HTMLDocument =
+          document.constructor =
+            new Function("return function Document() {}")();
         this.Document.prototype = document;
       }
     }
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://github.com/Financial-Times/polyfill-service/blob/master/packages/polyfill-library/polyfills/Element/detect.js
-    var detect = 'Element' in this && 'HTMLElement' in this;
+    var detect = "Element" in this && "HTMLElement" in this;
 
     if (detect) return;
 
@@ -607,15 +664,19 @@
       }
 
       // create Element constructor
-      window.Element = window.HTMLElement = new Function('return function Element() {}')();
+      window.Element = window.HTMLElement = new Function(
+        "return function Element() {}",
+      )();
 
       // generate sandboxed iframe
-      var vbody = document.appendChild(document.createElement('body'));
-      var frame = vbody.appendChild(document.createElement('iframe'));
+      var vbody = document.appendChild(document.createElement("body"));
+      var frame = vbody.appendChild(document.createElement("iframe"));
 
       // use sandboxed iframe to replicate Element functionality
       var frameDocument = frame.contentWindow.document;
-      var prototype = (Element.prototype = frameDocument.appendChild(frameDocument.createElement('*')));
+      var prototype = (Element.prototype = frameDocument.appendChild(
+        frameDocument.createElement("*"),
+      ));
       var cache = {};
 
       // polyfill Element.prototype on an element
@@ -642,12 +703,12 @@
         return element;
       };
 
-      var elements = document.getElementsByTagName('*');
+      var elements = document.getElementsByTagName("*");
       var nativeCreateElement = document.createElement;
       var interval;
       var loopLimit = 100;
 
-      prototype.attachEvent('onpropertychange', function (event) {
+      prototype.attachEvent("onpropertychange", function (event) {
         var propertyName = event.propertyName,
           nonValue = !cache.hasOwnProperty(propertyName),
           newValue = prototype[propertyName],
@@ -678,7 +739,11 @@
       // Apply Element prototype to the pre-existing DOM as soon as the body element appears.
       function bodyCheck() {
         if (!loopLimit--) clearTimeout(interval);
-        if (document.body && !document.body.prototype && /(complete|interactive)/.test(document.readyState)) {
+        if (
+          document.body &&
+          !document.body.prototype &&
+          /(complete|interactive)/.test(document.readyState)
+        ) {
           shiv(document, true);
           if (interval && document.body.prototype) clearTimeout(interval);
           return !!document.body.prototype;
@@ -699,24 +764,24 @@
       // remove sandboxed iframe
       document.removeChild(vbody);
     })();
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-service/8717a9e04ac7aff99b4980fbedead98036b0929a/packages/polyfill-library/polyfills/Element/prototype/classList/detect.js
     var detect =
-      'document' in this &&
-      'classList' in document.documentElement &&
-      'Element' in this &&
-      'classList' in Element.prototype &&
+      "document" in this &&
+      "classList" in document.documentElement &&
+      "Element" in this &&
+      "classList" in Element.prototype &&
       (function () {
-        var e = document.createElement('span');
-        e.classList.add('a', 'b');
-        return e.classList.contains('b');
+        var e = document.createElement("span");
+        e.classList.add("a", "b");
+        return e.classList.contains("b");
       })();
 
     if (detect) return;
@@ -734,7 +799,7 @@
       };
       /** Ensure the browser allows Object.defineProperty to be used on native JavaScript objects. */
       try {
-        defineGetter({}, 'support');
+        defineGetter({}, "support");
       } catch (e) {
         dpSupport = false;
       }
@@ -748,7 +813,7 @@
 
             var THIS = this,
               /** Prevent this from firing twice for some reason. What the hell, IE. */
-              gibberishProperty = '__defineGetter__' + 'DEFINE_PROPERTY' + name;
+              gibberishProperty = "__defineGetter__" + "DEFINE_PROPERTY" + name;
             if (THIS[gibberishProperty]) return tokenList;
             THIS[gibberishProperty] = true;
 
@@ -762,7 +827,7 @@
              */
             if (false === dpSupport) {
               var visage;
-              var mirror = addProp.mirror || document.createElement('div');
+              var mirror = addProp.mirror || document.createElement("div");
               var reflections = mirror.childNodes;
               var l = reflections.length;
 
@@ -773,7 +838,8 @@
                 }
 
               /** Couldn't find an element's reflection inside the mirror. Materialise one. */
-              visage || (visage = mirror.appendChild(document.createElement('div')));
+              visage ||
+                (visage = mirror.appendChild(document.createElement("div")));
 
               tokenList = DOMTokenList.call(visage, THIS, attr);
             } else tokenList = new DOMTokenList(THIS, attr);
@@ -785,40 +851,40 @@
 
             return tokenList;
           },
-          true
+          true,
         );
       };
 
-      addProp(global.Element, 'classList', 'className');
-      addProp(global.HTMLElement, 'classList', 'className');
-      addProp(global.HTMLLinkElement, 'relList', 'rel');
-      addProp(global.HTMLAnchorElement, 'relList', 'rel');
-      addProp(global.HTMLAreaElement, 'relList', 'rel');
+      addProp(global.Element, "classList", "className");
+      addProp(global.HTMLElement, "classList", "className");
+      addProp(global.HTMLLinkElement, "relList", "rel");
+      addProp(global.HTMLAnchorElement, "relList", "rel");
+      addProp(global.HTMLAreaElement, "relList", "rel");
     })(this);
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   function Accordion($module) {
     this.$module = $module;
-    this.moduleId = $module.getAttribute('id');
-    this.$sections = $module.querySelectorAll('.govuk-accordion__section');
-    this.$openAllButton = '';
+    this.moduleId = $module.getAttribute("id");
+    this.$sections = $module.querySelectorAll(".govuk-accordion__section");
+    this.$openAllButton = "";
     this.browserSupportsSessionStorage = helper.checkForSessionStorage();
 
-    this.controlsClass = 'govuk-accordion__controls';
-    this.openAllClass = 'govuk-accordion__open-all';
-    this.iconClass = 'govuk-accordion__icon';
+    this.controlsClass = "govuk-accordion__controls";
+    this.openAllClass = "govuk-accordion__open-all";
+    this.iconClass = "govuk-accordion__icon";
 
-    this.sectionHeaderClass = 'govuk-accordion__section-header';
-    this.sectionHeaderFocusedClass = 'govuk-accordion__section-header--focused';
-    this.sectionHeadingClass = 'govuk-accordion__section-heading';
-    this.sectionSummaryClass = 'govuk-accordion__section-summary';
-    this.sectionButtonClass = 'govuk-accordion__section-button';
-    this.sectionExpandedClass = 'govuk-accordion__section--expanded';
+    this.sectionHeaderClass = "govuk-accordion__section-header";
+    this.sectionHeaderFocusedClass = "govuk-accordion__section-header--focused";
+    this.sectionHeadingClass = "govuk-accordion__section-heading";
+    this.sectionSummaryClass = "govuk-accordion__section-summary";
+    this.sectionButtonClass = "govuk-accordion__section-button";
+    this.sectionExpandedClass = "govuk-accordion__section--expanded";
   }
 
   // Initialize component
@@ -840,21 +906,25 @@
   // Initialise controls and set attributes
   Accordion.prototype.initControls = function () {
     // Create "Open all" button and set attributes
-    this.$openAllButton = document.createElement('button');
-    this.$openAllButton.setAttribute('type', 'button');
-    this.$openAllButton.innerHTML = 'Open all <span class="govuk-visually-hidden">sections</span>';
-    this.$openAllButton.setAttribute('class', this.openAllClass);
-    this.$openAllButton.setAttribute('aria-expanded', 'false');
-    this.$openAllButton.setAttribute('type', 'button');
+    this.$openAllButton = document.createElement("button");
+    this.$openAllButton.setAttribute("type", "button");
+    this.$openAllButton.innerHTML =
+      'Open all <span class="govuk-visually-hidden">sections</span>';
+    this.$openAllButton.setAttribute("class", this.openAllClass);
+    this.$openAllButton.setAttribute("aria-expanded", "false");
+    this.$openAllButton.setAttribute("type", "button");
 
     // Create control wrapper and add controls to it
-    var accordionControls = document.createElement('div');
-    accordionControls.setAttribute('class', this.controlsClass);
+    var accordionControls = document.createElement("div");
+    accordionControls.setAttribute("class", this.controlsClass);
     accordionControls.appendChild(this.$openAllButton);
     this.$module.insertBefore(accordionControls, this.$module.firstChild);
 
     // Handle events for the controls
-    this.$openAllButton.addEventListener('click', this.onOpenOrCloseAllToggle.bind(this));
+    this.$openAllButton.addEventListener(
+      "click",
+      this.onOpenOrCloseAllToggle.bind(this),
+    );
   };
 
   // Initialise section headers
@@ -864,33 +934,39 @@
       this.$sections,
       function ($section, i) {
         // Set header attributes
-        var header = $section.querySelector('.' + this.sectionHeaderClass);
+        var header = $section.querySelector("." + this.sectionHeaderClass);
         this.initHeaderAttributes(header, i);
 
         this.setExpanded(this.isExpanded($section), $section);
 
         // Handle events
-        header.addEventListener('click', this.onSectionToggle.bind(this, $section));
+        header.addEventListener(
+          "click",
+          this.onSectionToggle.bind(this, $section),
+        );
 
         // See if there is any state stored in sessionStorage and set the sections to
         // open or closed.
         this.setInitialState($section);
-      }.bind(this)
+      }.bind(this),
     );
   };
 
   // Set individual header attributes
   Accordion.prototype.initHeaderAttributes = function ($headerWrapper, index) {
     var $module = this;
-    var $span = $headerWrapper.querySelector('.' + this.sectionButtonClass);
-    var $heading = $headerWrapper.querySelector('.' + this.sectionHeadingClass);
-    var $summary = $headerWrapper.querySelector('.' + this.sectionSummaryClass);
+    var $span = $headerWrapper.querySelector("." + this.sectionButtonClass);
+    var $heading = $headerWrapper.querySelector("." + this.sectionHeadingClass);
+    var $summary = $headerWrapper.querySelector("." + this.sectionSummaryClass);
 
     // Copy existing span element to an actual button element, for improved accessibility.
-    var $button = document.createElement('button');
-    $button.setAttribute('type', 'button');
-    $button.setAttribute('id', this.moduleId + '-heading-' + (index + 1));
-    $button.setAttribute('aria-controls', this.moduleId + '-content-' + (index + 1));
+    var $button = document.createElement("button");
+    $button.setAttribute("type", "button");
+    $button.setAttribute("id", this.moduleId + "-heading-" + (index + 1));
+    $button.setAttribute(
+      "aria-controls",
+      this.moduleId + "-content-" + (index + 1),
+    );
 
     // Copy all attributes (https://developer.mozilla.org/en-US/docs/Web/API/Element/attributes) from $span to $button
     for (var i = 0; i < $span.attributes.length; i++) {
@@ -898,18 +974,23 @@
       $button.setAttribute(attr.nodeName, attr.nodeValue);
     }
 
-    $button.addEventListener('focusin', function (e) {
-      if (!$headerWrapper.classList.contains($module.sectionHeaderFocusedClass)) {
-        $headerWrapper.className += ' ' + $module.sectionHeaderFocusedClass;
+    $button.addEventListener("focusin", function (e) {
+      if (
+        !$headerWrapper.classList.contains($module.sectionHeaderFocusedClass)
+      ) {
+        $headerWrapper.className += " " + $module.sectionHeaderFocusedClass;
       }
     });
 
-    $button.addEventListener('blur', function (e) {
+    $button.addEventListener("blur", function (e) {
       $headerWrapper.classList.remove($module.sectionHeaderFocusedClass);
     });
 
-    if (typeof $summary !== 'undefined' && $summary !== null) {
-      $button.setAttribute('aria-describedby', this.moduleId + '-summary-' + (index + 1));
+    if (typeof $summary !== "undefined" && $summary !== null) {
+      $button.setAttribute(
+        "aria-describedby",
+        this.moduleId + "-summary-" + (index + 1),
+      );
     }
 
     // $span could contain HTML elements (see https://www.w3.org/TR/2011/WD-html5-20110525/content-models.html#phrasing-content)
@@ -919,9 +1000,9 @@
     $heading.appendChild($button);
 
     // Add "+/-" icon
-    var icon = document.createElement('span');
+    var icon = document.createElement("span");
     icon.className = this.iconClass;
-    icon.setAttribute('aria-hidden', 'true');
+    icon.setAttribute("aria-hidden", "true");
 
     $button.appendChild(icon);
   };
@@ -953,8 +1034,8 @@
 
   // Set section attributes when opened/closed
   Accordion.prototype.setExpanded = function (expanded, $section) {
-    var $button = $section.querySelector('.' + this.sectionButtonClass);
-    $button.setAttribute('aria-expanded', expanded);
+    var $button = $section.querySelector("." + this.sectionButtonClass);
+    $button.setAttribute("aria-expanded", expanded);
 
     if (expanded) {
       $section.classList.add(this.sectionExpandedClass);
@@ -977,7 +1058,9 @@
     // Get a count of all the Accordion sections
     var sectionsCount = this.$sections.length;
     // Get a count of all Accordion sections that are expanded
-    var expandedSectionCount = this.$module.querySelectorAll('.' + this.sectionExpandedClass).length;
+    var expandedSectionCount = this.$module.querySelectorAll(
+      "." + this.sectionExpandedClass,
+    ).length;
     var areAllSectionsOpen = sectionsCount === expandedSectionCount;
 
     return areAllSectionsOpen;
@@ -985,25 +1068,29 @@
 
   // Update "Open all" button
   Accordion.prototype.updateOpenAllButton = function (expanded) {
-    var newButtonText = expanded ? 'Close all' : 'Open all';
+    var newButtonText = expanded ? "Close all" : "Open all";
     newButtonText += '<span class="govuk-visually-hidden"> sections</span>';
-    this.$openAllButton.setAttribute('aria-expanded', expanded);
+    this.$openAllButton.setAttribute("aria-expanded", expanded);
     this.$openAllButton.innerHTML = newButtonText;
   };
 
   // Check for `window.sessionStorage`, and that it actually works.
   var helper = {
     checkForSessionStorage: function () {
-      var testString = 'this is the test string';
+      var testString = "this is the test string";
       var result;
       try {
         window.sessionStorage.setItem(testString, testString);
-        result = window.sessionStorage.getItem(testString) === testString.toString();
+        result =
+          window.sessionStorage.getItem(testString) === testString.toString();
         window.sessionStorage.removeItem(testString);
         return result;
       } catch (exception) {
-        if (typeof console === 'undefined' || typeof console.log === 'undefined') {
-          console.log('Notice: sessionStorage not available.');
+        if (
+          typeof console === "undefined" ||
+          typeof console.log === "undefined"
+        ) {
+          console.log("Notice: sessionStorage not available.");
         }
       }
     },
@@ -1015,24 +1102,28 @@
       // We need a unique way of identifying each content in the accordion. Since
       // an `#id` should be unique and an `id` is required for `aria-` attributes
       // `id` can be safely used.
-      var $button = $section.querySelector('.' + this.sectionButtonClass);
+      var $button = $section.querySelector("." + this.sectionButtonClass);
 
       if ($button) {
-        var contentId = $button.getAttribute('aria-controls');
-        var contentState = $button.getAttribute('aria-expanded');
+        var contentId = $button.getAttribute("aria-controls");
+        var contentState = $button.getAttribute("aria-expanded");
 
         if (
-          typeof contentId === 'undefined' &&
-          (typeof console === 'undefined' || typeof console.log === 'undefined')
+          typeof contentId === "undefined" &&
+          (typeof console === "undefined" || typeof console.log === "undefined")
         ) {
-          console.error(new Error('No aria controls present in accordion section heading.'));
+          console.error(
+            new Error("No aria controls present in accordion section heading."),
+          );
         }
 
         if (
-          typeof contentState === 'undefined' &&
-          (typeof console === 'undefined' || typeof console.log === 'undefined')
+          typeof contentState === "undefined" &&
+          (typeof console === "undefined" || typeof console.log === "undefined")
         ) {
-          console.error(new Error('No aria expanded present in accordion section heading.'));
+          console.error(
+            new Error("No aria expanded present in accordion section heading."),
+          );
         }
 
         // Only set the state when both `contentId` and `contentState` are taken from the DOM.
@@ -1046,14 +1137,16 @@
   // Read the state of the accordions from sessionStorage
   Accordion.prototype.setInitialState = function ($section) {
     if (this.browserSupportsSessionStorage) {
-      var $button = $section.querySelector('.' + this.sectionButtonClass);
+      var $button = $section.querySelector("." + this.sectionButtonClass);
 
       if ($button) {
-        var contentId = $button.getAttribute('aria-controls');
-        var contentState = contentId ? window.sessionStorage.getItem(contentId) : null;
+        var contentId = $button.getAttribute("aria-controls");
+        var contentState = contentId
+          ? window.sessionStorage.getItem(contentId)
+          : null;
 
         if (contentState !== null) {
-          this.setExpanded(contentState === 'true', $section);
+          this.setExpanded(contentState === "true", $section);
         }
       }
     }
@@ -1061,36 +1154,40 @@
 
   (function (undefined) {
     // Detection from https://github.com/Financial-Times/polyfill-service/blob/master/packages/polyfill-library/polyfills/Window/detect.js
-    var detect = 'Window' in this;
+    var detect = "Window" in this;
 
     if (detect) return;
 
     // Polyfill from https://cdn.polyfill.io/v2/polyfill.js?features=Window&flags=always
-    if (typeof WorkerGlobalScope === 'undefined' && typeof importScripts !== 'function') {
+    if (
+      typeof WorkerGlobalScope === "undefined" &&
+      typeof importScripts !== "function"
+    ) {
       (function (global) {
         if (global.constructor) {
           global.Window = global.constructor;
         } else {
-          (global.Window = global.constructor = new Function('return function Window() {}')()).prototype = this;
+          (global.Window = global.constructor =
+            new Function("return function Window() {}")()).prototype = this;
         }
       })(this);
     }
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://github.com/Financial-Times/polyfill-service/blob/master/packages/polyfill-library/polyfills/Event/detect.js
     var detect = (function (global) {
-      if (!('Event' in global)) return false;
-      if (typeof global.Event === 'function') return true;
+      if (!("Event" in global)) return false;
+      if (typeof global.Event === "function") return true;
 
       try {
         // In IE 9-11, the Event object exists but cannot be instantiated
-        new Event('click');
+        new Event("click");
         return true;
       } catch (e) {
         return false;
@@ -1122,7 +1219,8 @@
       // This polyfill depends on availability of `document` so will not run in a worker
       // However, we asssume there are no browsers with worker support that lack proper
       // support for `Event` within the worker
-      if (typeof document === 'undefined' || typeof window === 'undefined') return;
+      if (typeof document === "undefined" || typeof window === "undefined")
+        return;
 
       function indexOf(array, element) {
         var index = -1,
@@ -1138,17 +1236,26 @@
       }
 
       var existingProto = (window.Event && window.Event.prototype) || null;
-      window.Event = Window.prototype.Event = function Event(type, eventInitDict) {
+      window.Event = Window.prototype.Event = function Event(
+        type,
+        eventInitDict,
+      ) {
         if (!type) {
-          throw new Error('Not enough arguments');
+          throw new Error("Not enough arguments");
         }
 
         var event;
         // Shortcut if browser supports createEvent
-        if ('createEvent' in document) {
-          event = document.createEvent('Event');
-          var bubbles = eventInitDict && eventInitDict.bubbles !== undefined ? eventInitDict.bubbles : false;
-          var cancelable = eventInitDict && eventInitDict.cancelable !== undefined ? eventInitDict.cancelable : false;
+        if ("createEvent" in document) {
+          event = document.createEvent("Event");
+          var bubbles =
+            eventInitDict && eventInitDict.bubbles !== undefined
+              ? eventInitDict.bubbles
+              : false;
+          var cancelable =
+            eventInitDict && eventInitDict.cancelable !== undefined
+              ? eventInitDict.cancelable
+              : false;
 
           event.initEvent(type, bubbles, cancelable);
 
@@ -1158,13 +1265,19 @@
         event = document.createEventObject();
 
         event.type = type;
-        event.bubbles = eventInitDict && eventInitDict.bubbles !== undefined ? eventInitDict.bubbles : false;
-        event.cancelable = eventInitDict && eventInitDict.cancelable !== undefined ? eventInitDict.cancelable : false;
+        event.bubbles =
+          eventInitDict && eventInitDict.bubbles !== undefined
+            ? eventInitDict.bubbles
+            : false;
+        event.cancelable =
+          eventInitDict && eventInitDict.cancelable !== undefined
+            ? eventInitDict.cancelable
+            : false;
 
         return event;
       };
       if (existingProto) {
-        Object.defineProperty(window.Event, 'prototype', {
+        Object.defineProperty(window.Event, "prototype", {
           configurable: false,
           enumerable: false,
           writable: true,
@@ -1172,167 +1285,196 @@
         });
       }
 
-      if (!('createEvent' in document)) {
-        window.addEventListener = Window.prototype.addEventListener = Document.prototype.addEventListener = Element.prototype.addEventListener = function addEventListener() {
-          var element = this,
-            type = arguments[0],
-            listener = arguments[1];
+      if (!("createEvent" in document)) {
+        window.addEventListener =
+          Window.prototype.addEventListener =
+          Document.prototype.addEventListener =
+          Element.prototype.addEventListener =
+            function addEventListener() {
+              var element = this,
+                type = arguments[0],
+                listener = arguments[1];
 
-          if (element === window && type in unlistenableWindowEvents) {
-            throw new Error(
-              'In IE8 the event: ' +
-                type +
-                ' is not available on the window object. Please see https://github.com/Financial-Times/polyfill-service/issues/317 for more information.'
-            );
-          }
-
-          if (!element._events) {
-            element._events = {};
-          }
-
-          if (!element._events[type]) {
-            element._events[type] = function (event) {
-              var list = element._events[event.type].list,
-                events = list.slice(),
-                index = -1,
-                length = events.length,
-                eventElement;
-
-              event.preventDefault = function preventDefault() {
-                if (event.cancelable !== false) {
-                  event.returnValue = false;
-                }
-              };
-
-              event.stopPropagation = function stopPropagation() {
-                event.cancelBubble = true;
-              };
-
-              event.stopImmediatePropagation = function stopImmediatePropagation() {
-                event.cancelBubble = true;
-                event.cancelImmediate = true;
-              };
-
-              event.currentTarget = element;
-              event.relatedTarget = event.fromElement || null;
-              event.target = event.target || event.srcElement || element;
-              event.timeStamp = new Date().getTime();
-
-              if (event.clientX) {
-                event.pageX = event.clientX + document.documentElement.scrollLeft;
-                event.pageY = event.clientY + document.documentElement.scrollTop;
+              if (element === window && type in unlistenableWindowEvents) {
+                throw new Error(
+                  "In IE8 the event: " +
+                    type +
+                    " is not available on the window object. Please see https://github.com/Financial-Times/polyfill-service/issues/317 for more information.",
+                );
               }
 
-              while (++index < length && !event.cancelImmediate) {
-                if (index in events) {
-                  eventElement = events[index];
+              if (!element._events) {
+                element._events = {};
+              }
 
-                  if (indexOf(list, eventElement) !== -1 && typeof eventElement === 'function') {
-                    eventElement.call(element, event);
+              if (!element._events[type]) {
+                element._events[type] = function (event) {
+                  var list = element._events[event.type].list,
+                    events = list.slice(),
+                    index = -1,
+                    length = events.length,
+                    eventElement;
+
+                  event.preventDefault = function preventDefault() {
+                    if (event.cancelable !== false) {
+                      event.returnValue = false;
+                    }
+                  };
+
+                  event.stopPropagation = function stopPropagation() {
+                    event.cancelBubble = true;
+                  };
+
+                  event.stopImmediatePropagation =
+                    function stopImmediatePropagation() {
+                      event.cancelBubble = true;
+                      event.cancelImmediate = true;
+                    };
+
+                  event.currentTarget = element;
+                  event.relatedTarget = event.fromElement || null;
+                  event.target = event.target || event.srcElement || element;
+                  event.timeStamp = new Date().getTime();
+
+                  if (event.clientX) {
+                    event.pageX =
+                      event.clientX + document.documentElement.scrollLeft;
+                    event.pageY =
+                      event.clientY + document.documentElement.scrollTop;
+                  }
+
+                  while (++index < length && !event.cancelImmediate) {
+                    if (index in events) {
+                      eventElement = events[index];
+
+                      if (
+                        indexOf(list, eventElement) !== -1 &&
+                        typeof eventElement === "function"
+                      ) {
+                        eventElement.call(element, event);
+                      }
+                    }
+                  }
+                };
+
+                element._events[type].list = [];
+
+                if (element.attachEvent) {
+                  element.attachEvent("on" + type, element._events[type]);
+                }
+              }
+
+              element._events[type].list.push(listener);
+            };
+
+        window.removeEventListener =
+          Window.prototype.removeEventListener =
+          Document.prototype.removeEventListener =
+          Element.prototype.removeEventListener =
+            function removeEventListener() {
+              var element = this,
+                type = arguments[0],
+                listener = arguments[1],
+                index;
+
+              if (
+                element._events &&
+                element._events[type] &&
+                element._events[type].list
+              ) {
+                index = indexOf(element._events[type].list, listener);
+
+                if (index !== -1) {
+                  element._events[type].list.splice(index, 1);
+
+                  if (!element._events[type].list.length) {
+                    if (element.detachEvent) {
+                      element.detachEvent("on" + type, element._events[type]);
+                    }
+                    delete element._events[type];
                   }
                 }
               }
             };
 
-            element._events[type].list = [];
+        window.dispatchEvent =
+          Window.prototype.dispatchEvent =
+          Document.prototype.dispatchEvent =
+          Element.prototype.dispatchEvent =
+            function dispatchEvent(event) {
+              if (!arguments.length) {
+                throw new Error("Not enough arguments");
+              }
 
-            if (element.attachEvent) {
-              element.attachEvent('on' + type, element._events[type]);
-            }
-          }
+              if (!event || typeof event.type !== "string") {
+                throw new Error("DOM Events Exception 0");
+              }
 
-          element._events[type].list.push(listener);
-        };
+              var element = this,
+                type = event.type;
 
-        window.removeEventListener = Window.prototype.removeEventListener = Document.prototype.removeEventListener = Element.prototype.removeEventListener = function removeEventListener() {
-          var element = this,
-            type = arguments[0],
-            listener = arguments[1],
-            index;
+              try {
+                if (!event.bubbles) {
+                  event.cancelBubble = true;
 
-          if (element._events && element._events[type] && element._events[type].list) {
-            index = indexOf(element._events[type].list, listener);
+                  var cancelBubbleEvent = function (event) {
+                    event.cancelBubble = true;
 
-            if (index !== -1) {
-              element._events[type].list.splice(index, 1);
+                    (element || window).detachEvent(
+                      "on" + type,
+                      cancelBubbleEvent,
+                    );
+                  };
 
-              if (!element._events[type].list.length) {
-                if (element.detachEvent) {
-                  element.detachEvent('on' + type, element._events[type]);
+                  this.attachEvent("on" + type, cancelBubbleEvent);
                 }
-                delete element._events[type];
-              }
-            }
-          }
-        };
 
-        window.dispatchEvent = Window.prototype.dispatchEvent = Document.prototype.dispatchEvent = Element.prototype.dispatchEvent = function dispatchEvent(
-          event
-        ) {
-          if (!arguments.length) {
-            throw new Error('Not enough arguments');
-          }
+                this.fireEvent("on" + type, event);
+              } catch (error) {
+                event.target = element;
 
-          if (!event || typeof event.type !== 'string') {
-            throw new Error('DOM Events Exception 0');
-          }
+                do {
+                  event.currentTarget = element;
 
-          var element = this,
-            type = event.type;
+                  if (
+                    "_events" in element &&
+                    typeof element._events[type] === "function"
+                  ) {
+                    element._events[type].call(element, event);
+                  }
 
-          try {
-            if (!event.bubbles) {
-              event.cancelBubble = true;
+                  if (typeof element["on" + type] === "function") {
+                    element["on" + type].call(element, event);
+                  }
 
-              var cancelBubbleEvent = function (event) {
-                event.cancelBubble = true;
-
-                (element || window).detachEvent('on' + type, cancelBubbleEvent);
-              };
-
-              this.attachEvent('on' + type, cancelBubbleEvent);
-            }
-
-            this.fireEvent('on' + type, event);
-          } catch (error) {
-            event.target = element;
-
-            do {
-              event.currentTarget = element;
-
-              if ('_events' in element && typeof element._events[type] === 'function') {
-                element._events[type].call(element, event);
+                  element =
+                    element.nodeType === 9
+                      ? element.parentWindow
+                      : element.parentNode;
+                } while (element && !event.cancelBubble);
               }
 
-              if (typeof element['on' + type] === 'function') {
-                element['on' + type].call(element, event);
-              }
-
-              element = element.nodeType === 9 ? element.parentWindow : element.parentNode;
-            } while (element && !event.cancelBubble);
-          }
-
-          return true;
-        };
+              return true;
+            };
 
         // Add the DOMContentLoaded Event
-        document.attachEvent('onreadystatechange', function () {
-          if (document.readyState === 'complete') {
+        document.attachEvent("onreadystatechange", function () {
+          if (document.readyState === "complete") {
             document.dispatchEvent(
-              new Event('DOMContentLoaded', {
+              new Event("DOMContentLoaded", {
                 bubbles: true,
-              })
+              }),
             );
           }
         });
       }
     })();
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   var KEY_SPACE = 32;
   var DEBOUNCE_TIMEOUT_IN_SECONDS = 1;
@@ -1355,7 +1497,10 @@
     // get the target element
     var target = event.target;
     // if the element has a role='button' and the pressed key is a space, we'll simulate a click
-    if (target.getAttribute('role') === 'button' && event.keyCode === KEY_SPACE) {
+    if (
+      target.getAttribute("role") === "button" &&
+      event.keyCode === KEY_SPACE
+    ) {
       event.preventDefault();
       // trigger the target's click event
       target.click();
@@ -1370,7 +1515,7 @@
   Button.prototype.debounce = function (event) {
     var target = event.target;
     // Check the button that is clicked on has the preventDoubleClick feature enabled
-    if (target.getAttribute('data-prevent-double-click') !== 'true') {
+    if (target.getAttribute("data-prevent-double-click") !== "true") {
       return;
     }
 
@@ -1384,7 +1529,7 @@
       function () {
         this.debounceFormSubmitTimer = null;
       }.bind(this),
-      DEBOUNCE_TIMEOUT_IN_SECONDS * 1000
+      DEBOUNCE_TIMEOUT_IN_SECONDS * 1000,
     );
   };
 
@@ -1393,8 +1538,8 @@
    * this will help listening for later inserted elements with a role="button"
    */
   Button.prototype.init = function () {
-    this.$module.addEventListener('keydown', this.handleKeyDown);
-    this.$module.addEventListener('click', this.debounce);
+    this.$module.addEventListener("keydown", this.handleKeyDown);
+    this.$module.addEventListener("click", this.debounce);
   };
 
   /**
@@ -1417,7 +1562,7 @@
     }
 
     // If there is native details support, we want to avoid running code to polyfill native behaviour.
-    var hasNativeDetails = typeof this.$module.open === 'boolean';
+    var hasNativeDetails = typeof this.$module.open === "boolean";
 
     if (hasNativeDetails) {
       return;
@@ -1430,8 +1575,12 @@
     var $module = this.$module;
 
     // Save shortcuts to the inner summary and content elements
-    var $summary = (this.$summary = $module.getElementsByTagName('summary').item(0));
-    var $content = (this.$content = $module.getElementsByTagName('div').item(0));
+    var $summary = (this.$summary = $module
+      .getElementsByTagName("summary")
+      .item(0));
+    var $content = (this.$content = $module
+      .getElementsByTagName("div")
+      .item(0));
 
     // If <details> doesn't have a <summary> and a <div> representing the content
     // it means the required HTML structure is not met so the script will stop
@@ -1442,17 +1591,17 @@
     // If the content doesn't have an ID, assign it one now
     // which we'll need for the summary's aria-controls assignment
     if (!$content.id) {
-      $content.id = 'details-content-' + generateUniqueID();
+      $content.id = "details-content-" + generateUniqueID();
     }
 
     // Add ARIA role="group" to details
-    $module.setAttribute('role', 'group');
+    $module.setAttribute("role", "group");
 
     // Add role=button to summary
-    $summary.setAttribute('role', 'button');
+    $summary.setAttribute("role", "button");
 
     // Add aria-controls
-    $summary.setAttribute('aria-controls', $content.id);
+    $summary.setAttribute("aria-controls", $content.id);
 
     // Set tabIndex so the summary is keyboard accessible for non-native elements
     //
@@ -1461,14 +1610,14 @@
     $summary.tabIndex = 0;
 
     // Detect initial open state
-    var openAttr = $module.getAttribute('open') !== null;
+    var openAttr = $module.getAttribute("open") !== null;
     if (openAttr === true) {
-      $summary.setAttribute('aria-expanded', 'true');
-      $content.setAttribute('aria-hidden', 'false');
+      $summary.setAttribute("aria-expanded", "true");
+      $content.setAttribute("aria-hidden", "false");
     } else {
-      $summary.setAttribute('aria-expanded', 'false');
-      $content.setAttribute('aria-hidden', 'true');
-      $content.style.display = 'none';
+      $summary.setAttribute("aria-expanded", "false");
+      $content.setAttribute("aria-hidden", "true");
+      $content.style.display = "none";
     }
 
     // Bind an event to handle summary elements
@@ -1484,19 +1633,19 @@
     var $summary = this.$summary;
     var $content = this.$content;
 
-    var expanded = $summary.getAttribute('aria-expanded') === 'true';
-    var hidden = $content.getAttribute('aria-hidden') === 'true';
+    var expanded = $summary.getAttribute("aria-expanded") === "true";
+    var hidden = $content.getAttribute("aria-hidden") === "true";
 
-    $summary.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-    $content.setAttribute('aria-hidden', hidden ? 'false' : 'true');
+    $summary.setAttribute("aria-expanded", expanded ? "false" : "true");
+    $content.setAttribute("aria-hidden", hidden ? "false" : "true");
 
-    $content.style.display = expanded ? 'none' : '';
+    $content.style.display = expanded ? "none" : "";
 
-    var hasOpenAttr = $module.getAttribute('open') !== null;
+    var hasOpenAttr = $module.getAttribute("open") !== null;
     if (!hasOpenAttr) {
-      $module.setAttribute('open', 'open');
+      $module.setAttribute("open", "open");
     } else {
-      $module.removeAttribute('open');
+      $module.removeAttribute("open");
     }
 
     return true;
@@ -1508,11 +1657,11 @@
    * @param {function} callback function
    */
   Details.prototype.polyfillHandleInputs = function (node, callback) {
-    node.addEventListener('keypress', function (event) {
+    node.addEventListener("keypress", function (event) {
       var target = event.target;
       // When the key gets pressed - check if it is enter or space
       if (event.keyCode === KEY_ENTER || event.keyCode === KEY_SPACE$1) {
-        if (target.nodeName.toLowerCase() === 'summary') {
+        if (target.nodeName.toLowerCase() === "summary") {
           // Prevent space from scrolling the page
           // and enter from submitting a form
           event.preventDefault();
@@ -1528,29 +1677,31 @@
     });
 
     // Prevent keyup to prevent clicking twice in Firefox when using space key
-    node.addEventListener('keyup', function (event) {
+    node.addEventListener("keyup", function (event) {
       var target = event.target;
       if (event.keyCode === KEY_SPACE$1) {
-        if (target.nodeName.toLowerCase() === 'summary') {
+        if (target.nodeName.toLowerCase() === "summary") {
           event.preventDefault();
         }
       }
     });
 
-    node.addEventListener('click', callback);
+    node.addEventListener("click", callback);
   };
 
   function CharacterCount($module) {
     this.$module = $module;
-    this.$textarea = $module.querySelector('.govuk-js-character-count');
+    this.$textarea = $module.querySelector(".govuk-js-character-count");
     if (this.$textarea) {
-      this.$countMessage = $module.querySelector('[id=' + this.$textarea.id + '-info]');
+      this.$countMessage = $module.querySelector(
+        "[id=" + this.$textarea.id + "-info]",
+      );
     }
   }
 
   CharacterCount.prototype.defaults = {
-    characterCountAttribute: 'data-maxlength',
-    wordCountAttribute: 'data-maxwords',
+    characterCountAttribute: "data-maxlength",
+    wordCountAttribute: "data-maxwords",
   };
 
   // Initialize component
@@ -1566,7 +1717,7 @@
 
     // We move count message right after the field
     // Kept for backwards compatibility
-    $textarea.insertAdjacentElement('afterend', $countMessage);
+    $textarea.insertAdjacentElement("afterend", $countMessage);
 
     // Read options set using dataset ('data-' values)
     this.options = this.getDataset($module);
@@ -1586,16 +1737,16 @@
     }
 
     // Remove hard limit if set
-    $module.removeAttribute('maxlength');
+    $module.removeAttribute("maxlength");
 
     // When the page is restored after navigating 'back' in some browsers the
     // state of the character count is not restored until *after* the DOMContentLoaded
     // event is fired, so we need to sync after the pageshow event in browsers
     // that support it.
-    if ('onpageshow' in window) {
-      window.addEventListener('pageshow', this.sync.bind(this));
+    if ("onpageshow" in window) {
+      window.addEventListener("pageshow", this.sync.bind(this));
     } else {
-      window.addEventListener('DOMContentLoaded', this.sync.bind(this));
+      window.addEventListener("DOMContentLoaded", this.sync.bind(this));
     }
 
     this.sync();
@@ -1637,18 +1788,18 @@
   // Bind input propertychange to the elements and update based on the change
   CharacterCount.prototype.bindChangeEvents = function () {
     var $textarea = this.$textarea;
-    $textarea.addEventListener('keyup', this.checkIfValueChanged.bind(this));
+    $textarea.addEventListener("keyup", this.checkIfValueChanged.bind(this));
 
     // Bind focus/blur events to start/stop polling
-    $textarea.addEventListener('focus', this.handleFocus.bind(this));
-    $textarea.addEventListener('blur', this.handleBlur.bind(this));
+    $textarea.addEventListener("focus", this.handleFocus.bind(this));
+    $textarea.addEventListener("blur", this.handleBlur.bind(this));
   };
 
   // Speech recognition software such as Dragon NaturallySpeaking will modify the
   // fields by directly changing its `value`. These changes don't trigger events
   // in JavaScript, so we need to poll to handle when and if they occur.
   CharacterCount.prototype.checkIfValueChanged = function () {
-    if (!this.$textarea.oldValue) this.$textarea.oldValue = '';
+    if (!this.$textarea.oldValue) this.$textarea.oldValue = "";
     if (this.$textarea.value !== this.$textarea.oldValue) {
       this.$textarea.oldValue = this.$textarea.value;
       this.updateCountMessage();
@@ -1670,39 +1821,41 @@
     var thresholdPercent = options.threshold ? options.threshold : 0;
     var thresholdValue = (maxLength * thresholdPercent) / 100;
     if (thresholdValue > currentLength) {
-      countMessage.classList.add('govuk-character-count__message--disabled');
+      countMessage.classList.add("govuk-character-count__message--disabled");
       // Ensure threshold is hidden for users of assistive technologies
-      countMessage.setAttribute('aria-hidden', true);
+      countMessage.setAttribute("aria-hidden", true);
     } else {
-      countMessage.classList.remove('govuk-character-count__message--disabled');
+      countMessage.classList.remove("govuk-character-count__message--disabled");
       // Ensure threshold is visible for users of assistive technologies
-      countMessage.removeAttribute('aria-hidden');
+      countMessage.removeAttribute("aria-hidden");
     }
 
     // Update styles
     if (remainingNumber < 0) {
-      countElement.classList.add('govuk-textarea--error');
-      countMessage.classList.remove('govuk-hint');
-      countMessage.classList.add('govuk-error-message');
+      countElement.classList.add("govuk-textarea--error");
+      countMessage.classList.remove("govuk-hint");
+      countMessage.classList.add("govuk-error-message");
     } else {
-      countElement.classList.remove('govuk-textarea--error');
-      countMessage.classList.remove('govuk-error-message');
-      countMessage.classList.add('govuk-hint');
+      countElement.classList.remove("govuk-textarea--error");
+      countMessage.classList.remove("govuk-error-message");
+      countMessage.classList.add("govuk-hint");
     }
 
     // Update message
-    var charVerb = 'remaining';
-    var charNoun = 'character';
+    var charVerb = "remaining";
+    var charNoun = "character";
     var displayNumber = remainingNumber;
     if (options.maxwords) {
-      charNoun = 'word';
+      charNoun = "word";
     }
-    charNoun = charNoun + (remainingNumber === -1 || remainingNumber === 1 ? '' : 's');
+    charNoun =
+      charNoun + (remainingNumber === -1 || remainingNumber === 1 ? "" : "s");
 
-    charVerb = remainingNumber < 0 ? 'too many' : 'remaining';
+    charVerb = remainingNumber < 0 ? "too many" : "remaining";
     displayNumber = Math.abs(remainingNumber);
 
-    countMessage.innerHTML = 'You have ' + displayNumber + ' ' + charNoun + ' ' + charVerb;
+    countMessage.innerHTML =
+      "You have " + displayNumber + " " + charNoun + " " + charVerb;
   };
 
   CharacterCount.prototype.handleFocus = function () {
@@ -1739,28 +1892,34 @@
     var $inputs = this.$inputs;
 
     nodeListForEach($inputs, function ($input) {
-      var target = $input.getAttribute('data-aria-controls');
+      var target = $input.getAttribute("data-aria-controls");
 
       // Skip checkboxes without data-aria-controls attributes, or where the
       // target element does not exist.
-      if (!target || !$module.querySelector('#' + target)) {
+      if (!target || !$module.querySelector("#" + target)) {
         return;
       }
 
       // Promote the data-aria-controls attribute to a aria-controls attribute
       // so that the relationship is exposed in the AOM
-      $input.setAttribute('aria-controls', target);
-      $input.removeAttribute('data-aria-controls');
+      $input.setAttribute("aria-controls", target);
+      $input.removeAttribute("data-aria-controls");
     });
 
     // When the page is restored after navigating 'back' in some browsers the
     // state of form controls is not restored until *after* the DOMContentLoaded
     // event is fired, so we need to sync after the pageshow event in browsers
     // that support it.
-    if ('onpageshow' in window) {
-      window.addEventListener('pageshow', this.syncAllConditionalReveals.bind(this));
+    if ("onpageshow" in window) {
+      window.addEventListener(
+        "pageshow",
+        this.syncAllConditionalReveals.bind(this),
+      );
     } else {
-      window.addEventListener('DOMContentLoaded', this.syncAllConditionalReveals.bind(this));
+      window.addEventListener(
+        "DOMContentLoaded",
+        this.syncAllConditionalReveals.bind(this),
+      );
     }
 
     // Although we've set up handlers to sync state on the pageshow or
@@ -1768,14 +1927,17 @@
     // for example if they are added to the page dynamically, so sync now too.
     this.syncAllConditionalReveals();
 
-    $module.addEventListener('click', this.handleClick.bind(this));
+    $module.addEventListener("click", this.handleClick.bind(this));
   };
 
   /**
    * Sync the conditional reveal states for all inputs in this $module.
    */
   Checkboxes.prototype.syncAllConditionalReveals = function () {
-    nodeListForEach(this.$inputs, this.syncConditionalRevealWithInputState.bind(this));
+    nodeListForEach(
+      this.$inputs,
+      this.syncConditionalRevealWithInputState.bind(this),
+    );
   };
 
   /**
@@ -1787,13 +1949,21 @@
    * @param {HTMLInputElement} $input Checkbox input
    */
   Checkboxes.prototype.syncConditionalRevealWithInputState = function ($input) {
-    var $target = this.$module.querySelector('#' + $input.getAttribute('aria-controls'));
+    var $target = this.$module.querySelector(
+      "#" + $input.getAttribute("aria-controls"),
+    );
 
-    if ($target && $target.classList.contains('govuk-checkboxes__conditional')) {
+    if (
+      $target &&
+      $target.classList.contains("govuk-checkboxes__conditional")
+    ) {
       var inputIsChecked = $input.checked;
 
-      $input.setAttribute('aria-expanded', inputIsChecked);
-      $target.classList.toggle('govuk-checkboxes__conditional--hidden', !inputIsChecked);
+      $input.setAttribute("aria-expanded", inputIsChecked);
+      $target.classList.toggle(
+        "govuk-checkboxes__conditional--hidden",
+        !inputIsChecked,
+      );
     }
   };
 
@@ -1809,8 +1979,8 @@
     var $target = event.target;
 
     // If a checkbox with aria-controls, handle click
-    var isCheckbox = $target.getAttribute('type') === 'checkbox';
-    var hasAriaControls = $target.getAttribute('aria-controls');
+    var isCheckbox = $target.getAttribute("type") === "checkbox";
+    var hasAriaControls = $target.getAttribute("aria-controls");
     if (isCheckbox && hasAriaControls) {
       this.syncConditionalRevealWithInputState($target);
     }
@@ -1818,7 +1988,7 @@
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-service/1f3c09b402f65bf6e393f933a15ba63f1b86ef1f/packages/polyfill-library/polyfills/Element/prototype/matches/detect.js
-    var detect = 'document' in this && 'matches' in document.documentElement;
+    var detect = "document" in this && "matches" in document.documentElement;
 
     if (detect) return;
 
@@ -1830,7 +2000,9 @@
       Element.prototype.mozMatchesSelector ||
       function matches(selector) {
         var element = this;
-        var elements = (element.document || element.ownerDocument).querySelectorAll(selector);
+        var elements = (
+          element.document || element.ownerDocument
+        ).querySelectorAll(selector);
         var index = 0;
 
         while (elements[index] && elements[index] !== element) {
@@ -1839,16 +2011,16 @@
 
         return !!elements[index];
       };
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-service/1f3c09b402f65bf6e393f933a15ba63f1b86ef1f/packages/polyfill-library/polyfills/Element/prototype/closest/detect.js
-    var detect = 'document' in this && 'closest' in document.documentElement;
+    var detect = "document" in this && "closest" in document.documentElement;
 
     if (detect) return;
 
@@ -1858,17 +2030,21 @@
 
       while (node) {
         if (node.matches(selector)) return node;
-        else node = 'SVGElement' in window && node instanceof SVGElement ? node.parentNode : node.parentElement;
+        else
+          node =
+            "SVGElement" in window && node instanceof SVGElement
+              ? node.parentNode
+              : node.parentElement;
       }
 
       return null;
     };
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   function ErrorSummary($module) {
     this.$module = $module;
@@ -1881,7 +2057,7 @@
     }
     $module.focus();
 
-    $module.addEventListener('click', this.handleClick.bind(this));
+    $module.addEventListener("click", this.handleClick.bind(this));
   };
 
   /**
@@ -1916,7 +2092,7 @@
    */
   ErrorSummary.prototype.focusTarget = function ($target) {
     // If the element that was clicked was not a link, return early
-    if ($target.tagName !== 'A' || $target.href === false) {
+    if ($target.tagName !== "A" || $target.href === false) {
       return false;
     }
 
@@ -1950,11 +2126,11 @@
    * @returns {string} Fragment from URL, without the hash
    */
   ErrorSummary.prototype.getFragmentFromUrl = function (url) {
-    if (url.indexOf('#') === -1) {
+    if (url.indexOf("#") === -1) {
       return false;
     }
 
-    return url.split('#').pop();
+    return url.split("#").pop();
   };
 
   /**
@@ -1973,17 +2149,17 @@
    *                        legend or label can be found
    */
   ErrorSummary.prototype.getAssociatedLegendOrLabel = function ($input) {
-    var $fieldset = $input.closest('fieldset');
+    var $fieldset = $input.closest("fieldset");
 
     if ($fieldset) {
-      var legends = $fieldset.getElementsByTagName('legend');
+      var legends = $fieldset.getElementsByTagName("legend");
 
       if (legends.length) {
         var $candidateLegend = legends[0];
 
         // If the input type is radio or checkbox, always use the legend if there
         // is one.
-        if ($input.type === 'checkbox' || $input.type === 'radio') {
+        if ($input.type === "checkbox" || $input.type === "radio") {
           return $candidateLegend;
         }
 
@@ -2008,13 +2184,22 @@
       }
     }
 
-    return document.querySelector("label[for='" + $input.getAttribute('id') + "']") || $input.closest('label');
+    return (
+      document.querySelector(
+        "label[for='" + $input.getAttribute("id") + "']",
+      ) || $input.closest("label")
+    );
   };
 
   function Header($module) {
     this.$module = $module;
-    this.$menuButton = $module && $module.querySelector('.govuk-js-header-toggle');
-    this.$menu = this.$menuButton && $module.querySelector('#' + this.$menuButton.getAttribute('aria-controls'));
+    this.$menuButton =
+      $module && $module.querySelector(".govuk-js-header-toggle");
+    this.$menu =
+      this.$menuButton &&
+      $module.querySelector(
+        "#" + this.$menuButton.getAttribute("aria-controls"),
+      );
   }
 
   /**
@@ -2028,8 +2213,13 @@
       return;
     }
 
-    this.syncState(this.$menu.classList.contains('govuk-header__navigation--open'));
-    this.$menuButton.addEventListener('click', this.handleMenuButtonClick.bind(this));
+    this.syncState(
+      this.$menu.classList.contains("govuk-header__navigation--open"),
+    );
+    this.$menuButton.addEventListener(
+      "click",
+      this.handleMenuButtonClick.bind(this),
+    );
   };
 
   /**
@@ -2041,8 +2231,11 @@
    * @param {boolean} isVisible Whether the menu is currently visible
    */
   Header.prototype.syncState = function (isVisible) {
-    this.$menuButton.classList.toggle('govuk-header__menu-button--open', isVisible);
-    this.$menuButton.setAttribute('aria-expanded', isVisible);
+    this.$menuButton.classList.toggle(
+      "govuk-header__menu-button--open",
+      isVisible,
+    );
+    this.$menuButton.setAttribute("aria-expanded", isVisible);
   };
 
   /**
@@ -2052,7 +2245,9 @@
    * sync the accessibility state and menu button state
    */
   Header.prototype.handleMenuButtonClick = function () {
-    var isVisible = this.$menu.classList.toggle('govuk-header__navigation--open');
+    var isVisible = this.$menu.classList.toggle(
+      "govuk-header__navigation--open",
+    );
     this.syncState(isVisible);
   };
 
@@ -2080,28 +2275,34 @@
     var $inputs = this.$inputs;
 
     nodeListForEach($inputs, function ($input) {
-      var target = $input.getAttribute('data-aria-controls');
+      var target = $input.getAttribute("data-aria-controls");
 
       // Skip radios without data-aria-controls attributes, or where the
       // target element does not exist.
-      if (!target || !$module.querySelector('#' + target)) {
+      if (!target || !$module.querySelector("#" + target)) {
         return;
       }
 
       // Promote the data-aria-controls attribute to a aria-controls attribute
       // so that the relationship is exposed in the AOM
-      $input.setAttribute('aria-controls', target);
-      $input.removeAttribute('data-aria-controls');
+      $input.setAttribute("aria-controls", target);
+      $input.removeAttribute("data-aria-controls");
     });
 
     // When the page is restored after navigating 'back' in some browsers the
     // state of form controls is not restored until *after* the DOMContentLoaded
     // event is fired, so we need to sync after the pageshow event in browsers
     // that support it.
-    if ('onpageshow' in window) {
-      window.addEventListener('pageshow', this.syncAllConditionalReveals.bind(this));
+    if ("onpageshow" in window) {
+      window.addEventListener(
+        "pageshow",
+        this.syncAllConditionalReveals.bind(this),
+      );
     } else {
-      window.addEventListener('DOMContentLoaded', this.syncAllConditionalReveals.bind(this));
+      window.addEventListener(
+        "DOMContentLoaded",
+        this.syncAllConditionalReveals.bind(this),
+      );
     }
 
     // Although we've set up handlers to sync state on the pageshow or
@@ -2110,14 +2311,17 @@
     this.syncAllConditionalReveals();
 
     // Handle events
-    $module.addEventListener('click', this.handleClick.bind(this));
+    $module.addEventListener("click", this.handleClick.bind(this));
   };
 
   /**
    * Sync the conditional reveal states for all inputs in this $module.
    */
   Radios.prototype.syncAllConditionalReveals = function () {
-    nodeListForEach(this.$inputs, this.syncConditionalRevealWithInputState.bind(this));
+    nodeListForEach(
+      this.$inputs,
+      this.syncConditionalRevealWithInputState.bind(this),
+    );
   };
 
   /**
@@ -2129,13 +2333,18 @@
    * @param {HTMLInputElement} $input Radio input
    */
   Radios.prototype.syncConditionalRevealWithInputState = function ($input) {
-    var $target = document.querySelector('#' + $input.getAttribute('aria-controls'));
+    var $target = document.querySelector(
+      "#" + $input.getAttribute("aria-controls"),
+    );
 
-    if ($target && $target.classList.contains('govuk-radios__conditional')) {
+    if ($target && $target.classList.contains("govuk-radios__conditional")) {
       var inputIsChecked = $input.checked;
 
-      $input.setAttribute('aria-expanded', inputIsChecked);
-      $target.classList.toggle('govuk-radios__conditional--hidden', !inputIsChecked);
+      $input.setAttribute("aria-expanded", inputIsChecked);
+      $target.classList.toggle(
+        "govuk-radios__conditional--hidden",
+        !inputIsChecked,
+      );
     }
   };
 
@@ -2153,13 +2362,15 @@
     var $clickedInput = event.target;
 
     // Ignore clicks on things that aren't radio buttons
-    if ($clickedInput.type !== 'radio') {
+    if ($clickedInput.type !== "radio") {
       return;
     }
 
     // We only need to consider radios with conditional reveals, which will have
     // aria-controls attributes.
-    var $allInputs = document.querySelectorAll('input[type="radio"][aria-controls]');
+    var $allInputs = document.querySelectorAll(
+      'input[type="radio"][aria-controls]',
+    );
 
     nodeListForEach(
       $allInputs,
@@ -2170,18 +2381,19 @@
         if (hasSameName && hasSameFormOwner) {
           this.syncConditionalRevealWithInputState($input);
         }
-      }.bind(this)
+      }.bind(this),
     );
   };
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-library/master/polyfills/Element/prototype/nextElementSibling/detect.js
-    var detect = 'document' in this && 'nextElementSibling' in document.documentElement;
+    var detect =
+      "document" in this && "nextElementSibling" in document.documentElement;
 
     if (detect) return;
 
     // Polyfill from https://raw.githubusercontent.com/Financial-Times/polyfill-library/master/polyfills/Element/prototype/nextElementSibling/polyfill.js
-    Object.defineProperty(Element.prototype, 'nextElementSibling', {
+    Object.defineProperty(Element.prototype, "nextElementSibling", {
       get: function () {
         var el = this.nextSibling;
         while (el && el.nodeType !== 1) {
@@ -2190,21 +2402,23 @@
         return el;
       },
     });
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   (function (undefined) {
     // Detection from https://raw.githubusercontent.com/Financial-Times/polyfill-library/master/polyfills/Element/prototype/previousElementSibling/detect.js
-    var detect = 'document' in this && 'previousElementSibling' in document.documentElement;
+    var detect =
+      "document" in this &&
+      "previousElementSibling" in document.documentElement;
 
     if (detect) return;
 
     // Polyfill from https://raw.githubusercontent.com/Financial-Times/polyfill-library/master/polyfills/Element/prototype/previousElementSibling/polyfill.js
-    Object.defineProperty(Element.prototype, 'previousElementSibling', {
+    Object.defineProperty(Element.prototype, "previousElementSibling", {
       get: function () {
         var el = this.previousSibling;
         while (el && el.nodeType !== 1) {
@@ -2213,23 +2427,23 @@
         return el;
       },
     });
-  }.call(
-    ('object' === typeof window && window) ||
-      ('object' === typeof self && self) ||
-      ('object' === typeof global && global) ||
-      {}
-  ));
+  }).call(
+    ("object" === typeof window && window) ||
+      ("object" === typeof self && self) ||
+      ("object" === typeof global && global) ||
+      {},
+  );
 
   function Tabs($module) {
     this.$module = $module;
-    this.$tabs = $module.querySelectorAll('.govuk-tabs__tab');
+    this.$tabs = $module.querySelectorAll(".govuk-tabs__tab");
 
     this.keys = { left: 37, right: 39, up: 38, down: 40 };
-    this.jsHiddenClass = 'govuk-tabs__panel--hidden';
+    this.jsHiddenClass = "govuk-tabs__panel--hidden";
   }
 
   Tabs.prototype.init = function () {
-    if (typeof window.matchMedia === 'function') {
+    if (typeof window.matchMedia === "function") {
       this.setupResponsiveChecks();
     } else {
       this.setup();
@@ -2237,7 +2451,7 @@
   };
 
   Tabs.prototype.setupResponsiveChecks = function () {
-    this.mql = window.matchMedia('(min-width: 40.0625em)');
+    this.mql = window.matchMedia("(min-width: 40.0625em)");
     this.mql.addListener(this.checkMode.bind(this));
     this.checkMode();
   };
@@ -2253,17 +2467,17 @@
   Tabs.prototype.setup = function () {
     var $module = this.$module;
     var $tabs = this.$tabs;
-    var $tabList = $module.querySelector('.govuk-tabs__list');
-    var $tabListItems = $module.querySelectorAll('.govuk-tabs__list-item');
+    var $tabList = $module.querySelector(".govuk-tabs__list");
+    var $tabListItems = $module.querySelectorAll(".govuk-tabs__list-item");
 
     if (!$tabs || !$tabList || !$tabListItems) {
       return;
     }
 
-    $tabList.setAttribute('role', 'tablist');
+    $tabList.setAttribute("role", "tablist");
 
     nodeListForEach($tabListItems, function ($item) {
-      $item.setAttribute('role', 'presentation');
+      $item.setAttribute("role", "presentation");
     });
 
     nodeListForEach(
@@ -2277,12 +2491,12 @@
         $tab.boundTabKeydown = this.onTabKeydown.bind(this);
 
         // Handle events
-        $tab.addEventListener('click', $tab.boundTabClick, true);
-        $tab.addEventListener('keydown', $tab.boundTabKeydown, true);
+        $tab.addEventListener("click", $tab.boundTabClick, true);
+        $tab.addEventListener("keydown", $tab.boundTabKeydown, true);
 
         // Remove old active panels
         this.hideTab($tab);
-      }.bind(this)
+      }.bind(this),
     );
 
     // Show either the active tab according to the URL's hash or the first tab
@@ -2291,39 +2505,39 @@
 
     // Handle hashchange events
     $module.boundOnHashChange = this.onHashChange.bind(this);
-    window.addEventListener('hashchange', $module.boundOnHashChange, true);
+    window.addEventListener("hashchange", $module.boundOnHashChange, true);
   };
 
   Tabs.prototype.teardown = function () {
     var $module = this.$module;
     var $tabs = this.$tabs;
-    var $tabList = $module.querySelector('.govuk-tabs__list');
-    var $tabListItems = $module.querySelectorAll('.govuk-tabs__list-item');
+    var $tabList = $module.querySelector(".govuk-tabs__list");
+    var $tabListItems = $module.querySelectorAll(".govuk-tabs__list-item");
 
     if (!$tabs || !$tabList || !$tabListItems) {
       return;
     }
 
-    $tabList.removeAttribute('role');
+    $tabList.removeAttribute("role");
 
     nodeListForEach($tabListItems, function ($item) {
-      $item.removeAttribute('role', 'presentation');
+      $item.removeAttribute("role", "presentation");
     });
 
     nodeListForEach(
       $tabs,
       function ($tab) {
         // Remove events
-        $tab.removeEventListener('click', $tab.boundTabClick, true);
-        $tab.removeEventListener('keydown', $tab.boundTabKeydown, true);
+        $tab.removeEventListener("click", $tab.boundTabClick, true);
+        $tab.removeEventListener("keydown", $tab.boundTabKeydown, true);
 
         // Unset HTML attributes
         this.unsetAttributes($tab);
-      }.bind(this)
+      }.bind(this),
     );
 
     // Remove hashchange event handler
-    window.removeEventListener('hashchange', $module.boundOnHashChange, true);
+    window.removeEventListener("hashchange", $module.boundOnHashChange, true);
   };
 
   Tabs.prototype.onHashChange = function (e) {
@@ -2364,36 +2578,36 @@
   Tabs.prototype.setAttributes = function ($tab) {
     // set tab attributes
     var panelId = this.getHref($tab).slice(1);
-    $tab.setAttribute('id', 'tab_' + panelId);
-    $tab.setAttribute('role', 'tab');
-    $tab.setAttribute('aria-controls', panelId);
-    $tab.setAttribute('aria-selected', 'false');
-    $tab.setAttribute('tabindex', '-1');
+    $tab.setAttribute("id", "tab_" + panelId);
+    $tab.setAttribute("role", "tab");
+    $tab.setAttribute("aria-controls", panelId);
+    $tab.setAttribute("aria-selected", "false");
+    $tab.setAttribute("tabindex", "-1");
 
     // set panel attributes
     var $panel = this.getPanel($tab);
-    $panel.setAttribute('role', 'tabpanel');
-    $panel.setAttribute('aria-labelledby', $tab.id);
+    $panel.setAttribute("role", "tabpanel");
+    $panel.setAttribute("aria-labelledby", $tab.id);
     $panel.classList.add(this.jsHiddenClass);
   };
 
   Tabs.prototype.unsetAttributes = function ($tab) {
     // unset tab attributes
-    $tab.removeAttribute('id');
-    $tab.removeAttribute('role');
-    $tab.removeAttribute('aria-controls');
-    $tab.removeAttribute('aria-selected');
-    $tab.removeAttribute('tabindex');
+    $tab.removeAttribute("id");
+    $tab.removeAttribute("role");
+    $tab.removeAttribute("aria-controls");
+    $tab.removeAttribute("aria-selected");
+    $tab.removeAttribute("tabindex");
 
     // unset panel attributes
     var $panel = this.getPanel($tab);
-    $panel.removeAttribute('role');
-    $panel.removeAttribute('aria-labelledby');
+    $panel.removeAttribute("role");
+    $panel.removeAttribute("aria-labelledby");
     $panel.classList.remove(this.jsHiddenClass);
   };
 
   Tabs.prototype.onTabClick = function (e) {
-    if (!e.target.classList.contains('govuk-tabs__tab')) {
+    if (!e.target.classList.contains("govuk-tabs__tab")) {
       // Allow events on child DOM elements to bubble up to tab parent
       return false;
     }
@@ -2411,7 +2625,7 @@
     // Save and restore the id
     // so the page doesn't jump when a user clicks a tab (which changes the hash)
     var id = $panel.id;
-    $panel.id = '';
+    $panel.id = "";
     this.changingHash = true;
     window.location.hash = this.getHref($tab).slice(1);
     $panel.id = id;
@@ -2436,7 +2650,7 @@
     var currentTab = this.getCurrentTab();
     var nextTabListItem = currentTab.parentNode.nextElementSibling;
     if (nextTabListItem) {
-      var nextTab = nextTabListItem.querySelector('.govuk-tabs__tab');
+      var nextTab = nextTabListItem.querySelector(".govuk-tabs__tab");
     }
     if (nextTab) {
       this.hideTab(currentTab);
@@ -2450,7 +2664,7 @@
     var currentTab = this.getCurrentTab();
     var previousTabListItem = currentTab.parentNode.previousElementSibling;
     if (previousTabListItem) {
-      var previousTab = previousTabListItem.querySelector('.govuk-tabs__tab');
+      var previousTab = previousTabListItem.querySelector(".govuk-tabs__tab");
     }
     if (previousTab) {
       this.hideTab(currentTab);
@@ -2476,37 +2690,39 @@
   };
 
   Tabs.prototype.unhighlightTab = function ($tab) {
-    $tab.setAttribute('aria-selected', 'false');
-    $tab.parentNode.classList.remove('govuk-tabs__list-item--selected');
-    $tab.setAttribute('tabindex', '-1');
+    $tab.setAttribute("aria-selected", "false");
+    $tab.parentNode.classList.remove("govuk-tabs__list-item--selected");
+    $tab.setAttribute("tabindex", "-1");
   };
 
   Tabs.prototype.highlightTab = function ($tab) {
-    $tab.setAttribute('aria-selected', 'true');
-    $tab.parentNode.classList.add('govuk-tabs__list-item--selected');
-    $tab.setAttribute('tabindex', '0');
+    $tab.setAttribute("aria-selected", "true");
+    $tab.parentNode.classList.add("govuk-tabs__list-item--selected");
+    $tab.setAttribute("tabindex", "0");
   };
 
   Tabs.prototype.getCurrentTab = function () {
-    return this.$module.querySelector('.govuk-tabs__list-item--selected .govuk-tabs__tab');
+    return this.$module.querySelector(
+      ".govuk-tabs__list-item--selected .govuk-tabs__tab",
+    );
   };
 
   // this is because IE doesn't always return the actual value but a relative full path
   // should be a utility function most prob
   // http://labs.thesedays.com/blog/2010/01/08/getting-the-href-value-with-jquery-in-ie/
   Tabs.prototype.getHref = function ($tab) {
-    var href = $tab.getAttribute('href');
-    var hash = href.slice(href.indexOf('#'), href.length);
+    var href = $tab.getAttribute("href");
+    var hash = href.slice(href.indexOf("#"), href.length);
     return hash;
   };
 
   function initAll(options) {
     // Set the options to an empty object by default if no options are passed.
-    options = typeof options !== 'undefined' ? options : {};
+    options = typeof options !== "undefined" ? options : {};
 
     // Allow the user to initialise GOV.UK Frontend in only certain sections of the page
     // Defaults to the entire document if nothing is set.
-    var scope = typeof options.scope !== 'undefined' ? options.scope : document;
+    var scope = typeof options.scope !== "undefined" ? options.scope : document;
 
     var $buttons = scope.querySelectorAll('[data-module="govuk-button"]');
     nodeListForEach($buttons, function ($button) {
@@ -2523,18 +2739,24 @@
       new Details($detail).init();
     });
 
-    var $characterCounts = scope.querySelectorAll('[data-module="govuk-character-count"]');
+    var $characterCounts = scope.querySelectorAll(
+      '[data-module="govuk-character-count"]',
+    );
     nodeListForEach($characterCounts, function ($characterCount) {
       new CharacterCount($characterCount).init();
     });
 
-    var $checkboxes = scope.querySelectorAll('[data-module="govuk-checkboxes"]');
+    var $checkboxes = scope.querySelectorAll(
+      '[data-module="govuk-checkboxes"]',
+    );
     nodeListForEach($checkboxes, function ($checkbox) {
       new Checkboxes($checkbox).init();
     });
 
     // Find first error summary module to enhance.
-    var $errorSummary = scope.querySelector('[data-module="govuk-error-summary"]');
+    var $errorSummary = scope.querySelector(
+      '[data-module="govuk-error-summary"]',
+    );
     new ErrorSummary($errorSummary).init();
 
     // Find first header module to enhance.

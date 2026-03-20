@@ -6,7 +6,7 @@ module.exports = {
     "./contexts/**/*.{js,ts,jsx,tsx}",
     "./hooks/**/*.{js,ts,jsx,tsx}",
     "./services/**/*.{js,ts,jsx,tsx}",
-    "./utils/**/*.{js,ts,jsx,tsx}"
+    "./utils/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -17,9 +17,9 @@ module.exports = {
         focusText: "#0b0c0c",
         hoverBlue: "#003078",
         govGreen: "#00703c",
-        govRed: "#d4351c"
-      }
-    }
+        govRed: "#d4351c",
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };

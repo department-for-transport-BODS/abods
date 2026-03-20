@@ -21,7 +21,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     // Global error handler for unhandled promise rejections
     const handleError = (event: PromiseRejectionEvent) => {
       console.error("Unhandled error:", event.reason);
-      
+
       // Check if it's a 500-level error
       if (
         event.reason?.message?.includes("(500)") ||

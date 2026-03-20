@@ -13,7 +13,11 @@ const Document = () => {
           type="image/x-icon"
         />
         <meta name="theme-color" content="#1d70b8" />
-        <link rel="icon" sizes="48x48" href="/assets/rebrand/images/favicon.ico" />
+        <link
+          rel="icon"
+          sizes="48x48"
+          href="/assets/rebrand/images/favicon.ico"
+        />
         <link
           rel="icon"
           sizes="any"
@@ -25,9 +29,15 @@ const Document = () => {
           href="/assets/rebrand/images/govuk-icon-mask.svg"
           color="#1d70b8"
         />
-        <link rel="apple-touch-icon" href="/assets/rebrand/images/govuk-icon-180.png" />
+        <link
+          rel="apple-touch-icon"
+          href="/assets/rebrand/images/govuk-icon-180.png"
+        />
         <link rel="manifest" href="/assets/rebrand/manifest.json" />
-        <meta property="og:image" content="/assets/rebrand/images/govuk-opengraph-image.png" />
+        <meta
+          property="og:image"
+          content="/assets/rebrand/images/govuk-opengraph-image.png"
+        />
       </Head>
       <body className="govuk-template__body">
         <script

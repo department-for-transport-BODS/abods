@@ -10,7 +10,12 @@ import { FeedStatusSummary } from "@/components/dashboard/FeedStatusSummary";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { DashboardVehicles, OperatorDashboard, PerformanceFiltersInputType, StopTypeOption } from "@/types/dashboard";
+import {
+  DashboardVehicles,
+  OperatorDashboard,
+  PerformanceFiltersInputType,
+  StopTypeOption,
+} from "@/types/dashboard";
 
 const DashboardPage = () => {
   useRequireAuth();
@@ -20,8 +25,10 @@ const DashboardPage = () => {
   const [vehicleCounts, setVehicleCounts] = useState<DashboardVehicles[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const nocCode = typeof router.query.nocCode === "string" ? router.query.nocCode : null;
-  const stopType: StopTypeOption = router.query.stopType === "AllStops" ? "AllStops" : "TimingPoints";
+  const nocCode =
+    typeof router.query.nocCode === "string" ? router.query.nocCode : null;
+  const stopType: StopTypeOption =
+    router.query.stopType === "AllStops" ? "AllStops" : "TimingPoints";
 
   const performanceFilters: PerformanceFiltersInputType = useMemo(
     () => ({
@@ -98,7 +105,10 @@ const DashboardPage = () => {
     router.replace(
       {
         pathname: router.pathname,
-        query: { ...router.query, stopType: value === "TimingPoints" ? undefined : value },
+        query: {
+          ...router.query,
+          stopType: value === "TimingPoints" ? undefined : value,
+        },
       },
       undefined,
       { shallow: true },
@@ -110,7 +120,11 @@ const DashboardPage = () => {
       <div className="app-page dashboard-page">
         <h1 className="govuk-heading-xl app-page-header">Dashboard</h1>
         <div className="dashboard__controls">
-          <OperatorSelector operators={operators} selectedOperatorId={nocCode} onChange={handleOperatorChange} />
+          <OperatorSelector
+            operators={operators}
+            selectedOperatorId={nocCode}
+            onChange={handleOperatorChange}
+          />
           <StopTypeToggle stopType={stopType} onChange={handleStopTypeChange} />
         </div>
         {isLoading ? (
@@ -120,12 +134,20 @@ const DashboardPage = () => {
             <div className="dashboard__performance">
               <Box>
                 <h2 className="govuk-heading-m">On-time performance</h2>
-                <PerformanceWidget filters={performanceFilters} operators={operators} nocCode={nocCode} />
+                <PerformanceWidget
+                  filters={performanceFilters}
+                  operators={operators}
+                  nocCode={nocCode}
+                />
               </Box>
             </div>
             <div className="dashboard__feeds">
               <div className="dashboard__vehicles-status">
-                <VehiclesStatus actual={currentVehicles} expected={expectedVehicles} nocCode={nocCode} />
+                <VehiclesStatus
+                  actual={currentVehicles}
+                  expected={expectedVehicles}
+                  nocCode={nocCode}
+                />
               </div>
               <div className="dashboard__feed-alerts">
                 <FeedStatusSummary operators={feedStatusOperators} />
