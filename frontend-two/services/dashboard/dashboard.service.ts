@@ -18,12 +18,12 @@ import {
 export const dashboardService = {
   fetchOperators: async (apiUrl: string): Promise<OperatorDashboard[]> => {
     try {
-      const result = await graphqlRequest<{ operatorsFeedMonitoring: OperatorDashboard[] }>(
-        apiUrl,
-        OPERATOR_LIST_QUERY,
-      );
+      const result = await graphqlRequest<{
+        operatorsFeedMonitoring: OperatorDashboard[];
+      }>(apiUrl, OPERATOR_LIST_QUERY);
       return result.operatorsFeedMonitoring ?? [];
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch operators:", error);
       return [];
     }
   },
@@ -32,13 +32,12 @@ export const dashboardService = {
     operatorId?: string | null,
   ): Promise<DashboardVehicles[]> => {
     try {
-      const result = await graphqlRequest<{ dashboardVehicles: DashboardVehicles[] }>(
-        apiUrl,
-        VEHICLE_COUNTS_QUERY,
-        { operatorId: operatorId ?? undefined },
-      );
+      const result = await graphqlRequest<{
+        dashboardVehicles: DashboardVehicles[];
+      }>(apiUrl, VEHICLE_COUNTS_QUERY, { operatorId: operatorId ?? undefined });
       return result.dashboardVehicles ?? [];
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch vehicle counts:", error);
       return [];
     }
   },
@@ -54,13 +53,14 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await graphqlRequest<{ onTimePerformance?: { punctualityOverview?: PunctualityOverview | null } | null }>(
-        apiUrl,
-        PERFORMANCE_STATS_QUERY,
-        { params },
-      );
+      const result = await graphqlRequest<{
+        onTimePerformance?: {
+          punctualityOverview?: PunctualityOverview | null;
+        } | null;
+      }>(apiUrl, PERFORMANCE_STATS_QUERY, { params });
       return result.onTimePerformance?.punctualityOverview ?? null;
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch punctuality stats:", error);
       return null;
     }
   },
@@ -80,17 +80,18 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await graphqlRequest<{ onTimePerformance?: { servicePunctuality?: ServicePunctuality[] | null } | null }>(
-        apiUrl,
-        SERVICE_RANKING_QUERY,
-        {
-          params,
-          trendFrom: trendFrom.toISO(),
-          trendTo: trendTo.toISO(),
-        },
-      );
+      const result = await graphqlRequest<{
+        onTimePerformance?: {
+          servicePunctuality?: ServicePunctuality[] | null;
+        } | null;
+      }>(apiUrl, SERVICE_RANKING_QUERY, {
+        params,
+        trendFrom: trendFrom.toISO(),
+        trendTo: trendTo.toISO(),
+      });
       return result.onTimePerformance?.servicePunctuality ?? [];
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch service ranking:", error);
       return [];
     }
   },

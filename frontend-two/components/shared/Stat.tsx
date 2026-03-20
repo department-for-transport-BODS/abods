@@ -5,7 +5,7 @@ interface StatProps {
   label: string;
   value: ReactNode;
   tooltip?: string;
-  id?: string;
+  id: string;
   className?: string;
 }
 
