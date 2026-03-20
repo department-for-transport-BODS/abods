@@ -56,4 +56,3 @@ export const SERVICE_RANKING_QUERY = `query dashboardServiceRanking(
     }
   }
 }`;
-

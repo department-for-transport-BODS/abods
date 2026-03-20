@@ -18,7 +18,11 @@ const ALL_OPERATORS_OPTION = {
   aliases: ["all"],
 };
 
-const ALL_OPERATORS_OPTION = { value: "all", label: "All operators", aliases: ["all"] };
+const ALL_OPERATORS_OPTION = {
+  value: "all",
+  label: "All operators",
+  aliases: ["all"],
+};
 
 interface OperatorSelectorProps {
   operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
