@@ -44,11 +44,17 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
               ? "onTime"
               : (category.toLowerCase() as "late" | "early")
           ] ?? 0;
-        const pct = total > 0 ? Number((((value as number) / total) * 100).toFixed(1)) : 0;
+        const pct =
+          total > 0
+            ? Number((((value as number) / total) * 100).toFixed(1))
+            : 0;
         return { category, value: pct };
       }),
     [data, total],
   );
+
+  const chartDataRef = useRef(chartData);
+  chartDataRef.current = chartData;
 
   useEffect(() => {
     let disposed = false;
@@ -103,10 +109,14 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         const series = chart.series.push(new am4charts.ColumnSeries());
         series.dataFields.valueY = "value";
         series.dataFields.categoryX = "category";
-        series.columns.template.adapter.add("fill", (fill: any, target: any) => {
-          const category = (target.dataItem as any)?.categoryX as PerformanceCategories;
-          return category ? am4core.color(categoryColours[category]) : fill;
-        });
+        series.columns.template.adapter.add(
+          "fill",
+          (fill: any, target: any) => {
+            const category = (target.dataItem as any)
+              ?.categoryX as PerformanceCategories;
+            return category ? am4core.color(categoryColours[category]) : fill;
+          },
+        );
         series.strokeWidth = 0;
 
         const label = series.bullets.push(new am4charts.LabelBullet());
@@ -121,8 +131,11 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         series.columns.template.adapter.add(
           "readerDescription",
           (value: string, target: any) => {
-            const category = (target.dataItem as any)?.categoryX as PerformanceCategories;
-            return category ? `${labels[category]} bar value is {valueY}%` : value;
+            const category = (target.dataItem as any)
+              ?.categoryX as PerformanceCategories;
+            return category
+              ? `${labels[category]} bar value is {valueY}%`
+              : value;
           },
         );
 
@@ -137,11 +150,15 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         legend.clickable = false;
         legend.itemContainers.template.cursorOverStyle =
           am4core.MouseCursorStyle.default;
-        legend.labels.template.adapter.add("text", (text: string, target: any) => {
-          const category = target.dataItem?.dataContext?.name as PerformanceCategories;
-          if (!category) return text;
-          return `[bold]${labels[category]}[/] [#505a5f]${hints[category]}[/]`;
-        });
+        legend.labels.template.adapter.add(
+          "text",
+          (text: string, target: any) => {
+            const category = target.dataItem?.dataContext
+              ?.name as PerformanceCategories;
+            if (!category) return text;
+            return `[bold]${labels[category]}[/] [#505a5f]${hints[category]}[/]`;
+          },
+        );
 
         const marker = legend.markers.template.children.getIndex(0) as any;
         if (marker) {
@@ -156,7 +173,7 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
           fill: am4core.color(categoryColours[category]),
         }));
 
-        chart.data = chartData;
+        chart.data = chartDataRef.current;
         setLoadFailed(false);
       } catch {
         console.error("Failed to load charting library");
@@ -186,8 +203,13 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
       <div className="performance-chart app-performance-chart performance-chart--fallback">
         <div className="performance-chart__fallback-bars" aria-hidden="true">
           {chartData.map((item) => (
-            <div key={item.category} className="performance-chart__fallback-bar">
-              <span className="performance-chart__fallback-value">{item.value.toFixed(1)}%</span>
+            <div
+              key={item.category}
+              className="performance-chart__fallback-bar"
+            >
+              <span className="performance-chart__fallback-value">
+                {item.value.toFixed(1)}%
+              </span>
               <div
                 className={`performance-chart__fallback-fill performance-chart__fallback-fill--${item.category.toLowerCase()}`}
                 style={{ height: `${item.value}%` }}
@@ -197,7 +219,10 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         </div>
         <div className="performance-chart__fallback-legend">
           {categories.map((category) => (
-            <div key={category} className="performance-chart__fallback-legend-item">
+            <div
+              key={category}
+              className="performance-chart__fallback-legend-item"
+            >
               <span
                 className={`performance-chart__fallback-swatch performance-chart__fallback-swatch--${category.toLowerCase()}`}
               />
@@ -211,5 +236,10 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
     );
   }
 
-  return <div className="performance-chart app-performance-chart" id={resolvedChartId} />;
+  return (
+    <div
+      className="performance-chart app-performance-chart"
+      id={resolvedChartId}
+    />
+  );
 };

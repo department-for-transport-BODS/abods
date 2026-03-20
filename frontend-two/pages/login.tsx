@@ -47,13 +47,19 @@ const LoginPage = () => {
     try {
       setIsSubmitting(true);
       await login(result.data.username, result.data.password);
-      const returnUrl = typeof router.query.returnUrl === "string" ? router.query.returnUrl : "/dashboard";
+      const returnUrl =
+        typeof router.query.returnUrl === "string"
+          ? router.query.returnUrl
+          : "/dashboard";
       router.push(returnUrl);
     } catch (error) {
       setErrors([
         {
           id: "username",
-          errorMessage: error instanceof Error ? error.message : "Invalid username or password.",
+          errorMessage:
+            error instanceof Error
+              ? error.message
+              : "Invalid username or password.",
         },
       ]);
     } finally {
@@ -102,10 +108,10 @@ const LoginPage = () => {
               />
 
               <div style={{ maxWidth: "41ex" }}>
-                <button 
-                  className="govuk-button" 
+                <button
+                  className="govuk-button"
                   data-module="govuk-button"
-                  type="submit" 
+                  type="submit"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Signing in..." : "Sign in"}
@@ -115,8 +121,8 @@ const LoginPage = () => {
 
             <div className="govuk-grid-column-one-third-from-desktop govuk-body">
               <h2 className="govuk-heading-m">Forgot your password?</h2>
-              <a 
-                className="govuk-link" 
+              <a
+                className="govuk-link"
                 href={`${config?.bodsBaseUrl}/account/password/reset/`}
               >
                 Reset your password

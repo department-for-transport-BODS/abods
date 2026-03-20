@@ -99,7 +99,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
-      events.forEach((event) => document.removeEventListener(event, resetTimer));
+      events.forEach((event) =>
+        document.removeEventListener(event, resetTimer),
+      );
     };
   }, [logout]);
 
@@ -117,7 +119,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const value = useMemo(
-    () => ({ user, isAuthenticated, isLoading, login, logout, clearUser: resetState }),
+    () => ({
+      user,
+      isAuthenticated,
+      isLoading,
+      login,
+      logout,
+      clearUser: resetState,
+    }),
     [user, isAuthenticated, isLoading, login, logout, resetState],
   );
 

@@ -1,25 +1,25 @@
-import { test as base, Page } from '@playwright/test';
+import { test as base, Page } from "@playwright/test";
 
 const APP_ROUTES = [
-  '/',
-  '/dashboard',
-  '/login',
-  '/privacy-policy',
-  '/cookies',
-  '/accessibility',
-  '/feed-monitoring',
-  '/on-time',
-  '/corridors',
-  '/vehicle-journeys',
-  '/data-monitoring',
-  '/stop-analysis',
-  '/service-monitoring',
+  "/",
+  "/dashboard",
+  "/login",
+  "/privacy-policy",
+  "/cookies",
+  "/accessibility",
+  "/feed-monitoring",
+  "/on-time",
+  "/corridors",
+  "/vehicle-journeys",
+  "/data-monitoring",
+  "/stop-analysis",
+  "/service-monitoring",
 ];
 
 async function loadAllRoutes(page: Page): Promise<void> {
   for (const route of APP_ROUTES) {
     await page.goto(route);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
   }
 }
 
@@ -30,4 +30,4 @@ export const test = base.extend({
   },
 });
 
-export { expect } from '@playwright/test';
+export { expect } from "@playwright/test";

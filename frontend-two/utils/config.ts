@@ -14,7 +14,9 @@ const REQUIRED_CONFIG_KEYS: (keyof ConfigObject)[] = [
   "freshdesk",
 ];
 
-function validateConfig(config: Record<string, unknown>): asserts config is ConfigObject {
+function validateConfig(
+  config: Record<string, unknown>,
+): asserts config is ConfigObject {
   const missing = REQUIRED_CONFIG_KEYS.filter(
     (key) => config[key] === undefined || config[key] === null,
   );

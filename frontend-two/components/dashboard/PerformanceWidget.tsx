@@ -115,7 +115,15 @@ export const PerformanceWidget = ({
       }
     };
     load();
-  }, [config, filters, window.from, window.to, window.trendFrom, window.trendTo, order]);
+  }, [
+    config,
+    filters,
+    window.from,
+    window.to,
+    window.trendFrom,
+    window.trendTo,
+    order,
+  ]);
 
   return (
     <div className="performance app-performance">

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 
 interface PanelContextType {
   isOpen: boolean;
@@ -12,7 +18,9 @@ interface PanelContextType {
 
 const PanelContext = createContext<PanelContextType | undefined>(undefined);
 
-export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const PanelProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<ReactNode | null>(null);
 
@@ -45,7 +53,7 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 export const usePanel = () => {
   const context = useContext(PanelContext);
   if (context === undefined) {
-    throw new Error('usePanel must be used within a PanelProvider');
+    throw new Error("usePanel must be used within a PanelProvider");
   }
   return context;
 };

@@ -9,7 +9,10 @@ export interface WindowDatetimes {
   trendTo: DateTime;
 }
 
-export const calculatePresetPeriod = (preset: Period, now: DateTime): WindowDatetimes => {
+export const calculatePresetPeriod = (
+  preset: Period,
+  now: DateTime,
+): WindowDatetimes => {
   let to = now.startOf("day");
   let from: DateTime;
   let trendTo: DateTime;

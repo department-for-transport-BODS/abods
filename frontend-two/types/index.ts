@@ -3,7 +3,7 @@ export interface ErrorInfo {
   errorMessage: string;
 }
 
-export interface ConfigObject {
+export type ConfigObject = {
   apiUrl: string;
   bodsBaseUrl: string;
   envName: string;
@@ -31,7 +31,7 @@ export interface ConfigObject {
     folders: Record<string, string>;
   };
   supportEmail: string;
-}
+};
 
 export interface LoginInfo {
   currentUserId: string;

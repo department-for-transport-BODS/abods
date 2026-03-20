@@ -45,8 +45,7 @@ export const UserAccount = () => {
       await authService.logout(config.apiUrl);
     } catch (error) {
       console.error("Logout failed:", error);
-    }
-    finally {
+    } finally {
       clearUser();
       router.push("/login");
     }

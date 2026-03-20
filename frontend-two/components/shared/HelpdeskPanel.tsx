@@ -7,13 +7,11 @@ const HelpdeskPanel: React.FC = () => {
   const { config } = useConfig();
   const panelRef = useRef<HTMLDivElement>(null);
 
-  if (!isOpen) {
-    return null;
-  }
-
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         close();
       }
     };
@@ -23,22 +21,21 @@ const HelpdeskPanel: React.FC = () => {
   }, [isOpen, close]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        panelRef.current &&
-        !panelRef.current.contains(e.target as Node) &&
-        isOpen
-      ) {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         close();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("mouseup", handleClickOutside);
-    }
-
+    document.addEventListener("mouseup", handleClickOutside);
     return () => document.removeEventListener("mouseup", handleClickOutside);
   }, [isOpen, close]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
