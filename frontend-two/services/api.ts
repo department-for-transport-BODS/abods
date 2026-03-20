@@ -18,14 +18,7 @@ export const graphqlRequest = async <T>(
   });
 
   if (!response.ok) {
-    const error = new Error(`GraphQL request failed (${response.status})`);
-    
-    // For 500-level errors, redirect will be handled by global error handler
-    if (response.status >= 500) {
-      throw error;
-    }
-    
-    throw error;
+    throw new Error(`GraphQL request failed (${response.status})`);
   }
 
   const payload = (await response.json()) as GraphqlResponse<T>;
