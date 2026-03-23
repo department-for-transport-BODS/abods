@@ -57,6 +57,7 @@ const CookiesPage = () => {
     };
     savePolicy(policy);
     setSaved(true);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -65,29 +66,45 @@ const CookiesPage = () => {
       <div className="govuk-grid-row govuk-body">
         <div className="govuk-grid-column-two-thirds">
           {saved ? (
-            <div className="govuk-notification-banner" role="alert" aria-labelledby="cookie-saved-title">
+            <div
+              className="govuk-notification-banner"
+              role="alert"
+              aria-labelledby="cookie-saved-title"
+            >
               <div className="govuk-notification-banner__header">
-                <h2 className="govuk-notification-banner__title" id="cookie-saved-title">
+                <h2
+                  className="govuk-notification-banner__title"
+                  id="cookie-saved-title"
+                >
                   Success
                 </h2>
               </div>
               <div className="govuk-notification-banner__content">
-                <p className="govuk-notification-banner__heading">Your cookie settings have been saved.</p>
+                <p className="govuk-notification-banner__heading">
+                  Your cookie settings have been saved.
+                </p>
               </div>
             </div>
           ) : null}
           <p className="govuk-body">
-            Cookies are small files saved on your phone, tablet or computer when you visit a website.
+            Cookies are small files saved on your phone, tablet or computer when
+            you visit a website.
           </p>
           <p className="govuk-body">
-            We use cookies to make this site work and collect information about how you use our service.
+            We use cookies to make this site work and collect information about
+            how you use our service.
           </p>
-          <h2 className="govuk-heading-m">Essential cookies (strictly necessary)</h2>
+          <h2 className="govuk-heading-m">
+            Essential cookies (strictly necessary)
+          </h2>
           <p className="govuk-body">
-            We use an essential cookie to remember when you accept or reject cookies on our website.
+            We use an essential cookie to remember when you accept or reject
+            cookies on our website.
           </p>
           <table className="govuk-table">
-            <caption className="govuk-table__caption">Essential cookies we use</caption>
+            <caption className="govuk-table__caption">
+              Essential cookies we use
+            </caption>
             <thead className="govuk-table__head">
               <tr className="govuk-table__row">
                 <th scope="col" className="govuk-table__header">
@@ -106,17 +123,22 @@ const CookiesPage = () => {
                 <th scope="row" className="govuk-table__header">
                   abod_cookies_policy
                 </th>
-                <td className="govuk-table__cell">Saves your cookie consent settings</td>
+                <td className="govuk-table__cell">
+                  Saves your cookie consent settings
+                </td>
                 <td className="govuk-table__cell">1 year</td>
               </tr>
             </tbody>
           </table>
           <h2 className="govuk-heading-m">Analytics cookies (optional)</h2>
           <p className="govuk-body">
-            With your permission, we use Google Analytics to collect data about how you use this service.
-            This information helps us to improve our service.
+            With your permission, we use Google Analytics to collect data about
+            how you use this service. This information helps us to improve our
+            service.
           </p>
-          <p className="govuk-body">Google Analytics stores anonymised information about:</p>
+          <p className="govuk-body">
+            Google Analytics stores anonymised information about:
+          </p>
           <ul className="govuk-list govuk-list--bullet">
             <li>the pages you visit</li>
             <li>how long you spend on each page</li>
@@ -124,9 +146,14 @@ const CookiesPage = () => {
             <li>what you click on while you visit the site</li>
             <li>the device and browser you use</li>
           </ul>
-          <p className="govuk-body">Google is not allowed to use or share our analytics data with anyone.</p>
+          <p className="govuk-body">
+            Google is not allowed to use or share our analytics data with
+            anyone.
+          </p>
           <table className="govuk-table">
-            <caption className="govuk-table__caption">Analytics cookies we use</caption>
+            <caption className="govuk-table__caption">
+              Analytics cookies we use
+            </caption>
             <thead className="govuk-table__head">
               <tr className="govuk-table__row">
                 <th scope="col" className="govuk-table__header">
@@ -152,7 +179,9 @@ const CookiesPage = () => {
                 <th scope="row" className="govuk-table__header">
                   _ga_[container-id]
                 </th>
-                <td className="govuk-table__cell">Used to persist session state</td>
+                <td className="govuk-table__cell">
+                  Used to persist session state
+                </td>
                 <td className="govuk-table__cell">2 years</td>
               </tr>
             </tbody>
@@ -173,7 +202,10 @@ const CookiesPage = () => {
                     checked={choice === "yes"}
                     onChange={() => setChoice("yes")}
                   />
-                  <label className="govuk-label govuk-radios__label" htmlFor="accept-cookies-yes">
+                  <label
+                    className="govuk-label govuk-radios__label"
+                    htmlFor="accept-cookies-yes"
+                  >
                     Yes
                   </label>
                 </div>
@@ -187,7 +219,10 @@ const CookiesPage = () => {
                     checked={choice === "no"}
                     onChange={() => setChoice("no")}
                   />
-                  <label className="govuk-label govuk-radios__label" htmlFor="accept-cookies-no">
+                  <label
+                    className="govuk-label govuk-radios__label"
+                    htmlFor="accept-cookies-no"
+                  >
                     No
                   </label>
                 </div>
