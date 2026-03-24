@@ -40,7 +40,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   env: {
-    NEXT_APP_VERSION: version,
+    NEXT_PUBLIC_APP_VERSION: version,
   },
 };
 
