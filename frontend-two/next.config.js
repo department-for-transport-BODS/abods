@@ -37,7 +37,7 @@ const nextConfig = {
       process.env.NEXT_GRAPHQL_API_BASE_URL ?? "http://localhost:3000",
   },
   env: {
-    NEXT_APP_VERSION: version,
+    NEXT_PUBLIC_APP_VERSION: version,
   },
 };
 
