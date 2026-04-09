@@ -119,6 +119,7 @@ jobs:
 
           rc_backend_path="$rc_path/backend"
           rc_frontend_path="$rc_path/frontend/$RC_ENV"
+          rc_frontend_v2_path="$rc_path/frontend-v2/$RC_ENV"
 
           # Application validation
           # Frontend validation
@@ -135,6 +136,13 @@ jobs:
           else
             echo "[ERROR] Release candidate version [${VERSION}] does not exist for component (BACKEND). Exiting"
             exit 1
+          fi
+
+          # Frontend v2 (optional for backward compatibility)
+          if [[ `aws s3 ls s3://$rc_frontend_v2_path|head` ]]; then
+            echo "[INFO] Release candidate version [${VERSION}] for component (FRONTEND V2) successfully validated"
+          else
+            echo "[INFO] Release candidate version [${VERSION}] for component (FRONTEND V2) not found. Skipping v2 deployment for ${RC_ENV^^}"
           fi
 
   backend:
@@ -216,6 +224,23 @@ jobs:
           aws s3 cp s3://$RC_SRC/$rc_path/ dist/ --recursive
           echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully downloaded for ${RC_ENV^^}"
 
+      - name: retrieve frontend v2 for ${{ env.RC_ENV }}
+        id: retrieve-v2
+        env:
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend-v2/$RC_ENV" || rc_path="abods/releases-dev/$VERSION/frontend-v2/$RC_ENV"
+
+          if [[ `aws s3 ls s3://$RC_SRC/$rc_path|head` ]]; then
+            mkdir -p dist-v2/
+            aws s3 cp s3://$RC_SRC/$rc_path/ dist-v2/ --recursive
+            echo "has-v2=true" >> "$GITHUB_OUTPUT"
+            echo "[INFO] Application component (FRONTEND V2) with version ${VERSION} successfully downloaded for ${RC_ENV^^}"
+          else
+            echo "has-v2=false" >> "$GITHUB_OUTPUT"
+            echo "[INFO] Application component (FRONTEND V2) with version ${VERSION} not found for ${RC_ENV^^}, skipping deployment"
+          fi
+
       - name: get stack values
         id: get-values
         run: |
@@ -223,6 +248,13 @@ jobs:
             aws cloudformation describe-stacks \
               --stack-name ${{ needs.backend.outputs.stack-name }} \
               --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketName`].OutputValue' \
+              --output text \
+          )" >> $GITHUB_OUTPUT
+
+          echo "frontend-bucket-v2-name=$( \
+            aws cloudformation describe-stacks \
+              --stack-name ${{ needs.backend.outputs.stack-name }} \
+              --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketV2Name`].OutputValue' \
               --output text \
           )" >> $GITHUB_OUTPUT
 
@@ -246,10 +278,29 @@ jobs:
           aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
           echo "[INFO] Application component (FRONTEND) with version ${RC_VER} successfully deployed for ${RC_ENV^^}"
 
+      - name: clear frontend v2 for ${{ env.RC_ENV }}
+        if: ${{ steps.retrieve-v2.outputs.has-v2 == 'true' }}
+        run: |
+          aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-v2-name }}/v2
+          echo "[INFO] S3 Bucket prefix for application component (FRONTEND V2) successfully cleared for ${RC_ENV^^}"
+
+      - name: deploy frontend v2 for ${{ env.RC_ENV }}
+        if: ${{ steps.retrieve-v2.outputs.has-v2 == 'true' }}
+        env:
+          VERSION: ${{ needs.validation.outputs.VERSION }}
+        run: |
+          aws s3 cp --recursive dist-v2/ ${{ steps.get-values.outputs.frontend-bucket-v2-name }}/v2/
+          echo "[INFO] Application component (FRONTEND V2) with version ${VERSION} successfully deployed for ${RC_ENV^^}"
+
       - name: invalidate cloudfront cache for ${{ env.RC_ENV }}
         run: |
           echo "[INFO] Executing invalidation against CloudFront Distribution Id ${{ steps.get-values.outputs.cloudfront-distribution-id }}"
-          invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths '/*' --output json \
+          invalidation_paths='/*'
+          if [[ "${{ steps.retrieve-v2.outputs.has-v2 }}" == 'true' ]]; then
+            invalidation_paths='/* /v2 /v2/*'
+          fi
+
+          invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths $invalidation_paths --output json \
             | jq -r '.Invalidation.Id')
 
           echo "[INFO] Waiting for invalidation to complete..."
