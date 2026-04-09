@@ -436,6 +436,9 @@ Resources:
       DistributionConfig:
         Enabled: true
         Comment: !Sub "${ProjectName}-${Environment}-cdn-v2"
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: TLSv1.2_2021
         Origins:
           - Id: frontendBucketV2
             DomainName: !GetAtt FrontendBucketV2.RegionalDomainName
