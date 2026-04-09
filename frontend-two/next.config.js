@@ -1,5 +1,7 @@
 const { version } = require("./package.json");
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -20,6 +22,8 @@ const nextConfig = {
   poweredByHeader: false,
   trailingSlash: true,
   output: "export",
+  basePath,
+  assetPrefix: basePath || undefined,
   images: {
     unoptimized: true,
   },
