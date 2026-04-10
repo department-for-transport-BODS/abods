@@ -437,8 +437,8 @@ Resources:
         Enabled: true
         Comment: !Sub "${ProjectName}-${Environment}-cdn-v2"
         ViewerCertificate:
+          # checkov:skip=CKV_AWS_174:We are using the default CloudFront certificate for internal testing, which defaults to TLSv1 regardless of the minimum protocol version specified
           CloudFrontDefaultCertificate: true
-          MinimumProtocolVersion: TLSv1.2_2021
         Origins:
           - Id: frontendBucketV2
             DomainName: !GetAtt FrontendBucketV2.RegionalDomainName
