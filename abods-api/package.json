@@ -66,7 +66,7 @@
     "eslint": "^9.25.1",
     "jest": "^30.2.0",
     "prisma": "^5.22.0",
-    "prisma-kysely": "^1.8.0",
+    "prisma-kysely": "^2.2.1",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.9.0",
     "serverless-plugin-typescript": "^2.1.5",
