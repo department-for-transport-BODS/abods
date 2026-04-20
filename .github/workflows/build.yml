@@ -291,7 +291,7 @@ jobs:
           domain_name=$(aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/route53/hostedzone/name" \
             | jq -r '.Parameter.Value')
           bods_base_url="https://${domain_name}"
-          graphql_api_url="${bods_base_url}/api/graphql"
+          graphql_api_url="/api/graphql"
           freshdesk_api_url="${bods_base_url}/freshdesk/"
           mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
           mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
