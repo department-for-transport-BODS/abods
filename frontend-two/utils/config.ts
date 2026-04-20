@@ -27,10 +27,8 @@ function validateConfig(
   }
 }
 
-const configUrl = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/config.json`;
-
 export const fetchConfig = async (): Promise<ConfigObject> => {
-  const response = await fetch(configUrl, { cache: "no-store" });
+  const response = await fetch("/config.json", { cache: "no-store" });
   if (!response.ok) {
     throw new Error("Failed to load config.json");
   }

@@ -280,7 +280,7 @@ jobs:
           echo "cloudfront-distribution-id=$( \
             aws cloudformation describe-stacks \
               --stack-name "$stack_name" \
-              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionV2Id`].OutputValue' \
               --output text \
           )" >> "$GITHUB_OUTPUT"
 
@@ -321,14 +321,14 @@ jobs:
           mv tmp.json public/config.json
 
           npm ci
-          NEXT_PUBLIC_API_BASE_URL="$bods_base_url" NEXT_PUBLIC_BASE_PATH="/v2" npm run build
+          NEXT_PUBLIC_API_BASE_URL="$bods_base_url" npm run build
 
           echo "[INFO] Uploading application component (FRONTEND V2) for ${RC_ENV^^}"
-          aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-v2-name }}/v2"
-          aws s3 sync out/ "${{ steps.get-values.outputs.frontend-bucket-v2-name }}/v2/" --delete
+          aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-v2-name }}"
+          aws s3 sync out/ "${{ steps.get-values.outputs.frontend-bucket-v2-name }}/" --delete
 
           echo "[INFO] Executing invalidation against CloudFront Distribution Id ${{ steps.get-values.outputs.cloudfront-distribution-id }}"
-          invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths '/v2/*' --output json \
+          invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths '/*' --output json \
             | jq -r '.Invalidation.Id')
 
           echo "[INFO] Waiting for invalidation to complete..."
