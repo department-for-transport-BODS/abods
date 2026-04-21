@@ -18,8 +18,7 @@ const APP_ROUTES = [
 
 async function loadAllRoutes(page: Page): Promise<void> {
   for (const route of APP_ROUTES) {
-    await page.goto(route);
-    await page.waitForLoadState("networkidle");
+    await page.goto(route, { waitUntil: "domcontentloaded" });
   }
 }
 

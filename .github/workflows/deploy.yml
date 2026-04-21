@@ -203,6 +203,8 @@ jobs:
     needs:
       - validation
       - backend
+    outputs:
+      has-v2: ${{ steps.retrieve-v2.outputs.has-v2 }}
 
     steps:
       - name: configure aws credentials
@@ -334,3 +336,44 @@ jobs:
           elif [ $? -eq 255 ]; then
             echo "[WARN] CloudFront V2 cache for application in ${RC_ENV^^} could not be invalidated"
           fi
+
+  e2e-playwright:
+    runs-on: ubuntu-latest
+    if: ${{ env.RC_ENV == 'sandbox' && needs.frontend.outputs.has-v2 == 'true' }}
+    needs:
+      - validation
+      - frontend
+    environment: sandbox
+    permissions:
+      contents: read
+    env:
+      CI: "1"
+      PLAYWRIGHT_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: validate deployed test url
+        run: |
+          if [[ -z "${PLAYWRIGHT_BASE_URL}" ]]; then
+            echo "[ERROR] GitHub variable PLAYWRIGHT_BASE_URL is not set for ${RC_ENV^^}."
+            exit 1
+          fi
+
+          echo "[INFO] Running deployed e2e tests against ${PLAYWRIGHT_BASE_URL}"
+
+      - name: install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: install playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: run playwright e2e tests
+        run: npm run test:e2e
