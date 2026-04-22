@@ -339,7 +339,6 @@ jobs:
 
   e2e-playwright:
     runs-on: ubuntu-latest
-    if: ${{ env.RC_ENV == 'sandbox' && needs.frontend.outputs.has-v2 == 'true' }}
     needs:
       - validation
       - frontend
@@ -351,16 +350,27 @@ jobs:
       PLAYWRIGHT_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL }}
 
     steps:
+      - name: check environment
+        id: check-env
+        run: |
+          if [[ "$RC_ENV" != "sandbox" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "[INFO] Skipping e2e tests — not sandbox"
+          fi
+
       - name: checkout
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         uses: actions/checkout@v4
 
       - name: setup node
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: validate deployed test url
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         run: |
           if [[ -z "${PLAYWRIGHT_BASE_URL}" ]]; then
             echo "[ERROR] GitHub variable PLAYWRIGHT_BASE_URL is not set for ${RC_ENV^^}."
@@ -370,10 +380,13 @@ jobs:
           echo "[INFO] Running deployed e2e tests against ${PLAYWRIGHT_BASE_URL}"
 
       - name: install dependencies
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         run: npm ci --ignore-scripts
 
       - name: install playwright browser
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         run: npx playwright install --with-deps chromium
 
       - name: run playwright e2e tests
+        if: ${{ steps.check-env.outputs.skip != 'true' }}
         run: npm run test:e2e
