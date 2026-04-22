@@ -4,12 +4,6 @@ permissions: read-all
 
 on:
   workflow_dispatch:
-    inputs:
-      deploy_frontend_v2_only:
-        description: Deploy frontend v2 only (skip backend/frontend v1 and automated deploy)
-        required: false
-        default: false
-        type: boolean
   push:
     branches:
       - "sandbox"
@@ -17,7 +11,7 @@ on:
     paths:
       - "VERSION"
       - "abods-api/**"
-      - "frontend/**"
+      - "frontend-two/**"
 
 concurrency:
   group:
@@ -91,7 +85,6 @@ jobs:
           fi
 
   backend:
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_frontend_v2_only != 'true' }}
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     needs: validation
@@ -144,98 +137,7 @@ jobs:
 
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully built uploaded"
 
-  frontend:
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_frontend_v2_only != 'true' }}
-    runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }}
-    needs: validation
-    defaults:
-      run:
-        working-directory: frontend
-
-    permissions:
-      id-token: write
-      contents: read
-
-    strategy:
-      matrix:
-        environment: [sandbox, dev, test-build, uat-build, prod-build]
-        isRelease:
-          - ${{ contains(github.ref, 'dev') }}
-        exclude:
-          - isRelease: true
-            environment: sandbox
-          - isRelease: false
-            environment: dev
-          - isRelease: false
-            environment: test-build
-          - isRelease: false
-            environment: uat-build
-          - isRelease: false
-            environment: prod-build
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: frontend/.nvmrc
-
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-build
-          role-duration-seconds: 3600
-          role-skip-session-tagging: true
-
-      - name: package and push frontend code
-        env:
-          CI: ""
-          VERSION: ${{ needs.validation.outputs.VERSION }}
-        run: |
-          ENVIRONMENT=$(cut -d '-' -f 1 <<< ${{ matrix.environment }})
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend/$ENVIRONMENT" || rc_path="abods/releases-dev/$VERSION/frontend/$ENVIRONMENT"
-
-          # determine environment variables for build
-          domain_name=`aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/route53/hostedzone/name" \
-            | jq -r '.Parameter.Value'`
-          freshdesk_api_url="https://${domain_name}/freshdesk/"
-          graphql_api_url="https://${domain_name}/api/graphql"
-          mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
-          mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
-          mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
-          analytics_id="${{ secrets.ANALYTICS_ID }}"
-
-
-           support_email=$(aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${ENVIRONMENT}/support_email" --with-decryption | jq -r '.Parameter.Value')
-
-           jq --arg freshdesk_api_url "$freshdesk_api_url" \
-             --arg graphql_api_url "$graphql_api_url" \
-             --arg mapbox_token "$mapbox_token" \
-             --arg mapbox_style "$mapbox_style" \
-             --arg mapbox_satellite_style "$mapbox_satellite_style" \
-             --arg ENVIRONMENT "$ENVIRONMENT" \
-             --arg analytics_id "$analytics_id" \
-             --arg support_email "$support_email" \
-             '.apiUrl = $graphql_api_url | .analyticsId = $analytics_id | .mapboxToken = $mapbox_token | .mapboxStyle = $mapbox_style | .mapboxSatelliteStyle = $mapbox_satellite_style | .envName = $ENVIRONMENT | .freshdesk.apiUrl = $freshdesk_api_url | .supportEmail = $support_email' src/config.json > tmp.json && \
-            mv tmp.json src/config.json
-
-          npm install
-          npx ng build -c production
-          mv ./dist/raa-client/browser/* ./dist/raa-client
-
-          echo "[INFO] Uploading application component (FRONTEND) for ${ENVIRONMENT^^}"
-          aws s3 cp --recursive dist/raa-client s3://$RC_DST/$rc_path/
-          aws s3 cp --recursive s3://$RC_DST/$rc_path/freshdesk s3://$RC_DST/$rc_path/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
-
-          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully uploaded for ${ENVIRONMENT^^}"
-
-  frontend-v2-dispatch:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_frontend_v2_only == 'true' }}
+  frontend-v2:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     needs: validation
@@ -299,8 +201,8 @@ jobs:
           analytics_id="${{ secrets.ANALYTICS_ID }}"
           support_email=$(aws ssm get-parameter --name "/${{ vars.PROJECT_NAME }}/${RC_ENV}/support_email" --with-decryption | jq -r '.Parameter.Value')
 
-          cp ../frontend/src/config.json public/config.json
-          jq --arg api_url "$graphql_api_url" \
+          jq -n \
+            --arg api_url "$graphql_api_url" \
             --arg bods_base_url "$bods_base_url" \
             --arg env_name "$RC_ENV" \
             --arg analytics_id "$analytics_id" \
@@ -309,16 +211,34 @@ jobs:
             --arg mapbox_satellite_style "$mapbox_satellite_style" \
             --arg support_email "$support_email" \
             --arg freshdesk_api_url "$freshdesk_api_url" \
-            '.apiUrl = $api_url
-            | .bodsBaseUrl = $bods_base_url
-            | .envName = $env_name
-            | .analyticsId = $analytics_id
-            | .mapboxToken = $mapbox_token
-            | .mapboxStyle = $mapbox_style
-            | .mapboxSatelliteStyle = $mapbox_satellite_style
-            | .supportEmail = $support_email
-            | .freshdesk.apiUrl = $freshdesk_api_url' public/config.json > tmp.json
-          mv tmp.json public/config.json
+            '{
+              apiUrl: $api_url,
+              bodsBaseUrl: $bods_base_url,
+              envName: $env_name,
+              analyticsId: $analytics_id,
+              mapboxToken: $mapbox_token,
+              mapboxStyle: $mapbox_style,
+              mapboxSatelliteStyle: $mapbox_satellite_style,
+              supportEmail: $support_email,
+              vehicleJourneys: { validDateRange: { offsetISO: "PT0H", durationISO: "P6M" } },
+              otp: { early: 1, late: 6 },
+              defaultCookiePolicy: { analyticsEnabled: false, version: 1, userSubmitted: false },
+              freshdesk: {
+                apiUrl: $freshdesk_api_url,
+                folders: {
+                  dashboard: "43000590095",
+                  feedMonitoring: "43000590096",
+                  otp: "43000590097",
+                  vehicleJourneys: "43000590098",
+                  corridors: "43000590099",
+                  organisation: "43000590100",
+                  dataMonitoring: "43000590101",
+                  serviceMonitoring: "43000590102",
+                  stopAnalysis: "43000590103",
+                  distances: "43000590104"
+                }
+              }
+            }' > public/config.json
 
           npm ci
           NEXT_PUBLIC_API_BASE_URL="$bods_base_url" npm run build
@@ -337,12 +257,12 @@ jobs:
           echo "[INFO] Application component (FRONTEND V2) successfully deployed for ${RC_ENV^^}"
 
   commit-and-tag:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') && (github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_frontend_v2_only != 'true') }}
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
     runs-on: ubuntu-latest
     needs:
       - validation
       - backend
-      - frontend
+      - frontend-v2
 
     permissions:
       contents: write
@@ -365,12 +285,12 @@ jobs:
           git push --tags --force
 
   trigger-deploy-dev:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(fromJSON('["test", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) && (github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_frontend_v2_only != 'true') }}
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !(contains(fromJSON('["test", "main"]'), github.ref_name) || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
     needs:
       - validation
       - backend
-      - frontend
+      - frontend-v2
       - commit-and-tag
 
     permissions:
