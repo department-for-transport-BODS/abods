@@ -12,9 +12,14 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-  webpack(config) {
-    config.module.rules.push({ test: /\.svg$/, use: ["@svgr/webpack"] });
-    return config;
+  turbopack: {
+    root: __dirname,
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
   reactStrictMode: true,
   poweredByHeader: false,
@@ -35,9 +40,6 @@ const nextConfig = {
           : "http://localhost:4200/api/:path*",
       },
     ];
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   env: {
     NEXT_PUBLIC_APP_VERSION: version,
