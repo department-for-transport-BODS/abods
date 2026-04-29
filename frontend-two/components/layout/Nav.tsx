@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useAuth } from "@/hooks/useAuth";
+import { useNav } from "@/contexts/NavContext";
 import { UserAccount } from "./UserAccount";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import QuestionInCircleIcon from "@/assets/icons/question-in-circle.svg";
@@ -32,6 +33,7 @@ export const Nav = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { open: openHelpdesk } = useHelpdesk();
+  const { isOpen, close } = useNav();
 
   const filteredNavItems = navItems.filter((item) => {
     if (item.requiresServiceMonitoring && !user?.canViewServiceMonitoring) {
@@ -44,7 +46,11 @@ export const Nav = () => {
   });
 
   return (
-    <nav id="navigation" className="nav app-nav" aria-label="Primary">
+    <nav
+      id="navigation"
+      className={`nav app-nav${isOpen ? " nav--open" : ""}`}
+      aria-label="Primary"
+    >
       <div className="nav__block" id="nav">
         <ul className="govuk-list nav__list">
           {filteredNavItems.map((item) => {
@@ -53,6 +59,7 @@ export const Nav = () => {
               <li key={item.href} className="nav__item">
                 <Link
                   href={item.href}
+                  onClick={close}
                   className={
                     isActive ? "nav__link nav__link--current" : "nav__link"
                   }

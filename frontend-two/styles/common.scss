@@ -73,6 +73,7 @@
     display: flex;
     flex-grow: 1;
     align-items: stretch;
+    position: relative;
   }
 
   &__content {
@@ -81,12 +82,21 @@
     background: govuk-colour("white");
     padding-top: govuk-spacing(7);
     padding-right: govuk-spacing(7);
+    padding-bottom: govuk-spacing(7);
     padding-left: govuk-spacing(7);
 
     &--narrow {
       max-width: 960px;
       margin: 0 auto;
     }
+  }
+
+  // When a page provides its own .app-page responsive wrapper (mirroring the
+  // legacy Angular <app-page> component), don't double up on horizontal
+  // padding from .app__content.
+  &__content:has(> .app-page) {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
@@ -96,6 +106,43 @@
       padding-left: govuk-spacing(8);
       padding-right: govuk-spacing(8);
     }
+
+    &__content:has(> .app-page) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+// Page wrapper – ports the legacy Angular `app-page` :host styles so the
+// dashboard (and any other page using .app-page) gets the same responsive
+// margins, max-width cap, and centering behavior on resize.
+.app-page {
+  display: block;
+  max-width: $max-width;
+  margin-right: $window-padding-small-screen;
+  margin-left: $window-padding-small-screen;
+
+  @include bp($tablet) {
+    margin-right: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+    );
+    margin-left: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+    );
+  }
+
+  @include bp($desktop) {
+    margin-right: $window-padding-large-screen;
+    margin-left: $window-padding-large-screen;
+  }
+
+  @include bp($max-desktop) {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
   }
 }
 
@@ -546,6 +593,9 @@
     display: flex;
     flex-direction: column;
   }
+  &__performance {
+    margin-bottom: govuk-spacing(6);
+  }
   &__vehicles-status {
     margin-bottom: govuk-spacing(6);
   }
@@ -829,6 +879,7 @@
     &__performance {
       flex: 1;
       margin-right: govuk-spacing(6);
+      margin-bottom: 0;
     }
     &__feeds {
       flex-direction: column;
@@ -1063,15 +1114,69 @@
 
 @media (max-width: 1024px) {
   .nav {
-    position: static;
-    min-height: auto;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: $z-menu;
+    min-height: 100%;
     max-height: none;
-    width: 100%;
+    width: 220px;
     margin-left: 0;
     margin-right: 0;
-    padding: 20px 15px;
-    border-right: 0;
-    border-bottom: 1px solid #b1b4b6;
+    padding: 20px 16px;
+    border-right: 1px solid #b1b4b6;
+    border-bottom: 0;
+    background-color: #ffffff;
+
+    &--open {
+      display: flex;
+    }
+  }
+}
+
+// Menu toggle button shown in the header on smaller screens (mirrors the
+// legacy `app-nav-toggle` component).
+.nav-toggle {
+  display: none;
+  pointer-events: auto;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-left: govuk-spacing(3);
+  font-family: inherit;
+  cursor: pointer;
+
+  &:hover:not(:focus) {
+    text-decoration: none;
+  }
+
+  &::after {
+    content: "";
+    margin-left: govuk-spacing(1);
+    @include govuk-shape-arrow(down, 10px, 8px, inline-block);
+    border-top-color: currentColor;
+  }
+
+  &--active::after {
+    @include govuk-shape-arrow(up, 10px, 8px, inline-block);
+    border-bottom-color: currentColor;
+  }
+
+  &--light {
+    color: govuk-colour("white");
+
+    &:focus {
+      color: govuk-colour("black");
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
   }
 }
 
