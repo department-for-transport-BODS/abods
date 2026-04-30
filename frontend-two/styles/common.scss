@@ -30,23 +30,23 @@
   }
 
   &__suffix-button {
-    color: #1d70b8;
+    color: $govuk-link-colour;
     text-decoration: underline;
     cursor: pointer;
-    background-color: #ffffff;
+    background-color: govuk-colour("white");
     width: 8ex;
     border: 0;
     padding: 0;
 
     &:hover {
-      color: #003078;
+      color: $govuk-link-hover-colour;
     }
 
     &:focus {
-      outline: 3px solid #ffdd00;
+      outline: 3px solid $govuk-focus-colour;
       outline-offset: 0;
-      background-color: #ffdd00;
-      color: #0b0c0c;
+      background-color: $govuk-focus-colour;
+      color: $govuk-focus-text-colour;
     }
 
     @media (max-width: 640px) {
@@ -186,7 +186,7 @@
   &__help-link {
     @include govuk-font(19);
     color: govuk-colour("white") !important;
-    margin-bottom: 10px;
+    margin-bottom: govuk-spacing(2);
     display: inline-flex;
     align-items: center;
 
@@ -906,13 +906,13 @@
   min-height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
-  border-right: 1px solid #b1b4b6;
+  border-right: 1px solid $govuk-border-colour;
   width: 220px;
   box-sizing: border-box;
   padding: 0 16px 16px 16px;
   margin-left: 16px;
-  margin-right: 30px;
-  background-color: #ffffff;
+  margin-right: govuk-spacing(6);
+  background-color: govuk-colour("white");
 
   &__block {
     flex: 1 1 auto;
@@ -928,16 +928,15 @@
 
   &__link {
     display: block;
-    color: #1d70b8;
+    @include govuk-font(19);
+    color: $govuk-link-colour;
     text-decoration: none;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: govuk-spacing(1);
+    padding-bottom: govuk-spacing(1);
     padding-left: 13px;
-    font-size: 19px;
-    line-height: 1.3157894737;
 
     &--current {
-      font-weight: 700;
+      font-weight: $govuk-font-weight-bold;
       position: relative;
       &::before {
         content: "";
@@ -946,7 +945,7 @@
         top: 0;
         bottom: 0;
         width: 3px;
-        background: #1d70b8;
+        background: $govuk-link-colour;
       }
     }
 
@@ -956,9 +955,9 @@
 
     &:focus {
       outline: 0;
-      color: #0b0c0c;
-      background-color: #ffdd00;
-      box-shadow: 0 4px #0b0c0c;
+      color: $govuk-focus-text-colour;
+      background-color: $govuk-focus-colour;
+      box-shadow: 0 4px $govuk-focus-text-colour;
     }
   }
 
@@ -967,27 +966,26 @@
     bottom: 0;
     margin-top: auto;
     padding-top: 16px;
-    background-color: #ffffff;
+    background-color: govuk-colour("white");
 
     &__action-item {
       display: inline-flex;
       width: 100%;
-      font-size: 19px;
-      line-height: 1.3157894737;
-      padding: 5px 5px 5px 13px;
+      @include govuk-font(19);
+      padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
       align-items: center;
 
       svg {
         display: inline-flex;
-        color: #1d70b8;
+        color: $govuk-link-colour;
         width: 20px;
         height: 20px;
-        margin-right: 10px;
+        margin-right: govuk-spacing(2);
       }
 
       &:focus {
         svg {
-          color: #0b0c0c;
+          color: $govuk-focus-text-colour;
         }
       }
     }
@@ -998,9 +996,8 @@
   &__invite-button {
     display: inline-flex;
     width: 100%;
-    font-size: 19px;
-    line-height: 1.3157894737;
-    padding: 5px 5px 5px 13px;
+    @include govuk-font(19);
+    padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
     align-items: center;
     margin-bottom: 8px;
 
@@ -1008,16 +1005,16 @@
       display: inline-flex;
 
       svg {
-        color: #1d70b8;
+        color: $govuk-link-colour;
         width: 20px;
         height: 20px;
-        margin-right: 10px;
+        margin-right: govuk-spacing(2);
       }
     }
 
     &:focus {
       svg {
-        color: #0b0c0c;
+        color: $govuk-focus-text-colour;
       }
     }
   }
@@ -1029,21 +1026,20 @@
   &__trigger {
     display: inline-flex;
     width: 100%;
-    font-size: 19px;
-    line-height: 1.3157894737;
-    padding: 5px 5px 5px 13px;
+    @include govuk-font(19);
+    padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
     align-items: center;
 
     svg {
-      color: #1d70b8;
+      color: $govuk-link-colour;
       width: 20px;
       height: 20px;
-      margin-right: 10px;
+      margin-right: govuk-spacing(2);
     }
 
     &:focus {
       svg {
-        color: #0b0c0c;
+        color: $govuk-focus-text-colour;
       }
     }
   }
@@ -1053,10 +1049,10 @@
     bottom: 100%;
     left: 0;
     right: 0;
-    background-color: #ffffff;
-    border: 1px solid #b1b4b6;
+    background-color: govuk-colour("white");
+    border: 1px solid $govuk-border-colour;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 5px;
+    margin-bottom: govuk-spacing(1);
     z-index: 100;
 
     ul {
@@ -1071,20 +1067,19 @@
         display: block;
         width: 100%;
         text-align: left;
-        padding: 10px 15px;
-        font-size: 19px;
-        line-height: 1.3157894737;
-        color: #1d70b8;
+        padding: govuk-spacing(2) govuk-spacing(3);
+        @include govuk-font(19);
+        color: $govuk-link-colour;
 
         &:hover {
-          background-color: #f3f2f1;
+          background-color: govuk-colour("light-grey");
         }
 
         &:focus {
-          outline: 3px solid #ffdd00;
+          outline: 3px solid $govuk-focus-colour;
           outline-offset: 0;
-          color: #0b0c0c;
-          background-color: #ffdd00;
+          color: $govuk-focus-text-colour;
+          background-color: $govuk-focus-colour;
         }
       }
     }
@@ -1094,7 +1089,7 @@
 .button-link {
   background: none;
   border: none;
-  color: #1d70b8;
+  color: $govuk-link-colour;
   cursor: pointer;
   text-decoration: none;
   font-family: inherit;
@@ -1104,15 +1099,15 @@
   }
 
   &:focus {
-    outline: 3px solid #ffdd00;
+    outline: 3px solid $govuk-focus-colour;
     outline-offset: 0;
-    color: #0b0c0c;
-    background-color: #ffdd00;
-    box-shadow: 0 4px #0b0c0c;
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow: 0 4px $govuk-focus-text-colour;
   }
 }
 
-@media (max-width: 1024px) {
+@include bp($to-desktop) {
   .nav {
     display: none;
     position: absolute;
@@ -1125,10 +1120,10 @@
     width: 220px;
     margin-left: 0;
     margin-right: 0;
-    padding: 20px 16px;
-    border-right: 1px solid #b1b4b6;
+    padding: govuk-spacing(4) 16px;
+    border-right: 1px solid $govuk-border-colour;
     border-bottom: 0;
-    background-color: #ffffff;
+    background-color: govuk-colour("white");
 
     &--open {
       display: flex;
@@ -1173,7 +1168,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@include bp($to-desktop) {
   .nav-toggle {
     display: inline-flex;
     align-items: center;
@@ -1261,7 +1256,7 @@
   }
 }
 
-@media (min-width: 40.0625em) {
+@include bp($tablet) {
   .helpdesk-panel {
     padding: govuk-spacing(6);
     width: 750px;
