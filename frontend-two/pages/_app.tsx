@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { ConfigProvider } from "@/contexts/ConfigContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { HelpdeskProvider } from "@/contexts/HelpdeskContext";
+import { NavProvider } from "@/contexts/NavContext";
 import { PanelProvider } from "@/contexts/PanelContext";
 import HelpdeskPanel from "@/components/shared/HelpdeskPanel";
 import "@/styles/globals.scss";
@@ -44,10 +45,12 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     <ConfigProvider>
       <AuthProvider>
         <HelpdeskProvider>
-          <PanelProvider>
-            <Component {...pageProps} />
-            <HelpdeskPanel />
-          </PanelProvider>
+          <NavProvider>
+            <PanelProvider>
+              <Component {...pageProps} />
+              <HelpdeskPanel />
+            </PanelProvider>
+          </NavProvider>
         </HelpdeskProvider>
       </AuthProvider>
     </ConfigProvider>
