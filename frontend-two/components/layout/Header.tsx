@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
+import { useNav } from "@/contexts/NavContext";
 
 const KainosGovukHeader = dynamic(
   () =>
@@ -15,7 +16,8 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { open: openHelpdesk } = useHelpdesk();
-  const showHelp = isAuthenticated && router.pathname !== "/login";
+  const { isOpen: isNavOpen, toggle: toggleNav } = useNav();
+  const showAuthControls = isAuthenticated && router.pathname !== "/login";
 
   return (
     <div className="header-shell">
@@ -26,7 +28,7 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
         showNavigation={false}
         rebrand
       />
-      {showHelp ? (
+      {showAuthControls ? (
         <div className="header__help-overlay govuk-width-container">
           <button
             className="govuk-header__link unbuttoned govuk__link header__help-link"
@@ -55,6 +57,18 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
               />
             </svg>
             Help
+          </button>
+          <button
+            type="button"
+            id="nav-toggle"
+            aria-controls="navigation"
+            aria-expanded={isNavOpen}
+            onClick={toggleNav}
+            className={`button-link nav-toggle nav-toggle--light${
+              isNavOpen ? " nav-toggle--active" : ""
+            }`}
+          >
+            Menu
           </button>
         </div>
       ) : null}
