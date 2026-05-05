@@ -8,6 +8,7 @@ import { NavProvider } from "@/contexts/NavContext";
 import { PanelProvider } from "@/contexts/PanelContext";
 import HelpdeskPanel from "@/components/shared/HelpdeskPanel";
 import "@/styles/globals.scss";
+import "@/styles/tailwind.css";
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   const router = useRouter();
