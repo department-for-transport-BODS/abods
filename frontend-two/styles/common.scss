@@ -1134,12 +1134,14 @@
 // Menu toggle button shown in the header on smaller screens (mirrors the
 // legacy `app-nav-toggle` component).
 .nav-toggle {
+  @include govuk-font(19);
   display: none;
   pointer-events: auto;
   background: none;
   border: 0;
   padding: 0;
   margin-left: govuk-spacing(3);
+  margin-bottom: govuk-spacing(2);
   font-family: inherit;
   cursor: pointer;
 
