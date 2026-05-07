@@ -16,14 +16,14 @@
 
   &__width {
     &--10 {
-      max-width: calc(23ex - 8ex);
-      @media (max-width: 640px) {
+      max-width: calc(11.5em - 8ex);
+      @media (max-width: 19.99em) {
         max-width: 100%;
       }
     }
     &--20 {
-      max-width: calc(41ex - 8ex);
-      @media (max-width: 640px) {
+      max-width: calc(20.5em - 8ex);
+      @media (max-width: 19.99em) {
         max-width: 100%;
       }
     }
@@ -49,7 +49,7 @@
       color: $govuk-focus-text-colour;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 19.99em) {
       width: 100%;
     }
   }
