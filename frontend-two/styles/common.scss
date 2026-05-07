@@ -1,6 +1,24 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// SortableTable styling
+.kns-table .sortable-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kns-table .sortable-header {
+  text-decoration: underline;
+  font-weight: 700;
+  cursor: pointer;
+  color: #1d70b8; /* govBlue */
+}
+
+.kns-table .sortable-header:hover {
+  color: #003078; /* hoverBlue */
+}
+
 // Password input component styles
 .password-input {
   &__label--required {
