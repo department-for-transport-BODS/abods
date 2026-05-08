@@ -124,6 +124,7 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         label.dy = 20;
         label.label.text = "{valueY}%";
         label.label.hideOversized = false;
+        label.label.truncate = false;
         label.label.fontWeight = "bold";
         label.label.fontSize = 19;
         chart.maskBullets = false;
