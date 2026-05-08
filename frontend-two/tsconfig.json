@@ -19,9 +19,13 @@
     "incremental": true,
     "isolatedModules": true,
     "baseUrl": ".",
+    "types": ["vitest/globals"],
     "paths": {
       "@/components/*": [
         "components/*"
+      ],
+      "@/pages/*": [
+        "pages/*"
       ],
       "@/contexts/*": [
         "contexts/*"
