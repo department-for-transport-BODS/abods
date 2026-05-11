@@ -79,3 +79,63 @@ export const DELETE_CORRIDOR_MUTATION = `mutation deleteCorridor($corridorId: In
     error
   }
 }`;
+
+export const CORRIDOR_STATS_QUERY = `query corridorStats($params: CorridorStatsInputType!) {
+  corridor {
+    stats(inputs: $params) {
+      summaryStats {
+        totalTransits
+        numberOfServices
+        averageTransitTime
+        scheduledTransits
+      }
+      transitTimeStats {
+        ts
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+      transitTimeTimeOfDayStats {
+        hour
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+      transitTimeDayOfWeekStats {
+        dow
+        minTransitTime
+        maxTransitTime
+        avgTransitTime
+        percentile25
+        percentile75
+      }
+      transitTimePerServiceStats {
+        lineName
+        servicePatternName
+        noc
+        operatorName
+        totalTransitTime
+        recordedTransits
+        scheduledTransits
+      }
+      transitTimeHistogram {
+        ts
+        hist {
+          bin
+          freq
+        }
+      }
+      serviceLinks {
+        fromStop
+        toStop
+        distance
+        routeValidity
+        linkRoute
+      }
+    }
+  }
+}`;
