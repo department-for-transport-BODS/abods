@@ -74,6 +74,9 @@
     flex-grow: 1;
     align-items: stretch;
     position: relative;
+    max-width: $max-width;
+    margin-right: $window-padding-small-screen;
+    margin-left: $window-padding-small-screen;
   }
 
   &__content {
@@ -102,6 +105,17 @@
 
 @include bp($tablet) {
   .app {
+    &__body {
+      margin-right: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+      );
+      margin-left: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+      );
+    }
+
     &__content {
       padding-left: govuk-spacing(8);
       padding-right: govuk-spacing(8);
@@ -110,6 +124,25 @@
     &__content:has(> .app-page) {
       padding-left: 0;
       padding-right: 0;
+    }
+  }
+}
+
+@include bp($desktop) {
+  .app {
+    &__body {
+      margin-right: $window-padding-large-screen;
+      margin-left: $window-padding-large-screen;
+    }
+  }
+}
+
+@include bp($max-desktop) {
+  .app {
+    &__body {
+      width: 100%;
+      margin-right: auto;
+      margin-left: auto;
     }
   }
 }
@@ -900,22 +933,19 @@
 .nav {
   display: flex;
   flex-direction: column;
-  align-self: flex-start;
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
-  max-height: 100vh;
-  overflow-y: auto;
+  justify-content: space-between;
+  height: 100%;
   border-right: 1px solid $govuk-border-colour;
-  width: 220px;
-  box-sizing: border-box;
-  padding: 0 16px 16px 16px;
-  margin-left: 16px;
+  width: 200px;
+  box-sizing: content-box;
+  padding-right: govuk-spacing(4);
   margin-right: govuk-spacing(6);
   background-color: govuk-colour("white");
+  z-index: $z-menu;
 
   &__block {
-    flex: 1 1 auto;
+    position: sticky;
+    top: 0;
     padding-top: govuk-spacing(7);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -964,7 +994,6 @@
   &__menu-bottom {
     position: sticky;
     bottom: 0;
-    padding-top: 16px;
     padding-bottom: govuk-spacing(2);
     background-color: govuk-colour("white");
 
@@ -994,6 +1023,7 @@
 
 .user-account {
   margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
 
   &__invite-button {
     display: inline-flex;
@@ -1003,14 +1033,19 @@
     align-items: center;
     margin-bottom: 8px;
 
+    span {
+      margin-left: govuk-spacing(2);
+    }
+
     div {
       display: inline-flex;
+      width: 20px;
+      height: 20px;
 
       svg {
         color: $govuk-link-colour;
-        width: 20px;
-        height: 20px;
-        margin-right: govuk-spacing(2);
+        width: 15px;
+        height: 15px;
       }
     }
 
@@ -1109,23 +1144,32 @@
   }
 }
 
+@include bp($to-tablet) {
+  .nav {
+    padding-left: $window-padding-small-screen;
+
+    &--open {
+      left: $window-padding-small-screen * -1;
+    }
+  }
+}
+
+@include bp($tablet-only) {
+  .nav {
+    padding-left: $window-padding-large-screen;
+
+    &--open {
+      left: $window-padding-large-screen * -1;
+    }
+  }
+}
+
 @include bp($to-desktop) {
   .nav {
     display: none;
     position: absolute;
     top: 0;
-    left: 0;
     bottom: 0;
-    z-index: $z-menu;
-    min-height: 100%;
-    max-height: none;
-    width: 220px;
-    margin-left: 0;
-    margin-right: 0;
-    padding: govuk-spacing(4) 16px;
-    border-right: 1px solid $govuk-border-colour;
-    border-bottom: 0;
-    background-color: govuk-colour("white");
 
     &--open {
       display: flex;
@@ -1145,9 +1189,8 @@
       position: fixed;
       left: 0;
       bottom: 0;
-      width: 220px;
+      width: 200px;
       padding: govuk-spacing(2) 16px govuk-spacing(4) 16px;
-      border-right: 1px solid $govuk-border-colour;
       background-color: govuk-colour("white");
       z-index: $z-menu;
     }
