@@ -1,13 +1,23 @@
 import { graphqlRequest } from "@/services/api";
 import {
   Corridor,
+  CorridorGranularity,
+  CorridorHistogramBin,
   CorridorListItem,
+  CorridorServiceStat,
+  CorridorStats,
+  CorridorStatsParams,
   CorridorStop,
+  CorridorSummaryStats,
+  CorridorTransitTimeStat,
   CorridorSummary,
   CorridorUpdateInput,
+  MatchType,
+  ServiceLink,
   StopLists,
 } from "@/types/corridors";
 import {
+  CORRIDOR_STATS_QUERY,
   CORRIDORS_LIST_QUERY,
   CORRIDORS_STOP_SEARCH_QUERY,
   CORRIDORS_SUBSEQUENT_STOPS_QUERY,
@@ -16,6 +26,13 @@ import {
   GET_CORRIDOR_QUERY,
   UPDATE_CORRIDOR_MUTATION,
 } from "@/services/corridors/corridors.operations";
+import {
+  toFilledDayOfWeekStats,
+  toFilledHistogram,
+  toFilledTimeOfDayStats,
+  toFilledTransitTimeStats,
+} from "@/services/corridors/corridors.transforms";
+import { DateTime } from "luxon";
 
 interface StopSearchResult {
   stopId: string;
@@ -39,6 +56,77 @@ interface CorridorStopResult {
     localityName: string | null;
   } | null;
 }
+
+interface CorridorStatsResult {
+  summaryStats: CorridorSummaryStats | null;
+  transitTimeStats: Array<CorridorTransitTimeStat | null> | null;
+  transitTimeTimeOfDayStats: Array<CorridorTransitTimeStat | null> | null;
+  transitTimeDayOfWeekStats: Array<CorridorTransitTimeStat | null> | null;
+  transitTimePerServiceStats: Array<CorridorServiceStat | null> | null;
+  transitTimeHistogram: Array<{
+    hist: Array<CorridorHistogramBin | null> | null;
+  } | null> | null;
+  serviceLinks: Array<ServiceLink | null> | null;
+}
+
+const toStats = (
+  stats: CorridorStatsResult,
+  params: CorridorStatsParams,
+): CorridorStats => {
+  const from = DateTime.fromISO(params.fromTimestamp);
+  const to = DateTime.fromISO(params.toTimestamp);
+
+  const transitTimeStats = (stats.transitTimeStats ?? []).filter(
+    (item): item is CorridorTransitTimeStat => item !== null,
+  );
+  const transitTimeTimeOfDayStats = (
+    stats.transitTimeTimeOfDayStats ?? []
+  ).filter((item): item is CorridorTransitTimeStat => item !== null);
+  const transitTimeDayOfWeekStats = (
+    stats.transitTimeDayOfWeekStats ?? []
+  ).filter((item): item is CorridorTransitTimeStat => item !== null);
+
+  const histogramRaw = (
+    (stats.transitTimeHistogram ?? [])[0]?.hist ?? []
+  ).filter((item): item is CorridorHistogramBin => item !== null);
+
+  return {
+    summaryStats: {
+      averageTransitTime: stats.summaryStats?.averageTransitTime ?? null,
+      numberOfServices: stats.summaryStats?.numberOfServices ?? null,
+      scheduledTransits: stats.summaryStats?.scheduledTransits ?? null,
+      totalTransits: stats.summaryStats?.totalTransits ?? null,
+    },
+    transitTimeStats: toFilledTransitTimeStats(
+      transitTimeStats,
+      from,
+      to,
+      params.granularity,
+    ),
+    transitTimeTimeOfDayStats: toFilledTimeOfDayStats(
+      transitTimeTimeOfDayStats,
+    ),
+    transitTimeDayOfWeekStats: toFilledDayOfWeekStats(
+      transitTimeDayOfWeekStats,
+    ),
+    transitTimeHistogram: toFilledHistogram(histogramRaw),
+    transitTimePerServiceStats: (stats.transitTimePerServiceStats ?? []).filter(
+      (item): item is CorridorServiceStat => item !== null,
+    ),
+    serviceLinks: (stats.serviceLinks ?? []).filter(
+      (item): item is ServiceLink => item !== null,
+    ),
+  };
+};
+
+const granularityFromRange = (
+  fromTimestamp: string,
+  toTimestamp: string,
+): CorridorGranularity => {
+  const from = DateTime.fromISO(fromTimestamp);
+  const to = DateTime.fromISO(toTimestamp);
+  return Math.abs(to.diff(from, "days").days) < 5 ? "hour" : "day";
+};
 
 const toStopFromSearch = (stop: StopSearchResult): CorridorStop => ({
   stopId: stop.stopId,
@@ -205,6 +293,37 @@ export const corridorsService = {
     } catch (error) {
       console.warn("Failed to delete corridor:", error);
       return false;
+    }
+  },
+
+  fetchStats: async (
+    apiUrl: string,
+    params: Omit<CorridorStatsParams, "granularity"> & {
+      granularity?: CorridorGranularity;
+      matchType?: MatchType;
+    },
+  ): Promise<CorridorStats | null> => {
+    const payload: CorridorStatsParams = {
+      ...params,
+      granularity:
+        params.granularity ??
+        granularityFromRange(params.fromTimestamp, params.toTimestamp),
+      matchType: params.matchType ?? "evidenced",
+    };
+
+    try {
+      const result = await graphqlRequest<{
+        corridor: {
+          stats: CorridorStatsResult | null;
+        };
+      }>(apiUrl, CORRIDOR_STATS_QUERY, { params: payload });
+
+      const stats = result.corridor?.stats;
+      if (!stats) return null;
+      return toStats(stats, payload);
+    } catch (error) {
+      console.warn("Failed to fetch corridor stats:", error);
+      return null;
     }
   },
 };
