@@ -9,3 +9,31 @@ export interface CorridorSummary {
   name: string;
   numStops: number;
 }
+
+export interface CorridorStop {
+  stopId: string;
+  stopName: string;
+  naptan: string;
+  localityName: string | null;
+  adminAreaId: string | null;
+  sourceId: string | null;
+  lon: number;
+  lat: number;
+}
+
+export interface Corridor {
+  id: number;
+  name: string;
+  stops: CorridorStop[];
+}
+
+export interface StopLists {
+  orgStops: CorridorStop[];
+  nonOrgStops: CorridorStop[];
+}
+
+export interface CorridorUpdateInput {
+  id: number;
+  name: string;
+  stopList: string[];
+}
