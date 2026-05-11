@@ -3,9 +3,9 @@ import { PagingPanel } from "../shared/PagingPanel";
 import { FeedMonitoringOperator } from "@/types/feed-monitoring";
 import { DateTime } from "luxon";
 import dynamic from "next/dynamic";
+import { Box } from "../shared/Box";
 
 // TODO:NOW Figure out how to add graph in table and what the graph is 
-// TODO:NOW Figure out hyperlinked operator pages
 
 const SortableTable = dynamic(
     () => import("kainossoftwareltd-govuk-react-kainos").then(mod => mod.SortableTable),
@@ -53,13 +53,14 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
     const totalPages = Math.ceil(sortedOperators.length / PAGE_SIZE);
     const pageData = sortedOperators.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
+    // TODO:NOW Change the name of this function
     const handleSort = (key: string, order: SortOrder) => {
         setSortKey(key);
         setSortOrder(order);
         setCurrentPage(0);
     };
 
-    const head = [
+    const columnHeaders = [
         { key: "icon", label: "", sortable: false },
         { key: "nocCode", label: "NOC", sortable: false },
         { key: "name", label: "Operator", sortable: false },
@@ -69,6 +70,7 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
         { key: "graph", label: "", sortable: false }
     ];
 
+    // TODO:NOW Review some the variable names so that the code is more readable 
     const rows = pageData.map((op) => ({
         icon: active 
             ? <img src="/assets/icons/check-in-circle-solid.svg" 
@@ -76,7 +78,7 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
             : <img src="/assets/icons/cross-in-circle-solid.svg" 
                 style={{ width: "24px", height: "24px", filter: "invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%)" }} />,
         nocCode: op.nocCode,
-        name: op.name,
+        name: <a className="govuk-link font-bold" href={`/feed-monitoring/${op.nocCode}`}>{op.name}</a>,
         availability: op.feedMonitoring?.availability != null
             ? `${(op.feedMonitoring.availability * 100).toFixed(1)}%`
             : "-",
@@ -84,12 +86,13 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
             ? `${op.feedMonitoring.liveStats.updateFrequency}s`
             : "-",
         lastOutage: <span> {translateToRelativeTime(op.feedMonitoring?.lastOutage ?? "")} </span>,
-        unavailableSince: <span style={{ color: "#ca3535", fontWeight: "bold" }}> {translateToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>
+        unavailableSince: <span style={{ color: "#d9221a", fontWeight: "bold" }}> {translateToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>,
+        graph: <Box children={undefined} />
     }));
 
      return (
         <>
-            <SortableTable head={head} rows={rows} onSort={handleSort}></SortableTable>
+            <SortableTable head={columnHeaders} rows={rows} onSort={handleSort}></SortableTable>
             <div className="flex justify-end">
                 <div className="w-2/5">
                     <PagingPanel
