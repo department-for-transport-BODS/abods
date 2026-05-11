@@ -460,6 +460,16 @@
   }
 }
 
+@include bp($to-tablet) {
+  .performance {
+    &__footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: govuk-spacing(3);
+    }
+  }
+}
+
 .performance-chart {
   min-height: rem(300);
 
@@ -560,6 +570,24 @@
     }
   }
 
+  &__service {
+    min-width: 0;
+
+    .govuk-link {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  &__operator {
+    color: $govuk-secondary-text-colour;
+  }
+
+  &__stat,
+  &__trend {
+    white-space: nowrap;
+  }
+
   &__link {
     text-decoration: none;
   }
@@ -577,6 +605,20 @@
 
   &__loading {
     position: relative;
+  }
+}
+
+@include bp($to-tablet) {
+  .ranking-table {
+    &__data {
+      td {
+        padding-right: govuk-spacing(2);
+      }
+    }
+
+    &__operator {
+      display: none;
+    }
   }
 }
 

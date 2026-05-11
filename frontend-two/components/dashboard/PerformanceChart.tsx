@@ -82,6 +82,10 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
         chart.padding(0, 0, 0, 0);
         chart.margin(0, 0, 0, 0);
 
+        const isSmallViewport = () =>
+          typeof window !== "undefined" &&
+          window.matchMedia("(max-width: 40em)").matches;
+
         const categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
         categoryAxis.dataFields.category = "category";
         categoryAxis.renderer.grid.template.disabled = true;
@@ -173,6 +177,24 @@ export const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
           name: category,
           fill: am4core.color(categoryColours[category]),
         }));
+
+        const updateSmallScreenLayout = () => {
+          const smallScreen = isSmallViewport();
+
+          legend.position = smallScreen ? "bottom" : "right";
+          legend.valign = smallScreen ? "top" : "middle";
+          legend.marginLeft = smallScreen ? 0 : 40;
+          legend.labels.template.maxWidth = smallScreen ? 180 : 260;
+
+          valueAxis.renderer.labels.template.fontSize = smallScreen ? 11 : 13;
+          valueAxis.renderer.minGridDistance = smallScreen ? 24 : 30;
+
+          label.dy = smallScreen ? 12 : 20;
+          label.label.fontSize = smallScreen ? 16 : 19;
+        };
+
+        updateSmallScreenLayout();
+        chart.events.on("sizechanged", updateSmallScreenLayout);
 
         chart.data = chartDataRef.current;
         setLoadFailed(false);
