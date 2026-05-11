@@ -223,6 +223,10 @@
     display: inline-flex;
     align-items: center;
 
+    @include bp($to-desktop) {
+      display: none;
+    }
+
     &:link,
     &:visited,
     &:hover {
@@ -243,9 +247,46 @@
     align-items: center;
     justify-content: flex-end;
     pointer-events: none;
+    max-width: $max-width;
+    margin-right: $window-padding-small-screen;
+    margin-left: $window-padding-small-screen;
 
     .header__help-link {
       pointer-events: auto;
+    }
+  }
+}
+
+@include bp($tablet) {
+  .header {
+    &__help-overlay {
+      margin-right: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+      );
+      margin-left: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+      );
+    }
+  }
+}
+
+@include bp($desktop) {
+  .header {
+    &__help-overlay {
+      margin-right: $window-padding-large-screen;
+      margin-left: $window-padding-large-screen;
+    }
+  }
+}
+
+@include bp($max-desktop) {
+  .header {
+    &__help-overlay {
+      width: 100%;
+      margin-right: auto;
+      margin-left: auto;
     }
   }
 }
