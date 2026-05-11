@@ -1,6 +1,66 @@
 import { graphqlRequest } from "@/services/api";
-import { CorridorListItem, CorridorSummary } from "@/types/corridors";
-import { CORRIDORS_LIST_QUERY } from "@/services/corridors/corridors.operations";
+import {
+  Corridor,
+  CorridorListItem,
+  CorridorStop,
+  CorridorSummary,
+  CorridorUpdateInput,
+  StopLists,
+} from "@/types/corridors";
+import {
+  CORRIDORS_LIST_QUERY,
+  CORRIDORS_STOP_SEARCH_QUERY,
+  CORRIDORS_SUBSEQUENT_STOPS_QUERY,
+  CREATE_CORRIDOR_MUTATION,
+  DELETE_CORRIDOR_MUTATION,
+  GET_CORRIDOR_QUERY,
+  UPDATE_CORRIDOR_MUTATION,
+} from "@/services/corridors/corridors.operations";
+
+interface StopSearchResult {
+  stopId: string;
+  stopName: string;
+  lat: number;
+  lon: number;
+  localityName: string | null;
+  adminAreaId: string | null;
+  sourceId: string | null;
+}
+
+interface CorridorStopResult {
+  stopId: string;
+  stopName: string;
+  sourceId: string | null;
+  stopLocation: {
+    latitude: number;
+    longitude: number;
+  };
+  stopLocality: {
+    localityName: string | null;
+  } | null;
+}
+
+const toStopFromSearch = (stop: StopSearchResult): CorridorStop => ({
+  stopId: stop.stopId,
+  stopName: stop.stopName,
+  lon: stop.lon,
+  lat: stop.lat,
+  localityName: stop.localityName,
+  adminAreaId: stop.adminAreaId,
+  sourceId: stop.sourceId,
+  naptan: stop.sourceId ?? stop.stopId,
+});
+
+const toStopFromCorridor = (stop: CorridorStopResult): CorridorStop => ({
+  stopId: stop.stopId,
+  stopName: stop.stopName,
+  lon: stop.stopLocation.longitude,
+  lat: stop.stopLocation.latitude,
+  localityName: stop.stopLocality?.localityName ?? null,
+  adminAreaId: null,
+  sourceId: stop.sourceId,
+  naptan: stop.sourceId ?? stop.stopId,
+});
 
 export const corridorsService = {
   fetchCorridors: async (apiUrl: string): Promise<CorridorSummary[] | null> => {
@@ -19,6 +79,132 @@ export const corridorsService = {
     } catch (error) {
       console.warn("Failed to fetch corridors:", error);
       return null;
+    }
+  },
+
+  fetchCorridorById: async (
+    apiUrl: string,
+    corridorId: number,
+  ): Promise<Corridor | null> => {
+    try {
+      const result = await graphqlRequest<{
+        corridor: {
+          getCorridor: {
+            id: number;
+            name: string;
+            stops: Array<CorridorStopResult | null> | null;
+          } | null;
+        };
+      }>(apiUrl, GET_CORRIDOR_QUERY, { corridorId });
+
+      const corridor = result.corridor?.getCorridor;
+      if (!corridor) return null;
+
+      return {
+        id: corridor.id,
+        name: corridor.name,
+        stops: (corridor.stops ?? [])
+          .filter((stop): stop is CorridorStopResult => stop !== null)
+          .map(toStopFromCorridor),
+      };
+    } catch (error) {
+      console.warn("Failed to fetch corridor by id:", error);
+      return null;
+    }
+  },
+
+  queryStops: async (
+    apiUrl: string,
+    searchString: string,
+  ): Promise<StopLists | null> => {
+    try {
+      const result = await graphqlRequest<{
+        corridor: {
+          addFirstStop: Array<StopSearchResult | null> | null;
+        };
+      }>(apiUrl, CORRIDORS_STOP_SEARCH_QUERY, {
+        inputs: { searchString },
+      });
+
+      const orgStops = (result.corridor?.addFirstStop ?? [])
+        .filter((stop): stop is StopSearchResult => stop !== null)
+        .map(toStopFromSearch);
+
+      // Angular splits organisation/non-organisation stops using operator admin area ids.
+      // That lookup has not yet been ported, so commit 2 returns all as organisation stops.
+      return { orgStops, nonOrgStops: [] };
+    } catch (error) {
+      console.warn("Failed to search corridor stops:", error);
+      return null;
+    }
+  },
+
+  fetchSubsequentStops: async (
+    apiUrl: string,
+    stopList: string[],
+  ): Promise<CorridorStop[] | null> => {
+    try {
+      const result = await graphqlRequest<{
+        corridor: {
+          addSubsequentStops: Array<StopSearchResult | null> | null;
+        };
+      }>(apiUrl, CORRIDORS_SUBSEQUENT_STOPS_QUERY, { stopList });
+
+      return (result.corridor?.addSubsequentStops ?? [])
+        .filter((stop): stop is StopSearchResult => stop !== null)
+        .map(toStopFromSearch);
+    } catch (error) {
+      console.warn("Failed to fetch subsequent corridor stops:", error);
+      return null;
+    }
+  },
+
+  createCorridor: async (
+    apiUrl: string,
+    name: string,
+    stopIds: string[],
+  ): Promise<boolean> => {
+    try {
+      const result = await graphqlRequest<{
+        createCorridor: { success: boolean; error: string | null };
+      }>(apiUrl, CREATE_CORRIDOR_MUTATION, { name, stopIds });
+
+      return result.createCorridor.success;
+    } catch (error) {
+      console.warn("Failed to create corridor:", error);
+      return false;
+    }
+  },
+
+  updateCorridor: async (
+    apiUrl: string,
+    inputs: CorridorUpdateInput,
+  ): Promise<boolean> => {
+    try {
+      const result = await graphqlRequest<{
+        updateCorridor: { success: boolean; error: string | null };
+      }>(apiUrl, UPDATE_CORRIDOR_MUTATION, { inputs });
+
+      return result.updateCorridor.success;
+    } catch (error) {
+      console.warn("Failed to update corridor:", error);
+      return false;
+    }
+  },
+
+  deleteCorridor: async (
+    apiUrl: string,
+    corridorId: number,
+  ): Promise<boolean> => {
+    try {
+      const result = await graphqlRequest<{
+        deleteCorridor: { success: boolean; error: string | null };
+      }>(apiUrl, DELETE_CORRIDOR_MUTATION, { corridorId });
+
+      return result.deleteCorridor.success;
+    } catch (error) {
+      console.warn("Failed to delete corridor:", error);
+      return false;
     }
   },
 };

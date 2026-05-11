@@ -60,8 +60,6 @@ const CorridorsEditPage = () => {
               apiUrl={config.apiUrl}
               mode="edit"
               initialCorridor={corridor}
-              mapboxToken={config.mapboxToken}
-              mapboxStyle={config.mapboxStyle}
             />
           )}
         </>

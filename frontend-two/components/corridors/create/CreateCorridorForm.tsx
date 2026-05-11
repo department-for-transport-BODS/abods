@@ -5,7 +5,6 @@ import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { corridorsService } from "@/services/corridors/corridors.service";
 import { Corridor, CorridorStop } from "@/types/corridors";
 import { ErrorInfo } from "@/types";
-import { CorridorCreateMap } from "@/components/corridors/create/CorridorCreateMap";
 import { CorridorStopList } from "@/components/corridors/create/CorridorStopList";
 import { StopSearchList } from "@/components/corridors/create/StopSearchList";
 import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorridorModal";
@@ -16,16 +15,12 @@ interface Props {
   apiUrl: string;
   mode: "create" | "edit";
   initialCorridor?: Corridor;
-  mapboxToken: string;
-  mapboxStyle: string;
 }
 
 export const CreateCorridorForm = ({
   apiUrl,
   mode,
   initialCorridor,
-  mapboxToken,
-  mapboxStyle,
 }: Props) => {
   const router = useRouter();
   const isEdit = mode === "edit" && !!initialCorridor;
@@ -394,15 +389,10 @@ export const CreateCorridorForm = ({
           </div>
 
           <div className="govuk-grid-column-one-half">
-            {mapboxToken && mapboxStyle ? (
-              <CorridorCreateMap
-                corridorStops={stopList}
-                matchingStops={matchingStops}
-                onSelectStop={addStop}
-                mapboxToken={mapboxToken}
-                mapboxStyle={mapboxStyle}
-              />
-            ) : null}
+            <div className="govuk-inset-text">
+              Map view and location-based map interactions will be added in the
+              next migration stage.
+            </div>
           </div>
         </div>
       </form>
