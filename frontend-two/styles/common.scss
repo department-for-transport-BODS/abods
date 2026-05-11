@@ -964,8 +964,8 @@
   &__menu-bottom {
     position: sticky;
     bottom: 0;
-    margin-top: auto;
     padding-top: 16px;
+    padding-bottom: govuk-spacing(2);
     background-color: govuk-colour("white");
 
     &__action-item {
@@ -993,6 +993,8 @@
 }
 
 .user-account {
+  margin-bottom: govuk-spacing(4);
+
   &__invite-button {
     display: inline-flex;
     width: 100%;
@@ -1127,6 +1129,43 @@
 
     &--open {
       display: flex;
+    }
+
+    &__menu-bottom {
+      margin-top: 0;
+    }
+  }
+
+  .nav--open {
+    .nav__block {
+      padding-bottom: 140px;
+    }
+
+    .nav__menu-bottom {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      padding: govuk-spacing(2) 16px govuk-spacing(4) 16px;
+      border-right: 1px solid $govuk-border-colour;
+      background-color: govuk-colour("white");
+      z-index: $z-menu;
+    }
+  }
+}
+
+@include bp($desktop) {
+  .nav {
+    min-height: calc(100vh - #{govuk-spacing(7)});
+    max-height: calc(100vh - #{govuk-spacing(7)});
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - #{govuk-spacing(7)});
+      max-height: calc(100dvh - #{govuk-spacing(7)});
+    }
+
+    &__menu-bottom {
+      margin-top: auto;
     }
   }
 }
