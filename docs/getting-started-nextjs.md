@@ -50,7 +50,7 @@ It will give you a link to open the UI in your browser after an initial build.
 
 ### Run front end against deployed APIs
 
-To run the front end in a dev server, connected to the Sandbox API, then run `mise r app:sandbox` to start the app.
+With the old Angular front end it was possible to run it in a dev server, connected to the Sandbox API. 
 
-There is a corresponding task for the UAT API, but your .env file will need to be updated.
-That is left as an exercise for the reader
+Further investigation is needed to determine if this is possible with the new Next.js front end.
+
