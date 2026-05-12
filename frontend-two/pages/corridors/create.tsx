@@ -16,7 +16,12 @@ const CorridorsCreatePage = () => {
       <span className="govuk-caption-xl">Corridors</span>
       <h1 className="govuk-heading-xl">Create new corridor</h1>
       {config?.apiUrl ? (
-        <CreateCorridorForm apiUrl={config.apiUrl} mode="create" />
+        <CreateCorridorForm
+          apiUrl={config.apiUrl}
+          mode="create"
+          mapboxToken={config.mapboxToken}
+          mapboxStyle={config.mapboxStyle}
+        />
       ) : (
         <p className="govuk-body">Loading...</p>
       )}
