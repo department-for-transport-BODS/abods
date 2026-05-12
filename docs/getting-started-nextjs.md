@@ -11,9 +11,7 @@ If that is installed and on your PATH, you should be able to run `mise install` 
 >
 > The rest of the guide will assume usage of that tool, but you can check [mise.toml](../mise.toml) to find the commands to run.
 
-Run `mise tasks` to get a list of tasks you can run.
-Many tasks use [Granted](https://docs.commonfate.io/granted/getting-started), and its `assume` command for convenience when working across multiple AWS accounts.
-You may also wish to manage this differently.
+Run `mise tasks` to get a list of tasks you can run. Make sure your AWS credentials are configured and you are authenticated against the sandbox environment before running the application locally.
 
 You can run `npm i` to install dependencies on each subproject, and perform code generation.
 It can be helpful to repeat this whenever changing Prisma or GraphQL code.
