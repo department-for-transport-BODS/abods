@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-
 export const SummaryStat = ({ title, value, tooltip }: { title: string, value: string | number, tooltip?: string }) => {
     const [visible, setVisible] = useState(false);
 
@@ -10,6 +9,7 @@ export const SummaryStat = ({ title, value, tooltip }: { title: string, value: s
             {tooltip ? (
                 <span className="font-bold" style={{ fontSize: "36px" }}>
                     <span
+                        className="summary-stat"
                         style={{ position: "relative", display: "inline-block" }}
                         onMouseEnter={() => setVisible(true)}
                         onMouseLeave={() => setVisible(false)}
@@ -18,27 +18,9 @@ export const SummaryStat = ({ title, value, tooltip }: { title: string, value: s
                             {value}
                         </span>
                         {visible && (
-                            <span className="govuk-body" style={{
-                                position: "absolute",
-                                bottom: "calc(100% + 12px)",
-                                left: "50%",
-                                transform: "translateX(-50%)",
-                                width: "300px",
-                                backgroundColor: "#000000",
-                                color: "#ffffff",
-                                fontSize: "16px",
-                                padding: "8px 12px",
-                            }}>
+                            <span className="govuk-body tooltip">
                                 {tooltip}
-                                <span style={{
-                                    position: "absolute",
-                                    bottom: "-10px",
-                                    left: "50%",
-                                    transform: "translateX(-50%)",
-                                    borderLeft: "12px solid transparent",
-                                    borderRight: "12px solid transparent",
-                                    borderTop: "12px solid #000000",
-                                }} />
+                                <span className="triangle" />
                             </span>
                         )}
                     </span>

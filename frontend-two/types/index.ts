@@ -1,3 +1,11 @@
+export interface MultiselectDropdownProps {
+    label: string;
+    options: string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+    placeholder?: string;
+}
+
 export interface ErrorInfo {
   id: string;
   errorMessage: string;

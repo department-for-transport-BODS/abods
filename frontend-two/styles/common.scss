@@ -1,32 +1,208 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
-// Distance filter styling
-.distance-grid-filters {
+// DistanceGrid styling
+.distance-grid__filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// MultiselectDropdown styling
+.multiselect-dropdown {
+  position: relative;
+}
+
+.multiselect-dropdown__button {
   display: flex;
-  flex-wrap: wrap;
-  // gap: govuk-spacing(4);
-  align-content: space-evenly;
-  margin-bottom: govuk-spacing(6);
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
+  height: 40px;
+  padding: 0.5em 0.75em;
+  background: #fff;
+  border: 2px solid #0b0c0c;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.multiselect-dropdown__button-text {
+  color: #484949;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.multiselect-dropdown__panel {
+  position: absolute;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #cecece;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.multiselect-dropdown__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6em 0.75em;
+  background-color: #f3f3f3;
+}
+
+.multiselect-dropdown__header-label {
+  margin: 0;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes {
+  padding: 8px 12px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__input {
+  padding: 2px 2px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label {
+  padding: 0.1em 0 0.1em 12px;
+  font-size: 19px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label::before {
+  width: 22px;
+  height: 22px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label::after {
+  top: 8px;
+  left: 8px;
+  width: 10px;
+  height: 6px;
+  border-width: 0 0 3px 3px;
+}
+
+// OperatorDropdown styling
+.operator-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.operator-dropdown__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+}
+
+.operator-dropdown__label {
+  color: #1d70b8;
+  font-weight: bold;
+  font-size: 24px;
+  margin: 0;
+}
+
+.operator-dropdown__chevron {
+  transition: transform 0.2s;
+}
+
+.operator-dropdown__chevron--open {
+  transform: rotate(180deg);
+}
+
+.operator-dropdown__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #b1b4b6;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 320px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.operator-dropdown__item {
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #0b0c0c;
+}
+
+.operator-dropdown__item--hovered {
+  background-color: #1d70b8;
+  color: #fff;
+}
+
+.operator-dropdown__item-text {
+  margin: 0;
+  color: inherit;
+}
+
+// SummaryStat tooltip styling
+.summary-stat .tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background-color: #000000;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 8px 12px;
+}
+
+.summary-stat .tooltip .triangle {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #000000;
 }
 
 // SortableTable styling
 .kns-table .sortable-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.kns-table .sortable-header {
+  display: flex;
+  font-size: 17px;
   text-decoration: underline;
-  font-weight: 700;
   cursor: pointer;
   color: #1d70b8; /* govBlue */
+  text-align: left;
+  align-items: center;
 }
 
 .kns-table .sortable-header:hover {
   color: #003078; /* hoverBlue */
+}
+
+.kns-table .sortable-header svg {
+  flex-shrink: 0;
 }
 
 // Password input component styles

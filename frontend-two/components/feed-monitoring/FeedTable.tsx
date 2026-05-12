@@ -67,10 +67,11 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
         { key: "availability", label: "Feed availability", sortable: true },
         { key: "updateFrequency", label: "Update frequency", sortable: true },
         { key: active ? "lastOutage" : "unavailableSince", label: active ? "Last outage" : "Unavailable since", sortable: true },
-        { key: "graph", label: "", sortable: false }
+        // { key: "graph", label: "", sortable: false }
     ];
 
     // TODO:NOW Review some the variable names so that the code is more readable 
+    // TODO:NOW Add the inline styling to the scss file and use class names
     const rows = pageData.map((op) => ({
         icon: active 
             ? <img src="/assets/icons/check-in-circle-solid.svg" 

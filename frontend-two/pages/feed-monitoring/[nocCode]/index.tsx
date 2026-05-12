@@ -9,8 +9,6 @@ import { SummaryStat } from "@/components/shared/SummaryStat";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 
-// TODO:NOW Check imports are in consistent order across files
-
 const NocFeedPage = () => {
     const router = useRouter();
     const { nocCode } = router.query as { nocCode: string};

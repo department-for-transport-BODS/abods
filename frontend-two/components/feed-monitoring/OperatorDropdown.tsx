@@ -26,60 +26,33 @@ export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { oper
     }, []);
 
     return (
-        <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
+        <div ref={ref} className="operator-dropdown">
             <button
                 onClick={() => setOpen(o => !o)}
-                style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: 0,
-                }}
+                className="operator-dropdown__button"
             >
-                <span className="govuk-body" style={{ color: "#1d70b8", fontWeight: "bold", fontSize: "24px", margin: 0 }}>
+                <span className="govuk-body operator-dropdown__label">
                     {current ? `${current.name} (${current.nocCode})` : "Select operator"}
                 </span>
                 <svg
                     width="16" height="16" viewBox="0 0 16 16" fill="none"
-                    style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+                    className={`operator-dropdown__chevron${open ? " operator-dropdown__chevron--open" : ""}`}
                 >
                     <path d="M2 5l6 6 6-6" stroke="#1d70b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </button>
 
             {open && (
-                <ul style={{
-                    position: "absolute",
-                    top: "calc(100% + 4px)",
-                    left: 0,
-                    backgroundColor: "#fff",
-                    border: "1px solid #b1b4b6",
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
-                    zIndex: 100,
-                    maxHeight: "300px",
-                    overflowY: "auto",
-                    minWidth: "320px",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                }}>
+                <ul className="operator-dropdown__list">
                     {operators.map(op => (
                         <li
                             key={op.nocCode}
                             onClick={() => handleSelect(op)}
                             onMouseEnter={() => setHovered(op.nocCode)}
                             onMouseLeave={() => setHovered(null)}
-                            style={{
-                                padding: "8px 12px",
-                                cursor: "pointer",
-                                backgroundColor: hovered === op.nocCode ? "#1d70b8" : "#fff",
-                                color: hovered === op.nocCode ? "#fff" : "#0b0c0c",
-                            }}
+                            className={`operator-dropdown__item${hovered === op.nocCode ? " operator-dropdown__item--hovered" : ""}`}
                         >
-                            <span className="govuk-body" style={{ margin: 0, color: "inherit" }}>
+                            <span className="govuk-body operator-dropdown__item-text">
                                 {op.name} ({op.nocCode})
                             </span>
                         </li>
