@@ -472,6 +472,7 @@
 
 .performance-chart {
   min-height: rem(300);
+  height: rem(300);
 
   &--fallback {
     display: flex;
