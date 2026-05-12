@@ -1,13 +1,15 @@
 import { graphqlRequest } from "@/services/api";
+
 import {
   ADMIN_ORG_LIST_QUERY,
   DISTANCES_DROPDOWNS_QUERY,
   DISTANCES_LIST_QUERY,
   USER_ORGANISATIONS_QUERY,
 } from "@/services/distances/distance.operations";
+
 import {
   AdminOrgMap,
-  Distance,
+  DistanceData,
   DistancesDropdowns,
   DistancesFilterInput,
   UserOrg,
@@ -56,9 +58,9 @@ export const distanceService = {
   fetchDistances: async (
     apiUrl: string,
     filterBy: DistancesFilterInput,
-  ): Promise<Distance[]> => {
+  ): Promise<DistanceData[]> => {
     try {
-      const result = await graphqlRequest<{ distances: Distance[] }>(
+      const result = await graphqlRequest<{ distances: DistanceData[] }>(
         apiUrl,
         DISTANCES_LIST_QUERY,
         { filterBy },

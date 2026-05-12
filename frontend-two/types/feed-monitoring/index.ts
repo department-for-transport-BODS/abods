@@ -4,7 +4,7 @@ export interface VehicleStat {
   timestamp: string;
 }
 
-export interface FeedMonitoringOperator {
+export interface FeedMonitoringOperatorData {
   name: string;
   nocCode: string;
   operatorId: string;

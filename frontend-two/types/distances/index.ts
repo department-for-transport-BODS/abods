@@ -32,7 +32,7 @@ export interface UserOrg {
   name: string;
 }
 
-export interface Distance extends Record<string, string | number | null | undefined> {
+export interface DistanceData extends Record<string, string | number | null | undefined> {
   operatorId: string;
   operatorName: string;
   nocLineAndServiceCode: string;
@@ -50,4 +50,22 @@ export interface DistancesFilterInput {
   nocLineAndServiceCodes?: string[];
   licenseIds?: string[];
   adminAreaIds?: string[];
+}
+
+export interface DistanceFiltersProps {
+  adminAreaOptions: string[];
+  selectedAdminAreas: string[];
+  onAdminAreasChange: (selected: string[]) => void;
+  orgOptions: string[];
+  selectedOrgs: string[];
+  onOrgsChange: (selected: string[]) => void;
+  operatorOptions: string[];
+  selectedOperators: string[];
+  onOperatorsChange: (selected: string[]) => void;
+  licenseOptions: string[];
+  selectedLicenses: string[];
+  onLicensesChange: (selected: string[]) => void;
+  serviceOptions: string[];
+  selectedServices: string[];
+  onServicesChange: (selected: string[]) => void;
 }
