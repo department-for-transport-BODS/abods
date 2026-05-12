@@ -70,8 +70,8 @@ export const MultiselectDropdown = ({
                         </button>
                     </div>
                     <div className="govuk-checkboxes">
-                        {options.map((option) => (
-                            <div className="govuk-checkboxes__item" key={option}>
+                        {options.map((option, idx) => (
+                            <div className="govuk-checkboxes__item" key={`${option}-${idx}`}>
                             <input
                                 className="govuk-checkboxes__input"
                                 type="checkbox"

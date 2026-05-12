@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { PagingPanel } from "../shared/PagingPanel";
-import { FeedMonitoringOperator } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 import { DateTime } from "luxon";
 import dynamic from "next/dynamic";
 import { Box } from "../shared/Box";
@@ -16,14 +16,14 @@ type SortOrder = "asc" | "desc" | "none";
 
 const PAGE_SIZE = 10;
 
-function getRowValue(op: FeedMonitoringOperator, key: string): string | number {
+function getRowValue(data: FeedMonitoringOperatorData, key: string): string | number {
     switch (key) {
-        case "nocCode": return op.nocCode;
-        case "name": return op.name;
-        case "availability": return op.feedMonitoring?.availability ?? -1;
-        case "updateFrequency": return op.feedMonitoring?.liveStats?.updateFrequency ?? -1;
-        case "lastOutage": return op.feedMonitoring?.lastOutage ?? "";
-        case "unavailableSince": return op.feedMonitoring?.unavailableSince ?? "";
+        case "nocCode": return data.nocCode;
+        case "name": return data.name;
+        case "availability": return data.feedMonitoring?.availability ?? -1;
+        case "updateFrequency": return data.feedMonitoring?.liveStats?.updateFrequency ?? -1;
+        case "lastOutage": return data.feedMonitoring?.lastOutage ?? "";
+        case "unavailableSince": return data.feedMonitoring?.unavailableSince ?? "";
         default: return "";
     }
 }
@@ -34,24 +34,24 @@ function translateToRelativeTime(date: string): string {
     return relative ?? "-";
 }
 
-export const FeedTable = ({ active, operators }: { active: boolean, operators: FeedMonitoringOperator[] }) => {
+export const FeedTable = ({ active, data }: { active: boolean, data: FeedMonitoringOperatorData[] }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-    const sortedOperators = useMemo(() => {
-        if (!sortKey || sortOrder === "none") return operators;
-        return [...operators].sort((a, b) => {
+    const sortedData = useMemo(() => {
+        if (!sortKey || sortOrder === "none") return data;
+        return [...data].sort((a, b) => {
             const aVal = getRowValue(a, sortKey);
             const bVal = getRowValue(b, sortKey);
             if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
             if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
             return 0;
         });
-    }, [operators, sortKey, sortOrder]);
+    }, [data, sortKey, sortOrder]);
 
-    const totalPages = Math.ceil(sortedOperators.length / PAGE_SIZE);
-    const pageData = sortedOperators.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+    const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
+    const pageData = sortedData.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
     // TODO:NOW Change the name of this function
     const handleSort = (key: string, order: SortOrder) => {
@@ -100,7 +100,7 @@ export const FeedTable = ({ active, operators }: { active: boolean, operators: F
                         currentPage={currentPage}
                         totalPages={totalPages}
                         pageSize={PAGE_SIZE}
-                        rowCount={operators.length}
+                        rowCount={data.length}
                         noun="feed"
                         onPageChange={setCurrentPage}
                     />

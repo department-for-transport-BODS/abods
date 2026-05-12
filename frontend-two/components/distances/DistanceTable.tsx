@@ -1,22 +1,35 @@
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { PagingPanel } from "../shared/PagingPanel";
 import dynamic from "next/dynamic";
-import { Distance } from "@/types/distances";
+import { DistanceData } from "@/types/distances";
 
 const SortableTable = dynamic(
     () => import("kainossoftwareltd-govuk-react-kainos").then(mod => mod.SortableTable),
     { ssr: false }
 );
 
+type SortOrder = "asc" | "desc" | "none";
+
 const PAGE_SIZE = 10;
 
-export const DistanceTable = ({ data }: { data: Distance[] }) => {
-    const [currentPage, setCurrentPage] = useState(0);
+function getRowValue(row: DistanceData, key: string): string | number {
+    switch (key) {
+        case "operatorName": return row.operatorName ?? "";
+        case "nocLineAndServiceCode": return row.nocLineAndServiceCode?.split("-").pop() ?? "";
+        case "lineName": return row.lineName ?? "";
+        case "distance": return row.distance ?? 0;
+        case "avlDistance": return row.avlDistance ?? 0;
+        case "avlDistancePercent": return (row.distance && row.avlDistance != null)
+            ? row.avlDistance / row.distance
+            : 0;
+        default: return "";
+    }
+}
 
-    const paged = useMemo(() => {
-        const start = currentPage * PAGE_SIZE;
-        return data.slice(start, start + PAGE_SIZE);
-    }, [data, currentPage]);
+export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
+    const [currentPage, setCurrentPage] = useState(0);
+    const [sortKey, setSortKey] = useState<string | null>(null);
+    const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
     const columnHeaders = [
         { key: "operatorName", label: "Operator", sortable: true },
@@ -27,21 +40,44 @@ export const DistanceTable = ({ data }: { data: Distance[] }) => {
         { key: "avlDistancePercent", label: "Distance of journeys with AVL (%)", sortable: true },
     ];
 
+    // Set to page 0 if data changes
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [data]);
+
+    // Sort the full dataset before paging
+    const sortedData = useMemo(() => {
+        if (!sortKey || sortOrder === "none") return data;
+        return [...data].sort((a, b) => {
+            const aVal = getRowValue(a, sortKey);
+            const bVal = getRowValue(b, sortKey);
+            if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+            if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+    }, [data, sortKey, sortOrder]);
+
+    const handleSort = (key: string, order: SortOrder) => {
+        setSortKey(key);
+        setSortOrder(order);
+        setCurrentPage(0);
+    };
+
     // Calculate totals for the full data set
     const totals = useMemo(() => {
         if (!data.length) return null;
         let totalDistance = 0;
         let totalAvlDistance = 0;
-       
+
         data.forEach(row => {
             if (row.distance != null) totalDistance += row.distance / 1000;
             if (row.avlDistance != null) totalAvlDistance += row.avlDistance / 1000;
         });
-       
+
         const avlPercent = totalDistance > 0
             ? `${((totalAvlDistance / totalDistance) * 100).toFixed(1)}%`
             : "-";
-       
+
         return {
             operatorName: "-",
             nocLineAndServiceCode: "-",
@@ -52,13 +88,19 @@ export const DistanceTable = ({ data }: { data: Distance[] }) => {
         };
     }, [data]);
 
-    // Data from db
+    // Page the sorted data
+    const paged = useMemo(() => {
+        const start = currentPage * PAGE_SIZE;
+        return sortedData.slice(start, start + PAGE_SIZE);
+    }, [sortedData, currentPage]);
+
+    // Map paged data to display rows
     const rows = useMemo(() => {
         const mapped = paged.map((row) => {
             const distance = row.distance != null ? row.distance / 1000 : null;
             const avlDistance = row.avlDistance != null ? row.avlDistance / 1000 : null;
             const avlPercent = distance && avlDistance != null
-                ? `${((avlDistance / distance) * 100).toFixed(2)}%`
+                ? `${((avlDistance / distance) * 100).toFixed(1)}%`
                 : "-";
 
             return {
@@ -71,13 +113,13 @@ export const DistanceTable = ({ data }: { data: Distance[] }) => {
             };
         });
 
-        // Only show totals row if there is data
+        // Totals row is always pinned to the top, outside of sort/page
         return totals ? [totals, ...mapped] : mapped;
     }, [paged, totals]);
 
     return(
         <>
-            <SortableTable head={columnHeaders} rows={rows}></SortableTable>
+            <SortableTable head={columnHeaders} rows={rows} onSort={handleSort}></SortableTable>
             {data.length === 0 && (
                 <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">
                     No operator data found
@@ -90,7 +132,7 @@ export const DistanceTable = ({ data }: { data: Distance[] }) => {
                         totalPages={Math.ceil(data.length / PAGE_SIZE)}
                         pageSize={PAGE_SIZE}
                         rowCount={data.length}
-                        noun="result"
+                        noun="operator"
                         onPageChange={setCurrentPage}
                     />
                 </div>

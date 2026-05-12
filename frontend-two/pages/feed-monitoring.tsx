@@ -3,17 +3,17 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { FeedSummaryGrid } from "@/components/feed-monitoring/FeedSummaryGrid";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperator } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 
 const FeedMonitoringPage = () => {
   const { config } = useConfig();
-  const [operators, setOperators] = useState<FeedMonitoringOperator[]>([]);
+  const [operatorData, setOperatorData] = useState<FeedMonitoringOperatorData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [operatorSearch, setOperatorSearch] = useState("");
 
   useEffect(() => {
     if (!config?.apiUrl) {
-      setOperators([]);
+      setOperatorData([]);
       setIsLoading(false);
       console.error("API URL is not configured");
       return;
@@ -21,7 +21,7 @@ const FeedMonitoringPage = () => {
     const load = async () => {
       setIsLoading(true);
       const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
-      setOperators(data);
+      setOperatorData(data);
       setIsLoading(false);
     };
 
@@ -31,13 +31,13 @@ const FeedMonitoringPage = () => {
   // Check if operator search has been used and filter data here
   // Can search either by operator name or NOC code
   const filteredOperators = useMemo(() => {
-    if (!operatorSearch) return operators;
-    return operators.filter(
+    if (!operatorSearch) return operatorData;
+    return operatorData.filter(
       (op) => 
         op.name.toLowerCase().includes(operatorSearch.toLowerCase()) ||
         op.nocCode.toLowerCase().includes(operatorSearch.toLowerCase())
     );
-  }, [operators, operatorSearch]);
+  }, [operatorData, operatorSearch]);
 
   // Data for inactive and active feeds
   const inactiveOperators = filteredOperators.filter(o => !o.feedMonitoring?.feedStatus);
@@ -60,13 +60,13 @@ const FeedMonitoringPage = () => {
           />
         </div>
         {isLoading ? (
-          // TODO:NOW Make a loading page that looks nicer than this and is reusable across the app
+          // TODO: Make a loading page that looks nicer than this and is reusable across the app
           <p className="govuk-body">Loading...</p>
           
         ) : (
           <>
-            <FeedSummaryGrid title="Inactive feeds" active={false} operators={inactiveOperators} />
-            <FeedSummaryGrid title="Active feeds" active={true} operators={activeOperators} />
+            <FeedSummaryGrid title="Inactive feeds" active={false} data={inactiveOperators} />
+            <FeedSummaryGrid title="Active feeds" active={true} data={activeOperators} />
           </>
         )}
       </div>
