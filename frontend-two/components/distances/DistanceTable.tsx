@@ -57,7 +57,7 @@ export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
         });
     }, [data, sortKey, sortOrder]);
 
-    const handleSort = (key: string, order: SortOrder) => {
+    const handleTableSorting = (key: string, order: SortOrder) => {
         setSortKey(key);
         setSortOrder(order);
         setCurrentPage(0);
@@ -119,7 +119,7 @@ export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
 
     return(
         <>
-            <SortableTable head={columnHeaders} rows={rows} onSort={handleSort}></SortableTable>
+            <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>
             {data.length === 0 && (
                 <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">
                     No operator data found

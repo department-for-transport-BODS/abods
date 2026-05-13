@@ -5,9 +5,9 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperator, OperatorLiveStatus } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
-import { SummaryStat } from "@/components/shared/SummaryStat";
+import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
-import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
+import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
 
 const NocFeedPage = () => {
     const router = useRouter();
@@ -68,9 +68,9 @@ const NocFeedPage = () => {
             </div>
             <div className="grid grid-cols-4 gap-4 mt-6">
                 <FeedStatusSummaryStat title="Feed status" value={operator?.feedMonitoring?.feedStatus != null ? (operator.feedMonitoring.feedStatus ? "Active" : "Inactive") : "-"} />
-                <SummaryStat title="Current vehicles" value={operator?.feedMonitoring?.liveStats?.currentVehicles ?? "-"} tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS" />
-                <SummaryStat title="Expected vehicles" value={operator?.feedMonitoring?.liveStats?.expectedVehicles ?? "-"} tooltip="The number of vehicles based that should be running now according to the timetables uploaded to BODS" />
-                <SummaryStat title="Update frequency" value={operator?.feedMonitoring?.liveStats?.updateFrequency ? `${operator.feedMonitoring.liveStats.updateFrequency}s` : "-"} tooltip="Average update frequency is calculated over the last 24 hour period" />
+                <SummaryStatWithTooltip title="Current vehicles" value={operator?.feedMonitoring?.liveStats?.currentVehicles ?? "-"} tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS" />
+                <SummaryStatWithTooltip title="Expected vehicles" value={operator?.feedMonitoring?.liveStats?.expectedVehicles ?? "-"} tooltip="The number of vehicles based that should be running now according to the timetables uploaded to BODS" />
+                <SummaryStatWithTooltip title="Update frequency" value={operator?.feedMonitoring?.liveStats?.updateFrequency ? `${operator.feedMonitoring.liveStats.updateFrequency}s` : "-"} tooltip="Average update frequency is calculated over the last 24 hour period" />
             </div>
             {/* TODO:NOW: Add graph */}
             <div className="mt-8">

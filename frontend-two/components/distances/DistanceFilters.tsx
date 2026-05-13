@@ -1,20 +1,28 @@
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
-import { DateSelect } from "@/components/shared/DateSelect";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { DistanceFiltersProps } from "@/types/distances";
 // TODO:NOW Figure out what the ORGANISATIONS filter is meant to do
 
 export const DistanceFilters = ({
-  adminAreaOptions, selectedAdminAreas, onAdminAreasChange,
-  orgOptions, selectedOrgs, onOrgsChange,
-  operatorOptions, selectedOperators, onOperatorsChange,
-  licenseOptions, selectedLicenses, onLicensesChange,
-  serviceOptions, selectedServices, onServicesChange,
+    isLoading,
+    fromDate, toDate, onFromDateChange, onToDateChange,
+    adminAreaOptions, selectedAdminAreas, onAdminAreasChange,
+    orgOptions, selectedOrgs, onOrgsChange,
+    operatorOptions, selectedOperators, onOperatorsChange,
+    licenseOptions, selectedLicenses, onLicensesChange,
+    serviceOptions, selectedServices, onServicesChange,
 }: DistanceFiltersProps) => {
     return (
         <>
             <div className="distance-grid__filters">
                 <div className="distance-grid__filter">
-                    <DateSelect />
+                    <DateRangeSelect
+                        value={{ from: fromDate, to: toDate }}
+                        onChange={({from, to}) => {
+                            onFromDateChange(from);
+                            onToDateChange(to);
+                        }}
+                    />
                 </div>
                 <div className="distance-grid__filter">
                     <MultiselectDropdown
@@ -22,7 +30,7 @@ export const DistanceFilters = ({
                         options={adminAreaOptions}
                         selected={selectedAdminAreas}
                         onChange={onAdminAreasChange}
-                        placeholder="All areas"
+                        placeholder={isLoading ? "Loading..." : "All areas"}
                     />
                 </div>
                 <div className="distance-grid__filter">
@@ -31,7 +39,7 @@ export const DistanceFilters = ({
                         options={orgOptions}
                         selected={selectedOrgs}
                         onChange={onOrgsChange}
-                        placeholder="All organisations"
+                        placeholder={isLoading ? "Loading..." : "All organisations"}
                     />
                 </div>
                 <div className="distance-grid__filter">
@@ -40,7 +48,7 @@ export const DistanceFilters = ({
                         options={operatorOptions}
                         selected={selectedOperators}
                         onChange={onOperatorsChange}
-                        placeholder="All operators"
+                        placeholder={isLoading ? "Loading..." : "All operators"}
                     />
                 </div>
                 <div className="distance-grid__filter">
@@ -49,7 +57,7 @@ export const DistanceFilters = ({
                         options={licenseOptions}
                         selected={selectedLicenses}
                         onChange={onLicensesChange}
-                        placeholder="All licenses"
+                        placeholder={isLoading ? "Loading..." : "All licenses"}
                     />
                 </div>
                 <div className="distance-grid__filter">
@@ -58,7 +66,7 @@ export const DistanceFilters = ({
                         options={serviceOptions}
                         selected={selectedServices}
                         onChange={onServicesChange}
-                        placeholder="All services"
+                        placeholder={isLoading ? "Loading..." : "All services"}
                     />
                 </div>
             </div>

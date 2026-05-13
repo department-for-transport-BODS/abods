@@ -1,6 +1,82 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// DateRangeSelect styling
+.date-range-select {
+  position: relative;
+  display: block;
+}
+
+.date-range-select__button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0.5em 0.75em;
+  background: #fff;
+  border: 2px solid #0b0c0c;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: #f3f2f1;
+  }
+}
+
+.date-range-select__button-text {
+  color: #484949;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.date-range-select__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.date-range-select__panel {
+  position: absolute;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #b1b4b6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  min-width: 560px;
+}
+
+.date-range-select__inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.date-range-select__date-input {
+  width: 100%;
+}
+
+.date-range-select__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid #b1b4b6;
+  margin-top: 0.5rem;
+}
+
+.date-range-select__apply {
+  background-color: #00703c !important;
+
+  &:hover {
+    background-color: #005a30 !important;
+  }
+}
+
 // DistanceGrid styling
 .distance-grid__filters {
   display: grid;
@@ -33,7 +109,6 @@
   background: #fff;
   border: 2px solid #0b0c0c;
   cursor: pointer;
-  font-size: 1rem;
   text-align: left;
 }
 

@@ -32,20 +32,18 @@ const DistancesPage = () => {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
-  // TODO:NOW: Sort out dateSelect and add from/to timestamps to the filter
-  const [fromDate, setFromDate] = useState(() => {
-  const d = new Date();
-    d.setDate(d.getDate() - 7);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  });
-
   const [toDate, setToDate] = useState(() => {
     const d = new Date();
-    d.setHours(23, 59, 59, 999);
-    return d;
+    d.setDate(d.getDate() - 1); // yesterday
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
+  const [fromDate, setFromDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7); // 6 days before yesterday
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  
   // Fetch dropdown options for filters
   useEffect(() => {
     if (!config?.apiUrl) {
@@ -115,6 +113,7 @@ const DistancesPage = () => {
       console.error("API URL is not configured");
       return;
     }
+    setIsGenerating(true);
 
     // Get IDs for dropdown filtering
     const adminAreaIds = adminOrgMapData
@@ -147,13 +146,14 @@ const DistancesPage = () => {
       {
         orgId, 
         operatorIds, 
-        fromTimestamp: fromDate.toISOString(),
-        toTimestamp: toDate.toISOString(),
+        fromTimestamp: fromDate,
+        toTimestamp: toDate,
         nocLineAndServiceCodes, 
         licenseIds,
         adminAreaIds,
       });
     setDistanceTableData(data);
+    setIsGenerating(false);
   }
 
   return (
@@ -161,6 +161,11 @@ const DistancesPage = () => {
       <div className="app-page feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">Distances</h1>
         <DistanceFilters
+          isLoading={isLoading}
+          fromDate={fromDate}
+          toDate={toDate}
+          onFromDateChange={setFromDate}
+          onToDateChange={setToDate}
           adminAreaOptions={adminAreaOptions}
           selectedAdminAreas={selectedAdminAreas}
           onAdminAreasChange={setSelectedAdminAreas}
@@ -177,8 +182,8 @@ const DistancesPage = () => {
           selectedServices={selectedServices}
           onServicesChange={setSelectedServices}
         />
-        <Button onClick={handleGenerateDataButton} disabled={isGenerating || isLoading}>
-          {isGenerating ? "Loading..." : "Generate"}
+        <Button onClick={handleGenerateDataButton} disabled={isLoading || isGenerating}>
+          {isLoading || isGenerating ? "Loading..." : "Generate"}
         </Button>
         <DistanceTable data={distanceTableData} />
       </div>

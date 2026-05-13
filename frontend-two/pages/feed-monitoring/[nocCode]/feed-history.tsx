@@ -5,8 +5,8 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperator } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
-import { SummaryStat } from "@/components/shared/SummaryStat";
-import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
+import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
+import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
 
 // TODO:NOW Check imports are in consistent order across files
 
@@ -60,8 +60,8 @@ const FeedHistoryPage = () => {
             <Box children={undefined} />
             </div>
             <div className="grid grid-cols-4 gap-4 mt-6">
-                <SummaryStat title="Feed availability" value="-" tooltip="The percentage of the day the feed was active when vehicles were expected to be running" />
-                <SummaryStat title="Average update frequency" value="-" />
+                <SummaryStatWithTooltip title="Feed availability" value="-" tooltip="The percentage of the day the feed was active when vehicles were expected to be running" />
+                <SummaryStatWithTooltip title="Average update frequency" value="-" />
             </div>
         </div>
         </BaseLayout>
