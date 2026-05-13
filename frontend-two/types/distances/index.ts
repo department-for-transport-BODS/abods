@@ -53,6 +53,11 @@ export interface DistancesFilterInput {
 }
 
 export interface DistanceFiltersProps {
+  isLoading: boolean;
+  fromDate: string;
+  toDate: string;
+  onFromDateChange: (date: string) => void;
+  onToDateChange: (date: string) => void;
   adminAreaOptions: string[];
   selectedAdminAreas: string[];
   onAdminAreasChange: (selected: string[]) => void;
