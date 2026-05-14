@@ -1,4 +1,5 @@
 export interface MultiselectDropdownProps {
+    isLoading?: boolean;
     label: string;
     options: string[];
     selected: string[];

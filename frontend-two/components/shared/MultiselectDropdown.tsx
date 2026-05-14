@@ -9,19 +9,26 @@ export const MultiselectDropdown = ({
     placeholder,
 }: MultiselectDropdownProps) => {
     const [open, setOpen] = useState(false);
+    
+    const hasSelected = selected.length > 0;
+
     const ref = useRef<HTMLDivElement>(null);
+
+    const [search, setSearch] = useState("");
+    const filteredOptions = options.filter((option) =>
+        option.toLowerCase().includes(search.toLowerCase())
+    );
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
                 setOpen(false);
+                setSearch("");
             }
         };
         if (open) document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [open]);
-
-    const allSelected = selected.length === options.length;
 
     const toggleOption = (option: string) => {
         if (selected.includes(option)) {
@@ -31,13 +38,13 @@ export const MultiselectDropdown = ({
         }
     };
 
-    const toggleAll = () => {
-        if (allSelected) {
-            onChange([]);
-        } else {
-            onChange([...options]);
-        }
-    };
+    const toggleAllOptions = () => {
+    if (hasSelected) {
+        onChange([]);
+    } else {
+        onChange([...options]);
+    }
+};
 
     const displayText = 
         selected.length === 0 
@@ -49,28 +56,39 @@ export const MultiselectDropdown = ({
     return (
         <div className="govuk-form-group multiselect-dropdown" ref={ref}>
             <label className="govuk-label">{label}</label>
-            <button
-                type="button"
-                className="multiselect-dropdown__button"
-                onClick={() => setOpen((v) => !v)}
-            >
-                <span className="multiselect-dropdown__button-text">{displayText}</span>
-                <span>{open ? "▲" : "▼"}</span>
-            </button>
+            {open ? (
+                <input
+                    type="text"
+                    className="multiselect-dropdown__button multiselect-dropdown__search-text"
+                    placeholder="Search here"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    autoFocus
+                />
+            ) : (
+                <button
+                    type="button"
+                    className="multiselect-dropdown__button"
+                    onClick={() => setOpen(true)}
+                >
+                    <span className="multiselect-dropdown__button-text">{displayText}</span>
+                    <span>▼</span>
+                </button>
+            )}
             {open && (
                 <div className="multiselect-dropdown__panel">
-                    <div className="multiselect-dropdown__header">
+                    <div className="multiselect-dropdown__header"> 
                         <div className="govuk-body multiselect-dropdown__header-label font-bold">{label}</div>
                         <button
                             type="button"
                             className="govuk-link"
-                            onClick={toggleAll}
+                            onClick={toggleAllOptions}
                         >
-                            {allSelected ? "Clear all" : "Show all"}
+                            {hasSelected ? "Clear all" : "Show all"}
                         </button>
                     </div>
                     <div className="govuk-checkboxes">
-                        {options.map((option, idx) => (
+                        {filteredOptions.map((option, idx) => (
                             <div className="govuk-checkboxes__item" key={`${option}-${idx}`}>
                             <input
                                 className="govuk-checkboxes__input"

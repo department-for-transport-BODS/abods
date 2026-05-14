@@ -79,12 +79,12 @@ export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
             : "-";
 
         return {
-            operatorName: "-",
-            nocLineAndServiceCode: "-",
-            lineName: "-",
-            distance: totalDistance.toFixed(2),
-            avlDistance: totalAvlDistance.toFixed(2),
-            avlDistancePercent: avlPercent,
+            operatorName: "",
+            nocLineAndServiceCode: "",
+            lineName: "",
+            distance: <strong>{totalDistance.toFixed(2)}</strong>,
+            avlDistance: <strong>{totalAvlDistance.toFixed(2)}</strong>,
+            avlDistancePercent: <strong>{avlPercent}</strong>,
         };
     }, [data]);
 

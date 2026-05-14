@@ -43,8 +43,7 @@
   position: absolute;
   z-index: 200;
   background: #fff;
-  border: 1px solid #b1b4b6;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #000000;
   padding: 1rem;
   min-width: 560px;
 }
@@ -65,16 +64,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 0.75rem;
-  border-top: 1px solid #b1b4b6;
   margin-top: 0.5rem;
-}
-
-.date-range-select__apply {
-  background-color: #00703c !important;
-
-  &:hover {
-    background-color: #005a30 !important;
-  }
 }
 
 // DistanceGrid styling
@@ -113,6 +103,15 @@
 }
 
 .multiselect-dropdown__button-text {
+  color: #484949;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.multiselect-dropdown__search-text {
   color: #484949;
   font-size: 19px;
   white-space: nowrap;
