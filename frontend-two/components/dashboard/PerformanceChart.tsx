@@ -16,7 +16,7 @@ interface PerformanceChartProps {
   chartId?: string;
 }
 
-const columnOrdering: PerformanceCategories[] = ["OnTime", "Late", "Early"];
+const orderedCategories: PerformanceCategories[] = ["OnTime", "Late", "Early"];
 
 const legendLabels: Record<PerformanceCategories, string> = {
   OnTime: "On-Time",
@@ -36,13 +36,13 @@ const categoryColours: Record<PerformanceCategories, string> = {
   Early: "#e0007b", // pink
 };
 
-const legendaryGrey = "#505a5f";
+const legendTextColor = "#505a5f";
 
 type ChartDatum = { category: PerformanceCategories; value: string };
 
-const transformData = (source: PunctualityOverview): ChartDatum[] => {
+const toChartData = (source: PunctualityOverview): ChartDatum[] => {
   const total = (source.early ?? 0) + (source.onTime ?? 0) + (source.late ?? 0);
-  return columnOrdering.map((category) => {
+  return orderedCategories.map((category) => {
     const raw =
       source[
         category === "OnTime"
@@ -73,7 +73,7 @@ const createValueAxis = (chart: any) => {
     (disabled: boolean, target: any) =>
       target.dataItem?.value === 100 || disabled,
   );
-  valueAxis.renderer.labels.template.fill = am4core.color(legendaryGrey);
+  valueAxis.renderer.labels.template.fill = am4core.color(legendTextColor);
   valueAxis.renderer.labels.template.adapter.add(
     "text",
     (text: string) => `${text}%`,
@@ -120,7 +120,7 @@ const createLegend = (chart: any) => {
     const category = target.dataItem?.dataContext
       ?.name as PerformanceCategories;
     return category
-      ? `[bold]${legendLabels[category]}[/] [${legendaryGrey}]${legendHints[category]}[/]`
+      ? `[bold]${legendLabels[category]}[/] [${legendTextColor}]${legendHints[category]}[/]`
       : label;
   });
   legend.marginLeft = 40;
@@ -139,7 +139,7 @@ const createLegend = (chart: any) => {
     marker.valign = "middle";
   }
 
-  legend.data = columnOrdering.map((category) => ({
+  legend.data = orderedCategories.map((category) => ({
     name: category,
     fill: am4core.color(categoryColours[category]),
   }));
@@ -153,7 +153,7 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  const chartData = useMemo(() => transformData(data), [data]);
+  const chartData = useMemo(() => toChartData(data), [data]);
 
   // Initialize/dispose chart around component lifecycle.
   useLayoutEffect(() => {
@@ -242,7 +242,7 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
           ))}
         </div>
         <div className="performance-chart__fallback-legend">
-          {columnOrdering.map((category) => (
+          {orderedCategories.map((category) => (
             <div
               key={category}
               className="performance-chart__fallback-legend-item"

@@ -14,8 +14,6 @@ import {
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
 
-// amCharts touches `window` on import, so the chart component must be loaded
-// client-side only. See https://nextjs.org/docs/pages/guides/lazy-loading#with-no-ssr
 const PerformanceChart = dynamic(
   () => import("@/components/dashboard/PerformanceChart"),
   { ssr: false },
