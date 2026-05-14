@@ -34,9 +34,14 @@
     text-decoration: underline;
     cursor: pointer;
     background-color: govuk-colour("white");
-    width: 8ex;
-    border: 0;
-    padding: 0;
+    min-width: 8ex;
+    padding: 0 govuk-spacing(2);
+    border: 2px solid govuk-colour("black");
+    border-left: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 
     &:hover {
       color: $govuk-link-hover-colour;

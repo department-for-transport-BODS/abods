@@ -75,19 +75,21 @@ export const PasswordInput = <T,>({
           autoComplete={autocomplete}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
-        <div
-          role="button"
+        <button
+          type="button"
           className="govuk-input__suffix password-input__suffix-button"
-          aria-hidden="true"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleMouseDown}
           onTouchEnd={handleMouseUp}
+          aria-controls={inputId}
+          aria-hidden="true"
           tabIndex={-1}
+          aria-label={`${showPassword ? "Hide" : "Show"} password`}
         >
           {showPassword ? "Hide" : "Show"}
-        </div>
+        </button>
       </div>
     </div>
   );
