@@ -35,13 +35,13 @@ const DistancesPage = () => {
   // Set default date range to past week
   const [toDate, setToDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 1); // yesterday
+    d.setDate(d.getDate());
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 7); // 6 days before yesterday
+    d.setDate(d.getDate() - 7);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   
