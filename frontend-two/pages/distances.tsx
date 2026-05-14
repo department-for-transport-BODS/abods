@@ -3,7 +3,7 @@ import { BaseLayout } from "../components/layout/BaseLayout";
 import { DistanceFilters} from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
 import { distanceService } from "@/services/distances/distance.services";
-import { AdminOrgMap, DistanceOperator, DistanceData, UserOrg } from "@/types/distances";
+import { AdminOrgMap, DistanceData, UserOrg, DistancesDropdowns } from "@/types/distances";
 import dynamic from "next/dist/shared/lib/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,8 +21,8 @@ const DistancesPage = () => {
   const [distanceTableData, setDistanceTableData] = useState<DistanceData[]>([]);
 
   // Dropdown options from data API calls
-  const [adminOrgMapData, setAdminOrgMapData] = useState<AdminOrgMap[]>([]);
-  const [operatorData, setOperatorData] = useState<DistanceOperator[]>([]);
+  const [dropdownInputsData, setDropdownInputsData] = useState<DistancesDropdowns>({ operators: [] });
+  const [adminOrgData, setAdminOrgData] = useState<AdminOrgMap[]>([]);
   const [userOrgData, setUserOrgData] = useState<UserOrg[]>([]);
 
   // Selected dropdown options 
@@ -32,6 +32,7 @@ const DistancesPage = () => {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
+  // Set default date range to past week
   const [toDate, setToDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 1); // yesterday
@@ -47,8 +48,8 @@ const DistancesPage = () => {
   // Fetch dropdown options for filters
   useEffect(() => {
     if (!config?.apiUrl) {
-      setAdminOrgMapData([]);
-      setOperatorData([]);
+      setDropdownInputsData({ operators: [] });
+      setAdminOrgData([]);
       setUserOrgData([]);
       setIsLoading(false);
       console.error("API URL is not configured");
@@ -57,14 +58,10 @@ const DistancesPage = () => {
     const load = async () => {
       setIsLoading(true);
               
-      // Note that the API call for fetchDropdowns only returns operators, licenses and services
-      const dropdownData = await distanceService.fetchDropdowns(config.apiUrl);
-      const adminOrgMap = await distanceService.fetchAdminOrgList(config.apiUrl);
-      const userOrgs = await distanceService.fetchUserOrgs(config.apiUrl);
-
-      setAdminOrgMapData(adminOrgMap);
-      setOperatorData(dropdownData.operators);
-      setUserOrgData(userOrgs);
+      // Note that the query for fetchDropdownInputs only returns operators, licenses and services
+      setDropdownInputsData(await distanceService.fetchDropdownInputs(config.apiUrl));
+      setAdminOrgData(await distanceService.fetchAdminOrg(config.apiUrl));
+      setUserOrgData(await distanceService.fetchUserOrganisations(config.apiUrl));
       setIsLoading(false);
     };
 
@@ -74,37 +71,55 @@ const DistancesPage = () => {
   // Derive dropdown options (String) from data (Object)
   // Ensure there are no duplicate options and that they are in alphabetical order
   const adminAreaOptions = useMemo(() => {
-        return Array.from(new Set(adminOrgMapData.map((adminArea) => adminArea.adminName))).sort();
-  }, [adminOrgMapData]);
+        return Array.from(new Set(adminOrgData.map((data) => data.adminName))).sort();
+  }, [adminOrgData]);
 
   const orgOptions = useMemo(() => {
-    return Array.from(new Set(userOrgData.map((org) => org.name))).sort();
-  }, [userOrgData]);
+    return Array.from(new Set(adminOrgData.map((data) => data.orgName))).sort();
+  }, [adminOrgData]);
 
   const operatorOptions = useMemo(() => {
-    return Array.from(new Set(operatorData.map((operator) => operator.name))).sort();
-  }, [operatorData]);
+    if (selectedOrgs.length === 0) {
+      return Array.from(new Set(dropdownInputsData.operators.map((data) => `${data.name} (${data.id})`))).sort();
+    }
+    // Use AdminOrgMap to filter operators based on any selected orgs
+    const orgOperatorIds = new Set(
+      adminOrgData
+        .filter((selected) => selectedOrgs.includes(selected.orgName))
+        .map((selected) => selected.operatorId)
+    );
+    return Array.from(new Set(
+      dropdownInputsData.operators
+        .filter((data) => orgOperatorIds.has(data.id))
+        .map((data) => `${data.name} (${data.id})`)
+    )).sort();
+  }, [dropdownInputsData.operators, adminOrgData, selectedOrgs]);
+
+  // Clear selected operators that are no longer in the filtered operator options
+  useEffect(() => {
+    setSelectedOperators((prev) => prev.filter((op) => operatorOptions.includes(op)));
+  }, [operatorOptions]);
 
   // Only show licenses and services relevant to selected operators (if any), otherwise show all
   const licenseOptions = useMemo(() => {
     const relevantOperators = selectedOperators.length > 0
-      ? operatorData.filter((operator) => selectedOperators.includes(operator.name))
-      : operatorData;
+      ? dropdownInputsData.operators.filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
+      : dropdownInputsData.operators;
     return Array.from(new Set(
       relevantOperators.flatMap((operator) => operator.licenses.map((license) => license.id))
     )).sort();
-  }, [operatorData, selectedOperators]);
+  }, [dropdownInputsData.operators, selectedOperators]);
 
   const serviceOptions = useMemo(() => {
     const relevantOperators = selectedOperators.length > 0
-      ? operatorData.filter((operator) => selectedOperators.includes(operator.name))
-      : operatorData;
+      ? dropdownInputsData.operators.filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
+      : dropdownInputsData.operators;
     return Array.from(new Set(
       relevantOperators.flatMap((operator) =>
-        operator.licenses.flatMap((license) => license.services.map((service) => service.name))
+        operator.licenses.flatMap((license) => license.services.map((service) => `${service.line}-${service.name}`))
       )
     )).sort();
-  }, [operatorData, selectedOperators]);
+  }, [dropdownInputsData.operators, selectedOperators]);
 
   const handleGenerateDataButton = async () => {
     if (!config?.apiUrl) {
@@ -115,32 +130,30 @@ const DistancesPage = () => {
     }
     setIsGenerating(true);
 
-    // Get IDs for dropdown filtering
-    const adminAreaIds = adminOrgMapData
+    // Get IDs for filtering
+    const adminAreaIds = adminOrgData
     .filter((adminArea) => selectedAdminAreas.includes(adminArea.adminName))
     .map((adminArea) => adminArea.adminAreaId.toString());
 
-    const operatorIds = operatorData
-    .filter((operator) => selectedOperators.includes(operator.name))
+    const operatorIds = dropdownInputsData.operators
+    .filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
     .map((operator) => operator.id);
 
-    const orgId = userOrgData
-      .find((org) => selectedOrgs.includes(org.name))
-      ?.id.toString();
+    const orgId = adminOrgData
+      .find((org) => selectedOrgs.includes(org.orgName))
+      ?.orgId.toString();
 
-    const licenseIds = operatorData
+    const licenseIds = dropdownInputsData.operators
       .flatMap((operator) => operator.licenses)
       .filter((license) => selectedLicenses.includes(license.id))
       .map((license) => license.id);
 
-    const nocLineAndServiceCodes = operatorData
+    const serviceIds = dropdownInputsData.operators
       .flatMap((operator) => operator.licenses.flatMap((license) => license.services))
-      .filter((service) => selectedServices.includes(service.name))
+      .filter((service) => selectedServices.includes(`${service.line}-${service.name}`))
       .map((service) => service.id);
 
     // Fetch data for table based on filter selections
-    // TODO:NOW: Sort out dateSelect and add from/to timestamps to the filter
-
     const data = await distanceService.fetchDistances(
       config.apiUrl, 
       {
@@ -148,7 +161,7 @@ const DistancesPage = () => {
         operatorIds, 
         fromTimestamp: fromDate,
         toTimestamp: toDate,
-        nocLineAndServiceCodes, 
+        nocLineAndServiceCodes: serviceIds, 
         licenseIds,
         adminAreaIds,
       });

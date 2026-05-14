@@ -173,6 +173,28 @@
   border-width: 0 0 3px 3px;
 }
 
+.multiselect-dropdown__single-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.multiselect-dropdown__single-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: "GDS Transport", arial, sans-serif;
+    font-size: 19px;
+    color: #0b0c0c;
+}
+
+.multiselect-dropdown__single-item:hover {
+    background: #f3f2f1;
+}
+
+.multiselect-dropdown__single-item--selected {
+    background: #d2e2f1;
+}
+
 // OperatorDropdown styling
 .operator-dropdown {
   position: relative;

@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { MultiselectDropdownProps } from "@/types";
 
 export const MultiselectDropdown = ({
+    multiSelect = true,
     label,
     options,
     selected,
     onChange,
-    placeholder,
+    placeholderText,
 }: MultiselectDropdownProps) => {
     const [open, setOpen] = useState(false);
     
@@ -31,6 +32,12 @@ export const MultiselectDropdown = ({
     }, [open]);
 
     const toggleOption = (option: string) => {
+        if (!multiSelect) {
+            onChange([option]);
+            setOpen(false);
+            setSearch("");
+            return;
+        }
         if (selected.includes(option)) {
             onChange(selected.filter((s) => s !== option));
         } else {
@@ -48,7 +55,7 @@ export const MultiselectDropdown = ({
 
     const displayText = 
         selected.length === 0 
-        ? placeholder 
+        ? placeholderText 
         : selected.length === 1
             ? selected[0]
             : `${selected.length} selected`;
@@ -77,7 +84,7 @@ export const MultiselectDropdown = ({
             )}
             {open && (
                 <div className="multiselect-dropdown__panel">
-                    <div className="multiselect-dropdown__header"> 
+                    <div className="multiselect-dropdown__header">
                         <div className="govuk-body multiselect-dropdown__header-label font-bold">{label}</div>
                         <button
                             type="button"
@@ -87,22 +94,43 @@ export const MultiselectDropdown = ({
                             {hasSelected ? "Clear all" : "Show all"}
                         </button>
                     </div>
-                    <div className="govuk-checkboxes">
-                        {filteredOptions.map((option, idx) => (
-                            <div className="govuk-checkboxes__item" key={`${option}-${idx}`}>
-                            <input
-                                className="govuk-checkboxes__input"
-                                type="checkbox"
-                                checked={selected.includes(option)}
-                                onChange={() => toggleOption(option)}
-                                id={`checkbox-${option}`}
-                            />
-                            <label className="govuk-label govuk-checkboxes__label" htmlFor={`checkbox-${option}`}>
-                                {option}
-                            </label>
-                            </div>
-                        ))}
-                    </div>
+                    {multiSelect ? (
+                        <div className="govuk-checkboxes">
+                            {filteredOptions.map((option, idx) => (
+                                <div className="govuk-checkboxes__item" key={`${option}-${idx}`}>
+                                    <input
+                                        className="govuk-checkboxes__input"
+                                        type="checkbox"
+                                        checked={selected.includes(option)}
+                                        onChange={() => toggleOption(option)}
+                                        id={`checkbox-${option}`}
+                                    />
+                                    <label
+                                        className="govuk-label govuk-checkboxes__label"
+                                        htmlFor={`checkbox-${option}`}
+                                    >
+                                        {option}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <ul className="multiselect-dropdown__single-list">
+                            {filteredOptions.map((option, idx) => (
+                                <li
+                                    key={`${option}-${idx}`}
+                                    className={`multiselect-dropdown__single-item${
+                                        selected.includes(option)
+                                            ? " multiselect-dropdown__single-item--selected"
+                                            : ""
+                                    }`}
+                                    onClick={() => toggleOption(option)}
+                                >
+                                    {option}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
         </div>

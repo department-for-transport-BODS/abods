@@ -1,10 +1,10 @@
 export interface MultiselectDropdownProps {
-    isLoading?: boolean;
+    multiSelect?: boolean;
     label: string;
     options: string[];
     selected: string[];
     onChange: (selected: string[]) => void;
-    placeholder?: string;
+    placeholderText?: string;
 }
 
 export interface ErrorInfo {
