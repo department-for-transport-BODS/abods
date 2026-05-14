@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
 import { CorridorsGrid } from "@/components/corridors/CorridorsGrid";
 import { corridorsService } from "@/services/corridors/corridors.service";
@@ -22,6 +24,11 @@ const CorridorsPage = () => {
   useRequireAuth();
   const { config } = useConfig();
   const router = useRouter();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("corridors", "Corridors");
+  }, [loadData]);
 
   const filter = getSearchParam(router.query.search);
 
