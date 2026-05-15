@@ -54,10 +54,7 @@ export const PagingPanel = ({
   const isLastPage = currentPage === totalPages - 1;
   const pluralNoun = `${noun}${rowCount > 1 ? "s" : ""}`;
 
-  const { pages, stickToStart, stickToEnd } = getPageNumbers(
-    currentPage,
-    totalPages,
-  );
+  const { pages, stickToStart, stickToEnd } = getPageNumbers( currentPage, totalPages );
 
   return (
     <div className="paging-panel flex justify-end">

@@ -1,24 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FeedMonitoringOperator } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 
-export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { operators: FeedMonitoringOperator[], currentNocCode: string, pageLink: string }) => {
+// TODO:NOW Data type for operators might need to change in future
+export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { operators: FeedMonitoringOperatorData[], currentNocCode: string, pageLink: string }) => {
     const router = useRouter();
-    const [open, setOpen] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(false);
     const [hovered, setHovered] = useState<string | null>(null);
     const ref = useRef<HTMLDivElement>(null);
 
     const current = operators.find(op => op.nocCode === currentNocCode);
 
-    const handleSelect = (op: FeedMonitoringOperator) => {
-        setOpen(false);
+    const handleSelect = (op: FeedMonitoringOperatorData) => {
+        setOpenDropdown(false);
         router.push(pageLink.replace("[nocCode]", op.nocCode));
     };
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
-                setOpen(false);
+                setOpenDropdown(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -28,7 +29,7 @@ export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { oper
     return (
         <div ref={ref} className="operator-dropdown">
             <button
-                onClick={() => setOpen(o => !o)}
+                onClick={() => setOpenDropdown(o => !o)}
                 className="operator-dropdown__button"
             >
                 <span className="govuk-body operator-dropdown__label">
@@ -36,13 +37,13 @@ export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { oper
                 </span>
                 <svg
                     width="16" height="16" viewBox="0 0 16 16" fill="none"
-                    className={`operator-dropdown__chevron${open ? " operator-dropdown__chevron--open" : ""}`}
+                    className={`operator-dropdown__chevron${openDropdown ? " operator-dropdown__chevron--open" : ""}`}
                 >
                     <path d="M2 5l6 6 6-6" stroke="#1d70b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </button>
 
-            {open && (
+            {openDropdown && (
                 <ul className="operator-dropdown__list">
                     {operators.map(op => (
                         <li

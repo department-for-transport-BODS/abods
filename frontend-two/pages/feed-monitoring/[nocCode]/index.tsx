@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperator, OperatorLiveStatus } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData, OperatorLiveStatus } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
@@ -12,10 +12,10 @@ import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
 const NocFeedPage = () => {
     const router = useRouter();
     const { nocCode } = router.query as { nocCode: string};
-
     const { config } = useConfig();
+    
     const [operator, setOperator] = useState<OperatorLiveStatus | null>(null);
-    const [operators, setOperators] = useState<FeedMonitoringOperator[]>([]);
+    const [operators, setOperators] = useState<FeedMonitoringOperatorData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {

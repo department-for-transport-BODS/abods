@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const SummaryStat = ({ title, value, tooltip }: { title: string, value: string | number, tooltip?: string }) => {
+export const SummaryStatWithTooltip = ({ title, value, tooltip }: { title: string, value: string | number, tooltip?: string }) => {
     const [visible, setVisible] = useState(false);
 
     return (

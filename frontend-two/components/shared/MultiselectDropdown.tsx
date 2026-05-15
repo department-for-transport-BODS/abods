@@ -31,7 +31,7 @@ export const MultiselectDropdown = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [open]);
 
-    const toggleOption = (option: string) => {
+    const toggleSelectedOption = (option: string) => {
         if (!multiSelect) {
             onChange([option]);
             setOpen(false);
@@ -102,7 +102,7 @@ export const MultiselectDropdown = ({
                                         className="govuk-checkboxes__input"
                                         type="checkbox"
                                         checked={selected.includes(option)}
-                                        onChange={() => toggleOption(option)}
+                                        onChange={() => toggleSelectedOption(option)}
                                         id={`checkbox-${option}`}
                                     />
                                     <label
@@ -124,7 +124,7 @@ export const MultiselectDropdown = ({
                                             ? " multiselect-dropdown__single-item--selected"
                                             : ""
                                     }`}
-                                    onClick={() => toggleOption(option)}
+                                    onClick={() => toggleSelectedOption(option)}
                                 >
                                     {option}
                                 </li>

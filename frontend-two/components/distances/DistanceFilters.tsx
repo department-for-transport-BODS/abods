@@ -42,6 +42,8 @@ export const DistanceFilters = ({
                         placeholderText={isLoading ? "Loading..." : "All organisations"}
                     />
                 </div>
+            </div>
+            <div className="distance-grid__filters">
                 <div className="distance-grid__filter">
                     <MultiselectDropdown
                         label="Operators"

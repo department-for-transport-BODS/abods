@@ -3,7 +3,7 @@ import { BaseLayout } from "../components/layout/BaseLayout";
 import { DistanceFilters} from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
 import { distanceService } from "@/services/distances/distance.services";
-import { AdminOrgMap, DistanceData, UserOrg, DistancesDropdowns } from "@/types/distances";
+import { AdminOrgMap, DistanceData, DistancesDropdowns } from "@/types/distances";
 import dynamic from "next/dist/shared/lib/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
@@ -23,7 +23,6 @@ const DistancesPage = () => {
   // Dropdown options from data API calls
   const [dropdownInputsData, setDropdownInputsData] = useState<DistancesDropdowns>({ operators: [] });
   const [adminOrgData, setAdminOrgData] = useState<AdminOrgMap[]>([]);
-  const [userOrgData, setUserOrgData] = useState<UserOrg[]>([]);
 
   // Selected dropdown options 
   const [selectedAdminAreas, setSelectedAdminAreas] = useState<string[]>([]);
@@ -50,7 +49,6 @@ const DistancesPage = () => {
     if (!config?.apiUrl) {
       setDropdownInputsData({ operators: [] });
       setAdminOrgData([]);
-      setUserOrgData([]);
       setIsLoading(false);
       console.error("API URL is not configured");
       return;
@@ -61,7 +59,6 @@ const DistancesPage = () => {
       // Note that the query for fetchDropdownInputs only returns operators, licenses and services
       setDropdownInputsData(await distanceService.fetchDropdownInputs(config.apiUrl));
       setAdminOrgData(await distanceService.fetchAdminOrg(config.apiUrl));
-      setUserOrgData(await distanceService.fetchUserOrganisations(config.apiUrl));
       setIsLoading(false);
     };
 
@@ -139,6 +136,7 @@ const DistancesPage = () => {
     .filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
     .map((operator) => operator.id);
 
+    // TODO:NOW Don't filter data by org, but only filter dropdown operator options by org? 
     const orgId = adminOrgData
       .find((org) => selectedOrgs.includes(org.orgName))
       ?.orgId.toString();
@@ -154,6 +152,7 @@ const DistancesPage = () => {
       .map((service) => service.id);
 
     // Fetch data for table based on filter selections
+    // TODO:NOW Check how we want to present 0 values within the table?
     const data = await distanceService.fetchDistances(
       config.apiUrl, 
       {

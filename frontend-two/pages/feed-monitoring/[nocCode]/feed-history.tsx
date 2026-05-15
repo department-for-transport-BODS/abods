@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperator } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
@@ -16,7 +16,7 @@ const FeedHistoryPage = () => {
     const formattedDate = date ? new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
 
     const { config } = useConfig();
-    const [operators, setOperators] = useState<FeedMonitoringOperator[]>([]);
+    const [operators, setOperators] = useState<FeedMonitoringOperatorData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {

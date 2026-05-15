@@ -1,7 +1,6 @@
 export const FeedStatusSummaryStat = ({ title, value }: { title: string, value: string | number }) => {
     const active = value === "Active";
     
-    // TODO:NOW: Move inline styling into CSS file.
     return (
         <div className="bg-white flex flex-col" style={{ borderTop: "2px solid #cecece" }}>
             <span className="govuk-body mt-4" style={{ color: "#484949" }}>{title}</span>

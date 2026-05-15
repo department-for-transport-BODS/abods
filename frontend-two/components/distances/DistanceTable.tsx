@@ -12,8 +12,8 @@ type SortOrder = "asc" | "desc" | "none";
 
 const PAGE_SIZE = 10;
 
-function getRowValue(row: DistanceData, key: string): string | number {
-    switch (key) {
+function getRowValue(row: DistanceData, column: string): string | number {
+    switch (column) {
         case "operatorName": return row.operatorName ?? "";
         case "nocLineAndServiceCode": return row.nocLineAndServiceCode?.split("-").pop() ?? "";
         case "lineName": return row.lineName ?? "";
@@ -28,7 +28,7 @@ function getRowValue(row: DistanceData, key: string): string | number {
 
 export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
     const [currentPage, setCurrentPage] = useState(0);
-    const [sortKey, setSortKey] = useState<string | null>(null);
+    const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
     const columnHeaders = [
@@ -47,18 +47,18 @@ export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
 
     // Sort the full dataset before paging
     const sortedData = useMemo(() => {
-        if (!sortKey || sortOrder === "none") return data;
+        if (!sortColumn || sortOrder === "none") return data;
         return [...data].sort((a, b) => {
-            const aVal = getRowValue(a, sortKey);
-            const bVal = getRowValue(b, sortKey);
+            const aVal = getRowValue(a, sortColumn);
+            const bVal = getRowValue(b, sortColumn);
             if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
             if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
             return 0;
         });
-    }, [data, sortKey, sortOrder]);
+    }, [data, sortColumn, sortOrder]);
 
-    const handleTableSorting = (key: string, order: SortOrder) => {
-        setSortKey(key);
+    const handleTableSorting = (column: string, order: SortOrder) => {
+        setSortColumn(column);
         setSortOrder(order);
         setCurrentPage(0);
     };

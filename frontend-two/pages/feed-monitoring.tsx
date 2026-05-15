@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { FeedSummaryGrid } from "@/components/feed-monitoring/FeedSummaryGrid";
+import { FeedTable } from "@/components/feed-monitoring/FeedTable";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
@@ -65,8 +65,8 @@ const FeedMonitoringPage = () => {
           
         ) : (
           <>
-            <FeedSummaryGrid title="Inactive feeds" active={false} data={inactiveOperators} />
-            <FeedSummaryGrid title="Active feeds" active={true} data={activeOperators} />
+            <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} />
+            <FeedTable title="Active feeds" active={true} data={activeOperators} />
           </>
         )}
       </div>

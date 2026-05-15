@@ -16,8 +16,8 @@ type SortOrder = "asc" | "desc" | "none";
 
 const PAGE_SIZE = 10;
 
-function getRowValue(data: FeedMonitoringOperatorData, key: string): string | number {
-    switch (key) {
+function getRowValue(data: FeedMonitoringOperatorData, column: string): string | number {
+    switch (column) {
         case "nocCode": return data.nocCode;
         case "name": return data.name;
         case "availability": return data.feedMonitoring?.availability ?? -1;
@@ -28,34 +28,34 @@ function getRowValue(data: FeedMonitoringOperatorData, key: string): string | nu
     }
 }
 
+// Translate ISO date string to relative time (e.g. "2 hours ago")
 function translateToRelativeTime(date: string): string {
     if (!date) return "-";
     const relative = DateTime.fromISO(date, { zone: "utc" }).toRelative();
     return relative ?? "-";
 }
 
-export const FeedTable = ({ active, data }: { active: boolean, data: FeedMonitoringOperatorData[] }) => {
+export const FeedTable = ({ title, active, data }: { title: string, active: boolean, data: FeedMonitoringOperatorData[] }) => {
     const [currentPage, setCurrentPage] = useState(0);
-    const [sortKey, setSortKey] = useState<string | null>(null);
+    const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
     const sortedData = useMemo(() => {
-        if (!sortKey || sortOrder === "none") return data;
+        if (!sortColumn || sortOrder === "none") return data;
         return [...data].sort((a, b) => {
-            const aVal = getRowValue(a, sortKey);
-            const bVal = getRowValue(b, sortKey);
+            const aVal = getRowValue(a, sortColumn);
+            const bVal = getRowValue(b, sortColumn);
             if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
             if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
             return 0;
         });
-    }, [data, sortKey, sortOrder]);
+    }, [data, sortColumn, sortOrder]);
 
     const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
     const pageData = sortedData.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
-    // TODO:NOW Change the name of this function
-    const handleSort = (key: string, order: SortOrder) => {
-        setSortKey(key);
+    const handleTableSorting = (column: string, order: SortOrder) => {
+        setSortColumn(column);
         setSortOrder(order);
         setCurrentPage(0);
     };
@@ -70,8 +70,6 @@ export const FeedTable = ({ active, data }: { active: boolean, data: FeedMonitor
         // { key: "graph", label: "", sortable: false }
     ];
 
-    // TODO:NOW Review some the variable names so that the code is more readable 
-    // TODO:NOW Add the inline styling to the scss file and use class names
     const rows = pageData.map((op) => ({
         icon: active 
             ? <img src="/assets/icons/check-in-circle-solid.svg" 
@@ -93,7 +91,8 @@ export const FeedTable = ({ active, data }: { active: boolean, data: FeedMonitor
 
      return (
         <>
-            <SortableTable head={columnHeaders} rows={rows} onSort={handleSort}></SortableTable>
+            <h2 className="govuk-heading-m">{title}</h2>
+            <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>
             <div className="flex justify-end">
                 <div className="w-2/5">
                     <PagingPanel
