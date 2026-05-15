@@ -1,0 +1,13 @@
+{
+  "apiUrl": "http://localhost:3000",
+  "bodsBaseUrl": "https://data.bus-data.dft.gov.uk",
+  "envName": "local",
+  "analyticsId": "",
+  "mapboxToken": "",
+  "mapboxStyle": "mapbox://styles/mapbox/streets-v11",
+  "mapboxSatelliteStyle": "mapbox://styles/mapbox/satellite-v9",
+  "vehicleJourneys": true,
+  "otp": false,
+  "defaultCookiePolicy": false,
+  "freshdesk": false
+}

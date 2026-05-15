@@ -15,6 +15,7 @@ provider:
       allowedHeaders:
         - Content-Type
         - Authorization
+        - apollo-require-preflight
 functions:
   graphql:
     handler: src/index.default

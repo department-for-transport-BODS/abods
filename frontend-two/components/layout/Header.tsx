@@ -29,7 +29,7 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
         rebrand
       />
       {showAuthControls ? (
-        <div className="header__help-overlay govuk-width-container">
+        <div className="header__help-overlay">
           <button
             className="govuk-header__link unbuttoned govuk__link header__help-link"
             type="button"
