@@ -12,6 +12,7 @@ export const graphqlRequest = async <T>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "apollo-require-preflight": "true",
     },
     credentials: "include",
     body: JSON.stringify({ query, variables }),

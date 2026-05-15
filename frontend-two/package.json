@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4200",
     "build": "next build",
     "export": "next build && next export",
-    "start": "next start",
+    "start": "next start -p 4200",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
@@ -14,6 +14,7 @@
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.40",
     "ag-grid-community": "^31.3.2",
+    "amazon-quicksight-embedding-sdk": "^2.11.3",
     "axios": "^1.7.7",
     "govuk-frontend": "^5.11.0",
     "kainossoftwareltd-govuk-react-kainos": "*",

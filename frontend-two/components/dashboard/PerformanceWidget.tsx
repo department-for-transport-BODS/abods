@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
 import { DateTime } from "luxon";
 import { useConfig } from "@/contexts/ConfigContext";
@@ -12,7 +13,11 @@ import {
 } from "@/types/dashboard";
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
-import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
+
+const PerformanceChart = dynamic(
+  () => import("@/components/dashboard/PerformanceChart"),
+  { ssr: false },
+);
 
 interface PerformanceWidgetProps {
   filters: PerformanceFiltersInputType;

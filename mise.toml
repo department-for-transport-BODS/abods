@@ -1,9 +1,9 @@
 [tools]
 awscli = "latest"
-granted = "latest"
 usage = "latest"
 jq = "latest"
 serverless = "3.39.0"
+node = "20.19.0"
 
 [env]
 REGION = "eu-west-2"
@@ -17,28 +17,28 @@ legacy_version_file = true
 alias="setup"
 description = "Setup task for the API"
 dir = "abods-api"
-run = "assume --exec -- ./setup.sh"
+run = "./setup.sh"
 
 [tasks."db:sandbox"]
 alias="db"
 description = "Run a proxy to the sandbox DB using AWS SSM"
 dir = "scripts"
-run = "assume --exec -- ./db_connect.sh sandbox"
+run = "./db_connect.sh sandbox"
 
 [tasks."db:dev"]
 description = "Run a proxy to the dev DB using AWS SSM"
 dir = "scripts"
-run = "assume --exec -- ./db_connect.sh dev"
+run = "./db_connect.sh dev"
 
 [tasks."db:test"]
 description = "Run a proxy to the test DB using AWS SSM"
 dir = "scripts"
-run = "assume --exec -- ./db_connect.sh test"
+run = "./db_connect.sh test"
 
 [tasks."db:uat"]
 description = "Run a proxy to the UAT DB using AWS SSM"
 dir = "scripts"
-run = "assume --exec -- ./db_connect.sh uat"
+run = "./db_connect.sh uat"
 
 [tasks.app]
 depends = ["build:frontend"]
@@ -79,4 +79,8 @@ depends = ["build:frontend", "build:backend"]
 
 [tasks.start]
 description = "Run db proxy, api, and frontend"
-run = "assume --exec -- npm start"
+run = "npm start"
+
+[tasks.start-next]
+description = "Run db proxy, api, and nextjs frontend (v2)"
+run = "npm run start-next"

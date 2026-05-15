@@ -454,14 +454,14 @@ $day-width: 46px;
 
   &__width {
     &--10 {
-      max-width: calc(23ex - 8ex);
-      @media (max-width: 640px) {
+      max-width: calc(11.5em - 8ex);
+      @media (max-width: 19.99em) {
         max-width: 100%;
       }
     }
     &--20 {
-      max-width: calc(41ex - 8ex);
-      @media (max-width: 640px) {
+      max-width: calc(20.5em - 8ex);
+      @media (max-width: 19.99em) {
         max-width: 100%;
       }
     }
@@ -472,9 +472,14 @@ $day-width: 46px;
     text-decoration: underline;
     cursor: pointer;
     background-color: govuk-colour("white");
-    width: 8ex;
-    border: 0;
-    padding: 0;
+    min-width: 8ex;
+    padding: 0 govuk-spacing(2);
+    border: 2px solid govuk-colour("black");
+    border-left: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 
     &:hover {
       color: $govuk-link-hover-colour;
@@ -487,7 +492,7 @@ $day-width: 46px;
       color: $govuk-focus-text-colour;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 19.99em) {
       width: 100%;
     }
   }
@@ -512,6 +517,9 @@ $day-width: 46px;
     flex-grow: 1;
     align-items: stretch;
     position: relative;
+    max-width: $max-width;
+    margin-right: $window-padding-small-screen;
+    margin-left: $window-padding-small-screen;
   }
 
   &__content {
@@ -540,6 +548,17 @@ $day-width: 46px;
 
 @include bp($tablet) {
   .app {
+    &__body {
+      margin-right: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+      );
+      margin-left: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+      );
+    }
+
     &__content {
       padding-left: govuk-spacing(8);
       padding-right: govuk-spacing(8);
@@ -548,6 +567,25 @@ $day-width: 46px;
     &__content:has(> .app-page) {
       padding-left: 0;
       padding-right: 0;
+    }
+  }
+}
+
+@include bp($desktop) {
+  .app {
+    &__body {
+      margin-right: $window-padding-large-screen;
+      margin-left: $window-padding-large-screen;
+    }
+  }
+}
+
+@include bp($max-desktop) {
+  .app {
+    &__body {
+      width: 100%;
+      margin-right: auto;
+      margin-left: auto;
     }
   }
 }
@@ -628,6 +666,10 @@ $day-width: 46px;
     display: inline-flex;
     align-items: center;
 
+    @include bp($to-desktop) {
+      display: none;
+    }
+
     &:link,
     &:visited,
     &:hover {
@@ -648,9 +690,46 @@ $day-width: 46px;
     align-items: center;
     justify-content: flex-end;
     pointer-events: none;
+    max-width: $max-width;
+    margin-right: $window-padding-small-screen;
+    margin-left: $window-padding-small-screen;
 
     .header__help-link {
       pointer-events: auto;
+    }
+  }
+}
+
+@include bp($tablet) {
+  .header {
+    &__help-overlay {
+      margin-right: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+      );
+      margin-left: max(
+        #{$window-padding-large-screen},
+        calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+      );
+    }
+  }
+}
+
+@include bp($desktop) {
+  .header {
+    &__help-overlay {
+      margin-right: $window-padding-large-screen;
+      margin-left: $window-padding-large-screen;
+    }
+  }
+}
+
+@include bp($max-desktop) {
+  .header {
+    &__help-overlay {
+      width: 100%;
+      margin-right: auto;
+      margin-left: auto;
     }
   }
 }
@@ -824,8 +903,19 @@ $day-width: 46px;
   }
 }
 
+@include bp($to-tablet) {
+  .performance {
+    &__footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: govuk-spacing(3);
+    }
+  }
+}
+
 .performance-chart {
   min-height: rem(300);
+  height: rem(300);
 
   &--fallback {
     display: flex;
@@ -924,6 +1014,24 @@ $day-width: 46px;
     }
   }
 
+  &__service {
+    min-width: 0;
+
+    .govuk-link {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  &__operator {
+    color: $govuk-secondary-text-colour;
+  }
+
+  &__stat,
+  &__trend {
+    white-space: nowrap;
+  }
+
   &__link {
     text-decoration: none;
   }
@@ -941,6 +1049,20 @@ $day-width: 46px;
 
   &__loading {
     position: relative;
+  }
+}
+
+@include bp($to-tablet) {
+  .ranking-table {
+    &__data {
+      td {
+        padding-right: govuk-spacing(2);
+      }
+    }
+
+    &__operator {
+      display: none;
+    }
   }
 }
 
@@ -1338,22 +1460,19 @@ $day-width: 46px;
 .nav {
   display: flex;
   flex-direction: column;
-  align-self: flex-start;
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
-  max-height: 100vh;
-  overflow-y: auto;
+  justify-content: space-between;
+  height: 100%;
   border-right: 1px solid $govuk-border-colour;
-  width: 220px;
-  box-sizing: border-box;
-  padding: 0 16px 16px 16px;
-  margin-left: 16px;
+  width: 200px;
+  box-sizing: content-box;
+  padding-right: govuk-spacing(4);
   margin-right: govuk-spacing(6);
   background-color: govuk-colour("white");
+  z-index: $z-menu;
 
   &__block {
-    flex: 1 1 auto;
+    position: sticky;
+    top: 0;
     padding-top: govuk-spacing(7);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -1402,8 +1521,7 @@ $day-width: 46px;
   &__menu-bottom {
     position: sticky;
     bottom: 0;
-    margin-top: auto;
-    padding-top: 16px;
+    padding-bottom: govuk-spacing(2);
     background-color: govuk-colour("white");
 
     &__action-item {
@@ -1431,6 +1549,9 @@ $day-width: 46px;
 }
 
 .user-account {
+  margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
+
   &__invite-button {
     display: inline-flex;
     width: 100%;
@@ -1439,14 +1560,19 @@ $day-width: 46px;
     align-items: center;
     margin-bottom: 8px;
 
+    span {
+      margin-left: govuk-spacing(2);
+    }
+
     div {
       display: inline-flex;
+      width: 20px;
+      height: 20px;
 
       svg {
         color: $govuk-link-colour;
-        width: 20px;
-        height: 20px;
-        margin-right: govuk-spacing(2);
+        width: 15px;
+        height: 15px;
       }
     }
 
@@ -1545,26 +1671,71 @@ $day-width: 46px;
   }
 }
 
+@include bp($to-tablet) {
+  .nav {
+    padding-left: $window-padding-small-screen;
+
+    &--open {
+      left: $window-padding-small-screen * -1;
+    }
+  }
+}
+
+@include bp($tablet-only) {
+  .nav {
+    padding-left: $window-padding-large-screen;
+
+    &--open {
+      left: $window-padding-large-screen * -1;
+    }
+  }
+}
+
 @include bp($to-desktop) {
   .nav {
     display: none;
     position: absolute;
     top: 0;
-    left: 0;
     bottom: 0;
-    z-index: $z-menu;
-    min-height: 100%;
-    max-height: none;
-    width: 220px;
-    margin-left: 0;
-    margin-right: 0;
-    padding: govuk-spacing(4) 16px;
-    border-right: 1px solid $govuk-border-colour;
-    border-bottom: 0;
-    background-color: govuk-colour("white");
 
     &--open {
       display: flex;
+    }
+
+    &__menu-bottom {
+      margin-top: 0;
+    }
+  }
+
+  .nav--open {
+    .nav__block {
+      padding-bottom: 140px;
+    }
+
+    .nav__menu-bottom {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 200px;
+      padding: govuk-spacing(2) 16px govuk-spacing(4) 16px;
+      background-color: govuk-colour("white");
+      z-index: $z-menu;
+    }
+  }
+}
+
+@include bp($desktop) {
+  .nav {
+    min-height: calc(100vh - #{govuk-spacing(7)});
+    max-height: calc(100vh - #{govuk-spacing(7)});
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - #{govuk-spacing(7)});
+      max-height: calc(100dvh - #{govuk-spacing(7)});
+    }
+
+    &__menu-bottom {
+      margin-top: auto;
     }
   }
 }
@@ -1572,12 +1743,14 @@ $day-width: 46px;
 // Menu toggle button shown in the header on smaller screens (mirrors the
 // legacy `app-nav-toggle` component).
 .nav-toggle {
+  @include govuk-font(19);
   display: none;
   pointer-events: auto;
   background: none;
   border: 0;
   padding: 0;
   margin-left: govuk-spacing(3);
+  margin-bottom: govuk-spacing(2);
   font-family: inherit;
   cursor: pointer;
 
