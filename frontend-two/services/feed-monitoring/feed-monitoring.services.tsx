@@ -10,7 +10,7 @@ import {
 } from "@/services/feed-monitoring/feed-monitoring.operations";
 
 import {
-    FeedMonitoringOperator,
+    FeedMonitoringOperatorData,
     VehicleStat,
     OperatorLiveStatus,
     OperatorFeedHistory,
@@ -19,12 +19,10 @@ import {
 } from "@/types/feed-monitoring";
 
 export const feedMonitoringService = {
-  fetchFeedMonitoringList: async (
-    apiUrl: string,
-  ): Promise<FeedMonitoringOperator[]> => {
+  fetchFeedMonitoringList: async ( apiUrl: string ): Promise<FeedMonitoringOperatorData[]> => {
     try {
       const result = await graphqlRequest<{
-        operatorsFeedMonitoring: FeedMonitoringOperator[];
+        operatorsFeedMonitoring: FeedMonitoringOperatorData[];
       }>(apiUrl, FEED_MONITORING_LIST_QUERY);
       return result.operatorsFeedMonitoring ?? [];
     } catch (error) {
@@ -33,10 +31,7 @@ export const feedMonitoringService = {
     }
   },
 
-  fetchOperatorSparklines: async (
-    apiUrl: string,
-    operatorIds: string[],
-  ): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
+  fetchOperatorSparklines: async ( apiUrl: string, operatorIds: string[] ): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
     try {
       const result = await graphqlRequest<{
         operatorsFeedMonitoring: {
@@ -56,10 +51,7 @@ export const feedMonitoringService = {
     }
   },
 
-  fetchOperatorLiveStatus: async (
-    apiUrl: string,
-    operatorId: string,
-  ): Promise<OperatorLiveStatus | null> => {
+  fetchOperatorLiveStatus: async ( apiUrl: string, operatorId: string ): Promise<OperatorLiveStatus | null> => {
     try {
       const result = await graphqlRequest<{
         operatorFeedMonitoring: OperatorLiveStatus | null;
