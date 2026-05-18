@@ -74,16 +74,17 @@ export const OPERATOR_HISTORIC_STATS_QUERY = `
       nocCode
       operatorId
       feedMonitoring {
-          historicalStats(date: $date) {
-              updateFrequency
-              availability
-          }
-          vehicleStats(granularity: minute, start: $start, end: $end) {
-              actual
-              expected
-              timestamp
-          }
+        historicalStats(date: $date) {
+          updateFrequency
+          availability
+        }
+        vehicleStats(granularity: minute, start: $start, end: $end) {
+          actual
+          expected
+          timestamp
+        }
       }
+    }
   }
 `;
 
