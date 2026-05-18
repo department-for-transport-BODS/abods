@@ -1,12 +1,19 @@
+import { useEffect } from "react";
 import Link from "next/link";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { CreateCorridorForm } from "@/components/corridors/create/CreateCorridorForm";
 
 const CorridorsCreatePage = () => {
   useRequireAuth();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("corridors", "Corridors");
+  }, [loadData]);
 
   return (
     <BaseLayout title="Create new corridor - Analyse Bus Open Data">

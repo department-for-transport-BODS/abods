@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { corridorsService } from "@/services/corridors/corridors.service";
 import { Corridor, CorridorStop } from "@/types/corridors";
@@ -28,6 +28,7 @@ export const CreateCorridorForm = ({
   mapboxStyle,
 }: Props) => {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const isEdit = mode === "edit" && !!initialCorridor;
 
   const [name, setName] = useState(initialCorridor?.name ?? "");
@@ -146,6 +147,7 @@ export const CreateCorridorForm = ({
     setCreating(false);
 
     if (success) {
+      void mutate(["corridors-list", apiUrl]);
       router.push("/corridors").catch(() => {
         /* noop */
       });
@@ -174,6 +176,7 @@ export const CreateCorridorForm = ({
     setUpdating(false);
 
     if (success) {
+      void mutate(["corridors-list", apiUrl]);
       if (window.history.length > 1) {
         router.back();
       } else {
@@ -202,6 +205,7 @@ export const CreateCorridorForm = ({
     setDeleting(false);
 
     if (success) {
+      void mutate(["corridors-list", apiUrl]);
       router.push("/corridors").catch(() => {
         /* noop */
       });

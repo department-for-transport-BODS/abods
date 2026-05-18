@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -7,6 +8,7 @@ import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { Stat } from "@/components/shared/Stat";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useCorridorHideOutliers } from "@/hooks/useCorridorHideOutliers";
 import { corridorsService } from "@/services/corridors/corridors.service";
 import { averageSpeedLabel } from "@/services/corridors/corridors-speed-metric";
@@ -58,8 +60,13 @@ const CorridorsViewPage = () => {
 
   const router = useRouter();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
   const { hideOutliers, setJourneyTime, setTimeOfDay, setDayOfWeek } =
     useCorridorHideOutliers();
+
+  useEffect(() => {
+    loadData("corridors", "Corridors");
+  }, [loadData]);
 
   const corridorId = parseCorridorId(router.query.corridorId);
 
