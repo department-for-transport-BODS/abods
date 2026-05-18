@@ -61,3 +61,8 @@ export interface EventStat {
   count: number;
   day: string;
 }
+
+export interface VehicleCountData {
+  operatorId: string; 
+  last24Hours: VehicleStat[] 
+}

@@ -31,6 +31,7 @@ export const OPERATOR_FEED_MONITORING_QUERY = `
           }
         }
       }
+    }
   }
 `;
 
