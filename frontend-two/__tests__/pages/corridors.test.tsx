@@ -25,6 +25,16 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/contexts/HelpdeskContext", () => ({
+  useHelpdesk: vi.fn().mockReturnValue({
+    isOpen: false,
+    data: null,
+    open: vi.fn(),
+    close: vi.fn(),
+    loadData: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 vi.mock("@/services/corridors/corridors.service", () => ({
   corridorsService: {
     fetchCorridors: vi.fn(),
