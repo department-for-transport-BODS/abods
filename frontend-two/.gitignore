@@ -36,4 +36,6 @@ yarn-error.log*
 next-env.d.ts
 
 # local config
+# Environment config
+# local config
 /public/config.json
