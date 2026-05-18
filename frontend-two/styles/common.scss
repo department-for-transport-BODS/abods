@@ -320,6 +320,162 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   min-width: 500px;
 }
 
+// DateNavigationDayBlocks styling
+.datenav__day-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5px, 1fr));
+  justify-content: space-between;
+  padding: govuk-spacing(1) 8px;
+  grid-gap: 3px;
+  position: relative;
+  margin-bottom: 25px;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 1px solid $govuk-border-colour;
+    z-index: -1;
+  }
+
+  &--with-labels {
+    margin-bottom: 0;
+
+    &::after {
+      bottom: 25px;
+    }
+  }
+}
+
+.datenav__item-wrapper {
+  display: block;
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.datenav__item {
+  display: block;
+  height: 32px;
+  width: 100%;
+  background-color: #f3f2f1;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease-in-out;
+  position: relative;
+
+  &--heat-1 { background-color: #ffd8ca; }
+  &--heat-2 { background-color: #fbbaa4; }
+  &--heat-3 { background-color: #f49c7f; }
+  &--heat-4 { background-color: #ec7d5d; }
+  &--heat-5 { background-color: #e15c3c; }
+  &--heat-6 { background-color: #d4351c; }
+
+  &--active {
+    transform: scale(1.05, 1.4);
+    position: relative;
+    border-radius: 1px;
+    box-shadow:
+      0 0 0 1.5px $govuk-input-border-colour,
+      0 0 0 4px $govuk-focus-colour;
+    z-index: 1;
+  }
+
+  &:hover {
+    z-index: 1;
+    position: relative;
+  }
+
+  &:focus:not(.datenav__item--active) {
+    outline: none;
+    box-shadow: 0 0 0 3px $govuk-focus-colour;
+  }
+}
+
+.datenav__tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0b0c0c;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: "GDS Transport", arial, sans-serif;
+  white-space: nowrap;
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 10;
+
+  // Arrow
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #0b0c0c;
+  }
+}
+
+.datenav__item:hover .datenav__tooltip,
+.datenav__item:focus .datenav__tooltip {
+  display: block;
+}
+
+.datenav__month-label {
+  color: $govuk-secondary-text-colour;
+  font-size: 13px;
+  line-height: 1.538;
+  transform: translateX(-50%);
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+}
+
+// FeedTable styling 
+.feed-table__check{
+  min-width: 24px;
+  min-height: 24px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+}
+
+.feed-table__cross{
+  min-width: 24px;
+  min-height: 24px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+}
+
+// FeedStatusSummary styling
+.feed-status-summary__check {
+  width: 36px;
+  height: 36px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+}
+
+.feed-status-summary__cross {
+  width: 36px;
+  height: 36px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+}
+// Live Status Feed Monitoring page
+.live-vehicle-stats__container {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 8px;
+  justify-content: space-between;
+} 
+
+.live-vehicle-stats__item{
+  flex: 1;
+  min-width: 500px;
+}
+
 // Sparkline styling
 .sparkline-wrapper {
   background-color: $govuk-template-background-colour;
