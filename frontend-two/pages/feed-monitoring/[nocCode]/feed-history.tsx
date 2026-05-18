@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperatorData, EventStat } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData, EventStat, OperatorFeedHistory } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
 import { DateNavigationHeatmapItem } from "@/types";
+
+const HistoricVehicleStats = dynamic(() => import("@/components/feed-monitoring/HistoricVehicleStats"), { ssr: false });
 
 // TODO:NOW Check imports are in consistent order across files
 
@@ -19,6 +22,15 @@ function buildHeatmap(stats: EventStat[]): DateNavigationHeatmapItem[] {
     date: DateTime.fromISO(day).startOf("day"),
     heat: count && max > 0 ? Math.ceil((count / max) * 6) : 0,
   }));
+}
+
+function formatAvailability(f?: number | null): string {
+  if (f === undefined || f === null) return "0.00%";
+  return `${(f * 100).toFixed(2)}%`;
+}
+
+function formatUpdateFrequency(f?: number | null): string {
+  return f ? `${f}s` : "-";
 }
 
 const FeedHistoryPage = () => {
@@ -41,6 +53,10 @@ const FeedHistoryPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [alertStats, setAlertStats] = useState<DateNavigationHeatmapItem[]>([]);
     const [statsLoading, setStatsLoading] = useState(false);
+    const [operatorHistory, setOperatorHistory] = useState<OperatorFeedHistory | null>(null);
+    const [historicalDataLoading, setHistoricalDataLoading] = useState(false);
+    const [chartErrored, setChartErrored] = useState(false);
+    const [noData, setNoData] = useState(false);
 
     useEffect(() => {
       if (!config?.apiUrl) {
@@ -68,6 +84,31 @@ const FeedHistoryPage = () => {
         });
     }, [config, nocCode]);
 
+    // Fetch historical operator stats for selected date
+    useEffect(() => {
+      if (!config?.apiUrl || !nocCode || !baseDate.isValid) return;
+      setHistoricalDataLoading(true);
+      setChartErrored(false);
+      setNoData(false);
+      const start = baseDate.startOf("day").toISO()!;
+      const end = baseDate.endOf("day").toISO()!;
+      feedMonitoringService
+        .fetchOperatorHistory(config.apiUrl, nocCode, baseDate.toISODate()!, start, end)
+        .then((result) => {
+          setHistoricalDataLoading(false);
+          if (!result) {
+            setChartErrored(true);
+          } else if ((result.feedMonitoring?.vehicleStats?.length ?? 0) === 0) {
+            setNoData(true);
+          }
+          setOperatorHistory(result);
+        })
+        .catch(() => {
+          setHistoricalDataLoading(false);
+          setChartErrored(true);
+        });
+    }, [config, nocCode, date]);
+
     if (isLoading) {
         return (
         <BaseLayout title="Dashboard - Analyse Bus Open Data">
@@ -77,6 +118,10 @@ const FeedHistoryPage = () => {
         </BaseLayout>
         );
     }
+
+    const vehicleStats = operatorHistory?.feedMonitoring?.vehicleStats ?? [];
+    const availability = operatorHistory?.feedMonitoring?.historicalStats?.availability;
+    const updateFrequency = operatorHistory?.feedMonitoring?.historicalStats?.updateFrequency;
   
     return (
         <BaseLayout title="Dashboard - Analyse Bus Open Data">
@@ -128,12 +173,41 @@ const FeedHistoryPage = () => {
                     }}
                 />
             )}
-            <div className="mt-8">
-            <Box children={undefined} />
+            <div className="mt-4">
+                {historicalDataLoading && (
+                    <Box minHeight="385px">
+                        <p className="govuk-body">Loading...</p>
+                    </Box>
+                )}
+                {!historicalDataLoading && chartErrored && (
+                    <Box minHeight="385px">
+                        <p className="govuk-body">There was an error loading the chart data, please try again.</p>
+                    </Box>
+                )}
+                {!historicalDataLoading && noData && (
+                    <Box minHeight="385px">
+                        <p className="govuk-body">No data found for the date selected.</p>
+                    </Box>
+                )}
+                {!historicalDataLoading && !chartErrored && !noData && vehicleStats.length > 0 && (
+                    <Box>
+                        <HistoricVehicleStats
+                            data={vehicleStats}
+                            date={baseDate}
+                        />
+                    </Box>
+                )}
             </div>
             <div className="grid grid-cols-4 gap-4 mt-6">
-                <SummaryStatWithTooltip title="Feed availability" value="-" tooltip="The percentage of the day the feed was active when vehicles were expected to be running" />
-                <SummaryStatWithTooltip title="Average update frequency" value="-" />
+                <SummaryStatWithTooltip
+                    title="Feed availability"
+                    value={historicalDataLoading ? "-" : formatAvailability(availability)}
+                    tooltip="The percentage of the day the feed was active when vehicles were expected to be running"
+                />
+                <SummaryStatWithTooltip
+                    title="Average update frequency"
+                    value={historicalDataLoading ? "-" : formatUpdateFrequency(updateFrequency)}
+                />
             </div>
         </div>
         </BaseLayout>

@@ -101,10 +101,11 @@ const LiveStatusPage = () => {
                     />
                 </div>
             </div>
-            <div className="govuk-inset-text">
-                {/* TODO:NOW Check the href for this component */}
-                If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are up to date <a href="https://www.bus-data.service.gov.uk/timetables" className="govuk-link">here</a>.
-            </div>
+            {operator?.feedMonitoring?.feedStatus === false && (
+                <div className="govuk-inset-text">
+                    If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are up to date <a href="https://www.bus-data.service.gov.uk/timetables" className="govuk-link">here</a>.
+                </div>
+            )}
             <div className="mt-8">
                 <Box>
                     <div className="live-vehicle-stats__container">

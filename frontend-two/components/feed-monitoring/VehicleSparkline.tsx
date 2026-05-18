@@ -51,7 +51,7 @@ export const VehicleSparkline = ({ data }: { data: VehicleStat[] }) => {
 
     chart.width = am4core.percent(100);
     chart.height = am4core.percent(100);
-    chart.background.fill = am4core.color("#f8f8f8"); // or your desired color
+    chart.background.fill = am4core.color("#f8f8f8");
     chart.padding(0, 0, 0, 0);
 
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());

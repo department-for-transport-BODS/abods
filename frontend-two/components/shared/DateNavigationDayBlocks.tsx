@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
-import { DateNavHeatmapItem } from "@/types";
+import { DateNavigationHeatmapItem } from "@/types";
 
-export const DateNavigationDayBlocks = ({ stats, date, onDateSelected }: {stats: DateNavHeatmapItem[]; date: DateTime; onDateSelected: (date: DateTime) => void;}) => {
+export const DateNavigationDayBlocks = ({ stats, date, onDateSelected }: {stats: DateNavigationHeatmapItem[]; date: DateTime; onDateSelected: (date: DateTime) => void;}) => {
   return (
     <div className="datenav__day-blocks datenav__day-blocks--with-labels">
       {stats.map((item) => {
@@ -17,7 +17,7 @@ export const DateNavigationDayBlocks = ({ stats, date, onDateSelected }: {stats:
               aria-label={item.date.toFormat("d MMMM")}
             >
               <span className="govuk-visually-hidden">{item.date.toFormat("d MMMM")}</span>
-              <span className="datenav__tooltip" aria-hidden="true">{item.date.toFormat("d MMM")}</span>
+              <span className="datenav__tooltip" aria-hidden="true">{item.date.toFormat("d MMMM")}</span>
             </button>
             {isFirstOfMonth && (
               <span className="datenav__month-label">{item.date.toFormat("MMM")}</span>
