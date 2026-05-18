@@ -77,10 +77,8 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: { title: st
         const sparklineStats = vehicleCountData.find(v => v.operatorId === op.operatorId)?.last24Hours ?? [];
         return {
             icon: active 
-                ? <img src="/assets/icons/check-in-circle-solid.svg" 
-                    style={{ minWidth: "24px", minHeight: "24px", filter: "invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%)" }} />
-                : <img src="/assets/icons/cross-in-circle-solid.svg" 
-                    style={{ minWidth: "24px", minHeight: "24px", filter: "invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%)" }} />,
+                ? <img src="/assets/icons/check-in-circle-solid.svg" className="feed-table__check" />
+                : <img src="/assets/icons/cross-in-circle-solid.svg" className="feed-table__cross" />,
             nocCode: op.nocCode,
             name: <a className="govuk-link font-bold" href={`/feed-monitoring/${op.nocCode}`}>{op.name}</a>,
             availability: op.feedMonitoring?.availability != null

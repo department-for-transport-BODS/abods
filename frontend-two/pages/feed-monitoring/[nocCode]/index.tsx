@@ -8,8 +8,10 @@ import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
+import dynamic from "next/dynamic";
+const LiveVehicleStats = dynamic(() => import("@/components/feed-monitoring/LiveVehicleStats"), { ssr: false });
 
-const NocFeedPage = () => {
+const LiveStatusPage = () => {
     const router = useRouter();
     const { nocCode } = router.query as { nocCode: string};
     const { config } = useConfig();
@@ -99,15 +101,42 @@ const NocFeedPage = () => {
                     />
                 </div>
             </div>
-            {/* TODO:NOW: Add graph */}
             <div className="govuk-inset-text">
+                {/* TODO:NOW Check the href for this component */}
                 If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are up to date <a href="https://www.bus-data.service.gov.uk/timetables" className="govuk-link">here</a>.
             </div>
             <div className="mt-8">
-                <Box children={undefined} />
+                <Box>
+                    <div className="live-vehicle-stats__container">
+                        <div className="live-vehicle-stats__item">
+                            <LiveVehicleStats
+                                data={operator?.feedMonitoring?.liveStats?.last24Hours ?? []}
+                                granularity="hour"
+                                label="Last 24 hours"
+                                xAxisMin={(() => {
+                                    const now = new Date();
+                                    return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                                })()}
+                                xAxisMax={new Date()}
+                            />
+                        </div>
+                        <div className="live-vehicle-stats__item mt-8">
+                            <LiveVehicleStats
+                                data={operator?.feedMonitoring?.liveStats?.last20Minutes ?? []}
+                                granularity="minute"
+                                label="Last 20 minutes"
+                                xAxisMin={(() => {
+                                    const now = new Date();
+                                    return new Date(now.getTime() - 20 * 60 * 1000);
+                                })()}
+                                xAxisMax={new Date()}
+                            />
+                        </div>
+                    </div>
+                </Box>
             </div>
         </div>
         </BaseLayout>
     );
 }
-export default NocFeedPage;
+export default LiveStatusPage;
