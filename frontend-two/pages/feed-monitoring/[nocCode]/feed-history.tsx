@@ -6,7 +6,7 @@ import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitorin
 import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
-import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
+import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 
 // TODO:NOW Check imports are in consistent order across files
 

@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 
-// TODO:NOW Data type for operators might need to change in future
 export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { operators: FeedMonitoringOperatorData[], currentNocCode: string, pageLink: string }) => {
     const router = useRouter();
     const [openDropdown, setOpenDropdown] = useState(false);

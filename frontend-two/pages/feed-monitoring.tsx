@@ -3,11 +3,12 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { FeedTable } from "@/components/feed-monitoring/FeedTable";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData, VehicleCountData } from "@/types/feed-monitoring";
 
 const FeedMonitoringPage = () => {
   const { config } = useConfig();
   const [operatorData, setOperatorData] = useState<FeedMonitoringOperatorData[]>([]);
+  const [vehicleCountData, setVehicleCountData] = useState<VehicleCountData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [operatorSearch, setOperatorSearch] = useState("");
 
@@ -21,13 +22,16 @@ const FeedMonitoringPage = () => {
     const load = async () => {
       setIsLoading(true);
       const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
+      const vehicleData = await feedMonitoringService.fetchOperatorSparklines(config.apiUrl, data.map(d => d.operatorId));
+      console.log("Fetched vehicle data:", vehicleData);
       setOperatorData(data);
+      setVehicleCountData(vehicleData);
       setIsLoading(false);
     };
-
     load();
   }, [config]);
 
+  console.log("vehicleCountData before load:", vehicleCountData);
   // Check if operator search has been used and filter data here
   // Can search either by operator name or NOC code
   const filteredOperators = useMemo(() => {
@@ -65,8 +69,8 @@ const FeedMonitoringPage = () => {
           
         ) : (
           <>
-            <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} />
-            <FeedTable title="Active feeds" active={true} data={activeOperators} />
+            <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} vehicleCountData={vehicleCountData} />
+            <FeedTable title="Active feeds" active={true} data={activeOperators} vehicleCountData={vehicleCountData} />
           </>
         )}
       </div>

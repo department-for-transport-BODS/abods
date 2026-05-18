@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
 import { PagingPanel } from "../shared/PagingPanel";
-import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData, VehicleCountData } from "@/types/feed-monitoring";
 import { DateTime } from "luxon";
 import dynamic from "next/dynamic";
-import { Box } from "../shared/Box";
-
-// TODO:NOW Figure out how to add graph in table and what the graph is 
 
 const SortableTable = dynamic(
     () => import("kainossoftwareltd-govuk-react-kainos").then(mod => mod.SortableTable),
+    { ssr: false }
+);
+
+const VehicleSparkline = dynamic(
+    () => import("./VehicleSparkline").then(mod => mod.VehicleSparkline),
     { ssr: false }
 );
 
@@ -35,7 +37,7 @@ function translateToRelativeTime(date: string): string {
     return relative ?? "-";
 }
 
-export const FeedTable = ({ title, active, data }: { title: string, active: boolean, data: FeedMonitoringOperatorData[] }) => {
+export const FeedTable = ({ title, active, data, vehicleCountData }: { title: string, active: boolean, data: FeedMonitoringOperatorData[], vehicleCountData: VehicleCountData[] }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");
@@ -67,29 +69,32 @@ export const FeedTable = ({ title, active, data }: { title: string, active: bool
         { key: "availability", label: "Feed availability", sortable: true },
         { key: "updateFrequency", label: "Update frequency", sortable: true },
         { key: active ? "lastOutage" : "unavailableSince", label: active ? "Last outage" : "Unavailable since", sortable: true },
-        // { key: "graph", label: "", sortable: false }
+        // TODO:NOW Do we want to add a column name for the graph - Not very clear what the data is
+        { key: "vehicleCount", label: "Actual vehicle counts within the last 24 hours", sortable: false }
     ];
 
-    const rows = pageData.map((op) => ({
-        icon: active 
-            ? <img src="/assets/icons/check-in-circle-solid.svg" 
-                style={{ width: "24px", height: "24px", filter: "invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%)" }} />
-            : <img src="/assets/icons/cross-in-circle-solid.svg" 
-                style={{ width: "24px", height: "24px", filter: "invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%)" }} />,
-        nocCode: op.nocCode,
-        name: <a className="govuk-link font-bold" href={`/feed-monitoring/${op.nocCode}`}>{op.name}</a>,
-        availability: op.feedMonitoring?.availability != null
-            ? `${(op.feedMonitoring.availability * 100).toFixed(1)}%`
-            : "-",
-        updateFrequency: op.feedMonitoring?.liveStats?.updateFrequency
-            ? `${op.feedMonitoring.liveStats.updateFrequency}s`
-            : "-",
-        lastOutage: <span> {translateToRelativeTime(op.feedMonitoring?.lastOutage ?? "")} </span>,
-        unavailableSince: <span style={{ color: "#d9221a", fontWeight: "bold" }}> {translateToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>,
-        graph: <Box children={undefined} />
-    }));
-
-     return (
+    const rows = pageData.map((op) => {
+        const sparklineStats = vehicleCountData.find(v => v.operatorId === op.operatorId)?.last24Hours ?? [];
+        return {
+            icon: active 
+                ? <img src="/assets/icons/check-in-circle-solid.svg" 
+                    style={{ minWidth: "24px", minHeight: "24px", filter: "invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%)" }} />
+                : <img src="/assets/icons/cross-in-circle-solid.svg" 
+                    style={{ minWidth: "24px", minHeight: "24px", filter: "invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%)" }} />,
+            nocCode: op.nocCode,
+            name: <a className="govuk-link font-bold" href={`/feed-monitoring/${op.nocCode}`}>{op.name}</a>,
+            availability: op.feedMonitoring?.availability != null
+                ? `${(op.feedMonitoring.availability * 100).toFixed(1)}%`
+                : "-",
+            updateFrequency: op.feedMonitoring?.liveStats?.updateFrequency
+                ? `${op.feedMonitoring.liveStats.updateFrequency}s`
+                : "-",
+            lastOutage: <span> {translateToRelativeTime(op.feedMonitoring?.lastOutage ?? "")} </span>,
+            unavailableSince: <span style={{ color: "#d9221a", fontWeight: "bold" }}> {translateToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>,
+            vehicleCount: <VehicleSparkline data={sparklineStats}/>
+        };
+    });
+    return (
         <>
             <h2 className="govuk-heading-m">{title}</h2>
             <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>

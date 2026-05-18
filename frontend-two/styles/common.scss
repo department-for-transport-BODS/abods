@@ -1,6 +1,16 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// TODO:NOW: Is there a way to seperate out style sheets for components
+
+// Sparkline styling
+.sparkline-wrapper {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
 // DateRangeSelect styling
 .date-range-select {
   position: relative;
@@ -437,6 +447,10 @@ $day-width: 46px;
 
 .kns-table .sortable-header svg {
   flex-shrink: 0;
+}
+
+.govuk-table__header{
+  font-size: 17px;
 }
 
 // Password input component styles

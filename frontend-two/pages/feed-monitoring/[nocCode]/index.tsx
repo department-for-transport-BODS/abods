@@ -7,7 +7,7 @@ import { FeedMonitoringOperatorData, OperatorLiveStatus } from "@/types/feed-mon
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
-import { OperatorDropdown } from "@/components/shared/OperatorDropdown";
+import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 
 const NocFeedPage = () => {
     const router = useRouter();
@@ -67,12 +67,42 @@ const NocFeedPage = () => {
                 <a href={`/feed-monitoring/${nocCode}/feed-history?date=${new Date(Date.now() - 86400000).toISOString().split("T")[0]}`} className="govuk-link" style={{fontSize: "20px"}}>View feed history</a>
             </div>
             <div className="grid grid-cols-4 gap-4 mt-6">
-                <FeedStatusSummaryStat title="Feed status" value={operator?.feedMonitoring?.feedStatus != null ? (operator.feedMonitoring.feedStatus ? "Active" : "Inactive") : "-"} />
-                <SummaryStatWithTooltip title="Current vehicles" value={operator?.feedMonitoring?.liveStats?.currentVehicles ?? "-"} tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS" />
-                <SummaryStatWithTooltip title="Expected vehicles" value={operator?.feedMonitoring?.liveStats?.expectedVehicles ?? "-"} tooltip="The number of vehicles based that should be running now according to the timetables uploaded to BODS" />
-                <SummaryStatWithTooltip title="Update frequency" value={operator?.feedMonitoring?.liveStats?.updateFrequency ? `${operator.feedMonitoring.liveStats.updateFrequency}s` : "-"} tooltip="Average update frequency is calculated over the last 24 hour period" />
+                <div className="min-w-0">
+                    <FeedStatusSummaryStat
+                    title="Feed status"
+                    value={operator?.feedMonitoring?.feedStatus != null
+                        ? (operator.feedMonitoring.feedStatus ? "Active" : "Inactive")
+                        : "-"}
+                    />
+                </div>
+                <div className="min-w-0">
+                    <SummaryStatWithTooltip
+                    title="Current vehicles"
+                    value={operator?.feedMonitoring?.liveStats?.currentVehicles ?? "-"}
+                    tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS"
+                    />
+                </div>
+                <div className="min-w-0">
+                    <SummaryStatWithTooltip
+                    title="Expected vehicles"
+                    value={operator?.feedMonitoring?.liveStats?.expectedVehicles ?? "-"}
+                    tooltip="The number of vehicles based that should be running now according to the timetables uploaded to BODS"
+                    />
+                </div>
+                <div className="min-w-0">
+                    <SummaryStatWithTooltip
+                    title="Update frequency"
+                    value={operator?.feedMonitoring?.liveStats?.updateFrequency
+                        ? `${operator.feedMonitoring.liveStats.updateFrequency}s`
+                        : "-"}
+                    tooltip="Average update frequency is calculated over the last 24 hour period"
+                    />
+                </div>
             </div>
             {/* TODO:NOW: Add graph */}
+            <div className="govuk-inset-text">
+                If the number of expected vehicles is zero and you were expecting vehicles, please check your BODS timetables are up to date <a href="https://www.bus-data.service.gov.uk/timetables" className="govuk-link">here</a>.
+            </div>
             <div className="mt-8">
                 <Box children={undefined} />
             </div>
