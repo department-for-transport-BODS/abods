@@ -10,7 +10,6 @@ import { ErrorInfo } from "@/types";
 import { CorridorsGrid } from "@/components/corridors/CorridorsGrid";
 import { corridorsService } from "@/services/corridors/corridors.service";
 
-
 const getSearchParam = (value: string | string[] | undefined): string => {
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return "";

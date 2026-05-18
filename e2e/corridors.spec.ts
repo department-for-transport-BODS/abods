@@ -5,9 +5,7 @@ const API_URL = "http://localhost:3000";
 // ── Fake session ──────────────────────────────────────────────────────────────
 
 async function injectSession(page: Page): Promise<void> {
-  const expiresAt = new Date(
-    Date.now() + 12 * 60 * 60 * 1000,
-  ).toISOString();
+  const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
   await page.addInitScript((expires: string) => {
     localStorage.setItem("session", JSON.stringify({ expiresAt: expires }));
   }, expiresAt);
@@ -154,7 +152,9 @@ test.describe("Corridors list page", () => {
 
   test("shows Edit links for each corridor", async ({ page }) => {
     await page.goto("/corridors");
-    await expect(page.getByRole("link", { name: "Edit" }).first()).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Edit" }).first(),
+    ).toBeVisible();
   });
 
   test("filters corridors using the search input", async ({ page }) => {
@@ -214,9 +214,7 @@ test.describe("Create corridor page", () => {
 
   test("shows the stop search input", async ({ page }) => {
     await page.goto("/corridors/create");
-    await expect(
-      page.getByLabel("Location name or postcode"),
-    ).toBeVisible();
+    await expect(page.getByLabel("Location name or postcode")).toBeVisible();
   });
 
   test("shows a validation error when finishing without a name", async ({
@@ -289,16 +287,12 @@ test.describe("Corridor view page", () => {
 
   test("shows average journey time stat", async ({ page }) => {
     await page.goto("/corridors/1");
-    await expect(
-      page.getByText("Average journey time").first(),
-    ).toBeVisible();
+    await expect(page.getByText("Average journey time").first()).toBeVisible();
   });
 
   test("shows the Services section with service rows", async ({ page }) => {
     await page.goto("/corridors/1");
-    await expect(
-      page.getByRole("heading", { name: "Services" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Services" })).toBeVisible();
     await expect(page.getByText("10: Outbound")).toBeVisible();
   });
 
