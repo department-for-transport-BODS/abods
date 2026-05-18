@@ -14,8 +14,6 @@ import { DateNavigationHeatmapItem } from "@/types";
 
 const HistoricVehicleStats = dynamic(() => import("@/components/feed-monitoring/HistoricVehicleStats"), { ssr: false });
 
-// TODO:NOW Check imports are in consistent order across files
-
 function buildHeatmap(stats: EventStat[]): DateNavigationHeatmapItem[] {
   const max = Math.max(...stats.map(({ count }) => count ?? 0));
   return stats.map(({ count, day }) => ({

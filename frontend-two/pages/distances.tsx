@@ -136,10 +136,18 @@ const DistancesPage = () => {
     .filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
     .map((operator) => operator.id);
 
-    // TODO:NOW Don't filter data by org, but only filter dropdown operator options by org? 
-    const orgId = adminOrgData
-      .find((org) => selectedOrgs.includes(org.orgName))
-      ?.orgId.toString();
+    // TODO:NOW Check whether this logic is actually right. Currently in ABODS, no data is returned
+    // Only send orgId if no operators are selected
+    let orgId: string | undefined = undefined;
+    let operatorIdsToSend: string[] = operatorIds;
+    if (operatorIds.length === 0) {
+      orgId = adminOrgData
+        .find((org) => selectedOrgs.includes(org.orgName))
+        ?.orgId.toString();
+    } else {
+      orgId = undefined;
+      operatorIdsToSend = operatorIds;
+    }
 
     const licenseIds = dropdownInputsData.operators
       .flatMap((operator) => operator.licenses)
@@ -152,12 +160,11 @@ const DistancesPage = () => {
       .map((service) => service.id);
 
     // Fetch data for table based on filter selections
-    // TODO:NOW Check how we want to present 0 values within the table?
     const data = await distanceService.fetchDistances(
       config.apiUrl, 
       {
-        orgId, 
-        operatorIds, 
+        orgId,
+        operatorIds: operatorIdsToSend,
         fromTimestamp: fromDate,
         toTimestamp: toDate,
         nocLineAndServiceCodes: serviceIds, 
