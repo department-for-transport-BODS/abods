@@ -9,8 +9,8 @@ const hasExternalBaseURL = Boolean(process.env.PLAYWRIGHT_BASE_URL?.trim());
 export default defineConfig({
   testDir: "./e2e",
 
-  /* Only run example.spec.ts by default */
-  testMatch: "example.spec.ts",
+  /* Run all spec files in the e2e folder */
+  testMatch: "**/*.spec.ts",
 
   /* Run tests in files in parallel */
   fullyParallel: true,

@@ -29,4 +29,26 @@ export const test = base.extend({
   },
 });
 
+/**
+ * Fixture that provides a page already logged in via the login form.
+ * Requires TEST_USERNAME and TEST_PASSWORD environment variables.
+ */
+export const loggedInTest = base.extend<{ loggedInPage: Page }>({
+  loggedInPage: async ({ page }, use) => {
+    const username = process.env.TEST_USERNAME;
+    const password = process.env.TEST_PASSWORD;
+    if (!username || !password) {
+      throw new Error(
+        "TEST_USERNAME and TEST_PASSWORD environment variables must be set for authenticated tests.",
+      );
+    }
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.getByLabel("Email").fill(username);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.waitForURL("**/dashboard**");
+    await use(page);
+  },
+});
+
 export { expect } from "@playwright/test";
