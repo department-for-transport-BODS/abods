@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Link from "next/link";
+import { SortableTable } from "kainossoftwareltd-govuk-react-kainos";
+import { SortOrder } from "kainossoftwareltd-govuk-react-kainos/dist/Components/SortableTable/types";
 import { CorridorSummary } from "@/types/corridors";
 
 type SortKey = "name" | "numStops";
-type SortDir = "asc" | "desc";
 
 const nameComparator = (a: string, b: string) =>
   a.trim().localeCompare(b.trim(), undefined, { numeric: true });
@@ -11,14 +12,20 @@ const nameComparator = (a: string, b: string) =>
 const sortCorridors = (
   data: CorridorSummary[],
   key: SortKey,
-  dir: SortDir,
+  dir: SortOrder,
 ): CorridorSummary[] => {
   const sorted = [...data].sort((a, b) => {
     if (key === "name") return nameComparator(a.name ?? "", b.name ?? "");
     return (a.numStops ?? 0) - (b.numStops ?? 0);
   });
-  return dir === "asc" ? sorted : sorted.reverse();
+  return dir === SortOrder.ASC ? sorted : sorted.reverse();
 };
+
+const HEAD = [
+  { key: "name", label: "Name", sortable: true, sortOrder: SortOrder.ASC },
+  { key: "numStops", label: "Stops", sortable: true },
+  { key: "edit", label: "", sortable: false },
+];
 
 const filterCorridors = (
   data: CorridorSummary[],
@@ -37,23 +44,31 @@ interface Props {
 
 export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
   const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortDir, setSortDir] = useState<SortOrder>(SortOrder.ASC);
 
-  const handleSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
+  const handleSort = (key: string, order: SortOrder) => {
+    setSortKey(key as SortKey);
+    setSortDir(order);
   };
 
   const filtered = filterCorridors(data, filter);
   const rows = sortCorridors(filtered, sortKey, sortDir);
   const noMatches = data.length > 0 && rows.length === 0;
 
-  const ariaSort = (key: SortKey) =>
-    sortKey === key ? (sortDir === "asc" ? "ascending" : "descending") : "none";
+  const tableRows = rows.map((corridor) => ({
+    key: String(corridor.id),
+    name: (
+      <Link href={`/corridors/${corridor.id}`} className="govuk-link">
+        {corridor.name}
+      </Link>
+    ) as unknown as string,
+    numStops: corridor.numStops ?? 0,
+    edit: (
+      <Link href={`/corridors/edit/${corridor.id}`} className="govuk-link">
+        Edit
+      </Link>
+    ) as unknown as string,
+  }));
 
   return (
     <>
@@ -86,61 +101,7 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
         </div>
       </div>
 
-      <table className="govuk-table">
-        <thead className="govuk-table__head">
-          <tr className="govuk-table__row">
-            <th
-              scope="col"
-              className="govuk-table__header"
-              aria-sort={ariaSort("name")}
-            >
-              <button
-                type="button"
-                className="unbuttoned"
-                onClick={() => handleSort("name")}
-              >
-                Name
-              </button>
-            </th>
-            <th
-              scope="col"
-              className="govuk-table__header"
-              aria-sort={ariaSort("numStops")}
-            >
-              <button
-                type="button"
-                className="unbuttoned"
-                onClick={() => handleSort("numStops")}
-              >
-                Stops
-              </button>
-            </th>
-            <th scope="col" className="govuk-table__header">
-              <span className="govuk-visually-hidden">Edit</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="govuk-table__body">
-          {rows.map((corridor) => (
-            <tr key={corridor.id} className="govuk-table__row">
-              <td className="govuk-table__cell">
-                <Link href={`/corridors/${corridor.id}`} className="govuk-link">
-                  {corridor.name}
-                </Link>
-              </td>
-              <td className="govuk-table__cell">{corridor.numStops}</td>
-              <td className="govuk-table__cell govuk-!-text-align-right">
-                <Link
-                  href={`/corridors/edit/${corridor.id}`}
-                  className="govuk-link"
-                >
-                  Edit
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <SortableTable head={HEAD} rows={tableRows} onSort={handleSort} />
 
       {noMatches ? (
         <div role="alert" className="govuk-body">
