@@ -149,6 +149,8 @@ const toStopFromCorridor = (stop: CorridorStopResult): CorridorStop => ({
   sourceId: stop.sourceId,
   naptan: stop.sourceId ?? stop.stopId,
 });
+import { CorridorListItem, CorridorSummary } from "@/types/corridors";
+import { CORRIDORS_LIST_QUERY } from "@/services/corridors/corridors.operations";
 
 export const corridorsService = {
   fetchCorridors: async (apiUrl: string): Promise<CorridorSummary[] | null> => {
