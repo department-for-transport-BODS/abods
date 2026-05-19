@@ -23,14 +23,16 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   });
 
   loggedInTest("shows the operator selector", async ({ loggedInPage }) => {
-    const operatorSelector = loggedInPage.locator("#operator_selector");
+    const operatorInput = loggedInPage.locator("#operator_selector");
 
-    await loggedInTest.step("combobox is visible", async () => {
-      await expect(operatorSelector).toBeVisible();
+    await loggedInTest.step("operator input is visible", async () => {
+      await expect(operatorInput).toBeVisible();
     });
 
     await loggedInTest.step("defaults to All operators", async () => {
-      await expect(operatorSelector).toHaveValue("All operators");
+      await expect(
+        loggedInPage.getByText("All operators", { exact: true }),
+      ).toBeVisible();
     });
   });
 
@@ -164,9 +166,9 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await loggedInPage.goto(`/dashboard?nocCode=${nocCode}`, {
         waitUntil: "domcontentloaded",
       });
-      await expect(loggedInPage.locator("#operator_selector")).not.toHaveValue(
-        "All operators",
-      );
+      await expect(
+        loggedInPage.getByText("All operators", { exact: true }),
+      ).not.toBeVisible();
     },
   );
 });
