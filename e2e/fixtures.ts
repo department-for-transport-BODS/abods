@@ -1,4 +1,6 @@
 import { test as base, Page } from "@playwright/test";
+import { existsSync } from "fs";
+import { AUTH_STATE_PATH } from "./global-setup";
 
 const APP_ROUTES = [
   "/",
@@ -30,24 +32,23 @@ export const test = base.extend({
 });
 
 /**
- * Fixture that provides a page already logged in via the login form.
- * Requires TEST_USERNAME and TEST_PASSWORD environment variables.
+ * Fixture that provides a page already authenticated via saved storage state.
+ * Run once with TEST_USERNAME and TEST_PASSWORD to generate the auth state via
+ * global setup, then all tests reuse it — no concurrent logins, no session
+ * conflicts.
  */
 export const loggedInTest = base.extend<{ loggedInPage: Page }>({
-  loggedInPage: async ({ page }, use) => {
-    const username = process.env.TEST_USERNAME;
-    const password = process.env.TEST_PASSWORD;
-    if (!username || !password) {
+  loggedInPage: async ({ browser }, use) => {
+    if (!existsSync(AUTH_STATE_PATH)) {
       throw new Error(
-        "TEST_USERNAME and TEST_PASSWORD environment variables must be set for authenticated tests.",
+        `Auth state not found at ${AUTH_STATE_PATH}. ` +
+          "Re-run with TEST_USERNAME and TEST_PASSWORD set to generate it.",
       );
     }
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await page.getByLabel("Email", { exact: false }).fill(username);
-    await page.getByLabel("Password", { exact: false }).fill(password);
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await page.waitForURL("**/dashboard**");
+    const context = await browser.newContext({ storageState: AUTH_STATE_PATH });
+    const page = await context.newPage();
     await use(page);
+    await context.close();
   },
 });
 

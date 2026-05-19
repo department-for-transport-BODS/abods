@@ -12,6 +12,9 @@ export default defineConfig({
   /* Run all spec files in the e2e folder */
   testMatch: "**/*.spec.ts",
 
+  /* Log in once before all tests and save auth state */
+  globalSetup: require.resolve("./e2e/global-setup"),
+
   /* Run tests in files in parallel */
   fullyParallel: true,
 
