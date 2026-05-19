@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { DateNavigationHeatmapItem } from "@/types";
 
+// TODO:NOW Check whether we need the heat map to work
 export const DateNavigationDayBlocks = ({ stats, date, onDateSelected }: {stats: DateNavigationHeatmapItem[]; date: DateTime; onDateSelected: (date: DateTime) => void;}) => {
   return (
     <div className="datenav__day-blocks datenav__day-blocks--with-labels">

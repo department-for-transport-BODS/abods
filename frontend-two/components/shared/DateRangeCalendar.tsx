@@ -19,7 +19,7 @@ type NullDay = {
     isSaturday: false 
 };
 
-// Calendar component is built as a 2D array of Day/NullDay, which is easier to render as a table
+// Calendar component is built as a 2D array of Day/NullDay, which is then rendered as a table
 function buildCalendarTable(month: DateTime, today: DateTime, maxDate: DateTime): (Day | NullDay)[][] {
   const start = month.startOf("month");
   const end = month.endOf("month");
