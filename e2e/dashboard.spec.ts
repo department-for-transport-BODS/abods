@@ -125,15 +125,19 @@ loggedInTest.describe("Dashboard - authenticated", () => {
 
     await loggedInTest.step("NOC feed monitoring link is visible", async () => {
       await expect(
-        loggedInPage.getByRole("link", { name: /noc feed monitoring/i }),
+        loggedInPage
+          .locator("main")
+          .getByRole("link", { name: /noc feed monitoring/i }),
       ).toBeVisible();
     });
   });
 
   loggedInTest(
-    "pre-selects All stops when stopType=AllStops is in the URL",
+    "pre-selects All stops when stopType query param is set",
     async ({ loggedInPage }) => {
-      await loggedInPage.goto("/dashboard?stopType=AllStops", {
+      // Angular app uses all_stops; Next.js app uses AllStops — this test
+      // will expose a discrepancy when run against the migrated app.
+      await loggedInPage.goto("/dashboard?stopType=all_stops", {
         waitUntil: "domcontentloaded",
       });
       await expect(
@@ -146,7 +150,9 @@ loggedInTest.describe("Dashboard - authenticated", () => {
     "updates the URL when stop type is changed to All stops",
     async ({ loggedInPage }) => {
       await loggedInPage.getByRole("radio", { name: "All stops" }).click();
-      await expect(loggedInPage).toHaveURL(/stopType=AllStops/);
+      // Angular app writes all_stops to the URL; Next.js app writes AllStops.
+      // A mismatch here signals the migration needs alignment.
+      await expect(loggedInPage).toHaveURL(/stopType=all_stops/);
     },
   );
 
