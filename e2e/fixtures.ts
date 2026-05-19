@@ -43,8 +43,8 @@ export const loggedInTest = base.extend<{ loggedInPage: Page }>({
       );
     }
     await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await page.getByLabel("Email").fill(username);
-    await page.getByLabel("Password").fill(password);
+    await page.getByLabel("Email", { exact: false }).fill(username);
+    await page.getByLabel("Password", { exact: false }).fill(password);
     await page.getByRole("button", { name: /sign in/i }).click();
     await page.waitForURL("**/dashboard**");
     await use(page);
