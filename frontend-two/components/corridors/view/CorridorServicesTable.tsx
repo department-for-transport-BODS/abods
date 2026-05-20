@@ -1,6 +1,6 @@
 import { Duration } from "luxon";
 import { CorridorServiceStat, ServiceLink } from "@/types/corridors";
-import { averageServiceSpeedLabel } from "@/services/corridors/corridors-speed-metric";
+import { averageServiceSpeedLabel } from "@/services/corridors/corridors-speed-utils";
 
 interface Props {
   services: CorridorServiceStat[];

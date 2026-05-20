@@ -11,7 +11,7 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useCorridorHideOutliers } from "@/hooks/useCorridorHideOutliers";
 import { corridorsService } from "@/services/corridors/corridors.service";
-import { averageSpeedLabel } from "@/services/corridors/corridors-speed-metric";
+import { averageSpeedLabel } from "@/services/corridors/corridors-speed-utils";
 import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnalysisPanel";
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
