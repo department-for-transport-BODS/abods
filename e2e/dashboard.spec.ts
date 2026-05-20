@@ -77,7 +77,6 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await loggedInTest.step(
         "period selector dropdown is visible",
         async () => {
-          // PerformanceWidget renders a combobox/select for the time period
           await expect(
             loggedInPage
               .getByRole("combobox", { name: /period|last/i })
@@ -135,9 +134,7 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   loggedInTest(
     "pre-selects All stops when stopType query param is set",
     async ({ loggedInPage }) => {
-      // Angular app uses all_stops; Next.js app uses AllStops — this test
-      // will expose a discrepancy when run against the migrated app.
-      await loggedInPage.goto("/dashboard?stopType=all_stops", {
+      await loggedInPage.goto("/dashboard?allStops=true", {
         waitUntil: "domcontentloaded",
       });
       await expect(
@@ -149,10 +146,11 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   loggedInTest(
     "updates the URL when stop type is changed to All stops",
     async ({ loggedInPage }) => {
-      await loggedInPage.getByRole("radio", { name: "All stops" }).click();
-      // Angular app writes all_stops to the URL; Next.js app writes AllStops.
-      // A mismatch here signals the migration needs alignment.
-      await expect(loggedInPage).toHaveURL(/stopType=all_stops/);
+      await expect(
+        loggedInPage.getByRole("radio", { name: "Timing points" }),
+      ).toBeChecked();
+      await loggedInPage.getByText("All stops").click();
+      await expect(loggedInPage).toHaveURL(/allStops=true/);
     },
   );
 
@@ -175,6 +173,23 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await expect(
         loggedInPage.getByText("All operators", { exact: true }),
       ).not.toBeVisible();
+    },
+  );
+
+  loggedInTest(
+    "filters by operator when nocCode is selected via dashboard dropdown",
+    async ({ loggedInPage }) => {
+      await loggedInPage.getByRole("combobox", { name: "Operator" }).click();
+
+      // ng-select renders options as role="option" in a dropdown panel
+      const firstOperator = loggedInPage
+        .getByRole("option")
+        .filter({ hasNotText: /all operators/i })
+        .first();
+
+      await expect(firstOperator).toBeVisible();
+      await firstOperator.click();
+      await expect(loggedInPage).toHaveURL(/nocCode=/);
     },
   );
 });
