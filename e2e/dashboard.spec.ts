@@ -1,4 +1,5 @@
 import { test, expect, loggedInTest } from "./fixtures";
+import { DashboardPage } from "./pages/DashboardPage";
 
 // ─── Unauthenticated ──────────────────────────────────────────────────────────
 
@@ -12,153 +13,117 @@ test("Dashboard - redirects unauthenticated users to login", async ({
 // ─── Authenticated ────────────────────────────────────────────────────────────
 
 loggedInTest.describe("Dashboard - authenticated", () => {
+  // Shared page object — assigned in beforeEach before each test runs.
+  let dashboard!: DashboardPage;
+
   loggedInTest.beforeEach(async ({ loggedInPage }) => {
-    await loggedInPage.goto("/dashboard", { waitUntil: "domcontentloaded" });
+    dashboard = new DashboardPage(loggedInPage);
+    await dashboard.goto();
   });
 
-  loggedInTest("displays the Dashboard heading", async ({ loggedInPage }) => {
-    await expect(
-      loggedInPage.getByRole("heading", { name: "Dashboard", level: 1 }),
-    ).toBeVisible();
+  loggedInTest("displays the Dashboard heading", async () => {
+    await expect(dashboard.heading()).toBeVisible();
   });
 
-  loggedInTest("shows the operator selector", async ({ loggedInPage }) => {
-    const operatorInput = loggedInPage.locator("#operator_selector");
-
+  loggedInTest("shows the operator selector", async () => {
     await loggedInTest.step("operator input is visible", async () => {
-      await expect(operatorInput).toBeVisible();
+      await expect(dashboard.operatorSelector.combobox()).toBeVisible();
     });
 
     await loggedInTest.step("defaults to All operators", async () => {
       await expect(
-        loggedInPage.getByText("All operators", { exact: true }),
+        dashboard.operatorSelector.defaultValueLabel(),
       ).toBeVisible();
     });
   });
 
-  loggedInTest(
-    "shows the stop type toggle with both options",
-    async ({ loggedInPage }) => {
-      await loggedInTest.step("All stops radio is visible", async () => {
+  loggedInTest("shows the stop type toggle with both options", async () => {
+    await loggedInTest.step("All stops radio is visible", async () => {
+      await expect(dashboard.stopTypeToggle.allStopsRadio()).toBeVisible();
+    });
+
+    await loggedInTest.step("Timing points radio is visible", async () => {
+      await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeVisible();
+    });
+
+    await loggedInTest.step(
+      "Timing points is selected by default",
+      async () => {
         await expect(
-          loggedInPage.getByRole("radio", { name: "All stops" }),
-        ).toBeVisible();
-      });
+          dashboard.stopTypeToggle.timingPointsRadio(),
+        ).toBeChecked();
+      },
+    );
+  });
 
-      await loggedInTest.step("Timing points radio is visible", async () => {
-        await expect(
-          loggedInPage.getByRole("radio", { name: "Timing points" }),
-        ).toBeVisible();
-      });
-
-      await loggedInTest.step(
-        "Timing points is selected by default",
-        async () => {
-          await expect(
-            loggedInPage.getByRole("radio", { name: "Timing points" }),
-          ).toBeChecked();
-        },
-      );
-    },
-  );
-
-  loggedInTest(
-    "shows the on-time performance section",
-    async ({ loggedInPage }) => {
-      await loggedInTest.step("section heading is visible", async () => {
-        await expect(
-          loggedInPage.getByRole("heading", {
-            name: "On-time performance",
-            level: 2,
-          }),
-        ).toBeVisible();
-      });
-
-      await loggedInTest.step(
-        "period selector dropdown is visible",
-        async () => {
-          await expect(
-            loggedInPage
-              .getByRole("combobox", { name: /period|last/i })
-              .or(loggedInPage.getByRole("combobox").nth(1)),
-          ).toBeVisible();
-        },
-      );
-    },
-  );
-
-  loggedInTest("shows the vehicle count section", async ({ loggedInPage }) => {
+  loggedInTest("shows the on-time performance section", async () => {
     await loggedInTest.step("section heading is visible", async () => {
-      await expect(
-        loggedInPage.getByRole("heading", { name: "Vehicle count", level: 2 }),
-      ).toBeVisible();
+      await expect(dashboard.onTimeHeading()).toBeVisible();
+    });
+
+    await loggedInTest.step("period selector dropdown is visible", async () => {
+      await expect(dashboard.periodSelector()).toBeVisible();
+    });
+  });
+
+  loggedInTest("shows the vehicle count section", async () => {
+    await loggedInTest.step("section heading is visible", async () => {
+      await expect(dashboard.vehicleCountHeading()).toBeVisible();
     });
 
     await loggedInTest.step("Current label is visible", async () => {
-      await expect(loggedInPage.getByText("Current")).toBeVisible();
+      await expect(dashboard.currentLabel()).toBeVisible();
     });
 
     await loggedInTest.step("Expected label is visible", async () => {
-      await expect(loggedInPage.getByText("Expected")).toBeVisible();
+      await expect(dashboard.expectedLabel()).toBeVisible();
     });
 
     await loggedInTest.step("Live status link is visible", async () => {
-      await expect(
-        loggedInPage.getByRole("link", { name: /live status/i }),
-      ).toBeVisible();
+      await expect(dashboard.liveStatusLink()).toBeVisible();
     });
   });
 
-  loggedInTest("shows the feed status section", async ({ loggedInPage }) => {
+  loggedInTest("shows the feed status section", async () => {
     await loggedInTest.step("section heading is visible", async () => {
-      await expect(
-        loggedInPage.getByRole("heading", { name: "Feed status", level: 2 }),
-      ).toBeVisible();
+      await expect(dashboard.feedStatusHeading()).toBeVisible();
     });
 
     await loggedInTest.step("feed status table is present", async () => {
-      await expect(
-        loggedInPage.locator("table.feed-status-summary"),
-      ).toBeVisible();
+      await expect(dashboard.feedStatusTable()).toBeVisible();
     });
 
     await loggedInTest.step("NOC feed monitoring link is visible", async () => {
-      await expect(
-        loggedInPage
-          .locator("main")
-          .getByRole("link", { name: /noc feed monitoring/i }),
-      ).toBeVisible();
+      await expect(dashboard.nocFeedMonitoringLink()).toBeVisible();
     });
   });
 
   loggedInTest(
     "pre-selects All stops when stopType query param is set",
-    async ({ loggedInPage }) => {
-      await loggedInPage.goto("/dashboard?allStops=true", {
-        waitUntil: "domcontentloaded",
-      });
-      await expect(
-        loggedInPage.getByRole("radio", { name: "All stops" }),
-      ).toBeChecked();
+    async () => {
+      // Angular dashboard reads ?allStops=true (not stopType).
+      // Next.js may use a different param — a mismatch here signals a migration issue.
+      await dashboard.goto({ allStops: "true" });
+      await expect(dashboard.stopTypeToggle.allStopsRadio()).toBeChecked();
     },
   );
 
   loggedInTest(
     "updates the URL when stop type is changed to All stops",
     async ({ loggedInPage }) => {
-      await expect(
-        loggedInPage.getByRole("radio", { name: "Timing points" }),
-      ).toBeChecked();
-      await loggedInPage.getByText("All stops").click();
+      // Wait for Angular to initialise the toggle before interacting.
+      // The default selection (Timing points checked) confirms event handlers are attached.
+      await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeChecked();
+      await dashboard.stopTypeToggle.selectAllStops();
+      // Angular dashboard writes ?allStops=true to the URL.
+      // If Next.js uses a different param, this test will flag the discrepancy.
       await expect(loggedInPage).toHaveURL(/allStops=true/);
     },
   );
 
   loggedInTest(
     "filters by operator when nocCode is provided in the URL",
-    async ({ loggedInPage }) => {
-      // Verify the operator selector reflects an active filter when a nocCode
-      // is present — the combobox should not read "All operators"
+    async () => {
       const nocCode = process.env.TEST_NOC_CODE;
       if (!nocCode) {
         loggedInTest.skip(
@@ -167,11 +132,9 @@ loggedInTest.describe("Dashboard - authenticated", () => {
         );
         return;
       }
-      await loggedInPage.goto(`/dashboard?nocCode=${nocCode}`, {
-        waitUntil: "domcontentloaded",
-      });
+      await dashboard.goto({ nocCode });
       await expect(
-        loggedInPage.getByText("All operators", { exact: true }),
+        dashboard.operatorSelector.defaultValueLabel(),
       ).not.toBeVisible();
     },
   );
@@ -179,16 +142,8 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   loggedInTest(
     "filters by operator when nocCode is selected via dashboard dropdown",
     async ({ loggedInPage }) => {
-      await loggedInPage.getByRole("combobox", { name: "Operator" }).click();
-
-      // ng-select renders options as role="option" in a dropdown panel
-      const firstOperator = loggedInPage
-        .getByRole("option")
-        .filter({ hasNotText: /all operators/i })
-        .first();
-
-      await expect(firstOperator).toBeVisible();
-      await firstOperator.click();
+      await dashboard.operatorSelector.selectFirstOperator();
+      // Angular dashboard writes ?nocCode=XXX to the URL on operator selection.
       await expect(loggedInPage).toHaveURL(/nocCode=/);
     },
   );
