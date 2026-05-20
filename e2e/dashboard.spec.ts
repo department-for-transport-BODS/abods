@@ -158,4 +158,21 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await expect(loggedInPage).toHaveURL(/nocCode=/);
     },
   );
+
+  loggedInTest(
+    "filters by operator when nocCode is selected via dashboard dropdown",
+    async ({ loggedInPage }) => {
+      await loggedInPage.getByRole("combobox", { name: "Operator" }).click();
+
+      // ng-select renders options as role="option" in a dropdown panel
+      const firstOperator = loggedInPage
+        .getByRole("option")
+        .filter({ hasNotText: /all operators/i })
+        .first();
+
+      await expect(firstOperator).toBeVisible();
+      await firstOperator.click();
+      await expect(loggedInPage).toHaveURL(/nocCode=/);
+    },
+  );
 });
