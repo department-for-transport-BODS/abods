@@ -7,7 +7,12 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
-import { CorridorsGrid } from "@/components/corridors/CorridorsGrid";
+import dynamic from "next/dynamic";
+const CorridorsGrid = dynamic(
+  () =>
+    import("@/components/corridors/CorridorsGrid").then((m) => m.CorridorsGrid),
+  { ssr: false },
+);
 import { corridorsService } from "@/services/corridors/corridors.service";
 
 const getSearchParam = (value: string | string[] | undefined): string => {

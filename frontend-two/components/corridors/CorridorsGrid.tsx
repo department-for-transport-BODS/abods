@@ -1,8 +1,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { SortableTable } from "kainossoftwareltd-govuk-react-kainos";
-import { SortOrder } from "kainossoftwareltd-govuk-react-kainos/dist/Components/SortableTable/types";
 import { CorridorSummary } from "@/types/corridors";
+
+enum SortOrder {
+  ASC = "asc",
+  DESC = "desc",
+  NONE = "none",
+}
 
 type SortKey = "name" | "numStops";
 
