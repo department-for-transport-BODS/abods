@@ -24,6 +24,7 @@ import {
   CREATE_CORRIDOR_MUTATION,
   DELETE_CORRIDOR_MUTATION,
   GET_CORRIDOR_QUERY,
+  OPERATORS_QUERY,
   UPDATE_CORRIDOR_MUTATION,
 } from "@/services/corridors/corridors.operations";
 import {
@@ -214,13 +215,25 @@ export const corridorsService = {
         inputs: { searchString },
       });
 
-      const orgStops = (result.corridor?.addFirstStop ?? [])
+      const allStops = (result.corridor?.addFirstStop ?? [])
         .filter((stop): stop is StopSearchResult => stop !== null)
         .map(toStopFromSearch);
 
-      // Angular splits organisation/non-organisation stops using operator admin area ids.
-      // That lookup has not yet been ported, so commit 2 returns all as organisation stops.
-      return { orgStops, nonOrgStops: [] };
+      const operatorsResult = await graphqlRequest<{
+        operators: Array<{ adminAreaIds: string[] }>;
+      }>(apiUrl, OPERATORS_QUERY);
+      const adminAreaIds = (operatorsResult.operators ?? []).flatMap(
+        (op) => op.adminAreaIds,
+      );
+
+      const orgStops = allStops.filter((stop) =>
+        adminAreaIds.some((id) => id === stop.adminAreaId),
+      );
+      const nonOrgStops = allStops.filter((stop) =>
+        adminAreaIds.every((id) => id !== stop.adminAreaId),
+      );
+
+      return { orgStops, nonOrgStops };
     } catch (error) {
       console.warn("Failed to search corridor stops:", error);
       return null;

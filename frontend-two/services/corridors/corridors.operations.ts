@@ -1,3 +1,9 @@
+export const OPERATORS_QUERY = `query corridorsOperatorList {
+  operators {
+    adminAreaIds
+  }
+}`;
+
 export const CORRIDORS_LIST_QUERY = `query corridorsList {
   corridor {
     corridorList {
