@@ -1,23 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { DateTime } from 'luxon';
 import { DateRangeCalendar } from './DateRangeCalendar';
+import { formatDateToDisplayString, formatISODateStringToDate, formatDateToISODateString } from '@/utils/dateFormatter';
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
-
-// Date to YYYY-MM-DD string for inputs and onChange
-function toInputValue(date: DateTime): string {
-  return date.toFormat('yyyy-MM-dd');
-}
-
-// DateTime to display string (e.g. "06 May 2026")
-function formatDate(date: DateTime): string {
-  return date.toFormat('dd MMM yyyy');
-}
-
-// Parse YYYY-MM-DD string to DateTime (local time)
-function parseDate(str: string): DateTime {
-  return DateTime.fromFormat(str, 'yyyy-MM-dd').startOf('day');
-}
 
 function applyDaySelection(date: DateTime, draft: CalendarDateRange): CalendarDateRange {
   if (draft.start?.isValid && draft.end?.isValid) {
@@ -42,8 +28,8 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   const maxDate = today.minus({ days: 1 });
 
   const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>({
-    start: value?.from ? parseDate(value.from) : today.minus({ days: 7 }),
-    end: value?.to ? parseDate(value.to) : maxDate,
+    start: value?.from ? formatISODateStringToDate(value.from) : today.minus({ days: 7 }),
+    end: value?.to ? formatISODateStringToDate(value.to) : maxDate,
   });
 
   const [draftDateRange, setDraftDateRange] = useState<CalendarDateRange>(selectedDateRange);
@@ -70,7 +56,7 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   };
 
   const handleInputChange = (field: 'start' | 'end', val: string) => {
-    const date = parseDate(val);
+    const date = formatISODateStringToDate(val);
     if (date.isValid) {
       setDraftDateRange(prev => ({ ...prev, [field]: date }));
     }
@@ -83,8 +69,8 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
       setSelectedDateRange(committed);
       
       onChange && onChange({
-        from: toInputValue(draftDateRange.start),
-        to: toInputValue(draftDateRange.end.plus({ days: 1 })),
+        from: formatDateToISODateString(draftDateRange.start),
+        to: formatDateToISODateString(draftDateRange.end.plus({ days: 1 })),
       });
       
       setOpenDropdown(false);
@@ -100,7 +86,7 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   const nextMonthDisabled = monthRight.startOf('month') >= today.startOf('month');
 
   const triggerLabel = selectedDateRange.start?.isValid && selectedDateRange.end?.isValid
-    ? `${formatDate(selectedDateRange.start)} - ${formatDate(selectedDateRange.end)}`
+    ? `${formatDateToDisplayString(selectedDateRange.start)} - ${formatDateToDisplayString(selectedDateRange.end)}`
     : 'Select date range';
 
   return (
@@ -124,8 +110,8 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
                 readOnly={true}
                 className="govuk-input date-range-select__date-input"
                 type="date"
-                max={toInputValue(maxDate)}
-                value={draftDateRange.start?.isValid ? toInputValue(draftDateRange.start) : ''}
+                max={formatDateToISODateString(maxDate)}
+                value={draftDateRange.start?.isValid ? formatDateToISODateString(draftDateRange.start) : ''}
                 onChange={e => handleInputChange('start', e.target.value)}
               />
             </div>
@@ -135,8 +121,8 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
                 readOnly={true}
                 className="govuk-input date-range-select__date-input"
                 type="date"
-                max={toInputValue(maxDate)}
-                value={draftDateRange.end?.isValid ? toInputValue(draftDateRange.end) : ''}
+                max={formatDateToISODateString(maxDate)}
+                value={draftDateRange.end?.isValid ? formatDateToISODateString(draftDateRange.end) : ''}
                 onChange={e => handleInputChange('end', e.target.value)}
               />
             </div>

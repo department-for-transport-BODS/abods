@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { PagingPanel } from "../shared/PagingPanel";
 import { FeedMonitoringOperatorData, VehicleCountData } from "@/types/feed-monitoring";
-import { DateTime } from "luxon";
+import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
 import dynamic from "next/dynamic";
 
 const SortableTable = dynamic(
@@ -28,13 +28,6 @@ function getRowValue(data: FeedMonitoringOperatorData, column: string): string |
         case "unavailableSince": return data.feedMonitoring?.unavailableSince ?? "";
         default: return "";
     }
-}
-
-// Translate ISO date string to relative time (e.g. "2 hours ago")
-function translateToRelativeTime(date: string): string {
-    if (!date) return "-";
-    const relative = DateTime.fromISO(date, { zone: "utc" }).toRelative();
-    return relative ?? "-";
 }
 
 interface FeedTableProps {
@@ -93,8 +86,8 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTablePr
             updateFrequency: op.feedMonitoring?.liveStats?.updateFrequency
                 ? `${op.feedMonitoring.liveStats.updateFrequency}s`
                 : "-",
-            lastOutage: <span> {translateToRelativeTime(op.feedMonitoring?.lastOutage ?? "")} </span>,
-            unavailableSince: <span style={{ color: "#d9221a", fontWeight: "bold" }}> {translateToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>,
+            lastOutage: <span> {formatISODateStringToRelativeTime(op.feedMonitoring?.lastOutage ?? "")} </span>,
+            unavailableSince: <span style={{ color: "#d9221a", fontWeight: "bold" }}> {formatISODateStringToRelativeTime(op.feedMonitoring?.unavailableSince ?? "")} </span>,
             vehicleCount: <VehicleSparkline data={sparklineStats}/>
         };
     });
