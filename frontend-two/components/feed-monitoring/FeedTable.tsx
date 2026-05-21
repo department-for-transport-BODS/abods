@@ -37,7 +37,14 @@ function translateToRelativeTime(date: string): string {
     return relative ?? "-";
 }
 
-export const FeedTable = ({ title, active, data, vehicleCountData }: { title: string, active: boolean, data: FeedMonitoringOperatorData[], vehicleCountData: VehicleCountData[] }) => {
+interface FeedTableProps {
+    title: string;
+    active: boolean;
+    data: FeedMonitoringOperatorData[];
+    vehicleCountData: VehicleCountData[];
+}
+
+export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTableProps) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");
@@ -69,8 +76,7 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: { title: st
         { key: "availability", label: "Feed availability", sortable: true },
         { key: "updateFrequency", label: "Update frequency", sortable: true },
         { key: active ? "lastOutage" : "unavailableSince", label: active ? "Last outage" : "Unavailable since", sortable: true },
-        // TODO:NOW Do we want to add a column name for the graph - Not very clear what the data is
-        { key: "vehicleCount", label: "Actual vehicle counts within the last 24 hours", sortable: false }
+        { key: "vehicleCount", label: "", sortable: false }
     ];
 
     const rows = pageData.map((op) => {

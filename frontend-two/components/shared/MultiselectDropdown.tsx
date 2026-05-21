@@ -1,5 +1,14 @@
+// TODO:NOW Check with F.KK whether the new change is useful
 import { useEffect, useRef, useState } from "react";
-import { MultiselectDropdownProps } from "@/types";
+
+interface MultiselectDropdownProps {
+    multiSelect?: boolean;
+    label: string;
+    options: string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+    placeholderText?: string;
+}
 
 export const MultiselectDropdown = ({
     multiSelect = true,

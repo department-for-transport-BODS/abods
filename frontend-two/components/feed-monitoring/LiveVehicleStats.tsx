@@ -6,13 +6,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
 
-const COLORS = {
-  lightBlue: "#5694ca",     // Actual bars
-  blue: "#1d70b8",          // Hatch pattern
-  darkBlue: "#003078",      // Expected step line
-  black: "#0b0c0c",         // Cursor / tooltip border
-  legendaryGrey: "#626A6E", // Axis labels
-};
+import { COLOURS } from "@/utils/chartColours";
 
 type Granularity = "hour" | "minute";
 
@@ -35,12 +29,15 @@ function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
   });
 }
 
-const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {  
-    data: VehicleStat[], 
-    granularity: Granularity, 
-    label: string, 
-    xAxisMin?: Date | number, 
-    xAxisMax?: Date | number }) => 
+interface LiveVehicleStatsProps {
+  data: VehicleStat[];
+  granularity: Granularity;
+  label: string;
+  xAxisMin?: Date | number;
+  xAxisMax?: Date | number;
+}
+
+const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: LiveVehicleStatsProps) => 
 {
   const idRef = useRef(`live-vehicle-stats-${Math.random().toString(36).slice(2)}`);
   const chartInstance = useRef<any>(null);
@@ -58,7 +55,7 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
     // Date axis (X)
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = am4core.color(COLORS.legendaryGrey);
+    dateAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
     dateAxis.baseInterval = { timeUnit: granularity, count: 1 };
     dateAxis.gridIntervals.setAll([
       { timeUnit: granularity, count: 2 },
@@ -75,7 +72,7 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.renderer.labels.template.fontSize = 13;
     valueAxis.min = 0;
-    valueAxis.renderer.labels.template.fill = am4core.color(COLORS.legendaryGrey);
+    valueAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
     if (valueAxis.tooltip) valueAxis.tooltip.disabled = true;
 
     // Expected vehicles step-line 
@@ -87,7 +84,7 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
     expectedSeries.strokeLinecap = "round";
     expectedSeries.noRisers = true;
     expectedSeries.strokeWidth = 2;
-    expectedSeries.stroke = am4core.color(COLORS.darkBlue);
+    expectedSeries.stroke = am4core.color(COLOURS.darkBlue);
     expectedSeries.startLocation = 0.1;
     expectedSeries.endLocation = 0.9;
 
@@ -97,8 +94,8 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
     actualSeries.dataFields.dateX = "timestamp";
     actualSeries.dataFields.valueY = "actual";
     actualSeries.clustered = false;
-    actualSeries.fill = am4core.color(COLORS.lightBlue);
-    actualSeries.stroke = am4core.color(COLORS.lightBlue);
+    actualSeries.fill = am4core.color(COLOURS.lightBlue);
+    actualSeries.stroke = am4core.color(COLOURS.lightBlue);
     actualSeries.strokeWidth = 0;
     actualSeries.defaultState.transitionDuration = 100;
     actualSeries.tooltipHTML = `
@@ -115,21 +112,21 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
     if (actualSeries.tooltip) {
       actualSeries.tooltip.pointerOrientation = "vertical";
       actualSeries.tooltip.getFillFromObject = false;
-      actualSeries.tooltip.stroke = am4core.color(COLORS.black);
-      actualSeries.tooltip.label.fill = am4core.color(COLORS.black);
+      actualSeries.tooltip.stroke = am4core.color(COLOURS.black);
+      actualSeries.tooltip.label.fill = am4core.color(COLOURS.black);
       actualSeries.tooltip.label.padding(10, 10, 5, 10);
       actualSeries.tooltip.background.cornerRadius = 0;
       actualSeries.tooltip.background.fillOpacity = 1;
       actualSeries.tooltip.background.filters.clear();
       actualSeries.tooltip.background.fill = am4core.color("#fff");
-      actualSeries.tooltip.background.stroke = am4core.color(COLORS.black);
+      actualSeries.tooltip.background.stroke = am4core.color(COLOURS.black);
     }
 
     // Cursor line
     chart.cursor = new am4charts.XYCursor();
     chart.cursor.behavior = "none";
     chart.cursor.lineY.disabled = true;
-    chart.cursor.lineX.stroke = am4core.color(COLORS.black);
+    chart.cursor.lineX.stroke = am4core.color(COLOURS.black);
     chart.cursor.lineX.strokeWidth = 2;
     chart.cursor.lineX.strokeOpacity = 1;
 
@@ -150,8 +147,8 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: {
         const pattern = new am4core.LinePattern();
         pattern.strokeWidth = 1;
         pattern.rotation = 135;
-        pattern.stroke = am4core.color(COLORS.blue);
-        pattern.fill = am4core.color(COLORS.blue);
+        pattern.stroke = am4core.color(COLOURS.blue);
+        pattern.fill = am4core.color(COLOURS.blue);
         range.axisFill.fill = pattern;
       });
 

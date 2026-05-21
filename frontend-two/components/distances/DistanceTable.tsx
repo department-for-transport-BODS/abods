@@ -1,3 +1,4 @@
+// TODO:NOW: Check old code and change 0s to dashes
 import { useMemo, useEffect, useState } from "react";
 import { PagingPanel } from "../shared/PagingPanel";
 import dynamic from "next/dynamic";
@@ -26,7 +27,11 @@ function getRowValue(row: DistanceData, column: string): string | number {
     }
 }
 
-export const DistanceTable = ({ data }: { data: DistanceData[] }) => {
+interface DistanceTableProps {
+    data: DistanceData[];
+}
+
+export const DistanceTable = ({ data }: DistanceTableProps) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("none");

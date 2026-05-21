@@ -3,15 +3,6 @@ const STICKY_THRESHOLD = 4;
 const PAGES_STICKY = 5;
 const PAGES_MIDDLE = 3;
 
-interface PagingPanelProps {
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-  rowCount: number;
-  noun?: string;
-  onPageChange: (page: number) => void;
-}
-
 function getPageNumbers(current: number, total: number) {
   const stickToStart = total <= MINIMUM_PAGES || current < STICKY_THRESHOLD;
   const stickToEnd =
@@ -37,6 +28,16 @@ function getPageNumbers(current: number, total: number) {
 
   return { pages, stickToStart, stickToEnd };
 }
+
+interface PagingPanelProps {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  rowCount: number;
+  noun?: string;
+  onPageChange: (page: number) => void;
+}
+
 
 export const PagingPanel = ({
   currentPage,

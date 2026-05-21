@@ -5,20 +5,20 @@ import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
-import { FeedMonitoringOperatorData, EventStat, OperatorFeedHistory } from "@/types/feed-monitoring";
+import { FeedMonitoringOperatorData, OperatorFeedHistory } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
-import { DateNavigationHeatmapItem } from "@/types";
 
 const HistoricVehicleStats = dynamic(() => import("@/components/feed-monitoring/HistoricVehicleStats"), { ssr: false });
 
-function buildHeatmap(stats: EventStat[]): DateNavigationHeatmapItem[] {
-  const max = Math.max(...stats.map(({ count }) => count ?? 0));
-  return stats.map(({ count, day }) => ({
-    date: DateTime.fromISO(day).startOf("day"),
-    heat: count && max > 0 ? Math.ceil((count / max) * 6) : 0,
+function buildDateList(): { date: DateTime }[] {
+  const yesterday = DateTime.now().startOf("day").minus({ days: 1 });
+  const startDate = yesterday.minus({ months: 3 }).plus({ days: 1 });
+  const days = Math.floor(yesterday.diff(startDate, "days").days) + 1;
+  return Array.from({ length: days }, (_, i) => ({
+    date: startDate.plus({ days: i }),
   }));
 }
 
@@ -49,8 +49,7 @@ const FeedHistoryPage = () => {
     const { config } = useConfig();
     const [operators, setOperators] = useState<FeedMonitoringOperatorData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [alertStats, setAlertStats] = useState<DateNavigationHeatmapItem[]>([]);
-    const [statsLoading, setStatsLoading] = useState(false);
+    const [dateList, setDateList] = useState<{ date: DateTime }[]>([]);
     const [operatorHistory, setOperatorHistory] = useState<OperatorFeedHistory | null>(null);
     const [historicalDataLoading, setHistoricalDataLoading] = useState(false);
     const [chartErrored, setChartErrored] = useState(false);
@@ -68,22 +67,11 @@ const FeedHistoryPage = () => {
       });
     }, [config]);
 
-    // Fetch alert stats (heatmap) for the last 28 days up to yesterday
-    useEffect(() => {
-      if (!config?.apiUrl || !nocCode) return;
-      const end = yesterday.endOf("day");
-      const start = end.minus({ days: 27 }).startOf("day");
-      setStatsLoading(true);
-      feedMonitoringService
-        .fetchEventStats(config.apiUrl, nocCode, start.toISO()!, end.toISO()!)
-        .then((stats) => {
-          setAlertStats(buildHeatmap(stats));
-          setStatsLoading(false);
-        });
-    }, [config, nocCode]);
-
     // Fetch historical operator stats for selected date
     useEffect(() => {
+      // Create date array for DateNavigation component
+      setDateList(buildDateList());
+      
       if (!config?.apiUrl || !nocCode || !baseDate.isValid) return;
       setHistoricalDataLoading(true);
       setChartErrored(false);
@@ -160,17 +148,13 @@ const FeedHistoryPage = () => {
                     )}
                 </div>
             </div>
-            {statsLoading ? (
-                <div className="datenav__day-blocks mt-4" style={{ height: 57 }} />
-            ) : (
-                <DateNavigationDayBlocks
-                    stats={alertStats}
-                    date={baseDate}
-                    onDateSelected={(selectedDate) => {
-                        router.push(`/feed-monitoring/${nocCode}/feed-history?date=${selectedDate.toISODate()}`);
-                    }}
-                />
-            )}
+            <DateNavigationDayBlocks
+                dateArray={dateList}
+                selectedDate={baseDate}
+                onDateSelected={(selectedDate) => {
+                    router.push(`/feed-monitoring/${nocCode}/feed-history?date=${selectedDate.toISODate()}`);
+                }}
+            />
             <div className="mt-4">
                 {historicalDataLoading && (
                     <Box minHeight="385px">

@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { Interface } from "readline";
 
 const DAY_NAMES = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -52,12 +53,18 @@ function buildCalendarTable(month: DateTime, today: DateTime, maxDate: DateTime)
   return table;
 }
 
-export const DateRangeCalendar = ( {month, selected, onDateChange }: 
-  { month: DateTime, selected: CalendarDateRange, onDateChange: (date: DateTime) => void }) => {
+interface DateRangeCalendarProps {
+  month: DateTime;
+  selected: CalendarDateRange;
+  onDateChange: (date: DateTime) => void;
+}
+
+export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCalendarProps) => {
 
   const today = DateTime.local().startOf("day");
 
   // TODO:NOW Check whether users should be able to select today or only yesterday as latest date
+  // Check old logic and review. Could be a timezone issue
   const maxDate = today
   const table = buildCalendarTable(month, today, maxDate);
 

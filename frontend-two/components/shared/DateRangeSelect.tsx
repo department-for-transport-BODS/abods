@@ -32,7 +32,12 @@ function applyDaySelection(date: DateTime, draft: CalendarDateRange): CalendarDa
   return { start: date, end: draft.start };
 }
 
-export const DateRangeSelect = ({ value, onChange }: { value?: { from: string; to: string }, onChange?: (dateRange: { from: string; to: string }) => void }) => {
+interface DateRangeSelectProps {
+  value?: { from: string; to: string };
+  onChange?: (dateRange: { from: string; to: string }) => void;
+}
+
+export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   const today = DateTime.local().startOf('day');
   const maxDate = today.minus({ days: 1 });
 

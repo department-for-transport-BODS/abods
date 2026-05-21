@@ -1,4 +1,3 @@
-// TODO:NOW: Potential to reduce some of these queries? Or condense
 export const FEED_MONITORING_LIST_QUERY = `
   query feedMonitoringList {
     operatorsFeedMonitoring {

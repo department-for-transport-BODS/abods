@@ -51,26 +51,3 @@ export interface DistancesFilterInput {
   licenseIds?: string[];
   adminAreaIds?: string[];
 }
-
-export interface DistanceFiltersProps {
-  isLoading: boolean;
-  fromDate: string;
-  toDate: string;
-  onFromDateChange: (date: string) => void;
-  onToDateChange: (date: string) => void;
-  adminAreaOptions: string[];
-  selectedAdminAreas: string[];
-  onAdminAreasChange: (selected: string[]) => void;
-  orgOptions: string[];
-  selectedOrgs: string[];
-  onOrgsChange: (selected: string[]) => void;
-  operatorOptions: string[];
-  selectedOperators: string[];
-  onOperatorsChange: (selected: string[]) => void;
-  licenseOptions: string[];
-  selectedLicenses: string[];
-  onLicensesChange: (selected: string[]) => void;
-  serviceOptions: string[];
-  selectedServices: string[];
-  onServicesChange: (selected: string[]) => void;
-}

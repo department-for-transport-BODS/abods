@@ -6,13 +6,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
 
-const COLORS = {
-  lightBlue: "#5694ca",     // Actual series stroke + fill
-  blue: "#1d70b8",          // Outage hatch pattern
-  darkBlue: "#003078",      // Expected series stroke
-  black: "#0b0c0c",         // Cursor / tooltip border
-  legendaryGrey: "#626A6E", // Axis labels
-};
+import { COLOURS } from "@/utils/chartColours";
 
 interface ChartDataPoint {
   dateTime: DateTime;
@@ -63,7 +57,12 @@ function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
   return filled;
 }
 
-const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTime}) => {
+interface HistoricVehicleStatsProps {
+  data: VehicleStat[];
+  date: DateTime;
+}
+
+const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
   const idRef = useRef(`historic-vehicle-stats-${Math.random().toString(36).slice(2)}`);
   const chartInstance = useRef<any>(null);
 
@@ -80,7 +79,7 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
     // Date axis (X) 
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = am4core.color(COLORS.legendaryGrey);
+    dateAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
 
     dateAxis.baseInterval = { timeUnit: "second", count: 1 };
     dateAxis.groupData = true;
@@ -92,7 +91,7 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
     // Value axis (Y)
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.renderer.labels.template.fontSize = 13;
-    valueAxis.renderer.labels.template.fill = am4core.color(COLORS.legendaryGrey);
+    valueAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
     valueAxis.min = 0;
     if (valueAxis.tooltip) valueAxis.tooltip.disabled = true;
 
@@ -102,7 +101,7 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
     expectedSeries.dataFields.dateX = "timestamp";
     expectedSeries.dataFields.valueY = "expected";
     expectedSeries.yAxis = valueAxis;
-    expectedSeries.stroke = am4core.color(COLORS.darkBlue);
+    expectedSeries.stroke = am4core.color(COLOURS.darkBlue);
     expectedSeries.strokeWidth = 2;
     expectedSeries.fillOpacity = 1;
     expectedSeries.tensionX = 0.8;
@@ -118,8 +117,8 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
     actualSeries.dataFields.valueY = "actual";
     actualSeries.dataFields.customValue = "expected";
     actualSeries.yAxis = valueAxis;
-    actualSeries.stroke = am4core.color(COLORS.lightBlue);
-    actualSeries.fill = am4core.color(COLORS.lightBlue);
+    actualSeries.stroke = am4core.color(COLOURS.lightBlue);
+    actualSeries.fill = am4core.color(COLOURS.lightBlue);
     actualSeries.strokeWidth = 2;
     actualSeries.fillOpacity = 0.8;
     actualSeries.tensionX = 0.8;
@@ -142,21 +141,21 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
     if (actualSeries.tooltip) {
       actualSeries.tooltip.pointerOrientation = "vertical";
       actualSeries.tooltip.getFillFromObject = false;
-      actualSeries.tooltip.stroke = am4core.color(COLORS.black);
-      actualSeries.tooltip.label.fill = am4core.color(COLORS.black);
+      actualSeries.tooltip.stroke = am4core.color(COLOURS.black);
+      actualSeries.tooltip.label.fill = am4core.color(COLOURS.black);
       actualSeries.tooltip.label.padding(10, 10, 5, 10);
       actualSeries.tooltip.background.cornerRadius = 0;
       actualSeries.tooltip.background.fillOpacity = 1;
       actualSeries.tooltip.background.filters.clear();
       actualSeries.tooltip.background.fill = am4core.color("#fff");
-      actualSeries.tooltip.background.stroke = am4core.color(COLORS.black);
+      actualSeries.tooltip.background.stroke = am4core.color(COLOURS.black);
     }
 
     // Cursor 
     chart.cursor = new am4charts.XYCursor();
     chart.cursor.behavior = "zoomX";
     chart.cursor.lineY.disabled = true;
-    chart.cursor.lineX.stroke = am4core.color(COLORS.black);
+    chart.cursor.lineX.stroke = am4core.color(COLOURS.black);
     chart.cursor.lineX.strokeWidth = 2;
     chart.cursor.lineX.strokeOpacity = 1;
     chart.cursor.zIndex = 3;
@@ -171,11 +170,11 @@ const HistoricVehicleStats = ({ data, date }: {data: VehicleStat[]; date: DateTi
         const pattern = new am4core.LinePattern();
         pattern.strokeWidth = 1;
         pattern.rotation = 135;
-        pattern.stroke = am4core.color(COLORS.blue);
-        pattern.fill = am4core.color(COLORS.blue);
+        pattern.stroke = am4core.color(COLOURS.blue);
+        pattern.fill = am4core.color(COLOURS.blue);
         point.expectedFill = pattern;
       } else {
-        point.expectedFill = am4core.color(COLORS.darkBlue);
+        point.expectedFill = am4core.color(COLOURS.darkBlue);
       }
     });
     chart.data = chartData;

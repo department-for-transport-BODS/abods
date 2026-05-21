@@ -2,7 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
 
-export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: { operators: FeedMonitoringOperatorData[], currentNocCode: string, pageLink: string }) => {
+interface OperatorDropdownProps {
+    operators: FeedMonitoringOperatorData[];
+    currentNocCode: string;
+    pageLink: string;
+}
+
+export const OperatorDropdown = ({ operators, currentNocCode, pageLink }: OperatorDropdownProps) => {
     const router = useRouter();
     const [openDropdown, setOpenDropdown] = useState(false);
     const [hovered, setHovered] = useState<string | null>(null);

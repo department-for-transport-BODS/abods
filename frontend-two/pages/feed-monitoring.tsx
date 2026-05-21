@@ -16,14 +16,12 @@ const FeedMonitoringPage = () => {
     if (!config?.apiUrl) {
       setOperatorData([]);
       setIsLoading(false);
-      console.error("API URL is not configured");
       return;
     }
     const load = async () => {
       setIsLoading(true);
       const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
       const vehicleData = await feedMonitoringService.fetchOperatorSparklines(config.apiUrl, data.map(d => d.operatorId));
-      console.log("Fetched vehicle data:", vehicleData);
       setOperatorData(data);
       setVehicleCountData(vehicleData);
       setIsLoading(false);
@@ -64,7 +62,6 @@ const FeedMonitoringPage = () => {
           />
         </div>
         {isLoading ? (
-          // TODO: Make a loading page that looks nicer than this and is reusable across the app
           <p className="govuk-body">Loading...</p>
           
         ) : (

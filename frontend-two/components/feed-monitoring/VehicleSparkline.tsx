@@ -35,7 +35,11 @@ function buildChartData(stats: VehicleStat[]) {
   return filled;
 }
 
-export const VehicleSparkline = ({ data }: { data: VehicleStat[] }) => {
+interface VehicleSparklineProps {
+    data: VehicleStat[];
+}
+
+export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<am4charts.XYChart | null>(null);
 
