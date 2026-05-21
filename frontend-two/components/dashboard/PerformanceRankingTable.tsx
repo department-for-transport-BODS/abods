@@ -125,6 +125,14 @@ export const PerformanceRankingTable = ({
         aria-busy={!loaded}
       >
         <table className="ranking-table__data">
+          <colgroup>
+            <col className="ranking-table__col-service" />
+            {nocCode === null ? (
+              <col className="ranking-table__col-operator" />
+            ) : null}
+            <col className="ranking-table__col-stat" />
+            <col className="ranking-table__col-trend" />
+          </colgroup>
           <thead>
             <tr>
               <th className="govuk-visually-hidden">Service</th>
@@ -145,17 +153,17 @@ export const PerformanceRankingTable = ({
                 <tr key={`${noc}-${lineId}`}>
                   <td className="ranking-table__service">
                     <Link
-                      className="link govuk-link ranking-table__link link--no-underline"
+                      className="govuk-link ranking-table__link"
                       href={noc ? `/on-time/${noc}/${lineId}` : "/on-time"}
                     >
-                      <span className="link__text">
-                        {buildServiceName(service)}
-                      </span>
+                      {buildServiceName(service)}
                     </Link>
                   </td>
                   {nocCode === null ? (
                     <td className="ranking-table__operator">
-                      {getOperatorName(operators, noc)}
+                      <span className="ranking-table__operator-text">
+                        {getOperatorName(operators, noc)}
+                      </span>
                     </td>
                   ) : null}
                   <td className="govuk-!-font-weight-bold ranking-table__stat">

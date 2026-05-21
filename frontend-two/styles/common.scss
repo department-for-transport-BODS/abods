@@ -665,23 +665,45 @@
   }
 
   &__service {
-    width: 100%;
-    min-width: 0;
-
     .govuk-link {
-      overflow-wrap: anywhere;
-      word-break: break-word;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+  }
+
+  &__col-service {
+    width: auto;
+  }
+
+  &__col-operator {
+    width: 12rem;
+  }
+
+  &__col-stat {
+    width: 7rem;
+  }
+
+  &__col-trend {
+    width: 8rem;
   }
 
   &__operator {
     color: $govuk-secondary-text-colour;
   }
 
+  &__operator-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   &__stat,
   &__trend {
-    width: 1%;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   &__link {
