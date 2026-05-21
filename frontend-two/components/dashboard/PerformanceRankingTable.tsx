@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
+import { Tooltip } from "@/components/shared/Tooltip";
 import {
   OperatorDashboard,
   RankingOrder,
@@ -165,11 +166,10 @@ export const PerformanceRankingTable = ({
                   </td>
                   <td className="ranking-table__trend">
                     {trend ? (
-                      <span
-                        className={buildTrendClassName(trend.direction)}
-                        title={tooltip}
-                      >
-                        <span className="change__value">{trend.diff}%</span>
+                      <span className={buildTrendClassName(trend.direction)}>
+                        <Tooltip message={tooltip} underline>
+                          <span className="change__value">{trend.diff}%</span>
+                        </Tooltip>
                       </span>
                     ) : null}
                   </td>
