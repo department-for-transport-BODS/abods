@@ -82,7 +82,7 @@ export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
     },
     include: {
       corridor_stops: true,
-      // bods_user: true,
+      bods_user: true,
     },
   });
 };
@@ -98,7 +98,7 @@ export const getCorridor = (
       organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
     include: {
-      // bods_user: true,
+      bods_user: true,
       corridor_stops: {
         include: {
           naptan_stop: {
