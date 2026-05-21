@@ -120,7 +120,10 @@ export const PerformanceRankingTable = ({
         </ul>
       </div>
 
-      <div className="ranking-table__content" aria-busy={!loaded}>
+      <div
+        className={`ranking-table__content ${!loaded ? "ranking-table__content--loading" : ""}`}
+        aria-busy={!loaded}
+      >
         <table className="ranking-table__data">
           <thead>
             <tr>
@@ -174,13 +177,24 @@ export const PerformanceRankingTable = ({
         </table>
 
         {stateMessage ? (
-          <div
-            className={
-              !loaded ? "ranking-table__loading" : "ranking-table__no-data"
-            }
-          >
-            <span className="govuk-body">{stateMessage}</span>
-          </div>
+          !loaded ? (
+            <div
+              className="ranking-table__loading"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="govuk-visually-hidden">Loading...</span>
+              <span className="ranking-table__loading-dots" aria-hidden="true">
+                <span className="ranking-table__loading-dot" />
+                <span className="ranking-table__loading-dot" />
+                <span className="ranking-table__loading-dot" />
+              </span>
+            </div>
+          ) : (
+            <div className="ranking-table__no-data">
+              <span className="govuk-body">{stateMessage}</span>
+            </div>
+          )
         ) : null}
       </div>
     </div>
