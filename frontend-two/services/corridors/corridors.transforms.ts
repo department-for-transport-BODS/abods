@@ -1,4 +1,4 @@
-import { Interval } from "luxon";
+import { DateTime, Interval } from "luxon";
 import {
   formatDayOfWeek,
   formatDayOfWeekShort,
