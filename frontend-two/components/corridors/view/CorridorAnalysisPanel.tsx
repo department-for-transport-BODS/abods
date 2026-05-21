@@ -1,8 +1,29 @@
+import dynamic from "next/dynamic";
 import {
   CorridorHideOutliers,
   CorridorStats,
   CorridorTransitTimeStat,
 } from "@/types/corridors";
+
+const CorridorBoxPlotChart = dynamic(
+  () =>
+    import("./CorridorBoxPlotChart").then((m) => ({
+      default: m.CorridorBoxPlotChart,
+    })),
+  { ssr: false },
+);
+
+const CorridorHistogramChart = dynamic(
+  () =>
+    import("./CorridorHistogramChart").then((m) => ({
+      default: m.CorridorHistogramChart,
+    })),
+  { ssr: false },
+);
+
+// Colours matching the Angular frontend
+const JOURNEY_TIME_WHISKER = "#4c2c92"; // govuk purple
+const JOURNEY_TIME_BOX = "#6f72af"; // light purple
 
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
 
@@ -81,13 +102,12 @@ export const CorridorAnalysisPanel = ({
   return (
     <div className="govuk-!-margin-bottom-6">
       <h2 className="govuk-heading-m">Journey-time analysis</h2>
-      <div className="govuk-button-group govuk-!-margin-bottom-3">
+      <div className="analysis-tabs govuk-!-margin-bottom-4">
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
-            className={`govuk-button govuk-button--secondary ${tab === item.id ? "govuk-!-font-weight-bold" : ""}`}
-            data-module="govuk-button"
+            className={`analysis-tabs__tab${tab === item.id ? " analysis-tabs__tab--active" : ""}`}
             onClick={() => onChangeTab(item.id)}
           >
             {item.label}
@@ -97,11 +117,17 @@ export const CorridorAnalysisPanel = ({
 
       {tab === "timeline" ? (
         <>
-          <TransitTimeTable
+          <CorridorBoxPlotChart
             data={stats.transitTimeStats}
-            label={(row) => row.ts ?? "Unknown"}
+            xAxisType="date"
+            xAxisTitle="Date"
+            yAxisType="time"
+            yAxisTitle="Journey time"
+            hideOutliers={hideOutliers.journeyTime}
+            whiskerColor={JOURNEY_TIME_WHISKER}
+            boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small">
+          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -125,11 +151,17 @@ export const CorridorAnalysisPanel = ({
 
       {tab === "timeOfDay" ? (
         <>
-          <TransitTimeTable
+          <CorridorBoxPlotChart
             data={stats.transitTimeTimeOfDayStats}
-            label={(row) => row.binLabel ?? row.category ?? "Unknown"}
+            xAxisType="category"
+            xAxisTitle="Time of day"
+            yAxisType="time"
+            yAxisTitle="Journey time"
+            hideOutliers={hideOutliers.timeOfDay}
+            whiskerColor={JOURNEY_TIME_WHISKER}
+            boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small">
+          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -153,11 +185,17 @@ export const CorridorAnalysisPanel = ({
 
       {tab === "dayOfWeek" ? (
         <>
-          <TransitTimeTable
+          <CorridorBoxPlotChart
             data={stats.transitTimeDayOfWeekStats}
-            label={(row) => row.binLabel ?? row.category ?? "Unknown"}
+            xAxisType="category"
+            xAxisTitle="Day of week"
+            yAxisType="time"
+            yAxisTitle="Journey time"
+            hideOutliers={hideOutliers.dayOfWeek}
+            whiskerColor={JOURNEY_TIME_WHISKER}
+            boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small">
+          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -180,28 +218,7 @@ export const CorridorAnalysisPanel = ({
       ) : null}
 
       {tab === "distribution" ? (
-        <table className="govuk-table govuk-!-margin-bottom-4">
-          <thead className="govuk-table__head">
-            <tr className="govuk-table__row">
-              <th scope="col" className="govuk-table__header">
-                Journey time bin
-              </th>
-              <th scope="col" className="govuk-table__header">
-                Number of journeys
-              </th>
-            </tr>
-          </thead>
-          <tbody className="govuk-table__body">
-            {stats.transitTimeHistogram.map((row, idx) => (
-              <tr key={`${row.bin}-${idx}`} className="govuk-table__row">
-                <td className="govuk-table__cell">
-                  {row.xAxisLabel ?? row.bin ?? "Unknown"}
-                </td>
-                <td className="govuk-table__cell">{row.freq ?? 0}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <CorridorHistogramChart data={stats.transitTimeHistogram} />
       ) : null}
     </div>
   );

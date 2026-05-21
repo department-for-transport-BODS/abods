@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -15,6 +15,7 @@ import { averageSpeedLabel } from "@/services/corridors/corridors-speed-utils";
 import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnalysisPanel";
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
+import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { MatchType } from "@/types/corridors";
 
@@ -55,6 +56,35 @@ const formatTransitTime = (seconds: number | null | undefined): string => {
 const parseMatchType = (value: string | null): MatchType =>
   value === "estimated" ? "estimated" : "evidenced";
 
+const PRESET_DATE_RANGES: Record<
+  string,
+  (today: DateTime) => { from: DateTime; to: DateTime }
+> = {
+  last7: (t) => ({ from: t.minus({ days: 7 }), to: t }),
+  last28: (t) => ({ from: t.minus({ days: 28 }), to: t }),
+  lastMonth: (t) => ({
+    from: t.minus({ months: 1 }).startOf("month"),
+    to: t.minus({ months: 1 }).endOf("month").startOf("day"),
+  }),
+  monthToDate: (t) => ({ from: t.startOf("month"), to: t }),
+};
+
+const formatDateDisplay = (dt: DateTime): string => dt.toFormat("d MMM yyyy");
+
+const CalendarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+    focusable="false"
+    fill="currentColor"
+  >
+    <path d="M15 2h-1V0h-2v2H8V0H6v2H5C3.9 2 3 2.9 3 4v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 16H5V7h10v11zm0-13H5V4h10v1z" />
+  </svg>
+);
+
 const CorridorsViewPage = () => {
   useRequireAuth();
 
@@ -63,6 +93,8 @@ const CorridorsViewPage = () => {
   const { loadData } = useHelpdesk();
   const { hideOutliers, setJourneyTime, setTimeOfDay, setDayOfWeek } =
     useCorridorHideOutliers();
+
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   useEffect(() => {
     loadData("corridors", "Corridors");
@@ -84,6 +116,8 @@ const CorridorsViewPage = () => {
     queryValue(router.query.tab) === "distribution"
       ? (queryValue(router.query.tab) as AnalysisTab)
       : "timeline";
+
+  const preset = queryValue(router.query.preset) ?? "last7";
 
   const selectedSegment = queryValue(router.query.segment);
   const selectedSegmentIndex =
@@ -148,6 +182,19 @@ const CorridorsViewPage = () => {
         ]
       : [];
 
+  const handlePresetChange = (newPreset: string) => {
+    const today = DateTime.utc().startOf("day");
+    const rangeBuilder = PRESET_DATE_RANGES[newPreset];
+    if (rangeBuilder) {
+      const range = rangeBuilder(today);
+      setQuery({
+        preset: newPreset,
+        from: range.from.toUTC().toISO() ?? undefined,
+        to: range.to.toUTC().toISO() ?? undefined,
+      });
+    }
+  };
+
   const setQuery = (updates: Record<string, string | undefined>) => {
     router
       .replace(
@@ -194,100 +241,108 @@ const CorridorsViewPage = () => {
             </div>
           </div>
 
-          <div className="govuk-grid-row govuk-!-margin-bottom-5">
-            <div className="govuk-grid-column-one-quarter">
-              <label className="govuk-label" htmlFor="corridor-from-date">
-                From
-              </label>
-              <input
-                id="corridor-from-date"
-                type="date"
-                className="govuk-input"
-                value={toIsoDateInput(fromDate)}
-                onChange={(event) =>
-                  setQuery({
-                    from:
-                      DateTime.fromISO(event.target.value).toUTC().toISO() ??
-                      undefined,
-                  })
-                }
-              />
-            </div>
-            <div className="govuk-grid-column-one-quarter">
-              <label className="govuk-label" htmlFor="corridor-to-date">
-                To
-              </label>
-              <input
-                id="corridor-to-date"
-                type="date"
-                className="govuk-input"
-                value={toIsoDateInput(toDate)}
-                onChange={(event) =>
-                  setQuery({
-                    to:
-                      DateTime.fromISO(event.target.value).toUTC().toISO() ??
-                      undefined,
-                  })
-                }
-              />
-            </div>
-            <div className="govuk-grid-column-one-quarter">
-              <fieldset className="govuk-fieldset">
-                <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
-                  Show performance using data from
-                </legend>
-                <div className="govuk-radios govuk-radios--small">
-                  <div className="govuk-radios__item">
-                    <input
-                      className="govuk-radios__input"
-                      id="corridor-match-estimated"
-                      type="radio"
-                      checked={matchType === "estimated"}
-                      onChange={() => setQuery({ matchType: "estimated" })}
-                    />
-                    <label
-                      className="govuk-label govuk-radios__label"
-                      htmlFor="corridor-match-estimated"
-                    >
-                      Estimated
+          <div className="corridor__date-wrapper govuk-!-margin-bottom-5">
+            <div className="corridor__date-range-picker">
+              <div className="corridor__date-range-input-wrapper">
+                <span className="corridor__date-range-text">
+                  {formatDateDisplay(fromDate)} &#x2013;{" "}
+                  {formatDateDisplay(toDate)}
+                </span>
+                <button
+                  type="button"
+                  className="unbuttoned corridor__date-range-calendar-btn"
+                  onClick={() => setIsDatePickerOpen((v) => !v)}
+                  aria-label="Open date range picker"
+                  aria-expanded={isDatePickerOpen}
+                >
+                  <CalendarIcon />
+                </button>
+              </div>
+              {isDatePickerOpen && (
+                <div className="corridor__date-range-panel">
+                  <div>
+                    <label className="govuk-label" htmlFor="corridor-from-date">
+                      From
                     </label>
+                    <input
+                      id="corridor-from-date"
+                      type="date"
+                      className="govuk-input govuk-input--width-10"
+                      value={toIsoDateInput(fromDate)}
+                      onChange={(event) => {
+                        const dt = DateTime.fromISO(event.target.value);
+                        if (dt.isValid) {
+                          setQuery({
+                            from: dt.toUTC().toISO() ?? undefined,
+                            preset: "custom",
+                          });
+                        }
+                      }}
+                    />
                   </div>
-                  <div className="govuk-radios__item">
-                    <input
-                      className="govuk-radios__input"
-                      id="corridor-match-evidenced"
-                      type="radio"
-                      checked={matchType === "evidenced"}
-                      onChange={() => setQuery({ matchType: "evidenced" })}
-                    />
-                    <label
-                      className="govuk-label govuk-radios__label"
-                      htmlFor="corridor-match-evidenced"
-                    >
-                      Evidenced
+                  <div>
+                    <label className="govuk-label" htmlFor="corridor-to-date">
+                      To
                     </label>
+                    <input
+                      id="corridor-to-date"
+                      type="date"
+                      className="govuk-input govuk-input--width-10"
+                      value={toIsoDateInput(toDate)}
+                      onChange={(event) => {
+                        const dt = DateTime.fromISO(event.target.value);
+                        if (dt.isValid) {
+                          setQuery({
+                            to: dt.toUTC().toISO() ?? undefined,
+                            preset: "custom",
+                          });
+                        }
+                      }}
+                    />
                   </div>
                 </div>
-              </fieldset>
+              )}
             </div>
-            <div className="govuk-grid-column-one-quarter govuk-!-text-align-right">
-              {corridor ? (
-                <Link
-                  href={`/corridors/edit/${corridor.id}`}
-                  role="button"
-                  draggable={false}
-                  className="govuk-button govuk-button--secondary"
-                  data-module="govuk-button"
-                >
-                  Edit corridor
-                </Link>
-              ) : null}
-            </div>
+            <select
+              className="govuk-select"
+              value={preset}
+              onChange={(e) => handlePresetChange(e.target.value)}
+              aria-label="Preset date range"
+            >
+              <option value="last7">Last 7 days</option>
+              <option value="last28">Last 28 days</option>
+              <option value="lastMonth">Last month</option>
+              <option value="monthToDate">Month to date</option>
+              {preset === "custom" && <option value="custom">Custom</option>}
+            </select>
+            <SegmentedToggle
+              name="match-type"
+              legend="Show performance using data from"
+              hideLegend
+              value={matchType}
+              onChange={(value) => setQuery({ matchType: value })}
+              options={[
+                { value: "estimated", label: "Estimated" },
+                { value: "evidenced", label: "Evidenced" },
+              ]}
+            />
+            {corridor ? (
+              <Link
+                href={`/corridors/edit/${corridor.id}`}
+                role="button"
+                draggable={false}
+                className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
+                data-module="govuk-button"
+              >
+                Edit corridor
+              </Link>
+            ) : null}
           </div>
 
           {corridor ? (
             <CorridorSegmentSelector
               stops={corridor.stops}
+              serviceLinks={stats?.serviceLinks}
               selectedSegmentIndex={selectedSegmentIndex}
               onChangeSegmentIndex={(value) =>
                 setQuery({
@@ -298,92 +353,109 @@ const CorridorsViewPage = () => {
             />
           ) : null}
 
-          {stats ? (
-            <>
-              <div className="govuk-grid-row govuk-!-margin-bottom-4">
-                <div className="govuk-grid-column-one-half">
-                  <Stat
-                    id="corridor-total-transits"
-                    label="Recorded transits"
-                    value={stats.summaryStats.totalTransits ?? "Unavailable"}
-                  />
-                </div>
-                <div className="govuk-grid-column-one-half">
-                  <Stat
-                    id="corridor-missing-transits"
-                    label="Missing transits"
-                    value={
-                      stats.summaryStats.scheduledTransits !== null &&
-                      stats.summaryStats.totalTransits !== null
-                        ? stats.summaryStats.scheduledTransits -
-                          stats.summaryStats.totalTransits
-                        : "Unavailable"
-                    }
-                  />
-                </div>
-              </div>
-              <div className="govuk-grid-row govuk-!-margin-bottom-6">
-                <div className="govuk-grid-column-one-half">
-                  <Stat
-                    id="corridor-average-journey-time"
-                    label="Average journey time"
-                    value={formatTransitTime(
-                      stats.summaryStats.averageTransitTime,
-                    )}
-                  />
-                </div>
-                <div className="govuk-grid-column-one-half">
-                  <Stat
-                    id="corridor-average-speed"
-                    label="Average speed"
-                    value={averageSpeedLabel(
-                      stats.serviceLinks,
-                      stats.summaryStats.averageTransitTime,
-                    )}
-                  />
-                </div>
-              </div>
-            </>
-          ) : null}
+          <div className="corridor__summary govuk-!-margin-bottom-7">
+            <Stat
+              id="corridor-total-transits"
+              label="Recorded transits"
+              className="corridor__summary-stat"
+              value={
+                statsLoading
+                  ? "\u2014"
+                  : stats?.summaryStats.totalTransits ?? "Unavailable"
+              }
+              tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
+            />
+            <Stat
+              id="corridor-missing-transits"
+              label="Missing transits"
+              className="corridor__summary-stat"
+              value={
+                statsLoading
+                  ? "\u2014"
+                  : stats?.summaryStats.scheduledTransits !== null &&
+                      stats?.summaryStats.scheduledTransits !== undefined &&
+                      stats?.summaryStats.totalTransits !== null &&
+                      stats?.summaryStats.totalTransits !== undefined
+                    ? stats.summaryStats.scheduledTransits -
+                      stats.summaryStats.totalTransits
+                    : "Unavailable"
+              }
+              tooltip="The number of journeys in the timetables provided that do not have real-time information recorded against them."
+            />
+            <Stat
+              id="corridor-average-journey-time"
+              label="Average journey time"
+              className="corridor__summary-stat"
+              value={
+                statsLoading
+                  ? "\u2014"
+                  : formatTransitTime(stats?.summaryStats.averageTransitTime)
+              }
+              tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
+            />
+            <Stat
+              id="corridor-average-speed"
+              label="Average speed"
+              className="corridor__summary-stat"
+              value={
+                statsLoading
+                  ? "\u2014"
+                  : averageSpeedLabel(
+                      stats?.serviceLinks ?? [],
+                      stats?.summaryStats.averageTransitTime,
+                    )
+              }
+              tooltip="The average speed of buses moving through the corridor according to the real-time information received."
+            />
+            <Stat
+              id="corridor-services"
+              label="Services"
+              className="corridor__summary-stat"
+              value={
+                statsLoading
+                  ? "\u2014"
+                  : stats?.summaryStats.numberOfServices ?? "Unavailable"
+              }
+              tooltip="The total number of different services that pass through this corridor."
+            />
+          </div>
 
-          <div className="govuk-form-group govuk-!-margin-bottom-4">
-            <fieldset className="govuk-fieldset">
-              <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
-                Analysis
-              </legend>
-              <div className="govuk-radios govuk-radios--inline govuk-radios--small">
-                <div className="govuk-radios__item">
-                  <input
-                    className="govuk-radios__input"
-                    id="corridor-mode-time"
-                    type="radio"
-                    checked={mode === "time"}
-                    onChange={() => setQuery({ mode: "time" })}
-                  />
-                  <label
-                    className="govuk-label govuk-radios__label"
-                    htmlFor="corridor-mode-time"
-                  >
-                    Journey time
-                  </label>
-                </div>
-                <div className="govuk-radios__item">
-                  <input
-                    className="govuk-radios__input"
-                    id="corridor-mode-speed"
-                    type="radio"
-                    checked={mode === "speed"}
-                    onChange={() => setQuery({ mode: "speed" })}
-                  />
-                  <label
-                    className="govuk-label govuk-radios__label"
-                    htmlFor="corridor-mode-speed"
-                  >
-                    Speed
-                  </label>
-                </div>
+          <div className="corridor__analysis-selector govuk-!-margin-bottom-4">
+            <h2 className="govuk-heading-m govuk-!-margin-top-0 govuk-!-margin-bottom-0">
+              Analysis
+            </h2>
+            <div className="govuk-radios govuk-radios--inline govuk-radios--small">
+              <div className="govuk-radios__item">
+                <input
+                  className="govuk-radios__input"
+                  id="corridor-mode-time"
+                  type="radio"
+                  checked={mode === "time"}
+                  onChange={() => setQuery({ mode: "time" })}
+                />
+                <label
+                  className="govuk-label govuk-radios__label"
+                  htmlFor="corridor-mode-time"
+                >
+                  Journey time
+                </label>
               </div>
-            </fieldset>
+              <div className="govuk-radios__item">
+                <input
+                  className="govuk-radios__input"
+                  id="corridor-mode-speed"
+                  type="radio"
+                  checked={mode === "speed"}
+                  onChange={() => setQuery({ mode: "speed" })}
+                />
+                <label
+                  className="govuk-label govuk-radios__label"
+                  htmlFor="corridor-mode-speed"
+                >
+                  Speed
+                </label>
+              </div>
+            </div>
           </div>
 
           <div className="govuk-inset-text">
