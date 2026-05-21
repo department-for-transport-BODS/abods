@@ -298,7 +298,11 @@ export const CreateCorridorForm = ({
                   name="stop-query"
                   type="text"
                   className="govuk-input govuk-input--width-20"
-                  placeholder="Enter four or more characters"
+                  placeholder={
+                    searchMode === "location"
+                      ? "Search"
+                      : "Enter four or more characters"
+                  }
                   value={stopQuery}
                   onChange={(event) => setStopQuery(event.target.value)}
                 />
