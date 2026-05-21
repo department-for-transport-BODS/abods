@@ -1,3 +1,7 @@
+import useSWR from "swr";
+import { fetchVersion } from "@/utils/config";
+
 export default function VersionPage() {
-  return <p>Version: {process.env.NEXT_PUBLIC_APP_VERSION}</p>;
+  const { data } = useSWR("version", fetchVersion);
+  return <p>Version: {data?.version}</p>;
 }
