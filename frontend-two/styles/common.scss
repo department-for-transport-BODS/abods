@@ -221,6 +221,98 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   }
 }
 
+// Corridor map
+.corridor__map-wrapper {
+  position: relative;
+}
+
+.corridor__map {
+  height: 440px;
+}
+
+.corridor__map-style-toggle {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: flex;
+  gap: 0;
+  z-index: 1;
+}
+
+.corridor__map-style-btn {
+  @include govuk-font(16);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  border: 2px solid $govuk-border-colour;
+  background: govuk-colour("white");
+  cursor: pointer;
+
+  & + & {
+    border-left: 0;
+  }
+
+  &--active {
+    background: govuk-colour("dark-grey");
+    color: govuk-colour("white");
+    font-weight: $govuk-font-weight-bold;
+    border-color: govuk-colour("dark-grey");
+  }
+}
+
+.corridor__map-recentre {
+  position: absolute;
+  bottom: govuk-spacing(3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+// Mapbox popup GDS styling
+.mapboxgl-popup.gds-popup {
+  .mapboxgl-popup-tip {
+    border-width: 9px;
+  }
+
+  &.mapboxgl-popup-anchor-top,
+  &.mapboxgl-popup-anchor-top-left,
+  &.mapboxgl-popup-anchor-top-right {
+    > .mapboxgl-popup-tip {
+      border-bottom-color: govuk-colour("black");
+      margin-bottom: -1px;
+    }
+  }
+
+  &.mapboxgl-popup-anchor-bottom,
+  &.mapboxgl-popup-anchor-bottom-left,
+  &.mapboxgl-popup-anchor-bottom-right {
+    > .mapboxgl-popup-tip {
+      border-top-color: govuk-colour("black");
+      margin-top: -1px;
+    }
+  }
+
+  &.mapboxgl-popup-anchor-left > .mapboxgl-popup-tip {
+    border-right-color: govuk-colour("black");
+    margin-right: -1px;
+  }
+
+  &.mapboxgl-popup-anchor-right > .mapboxgl-popup-tip {
+    border-left-color: govuk-colour("black");
+    margin-left: -1px;
+  }
+
+  > .mapboxgl-popup-content {
+    @include govuk-font(16);
+    background-color: govuk-colour("black");
+    border: 0 none;
+    color: govuk-colour("white");
+    box-shadow: none;
+    border-radius: 0;
+    outline: 0;
+    padding: govuk-spacing(2);
+    pointer-events: none;
+  }
+}
+
 // Analysis heading + mode selector row
 .corridor__analysis-selector {
   display: flex;

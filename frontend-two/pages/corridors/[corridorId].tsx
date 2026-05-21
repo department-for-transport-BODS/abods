@@ -15,6 +15,7 @@ import { averageSpeedLabel } from "@/services/corridors/corridors-speed-utils";
 import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnalysisPanel";
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
+import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { MatchType } from "@/types/corridors";
@@ -458,10 +459,16 @@ const CorridorsViewPage = () => {
             </div>
           </div>
 
-          <div className="govuk-inset-text">
-            Map view is being migrated separately. Corridor stats and segment
-            filtering are active.
-          </div>
+          {corridor && config ? (
+            <CorridorViewMap
+              stops={corridor.stops}
+              serviceLinks={stats?.serviceLinks ?? []}
+              selectedSegmentIndex={selectedSegmentIndex}
+              mapboxToken={config.mapboxToken}
+              mapboxStyle={config.mapboxStyle}
+              mapboxSatelliteStyle={config.mapboxSatelliteStyle}
+            />
+          ) : null}
 
           {stats ? (
             <CorridorAnalysisPanel
