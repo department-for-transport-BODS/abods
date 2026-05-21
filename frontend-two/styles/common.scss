@@ -420,6 +420,38 @@
   }
 }
 
+.link {
+  &--with-arrows {
+    &::after {
+      margin-left: govuk-spacing(1);
+      content: "\00BB";
+    }
+  }
+
+  &--no-underline {
+    text-decoration: none;
+    display: inline-flex;
+
+    &:focus,
+    &:hover,
+    &:active {
+      text-decoration: none;
+    }
+
+    &:hover {
+      .link__text {
+        text-decoration: underline;
+      }
+    }
+
+    &:focus {
+      .link__text {
+        text-decoration: none;
+      }
+    }
+  }
+}
+
 .link-with-arrow {
   font-weight: $govuk-font-weight-bold;
 }
@@ -604,9 +636,16 @@
 }
 
 .ranking-table {
+  &__content {
+    position: relative;
+    width: 100%;
+    min-height: 108px;
+  }
+
   &__data {
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
     @include govuk-font(19);
     padding: 0;
 
@@ -620,6 +659,7 @@
   }
 
   &__service {
+    width: 100%;
     min-width: 0;
 
     .govuk-link {
@@ -634,6 +674,7 @@
 
   &__stat,
   &__trend {
+    width: 1%;
     white-space: nowrap;
   }
 
@@ -646,6 +687,11 @@
 
   &__no-data,
   &__loading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: govuk-colour("white");
+    width: 100%;
     min-height: 108px;
     display: flex;
     align-items: center;
@@ -655,6 +701,10 @@
   &__loading {
     position: relative;
   }
+}
+
+.app-performance-ranking {
+  width: 100%;
 }
 
 @include bp($to-tablet) {
@@ -760,6 +810,7 @@
   }
   &__performance {
     margin-bottom: govuk-spacing(6);
+    min-width: 0;
   }
   &__vehicles-status {
     margin-bottom: govuk-spacing(6);

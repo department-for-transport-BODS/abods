@@ -79,6 +79,14 @@ export const PerformanceRankingTable = ({
       ? `Change in on-time percentage from ${periodLabel} (${trendFrom.toFormat("d MMMM")} - ${trendTo.toFormat("d MMMM")})`
       : `Change in on-time percentage from ${periodLabel}`;
 
+  const stateMessage = !loaded
+    ? "Loading..."
+    : errored
+      ? "There was an error fetching the service data"
+      : services.length === 0
+        ? "No service data for the selected time period"
+        : null;
+
   return (
     <div className="app-performance-ranking">
       <div className="tabs">
@@ -112,23 +120,7 @@ export const PerformanceRankingTable = ({
         </ul>
       </div>
 
-      {!loaded ? (
-        <div className="ranking-table__loading">
-          <p className="govuk-body">Loading...</p>
-        </div>
-      ) : errored ? (
-        <div className="ranking-table__no-data">
-          <span className="govuk-body">
-            There was an error fetching the service data
-          </span>
-        </div>
-      ) : services.length === 0 ? (
-        <div className="ranking-table__no-data">
-          <span className="govuk-body">
-            No service data for the selected time period
-          </span>
-        </div>
-      ) : (
+      <div className="ranking-table__content" aria-busy={!loaded}>
         <table className="ranking-table__data">
           <thead>
             <tr>
@@ -150,10 +142,12 @@ export const PerformanceRankingTable = ({
                 <tr key={`${noc}-${lineId}`}>
                   <td className="ranking-table__service">
                     <Link
-                      className="govuk-link"
+                      className="link govuk-link ranking-table__link link--no-underline"
                       href={noc ? `/on-time/${noc}/${lineId}` : "/on-time"}
                     >
-                      {buildServiceName(service)}
+                      <span className="link__text">
+                        {buildServiceName(service)}
+                      </span>
                     </Link>
                   </td>
                   {nocCode === null ? (
@@ -178,7 +172,17 @@ export const PerformanceRankingTable = ({
             })}
           </tbody>
         </table>
-      )}
+
+        {stateMessage ? (
+          <div
+            className={
+              !loaded ? "ranking-table__loading" : "ranking-table__no-data"
+            }
+          >
+            <span className="govuk-body">{stateMessage}</span>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
