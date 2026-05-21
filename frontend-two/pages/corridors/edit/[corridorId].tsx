@@ -8,18 +8,11 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { CreateCorridorForm } from "@/components/corridors/create/CreateCorridorForm";
 import { corridorsService } from "@/services/corridors/corridors.service";
+import { parseCorridorId } from "@/utils/query";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
   "Corridor not found, or you do not have permission to view.";
-
-const parseCorridorId = (
-  value: string | string[] | undefined,
-): number | null => {
-  const corridorId = Array.isArray(value) ? value[0] : value;
-  const parsed = Number(corridorId);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
 
 const CorridorsEditPage = () => {
   useRequireAuth();

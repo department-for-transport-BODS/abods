@@ -1,4 +1,11 @@
-import { DateTime, Duration, Interval } from "luxon";
+import { Interval } from "luxon";
+import {
+  formatDayOfWeek,
+  formatDayOfWeekShort,
+  formatDuration,
+  formatMinuteSeconds,
+  isoDayOfWeek,
+} from "@/utils/date";
 import {
   CorridorGranularity,
   CorridorHistogramBin,
@@ -12,26 +19,6 @@ const EMPTY_TRANSIT_TIME: CorridorTransitTimeStat = {
   percentile25: null,
   percentile75: null,
 };
-
-const formatMinuteSeconds = (minute: number) =>
-  Duration.fromObject({ minute }).toFormat("m:ss");
-
-const formatDuration = (minute: number) => {
-  const min = Duration.fromObject({ minute });
-  return `${min.toFormat("m:ss")} - ${min.plus({ seconds: 59 }).toFormat("m:ss")}`;
-};
-
-const formatDayOfWeekShort = (weekday: number) =>
-  DateTime.fromObject({
-    weekday: weekday as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-  }).toFormat("ccc");
-
-const formatDayOfWeek = (weekday: number) =>
-  DateTime.fromObject({
-    weekday: weekday as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-  }).toFormat("cccc");
-
-const isoDayOfWeek = (dow: number) => (dow === 0 ? 7 : dow);
 
 const toIsoRange = (
   from: DateTime,

@@ -19,6 +19,7 @@ import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { MatchType } from "@/types/corridors";
+import { parseCorridorId, queryValue } from "@/utils/query";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
@@ -26,19 +27,6 @@ const NOT_FOUND_MESSAGE =
 
 type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
-
-const parseCorridorId = (
-  value: string | string[] | undefined,
-): number | null => {
-  const corridorId = Array.isArray(value) ? value[0] : value;
-  const parsed = Number(corridorId);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
-
-const queryValue = (value: string | string[] | undefined): string | null => {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return raw ?? null;
-};
 
 const parseDate = (raw: string | null, fallback: DateTime): DateTime => {
   if (!raw) return fallback;
