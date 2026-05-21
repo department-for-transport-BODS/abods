@@ -1,19 +1,3 @@
-import { DateTime } from "luxon";
-
-export interface DateNavigationHeatmapItem {
-  date: DateTime;
-  heat: number;
-}
-
-export interface MultiselectDropdownProps {
-    multiSelect?: boolean;
-    label: string;
-    options: string[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    placeholderText?: string;
-}
-
 export interface ErrorInfo {
   id: string;
   errorMessage: string;
