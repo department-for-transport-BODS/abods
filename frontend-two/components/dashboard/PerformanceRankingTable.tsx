@@ -19,6 +19,8 @@ interface PerformanceRankingTableProps {
   periodLabel: string;
 }
 
+type TrendDirection = "increase" | "decrease";
+
 const buildServiceName = (service: ServicePunctuality) => {
   const number = service.lineInfo?.serviceNumber ?? "unknown";
   const name = service.lineInfo?.serviceName ?? "unknown";
@@ -31,7 +33,9 @@ const calculateOnTimePct = (service: ServicePunctuality) => {
   return total > 0 ? ((service.onTime ?? 0) / total) * 100 : 0;
 };
 
-const calculateTrend = (service: ServicePunctuality) => {
+const calculateTrend = (
+  service: ServicePunctuality,
+): { diff: string; direction: TrendDirection } | null => {
   if (!service.trend) return null;
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
@@ -48,6 +52,9 @@ const calculateTrend = (service: ServicePunctuality) => {
     direction: diff <= 0 ? "decrease" : "increase",
   };
 };
+
+const buildTrendClassName = (direction: TrendDirection) =>
+  `change change--small change--${direction}`;
 
 const getOperatorName = (
   operators: OperatorDashboard[],
@@ -158,9 +165,11 @@ export const PerformanceRankingTable = ({
                   </td>
                   <td className="ranking-table__trend">
                     {trend ? (
-                      <span title={tooltip}>
-                        {trend.direction === "increase" ? "▲" : "▼"}{" "}
-                        {trend.diff}%
+                      <span
+                        className={buildTrendClassName(trend.direction)}
+                        title={tooltip}
+                      >
+                        <span className="change__value">{trend.diff}%</span>
                       </span>
                     ) : null}
                   </td>
