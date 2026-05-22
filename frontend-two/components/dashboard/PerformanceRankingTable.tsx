@@ -161,9 +161,11 @@ export const PerformanceRankingTable = ({
                   </td>
                   {nocCode === null ? (
                     <td className="ranking-table__operator">
-                      <span className="ranking-table__operator-text">
-                        {getOperatorName(operators, noc)}
-                      </span>
+                      <Tooltip message={noc} selectable>
+                        <span className="ranking-table__operator-text">
+                          {getOperatorName(operators, noc)}
+                        </span>
+                      </Tooltip>
                     </td>
                   ) : null}
                   <td className="govuk-!-font-weight-bold ranking-table__stat">

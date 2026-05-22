@@ -688,7 +688,11 @@
   }
 
   &__operator {
-    color: $govuk-secondary-text-colour;
+    color: $govuk-text-colour;
+
+    .unbuttoned.tooltip.tooltip--selectable {
+      color: $govuk-text-colour;
+    }
   }
 
   &__operator-text {
