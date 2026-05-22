@@ -1,8 +1,6 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
-// TODO:NOW: Is there a way to seperate out style sheets for components - Check how to do this
-
 // DateNavigationDayBlocks styling
 .datenav__day-blocks {
   display: grid;

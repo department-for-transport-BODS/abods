@@ -67,58 +67,150 @@ const DistancesPage = () => {
     load();
   }, [config?.apiUrl]);
 
-  // Derive dropdown options (String) from data (Object)
-  // Ensure there are no duplicate options and that they are in alphabetical order
+  // Derive dropdown options with cross-filtering: each dropdown's options are narrowed by all other current selections. 
+  // Admin area 
   const adminAreaOptions = useMemo(() => {
-        return Array.from(new Set(adminOrgData.map((data) => data.adminName))).sort();
-  }, [adminOrgData]);
+    let opIds: Set<string> | null = null;
 
-  const orgOptions = useMemo(() => {
-    return Array.from(new Set(adminOrgData.map((data) => data.orgName))).sort();
-  }, [adminOrgData]);
-
-  const operatorOptions = useMemo(() => {
-    if (selectedOrgs.length === 0) {
-      return Array.from(new Set(dropdownInputsData.operators.map((data) => `${data.name} (${data.id})`))).sort();
+    if (selectedOrgs.length > 0) {
+      opIds = new Set(adminOrgData.filter(d => selectedOrgs.includes(d.orgName)).map(d => d.operatorId));
     }
-    // Use AdminOrgMap to filter operators based on any selected orgs
-    const orgOperatorIds = new Set(
-      adminOrgData
-        .filter((selected) => selectedOrgs.includes(selected.orgName))
-        .map((selected) => selected.operatorId)
-    );
+
+    const relevantOps = dropdownInputsData.operators.filter(op => {
+      if (opIds && !opIds.has(op.id)) return false;
+      if (selectedOperators.length > 0 && !selectedOperators.includes(`${op.name} (${op.id})`)) return false;
+      if (selectedLicenses.length > 0 && !op.licenses.some(l => selectedLicenses.includes(l.id))) return false;
+      if (selectedServices.length > 0 && !op.licenses.some(l => l.services.some(s => selectedServices.includes(`${s.line}-${s.name}`)))) return false;
+      return true;
+    });
+
+    const relevantOpIds = new Set(relevantOps.map(op => op.id));
+    
+    return Array.from(new Set(
+      adminOrgData.filter(d => relevantOpIds.has(d.operatorId)).map(d => d.adminName)
+    )).sort();
+  }, [adminOrgData, dropdownInputsData.operators, selectedOrgs, selectedOperators, selectedLicenses, selectedServices]);
+
+  // Organisation
+  const orgOptions = useMemo(() => {
+    let opIds: Set<string> | null = null;
+
+    if (selectedAdminAreas.length > 0) {
+      opIds = new Set(adminOrgData.filter(d => selectedAdminAreas.includes(d.adminName)).map(d => d.operatorId));
+    }
+    const relevantOps = dropdownInputsData.operators.filter(op => {
+      if (opIds && !opIds.has(op.id)) return false;
+      if (selectedOperators.length > 0 && !selectedOperators.includes(`${op.name} (${op.id})`)) return false;
+      if (selectedLicenses.length > 0 && !op.licenses.some(l => selectedLicenses.includes(l.id))) return false;
+      if (selectedServices.length > 0 && !op.licenses.some(l => l.services.some(s => selectedServices.includes(`${s.line}-${s.name}`)))) return false;
+      return true;
+    });
+
+    const relevantOpIds = new Set(relevantOps.map(op => op.id));
+    
+    return Array.from(new Set(
+      adminOrgData.filter(d => relevantOpIds.has(d.operatorId)).map(d => d.orgName)
+    )).sort();
+  }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOperators, selectedLicenses, selectedServices]);
+
+  // Operator
+  const operatorOptions = useMemo(() => {
+
+    let opIds: Set<string> | null = null;
+    
+    if (selectedAdminAreas.length > 0) {
+      opIds = new Set(adminOrgData.filter(d => selectedAdminAreas.includes(d.adminName)).map(d => d.operatorId));
+    }
+    
+    if (selectedOrgs.length > 0) {
+      const orgOpIds = new Set(adminOrgData.filter(d => selectedOrgs.includes(d.orgName)).map(d => d.operatorId));
+      opIds = opIds ? new Set([...opIds].filter(id => orgOpIds.has(id))) : orgOpIds;
+    }
+
     return Array.from(new Set(
       dropdownInputsData.operators
-        .filter((data) => orgOperatorIds.has(data.id))
-        .map((data) => `${data.name} (${data.id})`)
+        .filter(op => {
+          if (opIds && !opIds.has(op.id)) return false;
+          if (selectedLicenses.length > 0 && !op.licenses.some(l => selectedLicenses.includes(l.id))) return false;
+          if (selectedServices.length > 0 && !op.licenses.some(l => l.services.some(s => selectedServices.includes(`${s.line}-${s.name}`)))) return false;
+          return true;
+        })
+        .map(op => `${op.name} (${op.id})`)
     )).sort();
-  }, [dropdownInputsData.operators, adminOrgData, selectedOrgs]);
+  }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOrgs, selectedLicenses, selectedServices]);
 
-  // Clear selected operators that are no longer in the filtered operator options
+  // Clear selections that are no longer valid when options narrow
   useEffect(() => {
-    setSelectedOperators((prev) => prev.filter((op) => operatorOptions.includes(op)));
+    setSelectedAdminAreas(prev => prev.filter(a => adminAreaOptions.includes(a)));
+  }, [adminAreaOptions]);
+
+  useEffect(() => {
+    setSelectedOrgs(prev => prev.filter(o => orgOptions.includes(o)));
+  }, [orgOptions]);
+
+  useEffect(() => {
+    setSelectedOperators(prev => prev.filter(op => operatorOptions.includes(op)));
   }, [operatorOptions]);
 
-  // Only show licenses and services relevant to selected operators (if any), otherwise show all
   const licenseOptions = useMemo(() => {
-    const relevantOperators = selectedOperators.length > 0
-      ? dropdownInputsData.operators.filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
-      : dropdownInputsData.operators;
-    return Array.from(new Set(
-      relevantOperators.flatMap((operator) => operator.licenses.map((license) => license.id))
-    )).sort();
-  }, [dropdownInputsData.operators, selectedOperators]);
+    let opIds: Set<string> | null = null;
 
-  const serviceOptions = useMemo(() => {
-    const relevantOperators = selectedOperators.length > 0
-      ? dropdownInputsData.operators.filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
-      : dropdownInputsData.operators;
+    if (selectedAdminAreas.length > 0) {
+      opIds = new Set(adminOrgData.filter(d => selectedAdminAreas.includes(d.adminName)).map(d => d.operatorId));
+    }
+    if (selectedOrgs.length > 0) {
+      const orgOpIds = new Set(adminOrgData.filter(d => selectedOrgs.includes(d.orgName)).map(d => d.operatorId));
+      opIds = opIds ? new Set([...opIds].filter(id => orgOpIds.has(id))) : orgOpIds;
+    }
+
+    const relevantOps = dropdownInputsData.operators.filter(op => {
+      if (opIds && !opIds.has(op.id)) return false;
+      if (selectedOperators.length > 0 && !selectedOperators.includes(`${op.name} (${op.id})`)) return false;
+      return true;
+    });
+
     return Array.from(new Set(
-      relevantOperators.flatMap((operator) =>
-        operator.licenses.flatMap((license) => license.services.map((service) => `${service.line}-${service.name}`))
+      relevantOps.flatMap(op =>
+        op.licenses
+          .filter(l => selectedServices.length === 0 || l.services.some(s => selectedServices.includes(`${s.line}-${s.name}`)))
+          .map(l => l.id)
       )
     )).sort();
-  }, [dropdownInputsData.operators, selectedOperators]);
+  }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOrgs, selectedOperators, selectedServices]);
+
+  const serviceOptions = useMemo(() => {
+    let opIds: Set<string> | null = null;
+
+    if (selectedAdminAreas.length > 0) {
+      opIds = new Set(adminOrgData.filter(d => selectedAdminAreas.includes(d.adminName)).map(d => d.operatorId));
+    }
+    if (selectedOrgs.length > 0) {
+      const orgOpIds = new Set(adminOrgData.filter(d => selectedOrgs.includes(d.orgName)).map(d => d.operatorId));
+      opIds = opIds ? new Set([...opIds].filter(id => orgOpIds.has(id))) : orgOpIds;
+    }
+
+    const relevantOps = dropdownInputsData.operators.filter(op => {
+      if (opIds && !opIds.has(op.id)) return false;
+      if (selectedOperators.length > 0 && !selectedOperators.includes(`${op.name} (${op.id})`)) return false;
+      return true;
+    });
+    
+    return Array.from(new Set(
+      relevantOps.flatMap(op =>
+        op.licenses
+          .filter(l => selectedLicenses.length === 0 || selectedLicenses.includes(l.id))
+          .flatMap(l => l.services.map(s => `${s.line}-${s.name}`))
+      )
+    )).sort();
+  }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOrgs, selectedOperators, selectedLicenses]);
+
+  useEffect(() => {
+    setSelectedLicenses(prev => prev.filter(l => licenseOptions.includes(l)));
+  }, [licenseOptions]);
+
+  useEffect(() => {
+    setSelectedServices(prev => prev.filter(s => serviceOptions.includes(s)));
+  }, [serviceOptions]);
 
   const handleGenerateDataButton = async () => {
     if (!config?.apiUrl) {
@@ -139,15 +231,14 @@ const DistancesPage = () => {
     .filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
     .map((operator) => operator.id);
 
-    let orgId: string | undefined = undefined;
+    // If no operators explicitly selected but orgs are selected, resolve operator IDs from org membership
     let operatorIdsToSend: string[] = operatorIds;
-    if (operatorIds.length === 0) {
-      orgId = adminOrgData
-        .find((org) => selectedOrgs.includes(org.orgName))
-        ?.orgId.toString();
-    } else {
-      orgId = undefined;
-      operatorIdsToSend = operatorIds;
+    if (operatorIds.length === 0 && selectedOrgs.length > 0) {
+      operatorIdsToSend = Array.from(new Set(
+        adminOrgData
+          .filter(d => selectedOrgs.includes(d.orgName))
+          .map(d => d.operatorId)
+      ));
     }
 
     const licenseIds = dropdownInputsData.operators
@@ -165,7 +256,6 @@ const DistancesPage = () => {
       const data = await distanceService.fetchDistances(
         config.apiUrl,
         {
-          orgId,
           operatorIds: operatorIdsToSend,
           fromTimestamp: fromDate,
           toTimestamp: toDate,
