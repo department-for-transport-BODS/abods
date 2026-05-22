@@ -1286,10 +1286,14 @@
     @include govuk-font(19);
     padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
     align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: nowrap;
     margin-bottom: 8px;
 
     span {
       margin-left: govuk-spacing(2);
+      white-space: nowrap;
     }
 
     div {
