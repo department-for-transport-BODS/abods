@@ -31,8 +31,9 @@ loggedInTest.describe("Dashboard - authenticated", () => {
     });
 
     await loggedInTest.step("defaults to All operators", async () => {
+      await dashboard.operatorSelector.openDropdown();
       await expect(
-        dashboard.operatorSelector.defaultValueLabel(),
+        dashboard.operatorSelector.selectedOption("All operators"),
       ).toBeVisible();
     });
   });
@@ -133,9 +134,10 @@ loggedInTest.describe("Dashboard - authenticated", () => {
         return;
       }
       await dashboard.goto({ nocCode });
+      await dashboard.operatorSelector.openDropdown();
       await expect(
-        dashboard.operatorSelector.defaultValueLabel(),
-      ).not.toBeVisible();
+        dashboard.operatorSelector.selectedOption("All operators"),
+      ).toHaveCount(0);
     },
   );
 

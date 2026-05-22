@@ -1,4 +1,5 @@
 import { Locator, Page } from "@playwright/test";
+import { escapeRegExp } from "../utils/utils";
 
 /**
  * Encapsulates interactions with the operator selector combobox.
@@ -15,12 +16,19 @@ export class OperatorSelector {
     return this.page.getByRole("combobox", { name: "Operator" });
   }
 
+  /** Opens the operator dropdown. */
+  async openDropdown(): Promise<void> {
+    await this.combobox().click();
+  }
+
   /**
-   * The "All operators" label shown when no operator is selected.
-   * Use with toBeVisible() / not.toBeVisible().
+   * Selected option in the opened dropdown by its user-visible label.
+   * Uses aria-selected state rather than framework-specific class names.
    */
-  defaultValueLabel(): Locator {
-    return this.page.getByText("All operators", { exact: true });
+  selectedOption(label: string): Locator {
+    return this.page.locator('[role="option"][aria-selected="true"]', {
+      hasText: new RegExp(`^${escapeRegExp(label)}$`),
+    });
   }
 
   /**
@@ -28,7 +36,7 @@ export class OperatorSelector {
    * Waits for the option to be visible before clicking.
    */
   async selectFirstOperator(): Promise<void> {
-    await this.combobox().click();
+    await this.openDropdown();
     await this.page
       .getByRole("option")
       .filter({ hasNotText: /all operators/i })
