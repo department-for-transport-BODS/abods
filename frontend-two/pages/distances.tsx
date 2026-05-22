@@ -43,7 +43,6 @@ const DistancesPage = () => {
   });
   
   // Fetch dropdown options for filters
-  // TODO:NOW: Add try catch and error handling
   useEffect(() => {
     if (!config?.apiUrl) {
       setDropdownInputsData({ operators: [] });
@@ -54,11 +53,15 @@ const DistancesPage = () => {
     }
     const load = async () => {
       setIsLoading(true);
-              
-      // Note that the query for fetchDropdownInputs only returns operators, licenses and services
-      setDropdownInputsData(await distanceService.fetchDropdownInputs(config.apiUrl));
-      setAdminOrgData(await distanceService.fetchAdminOrg(config.apiUrl));
-      setIsLoading(false);
+      try {
+        // Note that the query for fetchDropdownInputs only returns operators, licenses and services
+        setDropdownInputsData(await distanceService.fetchDropdownInputs(config.apiUrl));
+        setAdminOrgData(await distanceService.fetchAdminOrg(config.apiUrl));
+      } catch (err) {
+        console.error("Failed to load filter options:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     load();
@@ -124,6 +127,7 @@ const DistancesPage = () => {
       console.error("API URL is not configured");
       return;
     }
+
     setIsGenerating(true);
 
     // Get IDs for filtering
@@ -157,20 +161,24 @@ const DistancesPage = () => {
       .map((service) => service.id);
 
     // Fetch data for table based on filter selections
-    // TODO:NOW: Add try catch and error handling
-    const data = await distanceService.fetchDistances(
-      config.apiUrl, 
-      {
-        orgId,
-        operatorIds: operatorIdsToSend,
-        fromTimestamp: fromDate,
-        toTimestamp: toDate,
-        nocLineAndServiceCodes: serviceIds, 
-        licenseIds,
-        adminAreaIds,
-      });
-    setDistanceTableData(data);
-    setIsGenerating(false);
+    try {
+      const data = await distanceService.fetchDistances(
+        config.apiUrl,
+        {
+          orgId,
+          operatorIds: operatorIdsToSend,
+          fromTimestamp: fromDate,
+          toTimestamp: toDate,
+          nocLineAndServiceCodes: serviceIds,
+          licenseIds,
+          adminAreaIds,
+        });
+      setDistanceTableData(data);
+    } catch (err) {
+      console.error("Failed to fetch distances:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   return (

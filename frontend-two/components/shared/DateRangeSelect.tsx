@@ -31,7 +31,7 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   const initialEndRaw = value?.to ? formatISODateStringToDate(value.to) : maxDate;
 
   // Clamp the displayed end date to maxDate if value.to is after maxDate.
-  // Old frontend treated the end date as inclusive
+  // Old frontend displayed the max selectable date as yesterday, but pulled data for the past week (incl. today)
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
   const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>({

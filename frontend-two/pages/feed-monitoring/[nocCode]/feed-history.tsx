@@ -57,14 +57,23 @@ const FeedHistoryPage = () => {
 
     useEffect(() => {
       if (!config?.apiUrl) {
+        setOperators([]);
         setIsLoading(false);
-        console.error("API URL is not configured");
         return;
       }
-      feedMonitoringService.fetchFeedMonitoringList(config.apiUrl).then((data) => {
-        setOperators(data);
-        setIsLoading(false);
-      });
+
+      const load = async () => {
+        setIsLoading(true);
+        try {
+          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
+          setOperators(feedMonitoringData);
+        } catch (err) {
+          console.error("Failed to load feed monitoring list data:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      load();
     }, [config]);
 
     // Fetch historical operator stats for selected date
@@ -76,23 +85,27 @@ const FeedHistoryPage = () => {
       setHistoricalDataLoading(true);
       setChartErrored(false);
       setNoData(false);
+
       const start = baseDate.startOf("day").toISO()!;
       const end = baseDate.endOf("day").toISO()!;
-      feedMonitoringService
-        .fetchOperatorHistory(config.apiUrl, nocCode, baseDate.toISODate()!, start, end)
-        .then((result) => {
+    
+      const load = async () => {
+        try {
+          const operatorHistoryData =  await feedMonitoringService.fetchOperatorHistory(config.apiUrl, nocCode, baseDate.toISODate()!, start, end)
           setHistoricalDataLoading(false);
-          if (!result) {
+          if (!operatorHistoryData) {
             setChartErrored(true);
-          } else if ((result.feedMonitoring?.vehicleStats?.length ?? 0) === 0) {
+          } else if ((operatorHistoryData.feedMonitoring?.vehicleStats?.length ?? 0) === 0) {
             setNoData(true);
           }
-          setOperatorHistory(result);
-        })
-        .catch(() => {
+          setOperatorHistory(operatorHistoryData);
+        } catch (err) {
+          console.error("Failed to load operator history data:", err);
           setHistoricalDataLoading(false);
           setChartErrored(true);
-        });
+        }
+      };
+      load();
     }, [config, nocCode, date]);
 
     if (isLoading) {

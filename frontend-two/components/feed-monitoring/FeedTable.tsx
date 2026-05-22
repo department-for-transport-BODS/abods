@@ -69,7 +69,7 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTablePr
         { key: "availability", label: "Feed availability", sortable: true },
         { key: "updateFrequency", label: "Update frequency", sortable: true },
         { key: active ? "lastOutage" : "unavailableSince", label: active ? "Last outage" : "Unavailable since", sortable: true },
-        { key: "vehicleCount", label: "", sortable: false }
+        { key: "vehicleCount", label: "\u200B", sortable: false }
     ];
 
     const rows = pageData.map((op) => {

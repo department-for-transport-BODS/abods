@@ -18,14 +18,18 @@ const FeedMonitoringPage = () => {
       setIsLoading(false);
       return;
     }
-    // TODO:NOW: Add try catch and error handling
     const load = async () => {
       setIsLoading(true);
-      const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
-      const vehicleData = await feedMonitoringService.fetchOperatorSparklines(config.apiUrl, data.map(d => d.operatorId));
-      setOperatorData(data);
-      setVehicleCountData(vehicleData);
-      setIsLoading(false);
+      try {
+        const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
+        const vehicleData = await feedMonitoringService.fetchOperatorSparklines(config.apiUrl, data.map(d => d.operatorId));
+        setOperatorData(data);
+        setVehicleCountData(vehicleData);
+      } catch (err) {
+        console.error("Failed to load feed monitoring data:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     load();
   }, [config]);
@@ -63,7 +67,6 @@ const FeedMonitoringPage = () => {
         </div>
         {isLoading ? (
           <p className="govuk-body">Loading...</p>
-          
         ) : (
           <>
             <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} vehicleCountData={vehicleCountData} />

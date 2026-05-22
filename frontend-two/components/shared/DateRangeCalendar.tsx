@@ -61,10 +61,6 @@ interface DateRangeCalendarProps {
 export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCalendarProps) => {
 
   const today = DateTime.now()
-
-  // TODO:NOW Check whether users should be able to select today or only yesterday as latest date
-  // Check old logic and review. Could be a timezone issue
-  // const maxDate = DateTime.now().minus({ days: 1 })
   const maxDate = DateTime.now().minus({ days: 1 });
   const table = buildCalendarTable(month, today, maxDate);
 

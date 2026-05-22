@@ -22,26 +22,27 @@ const LiveStatusPage = () => {
 
     useEffect(() => {
       if (!config?.apiUrl) {
+        setOperators([]);
+        setOperator(null);
         setIsLoading(false);
-        console.error("API URL is not configured");
         return;
       }
-      feedMonitoringService.fetchFeedMonitoringList(config.apiUrl).then(setOperators);
-    }, [config]);
-
-    useEffect(() => {
-      if (!config?.apiUrl) return;
-      if (!nocCode) return;
       const load = async () => {
         setIsLoading(true);
-        const data = await feedMonitoringService.fetchOperatorLiveStatus(config.apiUrl, nocCode);
-        setOperator(data);
-        setIsLoading(false);
+        try {
+          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
+          const operatorLiveStatusData = await feedMonitoringService.fetchOperatorLiveStatus(config.apiUrl, nocCode);
+          setOperators(feedMonitoringData);
+          setOperator(operatorLiveStatusData);
+        } catch (err) {
+          console.error("Failed to load live status data:", err);
+        } finally {
+          setIsLoading(false);
+        }
       };
-  
       load();
     }, [config, nocCode]);
-  
+
     if (isLoading) {
         return (
         <BaseLayout title="Dashboard - Analyse Bus Open Data">
