@@ -13,7 +13,7 @@ export const Stat = ({ label, value, tooltip, id, className }: StatProps) => (
   <div className={`stat ${className ?? ""}`.trim()} id={id}>
     <span className="stat__label">{label}</span>
     {tooltip ? (
-      <Tooltip message={tooltip} underline>
+      <Tooltip message={tooltip}>
         <span className="stat__value stat__value--tooltip">{value}</span>
       </Tooltip>
     ) : (
