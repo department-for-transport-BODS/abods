@@ -1,39 +1,44 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, loggedInTest } from "./fixtures";
 
-const username = process.env.E2E_USERNAME!;
-const password = process.env.E2E_PASSWORD!;
+// ─── Unauthenticated ──────────────────────────────────────────────────────────
 
-test("service monitoring page is reachable from nav after login", async ({
+test("Service monitoring - redirects unauthenticated users to login", async ({
   page,
 }) => {
-  test.skip(
-    !username || !password,
-    "Set E2E_USERNAME and E2E_PASSWORD to run service monitoring e2e",
+  await page.goto("/service-monitoring", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/login/);
+});
+
+// ─── Authenticated ────────────────────────────────────────────────────────────
+
+loggedInTest.describe("Service monitoring - authenticated", () => {
+  loggedInTest(
+    "is reachable from dashboard nav and loads panel content",
+    async ({ loggedInPage }) => {
+      await loggedInPage.goto("/dashboard", { waitUntil: "domcontentloaded" });
+      await loggedInPage
+        .getByRole("link", { name: "Service monitoring" })
+        .click();
+
+      await expect(loggedInPage).toHaveURL(/\/service-monitoring\/?$/);
+      await expect(
+        loggedInPage.getByRole("heading", { name: "Service monitoring" }),
+      ).toBeVisible();
+
+      const iframe = loggedInPage
+        .locator(".service-monitoring__iframe-container iframe")
+        .or(loggedInPage.locator("main iframe"));
+      const errorMessage = loggedInPage.getByText(
+        "Unable to load dashboard. Please contact admin",
+      );
+
+      await expect
+        .poll(async () => {
+          const iframeCount = await iframe.count();
+          const errorCount = await errorMessage.count();
+          return iframeCount > 0 || errorCount > 0;
+        })
+        .toBe(true);
+    },
   );
-
-  await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await page.locator("#username").fill(username!);
-  await page.locator("#password").fill(password!);
-  await page.getByRole("button", { name: "Sign in" }).click();
-
-  await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
-  await page.getByRole("link", { name: "Service monitoring" }).click();
-
-  await expect(page).toHaveURL(/\/service-monitoring$/);
-  await expect(
-    page.getByRole("heading", { name: "Service monitoring" }),
-  ).toBeVisible();
-
-  const iframe = page.locator(".service-monitoring__iframe-container iframe");
-  const errorMessage = page.getByText(
-    "Unable to load dashboard. Please contact admin",
-  );
-
-  await expect
-    .poll(async () => {
-      const iframeCount = await iframe.count();
-      const errorCount = await errorMessage.count();
-      return iframeCount > 0 || errorCount > 0;
-    })
-    .toBe(true);
 });
