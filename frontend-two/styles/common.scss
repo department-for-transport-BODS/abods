@@ -1189,7 +1189,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
   border-right: 1px solid $govuk-border-colour;
   width: 200px;
   box-sizing: content-box;
@@ -1458,14 +1457,6 @@
 
 @include bp($desktop) {
   .nav {
-    min-height: calc(100vh - #{govuk-spacing(7)});
-    max-height: calc(100vh - #{govuk-spacing(7)});
-
-    @supports (height: 100dvh) {
-      min-height: calc(100dvh - #{govuk-spacing(7)});
-      max-height: calc(100dvh - #{govuk-spacing(7)});
-    }
-
     &__menu-bottom {
       margin-top: auto;
     }
