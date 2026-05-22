@@ -667,7 +667,8 @@
   &__service {
     .govuk-link {
       white-space: normal;
-      overflow-wrap: break-word;
+      overflow-wrap: normal;
+      word-break: normal;
     }
   }
 
@@ -697,7 +698,8 @@
 
   &__operator-text {
     white-space: normal;
-    overflow-wrap: break-word;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   &__stat,
@@ -770,13 +772,23 @@
 @include bp($to-tablet) {
   .ranking-table {
     &__data {
+      table-layout: auto;
+
       td {
         padding-right: govuk-spacing(2);
       }
     }
 
+    &__col-service,
+    &__col-operator,
+    &__col-stat,
+    &__col-trend {
+      width: auto;
+    }
+
+    &__service,
     &__operator {
-      display: none;
+      min-width: 0;
     }
   }
 }
