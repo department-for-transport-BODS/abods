@@ -10,13 +10,17 @@ Please run the following commands to set your environment for local running
 
 ```bash
 
-export PLAYWRIGHT_BASE_URL=http://localhost:4200
+npm install
 export TEST_USERNAME=<YOUR_ABODS_EMAIL>
 export TEST_PASSWORD=<YOUR_ABODS_PASSWORD>
-
+export TEST_NOC_CODE=<EXAMPLE_NOC_CODE> #(Optional for specific noc code related tests)
 ```
 
 (This service assumes that you have a login to use the service)
+
+The utility assumes a default value of `http://localhost:4200` as the service under test. This can be overridden by specifying `export PLAYWRIGHT_BASE_URL=<SERVICE_URL> `.
+
+The service only needs user credentials for authenticated pages, to run solely on unauthenticated pages these need not be set.
 
 ### GitHub
 
