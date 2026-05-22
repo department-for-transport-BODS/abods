@@ -666,10 +666,8 @@
 
   &__service {
     .govuk-link {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow-wrap: break-word;
     }
   }
 
@@ -678,15 +676,15 @@
   }
 
   &__col-operator {
-    width: 12rem;
+    width: 10.8rem;
   }
 
   &__col-stat {
-    width: 7rem;
+    width: 6.3rem;
   }
 
   &__col-trend {
-    width: 8rem;
+    width: 7.2rem;
   }
 
   &__operator {
@@ -694,10 +692,8 @@
   }
 
   &__operator-text {
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 
   &__stat,
