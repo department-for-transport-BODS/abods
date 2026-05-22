@@ -18,8 +18,8 @@ export default async function globalSetup(config: FullConfig) {
   const page = await browser.newPage();
 
   await page.goto(`${baseURL}/login`);
-  await page.getByLabel("Email", { exact: false }).fill(username);
-  await page.getByLabel("Password", { exact: false }).fill(password);
+  await page.getByRole("textbox", { name: /^email/i }).fill(username);
+  await page.getByRole("textbox", { name: /^password/i }).fill(password);
   await page.getByRole("button", { name: /sign in/i }).click();
   await page.waitForURL("**/dashboard**");
 
