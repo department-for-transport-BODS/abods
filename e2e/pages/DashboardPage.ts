@@ -4,12 +4,6 @@ import { StopTypeToggle } from "../components/StopTypeToggle";
 
 /**
  * Page object for the Dashboard page (/dashboard).
- *
- * Composes shared component objects and exposes locators and actions
- * for dashboard-specific elements. Tests should use these methods rather
- * than constructing locators inline, so that selector changes are fixed
- * in one place.
- *
  * Usage:
  *   const dashboard = new DashboardPage(loggedInPage);
  *   await dashboard.goto();
@@ -25,7 +19,7 @@ export class DashboardPage {
 
   /**
    * Navigates to the dashboard, optionally with query params.
-   * Waits for the DOM to be loaded before returning.
+   * Waits for the DOM load before return
    */
   async goto(queryParams?: Record<string, string>): Promise<void> {
     const search = queryParams
@@ -51,10 +45,6 @@ export class DashboardPage {
     });
   }
 
-  /**
-   * The period selector combobox inside the on-time widget.
-   * Angular labels it "period"; Next.js may use a different accessible name.
-   */
   periodSelector(): Locator {
     return this.page
       .getByRole("combobox", { name: /period|last/i })
@@ -85,18 +75,10 @@ export class DashboardPage {
     return this.page.getByRole("heading", { name: "Feed status", level: 2 });
   }
 
-  /**
-   * The feed status summary table.
-   * Angular uses class="feed-status-summary"; Next.js may differ.
-   */
   feedStatusTable(): Locator {
     return this.page.locator("table.feed-status-summary");
   }
 
-  /**
-   * The "NOC feed monitoring" link inside the main content area.
-   * Scoped to <main> to exclude the identically-named nav sidebar link.
-   */
   nocFeedMonitoringLink(): Locator {
     return this.page
       .locator("main")

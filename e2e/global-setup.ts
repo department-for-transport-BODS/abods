@@ -13,7 +13,7 @@ export default async function globalSetup(config: FullConfig) {
     return;
   }
 
-  const baseURL = config.projects[0].use.baseURL ?? "http://localhost:4200";
+  const baseURL = config.projects[0].use.baseURL;
   const browser = await chromium.launch();
   const page = await browser.newPage();
 

@@ -102,8 +102,6 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   loggedInTest(
     "pre-selects All stops when stopType query param is set",
     async () => {
-      // Angular dashboard reads ?allStops=true (not stopType).
-      // Next.js may use a different param — a mismatch here signals a migration issue.
       await dashboard.goto({ allStops: "true" });
       await expect(dashboard.stopTypeToggle.allStopsRadio()).toBeChecked();
     },
@@ -112,16 +110,13 @@ loggedInTest.describe("Dashboard - authenticated", () => {
   loggedInTest(
     "updates the URL when stop type is changed to All stops",
     async ({ loggedInPage }) => {
-      // Wait for Angular to initialise the toggle before interacting.
-      // The default selection (Timing points checked) confirms event handlers are attached.
       await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeChecked();
       await dashboard.stopTypeToggle.selectAllStops();
-      // Angular dashboard writes ?allStops=true to the URL.
-      // If Next.js uses a different param, this test will flag the discrepancy.
       await expect(loggedInPage).toHaveURL(/allStops=true/);
     },
   );
 
+  // Optional: Requires TEST_NOC_CODE env var to be set
   loggedInTest(
     "filters by operator when nocCode is provided in the URL",
     async () => {
@@ -145,7 +140,6 @@ loggedInTest.describe("Dashboard - authenticated", () => {
     "filters by operator when nocCode is selected via dashboard dropdown",
     async ({ loggedInPage }) => {
       await dashboard.operatorSelector.selectFirstOperator();
-      // Angular dashboard writes ?nocCode=XXX to the URL on operator selection.
       await expect(loggedInPage).toHaveURL(/nocCode=/);
     },
   );

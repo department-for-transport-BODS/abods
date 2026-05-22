@@ -2,6 +2,7 @@ import { test as base, Page } from "@playwright/test";
 import { existsSync } from "fs";
 import { AUTH_STATE_PATH } from "./global-setup";
 
+// Boilerplate/reusable functionality for tests in here.
 const APP_ROUTES = [
   "/",
   "/dashboard",
