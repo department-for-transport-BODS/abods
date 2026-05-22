@@ -63,7 +63,7 @@ interface HistoricVehicleStatsProps {
 }
 
 const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
-  const idRef = useRef(`historic-vehicle-stats-${Math.random().toString(36).slice(2)}`);
+  const idRef = useRef(`historic-vehicle-stats`);
   const chartInstance = useRef<any>(null);
 
   useEffect(() => {

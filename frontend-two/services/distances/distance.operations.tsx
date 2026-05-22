@@ -1,4 +1,3 @@
-// TODO:NOW Check whether H.D has seen the seg fault issue
 export const USER_ORGANISATIONS_QUERY = `
   query userOrganisations {
     userOrgs {

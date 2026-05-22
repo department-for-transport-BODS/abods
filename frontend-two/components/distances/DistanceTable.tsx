@@ -102,8 +102,8 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
     // Map paged data to display rows
     const rows = useMemo(() => {
         const mapped = paged.map((row) => {
-            const distance = row.distance != null ? row.distance / 1000 : null;
-            const avlDistance = row.avlDistance != null ? row.avlDistance / 1000 : null;
+            const distance = row.distance ? row.distance / 1000 : null;
+            const avlDistance = row.avlDistance ? row.avlDistance / 1000 : null;
             const avlPercent = distance && avlDistance != null
                 ? `${((avlDistance / distance) * 100).toFixed(1)}%`
                 : "-";
@@ -131,7 +131,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
                 </div>
             )}
             <div className="flex justify-end">
-                <div className="w-2/5">
+                <div className="w-1/2">
                     <PagingPanel
                         currentPage={currentPage}
                         totalPages={Math.ceil(data.length / PAGE_SIZE)}

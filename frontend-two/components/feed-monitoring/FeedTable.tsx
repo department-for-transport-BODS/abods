@@ -96,7 +96,7 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTablePr
             <h2 className="govuk-heading-m">{title}</h2>
             <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>
             <div className="flex justify-end">
-                <div className="w-2/5">
+                <div className="w-1/2">
                     <PagingPanel
                         currentPage={currentPage}
                         totalPages={totalPages}

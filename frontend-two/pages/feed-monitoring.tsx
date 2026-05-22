@@ -18,6 +18,7 @@ const FeedMonitoringPage = () => {
       setIsLoading(false);
       return;
     }
+    // TODO:NOW: Add try catch and error handling
     const load = async () => {
       setIsLoading(true);
       const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
@@ -29,7 +30,6 @@ const FeedMonitoringPage = () => {
     load();
   }, [config]);
 
-  console.log("vehicleCountData before load:", vehicleCountData);
   // Check if operator search has been used and filter data here
   // Can search either by operator name or NOC code
   const filteredOperators = useMemo(() => {

@@ -1,4 +1,3 @@
-// TODO:NOW Check with F.KK whether the new change is useful
 import { useEffect, useRef, useState } from "react";
 
 interface MultiselectDropdownProps {

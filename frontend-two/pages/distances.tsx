@@ -6,6 +6,8 @@ import { distanceService } from "@/services/distances/distance.services";
 import { AdminOrgMap, DistanceData, DistancesDropdowns } from "@/types/distances";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import {formatDateToISODateString} from "@/utils/dateFormatter";
+import { DateTime } from "luxon";
 
 const Button = dynamic(
   () => import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Button),
@@ -33,18 +35,15 @@ const DistancesPage = () => {
 
   // Set default date range to past week
   const [toDate, setToDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate());
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return formatDateToISODateString(DateTime.now());
   });
 
   const [fromDate, setFromDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return formatDateToISODateString(DateTime.now().minus({ days: 7 }));
   });
   
   // Fetch dropdown options for filters
+  // TODO:NOW: Add try catch and error handling
   useEffect(() => {
     if (!config?.apiUrl) {
       setDropdownInputsData({ operators: [] });
@@ -136,9 +135,6 @@ const DistancesPage = () => {
     .filter((operator) => selectedOperators.includes(`${operator.name} (${operator.id})`))
     .map((operator) => operator.id);
 
-    // TODO:NOW Check whether this logic is actually right. Currently in ABODS, no data is returned
-    // Only send orgId if no operators are selected
-    // Check with S.VM
     let orgId: string | undefined = undefined;
     let operatorIdsToSend: string[] = operatorIds;
     if (operatorIds.length === 0) {
@@ -161,6 +157,7 @@ const DistancesPage = () => {
       .map((service) => service.id);
 
     // Fetch data for table based on filter selections
+    // TODO:NOW: Add try catch and error handling
     const data = await distanceService.fetchDistances(
       config.apiUrl, 
       {

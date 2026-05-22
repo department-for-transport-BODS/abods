@@ -27,9 +27,16 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
   const today = DateTime.local().startOf('day');
   const maxDate = today.minus({ days: 1 });
 
+  const initialStart = value?.from ? formatISODateStringToDate(value.from) : today.minus({ days: 7 });
+  const initialEndRaw = value?.to ? formatISODateStringToDate(value.to) : maxDate;
+
+  // Clamp the displayed end date to maxDate if value.to is after maxDate.
+  // Old frontend treated the end date as inclusive
+  const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
+
   const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>({
-    start: value?.from ? formatISODateStringToDate(value.from) : today.minus({ days: 7 }),
-    end: value?.to ? formatISODateStringToDate(value.to) : maxDate,
+    start: initialStart,
+    end: initialEnd,
   });
 
   const [draftDateRange, setDraftDateRange] = useState<CalendarDateRange>(selectedDateRange);
