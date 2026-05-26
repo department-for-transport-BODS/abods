@@ -10,7 +10,6 @@ import { SkipLinks } from "@/components/layout/SkipLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorInfo } from "@/types";
 import { buildTitle } from "@/utils/errors";
-import { normalizePathname } from "@/utils/path";
 
 interface BaseLayoutProps {
   title: string;
@@ -28,7 +27,7 @@ export const BaseLayout = ({
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const normalizedPath = normalizePathname(router.asPath);
+  const normalizedPath = router.asPath.split("?")[0].replace(/\/+$/, "") || "/";
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     normalizedPath === route || normalizedPath.endsWith(route),
   );

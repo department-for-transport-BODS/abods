@@ -88,7 +88,7 @@ export const CookieBanner = () => {
           >
             Reject analytics cookies
           </button>
-          <Link className="govuk-link" href="/cookies">
+          <Link className="govuk-link" href="/cookies/">
             View cookies
           </Link>
         </div>
