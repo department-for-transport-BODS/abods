@@ -51,6 +51,14 @@ export class DashboardPage {
       .or(this.page.getByRole("combobox").nth(1));
   }
 
+  topThreeTab(): Locator {
+    return this.page.locator("li.tabs__list-item", { hasText: "Top 3" });
+  }
+
+  bottomThreeTab(): Locator {
+    return this.page.locator("li.tabs__list-item", { hasText: "Bottom 3" });
+  }
+
   // ── Vehicle count section ───────────────────────────────────────────────────
 
   vehicleCountHeading(): Locator {

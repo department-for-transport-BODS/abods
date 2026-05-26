@@ -47,14 +47,9 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeVisible();
     });
 
-    await loggedInTest.step(
-      "Timing points is selected by default",
-      async () => {
-        await expect(
-          dashboard.stopTypeToggle.timingPointsRadio(),
-        ).toBeChecked();
-      },
-    );
+    await loggedInTest.step("Timing points is selected by default",async () => {
+        await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeChecked();
+      });
   });
 
   loggedInTest("shows the on-time performance section", async () => {
@@ -64,6 +59,16 @@ loggedInTest.describe("Dashboard - authenticated", () => {
 
     await loggedInTest.step("period selector dropdown is visible", async () => {
       await expect(dashboard.periodSelector()).toBeVisible();
+    });
+  });
+
+  loggedInTest("shows the Top 3 and Bottom 3 ranking tabs", async () => {
+    await loggedInTest.step("Top 3 tab is visible", async () => {
+      await expect(dashboard.topThreeTab()).toBeVisible();
+    });
+
+    await loggedInTest.step("Bottom 3 tab is visible", async () => {
+      await expect(dashboard.bottomThreeTab()).toBeVisible();
     });
   });
 

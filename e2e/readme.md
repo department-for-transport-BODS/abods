@@ -1,8 +1,7 @@
 # Development Playwright
 
-This folder exists to provide a utility to guide migration between the Angular (frontend) and Next.JS (frontend-two) services.
-
-The tests should be extended as we go along.
+This folder exists to provide a utility to ensure functionality within the ABODS Frontend service. 
+The tests should be extended and rand as new features are added, as well as existing things are editied. 
 
 ## Setup (Local)
 
