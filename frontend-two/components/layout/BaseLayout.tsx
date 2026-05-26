@@ -18,6 +18,8 @@ interface BaseLayoutProps {
   errors?: ErrorInfo[];
 }
 
+const PUBLIC_ROUTES = ["/login", "/accessibility", "/cookies", "/privacy-policy"];
+
 export const BaseLayout = ({
   title,
   description,
@@ -26,8 +28,8 @@ export const BaseLayout = ({
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const showAuthenticatedLayout =
-    isAuthenticated && router.pathname !== "/login";
+  const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
+  const showAuthenticatedLayout = isAuthenticated && !isPublicRoute;
   const pageTitle = buildTitle(errors, title);
 
   return (
