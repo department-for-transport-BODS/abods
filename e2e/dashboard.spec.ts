@@ -70,6 +70,16 @@ loggedInTest.describe("Dashboard - authenticated", () => {
     await loggedInTest.step("Bottom 3 tab is visible", async () => {
       await expect(dashboard.bottomThreeTab()).toBeVisible();
     });
+
+    await loggedInTest.step("Top 3 tab shows exactly 3 rows", async () => {
+      await dashboard.selectTopThree();
+      await expect(dashboard.rankingRows()).toHaveCount(3);
+    });
+
+    await loggedInTest.step("Bottom 3 tab shows exactly 3 rows", async () => {
+      await dashboard.selectBottomThree();
+      await expect(dashboard.rankingRows()).toHaveCount(3);
+    });
   });
 
   loggedInTest("shows the vehicle count section", async () => {

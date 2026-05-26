@@ -59,6 +59,18 @@ export class DashboardPage {
     return this.page.locator("li.tabs__list-item", { hasText: "Bottom 3" });
   }
 
+  rankingRows(): Locator {
+    return this.page.locator("table.ranking-table__data tbody tr");
+  }
+
+  async selectTopThree(): Promise<void> {
+    await this.topThreeTab().click();
+  }
+
+  async selectBottomThree(): Promise<void> {
+    await this.bottomThreeTab().click();
+  }
+
   // ── Vehicle count section ───────────────────────────────────────────────────
 
   vehicleCountHeading(): Locator {
