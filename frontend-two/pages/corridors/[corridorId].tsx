@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { Stat } from "@/components/shared/Stat";
@@ -18,8 +18,8 @@ import { CorridorServicesTable } from "@/components/corridors/view/CorridorServi
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
-import { MatchType } from "@/types/corridors";
-import { parseCorridorId, queryValue } from "@/utils/query";
+import { parseCorridorId, queryValue, parseMatchType } from "@/utils/query";
+import { parseDate, toIsoDateInput, formatTransitTime } from "@/utils/date";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
@@ -27,23 +27,6 @@ const NOT_FOUND_MESSAGE =
 
 type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
-
-const parseDate = (raw: string | null, fallback: DateTime): DateTime => {
-  if (!raw) return fallback;
-  const parsed = DateTime.fromISO(raw, { zone: "utc" });
-  return parsed.isValid ? parsed : fallback;
-};
-
-const toIsoDateInput = (dateTime: DateTime): string =>
-  dateTime.toISODate() ?? DateTime.utc().toISODate()!;
-
-const formatTransitTime = (seconds: number | null | undefined): string => {
-  if (!seconds || seconds <= 0) return "Unavailable";
-  return Duration.fromObject({ seconds }).toFormat("mm:ss");
-};
-
-const parseMatchType = (value: string | null): MatchType =>
-  value === "estimated" ? "estimated" : "evidenced";
 
 const PRESET_DATE_RANGES: Record<
   string,

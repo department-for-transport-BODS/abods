@@ -13,6 +13,11 @@ export const queryValue = (
   return raw ?? null;
 };
 
+import { MatchType } from "@/types/corridors";
+
+export const parseMatchType = (value: string | null): MatchType =>
+  value === "estimated" ? "estimated" : "evidenced";
+
 export const getSearchParam = (
   value: string | string[] | undefined,
 ): string => {
