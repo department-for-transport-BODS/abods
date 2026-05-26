@@ -91,6 +91,4 @@ app.use(
 
 const handler = serverlessExpress({ app });
 
-export { app };
-
 export default env !== "local" ? datadog(handler) : handler;
