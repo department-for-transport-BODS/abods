@@ -75,6 +75,7 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTablePr
     const rows = pageData.map((op) => {
         const sparklineStats = vehicleCountData.find(v => v.operatorId === op.operatorId)?.last24Hours ?? [];
         return {
+            key: op.operatorId ?? op.nocCode,
             icon: active 
                 ? <img src="/assets/icons/check-in-circle-solid.svg" className="feed-table__check" />
                 : <img src="/assets/icons/cross-in-circle-solid.svg" className="feed-table__cross" />,
@@ -94,7 +95,7 @@ export const FeedTable = ({ title, active, data, vehicleCountData }: FeedTablePr
     return (
         <>
             <h2 className="govuk-heading-m">{title}</h2>
-            <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>
+            <SortableTable head={columnHeaders} rows={rows as any[]} onSort={handleTableSorting}></SortableTable>
             <div className="flex justify-end">
                 <div className="w-1/2">
                     <PagingPanel

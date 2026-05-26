@@ -139,17 +139,28 @@ const DistancesPage = () => {
     )).sort();
   }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOrgs, selectedLicenses, selectedServices]);
 
-  // Clear selections that are no longer valid when options narrow
+  // Clear selections that are no longer valid when options narrow.
+  // Return `prev` unchanged (same reference) when nothing is removed, so React
+  // bails out and avoids an infinite re-render loop.
   useEffect(() => {
-    setSelectedAdminAreas(prev => prev.filter(a => adminAreaOptions.includes(a)));
+    setSelectedAdminAreas(prev => {
+      const next = prev.filter(a => adminAreaOptions.includes(a));
+      return next.length === prev.length ? prev : next;
+    });
   }, [adminAreaOptions]);
 
   useEffect(() => {
-    setSelectedOrgs(prev => prev.filter(o => orgOptions.includes(o)));
+    setSelectedOrgs(prev => {
+      const next = prev.filter(o => orgOptions.includes(o));
+      return next.length === prev.length ? prev : next;
+    });
   }, [orgOptions]);
 
   useEffect(() => {
-    setSelectedOperators(prev => prev.filter(op => operatorOptions.includes(op)));
+    setSelectedOperators(prev => {
+      const next = prev.filter(op => operatorOptions.includes(op));
+      return next.length === prev.length ? prev : next;
+    });
   }, [operatorOptions]);
 
   const licenseOptions = useMemo(() => {
@@ -205,11 +216,17 @@ const DistancesPage = () => {
   }, [adminOrgData, dropdownInputsData.operators, selectedAdminAreas, selectedOrgs, selectedOperators, selectedLicenses]);
 
   useEffect(() => {
-    setSelectedLicenses(prev => prev.filter(l => licenseOptions.includes(l)));
+    setSelectedLicenses(prev => {
+      const next = prev.filter(l => licenseOptions.includes(l));
+      return next.length === prev.length ? prev : next;
+    });
   }, [licenseOptions]);
 
   useEffect(() => {
-    setSelectedServices(prev => prev.filter(s => serviceOptions.includes(s)));
+    setSelectedServices(prev => {
+      const next = prev.filter(s => serviceOptions.includes(s));
+      return next.length === prev.length ? prev : next;
+    });
   }, [serviceOptions]);
 
   const handleGenerateDataButton = async () => {

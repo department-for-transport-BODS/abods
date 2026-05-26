@@ -99,6 +99,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
     }, [sortedData, currentPage]);
 
     // Map paged data to display rows
+
     const rows = useMemo(() => {
         const mapped = paged.map((row) => {
             const distance = row.distance ? row.distance / 1000 : null;
@@ -108,22 +109,23 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
                 : "-";
 
             return {
+                key: `${row.operatorId ?? ""}-${row.nocLineAndServiceCode ?? ""}`,
                 operatorName: row.operatorId ? `${row.operatorName} (${row.operatorId})` : row.operatorName ?? "-",
                 nocLineAndServiceCode: row.nocLineAndServiceCode?.split("-").pop() ?? "-",
                 lineName: row.lineName ? `${row.lineName}-${row.serviceName ?? "NA"}` : "-",
                 distance: distance != null ? distance.toFixed(2) : "-",
                 avlDistance: avlDistance != null ? avlDistance.toFixed(2) : "-",
-                avlDistancePercent: avlPercent,
+                avlDistancePercent: avlPercent
             };
         });
 
         // Totals row is always pinned to the top, outside of sort/page
-        return totals ? [totals, ...mapped] : mapped;
+        return totals ? [{ key: "totals", ...totals }, ...mapped] : mapped;
     }, [paged, totals]);
 
     return(
         <>
-            <SortableTable head={columnHeaders} rows={rows} onSort={handleTableSorting}></SortableTable>
+            <SortableTable head={columnHeaders} rows={rows as any[]} onSort={handleTableSorting}></SortableTable>
             {data.length === 0 && (
                 <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">
                     No operator data found
