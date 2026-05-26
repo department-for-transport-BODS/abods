@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4200";
-const hasExternalBaseURL = Boolean(process.env.PLAYWRIGHT_BASE_URL?.trim());
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -9,8 +8,11 @@ const hasExternalBaseURL = Boolean(process.env.PLAYWRIGHT_BASE_URL?.trim());
 export default defineConfig({
   testDir: "./e2e",
 
-  /* Only run example.spec.ts by default */
-  testMatch: "example.spec.ts",
+  /* Run all spec files in the e2e folder */
+  testMatch: "**/*.spec.ts",
+
+  /* Log in once before all tests and save auth state */
+  globalSetup: require.resolve("./e2e/global-setup"),
 
   /* Run tests in files in parallel */
   fullyParallel: true,
