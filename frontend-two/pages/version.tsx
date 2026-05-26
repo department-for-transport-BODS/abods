@@ -1,5 +1,5 @@
-import versionData from "../public/version.json";
+import { version } from "@/utils/config";
 
 export default function VersionPage() {
-  return <p>Version: {versionData.version}</p>;
+  return <p>Version: {version.version}</p>;
 }

@@ -1,4 +1,7 @@
 import { ConfigObject } from "@/types";
+import versionJson from "../public/version.json";
+
+export const version = versionJson;
 
 const REQUIRED_CONFIG_KEYS: (keyof ConfigObject)[] = [
   "apiUrl",
@@ -39,14 +42,3 @@ export const fetchConfig = async (): Promise<ConfigObject> => {
 
 export const getEnvName = (config: ConfigObject | null): string =>
   config?.envName ?? "unknown";
-
-export const fetchVersion = async (): Promise<{
-  version: string;
-  buildNumber: string;
-}> => {
-  const response = await fetch("/version.json", { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error("Failed to load version.json");
-  }
-  return response.json() as Promise<{ version: string; buildNumber: string }>;
-};
