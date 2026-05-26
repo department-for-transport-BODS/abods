@@ -1,7 +1,5 @@
-import useSWR from "swr";
-import { fetchVersion } from "@/utils/config";
+import versionData from "../public/version.json";
 
 export default function VersionPage() {
-  const { data } = useSWR("version", fetchVersion);
-  return <p>Version: {data?.version}</p>;
+  return <p>Version: {versionData.version}</p>;
 }
