@@ -57,14 +57,13 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    /* Uncomment to test in additional browsers for migration verification */
     // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
+    //   name: "firefox",
+    //   use: { ...devices["Desktop Firefox"] },
     // },
     // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
     // },
   ],
 

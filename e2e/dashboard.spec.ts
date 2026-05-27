@@ -47,9 +47,14 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeVisible();
     });
 
-    await loggedInTest.step("Timing points is selected by default",async () => {
-        await expect(dashboard.stopTypeToggle.timingPointsRadio()).toBeChecked();
-      });
+    await loggedInTest.step(
+      "Timing points is selected by default",
+      async () => {
+        await expect(
+          dashboard.stopTypeToggle.timingPointsRadio(),
+        ).toBeChecked();
+      },
+    );
   });
 
   loggedInTest("shows the on-time performance section", async () => {
