@@ -163,13 +163,4 @@ loggedInTest.describe("Dashboard - authenticated", () => {
       await expect(loggedInPage).toHaveURL(/nocCode=/);
     },
   );
-
-  loggedInTest(
-    "filters by operator when nocCode is selected via dashboard dropdown",
-    async ({ loggedInPage }) => {
-      await dashboard.operatorSelector.selectFirstOperator();
-      // Angular dashboard writes ?nocCode=XXX to the URL on operator selection.
-      await expect(loggedInPage).toHaveURL(/nocCode=/);
-    },
-  );
 });
