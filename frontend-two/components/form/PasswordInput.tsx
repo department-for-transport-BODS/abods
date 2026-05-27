@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useState } from "react";
 import { ErrorInfo } from "@/types";
 
 interface PasswordInputProps<T> {
@@ -44,6 +44,13 @@ export const PasswordInput = <T,>({
     setShowPassword(false);
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setShowPassword((current) => !current);
+    }
+  };
+
   return (
     <div
       className={
@@ -83,9 +90,8 @@ export const PasswordInput = <T,>({
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleMouseDown}
           onTouchEnd={handleMouseUp}
+          onKeyDown={handleKeyDown}
           aria-controls={inputId}
-          aria-hidden="true"
-          tabIndex={-1}
           aria-label={`${showPassword ? "Hide" : "Show"} password`}
         >
           {showPassword ? "Hide" : "Show"}
