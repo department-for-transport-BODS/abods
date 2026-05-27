@@ -6,7 +6,7 @@
     "postinstall": "(cd abods-api && npm install) && (cd frontend && npm install) && (cd frontend-two && npm install)",
     "db": "./scripts/db_connect.sh sandbox",
     "start:api": "(cd abods-api && npm run start:local)",
-    "start:app": "(cd frontend && npm run dev)",
+    "start:app": "(cd frontend && npm run start)",
     "start:next-app": "(cd frontend-two && npm run dev)",
     "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",
     "start-next": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:next-app\"",
@@ -26,6 +26,7 @@
     "@graphql-codegen/introspection": "^4.0.3",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
+    "@graphql-codegen/typescript-graphql-request": "^7.0.1",
     "@graphql-codegen/typescript-operations": "^5.0.2",
     "@graphql-codegen/typescript-resolvers": "^5.1.0",
     "@playwright/test": "^1.49.0",
@@ -39,6 +40,9 @@
     "prettier": "3.2.5",
     "source-map": "^0.7.6",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+     "graphql": "16.14.0"
   },
   "lint-staged": {
     "**/*": "prettier --write"

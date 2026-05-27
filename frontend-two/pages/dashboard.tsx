@@ -10,18 +10,20 @@ import { FeedStatusSummary } from "@/components/dashboard/FeedStatusSummary";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { StopTypeOption } from "@/types/dashboard";
 import {
   DashboardVehicles,
-  OperatorDashboard,
+  DashboardOperatorListQuery,
   PerformanceFiltersInputType,
-  StopTypeOption,
-} from "@/types/dashboard";
+} from "../src/generated/graphql";
 
 const DashboardPage = () => {
   useRequireAuth();
   const router = useRouter();
   const { config } = useConfig();
-  const [operators, setOperators] = useState<OperatorDashboard[]>([]);
+  const [operators, setOperators] = useState<
+    DashboardOperatorListQuery["operatorsFeedMonitoring"]
+  >([]);
   const [vehicleCounts, setVehicleCounts] = useState<DashboardVehicles[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,8 +51,8 @@ const DashboardPage = () => {
       setIsLoading(true);
       try {
         const [ops, counts] = await Promise.all([
-          dashboardService.fetchOperators(config.apiUrl),
-          dashboardService.fetchVehicleCounts(config.apiUrl, nocCode),
+          dashboardService.fetchOperators(),
+          dashboardService.fetchOperatorVehicleCounts(nocCode),
         ]);
         setOperators(ops);
         setVehicleCounts(counts);

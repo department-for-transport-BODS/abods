@@ -16,24 +16,24 @@ interface PerformanceChartProps {
   chartId?: string;
 }
 
-const orderedCategories: PerformanceCategories[] = ["OnTime", "Late", "Early"];
+const orderedCategories: PerformanceCategories[] = ["onTime", "late", "early"];
 
 const legendLabels: Record<PerformanceCategories, string> = {
-  OnTime: "On-Time",
-  Late: "Late",
-  Early: "Early",
+  onTime: "On-Time",
+  late: "Late",
+  early: "Early",
 };
 
 const legendHints: Record<PerformanceCategories, string> = {
-  OnTime: "",
-  Late: "(> 5:59 minutes)",
-  Early: "(> 1 minute)",
+  onTime: "",
+  late: "(> 5:59 minutes)",
+  early: "(> 1 minute)",
 };
 
 const categoryColours: Record<PerformanceCategories, string> = {
-  OnTime: "#4c2c92", // purple
-  Late: "#f4c300", // ochre
-  Early: "#e0007b", // pink
+  onTime: "#4c2c92", // purple
+  late: "#f4c300", // ochre
+  early: "#e0007b", // pink
 };
 
 const legendTextColor = "#505a5f";
@@ -45,7 +45,7 @@ const toChartData = (source: PunctualityOverview): ChartDatum[] => {
   return orderedCategories.map((category) => {
     const raw =
       source[
-        category === "OnTime"
+        category === "onTime"
           ? "onTime"
           : (category.toLowerCase() as "late" | "early")
       ] ?? 0;

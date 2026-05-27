@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
 import {
-  OperatorDashboard,
+  DashboardOperatorListQuery,
   RankingOrder,
-  ServicePunctuality,
-} from "@/types/dashboard";
+  ServicePunctualityType,
+} from "../../src/generated/graphql";
 
 interface PerformanceRankingTableProps {
-  services: ServicePunctuality[];
+  services: ServicePunctualityType[];
   loaded: boolean;
   errored: boolean;
   nocCode: string | null;
-  operators: OperatorDashboard[];
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
   order: RankingOrder;
   onChangeOrder: (order: RankingOrder) => void;
   trendFrom?: DateTime;
@@ -19,19 +19,19 @@ interface PerformanceRankingTableProps {
   periodLabel: string;
 }
 
-const buildServiceName = (service: ServicePunctuality) => {
+const buildServiceName = (service: ServicePunctualityType) => {
   const number = service.lineInfo?.serviceNumber ?? "unknown";
   const name = service.lineInfo?.serviceName ?? "unknown";
   return `${number}: ${name}`;
 };
 
-const calculateOnTimePct = (service: ServicePunctuality) => {
+const calculateOnTimePct = (service: ServicePunctualityType) => {
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
   return total > 0 ? ((service.onTime ?? 0) / total) * 100 : 0;
 };
 
-const calculateTrend = (service: ServicePunctuality) => {
+const calculateTrend = (service: ServicePunctualityType) => {
   if (!service.trend) return null;
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
@@ -50,7 +50,7 @@ const calculateTrend = (service: ServicePunctuality) => {
 };
 
 const getOperatorName = (
-  operators: OperatorDashboard[],
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"],
   noc: string | null | undefined,
 ) => operators.find((op) => op.nocCode === noc)?.name ?? "Unknown";
 
@@ -78,11 +78,11 @@ export const PerformanceRankingTable = ({
           <li
             className={`tabs__list-item ${order === "descending" ? "tabs__list-item--selected" : ""}`}
             tabIndex={0}
-            onClick={() => onChangeOrder("descending")}
+            onClick={() => onChangeOrder(RankingOrder.Descending)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                onChangeOrder("descending");
+                onChangeOrder(RankingOrder.Descending);
               }
             }}
           >
@@ -91,11 +91,11 @@ export const PerformanceRankingTable = ({
           <li
             className={`tabs__list-item ${order === "ascending" ? "tabs__list-item--selected" : ""}`}
             tabIndex={0}
-            onClick={() => onChangeOrder("ascending")}
+            onClick={() => onChangeOrder(RankingOrder.Descending)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                onChangeOrder("ascending");
+                onChangeOrder(RankingOrder.Ascending);
               }
             }}
           >

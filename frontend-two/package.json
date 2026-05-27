@@ -13,10 +13,12 @@
   },
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.40",
+    "@apollo/client": "^4.1.9",
     "ag-grid-community": "^31.3.2",
     "amazon-quicksight-embedding-sdk": "^2.11.3",
     "axios": "^1.7.7",
     "govuk-frontend": "^5.11.0",
+    "graphql": "^16.14.0",
     "kainossoftwareltd-govuk-react-kainos": "*",
     "luxon": "^3.5.0",
     "mapbox-gl": "^2.15.0",

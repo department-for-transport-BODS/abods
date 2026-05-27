@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { OperatorDashboard } from "@/types/dashboard";
+import { DashboardOperatorListQuery } from "../../src/generated/graphql";
 
 const ALL_OPERATORS_OPTION = {
   value: "all",
@@ -19,7 +19,7 @@ const ALL_OPERATORS_OPTION = {
 };
 
 interface OperatorSelectorProps {
-  operators: OperatorDashboard[];
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
   selectedOperatorId: string | null;
   onChange: (operatorId: string | null) => void;
 }
