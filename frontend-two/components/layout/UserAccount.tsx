@@ -42,7 +42,7 @@ export const UserAccount = () => {
       return;
     }
     try {
-      await authService.logout(config.apiUrl);
+      await authService.logout();
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

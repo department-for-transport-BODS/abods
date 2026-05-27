@@ -26,22 +26,20 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { config } = useConfig();
   const [user, setUserState] = useState<LoginInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    if (!config?.apiUrl) return null;
     try {
-      const result = await authService.getUser(config.apiUrl);
+      const result = await authService.getUser();
       setUserState(result);
       return result;
     } catch {
       setUserState(null);
       return null;
     }
-  }, [config?.apiUrl]);
+  }, []);
 
   const resetState = useCallback(() => {
     sessionStore.clear();
@@ -51,11 +49,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = useCallback(async () => {
-    if (config?.apiUrl) {
-      await authService.logout(config.apiUrl).catch(() => undefined);
-    }
+    await authService.logout().catch(() => undefined);
+
     resetState();
-  }, [config?.apiUrl, resetState]);
+  }, [resetState]);
 
   useEffect(() => {
     const init = async () => {
@@ -107,15 +104,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(
     async (username: string, password: string) => {
-      if (!config?.apiUrl) throw new Error("API URL not configured");
-      const result = await authService.login(config.apiUrl, username, password);
+      const result = await authService.login(username, password);
       if (!result.success || !result.expiresAt) throw new Error("Login failed");
       sessionStore.set({ expiresAt: result.expiresAt });
       userStore.set({ username });
       await fetchUser();
       setIsAuthenticated(true);
     },
-    [config?.apiUrl, fetchUser],
+    [fetchUser],
   );
 
   const value = useMemo(

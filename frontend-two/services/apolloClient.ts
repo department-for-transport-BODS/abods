@@ -22,6 +22,13 @@ const signOutAndRedirect = () => {
 };
 
 export function createApolloClient() {
+  const apiUrl = process.env.NEXT_GRAPHQL_API_BASE_URL;
+
+  if (!apiUrl) {
+    console.error("NEXT_GRAPHQL_API_BASE_URL environment variable is not set");
+    window.location.href = `/500`;
+  }
+
   const errorLink = new ErrorLink(({ error, operation }) => {
     if (ServerError.is(error)) {
       console.log(
@@ -49,7 +56,7 @@ export function createApolloClient() {
     link: ApolloLink.from([
       errorLink,
       new HttpLink({
-        uri: process.env.NEXT_GRAPHQL_API_BASE_URL,
+        uri: apiUrl,
         credentials: "include",
       }),
     ]),

@@ -19,9 +19,7 @@ const DataMonitoringPage = () => {
 
     const load = async () => {
       setIsLoading(true);
-      const result = await dataMonitoringService.fetchEmbeddedUrl(
-        config.apiUrl,
-      );
+      const result = await dataMonitoringService.fetchEmbeddedUrl();
 
       if (!result || !result.enabled || !result.url) {
         setErrors([
