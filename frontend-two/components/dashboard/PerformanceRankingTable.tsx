@@ -5,6 +5,7 @@ import {
   RankingOrder,
   ServicePunctualityType,
 } from "../../src/generated/graphql";
+import { Tooltip } from "@/components/shared/Tooltip";
 
 interface PerformanceRankingTableProps {
   services: ServicePunctualityType[];
@@ -19,6 +20,8 @@ interface PerformanceRankingTableProps {
   periodLabel: string;
 }
 
+type TrendDirection = "increase" | "decrease";
+
 const buildServiceName = (service: ServicePunctualityType) => {
   const number = service.lineInfo?.serviceNumber ?? "unknown";
   const name = service.lineInfo?.serviceName ?? "unknown";
@@ -31,7 +34,9 @@ const calculateOnTimePct = (service: ServicePunctualityType) => {
   return total > 0 ? ((service.onTime ?? 0) / total) * 100 : 0;
 };
 
-const calculateTrend = (service: ServicePunctualityType) => {
+const calculateTrend = (
+  service: ServicePunctualityType,
+): { diff: string; direction: TrendDirection } | null => {
   if (!service.trend) return null;
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
@@ -48,6 +53,9 @@ const calculateTrend = (service: ServicePunctualityType) => {
     direction: diff <= 0 ? "decrease" : "increase",
   };
 };
+
+const buildTrendClassName = (direction: TrendDirection) =>
+  `change change--small change--${direction}`;
 
 const getOperatorName = (
   operators: DashboardOperatorListQuery["operatorsFeedMonitoring"],
@@ -70,6 +78,14 @@ export const PerformanceRankingTable = ({
     trendFrom && trendTo
       ? `Change in on-time percentage from ${periodLabel} (${trendFrom.toFormat("d MMMM")} - ${trendTo.toFormat("d MMMM")})`
       : `Change in on-time percentage from ${periodLabel}`;
+
+  const stateMessage = !loaded
+    ? "Loading..."
+    : errored
+      ? "There was an error fetching the service data"
+      : services.length === 0
+        ? "No service data for the selected time period"
+        : null;
 
   return (
     <div className="app-performance-ranking">
@@ -104,24 +120,19 @@ export const PerformanceRankingTable = ({
         </ul>
       </div>
 
-      {!loaded ? (
-        <div className="ranking-table__loading">
-          <p className="govuk-body">Loading...</p>
-        </div>
-      ) : errored ? (
-        <div className="ranking-table__no-data">
-          <span className="govuk-body">
-            There was an error fetching the service data
-          </span>
-        </div>
-      ) : services.length === 0 ? (
-        <div className="ranking-table__no-data">
-          <span className="govuk-body">
-            No service data for the selected time period
-          </span>
-        </div>
-      ) : (
+      <div
+        className={`ranking-table__content ${!loaded ? "ranking-table__content--loading" : ""}`}
+        aria-busy={!loaded}
+      >
         <table className="ranking-table__data">
+          <colgroup>
+            <col className="ranking-table__col-service" />
+            {nocCode === null ? (
+              <col className="ranking-table__col-operator" />
+            ) : null}
+            <col className="ranking-table__col-stat" />
+            <col className="ranking-table__col-trend" />
+          </colgroup>
           <thead>
             <tr>
               <th className="govuk-visually-hidden">Service</th>
@@ -142,7 +153,7 @@ export const PerformanceRankingTable = ({
                 <tr key={`${noc}-${lineId}`}>
                   <td className="ranking-table__service">
                     <Link
-                      className="govuk-link"
+                      className="govuk-link ranking-table__link"
                       href={noc ? `/on-time/${noc}/${lineId}` : "/on-time"}
                     >
                       {buildServiceName(service)}
@@ -150,7 +161,11 @@ export const PerformanceRankingTable = ({
                   </td>
                   {nocCode === null ? (
                     <td className="ranking-table__operator">
-                      {getOperatorName(operators, noc)}
+                      <Tooltip message={noc} selectable>
+                        <span className="ranking-table__operator-text">
+                          {getOperatorName(operators, noc)}
+                        </span>
+                      </Tooltip>
                     </td>
                   ) : null}
                   <td className="govuk-!-font-weight-bold ranking-table__stat">
@@ -158,9 +173,10 @@ export const PerformanceRankingTable = ({
                   </td>
                   <td className="ranking-table__trend">
                     {trend ? (
-                      <span title={tooltip}>
-                        {trend.direction === "increase" ? "▲" : "▼"}{" "}
-                        {trend.diff}%
+                      <span className={buildTrendClassName(trend.direction)}>
+                        <Tooltip message={tooltip} underline>
+                          <span className="change__value">{trend.diff}%</span>
+                        </Tooltip>
                       </span>
                     ) : null}
                   </td>
@@ -169,7 +185,28 @@ export const PerformanceRankingTable = ({
             })}
           </tbody>
         </table>
-      )}
+
+        {stateMessage ? (
+          !loaded ? (
+            <div
+              className="ranking-table__loading"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="govuk-visually-hidden">Loading...</span>
+              <span className="ranking-table__loading-dots" aria-hidden="true">
+                <span className="ranking-table__loading-dot" />
+                <span className="ranking-table__loading-dot" />
+                <span className="ranking-table__loading-dot" />
+              </span>
+            </div>
+          ) : (
+            <div className="ranking-table__no-data">
+              <span className="govuk-body">{stateMessage}</span>
+            </div>
+          )
+        ) : null}
+      </div>
     </div>
   );
 };

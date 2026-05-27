@@ -37,6 +37,7 @@ generated_api_secrets/
 /.nyc_output/
 /coverage/
 .nyc_output/
+/e2e/.auth/
 
 # .agents
 .agents

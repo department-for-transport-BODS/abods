@@ -29,8 +29,16 @@ const DashboardPage = () => {
 
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
+
+  const allStopsQueryParam =
+    typeof router.query.allStops === "string" ? router.query.allStops : null;
+  const legacyStopTypeQueryParam =
+    typeof router.query.stopType === "string" ? router.query.stopType : null;
+
   const stopType: StopTypeOption =
-    router.query.stopType === "AllStops" ? "AllStops" : "TimingPoints";
+    allStopsQueryParam === "true" || legacyStopTypeQueryParam === "AllStops"
+      ? "AllStops"
+      : "TimingPoints";
 
   const performanceFilters: PerformanceFiltersInputType = useMemo(
     () => ({
@@ -109,7 +117,10 @@ const DashboardPage = () => {
         pathname: router.pathname,
         query: {
           ...router.query,
-          stopType: value === "TimingPoints" ? undefined : value,
+          // Keep Angular-compatible contract as canonical.
+          allStops: value === "AllStops" ? "true" : undefined,
+          // Remove legacy Next.js query param when writing new URL state.
+          stopType: undefined,
         },
       },
       undefined,

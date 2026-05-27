@@ -348,6 +348,9 @@ jobs:
     env:
       CI: "1"
       PLAYWRIGHT_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL }}
+      TEST_USERNAME: ${{ vars.TEST_USERNAME }}
+      TEST_PASSWORD: ${{ vars.TEST_PASSWORD }}
+      TEST_NOC_CODE: ${{ vars.TEST_NOC_CODE }}
 
     steps:
       - name: check environment

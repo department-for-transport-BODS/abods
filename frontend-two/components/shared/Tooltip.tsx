@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
+import tippy from "tippy.js";
 
 interface TooltipProps {
   message?: string;
@@ -12,11 +13,36 @@ export const Tooltip = ({
   underline,
   selectable,
   children,
-}: TooltipProps) => (
-  <span
-    className={`tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""}`}
-    title={message}
-  >
-    {children}
-  </span>
-);
+}: TooltipProps) => {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!triggerRef.current || !message) {
+      return;
+    }
+
+    const instance = tippy(triggerRef.current, {
+      content: message,
+      allowHTML: true,
+      theme: "gds-tooltip",
+      zIndex: 100,
+      placement: "top",
+      trigger: "mouseenter focus click",
+    });
+
+    return () => {
+      instance.destroy();
+    };
+  }, [message]);
+
+  return (
+    <button
+      ref={triggerRef}
+      className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""}`}
+      title={message}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+};
