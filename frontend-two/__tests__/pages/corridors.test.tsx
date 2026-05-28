@@ -159,17 +159,20 @@ describe("CorridorsPage", () => {
     });
   });
 
-  it("shows error summary when fetch returns null", async () => {
+  it("renders empty grid when fetch returns null", async () => {
     mockFetchCorridors.mockResolvedValue(null);
 
     renderPage();
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "There was an error loading operator data, please try again.",
-        ),
+        screen.getByLabelText("Search for a corridor"),
       ).toBeInTheDocument();
     });
+    expect(
+      screen.queryByText(
+        "There was an error loading operator data, please try again.",
+      ),
+    ).not.toBeInTheDocument();
   });
 });

@@ -2,11 +2,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
-import { ErrorInfo } from "@/types";
 import dynamic from "next/dynamic";
 const CorridorsGrid = dynamic(
   () =>
@@ -32,17 +30,7 @@ const CorridorsPage = () => {
     config?.apiUrl ? ["corridors-list", config.apiUrl] : null,
     ([, apiUrl]) => corridorsService.fetchCorridors(apiUrl),
   );
-
-  const errors: ErrorInfo[] =
-    !isLoading && !data
-      ? [
-          {
-            id: "corridors-load-error",
-            errorMessage:
-              "There was an error loading operator data, please try again.",
-          },
-        ]
-      : [];
+  const corridors = data ?? [];
 
   const handleFilterChange = (value: string) => {
     router
@@ -65,20 +53,15 @@ const CorridorsPage = () => {
   return (
     <BaseLayout title="Corridors - Analyse Bus Open Data">
       <h1 className="govuk-heading-xl">Corridors</h1>
-      <div className="govuk-grid-row">
-        <div className="govuk-grid-column-two-thirds-from-desktop">
-          <ErrorSummary errors={errors} />
-        </div>
-      </div>
       {isLoading ? (
         <p className="govuk-body">Loading...</p>
-      ) : data ? (
+      ) : (
         <CorridorsGrid
-          data={data}
+          data={corridors}
           filter={filter}
           onFilterChange={handleFilterChange}
         />
-      ) : null}
+      )}
     </BaseLayout>
   );
 };
