@@ -1,52 +1,54 @@
-import { graphqlRequest } from "@/services/api";
+import { apolloClient } from "@/services/apolloClient";
 import {
-  StopStatistics,
-  StopAnalysisFilters,
-  AdminArea,
-  Operator,
-  Line,
-} from "@/types/stop-analysis";
-import {
-  STOP_ANALYSIS_QUERY,
-  OPERATORS_QUERY,
-  ADMIN_AREAS_QUERY,
-  LINES_QUERY,
-} from "@/services/stop-analysis/stop-analysis.operations";
+  GetAdminAreasDocument,
+  GetAdminAreasQuery,
+  OperatorLinesDocument,
+  OperatorLinesQuery,
+  OperatorLinesQueryVariables,
+  OperatorListDocument,
+  OperatorListQuery,
+  StopAnalysisDocument,
+  StopAnalysisQuery,
+  StopAnalysisQueryVariables,
+} from "../../src/generated/graphql";
 
 export const stopAnalysisService = {
   fetchStopAnalysis: async (
-    apiUrl: string,
-    filters: StopAnalysisFilters,
-  ): Promise<StopStatistics[]> => {
+    filters: StopAnalysisQueryVariables,
+  ): Promise<StopAnalysisQuery["stopAnalysis"]> => {
     try {
-      const result = await graphqlRequest<{
-        stopAnalysis: StopStatistics[];
-      }>(apiUrl, STOP_ANALYSIS_QUERY, filters as unknown as Record<string, unknown>);
-      return result.stopAnalysis ?? [];
+      const result = await apolloClient.query({
+        query: StopAnalysisDocument,
+        variables: filters,
+        fetchPolicy: "no-cache",
+      });
+      return result.data?.stopAnalysis ?? [];
     } catch (error) {
       console.warn("Failed to fetch stop analysis:", error);
       return [];
     }
   },
 
-  fetchOperators: async (apiUrl: string): Promise<Operator[]> => {
+  fetchOperators: async (): Promise<OperatorListQuery["operators"]> => {
     try {
-      const result = await graphqlRequest<{
-        operators: Operator[];
-      }>(apiUrl, OPERATORS_QUERY);
-      return result.operators ?? [];
+      const result = await apolloClient.query({
+        query: OperatorListDocument,
+      });
+      return result.data?.operators ?? [];
     } catch (error) {
       console.warn("Failed to fetch operators:", error);
       return [];
     }
   },
 
-  fetchAdminAreas: async (apiUrl: string): Promise<AdminArea[]> => {
+  fetchAdminAreas: async (): Promise<
+    NonNullable<GetAdminAreasQuery["adminAreas"]>
+  > => {
     try {
-      const result = await graphqlRequest<{
-        adminAreas: AdminArea[];
-      }>(apiUrl, ADMIN_AREAS_QUERY);
-      return result.adminAreas ?? [];
+      const result = await apolloClient.query({
+        query: GetAdminAreasDocument,
+      });
+      return result.data?.adminAreas ?? [];
     } catch (error) {
       console.warn("Failed to fetch admin areas:", error);
       return [];
@@ -54,16 +56,16 @@ export const stopAnalysisService = {
   },
 
   fetchLines: async (
-    apiUrl: string,
     operatorIds: string[],
     inputDate: string,
     endDate?: string,
-  ): Promise<Line[]> => {
+  ): Promise<OperatorLinesQuery["lines"]> => {
     try {
-      const result = await graphqlRequest<{
-        lines: Line[];
-      }>(apiUrl, LINES_QUERY, { operatorIds, inputDate, endDate });
-      return result.lines ?? [];
+      const result = await apolloClient.query({
+        query: OperatorLinesDocument,
+        variables: { operatorIds, inputDate, endDate },
+      });
+      return result.data?.lines ?? [];
     } catch (error) {
       console.warn("Failed to fetch lines:", error);
       return [];

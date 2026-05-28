@@ -16,6 +16,13 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/services/apolloClient", () => ({
+  apolloClient: {
+    query: vi.fn().mockResolvedValue({ data: {} }),
+    mutate: vi.fn().mockResolvedValue({ data: {} }),
+  },
+}));
+
 vi.mock("@/services/stop-analysis/stop-analysis.service", () => ({
   stopAnalysisService: {
     fetchStopAnalysis: vi.fn(),
@@ -34,8 +41,20 @@ vi.mock("@/components/stop-analysis/StopAnalysisFilters", () => ({
 }));
 
 vi.mock("@/components/stop-analysis/StopAnalysisTable", () => ({
-  StopAnalysisTable: ({ data, loading, errored }: { data: unknown[]; loading: boolean; errored: boolean }) => (
-    <div data-testid="stop-analysis-table" data-loading={loading} data-errored={errored}>
+  StopAnalysisTable: ({
+    data,
+    loading,
+    errored,
+  }: {
+    data: unknown[];
+    loading: boolean;
+    errored: boolean;
+  }) => (
+    <div
+      data-testid="stop-analysis-table"
+      data-loading={loading}
+      data-errored={errored}
+    >
       {data.length} rows
     </div>
   ),

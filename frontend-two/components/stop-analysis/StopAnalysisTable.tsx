@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
+import { MultiselectCheckbox } from "./MultiselectCheckbox";
+import SortableTable, { SortOrder, type SortableTableHeadCell, type SortableTableRow } from "./SortableTable";
 
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
@@ -23,6 +25,60 @@ const formatSeconds = (value: number | undefined | null): string => {
   return `${sign}${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
+type SortKey =
+  | "stopId"
+  | "timingPoint"
+  | "stopName"
+  | "direction"
+  | "scheduledDepartures"
+  | "actualDepartures"
+  | "averageScheduled"
+  | "averageActual"
+  | "averageDelay"
+  | "onTime"
+  | "early"
+  | "late";
+
+const SORT_ASC = SortOrder.ASC;
+
+const compareValue = (a: string | number, b: string | number): number => {
+  if (typeof a === "number" && typeof b === "number") {
+    return a - b;
+  }
+
+  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+};
+
+const getSortValue = (row: StopPerformanceRow, key: SortKey): string | number => {
+  switch (key) {
+    case "timingPoint":
+      return row.timingPoint ? 1 : 0;
+    case "direction":
+      return row.direction ?? "";
+    case "averageScheduled":
+      return row.averageScheduled ?? Number.NEGATIVE_INFINITY;
+    case "averageActual":
+      return row.averageActual ?? Number.NEGATIVE_INFINITY;
+    case "averageDelay":
+      return row.averageDelay ?? Number.NEGATIVE_INFINITY;
+    case "onTime":
+      return row.onTime;
+    case "early":
+      return row.early;
+    case "late":
+      return row.late;
+    case "scheduledDepartures":
+      return row.scheduledDepartures;
+    case "actualDepartures":
+      return row.actualDepartures;
+    case "stopName":
+      return row.stopName;
+    case "stopId":
+    default:
+      return row.stopId;
+  }
+};
+
 export const StopAnalysisTable = ({
   data,
   loading,
@@ -32,6 +88,18 @@ export const StopAnalysisTable = ({
   onStopNameClick,
 }: StopAnalysisTableProps) => {
   const [quickFilter, setQuickFilter] = useState("");
+  const [sortState, setSortState] = useState<{ key: SortKey; order: SortOrder }>({
+    key: "stopName",
+    order: SORT_ASC,
+  });
+
+  const directionOptions = useMemo(
+    () => [
+      { label: "Inbound", value: "Inbound" },
+      { label: "Outbound", value: "Outbound" },
+    ],
+    [],
+  );
 
   const filteredData = useMemo(
     () =>
@@ -45,72 +113,6 @@ export const StopAnalysisTable = ({
     [data, directions],
   );
 
-  const handleDirectionToggle = (dir: Direction) => {
-    const newDirs = directions.includes(dir)
-      ? directions.filter((d) => d !== dir)
-      : [...directions, dir];
-    onDirectionsChange(newDirs.length === 0 ? ["Inbound", "Outbound"] : newDirs);
-  };
-
-  const handleExportCsv = () => {
-    const headers = [
-      "NAPTAN",
-      "Timing Point",
-      "Name",
-      "Locality",
-      "Admin Area",
-      "Direction",
-      "Scheduled Departures",
-      "Recorded Departures",
-      "Recorded %",
-      "Av. Scheduled Travel Time",
-      "Av. Actual Travel Time",
-      "Av. Delay",
-      "On Time",
-      "On Time %",
-      "On Time (avg secs)",
-      "Early",
-      "Early %",
-      "Early (avg secs)",
-      "Late",
-      "Late %",
-      "Late (avg secs)",
-    ];
-
-    const rows = filteredData.map((row) => [
-      row.stopId,
-      row.timingPoint ? "Yes" : "No",
-      row.stopName,
-      row.localityName,
-      row.adminAreaName,
-      row.direction ?? "",
-      row.scheduledDepartures,
-      row.actualDepartures,
-      formatPercent(row.completedRatio),
-      row.averageScheduled != null ? formatSeconds(row.averageScheduled) : "",
-      row.averageActual != null ? formatSeconds(row.averageActual) : "",
-      row.averageDelay != null ? formatSeconds(row.averageDelay) : "",
-      row.onTime,
-      formatPercent(row.onTimeRatio),
-      row.onTimeInSeconds != null ? row.onTimeInSeconds.toFixed(0) : "",
-      row.early,
-      formatPercent(row.earlyRatio),
-      row.earlyInSeconds != null ? row.earlyInSeconds.toFixed(0) : "",
-      row.late,
-      formatPercent(row.lateRatio),
-      row.lateInSeconds != null ? row.lateInSeconds.toFixed(0) : "",
-    ]);
-
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "stop-analysis.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const searchFilteredData = useMemo(() => {
     if (!quickFilter) return filteredData;
     const lower = quickFilter.toLowerCase();
@@ -121,6 +123,79 @@ export const StopAnalysisTable = ({
         row.localityName.toLowerCase().includes(lower),
     );
   }, [filteredData, quickFilter]);
+
+  const sortedRows = useMemo(() => {
+    const rows = [...searchFilteredData];
+    rows.sort((left, right) => {
+      const leftValue = getSortValue(left, sortState.key);
+      const rightValue = getSortValue(right, sortState.key);
+      const result = compareValue(leftValue, rightValue);
+      return sortState.order === SORT_ASC ? result : -result;
+    });
+    return rows;
+  }, [searchFilteredData, sortState]);
+
+  const tableHead = useMemo<Array<SortableTableHeadCell<SortableTableRow & { stopName: string }>>>(
+    () => [
+      { key: "stopId", label: "NAPTAN", sortable: true, sortOrder: sortState.key === "stopId" ? sortState.order : undefined },
+      { key: "timingPoint", label: "TP", sortable: true, sortOrder: sortState.key === "timingPoint" ? sortState.order : undefined },
+      {
+        key: "stopName",
+        label: "Name",
+        sortable: true,
+        sortOrder: sortState.key === "stopName" ? sortState.order : undefined,
+        render: (row) => (
+          <button
+            type="button"
+            className="govuk-link stop-analysis-table__stop-link"
+            onClick={() => onStopNameClick(row as StopPerformanceRow)}
+            title={`${(row as StopPerformanceRow).localityName}, ${(row as StopPerformanceRow).adminAreaName}`}
+          >
+            {row.stopName}
+          </button>
+        ),
+      },
+      { key: "direction", label: "Direction", sortable: true, sortOrder: sortState.key === "direction" ? sortState.order : undefined },
+      { key: "scheduledDepartures", label: "Scheduled", sortable: true, sortOrder: sortState.key === "scheduledDepartures" ? sortState.order : undefined },
+      { key: "actualDepartures", label: "Recorded", sortable: true, sortOrder: sortState.key === "actualDepartures" ? sortState.order : undefined },
+      { key: "averageScheduled", label: "Av. Sched.", sortable: true, sortOrder: sortState.key === "averageScheduled" ? sortState.order : undefined },
+      { key: "averageActual", label: "Av. Actual", sortable: true, sortOrder: sortState.key === "averageActual" ? sortState.order : undefined },
+      { key: "averageDelay", label: "Av. Delay", sortable: true, sortOrder: sortState.key === "averageDelay" ? sortState.order : undefined },
+      { key: "onTime", label: "On Time", sortable: true, sortOrder: sortState.key === "onTime" ? sortState.order : undefined },
+      { key: "early", label: "Early", sortable: true, sortOrder: sortState.key === "early" ? sortState.order : undefined },
+      { key: "late", label: "Late", sortable: true, sortOrder: sortState.key === "late" ? sortState.order : undefined },
+    ],
+    [onStopNameClick, sortState],
+  );
+
+  const tableRows = useMemo<Array<SortableTableRow & {
+    stopName: string;
+    localityName: string;
+    adminAreaName: string;
+  }>>(
+    () => sortedRows.map((row) => ({
+      key: `${row.stopId}-${row.direction}`,
+      stopId: row.stopId,
+      timingPoint: row.timingPoint ? "⏱" : "",
+      stopName: row.stopName,
+      localityName: row.localityName,
+      adminAreaName: row.adminAreaName,
+      direction: row.direction ?? "-",
+      scheduledDepartures: row.scheduledDepartures,
+      actualDepartures: `${row.actualDepartures} (${formatPercent(row.completedRatio)})`,
+      averageScheduled: row.averageScheduled != null ? formatSeconds(row.averageScheduled) : "-",
+      averageActual: row.averageActual != null ? formatSeconds(row.averageActual) : "-",
+      averageDelay: row.averageDelay != null ? formatSeconds(row.averageDelay) : "-",
+      onTime: `${row.onTime} (${formatPercent(row.onTimeRatio)})`,
+      early: `${row.early} (${formatPercent(row.earlyRatio)})`,
+      late: `${row.late} (${formatPercent(row.lateRatio)})`,
+    })),
+    [sortedRows],
+  );
+
+  const handleSort = (key: string, order: SortOrder) => {
+    setSortState({ key: key as SortKey, order });
+  };
 
   if (errored) {
     return (
@@ -136,35 +211,23 @@ export const StopAnalysisTable = ({
     <div className="stop-analysis-table govuk-!-margin-top-6">
       <div className="stop-analysis-table__controls">
         <div className="stop-analysis-table__direction-filters">
-          <fieldset className="govuk-fieldset">
-            <legend className="govuk-visually-hidden">Filter by direction</legend>
-            <div className="govuk-checkboxes govuk-checkboxes--small govuk-checkboxes--inline">
-              <div className="govuk-checkboxes__item">
-                <input
-                  className="govuk-checkboxes__input"
-                  id="dir-inbound"
-                  type="checkbox"
-                  checked={directions.includes("Inbound")}
-                  onChange={() => handleDirectionToggle("Inbound")}
-                />
-                <label className="govuk-checkboxes__label" htmlFor="dir-inbound">
-                  Inbound
-                </label>
-              </div>
-              <div className="govuk-checkboxes__item">
-                <input
-                  className="govuk-checkboxes__input"
-                  id="dir-outbound"
-                  type="checkbox"
-                  checked={directions.includes("Outbound")}
-                  onChange={() => handleDirectionToggle("Outbound")}
-                />
-                <label className="govuk-checkboxes__label" htmlFor="dir-outbound">
-                  Outbound
-                </label>
-              </div>
-            </div>
-          </fieldset>
+          <MultiselectCheckbox
+            id="sa-directions"
+            label="Directions"
+            options={directionOptions}
+            selectedValues={
+              directions.length === 2 ? [] : directions.map((direction) => direction)
+            }
+            onChange={(values) =>
+              onDirectionsChange(
+                values.length === 0 || values.length === 2
+                  ? ["Inbound", "Outbound"]
+                  : (values as Direction[]),
+              )
+            }
+            showAllLabel="All Directions"
+            placeholder="Directions"
+          />
         </div>
 
         <div className="stop-analysis-table__search">
@@ -177,98 +240,15 @@ export const StopAnalysisTable = ({
             aria-label="Search stops"
           />
         </div>
-
-        <button
-          type="button"
-          className="govuk-button govuk-button--secondary"
-          onClick={handleExportCsv}
-        >
-          Export CSV
-        </button>
       </div>
 
       {loading ? (
         <p className="govuk-body">Loading...</p>
+      ) : tableRows.length === 0 ? (
+        <p className="govuk-body govuk-!-margin-top-6">No data available</p>
       ) : (
         <div className="stop-analysis-table__grid">
-          <table className="govuk-table">
-            <thead className="govuk-table__head">
-              <tr className="govuk-table__row">
-                <th className="govuk-table__header" scope="col">NAPTAN</th>
-                <th className="govuk-table__header" scope="col">TP</th>
-                <th className="govuk-table__header" scope="col">Name</th>
-                <th className="govuk-table__header" scope="col">Direction</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Scheduled</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Recorded</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Av. Sched.</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Av. Actual</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Av. Delay</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">On Time</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Early</th>
-                <th className="govuk-table__header govuk-table__header--numeric" scope="col">Late</th>
-              </tr>
-            </thead>
-            <tbody className="govuk-table__body">
-              {searchFilteredData.length === 0 ? (
-                <tr className="govuk-table__row">
-                  <td className="govuk-table__cell" colSpan={12}>
-                    No data available
-                  </td>
-                </tr>
-              ) : (
-                searchFilteredData.slice(0, 100).map((row) => (
-                  <tr key={`${row.stopId}-${row.direction}`} className="govuk-table__row">
-                    <td className="govuk-table__cell">{row.stopId}</td>
-                    <td className="govuk-table__cell">
-                      {row.timingPoint ? "⏱" : ""}
-                    </td>
-                    <td className="govuk-table__cell">
-                      <button
-                        type="button"
-                        className="govuk-link stop-analysis-table__stop-link"
-                        onClick={() => onStopNameClick(row)}
-                        title={`${row.localityName}, ${row.adminAreaName}`}
-                      >
-                        {row.stopName}
-                      </button>
-                    </td>
-                    <td className="govuk-table__cell">
-                      {row.direction ?? "-"}
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.scheduledDepartures}
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.actualDepartures} ({formatPercent(row.completedRatio)})
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.averageScheduled != null ? formatSeconds(row.averageScheduled) : "-"}
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.averageActual != null ? formatSeconds(row.averageActual) : "-"}
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.averageDelay != null ? formatSeconds(row.averageDelay) : "-"}
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.onTime} ({formatPercent(row.onTimeRatio)})
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.early} ({formatPercent(row.earlyRatio)})
-                    </td>
-                    <td className="govuk-table__cell govuk-table__cell--numeric">
-                      {row.late} ({formatPercent(row.lateRatio)})
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          {searchFilteredData.length > 100 && (
-            <p className="govuk-body govuk-!-margin-top-2">
-              Showing 100 of {searchFilteredData.length} stops. Use search to narrow results.
-            </p>
-          )}
+          <SortableTable head={tableHead} rows={tableRows} onSort={handleSort} />
         </div>
       )}
     </div>

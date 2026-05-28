@@ -132,8 +132,6 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
       width: calc(
         100% - #{(2 * ($segment-stop-size + $segment-stop-surround))}
       );
-      border-top-left-radius: 999em;
-      border-top-right-radius: 999em;
     }
   }
 
@@ -2610,27 +2608,148 @@ body.helpdesk-open {
     justify-content: space-between;
     flex-wrap: wrap;
     height: 3785px;
+  }
+}
+
 // Stop Analysis page
 .stop-analysis-page {
-  .filters {
+  .filters:not(.stop-analysis-filters__grid) {
     display: flex;
     flex-wrap: wrap;
     gap: govuk-spacing(3);
     align-items: flex-end;
   }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  &__extra-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 .stop-analysis-filters {
+  &__grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr 2fr;
+    gap: govuk-spacing(3);
+    align-items: start;
+  }
+
+  &__item {
+    min-width: 0;
+  }
+
+  &__item--date {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  &__item--admin {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  &__item--toggles {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+
+  &__item--location {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  &__item--operators {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  &__item--services {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  @media (max-width: 1120px) {
+    &__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__item--date,
+    &__item--admin,
+    &__item--toggles,
+    &__item--location,
+    &__item--operators,
+    &__item--services {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 720px) {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   &__date-range {
-    display: flex;
-    align-items: center;
-    gap: govuk-spacing(2);
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: govuk-spacing(1);
   }
 
   &__toggles {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
     gap: govuk-spacing(2);
+  }
+
+  &__location-search {
+    position: relative;
+  }
+
+  &__location-input {
+    width: 100%;
+  }
+
+  &__location-results {
+    position: absolute;
+    z-index: 100;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 2px solid govuk-colour("black");
+    border-top: 0;
+    background: govuk-colour("white");
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  &__location-loading {
+    padding: govuk-spacing(2);
+    @include govuk-font(16);
+  }
+
+  &__location-option {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    border-top: 1px solid govuk-colour("light-grey");
+    background: govuk-colour("white");
+    padding: govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+
+    &:hover {
+      background: govuk-colour("light-grey");
+    }
   }
 
   &__refine-button {
@@ -2645,7 +2764,6 @@ body.helpdesk-open {
     padding: govuk-spacing(4);
     background: govuk-colour("light-grey");
   }
-
   &__chips {
     display: flex;
     flex-wrap: wrap;
@@ -2658,6 +2776,197 @@ body.helpdesk-open {
     background: govuk-colour("light-grey");
     padding: govuk-spacing(1) govuk-spacing(2);
     border-radius: 3px;
+  }
+}
+
+.refine-filters-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - #{govuk-spacing(8)});
+
+  &__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    white-space: nowrap;
+    text-decoration: underline;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: govuk-spacing(2);
+    margin-top: auto;
+    padding-top: govuk-spacing(6);
+  }
+
+  &__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: govuk-spacing(1);
+    row-gap: 0;
+
+    .govuk-checkboxes__item {
+      margin-bottom: 0;
+    }
+  }
+
+  &__day {
+    padding-left: 0;
+    padding-top: 0;
+    float: none;
+    margin-bottom: 0;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+
+    .govuk-checkboxes__label {
+      position: relative;
+      display: block;
+      padding: 38px 0 0;
+      float: none;
+      width: 100%;
+      text-align: center;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .govuk-checkboxes__label::before,
+    .govuk-checkboxes__label::after {
+      left: 50%;
+      transform: translate(-50%);
+    }
+
+    .govuk-checkboxes__label::after {
+      transform: rotate(-45deg) translate(-50%);
+      top: 11px;
+      margin-left: -2px;
+    }
+  }
+
+  // GOV.UK small checkbox styles add left padding that shifts labels right.
+  // Override with higher specificity for this horizontal day-of-week layout.
+  &__days.govuk-checkboxes--small .govuk-checkboxes__label {
+    padding-top: 38px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  &__time-range {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+
+    .govuk-label {
+      white-space: nowrap;
+    }
+
+    .govuk-input__wrapper {
+      width: 100%;
+    }
+
+  }
+
+  &__time-separator {
+    @include govuk-font(24);
+    line-height: 1;
+    margin-bottom: govuk-spacing(2);
+  }
+
+  &__range-slider {
+    margin-bottom: govuk-spacing(4);
+  }
+
+  &__reset {
+    display: inline-block;
+    margin-top: govuk-spacing(2);
+    text-decoration: underline;
+    align-self: flex-start;
+    text-align: left;
+  }
+}
+
+.range-slider {
+  .ng2-nouislider {
+    margin-top: govuk-spacing(2);
+    margin-bottom: govuk-spacing(4);
+  }
+
+  .noUi-horizontal {
+    height: govuk-spacing(4);
+
+    .noUi-handle {
+      cursor: pointer;
+      border-radius: 0;
+      border: 2px solid govuk-colour("black");
+      box-shadow: none;
+      height: 40px;
+      width: 15px;
+      top: -13px;
+
+      &:before,
+      &:after {
+        content: none;
+      }
+
+      &:focus {
+        box-shadow:
+          0 0 0 1.5px $govuk-input-border-colour,
+          0 0 0 4px $govuk-focus-colour;
+        outline: none;
+      }
+
+      &.noUi-handle-lower {
+        right: -12px;
+      }
+
+      &.noUi-handle-upper {
+        right: -1px;
+      }
+    }
+  }
+
+  .noUi-target {
+    border: 2px solid govuk-colour("black");
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: none;
+    background: govuk-colour("white");
+  }
+
+  .noUi-connects {
+    border-radius: 0;
+  }
+
+  .noUi-connect {
+    background: govuk-colour("black");
+    border: 3px solid govuk-colour("white");
+  }
+}
+
+.time-range-slider {
+  &__textboxes {
+    display: flex;
+
+    > * {
+      width: 50%;
+      min-width: 0;
+    }
+
+    > *:first-child {
+      margin-right: govuk-spacing(6);
+    }
+
+    input {
+      width: 100%;
+    }
   }
 }
 
@@ -2707,6 +3016,61 @@ body.helpdesk-open {
   position: relative;
   margin-bottom: govuk-spacing(4);
 
+  &__display-options {
+    position: absolute;
+    top: govuk-spacing(4);
+    left: govuk-spacing(4);
+    z-index: 1;
+  }
+
+  &__display-details {
+    position: relative;
+  }
+
+  &__display-summary {
+    list-style: none;
+    min-width: 200px;
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
+    padding: govuk-spacing(1) govuk-spacing(5) govuk-spacing(1) govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+    position: relative;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: "▼";
+      position: absolute;
+      right: govuk-spacing(2);
+      top: 50%;
+      transform: translateY(-50%);
+      @include govuk-font(14);
+    }
+  }
+
+  &__display-panel {
+    position: absolute;
+    margin-top: 2px;
+    min-width: 220px;
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    padding: govuk-spacing(2);
+  }
+
+  &__style-toggle {
+    display: flex;
+    gap: govuk-spacing(2);
+    flex-wrap: wrap;
+  }
+
+  &__style-btn {
+    margin-bottom: 0;
+  }
+
   &__container {
     width: 100%;
     height: 500px;
@@ -2717,15 +3081,16 @@ body.helpdesk-open {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.9);
-    padding: govuk-spacing(4);
-    border-radius: 4px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   &__legend {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: govuk-spacing(1) govuk-spacing(2);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: govuk-spacing(3);
     align-items: center;
     position: absolute;
     bottom: govuk-spacing(4);
@@ -2735,6 +3100,7 @@ body.helpdesk-open {
     border-radius: 4px;
     @include govuk-font(14);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
   }
 
   &__dot {
@@ -2742,6 +3108,7 @@ body.helpdesk-open {
     height: 12px;
     border-radius: 50%;
     display: inline-block;
+    flex: 0 0 auto;
 
     &--high {
       background-color: #28a197;

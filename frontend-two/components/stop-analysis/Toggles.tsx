@@ -20,8 +20,8 @@ export const MatchTypeToggle = ({
           id="match-estimated"
           name="match-type"
           type="radio"
-          checked={matchType === "estimated"}
-          onChange={() => onChange("estimated")}
+          checked={matchType === MatchType.Estimated}
+          onChange={() => onChange(MatchType.Estimated)}
         />
         <label
           className="segmented-toggle-item__label"
@@ -36,8 +36,8 @@ export const MatchTypeToggle = ({
           id="match-evidenced"
           name="match-type"
           type="radio"
-          checked={matchType === "evidenced"}
-          onChange={() => onChange("evidenced")}
+          checked={matchType === MatchType.Evidenced}
+          onChange={() => onChange(MatchType.Evidenced)}
         />
         <label
           className="segmented-toggle-item__label"

@@ -54,10 +54,18 @@ const CLUSTER_PROPERTIES = {
 interface StopAnalysisMapProps {
   mapboxToken: string;
   mapboxStyle: string;
+  mapboxSatelliteStyle?: string;
   stops: StopStatistics[];
   adminAreaShapes: FeatureCollection;
   boundingBoxTooBig: boolean;
   initialBounds?: BoundingBox;
+  focusStop?: { latitude: number; longitude: number } | null;
+  fitToAdminAreasRequest?: number;
+  locationSelection?: {
+    center?: [number, number];
+    bbox?: [number, number, number, number];
+  };
+  locationSelectionRequest?: number;
   onBoundsChange: (bounds: BoundingBox) => void;
   onAdminAreaClick?: (adminAreaId: string) => void;
   onStopClick?: (stop: StopStatistics) => void;
@@ -66,18 +74,59 @@ interface StopAnalysisMapProps {
 export const StopAnalysisMap = ({
   mapboxToken,
   mapboxStyle,
+  mapboxSatelliteStyle,
   stops,
   adminAreaShapes,
   boundingBoxTooBig,
   initialBounds,
+  focusStop,
+  fitToAdminAreasRequest,
+  locationSelection,
+  locationSelectionRequest,
   onBoundsChange,
   onAdminAreaClick,
   onStopClick,
 }: StopAnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  const mapboxStyleRef = useRef(mapboxStyle);
+  const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [styleRevision, setStyleRevision] = useState(0);
+  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
+    "street",
+  );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
+  const getFeatureBounds = useCallback((features: Feature[]) => {
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasCoordinates = false;
+
+    const addCoordinate = (value: unknown) => {
+      if (!Array.isArray(value) || value.length < 2) return;
+      if (typeof value[0] === "number" && typeof value[1] === "number") {
+        bounds.extend([value[0], value[1]] as [number, number]);
+        hasCoordinates = true;
+        return;
+      }
+
+      value.forEach(addCoordinate);
+    };
+
+    features.forEach((feature) => {
+      addCoordinate((feature.geometry as { coordinates?: unknown })?.coordinates);
+    });
+
+    return hasCoordinates ? bounds : null;
+  }, []);
+
+
+  useEffect(() => {
+    mapboxStyleRef.current = mapboxStyle;
+  }, [mapboxStyle]);
+
+  useEffect(() => {
+    mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
+  }, [mapboxSatelliteStyle]);
 
   const stopGeoJSON: FeatureCollection = {
     type: "FeatureCollection",
@@ -117,6 +166,11 @@ export const StopAnalysisMap = ({
       // Add timing point icons (placeholders — real app would load actual sprites)
       // For now, the symbol layer will degrade gracefully without custom icons
       setMapLoaded(true);
+    });
+
+    map.on("style.load", () => {
+      // When style changes, all custom sources/layers are removed and must be re-added.
+      setStyleRevision((prev) => prev + 1);
     });
 
     map.on("moveend", () => {
@@ -216,7 +270,7 @@ export const StopAnalysisMap = ({
         }
       });
     }
-  }, [mapLoaded, adminAreaShapes, onAdminAreaClick]);
+  }, [mapLoaded, adminAreaShapes, onAdminAreaClick, styleRevision]);
 
   // Update stops data
   useEffect(() => {
@@ -457,7 +511,7 @@ export const StopAnalysisMap = ({
         if (props) onStopClick?.(props as unknown as StopStatistics);
       });
     }
-  }, [mapLoaded, boundingBoxTooBig, stopGeoJSON, onStopClick]);
+  }, [mapLoaded, boundingBoxTooBig, stopGeoJSON, onStopClick, styleRevision]);
 
   // Fit to bounds when initialBounds changes from URL params
   const fitBounds = useCallback(
@@ -473,9 +527,119 @@ export const StopAnalysisMap = ({
     [],
   );
 
+  useEffect(() => {
+    if (!focusStop || !mapLoaded || !mapRef.current) return;
+
+    const map = mapRef.current;
+    map.easeTo({
+      center: [focusStop.longitude, focusStop.latitude],
+      zoom: map.getZoom() + 1,
+    });
+  }, [focusStop, mapLoaded]);
+
+  useEffect(() => {
+    if (!fitToAdminAreasRequest || !mapLoaded || !mapRef.current) return;
+    if (adminAreaShapes.features.length === 0) return;
+
+    const bounds = getFeatureBounds(adminAreaShapes.features as Feature[]);
+    if (!bounds) return;
+
+    mapRef.current.fitBounds(bounds, {
+      duration: 500,
+      padding: 40,
+      maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
+    });
+  }, [fitToAdminAreasRequest, adminAreaShapes, mapLoaded, getFeatureBounds]);
+
+  useEffect(() => {
+    if (!locationSelectionRequest || !mapLoaded || !mapRef.current) return;
+    if (!locationSelection) return;
+
+    const map = mapRef.current;
+    if (locationSelection.bbox && locationSelection.bbox.length === 4) {
+      const [minLongitude, minLatitude, maxLongitude, maxLatitude] =
+        locationSelection.bbox;
+      map.fitBounds(
+        [
+          [minLongitude, minLatitude],
+          [maxLongitude, maxLatitude],
+        ],
+        { duration: 500, maxZoom: 15 },
+      );
+      return;
+    }
+
+    if (locationSelection.center && locationSelection.center.length === 2) {
+      map.flyTo({ center: locationSelection.center, zoom: 15 });
+    }
+  }, [locationSelectionRequest, locationSelection, mapLoaded]);
+
+  const switchStyle = useCallback((style: "street" | "satellite") => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    setActiveStyle(style);
+    map.setStyle(
+      style === "street"
+        ? mapboxStyleRef.current
+        : mapboxSatelliteStyleRef.current ?? mapboxStyleRef.current,
+    );
+  }, []);
+
   return (
     <div className="stop-analysis-map">
       <div ref={mapContainer} className="stop-analysis-map__container" />
+      {mapboxSatelliteStyle && (
+        <div className="stop-analysis-map__display-options">
+          <details className="stop-analysis-map__display-details">
+            <summary className="stop-analysis-map__display-summary">
+              Display options
+            </summary>
+            <div className="stop-analysis-map__display-panel">
+              <p className="govuk-body govuk-!-margin-bottom-1">
+                <strong>Map view</strong>
+              </p>
+              <fieldset className="segmented-toggle app-map-view-segmented-toggle">
+                <legend className="govuk-visually-hidden">Map view</legend>
+                <div className="segmented-toggle__controls">
+                  <div className="segmented-toggle-item">
+                    <input
+                      className="segmented-toggle-item__input"
+                      id="map-view-street"
+                      name="map-view"
+                      type="radio"
+                      checked={activeStyle === "street"}
+                      onChange={() => switchStyle("street")}
+                    />
+                    <label
+                      className="segmented-toggle-item__label"
+                      htmlFor="map-view-street"
+                    >
+                      Street
+                    </label>
+                  </div>
+                  <div className="segmented-toggle-item">
+                    <input
+                      className="segmented-toggle-item__input"
+                      id="map-view-satellite"
+                      name="map-view"
+                      type="radio"
+                      checked={activeStyle === "satellite"}
+                      onChange={() => switchStyle("satellite")}
+                    />
+                    <label
+                      className="segmented-toggle-item__label"
+                      htmlFor="map-view-satellite"
+                    >
+                      Satellite
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </details>
+        </div>
+      )}
       {boundingBoxTooBig && mapLoaded && (
         <div className="stop-analysis-map__overlay">
           <p className="govuk-body">Zoom in to show stops</p>

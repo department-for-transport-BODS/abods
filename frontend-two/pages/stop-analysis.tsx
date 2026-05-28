@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { DateTime } from "luxon";
@@ -7,6 +7,7 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { usePanel } from "@/contexts/PanelContext";
 import { ErrorInfo } from "@/types";
 import {
   BoundingBox,
@@ -19,9 +20,10 @@ import {
   StopTypeOption,
 } from "@/types/stop-analysis";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
-import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
+import { StopAnalysisFilters as FiltersPanel, RefineFilters } from "@/components/stop-analysis/StopAnalysisFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
+import { MatchType as GqlMatchType } from "../src/generated/graphql";
 
 const MAX_BOUND_WIDTH = 0.5;
 
@@ -73,6 +75,15 @@ function parseBoundingBox(
   };
 }
 
+function withinBounds(newBounds: BoundingBox, bounds: BoundingBox): boolean {
+  return (
+    newBounds.minLongitude >= bounds.minLongitude &&
+    newBounds.minLatitude >= bounds.minLatitude &&
+    newBounds.maxLongitude <= bounds.maxLongitude &&
+    newBounds.maxLatitude <= bounds.maxLatitude
+  );
+}
+
 function getDividedValueOrUndefined(
   numerator: number | null | undefined,
   denominator: number | null | undefined,
@@ -106,7 +117,7 @@ function processStopsToRows(
         timingPoint: x.timingPoint,
         latitude: x.latitude,
         longitude: x.longitude,
-        direction: x.direction,
+        direction: x.direction ?? null,
         scheduledDepartures: x.scheduledDepartures,
         actualDepartures: x.completedDepartures,
         onTime: x.onTime,
@@ -115,16 +126,15 @@ function processStopsToRows(
         onTimeRatio: x.completedDepartures
           ? x.onTime / x.completedDepartures
           : 0,
-        earlyRatio: x.completedDepartures
-          ? x.early / x.completedDepartures
-          : 0,
-        lateRatio: x.completedDepartures
-          ? x.late / x.completedDepartures
-          : 0,
+        earlyRatio: x.completedDepartures ? x.early / x.completedDepartures : 0,
+        lateRatio: x.completedDepartures ? x.late / x.completedDepartures : 0,
         completedRatio: x.scheduledDepartures
           ? x.completedDepartures / x.scheduledDepartures
           : 0,
-        averageDelay: getDividedValueOrUndefined(x.averageDelay, x.countDelayed),
+        averageDelay: getDividedValueOrUndefined(
+          x.averageDelay,
+          x.countDelayed,
+        ),
         averageScheduled:
           stopType === "TimingPoints"
             ? x.averageScheduledTimingPoint
@@ -137,10 +147,7 @@ function processStopsToRows(
           x.onTimeInSeconds,
           x.onTime,
         ),
-        earlyInSeconds: getDividedValueOrUndefined(
-          x.earlyInSeconds,
-          x.early,
-        ),
+        earlyInSeconds: getDividedValueOrUndefined(x.earlyInSeconds, x.early),
         lateInSeconds: getDividedValueOrUndefined(x.lateInSeconds, x.late),
       }),
     )
@@ -222,7 +229,20 @@ const StopAnalysisPage = () => {
   useRequireAuth();
   const { config } = useConfig();
   const router = useRouter();
+  const { setContent, toggle, destroy } = usePanel();
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFetchedBoundsRef = useRef<BoundingBox>();
+  const lastFetchedFilterSignatureRef = useRef<string>("");
+  const [cachedStopData, setCachedStopData] = useState<StopStatistics[]>([]);
+  const [fitToAdminAreasRequest, setFitToAdminAreasRequest] = useState(0);
+  const [locationSelectionRequest, setLocationSelectionRequest] = useState(0);
+  const [locationSelection, setLocationSelection] = useState<{
+    center?: [number, number];
+    bbox?: [number, number, number, number];
+  }>();
+  const [focusedStop, setFocusedStop] = useState<
+    { latitude: number; longitude: number } | null
+  >(null);
 
   // Read filter state from URL
   const fromTimestamp =
@@ -230,7 +250,7 @@ const StopAnalysisPage = () => {
   const toTimestamp =
     parseStringParam(router.query.toTimestamp) ?? DEFAULT_TO.toISO()!;
   const matchType = (parseStringParam(router.query.matchType) ??
-    "evidenced") as MatchType;
+    GqlMatchType.Evidenced) as MatchType;
   const stopType = (parseStringParam(router.query.stopType) ??
     "TimingPoints") as StopTypeOption;
   const adminAreaIds = parseArrayParam(router.query.adminAreaIds);
@@ -263,22 +283,20 @@ const StopAnalysisPage = () => {
   );
 
   // Fetch reference data
-  const { data: operators } = useSWR(
-    config?.apiUrl ? ["sa-operators", config.apiUrl] : null,
-    ([, apiUrl]) => stopAnalysisService.fetchOperators(apiUrl),
+  const { data: operators } = useSWR("sa-operators", () =>
+    stopAnalysisService.fetchOperators(),
   );
 
-  const { data: adminAreas } = useSWR(
-    config?.apiUrl ? ["sa-admin-areas", config.apiUrl] : null,
-    ([, apiUrl]) => stopAnalysisService.fetchAdminAreas(apiUrl),
+  const { data: adminAreas } = useSWR("sa-admin-areas", () =>
+    stopAnalysisService.fetchAdminAreas(),
   );
 
   const { data: lines } = useSWR(
-    config?.apiUrl && operatorIds.length > 0
-      ? ["sa-lines", config.apiUrl, operatorIds.join(","), fromTimestamp]
+    operatorIds.length > 0
+      ? ["sa-lines", operatorIds.join(","), fromTimestamp]
       : null,
-    ([, apiUrl]) =>
-      stopAnalysisService.fetchLines(apiUrl, operatorIds, fromTimestamp, toTimestamp),
+    () =>
+      stopAnalysisService.fetchLines(operatorIds, fromTimestamp, toTimestamp),
   );
 
   // Fetch stop analysis data (only when bounds are small enough)
@@ -298,37 +316,90 @@ const StopAnalysisPage = () => {
         }
       : null;
 
+  const stopFilterSignature = useMemo(
+    () =>
+      JSON.stringify({
+        adminAreaIds,
+        fromTimestamp,
+        toTimestamp,
+        operatorIds,
+        lineIds,
+        matchType,
+        dayOfWeekFlags,
+        startTime,
+        endTime,
+      }),
+    [
+      adminAreaIds,
+      dayOfWeekFlags,
+      endTime,
+      fromTimestamp,
+      lineIds,
+      matchType,
+      operatorIds,
+      startTime,
+      toTimestamp,
+    ],
+  );
+
+  const shouldFetchStops =
+    !!filters &&
+    !(
+      lastFetchedBoundsRef.current &&
+      withinBounds(filters.boundingBox, lastFetchedBoundsRef.current) &&
+      stopFilterSignature === lastFetchedFilterSignatureRef.current
+    );
+
   const {
     data: stopData,
     isLoading: stopsLoading,
     error: stopsError,
   } = useSWR(
-    config?.apiUrl && filters
-      ? ["sa-stops", config.apiUrl, JSON.stringify(filters)]
-      : null,
-    ([, apiUrl]) => stopAnalysisService.fetchStopAnalysis(apiUrl, filters!),
+    filters && shouldFetchStops ? ["sa-stops", JSON.stringify(filters)] : null,
+    async () => {
+      const result = await stopAnalysisService.fetchStopAnalysis(filters!);
+      lastFetchedBoundsRef.current = filters!.boundingBox;
+      lastFetchedFilterSignatureRef.current = stopFilterSignature;
+      setCachedStopData(result);
+      return result;
+    },
   );
+
+  const effectiveStopData = filters ? stopData ?? cachedStopData : [];
 
   // Derive table rows and map features from raw data
   const tableRows = useMemo(
     () =>
-      stopData && bounds
-        ? processStopsToRows(stopData, stopType, bounds)
+      effectiveStopData && bounds
+        ? processStopsToRows(effectiveStopData, stopType, bounds)
         : [],
-    [stopData, stopType, bounds],
+    [effectiveStopData, stopType, bounds],
   );
 
   const mapStops = useMemo(
     () =>
-      stopData && bounds
-        ? aggregateStopsForMap(stopData, stopType, bounds)
+      effectiveStopData && bounds
+        ? aggregateStopsForMap(effectiveStopData, stopType, bounds)
         : [],
-    [stopData, stopType, bounds],
+    [effectiveStopData, stopType, bounds],
   );
 
+  const visibleAdminAreaIds = useMemo(() => {
+    if (adminAreaIds.length > 0) return adminAreaIds;
+    if (operatorIds.length === 0) return [];
+
+    return [
+      ...new Set(
+        (operators ?? [])
+          .filter((operator) => operatorIds.includes(operator.operatorId))
+          .flatMap((operator) => operator.adminAreaIds),
+      ),
+    ];
+  }, [adminAreaIds, operatorIds, operators]);
+
   const adminAreaGeoJSON = useMemo(
-    () => computeAdminAreaGeoJSON(adminAreas ?? [], adminAreaIds),
-    [adminAreas, adminAreaIds],
+    () => computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds),
+    [adminAreas, visibleAdminAreaIds],
   );
 
   // Error state
@@ -367,14 +438,108 @@ const StopAnalysisPage = () => {
     [adminAreaIds, updateQuery],
   );
 
-  const handleStopClick = useCallback((_stop: StopPerformanceRow) => {
-    // TODO: zoom map to stop location
+  const handleAdminAreasChange = useCallback(
+    (values: string[]) => {
+      setFitToAdminAreasRequest((prev) => prev + 1);
+      updateQuery({ adminAreaIds: values });
+    },
+    [updateQuery],
+  );
+
+  const handleOperatorsChange = useCallback(
+    (values: string[]) => {
+      setFitToAdminAreasRequest((prev) => prev + 1);
+      updateQuery({ operatorIds: values });
+    },
+    [updateQuery],
+  );
+
+  const handleStopClick = useCallback((stop: StopPerformanceRow) => {
+    setFocusedStop({ latitude: stop.latitude, longitude: stop.longitude });
   }, []);
+
+  const handleLocationSelect = useCallback(
+    (location: {
+      center?: [number, number];
+      bbox?: [number, number, number, number];
+    }) => {
+      setLocationSelection(location);
+      setLocationSelectionRequest((prev) => prev + 1);
+    },
+    [],
+  );
+
+  const activeChips: string[] = [];
+  if (startTime) activeChips.push(`From ${startTime}`);
+  if (endTime) activeChips.push(`Until ${endTime}`);
+  if (dayOfWeekFlags) {
+    const days = Object.entries(dayOfWeekFlags)
+      .filter(([, v]) => v)
+      .map(([k]) => k.charAt(0).toUpperCase() + k.slice(1));
+    if (days.length > 0 && days.length < 7) {
+      activeChips.push(days.join(", "));
+    }
+  }
+
+  useEffect(() => {
+    setContent(
+      <RefineFilters
+        dayOfWeekFlags={dayOfWeekFlags}
+        startTime={startTime}
+        endTime={endTime}
+        onDayOfWeekChange={(flags) =>
+          updateQuery({
+            dayOfWeek: flags
+              ? Object.entries(flags)
+                  .filter(([, v]) => v)
+                  .map(([k]) => k)
+                  .join(",")
+              : undefined,
+          })
+        }
+        onStartTimeChange={(v) => updateQuery({ startTime: v })}
+        onEndTimeChange={(v) => updateQuery({ endTime: v })}
+        onResetDefaults={() =>
+          updateQuery({
+            dayOfWeek: undefined,
+            startTime: "00:00",
+            endTime: "23:59",
+          })
+        }
+        onClose={toggle}
+      />,
+    );
+  }, [dayOfWeekFlags, startTime, endTime, setContent, toggle, updateQuery]);
+
+  useEffect(() => {
+    return () => { destroy(); };
+  }, [destroy]);
 
   return (
     <BaseLayout title="Stop analysis - Analyse Bus Open Data">
       <div className="stop-analysis-page">
-        <h1 className="govuk-heading-xl">Stop Analysis</h1>
+        <div className="stop-analysis-page__header">
+          <h1 className="govuk-heading-xl">Stop Analysis</h1>
+          <div className="stop-analysis-page__extra-filter">
+            <button
+              type="button"
+              className="govuk-link stop-analysis-filters__refine-button"
+              aria-controls="panel"
+              onClick={toggle}
+            >
+              Refine results
+            </button>
+            {activeChips.length > 0 && (
+              <div className="stop-analysis-filters__chips">
+                {activeChips.map((chip) => (
+                  <span key={chip} className="stop-analysis-filters__chip">
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-two-thirds-from-desktop">
@@ -390,41 +555,34 @@ const StopAnalysisPage = () => {
           lineIds={lineIds}
           matchType={matchType}
           stopType={stopType}
-          dayOfWeekFlags={dayOfWeekFlags}
-          startTime={startTime}
-          endTime={endTime}
+          mapboxToken={config?.mapboxToken}
           adminAreas={adminAreas ?? []}
           operators={operators ?? []}
           lines={lines ?? []}
-          onFromChange={(v) => updateQuery({ fromTimestamp: v })}
-          onToChange={(v) => updateQuery({ toTimestamp: v })}
-          onAdminAreasChange={(v) => updateQuery({ adminAreaIds: v })}
-          onOperatorsChange={(v) => updateQuery({ operatorIds: v })}
+          onDateRangeChange={(from, to) =>
+            updateQuery({ fromTimestamp: from, toTimestamp: to })
+          }
+          onAdminAreasChange={handleAdminAreasChange}
+          onOperatorsChange={handleOperatorsChange}
           onLinesChange={(v) => updateQuery({ lineIds: v })}
           onMatchTypeChange={(v) => updateQuery({ matchType: v })}
           onStopTypeChange={(v) => updateQuery({ stopType: v })}
-          onDayOfWeekChange={(flags) =>
-            updateQuery({
-              dayOfWeek: flags
-                ? Object.entries(flags)
-                    .filter(([, v]) => v)
-                    .map(([k]) => k)
-                    .join(",")
-                : undefined,
-            })
-          }
-          onStartTimeChange={(v) => updateQuery({ startTime: v })}
-          onEndTimeChange={(v) => updateQuery({ endTime: v })}
+          onLocationSelect={handleLocationSelect}
         />
 
         {config?.mapboxToken && config?.mapboxStyle && (
           <StopAnalysisMap
             mapboxToken={config.mapboxToken}
             mapboxStyle={config.mapboxStyle}
+            mapboxSatelliteStyle={config.mapboxSatelliteStyle}
             stops={mapStops}
             adminAreaShapes={adminAreaGeoJSON}
             boundingBoxTooBig={boundingBoxTooBig}
             initialBounds={bounds}
+            focusStop={focusedStop}
+            fitToAdminAreasRequest={fitToAdminAreasRequest}
+            locationSelection={locationSelection}
+            locationSelectionRequest={locationSelectionRequest}
             onBoundsChange={handleBoundsChange}
             onAdminAreaClick={handleAdminAreaClick}
           />
