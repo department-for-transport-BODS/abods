@@ -18,6 +18,9 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "isolatedModules": true,
+    "types": [
+      "vitest/globals"
+    ],
     "baseUrl": ".",
     "types": ["vitest/globals"],
     "paths": {
