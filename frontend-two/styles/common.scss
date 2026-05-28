@@ -1,6 +1,364 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// Segmented toggle (Estimated / Evidenced)
+.segmented-toggle {
+  padding: 0;
+  margin: 0;
+  border: 0 none;
+
+  &__controls {
+    border: 2px solid govuk-colour("black");
+    display: inline-flex;
+    white-space: nowrap;
+  }
+}
+
+.segmented-toggle-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 140px;
+
+  &__label {
+    @include govuk-font(19);
+    padding: govuk-spacing(1) govuk-spacing(2);
+    background-color: govuk-colour("light-grey");
+    cursor: pointer;
+    width: 100%;
+  }
+
+  &__input:checked + &__label {
+    color: govuk-colour("white");
+    background-color: govuk-colour("blue");
+    font-weight: $govuk-font-weight-bold;
+    pointer-events: none;
+  }
+
+  &__input:focus-visible + &__label {
+    outline: 0;
+    background-color: govuk-colour("yellow");
+    color: govuk-colour("black");
+  }
+}
+
+// Visual segment selector
+$segment-stop-size: 30px;
+$segment-stop-surround: 3px;
+$segment-min-width: 75px;
+$segment-half-height: calc(($segment-stop-size - 2px) / 2);
+
+.segment-selector-wrapper {
+  overflow: hidden;
+}
+
+.segment-selector {
+  position: relative;
+  flex-grow: 1;
+
+  &__stops-wrapper {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $segment-stop-size;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+    align-items: center;
+  }
+
+  &__stop {
+    background-color: govuk-colour("white");
+    border-radius: 50%;
+    width: $segment-stop-size;
+    height: $segment-stop-size;
+    border: 5px solid $govuk-border-colour;
+    flex-shrink: 0;
+
+    &:hover {
+      border-color: govuk-colour("black");
+    }
+  }
+
+  &__segment {
+    background-color: govuk-colour("light-grey");
+    width: 100%;
+    min-width: $segment-min-width;
+    height: $segment-half-height;
+    cursor: pointer;
+
+    &:hover {
+      background-color: govuk-colour("light-blue");
+    }
+
+    &:focus-visible {
+      background-color: govuk-colour("light-blue");
+      outline: 3px solid $govuk-focus-colour;
+    }
+
+    &--active,
+    &:active {
+      background-color: govuk-colour("blue");
+    }
+
+    &--all {
+      display: block;
+      margin: 0 ($segment-stop-size + $segment-stop-surround) 2px;
+      width: calc(
+        100% - #{(2 * ($segment-stop-size + $segment-stop-surround))}
+      );
+      border-top-left-radius: 999em;
+      border-top-right-radius: 999em;
+    }
+  }
+
+  &__segments-wrapper {
+    display: flex;
+    padding: 0 ($segment-stop-size + $segment-stop-surround);
+  }
+
+  // each individual segment button gets a margin-left after the first
+  &__segments-wrapper > button + button {
+    margin-left: ($segment-stop-size + $segment-stop-surround * 2);
+  }
+
+  &__distances-wrapper {
+    display: flex;
+    padding: govuk-spacing(1) ($segment-stop-size + $segment-stop-surround) 0;
+  }
+
+  &__distance {
+    width: 100%;
+    text-align: center;
+    @include govuk-font(16);
+    color: $govuk-secondary-text-colour;
+
+    & ~ & {
+      margin-left: ($segment-stop-size + $segment-stop-surround * 2);
+    }
+  }
+}
+
+// Corridor date wrapper / controls bar
+.corridor__date-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+
+.corridor__date-range-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.corridor__date-range-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid govuk-colour("black");
+  background: govuk-colour("white");
+  height: 40px;
+  padding: 0 govuk-spacing(1) 0 govuk-spacing(2);
+  gap: govuk-spacing(1);
+}
+
+.corridor__date-range-text {
+  @include govuk-font(19);
+  white-space: nowrap;
+}
+
+.corridor__date-range-calendar-btn {
+  display: inline-flex;
+  align-items: center;
+  color: govuk-colour("black");
+  cursor: pointer;
+  padding: govuk-spacing(1);
+
+  &:focus-visible {
+    outline: 3px solid $govuk-focus-colour;
+    outline-offset: 0;
+  }
+}
+
+.corridor__date-range-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+  padding: govuk-spacing(3);
+  display: flex;
+  gap: govuk-spacing(3);
+}
+
+// Corridor stats row
+.corridor__summary {
+  display: flex;
+  margin-left: -(govuk-spacing(3));
+  margin-right: -(govuk-spacing(3));
+}
+
+.corridor__summary-stat {
+  border-top: 1px solid $govuk-border-colour;
+  padding-top: govuk-spacing(3);
+  flex: 1;
+  margin-left: govuk-spacing(3);
+  margin-right: govuk-spacing(3);
+}
+
+// Hide outliers checkbox — right-aligned below chart
+.corridor__hide-outliers {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: govuk-spacing(2);
+
+  .govuk-form-group {
+    margin-bottom: 0;
+  }
+}
+
+// Corridor map
+.corridor__map-wrapper {
+  position: relative;
+}
+
+.corridor__map {
+  height: 440px;
+}
+
+.corridor__map-style-toggle {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: flex;
+  gap: 0;
+  z-index: 1;
+}
+
+.corridor__map-style-btn {
+  @include govuk-font(16);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  border: 2px solid $govuk-border-colour;
+  background: govuk-colour("white");
+  cursor: pointer;
+
+  & + & {
+    border-left: 0;
+  }
+
+  &--active {
+    background: govuk-colour("dark-grey");
+    color: govuk-colour("white");
+    font-weight: $govuk-font-weight-bold;
+    border-color: govuk-colour("dark-grey");
+  }
+}
+
+.corridor__map-recentre {
+  position: absolute;
+  bottom: govuk-spacing(3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+// Mapbox popup GDS styling
+.mapboxgl-popup.gds-popup {
+  .mapboxgl-popup-tip {
+    border-width: 9px;
+  }
+
+  &.mapboxgl-popup-anchor-top,
+  &.mapboxgl-popup-anchor-top-left,
+  &.mapboxgl-popup-anchor-top-right {
+    > .mapboxgl-popup-tip {
+      border-bottom-color: govuk-colour("black");
+      margin-bottom: -1px;
+    }
+  }
+
+  &.mapboxgl-popup-anchor-bottom,
+  &.mapboxgl-popup-anchor-bottom-left,
+  &.mapboxgl-popup-anchor-bottom-right {
+    > .mapboxgl-popup-tip {
+      border-top-color: govuk-colour("black");
+      margin-top: -1px;
+    }
+  }
+
+  &.mapboxgl-popup-anchor-left > .mapboxgl-popup-tip {
+    border-right-color: govuk-colour("black");
+    margin-right: -1px;
+  }
+
+  &.mapboxgl-popup-anchor-right > .mapboxgl-popup-tip {
+    border-left-color: govuk-colour("black");
+    margin-left: -1px;
+  }
+
+  > .mapboxgl-popup-content {
+    @include govuk-font(16);
+    background-color: govuk-colour("black");
+    border: 0 none;
+    color: govuk-colour("white");
+    box-shadow: none;
+    border-radius: 0;
+    outline: 0;
+    padding: govuk-spacing(2);
+    pointer-events: none;
+  }
+}
+
+// Analysis heading + mode selector row
+.corridor__analysis-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: govuk-spacing(4);
+
+  .govuk-form-group {
+    margin-bottom: govuk-spacing(2);
+  }
+}
+
+// Analysis tabs
+.analysis-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid $govuk-border-colour;
+
+  &__tab {
+    @include govuk-font(19);
+    background: none;
+    border: none;
+    border-bottom: 4px solid transparent;
+    padding: govuk-spacing(2) govuk-spacing(3);
+    cursor: pointer;
+    color: $govuk-link-colour;
+    margin-bottom: -1px;
+
+    &:hover {
+      color: $govuk-link-hover-colour;
+      border-bottom-color: $govuk-link-hover-colour;
+    }
+
+    &:focus-visible {
+      outline: 3px solid $govuk-focus-colour;
+      outline-offset: 0;
+    }
+
+    &--active {
+      font-weight: $govuk-font-weight-bold;
+      color: govuk-colour("black");
+      border-bottom-color: govuk-colour("blue");
+    }
+  }
+}
+
 // Password input component styles
 .password-input {
   &__label--required {

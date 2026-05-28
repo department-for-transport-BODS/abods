@@ -21,13 +21,12 @@ Run `mise r setup` to perform additional local setup.
 ## Prerequisites
 
 - **AWS Session Manager Plugin**: Required for database proxy and SSM tasks. For mac users using brew this can be installed by running:
-  
+
   ```sh
   brew install --cask session-manager-plugin
-  ``` 
-  
- Otherwise, follow the [official AWS instructions](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
+  ```
 
+Otherwise, follow the [official AWS instructions](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
 
 ## Manual config
 
@@ -48,7 +47,6 @@ It will give you a link to open the UI in your browser after an initial build.
 
 ### Run front end against deployed APIs
 
-With the old Angular front end it was possible to run it in a dev server, connected to the Sandbox API. 
+With the old Angular front end it was possible to run it in a dev server, connected to the Sandbox API.
 
 Further investigation is needed to determine if this is possible with the new Next.js front end.
-
