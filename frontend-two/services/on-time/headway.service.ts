@@ -36,10 +36,6 @@ const nonNullishArray = <T>(
     (value): value is T => value !== null && value !== undefined,
   );
 
-/**
- * ABOD-487 Exclude properties that the headway queries don't support. TypeScript's excess property
- * checking doesn't raise an error when types overlap sufficiently.
- */
 const pickHeadwayFilters = ({
   filters,
   ...params
@@ -49,6 +45,7 @@ const pickHeadwayFilters = ({
     endTime,
     granularity,
     lineIds,
+    matchType,
     operatorIds,
     startTime,
   } = filters ?? {};
@@ -59,6 +56,7 @@ const pickHeadwayFilters = ({
       endTime,
       granularity,
       lineIds,
+      matchType,
       operatorIds,
       startTime,
     },
