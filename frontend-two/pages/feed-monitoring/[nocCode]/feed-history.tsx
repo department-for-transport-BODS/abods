@@ -34,7 +34,7 @@ function formatUpdateFrequency(f?: number | null): string {
 const FeedHistoryPage = () => {
     const router = useRouter();
 
-    const { nocCode, date } = router.query as { nocCode: string; date?: string };
+    const { nocCode, date } = (router.query ?? {}) as { nocCode?: string; date?: string };
 
     const yesterday = DateTime.now().startOf("day").minus({ days: 1 });
     const baseDate = date && DateTime.fromISO(date).isValid

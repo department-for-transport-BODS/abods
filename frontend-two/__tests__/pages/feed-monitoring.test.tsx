@@ -95,7 +95,7 @@ const feedMonitoringListMockData = [
   },
 ];
 
-const vehicleCountDataMock = [
+const vehicleCountMockData = [
   {
     operatorId: "op1",
     last24Hours: [
@@ -130,8 +130,6 @@ beforeEach(() => {
     isLoading: false,
     error: null,
   } as ReturnType<typeof useConfig>);
-  mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountDataMock);
 });
 
 afterEach(() => {
@@ -150,6 +148,9 @@ it("Shows loading state whilst waiting for data", async () => {
 
 // Renders tables with correct headers
 it("Renders inactive feeds tables with correct headers", async () => {
+  mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
+  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);
+
   render(<FeedMonitoringPage />);
 
   await waitFor(() => {
@@ -163,6 +164,9 @@ it("Renders inactive feeds tables with correct headers", async () => {
 });
 
 it("Renders active feeds tables with correct headers", async () => {
+  mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
+  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);
+
   render(<FeedMonitoringPage />);
 
   await waitFor(() => {
@@ -175,9 +179,9 @@ it("Renders active feeds tables with correct headers", async () => {
   });
 });
 
-it("Check data is split into two tables", async () => {
+it("Splits the data into two tables", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountDataMock);
+  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);
   
   render(<FeedMonitoringPage />);
 
@@ -200,7 +204,7 @@ it("Check data is split into two tables", async () => {
 
 it("Filters tables based on operator search", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountDataMock);
+  mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);
 
   render(<FeedMonitoringPage />);
 

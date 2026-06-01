@@ -27,6 +27,11 @@ const LiveStatusPage = () => {
         setIsLoading(false);
         return;
       }
+
+      if (!nocCode) {
+        return;
+      }
+
       const load = async () => {
         setIsLoading(true);
         try {
