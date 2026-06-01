@@ -34,10 +34,6 @@ export class DistancesPage {
     return this.page.locator(".distance-table");
   }
 
-  noDataMessage(): Locator {
-    return this.page.getByText("No operator data found");
-  }
-
   generateButton(): Locator {
     return this.page.getByRole("button", { name: /generate/i });
   }
