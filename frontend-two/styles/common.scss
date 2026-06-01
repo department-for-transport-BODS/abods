@@ -21,12 +21,8 @@
     border: 1px solid $govuk-border-colour;
     z-index: -1;
   }
+}
 
-  &--with-labels {
-    margin-bottom: 0;
-
-    &::after {
-      bottom: 25px;
 // Segmented toggle (Estimated / Evidenced)
 .segmented-toggle {
   padding: 0;
@@ -168,7 +164,6 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   }
 }
 
-<<<<<<< HEAD
 .datenav__item-wrapper {
   display: block;
   position: relative;
@@ -770,7 +765,8 @@ $day-width: 46px;
 
 .govuk-table__header{
   font-size: 17px;
-=======
+}
+
 // Corridor date wrapper / controls bar
 .corridor__date-wrapper {
   display: flex;
@@ -986,7 +982,6 @@ $day-width: 46px;
       border-bottom-color: govuk-colour("blue");
     }
   }
->>>>>>> abods-two-next-js
 }
 
 // Password input component styles
@@ -2595,5 +2590,5 @@ body.helpdesk-open {
     justify-content: space-between;
     flex-wrap: wrap;
     height: 3785px;
-  }
+ }
 }
