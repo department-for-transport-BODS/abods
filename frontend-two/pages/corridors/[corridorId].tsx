@@ -20,6 +20,7 @@ import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { parseCorridorId, queryValue, parseMatchType } from "@/utils/query";
 import { parseDate, toIsoDateInput, formatTransitTime } from "@/utils/date";
+import { CorridorGranularity } from "../../src/generated/graphql";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
@@ -98,10 +99,8 @@ const CorridorsViewPage = () => {
       : null;
 
   const { data: corridor, isLoading: corridorLoading } = useSWR(
-    config?.apiUrl && corridorId
-      ? ["corridor-by-id", config.apiUrl, corridorId]
-      : null,
-    ([, apiUrl, id]) => corridorsService.fetchCorridorById(apiUrl, id),
+    corridorId ? ["corridor-by-id", corridorId] : null,
+    ([, id]) => corridorsService.fetchCorridorById(id),
   );
 
   const selectedStops = (() => {
@@ -114,29 +113,39 @@ const CorridorsViewPage = () => {
     return [from, to];
   })();
 
-  const fromTimestamp =
-    fromDate.toUTC().toISO() ?? defaultFrom.toUTC().toISO()!;
-  const toTimestamp = toDate.toUTC().toISO() ?? defaultTo.toUTC().toISO()!;
+  const granularityFromRange = (
+    from: DateTime,
+    to: DateTime,
+  ): CorridorGranularity => {
+    return Math.abs(to.diff(from, "days").days) < 5
+      ? CorridorGranularity.Hour
+      : CorridorGranularity.Day;
+  };
+
+  const from = fromDate.toUTC() ?? defaultFrom.toUTC()!;
+  const to = toDate.toUTC() ?? defaultTo.toUTC()!;
+  const granularity = granularityFromRange(fromDate, toDate);
 
   const { data: stats, isLoading: statsLoading } = useSWR(
-    config?.apiUrl && corridorId && corridor
+    corridorId && corridor
       ? [
           "corridor-stats",
-          config.apiUrl,
           corridorId,
-          fromTimestamp,
-          toTimestamp,
+          from,
+          to,
+          granularity,
           matchType,
           selectedStops.map((stop) => stop.naptan).join(","),
         ]
       : null,
-    ([, apiUrl]) =>
-      corridorsService.fetchStats(apiUrl, {
+    ([,]) =>
+      corridorsService.fetchStats({
         corridorId: String(corridorId),
-        fromTimestamp,
-        toTimestamp,
+        from,
+        to,
+        granularity,
         matchType,
-        stopList: selectedStops.map((stop) => stop.naptan),
+        stops: selectedStops,
       }),
   );
 

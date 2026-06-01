@@ -27,10 +27,8 @@ const CorridorsEditPage = () => {
   const corridorId = parseCorridorId(router.query.corridorId);
 
   const { data: corridor, isLoading } = useSWR(
-    config?.apiUrl && corridorId
-      ? ["corridor-by-id", config.apiUrl, corridorId]
-      : null,
-    ([, apiUrl, id]) => corridorsService.fetchCorridorById(apiUrl, id),
+    corridorId ? ["corridor-by-id", corridorId] : null,
+    ([, id]) => corridorsService.fetchCorridorById(id),
   );
 
   const showNotFound = !isLoading && corridor === null;
@@ -53,15 +51,14 @@ const CorridorsEditPage = () => {
         <>
           <span className="govuk-caption-xl">Corridors</span>
           <h1 className="govuk-heading-xl">Edit corridor</h1>
-          {isLoading || !config?.apiUrl || !corridor ? (
+          {isLoading || !corridor ? (
             <p className="govuk-body">Loading...</p>
           ) : (
             <CreateCorridorForm
-              apiUrl={config.apiUrl}
               mode="edit"
               initialCorridor={corridor}
-              mapboxToken={config.mapboxToken}
-              mapboxStyle={config.mapboxStyle}
+              mapboxToken={config?.mapboxToken}
+              mapboxStyle={config?.mapboxStyle}
             />
           )}
         </>

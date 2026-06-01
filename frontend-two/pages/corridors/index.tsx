@@ -8,13 +8,14 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
 import dynamic from "next/dynamic";
+import { corridorsService } from "@/services/corridors/corridors.service";
+import { getSearchParam } from "@/utils/query";
+
 const CorridorsGrid = dynamic(
   () =>
     import("@/components/corridors/CorridorsGrid").then((m) => m.CorridorsGrid),
   { ssr: false },
 );
-import { corridorsService } from "@/services/corridors/corridors.service";
-import { getSearchParam } from "@/utils/query";
 
 const CorridorsPage = () => {
   useRequireAuth();
@@ -28,9 +29,8 @@ const CorridorsPage = () => {
 
   const filter = getSearchParam(router.query.search);
 
-  const { data, isLoading } = useSWR(
-    config?.apiUrl ? ["corridors-list", config.apiUrl] : null,
-    ([, apiUrl]) => corridorsService.fetchCorridors(apiUrl),
+  const { data, isLoading } = useSWR("corridors-list", () =>
+    corridorsService.fetchCorridors(),
   );
 
   const errors: ErrorInfo[] =

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { CorridorTransitTimeStat } from "@/types/corridors";
+import { BoxPlotChartDataItem, CorridorTimeStats } from "@/types/corridors";
+import { CorridorTransitTimeStatsType } from "src/generated/graphql";
 
 export type XAxisType = "date" | "category";
 export type YAxisType = "time" | "value";
@@ -18,7 +19,7 @@ interface ChartDataItem {
 }
 
 interface Props {
-  data: CorridorTransitTimeStat[];
+  data: (CorridorTimeStats & BoxPlotChartDataItem)[];
   xAxisType: XAxisType;
   xAxisTitle: string;
   yAxisType: YAxisType;
@@ -28,14 +29,20 @@ interface Props {
   boxColor: string;
 }
 
+const isTransitTimeStat = (
+  s: CorridorTimeStats & BoxPlotChartDataItem,
+): s is CorridorTransitTimeStatsType & BoxPlotChartDataItem => {
+  return "ts" in s && typeof s.ts !== "undefined" && s.ts !== null;
+};
+
 const buildChartData = (
-  stats: CorridorTransitTimeStat[],
+  stats: (CorridorTimeStats & BoxPlotChartDataItem)[],
   hideOutliers: boolean,
 ): ChartDataItem[] =>
   stats.map((stat) => ({
-    ts: stat.ts,
-    category: stat.category ?? stat.xAxisCategory,
-    binLabel: stat.binLabel ?? stat.xAxisLabel,
+    ts: isTransitTimeStat(stat) ? stat.ts : null,
+    category: stat.category,
+    binLabel: stat.binLabel,
     yAxisMinValue: hideOutliers ? null : stat.minTransitTime,
     yAxisMaxValue: hideOutliers ? null : stat.maxTransitTime,
     yAxisMeanValue: stat.avgTransitTime,

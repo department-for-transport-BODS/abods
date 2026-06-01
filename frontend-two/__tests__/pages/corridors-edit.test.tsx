@@ -1,7 +1,10 @@
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SWRConfig } from "swr";
 import CorridorsEditPage from "@/pages/corridors/edit/[corridorId]";
+import { useConfig } from "@/contexts/ConfigContext";
+import { corridorsService } from "@/services/corridors/corridors.service";
+import { Corridor } from "@/types/corridors";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -56,9 +59,6 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-import { useConfig } from "@/contexts/ConfigContext";
-import { corridorsService } from "@/services/corridors/corridors.service";
-
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchCorridorById = vi.mocked(corridorsService.fetchCorridorById);
 const mockUpdateCorridor = vi.mocked(corridorsService.updateCorridor);
@@ -68,7 +68,7 @@ const mockFetchSubsequentStops = vi.mocked(
   corridorsService.fetchSubsequentStops,
 );
 
-const corridor = {
+const corridor: Corridor = {
   id: 12,
   name: "Corridor 12",
   stops: [
@@ -81,6 +81,7 @@ const corridor = {
       sourceId: "ATCO:A",
       lon: -1,
       lat: 53,
+      intId: 1,
     },
     {
       stopId: "b",
@@ -91,6 +92,7 @@ const corridor = {
       sourceId: "ATCO:B",
       lon: -1.1,
       lat: 53.1,
+      intId: 2,
     },
   ],
 };
@@ -108,7 +110,6 @@ describe("CorridorsEditPage", () => {
     mockQuery = { corridorId: "12" };
 
     mockUseConfig.mockReturnValue({
-      config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
@@ -162,7 +163,7 @@ describe("CorridorsEditPage", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
-      expect(mockUpdateCorridor).toHaveBeenCalledWith("http://test-api", {
+      expect(mockUpdateCorridor).toHaveBeenCalledWith({
         id: 12,
         name: "Updated corridor",
         stopList: ["a", "b"],
@@ -186,7 +187,7 @@ describe("CorridorsEditPage", () => {
     await user.click(screen.getByRole("button", { name: "Delete corridor" }));
 
     await waitFor(() => {
-      expect(mockDeleteCorridor).toHaveBeenCalledWith("http://test-api", 12);
+      expect(mockDeleteCorridor).toHaveBeenCalledWith(12);
     });
     expect(mockPush).toHaveBeenCalledWith("/corridors");
   });

@@ -1,200 +1,179 @@
-import { graphqlRequest } from "@/services/api";
 import {
   Corridor,
-  CorridorGranularity,
-  CorridorHistogramBin,
-  CorridorListItem,
-  CorridorServiceStat,
   CorridorStats,
-  CorridorStatsParams,
   CorridorStop,
-  CorridorSummaryStats,
-  CorridorTransitTimeStat,
   CorridorSummary,
-  CorridorUpdateInput,
-  MatchType,
-  ServiceLink,
   StopLists,
+  CorridorStatsViewParams,
+  BoxPlotChartDataItem,
+  CorridorTimeStats,
 } from "@/types/corridors";
+import { DateTime, Interval } from "luxon";
 import {
-  CORRIDOR_STATS_QUERY,
-  CORRIDORS_LIST_QUERY,
-  CORRIDORS_STOP_SEARCH_QUERY,
-  CORRIDORS_SUBSEQUENT_STOPS_QUERY,
-  CREATE_CORRIDOR_MUTATION,
-  DELETE_CORRIDOR_MUTATION,
-  GET_CORRIDOR_QUERY,
-  OPERATORS_QUERY,
-  UPDATE_CORRIDOR_MUTATION,
-} from "@/services/corridors/corridors.operations";
+  keyBy as _keyBy,
+  max as _max,
+  mergeWith as _mergeWith,
+  min as _min,
+  range as _range,
+  sortBy as _sortBy,
+  values as _values,
+} from "lodash-es";
+import { apolloClient } from "@/services/apolloClient";
 import {
-  toFilledDayOfWeekStats,
-  toFilledHistogram,
-  toFilledTimeOfDayStats,
-  toFilledTransitTimeStats,
-} from "@/services/corridors/corridors.transforms";
-import { DateTime } from "luxon";
+  CorridorGranularity,
+  CorridorsListDocument,
+  CorridorsListQuery,
+  CorridorsStopSearchDocument,
+  CorridorsStopSearchQuery,
+  CorridorsStopSearchQueryVariables,
+  CorridorsSubsequentStopsDocument,
+  CorridorsSubsequentStopsQuery,
+  CorridorStatsDocument,
+  CorridorStatsQuery,
+  CorridorStatsQueryVariables,
+  CorridorStatsType,
+  CorridorUpdateInputType,
+  CreateCorridorDocument,
+  CreateCorridorMutation,
+  DeleteCorridorDocument,
+  DeleteCorridorMutation,
+  GetCorridorDocument,
+  GetCorridorQuery,
+  GetCorridorQueryVariables,
+  StopInfoType,
+  StopType,
+  UpdateCorridorDocument,
+  UpdateCorridorMutation,
+} from "../../src/generated/graphql";
+import { nonNullishArray } from "@/utils/array-operators";
+import { LngLatBounds } from "mapbox-gl";
+import { operatorsService } from "@/services/operator.service";
+import {
+  formatDayOfWeek,
+  formatDayOfWeekShort,
+  formatDuration,
+  formatMinuteSeconds,
+  isoDayOfWeek,
+} from "@/utils/date";
 
-interface StopSearchResult {
-  stopId: string;
-  stopName: string;
-  lat: number;
-  lon: number;
-  localityName: string | null;
-  adminAreaId: string | null;
-  sourceId: string | null;
-}
-
-interface CorridorStopResult {
-  stopId: string;
-  stopName: string;
-  sourceId: string | null;
-  stopLocation: {
-    latitude: number;
-    longitude: number;
-  };
-  stopLocality: {
-    localityName: string | null;
-  } | null;
-}
-
-interface CorridorStatsResult {
-  summaryStats: CorridorSummaryStats | null;
-  transitTimeStats: Array<CorridorTransitTimeStat | null> | null;
-  transitTimeTimeOfDayStats: Array<CorridorTransitTimeStat | null> | null;
-  transitTimeDayOfWeekStats: Array<CorridorTransitTimeStat | null> | null;
-  transitTimePerServiceStats: Array<CorridorServiceStat | null> | null;
-  transitTimeHistogram: Array<{
-    hist: Array<CorridorHistogramBin | null> | null;
-  } | null> | null;
-  serviceLinks: Array<ServiceLink | null> | null;
-}
-
-const toStats = (
-  stats: CorridorStatsResult,
-  params: CorridorStatsParams,
-): CorridorStats => {
-  const from = DateTime.fromISO(params.fromTimestamp);
-  const to = DateTime.fromISO(params.toTimestamp);
-
-  const transitTimeStats = (stats.transitTimeStats ?? []).filter(
-    (item): item is CorridorTransitTimeStat => item !== null,
-  );
-  const transitTimeTimeOfDayStats = (
-    stats.transitTimeTimeOfDayStats ?? []
-  ).filter((item): item is CorridorTransitTimeStat => item !== null);
-  const transitTimeDayOfWeekStats = (
-    stats.transitTimeDayOfWeekStats ?? []
-  ).filter((item): item is CorridorTransitTimeStat => item !== null);
-
-  const histogramRaw = (
-    (stats.transitTimeHistogram ?? [])[0]?.hist ?? []
-  ).filter((item): item is CorridorHistogramBin => item !== null);
-
-  return {
-    summaryStats: {
-      averageTransitTime: stats.summaryStats?.averageTransitTime ?? null,
-      numberOfServices: stats.summaryStats?.numberOfServices ?? null,
-      scheduledTransits: stats.summaryStats?.scheduledTransits ?? null,
-      totalTransits: stats.summaryStats?.totalTransits ?? null,
-    },
-    transitTimeStats: toFilledTransitTimeStats(
-      transitTimeStats,
-      from,
-      to,
-      params.granularity,
-    ),
-    transitTimeTimeOfDayStats: toFilledTimeOfDayStats(
-      transitTimeTimeOfDayStats,
-    ),
-    transitTimeDayOfWeekStats: toFilledDayOfWeekStats(
-      transitTimeDayOfWeekStats,
-    ),
-    transitTimeHistogram: toFilledHistogram(histogramRaw),
-    transitTimePerServiceStats: (stats.transitTimePerServiceStats ?? []).filter(
-      (item): item is CorridorServiceStat => item !== null,
-    ),
-    serviceLinks: (stats.serviceLinks ?? []).filter(
-      (item): item is ServiceLink => item !== null,
-    ),
-  };
+export const fillGaps = <T, U, K extends keyof T>(
+  key: K,
+  data: T[],
+  defaultRange: T[K][],
+  formatter: (n: T[K]) => U = () => ({}) as U,
+  sortKey?: keyof U,
+): (T & U)[] => {
+  const defaults = defaultRange.map((n) => ({ [key]: n }));
+  const completeData = _values(
+    _mergeWith(_keyBy(defaults, key), _keyBy(nonNullishArray(data), key)),
+  ).map((item) => ({
+    ...item,
+    ...formatter(item[key]),
+  }));
+  return sortKey ? _sortBy(completeData, sortKey) : completeData;
 };
+
+function* timeSeriesRange(
+  interval: Interval,
+  granularity: CorridorGranularity,
+) {
+  let cursor = interval.start!;
+  while (cursor <= interval.end!) {
+    yield cursor;
+    cursor = cursor.plus({ [granularity]: 1 });
+  }
+}
 
 const granularityFromRange = (
-  fromTimestamp: string,
-  toTimestamp: string,
+  from: DateTime,
+  to: DateTime,
 ): CorridorGranularity => {
-  const from = DateTime.fromISO(fromTimestamp);
-  const to = DateTime.fromISO(toTimestamp);
-  return Math.abs(to.diff(from, "days").days) < 5 ? "hour" : "day";
+  return Math.abs(to.diff(from, "days").days) < 5
+    ? CorridorGranularity.Hour
+    : CorridorGranularity.Day;
 };
 
-const toStopFromSearch = (stop: StopSearchResult): CorridorStop => ({
-  stopId: stop.stopId,
-  stopName: stop.stopName,
-  lon: stop.lon,
-  lat: stop.lat,
-  localityName: stop.localityName,
-  adminAreaId: stop.adminAreaId,
-  sourceId: stop.sourceId,
-  naptan: stop.sourceId ?? stop.stopId,
+let uniqueId = 0;
+
+function isStopLocation(
+  obj: Pick<StopType, "lon" | "lat"> | Pick<StopInfoType, "stopLocation">,
+): obj is Pick<StopInfoType, "stopLocation"> {
+  return Object.prototype.hasOwnProperty.call(obj, "stopLocation");
+}
+
+const toStop: (stop: StopType | StopInfoType) => CorridorStop = ({
+  __typename,
+  stopId,
+  stopName,
+  ...stop
+}) => ({
+  stopId,
+  stopName,
+  ...(isStopLocation(stop)
+    ? { lon: stop.stopLocation.longitude, lat: stop.stopLocation.latitude }
+    : stop),
+  naptan: stop.sourceId ? stop.sourceId : stopId,
+  intId: ++uniqueId,
 });
 
-const toStopFromCorridor = (stop: CorridorStopResult): CorridorStop => ({
-  stopId: stop.stopId,
-  stopName: stop.stopName,
-  lon: stop.stopLocation.longitude,
-  lat: stop.stopLocation.latitude,
-  localityName: stop.stopLocality?.localityName ?? null,
-  adminAreaId: null,
-  sourceId: stop.sourceId,
-  naptan: stop.sourceId ?? stop.stopId,
-});
+const addBoxPlotChartDataItems = (
+  stat: CorridorTimeStats & BoxPlotChartDataItem,
+) => {
+  stat.yAxisMaxValue = stat.maxTransitTime;
+  stat.yAxisMinValue = stat.minTransitTime;
+  stat.yAxisMeanValue = stat.avgTransitTime;
+};
+
+const addBoxPlotData = (stats: CorridorStats): CorridorStats => {
+  stats.transitTimeStats.forEach((stat) => {
+    addBoxPlotChartDataItems(stat);
+  });
+  stats.transitTimeDayOfWeekStats.forEach((stat) => {
+    addBoxPlotChartDataItems(stat);
+  });
+  stats.transitTimeTimeOfDayStats.forEach((stat) => {
+    addBoxPlotChartDataItems(stat);
+  });
+  return stats;
+};
 
 export const corridorsService = {
-  fetchCorridors: async (apiUrl: string): Promise<CorridorSummary[] | null> => {
+  fetchCorridors: async (): Promise<CorridorSummary[] | null> => {
     try {
-      const result = await graphqlRequest<{
-        corridor: { corridorList: Array<CorridorListItem | null> | null };
-      }>(apiUrl, CORRIDORS_LIST_QUERY);
-      const list = result.corridor?.corridorList ?? [];
-      return list
-        .filter((c): c is CorridorListItem => c !== null)
-        .map(({ id, name, stops }) => ({
-          id,
-          name,
-          numStops: (stops ?? []).filter((s) => s !== null).length,
-        }));
+      const result = await apolloClient.query<CorridorsListQuery>({
+        query: CorridorsListDocument,
+        fetchPolicy: "no-cache",
+      });
+
+      return nonNullishArray(result.data?.corridor?.corridorList).map(
+        ({ stops, ...corridor }) => ({
+          ...corridor,
+          numStops: nonNullishArray(stops).length,
+        }),
+      );
     } catch (error) {
       console.warn("Failed to fetch corridors:", error);
       return null;
     }
   },
 
-  fetchCorridorById: async (
-    apiUrl: string,
-    corridorId: number,
-  ): Promise<Corridor | null> => {
+  fetchCorridorById: async (corridorId: number): Promise<Corridor | null> => {
     try {
-      const result = await graphqlRequest<{
-        corridor: {
-          getCorridor: {
-            id: number;
-            name: string;
-            stops: Array<CorridorStopResult | null> | null;
-          } | null;
-        };
-      }>(apiUrl, GET_CORRIDOR_QUERY, { corridorId });
+      const result = await apolloClient.query<
+        GetCorridorQuery,
+        GetCorridorQueryVariables
+      >({
+        query: GetCorridorDocument,
+        variables: { corridorId },
+        fetchPolicy: "no-cache",
+      });
 
-      const corridor = result.corridor?.getCorridor;
+      const corridor = result.data?.corridor?.getCorridor;
       if (!corridor) return null;
 
       return {
-        id: corridor.id,
-        name: corridor.name,
-        stops: (corridor.stops ?? [])
-          .filter((stop): stop is CorridorStopResult => stop !== null)
-          .map(toStopFromCorridor),
+        ...corridor,
+        stops: nonNullishArray(corridor.stops).map(toStop),
       };
     } catch (error) {
       console.warn("Failed to fetch corridor by id:", error);
@@ -203,28 +182,34 @@ export const corridorsService = {
   },
 
   queryStops: async (
-    apiUrl: string,
     searchString: string,
+    bounds?: LngLatBounds,
   ): Promise<StopLists | null> => {
     try {
-      const result = await graphqlRequest<{
-        corridor: {
-          addFirstStop: Array<StopSearchResult | null> | null;
-        };
-      }>(apiUrl, CORRIDORS_STOP_SEARCH_QUERY, {
-        inputs: { searchString },
+      const adminAreaIds = await operatorsService.fetchAdminAreaIds();
+
+      const result = await apolloClient.query<
+        CorridorsStopSearchQuery,
+        CorridorsStopSearchQueryVariables
+      >({
+        query: CorridorsStopSearchDocument,
+        variables: {
+          inputs: {
+            searchString,
+            boundingBox: bounds && {
+              minLongitude: bounds.getWest(),
+              minLatitude: bounds.getSouth(),
+              maxLongitude: bounds.getEast(),
+              maxLatitude: bounds.getNorth(),
+            },
+          },
+        },
+        fetchPolicy: "no-cache",
       });
 
-      const allStops = (result.corridor?.addFirstStop ?? [])
-        .filter((stop): stop is StopSearchResult => stop !== null)
-        .map(toStopFromSearch);
-
-      const operatorsResult = await graphqlRequest<{
-        operators: Array<{ adminAreaIds: string[] }>;
-      }>(apiUrl, OPERATORS_QUERY);
-      const adminAreaIds = (operatorsResult.operators ?? []).flatMap(
-        (op) => op.adminAreaIds,
-      );
+      const allStops = nonNullishArray(
+        result?.data?.corridor?.addFirstStop,
+      ).map(toStop);
 
       const orgStops = allStops.filter((stop) =>
         adminAreaIds.some((id) => id === stop.adminAreaId),
@@ -241,99 +226,190 @@ export const corridorsService = {
   },
 
   fetchSubsequentStops: async (
-    apiUrl: string,
     stopList: string[],
   ): Promise<CorridorStop[] | null> => {
     try {
-      const result = await graphqlRequest<{
-        corridor: {
-          addSubsequentStops: Array<StopSearchResult | null> | null;
-        };
-      }>(apiUrl, CORRIDORS_SUBSEQUENT_STOPS_QUERY, { stopList });
+      const result = await apolloClient.query<CorridorsSubsequentStopsQuery>({
+        query: CorridorsSubsequentStopsDocument,
+        variables: { stopList },
+        fetchPolicy: "no-cache",
+      });
 
-      return (result.corridor?.addSubsequentStops ?? [])
-        .filter((stop): stop is StopSearchResult => stop !== null)
-        .map(toStopFromSearch);
+      return nonNullishArray(result.data?.corridor?.addSubsequentStops).map(
+        toStop,
+      );
     } catch (error) {
       console.warn("Failed to fetch subsequent corridor stops:", error);
       return null;
     }
   },
 
-  createCorridor: async (
-    apiUrl: string,
-    name: string,
-    stopIds: string[],
-  ): Promise<boolean> => {
+  createCorridor: async (name: string, stopIds: string[]): Promise<boolean> => {
     try {
-      const result = await graphqlRequest<{
-        createCorridor: { success: boolean; error: string | null };
-      }>(apiUrl, CREATE_CORRIDOR_MUTATION, { name, stopIds });
+      const result = await apolloClient.mutate<CreateCorridorMutation>({
+        mutation: CreateCorridorDocument,
+        variables: { name, stopIds },
+      });
 
-      return result.createCorridor.success;
+      if (!result.data?.createCorridor?.success) {
+        throw (
+          result.data?.createCorridor.error ??
+          result.error?.message ??
+          "Unknown error"
+        );
+      }
+
+      return result.data.createCorridor.success;
     } catch (error) {
       console.warn("Failed to create corridor:", error);
       return false;
     }
   },
 
-  updateCorridor: async (
-    apiUrl: string,
-    inputs: CorridorUpdateInput,
-  ): Promise<boolean> => {
+  updateCorridor: async (inputs: CorridorUpdateInputType): Promise<boolean> => {
     try {
-      const result = await graphqlRequest<{
-        updateCorridor: { success: boolean; error: string | null };
-      }>(apiUrl, UPDATE_CORRIDOR_MUTATION, { inputs });
+      const result = await apolloClient.mutate<UpdateCorridorMutation>({
+        mutation: UpdateCorridorDocument,
+        variables: { inputs },
+      });
 
-      return result.updateCorridor.success;
+      if (!result.data?.updateCorridor?.success) {
+        throw (
+          result.data?.updateCorridor.error ??
+          result.error?.message ??
+          "Unknown error"
+        );
+      }
+
+      return result.data.updateCorridor.success;
     } catch (error) {
       console.warn("Failed to update corridor:", error);
       return false;
     }
   },
 
-  deleteCorridor: async (
-    apiUrl: string,
-    corridorId: number,
-  ): Promise<boolean> => {
+  deleteCorridor: async (corridorId: number): Promise<boolean> => {
     try {
-      const result = await graphqlRequest<{
-        deleteCorridor: { success: boolean; error: string | null };
-      }>(apiUrl, DELETE_CORRIDOR_MUTATION, { corridorId });
+      const result = await apolloClient.mutate<DeleteCorridorMutation>({
+        mutation: DeleteCorridorDocument,
+        variables: { corridorId },
+      });
 
-      return result.deleteCorridor.success;
+      if (!result.data?.deleteCorridor?.success) {
+        throw (
+          result.data?.deleteCorridor.error ??
+          result.error?.message ??
+          "Unknown error"
+        );
+      }
+
+      return result.data.deleteCorridor.success;
     } catch (error) {
       console.warn("Failed to delete corridor:", error);
       return false;
     }
   },
 
-  fetchStats: async (
-    apiUrl: string,
-    params: Omit<CorridorStatsParams, "granularity"> & {
-      granularity?: CorridorGranularity;
-      matchType?: MatchType;
-    },
-  ): Promise<CorridorStats | null> => {
-    const payload: CorridorStatsParams = {
-      ...params,
-      granularity:
-        params.granularity ??
-        granularityFromRange(params.fromTimestamp, params.toTimestamp),
-      matchType: params.matchType ?? "evidenced",
+  convertStats(
+    stats: CorridorStatsType,
+    params: CorridorStatsViewParams,
+  ): CorridorStats {
+    const timeSeries = nonNullishArray(stats.transitTimeStats);
+    const dayOfWeek = nonNullishArray(stats.transitTimeDayOfWeekStats);
+    const timeOfDay = nonNullishArray(stats.transitTimeTimeOfDayStats);
+    const histogram = nonNullishArray(
+      nonNullishArray(stats.transitTimeHistogram)?.[0]?.hist,
+    );
+    const histBins = histogram.map((h) => h.bin);
+    const histRange = _range(_min(histBins) ?? 0, (_max(histBins) ?? 0) + 2);
+
+    return {
+      summaryStats: stats.summaryStats ?? {},
+      transitTimeStats: fillGaps(
+        "ts",
+        timeSeries,
+        Array.from(
+          timeSeriesRange(
+            Interval.fromDateTimes(params.from, params.to),
+            params.granularity,
+          ),
+        ).map((dateTime) =>
+          dateTime.toISO({ suppressMilliseconds: true }).replace("Z", "+00:00"),
+        ),
+      ),
+      transitTimePerServiceStats: nonNullishArray(
+        stats.transitTimePerServiceStats,
+      ),
+      transitTimeDayOfWeekStats: fillGaps(
+        "dow",
+        dayOfWeek,
+        _range(0, 7),
+        (dow) => ({
+          category: formatDayOfWeekShort(isoDayOfWeek(dow)),
+          binLabel: formatDayOfWeek(isoDayOfWeek(dow)),
+          isoDayOfWeek: isoDayOfWeek(dow),
+        }),
+        "isoDayOfWeek",
+      ),
+      transitTimeTimeOfDayStats: fillGaps(
+        "hour",
+        timeOfDay,
+        _range(0, 25),
+        (hour) => {
+          /**
+           * This deliberately styles midnight at the start of the day as '00:00' and midnight
+           * at the end the day as '24:00' so that amCharts can distinguish the 2 categories
+           */
+          const startTime = `${hour.toString().padStart(2, "0")}:00`;
+          const endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
+          return {
+            category: startTime,
+            binLabel: `${startTime} - ${endTime}`,
+          };
+        },
+      ),
+      transitTimeHistogram: fillGaps("bin", histogram, histRange, (bin) => ({
+        xAxisCategory: formatMinuteSeconds(Number(bin)),
+        xAxisLabel: formatDuration(Number(bin)),
+      })),
+      serviceLinks: stats.serviceLinks ?? [],
     };
+  },
 
+  fetchStats: async (
+    params: CorridorStatsViewParams,
+  ): Promise<CorridorStats | null> => {
     try {
-      const result = await graphqlRequest<{
-        corridor: {
-          stats: CorridorStatsResult | null;
-        };
-      }>(apiUrl, CORRIDOR_STATS_QUERY, { params: payload });
+      const granularity = granularityFromRange(params.from, params.to);
 
-      const stats = result.corridor?.stats;
-      if (!stats) return null;
-      return toStats(stats, payload);
+      const result = await apolloClient.query<
+        CorridorStatsQuery,
+        CorridorStatsQueryVariables
+      >({
+        query: CorridorStatsDocument,
+        variables: {
+          params: {
+            corridorId: params.corridorId,
+            matchType: params.matchType,
+            fromTimestamp: params.from.toISO(),
+            toTimestamp: params.to.toISO(),
+            granularity,
+            stopList: params.stops.map((stop) => stop.naptan),
+          },
+        },
+      });
+
+      if (!result.data?.corridor?.stats) return null;
+
+      const convertedStats = corridorsService.convertStats(
+        result.data.corridor.stats,
+        {
+          ...params,
+          granularity,
+        },
+      );
+
+      return addBoxPlotData(convertedStats);
     } catch (error) {
       console.warn("Failed to fetch corridor stats:", error);
       return null;

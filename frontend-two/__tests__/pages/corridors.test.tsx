@@ -64,7 +64,6 @@ describe("CorridorsPage", () => {
     vi.clearAllMocks();
     mockQuery = {};
     mockUseConfig.mockReturnValue({
-      config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);

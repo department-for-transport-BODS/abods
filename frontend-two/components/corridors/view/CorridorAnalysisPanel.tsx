@@ -1,8 +1,9 @@
 import dynamic from "next/dynamic";
 import {
+  BoxPlotChartDataItem,
   CorridorHideOutliers,
   CorridorStats,
-  CorridorTransitTimeStat,
+  CorridorTimeStats,
 } from "@/types/corridors";
 
 const CorridorBoxPlotChart = dynamic(
@@ -46,8 +47,8 @@ const TransitTimeTable = ({
   data,
   label,
 }: {
-  data: CorridorTransitTimeStat[];
-  label: (row: CorridorTransitTimeStat) => string;
+  data: (CorridorTimeStats & BoxPlotChartDataItem)[];
+  label: (row: CorridorTimeStats & BoxPlotChartDataItem) => string;
 }) => (
   <table className="govuk-table govuk-!-margin-bottom-4">
     <thead className="govuk-table__head">

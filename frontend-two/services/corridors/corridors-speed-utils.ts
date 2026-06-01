@@ -1,9 +1,12 @@
-import { CorridorServiceStat, ServiceLink } from "@/types/corridors";
+import {
+  CorridorStatsPerServiceType,
+  ServiceLinkType,
+} from "../../src/generated/graphql";
 
 const MS_TO_MPH_FACTOR = 2.237;
 
 export const calculateTotalServiceLinkDistance = (
-  serviceLinks: ServiceLink[],
+  serviceLinks: ServiceLinkType[],
 ): number => serviceLinks.reduce((acc, link) => acc + link.distance, 0);
 
 export const calculateAverageSpeedInMph = (
@@ -17,7 +20,7 @@ export const calculateAverageSpeedInMph = (
 };
 
 export const averageSpeedLabel = (
-  serviceLinks: ServiceLink[],
+  serviceLinks: ServiceLinkType[],
   averageTransitTime: number | null | undefined,
 ): string => {
   const totalDistance = calculateTotalServiceLinkDistance(serviceLinks);
@@ -26,8 +29,8 @@ export const averageSpeedLabel = (
 };
 
 export const averageServiceSpeedLabel = (
-  serviceLinks: ServiceLink[],
-  service: CorridorServiceStat,
+  serviceLinks: ServiceLinkType[],
+  service: CorridorStatsPerServiceType,
 ): string => {
   const totalDistance = calculateTotalServiceLinkDistance(serviceLinks);
   const recorded = service.recordedTransits ?? 0;

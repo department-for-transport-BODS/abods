@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { PerformanceCategories, PunctualityOverview } from "@/types/dashboard";
+import { PunctualityOverview } from "@/types/dashboard";
 import { apolloClient } from "@/services/apolloClient";
 import {
   DashboardOperatorVehicleCountsListDocument,

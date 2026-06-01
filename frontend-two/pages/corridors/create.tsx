@@ -22,16 +22,11 @@ const CorridorsCreatePage = () => {
       </Link>
       <span className="govuk-caption-xl">Corridors</span>
       <h1 className="govuk-heading-xl">Create new corridor</h1>
-      {config?.apiUrl ? (
-        <CreateCorridorForm
-          apiUrl={config.apiUrl}
-          mode="create"
-          mapboxToken={config.mapboxToken}
-          mapboxStyle={config.mapboxStyle}
-        />
-      ) : (
-        <p className="govuk-body">Loading...</p>
-      )}
+      <CreateCorridorForm
+        mode="create"
+        mapboxToken={config?.mapboxToken}
+        mapboxStyle={config?.mapboxStyle}
+      />
     </BaseLayout>
   );
 };

@@ -1,14 +1,19 @@
 import { Duration } from "luxon";
-import { CorridorServiceStat, ServiceLink } from "@/types/corridors";
 import { averageServiceSpeedLabel } from "@/services/corridors/corridors-speed-utils";
+import {
+  CorridorStatsPerServiceType,
+  ServiceLinkType,
+} from "../../../src/generated/graphql";
 
 interface Props {
-  services: CorridorServiceStat[];
-  serviceLinks: ServiceLink[];
+  services: CorridorStatsPerServiceType[];
+  serviceLinks: ServiceLinkType[];
   isLoading: boolean;
 }
 
-const formatAverageJourneyTime = (service: CorridorServiceStat): string => {
+const formatAverageJourneyTime = (
+  service: CorridorStatsPerServiceType,
+): string => {
   const recorded = service.recordedTransits ?? 0;
   const totalTransitTime = service.totalTransitTime ?? 0;
 
