@@ -1,4 +1,5 @@
 import {
+  memo,
   useEffect,
   useId,
   useLayoutEffect,
@@ -157,9 +158,6 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   // Initialize/dispose chart around component lifecycle.
   useLayoutEffect(() => {
-    let resizeObserver: ResizeObserver | null = null;
-    let rafId: number | null = null;
-
     try {
       if (!chartContainerRef.current) {
         return;
@@ -182,19 +180,6 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
       createSeries(chart);
       createLegend(chart);
 
-      if (typeof ResizeObserver !== "undefined") {
-        resizeObserver = new ResizeObserver(() => {
-          if (rafId !== null) {
-            window.cancelAnimationFrame(rafId);
-          }
-          rafId = window.requestAnimationFrame(() => {
-            chart.reinit();
-            rafId = null;
-          });
-        });
-        resizeObserver.observe(chartContainerRef.current);
-      }
-
       chart.data = chartData;
       chart.reinit();
       setLoadFailed(false);
@@ -204,10 +189,6 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
     }
 
     return () => {
-      resizeObserver?.disconnect();
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
       chartRef.current?.dispose();
       chartRef.current = null;
     };
@@ -270,4 +251,4 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
   );
 };
 
-export default PerformanceChart;
+export default memo(PerformanceChart);

@@ -13,17 +13,23 @@ export const Footer = () => {
             <h2 className="govuk-visually-hidden">Support links</h2>
             <ul className="govuk-footer__inline-list">
               <li className="govuk-footer__inline-list-item">
-                <Link className="govuk-footer__link" href="/cookies">
+                <Link className="govuk-footer__link" href="/cookies/">
                   Cookies
                 </Link>
               </li>
               <li className="govuk-footer__inline-list-item">
-                <Link className="govuk-footer__link" href="/privacy-policy">
+                <Link
+                  className="govuk-footer__link"
+                  href="/privacy-policy/"
+                >
                   Privacy
                 </Link>
               </li>
               <li className="govuk-footer__inline-list-item">
-                <Link className="govuk-footer__link" href="/accessibility">
+                <Link
+                  className="govuk-footer__link"
+                  href="/accessibility/"
+                >
                   Accessibility
                 </Link>
               </li>

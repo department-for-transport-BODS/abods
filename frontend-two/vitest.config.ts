@@ -22,9 +22,9 @@ export default defineConfig({
     },
   },
   test: {
+    globals: true,
     environment: "jsdom",
     setupFiles: "./vitest.setup.ts",
-    exclude: ["node_modules", ".next", "dist"],
-    globals: true,
+    exclude: ["**/node_modules/**", "**/.next/**", "dist"],
   },
 });

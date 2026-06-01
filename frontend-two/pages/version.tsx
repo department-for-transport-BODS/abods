@@ -1,3 +1,5 @@
+import { version } from "@/utils/config";
+
 export default function VersionPage() {
-  return <p>Version: {process.env.NEXT_PUBLIC_APP_VERSION}</p>;
+  return <p>Version: {version.version}</p>;
 }

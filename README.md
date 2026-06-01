@@ -15,6 +15,7 @@ It provides the web interface and API layer for interacting with bus service dat
 - **[API](abods-api):** GraphQL, Apollo Server/Client, TypeScript
 - **[Infrastructure](abods-api/template.yaml):** AWS SAM (Serverless Application Model)
 - **[CI/CD](.github):** GitHub Actions
+- **[E2E Testing](e2e/README.md)** Playwright development tests
 
 ## 🛠️ Getting Started
 

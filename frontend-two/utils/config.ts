@@ -1,4 +1,7 @@
 import { ConfigObject } from "@/types";
+import versionJson from "../public/version.json";
+
+export const version = versionJson;
 
 const REQUIRED_CONFIG_KEYS: (keyof ConfigObject)[] = [
   "apiUrl",

@@ -356,6 +356,36 @@ Resources:
                   - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
                   - Distribution: !Ref CloudFrontDistributionV2
 
+  CloudFrontRewriteFunctionV2:
+    Type: AWS::CloudFront::Function
+    Condition: IsNonProd
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-rewrite-v2"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Rewrite extensionless frontend routes to static index documents
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          if (!uri || uri.indexOf('/api/') === 0) {
+            return request;
+          }
+
+          if (uri.endsWith('/')) {
+            request.uri = uri + 'index.html';
+            return request;
+          }
+
+          if (uri.indexOf('.') === -1) {
+            request.uri = uri + '/index.html';
+          }
+
+          return request;
+        }
+
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Condition: IsNotLocal
@@ -461,6 +491,9 @@ Resources:
             - OPTIONS
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt CloudFrontRewriteFunctionV2.FunctionARN
         CacheBehaviors:
           - TargetOriginId: backendApi
             PathPattern: "/api/*"
