@@ -54,7 +54,7 @@ const FeedMonitoringPage = () => {
       <div className="app-page feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">NOC feed monitoring</h1>
         <div className="govuk-form-group">
-          <label className="govuk-label">
+          <label className="govuk-label" htmlFor="operator-search">
             Search for an operator
           </label>
           <input

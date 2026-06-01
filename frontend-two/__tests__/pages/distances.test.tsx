@@ -3,7 +3,6 @@ import DistancesPage from "@/pages/distances";
 import { useConfig } from "@/contexts/ConfigContext";
 import { distanceService } from "@/services/distances/distance.services";
 import { DateTime } from "luxon";
-import { DisplayedGroupCreator } from "ag-grid-community";
 
 // Setup mocks
 vi.mock("@/hooks/useAuth", () => ({
@@ -159,7 +158,7 @@ it("Shows loading state within Generate button", async () => {
   expect(generateButton).toBeDisabled();
 });
 
-it("Renders a blank table with headers initially", async () => {
+it("Renders a blank table with correct headers initially", async () => {
   mockFetchDistances.mockResolvedValue([]);
   mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
   mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
