@@ -4,7 +4,6 @@ import useSWR from "swr";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
 import dynamic from "next/dynamic";
@@ -19,7 +18,6 @@ const CorridorsGrid = dynamic(
 
 const CorridorsPage = () => {
   useRequireAuth();
-  const { config } = useConfig();
   const router = useRouter();
   const { loadData } = useHelpdesk();
 
