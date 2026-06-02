@@ -50,7 +50,7 @@ export const setEnvVariables = (container: StartedPostgreSqlContainer) => {
 };
 
 export const connectPrisma = async (dbPrisma: PrismaClient) => {
-  dbPrisma = await initialisePrismaClient();
+  dbPrisma = await initialisePrismaClient(true);
   await dbPrisma.$connect();
   return dbPrisma;
 };
