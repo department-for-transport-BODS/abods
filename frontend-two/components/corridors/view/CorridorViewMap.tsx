@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import { CorridorStop, ServiceLink } from "@/types/corridors";
+import { CorridorStop } from "@/types/corridors";
+import { ServiceLinkType } from "../../../src/generated/graphql";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
@@ -9,7 +10,7 @@ const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
 
 const buildLineGeoJSON = (
   stops: CorridorStop[],
-  serviceLinks: ServiceLink[],
+  serviceLinks: ServiceLinkType[],
   selectedSegmentIndex: number | null,
 ): GeoJSON.FeatureCollection<GeoJSON.LineString> => {
   const features: GeoJSON.Feature<GeoJSON.LineString>[] = [];
@@ -51,7 +52,7 @@ const buildStopsGeoJSON = (
 
 interface Props {
   stops: CorridorStop[];
-  serviceLinks: ServiceLink[];
+  serviceLinks: ServiceLinkType[];
   selectedSegmentIndex: number | null;
   mapboxToken: string;
   mapboxStyle: string;

@@ -53,6 +53,7 @@ vi.mock("next/router", () => ({
 
 import { useConfig } from "@/contexts/ConfigContext";
 import { corridorsService } from "@/services/corridors/corridors.service";
+import { CorridorStop } from "@/types/corridors";
 
 const mockUseConfig = vi.mocked(useConfig);
 const mockQueryStops = vi.mocked(corridorsService.queryStops);
@@ -61,7 +62,7 @@ const mockFetchSubsequentStops = vi.mocked(
 );
 const mockCreateCorridor = vi.mocked(corridorsService.createCorridor);
 
-const stopA = {
+const stopA: CorridorStop = {
   stopId: "a",
   stopName: "Stop A",
   naptan: "ATCO:A",
@@ -70,9 +71,10 @@ const stopA = {
   sourceId: "ATCO:A",
   lon: -1,
   lat: 53,
+  intId: 1,
 };
 
-const stopB = {
+const stopB: CorridorStop = {
   stopId: "b",
   stopName: "Stop B",
   naptan: "ATCO:B",
@@ -81,6 +83,7 @@ const stopB = {
   sourceId: "ATCO:B",
   lon: -1.1,
   lat: 53.1,
+  intId: 2,
 };
 
 const renderPage = () =>
@@ -94,7 +97,6 @@ describe("CorridorsCreatePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseConfig.mockReturnValue({
-      config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
@@ -112,18 +114,6 @@ describe("CorridorsCreatePage", () => {
     renderPage();
     expect(screen.getByText("Create new corridor")).toBeInTheDocument();
     expect(screen.getByLabelText("Enter a corridor name")).toBeInTheDocument();
-  });
-
-  it("shows loading when config is not ready", () => {
-    mockUseConfig.mockReturnValue({
-      config: null,
-      isLoading: true,
-      error: null,
-    } as ReturnType<typeof useConfig>);
-
-    renderPage();
-
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
   it("shows validation error when trying to finish without name", async () => {
@@ -177,11 +167,10 @@ describe("CorridorsCreatePage", () => {
     await user.click(screen.getByRole("button", { name: "Finish" }));
 
     await waitFor(() => {
-      expect(mockCreateCorridor).toHaveBeenCalledWith(
-        "http://test-api",
-        "My corridor",
-        ["a", "b"],
-      );
+      expect(mockCreateCorridor).toHaveBeenCalledWith("My corridor", [
+        "a",
+        "b",
+      ]);
     });
     expect(mockPush).toHaveBeenCalledWith("/corridors");
   });

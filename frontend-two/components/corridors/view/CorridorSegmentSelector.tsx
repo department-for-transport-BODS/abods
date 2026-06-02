@@ -1,10 +1,11 @@
-import { CorridorStop, ServiceLink } from "@/types/corridors";
+import { CorridorStop } from "@/types/corridors";
+import { ServiceLinkType } from "../../../src/generated/graphql";
 
 const METERS_PER_MILE = 1609.344;
 
 interface Props {
   stops: CorridorStop[];
-  serviceLinks?: ServiceLink[];
+  serviceLinks?: ServiceLinkType[];
   selectedSegmentIndex: number | null;
   onChangeSegmentIndex: (value: number | null) => void;
   isDisabled?: boolean;

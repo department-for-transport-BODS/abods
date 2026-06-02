@@ -32,8 +32,8 @@ export class CorridorsPage {
     return this.page.getByRole("heading", { name: "Corridors", level: 1 });
   }
 
-  createNewCorridorLink(): Locator {
-    return this.page.getByRole("link", { name: "Create new corridor" });
+  createNewCorridorButton(): Locator {
+    return this.page.getByRole("button", { name: "Create new corridor" });
   }
 
   searchInput(): Locator {
@@ -85,8 +85,8 @@ export class CorridorsPage {
     return this.page.getByRole("heading", { level: 1 });
   }
 
-  editCorridorLink(): Locator {
-    return this.page.getByRole("link", { name: "Edit corridor" });
+  editCorridorButton(): Locator {
+    return this.page.getByRole("button", { name: "Edit corridor" });
   }
 
   recordedTransitsStat(): Locator {
@@ -114,7 +114,7 @@ export class CorridorsPage {
   }
 
   saveButton(): Locator {
-    return this.page.getByRole("button", { name: "Save" });
+    return this.page.getByRole("button", { name: "Save", exact: true });
   }
 
   deleteCorridorConfirmButton(): Locator {

@@ -1,3 +1,5 @@
+import { MatchType } from "../src/generated/graphql";
+
 export const parseCorridorId = (
   value: string | string[] | undefined,
 ): number | null => {
@@ -13,10 +15,8 @@ export const queryValue = (
   return raw ?? null;
 };
 
-import { MatchType } from "@/types/corridors";
-
 export const parseMatchType = (value: string | null): MatchType =>
-  value === "estimated" ? "estimated" : "evidenced";
+  value === "estimated" ? MatchType.Estimated : MatchType.Evidenced;
 
 export const getSearchParam = (
   value: string | string[] | undefined,

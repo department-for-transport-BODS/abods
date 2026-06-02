@@ -1,115 +1,94 @@
-export interface CorridorListItem {
-  id: number;
-  name: string;
-  stops: Array<{ stopId: string } | null> | null;
-}
+import { Definitely } from "@/utils/array-operators";
+import {
+  CorridorHistogramType,
+  CorridorStatsDayOfWeekType,
+  CorridorStatsTimeOfDayType,
+  CorridorStatsType,
+  CorridorTransitTimeStatsType,
+  CorridorType,
+  MatchType,
+  Maybe,
+  ServiceLinkType,
+  StopType,
+} from "../../src/generated/graphql";
+import { DateTime } from "luxon";
 
-export interface CorridorSummary {
-  id: number;
-  name: string;
+export type CorridorSummary = Definitely<Pick<CorridorType, "id" | "name">> & {
   numStops: number;
-}
+};
 
-export interface CorridorStop {
-  stopId: string;
-  stopName: string;
-  naptan: string;
-  localityName: string | null;
-  adminAreaId: string | null;
-  sourceId: string | null;
-  lon: number;
-  lat: number;
-}
-
-export interface Corridor {
-  id: number;
-  name: string;
+export type Corridor = Pick<CorridorType, "id" | "name"> & {
   stops: CorridorStop[];
-}
+};
+
+export type CorridorStop = Pick<
+  StopType,
+  | "stopId"
+  | "stopName"
+  | "lon"
+  | "lat"
+  | "localityName"
+  | "adminAreaId"
+  | "sourceId"
+> & {
+  naptan: string;
+  intId: number;
+};
 
 export interface StopLists {
   orgStops: CorridorStop[];
   nonOrgStops: CorridorStop[];
 }
 
-export interface CorridorUpdateInput {
-  id: number;
-  name: string;
-  stopList: string[];
+export enum CorridorGranularity {
+  Day = "day",
+  Hour = "hour",
+  Minute = "minute",
 }
 
-export type CorridorGranularity = "day" | "hour" | "minute";
-
-export type MatchType = "estimated" | "evidenced";
-
-export interface CorridorSummaryStats {
-  averageTransitTime: number | null;
-  numberOfServices: number | null;
-  scheduledTransits: number | null;
-  totalTransits: number | null;
+export interface BoxPlotChartDataItem {
+  yAxisMinValue?: number;
+  yAxisMaxValue?: number;
+  yAxisMeanValue?: Maybe<number>;
+  category?: any;
+  binLabel?: any;
+  isoDayOfWeek?: any;
 }
 
-export interface CorridorTransitTimeStat {
-  ts?: string | null;
-  hour?: number | null;
-  dow?: number | null;
-  minTransitTime: number;
-  maxTransitTime: number;
-  avgTransitTime: number | null;
-  percentile25: number | null;
-  percentile75: number | null;
-  category?: string;
-  binLabel?: string;
-  xAxisCategory?: string;
-  xAxisLabel?: string;
-}
+export type HistogramChartDataItem = CorridorHistogramType & {
+  xAxisCategory: string;
+  xAxisLabel: string;
+};
 
-export interface CorridorHistogramBin {
-  bin: number | null;
-  freq: number | null;
-  xAxisCategory?: string;
-  xAxisLabel?: string;
-}
-
-export interface ServiceLink {
-  fromStop: string;
-  toStop: string;
-  distance: number;
-  routeValidity: string;
-  linkRoute: string | null;
-}
-
-export interface CorridorServiceStat {
-  lineName: string;
-  servicePatternName: string;
-  noc: string | null;
-  operatorName: string | null;
-  recordedTransits: number | null;
-  scheduledTransits: number | null;
-  totalTransitTime: number | null;
-}
-
-export interface CorridorStats {
-  summaryStats: CorridorSummaryStats;
-  transitTimeStats: CorridorTransitTimeStat[];
-  transitTimeTimeOfDayStats: CorridorTransitTimeStat[];
-  transitTimeDayOfWeekStats: CorridorTransitTimeStat[];
-  transitTimeHistogram: CorridorHistogramBin[];
-  transitTimePerServiceStats: CorridorServiceStat[];
-  serviceLinks: ServiceLink[];
-}
-
-export interface CorridorStatsParams {
-  corridorId: string;
-  fromTimestamp: string;
-  toTimestamp: string;
-  stopList: string[];
-  granularity: CorridorGranularity;
-  matchType: MatchType;
-}
+export type CorridorStats = Pick<
+  Definitely<CorridorStatsType>,
+  "summaryStats" | "transitTimePerServiceStats"
+> & {
+  transitTimeTimeOfDayStats: (CorridorStatsTimeOfDayType &
+    BoxPlotChartDataItem)[];
+  transitTimeDayOfWeekStats: (CorridorStatsDayOfWeekType &
+    BoxPlotChartDataItem)[];
+  transitTimeHistogram: HistogramChartDataItem[];
+  transitTimeStats: (CorridorTransitTimeStatsType & BoxPlotChartDataItem)[];
+  serviceLinks: ServiceLinkType[];
+};
 
 export interface CorridorHideOutliers {
   journeyTime: boolean;
   timeOfDay: boolean;
   dayOfWeek: boolean;
 }
+
+export interface CorridorStatsViewParams {
+  corridorId: string;
+  from: DateTime<true>;
+  to: DateTime<true>;
+  granularity: CorridorGranularity;
+  stops: CorridorStop[];
+  matchType: MatchType;
+}
+
+export type CorridorTimeStats =
+  | CorridorTransitTimeStatsType
+  | CorridorStatsTimeOfDayType
+  | CorridorStatsDayOfWeekType;

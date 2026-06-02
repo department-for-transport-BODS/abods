@@ -1,7 +1,11 @@
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SWRConfig } from "swr";
 import CorridorsViewPage from "@/pages/corridors/[corridorId]";
+import { useConfig } from "@/contexts/ConfigContext";
+import { corridorsService } from "@/services/corridors/corridors.service";
+import { Corridor, CorridorStats } from "@/types/corridors";
+import { RouteType } from "../../src/generated/graphql";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -49,14 +53,11 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-import { useConfig } from "@/contexts/ConfigContext";
-import { corridorsService } from "@/services/corridors/corridors.service";
-
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchCorridorById = vi.mocked(corridorsService.fetchCorridorById);
 const mockFetchStats = vi.mocked(corridorsService.fetchStats);
 
-const corridor = {
+const corridor: Corridor = {
   id: 12,
   name: "Corridor 12",
   stops: [
@@ -69,6 +70,7 @@ const corridor = {
       sourceId: "ATCO:A",
       lon: -1,
       lat: 53,
+      intId: 1,
     },
     {
       stopId: "b",
@@ -79,11 +81,12 @@ const corridor = {
       sourceId: "ATCO:B",
       lon: -1.1,
       lat: 53.1,
+      intId: 2,
     },
   ],
 };
 
-const stats = {
+const stats: CorridorStats = {
   summaryStats: {
     averageTransitTime: 420,
     numberOfServices: 2,
@@ -148,7 +151,7 @@ const stats = {
       fromStop: "ATCO:A",
       toStop: "ATCO:B",
       distance: 1000,
-      routeValidity: "valid",
+      routeValidity: RouteType.Valid,
       linkRoute: null,
     },
   ],
@@ -169,7 +172,6 @@ describe("CorridorsViewPage", () => {
     mockQuery = { corridorId: "12" };
 
     mockUseConfig.mockReturnValue({
-      config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
@@ -212,7 +214,9 @@ describe("CorridorsViewPage", () => {
     expect(screen.getAllByText("Average journey time").length).toBeGreaterThan(
       0,
     );
-    expect(screen.getByText("Services")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Services" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("10: Outbound")).toBeInTheDocument();
   });
 
@@ -221,10 +225,16 @@ describe("CorridorsViewPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Segment")).toBeInTheDocument();
+      // CorridorSegmentSelector renders buttons with accessible name like "Segment - {from}, {to}"
+      expect(
+        screen.getAllByRole("button", { name: /segment -/i }).length,
+      ).toBeGreaterThan(0);
     });
 
-    await user.selectOptions(screen.getByLabelText("Segment"), "0");
+    const segmentButtons = screen.getAllByRole("button", {
+      name: /segment -/i,
+    });
+    await user.click(segmentButtons[0]);
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalled();

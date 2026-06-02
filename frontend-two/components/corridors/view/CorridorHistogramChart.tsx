@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { CorridorHistogramBin } from "../../../types/corridors";
+import { HistogramChartDataItem } from "../../../types/corridors";
 
 const COLUMN_FILL = "#6f72af"; // govuk light purple
 
 interface Props {
-  data: CorridorHistogramBin[];
+  data: HistogramChartDataItem[];
 }
 
 export const CorridorHistogramChart = ({ data }: Props) => {
@@ -98,7 +98,7 @@ export const CorridorHistogramChart = ({ data }: Props) => {
   return <div ref={containerRef} style={{ width: "100%", height: 440 }} />;
 };
 
-function buildChartData(data: CorridorHistogramBin[]) {
+function buildChartData(data: HistogramChartDataItem[]) {
   return data.map((item) => ({
     xAxisCategory: item.xAxisCategory ?? String(item.bin ?? ""),
     xAxisLabel: item.xAxisLabel ?? String(item.bin ?? ""),
