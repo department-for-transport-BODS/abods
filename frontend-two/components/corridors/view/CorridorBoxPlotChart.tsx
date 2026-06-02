@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { BoxPlotChartDataItem, CorridorTimeStats } from "@/types/corridors";
-import { CorridorTransitTimeStatsType } from "src/generated/graphql";
+import { CorridorTransitTimeStatsType } from "../../../src/generated/graphql";
 
 export type XAxisType = "date" | "category";
 export type YAxisType = "time" | "value";

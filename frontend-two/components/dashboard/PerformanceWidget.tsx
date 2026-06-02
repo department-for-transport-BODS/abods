@@ -4,7 +4,7 @@ import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
 import { DateTime } from "luxon";
 import { useConfig } from "@/contexts/ConfigContext";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
-import { PunctualityOverview } from "@/types/dashboard";
+import { PunctualityOverview, ServiceRankingResult } from "@/types/dashboard";
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
 import {
@@ -47,7 +47,7 @@ export const PerformanceWidget = ({
   const { config } = useConfig();
   const [period, setPeriod] = useState<Period>("last7");
   const [stats, setStats] = useState<PunctualityOverview | null>(null);
-  const [services, setServices] = useState<ServicePunctualityType[]>([]);
+  const [services, setServices] = useState<ServiceRankingResult>([]);
   const [loaded, setLoaded] = useState(false);
   const [servicesLoaded, setServicesLoaded] = useState(false);
   const [servicesErrored, setServicesErrored] = useState(false);

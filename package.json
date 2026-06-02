@@ -24,9 +24,9 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/introspection": "^4.0.3",
+    "@graphql-codegen/typed-document-node": "^5.1.2",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
-    "@graphql-codegen/typescript-graphql-request": "^7.0.1",
     "@graphql-codegen/typescript-operations": "^5.0.2",
     "@graphql-codegen/typescript-resolvers": "^5.1.0",
     "@playwright/test": "^1.49.0",
@@ -42,7 +42,7 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-     "graphql": "16.14.0"
+    "graphql": "16.14.1"
   },
   "lint-staged": {
     "**/*": "prettier --write"
