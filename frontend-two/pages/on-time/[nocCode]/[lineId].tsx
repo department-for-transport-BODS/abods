@@ -19,6 +19,7 @@ import {
   ServicePattern,
   transitModelService,
 } from "@/services/on-time/transit-model.service";
+import { settle } from "@/utils/settle";
 import {
   FrequentServiceInfoType,
   ServiceInfoType,
@@ -31,19 +32,6 @@ interface ServiceLevelData {
   mergedStops: NormalizedStop[];
   frequentServiceInfo: FrequentServiceInfoType | null;
 }
-
-const settle = async <T,>(
-  promise: Promise<T>,
-): Promise<{ data: T | null; error: string | null }> => {
-  try {
-    return { data: await promise, error: null };
-  } catch (err) {
-    return {
-      data: null,
-      error: err instanceof Error ? err.message : "Unknown error",
-    };
-  }
-};
 
 const OnTimeServicePage = () => {
   useRequireAuth();

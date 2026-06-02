@@ -15,6 +15,7 @@ import {
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
+import { settle } from "@/utils/settle";
 import {
   FrequentServicePerformance,
   performanceService,
@@ -35,19 +36,6 @@ interface OperatorOnTimeData {
   servicePerformancePlain: ServicePerformance[];
   headwayTimeSeries: HeadwayTimeSeriesType[];
 }
-
-const settle = async <T,>(
-  promise: Promise<T>,
-): Promise<{ data: T | null; error: string | null }> => {
-  try {
-    return { data: await promise, error: null };
-  } catch (err) {
-    return {
-      data: null,
-      error: err instanceof Error ? err.message : "Unknown error",
-    };
-  }
-};
 
 const OnTimeOperatorPage = () => {
   useRequireAuth();
