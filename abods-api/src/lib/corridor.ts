@@ -82,7 +82,6 @@ export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
     },
     include: {
       corridor_stops: true,
-      // TODO: why does removing this work?
       bods_user: true,
     },
   });
