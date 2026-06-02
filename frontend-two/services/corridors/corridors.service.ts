@@ -110,7 +110,13 @@ const toStop: (stop: StopType | StopInfoType) => CorridorStop = ({
   stopId,
   stopName,
   ...(isStopLocation(stop)
-    ? { lon: stop.stopLocation.longitude, lat: stop.stopLocation.latitude }
+    ? {
+        lon: stop.stopLocation.longitude,
+        lat: stop.stopLocation.latitude,
+        localityName: null,
+        adminAreaId: null,
+        sourceId: null,
+      }
     : stop),
   naptan: stop.sourceId ? stop.sourceId : stopId,
   intId: ++uniqueId,
@@ -119,9 +125,9 @@ const toStop: (stop: StopType | StopInfoType) => CorridorStop = ({
 const addBoxPlotChartDataItems = (
   stat: CorridorTimeStats & BoxPlotChartDataItem,
 ) => {
-  stat.yAxisMaxValue = stat.maxTransitTime;
-  stat.yAxisMinValue = stat.minTransitTime;
-  stat.yAxisMeanValue = stat.avgTransitTime;
+  stat.yAxisMaxValue = stat.maxTransitTime ?? undefined;
+  stat.yAxisMinValue = stat.minTransitTime ?? undefined;
+  stat.yAxisMeanValue = stat.avgTransitTime ?? undefined;
 };
 
 const addBoxPlotData = (stats: CorridorStats): CorridorStats => {
@@ -140,7 +146,7 @@ const addBoxPlotData = (stats: CorridorStats): CorridorStats => {
 export const corridorsService = {
   fetchCorridors: async (): Promise<CorridorSummary[] | null> => {
     try {
-      const result = await apolloClient.query<CorridorsListQuery>({
+      const result = await apolloClient.query({
         query: CorridorsListDocument,
         fetchPolicy: "no-cache",
       });
@@ -159,10 +165,7 @@ export const corridorsService = {
 
   fetchCorridorById: async (corridorId: number): Promise<Corridor | null> => {
     try {
-      const result = await apolloClient.query<
-        GetCorridorQuery,
-        GetCorridorQueryVariables
-      >({
+      const result = await apolloClient.query({
         query: GetCorridorDocument,
         variables: { corridorId },
         fetchPolicy: "no-cache",
@@ -188,10 +191,7 @@ export const corridorsService = {
     try {
       const adminAreaIds = await operatorsService.fetchAdminAreaIds();
 
-      const result = await apolloClient.query<
-        CorridorsStopSearchQuery,
-        CorridorsStopSearchQueryVariables
-      >({
+      const result = await apolloClient.query({
         query: CorridorsStopSearchDocument,
         variables: {
           inputs: {
@@ -229,7 +229,7 @@ export const corridorsService = {
     stopList: string[],
   ): Promise<CorridorStop[] | null> => {
     try {
-      const result = await apolloClient.query<CorridorsSubsequentStopsQuery>({
+      const result = await apolloClient.query({
         query: CorridorsSubsequentStopsDocument,
         variables: { stopList },
         fetchPolicy: "no-cache",
@@ -246,17 +246,13 @@ export const corridorsService = {
 
   createCorridor: async (name: string, stopIds: string[]): Promise<boolean> => {
     try {
-      const result = await apolloClient.mutate<CreateCorridorMutation>({
+      const result = await apolloClient.mutate({
         mutation: CreateCorridorDocument,
         variables: { name, stopIds },
       });
 
       if (!result.data?.createCorridor?.success) {
-        throw (
-          result.data?.createCorridor.error ??
-          result.error?.message ??
-          "Unknown error"
-        );
+        throw result.data?.createCorridor.error ?? "Unknown error";
       }
 
       return result.data.createCorridor.success;
@@ -268,17 +264,13 @@ export const corridorsService = {
 
   updateCorridor: async (inputs: CorridorUpdateInputType): Promise<boolean> => {
     try {
-      const result = await apolloClient.mutate<UpdateCorridorMutation>({
+      const result = await apolloClient.mutate({
         mutation: UpdateCorridorDocument,
         variables: { inputs },
       });
 
       if (!result.data?.updateCorridor?.success) {
-        throw (
-          result.data?.updateCorridor.error ??
-          result.error?.message ??
-          "Unknown error"
-        );
+        throw result.data?.updateCorridor.error ?? "Unknown error";
       }
 
       return result.data.updateCorridor.success;
@@ -290,17 +282,13 @@ export const corridorsService = {
 
   deleteCorridor: async (corridorId: number): Promise<boolean> => {
     try {
-      const result = await apolloClient.mutate<DeleteCorridorMutation>({
+      const result = await apolloClient.mutate({
         mutation: DeleteCorridorDocument,
         variables: { corridorId },
       });
 
       if (!result.data?.deleteCorridor?.success) {
-        throw (
-          result.data?.deleteCorridor.error ??
-          result.error?.message ??
-          "Unknown error"
-        );
+        throw result.data?.deleteCorridor.error ?? "Unknown error";
       }
 
       return result.data.deleteCorridor.success;
@@ -324,7 +312,12 @@ export const corridorsService = {
     const histRange = _range(_min(histBins) ?? 0, (_max(histBins) ?? 0) + 2);
 
     return {
-      summaryStats: stats.summaryStats ?? {},
+      summaryStats: stats.summaryStats ?? {
+        totalTransits: 0,
+        numberOfServices: 0,
+        averageTransitTime: 0,
+        scheduledTransits: 0,
+      },
       transitTimeStats: fillGaps(
         "ts",
         timeSeries,
@@ -382,10 +375,7 @@ export const corridorsService = {
     try {
       const granularity = granularityFromRange(params.from, params.to);
 
-      const result = await apolloClient.query<
-        CorridorStatsQuery,
-        CorridorStatsQueryVariables
-      >({
+      const result = await apolloClient.query({
         query: CorridorStatsDocument,
         variables: {
           params: {

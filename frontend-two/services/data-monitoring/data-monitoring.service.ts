@@ -8,7 +8,7 @@ import {
 export const dataMonitoringService = {
   fetchEmbeddedUrl: async (): Promise<AwsQuicksightUser | null> => {
     try {
-      const result = await apolloClient.query<DashboadEmbeddedUrlQuery>({
+      const result = await apolloClient.query({
         query: DashboadEmbeddedUrlDocument,
       });
 

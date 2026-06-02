@@ -6,9 +6,10 @@ import {
   ServicePunctualityType,
 } from "../../src/generated/graphql";
 import { Tooltip } from "@/components/shared/Tooltip";
+import { ServiceRankingItem, ServiceRankingResult } from "@/types/dashboard";
 
 interface PerformanceRankingTableProps {
-  services: ServicePunctualityType[];
+  services: ServiceRankingResult;
   loaded: boolean;
   errored: boolean;
   nocCode: string | null;
@@ -22,20 +23,20 @@ interface PerformanceRankingTableProps {
 
 type TrendDirection = "increase" | "decrease";
 
-const buildServiceName = (service: ServicePunctualityType) => {
+const buildServiceName = (service: ServiceRankingItem) => {
   const number = service.lineInfo?.serviceNumber ?? "unknown";
   const name = service.lineInfo?.serviceName ?? "unknown";
   return `${number}: ${name}`;
 };
 
-const calculateOnTimePct = (service: ServicePunctualityType) => {
+const calculateOnTimePct = (service: ServiceRankingItem) => {
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
   return total > 0 ? ((service.onTime ?? 0) / total) * 100 : 0;
 };
 
 const calculateTrend = (
-  service: ServicePunctualityType,
+  service: ServiceRankingItem,
 ): { diff: string; direction: TrendDirection } | null => {
   if (!service.trend) return null;
   const total =

@@ -1,7 +1,9 @@
 import { Definitely } from "@/utils/array-operators";
 import {
+  CorridorGranularity,
   CorridorHistogramType,
   CorridorStatsDayOfWeekType,
+  CorridorStatsQuery,
   CorridorStatsTimeOfDayType,
   CorridorStatsType,
   CorridorTransitTimeStatsType,
@@ -40,16 +42,10 @@ export interface StopLists {
   nonOrgStops: CorridorStop[];
 }
 
-export enum CorridorGranularity {
-  Day = "day",
-  Hour = "hour",
-  Minute = "minute",
-}
-
 export interface BoxPlotChartDataItem {
   yAxisMinValue?: number;
   yAxisMaxValue?: number;
-  yAxisMeanValue?: Maybe<number>;
+  yAxisMeanValue?: number;
   category?: any;
   binLabel?: any;
   isoDayOfWeek?: any;

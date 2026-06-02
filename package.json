@@ -10,7 +10,7 @@
     "start:next-app": "(cd frontend-two && npm run dev)",
     "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",
     "start-next": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:next-app\"",
-    "pre-push": "(npm run lint:check) && (npm run type-check)",
+    "pre-push": "(npm run lint:check) && (npm run fmt:check) && (npm run type-check)",
     "lint": "(cd abods-api && npm run lint) && (cd frontend && npm run lint) && (cd frontend-two && npm run lint)",
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check) && (cd frontend-two && npm run lint)",
     "prepare": "(npm run codegen) && husky",
@@ -24,9 +24,9 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/introspection": "^4.0.3",
+    "@graphql-codegen/typed-document-node": "^5.1.2",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
-    "@graphql-codegen/typescript-graphql-request": "^7.0.1",
     "@graphql-codegen/typescript-operations": "^5.0.2",
     "@graphql-codegen/typescript-resolvers": "^5.1.0",
     "@playwright/test": "^1.49.0",
@@ -42,7 +42,7 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-     "graphql": "16.14.0"
+    "graphql": "16.14.1"
   },
   "lint-staged": {
     "**/*": "prettier --write"

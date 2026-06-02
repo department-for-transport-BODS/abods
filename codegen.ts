@@ -30,11 +30,15 @@ const config: CodegenConfig = {
       },
     },
     "frontend-two/src/generated/graphql.ts": {
-      plugins: [
-        "typescript",
-        "typescript-operations",
-        "typescript-graphql-request",
-      ],
+      plugins: ["typescript-operations", "typed-document-node", "typescript"],
+      config: {
+        avoidOptionals: {
+          field: true,
+          inputValue: false,
+        },
+        defaultScalarType: "unknown",
+        skipTypeNameForRoot: true,
+      },
     },
   },
   config: {

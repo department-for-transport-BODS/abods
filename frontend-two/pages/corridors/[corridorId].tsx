@@ -18,8 +18,8 @@ import { CorridorServicesTable } from "@/components/corridors/view/CorridorServi
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
-import { parseCorridorId, queryValue, parseMatchType } from "@/utils/query";
-import { parseDate, toIsoDateInput, formatTransitTime } from "@/utils/date";
+import { parseCorridorId, parseMatchType, queryValue } from "@/utils/query";
+import { formatTransitTime, parseDate, toIsoDateInput } from "@/utils/date";
 import { CorridorGranularity } from "../../src/generated/graphql";
 
 const NOT_FOUND_HEADING = "Not found";

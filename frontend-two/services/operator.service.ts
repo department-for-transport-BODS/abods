@@ -8,7 +8,7 @@ import {
 export const operatorsService = {
   fetchOperators: async (): Promise<OperatorType[]> => {
     try {
-      const result = await apolloClient.query<OperatorListQuery>({
+      const result = await apolloClient.query({
         query: OperatorListDocument,
       });
 

@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { PunctualityOverview } from "@/types/dashboard";
+import { PunctualityOverview, ServiceRankingResult } from "@/types/dashboard";
 import { apolloClient } from "@/services/apolloClient";
 import {
   DashboardOperatorVehicleCountsListDocument,
@@ -13,14 +13,18 @@ import {
   RankingOrder,
   PerformanceFiltersInputType,
   ServicePunctualityType,
+  DashboardOperatorListQueryVariables,
+  DashboardOperatorVehicleCountsListQueryVariables,
+  DashboardPerformanceStatsQueryVariables,
 } from "../../src/generated/graphql";
+import { ApolloCache, FetchPolicy } from "@apollo/client";
 
 export const dashboardService = {
   fetchOperators: async (): Promise<
     DashboardOperatorListQuery["operatorsFeedMonitoring"]
   > => {
     try {
-      const result = await apolloClient.query<DashboardOperatorListQuery>({
+      const result = await apolloClient.query({
         query: DashboardOperatorListDocument,
       });
       return result.data?.operatorsFeedMonitoring ?? [];
@@ -33,11 +37,10 @@ export const dashboardService = {
     operatorId?: string | null,
   ): Promise<DashboardOperatorVehicleCountsListQuery["dashboardVehicles"]> => {
     try {
-      const result =
-        await apolloClient.query<DashboardOperatorVehicleCountsListQuery>({
-          query: DashboardOperatorVehicleCountsListDocument,
-          variables: { operatorId: operatorId ?? undefined },
-        });
+      const result = await apolloClient.query({
+        query: DashboardOperatorVehicleCountsListDocument,
+        variables: { operatorId: operatorId ?? undefined },
+      });
       return result.data?.dashboardVehicles ?? [];
     } catch (error) {
       console.error("Failed to fetch vehicle counts:", error);
@@ -46,8 +49,8 @@ export const dashboardService = {
   },
   fetchPunctualityStats: async (
     filters: PerformanceFiltersInputType,
-    from: DateTime,
-    to: DateTime,
+    from: DateTime<true>,
+    to: DateTime<true>,
   ): Promise<PunctualityOverview | null> => {
     const params = {
       fromTimestamp: from.toISO(),
@@ -55,7 +58,7 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await apolloClient.query<DashboardPerformanceStatsQuery>({
+      const result = await apolloClient.query({
         query: DashboardPerformanceStatsDocument,
         variables: { params },
         fetchPolicy: "no-cache",
@@ -68,12 +71,12 @@ export const dashboardService = {
   },
   fetchServiceRanking: async (
     filters: PerformanceFiltersInputType,
-    from: DateTime,
-    to: DateTime,
+    from: DateTime<true>,
+    to: DateTime<true>,
     order: RankingOrder,
-    trendFrom: DateTime,
-    trendTo: DateTime,
-  ): Promise<ServicePunctualityType[]> => {
+    trendFrom: DateTime<true>,
+    trendTo: DateTime<true>,
+  ): Promise<ServiceRankingResult> => {
     const params = {
       fromTimestamp: from.toISO(),
       toTimestamp: to.toISO(),
@@ -81,7 +84,7 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await apolloClient.query<DashboardServiceRankingQuery>({
+      const result = await apolloClient.query({
         query: DashboardServiceRankingDocument,
         variables: {
           params,
