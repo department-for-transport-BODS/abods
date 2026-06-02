@@ -15,15 +15,14 @@ export const transitModelService = {
     operatorId: string | null,
     lineId: string | null,
   ): Promise<ServicePattern[]> => {
-    const result =
-      await apolloClient.query<TransitModelServicePatternStopsQuery>({
-        query: TransitModelServicePatternStopsDocument,
-        variables: {
-          operatorId: operatorId ?? "",
-          lineId: lineId ?? "",
-        },
-        fetchPolicy: "no-cache",
-      });
+    const result = await apolloClient.query({
+      query: TransitModelServicePatternStopsDocument,
+      variables: {
+        operatorId: operatorId ?? "",
+        lineId: lineId ?? "",
+      },
+      fetchPolicy: "no-cache",
+    });
     return (result.data?.servicePatterns ?? []) as ServicePattern[];
   },
 };

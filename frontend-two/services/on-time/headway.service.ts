@@ -61,7 +61,7 @@ export const headwayService = {
   fetchTimeSeries: async (
     params: HeadwayParams,
   ): Promise<HeadwayTimeSeriesType[]> => {
-    const result = await apolloClient.query<HeadwayTimeSeriesQuery>({
+    const result = await apolloClient.query({
       query: HeadwayTimeSeriesDocument,
       variables: { params: pickHeadwayFilters(params) },
       fetchPolicy: "no-cache",
@@ -72,7 +72,7 @@ export const headwayService = {
   fetchOverview: async (
     params: HeadwayParams,
   ): Promise<HeadwayOverviewType> => {
-    const result = await apolloClient.query<HeadwayOverviewQuery>({
+    const result = await apolloClient.query({
       query: HeadwayOverviewDocument,
       variables: { params: pickHeadwayFilters(params) },
       fetchPolicy: "no-cache",
@@ -90,7 +90,7 @@ export const headwayService = {
     assertHasOneElement(filters?.operatorIds);
     const [operatorId] = filters?.operatorIds ?? [""];
 
-    const result = await apolloClient.query<HeadwayFrequentServicesQuery>({
+    const result = await apolloClient.query({
       query: HeadwayFrequentServicesDocument,
       variables: { operatorId, fromTimestamp, toTimestamp },
       fetchPolicy: "no-cache",
@@ -108,7 +108,7 @@ export const headwayService = {
     const [operatorId] = filters?.operatorIds ?? [""];
     const [lineId] = filters?.lineIds ?? [""];
 
-    const result = await apolloClient.query<HeadwayFrequentServiceInfoQuery>({
+    const result = await apolloClient.query({
       query: HeadwayFrequentServiceInfoDocument,
       variables: {
         inputs: {
