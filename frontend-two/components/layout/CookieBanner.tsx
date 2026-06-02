@@ -37,10 +37,12 @@ export const CookieBanner = () => {
       },
     [config?.defaultCookiePolicy],
   );
+  const [hasLoadedPolicy, setHasLoadedPolicy] = useState(false);
   const [policy, setPolicy] = useState<CookiePolicy>(defaultPolicy);
 
   useEffect(() => {
     setPolicy(loadPolicy(defaultPolicy));
+    setHasLoadedPolicy(true);
   }, [defaultPolicy]);
 
   const updatePolicy = (analyticsEnabled: boolean) => {
@@ -48,6 +50,10 @@ export const CookieBanner = () => {
     setPolicy(updated);
     savePolicy(updated);
   };
+
+  if (!hasLoadedPolicy) {
+    return null;
+  }
 
   if (policy.userSubmitted) {
     return null;
