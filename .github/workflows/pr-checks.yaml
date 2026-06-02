@@ -100,7 +100,7 @@ jobs:
         with:
           node-version-file: frontend-two/.nvmrc
 
-      - name: build frontend code
+      - name: build next js frontend code
         run: |
           npm install
-          npm run build:production
+          npm run build
