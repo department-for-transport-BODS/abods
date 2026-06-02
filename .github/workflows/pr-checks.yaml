@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
       - sandbox
+      - abods-two-next-js
 
 permissions: read-all
 
@@ -78,6 +79,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: frontend/.nvmrc
+
+      - name: build frontend code
+        run: |
+          npm install
+          npm run build:production
+
+  build-next-js-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-two
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend-two/.nvmrc
 
       - name: build frontend code
         run: |
