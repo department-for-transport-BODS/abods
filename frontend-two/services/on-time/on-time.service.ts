@@ -199,7 +199,7 @@ export const onTimeService = {
   fetchOnTimeStats: async (
     params: PerformanceParams,
   ): Promise<PunctualityOverview> => {
-    const result = await apolloClient.query<OnTimeStatsQuery>({
+    const result = await apolloClient.query({
       query: OnTimeStatsDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -221,7 +221,7 @@ export const onTimeService = {
   fetchOnTimeDelayFrequencyData: async (
     params: PerformanceParams,
   ): Promise<DelayFrequencyType[]> => {
-    const result = await apolloClient.query<OnTimeDelayFrequencyQuery>({
+    const result = await apolloClient.query({
       query: OnTimeDelayFrequencyDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -234,7 +234,7 @@ export const onTimeService = {
   fetchOnTimeTimeSeriesData: async (
     params: PerformanceParams,
   ): Promise<TimeSeriesData[]> => {
-    const result = await apolloClient.query<OnTimeTimeSeriesQuery>({
+    const result = await apolloClient.query({
       query: OnTimeTimeSeriesDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -247,7 +247,7 @@ export const onTimeService = {
   fetchOnTimePunctualityTimeOfDayData: async (
     params: PerformanceParams,
   ): Promise<TimeOfDayData[]> => {
-    const result = await apolloClient.query<OnTimePunctualityTimeOfDayQuery>({
+    const result = await apolloClient.query({
       query: OnTimePunctualityTimeOfDayDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -271,7 +271,7 @@ export const onTimeService = {
   fetchOnTimePunctualityDayOfWeekData: async (
     params: PerformanceParams,
   ): Promise<DayOfWeekData[]> => {
-    const result = await apolloClient.query<OnTimePunctualityDayOfWeekQuery>({
+    const result = await apolloClient.query({
       query: OnTimePunctualityDayOfWeekDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -289,7 +289,7 @@ export const onTimeService = {
   fetchOnTimePerformanceList: async (
     params: PerformanceParams,
   ): Promise<ServicePerformance[]> => {
-    const result = await apolloClient.query<OnTimeServicePerformanceListQuery>({
+    const result = await apolloClient.query({
       query: OnTimeServicePerformanceListDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -302,7 +302,7 @@ export const onTimeService = {
   fetchStopPerformanceList: async (
     params: PerformanceInputType,
   ): Promise<StopPerformance[]> => {
-    const result = await apolloClient.query<OnTimeStopPerformanceListQuery>({
+    const result = await apolloClient.query({
       query: OnTimeStopPerformanceListDocument,
       variables: { params },
       fetchPolicy: "no-cache",
@@ -315,13 +315,11 @@ export const onTimeService = {
   fetchOperatorPerformanceList: async (
     params: PerformanceInputType,
   ): Promise<OperatorPerformance[]> => {
-    const result = await apolloClient.query<OnTimeOperatorPerformanceListQuery>(
-      {
-        query: OnTimeOperatorPerformanceListDocument,
-        variables: { params },
-        fetchPolicy: "no-cache",
-      },
-    );
+    const result = await apolloClient.query({
+      query: OnTimeOperatorPerformanceListDocument,
+      variables: { params },
+      fetchPolicy: "no-cache",
+    });
     const items =
       result.data?.onTimePerformance?.operatorPerformance?.items ?? [];
     return items
@@ -330,7 +328,7 @@ export const onTimeService = {
   },
 
   fetchServiceInfo: async (lineId: string): Promise<ServiceInfoType> => {
-    const result = await apolloClient.query<ServiceInfoQuery>({
+    const result = await apolloClient.query({
       query: ServiceInfoDocument,
       variables: { lineId },
       fetchPolicy: "no-cache",
