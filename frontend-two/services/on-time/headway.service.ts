@@ -1,4 +1,5 @@
 import { apolloClient } from "@/services/apolloClient";
+import { nonNullishArray } from "@/utils/array-operators";
 import {
   FrequentServiceInfoType,
   HeadwayFrequentServiceInfoDocument,
@@ -28,13 +29,6 @@ const assertHasOneElement: (
     throw new Error("Array must have one element");
   }
 };
-
-const nonNullishArray = <T>(
-  arr: (T | null | undefined)[] | null | undefined,
-): T[] =>
-  (arr ?? []).filter(
-    (value): value is T => value !== null && value !== undefined,
-  );
 
 const pickHeadwayFilters = ({
   filters,
