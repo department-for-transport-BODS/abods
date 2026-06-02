@@ -1,4 +1,5 @@
-import { Maybe, StopType } from "../../src/generated/graphql";
+import { sumBy, stdDeviation } from "@/utils/maths";
+import { StopType } from "../../src/generated/graphql";
 import { StopPerformance } from "./on-time.service";
 import { ServicePattern } from "./transit-model.service";
 
@@ -14,27 +15,6 @@ export type NormalizedStop = Omit<NormalizedStopPerformance, "noData"> &
     noData: boolean;
     stopLocality?: string;
   };
-
-const isNotNullish = <T>(value: T | null | undefined): value is T =>
-  value !== null && value !== undefined;
-
-const sumBy = <T>(items: T[], key: keyof T): number =>
-  items.reduce((acc, item) => acc + (Number(item[key]) || 0), 0);
-
-const mean = (values: number[]): number =>
-  values.length === 0 ? 0 : values.reduce((a, b) => a + b, 0) / values.length;
-
-const stdDeviation = (
-  arr: Maybe<number | null | undefined>[],
-  meanValue: number,
-): number =>
-  Math.sqrt(
-    mean(
-      arr
-        .filter(isNotNullish)
-        .map((value) => Math.pow((value as number) - meanValue, 2)),
-    ),
-  );
 
 const uniqueStopsById = (
   patterns: ServicePattern[],
