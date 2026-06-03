@@ -10,6 +10,7 @@ export const dataMonitoringService = {
     try {
       const result = await apolloClient.query({
         query: DashboadEmbeddedUrlDocument,
+        fetchPolicy: "no-cache",
       });
 
       return result.data?.embeddedUrl ?? null;
