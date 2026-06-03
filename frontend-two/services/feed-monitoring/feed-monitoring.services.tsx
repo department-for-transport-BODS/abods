@@ -10,12 +10,12 @@ import {
 } from "../../src/generated/graphql";
 
 import {
-    FeedMonitoringOperatorData,
-    VehicleStat,
-    OperatorLiveStatus,
-    OperatorFeedHistory,
-    FeedEvent,
-    EventStat,
+  FeedMonitoringOperatorData,
+  VehicleStat,
+  OperatorLiveStatus,
+  OperatorFeedHistory,
+  FeedEvent,
+  EventStat,
 } from "@/types/feed-monitoring";
 
 export const feedMonitoringService = {
@@ -31,7 +31,9 @@ export const feedMonitoringService = {
     }
   },
 
-  fetchOperatorSparklines: async (operatorIds: string[]): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
+  fetchOperatorSparklines: async (
+    operatorIds: string[],
+  ): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
     try {
       const result = await apolloClient.query({
         query: OperatorSparklineStatsDocument,
@@ -47,7 +49,9 @@ export const feedMonitoringService = {
     }
   },
 
-  fetchOperatorLiveStatus: async (operatorId: string): Promise<OperatorLiveStatus | null> => {
+  fetchOperatorLiveStatus: async (
+    operatorId: string,
+  ): Promise<OperatorLiveStatus | null> => {
     try {
       const result = await apolloClient.query({
         query: OperatorLiveStatusDocument,
