@@ -6,25 +6,25 @@ export interface DistanceService {
 
 export interface DistanceLicense {
   id: string;
-  services: DistanceService[];
+  services: DistanceService[] | null;
 }
 
 export interface DistanceOperator {
   id: string;
   name: string;
-  licenses: DistanceLicense[];
+  licenses: DistanceLicense[] | null;
 }
 
 export interface DistancesDropdowns {
-  operators: DistanceOperator[];
+  operators: DistanceOperator[] | null;
 }
 
 export interface AdminOrgMap {
   adminAreaId: number;
-  adminName: string;
+  adminName: string | null;
   operatorId: string;
   orgId: number;
-  orgName: string;
+  orgName: string | null;
 }
 
 export interface UserOrg {
@@ -37,7 +37,7 @@ export interface DistanceData extends Record<string, string | number | null | un
   operatorName: string;
   nocLineAndServiceCode: string;
   lineName: string;
-  serviceName: string;
+  serviceName: string | null;
   distance: number | null;
   avlDistance: number | null;
 }

@@ -1,13 +1,13 @@
-import { graphqlRequest } from "@/services/api";
+import { apolloClient } from "@/services/apolloClient";
 
 import {
-  FEED_MONITORING_LIST_QUERY,
-  OPERATOR_FEED_MONITORING_QUERY,
-  OPERATOR_LIVE_STATUS_QUERY,
-  OPERATOR_HISTORIC_STATS_QUERY,
-  OPERATOR_EVENT_QUERY,
-  OPERATOR_EVENT_STATS_QUERY,
-} from "@/services/feed-monitoring/feed-monitoring.operations";
+  EventsDocument,
+  EventStatsDocument,
+  FeedMonitoringListDocument,
+  OperatorHistoricStatsDocument,
+  OperatorLiveStatusDocument,
+  OperatorSparklineStatsDocument,
+} from "../../src/generated/graphql";
 
 import {
     FeedMonitoringOperatorData,
@@ -19,29 +19,25 @@ import {
 } from "@/types/feed-monitoring";
 
 export const feedMonitoringService = {
-  fetchFeedMonitoringList: async ( apiUrl: string ): Promise<FeedMonitoringOperatorData[]> => {
+  fetchFeedMonitoringList: async (): Promise<FeedMonitoringOperatorData[]> => {
     try {
-      const result = await graphqlRequest<{
-        operatorsFeedMonitoring: FeedMonitoringOperatorData[];
-      }>(apiUrl, FEED_MONITORING_LIST_QUERY);
-      return result.operatorsFeedMonitoring ?? [];
+      const result = await apolloClient.query({
+        query: FeedMonitoringListDocument,
+      });
+      return result.data?.operatorsFeedMonitoring ?? [];
     } catch (error) {
       console.error("Failed to fetch feed monitoring list:", error);
       return [];
     }
   },
 
-  fetchOperatorSparklines: async ( apiUrl: string, operatorIds: string[] ): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
+  fetchOperatorSparklines: async (operatorIds: string[]): Promise<{ operatorId: string; last24Hours: VehicleStat[] }[]> => {
     try {
-      const result = await graphqlRequest<{
-        operatorsFeedMonitoring: {
-          operatorId: string;
-          feedMonitoring?: {
-            liveStats?: { last24Hours?: VehicleStat[] | null } | null;
-          } | null;
-        }[];
-      }>(apiUrl, OPERATOR_FEED_MONITORING_QUERY, { operatorIds });
-      return (result.operatorsFeedMonitoring ?? []).map((item) => ({
+      const result = await apolloClient.query({
+        query: OperatorSparklineStatsDocument,
+        variables: { operatorIds },
+      });
+      return (result.data?.operatorsFeedMonitoring ?? []).map((item) => ({
         operatorId: item.operatorId,
         last24Hours: item.feedMonitoring?.liveStats?.last24Hours ?? [],
       }));
@@ -51,12 +47,13 @@ export const feedMonitoringService = {
     }
   },
 
-  fetchOperatorLiveStatus: async ( apiUrl: string, operatorId: string ): Promise<OperatorLiveStatus | null> => {
+  fetchOperatorLiveStatus: async (operatorId: string): Promise<OperatorLiveStatus | null> => {
     try {
-      const result = await graphqlRequest<{
-        operatorFeedMonitoring: OperatorLiveStatus | null;
-      }>(apiUrl, OPERATOR_LIVE_STATUS_QUERY, { operatorId });
-      return result.operatorFeedMonitoring ?? null;
+      const result = await apolloClient.query({
+        query: OperatorLiveStatusDocument,
+        variables: { operatorId },
+      });
+      return result.data?.operatorFeedMonitoring ?? null;
     } catch (error) {
       console.error("Failed to fetch operator live status:", error);
       return null;
@@ -64,22 +61,17 @@ export const feedMonitoringService = {
   },
 
   fetchOperatorHistory: async (
-    apiUrl: string,
     operatorId: string,
     date: string,
     start: string,
     end: string,
   ): Promise<OperatorFeedHistory | null> => {
     try {
-      const result = await graphqlRequest<{
-        operatorFeedMonitoring: OperatorFeedHistory | null;
-      }>(apiUrl, OPERATOR_HISTORIC_STATS_QUERY, {
-        operatorId,
-        date,
-        start,
-        end,
+      const result = await apolloClient.query({
+        query: OperatorHistoricStatsDocument,
+        variables: { operatorId, date, start, end },
       });
-      return result.operatorFeedMonitoring ?? null;
+      return result.data?.operatorFeedMonitoring ?? null;
     } catch (error) {
       console.error("Failed to fetch operator history:", error);
       return null;
@@ -87,16 +79,16 @@ export const feedMonitoringService = {
   },
 
   fetchEvents: async (
-    apiUrl: string,
     operatorId: string,
     start: string,
     end: string,
   ): Promise<FeedEvent[]> => {
     try {
-      const result = await graphqlRequest<{
-        events: { items: FeedEvent[] };
-      }>(apiUrl, OPERATOR_EVENT_QUERY, { operatorId, start, end });
-      return result.events?.items ?? [];
+      const result = await apolloClient.query({
+        query: EventsDocument,
+        variables: { operatorId, start, end },
+      });
+      return result.data?.events?.items ?? [];
     } catch (error) {
       console.error("Failed to fetch events:", error);
       return [];
@@ -104,16 +96,16 @@ export const feedMonitoringService = {
   },
 
   fetchEventStats: async (
-    apiUrl: string,
     operatorId: string,
     start: string,
     end: string,
   ): Promise<EventStat[]> => {
     try {
-      const result = await graphqlRequest<{
-        eventStats: EventStat[];
-      }>(apiUrl, OPERATOR_EVENT_STATS_QUERY, { operatorId, start, end });
-      return result.eventStats ?? [];
+      const result = await apolloClient.query({
+        query: EventStatsDocument,
+        variables: { operatorId, start, end },
+      });
+      return result.data?.eventStats ?? [];
     } catch (error) {
       console.error("Failed to fetch event stats:", error);
       return [];

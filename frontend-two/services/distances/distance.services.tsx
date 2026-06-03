@@ -1,83 +1,78 @@
-import { graphqlRequest } from "@/services/api";
+import { apolloClient } from "@/services/apolloClient";
 
 import {
   AdminOrgMap,
   DistanceData,
   DistancesDropdowns,
-  DistancesFilterInput,
   UserOrg,
 } from "@/types/distances";
 
 import {
-  USER_ORGANISATIONS_QUERY,
-  ORG_OPERATOR_LIST_QUERY,
-  DISTANCE_LIST_QUERY,
-  DISTANCES_DROPDOWNS_INPUT_QUERY,
-  ADMIN_ORG_LIST_QUERY,
-} from "@/services/distances/distance.operations";
+  AdminOrgListDocument,
+  DistancesDropdownInputDocument,
+  DistancesFilterInput,
+  DistancesListDocument,
+  OrgOperatorListDocument,
+  UserOrganisationsDocument,
+} from "../../src/generated/graphql";
 
 export const distanceService = {
-  fetchUserOrganisations: async (apiUrl: string): Promise<UserOrg[]> => {
+  fetchUserOrganisations: async (): Promise<UserOrg[]> => {
     try {
-      const result = await graphqlRequest<{ userOrgs: UserOrg[] }>(
-        apiUrl,
-        USER_ORGANISATIONS_QUERY,
-      );
-      return result.userOrgs ?? [];
+      const result = await apolloClient.query({
+        query: UserOrganisationsDocument,
+      });
+      return result.data?.userOrgs ?? [];
     } catch (error) {
       console.error("Failed to fetch user organisations:", error);
       return [];
     }
   },
 
-  fetchOrgOperators: async (apiUrl: string, orgId: number): Promise<{ name: string; nocCode: string }[]> => {
+  fetchOrgOperators: async (orgId: number): Promise<{ name: string; nocCode: string }[]> => {
     try {
-      const result = await graphqlRequest<{ operators: { name: string; nocCode: string }[] }>(
-        apiUrl,
-        ORG_OPERATOR_LIST_QUERY,
-        { orgId },
-      );
-      return result.operators ?? [];
+      const result = await apolloClient.query({
+        query: OrgOperatorListDocument,
+        variables: { orgId },
+      });
+      return result.data?.operators ?? [];
     } catch (error) {
       console.error("Failed to fetch organisation operators:", error);
       return [];
     }
   },
 
-  fetchDistances: async (apiUrl: string, filterBy: DistancesFilterInput): Promise<DistanceData[]> => {
+  fetchDistances: async (filterBy: DistancesFilterInput): Promise<DistanceData[]> => {
     try {
-      const result = await graphqlRequest<{ distances: DistanceData[] }>(
-        apiUrl,
-        DISTANCE_LIST_QUERY,
-        { filterBy },
-      );
-      return result.distances ?? [];
+      const result = await apolloClient.query({
+        query: DistancesListDocument,
+        variables: { filterBy },
+      });
+      return result.data?.distances ?? [];
     } catch (error) {
       console.error("Failed to fetch distances:", error);
       return [];
     }
   },
 
-  fetchDropdownInputs: async (apiUrl: string): Promise<DistancesDropdowns> => {
+  fetchDropdownInputs: async (): Promise<DistancesDropdowns> => {
     try {
-      const result = await graphqlRequest<{ distancesDropdowns: DistancesDropdowns }>(
-        apiUrl,
-        DISTANCES_DROPDOWNS_INPUT_QUERY,
-      );
-      return result.distancesDropdowns ?? { operators: [] };
+      const result = await apolloClient.query({
+        query: DistancesDropdownInputDocument,
+      });
+      return result.data?.distancesDropdowns ?? { operators: [] };
     } catch (error) {
       console.error("Failed to fetch dropdown inputs:", error);
       return { operators: [] };
     }
   },
 
-  fetchAdminOrg: async (apiUrl: string): Promise<AdminOrgMap[]> => {
+  fetchAdminOrg: async (): Promise<AdminOrgMap[]> => {
     try {
-      const result = await graphqlRequest<{ adminOrgMap: AdminOrgMap[] }>(
-        apiUrl,
-        ADMIN_ORG_LIST_QUERY,
-      );
-      return result.adminOrgMap ?? [];
+      const result = await apolloClient.query({
+        query: AdminOrgListDocument,
+      });
+      return result.data?.adminOrgMap ?? [];
     } catch (error) {
       console.error("Failed to fetch admin organisation list:", error);
       return [];
