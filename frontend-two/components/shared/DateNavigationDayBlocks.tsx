@@ -6,7 +6,11 @@ interface DateNavigationDayBlocksProps {
   onDateSelected: (date: DateTime) => void;
 }
 
-export const DateNavigationDayBlocks = ({ dateArray, selectedDate, onDateSelected }: DateNavigationDayBlocksProps) => {
+export const DateNavigationDayBlocks = ({
+  dateArray,
+  selectedDate,
+  onDateSelected,
+}: DateNavigationDayBlocksProps) => {
   return (
     <div className="datenav__day-blocks datenav__day-blocks--with-labels">
       {dateArray.map((item) => {
@@ -16,15 +20,26 @@ export const DateNavigationDayBlocks = ({ dateArray, selectedDate, onDateSelecte
         return (
           <div key={item.date.toISODate()} className="datenav__item-wrapper">
             <button
-              className={["datenav__item", isActive ? "datenav__item--active" : ""].filter(Boolean).join(" ")}
+              className={[
+                "datenav__item",
+                isActive ? "datenav__item--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               onClick={() => onDateSelected(item.date)}
               aria-label={item.date.toFormat("d MMMM")}
             >
-              <span className="govuk-visually-hidden">{item.date.toFormat("d MMMM")}</span>
+              <span className="govuk-visually-hidden">
+                {item.date.toFormat("d MMMM")}
+              </span>
             </button>
-            <span className="datenav__tooltip" aria-hidden="true">{item.date.toFormat("d MMMM")}</span>
+            <span className="datenav__tooltip" aria-hidden="true">
+              {item.date.toFormat("d MMMM")}
+            </span>
             {isFirstOfMonth && (
-              <span className="datenav__month-label">{item.date.toFormat("MMM")}</span>
+              <span className="datenav__month-label">
+                {item.date.toFormat("MMM")}
+              </span>
             )}
           </div>
         );

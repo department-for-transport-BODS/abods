@@ -12,25 +12,32 @@ type Day = {
 };
 
 // NullDay represents the blank cells at the start of the calendar month
-type NullDay = { 
-    date: DateTime; 
-    isToday: false; 
-    isSelectable: false; 
-    isSaturday: false 
+type NullDay = {
+  date: DateTime;
+  isToday: false;
+  isSelectable: false;
+  isSaturday: false;
 };
 
 // Calendar component is built as a 2D array of Day/NullDay, which is then rendered as a table
-function buildCalendarTable(month: DateTime, today: DateTime, maxDate: DateTime): (Day | NullDay)[][] {
+function buildCalendarTable(
+  month: DateTime,
+  today: DateTime,
+  maxDate: DateTime,
+): (Day | NullDay)[][] {
   const start = month.startOf("month");
   const end = month.endOf("month");
 
   // If month doesn't start on Monday, add blank cells until the first day of the month
-  const leadingBlanks: NullDay[] = Array.from({ length: start.weekday - 1 }, () => ({
-    date: DateTime.invalid("blank"),
-    isToday: false as const,
-    isSelectable: false as const,
-    isSaturday: false as const,
-  }));
+  const leadingBlanks: NullDay[] = Array.from(
+    { length: start.weekday - 1 },
+    () => ({
+      date: DateTime.invalid("blank"),
+      isToday: false as const,
+      isSelectable: false as const,
+      isSaturday: false as const,
+    }),
+  );
 
   const days: Day[] = [];
   let cursor = start;
@@ -58,15 +65,20 @@ interface DateRangeCalendarProps {
   onDateChange: (date: DateTime) => void;
 }
 
-export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCalendarProps) => {
-
-  const today = DateTime.now()
+export const DateRangeCalendar = ({
+  month,
+  selected,
+  onDateChange,
+}: DateRangeCalendarProps) => {
+  const today = DateTime.now();
   const maxDate = DateTime.now().minus({ days: 1 });
   const table = buildCalendarTable(month, today, maxDate);
 
   const inRange = (date: DateTime) =>
-    selected.start?.isValid && selected.end?.isValid &&
-    date >= selected.start && date <= selected.end;
+    selected.start?.isValid &&
+    selected.end?.isValid &&
+    date >= selected.start &&
+    date <= selected.end;
 
   const isStart = (date: DateTime) =>
     selected.start?.isValid && selected.start.hasSame(date, "day");
@@ -83,7 +95,9 @@ export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCa
             className={[
               "date-range-controls__day-name",
               i === 5 ? "date-range-controls__day--saturday" : "",
-            ].filter(Boolean).join(" ")}
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             {name}
           </span>
@@ -98,10 +112,18 @@ export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCa
                   key={j}
                   className={[
                     "date-range-controls__table-cell",
-                    day.date.isValid && inRange(day.date) ? "date-range-controls__table-cell--included" : "",
-                    day.date.isValid && isStart(day.date) ? "date-range-controls__table-cell--start" : "",
-                    day.date.isValid && isEnd(day.date) ? "date-range-controls__table-cell--end" : "",
-                  ].filter(Boolean).join(" ")}
+                    day.date.isValid && inRange(day.date)
+                      ? "date-range-controls__table-cell--included"
+                      : "",
+                    day.date.isValid && isStart(day.date)
+                      ? "date-range-controls__table-cell--start"
+                      : "",
+                    day.date.isValid && isEnd(day.date)
+                      ? "date-range-controls__table-cell--end"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
                   {day.date.isValid && (
                     <button
@@ -109,12 +131,22 @@ export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCa
                       className={[
                         "date-range-controls__day",
                         day.isToday ? "date-range-controls__day--today" : "",
-                        !day.isSelectable ? "date-range-controls__day--disabled" : "",
-                        inRange(day.date) ? "date-range-controls__day--included" : "",
-                        isStart(day.date) ? "date-range-controls__day--start" : "",
+                        !day.isSelectable
+                          ? "date-range-controls__day--disabled"
+                          : "",
+                        inRange(day.date)
+                          ? "date-range-controls__day--included"
+                          : "",
+                        isStart(day.date)
+                          ? "date-range-controls__day--start"
+                          : "",
                         isEnd(day.date) ? "date-range-controls__day--end" : "",
-                        day.isSaturday ? "date-range-controls__day--saturday" : "",
-                      ].filter(Boolean).join(" ")}
+                        day.isSaturday
+                          ? "date-range-controls__day--saturday"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       onClick={() => day.isSelectable && onDateChange(day.date)}
                     >
                       {day.date.day}
@@ -128,4 +160,4 @@ export const DateRangeCalendar = ({ month, selected, onDateChange }: DateRangeCa
       </table>
     </div>
   );
-}
+};

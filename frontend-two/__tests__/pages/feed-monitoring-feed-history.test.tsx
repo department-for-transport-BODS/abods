@@ -1,4 +1,11 @@
-import { render, screen, waitFor, cleanup, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+  within,
+} from "@testing-library/react";
 import FeedHistoryPage from "@/pages/feed-monitoring/[nocCode]/feed-history";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
@@ -128,8 +135,12 @@ const operatorHistoryMockData_Alpha_Today = {
 };
 
 const mockUseConfig = vi.mocked(useConfig);
-const mockFetchFeedMonitoringList= vi.mocked(feedMonitoringService.fetchFeedMonitoringList);
-const mockFetchOperatorHistory = vi.mocked(feedMonitoringService.fetchOperatorHistory);
+const mockFetchFeedMonitoringList = vi.mocked(
+  feedMonitoringService.fetchFeedMonitoringList,
+);
+const mockFetchOperatorHistory = vi.mocked(
+  feedMonitoringService.fetchOperatorHistory,
+);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -154,9 +165,9 @@ afterEach(() => {
 it("Shows loading state whilst waiting for data", async () => {
   mockFetchFeedMonitoringList.mockImplementation(() => new Promise(() => {}));
   mockFetchOperatorHistory.mockImplementation(() => new Promise(() => {}));
-  
+
   render(<FeedHistoryPage />);
-  
+
   expect(screen.getByText("Loading...")).toBeInTheDocument();
 });
 
@@ -168,7 +179,11 @@ it("Renders yesterday's date by default", async () => {
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText(yesterday.toFormat("d MMMM yyyy"))).toBeInTheDocument());
+  await waitFor(() =>
+    expect(
+      screen.getByText(yesterday.toFormat("d MMMM yyyy")),
+    ).toBeInTheDocument(),
+  );
 });
 
 it("Renders the DateNavigation component with correct date range", async () => {
@@ -180,15 +195,25 @@ it("Renders the DateNavigation component with correct date range", async () => {
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText(yesterday.toFormat("d MMMM yyyy"))).toBeInTheDocument());
+  await waitFor(() =>
+    expect(
+      screen.getByText(yesterday.toFormat("d MMMM yyyy")),
+    ).toBeInTheDocument(),
+  );
 
-  const earliestDateButton = screen.getByRole("button", { name: earliestDate.toFormat("d MMMM") });
+  const earliestDateButton = screen.getByRole("button", {
+    name: earliestDate.toFormat("d MMMM"),
+  });
   expect(earliestDateButton).toBeInTheDocument();
 
-  const beforeEarliestDateButton = screen.queryByRole("button", { name: earliestDate.minus({ days: 1 }).toFormat("d MMMM") });
+  const beforeEarliestDateButton = screen.queryByRole("button", {
+    name: earliestDate.minus({ days: 1 }).toFormat("d MMMM"),
+  });
   expect(beforeEarliestDateButton).not.toBeInTheDocument();
 
-  const tomorrowButton = screen.queryByRole("button", { name: yesterday.plus({ days: 1 }).toFormat("d MMMM") });
+  const tomorrowButton = screen.queryByRole("button", {
+    name: yesterday.plus({ days: 1 }).toFormat("d MMMM"),
+  });
   expect(tomorrowButton).not.toBeInTheDocument();
 });
 
@@ -198,10 +223,15 @@ it("Shows previous date navigation and disables the next button on the latest av
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText("‹ Previous")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("‹ Previous")).toBeInTheDocument(),
+  );
 
   const previousLink = screen.getByRole("link", { name: /‹ Previous/i });
-  expect(previousLink).toHaveAttribute("href", expect.stringContaining("/feed-monitoring/ALPH/feed-history?date="));
+  expect(previousLink).toHaveAttribute(
+    "href",
+    expect.stringContaining("/feed-monitoring/ALPH/feed-history?date="),
+  );
 
   const nextSpan = screen.getByText("Next ›").closest("span");
   expect(nextSpan).toBeInTheDocument();
@@ -217,13 +247,21 @@ it("Displays the DateNavigation active date and pushes a new URL when a differen
 
   const { container } = render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText(yesterday.toFormat("d MMMM yyyy"))).toBeInTheDocument());
+  await waitFor(() =>
+    expect(
+      screen.getByText(yesterday.toFormat("d MMMM yyyy")),
+    ).toBeInTheDocument(),
+  );
   expect(container.querySelector(".datenav__item--active")).toBeInTheDocument();
 
-  const lastMonthButton = screen.getByRole("button", { name: lastMonth.toFormat("d MMMM") });
+  const lastMonthButton = screen.getByRole("button", {
+    name: lastMonth.toFormat("d MMMM"),
+  });
   fireEvent.click(lastMonthButton);
 
-  expect(mockRouterPush).toHaveBeenCalledWith(`/feed-monitoring/ALPH/feed-history?date=${lastMonth.toISODate()}`);
+  expect(mockRouterPush).toHaveBeenCalledWith(
+    `/feed-monitoring/ALPH/feed-history?date=${lastMonth.toISODate()}`,
+  );
 });
 
 it("Shows next date navigation and disables the previous button on the earliest available date", async () => {
@@ -235,23 +273,42 @@ it("Shows next date navigation and disables the previous button on the earliest 
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText(yesterday.toFormat("d MMMM yyyy"))).toBeInTheDocument());
+  await waitFor(() =>
+    expect(
+      screen.getByText(yesterday.toFormat("d MMMM yyyy")),
+    ).toBeInTheDocument(),
+  );
 
-  const earliestDateButton = screen.getByRole("button", { name: earliestDate.toFormat("d MMMM") });
+  const earliestDateButton = screen.getByRole("button", {
+    name: earliestDate.toFormat("d MMMM"),
+  });
   expect(earliestDateButton).toBeInTheDocument();
   fireEvent.click(earliestDateButton);
 
-  expect(mockRouterPush).toHaveBeenCalledWith(`/feed-monitoring/ALPH/feed-history?date=${earliestDate.toISODate()}`);
+  expect(mockRouterPush).toHaveBeenCalledWith(
+    `/feed-monitoring/ALPH/feed-history?date=${earliestDate.toISODate()}`,
+  );
 
   render(<FeedHistoryPage />);
 
   await waitFor(() => expect(screen.getByText("Next ›")).toBeInTheDocument());
-  
+
   const nextLink = screen.getByRole("link", { name: /Next ›/i });
-  expect(nextLink).toHaveAttribute("href", expect.stringContaining("/feed-monitoring/ALPH/feed-history?date="));
+  expect(nextLink).toHaveAttribute(
+    "href",
+    expect.stringContaining("/feed-monitoring/ALPH/feed-history?date="),
+  );
 
   const previousLinks = screen.getAllByRole("link", { name: /‹ Previous/i });
-  expect(previousLinks.some(link => link.getAttribute("href")?.includes(`/feed-monitoring/ALPH/feed-history?date=${earliestDate.minus({ days: 1 }).toISODate()}`))).toBe(true);
+  expect(
+    previousLinks.some((link) =>
+      link
+        .getAttribute("href")
+        ?.includes(
+          `/feed-monitoring/ALPH/feed-history?date=${earliestDate.minus({ days: 1 }).toISODate()}`,
+        ),
+    ),
+  ).toBe(true);
 });
 
 it("Shows operator dropdown options and navigates when a new operator is selected", async () => {
@@ -260,7 +317,9 @@ it("Shows operator dropdown options and navigates when a new operator is selecte
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText("Alpha Buses (ALPH)")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("Alpha Buses (ALPH)")).toBeInTheDocument(),
+  );
 
   const dropdownButton = screen.getByText(/Alpha Buses \(ALPH\)/i);
   fireEvent.click(dropdownButton);
@@ -271,7 +330,9 @@ it("Shows operator dropdown options and navigates when a new operator is selecte
 
   fireEvent.click(screen.getByText("Beta Coaches (BETA)"));
   const yesterday = DateTime.now().startOf("day").minus({ days: 1 });
-  expect(mockRouterPush).toHaveBeenCalledWith(`/feed-monitoring/BETA/feed-history?date=${yesterday.toISODate()}`);
+  expect(mockRouterPush).toHaveBeenCalledWith(
+    `/feed-monitoring/BETA/feed-history?date=${yesterday.toISODate()}`,
+  );
 });
 
 it("Renders a no data message when historical vehicle stats are empty", async () => {
@@ -286,19 +347,26 @@ it("Renders a no data message when historical vehicle stats are empty", async ()
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText("No data found for the date selected.")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(
+      screen.getByText("No data found for the date selected."),
+    ).toBeInTheDocument(),
+  );
 });
 
 it("Renders summary stats with the correct headers and data", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorHistory.mockResolvedValue(operatorHistoryMockData_Alpha_Today);
+  mockFetchOperatorHistory.mockResolvedValue(
+    operatorHistoryMockData_Alpha_Today,
+  );
 
   render(<FeedHistoryPage />);
 
-  await waitFor(() => expect(screen.getByText("Feed availability")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("Feed availability")).toBeInTheDocument(),
+  );
   expect(screen.getByText("Average update frequency")).toBeInTheDocument();
 
   await waitFor(() => expect(screen.getByText("92.37%")).toBeInTheDocument());
   expect(screen.getByText("15s")).toBeInTheDocument();
-
 });

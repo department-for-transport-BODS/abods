@@ -229,7 +229,6 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   }
 }
 
-
 .datenav__item-wrapper:hover .datenav__tooltip,
 .datenav__item-wrapper:focus-within .datenav__tooltip {
   display: block;
@@ -246,19 +245,21 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   bottom: 0;
 }
 
-// FeedTable styling 
-.feed-table__check{
+// FeedTable styling
+.feed-table__check {
   width: 30px;
   min-width: 24px;
   height: 30px;
-  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
 }
 
-.feed-table__cross{
+.feed-table__cross {
   width: 30px;
   min-width: 24px;
   height: 30px;
-  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
 }
 
 // FeedStatusSummaryStat styling
@@ -296,13 +297,15 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
 .feed-status-summary-stat__check {
   width: 36px;
   height: 36px;
-  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
 }
 
 .feed-status-summary-stat__cross {
   width: 36px;
   height: 36px;
-  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
 }
 // Live Status Feed Monitoring page
 .live-vehicle-stats__container {
@@ -310,9 +313,9 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   flex-flow: row wrap;
   gap: 8px;
   justify-content: space-between;
-} 
+}
 
-.live-vehicle-stats__item{
+.live-vehicle-stats__item {
   flex: 1;
   min-width: 500px;
 }
@@ -393,7 +396,9 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
 
 .date-range-select__apply {
   background-color: #00703c !important;
-  &:hover { background-color: #005a30 !important; }
+  &:hover {
+    background-color: #005a30 !important;
+  }
 }
 
 $day-width: 46px;
@@ -420,7 +425,9 @@ $day-width: 46px;
 .date-range-controls__month-name {
   font-size: 19px;
   font-family: "GDS Transport", arial, sans-serif;
-  &--this-month { font-weight: 700; }
+  &--this-month {
+    font-weight: 700;
+  }
 }
 
 .date-range-controls__month-step {
@@ -440,8 +447,12 @@ $day-width: 46px;
   align-items: center;
   justify-content: center;
 
-  &--prev { left: 0; }
-  &--next { right: 0; }
+  &--prev {
+    left: 0;
+  }
+  &--next {
+    right: 0;
+  }
   &--disabled {
     pointer-events: none;
     color: #b1b4b6;
@@ -506,7 +517,9 @@ $day-width: 46px;
     pointer-events: none;
   }
 
-  &--today { font-weight: 700; }
+  &--today {
+    font-weight: 700;
+  }
 
   &--disabled {
     color: #b1b4b6;
@@ -520,12 +533,19 @@ $day-width: 46px;
     background-color: $govuk-brand-colour;
   }
 
-  &--included:not(.date-range-controls__day--start, .date-range-controls__day--end) {
+  &--included:not(
+      .date-range-controls__day--start,
+      .date-range-controls__day--end
+    ) {
     background-color: #f3f2f1;
-    &:hover::after { background-color: rgba(0, 0, 0, 0.06); }
+    &:hover::after {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
   }
 
-  &--invisible { visibility: hidden; }
+  &--invisible {
+    visibility: hidden;
+  }
 
   &--saturday::before {
     content: "";
@@ -588,7 +608,7 @@ $day-width: 46px;
   background: $govuk-body-background-colour;
   border: 1px solid $govuk-border-colour;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   max-height: 260px;
   overflow-y: auto;
 }
@@ -636,25 +656,25 @@ $day-width: 46px;
 }
 
 .multiselect-dropdown__single-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .multiselect-dropdown__single-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    font-family: "GDS Transport", arial, sans-serif;
-    font-size: 19px;
-    color: $govuk-text-colour;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  color: $govuk-text-colour;
 }
 
 .multiselect-dropdown__single-item:hover {
-    background: #f3f2f1;
+  background: #f3f2f1;
 }
 
 .multiselect-dropdown__single-item--selected {
-    background: #d2e2f1;
+  background: #d2e2f1;
 }
 
 // OperatorDropdown styling
@@ -763,7 +783,7 @@ $day-width: 46px;
   flex-shrink: 0;
 }
 
-.govuk-table__header{
+.govuk-table__header {
   font-size: 17px;
 }
 
@@ -2590,5 +2610,5 @@ body.helpdesk-open {
     justify-content: space-between;
     flex-wrap: wrap;
     height: 3785px;
- }
+  }
 }

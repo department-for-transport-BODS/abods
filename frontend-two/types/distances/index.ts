@@ -32,7 +32,10 @@ export interface UserOrg {
   name: string;
 }
 
-export interface DistanceData extends Record<string, string | number | null | undefined> {
+export interface DistanceData extends Record<
+  string,
+  string | number | null | undefined
+> {
   operatorId: string;
   operatorName: string;
   nocLineAndServiceCode: string;

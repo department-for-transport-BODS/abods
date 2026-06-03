@@ -38,7 +38,6 @@ interface PagingPanelProps {
   onPageChange: (page: number) => void;
 }
 
-
 export const PagingPanel = ({
   currentPage,
   totalPages,
@@ -55,7 +54,10 @@ export const PagingPanel = ({
   const isLastPage = currentPage === totalPages - 1;
   const pluralNoun = `${noun}${rowCount > 1 ? "s" : ""}`;
 
-  const { pages, stickToStart, stickToEnd } = getPageNumbers( currentPage, totalPages );
+  const { pages, stickToStart, stickToEnd } = getPageNumbers(
+    currentPage,
+    totalPages,
+  );
 
   return (
     <div className="paging-panel flex justify-end">
@@ -64,65 +66,65 @@ export const PagingPanel = ({
           Showing {firstRow} - {lastRow} of {rowCount} {pluralNoun}
         </span>
         <div className="govuk-body paging-panel__controls">
-        {totalPages > 1 && (
-          <div className="flex items-center gap-2">
-            {!isFirstPage && (
-              <button
-                className="button-link paging-panel__prev"
-                aria-label="Previous page"
-                onClick={() => onPageChange(currentPage - 1)}
-              >
-                « Prev
-              </button>
-            )}
-            {!stickToStart && (
-              <>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              {!isFirstPage && (
                 <button
-                  className="button-link paging-panel__button"
-                  onClick={() => onPageChange(0)}
+                  className="button-link paging-panel__prev"
+                  aria-label="Previous page"
+                  onClick={() => onPageChange(currentPage - 1)}
                 >
-                  1
+                  « Prev
                 </button>
-                <span className="paging-panel__ellipsis">&hellip;</span>
-              </>
-            )}
-            {pages.map((page) =>
-              page === currentPage ? (
-                <span key={page} className="paging-panel__current">
-                  {page + 1}
-                </span>
-              ) : (
+              )}
+              {!stickToStart && (
+                <>
+                  <button
+                    className="button-link paging-panel__button"
+                    onClick={() => onPageChange(0)}
+                  >
+                    1
+                  </button>
+                  <span className="paging-panel__ellipsis">&hellip;</span>
+                </>
+              )}
+              {pages.map((page) =>
+                page === currentPage ? (
+                  <span key={page} className="paging-panel__current">
+                    {page + 1}
+                  </span>
+                ) : (
+                  <button
+                    key={page}
+                    className="button-link paging-panel__button"
+                    onClick={() => onPageChange(page)}
+                  >
+                    {page + 1}
+                  </button>
+                ),
+              )}
+              {!stickToEnd && (
+                <>
+                  <span className="paging-panel__ellipsis">&hellip;</span>
+                  <button
+                    className="button-link paging-panel__button"
+                    onClick={() => onPageChange(totalPages - 1)}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+              {!isLastPage && (
                 <button
-                  key={page}
-                  className="button-link paging-panel__button"
-                  onClick={() => onPageChange(page)}
+                  className="button-link paging-panel__next"
+                  aria-label="Next page"
+                  onClick={() => onPageChange(currentPage + 1)}
                 >
-                  {page + 1}
+                  Next »
                 </button>
-              ),
-            )}
-            {!stickToEnd && (
-              <>
-                <span className="paging-panel__ellipsis">&hellip;</span>
-                <button
-                  className="button-link paging-panel__button"
-                  onClick={() => onPageChange(totalPages - 1)}
-                >
-                  {totalPages}
-                </button>
-              </>
-            )}
-            {!isLastPage && (
-              <button
-                className="button-link paging-panel__next"
-                aria-label="Next page"
-                onClick={() => onPageChange(currentPage + 1)}
-              >
-                Next »
-              </button>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

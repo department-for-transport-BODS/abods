@@ -36,14 +36,16 @@ function buildChartData(stats: VehicleStat[]) {
 }
 
 interface VehicleSparklineProps {
-    data: VehicleStat[];
+  data: VehicleStat[];
 }
 
 export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<{ dispose: () => void } | null>(null);
 
-  const idRef = useRef(`vehicle-sparkline-${Math.random().toString(36).slice(2)}`);
+  const idRef = useRef(
+    `vehicle-sparkline-${Math.random().toString(36).slice(2)}`,
+  );
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -92,7 +94,7 @@ export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
     <div
       id={idRef.current}
       ref={chartRef}
-      style={{ minWidth:200, height: 40 }}
+      style={{ minWidth: 200, height: 40 }}
       title="Last 24 hours vehicle counts"
     />
   );

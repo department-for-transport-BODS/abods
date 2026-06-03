@@ -1,4 +1,11 @@
-import { render, screen, waitFor, cleanup, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+  within,
+} from "@testing-library/react";
 import FeedMonitoringPage from "@/pages/feed-monitoring";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
@@ -37,11 +44,19 @@ vi.mock("next/router", () => ({
 vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
   SortableTable: ({ head, rows }: any) => (
     <table>
-      <thead><tr>{head.map((h: any) => <th key={h.key}>{h.label}</th>)}</tr></thead>
+      <thead>
+        <tr>
+          {head.map((h: any) => (
+            <th key={h.key}>{h.label}</th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
         {rows.map((r: any) => (
           <tr key={r.key}>
-            {head.map((h: any) => <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>)}
+            {head.map((h: any) => (
+              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -120,8 +135,12 @@ const vehicleCountMockData = [
 ];
 
 const mockUseConfig = vi.mocked(useConfig);
-const mockFetchFeedMonitoringList= vi.mocked(feedMonitoringService.fetchFeedMonitoringList);
-const mockFetchOperatorSparklines = vi.mocked(feedMonitoringService.fetchOperatorSparklines);
+const mockFetchFeedMonitoringList = vi.mocked(
+  feedMonitoringService.fetchFeedMonitoringList,
+);
+const mockFetchOperatorSparklines = vi.mocked(
+  feedMonitoringService.fetchOperatorSparklines,
+);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -140,9 +159,9 @@ afterEach(() => {
 it("Shows loading state whilst waiting for data", async () => {
   mockFetchFeedMonitoringList.mockImplementation(() => new Promise(() => {}));
   mockFetchOperatorSparklines.mockImplementation(() => new Promise(() => {}));
-  
+
   render(<FeedMonitoringPage />);
-  
+
   expect(screen.getByText("Loading...")).toBeInTheDocument();
 });
 
@@ -157,9 +176,13 @@ it("Renders inactive feeds tables with correct headers", async () => {
     const tables = screen.getAllByRole("table");
     expect(within(tables[0]).getByText("NOC")).toBeInTheDocument();
     expect(within(tables[0]).getByText("Operator")).toBeInTheDocument();
-    expect(within(tables[0]).getByText("Feed availability")).toBeInTheDocument();
+    expect(
+      within(tables[0]).getByText("Feed availability"),
+    ).toBeInTheDocument();
     expect(within(tables[0]).getByText("Update frequency")).toBeInTheDocument();
-    expect(within(tables[0]).getByText("Unavailable since")).toBeInTheDocument();
+    expect(
+      within(tables[0]).getByText("Unavailable since"),
+    ).toBeInTheDocument();
   });
 });
 
@@ -173,7 +196,9 @@ it("Renders active feeds tables with correct headers", async () => {
     const tables = screen.getAllByRole("table");
     expect(within(tables[1]).getByText("NOC")).toBeInTheDocument();
     expect(within(tables[1]).getByText("Operator")).toBeInTheDocument();
-    expect(within(tables[1]).getByText("Feed availability")).toBeInTheDocument();
+    expect(
+      within(tables[1]).getByText("Feed availability"),
+    ).toBeInTheDocument();
     expect(within(tables[1]).getByText("Update frequency")).toBeInTheDocument();
     expect(within(tables[1]).getByText("Last outage")).toBeInTheDocument();
   });
@@ -182,7 +207,7 @@ it("Renders active feeds tables with correct headers", async () => {
 it("Splits the data into two tables", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
   mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);
-  
+
   render(<FeedMonitoringPage />);
 
   await waitFor(() => {
@@ -191,14 +216,18 @@ it("Splits the data into two tables", async () => {
     // Check inactive table rows
     const inactiveRows = rows.slice(1, 2); // First table has 1 data row
     expect(within(inactiveRows[0]).getByText("BETA")).toBeInTheDocument();
-    expect(within(inactiveRows[0]).getByText("Beta Coaches")).toBeInTheDocument();
+    expect(
+      within(inactiveRows[0]).getByText("Beta Coaches"),
+    ).toBeInTheDocument();
 
     // Check active table rows
     const activeRows = rows.slice(3); // Second table has 2 data rows
     expect(within(activeRows[0]).getByText("ALPH")).toBeInTheDocument();
     expect(within(activeRows[0]).getByText("Alpha Buses")).toBeInTheDocument();
     expect(within(activeRows[1]).getByText("GAMM")).toBeInTheDocument();
-    expect(within(activeRows[1]).getByText("Gamma Transit")).toBeInTheDocument();
+    expect(
+      within(activeRows[1]).getByText("Gamma Transit"),
+    ).toBeInTheDocument();
   });
 });
 

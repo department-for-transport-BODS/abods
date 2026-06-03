@@ -1,4 +1,10 @@
-import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+} from "@testing-library/react";
 import DistancesPage from "@/pages/distances";
 import { useConfig } from "@/contexts/ConfigContext";
 import { distanceService } from "@/services/distances/distance.services";
@@ -37,14 +43,24 @@ vi.mock("next/router", () => ({
 }));
 
 vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: any) => (
+    <button {...props}>{children}</button>
+  ),
   SortableTable: ({ head, rows }: any) => (
     <table>
-      <thead><tr>{head.map((h: any) => <th key={h.key}>{h.label}</th>)}</tr></thead>
+      <thead>
+        <tr>
+          {head.map((h: any) => (
+            <th key={h.key}>{h.label}</th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
         {rows.map((r: any) => (
           <tr key={r.key}>
-            {head.map((h: any) => <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>)}
+            {head.map((h: any) => (
+              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -93,8 +109,20 @@ const mockDistanceData = [
 ];
 
 const mockAdminAreaData = [
-  { adminAreaId: 1, adminName: "Greater Manchester", operatorId: "FBMN", orgId: 10, orgName: "First Group" },
-  { adminAreaId: 2, adminName: "West Yorkshire", operatorId: "ARWY", orgId: 11, orgName: "Arriva UK Bus" },
+  {
+    adminAreaId: 1,
+    adminName: "Greater Manchester",
+    operatorId: "FBMN",
+    orgId: 10,
+    orgName: "First Group",
+  },
+  {
+    adminAreaId: 2,
+    adminName: "West Yorkshire",
+    operatorId: "ARWY",
+    orgId: 11,
+    orgName: "Arriva UK Bus",
+  },
 ];
 
 const mockDropdownInputData = {
@@ -151,10 +179,12 @@ it("Shows loading state within Generate button", async () => {
   mockFetchDistances.mockImplementation(() => new Promise(() => {}));
   mockFetchDropdownInputs.mockImplementation(() => new Promise(() => {}));
   mockFetchAdminOrg.mockImplementation(() => new Promise(() => {}));
-  
+
   render(<DistancesPage />);
-  
-  const generateButton = await screen.findByRole("button", { name: "Loading..." });
+
+  const generateButton = await screen.findByRole("button", {
+    name: "Loading...",
+  });
   expect(generateButton).toBeDisabled();
 });
 
@@ -162,35 +192,53 @@ it("Renders a blank table with correct headers initially", async () => {
   mockFetchDistances.mockResolvedValue([]);
   mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
   mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
-  
+
   render(<DistancesPage />);
 
   await waitFor(() => {
     // Check for table headers (update header texts as per actual component)
-    expect(screen.getByRole("columnheader", { name: /Operator/i })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: /Service Code/i })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: /^Service$/i })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: /Distance excluding dead runs \(km\)/i })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: /Distance of journeys with AVL \(km\)/i })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: /Distance of journeys with AVL \(%\)/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /Operator/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /Service Code/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /^Service$/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", {
+        name: /Distance excluding dead runs \(km\)/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", {
+        name: /Distance of journeys with AVL \(km\)/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", {
+        name: /Distance of journeys with AVL \(%\)/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   const rows = screen.getAllByRole("row");
   // Check for one row - the header row
-  expect(rows.length).toBe(1); 
+  expect(rows.length).toBe(1);
 });
 
 it("Renders a message when the table is blank", async () => {
   mockFetchDistances.mockResolvedValue([]);
   mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
   mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
-  
+
   render(<DistancesPage />);
-  
+
   await waitFor(() => {
     expect(screen.getByText("No operator data found")).toBeInTheDocument();
   });
-})
+});
 
 it("Defaults to no selection for all the filters", async () => {
   mockFetchDistances.mockResolvedValue([]);
@@ -200,15 +248,27 @@ it("Defaults to no selection for all the filters", async () => {
   render(<DistancesPage />);
 
   await waitFor(() => {
-    expect(screen.getByRole("button", { name: "Generate" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Generate" }),
+    ).toBeInTheDocument();
   });
 
-  expect(screen.getByRole("button", { name: /All areas/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /All organisations/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /All operators/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /All licenses/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /All services/i })).toBeInTheDocument();
-})
+  expect(
+    screen.getByRole("button", { name: /All areas/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /All organisations/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /All operators/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /All licenses/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /All services/i }),
+  ).toBeInTheDocument();
+});
 
 it("Renders all data when generate button is pressed and no filters are applied", async () => {
   mockFetchDistances.mockResolvedValue(mockDistanceData);
@@ -218,7 +278,9 @@ it("Renders all data when generate button is pressed and no filters are applied"
   render(<DistancesPage />);
 
   // Wait for initial loading to complete — button should show "Generate" and be enabled
-  const generateButton = await screen.findByRole("button", { name: "Generate" });
+  const generateButton = await screen.findByRole("button", {
+    name: "Generate",
+  });
   expect(generateButton).not.toBeDisabled();
 
   fireEvent.click(generateButton);
@@ -238,22 +300,36 @@ it("Defaults the date range to last week", async () => {
   render(<DistancesPage />);
 
   await waitFor(() => {
-    expect(screen.getByRole("button", { name: "Generate" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Generate" }),
+    ).toBeInTheDocument();
   });
 
   const yesterday = DateTime.now().minus({ days: 1 }).toFormat("dd MMM yyyy");
-  const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat("dd MMM yyyy");
+  const sevenDaysAgo = DateTime.now()
+    .minus({ days: 7 })
+    .toFormat("dd MMM yyyy");
 
-  expect(screen.getByText(`${sevenDaysAgo} - ${yesterday}`)).toBeInTheDocument();
-})
+  expect(
+    screen.getByText(`${sevenDaysAgo} - ${yesterday}`),
+  ).toBeInTheDocument();
+});
 
 // Other filters
 const allFilterOptionsTestCases = [
   ["Admin Area", /All areas/i, ["Greater Manchester", "West Yorkshire"]],
   ["Organisations", /All organisations/i, ["Arriva UK Bus", "First Group"]],
-  ["Operators", /All operators/i, ["Arriva Yorkshire (ARWY)", "First Bus Manchester (FBMN)"]],
+  [
+    "Operators",
+    /All operators/i,
+    ["Arriva Yorkshire (ARWY)", "First Bus Manchester (FBMN)"],
+  ],
   ["Licenses", /All licenses/i, ["PB0000001", "PB0000002"]],
-  ["Services", /All services/i, ["1-City Centre", "5-North Loop", "X10-Airport Express", "7-South Route"]],
+  [
+    "Services",
+    /All services/i,
+    ["1-City Centre", "5-North Loop", "X10-Airport Express", "7-South Route"],
+  ],
 ] as const;
 
 it.each(allFilterOptionsTestCases)(
@@ -266,7 +342,9 @@ it.each(allFilterOptionsTestCases)(
     render(<DistancesPage />);
 
     // Wait for the dropdown trigger button to render first
-    const dropdownButton = await screen.findByRole("button", { name: filterButtonName });
+    const dropdownButton = await screen.findByRole("button", {
+      name: filterButtonName,
+    });
 
     fireEvent.click(dropdownButton);
     expectedOptions.forEach((option) => {
@@ -281,10 +359,26 @@ const crossFilterTestCases = [
     selectedDropdownButtonName: /All areas/i,
     selectedOption: "Greater Manchester",
     expectedByDropdown: [
-      { buttonName: /All organisations/i, present: ["First Group"], absent: ["Arriva UK Bus"] },
-      { buttonName: /All operators/i, present: ["First Bus Manchester (FBMN)"], absent: ["Arriva Yorkshire (ARWY)"] },
-      { buttonName: /All licenses/i, present: ["PB0000001"], absent: ["PB0000002"] },
-      { buttonName: /All services/i, present: ["1-City Centre", "X10-Airport Express"], absent: ["5-North Loop", "7-South Route"] },
+      {
+        buttonName: /All organisations/i,
+        present: ["First Group"],
+        absent: ["Arriva UK Bus"],
+      },
+      {
+        buttonName: /All operators/i,
+        present: ["First Bus Manchester (FBMN)"],
+        absent: ["Arriva Yorkshire (ARWY)"],
+      },
+      {
+        buttonName: /All licenses/i,
+        present: ["PB0000001"],
+        absent: ["PB0000002"],
+      },
+      {
+        buttonName: /All services/i,
+        present: ["1-City Centre", "X10-Airport Express"],
+        absent: ["5-North Loop", "7-South Route"],
+      },
     ],
   },
   {
@@ -292,10 +386,26 @@ const crossFilterTestCases = [
     selectedDropdownButtonName: /All organisations/i,
     selectedOption: "Arriva UK Bus",
     expectedByDropdown: [
-      { buttonName: /All areas/i, present: ["West Yorkshire"], absent: ["Greater Manchester"] },
-      { buttonName: /All operators/i, present: ["Arriva Yorkshire (ARWY)"], absent: ["First Bus Manchester (FBMN)"] },
-      { buttonName: /All licenses/i, present: ["PB0000002"], absent: ["PB0000001"] },
-      { buttonName: /All services/i, present: ["5-North Loop", "7-South Route"], absent: ["1-City Centre", "X10-Airport Express"] },
+      {
+        buttonName: /All areas/i,
+        present: ["West Yorkshire"],
+        absent: ["Greater Manchester"],
+      },
+      {
+        buttonName: /All operators/i,
+        present: ["Arriva Yorkshire (ARWY)"],
+        absent: ["First Bus Manchester (FBMN)"],
+      },
+      {
+        buttonName: /All licenses/i,
+        present: ["PB0000002"],
+        absent: ["PB0000001"],
+      },
+      {
+        buttonName: /All services/i,
+        present: ["5-North Loop", "7-South Route"],
+        absent: ["1-City Centre", "X10-Airport Express"],
+      },
     ],
   },
   {
@@ -303,10 +413,26 @@ const crossFilterTestCases = [
     selectedDropdownButtonName: /All licenses/i,
     selectedOption: "PB0000001",
     expectedByDropdown: [
-      { buttonName: /All areas/i, present: ["Greater Manchester"], absent: ["West Yorkshire"] },
-      { buttonName: /All organisations/i, present: ["First Group"], absent: ["Arriva UK Bus"] },
-      { buttonName: /All operators/i, present: ["First Bus Manchester (FBMN)"], absent: ["Arriva Yorkshire (ARWY)"] },
-      { buttonName: /All services/i, present: ["1-City Centre", "X10-Airport Express"], absent: ["5-North Loop", "7-South Route"] },
+      {
+        buttonName: /All areas/i,
+        present: ["Greater Manchester"],
+        absent: ["West Yorkshire"],
+      },
+      {
+        buttonName: /All organisations/i,
+        present: ["First Group"],
+        absent: ["Arriva UK Bus"],
+      },
+      {
+        buttonName: /All operators/i,
+        present: ["First Bus Manchester (FBMN)"],
+        absent: ["Arriva Yorkshire (ARWY)"],
+      },
+      {
+        buttonName: /All services/i,
+        present: ["1-City Centre", "X10-Airport Express"],
+        absent: ["5-North Loop", "7-South Route"],
+      },
     ],
   },
   {
@@ -314,41 +440,66 @@ const crossFilterTestCases = [
     selectedDropdownButtonName: /All services/i,
     selectedOption: "5-North Loop",
     expectedByDropdown: [
-      { buttonName: /All areas/i, present: ["West Yorkshire"], absent: ["Greater Manchester"] },
-      { buttonName: /All organisations/i, present: ["Arriva UK Bus"], absent: ["First Group"] },
-      { buttonName: /All operators/i, present: ["Arriva Yorkshire (ARWY)"], absent: ["First Bus Manchester (FBMN)"] },
-      { buttonName: /All licenses/i, present: ["PB0000002"], absent: ["PB0000001"] },
+      {
+        buttonName: /All areas/i,
+        present: ["West Yorkshire"],
+        absent: ["Greater Manchester"],
+      },
+      {
+        buttonName: /All organisations/i,
+        present: ["Arriva UK Bus"],
+        absent: ["First Group"],
+      },
+      {
+        buttonName: /All operators/i,
+        present: ["Arriva Yorkshire (ARWY)"],
+        absent: ["First Bus Manchester (FBMN)"],
+      },
+      {
+        buttonName: /All licenses/i,
+        present: ["PB0000002"],
+        absent: ["PB0000001"],
+      },
     ],
   },
 ] as const;
 
-it.each(crossFilterTestCases)("$name", async ({ selectedDropdownButtonName, selectedOption, expectedByDropdown }) => {
-  mockFetchDistances.mockResolvedValue([]);
-  mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
-  mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
+it.each(crossFilterTestCases)(
+  "$name",
+  async ({
+    selectedDropdownButtonName,
+    selectedOption,
+    expectedByDropdown,
+  }) => {
+    mockFetchDistances.mockResolvedValue([]);
+    mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
+    mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
 
-  render(<DistancesPage />);
+    render(<DistancesPage />);
 
-  const selectedDropdownButton = await screen.findByRole("button", { name: selectedDropdownButtonName });
-  fireEvent.click(selectedDropdownButton);
-  fireEvent.click(screen.getByText(selectedOption));
-
-  expectedByDropdown.forEach(({ buttonName, present, absent }) => {
-    // Close any currently open dropdown, before checking the next dropdown
-    fireEvent.mouseDown(document.body);
-
-    const dropdownButton = screen.getByRole("button", { name: buttonName });
-    fireEvent.click(dropdownButton);
-
-    present.forEach((text) => {
-      expect(screen.getByText(text)).toBeInTheDocument();
+    const selectedDropdownButton = await screen.findByRole("button", {
+      name: selectedDropdownButtonName,
     });
+    fireEvent.click(selectedDropdownButton);
+    fireEvent.click(screen.getByText(selectedOption));
 
-    absent.forEach((text) => {
-      expect(screen.queryByText(text)).not.toBeInTheDocument();
+    expectedByDropdown.forEach(({ buttonName, present, absent }) => {
+      // Close any currently open dropdown, before checking the next dropdown
+      fireEvent.mouseDown(document.body);
+
+      const dropdownButton = screen.getByRole("button", { name: buttonName });
+      fireEvent.click(dropdownButton);
+
+      present.forEach((text) => {
+        expect(screen.getByText(text)).toBeInTheDocument();
+      });
+
+      absent.forEach((text) => {
+        expect(screen.queryByText(text)).not.toBeInTheDocument();
+      });
     });
-  });
-});
+  },
+);
 
 const filteredTableDataTestCases = [
   {
@@ -356,127 +507,184 @@ const filteredTableDataTestCases = [
     filterButtonName: /All areas/i,
     selectedOption: "Greater Manchester",
     expectedRowCount: 4,
-    shouldSee: ["First Bus Manchester (FBMN)", "City Centre-City Centre", "Airport Express-Airport Express"],
-    shouldNotSee: ["Arriva Yorkshire (ARWY)", "North Loop-North Loop", "South Route-South Route"],
+    shouldSee: [
+      "First Bus Manchester (FBMN)",
+      "City Centre-City Centre",
+      "Airport Express-Airport Express",
+    ],
+    shouldNotSee: [
+      "Arriva Yorkshire (ARWY)",
+      "North Loop-North Loop",
+      "South Route-South Route",
+    ],
   },
   {
     name: "Organisation filter updates table rows",
     filterButtonName: /All organisations/i,
     selectedOption: "Arriva UK Bus",
     expectedRowCount: 4,
-    shouldSee: ["Arriva Yorkshire (ARWY)", "North Loop-North Loop", "South Route-South Route"],
-    shouldNotSee: ["First Bus Manchester (FBMN)", "City Centre-City Centre", "Airport Express-Airport Express"],
+    shouldSee: [
+      "Arriva Yorkshire (ARWY)",
+      "North Loop-North Loop",
+      "South Route-South Route",
+    ],
+    shouldNotSee: [
+      "First Bus Manchester (FBMN)",
+      "City Centre-City Centre",
+      "Airport Express-Airport Express",
+    ],
   },
   {
     name: "Operator filter updates table rows",
     filterButtonName: /All operators/i,
     selectedOption: "First Bus Manchester (FBMN)",
     expectedRowCount: 4,
-    shouldSee: ["First Bus Manchester (FBMN)", "City Centre-City Centre", "Airport Express-Airport Express"],
-    shouldNotSee: ["Arriva Yorkshire (ARWY)", "North Loop-North Loop", "South Route-South Route"],
+    shouldSee: [
+      "First Bus Manchester (FBMN)",
+      "City Centre-City Centre",
+      "Airport Express-Airport Express",
+    ],
+    shouldNotSee: [
+      "Arriva Yorkshire (ARWY)",
+      "North Loop-North Loop",
+      "South Route-South Route",
+    ],
   },
   {
     name: "License filter updates table rows",
     filterButtonName: /All licenses/i,
     selectedOption: "PB0000002",
     expectedRowCount: 4,
-    shouldSee: ["Arriva Yorkshire (ARWY)", "North Loop-North Loop", "South Route-South Route"],
-    shouldNotSee: ["First Bus Manchester (FBMN)", "City Centre-City Centre", "Airport Express-Airport Express"],
+    shouldSee: [
+      "Arriva Yorkshire (ARWY)",
+      "North Loop-North Loop",
+      "South Route-South Route",
+    ],
+    shouldNotSee: [
+      "First Bus Manchester (FBMN)",
+      "City Centre-City Centre",
+      "Airport Express-Airport Express",
+    ],
   },
   {
     name: "Service filter updates table rows",
     filterButtonName: /All services/i,
     selectedOption: "X10-Airport Express",
     expectedRowCount: 4,
-    shouldSee: ["First Bus Manchester (FBMN)", "City Centre-City Centre", "Airport Express-Airport Express"],
-    shouldNotSee: ["Arriva Yorkshire (ARWY)", "North Loop-North Loop", "South Route-South Route"],
+    shouldSee: [
+      "First Bus Manchester (FBMN)",
+      "City Centre-City Centre",
+      "Airport Express-Airport Express",
+    ],
+    shouldNotSee: [
+      "Arriva Yorkshire (ARWY)",
+      "North Loop-North Loop",
+      "South Route-South Route",
+    ],
   },
 ] as const;
 
-it.each(filteredTableDataTestCases)("$name", async ({ filterButtonName, selectedOption, expectedRowCount, shouldSee, shouldNotSee }) => {
-  mockFetchDistances.mockImplementation(async (filters) => {
-    const operatorByAdminAreaId: Record<string, string> = {
-      "1": "FBMN",
-      "2": "ARWY",
-    };
-    const operatorByLicenseId: Record<string, string> = {
-      PB0000001: "FBMN",
-      PB0000002: "ARWY",
-    };
-    const operatorByServiceId: Record<string, string> = {
-      SVC001: "FBMN",
-      SVC002: "FBMN",
-      SVC003: "ARWY",
-      SVC004: "ARWY",
-    };
+it.each(filteredTableDataTestCases)(
+  "$name",
+  async ({
+    filterButtonName,
+    selectedOption,
+    expectedRowCount,
+    shouldSee,
+    shouldNotSee,
+  }) => {
+    mockFetchDistances.mockImplementation(async (filters) => {
+      const operatorByAdminAreaId: Record<string, string> = {
+        "1": "FBMN",
+        "2": "ARWY",
+      };
+      const operatorByLicenseId: Record<string, string> = {
+        PB0000001: "FBMN",
+        PB0000002: "ARWY",
+      };
+      const operatorByServiceId: Record<string, string> = {
+        SVC001: "FBMN",
+        SVC002: "FBMN",
+        SVC003: "ARWY",
+        SVC004: "ARWY",
+      };
 
-    if (filters?.adminAreaIds?.length) {
-      const allowed = new Set(
-        filters.adminAreaIds.map((id: string) => operatorByAdminAreaId[id]).filter(Boolean),
-      );
-      return mockDistanceData.filter((row) => allowed.has(row.operatorId));
+      if (filters?.adminAreaIds?.length) {
+        const allowed = new Set(
+          filters.adminAreaIds
+            .map((id: string) => operatorByAdminAreaId[id])
+            .filter(Boolean),
+        );
+        return mockDistanceData.filter((row) => allowed.has(row.operatorId));
+      }
+
+      if (filters?.operatorIds?.length) {
+        const allowed = new Set(filters.operatorIds);
+        return mockDistanceData.filter((row) => allowed.has(row.operatorId));
+      }
+
+      if (filters?.licenseIds?.length) {
+        const allowed = new Set(
+          filters.licenseIds
+            .map((id: string) => operatorByLicenseId[id])
+            .filter(Boolean),
+        );
+        return mockDistanceData.filter((row) => allowed.has(row.operatorId));
+      }
+
+      if (filters?.nocLineAndServiceCodes?.length) {
+        const allowed = new Set(
+          filters.nocLineAndServiceCodes
+            .map((id: string) => operatorByServiceId[id])
+            .filter(Boolean),
+        );
+        return mockDistanceData.filter((row) => allowed.has(row.operatorId));
+      }
+
+      return mockDistanceData;
+    });
+
+    mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
+    mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
+
+    render(<DistancesPage />);
+
+    const generateButton = await screen.findByRole("button", {
+      name: "Generate",
+    });
+    fireEvent.click(generateButton);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row").length).toBe(6);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: filterButtonName }));
+
+    const optionCheckbox = screen.queryByLabelText(selectedOption);
+
+    if (optionCheckbox) {
+      fireEvent.click(optionCheckbox);
+    } else {
+      fireEvent.click(screen.getByText(selectedOption));
     }
 
-    if (filters?.operatorIds?.length) {
-      const allowed = new Set(filters.operatorIds);
-      return mockDistanceData.filter((row) => allowed.has(row.operatorId));
-    }
+    fireEvent.mouseDown(document.body);
 
-    if (filters?.licenseIds?.length) {
-      const allowed = new Set(
-        filters.licenseIds.map((id: string) => operatorByLicenseId[id]).filter(Boolean),
-      );
-      return mockDistanceData.filter((row) => allowed.has(row.operatorId));
-    }
+    fireEvent.click(generateButton);
 
-    if (filters?.nocLineAndServiceCodes?.length) {
-      const allowed = new Set(
-        filters.nocLineAndServiceCodes.map((id: string) => operatorByServiceId[id]).filter(Boolean),
-      );
-      return mockDistanceData.filter((row) => allowed.has(row.operatorId));
-    }
+    await waitFor(() => {
+      expect(screen.getAllByRole("row").length).toBe(expectedRowCount);
+    });
 
-    return mockDistanceData;
-  });
-  
-  mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
-  mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
+    shouldSee.forEach((value) => {
+      expect(screen.getAllByText(value).length).toBeGreaterThan(0);
+    });
 
-  render(<DistancesPage />);
-
-  const generateButton = await screen.findByRole("button", { name: "Generate" });
-  fireEvent.click(generateButton);
-
-  await waitFor(() => {
-    expect(screen.getAllByRole("row").length).toBe(6);
-  });
-
-  fireEvent.click(screen.getByRole("button", { name: filterButtonName }));
-  
-  const optionCheckbox = screen.queryByLabelText(selectedOption);
-
-  if (optionCheckbox) {
-    fireEvent.click(optionCheckbox);
-  } else {
-    fireEvent.click(screen.getByText(selectedOption));
-  }
-
-  fireEvent.mouseDown(document.body);
-  
-  fireEvent.click(generateButton);
-
-  await waitFor(() => {
-    expect(screen.getAllByRole("row").length).toBe(expectedRowCount);
-  });
-
-  shouldSee.forEach((value) => {
-    expect(screen.getAllByText(value).length).toBeGreaterThan(0);
-  });
-
-  shouldNotSee.forEach((value) => {
-    expect(screen.queryAllByText(value).length).toBe(0);
-  });
-});
+    shouldNotSee.forEach((value) => {
+      expect(screen.queryAllByText(value).length).toBe(0);
+    });
+  },
+);
 
 const clearAllDropdownTestCases = [
   {
@@ -516,35 +724,46 @@ const clearAllDropdownTestCases = [
   },
 ] as const;
 
-it.each(clearAllDropdownTestCases)("$name", async ({ filterButtonName, optionsToSelect, defaultText, displayText }) => {
-  mockFetchDistances.mockResolvedValue(mockDistanceData);
-  mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
-  mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
+it.each(clearAllDropdownTestCases)(
+  "$name",
+  async ({ filterButtonName, optionsToSelect, defaultText, displayText }) => {
+    mockFetchDistances.mockResolvedValue(mockDistanceData);
+    mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
+    mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
 
-  render(<DistancesPage />);
+    render(<DistancesPage />);
 
-  const dropdownButton = await screen.findByRole("button", { name: filterButtonName });
-  fireEvent.click(dropdownButton);
+    const dropdownButton = await screen.findByRole("button", {
+      name: filterButtonName,
+    });
+    fireEvent.click(dropdownButton);
 
-  for (const option of optionsToSelect) {
-    const checkbox = screen.queryByLabelText(option);
-    if (checkbox) {
-      fireEvent.click(checkbox);
-    } else {
-      fireEvent.click(screen.getByText(option));
+    for (const option of optionsToSelect) {
+      const checkbox = screen.queryByLabelText(option);
+      if (checkbox) {
+        fireEvent.click(checkbox);
+      } else {
+        fireEvent.click(screen.getByText(option));
+      }
     }
-  }
-  
-  // Check options have been selected (Button text should show number of selected options)
-  fireEvent.mouseDown(document.body); 
-  expect(screen.getByRole("button", { name: displayText })).toBeInTheDocument();
 
-  const newDropdownButton = await screen.findByRole("button", { name: displayText });
-  fireEvent.click(newDropdownButton);
+    // Check options have been selected (Button text should show number of selected options)
+    fireEvent.mouseDown(document.body);
+    expect(
+      screen.getByRole("button", { name: displayText }),
+    ).toBeInTheDocument();
 
-  fireEvent.click(screen.getByRole("button", { name: /Clear all/i }));
+    const newDropdownButton = await screen.findByRole("button", {
+      name: displayText,
+    });
+    fireEvent.click(newDropdownButton);
 
-  // Dropdown button should reset to default text
-  fireEvent.mouseDown(document.body); 
-  expect(screen.getByRole("button", { name: defaultText })).toBeInTheDocument();
-});
+    fireEvent.click(screen.getByRole("button", { name: /Clear all/i }));
+
+    // Dropdown button should reset to default text
+    fireEvent.mouseDown(document.body);
+    expect(
+      screen.getByRole("button", { name: defaultText }),
+    ).toBeInTheDocument();
+  },
+);

@@ -1,4 +1,11 @@
-import { render, screen, waitFor, cleanup, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+  within,
+} from "@testing-library/react";
 import LiveStatusPage from "@/pages/feed-monitoring/[nocCode]/index";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
@@ -41,7 +48,11 @@ vi.mock("next/router", () => ({
 vi.mock("next/dynamic", () => ({
   __esModule: true,
   default: () => {
-    return ({ label }: { label: string }) => <div><h3>{label}</h3></div>;
+    return ({ label }: { label: string }) => (
+      <div>
+        <h3>{label}</h3>
+      </div>
+    );
   },
 }));
 
@@ -146,8 +157,12 @@ const operatorLiveStatusMockData_Beta = {
 };
 
 const mockUseConfig = vi.mocked(useConfig);
-const mockFetchFeedMonitoringList= vi.mocked(feedMonitoringService.fetchFeedMonitoringList);
-const mockFetchOperatorLiveStatus = vi.mocked(feedMonitoringService.fetchOperatorLiveStatus);
+const mockFetchFeedMonitoringList = vi.mocked(
+  feedMonitoringService.fetchFeedMonitoringList,
+);
+const mockFetchOperatorLiveStatus = vi.mocked(
+  feedMonitoringService.fetchOperatorLiveStatus,
+);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -166,31 +181,45 @@ afterEach(() => {
 it("Shows loading state whilst waiting for data", async () => {
   mockFetchFeedMonitoringList.mockImplementation(() => new Promise(() => {}));
   mockFetchOperatorLiveStatus.mockImplementation(() => new Promise(() => {}));
-  
+
   render(<LiveStatusPage />);
-  
+
   expect(screen.getByText("Loading...")).toBeInTheDocument();
 });
 
 it("Shows the current date", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
-  
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
+
   render(<LiveStatusPage />);
 
-  const expectedDate = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  await waitFor(() => expect(screen.getByText(expectedDate)).toBeInTheDocument());
+  const expectedDate = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  await waitFor(() =>
+    expect(screen.getByText(expectedDate)).toBeInTheDocument(),
+  );
 });
 
 it("Shows correct options in operator dropdown", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
 
   render(<LiveStatusPage />);
 
-  await waitFor(() => expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument(),
+  );
 
-  fireEvent.click(screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }));
+  fireEvent.click(
+    screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }),
+  );
 
   expect(screen.getAllByText("Alpha Buses (ALPH)").length).toEqual(2); // One in the button, one in the dropdown
   expect(screen.getByText("Beta Coaches (BETA)")).toBeInTheDocument();
@@ -199,13 +228,19 @@ it("Shows correct options in operator dropdown", async () => {
 
 it("Changes the page if new operator is selected using dropdown", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
 
   render(<LiveStatusPage />);
 
-  await waitFor(() => expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument(),
+  );
 
-  fireEvent.click(screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }));
+  fireEvent.click(
+    screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }),
+  );
   fireEvent.click(screen.getByText("Beta Coaches (BETA)"));
 
   expect(mockRouterPush).toHaveBeenCalledWith("/feed-monitoring/BETA");
@@ -213,11 +248,15 @@ it("Changes the page if new operator is selected using dropdown", async () => {
 
 it("Renders the 4 summary boxes with correct headers and data", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
 
   render(<LiveStatusPage />);
 
-  await waitFor(() => expect(screen.getByText("Feed status")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("Feed status")).toBeInTheDocument(),
+  );
 
   expect(screen.getByText("Feed status")).toBeInTheDocument();
   expect(screen.getByText("Current vehicles")).toBeInTheDocument();
@@ -231,30 +270,48 @@ it("Renders the 4 summary boxes with correct headers and data", async () => {
 
 it("Renders warning message if feed is inactive", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Beta);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Beta,
+  );
 
   render(<LiveStatusPage />);
 
-  await waitFor(() => expect(screen.getByText(/Inactive/i)).toBeInTheDocument());
-  expect(screen.getByText(/If the number of expected vehicles is zero and you were expecting vehicles/i)).toBeInTheDocument();
+  await waitFor(() =>
+    expect(screen.getByText(/Inactive/i)).toBeInTheDocument(),
+  );
+  expect(
+    screen.getByText(
+      /If the number of expected vehicles is zero and you were expecting vehicles/i,
+    ),
+  ).toBeInTheDocument();
 });
 
 it("Does not render warning message if feed is active", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
 
   render(<LiveStatusPage />);
 
   await waitFor(() => expect(screen.getByText("Active")).toBeInTheDocument());
-  expect(screen.queryByText(/If the number of expected vehicles is zero and you were expecting vehicles/i)).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(
+      /If the number of expected vehicles is zero and you were expecting vehicles/i,
+    ),
+  ).not.toBeInTheDocument();
 });
 
 it("Renders 2 graphs with data", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
-  mockFetchOperatorLiveStatus.mockResolvedValue(operatorLiveStatusMockData_Alpha);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
 
   render(<LiveStatusPage />);
 
-  await waitFor(() => expect(screen.getByText("Last 24 hours")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("Last 24 hours")).toBeInTheDocument(),
+  );
   expect(screen.getByText("Last 20 minutes")).toBeInTheDocument();
 });

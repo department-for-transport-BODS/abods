@@ -29,7 +29,9 @@ export const distanceService = {
     }
   },
 
-  fetchOrgOperators: async (orgId: number): Promise<{ name: string; nocCode: string }[]> => {
+  fetchOrgOperators: async (
+    orgId: number,
+  ): Promise<{ name: string; nocCode: string }[]> => {
     try {
       const result = await apolloClient.query({
         query: OrgOperatorListDocument,
@@ -42,7 +44,9 @@ export const distanceService = {
     }
   },
 
-  fetchDistances: async (filterBy: DistancesFilterInput): Promise<DistanceData[]> => {
+  fetchDistances: async (
+    filterBy: DistancesFilterInput,
+  ): Promise<DistanceData[]> => {
     try {
       const result = await apolloClient.query({
         query: DistancesListDocument,
@@ -79,5 +83,3 @@ export const distanceService = {
     }
   },
 };
-
-  

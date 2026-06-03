@@ -30,16 +30,14 @@ function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
   });
 
   const minDateTime = protoData[0].dateTime;
-  const maxDateTime = protoData[protoData.length - 1].dateTime.plus({ minutes: 1 });
+  const maxDateTime = protoData[protoData.length - 1].dateTime.plus({
+    minutes: 1,
+  });
 
   const filled: ChartDataPoint[] = [];
   let i = 0;
 
-  for (
-    let ts = minDateTime;
-    ts < maxDateTime;
-    ts = ts.plus({ minute: 1 })
-  ) {
+  for (let ts = minDateTime; ts < maxDateTime; ts = ts.plus({ minute: 1 })) {
     const candidate = protoData[i];
     if (!candidate?.dateTime.equals(ts)) {
       filled.push({
@@ -76,10 +74,12 @@ const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
     chart.paddingLeft = 0;
     chart.defaultState.transitionDuration = 0;
 
-    // Date axis (X) 
+    // Date axis (X)
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
+    dateAxis.renderer.labels.template.fill = am4core.color(
+      COLOURS.legendaryGrey,
+    );
 
     dateAxis.baseInterval = { timeUnit: "second", count: 1 };
     dateAxis.groupData = true;
@@ -91,7 +91,9 @@ const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
     // Value axis (Y)
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.renderer.labels.template.fontSize = 13;
-    valueAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
+    valueAxis.renderer.labels.template.fill = am4core.color(
+      COLOURS.legendaryGrey,
+    );
     valueAxis.min = 0;
     if (valueAxis.tooltip) valueAxis.tooltip.disabled = true;
 
@@ -151,7 +153,7 @@ const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
       actualSeries.tooltip.background.stroke = am4core.color(COLOURS.black);
     }
 
-    // Cursor 
+    // Cursor
     chart.cursor = new am4charts.XYCursor();
     chart.cursor.behavior = "zoomX";
     chart.cursor.lineY.disabled = true;
@@ -187,7 +189,9 @@ const HistoricVehicleStats = ({ data, date }: HistoricVehicleStatsProps) => {
 
   return (
     <div>
-      <p className="govuk-caption-m" style={{ marginBottom: "8px" }}>Vehicle journeys</p>
+      <p className="govuk-caption-m" style={{ marginBottom: "8px" }}>
+        Vehicle journeys
+      </p>
       <div id={idRef.current} style={{ width: "100%", height: "300px" }} />
     </div>
   );

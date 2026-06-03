@@ -37,9 +37,16 @@ interface LiveVehicleStatsProps {
   xAxisMax?: Date | number;
 }
 
-const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: LiveVehicleStatsProps) => 
-{
-  const idRef = useRef(`live-vehicle-stats-${Math.random().toString(36).slice(2)}`);
+const LiveVehicleStats = ({
+  data,
+  granularity,
+  label,
+  xAxisMin,
+  xAxisMax,
+}: LiveVehicleStatsProps) => {
+  const idRef = useRef(
+    `live-vehicle-stats-${Math.random().toString(36).slice(2)}`,
+  );
   const chartInstance = useRef<any>(null);
 
   useEffect(() => {
@@ -55,7 +62,9 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: Live
     // Date axis (X)
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.labels.template.fontSize = 13;
-    dateAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
+    dateAxis.renderer.labels.template.fill = am4core.color(
+      COLOURS.legendaryGrey,
+    );
     dateAxis.baseInterval = { timeUnit: granularity, count: 1 };
     dateAxis.gridIntervals.setAll([
       { timeUnit: granularity, count: 2 },
@@ -65,17 +74,23 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: Live
     dateAxis.renderer.grid.template.disabled = true;
     if (dateAxis.tooltip) dateAxis.tooltip.disabled = true;
 
-    if (xAxisMin) dateAxis.min = typeof xAxisMin === "number" ? xAxisMin : xAxisMin.getTime();
-    if (xAxisMax) dateAxis.max = typeof xAxisMax === "number" ? xAxisMax : xAxisMax.getTime();
+    if (xAxisMin)
+      dateAxis.min =
+        typeof xAxisMin === "number" ? xAxisMin : xAxisMin.getTime();
+    if (xAxisMax)
+      dateAxis.max =
+        typeof xAxisMax === "number" ? xAxisMax : xAxisMax.getTime();
 
     // Value axis (Y)
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.renderer.labels.template.fontSize = 13;
     valueAxis.min = 0;
-    valueAxis.renderer.labels.template.fill = am4core.color(COLOURS.legendaryGrey);
+    valueAxis.renderer.labels.template.fill = am4core.color(
+      COLOURS.legendaryGrey,
+    );
     if (valueAxis.tooltip) valueAxis.tooltip.disabled = true;
 
-    // Expected vehicles step-line 
+    // Expected vehicles step-line
     const expectedSeries = chart.series.push(new am4charts.StepLineSeries());
     expectedSeries.name = "Expected vehicles";
     expectedSeries.dataFields.dateX = "timestamp";
@@ -160,7 +175,9 @@ const LiveVehicleStats = ({ data, granularity, label, xAxisMin, xAxisMax }: Live
 
   return (
     <div>
-      <h3 className="govuk-body" style={{ marginBottom: "8px" }}>{label}</h3>
+      <h3 className="govuk-body" style={{ marginBottom: "8px" }}>
+        {label}
+      </h3>
       <div id={idRef.current} style={{ width: "100%", height: "250px" }} />
     </div>
   );
