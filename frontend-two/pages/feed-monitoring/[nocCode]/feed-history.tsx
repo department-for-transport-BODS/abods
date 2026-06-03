@@ -134,7 +134,7 @@ const FeedHistoryPage = () => {
             <h1 className="app-page-header font-bold" style={{fontSize: "48px"}}>Feed history</h1>
             <div className="flex items-baseline gap-4">
                 <span className="govuk-body" style={{ color: "#484949", fontSize: "24px" }}>{`Operator`}</span>
-                <OperatorDropdown operators={operators} currentNocCode={nocCode} pageLink={`/feed-monitoring/[nocCode]/feed-history?date=${date ?? ""}`} />
+                <OperatorDropdown operators={operators} currentNocCode={nocCode ?? ""} pageLink={`/feed-monitoring/[nocCode]/feed-history?date=${date ?? ""}`} />
             </div>
             </div>
             <div className="flex items-center justify-between mt-8">

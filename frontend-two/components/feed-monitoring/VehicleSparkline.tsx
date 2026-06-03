@@ -41,7 +41,7 @@ interface VehicleSparklineProps {
 
 export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useRef<am4charts.XYChart | null>(null);
+  const chartInstance = useRef<{ dispose: () => void } | null>(null);
 
   const idRef = useRef(`vehicle-sparkline-${Math.random().toString(36).slice(2)}`);
 
