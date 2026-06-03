@@ -163,7 +163,7 @@ loggedInTest.describe("Live Status Page - Authenticated", () => {
   });
 });
 
-// Feed History Page - Unauthenticated
+// Feed History Page
 test("Feed History Page - Unauthenticated", async ({ page }) => {
   let nocCode: string = process.env.TEST_NOC_CODE as string;
   await page.goto(`/feed-monitoring/${nocCode}/feed-history`, { waitUntil: "domcontentloaded" });

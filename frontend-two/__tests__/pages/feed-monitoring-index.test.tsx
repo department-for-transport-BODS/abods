@@ -30,7 +30,6 @@ const mockRouterPush = vi.fn();
 
 vi.mock("next/router", () => ({
   useRouter: () => ({
-    // TODO: Resolve these urls
     pathname: "/feed-monitoring/[nocCode]",
     asPath: "/feed-monitoring/[nocCode]",
     query: { nocCode: "ALPH" },

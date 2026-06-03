@@ -1,13 +1,11 @@
 import { test, expect, loggedInTest } from "./fixtures";
 import { DistancesPage } from "./pages/DistancePage";
 
-// Unauthenticated
 test("Distance Page - Unauthenticated", async ({ page }) => {
   await page.goto("/distances", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/login/);
 });
 
-// Authenticated
 loggedInTest.describe("Distance Page - Authenticated", () => {
   let distances!: DistancesPage;
 

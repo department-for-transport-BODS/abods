@@ -18,7 +18,6 @@ export class LiveStatusPage {
     return this.page.getByText(/Operator/);
   }
 
-  // TODO: Check this works
   operatorDropdown(): Locator {
     return this.page.locator(".operator-dropdown__button");
   }
