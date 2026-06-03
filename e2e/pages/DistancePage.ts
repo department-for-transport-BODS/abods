@@ -8,9 +8,7 @@ export class DistancesPage {
   constructor(private readonly page: Page) {}
 
   async goTo(): Promise<void> {
-    await this.page.goto("/distances", {
-      waitUntil: "domcontentloaded",
-    });
+    await this.page.goto("/distances", { waitUntil: "domcontentloaded" });
   }
 
   async openFromNavigationPanel(): Promise<void> {
@@ -27,11 +25,11 @@ export class DistancesPage {
   }
 
   filterPanel(): Locator {
-    return this.page.locator(".distance-filters-panel");
+    return this.page.locator("main");
   }
 
   table(): Locator {
-    return this.page.locator(".distance-table");
+    return this.page.locator("table");
   }
 
   generateButton(): Locator {

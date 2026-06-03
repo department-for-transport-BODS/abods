@@ -4,7 +4,7 @@ import { Locator, Page } from "@playwright/test";
  * Page object for the Live Status page (/feed-monitoring/[nocCode]).
  */
 export class LiveStatusPage {
-  constructor(private readonly page: Page) {}
+  constructor(readonly page: Page) {}
 
   async goTo(nocCode: string): Promise<void> {
     await this.page.goto(`/feed-monitoring/${nocCode}`, { waitUntil: "domcontentloaded" });
@@ -18,27 +18,32 @@ export class LiveStatusPage {
     return this.page.getByText(/Operator/);
   }
 
+  // TODO: Check this works
+  operatorDropdown(): Locator {
+    return this.page.locator(".operator-dropdown__button");
+  }
+
   viewFeedHistoryLink(): Locator {
     return this.page.getByRole("link", { name: /View feed history/i });
   }
 
   backToAllOperatorsLink(): Locator {
-    return this.page.getByRole("link", { name: "All operators" });
+    return this.page.getByRole("link", { name: /All operators/i });
   }
 
   feedStatusStat(): Locator {
-    return this.page.getByText("Feed status").locator("..");
+    return this.page.getByTestId("feed-status-stat");
   }
 
   currentVehiclesStat(): Locator {
-    return this.page.getByText("Current vehicles").locator("..");
+    return this.page.getByTestId("current-vehicles-stat");
   }
 
   expectedVehiclesStat(): Locator {
-    return this.page.getByText("Expected vehicles").locator("..");
+    return this.page.getByTestId("expected-vehicles-stat");
   }
 
   updateFrequencyStat(): Locator {
-    return this.page.getByText("Update frequency").locator("..");
+    return this.page.getByTestId("update-frequency-stat");
   }
 }

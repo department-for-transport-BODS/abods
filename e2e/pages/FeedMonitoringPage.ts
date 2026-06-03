@@ -4,7 +4,7 @@ import { Locator, Page } from "@playwright/test";
  * Page object for the Feed Monitoring listing page (/feed-monitoring).
  */
 export class FeedMonitoringPage {
-  constructor(private readonly page: Page) {}
+  constructor(readonly page: Page) {}
 
   async goTo(): Promise<void> {
     await this.page.goto("/feed-monitoring", { waitUntil: "domcontentloaded" });
@@ -16,30 +16,30 @@ export class FeedMonitoringPage {
   }
 
   feedMonitoringNavLink(): Locator {
-    return this.page.getByRole("link", { name: "Feed monitoring" });
+    return this.page.getByRole("navigation").getByRole("link", { name: "NOC feed monitoring" });
   }
 
   heading(): Locator {
     return this.page.getByRole("heading", { name: "NOC feed monitoring" });
   }
 
+  searchInputLabel(): Locator {
+    return this.page.getByLabel("Search for an operator");
+  }
+  
   searchInput(): Locator {
-    return this.page.locator("#operator-search");
+    return this.page.getByTestId("operator-search-input");
   }
 
   inactiveTable(): Locator {
-    return this.page.getByRole("heading", { name: "Inactive feeds" }).locator("..");
+    return this.page.getByTestId("inactive-feeds-section").getByRole("table");
   }
 
   activeTable(): Locator {
-    return this.page.getByRole("heading", { name: "Active feeds" }).locator("..");
-  }
-
-  noDataMessage(): Locator {
-    return this.page.getByText("No operator data found");
+    return this.page.getByTestId("active-feeds-section").getByRole("table");
   }
 
   async clickOperatorLink(nocCode: string): Promise<void> {
-    await this.page.getByRole("link", { name: new RegExp(nocCode, "i") }).first().click();
+    await this.page.locator(`a[href="/feed-monitoring/${nocCode}"]`).click();
   }
 }

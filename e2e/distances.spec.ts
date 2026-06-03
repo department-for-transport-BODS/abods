@@ -11,9 +11,21 @@ test("Distance Page - Unauthenticated", async ({ page }) => {
 loggedInTest.describe("Distance Page - Authenticated", () => {
   let distances!: DistancesPage;
 
-  loggedInTest("reachable from dashboard navigation panel", async ({ page }) => {
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    distances = new DistancesPage(loggedInPage);
+    await distances.goTo();
+
+    // Wait for all network requests to complete
+    await loggedInPage.waitForLoadState("networkidle");
+
+    // Wait for loading indicators to disappear
+    await expect(loggedInPage.getByText(/Loading\.\.\./i)).toHaveCount(0, { timeout: 60000 });
+
+  });
+
+  loggedInTest("reachable from dashboard navigation panel", async ({ loggedInPage }) => {
     await distances.openFromNavigationPanel();
-    await expect(page).toHaveURL(/\/distances/);
+    await expect(loggedInPage).toHaveURL(/\/distances/);
   });
 
   loggedInTest("renders the Distances heading", async () => {
@@ -21,7 +33,22 @@ loggedInTest.describe("Distance Page - Authenticated", () => {
   });
 
   loggedInTest("renders the distances filter panel", async () => {
-    await expect(distances.filterPanel()).toBeVisible();
+    await expect(distances.filterPanel().getByText("Date Range")).toBeVisible();
+    await expect(
+      distances.filterPanel().getByRole("button", { name: /^All areas(\s+▼)?$/i }),
+    ).toBeVisible();
+    await expect(
+      distances.filterPanel().getByRole("button", { name: /^All organisations(\s+▼)?$/i }),
+    ).toBeVisible();
+    await expect(
+      distances.filterPanel().getByRole("button", { name: /^All operators(\s+▼)?$/i }),
+    ).toBeVisible();
+    await expect(
+      distances.filterPanel().getByRole("button", { name: /^All licenses(\s+▼)?$/i }),
+    ).toBeVisible();
+    await expect(
+      distances.filterPanel().getByRole("button", { name: /^All services(\s+▼)?$/i }),
+    ).toBeVisible();
   });
 
   loggedInTest("renders the distances table", async () => {

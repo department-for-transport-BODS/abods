@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
  * Page object for the Feed History page (/feed-monitoring/[nocCode]/feed-history).
  */
 export class FeedHistoryPage {
-  constructor(private readonly page: Page) {}
+  constructor(readonly page: Page) {}
 
   async goTo(nocCode: string, date?: DateTime): Promise<void> {
     const d = date ? date.toISODate() : new Date(Date.now() - 86400000).toISOString().split("T")[0];
