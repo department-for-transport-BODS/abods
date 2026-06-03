@@ -1,4 +1,5 @@
 import { useConfig } from "@/contexts/ConfigContext";
+import { useRequireAuth } from "@/hooks/useAuth";
 import { BaseLayout } from "../components/layout/BaseLayout";
 import { DistanceFilters} from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
@@ -15,6 +16,7 @@ const Button = dynamic(
 );
 
 const DistancesPage = () => {
+  useRequireAuth();
   const { config } = useConfig();
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);

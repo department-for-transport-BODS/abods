@@ -10,6 +10,7 @@ import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
+import { useRequireAuth } from "@/hooks/useAuth";
 
 const HistoricVehicleStats = dynamic(() => import("@/components/feed-monitoring/HistoricVehicleStats"), { ssr: false });
 
@@ -32,6 +33,8 @@ function formatUpdateFrequency(f?: number | null): string {
 }
 
 const FeedHistoryPage = () => {
+    useRequireAuth();
+
     const router = useRouter();
 
     const { nocCode, date } = (router.query ?? {}) as { nocCode?: string; date?: string };

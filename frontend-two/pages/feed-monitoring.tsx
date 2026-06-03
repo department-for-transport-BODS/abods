@@ -4,8 +4,10 @@ import { FeedTable } from "@/components/feed-monitoring/FeedTable";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperatorData, VehicleCountData } from "@/types/feed-monitoring";
+import { useRequireAuth } from "@/hooks/useAuth";
 
 const FeedMonitoringPage = () => {
+  useRequireAuth();
   const { config } = useConfig();
   const [operatorData, setOperatorData] = useState<FeedMonitoringOperatorData[]>([]);
   const [vehicleCountData, setVehicleCountData] = useState<VehicleCountData[]>([]);
@@ -60,6 +62,7 @@ const FeedMonitoringPage = () => {
           <input
             className="govuk-input govuk-input--width-20"
             id="operator-search"
+            data-testid="operator-search-input"
             type="text"
             value={operatorSearch}
             onChange={(e) => setOperatorSearch(e.target.value)}
@@ -69,8 +72,12 @@ const FeedMonitoringPage = () => {
           <p className="govuk-body">Loading...</p>
         ) : (
           <>
-            <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} vehicleCountData={vehicleCountData} />
-            <FeedTable title="Active feeds" active={true} data={activeOperators} vehicleCountData={vehicleCountData} />
+            <div data-testid="inactive-feeds-section">
+              <FeedTable title="Inactive feeds" active={false} data={inactiveOperators} vehicleCountData={vehicleCountData} />
+            </div>
+            <div data-testid="active-feeds-section">
+              <FeedTable title="Active feeds" active={true} data={activeOperators} vehicleCountData={vehicleCountData} />
+            </div>
           </>
         )}
       </div>

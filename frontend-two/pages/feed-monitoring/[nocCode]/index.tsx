@@ -9,9 +9,12 @@ import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithToolt
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import dynamic from "next/dynamic";
+import { useRequireAuth } from "@/hooks/useAuth";
+    
 const LiveVehicleStats = dynamic(() => import("@/components/feed-monitoring/LiveVehicleStats"), { ssr: false });
 
 const LiveStatusPage = () => {
+    useRequireAuth();
     const router = useRouter();
     const { nocCode } = router.query as { nocCode: string};
     const { config } = useConfig();
@@ -75,7 +78,7 @@ const LiveStatusPage = () => {
                 <a href={`/feed-monitoring/${nocCode}/feed-history?date=${new Date(Date.now() - 86400000).toISOString().split("T")[0]}`} className="govuk-link" style={{fontSize: "20px"}}>View feed history</a>
             </div>
             <div className="grid grid-cols-4 gap-4 mt-6">
-                <div className="min-w-0">
+                <div className="min-w-0" data-testid="feed-status-stat">
                     <FeedStatusSummaryStat
                     title="Feed status"
                     value={operator?.feedMonitoring?.feedStatus != null
@@ -83,21 +86,21 @@ const LiveStatusPage = () => {
                         : "-"}
                     />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0" data-testid="current-vehicles-stat">
                     <SummaryStatWithTooltip
                     title="Current vehicles"
                     value={operator?.feedMonitoring?.liveStats?.currentVehicles ?? "-"}
                     tooltip="Current number of vehicles running that we can match to the timetables uploaded to BODS"
                     />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0" data-testid="expected-vehicles-stat">
                     <SummaryStatWithTooltip
                     title="Expected vehicles"
                     value={operator?.feedMonitoring?.liveStats?.expectedVehicles ?? "-"}
                     tooltip="The number of vehicles based that should be running now according to the timetables uploaded to BODS"
                     />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0" data-testid="update-frequency-stat">
                     <SummaryStatWithTooltip
                     title="Update frequency"
                     value={operator?.feedMonitoring?.liveStats?.updateFrequency
