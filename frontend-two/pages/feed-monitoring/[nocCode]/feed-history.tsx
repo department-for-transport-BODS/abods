@@ -57,34 +57,30 @@ const FeedHistoryPage = () => {
     const [historicalDataLoading, setHistoricalDataLoading] = useState(false);
     const [chartErrored, setChartErrored] = useState(false);
     const [noData, setNoData] = useState(false);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
-      if (!config?.apiUrl) {
-        setOperators([]);
-        setIsLoading(false);
-        return;
-      }
-
       const load = async () => {
         setIsLoading(true);
         try {
-          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
+          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList();
           setOperators(feedMonitoringData);
         } catch (err) {
           console.error("Failed to load feed monitoring list data:", err);
+          setError(true);
         } finally {
           setIsLoading(false);
         }
       };
       load();
-    }, [config]);
+    }, []);
 
     // Fetch historical operator stats for selected date
     useEffect(() => {
       // Create date array for DateNavigation component
       setDateList(buildDateList());
       
-      if (!config?.apiUrl || !nocCode || !baseDate.isValid) return;
+      if (!nocCode || !baseDate.isValid) return;
       setHistoricalDataLoading(true);
       setChartErrored(false);
       setNoData(false);
@@ -94,7 +90,7 @@ const FeedHistoryPage = () => {
     
       const load = async () => {
         try {
-          const operatorHistoryData =  await feedMonitoringService.fetchOperatorHistory(config.apiUrl, nocCode, baseDate.toISODate()!, start, end)
+          const operatorHistoryData =  await feedMonitoringService.fetchOperatorHistory(nocCode, baseDate.toISODate()!, start, end)
           setHistoricalDataLoading(false);
           if (!operatorHistoryData) {
             setChartErrored(true);
@@ -109,7 +105,7 @@ const FeedHistoryPage = () => {
         }
       };
       load();
-    }, [config, nocCode, date]);
+    }, [nocCode, date]);
 
     if (isLoading) {
         return (
@@ -130,6 +126,14 @@ const FeedHistoryPage = () => {
         <div className="app-page feed-monitoring-page">
             <div>
             <a href={`/feed-monitoring/${nocCode}`} className="govuk-back-link">Live status</a>
+            {error && (
+              <div className="govuk-error-summary" role="alert" aria-labelledby="error-summary-title">
+                <h2 className="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+                <div className="govuk-error-summary__body">
+                  <p className="govuk-body">There was a problem loading the feed history data. Please try refreshing the page.</p>
+                </div>
+              </div>
+            )}
             <span className="govuk-caption-xl">NOC feed monitoring</span>
             <h1 className="app-page-header font-bold" style={{fontSize: "48px"}}>Feed history</h1>
             <div className="flex items-baseline gap-4">

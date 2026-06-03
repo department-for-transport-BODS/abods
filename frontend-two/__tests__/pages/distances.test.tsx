@@ -394,7 +394,7 @@ const filteredTableDataTestCases = [
 ] as const;
 
 it.each(filteredTableDataTestCases)("$name", async ({ filterButtonName, selectedOption, expectedRowCount, shouldSee, shouldNotSee }) => {
-  mockFetchDistances.mockImplementation(async (_apiUrl, filters) => {
+  mockFetchDistances.mockImplementation(async (filters) => {
     const operatorByAdminAreaId: Record<string, string> = {
       "1": "FBMN",
       "2": "ARWY",

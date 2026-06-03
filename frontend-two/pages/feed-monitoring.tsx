@@ -1,40 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { FeedTable } from "@/components/feed-monitoring/FeedTable";
-import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperatorData, VehicleCountData } from "@/types/feed-monitoring";
 import { useRequireAuth } from "@/hooks/useAuth";
 
 const FeedMonitoringPage = () => {
   useRequireAuth();
-  const { config } = useConfig();
   const [operatorData, setOperatorData] = useState<FeedMonitoringOperatorData[]>([]);
   const [vehicleCountData, setVehicleCountData] = useState<VehicleCountData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [operatorSearch, setOperatorSearch] = useState("");
 
   useEffect(() => {
-    if (!config?.apiUrl) {
-      setOperatorData([]);
-      setIsLoading(false);
-      return;
-    }
     const load = async () => {
       setIsLoading(true);
       try {
-        const data = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
-        const vehicleData = await feedMonitoringService.fetchOperatorSparklines(config.apiUrl, data.map(d => d.operatorId));
+        const data = await feedMonitoringService.fetchFeedMonitoringList();
+        const vehicleData = await feedMonitoringService.fetchOperatorSparklines(data.map(d => d.operatorId));
         setOperatorData(data);
         setVehicleCountData(vehicleData);
       } catch (err) {
         console.error("Failed to load feed monitoring data:", err);
+        setError(true);
       } finally {
         setIsLoading(false);
       }
     };
     load();
-  }, [config]);
+  }, []);
 
   // Check if operator search has been used and filter data here
   // Can search either by operator name or NOC code
@@ -55,6 +50,14 @@ const FeedMonitoringPage = () => {
     <BaseLayout title="Dashboard - Analyse Bus Open Data">
       <div className="app-page feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">NOC feed monitoring</h1>
+        {error && (
+          <div className="govuk-error-summary" role="alert" aria-labelledby="error-summary-title">
+            <h2 className="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+            <div className="govuk-error-summary__body">
+              <p className="govuk-body">There was a problem loading the feed monitoring data. Please try refreshing the page.</p>
+            </div>
+          </div>
+        )}
         <div className="govuk-form-group">
           <label className="govuk-label" htmlFor="operator-search">
             Search for an operator

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { FeedMonitoringOperatorData, OperatorLiveStatus } from "@/types/feed-monitoring";
 import { Box } from "@/components/shared/Box";
@@ -17,20 +16,13 @@ const LiveStatusPage = () => {
     useRequireAuth();
     const router = useRouter();
     const { nocCode } = router.query as { nocCode: string};
-    const { config } = useConfig();
     
     const [operator, setOperator] = useState<OperatorLiveStatus | null>(null);
     const [operators, setOperators] = useState<FeedMonitoringOperatorData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
-      if (!config?.apiUrl) {
-        setOperators([]);
-        setOperator(null);
-        setIsLoading(false);
-        return;
-      }
-
       if (!nocCode) {
         return;
       }
@@ -38,18 +30,19 @@ const LiveStatusPage = () => {
       const load = async () => {
         setIsLoading(true);
         try {
-          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList(config.apiUrl);
-          const operatorLiveStatusData = await feedMonitoringService.fetchOperatorLiveStatus(config.apiUrl, nocCode);
+          const feedMonitoringData = await feedMonitoringService.fetchFeedMonitoringList();
+          const operatorLiveStatusData = await feedMonitoringService.fetchOperatorLiveStatus(nocCode);
           setOperators(feedMonitoringData);
           setOperator(operatorLiveStatusData);
         } catch (err) {
           console.error("Failed to load live status data:", err);
+          setError(true);
         } finally {
           setIsLoading(false);
         }
       };
       load();
-    }, [config, nocCode]);
+    }, [nocCode]);
 
     if (isLoading) {
         return (
@@ -66,6 +59,14 @@ const LiveStatusPage = () => {
         <div className="app-page feed-monitoring-page">
             <div>
                 <a href="/feed-monitoring" className="govuk-back-link">All operators</a>
+                {error && (
+                  <div className="govuk-error-summary" role="alert" aria-labelledby="error-summary-title">
+                    <h2 className="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+                    <div className="govuk-error-summary__body">
+                      <p className="govuk-body">There was a problem loading the live status data. Please try refreshing the page.</p>
+                    </div>
+                  </div>
+                )}
                 <span className="govuk-caption-xl">NOC feed monitoring</span>
                 <h1 className="app-page-header font-bold" style={{fontSize: "48px"}}>Live status</h1>
                 <div className="flex items-baseline gap-4">
