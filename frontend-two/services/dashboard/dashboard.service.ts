@@ -1,51 +1,56 @@
 import { DateTime } from "luxon";
-import { graphqlRequest } from "@/services/api";
+import { PunctualityOverview, ServiceRankingResult } from "@/types/dashboard";
+import { apolloClient } from "@/services/apolloClient";
 import {
-  DashboardVehicles,
-  OperatorDashboard,
-  PerformanceFiltersInputType,
-  PunctualityOverview,
+  DashboardOperatorVehicleCountsListDocument,
+  DashboardOperatorVehicleCountsListQuery,
+  DashboardOperatorListDocument,
+  DashboardOperatorListQuery,
+  DashboardPerformanceStatsDocument,
+  DashboardPerformanceStatsQuery,
+  DashboardServiceRankingQuery,
+  DashboardServiceRankingDocument,
   RankingOrder,
-  ServicePunctuality,
-} from "@/types/dashboard";
-import {
-  OPERATOR_LIST_QUERY,
-  PERFORMANCE_STATS_QUERY,
-  SERVICE_RANKING_QUERY,
-  VEHICLE_COUNTS_QUERY,
-} from "@/services/dashboard/dashboard.operations";
+  PerformanceFiltersInputType,
+  ServicePunctualityType,
+  DashboardOperatorListQueryVariables,
+  DashboardOperatorVehicleCountsListQueryVariables,
+  DashboardPerformanceStatsQueryVariables,
+} from "../../src/generated/graphql";
+import { ApolloCache, FetchPolicy } from "@apollo/client";
 
 export const dashboardService = {
-  fetchOperators: async (apiUrl: string): Promise<OperatorDashboard[]> => {
+  fetchOperators: async (): Promise<
+    DashboardOperatorListQuery["operatorsFeedMonitoring"]
+  > => {
     try {
-      const result = await graphqlRequest<{
-        operatorsFeedMonitoring: OperatorDashboard[];
-      }>(apiUrl, OPERATOR_LIST_QUERY);
-      return result.operatorsFeedMonitoring ?? [];
+      const result = await apolloClient.query({
+        query: DashboardOperatorListDocument,
+      });
+      return result.data?.operatorsFeedMonitoring ?? [];
     } catch (error) {
       console.error("Failed to fetch operators:", error);
       return [];
     }
   },
-  fetchVehicleCounts: async (
-    apiUrl: string,
+  fetchOperatorVehicleCounts: async (
     operatorId?: string | null,
-  ): Promise<DashboardVehicles[]> => {
+  ): Promise<DashboardOperatorVehicleCountsListQuery["dashboardVehicles"]> => {
     try {
-      const result = await graphqlRequest<{
-        dashboardVehicles: DashboardVehicles[];
-      }>(apiUrl, VEHICLE_COUNTS_QUERY, { operatorId: operatorId ?? undefined });
-      return result.dashboardVehicles ?? [];
+      const result = await apolloClient.query({
+        query: DashboardOperatorVehicleCountsListDocument,
+        variables: { operatorId: operatorId ?? undefined },
+      });
+      return result.data?.dashboardVehicles ?? [];
     } catch (error) {
       console.error("Failed to fetch vehicle counts:", error);
       return [];
     }
   },
   fetchPunctualityStats: async (
-    apiUrl: string,
     filters: PerformanceFiltersInputType,
-    from: DateTime,
-    to: DateTime,
+    from: DateTime<true>,
+    to: DateTime<true>,
   ): Promise<PunctualityOverview | null> => {
     const params = {
       fromTimestamp: from.toISO(),
@@ -53,26 +58,25 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await graphqlRequest<{
-        onTimePerformance?: {
-          punctualityOverview?: PunctualityOverview | null;
-        } | null;
-      }>(apiUrl, PERFORMANCE_STATS_QUERY, { params });
-      return result.onTimePerformance?.punctualityOverview ?? null;
+      const result = await apolloClient.query({
+        query: DashboardPerformanceStatsDocument,
+        variables: { params },
+        fetchPolicy: "no-cache",
+      });
+      return result.data?.onTimePerformance?.punctualityOverview ?? null;
     } catch (error) {
       console.error("Failed to fetch punctuality stats:", error);
       return null;
     }
   },
   fetchServiceRanking: async (
-    apiUrl: string,
     filters: PerformanceFiltersInputType,
-    from: DateTime,
-    to: DateTime,
+    from: DateTime<true>,
+    to: DateTime<true>,
     order: RankingOrder,
-    trendFrom: DateTime,
-    trendTo: DateTime,
-  ): Promise<ServicePunctuality[]> => {
+    trendFrom: DateTime<true>,
+    trendTo: DateTime<true>,
+  ): Promise<ServiceRankingResult> => {
     const params = {
       fromTimestamp: from.toISO(),
       toTimestamp: to.toISO(),
@@ -80,16 +84,16 @@ export const dashboardService = {
       filters,
     };
     try {
-      const result = await graphqlRequest<{
-        onTimePerformance?: {
-          servicePunctuality?: ServicePunctuality[] | null;
-        } | null;
-      }>(apiUrl, SERVICE_RANKING_QUERY, {
-        params,
-        trendFrom: trendFrom.toISO(),
-        trendTo: trendTo.toISO(),
+      const result = await apolloClient.query({
+        query: DashboardServiceRankingDocument,
+        variables: {
+          params,
+          trendFrom: trendFrom.toISO(),
+          trendTo: trendTo.toISO(),
+        },
+        fetchPolicy: "no-cache",
       });
-      return result.onTimePerformance?.servicePunctuality ?? [];
+      return result.data?.onTimePerformance?.servicePunctuality ?? [];
     } catch (error) {
       console.error("Failed to fetch service ranking:", error);
       return [];

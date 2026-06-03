@@ -6,11 +6,11 @@
     "postinstall": "(cd abods-api && npm install) && (cd frontend && npm install) && (cd frontend-two && npm install)",
     "db": "./scripts/db_connect.sh sandbox",
     "start:api": "(cd abods-api && npm run start:local)",
-    "start:app": "(cd frontend && npm run dev)",
+    "start:app": "(cd frontend && npm run start)",
     "start:next-app": "(cd frontend-two && npm run dev)",
     "start": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:app\"",
     "start-next": "concurrently --kill-others \"npm run db\" \"npm run start:api\" \"npm run start:next-app\"",
-    "pre-push": "(npm run lint:check) && (npm run type-check)",
+    "pre-push": "(npm run lint:check) && (npm run fmt:check) && (npm run type-check)",
     "lint": "(cd abods-api && npm run lint) && (cd frontend && npm run lint) && (cd frontend-two && npm run lint)",
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check) && (cd frontend-two && npm run lint)",
     "prepare": "(npm run codegen) && husky",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/introspection": "^4.0.3",
+    "@graphql-codegen/typed-document-node": "^5.1.2",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
     "@graphql-codegen/typescript-operations": "^5.0.2",
@@ -39,6 +40,9 @@
     "prettier": "3.2.5",
     "source-map": "^0.7.6",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "graphql": "16.14.1"
   },
   "lint-staged": {
     "**/*": "prettier --write"

@@ -16,9 +16,8 @@ const CorridorsPage = () => {
 
   const filter = getSearchParam(router.query.search);
 
-  const { data, isLoading } = useSWR(
-    config?.apiUrl ? ["corridors-list", config.apiUrl] : null,
-    ([, apiUrl]) => corridorsService.fetchCorridors(apiUrl),
+  const { data, isLoading } = useSWR("corridors-list", () =>
+    corridorsService.fetchCorridors(),
   );
 
   const errors: ErrorInfo[] =

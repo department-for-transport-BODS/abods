@@ -4,15 +4,15 @@ import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
 import { DateTime } from "luxon";
 import { useConfig } from "@/contexts/ConfigContext";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
-import {
-  OperatorDashboard,
-  PerformanceFiltersInputType,
-  PunctualityOverview,
-  RankingOrder,
-  ServicePunctuality,
-} from "@/types/dashboard";
+import { PunctualityOverview, ServiceRankingResult } from "@/types/dashboard";
 import { calculatePresetPeriod, Period } from "@/utils/dateRange";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
+import {
+  DashboardOperatorListQuery,
+  PerformanceFiltersInputType,
+  RankingOrder,
+  ServicePunctualityType,
+} from "../../src/generated/graphql";
 
 const PerformanceChart = dynamic(
   () => import("@/components/dashboard/PerformanceChart"),
@@ -21,7 +21,7 @@ const PerformanceChart = dynamic(
 
 interface PerformanceWidgetProps {
   filters: PerformanceFiltersInputType;
-  operators: OperatorDashboard[];
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
   nocCode: string | null;
 }
 
@@ -47,12 +47,12 @@ export const PerformanceWidget = ({
   const { config } = useConfig();
   const [period, setPeriod] = useState<Period>("last7");
   const [stats, setStats] = useState<PunctualityOverview | null>(null);
-  const [services, setServices] = useState<ServicePunctuality[]>([]);
+  const [services, setServices] = useState<ServiceRankingResult>([]);
   const [loaded, setLoaded] = useState(false);
   const [servicesLoaded, setServicesLoaded] = useState(false);
   const [servicesErrored, setServicesErrored] = useState(false);
   const [errored, setErrored] = useState(false);
-  const [order, setOrder] = useState<RankingOrder>("descending");
+  const [order, setOrder] = useState<RankingOrder>(RankingOrder.Descending);
 
   const window = useMemo(
     () => calculatePresetPeriod(period, DateTime.local()),
@@ -71,7 +71,6 @@ export const PerformanceWidget = ({
       setErrored(false);
       try {
         const result = await dashboardService.fetchPunctualityStats(
-          config.apiUrl,
           filters,
           window.from,
           window.to,
@@ -103,7 +102,6 @@ export const PerformanceWidget = ({
       setServicesErrored(false);
       try {
         const result = await dashboardService.fetchServiceRanking(
-          config.apiUrl,
           filters,
           window.from,
           window.to,

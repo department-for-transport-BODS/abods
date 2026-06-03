@@ -241,7 +241,7 @@ jobs:
             }' > public/config.json
 
           npm ci
-          NEXT_PUBLIC_API_BASE_URL="$bods_base_url" npm run build
+          NEXT_GRAPHQL_API_BASE_URL="$graphql_api_url" npm run build
 
           echo "[INFO] Uploading application component (FRONTEND V2) for ${RC_ENV^^}"
           aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-v2-name }}"

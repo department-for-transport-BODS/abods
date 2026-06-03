@@ -23,7 +23,7 @@ loggedInTest.describe("Corridors list page", () => {
   });
 
   loggedInTest("shows the Create new corridor button", async () => {
-    await expect(corridors.createNewCorridorLink()).toBeVisible();
+    await expect(corridors.createNewCorridorButton()).toBeVisible();
   });
 
   loggedInTest("shows the search input", async () => {
@@ -86,7 +86,7 @@ loggedInTest.describe("Corridor view page", () => {
   });
 
   loggedInTest("shows the Edit corridor button", async () => {
-    await expect(corridors.editCorridorLink()).toBeVisible();
+    await expect(corridors.editCorridorButton()).toBeVisible();
   });
 
   loggedInTest("shows recorded and missing transit stats", async () => {

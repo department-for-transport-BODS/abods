@@ -17,7 +17,12 @@ interface BaseLayoutProps {
   children: ReactNode;
   errors?: ErrorInfo[];
 }
-const PUBLIC_ROUTES = ["/login", "/accessibility", "/cookies", "/privacy-policy"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/accessibility",
+  "/cookies",
+  "/privacy-policy",
+];
 
 export const BaseLayout = ({
   title,
@@ -28,8 +33,8 @@ export const BaseLayout = ({
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const normalizedPath = router.asPath.split("?")[0].replace(/\/+$/, "") || "/";
-  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    normalizedPath === route || normalizedPath.endsWith(route),
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => normalizedPath === route || normalizedPath.endsWith(route),
   );
   const showAuthenticatedLayout = isAuthenticated && !isPublicRoute;
   const pageTitle = buildTitle(errors, title);

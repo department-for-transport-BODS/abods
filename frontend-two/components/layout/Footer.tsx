@@ -18,18 +18,12 @@ export const Footer = () => {
                 </Link>
               </li>
               <li className="govuk-footer__inline-list-item">
-                <Link
-                  className="govuk-footer__link"
-                  href="/privacy-policy/"
-                >
+                <Link className="govuk-footer__link" href="/privacy-policy/">
                   Privacy
                 </Link>
               </li>
               <li className="govuk-footer__inline-list-item">
-                <Link
-                  className="govuk-footer__link"
-                  href="/accessibility/"
-                >
+                <Link className="govuk-footer__link" href="/accessibility/">
                   Accessibility
                 </Link>
               </li>

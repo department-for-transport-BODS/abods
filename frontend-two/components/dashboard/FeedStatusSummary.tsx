@@ -1,11 +1,11 @@
-import { OperatorDashboard } from "@/types/dashboard";
 import { Box } from "@/components/shared/Box";
 import { Status } from "@/components/shared/Status";
 import { Tooltip } from "@/components/shared/Tooltip";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
+import { DashboardOperatorListQuery } from "../../src/generated/graphql";
 
 interface FeedStatusSummaryProps {
-  operators: OperatorDashboard[];
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
 }
 
 export const FeedStatusSummary = ({ operators }: FeedStatusSummaryProps) => (

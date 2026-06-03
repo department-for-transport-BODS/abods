@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
-import { Tooltip } from "@/components/shared/Tooltip";
 import {
-  OperatorDashboard,
+  DashboardOperatorListQuery,
   RankingOrder,
-  ServicePunctuality,
-} from "@/types/dashboard";
+  ServicePunctualityType,
+} from "../../src/generated/graphql";
+import { Tooltip } from "@/components/shared/Tooltip";
+import { ServiceRankingItem, ServiceRankingResult } from "@/types/dashboard";
 
 interface PerformanceRankingTableProps {
-  services: ServicePunctuality[];
+  services: ServiceRankingResult;
   loaded: boolean;
   errored: boolean;
   nocCode: string | null;
-  operators: OperatorDashboard[];
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
   order: RankingOrder;
   onChangeOrder: (order: RankingOrder) => void;
   trendFrom?: DateTime;
@@ -22,20 +23,20 @@ interface PerformanceRankingTableProps {
 
 type TrendDirection = "increase" | "decrease";
 
-const buildServiceName = (service: ServicePunctuality) => {
+const buildServiceName = (service: ServiceRankingItem) => {
   const number = service.lineInfo?.serviceNumber ?? "unknown";
   const name = service.lineInfo?.serviceName ?? "unknown";
   return `${number}: ${name}`;
 };
 
-const calculateOnTimePct = (service: ServicePunctuality) => {
+const calculateOnTimePct = (service: ServiceRankingItem) => {
   const total =
     (service.onTime ?? 0) + (service.early ?? 0) + (service.late ?? 0);
   return total > 0 ? ((service.onTime ?? 0) / total) * 100 : 0;
 };
 
 const calculateTrend = (
-  service: ServicePunctuality,
+  service: ServiceRankingItem,
 ): { diff: string; direction: TrendDirection } | null => {
   if (!service.trend) return null;
   const total =
@@ -58,7 +59,7 @@ const buildTrendClassName = (direction: TrendDirection) =>
   `change change--small change--${direction}`;
 
 const getOperatorName = (
-  operators: OperatorDashboard[],
+  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"],
   noc: string | null | undefined,
 ) => operators.find((op) => op.nocCode === noc)?.name ?? "Unknown";
 
@@ -94,11 +95,11 @@ export const PerformanceRankingTable = ({
           <li
             className={`tabs__list-item ${order === "descending" ? "tabs__list-item--selected" : ""}`}
             tabIndex={0}
-            onClick={() => onChangeOrder("descending")}
+            onClick={() => onChangeOrder(RankingOrder.Descending)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                onChangeOrder("descending");
+                onChangeOrder(RankingOrder.Descending);
               }
             }}
           >
@@ -107,11 +108,11 @@ export const PerformanceRankingTable = ({
           <li
             className={`tabs__list-item ${order === "ascending" ? "tabs__list-item--selected" : ""}`}
             tabIndex={0}
-            onClick={() => onChangeOrder("ascending")}
+            onClick={() => onChangeOrder(RankingOrder.Descending)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                onChangeOrder("ascending");
+                onChangeOrder(RankingOrder.Ascending);
               }
             }}
           >

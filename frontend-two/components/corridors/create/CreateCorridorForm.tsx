@@ -13,15 +13,13 @@ import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorrido
 type SearchMode = "location" | "stop";
 
 interface Props {
-  apiUrl: string;
   mode: "create" | "edit";
   initialCorridor?: Corridor;
-  mapboxToken: string;
-  mapboxStyle: string;
+  mapboxToken?: string;
+  mapboxStyle?: string;
 }
 
 export const CreateCorridorForm = ({
-  apiUrl,
   mode,
   initialCorridor,
   mapboxToken,
@@ -48,9 +46,9 @@ export const CreateCorridorForm = ({
     stopList.length === 0 && stopQuery.trim().length > 3;
   const { data: firstStopData, isLoading: searchingFirstStop } = useSWR(
     firstStopSearchEnabled
-      ? ["corridor-first-stop-search", apiUrl, stopQuery.trim()]
+      ? ["corridor-first-stop-search", stopQuery.trim()]
       : null,
-    ([, fetchApiUrl, query]) => corridorsService.queryStops(fetchApiUrl, query),
+    ([, query]) => corridorsService.queryStops(query),
   );
 
   const subsequentSearchEnabled = stopList.length > 0;
@@ -58,11 +56,10 @@ export const CreateCorridorForm = ({
 
   const { data: subsequentStops, isLoading: searchingSubsequentStops } = useSWR(
     subsequentSearchEnabled
-      ? ["corridor-subsequent-stops", apiUrl, naptanListKey]
+      ? ["corridor-subsequent-stops", naptanListKey]
       : null,
-    ([, fetchApiUrl]) =>
+    ([,]) =>
       corridorsService.fetchSubsequentStops(
-        fetchApiUrl,
         stopList.map((stop) => stop.naptan).filter(Boolean),
       ),
   );
@@ -140,14 +137,13 @@ export const CreateCorridorForm = ({
 
     setCreating(true);
     const success = await corridorsService.createCorridor(
-      apiUrl,
       name.trim(),
       stopList.map((stop) => stop.stopId),
     );
     setCreating(false);
 
     if (success) {
-      void mutate(["corridors-list", apiUrl]);
+      void mutate(["corridors-list"]);
       router.push("/corridors").catch(() => {
         /* noop */
       });
@@ -168,7 +164,7 @@ export const CreateCorridorForm = ({
     if (!canSubmit) return;
 
     setUpdating(true);
-    const success = await corridorsService.updateCorridor(apiUrl, {
+    const success = await corridorsService.updateCorridor({
       id: initialCorridor.id,
       name: name.trim(),
       stopList: stopList.map((stop) => stop.stopId),
@@ -176,7 +172,7 @@ export const CreateCorridorForm = ({
     setUpdating(false);
 
     if (success) {
-      void mutate(["corridors-list", apiUrl]);
+      void mutate(["corridors-list"]);
       if (window.history.length > 1) {
         router.back();
       } else {
@@ -198,14 +194,11 @@ export const CreateCorridorForm = ({
     setDeleting(true);
     setActionError(null);
 
-    const success = await corridorsService.deleteCorridor(
-      apiUrl,
-      initialCorridor.id,
-    );
+    const success = await corridorsService.deleteCorridor(initialCorridor.id);
     setDeleting(false);
 
     if (success) {
-      void mutate(["corridors-list", apiUrl]);
+      void mutate(["corridors-list"]);
       router.push("/corridors").catch(() => {
         /* noop */
       });

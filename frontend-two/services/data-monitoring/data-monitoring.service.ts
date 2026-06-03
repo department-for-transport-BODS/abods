@@ -1,16 +1,19 @@
-import { graphqlRequest } from "@/services/api";
-import { EmbeddedUrlResponse } from "@/types/data-monitoring";
-import { EMBEDDED_URL_QUERY } from "@/services/data-monitoring/data-monitoring.operations";
+import { apolloClient } from "@/services/apolloClient";
+import {
+  AwsQuicksightUser,
+  DashboadEmbeddedUrlDocument,
+  DashboadEmbeddedUrlQuery,
+} from "../../src/generated/graphql";
 
 export const dataMonitoringService = {
-  fetchEmbeddedUrl: async (
-    apiUrl: string,
-  ): Promise<EmbeddedUrlResponse | null> => {
+  fetchEmbeddedUrl: async (): Promise<AwsQuicksightUser | null> => {
     try {
-      const result = await graphqlRequest<{
-        embeddedUrl: EmbeddedUrlResponse;
-      }>(apiUrl, EMBEDDED_URL_QUERY);
-      return result.embeddedUrl ?? null;
+      const result = await apolloClient.query({
+        query: DashboadEmbeddedUrlDocument,
+        fetchPolicy: "no-cache",
+      });
+
+      return result.data?.embeddedUrl ?? null;
     } catch (error) {
       console.warn("Failed to fetch embedded URL:", error);
       return null;

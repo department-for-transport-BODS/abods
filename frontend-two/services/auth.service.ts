@@ -1,9 +1,14 @@
-import { graphqlRequest } from "@/services/api";
+import { apolloClient } from "@/services/apolloClient";
 import {
-  LOGIN_MUTATION,
-  LOGOUT_MUTATION,
-  USER_QUERY,
-} from "@/services/auth/auth.operations";
+  LoginDocument,
+  LoginMutation,
+  LoginMutationVariables,
+  LogoutDocument,
+  LogoutMutation,
+  UserDocument,
+  UserQuery,
+} from "../src/generated/graphql";
+import { ApolloCache, DefaultContext } from "@apollo/client";
 
 export interface LoginResult {
   success: boolean;
@@ -15,35 +20,28 @@ export interface LoginResult {
 }
 
 export const authService = {
-  login: async (
-    apiUrl: string,
-    username: string,
-    password: string,
-  ): Promise<LoginResult> => {
-    const result = await graphqlRequest<{ login: LoginResult }>(
-      apiUrl,
-      LOGIN_MUTATION,
-      {
-        username,
-        password,
-      },
-    );
-    if (!result.login) {
+  login: async (username: string, password: string): Promise<LoginResult> => {
+    const result = await apolloClient.mutate({
+      mutation: LoginDocument,
+      variables: { username, password },
+    });
+
+    if (!result.data?.login) {
       throw new Error("Login failed");
     }
-    return result.login;
+    return result.data.login;
   },
-  logout: async (apiUrl: string): Promise<boolean> => {
-    const result = await graphqlRequest<{ logout: boolean }>(
-      apiUrl,
-      LOGOUT_MUTATION,
-    );
-    return Boolean(result.logout);
+  logout: async (): Promise<boolean> => {
+    const result = await apolloClient.mutate({
+      mutation: LogoutDocument,
+    });
+
+    return Boolean(result.data?.logout ?? false);
   },
-  getUser: async (apiUrl: string) => {
-    const result = await graphqlRequest<{
-      user: import("@/types").LoginInfo | null;
-    }>(apiUrl, USER_QUERY);
-    return result.user ?? null;
+  getUser: async () => {
+    const result = await apolloClient.mutate({
+      mutation: UserDocument,
+    });
+    return result.data?.user ?? null;
   },
 };
