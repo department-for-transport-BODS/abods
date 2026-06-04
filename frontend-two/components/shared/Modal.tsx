@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import CrownLogo from "@/assets/icons/govuk-logotype-crown.svg";
 
 interface ModalProps {
   open: boolean;
@@ -61,25 +62,44 @@ export const Modal = ({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="shared-modal__header">
-          <h2 className="govuk-heading-m govuk-!-margin-bottom-0" id={titleId}>
-            {title}
-          </h2>
+          <span className="shared-modal__logo">
+            <CrownLogo />
+          </span>
           {showCloseButton ? (
             <button
               type="button"
-              className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 shared-modal__close"
+              aria-label={closeLabel}
+              className="shared-modal__close"
               onClick={onClose}
             >
-              {closeLabel}
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                className="shared-modal__close-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 13 13"
+                width="32"
+                height="32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M.7 11.3L5.5 6 .7.7 1.4 0 6.2 4.8 11 .1l.7.7L6.9 6l4.8 5.3-.7.7L6.2 7.2 1.4 12l-.7-.7z"
+                />
+              </svg>
             </button>
           ) : null}
         </div>
-        {description ? (
-          <div className="govuk-body govuk-!-margin-top-3 govuk-!-margin-bottom-3">
-            {description}
-          </div>
-        ) : null}
-        {children}
+        <div className="shared-modal__body">
+          <h2 className="govuk-heading-m govuk-!-margin-bottom-0" id={titleId}>
+            {title}
+          </h2>
+          {description ? (
+            <div className="govuk-body govuk-!-margin-top-3 govuk-!-margin-bottom-3">
+              {description}
+            </div>
+          ) : null}
+          {children}
+        </div>
       </div>
     </div>,
     document.body,
