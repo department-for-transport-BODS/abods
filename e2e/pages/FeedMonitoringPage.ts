@@ -16,7 +16,9 @@ export class FeedMonitoringPage {
   }
 
   feedMonitoringNavLink(): Locator {
-    return this.page.getByRole("navigation").getByRole("link", { name: "NOC feed monitoring" });
+    return this.page
+      .getByRole("navigation")
+      .getByRole("link", { name: "NOC feed monitoring" });
   }
 
   heading(): Locator {
@@ -26,7 +28,7 @@ export class FeedMonitoringPage {
   searchInputLabel(): Locator {
     return this.page.getByLabel("Search for an operator");
   }
-  
+
   searchInput(): Locator {
     return this.page.getByTestId("operator-search-input");
   }

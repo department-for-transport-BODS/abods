@@ -1,7 +1,15 @@
 import { useMemo, useEffect, useState } from "react";
-import { PagingPanel } from "../shared/PagingPanel";
+import { MemoryRouter } from "react-router-dom";
 import dynamic from "next/dynamic";
 import { DistanceData } from "@/types/distances";
+
+const Pagination = dynamic(
+  () =>
+    import("kainossoftwareltd-govuk-react-kainos").then(
+      (mod) => mod.Pagination,
+    ),
+  { ssr: false },
+);
 
 const SortableTable = dynamic(
   () =>
@@ -136,7 +144,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
         key: `${row.operatorId ?? ""}-${row.nocLineAndServiceCode ?? ""}`,
         operatorName: row.operatorId
           ? `${row.operatorName} (${row.operatorId})`
-          : (row.operatorName ?? "-"),
+          : row.operatorName ?? "-",
         nocLineAndServiceCode:
           row.nocLineAndServiceCode?.split("-").pop() ?? "-",
         lineName: row.lineName
@@ -164,18 +172,16 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
           No operator data found
         </div>
       )}
-      <div className="flex justify-end">
-        <div className="w-1/2">
-          <PagingPanel
-            currentPage={currentPage}
+      {Math.ceil(data.length / PAGE_SIZE) > 1 && (
+        <MemoryRouter>
+          <Pagination
             totalPages={Math.ceil(data.length / PAGE_SIZE)}
-            pageSize={PAGE_SIZE}
-            rowCount={data.length}
-            noun="operator"
-            onPageChange={setCurrentPage}
+            currentPage={currentPage + 1}
+            onPageChange={(page) => setCurrentPage(page - 1)}
+            pathFunc={(page) => `?page=${page}`}
           />
-        </div>
-      </div>
+        </MemoryRouter>
+      )}
     </>
   );
 };

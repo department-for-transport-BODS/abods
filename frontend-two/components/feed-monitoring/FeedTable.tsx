@@ -1,11 +1,19 @@
-import { useMemo, useState } from "react";
-import { PagingPanel } from "../shared/PagingPanel";
+import { useEffect, useMemo, useState } from "react";
+import { MemoryRouter } from "react-router-dom";
+import dynamic from "next/dynamic";
 import {
   FeedMonitoringOperatorData,
   VehicleCountData,
 } from "@/types/feed-monitoring";
 import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
-import dynamic from "next/dynamic";
+
+const Pagination = dynamic(
+  () =>
+    import("kainossoftwareltd-govuk-react-kainos").then(
+      (mod) => mod.Pagination,
+    ),
+  { ssr: false },
+);
 
 const SortableTable = dynamic(
   () =>
@@ -62,6 +70,10 @@ export const FeedTable = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [data]);
 
   const sortedData = useMemo(() => {
     if (!sortColumn || sortOrder === "none") return data;
@@ -160,18 +172,16 @@ export const FeedTable = ({
         rows={rows as any[]}
         onSort={handleTableSorting}
       ></SortableTable>
-      <div className="flex justify-end">
-        <div className="w-1/2">
-          <PagingPanel
-            currentPage={currentPage}
+      {totalPages > 1 && (
+        <MemoryRouter>
+          <Pagination
             totalPages={totalPages}
-            pageSize={PAGE_SIZE}
-            rowCount={data.length}
-            noun="feed"
-            onPageChange={setCurrentPage}
+            currentPage={currentPage + 1}
+            onPageChange={(page) => setCurrentPage(page - 1)}
+            pathFunc={(page) => `?page=${page}`}
           />
-        </div>
-      </div>
+        </MemoryRouter>
+      )}
     </>
   );
 };

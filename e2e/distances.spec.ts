@@ -17,14 +17,18 @@ loggedInTest.describe("Distance Page - Authenticated", () => {
     await loggedInPage.waitForLoadState("networkidle");
 
     // Wait for loading indicators to disappear
-    await expect(loggedInPage.getByText(/Loading\.\.\./i)).toHaveCount(0, { timeout: 60000 });
-
+    await expect(loggedInPage.getByText(/Loading\.\.\./i)).toHaveCount(0, {
+      timeout: 60000,
+    });
   });
 
-  loggedInTest("reachable from dashboard navigation panel", async ({ loggedInPage }) => {
-    await distances.openFromNavigationPanel();
-    await expect(loggedInPage).toHaveURL(/\/distances/);
-  });
+  loggedInTest(
+    "reachable from dashboard navigation panel",
+    async ({ loggedInPage }) => {
+      await distances.openFromNavigationPanel();
+      await expect(loggedInPage).toHaveURL(/\/distances/);
+    },
+  );
 
   loggedInTest("renders the Distances heading", async () => {
     await expect(distances.heading()).toBeVisible();
@@ -33,19 +37,29 @@ loggedInTest.describe("Distance Page - Authenticated", () => {
   loggedInTest("renders the distances filter panel", async () => {
     await expect(distances.filterPanel().getByText("Date Range")).toBeVisible();
     await expect(
-      distances.filterPanel().getByRole("button", { name: /^All areas(\s+▼)?$/i }),
+      distances
+        .filterPanel()
+        .getByRole("button", { name: /^All areas(\s+▼)?$/i }),
     ).toBeVisible();
     await expect(
-      distances.filterPanel().getByRole("button", { name: /^All organisations(\s+▼)?$/i }),
+      distances
+        .filterPanel()
+        .getByRole("button", { name: /^All organisations(\s+▼)?$/i }),
     ).toBeVisible();
     await expect(
-      distances.filterPanel().getByRole("button", { name: /^All operators(\s+▼)?$/i }),
+      distances
+        .filterPanel()
+        .getByRole("button", { name: /^All operators(\s+▼)?$/i }),
     ).toBeVisible();
     await expect(
-      distances.filterPanel().getByRole("button", { name: /^All licenses(\s+▼)?$/i }),
+      distances
+        .filterPanel()
+        .getByRole("button", { name: /^All licenses(\s+▼)?$/i }),
     ).toBeVisible();
     await expect(
-      distances.filterPanel().getByRole("button", { name: /^All services(\s+▼)?$/i }),
+      distances
+        .filterPanel()
+        .getByRole("button", { name: /^All services(\s+▼)?$/i }),
     ).toBeVisible();
   });
 

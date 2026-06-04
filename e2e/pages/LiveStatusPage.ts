@@ -7,7 +7,9 @@ export class LiveStatusPage {
   constructor(readonly page: Page) {}
 
   async goTo(nocCode: string): Promise<void> {
-    await this.page.goto(`/feed-monitoring/${nocCode}`, { waitUntil: "domcontentloaded" });
+    await this.page.goto(`/feed-monitoring/${nocCode}`, {
+      waitUntil: "domcontentloaded",
+    });
   }
 
   heading(): Locator {

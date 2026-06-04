@@ -8,8 +8,12 @@ export class FeedHistoryPage {
   constructor(readonly page: Page) {}
 
   async goTo(nocCode: string, date?: DateTime): Promise<void> {
-    const d = date ? date.toISODate() : new Date(Date.now() - 86400000).toISOString().split("T")[0];
-    await this.page.goto(`/feed-monitoring/${nocCode}/feed-history?date=${d}`, { waitUntil: "domcontentloaded" });
+    const d = date
+      ? date.toISODate()
+      : new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    await this.page.goto(`/feed-monitoring/${nocCode}/feed-history?date=${d}`, {
+      waitUntil: "domcontentloaded",
+    });
   }
 
   backToLiveStatusLink(): Locator {
