@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { DateTime } from "luxon";
-import { VehicleStat } from "@/types/feed-monitoring";
+import { VehicleStatFragment } from "../../src/generated/graphql";
 
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -16,7 +16,7 @@ interface ChartDataPoint {
   expectedFill?: any;
 }
 
-function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
+function buildChartData(stats: VehicleStatFragment[]): ChartDataPoint[] {
   if (!stats.length) return [];
 
   const protoData = stats.map((s) => {
@@ -56,7 +56,7 @@ function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
 }
 
 interface HistoricVehicleStatsProps {
-  data: VehicleStat[];
+  data: VehicleStatFragment[];
   date: DateTime;
 }
 

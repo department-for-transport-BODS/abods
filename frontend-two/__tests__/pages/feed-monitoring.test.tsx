@@ -165,7 +165,22 @@ it("Shows loading state whilst waiting for data", async () => {
   expect(screen.getByText("Loading...")).toBeInTheDocument();
 });
 
-// Renders tables with correct headers
+it("Shows an error message when data fails to load", async () => {
+  mockFetchFeedMonitoringList.mockRejectedValue(new Error("Network error"));
+  mockFetchOperatorSparklines.mockResolvedValue([]);
+
+  render(<FeedMonitoringPage />);
+
+  await waitFor(() => {
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "There was a problem loading the feed monitoring data. Please try refreshing the page.",
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
 it("Renders inactive feeds tables with correct headers", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
   mockFetchOperatorSparklines.mockResolvedValue(vehicleCountMockData);

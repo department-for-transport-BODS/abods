@@ -1,7 +1,9 @@
 import { useMemo, useEffect, useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import dynamic from "next/dynamic";
-import { DistanceData } from "@/types/distances";
+import { DistancesListQuery } from "../../src/generated/graphql";
+
+type DistanceData = DistancesListQuery["distances"][number];
 
 const Pagination = dynamic(
   () =>

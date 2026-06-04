@@ -188,6 +188,48 @@ it("Shows loading state within Generate button", async () => {
   expect(generateButton).toBeDisabled();
 });
 
+it("Shows an error message when filter data fails to load", async () => {
+  mockFetchDropdownInputs.mockRejectedValue(new Error("Network error"));
+  mockFetchAdminOrg.mockRejectedValue(new Error("Network error"));
+  mockFetchDistances.mockResolvedValue([]);
+
+  render(<DistancesPage />);
+
+  await waitFor(() => {
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "There was a problem loading the filter data. Please try refreshing the page.",
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
+it("Shows an error message when generating distances data fails", async () => {
+  mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
+  mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
+  mockFetchDistances.mockRejectedValue(new Error("Network error"));
+
+  render(<DistancesPage />);
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Generate" }),
+    ).toBeInTheDocument(),
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: "Generate" }));
+
+  await waitFor(() => {
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "There was a problem fetching the distances data. Please try again.",
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
 it("Renders a blank table with correct headers initially", async () => {
   mockFetchDistances.mockResolvedValue([]);
   mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);

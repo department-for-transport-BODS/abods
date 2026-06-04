@@ -2,10 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import dynamic from "next/dynamic";
 import {
-  FeedMonitoringOperatorData,
-  VehicleCountData,
-} from "@/types/feed-monitoring";
+  FeedMonitoringListQuery,
+  VehicleStatFragment,
+} from "../../src/generated/graphql";
 import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
+
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
+type VehicleCountData = {
+  operatorId: string;
+  last24Hours: VehicleStatFragment[];
+};
 
 const Pagination = dynamic(
   () =>

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import {
-  FeedMonitoringOperatorData,
-  OperatorLiveStatus,
-} from "@/types/feed-monitoring";
+  FeedMonitoringListQuery,
+  OperatorLiveStatusQuery,
+} from "../../../src/generated/graphql";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
@@ -18,6 +18,10 @@ const LiveVehicleStats = dynamic(
   () => import("@/components/feed-monitoring/LiveVehicleStats"),
   { ssr: false },
 );
+
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
+type OperatorLiveStatus = OperatorLiveStatusQuery["operatorFeedMonitoring"];
 
 const LiveStatusPage = () => {
   useRequireAuth();

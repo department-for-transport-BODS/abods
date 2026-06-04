@@ -3,10 +3,17 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { FeedTable } from "@/components/feed-monitoring/FeedTable";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import {
-  FeedMonitoringOperatorData,
-  VehicleCountData,
-} from "@/types/feed-monitoring";
+  FeedMonitoringListQuery,
+  VehicleStatFragment,
+} from "../src/generated/graphql";
 import { useRequireAuth } from "@/hooks/useAuth";
+
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
+type VehicleCountData = {
+  operatorId: string;
+  last24Hours: VehicleStatFragment[];
+};
 
 const FeedMonitoringPage = () => {
   useRequireAuth();

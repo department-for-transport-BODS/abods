@@ -171,6 +171,22 @@ it("Shows loading state whilst waiting for data", async () => {
   expect(screen.getByText("Loading...")).toBeInTheDocument();
 });
 
+it("Shows an error message when data fails to load", async () => {
+  mockFetchFeedMonitoringList.mockRejectedValue(new Error("Network error"));
+  mockFetchOperatorHistory.mockRejectedValue(new Error("Network error"));
+
+  render(<FeedHistoryPage />);
+
+  await waitFor(() => {
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "There was a problem loading the feed history data. Please try refreshing the page.",
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
 it("Renders yesterday's date by default", async () => {
   mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
   mockFetchOperatorHistory.mockResolvedValue({} as any);

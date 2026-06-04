@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { DateTime } from "luxon";
-import { VehicleStat } from "@/types/feed-monitoring";
+import { VehicleStatFragment } from "../../src/generated/graphql";
 
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_microchart from "@amcharts/amcharts4/themes/microchart";
 
-function buildChartData(stats: VehicleStat[]) {
+function buildChartData(stats: VehicleStatFragment[]) {
   const parsed = stats.map((s) => ({
     dateTime: DateTime.fromISO(s.timestamp, { zone: "utc" }),
     timestamp: DateTime.fromISO(s.timestamp, { zone: "utc" }).toJSDate(),
@@ -36,7 +36,7 @@ function buildChartData(stats: VehicleStat[]) {
 }
 
 interface VehicleSparklineProps {
-  data: VehicleStat[];
+  data: VehicleStatFragment[];
 }
 
 export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { DateTime } from "luxon";
-import { VehicleStat } from "@/types/feed-monitoring";
+import { VehicleStatFragment } from "../../src/generated/graphql";
 
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -17,7 +17,7 @@ interface ChartDataPoint {
   expected: number;
 }
 
-function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
+function buildChartData(stats: VehicleStatFragment[]): ChartDataPoint[] {
   return stats.map((s) => {
     const dateTime = DateTime.fromISO(s.timestamp, { zone: "utc" });
     return {
@@ -30,7 +30,7 @@ function buildChartData(stats: VehicleStat[]): ChartDataPoint[] {
 }
 
 interface LiveVehicleStatsProps {
-  data: VehicleStat[];
+  data: VehicleStatFragment[];
   granularity: Granularity;
   label: string;
   xAxisMin?: Date | number;

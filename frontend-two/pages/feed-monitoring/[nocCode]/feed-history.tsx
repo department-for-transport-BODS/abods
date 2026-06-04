@@ -6,9 +6,9 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import {
-  FeedMonitoringOperatorData,
-  OperatorFeedHistory,
-} from "@/types/feed-monitoring";
+  FeedMonitoringListQuery,
+  OperatorHistoricStatsQuery,
+} from "../../../src/generated/graphql";
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
@@ -19,6 +19,10 @@ const HistoricVehicleStats = dynamic(
   () => import("@/components/feed-monitoring/HistoricVehicleStats"),
   { ssr: false },
 );
+
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
+type OperatorFeedHistory = OperatorHistoricStatsQuery["operatorFeedMonitoring"];
 
 function buildDateList(): { date: DateTime }[] {
   const yesterday = DateTime.now().startOf("day").minus({ days: 1 });

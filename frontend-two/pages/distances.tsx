@@ -4,10 +4,10 @@ import { DistanceFilters } from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
 import { distanceService } from "@/services/distances/distance.services";
 import {
-  AdminOrgMap,
-  DistanceData,
-  DistancesDropdowns,
-} from "@/types/distances";
+  AdminOrgListQuery,
+  DistancesDropdownInputQuery,
+  DistancesListQuery,
+} from "../src/generated/graphql";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { formatDateToISODateString } from "@/utils/dateFormatter";
@@ -18,6 +18,10 @@ const Button = dynamic(
     import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Button),
   { ssr: false },
 );
+
+type DistanceData = DistancesListQuery["distances"][number];
+type DistancesDropdowns = DistancesDropdownInputQuery["distancesDropdowns"];
+type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 
 const DistancesPage = () => {
   useRequireAuth();

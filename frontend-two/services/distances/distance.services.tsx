@@ -1,20 +1,22 @@
 import { apolloClient } from "@/services/apolloClient";
 
 import {
-  AdminOrgMap,
-  DistanceData,
-  DistancesDropdowns,
-  UserOrg,
-} from "@/types/distances";
-
-import {
   AdminOrgListDocument,
+  AdminOrgListQuery,
   DistancesDropdownInputDocument,
+  DistancesDropdownInputQuery,
   DistancesFilterInput,
   DistancesListDocument,
+  DistancesListQuery,
   OrgOperatorListDocument,
   UserOrganisationsDocument,
+  UserOrganisationsQuery,
 } from "../../src/generated/graphql";
+
+type DistanceData = DistancesListQuery["distances"][number];
+type DistancesDropdowns = DistancesDropdownInputQuery["distancesDropdowns"];
+type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
+type UserOrg = UserOrganisationsQuery["userOrgs"][number];
 
 export const distanceService = {
   fetchUserOrganisations: async (): Promise<UserOrg[]> => {

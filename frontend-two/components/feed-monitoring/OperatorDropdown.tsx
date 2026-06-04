@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FeedMonitoringOperatorData } from "@/types/feed-monitoring";
+import { FeedMonitoringListQuery } from "../../src/generated/graphql";
+
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
 
 interface OperatorDropdownProps {
   operators: FeedMonitoringOperatorData[];
