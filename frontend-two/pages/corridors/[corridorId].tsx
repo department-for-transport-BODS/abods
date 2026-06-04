@@ -213,7 +213,7 @@ const CorridorsViewPage = () => {
         <>
           <span className="govuk-caption-xl">Corridors</span>
           <h1 className="govuk-heading-xl">
-            {corridorLoading ? "Loading..." : (corridor?.name ?? "Corridor")}
+            {corridorLoading ? "Loading..." : corridor?.name ?? "Corridor"}
           </h1>
 
           <div className="govuk-grid-row">
@@ -342,7 +342,7 @@ const CorridorsViewPage = () => {
               value={
                 statsLoading
                   ? "\u2014"
-                  : (stats?.summaryStats.totalTransits ?? "Unavailable")
+                  : stats?.summaryStats.totalTransits ?? "Unavailable"
               }
               tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
             />
@@ -395,7 +395,7 @@ const CorridorsViewPage = () => {
               value={
                 statsLoading
                   ? "\u2014"
-                  : (stats?.summaryStats.numberOfServices ?? "Unavailable")
+                  : stats?.summaryStats.numberOfServices ?? "Unavailable"
               }
               tooltip="The total number of different services that pass through this corridor."
             />
