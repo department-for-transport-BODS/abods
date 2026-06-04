@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 import { DateTime } from "luxon";
 import type { FeatureCollection, Feature } from "geojson";
+import bbox from "@turf/bbox";
 import flip from "@turf/flip";
 import { feature } from "@turf/helpers";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -244,7 +245,6 @@ const StopAnalysisPage = () => {
   const lastFetchedBoundsRef = useRef<BoundingBox>();
   const lastFetchedFilterSignatureRef = useRef<string>("");
   const [cachedStopData, setCachedStopData] = useState<StopStatistics[]>([]);
-  const [fitToAdminAreasRequest, setFitToAdminAreasRequest] = useState(0);
   const [locationSelectionRequest, setLocationSelectionRequest] = useState(0);
   const [locationSelection, setLocationSelection] = useState<{
     center?: [number, number];
@@ -412,6 +412,24 @@ const StopAnalysisPage = () => {
     [adminAreas, visibleAdminAreaIds],
   );
 
+  const selectedAdminAreaBounds = useMemo(
+    () => {
+      if (adminAreaGeoJSON.features.length === 0) return null;
+
+      const [minLongitude, minLatitude, maxLongitude, maxLatitude] = bbox(
+        adminAreaGeoJSON,
+      );
+
+      return {
+        minLongitude,
+        minLatitude,
+        maxLongitude,
+        maxLatitude,
+      };
+    },
+    [adminAreaGeoJSON],
+  );
+
   // Error state
   const errors: ErrorInfo[] =
     stopsError && !stopsLoading
@@ -450,7 +468,6 @@ const StopAnalysisPage = () => {
 
   const handleAdminAreasChange = useCallback(
     (values: string[]) => {
-      setFitToAdminAreasRequest((prev) => prev + 1);
       updateQuery({ adminAreaIds: values });
     },
     [updateQuery],
@@ -458,7 +475,6 @@ const StopAnalysisPage = () => {
 
   const handleOperatorsChange = useCallback(
     (values: string[]) => {
-      setFitToAdminAreasRequest((prev) => prev + 1);
       updateQuery({ operatorIds: values });
     },
     [updateQuery],
@@ -590,7 +606,7 @@ const StopAnalysisPage = () => {
             boundingBoxTooBig={boundingBoxTooBig}
             initialBounds={bounds}
             focusStop={focusedStop}
-            fitToAdminAreasRequest={fitToAdminAreasRequest}
+            selectedAdminAreaBounds={selectedAdminAreaBounds}
             locationSelection={locationSelection}
             locationSelectionRequest={locationSelectionRequest}
             onBoundsChange={handleBoundsChange}
