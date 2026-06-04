@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 import { DateTime } from "luxon";
 import type { FeatureCollection, Feature } from "geojson";
+import flip from "@turf/flip";
+import { feature } from "@turf/helpers";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -210,12 +212,18 @@ function computeAdminAreaGeoJSON(
     features: areas
       .map((area) => {
         try {
-          const geometry = JSON.parse(area.shape);
+          const flipped = flip(
+            feature(JSON.parse(area.shape), {
+              id: area.id,
+              name: area.name,
+            }),
+            { mutate: true },
+          );
           return {
             type: "Feature" as const,
             id: area.id,
             properties: { id: area.id, name: area.name },
-            geometry,
+            geometry: flipped.geometry,
           };
         } catch {
           return null;
@@ -224,6 +232,8 @@ function computeAdminAreaGeoJSON(
       .filter(Boolean) as Feature[],
   };
 }
+
+export { computeAdminAreaGeoJSON };
 
 const StopAnalysisPage = () => {
   useRequireAuth();
