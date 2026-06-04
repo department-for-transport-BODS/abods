@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import { createHmac, randomBytes } from "node:crypto";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { v4 as uuidv4 } from "uuid";
 import { executeQuery } from "../lib/dbKysely.js";
@@ -34,6 +35,40 @@ const INCORRECT_LOGIN_MAX_ATTEMPTS = parseInt(
 const FAILED_LOGIN_LOCKOUT_MINS = parseInt(
   process.env.FAILED_LOGIN_LOCKOUT_MINS ?? "15",
 );
+
+const generateSecureDatadogEmbedUrl = (
+  baseUrl: string,
+  credential: string,
+): string => {
+  const nonce = randomBytes(16).toString("hex");
+  const timestamp = Math.floor(Date.now() / 1000);
+  const token = createHmac("sha256", credential)
+    .update(`${nonce}|${timestamp}`)
+    .digest("hex");
+
+  const url = new URL(baseUrl);
+  url.searchParams.set("token", token);
+  url.searchParams.set("nonce", nonce);
+  url.searchParams.set("ts", timestamp.toString());
+
+  return url.toString();
+};
+
+const getServiceMonitoringEmbedUrl = (): string | null => {
+  const dashboardUrl = process.env.DATADOG_SERVICE_MONITORING_DASHBOARD;
+  const secureEmbedCredential =
+    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL;
+
+  if (!dashboardUrl) {
+    return null;
+  }
+
+  if (!secureEmbedCredential) {
+    return dashboardUrl;
+  }
+
+  return generateSecureDatadogEmbedUrl(dashboardUrl, secureEmbedCredential);
+};
 
 export const getFeatureFlags = () => {
   const flags: FeatureFlag[] = [];
@@ -94,7 +129,7 @@ export const getUser: QueryResolvers["user"] = async (
       canEditAllAlerts: isAdmin,
       canViewDistances: isAdmin,
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
-        ? process.env.DATADOG_SERVICE_MONITORING_DASHBOARD
+        ? getServiceMonitoringEmbedUrl()
         : null,
       flags: getFeatureFlags(),
     };
