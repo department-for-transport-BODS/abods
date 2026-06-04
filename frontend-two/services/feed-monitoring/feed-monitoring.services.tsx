@@ -2,21 +2,26 @@ import { apolloClient } from "@/services/apolloClient";
 
 import {
   EventsDocument,
+  EventsQuery,
   EventStatsDocument,
+  EventStatsQuery,
   FeedMonitoringListDocument,
+  FeedMonitoringListQuery,
   OperatorHistoricStatsDocument,
+  OperatorHistoricStatsQuery,
   OperatorLiveStatusDocument,
+  OperatorLiveStatusQuery,
   OperatorSparklineStatsDocument,
+  VehicleStatFragment,
 } from "../../src/generated/graphql";
 
-import {
-  FeedMonitoringOperatorData,
-  VehicleStat,
-  OperatorLiveStatus,
-  OperatorFeedHistory,
-  FeedEvent,
-  EventStat,
-} from "@/types/feed-monitoring";
+type FeedMonitoringOperatorData =
+  FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
+type OperatorLiveStatus = OperatorLiveStatusQuery["operatorFeedMonitoring"];
+type OperatorFeedHistory = OperatorHistoricStatsQuery["operatorFeedMonitoring"];
+type FeedEvent = NonNullable<EventsQuery["events"]>["items"][number];
+type EventStat = EventStatsQuery["eventStats"][number];
+type VehicleStat = VehicleStatFragment;
 
 export const feedMonitoringService = {
   fetchFeedMonitoringList: async (): Promise<FeedMonitoringOperatorData[]> => {
