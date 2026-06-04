@@ -19,18 +19,6 @@ type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type UserOrg = UserOrganisationsQuery["userOrgs"][number];
 
 export const distanceService = {
-  fetchUserOrganisations: async (): Promise<UserOrg[]> => {
-    try {
-      const result = await apolloClient.query({
-        query: UserOrganisationsDocument,
-      });
-      return result.data?.userOrgs ?? [];
-    } catch (error) {
-      console.error("Failed to fetch user organisations:", error);
-      return [];
-    }
-  },
-
   fetchOrgOperators: async (
     orgId: number,
   ): Promise<{ name: string; nocCode: string }[]> => {
