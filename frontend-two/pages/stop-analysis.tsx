@@ -568,10 +568,19 @@ const StopAnalysisPage = () => {
             <button
               type="button"
               className="govuk-link stop-analysis-filters__refine-button"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
               aria-controls="panel"
               onClick={toggle}
             >
-              Refine results
+              <img
+                src="/assets/icons/refine.svg"
+                alt=""
+                aria-hidden="true"
+                width="24"
+                height="24"
+                style={{ display: "block", flexShrink: 0 }}
+              />
+              <span>Refine results</span>
             </button>
             {activeChips.length > 0 && (
               <div className="stop-analysis-filters__chips">
