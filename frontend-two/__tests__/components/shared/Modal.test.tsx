@@ -23,6 +23,14 @@ describe("Modal", () => {
     document.body.classList.remove("modal-open");
   });
 
+  it("renders a branded header and dialog content", () => {
+    render(<ModalHarness />);
+
+    expect(screen.getByRole("dialog", { name: "Display options" })).toBeInTheDocument();
+    expect(document.body.querySelector(".shared-modal__header")).not.toBeNull();
+    expect(document.body.querySelector(".shared-modal__logo")).not.toBeNull();
+  });
+
   it("renders dialog content and closes when dismissed", async () => {
     const user = userEvent.setup();
 
