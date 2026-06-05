@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource, MapMouseEvent } from "mapbox-gl";
 import type { FeatureCollection, Feature, Point } from "geojson";
+import bboxClip from "@turf/bbox-clip";
+import pointOnFeature from "@turf/point-on-feature";
 import { BoundingBox, StopStatistics } from "@/types/stop-analysis";
 
 // British Isles default bounds
@@ -60,7 +62,7 @@ interface StopAnalysisMapProps {
   boundingBoxTooBig: boolean;
   initialBounds?: BoundingBox;
   focusStop?: { latitude: number; longitude: number } | null;
-  fitToAdminAreasRequest?: number;
+  selectedAdminAreaBounds?: BoundingBox | null;
   locationSelection?: {
     center?: [number, number];
     bbox?: [number, number, number, number];
@@ -80,7 +82,7 @@ export const StopAnalysisMap = ({
   boundingBoxTooBig,
   initialBounds,
   focusStop,
-  fitToAdminAreasRequest,
+  selectedAdminAreaBounds,
   locationSelection,
   locationSelectionRequest,
   onBoundsChange,
@@ -91,12 +93,15 @@ export const StopAnalysisMap = ({
   const mapRef = useRef<Map | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
+  const displayOptionsRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
   const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
     "street",
   );
+  const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
+  const hoveredAdminAreaRef = useRef<Feature | null>(null);
   const getFeatureBounds = useCallback((features: Feature[]) => {
     const bounds = new mapboxgl.LngLatBounds();
     let hasCoordinates = false;
@@ -119,6 +124,62 @@ export const StopAnalysisMap = ({
     return hasCoordinates ? bounds : null;
   }, []);
 
+  const clearPopup = useCallback(() => {
+    popupRef.current?.remove();
+    popupRef.current = null;
+  }, []);
+
+  const updateAdminAreaPopup = useCallback((map: Map) => {
+    const hoveredAdminArea = hoveredAdminAreaRef.current;
+    if (!hoveredAdminArea) return;
+    if (map.getZoom() >= 11) {
+      clearPopup();
+      return;
+    }
+
+    const bounds = map.getBounds();
+    const clippedFeature = bboxClip(hoveredAdminArea, [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ]);
+    const labelPoint = pointOnFeature(clippedFeature);
+    const coordinates = labelPoint.geometry.coordinates as [number, number];
+    const properties = hoveredAdminArea.properties as {
+      id?: string;
+      name?: string;
+    } | undefined;
+
+    if (!properties?.name || !properties?.id) {
+      clearPopup();
+      return;
+    }
+
+    clearPopup();
+
+    const content = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1";
+    name.textContent = properties.name;
+    content.appendChild(name);
+
+    const id = document.createElement("div");
+    id.className = "govuk-body-small";
+    id.textContent = properties.id;
+    content.appendChild(id);
+
+    popupRef.current = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      maxWidth: "200px",
+      className: "gds-popup",
+    })
+      .setLngLat(coordinates)
+      .setDOMContent(content)
+      .addTo(map);
+  }, [clearPopup]);
+
 
   useEffect(() => {
     mapboxStyleRef.current = mapboxStyle;
@@ -127,6 +188,34 @@ export const StopAnalysisMap = ({
   useEffect(() => {
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   }, [mapboxSatelliteStyle]);
+
+  useEffect(() => {
+    if (!showDisplayOptions) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (displayOptionsRef.current?.contains(event.target as Node)) {
+        return;
+      }
+
+      setShowDisplayOptions(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDisplayOptions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showDisplayOptions]);
 
   const stopGeoJSON: FeatureCollection = {
     type: "FeatureCollection",
@@ -195,82 +284,98 @@ export const StopAnalysisMap = ({
   // Add/update sources and layers once map is loaded
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map || !mapLoaded || !map.isStyleLoaded()) return;
 
-    // Admin area boundaries
-    if (map.getSource("boundaries")) {
-      (map.getSource("boundaries") as GeoJSONSource).setData(adminAreaShapes);
-    } else {
-      map.addSource("boundaries", {
-        type: "geojson",
-        data: adminAreaShapes,
-        promoteId: "id",
-      });
+    try {
+      // Admin area boundaries
+      if (map.getSource("boundaries")) {
+        (map.getSource("boundaries") as GeoJSONSource).setData(adminAreaShapes);
+      } else {
+        map.addSource("boundaries", {
+          type: "geojson",
+          data: adminAreaShapes,
+          promoteId: "id",
+        });
 
-      map.addLayer({
-        id: "admin-area-boundaries",
-        source: "boundaries",
-        type: "fill",
-        paint: {
-          "fill-color": "#28A197",
-          "fill-opacity": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            9,
-            [
-              "case",
-              ["boolean", ["feature-state", "hover"], false],
-              0.5,
-              0.3,
+        map.addLayer({
+          id: "admin-area-boundaries",
+          source: "boundaries",
+          type: "fill",
+          paint: {
+            "fill-color": "#28A197",
+            "fill-opacity": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              9,
+              [
+                "case",
+                ["boolean", ["feature-state", "hover"], false],
+                0.5,
+                0.3,
+              ],
+              ADMIN_AREA_HIDDEN_ZOOM,
+              0,
             ],
-            ADMIN_AREA_HIDDEN_ZOOM,
-            0,
-          ],
-        },
-      });
+          },
+        });
 
-      // Admin area hover
-      let hoveredId: string | number | null = null;
-      map.on("mouseenter", "admin-area-boundaries", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mousemove", "admin-area-boundaries", (e) => {
-        if (hoveredId !== null) {
-          map.setFeatureState(
-            { source: "boundaries", id: hoveredId },
-            { hover: false },
-          );
-        }
-        if (e.features && e.features[0]) {
-          hoveredId = e.features[0].id ?? null;
+        // Admin area hover
+        let hoveredId: string | number | null = null;
+        map.on("mouseenter", "admin-area-boundaries", () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mousemove", "admin-area-boundaries", (e) => {
+          if (!e.features || e.features.length === 0) return;
+
+          const hoveredFeature = e.features[0] as Feature | undefined;
+          if (!hoveredFeature) return;
+
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "boundaries", id: hoveredId },
+              { hover: false },
+            );
+          }
+          hoveredId = hoveredFeature.id ?? null;
           if (hoveredId !== null) {
             map.setFeatureState(
               { source: "boundaries", id: hoveredId },
               { hover: true },
             );
           }
-        }
-      });
-      map.on("mouseleave", "admin-area-boundaries", () => {
-        map.getCanvas().style.cursor = "";
-        if (hoveredId !== null) {
-          map.setFeatureState(
-            { source: "boundaries", id: hoveredId },
-            { hover: false },
-          );
-          hoveredId = null;
-        }
-      });
 
-      // Admin area click
-      map.on("click", "admin-area-boundaries", (e) => {
-        if (e.features && e.features[0]?.properties) {
-          onAdminAreaClick?.(e.features[0].properties.id);
-        }
-      });
+          hoveredAdminAreaRef.current = hoveredFeature;
+          updateAdminAreaPopup(map);
+        });
+        map.on("mouseleave", "admin-area-boundaries", () => {
+          map.getCanvas().style.cursor = "";
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "boundaries", id: hoveredId },
+              { hover: false },
+            );
+            hoveredId = null;
+          }
+          hoveredAdminAreaRef.current = null;
+          clearPopup();
+        });
+
+        map.on("moveend", () => {
+          updateAdminAreaPopup(map);
+        });
+
+        // Admin area click
+        map.on("click", "admin-area-boundaries", (e) => {
+          if (e.features && e.features[0]?.properties) {
+            onAdminAreaClick?.(e.features[0].properties.id);
+          }
+        });
+      }
+    } catch {
+      return;
     }
-  }, [mapLoaded, adminAreaShapes, onAdminAreaClick, styleRevision]);
+  }, [mapLoaded, adminAreaShapes, onAdminAreaClick, styleRevision, clearPopup, updateAdminAreaPopup]);
 
   // Update stops data
   useEffect(() => {
@@ -538,18 +643,28 @@ export const StopAnalysisMap = ({
   }, [focusStop, mapLoaded]);
 
   useEffect(() => {
-    if (!fitToAdminAreasRequest || !mapLoaded || !mapRef.current) return;
-    if (adminAreaShapes.features.length === 0) return;
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !map.isStyleLoaded()) return;
+    if (!selectedAdminAreaBounds) {
+      return;
+    }
 
-    const bounds = getFeatureBounds(adminAreaShapes.features as Feature[]);
-    if (!bounds) return;
-
-    mapRef.current.fitBounds(bounds, {
-      duration: 500,
-      padding: 40,
-      maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
-    });
-  }, [fitToAdminAreasRequest, adminAreaShapes, mapLoaded, getFeatureBounds]);
+    try {
+      map.fitBounds(
+        [
+          [selectedAdminAreaBounds.minLongitude, selectedAdminAreaBounds.minLatitude],
+          [selectedAdminAreaBounds.maxLongitude, selectedAdminAreaBounds.maxLatitude],
+        ],
+        {
+          duration: 500,
+          padding: 40,
+          maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
+        },
+      );
+    } catch {
+      return;
+    }
+  }, [selectedAdminAreaBounds, mapLoaded, styleRevision]);
 
   useEffect(() => {
     if (!locationSelectionRequest || !mapLoaded || !mapRef.current) return;
@@ -590,54 +705,65 @@ export const StopAnalysisMap = ({
     <div className="stop-analysis-map">
       <div ref={mapContainer} className="stop-analysis-map__container" />
       {mapboxSatelliteStyle && (
-        <div className="stop-analysis-map__display-options">
-          <details className="stop-analysis-map__display-details">
-            <summary className="stop-analysis-map__display-summary">
-              Display options
-            </summary>
-            <div className="stop-analysis-map__display-panel">
-              <p className="govuk-body govuk-!-margin-bottom-1">
-                <strong>Map view</strong>
-              </p>
-              <fieldset className="segmented-toggle app-map-view-segmented-toggle">
-                <legend className="govuk-visually-hidden">Map view</legend>
-                <div className="segmented-toggle__controls">
-                  <div className="segmented-toggle-item">
-                    <input
-                      className="segmented-toggle-item__input"
-                      id="map-view-street"
-                      name="map-view"
-                      type="radio"
-                      checked={activeStyle === "street"}
-                      onChange={() => switchStyle("street")}
-                    />
-                    <label
-                      className="segmented-toggle-item__label"
-                      htmlFor="map-view-street"
-                    >
-                      Street
-                    </label>
-                  </div>
-                  <div className="segmented-toggle-item">
-                    <input
-                      className="segmented-toggle-item__input"
-                      id="map-view-satellite"
-                      name="map-view"
-                      type="radio"
-                      checked={activeStyle === "satellite"}
-                      onChange={() => switchStyle("satellite")}
-                    />
-                    <label
-                      className="segmented-toggle-item__label"
-                      htmlFor="map-view-satellite"
-                    >
-                      Satellite
-                    </label>
-                  </div>
+        <div ref={displayOptionsRef} className="stop-analysis-map__display-options">
+          <button
+            type="button"
+            className={`govuk-button govuk-button--secondary govuk-!-margin-bottom-0 stop-analysis-map__display-summary${showDisplayOptions ? " stop-analysis-map__display-summary--open" : ""}`}
+            aria-haspopup="true"
+            aria-expanded={showDisplayOptions}
+            aria-controls="stop-analysis-map-display-panel"
+            onClick={() => setShowDisplayOptions((current) => !current)}
+          >
+            Display options
+          </button>
+          <div
+            id="stop-analysis-map-display-panel"
+            className={`stop-analysis-map__display-panel${showDisplayOptions ? " stop-analysis-map__display-panel--open" : ""}`}
+            role="group"
+            aria-label="Map view"
+            aria-hidden={!showDisplayOptions}
+          >
+            <p className="govuk-body govuk-!-margin-bottom-1">
+              <strong>Map view</strong>
+            </p>
+            <fieldset className="segmented-toggle app-map-view-segmented-toggle">
+              <legend className="govuk-visually-hidden">Map view</legend>
+              <div className="segmented-toggle__controls">
+                <div className="segmented-toggle-item">
+                  <input
+                    className="segmented-toggle-item__input"
+                    id="map-view-street"
+                    name="map-view"
+                    type="radio"
+                    checked={activeStyle === "street"}
+                    onChange={() => switchStyle("street")}
+                  />
+                  <label
+                    className="segmented-toggle-item__label"
+                    htmlFor="map-view-street"
+                  >
+                    Street
+                  </label>
                 </div>
-              </fieldset>
-            </div>
-          </details>
+                <div className="segmented-toggle-item">
+                  <input
+                    className="segmented-toggle-item__input"
+                    id="map-view-satellite"
+                    name="map-view"
+                    type="radio"
+                    checked={activeStyle === "satellite"}
+                    onChange={() => switchStyle("satellite")}
+                  />
+                  <label
+                    className="segmented-toggle-item__label"
+                    htmlFor="map-view-satellite"
+                  >
+                    Satellite
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
         </div>
       )}
       {boundingBoxTooBig && mapLoaded && (

@@ -41,6 +41,7 @@ export const MultiselectCheckbox = ({
   );
 
   const allSelected = selectedValues.length === 0;
+  const hasSelection = selectedValues.length > 0;
 
   const handleToggle = useCallback(
     (value: string) => {
@@ -57,11 +58,13 @@ export const MultiselectCheckbox = ({
   }, [onChange]);
 
   const displayText = allSelected
-    ? showAllLabel
+    ? placeholder ?? label
     : selectedValues.length === 1
       ? options.find((o) => o.value === selectedValues[0])?.label ??
         `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
+
+  const inputValue = isOpen ? searchText : searchText || displayText;
 
   return (
     <div
@@ -76,39 +79,62 @@ export const MultiselectCheckbox = ({
       <label className="govuk-label" htmlFor={id}>
         {label}
       </label>
-      <button
-        id={id}
-        type="button"
-        className="multiselect-checkbox__trigger govuk-input"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-label={label}
-      >
-        {displayText}
-      </button>
+      <div className="multiselect-checkbox__trigger-wrap">
+        <input
+          id={id}
+          type="text"
+          className="multiselect-checkbox__trigger govuk-input"
+          value={inputValue}
+          onFocus={() => {
+            if (!disabled) {
+              setIsOpen(true);
+              if (!searchText) {
+                setSearchText("");
+              }
+            }
+          }}
+          onChange={(event) => {
+            if (disabled) {
+              return;
+            }
+
+            if (!isOpen) {
+              setIsOpen(true);
+            }
+
+            setSearchText(event.target.value);
+          }}
+          onClick={() => !disabled && setIsOpen(true)}
+          disabled={disabled}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-label={label}
+        />
+        <span
+          className={`multiselect-checkbox__chevron${isOpen ? " multiselect-checkbox__chevron--open" : ""}`}
+          aria-hidden="true"
+        />
+      </div>
       {isOpen && (
         <div className="multiselect-checkbox__dropdown" role="listbox">
-          <input
-            type="text"
-            className="govuk-input govuk-input--width-20 multiselect-checkbox__search"
-            placeholder={placeholder ?? `Search ${label.toLowerCase()}`}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            aria-label={`Search ${label.toLowerCase()}`}
-          />
+          {showAll ? (
+            <div className="multiselect-checkbox__header">
+              <strong className="multiselect-checkbox__header-label">
+                {showAllLabel}
+              </strong>
+              <button
+                type="button"
+                className={`button-link govuk-link multiselect-checkbox__header-action${
+                  hasSelection ? "" : " button-link--disabled"
+                }`}
+                onClick={handleSelectAll}
+                disabled={!hasSelection}
+              >
+                Show all
+              </button>
+            </div>
+          ) : null}
           <div className="multiselect-checkbox__options">
-            {showAll && (
-              <label className="multiselect-checkbox__option">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={handleSelectAll}
-                />
-                <span>{showAllLabel}</span>
-              </label>
-            )}
             {filteredOptions.map((option) => (
               <label
                 key={option.value}
