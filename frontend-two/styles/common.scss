@@ -1,6 +1,28 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// DateNavigationDayBlocks styling
+.datenav__day-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5px, 1fr));
+  justify-content: space-between;
+  padding: govuk-spacing(1) 8px;
+  grid-gap: 3px;
+  position: relative;
+  margin-bottom: 25px;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 1px solid $govuk-border-colour;
+    z-index: -1;
+  }
+}
+
 // Segmented toggle (Estimated / Evidenced)
 .segmented-toggle {
   padding: 0;
@@ -140,6 +162,629 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
       margin-left: ($segment-stop-size + $segment-stop-surround * 2);
     }
   }
+}
+
+.datenav__item-wrapper {
+  display: block;
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.datenav__item {
+  display: block;
+  height: 32px;
+  width: 100%;
+  background-color: #f3f3f3;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease-in-out;
+  position: relative;
+
+  &--active {
+    transform: scale(1.05, 1.4);
+    position: relative;
+    border-radius: 1px;
+    box-shadow:
+      0 0 0 1.5px $govuk-input-border-colour,
+      0 0 0 4px $govuk-focus-colour;
+    z-index: 1;
+  }
+
+  &:hover {
+    z-index: 1;
+    position: relative;
+  }
+
+  &:focus:not(.datenav__item--active) {
+    outline: none;
+    box-shadow: 0 0 0 3px $govuk-focus-colour;
+  }
+}
+
+.datenav__tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: $govuk-focus-text-colour;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: "GDS Transport", arial, sans-serif;
+  white-space: nowrap;
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 10;
+
+  // Arrow
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: $govuk-input-border-colour;
+  }
+}
+
+.datenav__item-wrapper:hover .datenav__tooltip,
+.datenav__item-wrapper:focus-within .datenav__tooltip {
+  display: block;
+}
+
+.datenav__month-label {
+  color: $govuk-secondary-text-colour;
+  font-size: 13px;
+  line-height: 1.538;
+  transform: translateX(-50%);
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+}
+
+// FeedTable styling
+.feed-table__check {
+  width: 30px;
+  min-width: 24px;
+  height: 30px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
+}
+
+.feed-table__cross {
+  width: 30px;
+  min-width: 24px;
+  height: 30px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
+}
+
+// FeedStatusSummaryStat styling
+.feed-status-summary-stat {
+  background: $govuk-body-background-colour;
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid $govuk-border-colour;
+}
+
+.feed-status-summary-stat__title {
+  @extend .govuk-body;
+  margin-top: 1rem;
+  color: $govuk-secondary-text-colour;
+}
+
+.feed-status-summary-stat__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.feed-status-summary-stat__value {
+  font-weight: bold;
+  font-size: 36px;
+}
+.feed-status-summary-stat__value--active {
+  color: #00703c;
+}
+.feed-status-summary-stat__value--inactive {
+  color: #d9221a;
+}
+
+.feed-status-summary-stat__check {
+  width: 36px;
+  height: 36px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
+}
+
+.feed-status-summary-stat__cross {
+  width: 36px;
+  height: 36px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
+}
+// Live Status Feed Monitoring page
+.live-vehicle-stats__container {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.live-vehicle-stats__item {
+  flex: 1;
+  min-width: 500px;
+}
+
+// Sparkline styling
+.sparkline-wrapper {
+  background-color: $govuk-template-background-colour;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+// DateRangeSelect styling
+.date-range-select {
+  position: relative;
+  display: block;
+}
+
+.date-range-select__button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0.5em 0.75em;
+  background: $govuk-body-background-colour;
+  border: 2px solid $govuk-input-border-colour;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: #f3f2f1;
+  }
+}
+
+.date-range-select__button-text {
+  color: $govuk-secondary-text-colour;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.date-range-select__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.date-range-select__panel {
+  position: absolute;
+  z-index: 200;
+  background: $govuk-body-background-colour;
+  border: 2px solid $govuk-input-border-colour;
+  padding: 1rem;
+  min-width: 700px;
+}
+
+.date-range-select__inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.date-range-select__date-input {
+  width: 100%;
+}
+
+.date-range-select__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.date-range-select__apply {
+  background-color: #00703c !important;
+  &:hover {
+    background-color: #005a30 !important;
+  }
+}
+
+$day-width: 46px;
+
+.date-range-controls__calendar-wrapper {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.date-range-controls__calendar {
+  width: calc(#{$day-width} * 7);
+}
+
+.date-range-controls__calendar-header {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.date-range-controls__month-name {
+  font-size: 19px;
+  font-family: "GDS Transport", arial, sans-serif;
+  &--this-month {
+    font-weight: 700;
+  }
+}
+
+.date-range-controls__month-step {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: $govuk-brand-colour;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--prev {
+    left: 0;
+  }
+  &--next {
+    right: 0;
+  }
+  &--disabled {
+    pointer-events: none;
+    color: #b1b4b6;
+  }
+}
+
+.date-range-controls__calendar-day-names {
+  display: flex;
+  align-items: center;
+}
+
+.date-range-controls__day-name,
+.date-range-controls__day {
+  width: $day-width;
+  height: $day-width;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-family: "GDS Transport", arial, sans-serif;
+  user-select: none;
+  padding: 3px 4px;
+  box-sizing: border-box;
+}
+
+.date-range-controls__table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.date-range-controls__table-cell {
+  padding: 0;
+
+  &--included {
+    background-color: #f3f2f1;
+  }
+  &--start {
+    background-color: #f3f2f1;
+    border-top-left-radius: 999em;
+    border-bottom-left-radius: 999em;
+  }
+  &--end {
+    background-color: #f3f2f1;
+    border-top-right-radius: 999em;
+    border-bottom-right-radius: 999em;
+  }
+}
+
+.date-range-controls__day {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  color: $govuk-text-colour;
+
+  &:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(24, 24, 24, 0.06);
+    border-radius: 100%;
+    pointer-events: none;
+  }
+
+  &--today {
+    font-weight: 700;
+  }
+
+  &--disabled {
+    color: #b1b4b6;
+    pointer-events: none;
+  }
+
+  &--start,
+  &--end {
+    color: #ffffff;
+    border-radius: 100%;
+    background-color: $govuk-brand-colour;
+  }
+
+  &--included:not(
+      .date-range-controls__day--start,
+      .date-range-controls__day--end
+    ) {
+    background-color: #f3f2f1;
+    &:hover::after {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &--invisible {
+    visibility: hidden;
+  }
+
+  &--saturday::before {
+    content: "";
+    position: absolute;
+    border-left: 1px solid #b1b4b6;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+  }
+}
+
+// DistanceGrid styling
+.distance-grid__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+// MultiselectDropdown styling
+.multiselect-dropdown {
+  position: relative;
+}
+
+.multiselect-dropdown__button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0.5em 0.75em;
+  background: $govuk-body-background-colour;
+  border: 2px solid $govuk-input-border-colour;
+  cursor: pointer;
+  text-align: left;
+}
+
+.multiselect-dropdown__button-text {
+  color: $govuk-secondary-text-colour;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.multiselect-dropdown__search-text {
+  color: $govuk-secondary-text-colour;
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.multiselect-dropdown__panel {
+  position: absolute;
+  z-index: 100;
+  background: $govuk-body-background-colour;
+  border: 1px solid $govuk-border-colour;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.multiselect-dropdown__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6em 0.75em;
+  background-color: #f3f3f3;
+}
+
+.multiselect-dropdown__header-label {
+  margin: 0;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes {
+  padding: 8px 12px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__input {
+  padding: 2px 2px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label {
+  padding: 0.1em 0 0.1em 12px;
+  font-size: 19px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label::before {
+  width: 22px;
+  height: 22px;
+}
+
+.multiselect-dropdown__panel .govuk-checkboxes__label::after {
+  top: 8px;
+  left: 8px;
+  width: 10px;
+  height: 6px;
+  border-width: 0 0 3px 3px;
+}
+
+.multiselect-dropdown__single-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.multiselect-dropdown__single-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  color: $govuk-text-colour;
+}
+
+.multiselect-dropdown__single-item:hover {
+  background: #f3f2f1;
+}
+
+.multiselect-dropdown__single-item--selected {
+  background: #d2e2f1;
+}
+
+// OperatorDropdown styling
+.operator-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.operator-dropdown__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+}
+
+.operator-dropdown__label {
+  color: $govuk-brand-colour;
+  font-weight: bold;
+  font-size: 24px;
+  margin: 0;
+}
+
+.operator-dropdown__chevron {
+  transition: transform 0.2s;
+}
+
+.operator-dropdown__chevron--open {
+  transform: rotate(180deg);
+}
+
+.operator-dropdown__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: $govuk-body-background-colour;
+  border: 1px solid #b1b4b6;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 320px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.operator-dropdown__item {
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: $govuk-body-background-colour;
+  color: $govuk-text-colour;
+}
+
+.operator-dropdown__item--hovered {
+  background-color: $govuk-brand-colour;
+  color: #ffffff;
+}
+
+.operator-dropdown__item-text {
+  margin: 0;
+  color: inherit;
+}
+
+// SummaryStat tooltip styling
+.summary-stat .tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background-color: $govuk-input-border-colour;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 8px 12px;
+}
+
+.summary-stat .tooltip .triangle {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid $govuk-input-border-colour;
+}
+
+// SortableTable styling
+.kns-table .sortable-header {
+  display: flex;
+  font-size: 17px;
+  text-decoration: underline;
+  cursor: pointer;
+  color: $govuk-link-colour;
+  text-align: left;
+  align-items: center;
+}
+
+.kns-table .sortable-header:hover {
+  color: $govuk-link-hover-colour;
+}
+
+.kns-table .sortable-header svg {
+  flex-shrink: 0;
+}
+
+.govuk-table__header {
+  font-size: 17px;
 }
 
 // Corridor date wrapper / controls bar
