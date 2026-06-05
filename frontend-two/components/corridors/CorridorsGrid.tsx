@@ -1,45 +1,42 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { SortableTable } from "kainossoftwareltd-govuk-react-kainos";
+import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
+import type { SortableTableRow } from "@/components/table/SortableTable";
 import { CorridorSummary } from "@/types/corridors";
 
-enum SortOrder {
-  ASC = "asc",
-  DESC = "desc",
-  NONE = "none",
-}
-
-type SortKey = "name" | "numStops";
-
-const nameComparator = (a: string, b: string) =>
-  a.trim().localeCompare(b.trim(), undefined, { numeric: true });
-
-const sortCorridors = (
-  data: CorridorSummary[],
-  key: SortKey,
-  dir: SortOrder,
-): CorridorSummary[] => {
-  const sorted = [...data].sort((a, b) => {
-    if (key === "name") return nameComparator(a.name ?? "", b.name ?? "");
-    return (a.numStops ?? 0) - (b.numStops ?? 0);
-  });
-  return dir === SortOrder.ASC ? sorted : sorted.reverse();
-};
-
-const HEAD = [
-  { key: "name", label: "Name", sortable: true, sortOrder: SortOrder.ASC },
+const COLUMNS = [
+  { key: "name", label: "Name", sortable: true },
   { key: "numStops", label: "Stops", sortable: true },
   { key: "edit", label: "", sortable: false },
 ];
 
-const filterCorridors = (
-  data: CorridorSummary[],
-  filter: string,
-): CorridorSummary[] => {
-  const needle = filter.trim().toLowerCase();
-  if (!needle) return data;
-  return data.filter((c) => (c.name ?? "").toLowerCase().includes(needle));
-};
+function getRowValue(row: CorridorSummary, column: string): string | number {
+  switch (column) {
+    case "name":
+      return row.name ?? "";
+    case "numStops":
+      return row.numStops ?? 0;
+    default:
+      return "";
+  }
+}
+
+function renderRow(corridor: CorridorSummary): SortableTableRow {
+  return {
+    key: String(corridor.id),
+    name: (
+      <Link href={`/corridors/${corridor.id}`} className="govuk-link">
+        {corridor.name}
+      </Link>
+    ),
+    numStops: corridor.numStops ?? 0,
+    edit: (
+      <Link href={`/corridors/edit/${corridor.id}`} className="govuk-link">
+        Edit
+      </Link>
+    ),
+  };
+}
 
 interface Props {
   data: CorridorSummary[];
@@ -48,32 +45,13 @@ interface Props {
 }
 
 export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDir, setSortDir] = useState<SortOrder>(SortOrder.ASC);
+  const filtered = useMemo(() => {
+    const needle = filter.trim().toLowerCase();
+    if (!needle) return data;
+    return data.filter((c) => (c.name ?? "").toLowerCase().includes(needle));
+  }, [data, filter]);
 
-  const handleSort = (key: string, order: SortOrder) => {
-    setSortKey(key as SortKey);
-    setSortDir(order);
-  };
-
-  const filtered = filterCorridors(data, filter);
-  const rows = sortCorridors(filtered, sortKey, sortDir);
-  const noMatches = data.length > 0 && rows.length === 0;
-
-  const tableRows = rows.map((corridor) => ({
-    key: String(corridor.id),
-    name: (
-      <Link href={`/corridors/${corridor.id}`} className="govuk-link">
-        {corridor.name}
-      </Link>
-    ) as unknown as string,
-    numStops: corridor.numStops ?? 0,
-    edit: (
-      <Link href={`/corridors/edit/${corridor.id}`} className="govuk-link">
-        Edit
-      </Link>
-    ) as unknown as string,
-  }));
+  const noMatches = data.length > 0 && filtered.length === 0;
 
   return (
     <>
@@ -106,7 +84,14 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
         </div>
       </div>
 
-      <SortableTable head={HEAD} rows={tableRows} onSort={handleSort} />
+      <SortedPaginatedTable
+        columns={COLUMNS}
+        data={filtered}
+        getRowValue={getRowValue}
+        renderRow={renderRow}
+        initialSortKey="name"
+        initialSortOrder="asc"
+      />
 
       {noMatches ? (
         <div role="alert" className="govuk-body">

@@ -192,7 +192,6 @@ export const StopAnalysisTable = ({
   onDirectionsChange,
   onStopNameClick,
 }: StopAnalysisTableProps) => {
-  const [quickFilter, setQuickFilter] = useState("");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("percentage");
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<TableColumnKey[]>(
@@ -226,19 +225,8 @@ export const StopAnalysisTable = ({
     [data, directions],
   );
 
-  const searchFilteredData = useMemo(() => {
-    if (!quickFilter) return filteredData;
-    const lower = quickFilter.toLowerCase();
-    return filteredData.filter(
-      (row) =>
-        row.stopId.toLowerCase().includes(lower) ||
-        row.stopName.toLowerCase().includes(lower) ||
-        row.localityName.toLowerCase().includes(lower),
-    );
-  }, [filteredData, quickFilter]);
-
   const sortedRows = useMemo(() => {
-    const rows = [...searchFilteredData];
+    const rows = [...filteredData];
     rows.sort((left, right) => {
       const leftValue = getSortValue(left, sortState.key, displayMode);
       const rightValue = getSortValue(right, sortState.key, displayMode);
@@ -246,7 +234,7 @@ export const StopAnalysisTable = ({
       return sortState.order === SORT_ASC ? result : -result;
     });
     return rows;
-  }, [displayMode, searchFilteredData, sortState]);
+  }, [displayMode, filteredData, sortState]);
 
   const visibleColumnSet = useMemo(() => new Set(visibleColumns), [visibleColumns]);
 
@@ -492,16 +480,6 @@ export const StopAnalysisTable = ({
           />
         </div>
 
-        <div className="stop-analysis-table__search">
-          <input
-            className="govuk-input govuk-input--width-20"
-            type="text"
-            placeholder="Search stops..."
-            value={quickFilter}
-            onChange={(e) => setQuickFilter(e.target.value)}
-            aria-label="Search stops"
-          />
-        </div>
       </div>
 
       {loading ? (
