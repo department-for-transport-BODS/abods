@@ -1,5 +1,5 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import StopAnalysisPage from "@/pages/stop-analysis";
+import StopAnalysisPage, { computeAdminAreaGeoJSON } from "@/pages/stop-analysis";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -14,6 +14,14 @@ vi.mock("@/components/layout/BaseLayout", () => ({
 
 vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
+}));
+
+vi.mock("@/contexts/PanelContext", () => ({
+  usePanel: () => ({
+    setContent: vi.fn(),
+    toggle: vi.fn(),
+    destroy: vi.fn(),
+  }),
 }));
 
 vi.mock("@/services/apolloClient", () => ({
@@ -38,6 +46,7 @@ vi.mock("@/components/stop-analysis/StopAnalysisMap", () => ({
 
 vi.mock("@/components/stop-analysis/StopAnalysisFilters", () => ({
   StopAnalysisFilters: () => <div data-testid="stop-analysis-filters" />,
+  RefineFilters: () => <div data-testid="refine-filters" />,
 }));
 
 vi.mock("@/components/stop-analysis/StopAnalysisTable", () => ({
@@ -45,15 +54,18 @@ vi.mock("@/components/stop-analysis/StopAnalysisTable", () => ({
     data,
     loading,
     errored,
+    showTotals,
   }: {
     data: unknown[];
     loading: boolean;
     errored: boolean;
+    showTotals?: boolean;
   }) => (
     <div
       data-testid="stop-analysis-table"
       data-loading={loading}
       data-errored={errored}
+      data-show-totals={showTotals ? "true" : "false"}
     >
       {data.length} rows
     </div>
@@ -112,6 +124,7 @@ describe("StopAnalysisPage", () => {
     render(<StopAnalysisPage />);
     const table = screen.getByTestId("stop-analysis-table");
     expect(table).toBeInTheDocument();
+    expect(table).toHaveAttribute("data-show-totals", "true");
   });
 
   it("renders base layout wrapper", () => {
@@ -128,5 +141,27 @@ describe("StopAnalysisPage", () => {
 
     render(<StopAnalysisPage />);
     expect(screen.queryByTestId("stop-analysis-map")).not.toBeInTheDocument();
+  });
+
+  it("flips admin area coordinates before rendering the map geojson", () => {
+    const geojson = computeAdminAreaGeoJSON(
+      [
+        {
+          id: "AA1",
+          name: "Example area",
+          shape: JSON.stringify({
+            type: "Polygon",
+            coordinates: [[[1, 2], [3, 4], [5, 6], [1, 2]]],
+          }),
+        },
+      ],
+      ["AA1"],
+    );
+
+    expect(geojson.features).toHaveLength(1);
+    expect(geojson.features[0].geometry).toMatchObject({
+      type: "Polygon",
+      coordinates: [[[2, 1], [4, 3], [6, 5], [2, 1]]],
+    });
   });
 });

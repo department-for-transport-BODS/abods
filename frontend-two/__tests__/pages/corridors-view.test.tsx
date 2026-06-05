@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { DateTime } from "luxon";
 import { SWRConfig } from "swr";
 import CorridorsViewPage from "@/pages/corridors/[corridorId]";
 import { useConfig } from "@/contexts/ConfigContext";
@@ -15,6 +16,24 @@ vi.mock("@/hooks/useAuth", () => ({
 vi.mock("@/components/layout/BaseLayout", () => ({
   BaseLayout: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="base-layout">{children}</div>
+  ),
+}));
+
+vi.mock("@/components/shared/DateRangeSelect", () => ({
+  DateRangeSelect: ({
+    value,
+    onChange,
+  }: {
+    value: { from: string; to: string };
+    onChange: (dateRange: { from: string; to: string }) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="date-range-select"
+      onClick={() => onChange({ from: "2026-05-01", to: "2026-05-08" })}
+    >
+      {value.from} - {value.to}
+    </button>
   ),
 }));
 
@@ -169,7 +188,12 @@ describe("CorridorsViewPage", () => {
     vi.clearAllMocks();
     localStorage.clear();
 
-    mockQuery = { corridorId: "12" };
+    mockQuery = {
+      corridorId: "12",
+      from: "2026-05-26T00:00:00.000Z",
+      to: "2026-06-02T00:00:00.000Z",
+      preset: "custom",
+    };
 
     mockUseConfig.mockReturnValue({
       isLoading: false,
@@ -260,6 +284,43 @@ describe("CorridorsViewPage", () => {
       journeyTime: true,
       timeOfDay: false,
       dayOfWeek: false,
+    });
+  });
+
+  it("renders the shared date range control and updates the query when changed", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("date-range-select")).toHaveTextContent(
+        "2026-05-26T00:00:00.000Z - 2026-06-02T00:00:00.000Z",
+      );
+    });
+
+    await user.click(screen.getByTestId("date-range-select"));
+
+    const expectedFrom = DateTime.fromISO("2026-05-01")
+      .startOf("day")
+      .toUTC()
+      .toISO();
+    const expectedTo = DateTime.fromISO("2026-05-08")
+      .endOf("day")
+      .toUTC()
+      .toISO();
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: "/corridors/[corridorId]",
+          query: expect.objectContaining({
+            from: expectedFrom,
+            to: expectedTo,
+            preset: "custom",
+          }),
+        }),
+        undefined,
+        { shallow: true },
+      );
     });
   });
 });
