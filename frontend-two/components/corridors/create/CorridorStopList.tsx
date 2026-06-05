@@ -16,7 +16,7 @@ export const CorridorStopList = ({
   if (!corridorStops.length) return null;
 
   return (
-    <>
+    <div className="corridor-stop-list">
       {corridorStops.map((stop, index) => {
         const isLast = index === corridorStops.length - 1;
         const canRemove = isLast && !loading && (isEdit ? index > 0 : true);
@@ -24,13 +24,15 @@ export const CorridorStopList = ({
         return (
           <div
             key={`${stop.stopId}-${index}`}
-            className="govuk-!-margin-bottom-3 govuk-!-padding-bottom-2"
+            className={`corridor-stop-list__stop corridor-stop-list__stop--added${
+              isLast ? "" : " corridor-stop-list__stop--connected"
+            }`}
           >
-            <div className="govuk-body govuk-!-margin-bottom-1">
-              <strong>{stop.stopName}</strong>
-            </div>
-            <div className="govuk-body-s govuk-!-margin-bottom-1">
-              {stop.naptan}
+            <div className="corridor-stop-list__stop-details">
+              <div className="corridor-stop-list__stop-label">
+                {stop.stopName}
+              </div>
+              <div className="corridor-stop-list__naptan">{stop.naptan}</div>
             </div>
             {canRemove ? (
               <button
@@ -47,6 +49,6 @@ export const CorridorStopList = ({
           </div>
         );
       })}
-    </>
+    </div>
   );
 };

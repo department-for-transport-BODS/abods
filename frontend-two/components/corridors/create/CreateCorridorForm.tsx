@@ -9,6 +9,7 @@ import { CorridorCreateMap } from "@/components/corridors/create/CorridorCreateM
 import { CorridorStopList } from "@/components/corridors/create/CorridorStopList";
 import { StopSearchList } from "@/components/corridors/create/StopSearchList";
 import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorridorModal";
+import { LocationLookupField } from "@/components/shared/LocationLookupField";
 
 type SearchMode = "location" | "stop";
 
@@ -44,8 +45,12 @@ export const CreateCorridorForm = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const isStopSearch = searchMode === "stop";
   const firstStopSearchEnabled =
-    stopList.length === 0 && stopQuery.trim().length > 3;
+    stopList.length === 0 &&
+    (isStopSearch
+      ? stopQuery.trim().length > 3
+      : stopQuery.trim().length > 0);
   const { data: firstStopData, isLoading: searchingFirstStop } = useSWR(
     firstStopSearchEnabled
       ? ["corridor-first-stop-search", stopQuery.trim()]
@@ -252,90 +257,101 @@ export const CreateCorridorForm = ({
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-one-half">
-            <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
+            <div className="corridor-stop-column">
+              <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
 
-            <CorridorStopList
-              corridorStops={stopList}
-              loading={loading}
-              isEdit={isEdit}
-              onRemoveLastStop={removeLastStop}
-            />
+              <CorridorStopList
+                corridorStops={stopList}
+                loading={loading}
+                isEdit={isEdit}
+                onRemoveLastStop={removeLastStop}
+              />
 
-            {showSearchModeSelector ? (
-              <div className="govuk-form-group">
-                <label className="govuk-label" htmlFor="search-mode">
-                  Search for the first stop in your corridor
-                </label>
-                <select
-                  id="search-mode"
-                  className="govuk-select"
-                  value={searchMode}
-                  onChange={(event) => {
-                    setSearchMode(event.target.value as SearchMode);
-                    resetSearch();
-                  }}
-                >
-                  <option value="location">Location</option>
-                  <option value="stop">Stop</option>
-                </select>
-              </div>
-            ) : null}
+              {showSearchModeSelector ? (
+                <div className="govuk-form-group">
+                  <label className="govuk-label" htmlFor="search-mode">
+                    Search for the first stop in your corridor
+                  </label>
+                  <select
+                    id="search-mode"
+                    className="govuk-select"
+                    value={searchMode}
+                    onChange={(event) => {
+                      setSearchMode(event.target.value as SearchMode);
+                      resetSearch();
+                    }}
+                  >
+                    <option value="location">Location</option>
+                    <option value="stop">Stop</option>
+                  </select>
+                </div>
+              ) : null}
 
-            {stopList.length === 0 ? (
-              <div className="govuk-form-group">
-                <label className="govuk-label" htmlFor="stop-query">
-                  {searchMode === "stop"
-                    ? "Stop name or NaPTAN code"
-                    : "Location name or postcode"}
-                </label>
-                <input
-                  id="stop-query"
-                  name="stop-query"
-                  type="text"
-                  className="govuk-input govuk-input--width-20"
-                  placeholder={
-                    searchMode === "location"
-                      ? "Search"
-                      : "Enter four or more characters"
-                  }
-                  value={stopQuery}
-                  onChange={(event) => setStopQuery(event.target.value)}
+              {stopList.length === 0 ? (
+                searchMode === "location" ? (
+                  <LocationLookupField
+                    id="stop-query"
+                    label="Location name or postcode"
+                    value={stopQuery}
+                    onValueChange={setStopQuery}
+                    mapboxToken={mapboxToken}
+                    containerClassName="govuk-form-group"
+                    placeholder="Search"
+                  />
+                ) : (
+                  <div className="govuk-form-group">
+                    <label className="govuk-label" htmlFor="stop-query">
+                      Stop name or NaPTAN code
+                    </label>
+                    <input
+                      id="stop-query"
+                      name="stop-query"
+                      type="text"
+                      className="govuk-input govuk-input--width-20"
+                      placeholder="Enter four or more characters"
+                      value={stopQuery}
+                      onChange={(event) => setStopQuery(event.target.value)}
+                    />
+                  </div>
+                )
+              ) : null}
+
+              {isStopSearch || stopList.length > 0 ? (
+              <>
+                {loading ? (
+                  <p className="govuk-body">Searching for stops...</p>
+                ) : null}
+
+                {!loading &&
+                stopList.length === 0 &&
+                stopQuery.trim().length > 0 &&
+                stopQuery.trim().length < 4 ? (
+                  <p className="govuk-body-s">Enter at least 4 characters</p>
+                ) : null}
+
+                {noData ? (
+                  <p className="govuk-body">
+                    {stopList.length === 0
+                      ? "Your organisation has no matching stops"
+                      : "No further stops available"}
+                  </p>
+                ) : null}
+
+                {!loading && matchingStops.length > 0 ? (
+                  <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
+                    {stopList.length === 0
+                      ? `${matchingStops.length} matching stops`
+                      : "Add further stops"}
+                  </h3>
+                ) : null}
+
+                <StopSearchList
+                  matchingStops={matchingStops}
+                  isFirstStop={stopList.length === 0}
+                  onAddStop={addStop}
                 />
-              </div>
+              </>
             ) : null}
-
-            {loading ? (
-              <p className="govuk-body">Searching for stops...</p>
-            ) : null}
-
-            {!loading &&
-            stopList.length === 0 &&
-            stopQuery.trim().length > 0 &&
-            stopQuery.trim().length < 4 ? (
-              <p className="govuk-body-s">Enter at least 4 characters</p>
-            ) : null}
-
-            {noData ? (
-              <p className="govuk-body">
-                {stopList.length === 0
-                  ? "Your organisation has no matching stops"
-                  : "No further stops available"}
-              </p>
-            ) : null}
-
-            {!loading && matchingStops.length > 0 ? (
-              <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
-                {stopList.length === 0
-                  ? `${matchingStops.length} matching stops`
-                  : "Add further stops"}
-              </h3>
-            ) : null}
-
-            <StopSearchList
-              matchingStops={matchingStops}
-              isFirstStop={stopList.length === 0}
-              onAddStop={addStop}
-            />
 
             {stopList.length > 0 ? (
               <div className="govuk-button-group govuk-!-margin-top-6">
@@ -381,6 +397,7 @@ export const CreateCorridorForm = ({
               </div>
             ) : null}
 
+
             {isEdit ? (
               <div className="govuk-!-margin-top-6">
                 <button
@@ -394,6 +411,7 @@ export const CreateCorridorForm = ({
                 </button>
               </div>
             ) : null}
+            </div>
           </div>
 
           <div className="govuk-grid-column-one-half">
