@@ -114,21 +114,35 @@ describe("StopAnalysisTable", () => {
     await user.click(screen.getByRole("button", { name: "Display options" }));
 
     const dialog = screen.getByRole("dialog", { name: "Display options" });
-    expect(within(dialog).getByRole("checkbox", { name: "NAPTAN" })).toBeDisabled();
+    expect(
+      within(dialog).getByRole("checkbox", { name: "NAPTAN" }),
+    ).toBeDisabled();
 
-    await user.click(within(dialog).getByRole("checkbox", { name: "Scheduled" }));
+    await user.click(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
     await user.click(within(dialog).getByRole("button", { name: "Show all" }));
-    expect(within(dialog).getByRole("checkbox", { name: "Scheduled" })).toBeChecked();
+    expect(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    ).toBeChecked();
 
-    await user.click(within(dialog).getByRole("checkbox", { name: "Scheduled" }));
+    await user.click(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
     await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByTestId("table-head")).toHaveTextContent("Scheduled");
 
     await user.click(screen.getByRole("button", { name: "Display options" }));
-    const updatedDialog = screen.getByRole("dialog", { name: "Display options" });
-    await user.click(within(updatedDialog).getByRole("checkbox", { name: "Scheduled" }));
-    await user.click(within(updatedDialog).getByRole("button", { name: "Update" }));
+    const updatedDialog = screen.getByRole("dialog", {
+      name: "Display options",
+    });
+    await user.click(
+      within(updatedDialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
+    await user.click(
+      within(updatedDialog).getByRole("button", { name: "Update" }),
+    );
 
     expect(screen.getByTestId("table-head")).not.toHaveTextContent("Scheduled");
     expect(screen.getByTestId("table-head")).toHaveTextContent("Recorded");

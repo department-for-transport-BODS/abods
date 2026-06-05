@@ -19,44 +19,50 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
     stopAnalysis = new StopAnalysisPage(loggedInPage);
   });
 
-  loggedInTest("renders the main page shell and controls", async ({
-    loggedInPage,
-  }) => {
-    await stopAnalysis.goto();
+  loggedInTest(
+    "renders the main page shell and controls",
+    async ({ loggedInPage }) => {
+      await stopAnalysis.goto();
 
-    await test.step("verify the page heading and filter controls", async () => {
-      await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
-      await expect(stopAnalysis.heading()).toBeVisible();
-      await expect(stopAnalysis.refineResultsButton()).toBeVisible();
-      await expect(stopAnalysis.displayOptionsButton()).toBeVisible();
-      await expect(stopAnalysis.presetDateRangeSelect()).toBeVisible();
-      await expect(stopAnalysis.adminAreasTrigger()).toBeVisible();
-      await expect(stopAnalysis.matchTypeRadio("Evidenced")).toBeChecked();
-      await expect(stopAnalysis.stopTypeRadio("Timing points")).toBeChecked();
-      await expect(stopAnalysis.directionCheckbox("Inbound")).toBeChecked();
-      await expect(stopAnalysis.directionCheckbox("Outbound")).toBeChecked();
-      await expect(stopAnalysis.searchStopsInput()).toBeVisible();
-    });
-  });
+      await test.step("verify the page heading and filter controls", async () => {
+        await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
+        await expect(stopAnalysis.heading()).toBeVisible();
+        await expect(stopAnalysis.refineResultsButton()).toBeVisible();
+        await expect(stopAnalysis.displayOptionsButton()).toBeVisible();
+        await expect(stopAnalysis.presetDateRangeSelect()).toBeVisible();
+        await expect(stopAnalysis.adminAreasTrigger()).toBeVisible();
+        await expect(stopAnalysis.matchTypeRadio("Evidenced")).toBeChecked();
+        await expect(stopAnalysis.stopTypeRadio("Timing points")).toBeChecked();
+        await expect(stopAnalysis.directionCheckbox("Inbound")).toBeChecked();
+        await expect(stopAnalysis.directionCheckbox("Outbound")).toBeChecked();
+        await expect(stopAnalysis.searchStopsInput()).toBeVisible();
+      });
+    },
+  );
 
-  loggedInTest("opens and closes the refine panel", async ({ loggedInPage }) => {
-    await stopAnalysis.goto();
+  loggedInTest(
+    "opens and closes the refine panel",
+    async ({ loggedInPage }) => {
+      await stopAnalysis.goto();
 
-    await test.step("open the refine panel", async () => {
-      await stopAnalysis.refineResultsButton().click();
-      await expect(stopAnalysis.refinePanel()).toBeVisible();
-      await expect(stopAnalysis.refinePanel()).toContainText("Refine results");
-      await expect(stopAnalysis.resetToDefaultsButton()).toBeVisible();
-      await expect(stopAnalysis.applyButton()).toBeVisible();
-      await expect(stopAnalysis.closeRefineButton()).toBeVisible();
-    });
+      await test.step("open the refine panel", async () => {
+        await stopAnalysis.refineResultsButton().click();
+        await expect(stopAnalysis.refinePanel()).toBeVisible();
+        await expect(stopAnalysis.refinePanel()).toContainText(
+          "Refine results",
+        );
+        await expect(stopAnalysis.resetToDefaultsButton()).toBeVisible();
+        await expect(stopAnalysis.applyButton()).toBeVisible();
+        await expect(stopAnalysis.closeRefineButton()).toBeVisible();
+      });
 
-    await test.step("close the refine panel", async () => {
-      await stopAnalysis.closeRefineButton().click();
-      await expect(stopAnalysis.refinePanel()).toBeHidden();
-      await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
-    });
-  });
+      await test.step("close the refine panel", async () => {
+        await stopAnalysis.closeRefineButton().click();
+        await expect(stopAnalysis.refinePanel()).toBeHidden();
+        await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
+      });
+    },
+  );
 
   loggedInTest(
     "shows active chips from query params and resets them to defaults",
@@ -71,7 +77,9 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await expect(stopAnalysis.heading()).toBeVisible();
         await expect(stopAnalysis.chip("From 08:00")).toBeVisible();
         await expect(stopAnalysis.chip("Until 17:59")).toBeVisible();
-        await expect(stopAnalysis.chip("Monday, Wednesday, Friday")).toBeVisible();
+        await expect(
+          stopAnalysis.chip("Monday, Wednesday, Friday"),
+        ).toBeVisible();
       });
 
       await test.step("reset the refine panel values back to defaults", async () => {
@@ -83,17 +91,20 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         );
         await expect(stopAnalysis.chip("From 00:00")).toBeVisible();
         await expect(stopAnalysis.chip("Until 23:59")).toBeVisible();
-        await expect(stopAnalysis.chip("Monday, Wednesday, Friday")).toHaveCount(0);
+        await expect(
+          stopAnalysis.chip("Monday, Wednesday, Friday"),
+        ).toHaveCount(0);
       });
     },
   );
 
-  loggedInTest("is reachable from the dashboard navigation", async ({
-    loggedInPage,
-  }) => {
-    await stopAnalysis.openFromDashboardNav();
+  loggedInTest(
+    "is reachable from the dashboard navigation",
+    async ({ loggedInPage }) => {
+      await stopAnalysis.openFromDashboardNav();
 
-    await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
-    await expect(stopAnalysis.heading()).toBeVisible();
-  });
+      await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
+      await expect(stopAnalysis.heading()).toBeVisible();
+    },
+  );
 });

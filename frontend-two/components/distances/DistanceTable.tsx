@@ -60,11 +60,8 @@ function renderRow(row: DistanceData): SortableTableRow {
     operatorName: row.operatorId
       ? `${row.operatorName} (${row.operatorId})`
       : row.operatorName ?? "-",
-    nocLineAndServiceCode:
-      row.nocLineAndServiceCode?.split("-").pop() ?? "-",
-    lineName: row.lineName
-      ? `${row.lineName}-${row.serviceName ?? "NA"}`
-      : "-",
+    nocLineAndServiceCode: row.nocLineAndServiceCode?.split("-").pop() ?? "-",
+    lineName: row.lineName ? `${row.lineName}-${row.serviceName ?? "NA"}` : "-",
     distance: distance != null ? distance.toFixed(2) : "-",
     avlDistance: avlDistance != null ? avlDistance.toFixed(2) : "-",
     avlDistancePercent: avlPercent,

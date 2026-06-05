@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StopAnalysisFilters } from "@/components/stop-analysis/StopAnalysisFilters";
+import { MatchType } from "@/types/stop-analysis";
 
 vi.mock("@/components/shared/DateRangeSelect", () => ({
   DateRangeSelect: ({
@@ -22,7 +23,9 @@ vi.mock("@/components/shared/DateRangeSelect", () => ({
 
 vi.mock("@/components/stop-analysis/MultiselectCheckbox", () => ({
   MultiselectCheckbox: ({ label }: { label: string }) => (
-    <div data-testid={`multiselect-${label.toLowerCase().replace(/\s+/g, "-")}`} />
+    <div
+      data-testid={`multiselect-${label.toLowerCase().replace(/\s+/g, "-")}`}
+    />
   ),
 }));
 
@@ -44,7 +47,7 @@ describe("StopAnalysisFilters", () => {
         adminAreaIds={[]}
         operatorIds={[]}
         lineIds={[]}
-        matchType="Evidenced"
+        matchType={MatchType.Evidenced}
         stopType="TimingPoints"
         adminAreas={[]}
         operators={[]}

@@ -24,7 +24,10 @@ import {
   StopTypeOption,
 } from "@/types/stop-analysis";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
-import { StopAnalysisFilters as FiltersPanel, RefineFilters } from "@/components/stop-analysis/StopAnalysisFilters";
+import {
+  StopAnalysisFilters as FiltersPanel,
+  RefineFilters,
+} from "@/components/stop-analysis/StopAnalysisFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import { MatchType as GqlMatchType } from "../src/generated/graphql";
@@ -32,7 +35,10 @@ import { Period } from "@/utils/dateRange";
 
 const MAX_BOUND_WIDTH = 0.5;
 
-const DEFAULT_TO = DateTime.local().startOf("day").minus({ days: 1 }).endOf("day");
+const DEFAULT_TO = DateTime.local()
+  .startOf("day")
+  .minus({ days: 1 })
+  .endOf("day");
 const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
 
 function getPresetWindow(preset: Period, today: DateTime) {
@@ -269,9 +275,10 @@ const StopAnalysisPage = () => {
     center?: [number, number];
     bbox?: [number, number, number, number];
   }>();
-  const [focusedStop, setFocusedStop] = useState<
-    { latitude: number; longitude: number } | null
-  >(null);
+  const [focusedStop, setFocusedStop] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   // Read filter state from URL
   const fromTimestamp =
@@ -431,23 +438,19 @@ const StopAnalysisPage = () => {
     [adminAreas, visibleAdminAreaIds],
   );
 
-  const selectedAdminAreaBounds = useMemo(
-    () => {
-      if (adminAreaGeoJSON.features.length === 0) return null;
+  const selectedAdminAreaBounds = useMemo(() => {
+    if (adminAreaGeoJSON.features.length === 0) return null;
 
-      const [minLongitude, minLatitude, maxLongitude, maxLatitude] = bbox(
-        adminAreaGeoJSON,
-      );
+    const [minLongitude, minLatitude, maxLongitude, maxLatitude] =
+      bbox(adminAreaGeoJSON);
 
-      return {
-        minLongitude,
-        minLatitude,
-        maxLongitude,
-        maxLatitude,
-      };
-    },
-    [adminAreaGeoJSON],
-  );
+    return {
+      minLongitude,
+      minLatitude,
+      maxLongitude,
+      maxLatitude,
+    };
+  }, [adminAreaGeoJSON]);
 
   // Error state
   const errors: ErrorInfo[] =
@@ -557,7 +560,9 @@ const StopAnalysisPage = () => {
   }, [dayOfWeekFlags, startTime, endTime, setContent, toggle, updateQuery]);
 
   useEffect(() => {
-    return () => { destroy(); };
+    return () => {
+      destroy();
+    };
   }, [destroy]);
 
   return (
@@ -569,7 +574,11 @@ const StopAnalysisPage = () => {
             <button
               type="button"
               className="govuk-link button-link stop-analysis-filters__refine-button"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.25rem",
+              }}
               aria-controls="panel"
               onClick={toggle}
             >
@@ -614,7 +623,10 @@ const StopAnalysisPage = () => {
             updateQuery({ fromTimestamp: from, toTimestamp: to })
           }
           onPresetChange={(preset: Period) => {
-            const range = getPresetWindow(preset, DateTime.local().startOf("day"));
+            const range = getPresetWindow(
+              preset,
+              DateTime.local().startOf("day"),
+            );
             updateQuery({
               fromTimestamp: range.from.startOf("day").toISO()!,
               toTimestamp: range.to.endOf("day").toISO()!,

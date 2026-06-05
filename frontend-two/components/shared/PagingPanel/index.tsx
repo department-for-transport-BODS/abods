@@ -5,7 +5,8 @@ const PAGES_MIDDLE = 3;
 
 function getPageNumbers(current: number, total: number) {
   const stickToStart = total <= MINIMUM_PAGES || current < STICKY_THRESHOLD;
-  const stickToEnd = total <= MINIMUM_PAGES || total - current - 1 < STICKY_THRESHOLD;
+  const stickToEnd =
+    total <= MINIMUM_PAGES || total - current - 1 < STICKY_THRESHOLD;
 
   const offset = stickToStart
     ? 0
@@ -16,7 +17,10 @@ function getPageNumbers(current: number, total: number) {
   const numPages =
     total <= MINIMUM_PAGES
       ? total
-      : Math.min(total, stickToStart || stickToEnd ? PAGES_STICKY : PAGES_MIDDLE);
+      : Math.min(
+          total,
+          stickToStart || stickToEnd ? PAGES_STICKY : PAGES_MIDDLE,
+        );
 
   const pages = Array(numPages)
     .fill(0)
@@ -50,7 +54,10 @@ export const PagingPanel = ({
   const isLastPage = currentPage === totalPages - 1;
   const pluralNoun = `${noun}${rowCount > 1 ? "s" : ""}`;
 
-  const { pages, stickToStart, stickToEnd } = getPageNumbers(currentPage, totalPages);
+  const { pages, stickToStart, stickToEnd } = getPageNumbers(
+    currentPage,
+    totalPages,
+  );
 
   return (
     <div className="paging-panel flex justify-end">
@@ -72,7 +79,10 @@ export const PagingPanel = ({
               )}
               {!stickToStart && (
                 <>
-                  <button className="button-link paging-panel__button" onClick={() => onPageChange(0)}>
+                  <button
+                    className="button-link paging-panel__button"
+                    onClick={() => onPageChange(0)}
+                  >
                     1
                   </button>
                   <span className="paging-panel__ellipsis">…</span>
@@ -84,7 +94,11 @@ export const PagingPanel = ({
                     {page + 1}
                   </span>
                 ) : (
-                  <button key={page} className="button-link paging-panel__button" onClick={() => onPageChange(page)}>
+                  <button
+                    key={page}
+                    className="button-link paging-panel__button"
+                    onClick={() => onPageChange(page)}
+                  >
                     {page + 1}
                   </button>
                 ),

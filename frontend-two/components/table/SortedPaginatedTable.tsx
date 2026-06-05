@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { SortableTable, type SortableTableRow, type SortOrder } from "./SortableTable";
+import {
+  SortableTable,
+  type SortableTableRow,
+  type SortOrder,
+} from "./SortableTable";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -50,8 +54,15 @@ export const SortedPaginatedTable = <T,>({
       const bVal = getRowValue(b, sortKey);
       const cmp =
         typeof aVal === "string" && typeof bVal === "string"
-          ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: "base" })
-          : aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+          ? aVal.localeCompare(bVal, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            })
+          : aVal < bVal
+            ? -1
+            : aVal > bVal
+              ? 1
+              : 0;
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [data, getRowValue, sortKey, sortOrder]);
@@ -63,7 +74,10 @@ export const SortedPaginatedTable = <T,>({
   };
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
-  const pageData = sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const pageData = sortedData.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
 
   const head = columns.map((col) => ({
     key: col.key,

@@ -1,5 +1,7 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import StopAnalysisPage, { computeAdminAreaGeoJSON } from "@/pages/stop-analysis";
+import StopAnalysisPage, {
+  computeAdminAreaGeoJSON,
+} from "@/pages/stop-analysis";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -151,7 +153,14 @@ describe("StopAnalysisPage", () => {
           name: "Example area",
           shape: JSON.stringify({
             type: "Polygon",
-            coordinates: [[[1, 2], [3, 4], [5, 6], [1, 2]]],
+            coordinates: [
+              [
+                [1, 2],
+                [3, 4],
+                [5, 6],
+                [1, 2],
+              ],
+            ],
           }),
         },
       ],
@@ -161,7 +170,14 @@ describe("StopAnalysisPage", () => {
     expect(geojson.features).toHaveLength(1);
     expect(geojson.features[0].geometry).toMatchObject({
       type: "Polygon",
-      coordinates: [[[2, 1], [4, 3], [6, 5], [2, 1]]],
+      coordinates: [
+        [
+          [2, 1],
+          [4, 3],
+          [6, 5],
+          [2, 1],
+        ],
+      ],
     });
   });
 });

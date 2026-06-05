@@ -119,7 +119,10 @@ export const LocationLookupField = ({
         </div>
 
         {open && !disabled && (value.trim().length === 0 || hasResults) && (
-          <div className="stop-analysis-filters__location-results" role="listbox">
+          <div
+            className="stop-analysis-filters__location-results"
+            role="listbox"
+          >
             {value.trim().length === 0 && (
               <div className="stop-analysis-filters__location-hint">
                 Type to search

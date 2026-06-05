@@ -48,14 +48,14 @@ describe("LocationLookupField", () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
 
-    render(
-      <Harness onSelect={onSelect} />,
-    );
+    render(<Harness onSelect={onSelect} />);
 
     await user.type(screen.getByRole("textbox"), "Test");
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Test location" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Test location" }),
+      ).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Test location" }));

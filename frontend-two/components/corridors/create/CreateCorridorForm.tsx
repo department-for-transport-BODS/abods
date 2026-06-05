@@ -48,9 +48,7 @@ export const CreateCorridorForm = ({
   const isStopSearch = searchMode === "stop";
   const firstStopSearchEnabled =
     stopList.length === 0 &&
-    (isStopSearch
-      ? stopQuery.trim().length > 3
-      : stopQuery.trim().length > 0);
+    (isStopSearch ? stopQuery.trim().length > 3 : stopQuery.trim().length > 0);
   const { data: firstStopData, isLoading: searchingFirstStop } = useSWR(
     firstStopSearchEnabled
       ? ["corridor-first-stop-search", stopQuery.trim()]
@@ -317,100 +315,99 @@ export const CreateCorridorForm = ({
               ) : null}
 
               {isStopSearch || stopList.length > 0 ? (
-              <>
-                {loading ? (
-                  <p className="govuk-body">Searching for stops...</p>
-                ) : null}
+                <>
+                  {loading ? (
+                    <p className="govuk-body">Searching for stops...</p>
+                  ) : null}
 
-                {!loading &&
-                stopList.length === 0 &&
-                stopQuery.trim().length > 0 &&
-                stopQuery.trim().length < 4 ? (
-                  <p className="govuk-body-s">Enter at least 4 characters</p>
-                ) : null}
+                  {!loading &&
+                  stopList.length === 0 &&
+                  stopQuery.trim().length > 0 &&
+                  stopQuery.trim().length < 4 ? (
+                    <p className="govuk-body-s">Enter at least 4 characters</p>
+                  ) : null}
 
-                {noData ? (
-                  <p className="govuk-body">
-                    {stopList.length === 0
-                      ? "Your organisation has no matching stops"
-                      : "No further stops available"}
-                  </p>
-                ) : null}
+                  {noData ? (
+                    <p className="govuk-body">
+                      {stopList.length === 0
+                        ? "Your organisation has no matching stops"
+                        : "No further stops available"}
+                    </p>
+                  ) : null}
 
-                {!loading && matchingStops.length > 0 ? (
-                  <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
-                    {stopList.length === 0
-                      ? `${matchingStops.length} matching stops`
-                      : "Add further stops"}
-                  </h3>
-                ) : null}
+                  {!loading && matchingStops.length > 0 ? (
+                    <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
+                      {stopList.length === 0
+                        ? `${matchingStops.length} matching stops`
+                        : "Add further stops"}
+                    </h3>
+                  ) : null}
 
-                <StopSearchList
-                  matchingStops={matchingStops}
-                  isFirstStop={stopList.length === 0}
-                  onAddStop={addStop}
-                />
-              </>
-            ) : null}
+                  <StopSearchList
+                    matchingStops={matchingStops}
+                    isFirstStop={stopList.length === 0}
+                    onAddStop={addStop}
+                  />
+                </>
+              ) : null}
 
-            {stopList.length > 0 ? (
-              <div className="govuk-button-group govuk-!-margin-top-6">
-                <button
-                  type="button"
-                  className="govuk-button govuk-button--secondary"
-                  data-module="govuk-button"
-                  onClick={onCancel}
-                >
-                  Cancel
-                </button>
-
-                {isEdit ? (
+              {stopList.length > 0 ? (
+                <div className="govuk-button-group govuk-!-margin-top-6">
                   <button
                     type="button"
                     className="govuk-button govuk-button--secondary"
                     data-module="govuk-button"
-                    disabled={loading || creating || updating}
-                    onClick={() => {
-                      void submitCreate();
-                    }}
+                    onClick={onCancel}
                   >
-                    {creating ? "Saving..." : "Save as new"}
+                    Cancel
                   </button>
-                ) : null}
 
-                {stopList.length > 1 ? (
+                  {isEdit ? (
+                    <button
+                      type="button"
+                      className="govuk-button govuk-button--secondary"
+                      data-module="govuk-button"
+                      disabled={loading || creating || updating}
+                      onClick={() => {
+                        void submitCreate();
+                      }}
+                    >
+                      {creating ? "Saving..." : "Save as new"}
+                    </button>
+                  ) : null}
+
+                  {stopList.length > 1 ? (
+                    <button
+                      type="submit"
+                      className="govuk-button"
+                      data-module="govuk-button"
+                      disabled={loading || creating || updating}
+                    >
+                      {isEdit
+                        ? updating
+                          ? "Saving..."
+                          : "Save"
+                        : creating
+                          ? "Saving..."
+                          : "Finish"}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {isEdit ? (
+                <div className="govuk-!-margin-top-6">
                   <button
-                    type="submit"
-                    className="govuk-button"
+                    type="button"
+                    className="govuk-button govuk-button--warning"
                     data-module="govuk-button"
-                    disabled={loading || creating || updating}
+                    disabled={loading || creating || updating || deleting}
+                    onClick={() => setShowDeleteModal(true)}
                   >
-                    {isEdit
-                      ? updating
-                        ? "Saving..."
-                        : "Save"
-                      : creating
-                        ? "Saving..."
-                        : "Finish"}
+                    Delete this corridor
                   </button>
-                ) : null}
-              </div>
-            ) : null}
-
-
-            {isEdit ? (
-              <div className="govuk-!-margin-top-6">
-                <button
-                  type="button"
-                  className="govuk-button govuk-button--warning"
-                  data-module="govuk-button"
-                  disabled={loading || creating || updating || deleting}
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  Delete this corridor
-                </button>
-              </div>
-            ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
 

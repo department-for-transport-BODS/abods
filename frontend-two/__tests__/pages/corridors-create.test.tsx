@@ -140,13 +140,18 @@ describe("CorridorsCreatePage", () => {
     renderPage();
 
     // Switch to stop mode to test stop search
-    await user.selectOptions(screen.getByLabelText("Search for the first stop in your corridor"), "stop");
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
 
     const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Select" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select" }),
+      ).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Select" }));
@@ -165,13 +170,18 @@ describe("CorridorsCreatePage", () => {
     renderPage();
 
     // Switch to stop mode to test stop search
-    await user.selectOptions(screen.getByLabelText("Search for the first stop in your corridor"), "stop");
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
 
     const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Select" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select" }),
+      ).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Select" }));
@@ -204,13 +214,18 @@ describe("CorridorsCreatePage", () => {
     renderPage();
 
     // Switch to stop mode to test stop search
-    await user.selectOptions(screen.getByLabelText("Search for the first stop in your corridor"), "stop");
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
 
     const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Select" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select" }),
+      ).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Select" }));

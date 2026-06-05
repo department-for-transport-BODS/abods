@@ -22,14 +22,22 @@ const COLUMNS = [
   { key: "averageSpeed", label: "Average speed", sortable: true },
 ];
 
-const formatAverageJourneyTime = (service: CorridorStatsPerServiceType): string => {
+const formatAverageJourneyTime = (
+  service: CorridorStatsPerServiceType,
+): string => {
   const recorded = service.recordedTransits ?? 0;
   const totalTransitTime = service.totalTransitTime ?? 0;
   if (!recorded || !totalTransitTime) return "0:00";
-  return Duration.fromObject({ seconds: totalTransitTime / recorded }).toFormat("mm:ss");
+  return Duration.fromObject({ seconds: totalTransitTime / recorded }).toFormat(
+    "mm:ss",
+  );
 };
 
-export const CorridorServicesTable = ({ services, serviceLinks, isLoading }: Props) => {
+export const CorridorServicesTable = ({
+  services,
+  serviceLinks,
+  isLoading,
+}: Props) => {
   if (isLoading) {
     return <p className="govuk-body">Loading...</p>;
   }

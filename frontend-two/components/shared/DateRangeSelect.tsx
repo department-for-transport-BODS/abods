@@ -40,10 +40,10 @@ export const DateRangeSelect = ({
   const today = DateTime.local().startOf("day");
   const maxDate = today.minus({ days: 1 });
 
-  const initialStart = value?.from ? DateTime.fromISO(value.from) : today.minus({ days: 7 });
-  const initialEndRaw = value?.to
-    ? DateTime.fromISO(value.to)
-    : maxDate;
+  const initialStart = value?.from
+    ? DateTime.fromISO(value.from)
+    : today.minus({ days: 7 });
+  const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
 
   // Clamp the displayed end date to maxDate if value.to is after maxDate.
   // Old frontend displayed the max selectable date as yesterday, but pulled data for the past week (incl. today)
@@ -125,7 +125,12 @@ export const DateRangeSelect = ({
       : "Select date range";
 
   return (
-    <div className={hideLabel ? "date-range-select" : "govuk-form-group date-range-select"} ref={ref}>
+    <div
+      className={
+        hideLabel ? "date-range-select" : "govuk-form-group date-range-select"
+      }
+      ref={ref}
+    >
       {!hideLabel && <label className="govuk-label">Date Range</label>}
       <button
         type="button"

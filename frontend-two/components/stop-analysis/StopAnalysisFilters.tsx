@@ -128,9 +128,7 @@ export const StopAnalysisFilters = ({
         .filter(
           (line) =>
             adminAreaIds.length === 0 ||
-            line.adminAreaIds.some((a) =>
-              adminAreaIds.includes(a.toString()),
-            ),
+            line.adminAreaIds.some((a) => adminAreaIds.includes(a.toString())),
         )
         .map((line) => ({
           label: `${line.number}: ${line.name}`,
@@ -178,7 +176,9 @@ export const StopAnalysisFilters = ({
             <select
               className="govuk-select stop-analysis-filters__preset-select"
               value={activePreset}
-              onChange={(event) => handlePresetChange(event.target.value as Period)}
+              onChange={(event) =>
+                handlePresetChange(event.target.value as Period)
+              }
               aria-label="Preset date range"
             >
               {PRESET_OPTIONS.map((option) => (
@@ -186,7 +186,9 @@ export const StopAnalysisFilters = ({
                   {option.label}
                 </option>
               ))}
-              {activePreset === "custom" && <option value="custom">Custom</option>}
+              {activePreset === "custom" && (
+                <option value="custom">Custom</option>
+              )}
             </select>
           </div>
         </div>
@@ -215,7 +217,10 @@ export const StopAnalysisFilters = ({
             value={locationQuery}
             onValueChange={setLocationQuery}
             onSelect={(location) => {
-              onLocationSelect({ center: location.center, bbox: location.bbox });
+              onLocationSelect({
+                center: location.center,
+                bbox: location.bbox,
+              });
             }}
             mapboxToken={mapboxToken}
             disabled={!mapboxToken}
@@ -411,7 +416,9 @@ export const RefineFilters = ({
   return (
     <div className="refine-filters-panel">
       <div className="refine-filters-panel__heading">
-        <h2 className="govuk-heading-l govuk-!-margin-bottom-0">Refine results</h2>
+        <h2 className="govuk-heading-l govuk-!-margin-bottom-0">
+          Refine results
+        </h2>
         <button
           type="button"
           className="govuk-link button-link refine-filters-panel__close"
@@ -436,10 +443,7 @@ export const RefineFilters = ({
                 onChange={() => handleDayToggle(day)}
                 aria-label={day.charAt(0).toUpperCase() + day.slice(1)}
               />
-              <label
-                className="govuk-checkboxes__label"
-                htmlFor={`day-${day}`}
-              >
+              <label className="govuk-checkboxes__label" htmlFor={`day-${day}`}>
                 {DAY_ABBREVIATIONS[day]}
               </label>
             </div>
@@ -454,7 +458,11 @@ export const RefineFilters = ({
           </legend>
 
           <div className="range-slider refine-filters-panel__range-slider">
-            <div id="time-range-slider" ref={sliderHostRef} className="ng2-nouislider" />
+            <div
+              id="time-range-slider"
+              ref={sliderHostRef}
+              className="ng2-nouislider"
+            />
           </div>
 
           <div className="refine-filters-panel__time-range time-range-slider__textboxes">
@@ -475,7 +483,9 @@ export const RefineFilters = ({
                     handleStartHourChange(parseInt(e.target.value || "0", 10))
                   }
                 />
-                <span className="govuk-input__suffix" aria-hidden="true">:00</span>
+                <span className="govuk-input__suffix" aria-hidden="true">
+                  :00
+                </span>
               </div>
             </div>
 
@@ -496,7 +506,9 @@ export const RefineFilters = ({
                     handleEndHourChange(parseInt(e.target.value || "0", 10) + 1)
                   }
                 />
-                <span className="govuk-input__suffix" aria-hidden="true">:59</span>
+                <span className="govuk-input__suffix" aria-hidden="true">
+                  :59
+                </span>
               </div>
             </div>
           </div>
@@ -530,5 +542,3 @@ export const RefineFilters = ({
     </div>
   );
 };
-
-

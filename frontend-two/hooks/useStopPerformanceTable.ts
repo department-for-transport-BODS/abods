@@ -91,28 +91,43 @@ export function useStopPerformanceTable(
   const totals = useMemo<StopPerformanceTotals | null>(() => {
     if (!showTotals || !filteredData.length) return null;
 
-    const totalScheduled = filteredData.reduce((sum, r) => sum + r.scheduledDepartures, 0);
-    const totalActual = filteredData.reduce((sum, r) => sum + r.actualDepartures, 0);
+    const totalScheduled = filteredData.reduce(
+      (sum, r) => sum + r.scheduledDepartures,
+      0,
+    );
+    const totalActual = filteredData.reduce(
+      (sum, r) => sum + r.actualDepartures,
+      0,
+    );
     const totalOnTime = filteredData.reduce((sum, r) => sum + r.onTime, 0);
     const totalEarly = filteredData.reduce((sum, r) => sum + r.early, 0);
     const totalLate = filteredData.reduce((sum, r) => sum + r.late, 0);
-    const completedRatio = totalScheduled > 0 ? totalActual / totalScheduled : null;
+    const completedRatio =
+      totalScheduled > 0 ? totalActual / totalScheduled : null;
 
     const avgDelayWeighted = filteredData.reduce(
-      (sum, r) => (r.averageDelay != null ? sum + r.averageDelay * r.actualDepartures : sum),
+      (sum, r) =>
+        r.averageDelay != null
+          ? sum + r.averageDelay * r.actualDepartures
+          : sum,
       0,
     );
     const avgDelay = totalActual > 0 ? avgDelayWeighted / totalActual : null;
 
-    const rowsWithScheduled = filteredData.filter((r) => r.averageScheduled != null);
+    const rowsWithScheduled = filteredData.filter(
+      (r) => r.averageScheduled != null,
+    );
     const avgScheduled = rowsWithScheduled.length
-      ? rowsWithScheduled.reduce((sum, r) => sum + (r.averageScheduled ?? 0), 0) /
-        rowsWithScheduled.length
+      ? rowsWithScheduled.reduce(
+          (sum, r) => sum + (r.averageScheduled ?? 0),
+          0,
+        ) / rowsWithScheduled.length
       : null;
 
     const rowsWithActual = filteredData.filter((r) => r.averageActual != null);
     const avgActual = rowsWithActual.length
-      ? rowsWithActual.reduce((sum, r) => sum + (r.averageActual ?? 0), 0) / rowsWithActual.length
+      ? rowsWithActual.reduce((sum, r) => sum + (r.averageActual ?? 0), 0) /
+        rowsWithActual.length
       : null;
 
     let onTime: string;
@@ -138,14 +153,16 @@ export function useStopPerformanceTable(
           (sum, r) => sum + (r.lateInSeconds ?? 0) * r.late,
           0,
         );
-        onTime = totalOnTime > 0 ? formatSeconds(onTimeSecs / totalOnTime) : "-";
+        onTime =
+          totalOnTime > 0 ? formatSeconds(onTimeSecs / totalOnTime) : "-";
         early = totalEarly > 0 ? formatSeconds(earlySecs / totalEarly) : "-";
         late = totalLate > 0 ? formatSeconds(lateSecs / totalLate) : "-";
         break;
       }
       case "percentage":
       default:
-        onTime = totalActual > 0 ? formatPercent(totalOnTime / totalActual) : "-";
+        onTime =
+          totalActual > 0 ? formatPercent(totalOnTime / totalActual) : "-";
         early = totalActual > 0 ? formatPercent(totalEarly / totalActual) : "-";
         late = totalActual > 0 ? formatPercent(totalLate / totalActual) : "-";
     }
@@ -156,7 +173,8 @@ export function useStopPerformanceTable(
         completedRatio != null
           ? `${totalActual} (${formatPercent(completedRatio)})`
           : String(totalActual),
-      averageScheduled: avgScheduled != null ? formatSeconds(avgScheduled) : "-",
+      averageScheduled:
+        avgScheduled != null ? formatSeconds(avgScheduled) : "-",
       averageActual: avgActual != null ? formatSeconds(avgActual) : "-",
       averageDelay: avgDelay != null ? formatSeconds(avgDelay) : "-",
       onTime,

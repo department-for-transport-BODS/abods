@@ -234,7 +234,9 @@ const CorridorsViewPage = () => {
                   <option value="last28">Last 28 days</option>
                   <option value="lastMonth">Last month</option>
                   <option value="monthToDate">Month to date</option>
-                  {preset === "custom" && <option value="custom">Custom</option>}
+                  {preset === "custom" && (
+                    <option value="custom">Custom</option>
+                  )}
                 </select>
               </div>
             </div>

@@ -3,7 +3,10 @@ import { ReactNode } from "react";
 import { PagingPanel } from "@/components/shared/PagingPanel";
 
 const KainosSortableTable = dynamic(
-  () => import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.SortableTable),
+  () =>
+    import("kainossoftwareltd-govuk-react-kainos").then(
+      (mod) => mod.SortableTable,
+    ),
   { ssr: false },
 );
 
@@ -47,7 +50,11 @@ export const SortableTable = ({
 }: SortableTableProps) => (
   <>
     {title ? <h2 className="govuk-heading-m">{title}</h2> : null}
-    <KainosSortableTable head={head as any} rows={rows as any[]} onSort={onSort} />
+    <KainosSortableTable
+      head={head as any}
+      rows={rows as any[]}
+      onSort={onSort}
+    />
     {pagination ? (
       <div className="flex justify-end">
         <div className="w-1/2">

@@ -29,12 +29,19 @@ describe("MultiselectCheckbox", () => {
     );
 
     await user.click(screen.getByRole("textbox", { name: "Admin Areas" }));
-    await user.type(screen.getByRole("textbox", { name: "Admin Areas" }), "Bed");
+    await user.type(
+      screen.getByRole("textbox", { name: "Admin Areas" }),
+      "Bed",
+    );
 
     const dropdown = screen.getByRole("listbox");
     expect(within(dropdown).getByText("All Areas")).toBeInTheDocument();
-    expect(within(dropdown).getByRole("button", { name: "Show all" })).toBeDisabled();
-    expect(within(dropdown).getByRole("checkbox", { name: "Bedford" })).toBeInTheDocument();
+    expect(
+      within(dropdown).getByRole("button", { name: "Show all" }),
+    ).toBeDisabled();
+    expect(
+      within(dropdown).getByRole("checkbox", { name: "Bedford" }),
+    ).toBeInTheDocument();
     expect(within(dropdown).getByText("Bedford")).toBeInTheDocument();
   });
 

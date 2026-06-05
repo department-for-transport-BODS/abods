@@ -12,7 +12,7 @@ interface SegmentedToggleProps<T extends string = string> {
   options: SegmentedToggleOption<T>[];
 }
 
-export const SegmentedToggle = <T extends string,>({
+export const SegmentedToggle = <T extends string>({
   legend,
   hideLegend,
   name,

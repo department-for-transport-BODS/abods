@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource, MapMouseEvent } from "mapbox-gl";
+import mapboxgl, {
+  Map,
+  LngLatBoundsLike,
+  GeoJSONSource,
+  MapMouseEvent,
+} from "mapbox-gl";
 import type {
   FeatureCollection,
   Feature,
@@ -16,9 +21,7 @@ import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { BoundingBox, StopStatistics } from "@/types/stop-analysis";
 
 // British Isles default bounds
-const BRITISH_ISLES_BBOX: LngLatBoundsLike = [
-  -10.5, 49.5, 2.0, 61.0,
-];
+const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];
 
 const RED_THRESHOLD = 0.6;
 const GREEN_THRESHOLD = 0.8;
@@ -59,16 +62,20 @@ const CLUSTER_PROPERTIES = {
   early: ["+", ["get", "early"]] as [string, mapboxgl.Expression],
   onTime: ["+", ["get", "onTime"]] as [string, mapboxgl.Expression],
   late: ["+", ["get", "late"]] as [string, mapboxgl.Expression],
-  completedDepartures: ["+", ["get", "completedDepartures"]] as [string, mapboxgl.Expression],
-  scheduledDepartures: ["+", ["get", "scheduledDepartures"]] as [string, mapboxgl.Expression],
+  completedDepartures: ["+", ["get", "completedDepartures"]] as [
+    string,
+    mapboxgl.Expression,
+  ],
+  scheduledDepartures: ["+", ["get", "scheduledDepartures"]] as [
+    string,
+    mapboxgl.Expression,
+  ],
 };
 
 type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
 type ClipableFeature = Feature<ClipableGeometry, GeoJsonProperties>;
 
-const isClipableFeature = (
-  feature: Feature,
-): feature is ClipableFeature => {
+const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   const geometryType = feature.geometry?.type;
   return (
     geometryType === "LineString" ||
@@ -141,7 +148,9 @@ export const StopAnalysisMap = ({
     };
 
     features.forEach((feature) => {
-      addCoordinate((feature.geometry as { coordinates?: unknown })?.coordinates);
+      addCoordinate(
+        (feature.geometry as { coordinates?: unknown })?.coordinates,
+      );
     });
 
     return hasCoordinates ? bounds : null;
@@ -152,57 +161,62 @@ export const StopAnalysisMap = ({
     popupRef.current = null;
   }, []);
 
-  const updateAdminAreaPopup = useCallback((map: Map) => {
-    const hoveredAdminArea = hoveredAdminAreaRef.current;
-    if (!hoveredAdminArea) return;
-    if (map.getZoom() >= 11) {
+  const updateAdminAreaPopup = useCallback(
+    (map: Map) => {
+      const hoveredAdminArea = hoveredAdminAreaRef.current;
+      if (!hoveredAdminArea) return;
+      if (map.getZoom() >= 11) {
+        clearPopup();
+        return;
+      }
+
+      const bounds = map.getBounds();
+      const clippedFeature = bboxClip(hoveredAdminArea, [
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ]);
+      const labelPoint = pointOnFeature(clippedFeature);
+      const coordinates = labelPoint.geometry.coordinates as [number, number];
+      const properties = hoveredAdminArea.properties as
+        | {
+            id?: string;
+            name?: string;
+          }
+        | undefined;
+
+      if (!properties?.name || !properties?.id) {
+        clearPopup();
+        return;
+      }
+
       clearPopup();
-      return;
-    }
 
-    const bounds = map.getBounds();
-    const clippedFeature = bboxClip(hoveredAdminArea, [
-      bounds.getWest(),
-      bounds.getSouth(),
-      bounds.getEast(),
-      bounds.getNorth(),
-    ]);
-    const labelPoint = pointOnFeature(clippedFeature);
-    const coordinates = labelPoint.geometry.coordinates as [number, number];
-    const properties = hoveredAdminArea.properties as {
-      id?: string;
-      name?: string;
-    } | undefined;
+      const content = document.createElement("div");
+      const name = document.createElement("div");
+      name.className =
+        "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1";
+      name.textContent = properties.name;
+      content.appendChild(name);
 
-    if (!properties?.name || !properties?.id) {
-      clearPopup();
-      return;
-    }
+      const id = document.createElement("div");
+      id.className = "govuk-body-small";
+      id.textContent = properties.id;
+      content.appendChild(id);
 
-    clearPopup();
-
-    const content = document.createElement("div");
-    const name = document.createElement("div");
-    name.className = "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1";
-    name.textContent = properties.name;
-    content.appendChild(name);
-
-    const id = document.createElement("div");
-    id.className = "govuk-body-small";
-    id.textContent = properties.id;
-    content.appendChild(id);
-
-    popupRef.current = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      maxWidth: "200px",
-      className: "gds-popup",
-    })
-      .setLngLat(coordinates)
-      .setDOMContent(content)
-      .addTo(map);
-  }, [clearPopup]);
-
+      popupRef.current = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        maxWidth: "200px",
+        className: "gds-popup",
+      })
+        .setLngLat(coordinates)
+        .setDOMContent(content)
+        .addTo(map);
+    },
+    [clearPopup],
+  );
 
   useEffect(() => {
     mapboxStyleRef.current = mapboxStyle;
@@ -370,7 +384,14 @@ export const StopAnalysisMap = ({
     } catch {
       return;
     }
-  }, [mapLoaded, adminAreaShapes, onAdminAreaClick, styleRevision, clearPopup, updateAdminAreaPopup]);
+  }, [
+    mapLoaded,
+    adminAreaShapes,
+    onAdminAreaClick,
+    styleRevision,
+    clearPopup,
+    updateAdminAreaPopup,
+  ]);
 
   // Update stops data
   useEffect(() => {
@@ -458,11 +479,7 @@ export const StopAnalysisMap = ({
         id: "timing-stops",
         type: "symbol",
         source: "stops",
-        filter: [
-          "all",
-          ["!", ["has", "point_count"]],
-          ["get", "timingPoint"],
-        ],
+        filter: ["all", ["!", ["has", "point_count"]], ["get", "timingPoint"]],
         layout: {
           "icon-size": 0.9,
           "icon-allow-overlap": true,
@@ -519,7 +536,7 @@ export const StopAnalysisMap = ({
         const coords =
           e.features[0].geometry.type === "Point"
             ? (e.features[0].geometry.coordinates.slice() as [number, number])
-            : [e.lngLat.lng, e.lngLat.lat] as [number, number];
+            : ([e.lngLat.lng, e.lngLat.lat] as [number, number]);
 
         popupRef.current?.remove();
         popupRef.current = new mapboxgl.Popup({
@@ -578,7 +595,7 @@ export const StopAnalysisMap = ({
         const coords =
           e.features[0].geometry.type === "Point"
             ? (e.features[0].geometry.coordinates.slice() as [number, number])
-            : [e.lngLat.lng, e.lngLat.lat] as [number, number];
+            : ([e.lngLat.lng, e.lngLat.lat] as [number, number]);
 
         popupRef.current?.remove();
         popupRef.current = new mapboxgl.Popup({
@@ -614,18 +631,15 @@ export const StopAnalysisMap = ({
   }, [mapLoaded, boundingBoxTooBig, stopGeoJSON, onStopClick, styleRevision]);
 
   // Fit to bounds when initialBounds changes from URL params
-  const fitBounds = useCallback(
-    (bounds: BoundingBox) => {
-      mapRef.current?.fitBounds(
-        [
-          [bounds.minLongitude, bounds.minLatitude],
-          [bounds.maxLongitude, bounds.maxLatitude],
-        ],
-        { maxDuration: 500 },
-      );
-    },
-    [],
-  );
+  const fitBounds = useCallback((bounds: BoundingBox) => {
+    mapRef.current?.fitBounds(
+      [
+        [bounds.minLongitude, bounds.minLatitude],
+        [bounds.maxLongitude, bounds.maxLatitude],
+      ],
+      { maxDuration: 500 },
+    );
+  }, []);
 
   useEffect(() => {
     if (!focusStop || !mapLoaded || !mapRef.current) return;
@@ -647,8 +661,14 @@ export const StopAnalysisMap = ({
     try {
       map.fitBounds(
         [
-          [selectedAdminAreaBounds.minLongitude, selectedAdminAreaBounds.minLatitude],
-          [selectedAdminAreaBounds.maxLongitude, selectedAdminAreaBounds.maxLatitude],
+          [
+            selectedAdminAreaBounds.minLongitude,
+            selectedAdminAreaBounds.minLatitude,
+          ],
+          [
+            selectedAdminAreaBounds.maxLongitude,
+            selectedAdminAreaBounds.maxLatitude,
+          ],
         ],
         {
           duration: 500,

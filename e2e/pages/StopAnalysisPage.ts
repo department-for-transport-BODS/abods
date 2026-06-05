@@ -38,7 +38,9 @@ export class StopAnalysisPage {
   }
 
   resetToDefaultsButton(): Locator {
-    return this.refinePanel().getByRole("button", { name: "Reset to defaults" });
+    return this.refinePanel().getByRole("button", {
+      name: "Reset to defaults",
+    });
   }
 
   applyButton(): Locator {

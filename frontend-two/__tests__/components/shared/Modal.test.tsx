@@ -26,7 +26,9 @@ describe("Modal", () => {
   it("renders a branded header and dialog content", () => {
     render(<ModalHarness />);
 
-    expect(screen.getByRole("dialog", { name: "Display options" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Display options" }),
+    ).toBeInTheDocument();
     expect(document.body.querySelector(".shared-modal__header")).not.toBeNull();
     expect(document.body.querySelector(".shared-modal__logo")).not.toBeNull();
   });

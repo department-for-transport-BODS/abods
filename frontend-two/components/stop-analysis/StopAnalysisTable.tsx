@@ -104,7 +104,10 @@ const compareValue = (a: string | number, b: string | number): number => {
     return a - b;
   }
 
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+  return String(a).localeCompare(String(b), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 };
 
 const SORT_ASC: SortOrder = "asc";
@@ -154,13 +157,16 @@ export const StopAnalysisTable = ({
 }: StopAnalysisTableProps) => {
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [draftVisibleColumns, setDraftVisibleColumns] = useState<TableColumnKey[]>(
-    TABLE_COLUMN_OPTIONS.map((column) => column.key),
-  );
+  const [draftVisibleColumns, setDraftVisibleColumns] = useState<
+    TableColumnKey[]
+  >(TABLE_COLUMN_OPTIONS.map((column) => column.key));
   const [visibleColumns, setVisibleColumns] = useState<TableColumnKey[]>(
     TABLE_COLUMN_OPTIONS.map((column) => column.key),
   );
-  const [sortState, setSortState] = useState<{ key: SortKey; order: SortOrder }>({
+  const [sortState, setSortState] = useState<{
+    key: SortKey;
+    order: SortOrder;
+  }>({
     key: "stopName",
     order: SORT_ASC,
   });
@@ -185,7 +191,10 @@ export const StopAnalysisTable = ({
     [data, directions],
   );
 
-  const { displayMode, setDisplayMode, totals } = useStopPerformanceTable(filteredData, showTotals);
+  const { displayMode, setDisplayMode, totals } = useStopPerformanceTable(
+    filteredData,
+    showTotals,
+  );
 
   const sortedRows = useMemo(() => {
     const rows = [...filteredData];
@@ -202,19 +211,24 @@ export const StopAnalysisTable = ({
     setCurrentPage(0);
   }, [sortedRows]);
 
-  const visibleColumnSet = useMemo(() => new Set(visibleColumns), [visibleColumns]);
+  const visibleColumnSet = useMemo(
+    () => new Set(visibleColumns),
+    [visibleColumns],
+  );
 
   const tableColumns = useMemo(
     () =>
-      TABLE_COLUMN_OPTIONS.filter((column) => visibleColumnSet.has(column.key)).map(
-        (column) => ({
-          key: column.key,
-          label: column.label,
-          sortable: column.key !== "stopId" && column.key !== "stopName" && column.key !== "timingPoint",
-          sortOrder:
-            sortState.key === column.key ? sortState.order : undefined,
-        }),
-      ),
+      TABLE_COLUMN_OPTIONS.filter((column) =>
+        visibleColumnSet.has(column.key),
+      ).map((column) => ({
+        key: column.key,
+        label: column.label,
+        sortable:
+          column.key !== "stopId" &&
+          column.key !== "stopName" &&
+          column.key !== "timingPoint",
+        sortOrder: sortState.key === column.key ? sortState.order : undefined,
+      })),
     [sortState, visibleColumnSet],
   );
 
@@ -239,33 +253,43 @@ export const StopAnalysisTable = ({
   const PAGE_SIZE = 10;
 
   const tableRows = useMemo<SortableRow[]>(
-    () => sortedRows
-      .slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
-      .map((row) => ({
-      key: `${row.stopId}-${row.direction}`,
-      stopId: row.stopId,
-      timingPoint: row.timingPoint ? <TimingIcon className="stop-analysis-table__timing-icon" /> : "",
-      stopName: (
-        <button
-          type="button"
-          className="govuk-link stop-analysis-table__stop-link"
-          onClick={() => onStopNameClick(row)}
-          title={`${row.localityName}, ${row.adminAreaName}`}
-        >
-          {row.stopName}
-        </button>
-      ),
-      source: row,
-      direction: formatDirection(row.direction),
-      scheduledDepartures: row.scheduledDepartures,
-      actualDepartures: `${row.actualDepartures} (${formatPercent(row.completedRatio)})`,
-      averageScheduled: row.averageScheduled != null ? formatSeconds(row.averageScheduled) : "-",
-      averageActual: row.averageActual != null ? formatSeconds(row.averageActual) : "-",
-      averageDelay: row.averageDelay != null ? formatSeconds(row.averageDelay) : "-",
-      onTime: formatMetricValue(row, "onTime", displayMode),
-      early: formatMetricValue(row, "early", displayMode),
-      late: formatMetricValue(row, "late", displayMode),
-    })),
+    () =>
+      sortedRows
+        .slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
+        .map((row) => ({
+          key: `${row.stopId}-${row.direction}`,
+          stopId: row.stopId,
+          timingPoint: row.timingPoint ? (
+            <TimingIcon className="stop-analysis-table__timing-icon" />
+          ) : (
+            ""
+          ),
+          stopName: (
+            <button
+              type="button"
+              className="govuk-link stop-analysis-table__stop-link"
+              onClick={() => onStopNameClick(row)}
+              title={`${row.localityName}, ${row.adminAreaName}`}
+            >
+              {row.stopName}
+            </button>
+          ),
+          source: row,
+          direction: formatDirection(row.direction),
+          scheduledDepartures: row.scheduledDepartures,
+          actualDepartures: `${row.actualDepartures} (${formatPercent(row.completedRatio)})`,
+          averageScheduled:
+            row.averageScheduled != null
+              ? formatSeconds(row.averageScheduled)
+              : "-",
+          averageActual:
+            row.averageActual != null ? formatSeconds(row.averageActual) : "-",
+          averageDelay:
+            row.averageDelay != null ? formatSeconds(row.averageDelay) : "-",
+          onTime: formatMetricValue(row, "onTime", displayMode),
+          early: formatMetricValue(row, "early", displayMode),
+          late: formatMetricValue(row, "late", displayMode),
+        })),
     [displayMode, onStopNameClick, sortedRows, currentPage],
   );
 
@@ -283,7 +307,10 @@ export const StopAnalysisTable = ({
     setShowDisplayOptions(true);
   };
 
-  const toggleDraftColumnVisibility = (key: TableColumnKey, visible: boolean) => {
+  const toggleDraftColumnVisibility = (
+    key: TableColumnKey,
+    visible: boolean,
+  ) => {
     if (key === "stopName") {
       return;
     }
@@ -386,7 +413,10 @@ export const StopAnalysisTable = ({
                       checked={checked}
                       disabled={column.alwaysVisible}
                       onChange={(event) =>
-                        toggleDraftColumnVisibility(column.key, event.target.checked)
+                        toggleDraftColumnVisibility(
+                          column.key,
+                          event.target.checked,
+                        )
                       }
                     />
                     <label
@@ -421,7 +451,10 @@ export const StopAnalysisTable = ({
                       checked={checked}
                       disabled={column.alwaysVisible}
                       onChange={(event) =>
-                        toggleDraftColumnVisibility(column.key, event.target.checked)
+                        toggleDraftColumnVisibility(
+                          column.key,
+                          event.target.checked,
+                        )
                       }
                     />
                     <label
@@ -444,7 +477,11 @@ export const StopAnalysisTable = ({
             >
               Cancel
             </button>
-            <button type="button" className="govuk-button govuk-!-margin-bottom-0" onClick={applyDisplayOptions}>
+            <button
+              type="button"
+              className="govuk-button govuk-!-margin-bottom-0"
+              onClick={applyDisplayOptions}
+            >
               Update
             </button>
           </div>
@@ -457,7 +494,9 @@ export const StopAnalysisTable = ({
             label="Directions"
             options={directionOptions}
             selectedValues={
-              directions.length === 2 ? [] : directions.map((direction) => direction)
+              directions.length === 2
+                ? []
+                : directions.map((direction) => direction)
             }
             onChange={(values) =>
               onDirectionsChange(
@@ -470,29 +509,40 @@ export const StopAnalysisTable = ({
             placeholder="Directions"
           />
         </div>
-
       </div>
 
       <div className="stop-analysis-table__grid">
-        <div className={showTotals ? "stop-analysis-table__table--with-totals" : undefined}>
+        <div
+          className={
+            showTotals ? "stop-analysis-table__table--with-totals" : undefined
+          }
+        >
           <SortableTable
             head={tableHead as any}
             rows={allTableRows as any[]}
             onSort={handleSort}
-            pagination={!loading && sortedRows.length > PAGE_SIZE ? {
-              currentPage,
-              totalPages: Math.ceil(sortedRows.length / PAGE_SIZE),
-              pageSize: PAGE_SIZE,
-              rowCount: sortedRows.length,
-              noun: "stop",
-              onPageChange: setCurrentPage,
-            } : undefined}
+            pagination={
+              !loading && sortedRows.length > PAGE_SIZE
+                ? {
+                    currentPage,
+                    totalPages: Math.ceil(sortedRows.length / PAGE_SIZE),
+                    pageSize: PAGE_SIZE,
+                    rowCount: sortedRows.length,
+                    noun: "stop",
+                    onPageChange: setCurrentPage,
+                  }
+                : undefined
+            }
           />
         </div>
         {loading ? (
-          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">Loading...</p>
+          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">
+            Loading...
+          </p>
         ) : allTableRows.length === 0 ? (
-          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">No stop data found</p>
+          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">
+            No stop data found
+          </p>
         ) : null}
       </div>
     </div>

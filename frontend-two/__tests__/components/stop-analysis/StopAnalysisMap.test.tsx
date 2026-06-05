@@ -132,7 +132,9 @@ describe("StopAnalysisMap", () => {
 
     await user.click(screen.getByRole("radio", { name: "Satellite" }));
 
-    expect(mapboxMock.methods.setStyle).toHaveBeenCalledWith("mapbox://styles/test/satellite");
+    expect(mapboxMock.methods.setStyle).toHaveBeenCalledWith(
+      "mapbox://styles/test/satellite",
+    );
     expect(screen.getByRole("radio", { name: "Satellite" })).toBeChecked();
   });
 
@@ -183,9 +185,16 @@ describe("StopAnalysisMap", () => {
     });
 
     const moveHandler = mapboxMock.methods.on.mock.calls.find(
-      ([event, layer]) => event === "mousemove" && layer === "admin-area-boundaries",
+      ([event, layer]) =>
+        event === "mousemove" && layer === "admin-area-boundaries",
     )?.[2] as
-      | ((event: { features?: Array<{ id?: string | number; properties?: { id?: string; name?: string }; geometry?: { type: string; coordinates: number[][][] } }> }) => void)
+      | ((event: {
+          features?: Array<{
+            id?: string | number;
+            properties?: { id?: string; name?: string };
+            geometry?: { type: string; coordinates: number[][][] };
+          }>;
+        }) => void)
       | undefined;
 
     expect(moveHandler).toBeDefined();
@@ -216,7 +225,8 @@ describe("StopAnalysisMap", () => {
 
     expect(mapboxMock.popupInstances).toHaveLength(1);
     expect(mapboxMock.popupInstances[0].setDOMContent).toHaveBeenCalledTimes(1);
-    const popupContent = mapboxMock.popupInstances[0].setDOMContent.mock.calls[0]?.[0] as HTMLElement;
+    const popupContent = mapboxMock.popupInstances[0].setDOMContent.mock
+      .calls[0]?.[0] as HTMLElement;
     expect(popupContent.textContent).toContain("Bedford");
     expect(popupContent.textContent).toContain("AA001");
   });
