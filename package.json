@@ -1,4 +1,4 @@
-{
+mise {
   "scripts": {
     "codegen": "graphql-codegen --config codegen.ts",
     "fmt": "prettier -w .",
