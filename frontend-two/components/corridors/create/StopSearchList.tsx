@@ -32,7 +32,7 @@ export const StopSearchList = ({
           key={`${stop.stopId}-${index}`}
           className="corridor-stop-list__stop corridor-stop-list__stop--matching"
         >
-          <div className={`corridor-stop-list__stop-details ${!showGraphic ? "corridor-stop-list__stop-details--no-graphic" : ""}`}>
+          <div className={`${!showGraphic ? "corridor-stop-list__stop-details--no-graphic" : "corridor-stop-list__stop-details "}`}>
             <div className="corridor-stop-list__stop-label">{stop.stopName}</div>
             <div className="corridor-stop-list__naptan">
               {stop.localityName ? `${stop.localityName} ` : ""}
