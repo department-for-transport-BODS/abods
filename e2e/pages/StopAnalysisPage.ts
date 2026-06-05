@@ -30,7 +30,7 @@ export class StopAnalysisPage {
   }
 
   refinePanel(): Locator {
-    return this.page.locator("#refine-panel");
+    return this.page.locator("#panel");
   }
 
   closeRefineButton(): Locator {
@@ -48,7 +48,10 @@ export class StopAnalysisPage {
   }
 
   displayOptionsButton(): Locator {
-    return this.page.getByRole("button", { name: "Display options" });
+    return this.page.getByRole("button", {
+      name: "Display options",
+      exact: true,
+    });
   }
 
   dateFromInput(): Locator {
@@ -76,7 +79,7 @@ export class StopAnalysisPage {
   }
 
   locationSearch(): Locator {
-    return this.page.getByLabel("Search for location");
+    return this.page.getByLabel("Location name or postcode");
   }
 
   operatorsTrigger(): Locator {
@@ -87,8 +90,8 @@ export class StopAnalysisPage {
     return this.page.getByLabel("Services");
   }
 
-  directionCheckbox(name: "Inbound" | "Outbound"): Locator {
-    return this.page.getByRole("checkbox", { name });
+  directionsTrigger(): Locator {
+    return this.page.getByLabel("Directions");
   }
 
   searchStopsInput(): Locator {

@@ -33,9 +33,8 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await expect(stopAnalysis.adminAreasTrigger()).toBeVisible();
         await expect(stopAnalysis.matchTypeRadio("Evidenced")).toBeChecked();
         await expect(stopAnalysis.stopTypeRadio("Timing points")).toBeChecked();
-        await expect(stopAnalysis.directionCheckbox("Inbound")).toBeChecked();
-        await expect(stopAnalysis.directionCheckbox("Outbound")).toBeChecked();
-        await expect(stopAnalysis.searchStopsInput()).toBeVisible();
+        await expect(stopAnalysis.directionsTrigger()).toBeVisible();
+        await expect(stopAnalysis.locationSearch()).toBeVisible();
       });
     },
   );
@@ -89,6 +88,7 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await expect(loggedInPage).toHaveURL(
           /\/stop-analysis\/?[^#]*startTime=00%3A00[^#]*endTime=23%3A59/,
         );
+        await loggedInPage.reload({ waitUntil: "domcontentloaded" });
         await expect(stopAnalysis.chip("From 00:00")).toBeVisible();
         await expect(stopAnalysis.chip("Until 23:59")).toBeVisible();
         await expect(
