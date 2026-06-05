@@ -12,6 +12,7 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
 import { usePanel } from "@/contexts/PanelContext";
 import { ErrorInfo } from "@/types";
+import RefineIcon from "@/assets/icons/refine.svg";
 import {
   BoundingBox,
   DayOfWeekFlags,
@@ -567,17 +568,14 @@ const StopAnalysisPage = () => {
           <div className="stop-analysis-page__extra-filter">
             <button
               type="button"
-              className="govuk-link stop-analysis-filters__refine-button"
+              className="govuk-link button-link stop-analysis-filters__refine-button"
               style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
               aria-controls="panel"
               onClick={toggle}
             >
-              <img
-                src="/assets/icons/refine.svg"
-                alt=""
+              <RefineIcon
                 aria-hidden="true"
-                width="24"
-                height="24"
+                focusable="false"
                 style={{ display: "block", flexShrink: 0 }}
               />
               <span>Refine results</span>
