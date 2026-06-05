@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
+import {
+  DISPLAY_MODE_OPTIONS,
+  formatMetricValue,
+  formatPercent,
+  formatSeconds,
+  getMetricSortValue,
+  useStopPerformanceTable,
+  type DisplayMode,
+} from "@/hooks/useStopPerformanceTable";
 import { MultiselectCheckbox } from "./MultiselectCheckbox";
 import { Modal } from "@/components/shared/Modal";
 import { SortableTable, type SortOrder } from "../table/SortableTable";
@@ -36,8 +45,6 @@ type SortableRow = {
   late: string;
 };
 
-type DisplayMode = "percentage" | "count" | "time";
-
 type TableColumnKey =
   | "stopId"
   | "timingPoint"
@@ -57,12 +64,6 @@ interface TableColumnDefinition {
   label: ReactNode;
   alwaysVisible?: boolean;
 }
-
-const DISPLAY_MODE_OPTIONS: { value: DisplayMode; label: string }[] = [
-  { value: "percentage", label: "Percentage" },
-  { value: "count", label: "Count" },
-  { value: "time", label: "Time" },
-];
 
 const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
@@ -92,63 +93,10 @@ interface StopAnalysisTableProps {
   showTotals?: boolean;
 }
 
-const formatPercent = (value: number | undefined | null): string => {
-  if (value == null || isNaN(value) || !isFinite(value)) return "-";
-  return `${(value * 100).toFixed(1)}%`;
-};
-
-const formatSeconds = (value: number | undefined | null): string => {
-  if (value == null || isNaN(value)) return "-";
-  const mins = Math.floor(Math.abs(value) / 60);
-  const secs = Math.round(Math.abs(value) % 60);
-  const sign = value < 0 ? "-" : "";
-  return `${sign}${mins}:${secs.toString().padStart(2, "0")}`;
-};
-
 const formatDirection = (direction: string | null): string => {
   if (!direction) return "-";
 
   return direction.charAt(0).toUpperCase() + direction.slice(1);
-};
-
-const formatMetricValue = (
-  row: StopPerformanceRow,
-  metric: "onTime" | "early" | "late",
-  displayMode: DisplayMode,
-): string => {
-  switch (displayMode) {
-    case "count":
-      return String(row[metric]);
-    case "time": {
-      const secondsKey = `${metric}InSeconds` as const;
-      return formatSeconds(row[secondsKey]);
-    }
-    case "percentage":
-    default: {
-      const ratioKey = `${metric}Ratio` as const;
-      return formatPercent(row[ratioKey]);
-    }
-  }
-};
-
-const getMetricSortValue = (
-  row: StopPerformanceRow,
-  metric: "onTime" | "early" | "late",
-  displayMode: DisplayMode,
-): string | number => {
-  switch (displayMode) {
-    case "count":
-      return row[metric];
-    case "time": {
-      const secondsKey = `${metric}InSeconds` as const;
-      return row[secondsKey] ?? Number.NEGATIVE_INFINITY;
-    }
-    case "percentage":
-    default: {
-      const ratioKey = `${metric}Ratio` as const;
-      return row[ratioKey] ?? Number.NEGATIVE_INFINITY;
-    }
-  }
 };
 
 const compareValue = (a: string | number, b: string | number): number => {
@@ -204,7 +152,6 @@ export const StopAnalysisTable = ({
   onStopNameClick,
   showTotals = false,
 }: StopAnalysisTableProps) => {
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("percentage");
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<TableColumnKey[]>(
@@ -237,6 +184,8 @@ export const StopAnalysisTable = ({
       ),
     [data, directions],
   );
+
+  const { displayMode, setDisplayMode, totals } = useStopPerformanceTable(filteredData, showTotals);
 
   const sortedRows = useMemo(() => {
     const rows = [...filteredData];
@@ -271,75 +220,21 @@ export const StopAnalysisTable = ({
 
   const tableHead = tableColumns;
 
-  const totalsRow = useMemo<SortableRow | null>(() => {
-    if (!filteredData.length) return null;
-
-    const totalScheduled = filteredData.reduce((sum, r) => sum + r.scheduledDepartures, 0);
-    const totalActual = filteredData.reduce((sum, r) => sum + r.actualDepartures, 0);
-    const totalOnTime = filteredData.reduce((sum, r) => sum + r.onTime, 0);
-    const totalEarly = filteredData.reduce((sum, r) => sum + r.early, 0);
-    const totalLate = filteredData.reduce((sum, r) => sum + r.late, 0);
-    const completedRatio = totalScheduled > 0 ? totalActual / totalScheduled : null;
-
-    const avgDelayWeighted = filteredData.reduce((sum, r) =>
-      r.averageDelay != null ? sum + r.averageDelay * r.actualDepartures : sum, 0);
-    const avgDelay = totalActual > 0 ? avgDelayWeighted / totalActual : null;
-
-    const rowsWithScheduled = filteredData.filter((r) => r.averageScheduled != null);
-    const avgScheduled = rowsWithScheduled.length
-      ? rowsWithScheduled.reduce((sum, r) => sum + (r.averageScheduled ?? 0), 0) / rowsWithScheduled.length
-      : null;
-
-    const rowsWithActual = filteredData.filter((r) => r.averageActual != null);
-    const avgActual = rowsWithActual.length
-      ? rowsWithActual.reduce((sum, r) => sum + (r.averageActual ?? 0), 0) / rowsWithActual.length
-      : null;
-
-    let onTimeVal: string;
-    let earlyVal: string;
-    let lateVal: string;
-
-    switch (displayMode) {
-      case "count":
-        onTimeVal = String(totalOnTime);
-        earlyVal = String(totalEarly);
-        lateVal = String(totalLate);
-        break;
-      case "time": {
-        const onTimeSecs = filteredData.reduce((sum, r) => sum + (r.onTimeInSeconds ?? 0) * r.onTime, 0);
-        const earlySecs = filteredData.reduce((sum, r) => sum + (r.earlyInSeconds ?? 0) * r.early, 0);
-        const lateSecs = filteredData.reduce((sum, r) => sum + (r.lateInSeconds ?? 0) * r.late, 0);
-        onTimeVal = totalOnTime > 0 ? formatSeconds(onTimeSecs / totalOnTime) : "-";
-        earlyVal = totalEarly > 0 ? formatSeconds(earlySecs / totalEarly) : "-";
-        lateVal = totalLate > 0 ? formatSeconds(lateSecs / totalLate) : "-";
-        break;
-      }
-      case "percentage":
-      default:
-        onTimeVal = totalActual > 0 ? formatPercent(totalOnTime / totalActual) : "-";
-        earlyVal = totalActual > 0 ? formatPercent(totalEarly / totalActual) : "-";
-        lateVal = totalActual > 0 ? formatPercent(totalLate / totalActual) : "-";
-    }
-
-    return {
-      key: "__totals__",
-      stopId: "-",
-      timingPoint: "",
-      stopName: "-",
-      source: null as unknown as StopPerformanceRow,
-      direction: "-",
-      scheduledDepartures: totalScheduled,
-      actualDepartures: completedRatio != null
-        ? `${totalActual} (${formatPercent(completedRatio)})`
-        : String(totalActual),
-      averageScheduled: avgScheduled != null ? formatSeconds(avgScheduled) : "-",
-      averageActual: avgActual != null ? formatSeconds(avgActual) : "-",
-      averageDelay: avgDelay != null ? formatSeconds(avgDelay) : "-",
-      onTime: onTimeVal,
-      early: earlyVal,
-      late: lateVal,
-    };
-  }, [filteredData, displayMode]);
+  const totalsRow = useMemo<SortableRow | null>(
+    () =>
+      totals
+        ? {
+            key: "__totals__",
+            stopId: "-",
+            timingPoint: "",
+            stopName: "-",
+            source: null as unknown as StopPerformanceRow,
+            direction: "-",
+            ...totals,
+          }
+        : null,
+    [totals],
+  );
 
   const PAGE_SIZE = 10;
 
@@ -375,8 +270,8 @@ export const StopAnalysisTable = ({
   );
 
   const allTableRows = useMemo(
-    () => showTotals && totalsRow ? [totalsRow, ...tableRows] : tableRows,
-    [showTotals, totalsRow, tableRows],
+    () => (totalsRow ? [totalsRow, ...tableRows] : tableRows),
+    [totalsRow, tableRows],
   );
 
   const handleSort = (key: string, order: SortOrder) => {
@@ -433,7 +328,7 @@ export const StopAnalysisTable = ({
         <div className="stop-analysis-table__display-actions">
           <button
             type="button"
-            className="govuk-link stop-analysis-table__display-options-link"
+            className="govuk-link button-link stop-analysis-table__display-options-link"
             onClick={openDisplayOptions}
           >
             Display options
