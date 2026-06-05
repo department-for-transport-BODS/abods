@@ -3426,6 +3426,13 @@ body.modal-open {
     overflow-x: auto;
   }
 
+  &__table--with-totals {
+    table tbody tr:first-child > * {
+      border-top: 0.125rem solid $govuk-border-colour;
+      border-bottom: 0.125rem solid $govuk-border-colour;
+    }
+  }
+
   &__stop-link {
     background: none;
     border: none;
@@ -3437,5 +3444,15 @@ body.modal-open {
     &:hover {
       color: $govuk-link-hover-colour;
     }
+  }
+
+  &__timing-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $govuk-text-colour;
+    vertical-align: middle;
   }
 }

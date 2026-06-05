@@ -655,6 +655,7 @@ const StopAnalysisPage = () => {
           loading={stopsLoading}
           errored={!!stopsError}
           directions={directions}
+          showTotals
           onDirectionsChange={(dirs) => updateQuery({ direction: dirs })}
           onStopNameClick={handleStopClick}
         />

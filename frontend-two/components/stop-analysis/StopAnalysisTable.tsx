@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
 import { MultiselectCheckbox } from "./MultiselectCheckbox";
 import { Modal } from "@/components/shared/Modal";
 import { SortableTable, type SortOrder } from "../table/SortableTable";
+import { TimingIcon } from "./TimingIcon";
 
 type SortKey =
   | "stopId"
@@ -53,7 +54,7 @@ type TableColumnKey =
 
 interface TableColumnDefinition {
   key: TableColumnKey;
-  label: string;
+  label: ReactNode;
   alwaysVisible?: boolean;
 }
 
@@ -65,7 +66,10 @@ const DISPLAY_MODE_OPTIONS: { value: DisplayMode; label: string }[] = [
 
 const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
-  { key: "timingPoint", label: "TP" },
+  {
+    key: "timingPoint",
+    label: <TimingIcon className="stop-analysis-table__timing-icon" />,
+  },
   { key: "stopName", label: "Name", alwaysVisible: true },
   { key: "direction", label: "Direction" },
   { key: "scheduledDepartures", label: "Scheduled" },
@@ -85,6 +89,7 @@ interface StopAnalysisTableProps {
   directions: Direction[];
   onDirectionsChange: (directions: Direction[]) => void;
   onStopNameClick: (stop: StopPerformanceRow) => void;
+  showTotals?: boolean;
 }
 
 const formatPercent = (value: number | undefined | null): string => {
@@ -98,6 +103,12 @@ const formatSeconds = (value: number | undefined | null): string => {
   const secs = Math.round(Math.abs(value) % 60);
   const sign = value < 0 ? "-" : "";
   return `${sign}${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
+const formatDirection = (direction: string | null): string => {
+  if (!direction) return "-";
+
+  return direction.charAt(0).toUpperCase() + direction.slice(1);
 };
 
 const formatMetricValue = (
@@ -191,9 +202,11 @@ export const StopAnalysisTable = ({
   directions,
   onDirectionsChange,
   onStopNameClick,
+  showTotals = false,
 }: StopAnalysisTableProps) => {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("percentage");
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<TableColumnKey[]>(
     TABLE_COLUMN_OPTIONS.map((column) => column.key),
   );
@@ -220,7 +233,7 @@ export const StopAnalysisTable = ({
           directions.length === 0 ||
           directions.length === 2 ||
           (row.direction &&
-            directions.includes(row.direction as Direction)),
+            directions.includes(formatDirection(row.direction) as Direction)),
       ),
     [data, directions],
   );
@@ -236,6 +249,10 @@ export const StopAnalysisTable = ({
     return rows;
   }, [displayMode, filteredData, sortState]);
 
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [sortedRows]);
+
   const visibleColumnSet = useMemo(() => new Set(visibleColumns), [visibleColumns]);
 
   const tableColumns = useMemo(
@@ -244,7 +261,7 @@ export const StopAnalysisTable = ({
         (column) => ({
           key: column.key,
           label: column.label,
-          sortable: true,
+          sortable: column.key !== "stopId" && column.key !== "stopName" && column.key !== "timingPoint",
           sortOrder:
             sortState.key === column.key ? sortState.order : undefined,
         }),
@@ -254,11 +271,85 @@ export const StopAnalysisTable = ({
 
   const tableHead = tableColumns;
 
+  const totalsRow = useMemo<SortableRow | null>(() => {
+    if (!filteredData.length) return null;
+
+    const totalScheduled = filteredData.reduce((sum, r) => sum + r.scheduledDepartures, 0);
+    const totalActual = filteredData.reduce((sum, r) => sum + r.actualDepartures, 0);
+    const totalOnTime = filteredData.reduce((sum, r) => sum + r.onTime, 0);
+    const totalEarly = filteredData.reduce((sum, r) => sum + r.early, 0);
+    const totalLate = filteredData.reduce((sum, r) => sum + r.late, 0);
+    const completedRatio = totalScheduled > 0 ? totalActual / totalScheduled : null;
+
+    const avgDelayWeighted = filteredData.reduce((sum, r) =>
+      r.averageDelay != null ? sum + r.averageDelay * r.actualDepartures : sum, 0);
+    const avgDelay = totalActual > 0 ? avgDelayWeighted / totalActual : null;
+
+    const rowsWithScheduled = filteredData.filter((r) => r.averageScheduled != null);
+    const avgScheduled = rowsWithScheduled.length
+      ? rowsWithScheduled.reduce((sum, r) => sum + (r.averageScheduled ?? 0), 0) / rowsWithScheduled.length
+      : null;
+
+    const rowsWithActual = filteredData.filter((r) => r.averageActual != null);
+    const avgActual = rowsWithActual.length
+      ? rowsWithActual.reduce((sum, r) => sum + (r.averageActual ?? 0), 0) / rowsWithActual.length
+      : null;
+
+    let onTimeVal: string;
+    let earlyVal: string;
+    let lateVal: string;
+
+    switch (displayMode) {
+      case "count":
+        onTimeVal = String(totalOnTime);
+        earlyVal = String(totalEarly);
+        lateVal = String(totalLate);
+        break;
+      case "time": {
+        const onTimeSecs = filteredData.reduce((sum, r) => sum + (r.onTimeInSeconds ?? 0) * r.onTime, 0);
+        const earlySecs = filteredData.reduce((sum, r) => sum + (r.earlyInSeconds ?? 0) * r.early, 0);
+        const lateSecs = filteredData.reduce((sum, r) => sum + (r.lateInSeconds ?? 0) * r.late, 0);
+        onTimeVal = totalOnTime > 0 ? formatSeconds(onTimeSecs / totalOnTime) : "-";
+        earlyVal = totalEarly > 0 ? formatSeconds(earlySecs / totalEarly) : "-";
+        lateVal = totalLate > 0 ? formatSeconds(lateSecs / totalLate) : "-";
+        break;
+      }
+      case "percentage":
+      default:
+        onTimeVal = totalActual > 0 ? formatPercent(totalOnTime / totalActual) : "-";
+        earlyVal = totalActual > 0 ? formatPercent(totalEarly / totalActual) : "-";
+        lateVal = totalActual > 0 ? formatPercent(totalLate / totalActual) : "-";
+    }
+
+    return {
+      key: "__totals__",
+      stopId: "-",
+      timingPoint: "",
+      stopName: "-",
+      source: null as unknown as StopPerformanceRow,
+      direction: "-",
+      scheduledDepartures: totalScheduled,
+      actualDepartures: completedRatio != null
+        ? `${totalActual} (${formatPercent(completedRatio)})`
+        : String(totalActual),
+      averageScheduled: avgScheduled != null ? formatSeconds(avgScheduled) : "-",
+      averageActual: avgActual != null ? formatSeconds(avgActual) : "-",
+      averageDelay: avgDelay != null ? formatSeconds(avgDelay) : "-",
+      onTime: onTimeVal,
+      early: earlyVal,
+      late: lateVal,
+    };
+  }, [filteredData, displayMode]);
+
+  const PAGE_SIZE = 10;
+
   const tableRows = useMemo<SortableRow[]>(
-    () => sortedRows.map((row) => ({
+    () => sortedRows
+      .slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
+      .map((row) => ({
       key: `${row.stopId}-${row.direction}`,
       stopId: row.stopId,
-      timingPoint: row.timingPoint ? "⏱" : "",
+      timingPoint: row.timingPoint ? <TimingIcon className="stop-analysis-table__timing-icon" /> : "",
       stopName: (
         <button
           type="button"
@@ -270,7 +361,7 @@ export const StopAnalysisTable = ({
         </button>
       ),
       source: row,
-      direction: row.direction ?? "-",
+      direction: formatDirection(row.direction),
       scheduledDepartures: row.scheduledDepartures,
       actualDepartures: `${row.actualDepartures} (${formatPercent(row.completedRatio)})`,
       averageScheduled: row.averageScheduled != null ? formatSeconds(row.averageScheduled) : "-",
@@ -280,7 +371,12 @@ export const StopAnalysisTable = ({
       early: formatMetricValue(row, "early", displayMode),
       late: formatMetricValue(row, "late", displayMode),
     })),
-    [displayMode, onStopNameClick, sortedRows],
+    [displayMode, onStopNameClick, sortedRows, currentPage],
+  );
+
+  const allTableRows = useMemo(
+    () => showTotals && totalsRow ? [totalsRow, ...tableRows] : tableRows,
+    [showTotals, totalsRow, tableRows],
   );
 
   const handleSort = (key: string, order: SortOrder) => {
@@ -382,7 +478,7 @@ export const StopAnalysisTable = ({
       >
         <div className="stop-analysis-table__display-modal">
           <div className="stop-analysis-table__display-columns">
-            <div className="stop-analysis-table__display-column">
+            <div className="stop-analysis-table__display-column govuk-checkboxes govuk-checkboxes--small">
               {TABLE_COLUMN_OPTIONS.slice(0, 6).map((column) => {
                 const checked = draftVisibleColumns.includes(column.key);
 
@@ -417,7 +513,7 @@ export const StopAnalysisTable = ({
               </button>
             </div>
 
-            <div className="stop-analysis-table__display-column">
+            <div className="stop-analysis-table__display-column govuk-checkboxes govuk-checkboxes--small">
               {TABLE_COLUMN_OPTIONS.slice(6).map((column) => {
                 const checked = draftVisibleColumns.includes(column.key);
 
@@ -482,15 +578,28 @@ export const StopAnalysisTable = ({
 
       </div>
 
-      {loading ? (
-        <p className="govuk-body">Loading...</p>
-      ) : tableRows.length === 0 ? (
-        <p className="govuk-body govuk-!-margin-top-6">No data available</p>
-      ) : (
-        <div className="stop-analysis-table__grid">
-          <SortableTable head={tableHead as any} rows={tableRows as any[]} onSort={handleSort} />
+      <div className="stop-analysis-table__grid">
+        <div className={showTotals ? "stop-analysis-table__table--with-totals" : undefined}>
+          <SortableTable
+            head={tableHead as any}
+            rows={allTableRows as any[]}
+            onSort={handleSort}
+            pagination={!loading && sortedRows.length > PAGE_SIZE ? {
+              currentPage,
+              totalPages: Math.ceil(sortedRows.length / PAGE_SIZE),
+              pageSize: PAGE_SIZE,
+              rowCount: sortedRows.length,
+              noun: "stop",
+              onPageChange: setCurrentPage,
+            } : undefined}
+          />
         </div>
-      )}
+        {loading ? (
+          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">Loading...</p>
+        ) : allTableRows.length === 0 ? (
+          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">No stop data found</p>
+        ) : null}
+      </div>
     </div>
   );
 };
