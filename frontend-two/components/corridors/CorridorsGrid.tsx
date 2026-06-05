@@ -25,13 +25,21 @@ function renderRow(corridor: CorridorSummary): SortableTableRow {
   return {
     key: String(corridor.id),
     name: (
-      <Link href={`/corridors/${corridor.id}`} className="govuk-link">
+      <Link
+        href={`/corridors/${corridor.id}`}
+        className="govuk-link"
+        style={{ textDecoration: "none" }}
+      >
         {corridor.name}
       </Link>
     ),
     numStops: corridor.numStops ?? 0,
     edit: (
-      <Link href={`/corridors/edit/${corridor.id}`} className="govuk-link">
+      <Link
+        href={`/corridors/edit/${corridor.id}`}
+        className="govuk-link"
+        style={{ textDecoration: "none" }}
+      >
         Edit
       </Link>
     ),
