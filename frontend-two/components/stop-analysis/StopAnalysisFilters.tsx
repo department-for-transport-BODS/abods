@@ -11,6 +11,7 @@ import {
   StopTypeOption,
 } from "@/types/stop-analysis";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
+import { LocationLookupField } from "@/components/shared/LocationLookupField";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
 import { MultiselectCheckbox } from "./MultiselectCheckbox";
 
@@ -97,11 +98,6 @@ export const StopAnalysisFilters = ({
   onPresetChange,
 }: StopAnalysisFiltersProps) => {
   const [locationQuery, setLocationQuery] = useState("");
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [locationOptions, setLocationOptions] = useState<
-    { id: string; label: string; center?: [number, number]; bbox?: [number, number, number, number] }[]
-  >([]);
-  const [locationLoading, setLocationLoading] = useState(false);
 
   const adminAreaOptions = useMemo(
     () =>
@@ -168,68 +164,6 @@ export const StopAnalysisFilters = ({
     onPresetChange(preset);
   };
 
-  useEffect(() => {
-    if (!mapboxToken || locationQuery.trim().length < 3) {
-      setLocationOptions([]);
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(async () => {
-      try {
-        setLocationLoading(true);
-        const encodedQuery = encodeURIComponent(locationQuery.trim());
-        const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?country=gb&autocomplete=true&limit=5&types=place,postcode,address&access_token=${mapboxToken}`,
-          { signal: controller.signal },
-        );
-        if (!response.ok) {
-          setLocationOptions([]);
-          return;
-        }
-
-        const payload = (await response.json()) as {
-          features?: Array<{
-            id: string;
-            place_name: string;
-            center?: [number, number];
-            bbox?: [number, number, number, number];
-          }>;
-        };
-
-        setLocationOptions(
-          (payload.features ?? []).map((feature) => ({
-            id: feature.id,
-            label: feature.place_name,
-            center: feature.center,
-            bbox: feature.bbox,
-          })),
-        );
-      } catch {
-        setLocationOptions([]);
-      } finally {
-        setLocationLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      controller.abort();
-      clearTimeout(timeoutId);
-    };
-  }, [locationQuery, mapboxToken]);
-
-  const handleLocationSelection = (selected: {
-    id: string;
-    label: string;
-    center?: [number, number];
-    bbox?: [number, number, number, number];
-  }) => {
-    setLocationQuery(selected.label);
-    setLocationOpen(false);
-    if (!selected) return;
-    onLocationSelect({ center: selected.center, bbox: selected.bbox });
-  };
-
   return (
     <div className="stop-analysis-filters">
       <div className="filters stop-analysis-filters__grid govuk-!-margin-bottom-2">
@@ -275,61 +209,17 @@ export const StopAnalysisFilters = ({
         </div>
 
         <div className="stop-analysis-filters__item stop-analysis-filters__item--location">
-          <label className="govuk-label" htmlFor="sa-location-search">
-            Location name or postcode
-          </label>
-          <div className="stop-analysis-filters__location-search">
-            <div className="stop-analysis-filters__location-input-wrap">
-              <input
-                id="sa-location-search"
-                className="govuk-input stop-analysis-filters__location-input"
-                type="text"
-                value={locationQuery}
-                onChange={(e) => {
-                  setLocationQuery(e.target.value);
-                  setLocationOpen(true);
-                }}
-                onFocus={() => setLocationOpen(true)}
-                onBlur={() => {
-                  window.setTimeout(() => setLocationOpen(false), 120);
-                }}
-                placeholder="Search"
-                aria-label="Search for location"
-                disabled={!mapboxToken}
-              />
-              <span
-                className={`stop-analysis-filters__location-chevron${locationOpen ? " stop-analysis-filters__location-chevron--open" : ""}`}
-                aria-hidden="true"
-              />
-            </div>
-
-            {locationOpen && (locationQuery.trim().length === 0 || locationOptions.length > 0 || locationLoading) && (
-              <div className="stop-analysis-filters__location-results" role="listbox">
-                {locationQuery.trim().length === 0 && (
-                  <div className="stop-analysis-filters__location-hint">
-                    Type to search
-                  </div>
-                )}
-                {locationQuery.trim().length > 0 && locationLoading && (
-                  <div className="stop-analysis-filters__location-loading">
-                    Searching...
-                  </div>
-                )}
-                {locationQuery.trim().length > 0 &&
-                  !locationLoading &&
-                  locationOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className="stop-analysis-filters__location-option"
-                      onClick={() => handleLocationSelection(option)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-              </div>
-            )}
-          </div>
+          <LocationLookupField
+            id="sa-location-search"
+            label="Location name or postcode"
+            value={locationQuery}
+            onValueChange={setLocationQuery}
+            onSelect={(location) => {
+              onLocationSelect({ center: location.center, bbox: location.bbox });
+            }}
+            mapboxToken={mapboxToken}
+            disabled={!mapboxToken}
+          />
         </div>
 
         <div className="stop-analysis-filters__item stop-analysis-filters__item--operators">
