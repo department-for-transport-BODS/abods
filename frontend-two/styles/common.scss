@@ -788,14 +788,18 @@ $day-width: 46px;
 // Corridor date wrapper / controls bar
 .corridor__date-wrapper {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
   gap: govuk-spacing(3);
-  flex-wrap: wrap;
 }
 
 .corridor__date-range-picker {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(2);
 }
 
 .corridor__date-range-input-wrapper {
@@ -853,10 +857,17 @@ $day-width: 46px;
   margin-right: govuk-spacing(3);
 }
 
-// Hide outliers checkbox — right-aligned below chart
+// Chart wrapper — gives the grey box a bottom padding to contain the hide-outliers checkbox
+.corridor__chart-wrapper {
+  background: #f3f2f1;
+  padding-bottom: govuk-spacing(3);
+}
+
+// Hide outliers checkbox — right-aligned inside the grey chart box
 .corridor__hide-outliers {
   display: flex;
   flex-direction: row-reverse;
+  padding-right: govuk-spacing(3);
   margin-top: govuk-spacing(2);
 
   .govuk-form-group {
@@ -901,12 +912,94 @@ $day-width: 46px;
   }
 }
 
+.map-display-options {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: inline-grid;
+  grid-template-columns: max-content;
+  width: fit-content;
+  z-index: 1;
+
+  &__summary {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
+    padding: govuk-spacing(1) govuk-spacing(5) govuk-spacing(1) govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+    position: relative;
+    text-align: left;
+
+    &::after {
+      content: "▼";
+      position: absolute;
+      right: govuk-spacing(2);
+      top: 50%;
+      transform: translateY(-50%);
+      @include govuk-font(14);
+    }
+  }
+
+  &__summary--open {
+    border-bottom: 0;
+  }
+
+  &__panel {
+    position: relative;
+    margin-top: -1px;
+    width: 100%;
+    display: grid;
+    gap: govuk-spacing(2);
+    background: govuk-colour("white");
+    border: 1px solid govuk-colour("black");
+    border-top: 0;
+    padding: govuk-spacing(3);
+    box-sizing: border-box;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  &__panel--open {
+    visibility: visible;
+    max-height: none;
+    pointer-events: auto;
+  }
+}
+
 .corridor__map-recentre {
   position: absolute;
   bottom: govuk-spacing(3);
-  left: 50%;
-  transform: translateX(-50%);
+  left: govuk-spacing(2);
+  transform: none;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: govuk-colour("white");
+  color: govuk-colour("blue");
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  cursor: pointer;
+
+  &:hover {
+    background: govuk-colour("light-grey");
+  }
+}
+
+.corridor__map-recentre-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 // Mapbox popup GDS styling

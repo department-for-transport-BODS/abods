@@ -26,6 +26,7 @@ const CorridorsCreatePage = () => {
         mode="create"
         mapboxToken={config?.mapboxToken}
         mapboxStyle={config?.mapboxStyle}
+        mapboxSatelliteStyle={config?.mapboxSatelliteStyle}
       />
     </BaseLayout>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -16,10 +16,11 @@ import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnaly
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { parseCorridorId, parseMatchType, queryValue } from "@/utils/query";
-import { formatTransitTime, parseDate, toIsoDateInput } from "@/utils/date";
+import { formatTransitTime, parseDate } from "@/utils/date";
 import { CorridorGranularity } from "../../src/generated/graphql";
 
 const NOT_FOUND_HEADING = "Not found";
@@ -42,22 +43,6 @@ const PRESET_DATE_RANGES: Record<
   monthToDate: (t) => ({ from: t.startOf("month"), to: t }),
 };
 
-const formatDateDisplay = (dt: DateTime): string => dt.toFormat("d MMM yyyy");
-
-const CalendarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-  >
-    <path d="M15 2h-1V0h-2v2H8V0H6v2H5C3.9 2 3 2.9 3 4v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 16H5V7h10v11zm0-13H5V4h10v1z" />
-  </svg>
-);
-
 const CorridorsViewPage = () => {
   useRequireAuth();
 
@@ -66,8 +51,6 @@ const CorridorsViewPage = () => {
   const { loadData } = useHelpdesk();
   const { hideOutliers, setJourneyTime, setTimeOfDay, setDayOfWeek } =
     useCorridorHideOutliers();
-
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   useEffect(() => {
     loadData("corridors", "Corridors");
@@ -194,6 +177,17 @@ const CorridorsViewPage = () => {
       });
   };
 
+  const handleDateRangeChange = (from: string, to: string) => {
+    const fromDate = DateTime.fromISO(from).startOf("day");
+    const toDate = DateTime.fromISO(to).endOf("day");
+
+    setQuery({
+      from: fromDate.toUTC().toISO() ?? undefined,
+      to: toDate.toUTC().toISO() ?? undefined,
+      preset: "custom",
+    });
+  };
+
   return (
     <BaseLayout title="Corridor - Analyse Bus Open Data">
       <Link href="/corridors" className="govuk-back-link">
@@ -224,78 +218,26 @@ const CorridorsViewPage = () => {
 
           <div className="corridor__date-wrapper govuk-!-margin-bottom-5">
             <div className="corridor__date-range-picker">
-              <div className="corridor__date-range-input-wrapper">
-                <span className="corridor__date-range-text">
-                  {formatDateDisplay(fromDate)} &#x2013;{" "}
-                  {formatDateDisplay(toDate)}
-                </span>
-                <button
-                  type="button"
-                  className="unbuttoned corridor__date-range-calendar-btn"
-                  onClick={() => setIsDatePickerOpen((v) => !v)}
-                  aria-label="Open date range picker"
-                  aria-expanded={isDatePickerOpen}
+              <div className="stop-analysis-filters__date-range">
+                <DateRangeSelect
+                  value={{ from: fromDate.toISO()!, to: toDate.toISO()! }}
+                  onChange={({ from, to }) => handleDateRangeChange(from, to)}
+                  hideLabel
+                />
+                <select
+                  className="govuk-select stop-analysis-filters__preset-select"
+                  value={preset}
+                  onChange={(e) => handlePresetChange(e.target.value)}
+                  aria-label="Preset date range"
                 >
-                  <CalendarIcon />
-                </button>
+                  <option value="last7">Last 7 days</option>
+                  <option value="last28">Last 28 days</option>
+                  <option value="lastMonth">Last month</option>
+                  <option value="monthToDate">Month to date</option>
+                  {preset === "custom" && <option value="custom">Custom</option>}
+                </select>
               </div>
-              {isDatePickerOpen && (
-                <div className="corridor__date-range-panel">
-                  <div>
-                    <label className="govuk-label" htmlFor="corridor-from-date">
-                      From
-                    </label>
-                    <input
-                      id="corridor-from-date"
-                      type="date"
-                      className="govuk-input govuk-input--width-10"
-                      value={toIsoDateInput(fromDate)}
-                      onChange={(event) => {
-                        const dt = DateTime.fromISO(event.target.value);
-                        if (dt.isValid) {
-                          setQuery({
-                            from: dt.toUTC().toISO() ?? undefined,
-                            preset: "custom",
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="govuk-label" htmlFor="corridor-to-date">
-                      To
-                    </label>
-                    <input
-                      id="corridor-to-date"
-                      type="date"
-                      className="govuk-input govuk-input--width-10"
-                      value={toIsoDateInput(toDate)}
-                      onChange={(event) => {
-                        const dt = DateTime.fromISO(event.target.value);
-                        if (dt.isValid) {
-                          setQuery({
-                            to: dt.toUTC().toISO() ?? undefined,
-                            preset: "custom",
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
-            <select
-              className="govuk-select"
-              value={preset}
-              onChange={(e) => handlePresetChange(e.target.value)}
-              aria-label="Preset date range"
-            >
-              <option value="last7">Last 7 days</option>
-              <option value="last28">Last 28 days</option>
-              <option value="lastMonth">Last month</option>
-              <option value="monthToDate">Month to date</option>
-              {preset === "custom" && <option value="custom">Custom</option>}
-            </select>
             <SegmentedToggle
               name="match-type"
               legend="Show performance using data from"

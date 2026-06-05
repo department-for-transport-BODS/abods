@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
+import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
+import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
 
@@ -75,7 +77,7 @@ export const CorridorViewMap = ({
   const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
     "street",
   );
-  const [hasMoved, setHasMoved] = useState(false);
+  const [moveCounter, setMoveCounter] = useState(0);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
@@ -196,7 +198,6 @@ export const CorridorViewMap = ({
     map.on("load", () => {
       addSourcesAndLayers(map);
       fitToBounds(map);
-
       map.on("mousemove", "corridor-markers", (e) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features?.[0];
@@ -243,7 +244,7 @@ export const CorridorViewMap = ({
       });
     });
 
-    map.on("moveend", () => setHasMoved(true));
+    map.on("moveend", () => setMoveCounter((count) => count + 1));
 
     mapRef.current = map;
 
@@ -286,7 +287,7 @@ export const CorridorViewMap = ({
     const map = mapRef.current;
     if (!map) return;
     fitToBounds(map, { duration: 500 });
-    setHasMoved(false);
+    setMoveCounter(0);
   };
 
   return (
@@ -296,28 +297,22 @@ export const CorridorViewMap = ({
         className="corridor__map"
         aria-label="Corridor map"
       />
-      <div className="corridor__map-style-toggle">
+      <MapDisplayOptions
+        activeStyle={activeStyle}
+        mapboxSatelliteStyle={mapboxSatelliteStyle}
+        onStyleChange={switchStyle}
+      />
+      {moveCounter > 1 && (
         <button
           type="button"
-          className={`corridor__map-style-btn${activeStyle === "street" ? " corridor__map-style-btn--active" : ""}`}
-          onClick={() => switchStyle("street")}
-        >
-          Street
-        </button>
-        <button
-          type="button"
-          className={`corridor__map-style-btn${activeStyle === "satellite" ? " corridor__map-style-btn--active" : ""}`}
-          onClick={() => switchStyle("satellite")}
-        >
-          Satellite
-        </button>
-      </div>
-      {hasMoved && (
-        <button
-          type="button"
-          className="corridor__map-recentre govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
+          className="corridor__map-recentre"
           onClick={recentre}
         >
+          <ReCentreIcon
+            className="corridor__map-recentre-icon"
+            aria-hidden="true"
+            focusable="false"
+          />
           Re-centre
         </button>
       )}

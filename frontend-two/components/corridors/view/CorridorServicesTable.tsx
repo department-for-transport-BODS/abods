@@ -1,4 +1,5 @@
 import { Duration } from "luxon";
+import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import { averageServiceSpeedLabel } from "@/services/corridors/corridors-speed-utils";
 import {
   CorridorStatsPerServiceType,
@@ -11,89 +12,67 @@ interface Props {
   isLoading: boolean;
 }
 
-const formatAverageJourneyTime = (
-  service: CorridorStatsPerServiceType,
-): string => {
+const COLUMNS = [
+  { key: "service", label: "Service", sortable: true },
+  { key: "noc", label: "NOC", sortable: true },
+  { key: "operator", label: "Operator", sortable: true },
+  { key: "scheduledTransits", label: "Scheduled transits", sortable: true },
+  { key: "recordedTransits", label: "Recorded transits", sortable: true },
+  { key: "averageJourneyTime", label: "Average journey time", sortable: true },
+  { key: "averageSpeed", label: "Average speed", sortable: true },
+];
+
+const formatAverageJourneyTime = (service: CorridorStatsPerServiceType): string => {
   const recorded = service.recordedTransits ?? 0;
   const totalTransitTime = service.totalTransitTime ?? 0;
-
   if (!recorded || !totalTransitTime) return "0:00";
-
-  return Duration.fromObject({
-    seconds: totalTransitTime / recorded,
-  }).toFormat("mm:ss");
+  return Duration.fromObject({ seconds: totalTransitTime / recorded }).toFormat("mm:ss");
 };
 
-export const CorridorServicesTable = ({
-  services,
-  serviceLinks,
-  isLoading,
-}: Props) => {
+export const CorridorServicesTable = ({ services, serviceLinks, isLoading }: Props) => {
   if (isLoading) {
     return <p className="govuk-body">Loading...</p>;
   }
 
-  if (!services.length) {
-    return (
-      <div role="alert" className="govuk-body">
-        No services found.
-      </div>
-    );
-  }
-
   return (
-    <table className="govuk-table">
-      <thead className="govuk-table__head">
-        <tr className="govuk-table__row">
-          <th scope="col" className="govuk-table__header">
-            Service
-          </th>
-          <th scope="col" className="govuk-table__header">
-            NOC
-          </th>
-          <th scope="col" className="govuk-table__header">
-            Operator
-          </th>
-          <th scope="col" className="govuk-table__header">
-            Scheduled transits
-          </th>
-          <th scope="col" className="govuk-table__header">
-            Recorded transits
-          </th>
-          <th scope="col" className="govuk-table__header">
-            Average journey time
-          </th>
-          <th scope="col" className="govuk-table__header">
-            Average speed
-          </th>
-        </tr>
-      </thead>
-      <tbody className="govuk-table__body">
-        {services.map((service, index) => (
-          <tr
-            key={`${service.noc ?? "unknown"}-${service.lineName}-${service.servicePatternName}-${index}`}
-            className="govuk-table__row"
-          >
-            <td className="govuk-table__cell">
-              {service.lineName}: {service.servicePatternName}
-            </td>
-            <td className="govuk-table__cell">{service.noc ?? "-"}</td>
-            <td className="govuk-table__cell">{service.operatorName ?? "-"}</td>
-            <td className="govuk-table__cell">
-              {service.scheduledTransits ?? 0}
-            </td>
-            <td className="govuk-table__cell">
-              {service.recordedTransits ?? 0}
-            </td>
-            <td className="govuk-table__cell">
-              {formatAverageJourneyTime(service)}
-            </td>
-            <td className="govuk-table__cell">
-              {averageServiceSpeedLabel(serviceLinks, service)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <SortedPaginatedTable
+      columns={COLUMNS}
+      data={services}
+      initialSortKey="service"
+      initialSortOrder="asc"
+      emptyMessage="No services found."
+      getRowValue={(service, column) => {
+        switch (column) {
+          case "service":
+            return `${service.lineName ?? ""}: ${service.servicePatternName ?? ""}`;
+          case "noc":
+            return service.noc ?? "-";
+          case "operator":
+            return service.operatorName ?? "-";
+          case "scheduledTransits":
+            return service.scheduledTransits ?? 0;
+          case "recordedTransits":
+            return service.recordedTransits ?? 0;
+          case "averageJourneyTime":
+            return service.recordedTransits && service.totalTransitTime
+              ? service.totalTransitTime / service.recordedTransits
+              : 0;
+          case "averageSpeed":
+            return averageServiceSpeedLabel(serviceLinks, service);
+          default:
+            return "";
+        }
+      }}
+      renderRow={(service) => ({
+        key: `${service.noc ?? "unknown"}-${service.lineName}-${service.servicePatternName}`,
+        service: `${service.lineName}: ${service.servicePatternName}`,
+        noc: service.noc ?? "-",
+        operator: service.operatorName ?? "-",
+        scheduledTransits: service.scheduledTransits ?? 0,
+        recordedTransits: service.recordedTransits ?? 0,
+        averageJourneyTime: formatAverageJourneyTime(service),
+        averageSpeed: averageServiceSpeedLabel(serviceLinks, service),
+      })}
+    />
   );
 };

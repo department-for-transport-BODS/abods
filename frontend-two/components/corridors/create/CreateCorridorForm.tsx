@@ -17,6 +17,7 @@ interface Props {
   initialCorridor?: Corridor;
   mapboxToken?: string;
   mapboxStyle?: string;
+  mapboxSatelliteStyle?: string;
 }
 
 export const CreateCorridorForm = ({
@@ -24,6 +25,7 @@ export const CreateCorridorForm = ({
   initialCorridor,
   mapboxToken,
   mapboxStyle,
+  mapboxSatelliteStyle,
 }: Props) => {
   const router = useRouter();
   const { mutate } = useSWRConfig();
@@ -402,6 +404,7 @@ export const CreateCorridorForm = ({
                 onSelectStop={addStop}
                 mapboxToken={mapboxToken}
                 mapboxStyle={mapboxStyle}
+                mapboxSatelliteStyle={mapboxSatelliteStyle}
               />
             ) : null}
           </div>

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
+import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { CorridorStop } from "@/types/corridors";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
@@ -36,6 +37,7 @@ interface Props {
   onSelectStop: (stop: CorridorStop) => void;
   mapboxToken: string;
   mapboxStyle: string;
+  mapboxSatelliteStyle?: string;
 }
 
 export const CorridorCreateMap = ({
@@ -44,9 +46,15 @@ export const CorridorCreateMap = ({
   onSelectStop,
   mapboxToken,
   mapboxStyle,
+  mapboxSatelliteStyle,
 }: Props) => {
+  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
+    "street",
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapboxStyleRef = useRef(mapboxStyle);
+  const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
   // Refs so event handlers inside the load closure always see latest values
   const onSelectStopRef = useRef(onSelectStop);
@@ -62,6 +70,12 @@ export const CorridorCreateMap = ({
   });
   useEffect(() => {
     corridorStopsRef.current = corridorStops;
+  });
+  useEffect(() => {
+    mapboxStyleRef.current = mapboxStyle;
+  });
+  useEffect(() => {
+    mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
   // Initialise map once
@@ -241,17 +255,36 @@ export const CorridorCreateMap = ({
     }
   }, [corridorStops]);
 
+  const switchStyle = (style: "street" | "satellite") => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    setActiveStyle(style);
+    map.setStyle(
+      style === "street"
+        ? mapboxStyleRef.current
+        : mapboxSatelliteStyleRef.current ?? mapboxStyleRef.current,
+    );
+  };
+
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "480px",
-        border: "1px solid #b1b4b6",
-        position: "sticky",
-        top: "40px",
-      }}
-      aria-label="Corridor map"
-    />
+    <div style={{ position: "relative" }}>
+      <div
+        ref={containerRef}
+        style={{
+          width: "100%",
+          height: "480px",
+          border: "1px solid #b1b4b6",
+          position: "sticky",
+          top: "40px",
+        }}
+        aria-label="Corridor map"
+      />
+      <MapDisplayOptions
+        activeStyle={activeStyle}
+        mapboxSatelliteStyle={mapboxSatelliteStyle}
+        onStyleChange={switchStyle}
+      />
+    </div>
   );
 };
