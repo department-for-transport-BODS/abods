@@ -59,6 +59,7 @@ const CorridorsEditPage = () => {
               initialCorridor={corridor}
               mapboxToken={config?.mapboxToken}
               mapboxStyle={config?.mapboxStyle}
+              mapboxSatelliteStyle={config?.mapboxSatelliteStyle}
             />
           )}
         </>
