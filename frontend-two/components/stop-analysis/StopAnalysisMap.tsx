@@ -3,6 +3,7 @@ import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource, MapMouseEvent } from "m
 import type { FeatureCollection, Feature, Point } from "geojson";
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
+import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { BoundingBox, StopStatistics } from "@/types/stop-analysis";
 
 // British Isles default bounds
@@ -93,13 +94,11 @@ export const StopAnalysisMap = ({
   const mapRef = useRef<Map | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
-  const displayOptionsRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
   const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
     "street",
   );
-  const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<Feature | null>(null);
   const getFeatureBounds = useCallback((features: Feature[]) => {
@@ -188,34 +187,6 @@ export const StopAnalysisMap = ({
   useEffect(() => {
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   }, [mapboxSatelliteStyle]);
-
-  useEffect(() => {
-    if (!showDisplayOptions) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (displayOptionsRef.current?.contains(event.target as Node)) {
-        return;
-      }
-
-      setShowDisplayOptions(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setShowDisplayOptions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [showDisplayOptions]);
 
   const stopGeoJSON: FeatureCollection = {
     type: "FeatureCollection",
@@ -704,68 +675,11 @@ export const StopAnalysisMap = ({
   return (
     <div className="stop-analysis-map">
       <div ref={mapContainer} className="stop-analysis-map__container" />
-      {mapboxSatelliteStyle && (
-        <div ref={displayOptionsRef} className="stop-analysis-map__display-options">
-          <button
-            type="button"
-            className={`govuk-button govuk-button--secondary govuk-!-margin-bottom-0 stop-analysis-map__display-summary${showDisplayOptions ? " stop-analysis-map__display-summary--open" : ""}`}
-            aria-haspopup="true"
-            aria-expanded={showDisplayOptions}
-            aria-controls="stop-analysis-map-display-panel"
-            onClick={() => setShowDisplayOptions((current) => !current)}
-          >
-            Display options
-          </button>
-          <div
-            id="stop-analysis-map-display-panel"
-            className={`stop-analysis-map__display-panel${showDisplayOptions ? " stop-analysis-map__display-panel--open" : ""}`}
-            role="group"
-            aria-label="Map view"
-            aria-hidden={!showDisplayOptions}
-          >
-            <p className="govuk-body govuk-!-margin-bottom-1">
-              <strong>Map view</strong>
-            </p>
-            <fieldset className="segmented-toggle app-map-view-segmented-toggle">
-              <legend className="govuk-visually-hidden">Map view</legend>
-              <div className="segmented-toggle__controls">
-                <div className="segmented-toggle-item">
-                  <input
-                    className="segmented-toggle-item__input"
-                    id="map-view-street"
-                    name="map-view"
-                    type="radio"
-                    checked={activeStyle === "street"}
-                    onChange={() => switchStyle("street")}
-                  />
-                  <label
-                    className="segmented-toggle-item__label"
-                    htmlFor="map-view-street"
-                  >
-                    Street
-                  </label>
-                </div>
-                <div className="segmented-toggle-item">
-                  <input
-                    className="segmented-toggle-item__input"
-                    id="map-view-satellite"
-                    name="map-view"
-                    type="radio"
-                    checked={activeStyle === "satellite"}
-                    onChange={() => switchStyle("satellite")}
-                  />
-                  <label
-                    className="segmented-toggle-item__label"
-                    htmlFor="map-view-satellite"
-                  >
-                    Satellite
-                  </label>
-                </div>
-              </div>
-            </fieldset>
-          </div>
-        </div>
-      )}
+      <MapDisplayOptions
+        activeStyle={activeStyle}
+        mapboxSatelliteStyle={mapboxSatelliteStyle}
+        onStyleChange={switchStyle}
+      />
       {boundingBoxTooBig && mapLoaded && (
         <div className="stop-analysis-map__overlay">
           <p className="govuk-body">Zoom in to show stops</p>
