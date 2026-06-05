@@ -21,7 +21,7 @@ import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { parseCorridorId, parseMatchType, queryValue } from "@/utils/query";
 import { formatTransitTime, parseDate } from "@/utils/date";
-import { CorridorGranularity } from "../../src/generated/graphql";
+import { CorridorGranularity, MatchType } from "../../src/generated/graphql";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
@@ -245,8 +245,8 @@ const CorridorsViewPage = () => {
               value={matchType}
               onChange={(value) => setQuery({ matchType: value })}
               options={[
-                { value: "estimated", label: "Estimated" },
-                { value: "evidenced", label: "Evidenced" },
+                { value: MatchType.Estimated, label: "Estimated" },
+                { value: MatchType.Evidenced, label: "Evidenced" },
               ]}
             />
             {corridor ? (

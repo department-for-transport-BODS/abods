@@ -1,25 +1,25 @@
-interface SegmentedToggleOption {
-  value: string;
+interface SegmentedToggleOption<T extends string = string> {
+  value: T;
   label: string;
 }
 
-interface SegmentedToggleProps {
+interface SegmentedToggleProps<T extends string = string> {
   legend: string;
   hideLegend?: boolean;
   name: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: SegmentedToggleOption[];
+  value: T;
+  onChange: (value: T) => void;
+  options: SegmentedToggleOption<T>[];
 }
 
-export const SegmentedToggle = ({
+export const SegmentedToggle = <T extends string,>({
   legend,
   hideLegend,
   name,
   value,
   onChange,
   options,
-}: SegmentedToggleProps) => (
+}: SegmentedToggleProps<T>) => (
   <fieldset className="segmented-toggle">
     <legend
       className={`govuk-label${hideLegend ? " govuk-visually-hidden" : ""}`}

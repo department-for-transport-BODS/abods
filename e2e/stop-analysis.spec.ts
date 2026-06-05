@@ -24,7 +24,7 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
   }) => {
     await stopAnalysis.goto();
 
-    await test.step("verify the page heading and core filter controls", async () => {
+    await test.step("verify the page heading and filter controls", async () => {
       await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?$/);
       await expect(stopAnalysis.heading()).toBeVisible();
       await expect(stopAnalysis.refineResultsButton()).toBeVisible();

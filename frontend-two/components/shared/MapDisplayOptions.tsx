@@ -78,7 +78,7 @@ export const MapDisplayOptions = ({
           hideLegend
           name={toggleName}
           value={activeStyle}
-          onChange={onStyleChange}
+          onChange={(value) => onStyleChange(value as MapStyle)}
           options={[
             { value: "street", label: "Street" },
             { value: "satellite", label: "Satellite" },

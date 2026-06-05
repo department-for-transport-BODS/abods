@@ -31,7 +31,7 @@ type SortKey =
 type SortableRow = {
   key: string;
   stopId: string;
-  timingPoint: string;
+  timingPoint: ReactNode;
   stopName: React.ReactNode;
   source: StopPerformanceRow;
   direction: string;

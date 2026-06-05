@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource, MapMouseEvent } from "mapbox-gl";
-import type { FeatureCollection, Feature, Point } from "geojson";
+import type {
+  FeatureCollection,
+  Feature,
+  GeoJsonProperties,
+  LineString,
+  MultiLineString,
+  MultiPolygon,
+  Polygon,
+  Point,
+} from "geojson";
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
@@ -54,6 +63,21 @@ const CLUSTER_PROPERTIES = {
   scheduledDepartures: ["+", ["get", "scheduledDepartures"]] as [string, mapboxgl.Expression],
 };
 
+type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
+type ClipableFeature = Feature<ClipableGeometry, GeoJsonProperties>;
+
+const isClipableFeature = (
+  feature: Feature,
+): feature is ClipableFeature => {
+  const geometryType = feature.geometry?.type;
+  return (
+    geometryType === "LineString" ||
+    geometryType === "MultiLineString" ||
+    geometryType === "Polygon" ||
+    geometryType === "MultiPolygon"
+  );
+};
+
 interface StopAnalysisMapProps {
   mapboxToken: string;
   mapboxStyle: string;
@@ -100,7 +124,7 @@ export const StopAnalysisMap = ({
     "street",
   );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
-  const hoveredAdminAreaRef = useRef<Feature | null>(null);
+  const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
   const getFeatureBounds = useCallback((features: Feature[]) => {
     const bounds = new mapboxgl.LngLatBounds();
     let hasCoordinates = false;
@@ -300,7 +324,7 @@ export const StopAnalysisMap = ({
           if (!e.features || e.features.length === 0) return;
 
           const hoveredFeature = e.features[0] as Feature | undefined;
-          if (!hoveredFeature) return;
+          if (!hoveredFeature || !isClipableFeature(hoveredFeature)) return;
 
           if (hoveredId !== null) {
             map.setFeatureState(
