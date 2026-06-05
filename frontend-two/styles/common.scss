@@ -968,6 +968,26 @@ $day-width: 46px;
   }
 }
 
+.corridors-grid-search {
+  position: relative;
+  display: inline-block;
+
+  &__icon {
+    position: absolute;
+    left: govuk-spacing(2);
+    top: 50%;
+    width: 1rem;
+    height: 1rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: govuk-colour("dark-grey");
+  }
+
+  &__input {
+    padding-left: govuk-spacing(5);
+  }
+}
+
 // Analysis tabs
 .analysis-tabs {
   display: flex;

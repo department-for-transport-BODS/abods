@@ -61,14 +61,22 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
             <label className="govuk-label" htmlFor="corridors-grid-filter">
               Search for a corridor
             </label>
-            <input
-              id="corridors-grid-filter"
-              name="filter"
-              type="search"
-              className="govuk-input govuk-input--width-20"
-              value={filter}
-              onChange={(e) => onFilterChange(e.target.value)}
-            />
+            <div className="corridors-grid-search">
+              <img
+                className="corridors-grid-search__icon"
+                src="/assets/icons/search.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <input
+                id="corridors-grid-filter"
+                name="filter"
+                type="search"
+                className="govuk-input govuk-input--width-20 corridors-grid-search__input"
+                value={filter}
+                onChange={(e) => onFilterChange(e.target.value)}
+              />
+            </div>
           </div>
         </div>
         <div className="govuk-grid-column-one-third-from-desktop govuk-!-text-align-right">
