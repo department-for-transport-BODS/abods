@@ -32,6 +32,9 @@ export const MultiselectCheckbox = ({
   const [searchText, setSearchText] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const getOptionId = (value: string) =>
+    `${id}-${value.toLowerCase().replace(/[^a-z0-9_-]+/g, "-")}`;
+
   const filteredOptions = useMemo(
     () =>
       options.filter((opt) =>
@@ -134,19 +137,23 @@ export const MultiselectCheckbox = ({
               </button>
             </div>
           ) : null}
-          <div className="multiselect-checkbox__options">
+          <div className="govuk-checkboxes govuk-checkboxes--small multiselect-checkbox__options">
             {filteredOptions.map((option) => (
-              <label
-                key={option.value}
-                className="multiselect-checkbox__option"
-              >
+              <div key={option.value} className="govuk-checkboxes__item">
                 <input
+                  id={getOptionId(option.value)}
+                  className="govuk-checkboxes__input"
                   type="checkbox"
                   checked={selectedValues.includes(option.value)}
                   onChange={() => handleToggle(option.value)}
                 />
-                <span>{option.label}</span>
-              </label>
+                <label
+                  className="govuk-label govuk-checkboxes__label"
+                  htmlFor={getOptionId(option.value)}
+                >
+                  {option.label}
+                </label>
+              </div>
             ))}
           </div>
         </div>
