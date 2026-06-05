@@ -27,11 +27,29 @@ import { StopAnalysisFilters as FiltersPanel, RefineFilters } from "@/components
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import { MatchType as GqlMatchType } from "../src/generated/graphql";
+import { Period } from "@/utils/dateRange";
 
 const MAX_BOUND_WIDTH = 0.5;
 
-const DEFAULT_FROM = DateTime.local().minus({ days: 7 }).startOf("day");
-const DEFAULT_TO = DateTime.local().endOf("day");
+const DEFAULT_TO = DateTime.local().startOf("day").minus({ days: 1 }).endOf("day");
+const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
+
+function getPresetWindow(preset: Period, today: DateTime) {
+  const yesterday = today.minus({ days: 1 });
+
+  switch (preset) {
+    case "last7":
+      return { from: today.minus({ days: 7 }), to: yesterday };
+    case "last28":
+      return { from: today.minus({ days: 28 }), to: yesterday };
+    case "monthToDate":
+      return { from: today.startOf("month"), to: yesterday };
+    case "lastMonth": {
+      const from = today.minus({ months: 1 }).startOf("month");
+      return { from, to: from.plus({ months: 1 }).minus({ days: 1 }) };
+    }
+  }
+}
 
 function parseArrayParam(param: string | string[] | undefined): string[] {
   if (!param) return [];
@@ -588,6 +606,13 @@ const StopAnalysisPage = () => {
           onDateRangeChange={(from, to) =>
             updateQuery({ fromTimestamp: from, toTimestamp: to })
           }
+          onPresetChange={(preset: Period) => {
+            const range = getPresetWindow(preset, DateTime.local().startOf("day"));
+            updateQuery({
+              fromTimestamp: range.from.startOf("day").toISO()!,
+              toTimestamp: range.to.endOf("day").toISO()!,
+            });
+          }}
           onAdminAreasChange={handleAdminAreasChange}
           onOperatorsChange={handleOperatorsChange}
           onLinesChange={(v) => updateQuery({ lineIds: v })}

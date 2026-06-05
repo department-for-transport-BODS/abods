@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import noUiSlider, { API as NoUiSliderApi } from "nouislider";
-import { calculatePresetPeriod, Period } from "@/utils/dateRange";
+import { Period } from "@/utils/dateRange";
 import {
   AdminArea,
   DayOfWeekFlags,
@@ -10,6 +10,7 @@ import {
   Operator,
   StopTypeOption,
 } from "@/types/stop-analysis";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
 import { MultiselectCheckbox } from "./MultiselectCheckbox";
 
@@ -35,14 +36,44 @@ interface StopAnalysisFiltersProps {
     center?: [number, number];
     bbox?: [number, number, number, number];
   }) => void;
+  onPresetChange: (preset: Period) => void;
 }
 
-const DATE_RANGE_PRESET_OPTIONS: { value: Period; label: string }[] = [
+const PRESET_OPTIONS: { value: Period; label: string }[] = [
   { value: "last7", label: "Last 7 days" },
   { value: "last28", label: "Last 28 days" },
-  { value: "lastMonth", label: "Last month" },
   { value: "monthToDate", label: "Month to date" },
+  { value: "lastMonth", label: "Last month" },
 ];
+
+function getPresetWindow(preset: Period, today: DateTime) {
+  const yesterday = today.minus({ days: 1 });
+
+  switch (preset) {
+    case "last7":
+      return {
+        from: today.minus({ days: 7 }),
+        to: yesterday,
+      };
+    case "last28":
+      return {
+        from: today.minus({ days: 28 }),
+        to: yesterday,
+      };
+    case "monthToDate":
+      return {
+        from: today.startOf("month"),
+        to: yesterday,
+      };
+    case "lastMonth": {
+      const from = today.minus({ months: 1 }).startOf("month");
+      return {
+        from,
+        to: from.plus({ months: 1 }).minus({ days: 1 }),
+      };
+    }
+  }
+}
 
 export const StopAnalysisFilters = ({
   fromTimestamp,
@@ -63,6 +94,7 @@ export const StopAnalysisFilters = ({
   onMatchTypeChange,
   onStopTypeChange,
   onLocationSelect,
+  onPresetChange,
 }: StopAnalysisFiltersProps) => {
   const [locationQuery, setLocationQuery] = useState("");
   const [locationOpen, setLocationOpen] = useState(false);
@@ -111,9 +143,6 @@ export const StopAnalysisFilters = ({
     [lines, adminAreaIds],
   );
 
-  const fromDate = DateTime.fromISO(fromTimestamp).toISODate() ?? "";
-  const toDate = DateTime.fromISO(toTimestamp).toISODate() ?? "";
-
   const activePreset = useMemo<Period | "custom">(() => {
     const currentFrom = DateTime.fromISO(fromTimestamp);
     const currentTo = DateTime.fromISO(toTimestamp);
@@ -122,8 +151,8 @@ export const StopAnalysisFilters = ({
     }
 
     const now = DateTime.local();
-    for (const option of DATE_RANGE_PRESET_OPTIONS) {
-      const window = calculatePresetPeriod(option.value, now);
+    for (const option of PRESET_OPTIONS) {
+      const window = getPresetWindow(option.value, now);
       if (
         currentFrom.hasSame(window.from, "day") &&
         currentTo.hasSame(window.to, "day")
@@ -135,17 +164,9 @@ export const StopAnalysisFilters = ({
     return "custom";
   }, [fromTimestamp, toTimestamp]);
 
-  const onPresetChange = (preset: Period) => {
-    const window = calculatePresetPeriod(preset, DateTime.local());
-    onDateRangeChange(
-      window.from.startOf("day").toISO()!,
-      window.to.endOf("day").toISO()!,
-    );
+  const handlePresetChange = (preset: Period) => {
+    onPresetChange(preset);
   };
-
-  const fromToDisplay = `${
-    DateTime.fromISO(fromTimestamp).toFormat("dd/MM/yyyy")
-  } - ${DateTime.fromISO(toTimestamp).toFormat("dd/MM/yyyy")}`;
 
   useEffect(() => {
     if (!mapboxToken || locationQuery.trim().length < 3) {
@@ -213,26 +234,20 @@ export const StopAnalysisFilters = ({
     <div className="stop-analysis-filters">
       <div className="filters stop-analysis-filters__grid govuk-!-margin-bottom-2">
         <div className="stop-analysis-filters__item stop-analysis-filters__item--date">
-          <label className="govuk-label" htmlFor="sa-date-range-preset">
-            Date Range
-          </label>
+          <label className="govuk-label">Date Range</label>
           <div className="stop-analysis-filters__date-range">
-            <input
-              id="sa-date-range-display"
-              className="govuk-input"
-              type="text"
-              value={fromToDisplay}
-              readOnly
-              aria-label="Date range"
+            <DateRangeSelect
+              value={{ from: fromTimestamp, to: toTimestamp }}
+              onChange={({ from, to }) => onDateRangeChange(from, to)}
+              hideLabel
             />
             <select
-              id="sa-date-range-preset"
-              className="govuk-select"
+              className="govuk-select stop-analysis-filters__preset-select"
               value={activePreset}
-              onChange={(e) => onPresetChange(e.target.value as Period)}
-              aria-label="Date range preset"
+              onChange={(event) => handlePresetChange(event.target.value as Period)}
+              aria-label="Preset date range"
             >
-              {DATE_RANGE_PRESET_OPTIONS.map((option) => (
+              {PRESET_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -264,32 +279,44 @@ export const StopAnalysisFilters = ({
             Location name or postcode
           </label>
           <div className="stop-analysis-filters__location-search">
-            <input
-              id="sa-location-search"
-              className="govuk-input stop-analysis-filters__location-input"
-              type="text"
-              value={locationQuery}
-              onChange={(e) => {
-                setLocationQuery(e.target.value);
-                setLocationOpen(true);
-              }}
-              onFocus={() => setLocationOpen(true)}
-              onBlur={() => {
-                window.setTimeout(() => setLocationOpen(false), 120);
-              }}
-              placeholder="Search"
-              aria-label="Search for location"
-              disabled={!mapboxToken}
-            />
+            <div className="stop-analysis-filters__location-input-wrap">
+              <input
+                id="sa-location-search"
+                className="govuk-input stop-analysis-filters__location-input"
+                type="text"
+                value={locationQuery}
+                onChange={(e) => {
+                  setLocationQuery(e.target.value);
+                  setLocationOpen(true);
+                }}
+                onFocus={() => setLocationOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setLocationOpen(false), 120);
+                }}
+                placeholder="Search"
+                aria-label="Search for location"
+                disabled={!mapboxToken}
+              />
+              <span
+                className={`stop-analysis-filters__location-chevron${locationOpen ? " stop-analysis-filters__location-chevron--open" : ""}`}
+                aria-hidden="true"
+              />
+            </div>
 
-            {locationOpen && (locationOptions.length > 0 || locationLoading) && (
+            {locationOpen && (locationQuery.trim().length === 0 || locationOptions.length > 0 || locationLoading) && (
               <div className="stop-analysis-filters__location-results" role="listbox">
-                {locationLoading && (
+                {locationQuery.trim().length === 0 && (
+                  <div className="stop-analysis-filters__location-hint">
+                    Type to search
+                  </div>
+                )}
+                {locationQuery.trim().length > 0 && locationLoading && (
                   <div className="stop-analysis-filters__location-loading">
                     Searching...
                   </div>
                 )}
-                {!locationLoading &&
+                {locationQuery.trim().length > 0 &&
+                  !locationLoading &&
                   locationOptions.map((option) => (
                     <button
                       key={option.id}
