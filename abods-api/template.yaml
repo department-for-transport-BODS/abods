@@ -247,7 +247,6 @@ Resources:
                 Resource:
                   - !Ref GraphQLAPITokenSecret
                   - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/apikey*"
-                  - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/service_monitoring_dashboard*"
               - Effect: Allow
                 Action:
                   - kms:Decrypt
