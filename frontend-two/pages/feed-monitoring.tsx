@@ -67,7 +67,7 @@ const FeedMonitoringPage = () => {
   );
 
   return (
-    <BaseLayout title="Dashboard - Analyse Bus Open Data">
+    <BaseLayout title="NOC feed monitoring - Analyse Bus Open Data">
       <div className="app-page feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">
           NOC feed monitoring
