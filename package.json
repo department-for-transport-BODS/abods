@@ -15,7 +15,7 @@
     "lint:check": "(cd abods-api && npm run lint:check) && (cd frontend && npm run lint:check) && (cd frontend-two && npm run lint)",
     "prepare": "(npm run codegen) && husky",
     "type-check": "(cd abods-api && npm run type-check) && (cd frontend && npm run type-check) && (cd frontend-two && npm run typecheck)",
-    "test:ci": "(cd abods-api && npm run test) && (cd frontend && npm run test:ci) && (cd frontend-two && npm run test)",
+    "test:ci": "(cd abods-api && npm run test:unit) && (cd abods-api && npm run test:int) && (cd frontend && npm run test:ci) && (cd frontend-two && npm run test)",
     "test:e2e": "playwright test --ignore-snapshots",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

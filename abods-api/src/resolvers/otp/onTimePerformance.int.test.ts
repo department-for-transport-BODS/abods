@@ -62,9 +62,9 @@ beforeAll(async () => {
 }, 120000);
 
 afterAll(async () => {
-  if (prisma) await prisma.$disconnect();
-  if (kysely) await kysely.destroy();
-  if (container) await container.stop();
+  await Promise.allSettled([prisma?.$disconnect(), kysely?.destroy()]);
+
+  await container?.stop();
 });
 
 describe("OnTimePerformance queries", () => {
