@@ -59,7 +59,7 @@ const LiveStatusPage = () => {
 
   if (isLoading) {
     return (
-      <BaseLayout title="Dashboard - Analyse Bus Open Data">
+      <BaseLayout title="Live status - Analyse Bus Open Data">
         <div className="app-page feed-monitoring-page">
           <p className="govuk-body">Loading...</p>
         </div>
@@ -68,7 +68,7 @@ const LiveStatusPage = () => {
   }
 
   return (
-    <BaseLayout title="Dashboard - Analyse Bus Open Data">
+    <BaseLayout title="Live status - Analyse Bus Open Data">
       <div className="app-page feed-monitoring-page">
         <div>
           <Link href="/feed-monitoring" className="govuk-back-link">

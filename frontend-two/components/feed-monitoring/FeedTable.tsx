@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { MemoryRouter } from "react-router-dom";
 import dynamic from "next/dynamic";
+import { PagingPanel } from "../shared/PagingPanel";
 import {
   FeedMonitoringListQuery,
   VehicleStatFragment,
@@ -13,14 +13,6 @@ type VehicleCountData = {
   operatorId: string;
   last24Hours: VehicleStatFragment[];
 };
-
-const Pagination = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (mod) => mod.Pagination,
-    ),
-  { ssr: false },
-);
 
 const SortableTable = dynamic(
   () =>
@@ -179,16 +171,16 @@ export const FeedTable = ({
         rows={rows as any[]}
         onSort={handleTableSorting}
       ></SortableTable>
-      {totalPages > 1 && (
-        <MemoryRouter>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage + 1}
-            onPageChange={(page) => setCurrentPage(page - 1)}
-            pathFunc={(page) => `?page=${page}`}
-          />
-        </MemoryRouter>
-      )}
+      <div className="flex justify-end">
+        <PagingPanel
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          pageSize={PAGE_SIZE}
+          rowCount={sortedData.length}
+          onPageChange={(page) => setCurrentPage(page - 1)}
+          noun={"feed"}
+        />
+      </div>
     </>
   );
 };

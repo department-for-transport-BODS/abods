@@ -133,7 +133,7 @@ const FeedHistoryPage = () => {
 
   if (isLoading) {
     return (
-      <BaseLayout title="Dashboard - Analyse Bus Open Data">
+      <BaseLayout title="Feed history - Analyse Bus Open Data">
         <div className="app-page feed-monitoring-page">
           <p className="govuk-body">Loading...</p>
         </div>
@@ -148,7 +148,7 @@ const FeedHistoryPage = () => {
     operatorHistory?.feedMonitoring?.historicalStats?.updateFrequency;
 
   return (
-    <BaseLayout title="Dashboard - Analyse Bus Open Data">
+    <BaseLayout title="Feed history - Analyse Bus Open Data">
       <div className="app-page feed-monitoring-page">
         <div>
           <a href={`/feed-monitoring/${nocCode}`} className="govuk-back-link">
