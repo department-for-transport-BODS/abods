@@ -9,7 +9,7 @@
     "watch": "tsc --watch",
     "test": "jest --no-coverage",
     "test:unit": "jest --no-coverage --testPathIgnorePatterns=\\.int\\.test\\.ts$",
-    "test:int": "jest --no-coverage --runInBand --testPathPattern=\\.int\\.test\\.ts$",
+    "test:int": "jest --no-coverage --runInBand --testPathPatterns=\\.int\\.test\\.ts$",
     "coverage": "jest --coverage",
     "test:ci": "jest --ci",
     "prisma:generate": "prisma generate",
