@@ -1,14 +1,9 @@
 import { apolloClient } from "@/services/apolloClient";
 import {
   LoginDocument,
-  LoginMutation,
-  LoginMutationVariables,
   LogoutDocument,
-  LogoutMutation,
   UserDocument,
-  UserQuery,
 } from "../src/generated/graphql";
-import { ApolloCache, DefaultContext } from "@apollo/client";
 
 export interface LoginResult {
   success: boolean;
@@ -39,8 +34,9 @@ export const authService = {
     return Boolean(result.data?.logout ?? false);
   },
   getUser: async () => {
-    const result = await apolloClient.mutate({
-      mutation: UserDocument,
+    const result = await apolloClient.query({
+      query: UserDocument,
+      fetchPolicy: "network-only",
     });
     return result.data?.user ?? null;
   },

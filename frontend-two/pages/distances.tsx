@@ -1,4 +1,4 @@
-import { useRequireAuth } from "@/hooks/useAuth";
+import { useAuth, useRequireAuth } from "@/hooks/useAuth";
 import { BaseLayout } from "../components/layout/BaseLayout";
 import { DistanceFilters } from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
@@ -10,6 +10,7 @@ import {
 } from "../src/generated/graphql";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { formatDateToISODateString } from "@/utils/dateFormatter";
 import { DateTime } from "luxon";
 
@@ -25,6 +26,15 @@ type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 
 const DistancesPage = () => {
   useRequireAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && user && !user.canViewDistances) {
+      router.replace("/not-authorised");
+    }
+  }, [isAuthLoading, user, router]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(false);
