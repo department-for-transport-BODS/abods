@@ -174,6 +174,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
             pageSize={PAGE_SIZE}
             rowCount={data.length}
             onPageChange={(page) => setCurrentPage(page - 1)}
+            noun={"feed"}
           />
         </div>
       )}
