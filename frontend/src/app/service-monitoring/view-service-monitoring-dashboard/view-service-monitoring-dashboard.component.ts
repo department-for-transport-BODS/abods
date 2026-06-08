@@ -7,6 +7,7 @@ import {
 } from "@angular/core";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
 import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { UserGQL } from "../../../generated/graphql";
 
 @Component({
   selector: "app-view-service-monitoring-dashboard",
@@ -20,6 +21,7 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
   constructor(
     private renderer: Renderer2,
     private userService: AuthenticatedUserService,
+    private userQuery: UserGQL,
   ) {}
 
   serviceMonitoringUrl = "";
@@ -28,27 +30,31 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
   ngAfterViewInit() {
     const iframe = this.renderer.createElement("iframe");
 
-    this.userService.authenticatedUser$.subscribe((loginInfo) => {
-      this.loading = false;
-      if (
-        !loginInfo.canViewServiceMonitoring ||
-        !loginInfo.serviceMonitoringEmbedUrl
-      ) {
-        this.errors = [
-          {
-            error: "Unable to load dashboad. Please contact admin",
-            label: "enable-service-monitoring",
-          },
-        ];
-        return;
-      }
-      this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
-      this.renderer.setStyle(iframe, "border", "none");
-      this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
-      this.renderer.setAttribute(iframe, "width", "100%");
-      this.renderer.setAttribute(iframe, "height", "100%");
-      this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
-      this.errors = [];
-    });
+    // Fetch fresh user data with no cache for valid Datadog token
+    this.userQuery
+      .fetch({}, { fetchPolicy: "no-cache" })
+      .subscribe((result) => {
+        const loginInfo = result.data?.user;
+        this.loading = false;
+        if (
+          !loginInfo?.canViewServiceMonitoring ||
+          !loginInfo?.serviceMonitoringEmbedUrl
+        ) {
+          this.errors = [
+            {
+              error: "Unable to load dashboad. Please contact admin",
+              label: "enable-service-monitoring",
+            },
+          ];
+          return;
+        }
+        this.serviceMonitoringUrl = loginInfo.serviceMonitoringEmbedUrl;
+        this.renderer.setStyle(iframe, "border", "none");
+        this.renderer.setAttribute(iframe, "src", this.serviceMonitoringUrl);
+        this.renderer.setAttribute(iframe, "width", "100%");
+        this.renderer.setAttribute(iframe, "height", "100%");
+        this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
+        this.errors = [];
+      });
   }
 }
