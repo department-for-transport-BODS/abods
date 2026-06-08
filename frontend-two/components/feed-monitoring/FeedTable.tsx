@@ -128,6 +128,7 @@ export const FeedTable = ({
       getRowValue={getRowValue}
       renderRow={renderRow}
       title={title}
+      paginationNoun={"feed"}
     />
   );
 };

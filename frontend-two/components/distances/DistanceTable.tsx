@@ -107,6 +107,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
       renderRow={renderRow}
       pinnedRows={totalsRow ? [totalsRow] : undefined}
       emptyMessage="No operator data found"
+      paginationNoun={"operator"}
     />
   );
 };

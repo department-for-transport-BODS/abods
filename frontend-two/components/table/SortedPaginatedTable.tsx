@@ -25,6 +25,7 @@ export interface SortedPaginatedTableProps<T> {
   emptyMessage?: string;
   initialSortKey?: string | null;
   initialSortOrder?: SortOrder;
+  paginationNoun?: string;
 }
 
 export const SortedPaginatedTable = <T,>({
@@ -38,6 +39,7 @@ export const SortedPaginatedTable = <T,>({
   emptyMessage,
   initialSortKey = null,
   initialSortOrder = "none",
+  paginationNoun = "row",
 }: SortedPaginatedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(initialSortKey);
@@ -99,6 +101,7 @@ export const SortedPaginatedTable = <T,>({
           pageSize,
           rowCount: sortedData.length,
           onPageChange: setCurrentPage,
+          noun: paginationNoun ?? "row",
         }
       : undefined;
 
