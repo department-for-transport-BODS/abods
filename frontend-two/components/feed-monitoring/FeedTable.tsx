@@ -178,7 +178,7 @@ export const FeedTable = ({
           pageSize={PAGE_SIZE}
           rowCount={sortedData.length}
           onPageChange={(page) => setCurrentPage(page - 1)}
-          />
+        />
       </div>
     </>
   );
