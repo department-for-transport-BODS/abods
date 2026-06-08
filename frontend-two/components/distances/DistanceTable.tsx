@@ -1,17 +1,9 @@
 import { useMemo, useEffect, useState } from "react";
-import { MemoryRouter } from "react-router-dom";
 import dynamic from "next/dynamic";
+import { PagingPanel } from "../shared/PagingPanel";
 import { DistancesListQuery } from "../../src/generated/graphql";
 
 type DistanceData = DistancesListQuery["distances"][number];
-
-const Pagination = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (mod) => mod.Pagination,
-    ),
-  { ssr: false },
-);
 
 const SortableTable = dynamic(
   () =>
@@ -175,14 +167,15 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
         </div>
       )}
       {Math.ceil(data.length / PAGE_SIZE) > 1 && (
-        <MemoryRouter>
-          <Pagination
-            totalPages={Math.ceil(data.length / PAGE_SIZE)}
+        <div className="flex justify-end">
+          <PagingPanel
             currentPage={currentPage + 1}
+            totalPages={Math.ceil(data.length / PAGE_SIZE)}
+            pageSize={PAGE_SIZE}
+            rowCount={data.length}
             onPageChange={(page) => setCurrentPage(page - 1)}
-            pathFunc={(page) => `?page=${page}`}
           />
-        </MemoryRouter>
+        </div>
       )}
     </>
   );
