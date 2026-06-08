@@ -124,6 +124,8 @@ describe("getFeatureFlags", () => {
 describe("getUser", () => {
   beforeEach(() => {
     delete process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL;
+    delete process.env.DATADOG_SERVICE_MONITORING_DASHBOARD;
+    delete process.env.SUPPORT_USER_EMAIL_DOMAINS;
   });
 
   it("returns user info with correct flags and permissions", async () => {
