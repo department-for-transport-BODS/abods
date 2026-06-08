@@ -67,7 +67,12 @@ const getServiceMonitoringEmbedUrl = (): string | null => {
     return dashboardUrl;
   }
 
-  return generateSecureDatadogEmbedUrl(dashboardUrl, secureEmbedCredential);
+  try {
+    return generateSecureDatadogEmbedUrl(dashboardUrl, secureEmbedCredential);
+  } catch (error) {
+    logger.error(error, "Error generating secure Datadog embed URL");
+    return null;
+  }
 };
 
 export const getFeatureFlags = () => {
