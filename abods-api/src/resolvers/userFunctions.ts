@@ -64,7 +64,7 @@ const getServiceMonitoringEmbedUrl = (): string | null => {
   }
 
   if (!secureEmbedCredential) {
-    return dashboardUrl;
+    return null;
   }
 
   try {
