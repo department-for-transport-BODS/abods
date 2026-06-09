@@ -6,7 +6,6 @@ import {
   ViewChild,
 } from "@angular/core";
 import { FormErrors } from "../../shared/gds/error-summary/error-summary.component";
-import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
 import { UserGQL } from "../../../generated/graphql";
 
 @Component({
@@ -20,7 +19,6 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
 
   constructor(
     private renderer: Renderer2,
-    private userService: AuthenticatedUserService,
     private userQuery: UserGQL,
   ) {}
 
@@ -31,9 +29,8 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
     const iframe = this.renderer.createElement("iframe");
 
     // Fetch fresh user data with no cache for valid Datadog token
-    this.userQuery
-      .fetch({}, { fetchPolicy: "no-cache" })
-      .subscribe((result) => {
+    this.userQuery.fetch({}, { fetchPolicy: "no-cache" }).subscribe({
+      next: (result) => {
         const loginInfo = result.data?.user;
         this.loading = false;
         if (
@@ -42,7 +39,7 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
         ) {
           this.errors = [
             {
-              error: "Unable to load dashboad. Please contact admin",
+              error: "Unable to load dashboard. Please contact admin",
               label: "enable-service-monitoring",
             },
           ];
@@ -55,6 +52,16 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
         this.renderer.setAttribute(iframe, "height", "100%");
         this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
         this.errors = [];
-      });
+      },
+      error: (err) => {
+        this.loading = false;
+        this.errors = [
+          {
+            error: "Failed to load dashboard. Please try again",
+            label: "dashboard-load-error",
+          },
+        ];
+      },
+    });
   }
 }
