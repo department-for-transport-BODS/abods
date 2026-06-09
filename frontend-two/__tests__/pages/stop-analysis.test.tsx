@@ -36,6 +36,11 @@ vi.mock("@/services/apolloClient", () => ({
 vi.mock("@/services/stop-analysis/stop-analysis.service", () => ({
   stopAnalysisService: {
     fetchStopAnalysis: vi.fn(),
+  },
+}));
+
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
     fetchOperators: vi.fn(),
     fetchAdminAreas: vi.fn(),
     fetchLines: vi.fn(),
@@ -86,11 +91,12 @@ vi.mock("next/router", () => ({
 
 import { useConfig } from "@/contexts/ConfigContext";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
+import { operatorsService } from "@/services/operator.service";
 
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchStopAnalysis = vi.mocked(stopAnalysisService.fetchStopAnalysis);
-const mockFetchOperators = vi.mocked(stopAnalysisService.fetchOperators);
-const mockFetchAdminAreas = vi.mocked(stopAnalysisService.fetchAdminAreas);
+const mockFetchOperators = vi.mocked(operatorsService.fetchOperators);
+const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
 
 describe("StopAnalysisPage", () => {
   beforeEach(() => {

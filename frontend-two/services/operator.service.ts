@@ -1,7 +1,10 @@
 import { apolloClient } from "@/services/apolloClient";
 import {
+  GetAdminAreasDocument,
+  GetAdminAreasQuery,
+  OperatorLinesDocument,
+  OperatorLinesQuery,
   OperatorListDocument,
-  OperatorListQuery,
   OperatorType,
 } from "../src/generated/graphql";
 
@@ -29,6 +32,37 @@ export const operatorsService = {
       return uniqueAdminAreaIds;
     } catch (error) {
       console.warn("Failed to fetch admin area ids:", error);
+      return [];
+    }
+  },
+
+  fetchAdminAreas: async (): Promise<
+    NonNullable<GetAdminAreasQuery["adminAreas"]>
+  > => {
+    try {
+      const result = await apolloClient.query({
+        query: GetAdminAreasDocument,
+      });
+      return result.data?.adminAreas ?? [];
+    } catch (error) {
+      console.warn("Failed to fetch admin areas:", error);
+      return [];
+    }
+  },
+
+  fetchLines: async (
+    operatorIds: string[],
+    inputDate: string,
+    endDate?: string,
+  ): Promise<OperatorLinesQuery["lines"]> => {
+    try {
+      const result = await apolloClient.query({
+        query: OperatorLinesDocument,
+        variables: { operatorIds, inputDate, endDate },
+      });
+      return result.data?.lines ?? [];
+    } catch (error) {
+      console.warn("Failed to fetch lines:", error);
       return [];
     }
   },

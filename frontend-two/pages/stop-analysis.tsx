@@ -32,8 +32,9 @@ import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import { MatchType as GqlMatchType } from "../src/generated/graphql";
 import { Period } from "@/utils/dateRange";
+import { operatorsService } from "@/services/operator.service";
 
-const MAX_BOUND_WIDTH = 0.5;
+const MAX_BOUND_SPAN = 0.5;
 
 const DEFAULT_TO = DateTime.local()
   .startOf("day")
@@ -300,12 +301,13 @@ const StopAnalysisPage = () => {
       ? parseArrayParam(router.query.direction)
       : ["Inbound", "Outbound"]
   ) as Direction[];
+
   const bounds = parseBoundingBox(router.query);
-
+  // compute spans as absolute values to be robust
   const boundingBoxTooBig = bounds
-    ? bounds.maxLongitude - bounds.minLongitude >= MAX_BOUND_WIDTH
+    ? Math.abs(bounds.maxLongitude - bounds.minLongitude) >= MAX_BOUND_SPAN ||
+      Math.abs(bounds.maxLatitude - bounds.minLatitude) >= MAX_BOUND_SPAN
     : true;
-
   // Update URL params (shallow — no page reload)
   const updateQuery = useCallback(
     (updates: Record<string, string | string[] | undefined>) => {
@@ -320,19 +322,18 @@ const StopAnalysisPage = () => {
 
   // Fetch reference data
   const { data: operators } = useSWR("sa-operators", () =>
-    stopAnalysisService.fetchOperators(),
+    operatorsService.fetchOperators(),
   );
 
   const { data: adminAreas } = useSWR("sa-admin-areas", () =>
-    stopAnalysisService.fetchAdminAreas(),
+    operatorsService.fetchAdminAreas(),
   );
 
   const { data: lines } = useSWR(
     operatorIds.length > 0
-      ? ["sa-lines", operatorIds.join(","), fromTimestamp]
+      ? ["sa-lines", operatorIds.join(","), fromTimestamp, toTimestamp]
       : null,
-    () =>
-      stopAnalysisService.fetchLines(operatorIds, fromTimestamp, toTimestamp),
+    () => operatorsService.fetchLines(operatorIds, fromTimestamp, toTimestamp),
   );
 
   // Fetch stop analysis data (only when bounds are small enough)
