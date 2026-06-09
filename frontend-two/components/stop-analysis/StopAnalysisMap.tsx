@@ -1,19 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import mapboxgl, {
-  Map,
-  LngLatBoundsLike,
-  GeoJSONSource,
-  MapMouseEvent,
-} from "mapbox-gl";
+import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource } from "mapbox-gl";
 import type {
   FeatureCollection,
   Feature,
-  GeoJsonProperties,
   LineString,
   MultiLineString,
   MultiPolygon,
   Polygon,
-  Point,
 } from "geojson";
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
@@ -25,10 +18,9 @@ const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];
 
 const RED_THRESHOLD = 0.6;
 const GREEN_THRESHOLD = 0.8;
-const MAX_BOUND_WIDTH = 0.5;
 const ADMIN_AREA_HIDDEN_ZOOM = 12;
 
-const POINT_COLOURS: mapboxgl.Expression = [
+const POINT_COLOURS: mapboxgl.ExpressionSpecification = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "#b1b4b6",
@@ -43,7 +35,7 @@ const POINT_COLOURS: mapboxgl.Expression = [
   ],
 ];
 
-const TIMING_POINT_ICONS: mapboxgl.Expression = [
+const TIMING_POINT_ICONS: mapboxgl.ExpressionSpecification = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "timing-no-data-map",
@@ -59,21 +51,24 @@ const TIMING_POINT_ICONS: mapboxgl.Expression = [
 ];
 
 const CLUSTER_PROPERTIES = {
-  early: ["+", ["get", "early"]] as [string, mapboxgl.Expression],
-  onTime: ["+", ["get", "onTime"]] as [string, mapboxgl.Expression],
-  late: ["+", ["get", "late"]] as [string, mapboxgl.Expression],
+  early: ["+", ["get", "early"]] as [string, mapboxgl.ExpressionSpecification],
+  onTime: ["+", ["get", "onTime"]] as [
+    string,
+    mapboxgl.ExpressionSpecification,
+  ],
+  late: ["+", ["get", "late"]] as [string, mapboxgl.ExpressionSpecification],
   completedDepartures: ["+", ["get", "completedDepartures"]] as [
     string,
-    mapboxgl.Expression,
+    mapboxgl.ExpressionSpecification,
   ],
   scheduledDepartures: ["+", ["get", "scheduledDepartures"]] as [
     string,
-    mapboxgl.Expression,
+    mapboxgl.ExpressionSpecification,
   ],
 };
 
 type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
-type ClipableFeature = Feature<ClipableGeometry, GeoJsonProperties>;
+type ClipableFeature = Feature<ClipableGeometry>;
 
 const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   const geometryType = feature.geometry?.type;
@@ -132,29 +127,6 @@ export const StopAnalysisMap = ({
   );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
-  const getFeatureBounds = useCallback((features: Feature[]) => {
-    const bounds = new mapboxgl.LngLatBounds();
-    let hasCoordinates = false;
-
-    const addCoordinate = (value: unknown) => {
-      if (!Array.isArray(value) || value.length < 2) return;
-      if (typeof value[0] === "number" && typeof value[1] === "number") {
-        bounds.extend([value[0], value[1]] as [number, number]);
-        hasCoordinates = true;
-        return;
-      }
-
-      value.forEach(addCoordinate);
-    };
-
-    features.forEach((feature) => {
-      addCoordinate(
-        (feature.geometry as { coordinates?: unknown })?.coordinates,
-      );
-    });
-
-    return hasCoordinates ? bounds : null;
-  }, []);
 
   const clearPopup = useCallback(() => {
     popupRef.current?.remove();
@@ -163,6 +135,9 @@ export const StopAnalysisMap = ({
 
   const updateAdminAreaPopup = useCallback(
     (map: Map) => {
+      if (!map) {
+        return;
+      }
       const hoveredAdminArea = hoveredAdminAreaRef.current;
       if (!hoveredAdminArea) return;
       if (map.getZoom() >= 11) {
@@ -171,12 +146,15 @@ export const StopAnalysisMap = ({
       }
 
       const bounds = map.getBounds();
+      if (!bounds) return;
+
       const clippedFeature = bboxClip(hoveredAdminArea, [
         bounds.getWest(),
         bounds.getSouth(),
         bounds.getEast(),
         bounds.getNorth(),
       ]);
+
       const labelPoint = pointOnFeature(clippedFeature);
       const coordinates = labelPoint.geometry.coordinates as [number, number];
       const properties = hoveredAdminArea.properties as
@@ -273,6 +251,8 @@ export const StopAnalysisMap = ({
 
     map.on("moveend", () => {
       const bounds = map.getBounds();
+      if (!bounds) return;
+
       onBoundsChange({
         minLatitude: bounds.getSouth(),
         maxLatitude: bounds.getNorth(),
@@ -629,17 +609,6 @@ export const StopAnalysisMap = ({
       });
     }
   }, [mapLoaded, boundingBoxTooBig, stopGeoJSON, onStopClick, styleRevision]);
-
-  // Fit to bounds when initialBounds changes from URL params
-  const fitBounds = useCallback((bounds: BoundingBox) => {
-    mapRef.current?.fitBounds(
-      [
-        [bounds.minLongitude, bounds.minLatitude],
-        [bounds.maxLongitude, bounds.maxLatitude],
-      ],
-      { maxDuration: 500 },
-    );
-  }, []);
 
   useEffect(() => {
     if (!focusStop || !mapLoaded || !mapRef.current) return;
