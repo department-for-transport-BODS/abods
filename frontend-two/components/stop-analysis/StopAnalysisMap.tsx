@@ -11,7 +11,9 @@ import type {
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
-import { BoundingBox, StopStatistics } from "@/types/stop-analysis";
+import { BoundingBoxInputType as BoundingBox } from "@/src/generated/graphql";
+
+import { StopStatistics } from "@/src/generated/graphql";
 
 // British Isles default bounds
 const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];

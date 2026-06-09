@@ -2,18 +2,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import noUiSlider, { API as NoUiSliderApi } from "nouislider";
 import { Period } from "@/utils/dateRange";
-import {
-  AdminArea,
-  DayOfWeekFlags,
-  Line,
-  MatchType,
-  Operator,
-  StopTypeOption,
-} from "@/types/stop-analysis";
+import { StopTypeOption } from "@/types/stop-analysis";
+import { DayOfWeekFlagsInputType as DayOfWeekFlags } from "@/src/generated/graphql";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
 import { MultiselectCheckbox } from "./MultiselectCheckbox";
+import {
+  AdminAreasType,
+  LineType,
+  MatchType,
+  OperatorType,
+} from "@/src/generated/graphql";
 
 interface StopAnalysisFiltersProps {
   fromTimestamp: string;
@@ -23,9 +23,9 @@ interface StopAnalysisFiltersProps {
   lineIds: string[];
   matchType: MatchType;
   stopType: StopTypeOption;
-  adminAreas: AdminArea[];
-  operators: Operator[];
-  lines: Line[];
+  adminAreas: AdminAreasType[];
+  operators: OperatorType[];
+  lines: LineType[];
   mapboxToken?: string;
   onDateRangeChange: (from: string, to: string) => void;
   onAdminAreasChange: (values: string[]) => void;

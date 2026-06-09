@@ -1,4 +1,5 @@
-import { MatchType, StopTypeOption } from "@/types/stop-analysis";
+import { StopTypeOption } from "@/types/stop-analysis";
+import { MatchType } from "@/src/generated/graphql";
 
 interface MatchTypeToggleProps {
   matchType: MatchType;

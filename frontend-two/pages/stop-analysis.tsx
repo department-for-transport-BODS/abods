@@ -14,15 +14,14 @@ import { usePanel } from "@/contexts/PanelContext";
 import { ErrorInfo } from "@/types";
 import RefineIcon from "@/assets/icons/refine.svg";
 import {
-  BoundingBox,
-  DayOfWeekFlags,
   Direction,
-  MatchType,
-  StopAnalysisFilters,
   StopPerformanceRow,
-  StopStatistics,
   StopTypeOption,
 } from "@/types/stop-analysis";
+import {
+  BoundingBoxInputType as BoundingBox,
+  DayOfWeekFlagsInputType as DayOfWeekFlags,
+} from "@/src/generated/graphql";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
 import {
   StopAnalysisFilters as FiltersPanel,
@@ -30,7 +29,12 @@ import {
 } from "@/components/stop-analysis/StopAnalysisFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
-import { MatchType as GqlMatchType } from "../src/generated/graphql";
+import {
+  MatchType,
+  MatchType as GqlMatchType,
+  StopAnalysisQueryVariables,
+  StopStatistics,
+} from "../src/generated/graphql";
 import { Period } from "@/utils/dateRange";
 import { operatorsService } from "@/services/operator.service";
 
@@ -337,7 +341,7 @@ const StopAnalysisPage = () => {
   );
 
   // Fetch stop analysis data (only when bounds are small enough)
-  const filters: StopAnalysisFilters | null =
+  const filters: StopAnalysisQueryVariables | null =
     bounds && !boundingBoxTooBig
       ? {
           adminAreaIds,

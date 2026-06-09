@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StopAnalysisFilters } from "@/components/stop-analysis/StopAnalysisFilters";
-import { MatchType } from "@/types/stop-analysis";
+import { MatchType } from "@/src/generated/graphql";
 
 vi.mock("@/components/shared/DateRangeSelect", () => ({
   DateRangeSelect: ({
