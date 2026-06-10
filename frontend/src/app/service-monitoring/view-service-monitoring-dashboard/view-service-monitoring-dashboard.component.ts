@@ -53,7 +53,7 @@ export class ViewServiceMonitoringDashboardComponent implements AfterViewInit {
         this.renderer.appendChild(this.iframeContainer.nativeElement, iframe);
         this.errors = [];
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
         this.errors = [
           {
