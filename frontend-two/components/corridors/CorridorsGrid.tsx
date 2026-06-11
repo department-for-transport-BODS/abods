@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { CorridorSummary } from "@/types/corridors";
+import Image from "next/image";
 
 const COLUMNS = [
   { key: "name", label: "Name", sortable: true },
@@ -70,7 +71,7 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
               Search for a corridor
             </label>
             <div className="corridors-grid-search">
-              <img
+              <Image
                 className="corridors-grid-search__icon"
                 src="/assets/icons/search.svg"
                 alt=""

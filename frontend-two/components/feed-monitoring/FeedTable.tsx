@@ -6,6 +6,7 @@ import {
 import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
 import { SortedPaginatedTable } from "../table/SortedPaginatedTable";
 import type { SortableTableRow } from "../table/SortableTable";
+import Image from "next/image";
 
 type FeedMonitoringOperatorData =
   FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
@@ -75,12 +76,12 @@ export const FeedTable = ({
     return {
       key: op.operatorId ?? op.nocCode,
       icon: active ? (
-        <img
+        <Image
           src="/assets/icons/check-in-circle-solid.svg"
           className="feed-table__check"
         />
       ) : (
-        <img
+        <Image
           src="/assets/icons/cross-in-circle-solid.svg"
           className="feed-table__cross"
         />
