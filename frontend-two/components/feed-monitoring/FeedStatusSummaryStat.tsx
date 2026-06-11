@@ -17,11 +17,13 @@ export const FeedStatusSummaryStat = ({
           <Image
             src="/assets/icons/check-in-circle-solid.svg"
             className="feed-status-summary-stat__check"
+            alt="Active Feed"
           />
         ) : (
           <Image
             src="/assets/icons/cross-in-circle-solid.svg"
             className="feed-status-summary-stat__cross"
+            alt="Inactive Feed"
           />
         )}
         <span

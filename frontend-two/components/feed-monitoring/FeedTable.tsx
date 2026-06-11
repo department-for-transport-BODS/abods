@@ -79,11 +79,13 @@ export const FeedTable = ({
         <Image
           src="/assets/icons/check-in-circle-solid.svg"
           className="feed-table__check"
+          alt="Active Feed"
         />
       ) : (
         <Image
           src="/assets/icons/cross-in-circle-solid.svg"
           className="feed-table__cross"
+          alt="Inactive Feed"
         />
       ),
       nocCode: op.nocCode,
