@@ -1,5 +1,6 @@
 import argon2 from "argon2";
 import { createHmac, randomBytes } from "node:crypto";
+import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import { sendDistributionMetric } from "datadog-lambda-js";
 import { v4 as uuidv4 } from "uuid";
 import { executeQuery } from "../lib/dbKysely.js";
@@ -36,6 +37,40 @@ const FAILED_LOGIN_LOCKOUT_MINS = parseInt(
   process.env.FAILED_LOGIN_LOCKOUT_MINS ?? "15",
 );
 
+interface DashboardSecret {
+  base_url: string;
+  credential: string;
+}
+
+let dashboardSecretCache: DashboardSecret | null = null;
+
+const getDashboardSecret = async (): Promise<DashboardSecret | null> => {
+  if (dashboardSecretCache) return dashboardSecretCache;
+
+  const secretArn = process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_SECRET_ARN;
+
+  if (!secretArn) {
+    // Local/test fallback: read directly from env vars without caching
+    const base_url = process.env.DATADOG_SERVICE_MONITORING_DASHBOARD;
+    const credential =
+      process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL;
+    if (base_url && credential) return { base_url, credential };
+    return null;
+  }
+
+  try {
+    const client = new SecretsManager({ region: process.env.AWS_REGION });
+    const response = await client.getSecretValue({ SecretId: secretArn });
+    if (!response.SecretString) return null;
+    const secret = JSON.parse(response.SecretString) as DashboardSecret;
+    dashboardSecretCache = secret;
+    return secret;
+  } catch (error) {
+    logger.error(error, "Error fetching dashboard secret from Secrets Manager");
+    return null;
+  }
+};
+
 const generateSecureDatadogEmbedUrl = (
   baseUrl: string,
   credential: string,
@@ -54,21 +89,15 @@ const generateSecureDatadogEmbedUrl = (
   return url.toString();
 };
 
-const getServiceMonitoringEmbedUrl = (): string | null => {
-  const dashboardUrl = process.env.DATADOG_SERVICE_MONITORING_DASHBOARD;
-  const secureEmbedCredential =
-    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL;
+const getServiceMonitoringEmbedUrl = async (): Promise<string | null> => {
+  const secret = await getDashboardSecret();
 
-  if (!dashboardUrl) {
-    return null;
-  }
-
-  if (!secureEmbedCredential) {
+  if (!secret?.base_url || !secret?.credential) {
     return null;
   }
 
   try {
-    return generateSecureDatadogEmbedUrl(dashboardUrl, secureEmbedCredential);
+    return generateSecureDatadogEmbedUrl(secret.base_url, secret.credential);
   } catch (error) {
     logger.error(error, "Error generating secure Datadog embed URL");
     return null;
@@ -134,7 +163,7 @@ export const getUser: QueryResolvers["user"] = async (
       canEditAllAlerts: isAdmin,
       canViewDistances: isAdmin,
       serviceMonitoringEmbedUrl: canViewServiceMonitoring
-        ? getServiceMonitoringEmbedUrl()
+        ? await getServiceMonitoringEmbedUrl()
         : null,
       flags: getFeatureFlags(),
     };
