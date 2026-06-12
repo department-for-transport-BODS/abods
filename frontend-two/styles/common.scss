@@ -3374,6 +3374,22 @@ body.helpdesk-open {
     padding: 0;
     border-radius: 0;
     box-shadow: none;
+    z-index: 2;
+  }
+
+  &__loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    z-index: 2;
   }
 
   &__legend {

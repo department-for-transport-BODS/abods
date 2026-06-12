@@ -11,6 +11,8 @@ import type {
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
+import { Spinner } from "@/components/shared/Spinner";
+import { registerTimingPointIcons } from "@/components/stop-analysis/timingPointIcons";
 import { BoundingBoxInputType as BoundingBox } from "@/src/generated/graphql";
 
 import { StopStatistics } from "@/src/generated/graphql";
@@ -18,17 +20,10 @@ import { StopStatistics } from "@/src/generated/graphql";
 // British Isles default bounds
 const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];
 
+const ADMIN_AREA_HIDDEN_ZOOM = 12;
+
 const RED_THRESHOLD = 0.6;
 const GREEN_THRESHOLD = 0.8;
-const ADMIN_AREA_HIDDEN_ZOOM = 12;
-const TIMING_POINT_ICON_SIZE = 32;
-
-const TIMING_POINT_ICON_COLOURS = {
-  red: [212, 53, 28, 255] as const,
-  yellow: [255, 221, 0, 255] as const,
-  turquoise: [40, 161, 151, 255] as const,
-  noData: [177, 180, 182, 255] as const,
-};
 
 const POINT_COLOURS = [
   "case",
@@ -44,21 +39,6 @@ const POINT_COLOURS = [
     "#28a197",
   ],
 ] as mapboxgl.CirclePaint["circle-color"];
-
-const TIMING_POINT_ICONS = [
-  "case",
-  ["==", ["get", "completedDepartures"], 0],
-  "timing-no-data-map",
-  [
-    "step",
-    ["/", ["get", "onTime"], ["get", "completedDepartures"]],
-    "otp-timing-map-red",
-    RED_THRESHOLD,
-    "otp-timing-map-yellow",
-    GREEN_THRESHOLD,
-    "otp-timing-map-turquoise",
-  ],
-] as mapboxgl.SymbolLayout["icon-image"];
 
 const CLUSTER_PROPERTIES = {
   early: ["+", ["get", "early"]] as [string, mapboxgl.ExpressionSpecification],
@@ -90,120 +70,6 @@ const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   );
 };
 
-const distanceToSegment = (
-  pointX: number,
-  pointY: number,
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-) => {
-  const deltaX = endX - startX;
-  const deltaY = endY - startY;
-
-  if (deltaX === 0 && deltaY === 0) {
-    return Math.hypot(pointX - startX, pointY - startY);
-  }
-
-  const projection =
-    ((pointX - startX) * deltaX + (pointY - startY) * deltaY) /
-    (deltaX * deltaX + deltaY * deltaY);
-  const clampedProjection = Math.max(0, Math.min(1, projection));
-  const closestX = startX + clampedProjection * deltaX;
-  const closestY = startY + clampedProjection * deltaY;
-
-  return Math.hypot(pointX - closestX, pointY - closestY);
-};
-
-const createTimingPointIcon = (
-  fillColour: readonly [number, number, number, number],
-) => {
-  const size = TIMING_POINT_ICON_SIZE;
-  const center = (size - 1) / 2;
-  const outerRadius = 13;
-  const innerRadius = 10.5;
-  const borderColour = [47, 50, 52, 255] as const;
-  const handColour = [255, 255, 255, 255] as const;
-  const data = new Uint8ClampedArray(size * size * 4);
-
-  const paintPixel = (
-    pixelIndex: number,
-    [red, green, blue, alpha]: readonly [number, number, number, number],
-  ) => {
-    data[pixelIndex] = red;
-    data[pixelIndex + 1] = green;
-    data[pixelIndex + 2] = blue;
-    data[pixelIndex + 3] = alpha;
-  };
-
-  for (let y = 0; y < size; y += 1) {
-    for (let x = 0; x < size; x += 1) {
-      const offset = (y * size + x) * 4;
-      const distanceFromCenter = Math.hypot(x - center, y - center);
-
-      if (distanceFromCenter > outerRadius) {
-        continue;
-      }
-
-      let colour: readonly [number, number, number, number] =
-        distanceFromCenter >= innerRadius ? borderColour : fillColour;
-
-      const hourHandDistance = distanceToSegment(
-        x,
-        y,
-        center,
-        center,
-        center - 4,
-        center - 5,
-      );
-      const minuteHandDistance = distanceToSegment(
-        x,
-        y,
-        center,
-        center,
-        center + 6,
-        center - 1,
-      );
-
-      if (hourHandDistance <= 0.9 || minuteHandDistance <= 0.9) {
-        colour = handColour;
-      }
-
-      if (distanceFromCenter <= 1.5) {
-        colour = borderColour;
-      }
-
-      paintPixel(offset, colour);
-    }
-  }
-
-  return {
-    width: size,
-    height: size,
-    data,
-  };
-};
-
-const registerTimingPointIcons = (map: Map) => {
-  const timingPointIcons = {
-    "timing-no-data-map": createTimingPointIcon(
-      TIMING_POINT_ICON_COLOURS.noData,
-    ),
-    "otp-timing-map-red": createTimingPointIcon(TIMING_POINT_ICON_COLOURS.red),
-    "otp-timing-map-yellow": createTimingPointIcon(
-      TIMING_POINT_ICON_COLOURS.yellow,
-    ),
-    "otp-timing-map-turquoise": createTimingPointIcon(
-      TIMING_POINT_ICON_COLOURS.turquoise,
-    ),
-  } as const;
-
-  for (const [name, image] of Object.entries(timingPointIcons)) {
-    if (!map.hasImage(name)) {
-      map.addImage(name, image);
-    }
-  }
-};
 
 interface StopAnalysisMapProps {
   mapboxToken: string;
@@ -369,13 +235,12 @@ export const StopAnalysisMap = ({
     );
 
     map.on("load", () => {
-      // Add timing point icons (placeholders — real app would load actual sprites)
-      // For now, the symbol layer will degrade gracefully without custom icons
+      registerTimingPointIcons(map);
       setMapLoaded(true);
     });
 
     map.on("style.load", () => {
-      // When style changes, all custom sources/layers are removed and must be re-added.
+      registerTimingPointIcons(map);
       setStyleRevision((prev) => prev + 1);
     });
 
@@ -406,8 +271,6 @@ export const StopAnalysisMap = ({
     if (!map || !mapLoaded || !map.isStyleLoaded()) return;
 
     try {
-      registerTimingPointIcons(map);
-
       // Admin area boundaries
       if (map.getSource("boundaries")) {
         (map.getSource("boundaries") as GeoJSONSource).setData(adminAreaShapes);
@@ -568,7 +431,7 @@ export const StopAnalysisMap = ({
         },
       });
 
-      // Non-timing-point stops
+      // Non-timing-point stop markers
       map.addLayer({
         id: "other-stops",
         type: "circle",
@@ -586,7 +449,7 @@ export const StopAnalysisMap = ({
         },
       });
 
-      // Timing point stops (symbol layer)
+      // Timing-point stop markers
       map.addLayer({
         id: "timing-stops",
         type: "symbol",
@@ -595,7 +458,20 @@ export const StopAnalysisMap = ({
         layout: {
           "icon-size": 0.9,
           "icon-allow-overlap": true,
-          "icon-image": TIMING_POINT_ICONS,
+          "icon-image": [
+            "case",
+            ["==", ["get", "completedDepartures"], 0],
+            "timing-no-data-map",
+            [
+              "step",
+              ["/", ["get", "onTime"], ["get", "completedDepartures"]],
+              "otp-timing-map-red",
+              RED_THRESHOLD,
+              "otp-timing-map-yellow",
+              GREEN_THRESHOLD,
+              "otp-timing-map-turquoise",
+            ],
+          ] as mapboxgl.SymbolLayout["icon-image"],
         },
       });
 
@@ -832,13 +708,7 @@ export const StopAnalysisMap = ({
       )}
       {loading && (
         <div className="stop-analysis-map__loading-overlay" role="status" aria-live="polite" aria-label="Loading stop analysis map">
-          <div className="spinner spinner--x-small" aria-hidden="true">
-            <svg className="spinner__icon" viewBox="0 0 50 50" focusable="false" aria-hidden="true">
-              <circle className="spinner__dot1" cx="15" cy="25" r="5" fill="currentColor" />
-              <circle className="spinner__dot2" cx="25" cy="25" r="5" fill="currentColor" />
-              <circle className="spinner__dot3" cx="35" cy="25" r="5" fill="currentColor" />
-            </svg>
-          </div>
+          <Spinner size="x-small" />
         </div>
       )}
       <StopAnalysisLegend />
