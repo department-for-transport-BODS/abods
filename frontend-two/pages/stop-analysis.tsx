@@ -266,6 +266,24 @@ function computeAdminAreaGeoJSON(
 
 export { computeAdminAreaGeoJSON };
 
+export const mergeStopAnalysisQuery = (
+  currentQuery: Record<string, string | string[] | undefined>,
+  updates: Record<string, string | string[] | undefined>,
+  fallbackStopType?: StopTypeOption,
+) => {
+  const nextQuery = { ...currentQuery, ...updates };
+
+  if (!Object.prototype.hasOwnProperty.call(updates, "stopType")) {
+    const currentStopType =
+      parseStringParam(currentQuery.stopType) ?? fallbackStopType;
+    if (currentStopType) {
+      nextQuery.stopType = currentStopType;
+    }
+  }
+
+  return nextQuery;
+};
+
 const StopAnalysisPage = () => {
   useRequireAuth();
   const { config } = useConfig();
@@ -284,6 +302,7 @@ const StopAnalysisPage = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const stopTypeRef = useRef<StopTypeOption>("TimingPoints");
 
   // Read filter state from URL
   const fromTimestamp =
@@ -294,33 +313,18 @@ const StopAnalysisPage = () => {
     GqlMatchType.Evidenced) as MatchType;
   const stopType = (parseStringParam(router.query.stopType) ??
     "TimingPoints") as StopTypeOption;
-  const adminAreaIdsParam = router.query.adminAreaIds;
-  const operatorIdsParam = router.query.operatorIds;
-  const lineIdsParam = router.query.lineIds;
-  const directionParam = router.query.direction;
-  const dayOfWeekParam = router.query.dayOfWeek;
-
-  const adminAreaIds = useMemo(
-    () => parseArrayParam(adminAreaIdsParam),
-    [adminAreaIdsParam],
-  );
-  const operatorIds = useMemo(
-    () => parseArrayParam(operatorIdsParam),
-    [operatorIdsParam],
-  );
-  const lineIds = useMemo(() => parseArrayParam(lineIdsParam), [lineIdsParam]);
-  const dayOfWeekFlags = useMemo(
-    () => parseDayOfWeekFlags(dayOfWeekParam),
-    [dayOfWeekParam],
-  );
+  stopTypeRef.current = stopType;
+  const adminAreaIds = parseArrayParam(router.query.adminAreaIds);
+  const operatorIds = parseArrayParam(router.query.operatorIds);
+  const lineIds = parseArrayParam(router.query.lineIds);
+  const dayOfWeekFlags = parseDayOfWeekFlags(router.query.dayOfWeek);
   const startTime = parseStringParam(router.query.startTime);
   const endTime = parseStringParam(router.query.endTime);
-  const directions = useMemo(() => {
-    const parsedDirections = parseArrayParam(directionParam);
-    return (parsedDirections.length > 0
-      ? parsedDirections
-      : ["Inbound", "Outbound"]) as Direction[];
-  }, [directionParam]);
+  const directions = (
+    parseArrayParam(router.query.direction).length > 0
+      ? parseArrayParam(router.query.direction)
+      : ["Inbound", "Outbound"]
+  ) as Direction[];
 
   const bounds = parseBoundingBox(router.query);
   // compute spans as absolute values to be robust
@@ -332,7 +336,14 @@ const StopAnalysisPage = () => {
   const updateQuery = useCallback(
     (updates: Record<string, string | string[] | undefined>) => {
       router.replace(
-        { pathname: router.pathname, query: { ...router.query, ...updates } },
+        {
+          pathname: router.pathname,
+          query: mergeStopAnalysisQuery(
+            router.query,
+            updates,
+            stopTypeRef.current,
+          ),
+        },
         undefined,
         { shallow: true },
       );
@@ -509,10 +520,10 @@ const StopAnalysisPage = () => {
       if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
       boundsDebounceRef.current = setTimeout(() => {
         updateQuery({
-          minLatitude: newBounds.minLatitude.toFixed(6),
-          maxLatitude: newBounds.maxLatitude.toFixed(6),
-          minLongitude: newBounds.minLongitude.toFixed(6),
-          maxLongitude: newBounds.maxLongitude.toFixed(6),
+          minLatitude: String(newBounds.minLatitude),
+          maxLatitude: String(newBounds.maxLatitude),
+          minLongitude: String(newBounds.minLongitude),
+          maxLongitude: String(newBounds.maxLongitude),
         });
       }, 500);
     },
@@ -536,12 +547,9 @@ const StopAnalysisPage = () => {
 
   const handleOperatorsChange = useCallback(
     (values: string[]) => {
-      updateQuery({
-        operatorIds: values,
-        lineIds: values.length === 0 ? [] : lineIds,
-      });
+      updateQuery({ operatorIds: values });
     },
-    [lineIds, updateQuery],
+    [updateQuery],
   );
 
   const handleStopClick = useCallback((stop: StopPerformanceRow) => {
@@ -688,6 +696,7 @@ const StopAnalysisPage = () => {
             mapboxStyle={config.mapboxStyle}
             mapboxSatelliteStyle={config.mapboxSatelliteStyle}
             stops={mapStops}
+            loading={stopsLoading}
             adminAreaShapes={adminAreaGeoJSON}
             boundingBoxTooBig={boundingBoxTooBig}
             initialBounds={bounds}
@@ -699,7 +708,6 @@ const StopAnalysisPage = () => {
             onAdminAreaClick={handleAdminAreaClick}
           />
         )}
-
         {stopsLoading && <p className="govuk-body">Loading...</p>}
 
         <StopAnalysisTable
