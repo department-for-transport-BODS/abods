@@ -21,8 +21,16 @@ const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];
 const RED_THRESHOLD = 0.6;
 const GREEN_THRESHOLD = 0.8;
 const ADMIN_AREA_HIDDEN_ZOOM = 12;
+const TIMING_POINT_ICON_SIZE = 32;
 
-const POINT_COLOURS: mapboxgl.CirclePaint["circle-color"] = [
+const TIMING_POINT_ICON_COLOURS = {
+  red: [212, 53, 28, 255] as const,
+  yellow: [255, 221, 0, 255] as const,
+  turquoise: [40, 161, 151, 255] as const,
+  noData: [177, 180, 182, 255] as const,
+};
+
+const POINT_COLOURS = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "#b1b4b6",
@@ -35,9 +43,9 @@ const POINT_COLOURS: mapboxgl.CirclePaint["circle-color"] = [
     GREEN_THRESHOLD,
     "#28a197",
   ],
-];
+] as mapboxgl.CirclePaint["circle-color"];
 
-const TIMING_POINT_ICONS: mapboxgl.SymbolLayout["icon-image"] = [
+const TIMING_POINT_ICONS = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "timing-no-data-map",
@@ -50,7 +58,7 @@ const TIMING_POINT_ICONS: mapboxgl.SymbolLayout["icon-image"] = [
     GREEN_THRESHOLD,
     "otp-timing-map-turquoise",
   ],
-];
+] as mapboxgl.SymbolLayout["icon-image"];
 
 const CLUSTER_PROPERTIES = {
   early: ["+", ["get", "early"]] as [string, mapboxgl.ExpressionSpecification],
@@ -82,48 +90,126 @@ const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   );
 };
 
+const distanceToSegment = (
+  pointX: number,
+  pointY: number,
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+) => {
+  const deltaX = endX - startX;
+  const deltaY = endY - startY;
 
+  if (deltaX === 0 && deltaY === 0) {
+    return Math.hypot(pointX - startX, pointY - startY);
+  }
 
-const getCoordinatesBounds = (
-  coordinates: unknown,
-): [number, number, number, number] | null => {
-  let minLongitude = Number.POSITIVE_INFINITY;
-  let minLatitude = Number.POSITIVE_INFINITY;
-  let maxLongitude = Number.NEGATIVE_INFINITY;
-  let maxLatitude = Number.NEGATIVE_INFINITY;
-  let foundCoordinate = false;
+  const projection =
+    ((pointX - startX) * deltaX + (pointY - startY) * deltaY) /
+    (deltaX * deltaX + deltaY * deltaY);
+  const clampedProjection = Math.max(0, Math.min(1, projection));
+  const closestX = startX + clampedProjection * deltaX;
+  const closestY = startY + clampedProjection * deltaY;
 
-  const visit = (value: unknown): void => {
-    if (!Array.isArray(value) || value.length === 0) {
-      return;
-    }
+  return Math.hypot(pointX - closestX, pointY - closestY);
+};
 
-    if (typeof value[0] === "number" && typeof value[1] === "number") {
-      const [longitude, latitude] = value as [number, number];
-      minLongitude = Math.min(minLongitude, longitude);
-      minLatitude = Math.min(minLatitude, latitude);
-      maxLongitude = Math.max(maxLongitude, longitude);
-      maxLatitude = Math.max(maxLatitude, latitude);
-      foundCoordinate = true;
-      return;
-    }
+const createTimingPointIcon = (
+  fillColour: readonly [number, number, number, number],
+) => {
+  const size = TIMING_POINT_ICON_SIZE;
+  const center = (size - 1) / 2;
+  const outerRadius = 13;
+  const innerRadius = 10.5;
+  const borderColour = [47, 50, 52, 255] as const;
+  const handColour = [255, 255, 255, 255] as const;
+  const data = new Uint8ClampedArray(size * size * 4);
 
-    for (const child of value) {
-      visit(child);
-    }
+  const paintPixel = (
+    pixelIndex: number,
+    [red, green, blue, alpha]: readonly [number, number, number, number],
+  ) => {
+    data[pixelIndex] = red;
+    data[pixelIndex + 1] = green;
+    data[pixelIndex + 2] = blue;
+    data[pixelIndex + 3] = alpha;
   };
 
-  visit(coordinates);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const offset = (y * size + x) * 4;
+      const distanceFromCenter = Math.hypot(x - center, y - center);
 
-  return foundCoordinate
-    ? [minLongitude, minLatitude, maxLongitude, maxLatitude]
-    : null;
+      if (distanceFromCenter > outerRadius) {
+        continue;
+      }
+
+      let colour: readonly [number, number, number, number] =
+        distanceFromCenter >= innerRadius ? borderColour : fillColour;
+
+      const hourHandDistance = distanceToSegment(
+        x,
+        y,
+        center,
+        center,
+        center - 4,
+        center - 5,
+      );
+      const minuteHandDistance = distanceToSegment(
+        x,
+        y,
+        center,
+        center,
+        center + 6,
+        center - 1,
+      );
+
+      if (hourHandDistance <= 0.9 || minuteHandDistance <= 0.9) {
+        colour = handColour;
+      }
+
+      if (distanceFromCenter <= 1.5) {
+        colour = borderColour;
+      }
+
+      paintPixel(offset, colour);
+    }
+  }
+
+  return {
+    width: size,
+    height: size,
+    data,
+  };
+};
+
+const registerTimingPointIcons = (map: Map) => {
+  const timingPointIcons = {
+    "timing-no-data-map": createTimingPointIcon(
+      TIMING_POINT_ICON_COLOURS.noData,
+    ),
+    "otp-timing-map-red": createTimingPointIcon(TIMING_POINT_ICON_COLOURS.red),
+    "otp-timing-map-yellow": createTimingPointIcon(
+      TIMING_POINT_ICON_COLOURS.yellow,
+    ),
+    "otp-timing-map-turquoise": createTimingPointIcon(
+      TIMING_POINT_ICON_COLOURS.turquoise,
+    ),
+  } as const;
+
+  for (const [name, image] of Object.entries(timingPointIcons)) {
+    if (!map.hasImage(name)) {
+      map.addImage(name, image);
+    }
+  }
 };
 
 interface StopAnalysisMapProps {
   mapboxToken: string;
   mapboxStyle: string;
   mapboxSatelliteStyle?: string;
+  loading?: boolean;
   stops: StopStatistics[];
   adminAreaShapes: FeatureCollection;
   boundingBoxTooBig: boolean;
@@ -144,6 +230,7 @@ export const StopAnalysisMap = ({
   mapboxToken,
   mapboxStyle,
   mapboxSatelliteStyle,
+  loading = false,
   stops,
   adminAreaShapes,
   boundingBoxTooBig,
@@ -160,10 +247,6 @@ export const StopAnalysisMap = ({
   const mapRef = useRef<Map | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
-  const onBoundsChangeRef = useRef(onBoundsChange);
-  onBoundsChangeRef.current = onBoundsChange;
-  const initialBoundsRef = useRef(initialBounds);
-  initialBoundsRef.current = initialBounds;
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
   const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
@@ -171,7 +254,6 @@ export const StopAnalysisMap = ({
   );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
-  const previousSelectedAdminAreaBoundsRef = useRef<BoundingBox | null>(null);
 
   const clearPopup = useCallback(() => {
     popupRef.current?.remove();
@@ -301,7 +383,7 @@ export const StopAnalysisMap = ({
       const bounds = map.getBounds();
       if (!bounds) return;
 
-      onBoundsChangeRef.current({
+      onBoundsChange({
         minLatitude: bounds.getSouth(),
         maxLatitude: bounds.getNorth(),
         minLongitude: bounds.getWest(),
@@ -324,6 +406,8 @@ export const StopAnalysisMap = ({
     if (!map || !mapLoaded || !map.isStyleLoaded()) return;
 
     try {
+      registerTimingPointIcons(map);
+
       // Admin area boundaries
       if (map.getSource("boundaries")) {
         (map.getSource("boundaries") as GeoJSONSource).setData(adminAreaShapes);
@@ -404,29 +488,8 @@ export const StopAnalysisMap = ({
 
         // Admin area click
         map.on("click", "admin-area-boundaries", (e) => {
-          if (!e.features || !e.features[0]) return;
-
-          const clickedFeature = e.features[0] as Feature;
-          if (isClipableFeature(clickedFeature)) {
-            const selectedBounds = getCoordinatesBounds(
-              clickedFeature.geometry.coordinates,
-            );
-            if (selectedBounds) {
-              map.fitBounds(
-                [
-                  [selectedBounds[0], selectedBounds[1]],
-                  [selectedBounds[2], selectedBounds[3]],
-                ],
-                {
-                  duration: 500,
-                  padding: 40,
-                },
-              );
-            }
-          }
-
-          if (clickedFeature.properties) {
-            onAdminAreaClick?.(clickedFeature.properties.id);
+          if (e.features && e.features[0]?.properties) {
+            onAdminAreaClick?.(e.features[0].properties.id);
           }
         });
       }
@@ -691,39 +754,8 @@ export const StopAnalysisMap = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
-    const previousSelectedAdminAreaBounds =
-      previousSelectedAdminAreaBoundsRef.current;
-    previousSelectedAdminAreaBoundsRef.current = selectedAdminAreaBounds ?? null;
-
+    if (!map || !mapLoaded || !map.isStyleLoaded()) return;
     if (!selectedAdminAreaBounds) {
-      if (!previousSelectedAdminAreaBounds) {
-        return;
-      }
-
-      const fallbackBounds = initialBoundsRef.current ?? {
-        minLongitude: BRITISH_ISLES_BBOX[0],
-        minLatitude: BRITISH_ISLES_BBOX[1],
-        maxLongitude: BRITISH_ISLES_BBOX[2],
-        maxLatitude: BRITISH_ISLES_BBOX[3],
-      };
-
-      try {
-        map.fitBounds(
-          [
-            [fallbackBounds.minLongitude, fallbackBounds.minLatitude],
-            [fallbackBounds.maxLongitude, fallbackBounds.maxLatitude],
-          ],
-          {
-            duration: 500,
-            padding: 40,
-            maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
-          },
-        );
-      } catch {
-        return;
-      }
-
       return;
     }
 
@@ -742,6 +774,7 @@ export const StopAnalysisMap = ({
         {
           duration: 500,
           padding: 40,
+          maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
         },
       );
     } catch {
@@ -795,6 +828,17 @@ export const StopAnalysisMap = ({
       {boundingBoxTooBig && mapLoaded && (
         <div className="stop-analysis-map__overlay">
           <p className="govuk-body">Zoom in to show stops</p>
+        </div>
+      )}
+      {loading && (
+        <div className="stop-analysis-map__loading-overlay" role="status" aria-live="polite" aria-label="Loading stop analysis map">
+          <div className="spinner spinner--x-small" aria-hidden="true">
+            <svg className="spinner__icon" viewBox="0 0 50 50" focusable="false" aria-hidden="true">
+              <circle className="spinner__dot1" cx="15" cy="25" r="5" fill="currentColor" />
+              <circle className="spinner__dot2" cx="25" cy="25" r="5" fill="currentColor" />
+              <circle className="spinner__dot3" cx="35" cy="25" r="5" fill="currentColor" />
+            </svg>
+          </div>
         </div>
       )}
       <StopAnalysisLegend />
