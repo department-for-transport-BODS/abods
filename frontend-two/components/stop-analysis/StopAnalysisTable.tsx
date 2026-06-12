@@ -9,7 +9,7 @@ import {
   useStopPerformanceTable,
   type DisplayMode,
 } from "@/hooks/useStopPerformanceTable";
-import { MultiselectCheckbox } from "./MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
 import { Modal } from "@/components/shared/Modal";
 import { SortableTable, type SortOrder } from "../table/SortableTable";
 import { TimingIcon } from "./TimingIcon";

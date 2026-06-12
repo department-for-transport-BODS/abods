@@ -7,7 +7,7 @@ import { DayOfWeekFlagsInputType as DayOfWeekFlags } from "@/src/generated/graph
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
-import { MultiselectCheckbox } from "./MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
 import {
   AdminAreasType,
   LineType,
