@@ -33,4 +33,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts/public/config.json
+next-env.d.ts
+
+# local config
+/public/config.json
