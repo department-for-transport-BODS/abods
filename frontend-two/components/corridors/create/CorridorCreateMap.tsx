@@ -48,8 +48,8 @@ export const CorridorCreateMap = ({
   mapboxStyle,
   mapboxSatelliteStyle,
 }: Props) => {
-  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
-    "street",
+  const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
+    "default",
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -255,13 +255,13 @@ export const CorridorCreateMap = ({
     }
   }, [corridorStops]);
 
-  const switchStyle = (style: "street" | "satellite") => {
+  const switchStyle = (style: "default" | "satellite") => {
     const map = mapRef.current;
     if (!map) return;
 
     setActiveStyle(style);
     map.setStyle(
-      style === "street"
+      style === "default"
         ? mapboxStyleRef.current
         : mapboxSatelliteStyleRef.current ?? mapboxStyleRef.current,
     );

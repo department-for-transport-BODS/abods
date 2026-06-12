@@ -30,6 +30,17 @@ const NOT_FOUND_MESSAGE =
 type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
 
+const LoadingDots = () => (
+  <span role="status" aria-live="polite">
+    <span className="govuk-visually-hidden">Loading...</span>
+    <span className="ranking-table__loading-dots" aria-hidden="true">
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+    </span>
+  </span>
+);
+
 const PRESET_DATE_RANGES: Record<
   string,
   (today: DateTime) => { from: DateTime; to: DateTime }
@@ -284,9 +295,7 @@ const CorridorsViewPage = () => {
               label="Recorded transits"
               className="corridor__summary-stat"
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.totalTransits ?? "Unavailable"
+                statsLoading ? <LoadingDots /> : stats?.summaryStats.totalTransits ?? "Unavailable"
               }
               tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
             />
@@ -295,12 +304,12 @@ const CorridorsViewPage = () => {
               label="Missing transits"
               className="corridor__summary-stat"
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.scheduledTransits !== null &&
-                      stats?.summaryStats.scheduledTransits !== undefined &&
-                      stats?.summaryStats.totalTransits !== null &&
-                      stats?.summaryStats.totalTransits !== undefined
+                statsLoading ? (
+                  <LoadingDots />
+                ) : stats?.summaryStats.scheduledTransits !== null &&
+                  stats?.summaryStats.scheduledTransits !== undefined &&
+                  stats?.summaryStats.totalTransits !== null &&
+                  stats?.summaryStats.totalTransits !== undefined
                     ? stats.summaryStats.scheduledTransits -
                       stats.summaryStats.totalTransits
                     : "Unavailable"
@@ -312,9 +321,9 @@ const CorridorsViewPage = () => {
               label="Average journey time"
               className="corridor__summary-stat"
               value={
-                statsLoading
-                  ? "\u2014"
-                  : formatTransitTime(stats?.summaryStats.averageTransitTime)
+                statsLoading ? (
+                  <LoadingDots />
+                ) : formatTransitTime(stats?.summaryStats.averageTransitTime)
               }
               tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
             />
@@ -323,12 +332,12 @@ const CorridorsViewPage = () => {
               label="Average speed"
               className="corridor__summary-stat"
               value={
-                statsLoading
-                  ? "\u2014"
-                  : averageSpeedLabel(
-                      stats?.serviceLinks ?? [],
-                      stats?.summaryStats.averageTransitTime,
-                    )
+                statsLoading ? (
+                  <LoadingDots />
+                ) : averageSpeedLabel(
+                  stats?.serviceLinks ?? [],
+                  stats?.summaryStats.averageTransitTime,
+                )
               }
               tooltip="The average speed of buses moving through the corridor according to the real-time information received."
             />
@@ -337,9 +346,7 @@ const CorridorsViewPage = () => {
               label="Services"
               className="corridor__summary-stat"
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.numberOfServices ?? "Unavailable"
+                statsLoading ? <LoadingDots /> : stats?.summaryStats.numberOfServices ?? "Unavailable"
               }
               tooltip="The total number of different services that pass through this corridor."
             />

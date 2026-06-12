@@ -115,8 +115,8 @@ export const StopAnalysisMap = ({
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
-  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
-    "street",
+  const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
+    "default",
   );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
@@ -235,13 +235,23 @@ export const StopAnalysisMap = ({
     );
 
     map.on("load", () => {
-      registerTimingPointIcons(map);
-      setMapLoaded(true);
+      void (async () => {
+        try {
+          await registerTimingPointIcons(map);
+        } finally {
+          setMapLoaded(true);
+        }
+      })();
     });
 
     map.on("style.load", () => {
-      registerTimingPointIcons(map);
-      setStyleRevision((prev) => prev + 1);
+      void (async () => {
+        try {
+          await registerTimingPointIcons(map);
+        } finally {
+          setStyleRevision((prev) => prev + 1);
+        }
+      })();
     });
 
     map.on("moveend", () => {
@@ -681,13 +691,13 @@ export const StopAnalysisMap = ({
     }
   }, [locationSelectionRequest, locationSelection, mapLoaded]);
 
-  const switchStyle = useCallback((style: "street" | "satellite") => {
+  const switchStyle = useCallback((style: "default" | "satellite") => {
     const map = mapRef.current;
     if (!map) return;
 
     setActiveStyle(style);
     map.setStyle(
-      style === "street"
+      style === "default"
         ? mapboxStyleRef.current
         : mapboxSatelliteStyleRef.current ?? mapboxStyleRef.current,
     );

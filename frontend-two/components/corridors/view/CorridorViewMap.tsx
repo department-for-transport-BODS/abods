@@ -74,8 +74,8 @@ export const CorridorViewMap = ({
   const stopsRef = useRef(stops);
   const serviceLinksRef = useRef(serviceLinks);
   const selectedSegmentIndexRef = useRef(selectedSegmentIndex);
-  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
-    "street",
+  const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
+    "default",
   );
   const [moveCounter, setMoveCounter] = useState(0);
   const mapboxStyleRef = useRef(mapboxStyle);
@@ -274,10 +274,10 @@ export const CorridorViewMap = ({
     )?.setData(buildStopsGeoJSON(stops));
   }, [stops]);
 
-  const switchStyle = (style: "street" | "satellite") => {
+  const switchStyle = (style: "default" | "satellite") => {
     setActiveStyle(style);
     mapRef.current?.setStyle(
-      style === "street"
+      style === "default"
         ? mapboxStyleRef.current
         : mapboxSatelliteStyleRef.current,
     );
