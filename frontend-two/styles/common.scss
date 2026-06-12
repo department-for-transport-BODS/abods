@@ -367,12 +367,24 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   transition: transform 0.1s ease-in-out;
   position: relative;
 
-  &--heat-1 { background-color: #ffd8ca; }
-  &--heat-2 { background-color: #fbbaa4; }
-  &--heat-3 { background-color: #f49c7f; }
-  &--heat-4 { background-color: #ec7d5d; }
-  &--heat-5 { background-color: #e15c3c; }
-  &--heat-6 { background-color: #d4351c; }
+  &--heat-1 {
+    background-color: #ffd8ca;
+  }
+  &--heat-2 {
+    background-color: #fbbaa4;
+  }
+  &--heat-3 {
+    background-color: #f49c7f;
+  }
+  &--heat-4 {
+    background-color: #ec7d5d;
+  }
+  &--heat-5 {
+    background-color: #e15c3c;
+  }
+  &--heat-6 {
+    background-color: #d4351c;
+  }
 
   &--active {
     transform: scale(1.05, 1.4);
@@ -438,30 +450,34 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   bottom: 0;
 }
 
-// FeedTable styling 
-.feed-table__check{
+// FeedTable styling
+.feed-table__check {
   min-width: 24px;
   min-height: 24px;
-  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
 }
 
-.feed-table__cross{
+.feed-table__cross {
   min-width: 24px;
   min-height: 24px;
-  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
 }
 
 // FeedStatusSummary styling
 .feed-status-summary__check {
   width: 36px;
   height: 36px;
-  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg) brightness(90%);
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
 }
 
 .feed-status-summary__cross {
   width: 36px;
   height: 36px;
-  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg) brightness(85%);
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
 }
 // Live Status Feed Monitoring page
 .live-vehicle-stats__container {
@@ -469,9 +485,9 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   flex-flow: row wrap;
   gap: 8px;
   justify-content: space-between;
-} 
+}
 
-.live-vehicle-stats__item{
+.live-vehicle-stats__item {
   flex: 1;
   min-width: 500px;
 }
@@ -2766,5 +2782,5 @@ body.helpdesk-open {
     justify-content: space-between;
     flex-wrap: wrap;
     height: 3785px;
- }
+  }
 }
