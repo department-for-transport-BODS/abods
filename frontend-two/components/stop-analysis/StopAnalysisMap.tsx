@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource } from "mapbox-gl";
 import type {
   FeatureCollection,
@@ -22,7 +22,7 @@ const RED_THRESHOLD = 0.6;
 const GREEN_THRESHOLD = 0.8;
 const ADMIN_AREA_HIDDEN_ZOOM = 12;
 
-const POINT_COLOURS: mapboxgl.ExpressionSpecification = [
+const POINT_COLOURS: mapboxgl.CirclePaint["circle-color"] = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "#b1b4b6",
@@ -37,7 +37,7 @@ const POINT_COLOURS: mapboxgl.ExpressionSpecification = [
   ],
 ];
 
-const TIMING_POINT_ICONS: mapboxgl.ExpressionSpecification = [
+const TIMING_POINT_ICONS: mapboxgl.SymbolLayout["icon-image"] = [
   "case",
   ["==", ["get", "completedDepartures"], 0],
   "timing-no-data-map",
@@ -82,6 +82,44 @@ const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   );
 };
 
+
+
+const getCoordinatesBounds = (
+  coordinates: unknown,
+): [number, number, number, number] | null => {
+  let minLongitude = Number.POSITIVE_INFINITY;
+  let minLatitude = Number.POSITIVE_INFINITY;
+  let maxLongitude = Number.NEGATIVE_INFINITY;
+  let maxLatitude = Number.NEGATIVE_INFINITY;
+  let foundCoordinate = false;
+
+  const visit = (value: unknown): void => {
+    if (!Array.isArray(value) || value.length === 0) {
+      return;
+    }
+
+    if (typeof value[0] === "number" && typeof value[1] === "number") {
+      const [longitude, latitude] = value as [number, number];
+      minLongitude = Math.min(minLongitude, longitude);
+      minLatitude = Math.min(minLatitude, latitude);
+      maxLongitude = Math.max(maxLongitude, longitude);
+      maxLatitude = Math.max(maxLatitude, latitude);
+      foundCoordinate = true;
+      return;
+    }
+
+    for (const child of value) {
+      visit(child);
+    }
+  };
+
+  visit(coordinates);
+
+  return foundCoordinate
+    ? [minLongitude, minLatitude, maxLongitude, maxLatitude]
+    : null;
+};
+
 interface StopAnalysisMapProps {
   mapboxToken: string;
   mapboxStyle: string;
@@ -122,6 +160,10 @@ export const StopAnalysisMap = ({
   const mapRef = useRef<Map | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  onBoundsChangeRef.current = onBoundsChange;
+  const initialBoundsRef = useRef(initialBounds);
+  initialBoundsRef.current = initialBounds;
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
   const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
@@ -129,6 +171,7 @@ export const StopAnalysisMap = ({
   );
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
+  const previousSelectedAdminAreaBoundsRef = useRef<BoundingBox | null>(null);
 
   const clearPopup = useCallback(() => {
     popupRef.current?.remove();
@@ -206,17 +249,20 @@ export const StopAnalysisMap = ({
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   }, [mapboxSatelliteStyle]);
 
-  const stopGeoJSON: FeatureCollection = {
-    type: "FeatureCollection",
-    features: stops.map((stop) => ({
-      type: "Feature",
-      properties: stop,
-      geometry: {
-        type: "Point",
-        coordinates: [stop.longitude, stop.latitude],
-      },
-    })),
-  };
+  const stopGeoJSON: FeatureCollection = useMemo(
+    () => ({
+      type: "FeatureCollection",
+      features: stops.map((stop) => ({
+        type: "Feature",
+        properties: stop,
+        geometry: {
+          type: "Point",
+          coordinates: [stop.longitude, stop.latitude],
+        },
+      })),
+    }),
+    [stops],
+  );
 
   // Initialise map
   useEffect(() => {
@@ -255,7 +301,7 @@ export const StopAnalysisMap = ({
       const bounds = map.getBounds();
       if (!bounds) return;
 
-      onBoundsChange({
+      onBoundsChangeRef.current({
         minLatitude: bounds.getSouth(),
         maxLatitude: bounds.getNorth(),
         minLongitude: bounds.getWest(),
@@ -358,8 +404,29 @@ export const StopAnalysisMap = ({
 
         // Admin area click
         map.on("click", "admin-area-boundaries", (e) => {
-          if (e.features && e.features[0]?.properties) {
-            onAdminAreaClick?.(e.features[0].properties.id);
+          if (!e.features || !e.features[0]) return;
+
+          const clickedFeature = e.features[0] as Feature;
+          if (isClipableFeature(clickedFeature)) {
+            const selectedBounds = getCoordinatesBounds(
+              clickedFeature.geometry.coordinates,
+            );
+            if (selectedBounds) {
+              map.fitBounds(
+                [
+                  [selectedBounds[0], selectedBounds[1]],
+                  [selectedBounds[2], selectedBounds[3]],
+                ],
+                {
+                  duration: 500,
+                  padding: 40,
+                },
+              );
+            }
+          }
+
+          if (clickedFeature.properties) {
+            onAdminAreaClick?.(clickedFeature.properties.id);
           }
         });
       }
@@ -624,8 +691,39 @@ export const StopAnalysisMap = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded || !map.isStyleLoaded()) return;
+    if (!map || !mapLoaded) return;
+    const previousSelectedAdminAreaBounds =
+      previousSelectedAdminAreaBoundsRef.current;
+    previousSelectedAdminAreaBoundsRef.current = selectedAdminAreaBounds ?? null;
+
     if (!selectedAdminAreaBounds) {
+      if (!previousSelectedAdminAreaBounds) {
+        return;
+      }
+
+      const fallbackBounds = initialBoundsRef.current ?? {
+        minLongitude: BRITISH_ISLES_BBOX[0],
+        minLatitude: BRITISH_ISLES_BBOX[1],
+        maxLongitude: BRITISH_ISLES_BBOX[2],
+        maxLatitude: BRITISH_ISLES_BBOX[3],
+      };
+
+      try {
+        map.fitBounds(
+          [
+            [fallbackBounds.minLongitude, fallbackBounds.minLatitude],
+            [fallbackBounds.maxLongitude, fallbackBounds.maxLatitude],
+          ],
+          {
+            duration: 500,
+            padding: 40,
+            maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
+          },
+        );
+      } catch {
+        return;
+      }
+
       return;
     }
 
@@ -644,7 +742,6 @@ export const StopAnalysisMap = ({
         {
           duration: 500,
           padding: 40,
-          maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
         },
       );
     } catch {

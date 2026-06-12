@@ -294,17 +294,33 @@ const StopAnalysisPage = () => {
     GqlMatchType.Evidenced) as MatchType;
   const stopType = (parseStringParam(router.query.stopType) ??
     "TimingPoints") as StopTypeOption;
-  const adminAreaIds = parseArrayParam(router.query.adminAreaIds);
-  const operatorIds = parseArrayParam(router.query.operatorIds);
-  const lineIds = parseArrayParam(router.query.lineIds);
-  const dayOfWeekFlags = parseDayOfWeekFlags(router.query.dayOfWeek);
+  const adminAreaIdsParam = router.query.adminAreaIds;
+  const operatorIdsParam = router.query.operatorIds;
+  const lineIdsParam = router.query.lineIds;
+  const directionParam = router.query.direction;
+  const dayOfWeekParam = router.query.dayOfWeek;
+
+  const adminAreaIds = useMemo(
+    () => parseArrayParam(adminAreaIdsParam),
+    [adminAreaIdsParam],
+  );
+  const operatorIds = useMemo(
+    () => parseArrayParam(operatorIdsParam),
+    [operatorIdsParam],
+  );
+  const lineIds = useMemo(() => parseArrayParam(lineIdsParam), [lineIdsParam]);
+  const dayOfWeekFlags = useMemo(
+    () => parseDayOfWeekFlags(dayOfWeekParam),
+    [dayOfWeekParam],
+  );
   const startTime = parseStringParam(router.query.startTime);
   const endTime = parseStringParam(router.query.endTime);
-  const directions = (
-    parseArrayParam(router.query.direction).length > 0
-      ? parseArrayParam(router.query.direction)
-      : ["Inbound", "Outbound"]
-  ) as Direction[];
+  const directions = useMemo(() => {
+    const parsedDirections = parseArrayParam(directionParam);
+    return (parsedDirections.length > 0
+      ? parsedDirections
+      : ["Inbound", "Outbound"]) as Direction[];
+  }, [directionParam]);
 
   const bounds = parseBoundingBox(router.query);
   // compute spans as absolute values to be robust
@@ -341,21 +357,36 @@ const StopAnalysisPage = () => {
   );
 
   // Fetch stop analysis data (only when bounds are small enough)
-  const filters: StopAnalysisQueryVariables | null =
-    bounds && !boundingBoxTooBig
-      ? {
-          adminAreaIds,
-          boundingBox: bounds,
-          fromTimestamp,
-          toTimestamp,
-          operatorIds,
-          lineIds,
-          matchType,
-          dayOfWeekFlags,
-          startTime,
-          endTime,
-        }
-      : null;
+  const filters: StopAnalysisQueryVariables | null = useMemo(
+    () =>
+      bounds && !boundingBoxTooBig
+        ? {
+            adminAreaIds,
+            boundingBox: bounds,
+            fromTimestamp,
+            toTimestamp,
+            operatorIds,
+            lineIds,
+            matchType,
+            dayOfWeekFlags,
+            startTime,
+            endTime,
+          }
+        : null,
+    [
+      adminAreaIds,
+      boundingBoxTooBig,
+      bounds,
+      dayOfWeekFlags,
+      endTime,
+      fromTimestamp,
+      lineIds,
+      matchType,
+      operatorIds,
+      startTime,
+      toTimestamp,
+    ],
+  );
 
   const stopFilterSignature = useMemo(
     () =>
@@ -406,7 +437,10 @@ const StopAnalysisPage = () => {
     },
   );
 
-  const effectiveStopData = filters ? stopData ?? cachedStopData : [];
+  const effectiveStopData = useMemo(
+    () => (filters ? stopData ?? cachedStopData : []),
+    [filters, stopData, cachedStopData],
+  );
 
   // Derive table rows and map features from raw data
   const tableRows = useMemo(
@@ -475,10 +509,10 @@ const StopAnalysisPage = () => {
       if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
       boundsDebounceRef.current = setTimeout(() => {
         updateQuery({
-          minLatitude: String(newBounds.minLatitude),
-          maxLatitude: String(newBounds.maxLatitude),
-          minLongitude: String(newBounds.minLongitude),
-          maxLongitude: String(newBounds.maxLongitude),
+          minLatitude: newBounds.minLatitude.toFixed(6),
+          maxLatitude: newBounds.maxLatitude.toFixed(6),
+          minLongitude: newBounds.minLongitude.toFixed(6),
+          maxLongitude: newBounds.maxLongitude.toFixed(6),
         });
       }, 500);
     },
@@ -502,9 +536,12 @@ const StopAnalysisPage = () => {
 
   const handleOperatorsChange = useCallback(
     (values: string[]) => {
-      updateQuery({ operatorIds: values });
+      updateQuery({
+        operatorIds: values,
+        lineIds: values.length === 0 ? [] : lineIds,
+      });
     },
-    [updateQuery],
+    [lineIds, updateQuery],
   );
 
   const handleStopClick = useCallback((stop: StopPerformanceRow) => {
