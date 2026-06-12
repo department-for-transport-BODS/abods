@@ -76,6 +76,8 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
                 src="/assets/icons/search.svg"
                 alt=""
                 aria-hidden="true"
+                width={16}
+                height={16}
               />
               <input
                 id="corridors-grid-filter"
