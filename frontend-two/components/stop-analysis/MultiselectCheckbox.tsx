@@ -51,12 +51,14 @@ export const MultiselectCheckbox = ({
       const newValues = selectedValues.includes(value)
         ? selectedValues.filter((v) => v !== value)
         : [...selectedValues, value];
+      setSearchText("");
       onChange(newValues);
     },
     [selectedValues, onChange],
   );
 
   const handleSelectAll = useCallback(() => {
+    setSearchText("");
     onChange([]);
   }, [onChange]);
 
@@ -67,7 +69,11 @@ export const MultiselectCheckbox = ({
         `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
 
-  const inputValue = isOpen ? searchText : searchText || displayText;
+  const inputPlaceholder = placeholder ?? label;
+  const inputPrefix = isOpen && hasSelection ? `${displayText}` : "";
+  const inputValue = isOpen
+    ? `${inputPrefix}${inputPrefix && searchText ? "  " : ""}${searchText}`
+    : searchText || displayText;
 
   return (
     <div
@@ -88,12 +94,10 @@ export const MultiselectCheckbox = ({
           type="text"
           className="multiselect-checkbox__trigger govuk-input"
           value={inputValue}
+          placeholder={inputPlaceholder}
           onFocus={() => {
             if (!disabled) {
               setIsOpen(true);
-              if (!searchText) {
-                setSearchText("");
-              }
             }
           }}
           onChange={(event) => {
@@ -105,11 +109,17 @@ export const MultiselectCheckbox = ({
               setIsOpen(true);
             }
 
-            setSearchText(event.target.value);
+            const rawValue = event.target.value;
+
+            if (inputPrefix && rawValue.startsWith(inputPrefix)) {
+              setSearchText(rawValue.slice(inputPrefix.length).trimStart());
+              return;
+            }
+
+            setSearchText(rawValue);
           }}
           onClick={() => !disabled && setIsOpen(true)}
           disabled={disabled}
-          aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-label={label}
         />
@@ -127,34 +137,37 @@ export const MultiselectCheckbox = ({
               </strong>
               <button
                 type="button"
-                className={`button-link govuk-link multiselect-checkbox__header-action${
-                  hasSelection ? "" : " button-link--disabled"
-                }`}
+                className="button-link govuk-link multiselect-checkbox__header-action"
                 onClick={handleSelectAll}
-                disabled={!hasSelection}
               >
                 Show all
               </button>
             </div>
           ) : null}
           <div className="govuk-checkboxes govuk-checkboxes--small multiselect-checkbox__options">
-            {filteredOptions.map((option) => (
-              <div key={option.value} className="govuk-checkboxes__item">
-                <input
-                  id={getOptionId(option.value)}
-                  className="govuk-checkboxes__input"
-                  type="checkbox"
-                  checked={selectedValues.includes(option.value)}
-                  onChange={() => handleToggle(option.value)}
-                />
-                <label
-                  className="govuk-label govuk-checkboxes__label"
-                  htmlFor={getOptionId(option.value)}
-                >
-                  {option.label}
-                </label>
-              </div>
-            ))}
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => (
+                <div key={option.value} className="govuk-checkboxes__item">
+                  <input
+                    id={getOptionId(option.value)}
+                    className="govuk-checkboxes__input"
+                    type="checkbox"
+                    checked={selectedValues.includes(option.value)}
+                    onChange={() => handleToggle(option.value)}
+                  />
+                  <label
+                    className="govuk-label govuk-checkboxes__label"
+                    htmlFor={getOptionId(option.value)}
+                  >
+                    {option.label}
+                  </label>
+                </div>
+              ))
+            ) : (
+              <p className="govuk-body-s multiselect-checkbox__empty-state">
+                No items found
+              </p>
+            )}
           </div>
         </div>
       )}
