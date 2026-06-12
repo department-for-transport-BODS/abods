@@ -14,7 +14,7 @@ jobs:
       actions: read
       pull-requests: read
     steps:
-      - uses: fpicalausa/remove-stale-branches@v2.6.1
+      - uses: fpicalausa/remove-stale-branches@9b829bc2975ade0c61e64e9613def53ec0732440 # v2.6.1
         with:
           dry-run: false
           days-before-branch-stale: 60
