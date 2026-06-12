@@ -53,6 +53,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+<<<<<<< HEAD
 
 # local config
 # Environment config
@@ -68,3 +69,6 @@ next-env.d.ts
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+=======
+.github
+>>>>>>> 4fdd85cf (Update .gitignore)
