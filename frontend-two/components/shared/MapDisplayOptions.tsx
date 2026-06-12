@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 
-type MapStyle = "street" | "satellite";
+type MapStyle = "default" | "satellite";
 
 interface MapDisplayOptionsProps {
   activeStyle: MapStyle;
@@ -80,7 +80,7 @@ export const MapDisplayOptions = ({
           value={activeStyle}
           onChange={(value) => onStyleChange(value as MapStyle)}
           options={[
-            { value: "street", label: "Street" },
+            { value: "default", label: "Default" },
             { value: "satellite", label: "Satellite" },
           ]}
         />
