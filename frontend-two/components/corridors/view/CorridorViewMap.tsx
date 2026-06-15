@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
+import { displayCorridorChevrons } from "@/components/corridors/shared/corridorChevrons";
 import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
-
-const CORRIDOR_CHEVRON_ICON_ID = "map-chevron-large";
-const CORRIDOR_CHEVRON_ICON_URL = "/assets/icons/map-chevron.svg";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
@@ -100,27 +98,6 @@ export const CorridorViewMap = ({
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
-  const registerCorridorChevronIcon = (map: mapboxgl.Map) =>
-    new Promise<void>((resolve, reject) => {
-      if (map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
-        resolve();
-        return;
-      }
-
-      map.loadImage(CORRIDOR_CHEVRON_ICON_URL, (error, image) => {
-        if (error || !image) {
-          reject(error ?? new Error("Unable to load corridor chevron icon"));
-          return;
-        }
-
-        if (!map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
-          map.addImage(CORRIDOR_CHEVRON_ICON_ID, image);
-        }
-
-        resolve();
-      });
-    });
-
   const addSourcesAndLayers = async (map: mapboxgl.Map) => {
     ["corridor-chevrons", "corridor-markers", "corridor-line-layer"].forEach(
       (id) => {
@@ -177,26 +154,7 @@ export const CorridorViewMap = ({
       },
     });
 
-    await registerCorridorChevronIcon(map);
-
-    map.addLayer(
-      {
-        id: "corridor-chevrons",
-        type: "symbol",
-        source: "corridor-line",
-        layout: {
-          "icon-image": CORRIDOR_CHEVRON_ICON_ID,
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "symbol-placement": "line",
-          "symbol-spacing": 150,
-        },
-        paint: {
-          "icon-opacity": ["case", ["==", ["get", "selected"], true], 1, 0],
-        },
-      },
-      "corridor-markers",
-    );
+    await displayCorridorChevrons(map, "corridor-markers");
   };
 
   const fitToBounds = (map: mapboxgl.Map, opts?: mapboxgl.FitBoundsOptions) => {

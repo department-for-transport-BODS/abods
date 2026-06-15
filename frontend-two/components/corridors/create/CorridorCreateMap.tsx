@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
+import { displayCorridorChevrons } from "@/components/corridors/shared/corridorChevrons";
 import { CorridorStop } from "@/types/corridors";
-
-const CORRIDOR_CHEVRON_ICON_ID = "map-chevron-large";
-const CORRIDOR_CHEVRON_ICON_URL = "/assets/icons/map-chevron.svg";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
@@ -98,28 +96,7 @@ export const CorridorCreateMap = ({
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
-  const registerCorridorChevronIcon = (map: mapboxgl.Map) =>
-    new Promise<void>((resolve, reject) => {
-      if (map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
-        resolve();
-        return;
-      }
-
-      map.loadImage(CORRIDOR_CHEVRON_ICON_URL, (error, image) => {
-        if (error || !image) {
-          reject(error ?? new Error("Unable to load corridor chevron icon"));
-          return;
-        }
-
-        if (!map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
-          map.addImage(CORRIDOR_CHEVRON_ICON_ID, image);
-        }
-
-        resolve();
-      });
-    });
-
-  const addSourcesAndLayers = (map: mapboxgl.Map) => {
+  const addSourcesAndLayers = async (map: mapboxgl.Map) => {
     if (!map.getSource("matching-stops")) {
       map.addSource("matching-stops", {
         type: "geojson",
@@ -200,23 +177,7 @@ export const CorridorCreateMap = ({
       });
     }
 
-    if (!map.getLayer("corridor-chevrons")) {
-      map.addLayer(
-        {
-          id: "corridor-chevrons",
-          type: "symbol",
-          source: "corridor-line",
-          layout: {
-            "icon-image": CORRIDOR_CHEVRON_ICON_ID,
-            "icon-allow-overlap": true,
-            "icon-ignore-placement": true,
-            "symbol-placement": "line",
-            "symbol-spacing": 150,
-          },
-        },
-        "corridor-markers",
-      );
-    }
+    await displayCorridorChevrons(map, "corridor-markers");
 
     if (!map.getLayer("other-stop-markers")) {
       map.addLayer(
@@ -309,10 +270,10 @@ export const CorridorCreateMap = ({
     });
 
     map.on("load", () => {
-      void registerCorridorChevronIcon(map).then(() => {
-        addSourcesAndLayers(map);
+      void (async () => {
+        await addSourcesAndLayers(map);
         fitCorridorBounds(map);
-      });
+      })();
 
       map.on("moveend", () => {
         if (
@@ -326,9 +287,7 @@ export const CorridorCreateMap = ({
       });
 
       map.on("style.load", () => {
-        void registerCorridorChevronIcon(map).then(() => {
-          addSourcesAndLayers(map);
-        });
+        void addSourcesAndLayers(map);
       });
 
       map.on("mousemove", "matching-stop-markers", (e) => {
