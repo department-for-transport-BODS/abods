@@ -109,7 +109,6 @@ export const MultiselectCheckbox = ({
           }}
           onClick={() => !disabled && setIsOpen(true)}
           disabled={disabled}
-          aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-label={label}
         />
