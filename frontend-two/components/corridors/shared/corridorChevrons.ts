@@ -5,18 +5,16 @@ const CORRIDOR_CHEVRON_ICON_URL = "/assets/icons/map-chevron.svg";
 const CORRIDOR_CHEVRON_LAYER_ID = "corridor-chevrons";
 
 const loadImageFromMap = (map: mapboxgl.Map, url: string) =>
-  new Promise<mapboxgl.ImageData | HTMLImageElement | ImageBitmap>(
-    (resolve, reject) => {
-      map.loadImage(url, (error, image) => {
-        if (error || !image) {
-          reject(error ?? new Error("Unable to load corridor chevron icon"));
-          return;
-        }
+  new Promise<ImageData | HTMLImageElement | ImageBitmap>((resolve, reject) => {
+    map.loadImage(url, (error, image) => {
+      if (error || !image) {
+        reject(error ?? new Error("Unable to load corridor chevron icon"));
+        return;
+      }
 
-        resolve(image);
-      });
-    },
-  );
+      resolve(image);
+    });
+  });
 
 export const displayCorridorChevrons = async (
   map: mapboxgl.Map,
