@@ -143,6 +143,8 @@ const CorridorsViewPage = () => {
       }),
   );
 
+  const isStatsLoading = corridorLoading || statsLoading;
+
   const showNotFound =
     !corridorLoading && (corridorId === null || corridor === null);
 
@@ -285,7 +287,7 @@ const CorridorsViewPage = () => {
                   segment: value === null ? undefined : String(value),
                 })
               }
-              isDisabled={statsLoading}
+              isDisabled={isStatsLoading}
             />
           ) : null}
 
@@ -295,7 +297,11 @@ const CorridorsViewPage = () => {
               label="Recorded transits"
               className="corridor__summary-stat"
               value={
-                statsLoading ? <LoadingDots /> : stats?.summaryStats.totalTransits ?? "Unavailable"
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  stats?.summaryStats.totalTransits ?? "Unavailable"
+                )
               }
               tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
             />
@@ -304,15 +310,17 @@ const CorridorsViewPage = () => {
               label="Missing transits"
               className="corridor__summary-stat"
               value={
-                statsLoading ? (
+                isStatsLoading ? (
                   <LoadingDots />
                 ) : stats?.summaryStats.scheduledTransits !== null &&
                   stats?.summaryStats.scheduledTransits !== undefined &&
                   stats?.summaryStats.totalTransits !== null &&
-                  stats?.summaryStats.totalTransits !== undefined
-                    ? stats.summaryStats.scheduledTransits -
-                      stats.summaryStats.totalTransits
-                    : "Unavailable"
+                  stats?.summaryStats.totalTransits !== undefined ? (
+                  stats.summaryStats.scheduledTransits -
+                  stats.summaryStats.totalTransits
+                ) : (
+                  "Unavailable"
+                )
               }
               tooltip="The number of journeys in the timetables provided that do not have real-time information recorded against them."
             />
@@ -321,9 +329,11 @@ const CorridorsViewPage = () => {
               label="Average journey time"
               className="corridor__summary-stat"
               value={
-                statsLoading ? (
+                isStatsLoading ? (
                   <LoadingDots />
-                ) : formatTransitTime(stats?.summaryStats.averageTransitTime)
+                ) : (
+                  formatTransitTime(stats?.summaryStats.averageTransitTime)
+                )
               }
               tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
             />
@@ -332,11 +342,13 @@ const CorridorsViewPage = () => {
               label="Average speed"
               className="corridor__summary-stat"
               value={
-                statsLoading ? (
+                isStatsLoading ? (
                   <LoadingDots />
-                ) : averageSpeedLabel(
-                  stats?.serviceLinks ?? [],
-                  stats?.summaryStats.averageTransitTime,
+                ) : (
+                  averageSpeedLabel(
+                    stats?.serviceLinks ?? [],
+                    stats?.summaryStats.averageTransitTime,
+                  )
                 )
               }
               tooltip="The average speed of buses moving through the corridor according to the real-time information received."
@@ -346,7 +358,11 @@ const CorridorsViewPage = () => {
               label="Services"
               className="corridor__summary-stat"
               value={
-                statsLoading ? <LoadingDots /> : stats?.summaryStats.numberOfServices ?? "Unavailable"
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  stats?.summaryStats.numberOfServices ?? "Unavailable"
+                )
               }
               tooltip="The total number of different services that pass through this corridor."
             />
