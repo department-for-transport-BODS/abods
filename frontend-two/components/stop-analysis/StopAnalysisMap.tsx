@@ -70,7 +70,6 @@ const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
   );
 };
 
-
 interface StopAnalysisMapProps {
   mapboxToken: string;
   mapboxStyle: string;
@@ -717,7 +716,12 @@ export const StopAnalysisMap = ({
         </div>
       )}
       {loading && (
-        <div className="stop-analysis-map__loading-overlay" role="status" aria-live="polite" aria-label="Loading stop analysis map">
+        <div
+          className="stop-analysis-map__loading-overlay"
+          role="status"
+          aria-live="polite"
+          aria-label="Loading stop analysis map"
+        >
           <Spinner size="x-small" />
         </div>
       )}

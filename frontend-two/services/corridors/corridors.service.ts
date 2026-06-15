@@ -185,7 +185,7 @@ export const corridorsService = {
   },
 
   queryStops: async (
-    searchString: string,
+    searchString?: string,
     bounds?: LngLatBounds,
   ): Promise<StopLists | null> => {
     try {
@@ -195,13 +195,17 @@ export const corridorsService = {
         query: CorridorsStopSearchDocument,
         variables: {
           inputs: {
-            searchString,
-            boundingBox: bounds && {
-              minLongitude: bounds.getWest(),
-              minLatitude: bounds.getSouth(),
-              maxLongitude: bounds.getEast(),
-              maxLatitude: bounds.getNorth(),
-            },
+            ...(searchString ? { searchString } : {}),
+            ...(bounds
+              ? {
+                  boundingBox: {
+                    minLongitude: bounds.getWest(),
+                    minLatitude: bounds.getSouth(),
+                    maxLongitude: bounds.getEast(),
+                    maxLatitude: bounds.getNorth(),
+                  },
+                }
+              : {}),
           },
         },
         fetchPolicy: "no-cache",
