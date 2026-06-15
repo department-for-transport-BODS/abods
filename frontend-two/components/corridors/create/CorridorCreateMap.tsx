@@ -38,7 +38,7 @@ interface Props {
   otherStops?: CorridorStop[];
   nonOrgStops?: CorridorStop[];
   onSelectStop: (stop: CorridorStop) => void;
-  onBoundsChange?: (bounds: mapboxgl.LngLatBounds) => void;
+  onBoundsChange?: (bounds: mapboxgl.LngLatBounds | null) => void;
   mapboxToken: string;
   mapboxStyle: string;
   mapboxSatelliteStyle?: string;

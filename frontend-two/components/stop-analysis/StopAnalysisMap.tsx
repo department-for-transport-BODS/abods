@@ -38,7 +38,7 @@ const POINT_COLOURS = [
     GREEN_THRESHOLD,
     "#28a197",
   ],
-] as mapboxgl.CirclePaint["circle-color"];
+] as NonNullable<mapboxgl.CirclePaint>["circle-color"];
 
 const CLUSTER_PROPERTIES = {
   early: ["+", ["get", "early"]] as [string, mapboxgl.ExpressionSpecification],
@@ -480,7 +480,7 @@ export const StopAnalysisMap = ({
               GREEN_THRESHOLD,
               "otp-timing-map-turquoise",
             ],
-          ] as mapboxgl.SymbolLayout["icon-image"],
+          ] as NonNullable<mapboxgl.SymbolLayout>["icon-image"],
         },
       });
 
