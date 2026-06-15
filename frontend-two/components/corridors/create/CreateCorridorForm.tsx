@@ -278,91 +278,95 @@ export const CreateCorridorForm = ({
                 onRemoveLastStop={removeLastStop}
               />
 
-              {showSearchModeSelector ? (
-                <div className="govuk-form-group">
-                  <label className="govuk-label" htmlFor="search-mode">
-                    Search for the first stop in your corridor
-                  </label>
-                  <select
-                    id="search-mode"
-                    className="govuk-select"
-                    value={searchMode}
-                    onChange={(event) => {
-                      setSearchMode(event.target.value as SearchMode);
-                      resetSearch();
-                    }}
-                  >
-                    <option value="location">Location</option>
-                    <option value="stop">Stop</option>
-                  </select>
-                </div>
-              ) : null}
-
-              {stopList.length === 0 ? (
-                searchMode === "location" ? (
-                  <LocationLookupField
-                    id="stop-query"
-                    label="Location name or postcode"
-                    value={stopQuery}
-                    onValueChange={setStopQuery}
-                    mapboxToken={mapboxToken}
-                    containerClassName="govuk-form-group"
-                    placeholder="Search"
-                  />
-                ) : (
+              <div className="corridor-stop-column__search-panel">
+                {showSearchModeSelector ? (
                   <div className="govuk-form-group">
-                    <label className="govuk-label" htmlFor="stop-query">
-                      Stop name or NaPTAN code
+                    <label className="govuk-label" htmlFor="search-mode">
+                      Search for the first stop in your corridor
                     </label>
-                    <input
-                      id="stop-query"
-                      name="stop-query"
-                      type="text"
-                      className="govuk-input govuk-input--width-20"
-                      placeholder="Enter four or more characters"
-                      value={stopQuery}
-                      onChange={(event) => setStopQuery(event.target.value)}
-                    />
+                    <select
+                      id="search-mode"
+                      className="govuk-select"
+                      value={searchMode}
+                      onChange={(event) => {
+                        setSearchMode(event.target.value as SearchMode);
+                        resetSearch();
+                      }}
+                    >
+                      <option value="location">Location</option>
+                      <option value="stop">Stop</option>
+                    </select>
                   </div>
-                )
-              ) : null}
+                ) : null}
 
-              {isStopSearch || stopList.length > 0 ? (
-                <>
-                  {loading ? (
-                    <p className="govuk-body">Searching for stops...</p>
-                  ) : null}
+                {stopList.length === 0 ? (
+                  searchMode === "location" ? (
+                    <LocationLookupField
+                      id="stop-query"
+                      label="Location name or postcode"
+                      value={stopQuery}
+                      onValueChange={setStopQuery}
+                      mapboxToken={mapboxToken}
+                      containerClassName="govuk-form-group"
+                      placeholder="Search"
+                    />
+                  ) : (
+                    <div className="govuk-form-group">
+                      <label className="govuk-label" htmlFor="stop-query">
+                        Stop name or NaPTAN code
+                      </label>
+                      <input
+                        id="stop-query"
+                        name="stop-query"
+                        type="text"
+                        className="govuk-input govuk-input--width-20"
+                        placeholder="Enter four or more characters"
+                        value={stopQuery}
+                        onChange={(event) => setStopQuery(event.target.value)}
+                      />
+                    </div>
+                  )
+                ) : null}
 
-                  {!loading &&
-                  stopList.length === 0 &&
-                  stopQuery.trim().length > 0 &&
-                  stopQuery.trim().length < 4 ? (
-                    <p className="govuk-body-s">Enter at least 4 characters</p>
-                  ) : null}
+                {isStopSearch || stopList.length > 0 ? (
+                  <>
+                    {loading ? (
+                      <p className="govuk-body">Searching for stops...</p>
+                    ) : null}
 
-                  {noData ? (
-                    <p className="govuk-body">
-                      {stopList.length === 0
-                        ? "Your organisation has no matching stops"
-                        : "No further stops available"}
-                    </p>
-                  ) : null}
+                    {!loading &&
+                    stopList.length === 0 &&
+                    stopQuery.trim().length > 0 &&
+                    stopQuery.trim().length < 4 ? (
+                      <p className="govuk-body-s">
+                        Enter at least 4 characters
+                      </p>
+                    ) : null}
 
-                  {!loading && matchingStops.length > 0 ? (
-                    <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
-                      {stopList.length === 0
-                        ? `${matchingStops.length} matching stops`
-                        : "Add further stops"}
-                    </h3>
-                  ) : null}
+                    {noData ? (
+                      <p className="govuk-body">
+                        {stopList.length === 0
+                          ? "Your organisation has no matching stops"
+                          : "No further stops available"}
+                      </p>
+                    ) : null}
 
-                  <StopSearchList
-                    matchingStops={matchingStops}
-                    isFirstStop={stopList.length === 0}
-                    onAddStop={addStop}
-                  />
-                </>
-              ) : null}
+                    {!loading && matchingStops.length > 0 ? (
+                      <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
+                        {stopList.length === 0
+                          ? `${matchingStops.length} matching stops`
+                          : "Add further stops"}
+                      </h3>
+                    ) : null}
+
+                    <StopSearchList
+                      matchingStops={matchingStops}
+                      isFirstStop={stopList.length === 0}
+                      onAddStop={addStop}
+                    />
+                  </>
+                ) : null}
+              </div>
 
               {stopList.length > 0 ? (
                 <div className="govuk-button-group govuk-!-margin-top-6">

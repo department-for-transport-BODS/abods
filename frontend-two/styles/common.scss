@@ -809,6 +809,8 @@ $day-width: 46px;
       padding-top: govuk-spacing(3);
       padding-left: govuk-spacing(1);
       background-color: govuk-colour("white");
+      width: 100%;
+      box-sizing: border-box;
     }
 
     &--connected::before {
@@ -870,6 +872,11 @@ $day-width: 46px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  &__search-panel {
+    width: 100%;
+    max-width: 50ex;
+  }
 }
 
 // Corridor date wrapper / controls bar
