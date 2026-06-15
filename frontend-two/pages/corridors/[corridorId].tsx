@@ -296,6 +296,7 @@ const CorridorsViewPage = () => {
               id="corridor-total-transits"
               label="Recorded transits"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
                 isStatsLoading ? (
                   <LoadingDots />
@@ -309,6 +310,7 @@ const CorridorsViewPage = () => {
               id="corridor-missing-transits"
               label="Missing transits"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
                 isStatsLoading ? (
                   <LoadingDots />
@@ -328,6 +330,7 @@ const CorridorsViewPage = () => {
               id="corridor-average-journey-time"
               label="Average journey time"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
                 isStatsLoading ? (
                   <LoadingDots />
@@ -341,6 +344,7 @@ const CorridorsViewPage = () => {
               id="corridor-average-speed"
               label="Average speed"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
                 isStatsLoading ? (
                   <LoadingDots />
@@ -357,6 +361,7 @@ const CorridorsViewPage = () => {
               id="corridor-services"
               label="Services"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
                 isStatsLoading ? (
                   <LoadingDots />

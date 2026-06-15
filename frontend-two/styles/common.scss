@@ -1519,6 +1519,9 @@ $day-width: 46px;
     &--tooltip {
       border-bottom: 4px dotted;
     }
+    &--loading {
+      border-bottom: 0;
+    }
   }
 }
 
