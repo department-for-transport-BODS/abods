@@ -213,7 +213,35 @@ describe("CorridorsViewPage", () => {
 
     renderPage();
 
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--loading"),
+    ).toBeTruthy();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
+    ).toBeNull();
+    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
+  });
+
+  it("shows loading dots while stats are fetching", async () => {
+    mockFetchStats.mockImplementation(() => new Promise(() => {}));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Corridor 12")).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--loading"),
+    ).toBeTruthy();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
+    ).toBeNull();
+    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
   });
 
   it("shows not found when corridor is missing", async () => {

@@ -1,6 +1,7 @@
 import { render, screen, cleanup } from "@testing-library/react";
 import StopAnalysisPage, {
   computeAdminAreaGeoJSON,
+  mergeStopAnalysisQuery,
 } from "@/pages/stop-analysis";
 
 vi.mock("@/hooks/useAuth", () => ({
@@ -52,7 +53,12 @@ vi.mock("@/components/stop-analysis/StopAnalysisMap", () => ({
 }));
 
 vi.mock("@/components/stop-analysis/StopAnalysisFilters", () => ({
-  StopAnalysisFilters: () => <div data-testid="stop-analysis-filters" />,
+  StopAnalysisFilters: (props: {
+    onOperatorsChange: (values: string[]) => void;
+  }) => {
+    latestStopAnalysisFiltersProps = props;
+    return <div data-testid="stop-analysis-filters" />;
+  },
   RefineFilters: () => <div data-testid="refine-filters" />,
 }));
 
@@ -97,10 +103,16 @@ const mockUseConfig = vi.mocked(useConfig);
 const mockFetchStopAnalysis = vi.mocked(stopAnalysisService.fetchStopAnalysis);
 const mockFetchOperators = vi.mocked(operatorsService.fetchOperators);
 const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
+let latestStopAnalysisFiltersProps:
+  | {
+      onOperatorsChange: (values: string[]) => void;
+    }
+  | undefined;
 
 describe("StopAnalysisPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    latestStopAnalysisFiltersProps = undefined;
     mockUseConfig.mockReturnValue({
       config: {
         apiUrl: "http://test-api",
@@ -184,6 +196,54 @@ describe("StopAnalysisPage", () => {
           [2, 1],
         ],
       ],
+    });
+  });
+
+  it("clears line selections when all operators are removed", () => {
+    render(<StopAnalysisPage />);
+
+    expect(latestStopAnalysisFiltersProps).toBeDefined();
+
+    latestStopAnalysisFiltersProps?.onOperatorsChange([]);
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: "/stop-analysis",
+        query: expect.objectContaining({
+          operatorIds: [],
+        }),
+      }),
+      undefined,
+      { shallow: true },
+    );
+  });
+
+  it("preserves the selected stop type when map bounds are merged into the query", () => {
+    expect(
+      mergeStopAnalysisQuery(
+        { stopType: "AllStops", fromTimestamp: "2026-01-01" },
+        { minLatitude: "51.1", maxLatitude: "51.2" },
+      ),
+    ).toMatchObject({
+      stopType: "AllStops",
+      fromTimestamp: "2026-01-01",
+      minLatitude: "51.1",
+      maxLatitude: "51.2",
+    });
+  });
+
+  it("falls back to the latest selected stop type when the query snapshot is stale", () => {
+    expect(
+      mergeStopAnalysisQuery(
+        { fromTimestamp: "2026-01-01" },
+        { minLatitude: "51.1", maxLatitude: "51.2" },
+        "AllStops",
+      ),
+    ).toMatchObject({
+      stopType: "AllStops",
+      fromTimestamp: "2026-01-01",
+      minLatitude: "51.1",
+      maxLatitude: "51.2",
     });
   });
 });

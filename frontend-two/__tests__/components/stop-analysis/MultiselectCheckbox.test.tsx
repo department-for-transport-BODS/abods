@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MultiselectCheckbox } from "@/components/stop-analysis/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
 
 describe("MultiselectCheckbox", () => {
   const options = [
@@ -9,7 +9,7 @@ describe("MultiselectCheckbox", () => {
     { label: "Blackburn with Darwen", value: "3" },
   ];
 
-  it("shows the legacy-style header and disabled clear action when nothing is selected", async () => {
+  it("shows all options again when nothing is selected", async () => {
     const user = userEvent.setup();
 
     render(
@@ -42,10 +42,19 @@ describe("MultiselectCheckbox", () => {
     expect(
       within(dropdown).getByRole("checkbox", { name: "Bedford" }),
     ).toBeInTheDocument();
-    expect(within(dropdown).getByText("Bedford")).toBeInTheDocument();
+    expect(
+      within(dropdown).queryByRole("checkbox", {
+        name: "Bath & North East Somerset",
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dropdown).queryByRole("checkbox", {
+        name: "Blackburn with Darwen",
+      }),
+    ).not.toBeInTheDocument();
   });
 
-  it("clears the selection from the header action", async () => {
+  it("emits an empty selection from the header action", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 
@@ -66,8 +75,93 @@ describe("MultiselectCheckbox", () => {
     );
 
     await user.click(screen.getByRole("textbox", { name: "Admin Areas" }));
+    await user.type(
+      screen.getByRole("textbox", { name: "Admin Areas" }),
+      "zzz",
+    );
     await user.click(screen.getByRole("button", { name: "Show all" }));
 
     expect(onChange).toHaveBeenCalledWith([]);
+    expect(screen.getByRole("textbox", { name: "Admin Areas" })).toHaveValue(
+      "zzz",
+    );
+    expect(
+      within(screen.getByRole("listbox")).queryAllByRole("checkbox"),
+    ).toHaveLength(0);
+  });
+
+  it("clears the search text after selecting an option", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <MultiselectCheckbox
+        id="admin-areas"
+        label="Admin Areas"
+        options={options}
+        selectedValues={[]}
+        onChange={onChange}
+        showAllLabel="All Areas"
+        placeholder="Admin Areas"
+      />,
+    );
+
+    const trigger = screen.getByRole("textbox", { name: "Admin Areas" });
+    await user.click(trigger);
+    await user.type(trigger, "Bed");
+
+    await user.click(screen.getByRole("checkbox", { name: "Bedford" }));
+
+    expect(trigger).toHaveValue("Bed");
+    expect(onChange).toHaveBeenCalledWith(["2"]);
+  });
+
+  it("shows the selected count and search text in the search box when open", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiselectCheckbox
+        id="admin-areas"
+        label="Admin Areas"
+        options={options}
+        selectedValues={["1", "2"]}
+        onChange={vi.fn()}
+        showAllLabel="All Areas"
+        placeholder="Admin Areas"
+      />,
+    );
+
+    const trigger = screen.getByRole("textbox", { name: "Admin Areas" });
+    await user.click(trigger);
+
+    expect(trigger).toHaveValue("");
+
+    await user.type(trigger, "hello");
+
+    expect(trigger).toHaveValue("hello");
+  });
+
+  it("shows a no items found message when no options match", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiselectCheckbox
+        id="admin-areas"
+        label="Admin Areas"
+        options={options}
+        selectedValues={[]}
+        onChange={vi.fn()}
+        showAllLabel="All Areas"
+        placeholder="Admin Areas"
+      />,
+    );
+
+    const trigger = screen.getByRole("textbox", { name: "Admin Areas" });
+    await user.click(trigger);
+    await user.type(trigger, "zzz");
+
+    expect(screen.queryByText("No items found")).not.toBeInTheDocument();
+    const dropdown = screen.getByRole("listbox");
+    expect(within(dropdown).queryAllByRole("checkbox")).toHaveLength(0);
   });
 });
