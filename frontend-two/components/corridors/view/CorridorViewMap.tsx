@@ -5,6 +5,9 @@ import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
 
+const CORRIDOR_CHEVRON_ICON_ID = "map-chevron-large";
+const CORRIDOR_CHEVRON_ICON_URL = "/assets/icons/map-chevron.svg";
+
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
   [1.68, 58.64],
@@ -97,11 +100,33 @@ export const CorridorViewMap = ({
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
-  const addSourcesAndLayers = (map: mapboxgl.Map) => {
-    // Clean up any existing layers/sources (needed after style change)
-    ["corridor-markers", "corridor-line-layer"].forEach((id) => {
-      if (map.getLayer(id)) map.removeLayer(id);
+  const registerCorridorChevronIcon = (map: mapboxgl.Map) =>
+    new Promise<void>((resolve, reject) => {
+      if (map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
+        resolve();
+        return;
+      }
+
+      map.loadImage(CORRIDOR_CHEVRON_ICON_URL, (error, image) => {
+        if (error || !image) {
+          reject(error ?? new Error("Unable to load corridor chevron icon"));
+          return;
+        }
+
+        if (!map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
+          map.addImage(CORRIDOR_CHEVRON_ICON_ID, image);
+        }
+
+        resolve();
+      });
     });
+
+  const addSourcesAndLayers = async (map: mapboxgl.Map) => {
+    ["corridor-chevrons", "corridor-markers", "corridor-line-layer"].forEach(
+      (id) => {
+        if (map.getLayer(id)) map.removeLayer(id);
+      },
+    );
     ["corridor-line", "corridor-stops"].forEach((id) => {
       if (map.getSource(id)) map.removeSource(id);
     });
@@ -151,9 +176,29 @@ export const CorridorViewMap = ({
         ],
       },
     });
+
+    await registerCorridorChevronIcon(map);
+
+    map.addLayer(
+      {
+        id: "corridor-chevrons",
+        type: "symbol",
+        source: "corridor-line",
+        layout: {
+          "icon-image": CORRIDOR_CHEVRON_ICON_ID,
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "symbol-placement": "line",
+          "symbol-spacing": 150,
+        },
+        paint: {
+          "icon-opacity": ["case", ["==", ["get", "selected"], true], 1, 0],
+        },
+      },
+      "corridor-markers",
+    );
   };
 
-  // Fit map bounds to the current stop list
   const fitToBounds = (map: mapboxgl.Map, opts?: mapboxgl.FitBoundsOptions) => {
     if (stopsRef.current.length === 0) return;
     const bounds = new mapboxgl.LngLatBounds();
@@ -185,20 +230,12 @@ export const CorridorViewMap = ({
 
     const hoveredStopId = { current: null as string | null };
     let isFirstStyleLoad = true;
+    let detachHoverHandlers = () => undefined;
 
-    map.on("style.load", () => {
-      if (isFirstStyleLoad) {
-        isFirstStyleLoad = false;
-        return; // handled by "load"
-      }
-      // Re-add after style switch
-      addSourcesAndLayers(map);
-    });
+    const bindHoverHandlers = () => {
+      detachHoverHandlers();
 
-    map.on("load", () => {
-      addSourcesAndLayers(map);
-      fitToBounds(map);
-      map.on("mousemove", "corridor-markers", (e) => {
+      const handleMouseMove = (e: mapboxgl.MapLayerMouseEvent) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features?.[0];
         if (!feature) return;
@@ -229,9 +266,9 @@ export const CorridorViewMap = ({
               `<div class="govuk-body-small">${props.naptan ?? ""}</div>`,
           )
           .addTo(map);
-      });
+      };
 
-      map.on("mouseleave", "corridor-markers", () => {
+      const handleMouseLeave = () => {
         map.getCanvas().style.cursor = "";
         popup.remove();
         if (hoveredStopId.current) {
@@ -241,7 +278,34 @@ export const CorridorViewMap = ({
           );
           hoveredStopId.current = null;
         }
-      });
+      };
+
+      map.on("mousemove", "corridor-markers", handleMouseMove);
+      map.on("mouseleave", "corridor-markers", handleMouseLeave);
+
+      detachHoverHandlers = () => {
+        map.off("mousemove", "corridor-markers", handleMouseMove);
+        map.off("mouseleave", "corridor-markers", handleMouseLeave);
+      };
+    };
+
+    map.on("style.load", () => {
+      if (isFirstStyleLoad) {
+        isFirstStyleLoad = false;
+        return; // handled by "load"
+      }
+      void (async () => {
+        await addSourcesAndLayers(map);
+        bindHoverHandlers();
+      })();
+    });
+
+    map.on("load", () => {
+      void (async () => {
+        await addSourcesAndLayers(map);
+        bindHoverHandlers();
+        fitToBounds(map);
+      })();
     });
 
     map.on("moveend", () => setMoveCounter((count) => count + 1));
@@ -249,6 +313,7 @@ export const CorridorViewMap = ({
     mapRef.current = map;
 
     return () => {
+      detachHoverHandlers();
       popup.remove();
       map.remove();
       mapRef.current = null;

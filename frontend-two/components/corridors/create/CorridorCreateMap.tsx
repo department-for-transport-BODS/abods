@@ -3,6 +3,9 @@ import mapboxgl from "mapbox-gl";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { CorridorStop } from "@/types/corridors";
 
+const CORRIDOR_CHEVRON_ICON_ID = "map-chevron-large";
+const CORRIDOR_CHEVRON_ICON_URL = "/assets/icons/map-chevron.svg";
+
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
   [1.68, 58.64],
@@ -34,7 +37,10 @@ const lineGeoJSON = (
 interface Props {
   corridorStops: CorridorStop[];
   matchingStops: CorridorStop[];
+  otherStops?: CorridorStop[];
+  nonOrgStops?: CorridorStop[];
   onSelectStop: (stop: CorridorStop) => void;
+  onBoundsChange?: (bounds: mapboxgl.LngLatBounds) => void;
   mapboxToken: string;
   mapboxStyle: string;
   mapboxSatelliteStyle?: string;
@@ -43,7 +49,10 @@ interface Props {
 export const CorridorCreateMap = ({
   corridorStops,
   matchingStops,
+  otherStops,
+  nonOrgStops,
   onSelectStop,
+  onBoundsChange,
   mapboxToken,
   mapboxStyle,
   mapboxSatelliteStyle,
@@ -56,14 +65,19 @@ export const CorridorCreateMap = ({
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
-  // Refs so event handlers inside the load closure always see latest values
   const onSelectStopRef = useRef(onSelectStop);
+  const onBoundsChangeRef = useRef(onBoundsChange);
   const matchingStopsRef = useRef(matchingStops);
   const corridorStopsRef = useRef(corridorStops);
+  const otherStopsRef = useRef(otherStops ?? []);
+  const nonOrgStopsRef = useRef(nonOrgStops ?? []);
   const hoveredNaptanRef = useRef<string | null>(null);
 
   useEffect(() => {
     onSelectStopRef.current = onSelectStop;
+  });
+  useEffect(() => {
+    onBoundsChangeRef.current = onBoundsChange;
   });
   useEffect(() => {
     matchingStopsRef.current = matchingStops;
@@ -72,13 +86,205 @@ export const CorridorCreateMap = ({
     corridorStopsRef.current = corridorStops;
   });
   useEffect(() => {
+    otherStopsRef.current = otherStops ?? [];
+  });
+  useEffect(() => {
+    nonOrgStopsRef.current = nonOrgStops ?? [];
+  });
+  useEffect(() => {
     mapboxStyleRef.current = mapboxStyle;
   });
   useEffect(() => {
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
-  // Initialise map once
+  const registerCorridorChevronIcon = (map: mapboxgl.Map) =>
+    new Promise<void>((resolve, reject) => {
+      if (map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
+        resolve();
+        return;
+      }
+
+      map.loadImage(CORRIDOR_CHEVRON_ICON_URL, (error, image) => {
+        if (error || !image) {
+          reject(error ?? new Error("Unable to load corridor chevron icon"));
+          return;
+        }
+
+        if (!map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
+          map.addImage(CORRIDOR_CHEVRON_ICON_ID, image);
+        }
+
+        resolve();
+      });
+    });
+
+  const addSourcesAndLayers = (map: mapboxgl.Map) => {
+    if (!map.getSource("matching-stops")) {
+      map.addSource("matching-stops", {
+        type: "geojson",
+        data: stopsToGeoJSON(matchingStopsRef.current),
+      });
+    }
+
+    if (!map.getSource("corridor-stops")) {
+      map.addSource("corridor-stops", {
+        type: "geojson",
+        data: stopsToGeoJSON(corridorStopsRef.current),
+      });
+    }
+
+    if (!map.getSource("corridor-line")) {
+      map.addSource("corridor-line", {
+        type: "geojson",
+        data: lineGeoJSON(corridorStopsRef.current),
+      });
+    }
+
+    if (!map.getSource("other-stops")) {
+      map.addSource("other-stops", {
+        type: "geojson",
+        data: stopsToGeoJSON(otherStopsRef.current),
+      });
+    }
+
+    if (!map.getSource("non-org-stops")) {
+      map.addSource("non-org-stops", {
+        type: "geojson",
+        data: stopsToGeoJSON(nonOrgStopsRef.current),
+      });
+    }
+
+    if (!map.getLayer("corridor-line-layer")) {
+      map.addLayer({
+        id: "corridor-line-layer",
+        type: "line",
+        source: "corridor-line",
+        paint: { "line-color": "#1d70b8", "line-width": 5 },
+        layout: { "line-cap": "round", "line-join": "round" },
+      });
+    }
+
+    if (!map.getLayer("matching-stop-markers")) {
+      map.addLayer({
+        id: "matching-stop-markers",
+        type: "circle",
+        source: "matching-stops",
+        paint: {
+          "circle-color": "#ffffff",
+          "circle-radius": 6,
+          "circle-stroke-width": 4,
+          "circle-stroke-color": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            "#0b0c0c",
+            "#B1B4B6",
+          ],
+          "circle-pitch-alignment": "map",
+        },
+      });
+    }
+
+    if (!map.getLayer("corridor-markers")) {
+      map.addLayer({
+        id: "corridor-markers",
+        type: "circle",
+        source: "corridor-stops",
+        paint: {
+          "circle-color": "#ffffff",
+          "circle-radius": 6,
+          "circle-stroke-width": 4,
+          "circle-stroke-color": "#0b0c0c",
+          "circle-pitch-alignment": "map",
+        },
+      });
+    }
+
+    if (!map.getLayer("corridor-chevrons")) {
+      map.addLayer(
+        {
+          id: "corridor-chevrons",
+          type: "symbol",
+          source: "corridor-line",
+          layout: {
+            "icon-image": CORRIDOR_CHEVRON_ICON_ID,
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            "symbol-placement": "line",
+            "symbol-spacing": 150,
+          },
+        },
+        "corridor-markers",
+      );
+    }
+
+    if (!map.getLayer("other-stop-markers")) {
+      map.addLayer(
+        {
+          id: "other-stop-markers",
+          type: "circle",
+          source: "other-stops",
+          paint: {
+            "circle-color": "#28A197",
+            "circle-radius": [
+              "interpolate",
+              ["exponential", 0.6],
+              ["zoom"],
+              11,
+              2,
+              13,
+              5,
+            ],
+            "circle-pitch-alignment": "map",
+          },
+        },
+        map.getLayer("matching-stop-markers")
+          ? "matching-stop-markers"
+          : "corridor-markers",
+      );
+    }
+
+    if (!map.getLayer("non-org-stop-markers")) {
+      map.addLayer(
+        {
+          id: "non-org-stop-markers",
+          type: "circle",
+          source: "non-org-stops",
+          paint: {
+            "circle-color": "#B1B4B6",
+            "circle-radius": [
+              "interpolate",
+              ["exponential", 0.6],
+              ["zoom"],
+              11,
+              2,
+              13,
+              5,
+            ],
+            "circle-pitch-alignment": "map",
+          },
+        },
+        map.getLayer("other-stop-markers")
+          ? "other-stop-markers"
+          : map.getLayer("corridor-markers")
+            ? "corridor-markers"
+            : "matching-stop-markers",
+      );
+    }
+  };
+
+  const fitCorridorBounds = (map: mapboxgl.Map) => {
+    if (corridorStopsRef.current.length === 0) {
+      return;
+    }
+
+    const bounds = new mapboxgl.LngLatBounds();
+    corridorStopsRef.current.forEach((stop) =>
+      bounds.extend([stop.lon, stop.lat]),
+    );
+    map.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+  };
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -103,61 +309,28 @@ export const CorridorCreateMap = ({
     });
 
     map.on("load", () => {
-      // Sources — seeded with whatever data is current at load time
-      map.addSource("matching-stops", {
-        type: "geojson",
-        data: stopsToGeoJSON(matchingStopsRef.current),
-      });
-      map.addSource("corridor-stops", {
-        type: "geojson",
-        data: stopsToGeoJSON(corridorStopsRef.current),
-      });
-      map.addSource("corridor-line", {
-        type: "geojson",
-        data: lineGeoJSON(corridorStopsRef.current),
+      void registerCorridorChevronIcon(map).then(() => {
+        addSourcesAndLayers(map);
+        fitCorridorBounds(map);
       });
 
-      // Layers — order: line first, then matching stops, then corridor stops on top
-      map.addLayer({
-        id: "corridor-line-layer",
-        type: "line",
-        source: "corridor-line",
-        paint: { "line-color": "#1d70b8", "line-width": 5 },
-        layout: { "line-cap": "round", "line-join": "round" },
+      map.on("moveend", () => {
+        if (
+          !onBoundsChangeRef.current ||
+          corridorStopsRef.current.length === 0
+        ) {
+          return;
+        }
+
+        onBoundsChangeRef.current(map.getBounds());
       });
 
-      map.addLayer({
-        id: "matching-stop-markers",
-        type: "circle",
-        source: "matching-stops",
-        paint: {
-          "circle-color": "#ffffff",
-          "circle-radius": 6,
-          "circle-stroke-width": 4,
-          "circle-stroke-color": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            "#0b0c0c",
-            "#B1B4B6",
-          ],
-          "circle-pitch-alignment": "map",
-        },
+      map.on("style.load", () => {
+        void registerCorridorChevronIcon(map).then(() => {
+          addSourcesAndLayers(map);
+        });
       });
 
-      map.addLayer({
-        id: "corridor-markers",
-        type: "circle",
-        source: "corridor-stops",
-        paint: {
-          "circle-color": "#ffffff",
-          "circle-radius": 6,
-          "circle-stroke-width": 4,
-          "circle-stroke-color": "#0b0c0c",
-          "circle-pitch-alignment": "map",
-        },
-      });
-
-      // Hover: show popup and highlight stop
       map.on("mousemove", "matching-stop-markers", (e) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features?.[0];
@@ -166,7 +339,6 @@ export const CorridorCreateMap = ({
         const naptan = feature.properties?.naptan as string | undefined;
         if (!naptan) return;
 
-        // Clear previous hover state if moved to a different stop
         if (hoveredNaptanRef.current && hoveredNaptanRef.current !== naptan) {
           map.setFeatureState(
             { source: "matching-stops", id: hoveredNaptanRef.current },
@@ -208,11 +380,67 @@ export const CorridorCreateMap = ({
         }
       });
 
-      // Click to add stop to corridor
       map.on("click", "matching-stop-markers", (e) => {
         const feature = e.features?.[0];
         if (!feature) return;
         onSelectStopRef.current(feature.properties as CorridorStop);
+      });
+
+      map.on("mousemove", "other-stop-markers", (e) => {
+        map.getCanvas().style.cursor = "default";
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const coords = (
+          feature.geometry as GeoJSON.Point
+        ).coordinates.slice() as [number, number];
+        const { stopName, localityName, naptan } =
+          feature.properties as CorridorStop;
+        const subtitle = [localityName, naptan].filter(Boolean).join(" ");
+
+        popup
+          .setLngLat(coords)
+          .setHTML(
+            `<div>
+              <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">${stopName ?? ""}</div>
+              <div class="govuk-body-small">${subtitle}</div>
+            </div>`,
+          )
+          .addTo(map);
+      });
+
+      map.on("mouseleave", "other-stop-markers", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
+      map.on("mousemove", "non-org-stop-markers", (e) => {
+        map.getCanvas().style.cursor = "default";
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const coords = (
+          feature.geometry as GeoJSON.Point
+        ).coordinates.slice() as [number, number];
+        const { stopName, localityName, naptan } =
+          feature.properties as CorridorStop;
+
+        popup
+          .setLngLat(coords)
+          .setHTML(
+            `<div>
+              <div class="govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1">${stopName ?? ""}</div>
+              <div class="govuk-body-small">${[localityName, naptan].filter(Boolean).join(" ")}</div>
+              <hr style="margin: 6px 0; border: 0; border-top: 1px solid #b1b4b6" />
+              <div class="govuk-body-small">We can't find any services from your organisation's data that use this stop</div>
+            </div>`,
+          )
+          .addTo(map);
+      });
+
+      map.on("mouseleave", "non-org-stop-markers", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
       });
     });
 
@@ -226,16 +454,27 @@ export const CorridorCreateMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update matching stops when prop changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map?.isStyleLoaded()) return;
+
     (
       map.getSource("matching-stops") as mapboxgl.GeoJSONSource | undefined
     )?.setData(stopsToGeoJSON(matchingStops));
   }, [matchingStops]);
 
-  // Update corridor stops and line when prop changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map?.isStyleLoaded()) return;
+
+    (
+      map.getSource("other-stops") as mapboxgl.GeoJSONSource | undefined
+    )?.setData(stopsToGeoJSON(otherStops ?? []));
+    (
+      map.getSource("non-org-stops") as mapboxgl.GeoJSONSource | undefined
+    )?.setData(stopsToGeoJSON(nonOrgStops ?? []));
+  }, [otherStops, nonOrgStops]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map?.isStyleLoaded()) return;
@@ -247,12 +486,6 @@ export const CorridorCreateMap = ({
     (
       map.getSource("corridor-line") as mapboxgl.GeoJSONSource | undefined
     )?.setData(lineGeoJSON(corridorStops));
-
-    if (corridorStops.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      corridorStops.forEach((s) => bounds.extend([s.lon, s.lat]));
-      map.fitBounds(bounds, { padding: 60, maxZoom: 14 });
-    }
   }, [corridorStops]);
 
   const switchStyle = (style: "default" | "satellite") => {

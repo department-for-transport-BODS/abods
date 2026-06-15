@@ -6,6 +6,7 @@ import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
 const mapboxMock = vi.hoisted(() => {
   const methods = {
     addControl: vi.fn(),
+    addImage: vi.fn(),
     addLayer: vi.fn(),
     addSource: vi.fn(),
     fitBounds: vi.fn(),
@@ -18,18 +19,29 @@ const mapboxMock = vi.hoisted(() => {
     getCanvas: vi.fn(() => ({ style: {} })),
     getLayer: vi.fn(() => undefined),
     getSource: vi.fn(() => undefined),
+    hasImage: vi.fn(() => false),
     isStyleLoaded: vi.fn(() => true),
     off: vi.fn(),
-    on: vi.fn(),
     remove: vi.fn(),
     removeLayer: vi.fn(),
     removeSource: vi.fn(),
+    loadImage: vi.fn((_, callback) =>
+      callback(null, { width: 16, height: 16 }),
+    ),
     setFeatureState: vi.fn(),
     setStyle: vi.fn(),
+    on: vi.fn((event, layerOrHandler, handler) => {
+      const callback =
+        typeof layerOrHandler === "function" ? layerOrHandler : handler;
+      if (event === "load" || event === "style.load") {
+        callback?.();
+      }
+    }),
   };
 
   class MockMap {
     addControl = methods.addControl;
+    addImage = methods.addImage;
     addLayer = methods.addLayer;
     addSource = methods.addSource;
     fitBounds = methods.fitBounds;
@@ -37,12 +49,14 @@ const mapboxMock = vi.hoisted(() => {
     getCanvas = methods.getCanvas;
     getLayer = methods.getLayer;
     getSource = methods.getSource;
+    hasImage = methods.hasImage;
     isStyleLoaded = methods.isStyleLoaded;
     off = methods.off;
     on = methods.on;
     remove = methods.remove;
     removeLayer = methods.removeLayer;
     removeSource = methods.removeSource;
+    loadImage = methods.loadImage;
     setFeatureState = methods.setFeatureState;
     setStyle = methods.setStyle;
 
@@ -58,6 +72,11 @@ vi.mock("mapbox-gl", () => ({
   default: {
     Map: mapboxMock.MockMap,
     NavigationControl: class {},
+    LngLatBounds: class {
+      extend() {
+        return this;
+      }
+    },
     accessToken: "",
     Popup: class {
       remove = vi.fn();
@@ -65,6 +84,11 @@ vi.mock("mapbox-gl", () => ({
   },
   Map: mapboxMock.MockMap,
   NavigationControl: class {},
+  LngLatBounds: class {
+    extend() {
+      return this;
+    }
+  },
 }));
 
 describe("CorridorViewMap", () => {
@@ -114,11 +138,28 @@ describe("CorridorViewMap", () => {
 
     await user.click(trigger);
 
-    expect(screen.getByRole("radio", { name: "Street" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Default" })).toBeChecked();
     await user.click(screen.getByRole("radio", { name: "Satellite" }));
 
     expect(mapboxMock.methods.setStyle).toHaveBeenCalledWith(
       "mapbox://styles/test/satellite",
+    );
+
+    expect(mapboxMock.methods.loadImage).toHaveBeenCalledWith(
+      "/assets/icons/map-chevron.svg",
+      expect.any(Function),
+    );
+    expect(mapboxMock.methods.addImage).toHaveBeenCalledWith(
+      "map-chevron-large",
+      expect.any(Object),
+    );
+
+    expect(mapboxMock.methods.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "corridor-chevrons",
+        type: "symbol",
+      }),
+      "corridor-markers",
     );
   });
 });

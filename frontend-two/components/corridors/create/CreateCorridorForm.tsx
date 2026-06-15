@@ -10,6 +10,7 @@ import { CorridorStopList } from "@/components/corridors/create/CorridorStopList
 import { StopSearchList } from "@/components/corridors/create/StopSearchList";
 import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorridorModal";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
+import type { LngLatBounds } from "mapbox-gl";
 
 type SearchMode = "location" | "stop";
 
@@ -38,6 +39,7 @@ export const CreateCorridorForm = ({
   const [stopList, setStopList] = useState<CorridorStop[]>(
     initialCorridor?.stops ?? [],
   );
+  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -67,6 +69,17 @@ export const CreateCorridorForm = ({
       corridorsService.fetchSubsequentStops(
         stopList.map((stop) => stop.naptan).filter(Boolean),
       ),
+  );
+
+  const boundsKey = mapBounds
+    ? `${mapBounds.getWest().toFixed(4)},${mapBounds.getSouth().toFixed(4)},${mapBounds.getEast().toFixed(4)},${mapBounds.getNorth().toFixed(4)}`
+    : null;
+
+  const { data: otherStopsData } = useSWR(
+    stopList.length > 0 && boundsKey
+      ? ["corridor-other-stops", boundsKey]
+      : null,
+    () => corridorsService.queryStops(undefined, mapBounds ?? undefined),
   );
 
   const loading = searchingFirstStop || searchingSubsequentStops;
@@ -416,7 +429,10 @@ export const CreateCorridorForm = ({
               <CorridorCreateMap
                 corridorStops={stopList}
                 matchingStops={matchingStops}
+                otherStops={otherStopsData?.orgStops}
+                nonOrgStops={otherStopsData?.nonOrgStops}
                 onSelectStop={addStop}
+                onBoundsChange={setMapBounds}
                 mapboxToken={mapboxToken}
                 mapboxStyle={mapboxStyle}
                 mapboxSatelliteStyle={mapboxSatelliteStyle}
