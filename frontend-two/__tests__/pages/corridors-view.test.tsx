@@ -58,7 +58,7 @@ vi.mock("@/services/corridors/corridors.service", () => ({
   },
 }));
 
-vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
+vi.mock("@/components/table/SortableTable", () => ({
   SortableTable: ({ head, rows }: any) => (
     <table>
       <thead>
