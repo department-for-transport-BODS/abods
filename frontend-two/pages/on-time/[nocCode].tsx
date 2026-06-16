@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import DayOfWeekChart from "@/components/on-time/DayOfWeekChart";
+import DelayFrequencyChart from "@/components/on-time/DelayFrequencyChart";
 import { JsonSection } from "@/components/on-time/JsonSection";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -144,11 +145,14 @@ const OnTimeOperatorPage = () => {
             data={data.overview}
             error={errors.overview}
           />
-          <JsonSection
-            title="onTimeService.fetchOnTimeDelayFrequencyData"
-            data={data.delayFrequency}
-            error={errors.delayFrequency}
-          />
+          {errors.delayFrequency ? (
+            <p className="govuk-error-message">
+              <span className="govuk-visually-hidden">Error:</span>{" "}
+              {errors.delayFrequency}
+            </p>
+          ) : (
+            <DelayFrequencyChart data={data.delayFrequency ?? []} />
+          )}
           <JsonSection
             title="onTimeService.fetchOnTimeTimeSeriesData"
             data={data.timeSeries}
