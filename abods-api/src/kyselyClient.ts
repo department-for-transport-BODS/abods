@@ -12,14 +12,12 @@ export const getKyselyClient = async () => {
   // When a database is terminated (for example, testcontainers teardown),
   // idle clients can emit errors. Handle them to avoid unhandled exceptions.
   pool.on("error", (error) => {
-    logger.error({ error }, "Postgres pool emitted idle client error");
+    logger.warn({ error }, "Postgres pool emitted idle client error");
   });
 
   return new Kysely<DB>({
     dialect: new PostgresDialect({
-      pool: new pg.Pool({
-        connectionString: await getDatabaseUrl(),
-      }),
+      pool,
     }),
     log(event) {
       if (event.level === "query") {
