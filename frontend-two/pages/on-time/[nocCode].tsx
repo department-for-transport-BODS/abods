@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import DayOfWeekChart from "@/components/on-time/DayOfWeekChart";
 import { JsonSection } from "@/components/on-time/JsonSection";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -158,11 +159,14 @@ const OnTimeOperatorPage = () => {
             data={data.timeOfDay}
             error={errors.timeOfDay}
           />
-          <JsonSection
-            title="onTimeService.fetchOnTimePunctualityDayOfWeekData"
-            data={data.dayOfWeek}
-            error={errors.dayOfWeek}
-          />
+          {errors.dayOfWeek ? (
+            <p className="govuk-error-message">
+              <span className="govuk-visually-hidden">Error:</span>{" "}
+              {errors.dayOfWeek}
+            </p>
+          ) : (
+            <DayOfWeekChart data={data.dayOfWeek ?? []} />
+          )}
           <JsonSection
             title="onTimeService.fetchOnTimePerformanceList"
             data={data.servicePerformancePlain}
