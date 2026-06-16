@@ -269,9 +269,7 @@ describe("CorridorsViewPage", () => {
     expect(
       screen.getByRole("heading", { name: "Services" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Services" }).nextElementSibling,
-    ).toHaveTextContent("10: Outbound");
+    expect(screen.getByRole("table")).toHaveTextContent("10: Outbound");
   });
 
   it("updates URL when segment selection changes", async () => {
