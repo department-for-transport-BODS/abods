@@ -176,7 +176,7 @@ Resources:
           QUICKSIGHT_OPERATOR_DASHBOARD_ID: !Ref QuickSightOperatorDashboardId
           QUICKSIGHT_SUPER_ADMIN_DASHBOARD_ID: !Ref QuickSightSuperadminDashboardId
           QUICKSIGHT_ALLOW_USER_ACCESS_COUNT: "100"
-          DATADOG_SERVICE_MONITORING_DASHBOARD: "https://p.datadoghq.eu/sb/embed/a3871eef-a4e7-11f0-bd80-b23d5f4281cc-a7e031ac5f5b2f8fc35cae5618c17ef7"
+          DATADOG_SERVICE_MONITORING_DASHBOARD_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/service_monitoring_dashboard"
           ABODS_FLAG_ServiceMonitoring: true
           SUPPORT_USER_EMAIL_DOMAINS: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/support_user_email_domains}}"
           INCORRECT_LOGIN_MAX_ATTEMPTS: 5
@@ -246,6 +246,7 @@ Resources:
                 Resource:
                   - !Ref GraphQLAPITokenSecret
                   - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/apikey*"
+                  - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ProjectName}/${Environment}/datadog/service_monitoring_dashboard*"
               - Effect: Allow
                 Action:
                   - kms:Decrypt
