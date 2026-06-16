@@ -58,6 +58,29 @@ vi.mock("@/services/corridors/corridors.service", () => ({
   },
 }));
 
+vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
+  SortableTable: ({ head, rows }: any) => (
+    <table>
+      <thead>
+        <tr>
+          {head.map((h: any) => (
+            <th key={h.key}>{h.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r: any) => (
+          <tr key={r.key}>
+            {head.map((h: any) => (
+              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
+}));
+
 let mockQuery: Record<string, string | string[] | undefined> = {
   corridorId: "12",
 };
