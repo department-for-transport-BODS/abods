@@ -350,6 +350,8 @@ const StopAnalysisPage = () => {
     },
     [router],
   );
+  const updateQueryRef = useRef(updateQuery);
+  updateQueryRef.current = updateQuery;
 
   // Fetch reference data
   const { data: operators } = useSWR("sa-operators", () =>
@@ -484,10 +486,7 @@ const StopAnalysisPage = () => {
   }, [adminAreaIds, operatorIds, operators]);
 
   const adminAreaGeoJSON = useMemo(
-    () =>
-      visibleAdminAreaIds.length > 0
-        ? computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds)
-        : { type: "FeatureCollection" as const, features: [] },
+    () => computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds),
     [adminAreas, visibleAdminAreaIds],
   );
 
@@ -523,7 +522,7 @@ const StopAnalysisPage = () => {
     (newBounds: BoundingBox) => {
       if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
       boundsDebounceRef.current = setTimeout(() => {
-        updateQuery({
+        updateQueryRef.current({
           minLatitude: String(newBounds.minLatitude),
           maxLatitude: String(newBounds.maxLatitude),
           minLongitude: String(newBounds.minLongitude),
@@ -531,7 +530,8 @@ const StopAnalysisPage = () => {
         });
       }, 500);
     },
-    [updateQuery],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   const handleAdminAreaClick = useCallback(
@@ -622,6 +622,7 @@ const StopAnalysisPage = () => {
 
   useEffect(() => {
     return () => {
+      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
       destroy();
     };
   }, [destroy]);
