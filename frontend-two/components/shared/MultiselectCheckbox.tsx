@@ -67,10 +67,14 @@ export const MultiselectCheckbox = ({
         `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
 
-  const selectionSummary = `${selectedValues.length} selected`;
+  const selectionSummary =
+    selectedValues.length === 1
+      ? options.find((o) => o.value === selectedValues[0])?.label ??
+        `${selectedValues.length} selected`
+      : `${selectedValues.length} selected`;
   const showSelectionSummary = isOpen && hasSelection;
 
-  const inputValue = isOpen ? searchText : searchText || displayText;
+  const inputValue = isOpen ? searchText : displayText;
 
   return (
     <div
