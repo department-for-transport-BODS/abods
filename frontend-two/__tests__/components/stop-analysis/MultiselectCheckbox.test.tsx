@@ -116,7 +116,7 @@ describe("MultiselectCheckbox", () => {
     expect(onChange).toHaveBeenCalledWith(["2"]);
   });
 
-  it("shows the selected count and search text in the search box when open", async () => {
+  it("shows selected summary while allowing typing when open", async () => {
     const user = userEvent.setup();
 
     render(
@@ -135,10 +135,12 @@ describe("MultiselectCheckbox", () => {
     await user.click(trigger);
 
     expect(trigger).toHaveValue("");
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
 
     await user.type(trigger, "hello");
 
     expect(trigger).toHaveValue("hello");
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
   });
 
   it("shows a no items found message when no options match", async () => {

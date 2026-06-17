@@ -67,6 +67,9 @@ export const MultiselectCheckbox = ({
         `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
 
+  const selectionSummary = `${selectedValues.length} selected`;
+  const showSelectionSummary = isOpen && hasSelection;
+
   const inputValue = isOpen ? searchText : searchText || displayText;
 
   return (
@@ -83,10 +86,19 @@ export const MultiselectCheckbox = ({
         {label}
       </label>
       <div className="multiselect-checkbox__trigger-wrap">
+        {showSelectionSummary ? (
+          <span className="multiselect-checkbox__selection-summary">
+            {selectionSummary}
+          </span>
+        ) : null}
         <input
           id={id}
           type="text"
-          className="multiselect-checkbox__trigger govuk-input"
+          className={`multiselect-checkbox__trigger govuk-input${
+            showSelectionSummary
+              ? " multiselect-checkbox__trigger--with-prefix"
+              : ""
+          }`}
           value={inputValue}
           onFocus={() => {
             if (!disabled) {

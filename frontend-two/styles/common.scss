@@ -3225,10 +3225,25 @@ body.helpdesk-open {
     position: relative;
   }
 
+  &__selection-summary {
+    position: absolute;
+    top: 50%;
+    left: govuk-spacing(2);
+    transform: translateY(-50%);
+    @include govuk-font($size: 19, $line-height: 1.25);
+    color: govuk-colour("dark-grey");
+    pointer-events: none;
+    z-index: 1;
+  }
+
   &__trigger {
     text-align: left;
     width: 100%;
     padding-right: govuk-spacing(6);
+
+    &--with-prefix {
+      padding-left: 6.75rem;
+    }
   }
 
   &__chevron {
