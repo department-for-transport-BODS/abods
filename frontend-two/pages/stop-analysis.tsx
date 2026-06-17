@@ -518,21 +518,17 @@ const StopAnalysisPage = () => {
       : [];
 
   // Handlers
-  const handleBoundsChange = useCallback(
-    (newBounds: BoundingBox) => {
-      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
-      boundsDebounceRef.current = setTimeout(() => {
-        updateQueryRef.current({
-          minLatitude: String(newBounds.minLatitude),
-          maxLatitude: String(newBounds.maxLatitude),
-          minLongitude: String(newBounds.minLongitude),
-          maxLongitude: String(newBounds.maxLongitude),
-        });
-      }, 500);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  const handleBoundsChange = useCallback((newBounds: BoundingBox) => {
+    if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
+    boundsDebounceRef.current = setTimeout(() => {
+      updateQueryRef.current({
+        minLatitude: String(newBounds.minLatitude),
+        maxLatitude: String(newBounds.maxLatitude),
+        minLongitude: String(newBounds.minLongitude),
+        maxLongitude: String(newBounds.maxLongitude),
+      });
+    }, 500);
+  }, []);
 
   const handleAdminAreaClick = useCallback(
     (adminAreaId: string) => {

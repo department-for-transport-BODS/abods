@@ -360,8 +360,9 @@ export const StopAnalysisMap = ({
           updateAdminAreaPopup(map);
         });
 
-        // Admin area click
+        // Admin area click — block clicks when areas are hidden at high zoom
         map.on("click", "admin-area-boundaries", (e) => {
+          if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM) return;
           if (e.features && e.features[0]?.properties) {
             onAdminAreaClick?.(e.features[0].properties.id);
           }
