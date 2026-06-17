@@ -1,9 +1,8 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import DayOfWeekChart from "@/components/on-time/DayOfWeekChart";
-import DelayFrequencyChart from "@/components/on-time/DelayFrequencyChart";
 import { JsonSection } from "@/components/on-time/JsonSection";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -27,6 +26,16 @@ import {
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
 } from "../../src/generated/graphql";
+
+const DelayFrequencyChart = dynamic(
+  () => import("@/components/on-time/DelayFrequencyChart"),
+  { ssr: false },
+);
+
+const DayOfWeekChart = dynamic(
+  () => import("@/components/on-time/DayOfWeekChart"),
+  { ssr: false },
+);
 
 interface OperatorOnTimeData {
   overview: { onTime?: PunctualityOverview; headway?: HeadwayOverviewType };
