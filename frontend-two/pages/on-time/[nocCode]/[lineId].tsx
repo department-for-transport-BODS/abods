@@ -11,6 +11,7 @@ import {
   StopPerformance,
   onTimeService,
 } from "@/services/on-time/on-time.service";
+import { DateTime } from "luxon";
 import { buildDefaultParams } from "@/services/on-time/params";
 import {
   NormalizedStop,
@@ -23,6 +24,7 @@ import {
 import { settle } from "@/utils/settle";
 import {
   FrequentServiceInfoType,
+  Granularity,
   HeadwayTimeSeriesType,
   ServiceInfoType,
 } from "../../../src/generated/graphql";
@@ -62,12 +64,23 @@ const OnTimeServicePage = () => {
       setIsLoading(true);
       const params = buildDefaultParams({ nocCode, lineId });
 
+      const fromDate = DateTime.fromISO(params.fromTimestamp);
+      const toDate = DateTime.fromISO(params.toTimestamp);
+      const granularity =
+        Math.abs(toDate.diff(fromDate, "days").days) <= 5
+          ? Granularity.Hour
+          : Granularity.Day;
+      const headwayParams = {
+        ...params,
+        filters: { ...params.filters, granularity },
+      };
+
       const [serviceInfo, stopPerformance, servicePatterns, headwayTimeSeries] =
         await Promise.all([
           settle(onTimeService.fetchServiceInfo(lineId)),
           settle(onTimeService.fetchStopPerformanceList(params)),
           settle(transitModelService.fetchServicePatternStops(nocCode, lineId)),
-          settle(headwayService.fetchTimeSeries(params)),
+          settle(headwayService.fetchTimeSeries(headwayParams)),
         ]);
 
       const frequentServiceInfo = await settle(
