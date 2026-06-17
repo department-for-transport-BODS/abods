@@ -37,6 +37,11 @@ const DayOfWeekChart = dynamic(
   { ssr: false },
 );
 
+const TimeOfDayChart = dynamic(
+  () => import("@/components/on-time/TimeOfDayChart"),
+  { ssr: false },
+);
+
 interface OperatorOnTimeData {
   overview: { onTime?: PunctualityOverview; headway?: HeadwayOverviewType };
   delayFrequency: DelayFrequencyType[];
@@ -167,11 +172,14 @@ const OnTimeOperatorPage = () => {
             data={data.timeSeries}
             error={errors.timeSeries}
           />
-          <JsonSection
-            title="onTimeService.fetchOnTimePunctualityTimeOfDayData"
-            data={data.timeOfDay}
-            error={errors.timeOfDay}
-          />
+          {errors.timeOfDay ? (
+            <p className="govuk-error-message">
+              <span className="govuk-visually-hidden">Error:</span>{" "}
+              {errors.timeOfDay}
+            </p>
+          ) : (
+            <TimeOfDayChart data={data.timeOfDay ?? []} />
+          )}
           {errors.dayOfWeek ? (
             <p className="govuk-error-message">
               <span className="govuk-visually-hidden">Error:</span>{" "}

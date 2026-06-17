@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { PerformanceParams } from "@/services/on-time/on-time.service";
+import { MatchType } from "../../src/generated/graphql";
 
 /**
  * Builds a default PerformanceParams covering the last 7 full days, optionally
@@ -22,6 +23,8 @@ export const buildDefaultParams = (options?: {
     filters: {
       operatorIds: options?.nocCode ? [options.nocCode] : undefined,
       lineIds: options?.lineId ? [options.lineId] : undefined,
+      timingPointsOnly: true,
+      matchType: MatchType.Evidenced,
     },
   };
 };
