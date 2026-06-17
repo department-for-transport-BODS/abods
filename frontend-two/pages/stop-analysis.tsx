@@ -484,11 +484,15 @@ const StopAnalysisPage = () => {
   }, [adminAreaIds, operatorIds, operators]);
 
   const adminAreaGeoJSON = useMemo(
-    () => computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds),
+    () =>
+      visibleAdminAreaIds.length > 0
+        ? computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds)
+        : { type: "FeatureCollection" as const, features: [] },
     [adminAreas, visibleAdminAreaIds],
   );
 
   const selectedAdminAreaBounds = useMemo(() => {
+    if (visibleAdminAreaIds.length === 0) return null;
     if (adminAreaGeoJSON.features.length === 0) return null;
 
     const [minLongitude, minLatitude, maxLongitude, maxLatitude] =
@@ -500,7 +504,7 @@ const StopAnalysisPage = () => {
       maxLongitude,
       maxLatitude,
     };
-  }, [adminAreaGeoJSON]);
+  }, [adminAreaGeoJSON, visibleAdminAreaIds]);
 
   // Error state
   const errors: ErrorInfo[] =

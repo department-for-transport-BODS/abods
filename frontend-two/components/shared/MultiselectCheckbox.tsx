@@ -31,6 +31,7 @@ export const MultiselectCheckbox = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const summaryRef = useRef<HTMLSpanElement>(null);
 
   const getOptionId = (value: string) =>
     `${id}-${value.toLowerCase().replace(/[^a-z0-9_-]+/g, "-")}`;
@@ -83,6 +84,7 @@ export const MultiselectCheckbox = ({
       onBlur={(e) => {
         if (!containerRef.current?.contains(e.relatedTarget)) {
           setIsOpen(false);
+          setSearchText("");
         }
       }}
     >
@@ -91,18 +93,22 @@ export const MultiselectCheckbox = ({
       </label>
       <div className="multiselect-checkbox__trigger-wrap">
         {showSelectionSummary ? (
-          <span className="multiselect-checkbox__selection-summary">
+          <span
+            ref={summaryRef}
+            className="multiselect-checkbox__selection-summary"
+          >
             {selectionSummary}
           </span>
         ) : null}
         <input
           id={id}
           type="text"
-          className={`multiselect-checkbox__trigger govuk-input${
-            showSelectionSummary
-              ? " multiselect-checkbox__trigger--with-prefix"
-              : ""
-          }`}
+          className="multiselect-checkbox__trigger govuk-input"
+          style={
+            showSelectionSummary && summaryRef.current
+              ? { paddingLeft: summaryRef.current.offsetWidth + 8 }
+              : undefined
+          }
           value={inputValue}
           onFocus={() => {
             if (!disabled) {

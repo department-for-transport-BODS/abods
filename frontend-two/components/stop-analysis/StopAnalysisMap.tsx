@@ -112,6 +112,8 @@ export const StopAnalysisMap = ({
   const mapRef = useRef<Map | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  onBoundsChangeRef.current = onBoundsChange;
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleRevision, setStyleRevision] = useState(0);
   const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
@@ -257,7 +259,7 @@ export const StopAnalysisMap = ({
       const bounds = map.getBounds();
       if (!bounds) return;
 
-      onBoundsChange({
+      onBoundsChangeRef.current({
         minLatitude: bounds.getSouth(),
         maxLatitude: bounds.getNorth(),
         minLongitude: bounds.getWest(),
@@ -639,14 +641,10 @@ export const StopAnalysisMap = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded || !map.isStyleLoaded()) return;
-    if (!selectedAdminAreaBounds) {
-      return;
-    }
+    if (!map || !mapLoaded) return;
 
-    try {
-      map.fitBounds(
-        [
+    const targetBounds = selectedAdminAreaBounds
+      ? [
           [
             selectedAdminAreaBounds.minLongitude,
             selectedAdminAreaBounds.minLatitude,
@@ -655,13 +653,18 @@ export const StopAnalysisMap = ({
             selectedAdminAreaBounds.maxLongitude,
             selectedAdminAreaBounds.maxLatitude,
           ],
-        ],
-        {
-          duration: 500,
-          padding: 40,
-          maxZoom: ADMIN_AREA_HIDDEN_ZOOM,
-        },
-      );
+        ]
+      : [
+          [BRITISH_ISLES_BBOX[0], BRITISH_ISLES_BBOX[1]],
+          [BRITISH_ISLES_BBOX[2], BRITISH_ISLES_BBOX[3]],
+        ];
+
+    try {
+      map.fitBounds(targetBounds as LngLatBoundsLike, {
+        duration: 500,
+        padding: 40,
+        maxZoom: selectedAdminAreaBounds ? ADMIN_AREA_HIDDEN_ZOOM : undefined,
+      });
     } catch {
       return;
     }

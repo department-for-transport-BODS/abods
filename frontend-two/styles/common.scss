@@ -3234,16 +3234,16 @@ body.helpdesk-open {
     color: govuk-colour("dark-grey");
     pointer-events: none;
     z-index: 1;
+    max-width: 50%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   &__trigger {
     text-align: left;
     width: 100%;
     padding-right: govuk-spacing(6);
-
-    &--with-prefix {
-      padding-left: 6.75rem;
-    }
   }
 
   &__chevron {
