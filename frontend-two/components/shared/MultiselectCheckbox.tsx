@@ -140,7 +140,11 @@ export const MultiselectCheckbox = ({
         />
       </div>
       {isOpen && (
-        <div className="multiselect-checkbox__dropdown" role="listbox">
+        <div
+          className="multiselect-checkbox__dropdown"
+          role="listbox"
+          onMouseDown={(e) => e.preventDefault()}
+        >
           {showAll ? (
             <div className="multiselect-checkbox__header">
               <strong className="multiselect-checkbox__header-label">

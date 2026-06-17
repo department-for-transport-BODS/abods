@@ -3231,7 +3231,7 @@ body.helpdesk-open {
     left: govuk-spacing(2);
     transform: translateY(-50%);
     @include govuk-font($size: 19, $line-height: 1.25);
-    color: govuk-colour("dark-grey");
+    color: govuk-colour("black");
     pointer-events: none;
     z-index: 1;
     max-width: 50%;
