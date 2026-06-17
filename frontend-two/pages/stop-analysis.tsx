@@ -547,9 +547,16 @@ const StopAnalysisPage = () => {
 
   const handleOperatorsChange = useCallback(
     (values: string[]) => {
-      updateQuery({ operatorIds: values });
+      const hasDeselectedOperator = operatorIds.some(
+        (operatorId) => !values.includes(operatorId),
+      );
+
+      updateQuery({
+        operatorIds: values,
+        lineIds: hasDeselectedOperator ? [] : lineIds,
+      });
     },
-    [updateQuery],
+    [lineIds, operatorIds, updateQuery],
   );
 
   const handleStopClick = useCallback((stop: StopPerformanceRow) => {
