@@ -268,6 +268,7 @@ const ExcessWaitTimeChart = ({
 
   return (
     <div
+      data-testid="excess-wait-time-chart"
       ref={chartContainerRef}
       style={{ minHeight: "420px", width: "100%" }}
     />

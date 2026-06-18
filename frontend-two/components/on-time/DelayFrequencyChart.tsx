@@ -183,6 +183,7 @@ const DelayFrequencyChart = ({ data }: DelayFrequencyChartProps) => {
 
   return (
     <div
+      data-testid="delay-frequency-chart"
       ref={chartContainerRef}
       style={{ minHeight: "400px", width: "100%" }}
     />

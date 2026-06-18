@@ -7,7 +7,9 @@ interface TimeOfDayChartProps {
 }
 
 const TimeOfDayChart = ({ data }: TimeOfDayChartProps) => (
-  <StackedHistogramChart data={data} category="timeOfDay" />
+  <div data-testid="time-of-day-chart">
+    <StackedHistogramChart data={data} category="timeOfDay" />
+  </div>
 );
 
 export default memo(TimeOfDayChart);

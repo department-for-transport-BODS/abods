@@ -215,6 +215,7 @@ const StackedHistogramChart = ({
 
   return (
     <div
+      data-testid="stacked-histogram-chart"
       ref={chartContainerRef}
       style={{ minHeight: "400px", width: "100%" }}
     />

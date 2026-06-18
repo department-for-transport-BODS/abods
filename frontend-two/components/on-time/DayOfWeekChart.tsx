@@ -7,7 +7,9 @@ interface DayOfWeekChartProps {
 }
 
 const DayOfWeekChart = ({ data }: DayOfWeekChartProps) => (
-  <StackedHistogramChart data={data} category="dayOfWeek" centerAxis />
+  <div data-testid="day-of-week-chart">
+    <StackedHistogramChart data={data} category="dayOfWeek" centerAxis />
+  </div>
 );
 
 export default memo(DayOfWeekChart);
