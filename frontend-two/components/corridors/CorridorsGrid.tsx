@@ -1,45 +1,51 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { SortableTable } from "kainossoftwareltd-govuk-react-kainos";
+import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
+import type { SortableTableRow } from "@/components/table/SortableTable";
 import { CorridorSummary } from "@/types/corridors";
+import Image from "next/image";
 
-enum SortOrder {
-  ASC = "asc",
-  DESC = "desc",
-  NONE = "none",
-}
-
-type SortKey = "name" | "numStops";
-
-const nameComparator = (a: string, b: string) =>
-  a.trim().localeCompare(b.trim(), undefined, { numeric: true });
-
-const sortCorridors = (
-  data: CorridorSummary[],
-  key: SortKey,
-  dir: SortOrder,
-): CorridorSummary[] => {
-  const sorted = [...data].sort((a, b) => {
-    if (key === "name") return nameComparator(a.name ?? "", b.name ?? "");
-    return (a.numStops ?? 0) - (b.numStops ?? 0);
-  });
-  return dir === SortOrder.ASC ? sorted : sorted.reverse();
-};
-
-const HEAD = [
-  { key: "name", label: "Name", sortable: true, sortOrder: SortOrder.ASC },
+const COLUMNS = [
+  { key: "name", label: "Name", sortable: true },
   { key: "numStops", label: "Stops", sortable: true },
   { key: "edit", label: "", sortable: false },
 ];
 
-const filterCorridors = (
-  data: CorridorSummary[],
-  filter: string,
-): CorridorSummary[] => {
-  const needle = filter.trim().toLowerCase();
-  if (!needle) return data;
-  return data.filter((c) => (c.name ?? "").toLowerCase().includes(needle));
-};
+function getRowValue(row: CorridorSummary, column: string): string | number {
+  switch (column) {
+    case "name":
+      return row.name ?? "";
+    case "numStops":
+      return row.numStops ?? 0;
+    default:
+      return "";
+  }
+}
+
+function renderRow(corridor: CorridorSummary): SortableTableRow {
+  return {
+    key: String(corridor.id),
+    name: (
+      <Link
+        href={`/corridors/${corridor.id}`}
+        className="govuk-link"
+        style={{ textDecoration: "none" }}
+      >
+        {corridor.name}
+      </Link>
+    ),
+    numStops: corridor.numStops ?? 0,
+    edit: (
+      <Link
+        href={`/corridors/edit/${corridor.id}`}
+        className="govuk-link"
+        style={{ textDecoration: "none" }}
+      >
+        Edit
+      </Link>
+    ),
+  };
+}
 
 interface Props {
   data: CorridorSummary[];
@@ -48,32 +54,13 @@ interface Props {
 }
 
 export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDir, setSortDir] = useState<SortOrder>(SortOrder.ASC);
+  const filtered = useMemo(() => {
+    const needle = filter.trim().toLowerCase();
+    if (!needle) return data;
+    return data.filter((c) => (c.name ?? "").toLowerCase().includes(needle));
+  }, [data, filter]);
 
-  const handleSort = (key: string, order: SortOrder) => {
-    setSortKey(key as SortKey);
-    setSortDir(order);
-  };
-
-  const filtered = filterCorridors(data, filter);
-  const rows = sortCorridors(filtered, sortKey, sortDir);
-  const noMatches = data.length > 0 && rows.length === 0;
-
-  const tableRows = rows.map((corridor) => ({
-    key: String(corridor.id),
-    name: (
-      <Link href={`/corridors/${corridor.id}`} className="govuk-link">
-        {corridor.name}
-      </Link>
-    ) as unknown as string,
-    numStops: corridor.numStops ?? 0,
-    edit: (
-      <Link href={`/corridors/edit/${corridor.id}`} className="govuk-link">
-        Edit
-      </Link>
-    ) as unknown as string,
-  }));
+  const noMatches = data.length > 0 && filtered.length === 0;
 
   return (
     <>
@@ -83,14 +70,24 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
             <label className="govuk-label" htmlFor="corridors-grid-filter">
               Search for a corridor
             </label>
-            <input
-              id="corridors-grid-filter"
-              name="filter"
-              type="search"
-              className="govuk-input govuk-input--width-20"
-              value={filter}
-              onChange={(e) => onFilterChange(e.target.value)}
-            />
+            <div className="corridors-grid-search">
+              <Image
+                className="corridors-grid-search__icon"
+                src="/assets/icons/search.svg"
+                alt=""
+                aria-hidden="true"
+                width={16}
+                height={16}
+              />
+              <input
+                id="corridors-grid-filter"
+                name="filter"
+                type="search"
+                className="govuk-input govuk-input--width-20 corridors-grid-search__input"
+                value={filter}
+                onChange={(e) => onFilterChange(e.target.value)}
+              />
+            </div>
           </div>
         </div>
         <div className="govuk-grid-column-one-third-from-desktop govuk-!-text-align-right">
@@ -106,7 +103,14 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
         </div>
       </div>
 
-      <SortableTable head={HEAD} rows={tableRows} onSort={handleSort} />
+      <SortedPaginatedTable
+        columns={COLUMNS}
+        data={filtered}
+        getRowValue={getRowValue}
+        renderRow={renderRow}
+        initialSortKey="name"
+        initialSortOrder="asc"
+      />
 
       {noMatches ? (
         <div role="alert" className="govuk-body">

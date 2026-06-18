@@ -95,10 +95,16 @@ describe("CorridorsPage", () => {
       "href",
       "/corridors/1",
     );
+    expect(screen.getByRole("link", { name: "Alpha" })).toHaveStyle({
+      textDecoration: "none",
+    });
     expect(screen.getAllByRole("link", { name: "Edit" })[0]).toHaveAttribute(
       "href",
       "/corridors/edit/1",
     );
+    expect(screen.getAllByRole("link", { name: "Edit" })[0]).toHaveStyle({
+      textDecoration: "none",
+    });
     expect(
       screen.getByRole("button", { name: "Create new corridor" }),
     ).toHaveAttribute("href", "/corridors/create");
@@ -140,6 +146,10 @@ describe("CorridorsPage", () => {
     const input = screen.getByLabelText("Search for a corridor");
     await user.type(input, "bet");
 
+    expect(screen.getByAltText("")).toHaveAttribute(
+      "src",
+      "/assets/icons/search.svg",
+    );
     expect(mockReplace).toHaveBeenCalled();
   });
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -16,11 +16,12 @@ import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnaly
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { parseCorridorId, parseMatchType, queryValue } from "@/utils/query";
-import { formatTransitTime, parseDate, toIsoDateInput } from "@/utils/date";
-import { CorridorGranularity } from "../../src/generated/graphql";
+import { formatTransitTime, parseDate } from "@/utils/date";
+import { CorridorGranularity, MatchType } from "../../src/generated/graphql";
 
 const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
@@ -28,6 +29,17 @@ const NOT_FOUND_MESSAGE =
 
 type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
+
+const LoadingDots = () => (
+  <span role="status" aria-live="polite">
+    <span className="govuk-visually-hidden">Loading...</span>
+    <span className="ranking-table__loading-dots" aria-hidden="true">
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+    </span>
+  </span>
+);
 
 const PRESET_DATE_RANGES: Record<
   string,
@@ -42,22 +54,6 @@ const PRESET_DATE_RANGES: Record<
   monthToDate: (t) => ({ from: t.startOf("month"), to: t }),
 };
 
-const formatDateDisplay = (dt: DateTime): string => dt.toFormat("d MMM yyyy");
-
-const CalendarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-  >
-    <path d="M15 2h-1V0h-2v2H8V0H6v2H5C3.9 2 3 2.9 3 4v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 16H5V7h10v11zm0-13H5V4h10v1z" />
-  </svg>
-);
-
 const CorridorsViewPage = () => {
   useRequireAuth();
 
@@ -66,8 +62,6 @@ const CorridorsViewPage = () => {
   const { loadData } = useHelpdesk();
   const { hideOutliers, setJourneyTime, setTimeOfDay, setDayOfWeek } =
     useCorridorHideOutliers();
-
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   useEffect(() => {
     loadData("corridors", "Corridors");
@@ -149,6 +143,8 @@ const CorridorsViewPage = () => {
       }),
   );
 
+  const isStatsLoading = corridorLoading || statsLoading;
+
   const showNotFound =
     !corridorLoading && (corridorId === null || corridor === null);
 
@@ -194,6 +190,17 @@ const CorridorsViewPage = () => {
       });
   };
 
+  const handleDateRangeChange = (from: string, to: string) => {
+    const fromDate = DateTime.fromISO(from).startOf("day");
+    const toDate = DateTime.fromISO(to).endOf("day");
+
+    setQuery({
+      from: fromDate.toUTC().toISO() ?? undefined,
+      to: toDate.toUTC().toISO() ?? undefined,
+      preset: "custom",
+    });
+  };
+
   return (
     <BaseLayout title="Corridor - Analyse Bus Open Data">
       <Link href="/corridors" className="govuk-back-link">
@@ -224,78 +231,28 @@ const CorridorsViewPage = () => {
 
           <div className="corridor__date-wrapper govuk-!-margin-bottom-5">
             <div className="corridor__date-range-picker">
-              <div className="corridor__date-range-input-wrapper">
-                <span className="corridor__date-range-text">
-                  {formatDateDisplay(fromDate)} &#x2013;{" "}
-                  {formatDateDisplay(toDate)}
-                </span>
-                <button
-                  type="button"
-                  className="unbuttoned corridor__date-range-calendar-btn"
-                  onClick={() => setIsDatePickerOpen((v) => !v)}
-                  aria-label="Open date range picker"
-                  aria-expanded={isDatePickerOpen}
+              <div className="stop-analysis-filters__date-range">
+                <DateRangeSelect
+                  value={{ from: fromDate.toISO()!, to: toDate.toISO()! }}
+                  onChange={({ from, to }) => handleDateRangeChange(from, to)}
+                  hideLabel
+                />
+                <select
+                  className="govuk-select stop-analysis-filters__preset-select"
+                  value={preset}
+                  onChange={(e) => handlePresetChange(e.target.value)}
+                  aria-label="Preset date range"
                 >
-                  <CalendarIcon />
-                </button>
+                  <option value="last7">Last 7 days</option>
+                  <option value="last28">Last 28 days</option>
+                  <option value="lastMonth">Last month</option>
+                  <option value="monthToDate">Month to date</option>
+                  {preset === "custom" && (
+                    <option value="custom">Custom</option>
+                  )}
+                </select>
               </div>
-              {isDatePickerOpen && (
-                <div className="corridor__date-range-panel">
-                  <div>
-                    <label className="govuk-label" htmlFor="corridor-from-date">
-                      From
-                    </label>
-                    <input
-                      id="corridor-from-date"
-                      type="date"
-                      className="govuk-input govuk-input--width-10"
-                      value={toIsoDateInput(fromDate)}
-                      onChange={(event) => {
-                        const dt = DateTime.fromISO(event.target.value);
-                        if (dt.isValid) {
-                          setQuery({
-                            from: dt.toUTC().toISO() ?? undefined,
-                            preset: "custom",
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="govuk-label" htmlFor="corridor-to-date">
-                      To
-                    </label>
-                    <input
-                      id="corridor-to-date"
-                      type="date"
-                      className="govuk-input govuk-input--width-10"
-                      value={toIsoDateInput(toDate)}
-                      onChange={(event) => {
-                        const dt = DateTime.fromISO(event.target.value);
-                        if (dt.isValid) {
-                          setQuery({
-                            to: dt.toUTC().toISO() ?? undefined,
-                            preset: "custom",
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
-            <select
-              className="govuk-select"
-              value={preset}
-              onChange={(e) => handlePresetChange(e.target.value)}
-              aria-label="Preset date range"
-            >
-              <option value="last7">Last 7 days</option>
-              <option value="last28">Last 28 days</option>
-              <option value="lastMonth">Last month</option>
-              <option value="monthToDate">Month to date</option>
-              {preset === "custom" && <option value="custom">Custom</option>}
-            </select>
             <SegmentedToggle
               name="match-type"
               legend="Show performance using data from"
@@ -303,8 +260,8 @@ const CorridorsViewPage = () => {
               value={matchType}
               onChange={(value) => setQuery({ matchType: value })}
               options={[
-                { value: "estimated", label: "Estimated" },
-                { value: "evidenced", label: "Evidenced" },
+                { value: MatchType.Estimated, label: "Estimated" },
+                { value: MatchType.Evidenced, label: "Evidenced" },
               ]}
             />
             {corridor ? (
@@ -330,7 +287,7 @@ const CorridorsViewPage = () => {
                   segment: value === null ? undefined : String(value),
                 })
               }
-              isDisabled={statsLoading}
+              isDisabled={isStatsLoading}
             />
           ) : null}
 
@@ -339,10 +296,13 @@ const CorridorsViewPage = () => {
               id="corridor-total-transits"
               label="Recorded transits"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.totalTransits ?? "Unavailable"
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  stats?.summaryStats.totalTransits ?? "Unavailable"
+                )
               }
               tooltip="The total number of journeys that actually passed through the corridor according to real-time information received."
             />
@@ -350,16 +310,19 @@ const CorridorsViewPage = () => {
               id="corridor-missing-transits"
               label="Missing transits"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.scheduledTransits !== null &&
-                      stats?.summaryStats.scheduledTransits !== undefined &&
-                      stats?.summaryStats.totalTransits !== null &&
-                      stats?.summaryStats.totalTransits !== undefined
-                    ? stats.summaryStats.scheduledTransits -
-                      stats.summaryStats.totalTransits
-                    : "Unavailable"
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : stats?.summaryStats.scheduledTransits !== null &&
+                  stats?.summaryStats.scheduledTransits !== undefined &&
+                  stats?.summaryStats.totalTransits !== null &&
+                  stats?.summaryStats.totalTransits !== undefined ? (
+                  stats.summaryStats.scheduledTransits -
+                  stats.summaryStats.totalTransits
+                ) : (
+                  "Unavailable"
+                )
               }
               tooltip="The number of journeys in the timetables provided that do not have real-time information recorded against them."
             />
@@ -367,10 +330,13 @@ const CorridorsViewPage = () => {
               id="corridor-average-journey-time"
               label="Average journey time"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
-                statsLoading
-                  ? "\u2014"
-                  : formatTransitTime(stats?.summaryStats.averageTransitTime)
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  formatTransitTime(stats?.summaryStats.averageTransitTime)
+                )
               }
               tooltip="The average time taken for a bus to move through the corridor according to real-time information received."
             />
@@ -378,13 +344,16 @@ const CorridorsViewPage = () => {
               id="corridor-average-speed"
               label="Average speed"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
-                statsLoading
-                  ? "\u2014"
-                  : averageSpeedLabel(
-                      stats?.serviceLinks ?? [],
-                      stats?.summaryStats.averageTransitTime,
-                    )
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  averageSpeedLabel(
+                    stats?.serviceLinks ?? [],
+                    stats?.summaryStats.averageTransitTime,
+                  )
+                )
               }
               tooltip="The average speed of buses moving through the corridor according to the real-time information received."
             />
@@ -392,10 +361,13 @@ const CorridorsViewPage = () => {
               id="corridor-services"
               label="Services"
               className="corridor__summary-stat"
+              loading={isStatsLoading}
               value={
-                statsLoading
-                  ? "\u2014"
-                  : stats?.summaryStats.numberOfServices ?? "Unavailable"
+                isStatsLoading ? (
+                  <LoadingDots />
+                ) : (
+                  stats?.summaryStats.numberOfServices ?? "Unavailable"
+                )
               }
               tooltip="The total number of different services that pass through this corridor."
             />

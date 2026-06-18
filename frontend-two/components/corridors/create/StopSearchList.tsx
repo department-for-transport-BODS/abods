@@ -7,12 +7,14 @@ interface Props {
   matchingStops: CorridorStop[];
   isFirstStop: boolean;
   onAddStop: (stop: CorridorStop) => void;
+  showGraphic?: boolean;
 }
 
 export const StopSearchList = ({
   matchingStops,
   isFirstStop,
   onAddStop,
+  showGraphic = false,
 }: Props) => {
   const [listSize, setListSize] = useState(LIST_LEN);
 
@@ -28,14 +30,18 @@ export const StopSearchList = ({
       {stops.map((stop, index) => (
         <div
           key={`${stop.stopId}-${index}`}
-          className="govuk-!-margin-bottom-3 govuk-!-padding-bottom-2"
+          className="corridor-stop-list__stop corridor-stop-list__stop--matching"
         >
-          <div className="govuk-body govuk-!-margin-bottom-1">
-            <strong>{stop.stopName}</strong>
-          </div>
-          <div className="govuk-body-s govuk-!-margin-bottom-2">
-            {stop.localityName ? `${stop.localityName} ` : ""}
-            {stop.naptan}
+          <div
+            className={`${!showGraphic ? "corridor-stop-list__stop-details--no-graphic" : "corridor-stop-list__stop-details "}`}
+          >
+            <div className="corridor-stop-list__stop-label">
+              {stop.stopName}
+            </div>
+            <div className="corridor-stop-list__naptan">
+              {stop.localityName ? `${stop.localityName} ` : ""}
+              {stop.naptan}
+            </div>
           </div>
           <button
             type="button"
@@ -45,14 +51,13 @@ export const StopSearchList = ({
           >
             {isFirstStop ? "Select" : "Add"}
           </button>
-          <hr className="govuk-section-break govuk-section-break--visible" />
         </div>
       ))}
 
       {showMoreBtn ? (
         <button
           type="button"
-          className="govuk-button govuk-button--secondary"
+          className="govuk-button govuk-button--secondary govuk-!-margin-top-4"
           data-module="govuk-button"
           onClick={() => setListSize((current) => current + LIST_LEN)}
         >

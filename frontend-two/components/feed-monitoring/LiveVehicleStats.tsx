@@ -171,7 +171,7 @@ const LiveVehicleStats = ({
       chart.dispose();
       chartInstance.current = null;
     };
-  }, [data, granularity]);
+  }, [data, granularity, xAxisMin, xAxisMax]);
 
   return (
     <div>

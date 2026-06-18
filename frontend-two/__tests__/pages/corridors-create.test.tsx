@@ -61,6 +61,7 @@ const mockFetchSubsequentStops = vi.mocked(
   corridorsService.fetchSubsequentStops,
 );
 const mockCreateCorridor = vi.mocked(corridorsService.createCorridor);
+const mockFetch = vi.fn();
 
 const stopA: CorridorStop = {
   stopId: "a",
@@ -96,7 +97,11 @@ const renderPage = () =>
 describe("CorridorsCreatePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("fetch", mockFetch);
     mockUseConfig.mockReturnValue({
+      config: {
+        mapboxToken: "test-mapbox-token",
+      },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
@@ -104,10 +109,24 @@ describe("CorridorsCreatePage", () => {
     mockQueryStops.mockResolvedValue({ orgStops: [stopA], nonOrgStops: [] });
     mockFetchSubsequentStops.mockResolvedValue([stopB]);
     mockCreateCorridor.mockResolvedValue(true);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        features: [
+          {
+            id: "place.1",
+            place_name: "Test location",
+            center: [-1, 53],
+            bbox: [-1.1, 52.9, -0.9, 53.1],
+          },
+        ],
+      }),
+    } as Response);
   });
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
   });
 
   it("renders create corridor form", () => {
@@ -120,7 +139,13 @@ describe("CorridorsCreatePage", () => {
     const user = userEvent.setup();
     renderPage();
 
-    const searchInput = screen.getByLabelText("Location name or postcode");
+    // Switch to stop mode to test stop search
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
+
+    const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
@@ -130,6 +155,7 @@ describe("CorridorsCreatePage", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "Select" }));
+
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
     });
@@ -143,7 +169,13 @@ describe("CorridorsCreatePage", () => {
     const user = userEvent.setup();
     renderPage();
 
-    const searchInput = screen.getByLabelText("Location name or postcode");
+    // Switch to stop mode to test stop search
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
+
+    const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
@@ -181,7 +213,13 @@ describe("CorridorsCreatePage", () => {
     const user = userEvent.setup();
     renderPage();
 
-    const searchInput = screen.getByLabelText("Location name or postcode");
+    // Switch to stop mode to test stop search
+    await user.selectOptions(
+      screen.getByLabelText("Search for the first stop in your corridor"),
+      "stop",
+    );
+
+    const searchInput = screen.getByLabelText("Stop name or NaPTAN code");
     await user.type(searchInput, "Test");
 
     await waitFor(() => {

@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { DateTime } from "luxon";
 import { SWRConfig } from "swr";
 import CorridorsViewPage from "@/pages/corridors/[corridorId]";
 import { useConfig } from "@/contexts/ConfigContext";
@@ -15,6 +16,24 @@ vi.mock("@/hooks/useAuth", () => ({
 vi.mock("@/components/layout/BaseLayout", () => ({
   BaseLayout: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="base-layout">{children}</div>
+  ),
+}));
+
+vi.mock("@/components/shared/DateRangeSelect", () => ({
+  DateRangeSelect: ({
+    value,
+    onChange,
+  }: {
+    value: { from: string; to: string };
+    onChange: (dateRange: { from: string; to: string }) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="date-range-select"
+      onClick={() => onChange({ from: "2026-05-01", to: "2026-05-08" })}
+    >
+      {value.from} - {value.to}
+    </button>
   ),
 }));
 
@@ -37,6 +56,29 @@ vi.mock("@/services/corridors/corridors.service", () => ({
     fetchCorridorById: vi.fn(),
     fetchStats: vi.fn(),
   },
+}));
+
+vi.mock("@/components/table/SortableTable", () => ({
+  SortableTable: ({ head, rows }: any) => (
+    <table>
+      <thead>
+        <tr>
+          {head.map((h: any) => (
+            <th key={h.key}>{h.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r: any) => (
+          <tr key={r.key}>
+            {head.map((h: any) => (
+              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
 }));
 
 let mockQuery: Record<string, string | string[] | undefined> = {
@@ -169,7 +211,12 @@ describe("CorridorsViewPage", () => {
     vi.clearAllMocks();
     localStorage.clear();
 
-    mockQuery = { corridorId: "12" };
+    mockQuery = {
+      corridorId: "12",
+      from: "2026-05-26T00:00:00.000Z",
+      to: "2026-06-02T00:00:00.000Z",
+      preset: "custom",
+    };
 
     mockUseConfig.mockReturnValue({
       isLoading: false,
@@ -189,7 +236,35 @@ describe("CorridorsViewPage", () => {
 
     renderPage();
 
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--loading"),
+    ).toBeTruthy();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
+    ).toBeNull();
+    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
+  });
+
+  it("shows loading dots while stats are fetching", async () => {
+    mockFetchStats.mockImplementation(() => new Promise(() => {}));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Corridor 12")).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--loading"),
+    ).toBeTruthy();
+    expect(
+      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
+    ).toBeNull();
+    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
   });
 
   it("shows not found when corridor is missing", async () => {
@@ -217,7 +292,7 @@ describe("CorridorsViewPage", () => {
     expect(
       screen.getByRole("heading", { name: "Services" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("10: Outbound")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toHaveTextContent("10: Outbound");
   });
 
   it("updates URL when segment selection changes", async () => {
@@ -260,6 +335,43 @@ describe("CorridorsViewPage", () => {
       journeyTime: true,
       timeOfDay: false,
       dayOfWeek: false,
+    });
+  });
+
+  it("renders the shared date range control and updates the query when changed", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("date-range-select")).toHaveTextContent(
+        "2026-05-26T00:00:00.000Z - 2026-06-02T00:00:00.000Z",
+      );
+    });
+
+    await user.click(screen.getByTestId("date-range-select"));
+
+    const expectedFrom = DateTime.fromISO("2026-05-01")
+      .startOf("day")
+      .toUTC()
+      .toISO();
+    const expectedTo = DateTime.fromISO("2026-05-08")
+      .endOf("day")
+      .toUTC()
+      .toISO();
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: "/corridors/[corridorId]",
+          query: expect.objectContaining({
+            from: expectedFrom,
+            to: expectedTo,
+            preset: "custom",
+          }),
+        }),
+        undefined,
+        { shallow: true },
+      );
     });
   });
 });

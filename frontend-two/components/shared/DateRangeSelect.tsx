@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
+import Image from "next/image";
 import { DateRangeCalendar } from "./DateRangeCalendar";
 import {
   formatDateToDisplayString,
-  formatISODateStringToDate,
   formatDateToISODateString,
+  formatISODateStringToDate,
 } from "@/utils/dateFormatter";
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
@@ -28,18 +29,21 @@ function applyDaySelection(
 interface DateRangeSelectProps {
   value?: { from: string; to: string };
   onChange?: (dateRange: { from: string; to: string }) => void;
+  hideLabel?: boolean;
 }
 
-export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
+export const DateRangeSelect = ({
+  value,
+  onChange,
+  hideLabel = false,
+}: DateRangeSelectProps) => {
   const today = DateTime.local().startOf("day");
   const maxDate = today.minus({ days: 1 });
 
   const initialStart = value?.from
-    ? formatISODateStringToDate(value.from)
+    ? DateTime.fromISO(value.from)
     : today.minus({ days: 7 });
-  const initialEndRaw = value?.to
-    ? formatISODateStringToDate(value.to)
-    : maxDate;
+  const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
 
   // Clamp the displayed end date to maxDate if value.to is after maxDate.
   // Old frontend displayed the max selectable date as yesterday, but pulled data for the past week (incl. today)
@@ -121,8 +125,13 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
       : "Select date range";
 
   return (
-    <div className="govuk-form-group date-range-select" ref={ref}>
-      <label className="govuk-label">Date Range</label>
+    <div
+      className={
+        hideLabel ? "date-range-select" : "govuk-form-group date-range-select"
+      }
+      ref={ref}
+    >
+      {!hideLabel && <label className="govuk-label">Date Range</label>}
       <button
         type="button"
         className="date-range-select__button"
@@ -132,9 +141,11 @@ export const DateRangeSelect = ({ value, onChange }: DateRangeSelectProps) => {
         }}
       >
         <span className="date-range-select__button-text">{triggerLabel}</span>
-        <img
+        <Image
           src="/assets/icons/calendar.svg"
           alt=""
+          width={20}
+          height={20}
           className="date-range-select__icon"
         />
       </button>

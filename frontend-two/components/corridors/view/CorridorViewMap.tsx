@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
+import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
+import { displayCorridorChevrons } from "@/components/corridors/shared/corridorChevrons";
+import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
 
@@ -72,10 +75,10 @@ export const CorridorViewMap = ({
   const stopsRef = useRef(stops);
   const serviceLinksRef = useRef(serviceLinks);
   const selectedSegmentIndexRef = useRef(selectedSegmentIndex);
-  const [activeStyle, setActiveStyle] = useState<"street" | "satellite">(
-    "street",
+  const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
+    "default",
   );
-  const [hasMoved, setHasMoved] = useState(false);
+  const [moveCounter, setMoveCounter] = useState(0);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
@@ -95,11 +98,12 @@ export const CorridorViewMap = ({
     mapboxSatelliteStyleRef.current = mapboxSatelliteStyle;
   });
 
-  const addSourcesAndLayers = (map: mapboxgl.Map) => {
-    // Clean up any existing layers/sources (needed after style change)
-    ["corridor-markers", "corridor-line-layer"].forEach((id) => {
-      if (map.getLayer(id)) map.removeLayer(id);
-    });
+  const addSourcesAndLayers = async (map: mapboxgl.Map) => {
+    ["corridor-chevrons", "corridor-markers", "corridor-line-layer"].forEach(
+      (id) => {
+        if (map.getLayer(id)) map.removeLayer(id);
+      },
+    );
     ["corridor-line", "corridor-stops"].forEach((id) => {
       if (map.getSource(id)) map.removeSource(id);
     });
@@ -149,9 +153,10 @@ export const CorridorViewMap = ({
         ],
       },
     });
+
+    await displayCorridorChevrons(map, "corridor-markers");
   };
 
-  // Fit map bounds to the current stop list
   const fitToBounds = (map: mapboxgl.Map, opts?: mapboxgl.FitBoundsOptions) => {
     if (stopsRef.current.length === 0) return;
     const bounds = new mapboxgl.LngLatBounds();
@@ -183,21 +188,12 @@ export const CorridorViewMap = ({
 
     const hoveredStopId = { current: null as string | null };
     let isFirstStyleLoad = true;
+    let detachHoverHandlers = () => undefined;
 
-    map.on("style.load", () => {
-      if (isFirstStyleLoad) {
-        isFirstStyleLoad = false;
-        return; // handled by "load"
-      }
-      // Re-add after style switch
-      addSourcesAndLayers(map);
-    });
+    const bindHoverHandlers = () => {
+      detachHoverHandlers();
 
-    map.on("load", () => {
-      addSourcesAndLayers(map);
-      fitToBounds(map);
-
-      map.on("mousemove", "corridor-markers", (e) => {
+      const handleMouseMove = (e: mapboxgl.MapLayerMouseEvent) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features?.[0];
         if (!feature) return;
@@ -228,9 +224,9 @@ export const CorridorViewMap = ({
               `<div class="govuk-body-small">${props.naptan ?? ""}</div>`,
           )
           .addTo(map);
-      });
+      };
 
-      map.on("mouseleave", "corridor-markers", () => {
+      const handleMouseLeave = () => {
         map.getCanvas().style.cursor = "";
         popup.remove();
         if (hoveredStopId.current) {
@@ -240,14 +236,42 @@ export const CorridorViewMap = ({
           );
           hoveredStopId.current = null;
         }
-      });
+      };
+
+      map.on("mousemove", "corridor-markers", handleMouseMove);
+      map.on("mouseleave", "corridor-markers", handleMouseLeave);
+
+      detachHoverHandlers = () => {
+        map.off("mousemove", "corridor-markers", handleMouseMove);
+        map.off("mouseleave", "corridor-markers", handleMouseLeave);
+      };
+    };
+
+    map.on("style.load", () => {
+      if (isFirstStyleLoad) {
+        isFirstStyleLoad = false;
+        return; // handled by "load"
+      }
+      void (async () => {
+        await addSourcesAndLayers(map);
+        bindHoverHandlers();
+      })();
     });
 
-    map.on("moveend", () => setHasMoved(true));
+    map.on("load", () => {
+      void (async () => {
+        await addSourcesAndLayers(map);
+        bindHoverHandlers();
+        fitToBounds(map);
+      })();
+    });
+
+    map.on("moveend", () => setMoveCounter((count) => count + 1));
 
     mapRef.current = map;
 
     return () => {
+      detachHoverHandlers();
       popup.remove();
       map.remove();
       mapRef.current = null;
@@ -273,10 +297,10 @@ export const CorridorViewMap = ({
     )?.setData(buildStopsGeoJSON(stops));
   }, [stops]);
 
-  const switchStyle = (style: "street" | "satellite") => {
+  const switchStyle = (style: "default" | "satellite") => {
     setActiveStyle(style);
     mapRef.current?.setStyle(
-      style === "street"
+      style === "default"
         ? mapboxStyleRef.current
         : mapboxSatelliteStyleRef.current,
     );
@@ -286,7 +310,7 @@ export const CorridorViewMap = ({
     const map = mapRef.current;
     if (!map) return;
     fitToBounds(map, { duration: 500 });
-    setHasMoved(false);
+    setMoveCounter(0);
   };
 
   return (
@@ -296,28 +320,22 @@ export const CorridorViewMap = ({
         className="corridor__map"
         aria-label="Corridor map"
       />
-      <div className="corridor__map-style-toggle">
+      <MapDisplayOptions
+        activeStyle={activeStyle}
+        mapboxSatelliteStyle={mapboxSatelliteStyle}
+        onStyleChange={switchStyle}
+      />
+      {moveCounter > 1 && (
         <button
           type="button"
-          className={`corridor__map-style-btn${activeStyle === "street" ? " corridor__map-style-btn--active" : ""}`}
-          onClick={() => switchStyle("street")}
-        >
-          Street
-        </button>
-        <button
-          type="button"
-          className={`corridor__map-style-btn${activeStyle === "satellite" ? " corridor__map-style-btn--active" : ""}`}
-          onClick={() => switchStyle("satellite")}
-        >
-          Satellite
-        </button>
-      </div>
-      {hasMoved && (
-        <button
-          type="button"
-          className="corridor__map-recentre govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
+          className="corridor__map-recentre"
           onClick={recentre}
         >
+          <ReCentreIcon
+            className="corridor__map-recentre-icon"
+            aria-hidden="true"
+            focusable="false"
+          />
           Re-centre
         </button>
       )}

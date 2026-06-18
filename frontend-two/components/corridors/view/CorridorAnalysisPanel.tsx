@@ -102,7 +102,6 @@ export const CorridorAnalysisPanel = ({
 
   return (
     <div className="govuk-!-margin-bottom-6">
-      <h2 className="govuk-heading-m">Journey-time analysis</h2>
       <div className="analysis-tabs govuk-!-margin-bottom-4">
         {tabs.map((item) => (
           <button
@@ -117,7 +116,7 @@ export const CorridorAnalysisPanel = ({
       </div>
 
       {tab === "timeline" ? (
-        <>
+        <div className="corridor__chart-wrapper">
           <CorridorBoxPlotChart
             data={stats.transitTimeStats}
             xAxisType="date"
@@ -147,11 +146,11 @@ export const CorridorAnalysisPanel = ({
               </label>
             </div>
           </div>
-        </>
+        </div>
       ) : null}
 
       {tab === "timeOfDay" ? (
-        <>
+        <div className="corridor__chart-wrapper">
           <CorridorBoxPlotChart
             data={stats.transitTimeTimeOfDayStats}
             xAxisType="category"
@@ -181,11 +180,11 @@ export const CorridorAnalysisPanel = ({
               </label>
             </div>
           </div>
-        </>
+        </div>
       ) : null}
 
       {tab === "dayOfWeek" ? (
-        <>
+        <div className="corridor__chart-wrapper">
           <CorridorBoxPlotChart
             data={stats.transitTimeDayOfWeekStats}
             xAxisType="category"
@@ -215,7 +214,7 @@ export const CorridorAnalysisPanel = ({
               </label>
             </div>
           </div>
-        </>
+        </div>
       ) : null}
 
       {tab === "distribution" ? (

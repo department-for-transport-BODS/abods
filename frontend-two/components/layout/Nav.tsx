@@ -13,6 +13,12 @@ interface NavItem {
   requiresDistances?: boolean;
 }
 
+const normalizePath = (path: string) =>
+  path.split("?")[0].replace(/\/+$/, "") || "/";
+
+const isActiveNavItem = (currentPath: string, itemPath: string) =>
+  currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
+
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/feed-monitoring", label: "NOC feed monitoring" },
@@ -34,6 +40,7 @@ export const Nav = () => {
   const { user } = useAuth();
   const { open: openHelpdesk } = useHelpdesk();
   const { isOpen, close } = useNav();
+  const currentPath = normalizePath(router.asPath);
 
   const filteredNavItems = navItems.filter((item) => {
     if (item.requiresServiceMonitoring && !user?.canViewServiceMonitoring) {
@@ -54,7 +61,7 @@ export const Nav = () => {
       <div className="nav__block" id="nav">
         <ul className="govuk-list nav__list">
           {filteredNavItems.map((item) => {
-            const isActive = router.pathname === item.href;
+            const isActive = isActiveNavItem(currentPath, item.href);
             return (
               <li key={item.href} className="nav__item">
                 <Link

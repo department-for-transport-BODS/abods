@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { PagingPanel } from "../shared/PagingPanel";
 import {
   FeedMonitoringListQuery,
   VehicleStatFragment,
 } from "../../src/generated/graphql";
 import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
+import { SortedPaginatedTable } from "../table/SortedPaginatedTable";
+import type { SortableTableRow } from "../table/SortableTable";
+import Image from "next/image";
 
 type FeedMonitoringOperatorData =
   FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
@@ -14,22 +15,10 @@ type VehicleCountData = {
   last24Hours: VehicleStatFragment[];
 };
 
-const SortableTable = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (mod) => mod.SortableTable,
-    ),
-  { ssr: false },
-);
-
 const VehicleSparkline = dynamic(
   () => import("./VehicleSparkline").then((mod) => mod.VehicleSparkline),
   { ssr: false },
 );
-
-type SortOrder = "asc" | "desc" | "none";
-
-const PAGE_SIZE = 10;
 
 function getRowValue(
   data: FeedMonitoringOperatorData,
@@ -66,38 +55,7 @@ export const FeedTable = ({
   data,
   vehicleCountData,
 }: FeedTableProps) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [data]);
-
-  const sortedData = useMemo(() => {
-    if (!sortColumn || sortOrder === "none") return data;
-    return [...data].sort((a, b) => {
-      const aVal = getRowValue(a, sortColumn);
-      const bVal = getRowValue(b, sortColumn);
-      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [data, sortColumn, sortOrder]);
-
-  const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
-  const pageData = sortedData.slice(
-    currentPage * PAGE_SIZE,
-    (currentPage + 1) * PAGE_SIZE,
-  );
-
-  const handleTableSorting = (column: string, order: SortOrder) => {
-    setSortColumn(column);
-    setSortOrder(order);
-    setCurrentPage(0);
-  };
-
-  const columnHeaders = [
+  const columns = [
     { key: "icon", label: "", sortable: false },
     { key: "nocCode", label: "NOC", sortable: false },
     { key: "name", label: "Operator", sortable: false },
@@ -111,21 +69,27 @@ export const FeedTable = ({
     { key: "vehicleCount", label: "\u200B", sortable: false },
   ];
 
-  const rows = pageData.map((op) => {
+  const renderRow = (op: FeedMonitoringOperatorData): SortableTableRow => {
     const sparklineStats =
       vehicleCountData.find((v) => v.operatorId === op.operatorId)
         ?.last24Hours ?? [];
     return {
       key: op.operatorId ?? op.nocCode,
       icon: active ? (
-        <img
+        <Image
           src="/assets/icons/check-in-circle-solid.svg"
           className="feed-table__check"
+          alt="Active Feed"
+          width={36}
+          height={36}
         />
       ) : (
-        <img
+        <Image
           src="/assets/icons/cross-in-circle-solid.svg"
           className="feed-table__cross"
+          alt="Inactive Feed"
+          width={36}
+          height={36}
         />
       ),
       nocCode: op.nocCode,
@@ -162,25 +126,16 @@ export const FeedTable = ({
       ),
       vehicleCount: <VehicleSparkline data={sparklineStats} />,
     };
-  });
+  };
+
   return (
-    <>
-      <h2 className="govuk-heading-m">{title}</h2>
-      <SortableTable
-        head={columnHeaders}
-        rows={rows as any[]}
-        onSort={handleTableSorting}
-      ></SortableTable>
-      <div className="flex justify-end">
-        <PagingPanel
-          currentPage={currentPage + 1}
-          totalPages={totalPages}
-          pageSize={PAGE_SIZE}
-          rowCount={sortedData.length}
-          onPageChange={(page) => setCurrentPage(page - 1)}
-          noun={"feed"}
-        />
-      </div>
-    </>
+    <SortedPaginatedTable
+      columns={columns}
+      data={data}
+      getRowValue={getRowValue}
+      renderRow={renderRow}
+      title={title}
+      paginationNoun={"feed"}
+    />
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
@@ -52,11 +52,17 @@ const FeedHistoryPage = () => {
     date?: string;
   };
 
-  const yesterday = DateTime.now().startOf("day").minus({ days: 1 });
-  const baseDate =
-    date && DateTime.fromISO(date).isValid
-      ? DateTime.fromISO(date).startOf("day")
-      : yesterday;
+  const yesterday = useMemo(
+    () => DateTime.now().startOf("day").minus({ days: 1 }),
+    [],
+  );
+  const baseDate = useMemo(
+    () =>
+      date && DateTime.fromISO(date).isValid
+        ? DateTime.fromISO(date).startOf("day")
+        : yesterday,
+    [date, yesterday],
+  );
   const formattedDate = baseDate.toFormat("d MMMM yyyy");
 
   const prevDate = baseDate.minus({ days: 1 });
@@ -129,7 +135,7 @@ const FeedHistoryPage = () => {
       }
     };
     load();
-  }, [nocCode, date]);
+  }, [nocCode, baseDate]);
 
   if (isLoading) {
     return (

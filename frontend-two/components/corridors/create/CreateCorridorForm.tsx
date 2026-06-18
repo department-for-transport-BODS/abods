@@ -9,6 +9,8 @@ import { CorridorCreateMap } from "@/components/corridors/create/CorridorCreateM
 import { CorridorStopList } from "@/components/corridors/create/CorridorStopList";
 import { StopSearchList } from "@/components/corridors/create/StopSearchList";
 import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorridorModal";
+import { LocationLookupField } from "@/components/shared/LocationLookupField";
+import type { LngLatBounds } from "mapbox-gl";
 
 type SearchMode = "location" | "stop";
 
@@ -17,6 +19,7 @@ interface Props {
   initialCorridor?: Corridor;
   mapboxToken?: string;
   mapboxStyle?: string;
+  mapboxSatelliteStyle?: string;
 }
 
 export const CreateCorridorForm = ({
@@ -24,6 +27,7 @@ export const CreateCorridorForm = ({
   initialCorridor,
   mapboxToken,
   mapboxStyle,
+  mapboxSatelliteStyle,
 }: Props) => {
   const router = useRouter();
   const { mutate } = useSWRConfig();
@@ -35,6 +39,7 @@ export const CreateCorridorForm = ({
   const [stopList, setStopList] = useState<CorridorStop[]>(
     initialCorridor?.stops ?? [],
   );
+  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -42,8 +47,10 @@ export const CreateCorridorForm = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const isStopSearch = searchMode === "stop";
   const firstStopSearchEnabled =
-    stopList.length === 0 && stopQuery.trim().length > 3;
+    stopList.length === 0 &&
+    (isStopSearch ? stopQuery.trim().length > 3 : stopQuery.trim().length > 0);
   const { data: firstStopData, isLoading: searchingFirstStop } = useSWR(
     firstStopSearchEnabled
       ? ["corridor-first-stop-search", stopQuery.trim()]
@@ -62,6 +69,17 @@ export const CreateCorridorForm = ({
       corridorsService.fetchSubsequentStops(
         stopList.map((stop) => stop.naptan).filter(Boolean),
       ),
+  );
+
+  const boundsKey = mapBounds
+    ? `${mapBounds.getWest().toFixed(4)},${mapBounds.getSouth().toFixed(4)},${mapBounds.getEast().toFixed(4)},${mapBounds.getNorth().toFixed(4)}`
+    : null;
+
+  const { data: otherStopsData } = useSWR(
+    stopList.length > 0 && boundsKey
+      ? ["corridor-other-stops", boundsKey]
+      : null,
+    () => corridorsService.queryStops(undefined, mapBounds ?? undefined),
   );
 
   const loading = searchingFirstStop || searchingSubsequentStops;
@@ -250,148 +268,164 @@ export const CreateCorridorForm = ({
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-one-half">
-            <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
+            <div className="corridor-stop-column">
+              <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
 
-            <CorridorStopList
-              corridorStops={stopList}
-              loading={loading}
-              isEdit={isEdit}
-              onRemoveLastStop={removeLastStop}
-            />
+              <CorridorStopList
+                corridorStops={stopList}
+                loading={loading}
+                isEdit={isEdit}
+                onRemoveLastStop={removeLastStop}
+              />
 
-            {showSearchModeSelector ? (
-              <div className="govuk-form-group">
-                <label className="govuk-label" htmlFor="search-mode">
-                  Search for the first stop in your corridor
-                </label>
-                <select
-                  id="search-mode"
-                  className="govuk-select"
-                  value={searchMode}
-                  onChange={(event) => {
-                    setSearchMode(event.target.value as SearchMode);
-                    resetSearch();
-                  }}
-                >
-                  <option value="location">Location</option>
-                  <option value="stop">Stop</option>
-                </select>
+              <div className="corridor-stop-column__search-panel">
+                {showSearchModeSelector ? (
+                  <div className="govuk-form-group">
+                    <label className="govuk-label" htmlFor="search-mode">
+                      Search for the first stop in your corridor
+                    </label>
+                    <select
+                      id="search-mode"
+                      className="govuk-select"
+                      value={searchMode}
+                      onChange={(event) => {
+                        setSearchMode(event.target.value as SearchMode);
+                        resetSearch();
+                      }}
+                    >
+                      <option value="location">Location</option>
+                      <option value="stop">Stop</option>
+                    </select>
+                  </div>
+                ) : null}
+
+                {stopList.length === 0 ? (
+                  searchMode === "location" ? (
+                    <LocationLookupField
+                      id="stop-query"
+                      label="Location name or postcode"
+                      value={stopQuery}
+                      onValueChange={setStopQuery}
+                      mapboxToken={mapboxToken}
+                      containerClassName="govuk-form-group"
+                      placeholder="Search"
+                    />
+                  ) : (
+                    <div className="govuk-form-group">
+                      <label className="govuk-label" htmlFor="stop-query">
+                        Stop name or NaPTAN code
+                      </label>
+                      <input
+                        id="stop-query"
+                        name="stop-query"
+                        type="text"
+                        className="govuk-input govuk-input--width-20"
+                        placeholder="Enter four or more characters"
+                        value={stopQuery}
+                        onChange={(event) => setStopQuery(event.target.value)}
+                      />
+                    </div>
+                  )
+                ) : null}
+
+                {isStopSearch || stopList.length > 0 ? (
+                  <>
+                    {loading ? (
+                      <p className="govuk-body">Searching for stops...</p>
+                    ) : null}
+
+                    {!loading &&
+                    stopList.length === 0 &&
+                    stopQuery.trim().length > 0 &&
+                    stopQuery.trim().length < 4 ? (
+                      <p className="govuk-body-s">
+                        Enter at least 4 characters
+                      </p>
+                    ) : null}
+
+                    {noData ? (
+                      <p className="govuk-body">
+                        {stopList.length === 0
+                          ? "Your organisation has no matching stops"
+                          : "No further stops available"}
+                      </p>
+                    ) : null}
+
+                    {!loading && matchingStops.length > 0 ? (
+                      <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
+                        {stopList.length === 0
+                          ? `${matchingStops.length} matching stops`
+                          : "Add further stops"}
+                      </h3>
+                    ) : null}
+
+                    <StopSearchList
+                      matchingStops={matchingStops}
+                      isFirstStop={stopList.length === 0}
+                      onAddStop={addStop}
+                    />
+                  </>
+                ) : null}
               </div>
-            ) : null}
 
-            {stopList.length === 0 ? (
-              <div className="govuk-form-group">
-                <label className="govuk-label" htmlFor="stop-query">
-                  {searchMode === "stop"
-                    ? "Stop name or NaPTAN code"
-                    : "Location name or postcode"}
-                </label>
-                <input
-                  id="stop-query"
-                  name="stop-query"
-                  type="text"
-                  className="govuk-input govuk-input--width-20"
-                  placeholder={
-                    searchMode === "location"
-                      ? "Search"
-                      : "Enter four or more characters"
-                  }
-                  value={stopQuery}
-                  onChange={(event) => setStopQuery(event.target.value)}
-                />
-              </div>
-            ) : null}
-
-            {loading ? (
-              <p className="govuk-body">Searching for stops...</p>
-            ) : null}
-
-            {!loading &&
-            stopList.length === 0 &&
-            stopQuery.trim().length > 0 &&
-            stopQuery.trim().length < 4 ? (
-              <p className="govuk-body-s">Enter at least 4 characters</p>
-            ) : null}
-
-            {noData ? (
-              <p className="govuk-body">
-                {stopList.length === 0
-                  ? "Your organisation has no matching stops"
-                  : "No further stops available"}
-              </p>
-            ) : null}
-
-            {!loading && matchingStops.length > 0 ? (
-              <h3 className="govuk-heading-s govuk-!-margin-bottom-2">
-                {stopList.length === 0
-                  ? `${matchingStops.length} matching stops`
-                  : "Add further stops"}
-              </h3>
-            ) : null}
-
-            <StopSearchList
-              matchingStops={matchingStops}
-              isFirstStop={stopList.length === 0}
-              onAddStop={addStop}
-            />
-
-            {stopList.length > 0 ? (
-              <div className="govuk-button-group govuk-!-margin-top-6">
-                <button
-                  type="button"
-                  className="govuk-button govuk-button--secondary"
-                  data-module="govuk-button"
-                  onClick={onCancel}
-                >
-                  Cancel
-                </button>
-
-                {isEdit ? (
+              {stopList.length > 0 ? (
+                <div className="govuk-button-group govuk-!-margin-top-6">
                   <button
                     type="button"
                     className="govuk-button govuk-button--secondary"
                     data-module="govuk-button"
-                    disabled={loading || creating || updating}
-                    onClick={() => {
-                      void submitCreate();
-                    }}
+                    onClick={onCancel}
                   >
-                    {creating ? "Saving..." : "Save as new"}
+                    Cancel
                   </button>
-                ) : null}
 
-                {stopList.length > 1 ? (
+                  {isEdit ? (
+                    <button
+                      type="button"
+                      className="govuk-button govuk-button--secondary"
+                      data-module="govuk-button"
+                      disabled={loading || creating || updating}
+                      onClick={() => {
+                        void submitCreate();
+                      }}
+                    >
+                      {creating ? "Saving..." : "Save as new"}
+                    </button>
+                  ) : null}
+
+                  {stopList.length > 1 ? (
+                    <button
+                      type="submit"
+                      className="govuk-button"
+                      data-module="govuk-button"
+                      disabled={loading || creating || updating}
+                    >
+                      {isEdit
+                        ? updating
+                          ? "Saving..."
+                          : "Save"
+                        : creating
+                          ? "Saving..."
+                          : "Finish"}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {isEdit ? (
+                <div className="govuk-!-margin-top-6">
                   <button
-                    type="submit"
-                    className="govuk-button"
+                    type="button"
+                    className="govuk-button govuk-button--warning"
                     data-module="govuk-button"
-                    disabled={loading || creating || updating}
+                    disabled={loading || creating || updating || deleting}
+                    onClick={() => setShowDeleteModal(true)}
                   >
-                    {isEdit
-                      ? updating
-                        ? "Saving..."
-                        : "Save"
-                      : creating
-                        ? "Saving..."
-                        : "Finish"}
+                    Delete this corridor
                   </button>
-                ) : null}
-              </div>
-            ) : null}
-
-            {isEdit ? (
-              <div className="govuk-!-margin-top-6">
-                <button
-                  type="button"
-                  className="govuk-button govuk-button--warning"
-                  data-module="govuk-button"
-                  disabled={loading || creating || updating || deleting}
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  Delete this corridor
-                </button>
-              </div>
-            ) : null}
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="govuk-grid-column-one-half">
@@ -399,9 +433,13 @@ export const CreateCorridorForm = ({
               <CorridorCreateMap
                 corridorStops={stopList}
                 matchingStops={matchingStops}
+                otherStops={otherStopsData?.orgStops}
+                nonOrgStops={otherStopsData?.nonOrgStops}
                 onSelectStop={addStop}
+                onBoundsChange={setMapBounds}
                 mapboxToken={mapboxToken}
                 mapboxStyle={mapboxStyle}
+                mapboxSatelliteStyle={mapboxSatelliteStyle}
               />
             ) : null}
           </div>

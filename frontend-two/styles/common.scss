@@ -132,8 +132,6 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
       width: calc(
         100% - #{(2 * ($segment-stop-size + $segment-stop-surround))}
       );
-      border-top-left-radius: 999em;
-      border-top-right-radius: 999em;
     }
   }
 
@@ -768,7 +766,7 @@ $day-width: 46px;
 .kns-table .sortable-header {
   display: flex;
   font-size: 17px;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
   color: $govuk-link-colour;
   text-align: left;
@@ -787,17 +785,115 @@ $day-width: 46px;
   font-size: 17px;
 }
 
+// Corridor stop list styling for create/edit corridor flow
+.corridor-stop-list {
+  background-color: #f3f2f1;
+  width: 50ex;
+  max-width: 100%;
+  padding: govuk-spacing(2) govuk-spacing(2) 0;
+  margin-bottom: govuk-spacing(4);
+
+  &__stop {
+    display: flex;
+    justify-content: space-between;
+    gap: govuk-spacing(2);
+    position: relative;
+    padding: govuk-spacing(3) govuk-spacing(1) govuk-spacing(3) govuk-spacing(2);
+
+    &--added {
+      background-color: govuk-colour("light-grey");
+    }
+
+    &--matching {
+      box-shadow: inset 0px -2px 0px $govuk-border-colour;
+      padding-top: govuk-spacing(3);
+      padding-left: govuk-spacing(1);
+      background-color: govuk-colour("white");
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    &--connected::before {
+      content: "";
+      position: absolute;
+      display: block;
+      border-left: 5px solid govuk-colour("blue");
+      left: govuk-spacing(4);
+      top: 32px;
+      height: 100%;
+      z-index: 1;
+    }
+
+    &:hover,
+    &--added {
+      .corridor-stop-list__stop-details:before {
+        border-color: govuk-colour("black");
+      }
+    }
+  }
+
+  &__stop-details {
+    @include govuk-font(19);
+    position: relative;
+    padding: 0 govuk-spacing(4) 0 govuk-spacing(8);
+
+    &--no-graphic {
+      padding-left: 0;
+
+      &:before {
+        content: none;
+      }
+    }
+
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 25px;
+      height: 25px;
+      border: 4px solid govuk-colour("mid-grey");
+      background-color: govuk-colour("white");
+      border-radius: 50%;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+  }
+
+  &__stop-label {
+    @include govuk-responsive-margin(1, "bottom");
+  }
+
+  &__naptan {
+    color: $govuk-secondary-text-colour;
+  }
+}
+
+.corridor-stop-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  &__search-panel {
+    width: 100%;
+    max-width: 50ex;
+  }
+}
+
 // Corridor date wrapper / controls bar
 .corridor__date-wrapper {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
   gap: govuk-spacing(3);
-  flex-wrap: wrap;
 }
 
 .corridor__date-range-picker {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(2);
 }
 
 .corridor__date-range-input-wrapper {
@@ -855,10 +951,17 @@ $day-width: 46px;
   margin-right: govuk-spacing(3);
 }
 
-// Hide outliers checkbox — right-aligned below chart
+// Chart wrapper — gives the grey box a bottom padding to contain the hide-outliers checkbox
+.corridor__chart-wrapper {
+  background: #f3f2f1;
+  padding-bottom: govuk-spacing(3);
+}
+
+// Hide outliers checkbox — right-aligned inside the grey chart box
 .corridor__hide-outliers {
   display: flex;
   flex-direction: row-reverse;
+  padding-right: govuk-spacing(3);
   margin-top: govuk-spacing(2);
 
   .govuk-form-group {
@@ -903,12 +1006,94 @@ $day-width: 46px;
   }
 }
 
+.map-display-options {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: inline-grid;
+  grid-template-columns: max-content;
+  width: fit-content;
+  z-index: 1;
+
+  &__summary {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
+    padding: govuk-spacing(1) govuk-spacing(5) govuk-spacing(1) govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+    position: relative;
+    text-align: left;
+
+    &::after {
+      content: "▼";
+      position: absolute;
+      right: govuk-spacing(2);
+      top: 50%;
+      transform: translateY(-50%);
+      @include govuk-font(14);
+    }
+  }
+
+  &__summary--open {
+    border-bottom: 0;
+  }
+
+  &__panel {
+    position: relative;
+    margin-top: -1px;
+    width: 100%;
+    display: grid;
+    gap: govuk-spacing(2);
+    background: govuk-colour("white");
+    border: 1px solid govuk-colour("black");
+    border-top: 0;
+    padding: govuk-spacing(3);
+    box-sizing: border-box;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  &__panel--open {
+    visibility: visible;
+    max-height: none;
+    pointer-events: auto;
+  }
+}
+
 .corridor__map-recentre {
   position: absolute;
   bottom: govuk-spacing(3);
-  left: 50%;
-  transform: translateX(-50%);
+  left: govuk-spacing(2);
+  transform: none;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: govuk-colour("white");
+  color: govuk-colour("blue");
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  cursor: pointer;
+
+  &:hover {
+    background: govuk-colour("light-grey");
+  }
+}
+
+.corridor__map-recentre-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 // Mapbox popup GDS styling
@@ -967,6 +1152,26 @@ $day-width: 46px;
 
   .govuk-form-group {
     margin-bottom: govuk-spacing(2);
+  }
+}
+
+.corridors-grid-search {
+  position: relative;
+  display: inline-block;
+
+  &__icon {
+    position: absolute;
+    left: govuk-spacing(2);
+    top: 50%;
+    width: 1rem;
+    height: 1rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: govuk-colour("dark-grey");
+  }
+
+  &__input {
+    padding-left: govuk-spacing(5);
   }
 }
 
@@ -1320,6 +1525,9 @@ $day-width: 46px;
     font-weight: $govuk-font-weight-bold;
     &--tooltip {
       border-bottom: 4px dotted;
+    }
+    &--loading {
+      border-bottom: 0;
     }
   }
 }
@@ -2610,5 +2818,861 @@ body.helpdesk-open {
     justify-content: space-between;
     flex-wrap: wrap;
     height: 3785px;
+  }
+}
+
+// Stop Analysis page
+.stop-analysis-page {
+  .filters:not(.stop-analysis-filters__grid) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: govuk-spacing(3);
+    align-items: flex-end;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  &__extra-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+.stop-analysis-filters {
+  &__grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr 2fr;
+    gap: govuk-spacing(3);
+    align-items: start;
+  }
+
+  &__item {
+    min-width: 0;
+  }
+
+  &__item--date {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  &__item--admin {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  &__item--toggles {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+
+  &__item--location {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  &__item--operators {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  &__item--services {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  @media (max-width: 1120px) {
+    &__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__item--date,
+    &__item--admin,
+    &__item--toggles,
+    &__item--location,
+    &__item--operators,
+    &__item--services {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 720px) {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__date-range {
+    display: flex;
+    gap: govuk-spacing(2);
+    align-items: center;
+
+    .date-range-select {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  &__preset-select {
+    flex-shrink: 0;
+  }
+
+  &__toggles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: govuk-spacing(2);
+  }
+
+  &__location-search {
+    position: relative;
+  }
+
+  &__location-input {
+    width: 100%;
+  }
+
+  &__location-results {
+    position: absolute;
+    z-index: 100;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 2px solid govuk-colour("black");
+    border-top: 0;
+    background: govuk-colour("white");
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  &__location-input-wrap {
+    position: relative;
+  }
+
+  &__location-input {
+    padding-right: govuk-spacing(6);
+  }
+
+  &__location-chevron {
+    position: absolute;
+    top: 50%;
+    right: govuk-spacing(2);
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 3px solid govuk-colour("mid-grey");
+    border-bottom: 3px solid govuk-colour("mid-grey");
+    transform: translateY(-60%) rotate(45deg);
+    pointer-events: none;
+
+    &--open {
+      transform: translateY(-35%) rotate(-135deg);
+    }
+  }
+
+  &__location-hint {
+    padding: govuk-spacing(2);
+    @include govuk-font(16);
+    color: $govuk-secondary-text-colour;
+  }
+
+  &__location-loading {
+    padding: govuk-spacing(2);
+    @include govuk-font(16);
+  }
+
+  &__location-option {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    border-top: 1px solid govuk-colour("light-grey");
+    background: govuk-colour("white");
+    padding: govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+
+    &:hover {
+      background: govuk-colour("light-grey");
+    }
+  }
+
+  &__refine-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  &__refine-panel {
+    margin-top: govuk-spacing(3);
+    padding: govuk-spacing(4);
+    background: govuk-colour("light-grey");
+  }
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: govuk-spacing(2);
+    margin-top: govuk-spacing(2);
+  }
+
+  &__chip {
+    @include govuk-font(14);
+    background: govuk-colour("light-grey");
+    padding: govuk-spacing(1) govuk-spacing(2);
+    border-radius: 3px;
+  }
+}
+
+.refine-filters-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - #{govuk-spacing(8)});
+
+  &__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    white-space: nowrap;
+    text-decoration: underline;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: govuk-spacing(2);
+    margin-top: auto;
+    padding-top: govuk-spacing(6);
+  }
+
+  &__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: govuk-spacing(1);
+    row-gap: 0;
+
+    .govuk-checkboxes__item {
+      margin-bottom: 0;
+    }
+  }
+
+  &__day {
+    padding-left: 0;
+    padding-top: 0;
+    float: none;
+    margin-bottom: 0;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+
+    .govuk-checkboxes__label {
+      position: relative;
+      display: block;
+      padding: 38px 0 0;
+      float: none;
+      width: 100%;
+      text-align: center;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .govuk-checkboxes__label::before,
+    .govuk-checkboxes__label::after {
+      left: 50%;
+      transform: translate(-50%);
+    }
+
+    .govuk-checkboxes__label::after {
+      transform: rotate(-45deg) translate(-50%);
+      top: 11px;
+      margin-left: -2px;
+    }
+  }
+
+  // GOV.UK small checkbox styles add left padding that shifts labels right.
+  // Override with higher specificity for this horizontal day-of-week layout.
+  &__days.govuk-checkboxes--small .govuk-checkboxes__label {
+    padding-top: 38px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  &__time-range {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+
+    .govuk-label {
+      white-space: nowrap;
+    }
+
+    .govuk-input__wrapper {
+      width: 100%;
+    }
+  }
+
+  &__time-separator {
+    @include govuk-font(24);
+    line-height: 1;
+    margin-bottom: govuk-spacing(2);
+  }
+
+  &__range-slider {
+    margin-bottom: govuk-spacing(4);
+  }
+
+  &__reset {
+    display: inline-block;
+    margin-top: govuk-spacing(2);
+    text-decoration: underline;
+    align-self: flex-start;
+    text-align: left;
+  }
+}
+
+.range-slider {
+  .ng2-nouislider {
+    margin-top: govuk-spacing(2);
+    margin-bottom: govuk-spacing(4);
+  }
+
+  .noUi-horizontal {
+    height: govuk-spacing(4);
+
+    .noUi-handle {
+      cursor: pointer;
+      border-radius: 0;
+      border: 2px solid govuk-colour("black");
+      box-shadow: none;
+      height: 40px;
+      width: 15px;
+      top: -13px;
+
+      &:before,
+      &:after {
+        content: none;
+      }
+
+      &:focus {
+        box-shadow:
+          0 0 0 1.5px $govuk-input-border-colour,
+          0 0 0 4px $govuk-focus-colour;
+        outline: none;
+      }
+
+      &.noUi-handle-lower {
+        right: -12px;
+      }
+
+      &.noUi-handle-upper {
+        right: -1px;
+      }
+    }
+  }
+
+  .noUi-target {
+    border: 2px solid govuk-colour("black");
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: none;
+    background: govuk-colour("white");
+  }
+
+  .noUi-connects {
+    border-radius: 0;
+  }
+
+  .noUi-connect {
+    background: govuk-colour("black");
+    border: 3px solid govuk-colour("white");
+  }
+}
+
+.time-range-slider {
+  &__textboxes {
+    display: flex;
+
+    > * {
+      width: 50%;
+      min-width: 0;
+    }
+
+    > *:first-child {
+      margin-right: govuk-spacing(6);
+    }
+
+    input {
+      width: 100%;
+    }
+  }
+}
+
+.multiselect-checkbox {
+  position: relative;
+
+  &__trigger-wrap {
+    position: relative;
+  }
+
+  &__selection-summary {
+    position: absolute;
+    top: 50%;
+    left: govuk-spacing(2);
+    transform: translateY(-50%);
+    @include govuk-font($size: 19, $line-height: 1.25);
+    color: govuk-colour("black");
+    pointer-events: none;
+    z-index: 1;
+    max-width: 50%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__trigger {
+    text-align: left;
+    width: 100%;
+    padding-right: govuk-spacing(6);
+  }
+
+  &__chevron {
+    position: absolute;
+    top: 50%;
+    right: govuk-spacing(2);
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 3px solid govuk-colour("mid-grey");
+    border-bottom: 3px solid govuk-colour("mid-grey");
+    transform: translateY(-60%) rotate(45deg);
+    pointer-events: none;
+
+    &--open {
+      transform: translateY(-35%) rotate(-135deg);
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: govuk-spacing(2);
+    background: govuk-colour("light-grey");
+    padding: govuk-spacing(2);
+    margin: govuk-spacing(1);
+  }
+
+  &__header-label {
+    margin: 0;
+  }
+
+  &__header-action {
+    margin-left: auto;
+  }
+
+  &__dropdown {
+    position: absolute;
+    z-index: 100;
+    background: govuk-colour("white");
+    border: 2px solid govuk-colour("black");
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: -2px;
+  }
+
+  &__options {
+    padding: 0 govuk-spacing(2) govuk-spacing(2);
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: govuk-spacing(2);
+    padding: govuk-spacing(1) 0;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.stop-analysis-map {
+  position: relative;
+  margin-bottom: govuk-spacing(4);
+
+  &__display-options {
+    position: absolute;
+    top: govuk-spacing(4);
+    left: govuk-spacing(4);
+    z-index: 1;
+    display: inline-grid;
+    grid-template-columns: max-content;
+    width: fit-content;
+  }
+
+  &__display-details {
+    position: relative;
+  }
+
+  &__display-summary {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid govuk-colour("black");
+    background: govuk-colour("white");
+    padding: govuk-spacing(1) govuk-spacing(5) govuk-spacing(1) govuk-spacing(2);
+    cursor: pointer;
+    @include govuk-font(16);
+    position: relative;
+    text-align: left;
+
+    &::after {
+      content: "▼";
+      position: absolute;
+      right: govuk-spacing(2);
+      top: 50%;
+      transform: translateY(-50%);
+      @include govuk-font(14);
+    }
+  }
+
+  &__display-summary--open {
+    border-bottom: 0;
+  }
+
+  &__display-panel {
+    position: relative;
+    margin-top: -1px;
+    width: 100%;
+    display: grid;
+    gap: govuk-spacing(2);
+    background: govuk-colour("white");
+    border: 1px solid govuk-colour("black");
+    border-top: 0;
+    padding: govuk-spacing(3);
+    box-sizing: border-box;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  &__display-panel--open {
+    visibility: visible;
+    max-height: none;
+    pointer-events: auto;
+  }
+
+  &__style-toggle {
+    display: flex;
+    gap: govuk-spacing(2);
+    flex-wrap: wrap;
+  }
+
+  &__style-btn {
+    margin-bottom: 0;
+  }
+
+  &__container {
+    width: 100%;
+    height: 500px;
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 2;
+  }
+
+  &__loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    z-index: 2;
+  }
+
+  &__legend {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: govuk-spacing(3);
+    align-items: center;
+    position: absolute;
+    bottom: govuk-spacing(4);
+    left: govuk-spacing(4);
+    background: govuk-colour("white");
+    padding: govuk-spacing(3);
+    border-radius: 4px;
+    @include govuk-font(14);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+  }
+
+  &__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 auto;
+
+    &--high {
+      background-color: #28a197;
+    }
+    &--med {
+      background-color: #ffdd00;
+    }
+    &--low {
+      background-color: #d4351c;
+    }
+    &--no-data {
+      background-color: #b1b4b6;
+    }
+  }
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.shared-modal {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: govuk-spacing(4);
+  background-color: rgba(11, 12, 12, 0.65);
+  overflow: auto;
+
+  &__dialog {
+    width: min(100%, 640px);
+    max-height: calc(100vh - #{govuk-spacing(8)});
+    overflow: auto;
+    background: govuk-colour("white");
+    border: 1px solid $govuk-border-colour;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+    padding: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: govuk-spacing(3);
+    background-color: govuk-colour("blue");
+    padding: 10px 15px;
+  }
+
+  &__logo {
+    color: govuk-colour("white");
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  &__logo-icon {
+    display: block;
+  }
+
+  &__body {
+    padding: govuk-spacing(4);
+  }
+
+  &__close {
+    border: 0;
+    background: none;
+    padding: 0;
+    flex-shrink: 0;
+    color: govuk-colour("white");
+
+    &:focus {
+      background: $govuk-focus-colour;
+
+      .shared-modal__close-icon {
+        color: govuk-colour("black");
+      }
+    }
+  }
+
+  &__close-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    color: govuk-colour("white");
+  }
+}
+
+.stop-analysis-table {
+  &__display-modal {
+    display: flex;
+    flex-direction: column;
+    gap: govuk-spacing(4);
+  }
+
+  &__display-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: govuk-spacing(6);
+  }
+
+  &__display-column {
+    display: flex;
+    flex-direction: column;
+    gap: govuk-spacing(3);
+  }
+
+  &__show-all-link {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-decoration: underline;
+    @include govuk-font(16);
+  }
+
+  &__display-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: govuk-spacing(3);
+    margin-top: govuk-spacing(2);
+  }
+}
+
+@media (max-width: 640px) {
+  .shared-modal {
+    padding: govuk-spacing(3);
+
+    &__dialog {
+      padding: 0;
+    }
+
+    &__body {
+      padding: govuk-spacing(3);
+    }
+  }
+
+  .stop-analysis-table {
+    &__display-columns {
+      grid-template-columns: 1fr;
+      gap: govuk-spacing(4);
+    }
+
+    &__display-footer {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+  }
+}
+
+.stop-analysis-table {
+  &__display-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: govuk-spacing(4);
+    flex-wrap: wrap;
+    margin-bottom: govuk-spacing(3);
+  }
+
+  &__display-actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: govuk-spacing(4);
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  &__display-mode {
+    margin-bottom: 0;
+  }
+
+  &__display-options-link {
+    align-self: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-decoration: underline;
+    @include govuk-font(16);
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: govuk-spacing(3);
+    align-items: flex-end;
+    margin-bottom: govuk-spacing(3);
+  }
+
+  &__direction-filters {
+    flex-shrink: 0;
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  &__grid {
+    overflow-x: auto;
+  }
+
+  &__table--with-totals {
+    table tbody tr:first-child > * {
+      border-top: 0.125rem solid $govuk-border-colour;
+      border-bottom: 0.125rem solid $govuk-border-colour;
+    }
+  }
+
+  &__stop-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    color: $govuk-link-colour;
+
+    &:hover {
+      color: $govuk-link-hover-colour;
+    }
+  }
+
+  &__timing-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $govuk-text-colour;
+    vertical-align: middle;
   }
 }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 interface FeedStatusSummaryStatProps {
   title: string;
   value: string | number;
@@ -13,14 +14,20 @@ export const FeedStatusSummaryStat = ({
       <span className="feed-status-summary-stat__title">{title}</span>
       <div className="feed-status-summary-stat__row">
         {active ? (
-          <img
+          <Image
             src="/assets/icons/check-in-circle-solid.svg"
+            width={36}
+            height={36}
             className="feed-status-summary-stat__check"
+            alt="Active Feed"
           />
         ) : (
-          <img
+          <Image
             src="/assets/icons/cross-in-circle-solid.svg"
+            width={36}
+            height={36}
             className="feed-status-summary-stat__cross"
+            alt="Inactive Feed"
           />
         )}
         <span

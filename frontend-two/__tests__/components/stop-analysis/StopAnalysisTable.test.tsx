@@ -1,0 +1,170 @@
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
+import { type StopPerformanceRow } from "@/types/stop-analysis";
+
+vi.mock("@/components/stop-analysis/MultiselectCheckbox", () => ({
+  MultiselectCheckbox: () => <div data-testid="direction-filters" />,
+}));
+
+vi.mock("@/components/table/SortableTable", () => ({
+  SortableTable: ({
+    head,
+    rows,
+  }: {
+    head: Array<{ key: string; label: string }>;
+    rows: Array<Record<string, React.ReactNode>>;
+  }) => (
+    <div data-testid="sortable-table">
+      <div data-testid="table-head">
+        {head.map((column) => (
+          <span key={column.key}>{column.label}</span>
+        ))}
+      </div>
+      {rows.map((row) => (
+        <div key={String(row.key)} data-testid="table-row">
+          <div data-testid="stop-id">{row.stopId}</div>
+          <div data-testid="stop-name">{row.stopName}</div>
+          <div data-testid="direction">{row.direction}</div>
+          <div data-testid="metric-onTime">{row.onTime}</div>
+          <div data-testid="metric-early">{row.early}</div>
+          <div data-testid="metric-late">{row.late}</div>
+        </div>
+      ))}
+    </div>
+  ),
+}));
+
+const baseRow: StopPerformanceRow = {
+  stopId: "12345",
+  stopName: "High Street",
+  localityName: "Leeds",
+  adminAreaName: "West Yorkshire",
+  timingPoint: true,
+  latitude: 53.8,
+  longitude: -1.5,
+  direction: "Inbound",
+  scheduledDepartures: 100,
+  actualDepartures: 80,
+  onTime: 60,
+  early: 20,
+  late: 20,
+  onTimeRatio: 0.75,
+  earlyRatio: 0.25,
+  lateRatio: 0.25,
+  completedRatio: 0.8,
+  averageDelay: 120,
+  averageScheduled: 90,
+  averageActual: 100,
+  onTimeInSeconds: 180,
+  earlyInSeconds: 60,
+  lateInSeconds: 45,
+};
+
+describe("StopAnalysisTable", () => {
+  it("switches metric formatting between percentage, count, and time", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <StopAnalysisTable
+        data={[baseRow]}
+        loading={false}
+        errored={false}
+        directions={["Inbound", "Outbound"]}
+        onDirectionsChange={vi.fn()}
+        onStopNameClick={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("radio", { name: "Percentage" })).toBeChecked();
+    expect(screen.getByTestId("metric-onTime")).toHaveTextContent("75.0%");
+    expect(screen.getByTestId("metric-early")).toHaveTextContent("25.0%");
+    expect(screen.getByTestId("metric-late")).toHaveTextContent("25.0%");
+
+    await user.click(screen.getByRole("radio", { name: "Count" }));
+    expect(screen.getByRole("radio", { name: "Count" })).toBeChecked();
+    expect(screen.getByTestId("metric-onTime")).toHaveTextContent("60");
+    expect(screen.getByTestId("metric-early")).toHaveTextContent("20");
+    expect(screen.getByTestId("metric-late")).toHaveTextContent("20");
+
+    await user.click(screen.getByRole("radio", { name: "Time" }));
+    expect(screen.getByRole("radio", { name: "Time" })).toBeChecked();
+    expect(screen.getByTestId("metric-onTime")).toHaveTextContent("3:00");
+    expect(screen.getByTestId("metric-early")).toHaveTextContent("1:00");
+    expect(screen.getByTestId("metric-late")).toHaveTextContent("0:45");
+  });
+
+  it("opens the display options modal and hides selected columns", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <StopAnalysisTable
+        data={[baseRow]}
+        loading={false}
+        errored={false}
+        directions={["Inbound", "Outbound"]}
+        onDirectionsChange={vi.fn()}
+        onStopNameClick={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Scheduled");
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Recorded");
+
+    await user.click(screen.getByRole("button", { name: "Display options" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Display options" });
+    expect(
+      within(dialog).getByRole("checkbox", { name: "NAPTAN" }),
+    ).toBeDisabled();
+
+    await user.click(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Show all" }));
+    expect(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    ).toBeChecked();
+
+    await user.click(
+      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Scheduled");
+
+    await user.click(screen.getByRole("button", { name: "Display options" }));
+    const updatedDialog = screen.getByRole("dialog", {
+      name: "Display options",
+    });
+    await user.click(
+      within(updatedDialog).getByRole("checkbox", { name: "Scheduled" }),
+    );
+    await user.click(
+      within(updatedDialog).getByRole("button", { name: "Update" }),
+    );
+
+    expect(screen.getByTestId("table-head")).not.toHaveTextContent("Scheduled");
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Recorded");
+  });
+
+  it("renders a totals row with simplified labels when enabled", () => {
+    render(
+      <StopAnalysisTable
+        data={[baseRow]}
+        loading={false}
+        errored={false}
+        directions={["Inbound", "Outbound"]}
+        onDirectionsChange={vi.fn()}
+        onStopNameClick={vi.fn()}
+        showTotals
+      />,
+    );
+
+    const rows = screen.getAllByTestId("table-row");
+    expect(rows[0]).toHaveTextContent("-");
+    expect(within(rows[0]).getByTestId("stop-id")).toHaveTextContent("-");
+    expect(within(rows[0]).getByTestId("stop-name")).toHaveTextContent("-");
+    expect(within(rows[0]).getByTestId("direction")).toHaveTextContent("-");
+  });
+});
