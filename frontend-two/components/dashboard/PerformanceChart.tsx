@@ -117,12 +117,14 @@ const createLegend = (chart: any) => {
   const legend = (chart.legend = new am4charts.Legend());
   legend.position = "right";
   legend.itemContainers.template.togglable = false;
-  legend.labels.template.adapter.add("text", (label: string, target: any) => {
-    const category = target.dataItem?.dataContext
-      ?.name as PerformanceCategories;
+  legend.labels.template.adapter.add("text", (label, target) => {
+    const dataContext = target.dataItem?.dataContext as
+      | { name?: PerformanceCategories }
+      | undefined;
+    const category = dataContext?.name;
     return category
       ? `[bold]${legendLabels[category]}[/] [${legendTextColor}]${legendHints[category]}[/]`
-      : label;
+      : label ?? "";
   });
   legend.marginLeft = 40;
   legend.itemContainers.template.paddingTop = 0;

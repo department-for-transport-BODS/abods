@@ -104,9 +104,9 @@ const StackedHistogramChart = ({
     valueAxis.renderer.labels.template.fontSize = 13;
     valueAxis.renderer.grid.template.adapter.add(
       "disabled",
-      (disabled: boolean, target: any) =>
+      (disabled, target) =>
         (target.dataItem as am4charts.ValueAxisDataItem)?.value === 1 ||
-        disabled,
+        !!disabled,
     );
     valueAxis.renderer.labels.template.fill = am4core.color(LEGEND_GREY);
     valueAxis.renderer.line.strokeOpacity = 0.15;

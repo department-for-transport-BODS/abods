@@ -249,6 +249,10 @@ const ExcessWaitTimeChart = ({
       DateTime.fromISO(toTimestamp).minus({ [granularUnit(granularity)]: 1 }),
     );
 
+    if (!dateRange.start || !dateRange.end) {
+      return;
+    }
+
     xAxisRef.current.min = dateRange.start.toMillis();
     xAxisRef.current.max = dateRange.end.toMillis();
 
