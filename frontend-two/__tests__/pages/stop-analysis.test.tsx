@@ -2,6 +2,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import StopAnalysisPage, {
   computeAdminAreaGeoJSON,
   mergeStopAnalysisQuery,
+  pruneStopAnalysisSelections,
 } from "@/pages/stop-analysis";
 
 vi.mock("@/hooks/useAuth", () => ({
@@ -103,6 +104,7 @@ const mockUseConfig = vi.mocked(useConfig);
 const mockFetchStopAnalysis = vi.mocked(stopAnalysisService.fetchStopAnalysis);
 const mockFetchOperators = vi.mocked(operatorsService.fetchOperators);
 const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
+const mockFetchLines = vi.mocked(operatorsService.fetchLines);
 let latestStopAnalysisFiltersProps:
   | {
       onOperatorsChange: (values: string[]) => void;
@@ -196,6 +198,55 @@ describe("StopAnalysisPage", () => {
           [2, 1],
         ],
       ],
+    });
+  });
+
+  it("prunes operators and services when admin areas change", () => {
+    const operators = [
+      {
+        operatorId: "suffolk-op",
+        adminAreaIds: ["1"],
+      },
+      {
+        operatorId: "northampton-op",
+        adminAreaIds: ["2"],
+      },
+    ];
+    const lines = [
+      {
+        id: "suffolk-line",
+        adminAreaIds: [1],
+      },
+      {
+        id: "northampton-line",
+        adminAreaIds: [2],
+      },
+    ];
+
+    expect(
+      pruneStopAnalysisSelections(
+        ["1"],
+        ["suffolk-op", "northampton-op"],
+        ["suffolk-line", "northampton-line"],
+        operators,
+        lines,
+      ),
+    ).toEqual({
+      operatorIds: ["suffolk-op"],
+      lineIds: [],
+    });
+
+    expect(
+      pruneStopAnalysisSelections(
+        ["1"],
+        ["suffolk-op"],
+        ["suffolk-line", "northampton-line"],
+        operators,
+        lines,
+      ),
+    ).toEqual({
+      operatorIds: ["suffolk-op"],
+      lineIds: ["suffolk-line"],
     });
   });
 

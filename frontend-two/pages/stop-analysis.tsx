@@ -284,6 +284,47 @@ export const mergeStopAnalysisQuery = (
   return nextQuery;
 };
 
+export const pruneStopAnalysisSelections = (
+  adminAreaIds: string[],
+  operatorIds: string[],
+  lineIds: string[],
+  operators: Array<{ operatorId: string; adminAreaIds: string[] }>,
+  lines: Array<{ id: string; adminAreaIds: number[] }>,
+) => {
+  const selectedAdminAreaIds = new Set(adminAreaIds);
+  const availableOperatorIds = operators
+    .filter(
+      (operator) =>
+        selectedAdminAreaIds.size === 0 ||
+        operator.adminAreaIds.some((adminAreaId) =>
+          selectedAdminAreaIds.has(adminAreaId),
+        ),
+    )
+    .map((operator) => operator.operatorId);
+
+  const nextOperatorIds = operatorIds.filter((operatorId) =>
+    availableOperatorIds.includes(operatorId),
+  );
+  const operatorSelectionChanged =
+    nextOperatorIds.length !== operatorIds.length;
+
+  const availableLineIds = lines
+    .filter(
+      (line) =>
+        selectedAdminAreaIds.size === 0 ||
+        line.adminAreaIds.some((adminAreaId) =>
+          selectedAdminAreaIds.has(adminAreaId.toString()),
+        ),
+    )
+    .map((line) => line.id);
+
+  const nextLineIds = operatorSelectionChanged
+    ? []
+    : lineIds.filter((lineId) => availableLineIds.includes(lineId));
+
+  return { operatorIds: nextOperatorIds, lineIds: nextLineIds };
+};
+
 const StopAnalysisPage = () => {
   useRequireAuth();
   const { config } = useConfig();
@@ -540,9 +581,21 @@ const StopAnalysisPage = () => {
 
   const handleAdminAreasChange = useCallback(
     (values: string[]) => {
-      updateQuery({ adminAreaIds: values });
+      const nextSelection = pruneStopAnalysisSelections(
+        values,
+        operatorIds,
+        lineIds,
+        operators ?? [],
+        lines ?? [],
+      );
+
+      updateQuery({
+        adminAreaIds: values,
+        operatorIds: nextSelection.operatorIds,
+        lineIds: nextSelection.lineIds,
+      });
     },
-    [updateQuery],
+    [lineIds, operatorIds, operators, lines, updateQuery],
   );
 
   const handleOperatorsChange = useCallback(
