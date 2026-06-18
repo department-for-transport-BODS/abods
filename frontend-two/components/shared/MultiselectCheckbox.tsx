@@ -32,6 +32,7 @@ export const MultiselectCheckbox = ({
   const [searchText, setSearchText] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLSpanElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const getOptionId = (value: string) =>
     `${id}-${value.toLowerCase().replace(/[^a-z0-9_-]+/g, "-")}`;
@@ -92,30 +93,39 @@ export const MultiselectCheckbox = ({
         {label}
       </label>
       <div className="multiselect-checkbox__trigger-wrap">
-        {showSelectionSummary ? (
+        {hasSelection ? (
           <span
             ref={summaryRef}
             className="multiselect-checkbox__selection-summary"
+            style={{ visibility: showSelectionSummary ? "visible" : "hidden" }}
           >
             {selectionSummary}
           </span>
         ) : null}
         <input
+          ref={inputRef}
           id={id}
           type="text"
           className="multiselect-checkbox__trigger govuk-input"
           style={
             showSelectionSummary && summaryRef.current
-              ? { paddingLeft: summaryRef.current.offsetWidth + 8 }
+              ? { paddingLeft: summaryRef.current.offsetWidth + 16 }
               : undefined
           }
           value={inputValue}
+          onMouseDown={(event) => {
+            if (disabled || isOpen) {
+              return;
+            }
+            event.preventDefault();
+            setIsOpen(true);
+            requestAnimationFrame(() => {
+              inputRef.current?.focus();
+            });
+          }}
           onFocus={() => {
             if (!disabled) {
               setIsOpen(true);
-              if (!searchText) {
-                setSearchText("");
-              }
             }
           }}
           onChange={(event) => {
@@ -129,7 +139,6 @@ export const MultiselectCheckbox = ({
 
             setSearchText(event.target.value);
           }}
-          onClick={() => !disabled && setIsOpen(true)}
           disabled={disabled}
           aria-haspopup="listbox"
           aria-label={label}
