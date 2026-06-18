@@ -1,4 +1,5 @@
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
 
 vi.mock("@/hooks/useAuth", () => ({
@@ -37,6 +38,26 @@ vi.mock("@/services/on-time/headway.service", () => ({
   headwayService: {
     fetchTimeSeries: vi.fn(),
   },
+}));
+
+vi.mock("@/components/on-time/DelayFrequencyChart", () => ({
+  default: ({ data }: any) => (
+    <div data-testid="delay-frequency-chart">
+      Delay Frequency: {data.length} items
+    </div>
+  ),
+}));
+
+vi.mock("@/components/on-time/TimeOfDayChart", () => ({
+  default: ({ data }: any) => (
+    <div data-testid="time-of-day-chart">Time of Day: {data.length} items</div>
+  ),
+}));
+
+vi.mock("@/components/on-time/DayOfWeekChart", () => ({
+  default: ({ data }: any) => (
+    <div data-testid="day-of-week-chart">Day of Week: {data.length} items</div>
+  ),
 }));
 
 let mockQuery: Record<string, string | string[] | undefined> = {
@@ -136,9 +157,6 @@ describe("OnTimeOperatorPage", () => {
     });
 
     expect(
-      screen.getByText("onTimeService.fetchOnTimeDelayFrequencyData"),
-    ).toBeInTheDocument();
-    expect(
       screen.getByText("onTimeService.fetchOnTimeTimeSeriesData"),
     ).toBeInTheDocument();
     expect(
@@ -148,5 +166,56 @@ describe("OnTimeOperatorPage", () => {
       "href",
       "/on-time/ABCD/LINE1",
     );
+  });
+
+  it("renders charts section with all tabs", async () => {
+    mockFetchDelayFrequency.mockResolvedValue([
+      { delayMinutes: 0, count: 100 },
+      { delayMinutes: 5, count: 50 },
+    ] as any);
+    mockFetchTimeOfDay.mockResolvedValue([
+      { hour: 0, onTime: 50, early: 10, late: 40 },
+    ] as any);
+    mockFetchDayOfWeek.mockResolvedValue([
+      { dayOfWeek: "Monday", onTime: 60, early: 10, late: 30 },
+    ] as any);
+
+    render(<OnTimeOperatorPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delay-frequency-chart")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Delay Frequency: 2 items")).toBeInTheDocument();
+  });
+
+  it("switches between chart tabs", async () => {
+    mockFetchDelayFrequency.mockResolvedValue([
+      { delayMinutes: 0, count: 100 },
+    ] as any);
+    mockFetchTimeOfDay.mockResolvedValue([
+      { hour: 0, onTime: 50, early: 10, late: 40 },
+      { hour: 1, onTime: 60, early: 5, late: 35 },
+    ] as any);
+    mockFetchDayOfWeek.mockResolvedValue([
+      { dayOfWeek: "Monday", onTime: 60, early: 10, late: 30 },
+    ] as any);
+
+    const user = userEvent.setup();
+    render(<OnTimeOperatorPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Delay Frequency: 1 items")).toBeInTheDocument();
+    });
+
+    const timeOfDayTab = screen.getByRole("button", { name: "Time of day" });
+    await user.click(timeOfDayTab);
+
+    expect(screen.getByText("Time of Day: 2 items")).toBeInTheDocument();
+
+    const dayOfWeekTab = screen.getByRole("button", { name: "Day of week" });
+    await user.click(dayOfWeekTab);
+
+    expect(screen.getByText("Day of Week: 1 items")).toBeInTheDocument();
   });
 });
