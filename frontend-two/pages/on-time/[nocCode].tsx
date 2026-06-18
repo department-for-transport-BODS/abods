@@ -1,8 +1,8 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import { ChartsSection } from "@/components/on-time/ChartsSection";
 import { JsonSection } from "@/components/on-time/JsonSection";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -26,21 +26,6 @@ import {
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
 } from "../../src/generated/graphql";
-
-const DelayFrequencyChart = dynamic(
-  () => import("@/components/on-time/DelayFrequencyChart"),
-  { ssr: false },
-);
-
-const DayOfWeekChart = dynamic(
-  () => import("@/components/on-time/DayOfWeekChart"),
-  { ssr: false },
-);
-
-const TimeOfDayChart = dynamic(
-  () => import("@/components/on-time/TimeOfDayChart"),
-  { ssr: false },
-);
 
 interface OperatorOnTimeData {
   overview: { onTime?: PunctualityOverview; headway?: HeadwayOverviewType };
@@ -159,35 +144,21 @@ const OnTimeOperatorPage = () => {
             data={data.overview}
             error={errors.overview}
           />
-          {errors.delayFrequency ? (
-            <p className="govuk-error-message">
-              <span className="govuk-visually-hidden">Error:</span>{" "}
-              {errors.delayFrequency}
-            </p>
-          ) : (
-            <DelayFrequencyChart data={data.delayFrequency ?? []} />
-          )}
           <JsonSection
             title="onTimeService.fetchOnTimeTimeSeriesData"
             data={data.timeSeries}
             error={errors.timeSeries}
           />
-          {errors.timeOfDay ? (
-            <p className="govuk-error-message">
-              <span className="govuk-visually-hidden">Error:</span>{" "}
-              {errors.timeOfDay}
-            </p>
-          ) : (
-            <TimeOfDayChart data={data.timeOfDay ?? []} />
-          )}
-          {errors.dayOfWeek ? (
-            <p className="govuk-error-message">
-              <span className="govuk-visually-hidden">Error:</span>{" "}
-              {errors.dayOfWeek}
-            </p>
-          ) : (
-            <DayOfWeekChart data={data.dayOfWeek ?? []} />
-          )}
+          <ChartsSection
+            delayFrequency={data.delayFrequency ?? []}
+            timeOfDay={data.timeOfDay ?? []}
+            dayOfWeek={data.dayOfWeek ?? []}
+            errors={{
+              delayFrequency: errors.delayFrequency,
+              timeOfDay: errors.timeOfDay,
+              dayOfWeek: errors.dayOfWeek,
+            }}
+          />
           <JsonSection
             title="onTimeService.fetchOnTimePerformanceList"
             data={data.servicePerformancePlain}
