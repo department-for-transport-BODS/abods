@@ -121,13 +121,13 @@ const LiveStatusPage = () => {
               year: "numeric",
             })}
           </span>
-          <a
+          <Link
             href={`/feed-monitoring/${nocCode}/feed-history?date=${new Date(Date.now() - 86400000).toISOString().split("T")[0]}`}
             className="govuk-link"
             style={{ fontSize: "20px" }}
           >
             View feed history
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-4 gap-4 mt-6">
           <div className="min-w-0" data-testid="feed-status-stat">
