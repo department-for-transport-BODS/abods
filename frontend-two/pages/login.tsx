@@ -19,6 +19,14 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<ErrorInfo[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [returnUrl, setReturnUrl] = useState("/dashboard");
+
+  // Capture returnUrl once router query params are available
+  useEffect(() => {
+    if (typeof router.query.returnUrl === "string") {
+      setReturnUrl(router.query.returnUrl);
+    }
+  }, [router.query.returnUrl]);
 
   // Clear errors when form data changes
   useEffect(() => {
@@ -47,10 +55,6 @@ const LoginPage = () => {
     try {
       setIsSubmitting(true);
       await login(result.data.username, result.data.password);
-      const returnUrl =
-        typeof router.query.returnUrl === "string"
-          ? router.query.returnUrl
-          : "/dashboard";
       router.push(returnUrl);
     } catch (error) {
       setErrors([
