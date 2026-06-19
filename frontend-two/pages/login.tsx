@@ -21,10 +21,16 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [returnUrl, setReturnUrl] = useState("/dashboard");
 
-  // Capture returnUrl once router query params are available
+  // Capture returnUrl once router query params are available.
+  // Only accept relative paths to prevent open redirect attacks.
   useEffect(() => {
-    if (typeof router.query.returnUrl === "string") {
-      setReturnUrl(router.query.returnUrl);
+    const raw = router.query.returnUrl;
+    if (
+      typeof raw === "string" &&
+      raw.startsWith("/") &&
+      !raw.startsWith("//")
+    ) {
+      setReturnUrl(raw);
     }
   }, [router.query.returnUrl]);
 
@@ -55,7 +61,7 @@ const LoginPage = () => {
     try {
       setIsSubmitting(true);
       await login(result.data.username, result.data.password);
-      router.push(returnUrl);
+      router.replace(returnUrl);
     } catch (error) {
       setErrors([
         {
