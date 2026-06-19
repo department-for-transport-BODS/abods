@@ -32,7 +32,6 @@ function applyDaySelection(
   return { start: date, end: draft.start };
 }
 
-<<<<<<< HEAD
 interface DateRangeSelectProps {
   value?: { from: string; to: string };
   onChange?: (dateRange: { from: string; to: string }) => void;
@@ -44,9 +43,6 @@ export const DateRangeSelect = ({
   onChange,
   hideLabel = false,
 }: DateRangeSelectProps) => {
-=======
-export const DateRangeSelect = ({ label, value, onChange }: DateRangeSelectProps) => {
->>>>>>> 0b1d7831 (feat: add components for filtering and no data results)
   const today = DateTime.local().startOf("day");
   // maxDate is today: users can select today as end date; DateRangeSelect emits today+1 (exclusive)
   // which the API interprets as inclusive of today.
@@ -55,14 +51,7 @@ export const DateRangeSelect = ({ label, value, onChange }: DateRangeSelectProps
   const initialStart = value?.from
     ? DateTime.fromISO(value.from)
     : today.minus({ days: 7 });
-<<<<<<< HEAD
   const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
-=======
-  // value.to is an exclusive end date — subtract 1 to get the inclusive display date.
-  const initialEndRaw = value?.to
-    ? formatISODateStringToDate(value.to).minus({ days: 1 })
-    : maxDate;
->>>>>>> 0b1d7831 (feat: add components for filtering and no data results)
 
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
@@ -108,7 +97,13 @@ export const DateRangeSelect = ({ label, value, onChange }: DateRangeSelectProps
       setDraftDateRange(nextRange);
       setMonthLeft(nextStart.startOf("month"));
     }
-  }, [maxDate, selectedDateRange.end, selectedDateRange.start, value?.from, value?.to]);
+  }, [
+    maxDate,
+    selectedDateRange.end,
+    selectedDateRange.start,
+    value?.from,
+    value?.to,
+  ]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
