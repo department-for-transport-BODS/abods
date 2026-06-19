@@ -28,9 +28,10 @@ export const PagingPanel = ({
 }: PagingPanelProps) => {
   if (totalPages === 0 || rowCount === 0) return null;
 
-  const firstRow = pageSize * (currentPage - 1) + 1;
+  const firstRow = pageSize * currentPage + 1;
   const lastRow = Math.min(firstRow + pageSize - 1, rowCount);
   const pluralNoun = `${noun}${rowCount > 1 ? "s" : ""}`;
+  const paginationCurrentPage = currentPage + 1;
 
   return (
     <div className="flex justify-end">
@@ -41,9 +42,9 @@ export const PagingPanel = ({
         {totalPages > 1 && (
           <MemoryRouter>
             <Pagination
-              currentPage={currentPage}
+              currentPage={paginationCurrentPage}
               totalPages={totalPages}
-              onPageChange={onPageChange}
+              onPageChange={(page) => onPageChange(Math.max(0, page - 1))}
               pathFunc={() => "#"}
             />
           </MemoryRouter>
