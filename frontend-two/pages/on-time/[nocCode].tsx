@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import { ChartsSection } from "@/components/on-time/ChartsSection";
 import { JsonSection } from "@/components/on-time/JsonSection";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
@@ -144,24 +145,19 @@ const OnTimeOperatorPage = () => {
             error={errors.overview}
           />
           <JsonSection
-            title="onTimeService.fetchOnTimeDelayFrequencyData"
-            data={data.delayFrequency}
-            error={errors.delayFrequency}
-          />
-          <JsonSection
             title="onTimeService.fetchOnTimeTimeSeriesData"
             data={data.timeSeries}
             error={errors.timeSeries}
           />
-          <JsonSection
-            title="onTimeService.fetchOnTimePunctualityTimeOfDayData"
-            data={data.timeOfDay}
-            error={errors.timeOfDay}
-          />
-          <JsonSection
-            title="onTimeService.fetchOnTimePunctualityDayOfWeekData"
-            data={data.dayOfWeek}
-            error={errors.dayOfWeek}
+          <ChartsSection
+            delayFrequency={data.delayFrequency ?? []}
+            timeOfDay={data.timeOfDay ?? []}
+            dayOfWeek={data.dayOfWeek ?? []}
+            errors={{
+              delayFrequency: errors.delayFrequency,
+              timeOfDay: errors.timeOfDay,
+              dayOfWeek: errors.dayOfWeek,
+            }}
           />
           <JsonSection
             title="onTimeService.fetchOnTimePerformanceList"

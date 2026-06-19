@@ -32,6 +32,7 @@ vi.mock("@/services/on-time/transit-model.service", () => ({
 vi.mock("@/services/on-time/headway.service", () => ({
   headwayService: {
     fetchFrequentServiceInfo: vi.fn(),
+    fetchTimeSeries: vi.fn(),
   },
 }));
 
@@ -39,6 +40,16 @@ vi.mock("@/services/on-time/stop-performance.service", () => ({
   stopPerformanceService: {
     mergeStops: vi.fn(),
   },
+}));
+
+vi.mock("@/components/on-time/ExcessWaitTimeChart", () => ({
+  default: ({ data, fromTimestamp, toTimestamp }: any) => (
+    <div data-testid="excess-wait-time-chart">
+      <p>Chart with {data.length} data points</p>
+      <p>From: {fromTimestamp}</p>
+      <p>To: {toTimestamp}</p>
+    </div>
+  ),
 }));
 
 let mockQuery: Record<string, string | string[] | undefined> = {
@@ -72,6 +83,7 @@ const mockFetchServicePatternStops = vi.mocked(
 const mockFetchFrequentServiceInfo = vi.mocked(
   headwayService.fetchFrequentServiceInfo,
 );
+const mockFetchHeadwayTimeSeries = vi.mocked(headwayService.fetchTimeSeries);
 const mockMergeStops = vi.mocked(stopPerformanceService.mergeStops);
 
 describe("OnTimeServicePage", () => {
@@ -98,6 +110,7 @@ describe("OnTimeServicePage", () => {
       waitingTime: 5,
       inVehicleTime: 25,
     } as any);
+    mockFetchHeadwayTimeSeries.mockResolvedValue([] as any);
     mockMergeStops.mockReturnValue([] as any);
   });
 
@@ -132,5 +145,54 @@ describe("OnTimeServicePage", () => {
       screen.getByText("headwayService.fetchFrequentServiceInfo"),
     ).toBeInTheDocument();
     expect(mockMergeStops).toHaveBeenCalled();
+  });
+
+  it("renders ExcessWaitTimeChart when frequent service hours are available", async () => {
+    mockFetchFrequentServiceInfo.mockResolvedValue({
+      averageHeadway: 10,
+      averageExcessWaitTime: 2,
+      totalJourneyTime: 30,
+      waitingTime: 5,
+      inVehicleTime: 25,
+      numHours: 10,
+      totalHours: 24,
+    } as any);
+
+    mockFetchHeadwayTimeSeries.mockResolvedValue([
+      { timestamp: "2024-01-01T00:00:00Z", value: 1.5 },
+    ] as any);
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("excess-wait-time-chart")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Chart with 1 data points")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /10 hours out of a total 24 service hours during the selected period/,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows unavailable message when no frequent service hours", async () => {
+    mockFetchFrequentServiceInfo.mockResolvedValue({
+      averageHeadway: 0,
+      averageExcessWaitTime: 0,
+      totalJourneyTime: 0,
+      waitingTime: 0,
+      inVehicleTime: 0,
+      numHours: 0,
+      totalHours: 24,
+    } as any);
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Excess waiting time is unavailable for this service/),
+      ).toBeInTheDocument();
+    });
   });
 });

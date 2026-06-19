@@ -1,4 +1,5 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -10,6 +11,7 @@ import {
   StopPerformance,
   onTimeService,
 } from "@/services/on-time/on-time.service";
+import { DateTime } from "luxon";
 import { buildDefaultParams } from "@/services/on-time/params";
 import {
   NormalizedStop,
@@ -22,15 +24,25 @@ import {
 import { settle } from "@/utils/settle";
 import {
   FrequentServiceInfoType,
+  Granularity,
+  HeadwayTimeSeriesType,
   ServiceInfoType,
 } from "../../../src/generated/graphql";
 
+const ExcessWaitTimeChart = dynamic(
+  () => import("@/components/on-time/ExcessWaitTimeChart"),
+  { ssr: false },
+);
+
 interface ServiceLevelData {
+  fromTimestamp: string;
+  toTimestamp: string;
   serviceInfo: ServiceInfoType | null;
   stopPerformance: StopPerformance[];
   servicePatterns: ServicePattern[];
   mergedStops: NormalizedStop[];
   frequentServiceInfo: FrequentServiceInfoType | null;
+  headwayTimeSeries: HeadwayTimeSeriesType[];
 }
 
 const OnTimeServicePage = () => {
@@ -52,13 +64,24 @@ const OnTimeServicePage = () => {
       setIsLoading(true);
       const params = buildDefaultParams({ nocCode, lineId });
 
-      const [serviceInfo, stopPerformance, servicePatterns] = await Promise.all(
-        [
+      const fromDate = DateTime.fromISO(params.fromTimestamp);
+      const toDate = DateTime.fromISO(params.toTimestamp);
+      const granularity =
+        Math.abs(toDate.diff(fromDate, "days").days) <= 5
+          ? Granularity.Hour
+          : Granularity.Day;
+      const headwayParams = {
+        ...params,
+        filters: { ...params.filters, granularity },
+      };
+
+      const [serviceInfo, stopPerformance, servicePatterns, headwayTimeSeries] =
+        await Promise.all([
           settle(onTimeService.fetchServiceInfo(lineId)),
           settle(onTimeService.fetchStopPerformanceList(params)),
           settle(transitModelService.fetchServicePatternStops(nocCode, lineId)),
-        ],
-      );
+          settle(headwayService.fetchTimeSeries(headwayParams)),
+        ]);
 
       const frequentServiceInfo = await settle(
         headwayService.fetchFrequentServiceInfo(params),
@@ -73,17 +96,21 @@ const OnTimeServicePage = () => {
           : [];
 
       setData({
+        fromTimestamp: params.fromTimestamp,
+        toTimestamp: params.toTimestamp,
         serviceInfo: serviceInfo.data,
         stopPerformance: stopPerformance.data ?? [],
         servicePatterns: servicePatterns.data ?? [],
         mergedStops,
         frequentServiceInfo: frequentServiceInfo.data,
+        headwayTimeSeries: headwayTimeSeries.data ?? [],
       });
       setErrors({
         serviceInfo: serviceInfo.error,
         stopPerformance: stopPerformance.error,
         servicePatterns: servicePatterns.error,
         frequentServiceInfo: frequentServiceInfo.error,
+        headwayTimeSeries: headwayTimeSeries.error,
       });
       setIsLoading(false);
     };
@@ -146,6 +173,32 @@ const OnTimeServicePage = () => {
             data={data.frequentServiceInfo}
             error={errors.frequentServiceInfo}
           />
+          {errors.headwayTimeSeries ? (
+            <p className="govuk-error-message">
+              <span className="govuk-visually-hidden">Error:</span>{" "}
+              {errors.headwayTimeSeries}
+            </p>
+          ) : (data.frequentServiceInfo?.numHours ?? 0) > 0 ? (
+            <>
+              <ExcessWaitTimeChart
+                data={data.headwayTimeSeries ?? []}
+                fromTimestamp={data.fromTimestamp ?? ""}
+                toTimestamp={data.toTimestamp ?? ""}
+              />
+              <p className="govuk-body govuk-!-margin-top-3">
+                {data.frequentServiceInfo?.numHours} hours out of a total{" "}
+                {data.frequentServiceInfo?.totalHours} service hours during the
+                selected period operated on a frequent service basis. Excess
+                Waiting Time is averaged over the period in which the service is
+                running on a frequent basis.
+              </p>
+            </>
+          ) : (
+            <p className="govuk-body">
+              Excess waiting time is unavailable for this service in the
+              selected period because no frequent service hours were found.
+            </p>
+          )}
         </>
       )}
     </BaseLayout>
