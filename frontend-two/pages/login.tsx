@@ -19,6 +19,20 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<ErrorInfo[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [returnUrl, setReturnUrl] = useState("/dashboard");
+
+  // Capture returnUrl once router query params are available.
+  // Only accept relative paths to prevent open redirect attacks.
+  useEffect(() => {
+    const raw = router.query.returnUrl;
+    if (
+      typeof raw === "string" &&
+      raw.startsWith("/") &&
+      !raw.startsWith("//")
+    ) {
+      setReturnUrl(raw);
+    }
+  }, [router.query.returnUrl]);
 
   // Clear errors when form data changes
   useEffect(() => {
@@ -47,11 +61,7 @@ const LoginPage = () => {
     try {
       setIsSubmitting(true);
       await login(result.data.username, result.data.password);
-      const returnUrl =
-        typeof router.query.returnUrl === "string"
-          ? router.query.returnUrl
-          : "/dashboard";
-      router.push(returnUrl);
+      router.replace(returnUrl);
     } catch (error) {
       setErrors([
         {

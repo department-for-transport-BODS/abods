@@ -148,6 +148,10 @@ const CorridorsViewPage = () => {
   const showNotFound =
     !corridorLoading && (corridorId === null || corridor === null);
 
+  const pageTitle = corridor?.name
+    ? `${corridor.name} - Analyse Bus Open Data`
+    : "Corridor - Analyse Bus Open Data";
+
   const errors: ErrorInfo[] =
     !statsLoading && corridor && !stats
       ? [
@@ -202,7 +206,7 @@ const CorridorsViewPage = () => {
   };
 
   return (
-    <BaseLayout title="Corridor - Analyse Bus Open Data">
+    <BaseLayout title={pageTitle}>
       <Link href="/corridors" className="govuk-back-link">
         All corridors
       </Link>
@@ -268,7 +272,6 @@ const CorridorsViewPage = () => {
               <Link
                 href={`/corridors/edit/${corridor.id}`}
                 role="button"
-                draggable={false}
                 className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
                 data-module="govuk-button"
               >

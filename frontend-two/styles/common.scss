@@ -1065,17 +1065,12 @@ $day-width: 46px;
 }
 
 .corridor__map-recentre {
-  position: absolute;
-  bottom: govuk-spacing(3);
-  left: govuk-spacing(2);
-  transform: none;
-  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: govuk-spacing(1);
   padding: govuk-spacing(1) govuk-spacing(2);
-  margin: 0;
+  margin: 0 0 govuk-spacing(1) govuk-spacing(2);
   border: 0;
   border-radius: 0;
   background: govuk-colour("white");

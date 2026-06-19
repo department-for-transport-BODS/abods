@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
@@ -79,6 +80,9 @@ export const CorridorViewMap = ({
     "default",
   );
   const [moveCounter, setMoveCounter] = useState(0);
+  const [recentrePortal, setRecentrePortal] = useState<HTMLDivElement | null>(
+    null,
+  );
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
@@ -268,9 +272,17 @@ export const CorridorViewMap = ({
 
     map.on("moveend", () => setMoveCounter((count) => count + 1));
 
+    const recentreContainer = document.createElement("div");
+    map.addControl(
+      { onAdd: () => recentreContainer, onRemove: () => {} },
+      "bottom-left",
+    );
+    setRecentrePortal(recentreContainer);
+
     mapRef.current = map;
 
     return () => {
+      setRecentrePortal(null);
       detachHoverHandlers();
       popup.remove();
       map.remove();
@@ -325,20 +337,23 @@ export const CorridorViewMap = ({
         mapboxSatelliteStyle={mapboxSatelliteStyle}
         onStyleChange={switchStyle}
       />
-      {moveCounter > 1 && (
-        <button
-          type="button"
-          className="corridor__map-recentre"
-          onClick={recentre}
-        >
-          <ReCentreIcon
-            className="corridor__map-recentre-icon"
-            aria-hidden="true"
-            focusable="false"
-          />
-          Re-centre
-        </button>
-      )}
+      {recentrePortal &&
+        moveCounter > 1 &&
+        createPortal(
+          <button
+            type="button"
+            className="corridor__map-recentre"
+            onClick={recentre}
+          >
+            <ReCentreIcon
+              className="corridor__map-recentre-icon"
+              aria-hidden="true"
+              focusable="false"
+            />
+            Re-centre
+          </button>,
+          recentrePortal,
+        )}
     </div>
   );
 };
