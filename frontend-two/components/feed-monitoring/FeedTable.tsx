@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import {
   FeedMonitoringListQuery,
   VehicleStatFragment,
@@ -94,12 +95,12 @@ export const FeedTable = ({
       ),
       nocCode: op.nocCode,
       name: (
-        <a
+        <Link
           className="govuk-link font-bold"
           href={`/feed-monitoring/${op.nocCode}`}
         >
           {op.name}
-        </a>
+        </Link>
       ),
       availability:
         op.feedMonitoring?.availability != null

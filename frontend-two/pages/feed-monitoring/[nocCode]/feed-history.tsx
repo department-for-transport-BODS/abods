@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -157,9 +158,9 @@ const FeedHistoryPage = () => {
     <BaseLayout title="Feed history - Analyse Bus Open Data">
       <div className="app-page feed-monitoring-page">
         <div>
-          <a href={`/feed-monitoring/${nocCode}`} className="govuk-back-link">
+          <Link href={`/feed-monitoring/${nocCode}`} className="govuk-back-link">
             Live status
-          </a>
+          </Link>
           {error && (
             <div
               className="govuk-error-summary"
