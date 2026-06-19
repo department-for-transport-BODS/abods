@@ -17,7 +17,9 @@ export const DaySelect = ({
 }: DaySelectProps) => {
   return (
     <fieldset className="govuk-fieldset">
-      <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">{legend}</legend>
+      <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
+        {legend}
+      </legend>
       <div className="day-select__checkboxes">
         {DAYS.map((day) => {
           const inputId = `${idPrefix}-${day}`;
@@ -31,9 +33,7 @@ export const DaySelect = ({
                 checked={selectedDays[day]}
                 onChange={(event) => onDayChange(day, event.target.checked)}
               />
-              <span className="day-select__label">
-                {day}
-              </span>
+              <span className="day-select__label">{day}</span>
             </label>
           );
         })}

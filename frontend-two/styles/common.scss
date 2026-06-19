@@ -1,7 +1,7 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
-// Controls styling 
+// Controls styling
 .controls-container {
   display: flex;
   flex-direction: row;
@@ -60,7 +60,7 @@
 .on-time-refine-results-button__icon {
   width: 24px;
   height: 24px;
-  color: $govuk-link-colour; 
+  color: $govuk-link-colour;
 }
 
 // FilterChips styling
@@ -243,7 +243,9 @@
 
 // TimeRangeSlider styling
 // Matches original noUiSlider appearance: square track, black border, tall narrow square thumbs
-$_slider-track-height: govuk-spacing(4); // 20px — matches noUi-horizontal height
+$_slider-track-height: govuk-spacing(
+  4
+); // 20px — matches noUi-horizontal height
 $_slider-thumb-width: 15px;
 $_slider-thumb-height: 40px;
 

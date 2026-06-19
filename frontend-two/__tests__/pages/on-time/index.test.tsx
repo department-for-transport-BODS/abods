@@ -235,7 +235,10 @@ describe("OnTimeIndexPage", () => {
 
       await waitFor(() => {
         expect(screen.getByText(expectedButtonText)).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
         expect(lastCall.toTimestamp).toContain(today.toFormat("yyyy-MM-dd"));
       });
@@ -244,17 +247,24 @@ describe("OnTimeIndexPage", () => {
     it("'Last 28 days' preset shows correct date range and passes correct timestamps", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       const today = DateTime.local().startOf("day");
       const from = today.minus({ days: 28 });
       const expectedButtonText = `${from.toFormat("dd MMM yyyy")} - ${today.minus({ days: 1 }).toFormat("dd MMM yyyy")}`;
 
-      fireEvent.change(screen.getByDisplayValue("Last 7 days"), { target: { value: "Last 28 days" } });
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last 28 days" },
+      });
 
       await waitFor(() => {
         expect(screen.getByText(expectedButtonText)).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
         expect(lastCall.toTimestamp).toContain(today.toFormat("yyyy-MM-dd"));
       });
@@ -263,7 +273,9 @@ describe("OnTimeIndexPage", () => {
     it("'Last month' preset shows correct date range and passes correct timestamps", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       const today = DateTime.local().startOf("day");
       const lastMonth = today.minus({ months: 1 });
@@ -272,33 +284,49 @@ describe("OnTimeIndexPage", () => {
       const toTimestampDate = from.plus({ months: 1 });
       const expectedButtonText = `${from.toFormat("dd MMM yyyy")} - ${displayEnd.toFormat("dd MMM yyyy")}`;
 
-      fireEvent.change(screen.getByDisplayValue("Last 7 days"), { target: { value: "Last month" } });
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last month" },
+      });
 
       await waitFor(() => {
         expect(screen.getByText(expectedButtonText)).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
-        expect(lastCall.toTimestamp).toContain(toTimestampDate.toFormat("yyyy-MM-dd"));
+        expect(lastCall.toTimestamp).toContain(
+          toTimestampDate.toFormat("yyyy-MM-dd"),
+        );
       });
     });
 
     it("'Month to date' preset shows correct date range and passes correct timestamps", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       const today = DateTime.local().startOf("day");
       const from = today.startOf("month");
       // to = today + 1 day (exclusive), so DateRangeSelect displays today as the end
       const expectedButtonText = `${from.toFormat("dd MMM yyyy")} - ${today.toFormat("dd MMM yyyy")}`;
 
-      fireEvent.change(screen.getByDisplayValue("Last 7 days"), { target: { value: "Month to date" } });
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Month to date" },
+      });
 
       await waitFor(() => {
         expect(screen.getByText(expectedButtonText)).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
-        expect(lastCall.toTimestamp).toContain(today.plus({ days: 1 }).toFormat("yyyy-MM-dd"));
+        expect(lastCall.toTimestamp).toContain(
+          today.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
+        );
       });
     });
   });
@@ -345,9 +373,7 @@ describe("OnTimeIndexPage", () => {
       render(<OnTimeIndexPage />);
 
       await waitFor(() => {
-        expect(
-          mockFetchOperatorPerformanceList,
-        ).toHaveBeenCalledWith(
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledWith(
           expect.objectContaining({
             filters: expect.objectContaining({
               timingPointsOnly: true,
@@ -368,9 +394,7 @@ describe("OnTimeIndexPage", () => {
       fireEvent.click(allStopsRadio);
 
       await waitFor(() => {
-        expect(
-          mockFetchOperatorPerformanceList,
-        ).toHaveBeenCalledWith(
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledWith(
           expect.objectContaining({
             filters: expect.objectContaining({
               timingPointsOnly: false,
@@ -393,7 +417,9 @@ describe("OnTimeIndexPage", () => {
     it("day of week filter: unchecking Saturday shows a filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
       fireEvent.click(screen.getByRole("checkbox", { name: "Sat" }));
@@ -402,15 +428,22 @@ describe("OnTimeIndexPage", () => {
       await waitFor(() => {
         expect(screen.getByText("Day of the week:")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
-        expect(lastCall.filters.dayOfWeekFlags).toEqual(expect.objectContaining({ saturday: false }));
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
+        expect(lastCall.filters.dayOfWeekFlags).toEqual(
+          expect.objectContaining({ saturday: false }),
+        );
       });
     });
 
     it("day of week filter: selecting only weekdays shows 'Weekdays' chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
       fireEvent.click(screen.getByRole("checkbox", { name: "Sat" }));
@@ -421,27 +454,44 @@ describe("OnTimeIndexPage", () => {
         expect(screen.getByText("Day of the week:")).toBeInTheDocument();
         expect(screen.getByText("Weekdays")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
-        expect(lastCall.filters.dayOfWeekFlags).toEqual(expect.objectContaining({ saturday: false, sunday: false }));
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
+        expect(lastCall.filters.dayOfWeekFlags).toEqual(
+          expect.objectContaining({ saturday: false, sunday: false }),
+        );
       });
     });
 
     it("time range filter: changing start time shows a time range filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
-      const panel = screen.getByRole("heading", { name: "Refine results" }).closest("div.refine-results-panel") as HTMLElement;
-      fireEvent.change(within(panel).getByRole("spinbutton", { name: "Start time" }), { target: { value: "8" } });
-      fireEvent.blur(within(panel).getByRole("spinbutton", { name: "Start time" }));
+      const panel = screen
+        .getByRole("heading", { name: "Refine results" })
+        .closest("div.refine-results-panel") as HTMLElement;
+      fireEvent.change(
+        within(panel).getByRole("spinbutton", { name: "Start time" }),
+        { target: { value: "8" } },
+      );
+      fireEvent.blur(
+        within(panel).getByRole("spinbutton", { name: "Start time" }),
+      );
       applyFilters();
 
       await waitFor(() => {
         expect(screen.getByText("Time range:")).toBeInTheDocument();
         expect(screen.getByText("08:00 - 23:59")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.filters.startTime).toBe("08:00");
       });
     });
@@ -449,19 +499,31 @@ describe("OnTimeIndexPage", () => {
     it("time range filter: changing end time shows a time range filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
-      const panel = screen.getByRole("heading", { name: "Refine results" }).closest("div.refine-results-panel") as HTMLElement;
-      fireEvent.change(within(panel).getByRole("spinbutton", { name: "End time" }), { target: { value: "18" } });
-      fireEvent.blur(within(panel).getByRole("spinbutton", { name: "End time" }));
+      const panel = screen
+        .getByRole("heading", { name: "Refine results" })
+        .closest("div.refine-results-panel") as HTMLElement;
+      fireEvent.change(
+        within(panel).getByRole("spinbutton", { name: "End time" }),
+        { target: { value: "18" } },
+      );
+      fireEvent.blur(
+        within(panel).getByRole("spinbutton", { name: "End time" }),
+      );
       applyFilters();
 
       await waitFor(() => {
         expect(screen.getByText("Time range:")).toBeInTheDocument();
         expect(screen.getByText("00:00 - 18:59")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.filters.endTime).toBe("18:59");
       });
     });
@@ -469,17 +531,24 @@ describe("OnTimeIndexPage", () => {
     it("maximum early filter: selecting a delay limit shows a filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
-      fireEvent.change(screen.getByLabelText("Maximum early"), { target: { value: "10" } });
+      fireEvent.change(screen.getByLabelText("Maximum early"), {
+        target: { value: "10" },
+      });
       applyFilters();
 
       await waitFor(() => {
         expect(screen.getByText("Maximum early:")).toBeInTheDocument();
         expect(screen.getByText("10 minutes")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.filters.minDelay).toBe(-10);
       });
     });
@@ -487,17 +556,24 @@ describe("OnTimeIndexPage", () => {
     it("maximum late filter: selecting a delay limit shows a filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       openRefinePanel();
-      fireEvent.change(screen.getByLabelText("Maximum late"), { target: { value: "20" } });
+      fireEvent.change(screen.getByLabelText("Maximum late"), {
+        target: { value: "20" },
+      });
       applyFilters();
 
       await waitFor(() => {
         expect(screen.getByText("Maximum late:")).toBeInTheDocument();
         expect(screen.getByText("20 minutes")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.filters.maxDelay).toBe(20);
       });
     });
@@ -505,7 +581,9 @@ describe("OnTimeIndexPage", () => {
     it("resetting filters removes all filter chips", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
-      await waitFor(() => expect(mockFetchOperatorPerformanceList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
 
       // Apply a filter first
       openRefinePanel();
@@ -523,7 +601,10 @@ describe("OnTimeIndexPage", () => {
       await waitFor(() => {
         expect(screen.queryByText("Day of the week:")).not.toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
-        const lastCall = mockFetchOperatorPerformanceList.mock.calls[mockFetchOperatorPerformanceList.mock.calls.length - 1][0];
+        const lastCall =
+          mockFetchOperatorPerformanceList.mock.calls[
+            mockFetchOperatorPerformanceList.mock.calls.length - 1
+          ][0];
         expect(lastCall.filters.dayOfWeekFlags).toBeUndefined();
       });
     });

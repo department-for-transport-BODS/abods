@@ -12,7 +12,10 @@ import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { MatchType, PerformanceFiltersInputType } from "@/src/generated/graphql";
+import {
+  MatchType,
+  PerformanceFiltersInputType,
+} from "@/src/generated/graphql";
 import {
   OperatorPerformance,
   onTimeService,
@@ -22,17 +25,12 @@ import { formatDateToISODateString } from "@/utils/dateFormatter";
 
 const Select = dynamic(
   () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (mod) => mod.Select,
-    ),
+    import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Select),
   { ssr: false },
 );
 
 const Table = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (mod) => mod.Table,
-    ),
+  () => import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Table),
   { ssr: false },
 );
 
@@ -53,7 +51,7 @@ const STOP_TYPE_OPTIONS = [
   { value: "timing-points", label: "Timing points" },
 ];
 
-const refineResultsToPerformanceFilters  = (
+const refineResultsToPerformanceFilters = (
   values: RefineResultsFilterValues,
 ): PerformanceFiltersInputType => {
   const hasCustomDaySelection = Object.values(values.dayOfWeekFlags).some(
@@ -105,10 +103,18 @@ const performanceFiltersToRefineResults = (
     ...(filters.startTime ? { startTime: filters.startTime } : {}),
     ...(filters.endTime ? { endTime: filters.endTime } : {}),
     ...(typeof filters.minDelay === "number"
-      ? { minDelayStr: String(Math.abs(filters.minDelay)) as RefineResultsFilterValues["minDelayStr"] }
+      ? {
+          minDelayStr: String(
+            Math.abs(filters.minDelay),
+          ) as RefineResultsFilterValues["minDelayStr"],
+        }
       : {}),
     ...(typeof filters.maxDelay === "number"
-      ? { maxDelayStr: String(filters.maxDelay) as RefineResultsFilterValues["maxDelayStr"] }
+      ? {
+          maxDelayStr: String(
+            filters.maxDelay,
+          ) as RefineResultsFilterValues["maxDelayStr"],
+        }
       : {}),
   };
 };
@@ -132,7 +138,9 @@ const calculateDateRange = (
       const lastMonth = today.minus({ months: 1 });
       return {
         from: formatDateToISODateString(lastMonth.startOf("month")),
-        to: formatDateToISODateString(lastMonth.endOf("month").plus({ days: 1 })),
+        to: formatDateToISODateString(
+          lastMonth.endOf("month").plus({ days: 1 }),
+        ),
       };
     }
     case "Month to date":
@@ -150,16 +158,21 @@ const OnTimeIndexPage = () => {
   const { config } = useConfig();
   const [showRefineResults, setShowRefineResults] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [operatorPerformance, setOperatorPerformance] = useState<OperatorPerformance[]>([]);
+  const [operatorPerformance, setOperatorPerformance] = useState<
+    OperatorPerformance[]
+  >([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
   const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
   const [selectedStopType, setSelectedStopType] = useState("timing-points");
-  const [activeFilters, setActiveFilters] = useState<PerformanceFiltersInputType>({});
-  const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(
-    calculateDateRange("Last 7 days"),
-  );
-  const hasNoOperatorData = !isLoading && !error && operatorPerformance.length === 0;
+  const [activeFilters, setActiveFilters] =
+    useState<PerformanceFiltersInputType>({});
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(calculateDateRange("Last 7 days"));
+  const hasNoOperatorData =
+    !isLoading && !error && operatorPerformance.length === 0;
   const dataExpected = selectedMatchType === "evidenced";
   const wrapperNoData = hasNoOperatorData;
   const wrapperDataExpected = dataExpected;
@@ -191,15 +204,16 @@ const OnTimeIndexPage = () => {
           filters: {
             ...defaultParams.filters,
             ...activeFilters,
-            matchType: selectedMatchType === "evidenced" ? MatchType.Evidenced : MatchType.Estimated,
+            matchType:
+              selectedMatchType === "evidenced"
+                ? MatchType.Evidenced
+                : MatchType.Estimated,
             timingPointsOnly: selectedStopType === "timing-points",
           },
         };
 
         const data = await onTimeService.fetchOperatorPerformanceList(params);
         setOperatorPerformance(data);
-
-
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -218,7 +232,7 @@ const OnTimeIndexPage = () => {
         fetched from the same GraphQL operations used by the existing Angular
         app and displayed as JSON for verification.
       </p> */}
-      
+
       <div className="controls-container">
         <div className="controls-date-selects-container">
           <DateRangeSelect
@@ -261,14 +275,16 @@ const OnTimeIndexPage = () => {
                 fill="currentColor"
               />
             </svg>
-            <a href="#" className="govuk-link--no-visited-state">Refine results</a>
+            <a href="#" className="govuk-link--no-visited-state">
+              Refine results
+            </a>
           </button>
           <RefineResultsPanel
             isOpen={showRefineResults}
             isLoading={isLoading}
             initialValues={performanceFiltersToRefineResults(activeFilters)}
             onApply={(values) => {
-              setActiveFilters(refineResultsToPerformanceFilters (values));
+              setActiveFilters(refineResultsToPerformanceFilters(values));
               setShowRefineResults(false);
             }}
             onReset={() => setActiveFilters({})}
@@ -293,7 +309,10 @@ const OnTimeIndexPage = () => {
         </div>
       </div>
       <div className="filter-chips-container">
-        <FilterChips filters={activeFilters} onFilterChange={setActiveFilters} />
+        <FilterChips
+          filters={activeFilters}
+          onFilterChange={setActiveFilters}
+        />
       </div>
       <div className="summary-container">
         <h2 className="govuk-heading-l">Summary</h2>
@@ -336,8 +355,14 @@ const OnTimeIndexPage = () => {
               head={[
                 { content: "NOC" },
                 { content: "Operator" },
-                { content: "Av. delay", classes: "govuk-table__header--numeric" },
-                { content: "On-time %", classes: "govuk-table__header--numeric" },
+                {
+                  content: "Av. delay",
+                  classes: "govuk-table__header--numeric",
+                },
+                {
+                  content: "On-time %",
+                  classes: "govuk-table__header--numeric",
+                },
                 { content: "Late %", classes: "govuk-table__header--numeric" },
                 { content: "Early %", classes: "govuk-table__header--numeric" },
               ]}
@@ -351,32 +376,48 @@ const OnTimeIndexPage = () => {
                     delay == null
                       ? "-"
                       : (Math.round(delay) >= 0 ? "+" : "-") +
-                        Duration.fromObject({ seconds: Math.abs(Math.round(delay)) }).toFormat("mm:ss");
+                        Duration.fromObject({
+                          seconds: Math.abs(Math.round(delay)),
+                        }).toFormat("mm:ss");
                   return [
                     { content: op.nocCode },
                     {
                       content: (
-                        <Link href={`/on-time/${encodeURIComponent(op.nocCode)}`} className="govuk-link">
+                        <Link
+                          href={`/on-time/${encodeURIComponent(op.nocCode)}`}
+                          className="govuk-link"
+                        >
                           {op.name}
                         </Link>
                       ),
                     },
-                    { content: formattedDelay, classes: "govuk-table__cell--numeric" },
                     {
-                      content: op.onTimeRatio != null ? `${(op.onTimeRatio * 100).toFixed(1)}%` : "-",
+                      content: formattedDelay,
                       classes: "govuk-table__cell--numeric",
                     },
                     {
-                      content: op.lateRatio != null ? `${(op.lateRatio * 100).toFixed(1)}%` : "-",
+                      content:
+                        op.onTimeRatio != null
+                          ? `${(op.onTimeRatio * 100).toFixed(1)}%`
+                          : "-",
                       classes: "govuk-table__cell--numeric",
                     },
                     {
-                      content: op.earlyRatio != null ? `${(op.earlyRatio * 100).toFixed(1)}%` : "-",
+                      content:
+                        op.lateRatio != null
+                          ? `${(op.lateRatio * 100).toFixed(1)}%`
+                          : "-",
+                      classes: "govuk-table__cell--numeric",
+                    },
+                    {
+                      content:
+                        op.earlyRatio != null
+                          ? `${(op.earlyRatio * 100).toFixed(1)}%`
+                          : "-",
                       classes: "govuk-table__cell--numeric",
                     },
                   ];
-                })
-              }
+                })}
             />
           </ChartNoDataWrapper>
         )}

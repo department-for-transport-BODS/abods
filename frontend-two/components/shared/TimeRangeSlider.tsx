@@ -1,4 +1,10 @@
-import { ChangeEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const MIN_HOUR = 0;
 const MAX_START_HOUR = 23;
@@ -106,7 +112,11 @@ export const TimeRangeSlider = ({
       return;
     }
 
-    const nextStart = clamp(parsed, MIN_HOUR, Math.min(MAX_START_HOUR, endHour - 1));
+    const nextStart = clamp(
+      parsed,
+      MIN_HOUR,
+      Math.min(MAX_START_HOUR, endHour - 1),
+    );
     onStartTimeChange(formatStartTime(nextStart));
   };
 
@@ -123,7 +133,11 @@ export const TimeRangeSlider = ({
       return;
     }
 
-    const nextEnd = clamp(parsed + 1, Math.max(MIN_END_HOUR, startHour + 1), MAX_END_HOUR);
+    const nextEnd = clamp(
+      parsed + 1,
+      Math.max(MIN_END_HOUR, startHour + 1),
+      MAX_END_HOUR,
+    );
     onEndTimeChange(formatEndTime(nextEnd));
   };
 
@@ -163,10 +177,14 @@ export const TimeRangeSlider = ({
   const errorId = error ? "time-range-slider-error" : undefined;
 
   return (
-    <div className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`}>
+    <div
+      className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`}
+    >
       <fieldset className="govuk-fieldset">
         {legend ? (
-          <legend className={`govuk-fieldset__legend govuk-fieldset__legend--${legendSize}`}>
+          <legend
+            className={`govuk-fieldset__legend govuk-fieldset__legend--${legendSize}`}
+          >
             {legend}
           </legend>
         ) : null}
@@ -179,7 +197,10 @@ export const TimeRangeSlider = ({
 
         <div className="time-range-slider" id="time-range-slider">
           <div className="time-range-slider__track">
-            <div className="time-range-slider__selected" style={sliderSelectedStyle} />
+            <div
+              className="time-range-slider__selected"
+              style={sliderSelectedStyle}
+            />
           </div>
           <input
             className="time-range-slider__input"

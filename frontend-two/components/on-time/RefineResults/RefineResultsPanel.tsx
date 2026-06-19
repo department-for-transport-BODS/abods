@@ -32,9 +32,17 @@ export const RefineResultsPanel = ({
       <button type="button" className="refine-results-panel-drawer__backdrop" />
       <div className="refine-results-panel">
         <div className="refine-results-panel__header">
-          <h2 className="govuk-heading-l govuk-!-margin-bottom-0">Refine results</h2>
-          <button type="button" className="refine-results-panel__close" onClick={onCancel}>
-            <a href="#" className="govuk-link">Close</a>
+          <h2 className="govuk-heading-l govuk-!-margin-bottom-0">
+            Refine results
+          </h2>
+          <button
+            type="button"
+            className="refine-results-panel__close"
+            onClick={onCancel}
+          >
+            <a href="#" className="govuk-link">
+              Close
+            </a>
           </button>
         </div>
 

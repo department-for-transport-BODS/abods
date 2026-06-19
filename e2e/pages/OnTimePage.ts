@@ -127,7 +127,3 @@ export class OnTimePage {
     return this.page.getByLabel("Timing points");
   }
 }
-
-
-  
-

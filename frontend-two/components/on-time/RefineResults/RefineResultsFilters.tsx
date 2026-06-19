@@ -99,12 +99,18 @@ export const RefineResultsFilters = ({
           legendSize="s"
           startTime={values.startTime}
           endTime={values.endTime}
-          onStartTimeChange={(startTime) => setValues((prev) => ({ ...prev, startTime }))}
-          onEndTimeChange={(endTime) => setValues((prev) => ({ ...prev, endTime }))}
+          onStartTimeChange={(startTime) =>
+            setValues((prev) => ({ ...prev, startTime }))
+          }
+          onEndTimeChange={(endTime) =>
+            setValues((prev) => ({ ...prev, endTime }))
+          }
         />
 
         <fieldset className="govuk-fieldset">
-          <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">Performance</legend>
+          <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
+            Performance
+          </legend>
           <div className="refine-results-filters__delay-selects">
             <div className="govuk-form-group">
               <label className="govuk-label" htmlFor="max-early">
@@ -114,11 +120,18 @@ export const RefineResultsFilters = ({
                 id="max-early"
                 className="govuk-select"
                 value={values.minDelayStr}
-                onChange={(event) => setValues((prev) => ({ ...prev, minDelayStr: event.target.value as DelayBound }))}
+                onChange={(event) =>
+                  setValues((prev) => ({
+                    ...prev,
+                    minDelayStr: event.target.value as DelayBound,
+                  }))
+                }
               >
                 {DELAY_OPTIONS.map((option) => (
                   <option key={option} value={option}>
-                    {option === "none" ? "No limit" : `${Math.abs(Number(option))} minutes`}
+                    {option === "none"
+                      ? "No limit"
+                      : `${Math.abs(Number(option))} minutes`}
                   </option>
                 ))}
               </select>
@@ -131,7 +144,12 @@ export const RefineResultsFilters = ({
                 id="max-late"
                 className="govuk-select"
                 value={values.maxDelayStr}
-                onChange={(event) => setValues((prev) => ({ ...prev, maxDelayStr: event.target.value as DelayBound }))}
+                onChange={(event) =>
+                  setValues((prev) => ({
+                    ...prev,
+                    maxDelayStr: event.target.value as DelayBound,
+                  }))
+                }
               >
                 {DELAY_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -146,12 +164,18 @@ export const RefineResultsFilters = ({
 
       <div className="govuk-!-margin-bottom-4">
         <button type="button" className="govuk-body" onClick={resetToDefault}>
-          <a href="#" className="govuk-link">Reset to defaults</a>
+          <a href="#" className="govuk-link">
+            Reset to defaults
+          </a>
         </button>
       </div>
 
       <div className="govuk-button-group refine-results-filters__actions">
-        <button type="button" className="govuk-button govuk-button--secondary" onClick={onCancel}>
+        <button
+          type="button"
+          className="govuk-button govuk-button--secondary"
+          onClick={onCancel}
+        >
           Cancel
         </button>
         <button type="submit" className="govuk-button" disabled={isLoading}>

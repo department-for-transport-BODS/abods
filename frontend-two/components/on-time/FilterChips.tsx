@@ -63,21 +63,13 @@ const FilterChip = ({
   );
 };
 
-export const FilterChips = ({
-  filters,
-  onFilterChange,
-}: FilterChipsProps) => {
+export const FilterChips = ({ filters, onFilterChange }: FilterChipsProps) => {
   const isDayOfWeek = Boolean(filters.dayOfWeekFlags);
   const isTimeRange = Boolean(filters.startTime) || Boolean(filters.endTime);
   const isMinDelay = Boolean(filters.minDelay);
   const isMaxDelay = Boolean(filters.maxDelay);
 
-  if (
-    !isDayOfWeek &&
-    !isTimeRange &&
-    !isMinDelay &&
-    !isMaxDelay
-  ) {
+  if (!isDayOfWeek && !isTimeRange && !isMinDelay && !isMaxDelay) {
     return null;
   }
 
@@ -104,7 +96,6 @@ export const FilterChips = ({
     const { maxDelay: _, ...rest } = filters;
     updateFilters(rest);
   };
-
 
   const timeRange = `${filters.startTime ?? DEFAULT_START_TIME} - ${filters.endTime ?? DEFAULT_END_TIME}`;
   const minDelay = filters.minDelay ? `${filters.minDelay * -1} minutes` : "";

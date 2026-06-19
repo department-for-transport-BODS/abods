@@ -25,6 +25,19 @@ loggedInTest.describe("On-time performance - authenticated", () => {
 
       await expect(loggedInPage).toHaveURL(/\/on-time\/?$/);
       await expect(onTime.heading()).toBeVisible();
+      await onTime.goto();
+  });
+
+  loggedInTest(
+    "shows the segmented toggles and defaults correctly",
+    async () => {
+      await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
+
+      await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
     },
   );
 
@@ -108,17 +121,9 @@ loggedInTest.describe("On-time performance - authenticated", () => {
     },
   );
 
-    loggedInTest("shows the segmented toggles and defaults correctly", async () => {
-    await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
-    await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
-    await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
-
-    await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
-    await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
-    await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
-  });
-
-    loggedInTest("shows date controls and checks correct options are present", async () => {
+    loggedInTest(
+    "shows date controls and checks correct options are present",
+    async () => {
       await expect(onTime.dateRangeButton()).toBeVisible();
       await expect(onTime.datePresetSelect()).toBeVisible();
 
@@ -126,9 +131,12 @@ loggedInTest.describe("On-time performance - authenticated", () => {
       await expect(onTime.datePresetSelect()).toContainText("Last 28 days");
       await expect(onTime.datePresetSelect()).toContainText("Last month");
       await expect(onTime.datePresetSelect()).toContainText("Month to date");
-    });
+    },
+  );
 
-    loggedInTest("shows and closes the refine results panel and key filters", async () => {
+  loggedInTest(
+    "shows and closes the refine results panel and key filters",
+    async () => {
       await expect(onTime.refineResultsButton()).toBeVisible();
 
       await onTime.refineResultsButton().click();
@@ -139,5 +147,6 @@ loggedInTest.describe("On-time performance - authenticated", () => {
 
       await onTime.refineResultsCloseButton().click();
       await expect(onTime.refineResultsHeading()).toHaveCount(0);
-    });
+    },
+  );
 });
