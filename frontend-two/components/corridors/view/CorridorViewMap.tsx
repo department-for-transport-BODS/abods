@@ -273,6 +273,7 @@ export const CorridorViewMap = ({
     map.on("moveend", () => setMoveCounter((count) => count + 1));
 
     const recentreContainer = document.createElement("div");
+    recentreContainer.className = "mapboxgl-ctrl";
     map.addControl(
       { onAdd: () => recentreContainer, onRemove: () => {} },
       "bottom-left",
