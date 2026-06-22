@@ -119,6 +119,7 @@ export const StopAnalysisMap = ({
   const [activeStyle, setActiveStyle] = useState<"default" | "satellite">(
     "default",
   );
+  const lastAutoFitBoundsKeyRef = useRef<string | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
 
@@ -149,8 +150,28 @@ export const StopAnalysisMap = ({
         bounds.getNorth(),
       ]);
 
-      const labelPoint = pointOnFeature(clippedFeature);
-      const coordinates = labelPoint.geometry.coordinates as [number, number];
+      let coordinates: [number, number] | null = null;
+      try {
+        const labelPoint = pointOnFeature(clippedFeature);
+        const rawCoordinates = labelPoint.geometry?.coordinates;
+        if (
+          Array.isArray(rawCoordinates) &&
+          rawCoordinates.length >= 2 &&
+          Number.isFinite(rawCoordinates[0]) &&
+          Number.isFinite(rawCoordinates[1])
+        ) {
+          coordinates = [rawCoordinates[0], rawCoordinates[1]];
+        }
+      } catch {
+        clearPopup();
+        return;
+      }
+
+      if (!coordinates) {
+        clearPopup();
+        return;
+      }
+
       const properties = hoveredAdminArea.properties as
         | {
             id?: string;
@@ -655,21 +676,36 @@ export const StopAnalysisMap = ({
             selectedAdminAreaBounds.maxLatitude,
           ],
         ]
-      : [
-          [BRITISH_ISLES_BBOX[0], BRITISH_ISLES_BBOX[1]],
-          [BRITISH_ISLES_BBOX[2], BRITISH_ISLES_BBOX[3]],
-        ];
+      : initialBounds
+        ? [
+            [initialBounds.minLongitude, initialBounds.minLatitude],
+            [initialBounds.maxLongitude, initialBounds.maxLatitude],
+          ]
+        : [
+            [BRITISH_ISLES_BBOX[0], BRITISH_ISLES_BBOX[1]],
+            [BRITISH_ISLES_BBOX[2], BRITISH_ISLES_BBOX[3]],
+          ];
+
+    const fitKey = selectedAdminAreaBounds
+      ? `admin:${selectedAdminAreaBounds.minLongitude.toFixed(6)},${selectedAdminAreaBounds.minLatitude.toFixed(6)},${selectedAdminAreaBounds.maxLongitude.toFixed(6)},${selectedAdminAreaBounds.maxLatitude.toFixed(6)}`
+      : initialBounds
+        ? `initial:${initialBounds.minLongitude.toFixed(6)},${initialBounds.minLatitude.toFixed(6)},${initialBounds.maxLongitude.toFixed(6)},${initialBounds.maxLatitude.toFixed(6)}`
+        : "default-british-isles";
+
+    if (lastAutoFitBoundsKeyRef.current === fitKey) {
+      return;
+    }
+    lastAutoFitBoundsKeyRef.current = fitKey;
 
     try {
       map.fitBounds(targetBounds as LngLatBoundsLike, {
         duration: 500,
         padding: 40,
-        maxZoom: selectedAdminAreaBounds ? ADMIN_AREA_HIDDEN_ZOOM : undefined,
       });
     } catch {
       return;
     }
-  }, [selectedAdminAreaBounds, mapLoaded, styleRevision]);
+  }, [selectedAdminAreaBounds, initialBounds, mapLoaded, styleRevision]);
 
   useEffect(() => {
     if (!locationSelectionRequest || !mapLoaded || !mapRef.current) return;

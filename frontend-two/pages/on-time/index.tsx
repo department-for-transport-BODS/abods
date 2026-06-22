@@ -236,7 +236,6 @@ const OnTimeIndexPage = () => {
         fetched from the same GraphQL operations used by the existing Angular
         app and displayed as JSON for verification.
       </p> */}
-
       <div className="controls-container">
         <div className="controls-date-selects-container">
           <DateRangeSelect

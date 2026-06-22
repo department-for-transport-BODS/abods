@@ -732,11 +732,14 @@ const StopAnalysisPage = () => {
                   dayOfWeek: updated.dayOfWeekFlags
                     ? Object.entries(updated.dayOfWeekFlags)
                         .filter(([, v]) => v)
-                        .map(([k]) => k)
+                        .map(
+                          ([k]) =>
+                            DAY_KEY_TO_QUERY[k as keyof typeof DAY_KEY_TO_QUERY],
+                        )
                         .join(",")
                     : undefined,
-                  startTime: updated.startTime,
-                  endTime: updated.endTime,
+                  startTime: updated.startTime ?? undefined,
+                  endTime: updated.endTime ?? undefined,
                 })
               }
             />
