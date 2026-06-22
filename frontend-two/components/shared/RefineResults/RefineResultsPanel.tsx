@@ -4,9 +4,7 @@ import { RefineResultsFilters } from "./RefineResultsFilters";
 interface RefineResultsPanelProps {
   isOpen: boolean;
   isLoading: boolean;
-  showDelay?: boolean;
-  showAdminAreas?: boolean;
-  adminAreaOptions?: string[];
+  showPerformanceFilters?: boolean;
   initialValues?: Partial<RefineResultsFilterValues>;
   onApply?: (values: RefineResultsFilterValues) => void;
   onCancel?: () => void;
@@ -16,7 +14,7 @@ interface RefineResultsPanelProps {
 export const RefineResultsPanel = ({
   isOpen,
   isLoading,
-  showDelay = true,
+  showPerformanceFilters = true,
   initialValues,
   onApply,
   onCancel,
@@ -48,7 +46,7 @@ export const RefineResultsPanel = ({
 
         <RefineResultsFilters
           isLoading={isLoading}
-          showDelay={showDelay}
+          showPerformanceFilters={showPerformanceFilters}
           initialValues={initialValues}
           onApply={onApply}
           onCancel={onCancel}

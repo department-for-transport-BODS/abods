@@ -16,7 +16,7 @@ export interface RefineResultsFilterValues {
 
 interface RefineResultsFiltersProps {
   isLoading: boolean;
-  showDelay?: boolean;
+  showPerformanceFilters?: boolean;
   initialValues?: Partial<RefineResultsFilterValues>;
   onApply?: (values: RefineResultsFilterValues) => void;
   onCancel?: () => void;
@@ -41,6 +41,7 @@ const buildDefaultValues = (): RefineResultsFilterValues => ({
 
 export const RefineResultsFilters = ({
   isLoading,
+  showPerformanceFilters = true,
   initialValues,
   onApply,
   onCancel,
@@ -107,59 +108,61 @@ export const RefineResultsFilters = ({
           }
         />
 
-        <fieldset className="govuk-fieldset">
-          <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
-            Performance
-          </legend>
-          <div className="refine-results-filters__delay-selects">
-            <div className="govuk-form-group">
-              <label className="govuk-label" htmlFor="max-early">
-                Maximum early
-              </label>
-              <select
-                id="max-early"
-                className="govuk-select"
-                value={values.minDelayStr}
-                onChange={(event) =>
-                  setValues((prev) => ({
-                    ...prev,
-                    minDelayStr: event.target.value as DelayBound,
-                  }))
-                }
-              >
-                {DELAY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option === "none"
-                      ? "No limit"
-                      : `${Math.abs(Number(option))} minutes`}
-                  </option>
-                ))}
-              </select>
+        {showPerformanceFilters && (
+          <fieldset className="govuk-fieldset">
+            <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
+              Performance
+            </legend>
+            <div className="refine-results-filters__delay-selects">
+              <div className="govuk-form-group">
+                <label className="govuk-label" htmlFor="max-early">
+                  Maximum early
+                </label>
+                <select
+                  id="max-early"
+                  className="govuk-select"
+                  value={values.minDelayStr}
+                  onChange={(event) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      minDelayStr: event.target.value as DelayBound,
+                    }))
+                  }
+                >
+                  {DELAY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option === "none"
+                        ? "No limit"
+                        : `${Math.abs(Number(option))} minutes`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="govuk-form-group">
+                <label className="govuk-label" htmlFor="max-late">
+                  Maximum late
+                </label>
+                <select
+                  id="max-late"
+                  className="govuk-select"
+                  value={values.maxDelayStr}
+                  onChange={(event) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      maxDelayStr: event.target.value as DelayBound,
+                    }))
+                  }
+                >
+                  {DELAY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option === "none" ? "No limit" : `${option} minutes`}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="govuk-form-group">
-              <label className="govuk-label" htmlFor="max-late">
-                Maximum late
-              </label>
-              <select
-                id="max-late"
-                className="govuk-select"
-                value={values.maxDelayStr}
-                onChange={(event) =>
-                  setValues((prev) => ({
-                    ...prev,
-                    maxDelayStr: event.target.value as DelayBound,
-                  }))
-                }
-              >
-                {DELAY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option === "none" ? "No limit" : `${option} minutes`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </fieldset>
+          </fieldset>
+        )}
       </div>
 
       <div className="govuk-!-margin-bottom-4">

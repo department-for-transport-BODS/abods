@@ -44,7 +44,8 @@
   margin-bottom: govuk-spacing(6);
 }
 
-.on-time-refine-results-button {
+.on-time-refine-results-button,
+.stop-analysis-filters__refine-button {
   display: inline-flex;
   align-items: center;
   gap: govuk-spacing(1);
@@ -3282,6 +3283,8 @@ body.helpdesk-open {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    gap: govuk-spacing(4);
+    padding: govuk-spacing(2) 0;
   }
 }
 

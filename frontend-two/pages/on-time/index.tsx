@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { DateTime, Duration } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { FilterChips } from "@/components/on-time/FilterChips";
 import { JsonSection } from "@/components/on-time/JsonSection";
-import { RefineResultsPanel } from "@/components/on-time/RefineResults/RefineResultsPanel";
-import { RefineResultsFilterValues } from "@/components/on-time/RefineResults/RefineResultsFilters";
+import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
+import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { useConfig } from "@/contexts/ConfigContext";
@@ -156,7 +156,6 @@ const calculateDateRange = (
 const OnTimeIndexPage = () => {
   useRequireAuth();
   const { config } = useConfig();
-  const [showRefineResults, setShowRefineResults] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [operatorPerformance, setOperatorPerformance] = useState<
     OperatorPerformance[]
@@ -165,8 +164,13 @@ const OnTimeIndexPage = () => {
   const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
   const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
   const [selectedStopType, setSelectedStopType] = useState("timing-points");
-  const [activeFilters, setActiveFilters] =
+  const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(refineResultsFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(refineResultsFilters)],
+  );
   const [dateRange, setDateRange] = useState<{
     from: string;
     to: string;
@@ -203,7 +207,7 @@ const OnTimeIndexPage = () => {
             : {}),
           filters: {
             ...defaultParams.filters,
-            ...activeFilters,
+            ...refineResultsFilters,
             matchType:
               selectedMatchType === "evidenced"
                 ? MatchType.Evidenced
@@ -221,7 +225,7 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [config, activeFilters, dateRange, selectedMatchType, selectedStopType]);
+  }, [config, refineResultsFilters, dateRange, selectedMatchType, selectedStopType]);
 
   return (
     <BaseLayout title="All services - Analyse Bus Open Data">
@@ -236,7 +240,7 @@ const OnTimeIndexPage = () => {
       <div className="controls-container">
         <div className="controls-date-selects-container">
           <DateRangeSelect
-            label=""
+            hideLabel={true}
             value={dateRange || undefined}
             onChange={setDateRange}
           />
@@ -252,43 +256,13 @@ const OnTimeIndexPage = () => {
           />
         </div>
         <div className="refine-results-button-container">
-          <button
-            type="button"
-            className="on-time-refine-results-button govuk-link"
-            onClick={() => setShowRefineResults(true)}
-          >
-            <svg
-              className="on-time-refine-results-button__icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M13.7439 5H20.5C21.3284 5 22 5.67157 22 6.5C22 7.32843 21.3284 8 20.5 8H13.7439C13.1262 9.74779 11.4593 11 9.5 11C7.54067 11 5.87381 9.74779 5.25606 8H3.5C2.67157 8 2 7.32843 2 6.5C2 5.67157 2.67157 5 3.5 5H5.25606C5.87381 3.25221 7.54067 2 9.5 2C11.4593 2 13.1262 3.25221 13.7439 5ZM7 6.5C7 7.88071 8.11929 9 9.5 9C10.8807 9 12 7.88071 12 6.5C12 5.11929 10.8807 4 9.5 4C8.11929 4 7 5.11929 7 6.5Z"
-                fill="currentColor"
-              />
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M18.7439 16H20.5C21.3284 16 22 16.6716 22 17.5C22 18.3284 21.3284 19 20.5 19H18.7439C18.1262 20.7478 16.4593 22 14.5 22C12.5407 22 10.8738 20.7478 10.2561 19H3.5C2.67157 19 2 18.3284 2 17.5C2 16.6716 2.67157 16 3.5 16H10.2561C10.8738 14.2522 12.5407 13 14.5 13C16.4593 13 18.1262 14.2522 18.7439 16ZM12 17.5C12 18.8807 13.1193 20 14.5 20C15.8807 20 17 18.8807 17 17.5C17 16.1193 15.8807 15 14.5 15C13.1193 15 12 16.1193 12 17.5Z"
-                fill="currentColor"
-              />
-            </svg>
-            <a href="#" className="govuk-link--no-visited-state">
-              Refine results
-            </a>
-          </button>
-          <RefineResultsPanel
-            isOpen={showRefineResults}
+          <RefineResultsButton
             isLoading={isLoading}
-            initialValues={performanceFiltersToRefineResults(activeFilters)}
+            initialValues={refineResultsInitialValues}
             onApply={(values) => {
-              setActiveFilters(refineResultsToPerformanceFilters(values));
-              setShowRefineResults(false);
+              setRefineResultsFilters(refineResultsToPerformanceFilters(values));
             }}
-            onReset={() => setActiveFilters({})}
-            onCancel={() => setShowRefineResults(false)}
+            onReset={() => setRefineResultsFilters({})}
           />
         </div>
         <div className="on-time-toggle-container">
@@ -310,8 +284,8 @@ const OnTimeIndexPage = () => {
       </div>
       <div className="filter-chips-container">
         <FilterChips
-          filters={activeFilters}
-          onFilterChange={setActiveFilters}
+          filters={refineResultsFilters}
+          onFilterChange={setRefineResultsFilters}
         />
       </div>
       <div className="summary-container">
