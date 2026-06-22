@@ -27,12 +27,14 @@ function applyDaySelection(
 }
 
 interface DateRangeSelectProps {
+  label?: string;
   value?: { from: string; to: string };
   onChange?: (dateRange: { from: string; to: string }) => void;
   hideLabel?: boolean;
 }
 
 export const DateRangeSelect = ({
+  label = "Date Range",
   value,
   onChange,
   hideLabel = false,
@@ -156,7 +158,7 @@ export const DateRangeSelect = ({
       }
       ref={ref}
     >
-      {!hideLabel && <label className="govuk-label">Date Range</label>}
+      {!hideLabel && <label className="govuk-label">{label}</label>}
       <button
         type="button"
         className="date-range-select__button"
