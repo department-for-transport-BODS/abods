@@ -43,10 +43,10 @@ export const DateRangeSelect = ({
   const maxDate = today;
 
   const initialStart = value?.from
-    ? DateTime.fromISO(value.from).startOf("day")
+    ? formatISODateStringToDate(value.from)
     : today.minus({ days: 7 });
   const initialEndRaw = value?.to
-    ? DateTime.fromISO(value.to).startOf("day").minus({ days: 1 })
+    ? formatISODateStringToDate(value.to).minus({ days: 1 })
     : maxDate;
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
@@ -69,8 +69,8 @@ export const DateRangeSelect = ({
   useEffect(() => {
     if (!value?.from || !value?.to) return;
 
-    const nextStart = DateTime.fromISO(value.from).startOf("day");
-    const nextEndRaw = DateTime.fromISO(value.to).startOf("day").minus({ days: 1 });
+    const nextStart = formatISODateStringToDate(value.from);
+    const nextEndRaw = formatISODateStringToDate(value.to).minus({ days: 1 });
 
     if (!nextStart.isValid || !nextEndRaw.isValid) return;
 
