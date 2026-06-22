@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import { DateRangeCalendar } from "./DateRangeCalendar";
@@ -48,10 +48,15 @@ export const DateRangeSelect = ({
   // which the API interprets as inclusive of today.
   const maxDate = today;
 
-  const initialStart = value?.from
-    ? DateTime.fromISO(value.from)
-    : today.minus({ days: 7 });
-  const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
+  const selectedDateRange = useMemo<CalendarDateRange>(() => {
+    const start = value?.from
+      ? DateTime.fromISO(value.from)
+      : today.minus({ days: 7 });
+    const endRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
+    const end = endRaw > maxDate ? maxDate : endRaw;
+    return { start, end };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.from, value?.to]);
 
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
@@ -109,13 +114,13 @@ export const DateRangeSelect = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpenDropdown(false);
-        setDraftDateRange(selectedDateRange);
+        setDraftDateRange(selectedDateRangeRef.current);
       }
     };
     if (openDropdown)
       document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openDropdown, selectedDateRange]);
+  }, [openDropdown]);
 
   const handleDaySelect = (date: DateTime) => {
     setDraftDateRange((prev) => applyDaySelection(date, prev));
@@ -130,13 +135,6 @@ export const DateRangeSelect = ({
 
   const handleApplyButton = () => {
     if (draftDateRange.start?.isValid && draftDateRange.end?.isValid) {
-      const committed = {
-        start: draftDateRange.start,
-        end: draftDateRange.end,
-      };
-
-      setSelectedDateRange(committed);
-
       onChange &&
         onChange({
           from: formatDateToISODateString(draftDateRange.start),
