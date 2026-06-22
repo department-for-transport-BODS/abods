@@ -10,9 +10,7 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
-import { usePanel } from "@/contexts/PanelContext";
 import { ErrorInfo } from "@/types";
-import RefineIcon from "@/assets/icons/refine.svg";
 import {
   Direction,
   StopPerformanceRow,
@@ -23,18 +21,19 @@ import {
   DayOfWeekFlagsInputType as DayOfWeekFlags,
 } from "@/src/generated/graphql";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
-import {
-  StopAnalysisFilters as FiltersPanel,
-  RefineFilters,
-} from "@/components/stop-analysis/StopAnalysisFilters";
+import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
+import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
+import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import {
   MatchType,
   MatchType as GqlMatchType,
+  PerformanceFiltersInputType,
   StopAnalysisQueryVariables,
   StopStatistics,
 } from "../src/generated/graphql";
+import { FilterChips } from "@/components/on-time/FilterChips";
 import { Period } from "@/utils/dateRange";
 import { operatorsService } from "@/services/operator.service";
 
@@ -45,6 +44,16 @@ const DEFAULT_TO = DateTime.local()
   .minus({ days: 1 })
   .endOf("day");
 const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
+
+const DAY_KEY_TO_QUERY = {
+  Mon: "monday",
+  Tue: "tuesday",
+  Wed: "wednesday",
+  Thu: "thursday",
+  Fri: "friday",
+  Sat: "saturday",
+  Sun: "sunday",
+} as const;
 
 function getPresetWindow(preset: Period, today: DateTime) {
   const yesterday = today.minus({ days: 1 });
@@ -62,6 +71,54 @@ function getPresetWindow(preset: Period, today: DateTime) {
     }
   }
 }
+
+const dayOfWeekToRefineValues = (
+  dayOfWeekFlags?: DayOfWeekFlags,
+): RefineResultsFilterValues["dayOfWeekFlags"] | undefined => {
+  if (!dayOfWeekFlags) {
+    return undefined;
+  }
+
+  return {
+    Mon: Boolean(dayOfWeekFlags.monday),
+    Tue: Boolean(dayOfWeekFlags.tuesday),
+    Wed: Boolean(dayOfWeekFlags.wednesday),
+    Thu: Boolean(dayOfWeekFlags.thursday),
+    Fri: Boolean(dayOfWeekFlags.friday),
+    Sat: Boolean(dayOfWeekFlags.saturday),
+    Sun: Boolean(dayOfWeekFlags.sunday),
+  };
+};
+
+const refineValuesToDayOfWeekQuery = (
+  dayOfWeekFlags: RefineResultsFilterValues["dayOfWeekFlags"],
+): string | undefined => {
+  const selectedDays = Object.entries(dayOfWeekFlags)
+    .filter(([, enabled]) => enabled)
+    .map(([day]) => DAY_KEY_TO_QUERY[day as keyof typeof DAY_KEY_TO_QUERY]);
+
+  return selectedDays.length === 7 ? undefined : selectedDays.join(",");
+};
+
+const stopFiltersToRefineValues = (
+  dayOfWeekFlags: DayOfWeekFlags | undefined,
+  startTime: string | undefined,
+  endTime: string | undefined,
+): Partial<RefineResultsFilterValues> => ({
+  ...(dayOfWeekToRefineValues(dayOfWeekFlags)
+    ? { dayOfWeekFlags: dayOfWeekToRefineValues(dayOfWeekFlags) }
+    : {}),
+  ...(startTime ? { startTime } : {}),
+  ...(endTime ? { endTime } : {}),
+});
+
+const refineValuesToStopFiltersQuery = (
+  values: RefineResultsFilterValues,
+): Record<string, string | undefined> => ({
+  dayOfWeek: refineValuesToDayOfWeekQuery(values.dayOfWeekFlags),
+  startTime: values.startTime === "00:00" ? undefined : values.startTime,
+  endTime: values.endTime === "23:59" ? undefined : values.endTime,
+});
 
 function parseArrayParam(param: string | string[] | undefined): string[] {
   if (!param) return [];
@@ -329,7 +386,6 @@ const StopAnalysisPage = () => {
   useRequireAuth();
   const { config } = useConfig();
   const router = useRouter();
-  const { setContent, toggle, destroy } = usePanel();
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFetchedBoundsRef = useRef<BoundingBox>();
   const lastFetchedFilterSignatureRef = useRef<string>("");
@@ -627,54 +683,23 @@ const StopAnalysisPage = () => {
     [],
   );
 
-  const activeChips: string[] = [];
-  if (startTime) activeChips.push(`From ${startTime}`);
-  if (endTime) activeChips.push(`Until ${endTime}`);
-  if (dayOfWeekFlags) {
-    const days = Object.entries(dayOfWeekFlags)
-      .filter(([, v]) => v)
-      .map(([k]) => k.charAt(0).toUpperCase() + k.slice(1));
-    if (days.length > 0 && days.length < 7) {
-      activeChips.push(days.join(", "));
-    }
-  }
+  const refineResultsInitialValues = useMemo(
+    () => stopFiltersToRefineValues(dayOfWeekFlags, startTime, endTime),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
+  );
 
-  useEffect(() => {
-    setContent(
-      <RefineFilters
-        dayOfWeekFlags={dayOfWeekFlags}
-        startTime={startTime}
-        endTime={endTime}
-        onDayOfWeekChange={(flags) =>
-          updateQuery({
-            dayOfWeek: flags
-              ? Object.entries(flags)
-                  .filter(([, v]) => v)
-                  .map(([k]) => k)
-                  .join(",")
-              : undefined,
-          })
-        }
-        onStartTimeChange={(v) => updateQuery({ startTime: v })}
-        onEndTimeChange={(v) => updateQuery({ endTime: v })}
-        onResetDefaults={() =>
-          updateQuery({
-            dayOfWeek: undefined,
-            startTime: "00:00",
-            endTime: "23:59",
-          })
-        }
-        onClose={toggle}
-      />,
-    );
-  }, [dayOfWeekFlags, startTime, endTime, setContent, toggle, updateQuery]);
+  const activeRefineFilters: PerformanceFiltersInputType = {
+    ...(dayOfWeekFlags ? { dayOfWeekFlags } : {}),
+    ...(startTime ? { startTime } : {}),
+    ...(endTime ? { endTime } : {}),
+  };
 
   useEffect(() => {
     return () => {
       if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
-      destroy();
     };
-  }, [destroy]);
+  }, []);
 
   return (
     <BaseLayout title="Stop analysis - Analyse Bus Open Data">
@@ -682,33 +707,42 @@ const StopAnalysisPage = () => {
         <div className="stop-analysis-page__header">
           <h1 className="govuk-heading-xl">Stop Analysis</h1>
           <div className="stop-analysis-page__extra-filter">
-            <button
-              type="button"
-              className="govuk-link button-link stop-analysis-filters__refine-button"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.25rem",
-              }}
-              aria-controls="panel"
-              onClick={toggle}
-            >
-              <RefineIcon
-                aria-hidden="true"
-                focusable="false"
-                style={{ display: "block", flexShrink: 0 }}
-              />
-              <span>Refine results</span>
-            </button>
-            {activeChips.length > 0 && (
-              <div className="stop-analysis-filters__chips">
-                {activeChips.map((chip) => (
-                  <span key={chip} className="stop-analysis-filters__chip">
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            )}
+            <RefineResultsButton
+              isLoading={stopsLoading}
+              showPerformanceFilters={false}
+              buttonClassName="govuk-link button-link stop-analysis-filters__refine-button"
+              initialValues={refineResultsInitialValues}
+              onApply={(values) =>
+                updateQuery(refineValuesToStopFiltersQuery(values))
+              }
+              onReset={() =>
+                updateQuery({
+                  dayOfWeek: undefined,
+                  startTime: undefined,
+                  endTime: undefined,
+                })
+              }
+            />
+            <FilterChips
+              filters={activeRefineFilters}
+              onFilterChange={(updated) =>
+                updateQuery({
+                  dayOfWeek: updated.dayOfWeekFlags
+                    ? Object.entries(updated.dayOfWeekFlags)
+                        .filter(([, v]) => v)
+                        .map(
+                          ([k]) =>
+                            DAY_KEY_TO_QUERY[
+                              k as keyof typeof DAY_KEY_TO_QUERY
+                            ],
+                        )
+                        .join(",")
+                    : undefined,
+                  startTime: updated.startTime ?? undefined,
+                  endTime: updated.endTime ?? undefined,
+                })
+              }
+            />
           </div>
         </div>
 

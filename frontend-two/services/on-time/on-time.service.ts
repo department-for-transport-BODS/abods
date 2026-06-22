@@ -77,7 +77,13 @@ export type ServicePerformance = Omit<ServicePerformanceType, "operatorInfo"> &
 export type StopPerformance = StopPerformanceType & OnTimeRatios;
 export type OperatorPerformance = Pick<
   OperatorPerformanceType,
-  "name" | "nocCode" | "onTime" | "late" | "early" | "operatorId"
+  | "name"
+  | "nocCode"
+  | "onTime"
+  | "late"
+  | "early"
+  | "operatorId"
+  | "averageDelay"
 > &
   OnTimeRatios;
 

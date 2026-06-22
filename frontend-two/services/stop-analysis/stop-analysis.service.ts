@@ -15,7 +15,8 @@ export const stopAnalysisService = {
         variables: filters,
         fetchPolicy: "no-cache",
       });
-      return result.data?.stopAnalysis ?? [];
+      const data = result.data?.stopAnalysis ?? [];
+      return data;
     } catch (error) {
       console.error("Failed to fetch stop analysis:", error);
       throw new Error("Failed to fetch stop analysis");

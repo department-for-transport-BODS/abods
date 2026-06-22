@@ -10,6 +10,12 @@ import {
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
 
+interface DateRangeSelectProps {
+  label?: string;
+  value?: { from: string; to: string };
+  onChange?: (dateRange: { from: string; to: string }) => void;
+}
+
 function applyDaySelection(
   date: DateTime,
   draft: CalendarDateRange,
@@ -38,15 +44,15 @@ export const DateRangeSelect = ({
   hideLabel = false,
 }: DateRangeSelectProps) => {
   const today = DateTime.local().startOf("day");
-  const maxDate = today.minus({ days: 1 });
+  // maxDate is today: users can select today as end date; DateRangeSelect emits today+1 (exclusive)
+  // which the API interprets as inclusive of today.
+  const maxDate = today;
 
   const initialStart = value?.from
     ? DateTime.fromISO(value.from)
     : today.minus({ days: 7 });
   const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
 
-  // Clamp the displayed end date to maxDate if value.to is after maxDate.
-  // Old frontend displayed the max selectable date as yesterday, but pulled data for the past week (incl. today)
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
   const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>(
@@ -66,6 +72,38 @@ export const DateRangeSelect = ({
 
   const [openDropdown, setOpenDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Update selectedDateRange when value prop changes, but only if the new value is different from the current selectedDateRange.
+  useEffect(() => {
+    if (!value?.from || !value?.to) {
+      return;
+    }
+
+    const nextStart = formatISODateStringToDate(value.from);
+    // value.to is exclusive — subtract 1 for the inclusive display date.
+    const nextEndRaw = formatISODateStringToDate(value.to).minus({ days: 1 });
+
+    if (!nextStart.isValid || !nextEndRaw.isValid) {
+      return;
+    }
+
+    const nextEnd = nextEndRaw > maxDate ? maxDate : nextEndRaw;
+    const sameStart = selectedDateRange.start?.hasSame(nextStart, "day");
+    const sameEnd = selectedDateRange.end?.hasSame(nextEnd, "day");
+
+    if (!sameStart || !sameEnd) {
+      const nextRange = { start: nextStart, end: nextEnd };
+      setSelectedDateRange(nextRange);
+      setDraftDateRange(nextRange);
+      setMonthLeft(nextStart.startOf("month"));
+    }
+  }, [
+    maxDate,
+    selectedDateRange.end,
+    selectedDateRange.start,
+    value?.from,
+    value?.to,
+  ]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

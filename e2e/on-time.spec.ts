@@ -1,8 +1,7 @@
 import { test, expect, loggedInTest } from "./fixtures";
 import { OnTimePage } from "./pages/OnTimePage";
 
-// ─── Unauthenticated ──────────────────────────────────────────────────────────
-
+// Unauthenticated
 test("On-time performance - redirects unauthenticated users to login", async ({
   page,
 }) => {
@@ -10,7 +9,7 @@ test("On-time performance - redirects unauthenticated users to login", async ({
   await expect(page).toHaveURL(/\/login/);
 });
 
-// ─── Authenticated ────────────────────────────────────────────────────────────
+// Authenticated
 
 loggedInTest.describe("On-time performance - authenticated", () => {
   let onTime!: OnTimePage;
@@ -26,6 +25,20 @@ loggedInTest.describe("On-time performance - authenticated", () => {
 
       await expect(loggedInPage).toHaveURL(/\/on-time\/?$/);
       await expect(onTime.heading()).toBeVisible();
+      await onTime.goto();
+    },
+  );
+
+  loggedInTest(
+    "shows the segmented toggles and defaults correctly",
+    async () => {
+      await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
+
+      await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
     },
   );
 
@@ -106,6 +119,35 @@ loggedInTest.describe("On-time performance - authenticated", () => {
           return chartCount + unavailableCount;
         })
         .toBeGreaterThan(0);
+    },
+  );
+
+  loggedInTest(
+    "shows date controls and checks correct options are present",
+    async () => {
+      await expect(onTime.dateRangeButton()).toBeVisible();
+      await expect(onTime.datePresetSelect()).toBeVisible();
+
+      await expect(onTime.datePresetSelect()).toContainText("Last 7 days");
+      await expect(onTime.datePresetSelect()).toContainText("Last 28 days");
+      await expect(onTime.datePresetSelect()).toContainText("Last month");
+      await expect(onTime.datePresetSelect()).toContainText("Month to date");
+    },
+  );
+
+  loggedInTest(
+    "shows and closes the refine results panel and key filters",
+    async () => {
+      await expect(onTime.refineResultsButton()).toBeVisible();
+
+      await onTime.refineResultsButton().click();
+      await expect(onTime.refineResultsHeading()).toBeVisible();
+
+      await expect(onTime.refineResultsMaximumEarlySelect()).toBeVisible();
+      await expect(onTime.refineResultsMaximumLateSelect()).toBeVisible();
+
+      await onTime.refineResultsCloseButton().click();
+      await expect(onTime.refineResultsHeading()).toHaveCount(0);
     },
   );
 });

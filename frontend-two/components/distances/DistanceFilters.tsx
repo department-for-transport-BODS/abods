@@ -51,6 +51,7 @@ export const DistanceFilters = ({
       <div className="distance-grid__filters">
         <div className="distance-grid__filter">
           <DateRangeSelect
+            label="Date Range"
             value={{ from: fromDate, to: toDate }}
             onChange={({ from, to }) => {
               onFromDateChange(from);

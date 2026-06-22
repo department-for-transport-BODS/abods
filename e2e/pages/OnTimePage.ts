@@ -80,4 +80,50 @@ export class OnTimePage {
       "Excess waiting time is unavailable for this service in the selected period because no frequent service hours were found.",
     );
   }
+
+  dateRangeButton(): Locator {
+    return this.page.locator(".date-range-select__button");
+  }
+
+  datePresetSelect(): Locator {
+    return this.page.locator('select[name="date-preset"]');
+  }
+
+  refineResultsButton(): Locator {
+    return this.page.locator(".on-time-refine-results-button");
+  }
+
+  refineResultsHeading(): Locator {
+    return this.page.getByRole("heading", { name: "Refine results", level: 2 });
+  }
+
+  refineResultsCloseButton(): Locator {
+    return this.page
+      .locator(".refine-results-panel")
+      .locator(".refine-results-panel__close");
+  }
+
+  refineResultsMaximumEarlySelect(): Locator {
+    return this.page.getByLabel("Maximum early");
+  }
+
+  refineResultsMaximumLateSelect(): Locator {
+    return this.page.getByLabel("Maximum late");
+  }
+
+  matchTypeEstimatedButton(): Locator {
+    return this.page.getByLabel("Estimated");
+  }
+
+  matchTypeEvidencedButton(): Locator {
+    return this.page.getByLabel("Evidenced");
+  }
+
+  stopTypeAllStopsButton(): Locator {
+    return this.page.getByLabel("All stops");
+  }
+
+  stopTypeTimingPointsButton(): Locator {
+    return this.page.getByLabel("Timing points");
+  }
 }
