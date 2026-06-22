@@ -771,8 +771,12 @@ const StopAnalysisPage = () => {
               DateTime.local().startOf("day"),
             );
             updateQuery({
-              fromTimestamp: formatDateToISODateString(range.from.startOf("day")),
-              toTimestamp: formatDateToISODateString(range.to.plus({ days: 1 })),
+              fromTimestamp: formatDateToISODateString(
+                range.from.startOf("day"),
+              ),
+              toTimestamp: formatDateToISODateString(
+                range.to.plus({ days: 1 }),
+              ),
             });
           }}
           onAdminAreasChange={handleAdminAreasChange}

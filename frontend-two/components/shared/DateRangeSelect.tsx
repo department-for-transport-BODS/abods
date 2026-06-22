@@ -52,10 +52,12 @@ export const DateRangeSelect = ({
     : maxDate;
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
-  const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>({
-    start: initialStart,
-    end: initialEnd,
-  });
+  const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>(
+    {
+      start: initialStart,
+      end: initialEnd,
+    },
+  );
 
   const [draftDateRange, setDraftDateRange] =
     useState<CalendarDateRange>(selectedDateRange);
