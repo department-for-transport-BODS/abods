@@ -26,7 +26,8 @@ loggedInTest.describe("On-time performance - authenticated", () => {
       await expect(loggedInPage).toHaveURL(/\/on-time\/?$/);
       await expect(onTime.heading()).toBeVisible();
       await onTime.goto();
-  });
+    },
+  );
 
   loggedInTest(
     "shows the segmented toggles and defaults correctly",
@@ -121,7 +122,7 @@ loggedInTest.describe("On-time performance - authenticated", () => {
     },
   );
 
-    loggedInTest(
+  loggedInTest(
     "shows date controls and checks correct options are present",
     async () => {
       await expect(onTime.dateRangeButton()).toBeVisible();

@@ -225,7 +225,13 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [config, refineResultsFilters, dateRange, selectedMatchType, selectedStopType]);
+  }, [
+    config,
+    refineResultsFilters,
+    dateRange,
+    selectedMatchType,
+    selectedStopType,
+  ]);
 
   return (
     <BaseLayout title="All services - Analyse Bus Open Data">
@@ -259,7 +265,9 @@ const OnTimeIndexPage = () => {
             isLoading={isLoading}
             initialValues={refineResultsInitialValues}
             onApply={(values) => {
-              setRefineResultsFilters(refineResultsToPerformanceFilters(values));
+              setRefineResultsFilters(
+                refineResultsToPerformanceFilters(values),
+              );
             }}
             onReset={() => setRefineResultsFilters({})}
           />

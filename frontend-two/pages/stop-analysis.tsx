@@ -21,9 +21,7 @@ import {
   DayOfWeekFlagsInputType as DayOfWeekFlags,
 } from "@/src/generated/graphql";
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
-import {
-  StopAnalysisFilters as FiltersPanel,
-} from "@/components/stop-analysis/StopAnalysisFilters";
+import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
 import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
@@ -734,7 +732,9 @@ const StopAnalysisPage = () => {
                         .filter(([, v]) => v)
                         .map(
                           ([k]) =>
-                            DAY_KEY_TO_QUERY[k as keyof typeof DAY_KEY_TO_QUERY],
+                            DAY_KEY_TO_QUERY[
+                              k as keyof typeof DAY_KEY_TO_QUERY
+                            ],
                         )
                         .join(",")
                     : undefined,
