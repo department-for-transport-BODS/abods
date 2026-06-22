@@ -803,8 +803,6 @@ const StopAnalysisPage = () => {
             onAdminAreaClick={handleAdminAreaClick}
           />
         )}
-        {stopsLoading && <p className="govuk-body">Loading...</p>}
-
         <StopAnalysisTable
           data={tableRows}
           loading={stopsLoading}
