@@ -90,7 +90,9 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?(?:\?.*)?$/);
         await expect(stopAnalysis.chip("From 00:00")).toHaveCount(0);
         await expect(stopAnalysis.chip("Until 23:59")).toHaveCount(0);
-        await expect(stopAnalysis.chip("Monday, Wednesday, Friday")).toBeVisible();
+        await expect(
+          stopAnalysis.chip("Monday, Wednesday, Friday"),
+        ).toBeVisible();
       });
     },
   );
