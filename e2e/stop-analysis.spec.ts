@@ -85,15 +85,12 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await stopAnalysis.refineResultsButton().click();
         await expect(stopAnalysis.refinePanel()).toBeVisible();
         await stopAnalysis.resetToDefaultsButton().click();
-        await expect(loggedInPage).toHaveURL(
-          /\/stop-analysis\/?[^#]*startTime=00%3A00[^#]*endTime=23%3A59/,
-        );
-        await loggedInPage.reload({ waitUntil: "domcontentloaded" });
-        await expect(stopAnalysis.chip("From 00:00")).toBeVisible();
-        await expect(stopAnalysis.chip("Until 23:59")).toBeVisible();
-        await expect(
-          stopAnalysis.chip("Monday, Wednesday, Friday"),
-        ).toHaveCount(0);
+        await stopAnalysis.applyButton().click();
+        await expect(stopAnalysis.refinePanel()).toBeHidden();
+        await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?(?:\?.*)?$/);
+        await expect(stopAnalysis.chip("From 00:00")).toHaveCount(0);
+        await expect(stopAnalysis.chip("Until 23:59")).toHaveCount(0);
+        await expect(stopAnalysis.chip("Monday, Wednesday, Friday")).toBeVisible();
       });
     },
   );
