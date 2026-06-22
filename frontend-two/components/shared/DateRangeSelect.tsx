@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import { DateRangeCalendar } from "./DateRangeCalendar";
@@ -9,12 +9,6 @@ import {
 } from "@/utils/dateFormatter";
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
-
-interface DateRangeSelectProps {
-  label?: string;
-  value?: { from: string; to: string };
-  onChange?: (dateRange: { from: string; to: string }) => void;
-}
 
 function applyDaySelection(
   date: DateTime,
@@ -48,24 +42,18 @@ export const DateRangeSelect = ({
   // which the API interprets as inclusive of today.
   const maxDate = today;
 
-  const selectedDateRange = useMemo<CalendarDateRange>(() => {
-    const start = value?.from
-      ? DateTime.fromISO(value.from)
-      : today.minus({ days: 7 });
-    const endRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
-    const end = endRaw > maxDate ? maxDate : endRaw;
-    return { start, end };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.from, value?.to]);
-
+  const initialStart = value?.from
+    ? DateTime.fromISO(value.from).startOf("day")
+    : today.minus({ days: 7 });
+  const initialEndRaw = value?.to
+    ? DateTime.fromISO(value.to).startOf("day").minus({ days: 1 })
+    : maxDate;
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
-  const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>(
-    {
-      start: initialStart,
-      end: initialEnd,
-    },
-  );
+  const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>({
+    start: initialStart,
+    end: initialEnd,
+  });
 
   const [draftDateRange, setDraftDateRange] =
     useState<CalendarDateRange>(selectedDateRange);
@@ -78,19 +66,13 @@ export const DateRangeSelect = ({
   const [openDropdown, setOpenDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Update selectedDateRange when value prop changes, but only if the new value is different from the current selectedDateRange.
   useEffect(() => {
-    if (!value?.from || !value?.to) {
-      return;
-    }
+    if (!value?.from || !value?.to) return;
 
-    const nextStart = formatISODateStringToDate(value.from);
-    // value.to is exclusive — subtract 1 for the inclusive display date.
-    const nextEndRaw = formatISODateStringToDate(value.to).minus({ days: 1 });
+    const nextStart = DateTime.fromISO(value.from).startOf("day");
+    const nextEndRaw = DateTime.fromISO(value.to).startOf("day").minus({ days: 1 });
 
-    if (!nextStart.isValid || !nextEndRaw.isValid) {
-      return;
-    }
+    if (!nextStart.isValid || !nextEndRaw.isValid) return;
 
     const nextEnd = nextEndRaw > maxDate ? maxDate : nextEndRaw;
     const sameStart = selectedDateRange.start?.hasSame(nextStart, "day");
@@ -114,13 +96,13 @@ export const DateRangeSelect = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpenDropdown(false);
-        setDraftDateRange(selectedDateRangeRef.current);
+        setDraftDateRange(selectedDateRange);
       }
     };
     if (openDropdown)
       document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openDropdown]);
+  }, [openDropdown, selectedDateRange]);
 
   const handleDaySelect = (date: DateTime) => {
     setDraftDateRange((prev) => applyDaySelection(date, prev));
@@ -135,6 +117,13 @@ export const DateRangeSelect = ({
 
   const handleApplyButton = () => {
     if (draftDateRange.start?.isValid && draftDateRange.end?.isValid) {
+      const committed = {
+        start: draftDateRange.start,
+        end: draftDateRange.end,
+      };
+
+      setSelectedDateRange(committed);
+
       onChange &&
         onChange({
           from: formatDateToISODateString(draftDateRange.start),
@@ -173,6 +162,9 @@ export const DateRangeSelect = ({
         className="date-range-select__button"
         onClick={() => {
           setDraftDateRange(selectedDateRange);
+          if (selectedDateRange.start?.isValid) {
+            setMonthLeft(selectedDateRange.start.startOf("month"));
+          }
           setOpenDropdown((v) => !v);
         }}
       >

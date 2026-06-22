@@ -137,8 +137,8 @@ export const StopAnalysisFilters = ({
 
   const activePreset = useMemo<Period | "custom">(() => {
     const currentFrom = DateTime.fromISO(fromTimestamp);
-    const currentTo = DateTime.fromISO(toTimestamp);
-    if (!currentFrom.isValid || !currentTo.isValid) {
+    const currentToInclusive = DateTime.fromISO(toTimestamp).minus({ days: 1 });
+    if (!currentFrom.isValid || !currentToInclusive.isValid) {
       return "custom";
     }
 
@@ -147,7 +147,7 @@ export const StopAnalysisFilters = ({
       const window = getPresetWindow(option.value, now);
       if (
         currentFrom.hasSame(window.from, "day") &&
-        currentTo.hasSame(window.to, "day")
+        currentToInclusive.hasSame(window.to, "day")
       ) {
         return option.value;
       }
