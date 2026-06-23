@@ -3885,6 +3885,15 @@ body.helpdesk-open {
     border-radius: 0;
     box-shadow: none;
     z-index: 2;
+    pointer-events: none;
+
+    p {
+      font-size: 48px;
+      text-shadow: 0 0 10px black;
+      color: govuk-colour("black");
+      margin: 0;
+      white-space: nowrap;
+    }
   }
 
   &__loading-overlay {

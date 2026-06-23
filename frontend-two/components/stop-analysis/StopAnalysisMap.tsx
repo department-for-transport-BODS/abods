@@ -752,7 +752,7 @@ export const StopAnalysisMap = ({
       />
       {boundingBoxTooBig && mapLoaded && (
         <div className="stop-analysis-map__overlay">
-          <p className="govuk-body">Zoom in to show stops</p>
+          <p>Zoom in to show stops</p>
         </div>
       )}
       {loading && (
