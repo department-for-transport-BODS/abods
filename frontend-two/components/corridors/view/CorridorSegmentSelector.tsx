@@ -1,5 +1,5 @@
 import { CorridorStop } from "@/types/corridors";
-import { ServiceLinkType } from "../../../src/generated/graphql";
+import { RouteType, ServiceLinkType } from "../../../src/generated/graphql";
 
 const METERS_PER_MILE = 1609.344;
 
@@ -26,6 +26,18 @@ export const CorridorSegmentSelector = ({
     to: stops[index + 1],
   }));
 
+  const isInvalidServiceLink = (fromNaptan: string, toNaptan: string): boolean => {
+    if (!serviceLinks?.length) return false;
+    const link = serviceLinks.find(
+      (l) => l.fromStop === fromNaptan && l.toStop === toNaptan,
+    );
+    return link ? link.routeValidity !== RouteType.Valid : false;
+  };
+
+  const containsInvalidServiceLink = segments.some((seg) =>
+    isInvalidServiceLink(seg.from.naptan, seg.to.naptan),
+  );
+
   const getSegmentDistance = (
     fromNaptan: string,
     toNaptan: string,
@@ -40,8 +52,9 @@ export const CorridorSegmentSelector = ({
   };
 
   return (
-    <div className="segment-selector-wrapper govuk-!-margin-bottom-6">
-      <div className="segment-selector">
+    <>
+      <div className="segment-selector-wrapper govuk-!-margin-bottom-6">
+        <div className="segment-selector">
         {/* All segments button — top half of the rail */}
         <button
           type="button"
@@ -63,9 +76,13 @@ export const CorridorSegmentSelector = ({
               key={seg.index}
               type="button"
               className={`unbuttoned segment-selector__segment${
-                selectedSegmentIndex === seg.index
-                  ? " segment-selector__segment--active"
-                  : ""
+                isInvalidServiceLink(seg.from.naptan, seg.to.naptan)
+                  ? selectedSegmentIndex === seg.index
+                    ? " segment-selector__segment__invalid-service-link segment-selector__segment__invalid-service-link--active"
+                    : " segment-selector__segment__invalid-service-link"
+                  : selectedSegmentIndex === seg.index
+                    ? " segment-selector__segment--active"
+                    : ""
               }`}
               onClick={() => onChangeSegmentIndex(seg.index)}
               disabled={isDisabled}
@@ -81,9 +98,11 @@ export const CorridorSegmentSelector = ({
         <div className="segment-selector__distances-wrapper">
           {segments.map((seg) => {
             const distance = getSegmentDistance(seg.from.naptan, seg.to.naptan);
+            const invalid = isInvalidServiceLink(seg.from.naptan, seg.to.naptan);
             return (
               <div key={seg.index} className="segment-selector__distance">
                 {distance && <span>{distance}</span>}
+                {invalid && <span>*</span>}
               </div>
             );
           })}
@@ -107,5 +126,15 @@ export const CorridorSegmentSelector = ({
         </div>
       </div>
     </div>
+
+    {containsInvalidServiceLink && (
+      <div className="segment-selector-hint">
+        <span className="segment-selector-hint__text">
+          * Dashed line indicates speed and distance are based on straight-line
+          measurement
+        </span>
+      </div>
+    )}
+    </>
   );
 };
