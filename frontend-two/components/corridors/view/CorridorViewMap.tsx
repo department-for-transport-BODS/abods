@@ -5,7 +5,8 @@ import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { displayCorridorChevrons } from "@/components/corridors/shared/corridorChevrons";
 import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
-import { RouteType, ServiceLinkType } from "../../../src/generated/graphql";
+import { ServiceLinkType } from "../../../src/generated/graphql";
+import { isInvalidRouteLink } from "@/services/corridors/corridors-speed-utils";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
@@ -32,7 +33,7 @@ const buildLineGeoJSON = (
         ];
     const selected =
       selectedSegmentIndex === null || selectedSegmentIndex === i;
-    const dashedLine = link ? link.routeValidity !== RouteType.Valid : true;
+    const dashedLine = link ? isInvalidRouteLink(link) : true;
     features.push({
       type: "Feature",
       id: i,

@@ -1,5 +1,6 @@
 import { CorridorStop } from "@/types/corridors";
-import { RouteType, ServiceLinkType } from "../../../src/generated/graphql";
+import { ServiceLinkType } from "../../../src/generated/graphql";
+import { isInvalidRouteLink } from "@/services/corridors/corridors-speed-utils";
 
 const METERS_PER_MILE = 1609.344;
 
@@ -34,7 +35,7 @@ export const CorridorSegmentSelector = ({
     const link = serviceLinks.find(
       (l) => l.fromStop === fromNaptan && l.toStop === toNaptan,
     );
-    return link ? link.routeValidity !== RouteType.Valid : false;
+    return link ? isInvalidRouteLink(link) : false;
   };
 
   const containsInvalidServiceLink = segments.some((seg) =>
