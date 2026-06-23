@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 import { GraphQLResolveInfo } from "graphql";
 import { DeepMockProxy, mockDeep } from "jest-mock-extended";
-import { createHmac } from "node:crypto";
 import {
   Dialect,
   DummyDriver,
@@ -122,12 +121,6 @@ describe("getFeatureFlags", () => {
 });
 
 describe("getUser", () => {
-  beforeEach(() => {
-    delete process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL;
-    delete process.env.DATADOG_SERVICE_MONITORING_DASHBOARD;
-    delete process.env.SUPPORT_USER_EMAIL_DOMAINS;
-  });
-
   it("returns user info with correct flags and permissions", async () => {
     // Mock session user
     (helpers.requireUserSession as jest.Mock).mockResolvedValue({
@@ -161,7 +154,9 @@ describe("getUser", () => {
     expect(result?.canViewServiceMonitoring).toBe(true);
     expect(result?.canEditAllAlerts).toBe(true);
     expect(result?.canViewDistances).toBe(true);
-    expect(result?.serviceMonitoringEmbedUrl).toBeNull();
+    expect(result?.serviceMonitoringEmbedUrl).toBe(
+      "https://dashboard.example.com",
+    );
     expect(result?.flags).not.toContain(FeatureFlag.ServiceMonitoring);
   });
 
@@ -210,7 +205,7 @@ describe("getUser", () => {
     expect(result?.serviceMonitoringEmbedUrl).toBeNull();
   });
 
-  it("can access service monitoring but gets no embed URL without secure credential (support email domain)", async () => {
+  it("can view service monitoring url for users with support email domain", async () => {
     (helpers.requireUserSession as jest.Mock).mockResolvedValue({
       id: 456,
       orgs: [{ id: 20 }],
@@ -234,81 +229,12 @@ describe("getUser", () => {
 
     expect(result).not.toBeNull();
     expect(result?.canViewServiceMonitoring).toBe(true);
-    expect(result?.serviceMonitoringEmbedUrl).toBeNull();
-  });
-
-  it("generates a secure service monitoring embed url when a credential is configured", async () => {
-    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-      id: 456,
-      orgs: [{ id: 20 }],
-    });
-
-    mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
-      userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-      email: "user@example.co.uk",
-      account_type: 3,
-    } as never);
-
-    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD =
-      "https://dashboard.example.com/embed/base";
-    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL =
-      "secure-credential";
-    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk";
-
-    let result: Partial<LoginInfo> | null = null;
-    if (typeof getUser === "function") {
-      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-    }
-
-    expect(result).not.toBeNull();
-    expect(result?.canViewServiceMonitoring).toBe(true);
-    expect(result?.serviceMonitoringEmbedUrl).toBeTruthy();
-
-    const embedUrl = new URL(result?.serviceMonitoringEmbedUrl ?? "");
-    const nonce = embedUrl.searchParams.get("nonce");
-    const timestamp = embedUrl.searchParams.get("ts");
-    const token = embedUrl.searchParams.get("token");
-
-    expect(`${embedUrl.origin}${embedUrl.pathname}`).toBe(
-      "https://dashboard.example.com/embed/base",
-    );
-    expect(nonce).toMatch(/^[a-f0-9]{32}$/);
-    expect(timestamp).toMatch(/^\d+$/);
-    expect(token).toBe(
-      createHmac("sha256", "secure-credential")
-        .update(`${nonce}|${timestamp}`)
-        .digest("hex"),
+    expect(result?.serviceMonitoringEmbedUrl).toBe(
+      "https://dashboard.example.com",
     );
   });
 
-  it("returns null service monitoring embed url when secure url generation fails", async () => {
-    (helpers.requireUserSession as jest.Mock).mockResolvedValue({
-      id: 456,
-      orgs: [{ id: 20 }],
-    });
-
-    mockDb.bods_user.findUniqueOrThrow.mockResolvedValue({
-      userOrganisations: [{ organisation: { is_abods_global_viewer: false } }],
-      email: "user@example.co.uk",
-      account_type: 3,
-    } as never);
-
-    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD = "not-a-valid-url";
-    process.env.DATADOG_SERVICE_MONITORING_DASHBOARD_CREDENTIAL =
-      "secure-credential";
-    process.env.SUPPORT_USER_EMAIL_DOMAINS = "example.co.uk";
-
-    let result: Partial<LoginInfo> | null = null;
-    if (typeof getUser === "function") {
-      result = await getUser({}, {}, context, {} as GraphQLResolveInfo);
-    }
-
-    expect(result).not.toBeNull();
-    expect(result?.canViewServiceMonitoring).toBe(true);
-    expect(result?.serviceMonitoringEmbedUrl).toBeNull();
-  });
-
-  it("can access service monitoring but gets no embed URL without secure credential (DfT admin)", async () => {
+  it("can view service monitoring url for dft admin user", async () => {
     (helpers.requireUserSession as jest.Mock).mockResolvedValue({
       id: 456,
       orgs: [{ id: 20 }],
@@ -330,7 +256,9 @@ describe("getUser", () => {
 
     expect(result).not.toBeNull();
     expect(result?.canViewServiceMonitoring).toBe(true);
-    expect(result?.serviceMonitoringEmbedUrl).toBeNull();
+    expect(result?.serviceMonitoringEmbedUrl).toBe(
+      "https://dashboard.example.com",
+    );
   });
 });
 
