@@ -8,14 +8,22 @@ vi.mock("@/components/shared/MultiselectCheckbox", () => ({
   MultiselectCheckbox: ({
     selectedValues = [],
     onChange,
+    onShowAll,
   }: {
     selectedValues?: string[];
     onChange: (values: string[]) => void;
+    onShowAll?: () => void;
   }) => (
     <div data-testid="direction-filters">
-      <span>{selectedValues.join(",")}</span>
+      <span data-testid="selected-values">{selectedValues.join(",")}</span>
       <button type="button" onClick={() => onChange(["Inbound", "Outbound"])}>
         Select both
+      </button>
+      <button type="button" onClick={() => onChange([])}>
+        Clear all
+      </button>
+      <button type="button" onClick={() => onShowAll?.()}>
+        Show all
       </button>
     </div>
   ),
@@ -182,7 +190,7 @@ describe("StopAnalysisTable", () => {
     expect(within(rows[0]).getByTestId("direction")).toHaveTextContent("-");
   });
 
-  it("keeps both directions selected after the filter returns both values", async () => {
+  it("allows clearing all directions and shows no rows", async () => {
     const user = userEvent.setup();
 
     function Harness() {
@@ -206,10 +214,39 @@ describe("StopAnalysisTable", () => {
       "Inbound",
     );
 
-    await user.click(screen.getByRole("button", { name: "Select both" }));
+    await user.click(screen.getByRole("button", { name: "Clear all" }));
 
-    expect(screen.getByTestId("direction-filters")).toHaveTextContent(
+    expect(screen.getByTestId("selected-values")).toHaveTextContent("");
+    expect(screen.queryAllByTestId("table-row")).toHaveLength(0);
+  });
+
+  it("restores both directions from the show-all action", async () => {
+    const user = userEvent.setup();
+
+    function Harness() {
+      const [directions, setDirections] = useState<Direction[]>([]);
+
+      return (
+        <StopAnalysisTable
+          data={[baseRow]}
+          loading={false}
+          errored={false}
+          directions={directions}
+          onDirectionsChange={setDirections}
+          onStopNameClick={vi.fn()}
+        />
+      );
+    }
+
+    render(<Harness />);
+
+    expect(screen.getByTestId("selected-values")).toHaveTextContent("");
+
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+
+    expect(screen.getByTestId("selected-values")).toHaveTextContent(
       "Inbound,Outbound",
     );
+    expect(screen.getAllByTestId("table-row")).toHaveLength(1);
   });
 });

@@ -83,8 +83,6 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "late", label: "Late" },
 ];
 
-const ALL_DIRECTIONS: Direction[] = ["Inbound", "Outbound"];
-
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
   loading: boolean;
@@ -185,7 +183,6 @@ export const StopAnalysisTable = ({
     () =>
       data.filter(
         (row) =>
-          directions.length === 0 ||
           directions.length === 2 ||
           (row.direction &&
             directions.includes(formatDirection(row.direction) as Direction)),
@@ -496,9 +493,10 @@ export const StopAnalysisTable = ({
             label="Directions"
             options={directionOptions}
             selectedValues={directions}
-            onChange={(values) =>
+            onChange={(values) => onDirectionsChange(values as Direction[])}
+            onShowAll={() =>
               onDirectionsChange(
-                values.length === 0 ? ALL_DIRECTIONS : (values as Direction[]),
+                directionOptions.map((o) => o.value) as Direction[],
               )
             }
             showAllLabel="All Directions"

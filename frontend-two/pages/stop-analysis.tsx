@@ -39,6 +39,7 @@ import { formatDateToISODateString } from "@/utils/dateFormatter";
 import { operatorsService } from "@/services/operator.service";
 
 const MAX_BOUND_SPAN = 0.5;
+const EMPTY_DIRECTION_SELECTION = "none";
 
 const DEFAULT_TO = DateTime.local().startOf("day");
 const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
@@ -121,6 +122,16 @@ const refineValuesToStopFiltersQuery = (
 function parseArrayParam(param: string | string[] | undefined): string[] {
   if (!param) return [];
   return Array.isArray(param) ? param : [param];
+}
+
+function parseDirectionParam(
+  param: string | string[] | undefined,
+): Direction[] {
+  const values = parseArrayParam(param);
+  if (values.length === 1 && values[0] === EMPTY_DIRECTION_SELECTION) {
+    return [];
+  }
+  return values.length > 0 ? (values as Direction[]) : ["Inbound", "Outbound"];
 }
 
 function parseStringParam(
@@ -415,11 +426,7 @@ const StopAnalysisPage = () => {
   const dayOfWeekFlags = parseDayOfWeekFlags(router.query.dayOfWeek);
   const startTime = parseStringParam(router.query.startTime);
   const endTime = parseStringParam(router.query.endTime);
-  const directions = (
-    parseArrayParam(router.query.direction).length > 0
-      ? parseArrayParam(router.query.direction)
-      : ["Inbound", "Outbound"]
-  ) as Direction[];
+  const directions = parseDirectionParam(router.query.direction);
 
   const bounds = parseBoundingBox(router.query);
   // compute spans as absolute values to be robust
@@ -811,7 +818,11 @@ const StopAnalysisPage = () => {
           errored={!!stopsError}
           directions={directions}
           showTotals
-          onDirectionsChange={(dirs) => updateQuery({ direction: dirs })}
+          onDirectionsChange={(dirs) =>
+            updateQuery({
+              direction: dirs.length === 0 ? EMPTY_DIRECTION_SELECTION : dirs,
+            })
+          }
           onStopNameClick={handleStopClick}
         />
       </div>
