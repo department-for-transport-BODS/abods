@@ -494,7 +494,11 @@ export const StopAnalysisTable = ({
             options={directionOptions}
             selectedValues={directions}
             onChange={(values) => onDirectionsChange(values as Direction[])}
-            onShowAll={() => onDirectionsChange(directionOptions.map((o) => o.value) as Direction[])}
+            onShowAll={() =>
+              onDirectionsChange(
+                directionOptions.map((o) => o.value) as Direction[],
+              )
+            }
             showAllLabel="All Directions"
             placeholder="Directions"
           />
