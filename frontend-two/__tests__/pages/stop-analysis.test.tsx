@@ -69,29 +69,35 @@ vi.mock("@/components/stop-analysis/StopAnalysisTable", () => ({
     loading,
     errored,
     showTotals,
+    directions,
+    onDirectionsChange,
   }: {
     data: unknown[];
     loading: boolean;
     errored: boolean;
     showTotals?: boolean;
+    directions: string[];
+    onDirectionsChange: (values: string[]) => void;
   }) => (
     <div
       data-testid="stop-analysis-table"
       data-loading={loading}
       data-errored={errored}
       data-show-totals={showTotals ? "true" : "false"}
+      data-directions={directions.join(",")}
     >
       {data.length} rows
     </div>
   ),
 }));
 
+let mockRouterQuery: Record<string, string | string[] | undefined> = {};
 const mockRouterReplace = vi.fn();
 vi.mock("next/router", () => ({
   useRouter: () => ({
     pathname: "/stop-analysis",
     asPath: "/stop-analysis",
-    query: {},
+    query: mockRouterQuery,
     replace: mockRouterReplace,
   }),
 }));
@@ -115,6 +121,7 @@ describe("StopAnalysisPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     latestStopAnalysisFiltersProps = undefined;
+    mockRouterQuery = {};
     mockUseConfig.mockReturnValue({
       config: {
         apiUrl: "http://test-api",
@@ -147,6 +154,7 @@ describe("StopAnalysisPage", () => {
     const table = screen.getByTestId("stop-analysis-table");
     expect(table).toBeInTheDocument();
     expect(table).toHaveAttribute("data-show-totals", "true");
+    expect(table).toHaveAttribute("data-directions", "Inbound,Outbound");
   });
 
   it("renders base layout wrapper", () => {
@@ -266,6 +274,17 @@ describe("StopAnalysisPage", () => {
       }),
       undefined,
       { shallow: true },
+    );
+  });
+
+  it("round-trips an empty direction selection through the query", () => {
+    mockRouterQuery = { direction: "none" };
+
+    render(<StopAnalysisPage />);
+
+    expect(screen.getByTestId("stop-analysis-table")).toHaveAttribute(
+      "data-directions",
+      "",
     );
   });
 
