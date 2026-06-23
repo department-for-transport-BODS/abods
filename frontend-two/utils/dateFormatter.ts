@@ -19,5 +19,5 @@ export function formatDateToDisplayString(date: DateTime): string {
 
 // ISO date string (YYYY-MM-DD) to DateTime object (local time)
 export function formatISODateStringToDate(str: string): DateTime {
-  return DateTime.fromFormat(str, "yyyy-MM-dd").startOf("day");
+  return DateTime.fromISO(str).startOf("day");
 }

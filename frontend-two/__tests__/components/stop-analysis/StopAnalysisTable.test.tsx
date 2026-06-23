@@ -1,10 +1,24 @@
+import { useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
-import { type StopPerformanceRow } from "@/types/stop-analysis";
+import { type Direction, type StopPerformanceRow } from "@/types/stop-analysis";
 
-vi.mock("@/components/stop-analysis/MultiselectCheckbox", () => ({
-  MultiselectCheckbox: () => <div data-testid="direction-filters" />,
+vi.mock("@/components/shared/MultiselectCheckbox", () => ({
+  MultiselectCheckbox: ({
+    selectedValues = [],
+    onChange,
+  }: {
+    selectedValues?: string[];
+    onChange: (values: string[]) => void;
+  }) => (
+    <div data-testid="direction-filters">
+      <span>{selectedValues.join(",")}</span>
+      <button type="button" onClick={() => onChange(["Inbound", "Outbound"])}>
+        Select both
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("@/components/table/SortableTable", () => ({
@@ -166,5 +180,36 @@ describe("StopAnalysisTable", () => {
     expect(within(rows[0]).getByTestId("stop-id")).toHaveTextContent("-");
     expect(within(rows[0]).getByTestId("stop-name")).toHaveTextContent("-");
     expect(within(rows[0]).getByTestId("direction")).toHaveTextContent("-");
+  });
+
+  it("keeps both directions selected after the filter returns both values", async () => {
+    const user = userEvent.setup();
+
+    function Harness() {
+      const [directions, setDirections] = useState<Direction[]>(["Inbound"]);
+
+      return (
+        <StopAnalysisTable
+          data={[baseRow]}
+          loading={false}
+          errored={false}
+          directions={directions}
+          onDirectionsChange={setDirections}
+          onStopNameClick={vi.fn()}
+        />
+      );
+    }
+
+    render(<Harness />);
+
+    expect(screen.getByTestId("direction-filters")).toHaveTextContent(
+      "Inbound",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Select both" }));
+
+    expect(screen.getByTestId("direction-filters")).toHaveTextContent(
+      "Inbound,Outbound",
+    );
   });
 });

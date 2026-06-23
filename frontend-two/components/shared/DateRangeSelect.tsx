@@ -10,12 +10,6 @@ import {
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
 
-interface DateRangeSelectProps {
-  label?: string;
-  value?: { from: string; to: string };
-  onChange?: (dateRange: { from: string; to: string }) => void;
-}
-
 function applyDaySelection(
   date: DateTime,
   draft: CalendarDateRange,
@@ -33,12 +27,14 @@ function applyDaySelection(
 }
 
 interface DateRangeSelectProps {
+  label?: string;
   value?: { from: string; to: string };
   onChange?: (dateRange: { from: string; to: string }) => void;
   hideLabel?: boolean;
 }
 
 export const DateRangeSelect = ({
+  label = "Date Range",
   value,
   onChange,
   hideLabel = false,
@@ -49,10 +45,11 @@ export const DateRangeSelect = ({
   const maxDate = today;
 
   const initialStart = value?.from
-    ? DateTime.fromISO(value.from)
+    ? formatISODateStringToDate(value.from)
     : today.minus({ days: 7 });
-  const initialEndRaw = value?.to ? DateTime.fromISO(value.to) : maxDate;
-
+  const initialEndRaw = value?.to
+    ? formatISODateStringToDate(value.to).minus({ days: 1 })
+    : maxDate;
   const initialEnd = initialEndRaw > maxDate ? maxDate : initialEndRaw;
 
   const [selectedDateRange, setSelectedDateRange] = useState<CalendarDateRange>(
@@ -73,19 +70,13 @@ export const DateRangeSelect = ({
   const [openDropdown, setOpenDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Update selectedDateRange when value prop changes, but only if the new value is different from the current selectedDateRange.
   useEffect(() => {
-    if (!value?.from || !value?.to) {
-      return;
-    }
+    if (!value?.from || !value?.to) return;
 
     const nextStart = formatISODateStringToDate(value.from);
-    // value.to is exclusive — subtract 1 for the inclusive display date.
     const nextEndRaw = formatISODateStringToDate(value.to).minus({ days: 1 });
 
-    if (!nextStart.isValid || !nextEndRaw.isValid) {
-      return;
-    }
+    if (!nextStart.isValid || !nextEndRaw.isValid) return;
 
     const nextEnd = nextEndRaw > maxDate ? maxDate : nextEndRaw;
     const sameStart = selectedDateRange.start?.hasSame(nextStart, "day");
@@ -169,12 +160,15 @@ export const DateRangeSelect = ({
       }
       ref={ref}
     >
-      {!hideLabel && <label className="govuk-label">Date Range</label>}
+      {!hideLabel && <label className="govuk-label">{label}</label>}
       <button
         type="button"
         className="date-range-select__button"
         onClick={() => {
           setDraftDateRange(selectedDateRange);
+          if (selectedDateRange.start?.isValid) {
+            setMonthLeft(selectedDateRange.start.startOf("month"));
+          }
           setOpenDropdown((v) => !v);
         }}
       >

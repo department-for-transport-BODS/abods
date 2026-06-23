@@ -35,14 +35,12 @@ import {
 } from "../src/generated/graphql";
 import { FilterChips } from "@/components/on-time/FilterChips";
 import { Period } from "@/utils/dateRange";
+import { formatDateToISODateString } from "@/utils/dateFormatter";
 import { operatorsService } from "@/services/operator.service";
 
 const MAX_BOUND_SPAN = 0.5;
 
-const DEFAULT_TO = DateTime.local()
-  .startOf("day")
-  .minus({ days: 1 })
-  .endOf("day");
+const DEFAULT_TO = DateTime.local().startOf("day");
 const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
 
 const DAY_KEY_TO_QUERY = {
@@ -773,8 +771,12 @@ const StopAnalysisPage = () => {
               DateTime.local().startOf("day"),
             );
             updateQuery({
-              fromTimestamp: range.from.startOf("day").toISO()!,
-              toTimestamp: range.to.endOf("day").toISO()!,
+              fromTimestamp: formatDateToISODateString(
+                range.from.startOf("day"),
+              ),
+              toTimestamp: formatDateToISODateString(
+                range.to.plus({ days: 1 }),
+              ),
             });
           }}
           onAdminAreasChange={handleAdminAreasChange}
@@ -803,8 +805,6 @@ const StopAnalysisPage = () => {
             onAdminAreaClick={handleAdminAreaClick}
           />
         )}
-        {stopsLoading && <p className="govuk-body">Loading...</p>}
-
         <StopAnalysisTable
           data={tableRows}
           loading={stopsLoading}

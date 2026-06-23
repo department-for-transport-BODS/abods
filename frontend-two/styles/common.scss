@@ -2847,6 +2847,7 @@ $day-width: 46px;
   justify-content: space-between;
   border-right: 1px solid $govuk-border-colour;
   width: 200px;
+  flex-shrink: 0;
   box-sizing: content-box;
   padding-right: govuk-spacing(4);
   margin-right: govuk-spacing(6);
