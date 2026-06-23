@@ -1,9 +1,13 @@
 import {
   CorridorStatsPerServiceType,
+  RouteType,
   ServiceLinkType,
 } from "../../src/generated/graphql";
 
 const MS_TO_MPH_FACTOR = 2.237;
+
+export const isInvalidRouteLink = (link: ServiceLinkType): boolean =>
+  link.routeValidity !== RouteType.Valid;
 
 export const calculateTotalServiceLinkDistance = (
   serviceLinks: ServiceLinkType[],

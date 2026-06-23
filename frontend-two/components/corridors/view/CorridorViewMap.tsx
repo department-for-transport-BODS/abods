@@ -6,6 +6,7 @@ import { displayCorridorChevrons } from "@/components/corridors/shared/corridorC
 import ReCentreIcon from "@/assets/icons/re-centre.svg";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
+import { isInvalidRouteLink } from "@/services/corridors/corridors-speed-utils";
 
 const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
   [-7.57, 49.96],
@@ -32,11 +33,12 @@ const buildLineGeoJSON = (
         ];
     const selected =
       selectedSegmentIndex === null || selectedSegmentIndex === i;
+    const dashedLine = link ? isInvalidRouteLink(link) : true;
     features.push({
       type: "Feature",
       id: i,
       geometry: { type: "LineString", coordinates },
-      properties: { segmentId: String(i), selected },
+      properties: { segmentId: String(i), selected, dashedLine },
     });
   }
   return { type: "FeatureCollection", features };
@@ -137,8 +139,14 @@ export const CorridorViewMap = ({
           "#77a9d4",
         ],
         "line-width": 5,
+        "line-dasharray": [
+          "case",
+          ["boolean", ["get", "dashedLine"], true],
+          ["literal", [0.8, 1.6]],
+          ["literal", [1]],
+        ],
       },
-      layout: { "line-cap": "round", "line-join": "round" },
+      layout: { "line-cap": "square", "line-join": "round" },
     });
 
     map.addLayer({

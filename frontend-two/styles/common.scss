@@ -582,6 +582,35 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
         100% - #{(2 * ($segment-stop-size + $segment-stop-surround))}
       );
     }
+
+    &__invalid-service-link {
+      background: repeating-linear-gradient(
+        to right,
+        govuk-colour("light-grey"),
+        govuk-colour("light-grey") 10px,
+        govuk-colour("white") 4px,
+        govuk-colour("white") 14px
+      );
+      &:hover {
+        background: repeating-linear-gradient(
+          to right,
+          govuk-colour("light-blue"),
+          govuk-colour("light-blue") 10px,
+          govuk-colour("white") 4px,
+          govuk-colour("white") 14px
+        );
+      }
+      &:active,
+      &--active {
+        background: repeating-linear-gradient(
+          to right,
+          govuk-colour("blue"),
+          govuk-colour("blue") 10px,
+          govuk-colour("white") 4px,
+          govuk-colour("white") 14px
+        );
+      }
+    }
   }
 
   &__segments-wrapper {
@@ -608,6 +637,14 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
     & ~ & {
       margin-left: ($segment-stop-size + $segment-stop-surround * 2);
     }
+  }
+}
+
+.segment-selector-hint {
+  margin-top: 15px;
+
+  &__text {
+    color: govuk-colour("dark-grey");
   }
 }
 
@@ -3848,6 +3885,15 @@ body.helpdesk-open {
     border-radius: 0;
     box-shadow: none;
     z-index: 2;
+    pointer-events: none;
+
+    p {
+      font-size: 48px;
+      text-shadow: 0 0 10px black;
+      color: govuk-colour("black");
+      margin: 0;
+      white-space: nowrap;
+    }
   }
 
   &__loading-overlay {
@@ -4083,6 +4129,7 @@ body.modal-open {
 
   &__direction-filters {
     flex-shrink: 0;
+    width: 20rem;
   }
 
   &__search {
