@@ -11,6 +11,7 @@ interface MultiselectCheckboxProps {
   options: MultiselectOption[];
   selectedValues: string[];
   onChange: (values: string[]) => void;
+  onShowAll?: () => void;
   showAll?: boolean;
   showAllLabel?: string;
   placeholder?: string;
@@ -23,6 +24,7 @@ export const MultiselectCheckbox = ({
   options,
   selectedValues,
   onChange,
+  onShowAll,
   showAll = true,
   showAllLabel = "All",
   placeholder,
@@ -59,8 +61,12 @@ export const MultiselectCheckbox = ({
   );
 
   const handleSelectAll = useCallback(() => {
+    if (onShowAll) {
+      onShowAll();
+      return;
+    }
     onChange([]);
-  }, [onChange]);
+  }, [onChange, onShowAll]);
 
   const displayText = allSelected
     ? placeholder ?? label
@@ -162,10 +168,10 @@ export const MultiselectCheckbox = ({
               <button
                 type="button"
                 className={`button-link govuk-link multiselect-checkbox__header-action${
-                  hasSelection ? "" : " button-link--disabled"
+                  hasSelection || onShowAll ? "" : " button-link--disabled"
                 }`}
                 onClick={handleSelectAll}
-                disabled={!hasSelection}
+                disabled={!hasSelection && !onShowAll}
               >
                 Show all
               </button>
