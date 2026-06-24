@@ -29,7 +29,7 @@ describe("LocationLookupField", () => {
         features: [
           {
             id: "place.1",
-            place_name: "Test location",
+            text: "Test location",
             center: [-1, 53],
             bbox: [-1.1, 52.9, -0.9, 53.1],
           },

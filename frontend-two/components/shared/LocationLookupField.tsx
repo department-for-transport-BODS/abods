@@ -1,8 +1,20 @@
 import { useEffect, useState } from "react";
+import {
+  buildLocationContext,
+  buildLocationSearchTypes,
+  type GeocodingFeature,
+} from "@/types/mapbox";
+
+const LOCATION_SEARCH_TYPES = buildLocationSearchTypes([
+  "poi",
+  "region",
+  "country",
+]);
 
 export interface LocationLookupSelection {
   id: string;
   label: string;
+  context?: string;
   center?: [number, number];
   bbox?: [number, number, number, number];
 }
@@ -47,7 +59,7 @@ export const LocationLookupField = ({
         setLoading(true);
         const encodedQuery = encodeURIComponent(value.trim());
         const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?country=gb&autocomplete=true&limit=5&types=place,postcode,address&access_token=${mapboxToken}`,
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?country=gb&autocomplete=true&limit=5&types=${LOCATION_SEARCH_TYPES}&access_token=${mapboxToken}`,
           { signal: controller.signal },
         );
 
@@ -57,18 +69,14 @@ export const LocationLookupField = ({
         }
 
         const payload = (await response.json()) as {
-          features?: Array<{
-            id: string;
-            place_name: string;
-            center?: [number, number];
-            bbox?: [number, number, number, number];
-          }>;
+          features?: GeocodingFeature[];
         };
 
         setOptions(
           (payload.features ?? []).map((feature) => ({
             id: feature.id,
-            label: feature.place_name,
+            label: feature.text,
+            context: buildLocationContext(feature.context ?? []),
             center: feature.center,
             bbox: feature.bbox,
           })),
@@ -147,6 +155,11 @@ export const LocationLookupField = ({
                   }}
                 >
                   {option.label}
+                  {option.context && (
+                    <span className="stop-analysis-filters__location-option-context">
+                      {option.context}
+                    </span>
+                  )}
                 </button>
               ))}
           </div>

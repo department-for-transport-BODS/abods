@@ -1250,9 +1250,10 @@ $day-width: 46px;
 }
 
 // SortableTable styling
-.kns-table .sortable-header {
+.sortable-table .sortable-header {
   display: flex;
   font-size: 17px;
+  font-weight: $govuk-font-weight-bold;
   text-decoration: none;
   cursor: pointer;
   color: $govuk-link-colour;
@@ -1260,16 +1261,67 @@ $day-width: 46px;
   align-items: center;
 }
 
-.kns-table .sortable-header:hover {
+.sortable-table .sortable-header:hover {
   color: $govuk-link-hover-colour;
 }
 
-.kns-table .sortable-header svg {
+.sortable-table__align--right {
+  justify-content: flex-end;
+  width: 100%;
+  text-align: right;
+}
+
+.sortable-table__align--center {
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+.sortable-table .sortable-header.sortable-table__align--left {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+
+.sortable-table-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
   flex-shrink: 0;
+  color: $govuk-link-colour;
+  line-height: 1;
+  vertical-align: middle;
+  // height is set by --none's two stacked 8px chars (~16px)
+  min-height: 16px;
+
+  &--asc::before {
+    content: "\25b2";
+    font-size: 14px;
+  }
+
+  &--desc::before {
+    content: "\25bc";
+    font-size: 14px;
+  }
+
+  &--none {
+    color: govuk-colour("mid-grey");
+    font-size: 8px;
+
+    &::before {
+      content: "\25b2\a\25bc";
+      white-space: pre;
+      display: block;
+      text-align: center;
+      line-height: 1;
+    }
+  }
 }
 
 .govuk-table__header {
   font-size: 17px;
+  font-weight: $govuk-font-weight-bold;
 }
 
 // Corridor stop list styling for create/edit corridor flow
@@ -3326,6 +3378,15 @@ body.helpdesk-open {
     gap: govuk-spacing(4);
     padding: govuk-spacing(2) 0;
   }
+
+  &__loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: govuk-spacing(2);
+    min-height: 108px;
+  }
 }
 
 .stop-analysis-filters {
@@ -3484,6 +3545,13 @@ body.helpdesk-open {
     &:hover {
       background: govuk-colour("light-grey");
     }
+  }
+
+  &__location-option-context {
+    display: inline;
+    margin-left: govuk-spacing(1);
+    @include govuk-font(14);
+    color: $govuk-secondary-text-colour;
   }
 
   &__refine-button {
@@ -4148,17 +4216,21 @@ body.modal-open {
     }
   }
 
-  &__stop-link {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    text-decoration: underline;
-    color: $govuk-link-colour;
+  &__summary-row > * {
+    font-weight: $govuk-font-weight-bold;
+  }
 
-    &:hover {
-      color: $govuk-link-hover-colour;
-    }
+  &__stop-link {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  &__cell--numeric {
+    text-align: right;
   }
 
   &__timing-icon {
@@ -4169,5 +4241,22 @@ body.modal-open {
     height: 1.25rem;
     color: $govuk-text-colour;
     vertical-align: middle;
+  }
+
+  .sortable-header__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal;
+    text-overflow: ellipsis;
+  }
+
+  .sortable-header {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .sortable-header.sortable-table__align--left {
+    gap: govuk-spacing(1);
   }
 }

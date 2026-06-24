@@ -14,11 +14,14 @@ export const formatPercent = (value: number | undefined | null): string => {
   return `${(value * 100).toFixed(1)}%`;
 };
 
-export const formatSeconds = (value: number | undefined | null): string => {
+export const formatSeconds = (
+  value: number | undefined | null,
+  signed = false,
+): string => {
   if (value == null || isNaN(value)) return "-";
   const mins = Math.floor(Math.abs(value) / 60);
   const secs = Math.round(Math.abs(value) % 60);
-  const sign = value < 0 ? "-" : "";
+  const sign = signed ? (value < 0 ? "-" : "+") : value < 0 ? "-" : "";
   return `${sign}${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
@@ -170,12 +173,12 @@ export function useStopPerformanceTable(
     return {
       scheduledDepartures: totalScheduled,
       actualDepartures:
-        completedRatio != null
-          ? `${totalActual} (${formatPercent(completedRatio)})`
+        displayMode === "percentage"
+          ? formatPercent(completedRatio)
           : String(totalActual),
       averageScheduled:
-        avgScheduled != null ? formatSeconds(avgScheduled) : "-",
-      averageActual: avgActual != null ? formatSeconds(avgActual) : "-",
+        avgScheduled != null ? formatSeconds(avgScheduled, true) : "-",
+      averageActual: avgActual != null ? formatSeconds(avgActual, true) : "-",
       averageDelay: avgDelay != null ? formatSeconds(avgDelay) : "-",
       onTime,
       early,

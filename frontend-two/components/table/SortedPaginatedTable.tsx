@@ -10,8 +10,12 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export interface SortedPaginatedTableColumn {
   key: string;
-  label: string;
+  label: ReactNode;
   sortable?: boolean;
+  ariaLabel?: string;
+  alignment?: "left" | "right" | "center";
+  cellClassName?: string;
+  headerClassName?: string;
 }
 
 export interface SortedPaginatedTableProps<T> {
@@ -25,7 +29,11 @@ export interface SortedPaginatedTableProps<T> {
   emptyMessage?: string;
   initialSortKey?: string | null;
   initialSortOrder?: SortOrder;
+  paginationResetKey?: string | number | boolean;
   paginationNoun?: string;
+  paginationAlignment?: "left" | "right";
+  onSortChange?: (key: string | null, order: SortOrder) => void;
+  colWidths?: Partial<Record<string, string>>;
 }
 
 export const SortedPaginatedTable = <T,>({
@@ -39,7 +47,11 @@ export const SortedPaginatedTable = <T,>({
   emptyMessage,
   initialSortKey = null,
   initialSortOrder = "none",
+  paginationResetKey,
   paginationNoun = "row",
+  paginationAlignment = "right",
+  onSortChange,
+  colWidths,
 }: SortedPaginatedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(initialSortKey);
@@ -47,7 +59,7 @@ export const SortedPaginatedTable = <T,>({
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [data]);
+  }, [data, paginationResetKey]);
 
   const sortedData = useMemo(() => {
     if (!sortKey || sortOrder === "none") return data;
@@ -73,6 +85,7 @@ export const SortedPaginatedTable = <T,>({
     setSortKey(column);
     setSortOrder(order);
     setCurrentPage(0);
+    onSortChange?.(column, order);
   };
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
@@ -86,6 +99,10 @@ export const SortedPaginatedTable = <T,>({
     label: col.label,
     sortable: col.sortable ?? false,
     sortOrder: sortKey === col.key ? sortOrder : undefined,
+    ariaLabel: col.ariaLabel,
+    alignment: col.alignment,
+    cellClassName: col.cellClassName,
+    headerClassName: col.headerClassName,
   }));
 
   const rows: SortableTableRow[] = [
@@ -102,6 +119,7 @@ export const SortedPaginatedTable = <T,>({
           rowCount: sortedData.length,
           onPageChange: setCurrentPage,
           noun: paginationNoun ?? "row",
+          alignment: paginationAlignment,
         }
       : undefined;
 
@@ -113,6 +131,8 @@ export const SortedPaginatedTable = <T,>({
         onSort={handleSort}
         title={title}
         pagination={pagination}
+        paginationAlignment={paginationAlignment}
+        colWidths={colWidths}
       />
       {emptyMessage && data.length === 0 && (
         <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">

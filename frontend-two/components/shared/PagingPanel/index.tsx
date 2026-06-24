@@ -35,6 +35,7 @@ interface PagingPanelProps {
   pageSize: number;
   rowCount: number;
   noun?: string;
+  alignment?: "left" | "right";
   onPageChange: (page: number) => void;
 }
 
@@ -44,6 +45,7 @@ export const PagingPanel = ({
   pageSize,
   rowCount,
   noun = "row",
+  alignment = "right",
   onPageChange,
 }: PagingPanelProps) => {
   if (totalPages === 0 || rowCount === 0) return null;
@@ -60,8 +62,10 @@ export const PagingPanel = ({
   );
 
   return (
-    <div className="paging-panel flex justify-end">
-      <div className="w-full flex items-center justify-between">
+    <div
+      className={`paging-panel flex w-full ${alignment === "left" ? "justify-start" : "justify-end"}`}
+    >
+      <div className="inline-flex items-center gap-2">
         <span className="govuk-body paging-panel__count">
           Showing {firstRow} - {lastRow} of {rowCount} {pluralNoun}
         </span>

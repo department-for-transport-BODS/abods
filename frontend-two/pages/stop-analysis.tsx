@@ -119,6 +119,21 @@ const refineValuesToStopFiltersQuery = (
   endTime: values.endTime === "23:59" ? undefined : values.endTime,
 });
 
+const LoadingDots = () => (
+  <div
+    className="stop-analysis-page__loading-state govuk-!-margin-top-4"
+    role="status"
+    aria-live="polite"
+  >
+    <span className="ranking-table__loading-dots" aria-hidden="true">
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+      <span className="ranking-table__loading-dot" />
+    </span>
+    <span className="govuk-body-s govuk-!-margin-bottom-0">Loading...</span>
+  </div>
+);
+
 function parseArrayParam(param: string | string[] | undefined): string[] {
   if (!param) return [];
   return Array.isArray(param) ? param : [param];
@@ -812,19 +827,23 @@ const StopAnalysisPage = () => {
             onAdminAreaClick={handleAdminAreaClick}
           />
         )}
-        <StopAnalysisTable
-          data={tableRows}
-          loading={stopsLoading}
-          errored={!!stopsError}
-          directions={directions}
-          showTotals
-          onDirectionsChange={(dirs) =>
-            updateQuery({
-              direction: dirs.length === 0 ? EMPTY_DIRECTION_SELECTION : dirs,
-            })
-          }
-          onStopNameClick={handleStopClick}
-        />
+        {stopsLoading ? (
+          <LoadingDots />
+        ) : (
+          <StopAnalysisTable
+            data={tableRows}
+            loading={stopsLoading}
+            errored={!!stopsError}
+            directions={directions}
+            showTotals
+            onDirectionsChange={(dirs) =>
+              updateQuery({
+                direction: dirs.length === 0 ? EMPTY_DIRECTION_SELECTION : dirs,
+              })
+            }
+            onStopNameClick={handleStopClick}
+          />
+        )}
       </div>
     </BaseLayout>
   );

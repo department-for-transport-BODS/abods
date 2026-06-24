@@ -5,6 +5,8 @@ interface TooltipProps {
   message?: string;
   underline?: boolean;
   selectable?: boolean;
+  onClick?: () => void;
+  className?: string;
   children: ReactNode;
 }
 
@@ -12,6 +14,8 @@ export const Tooltip = ({
   message,
   underline,
   selectable,
+  onClick,
+  className,
   children,
 }: TooltipProps) => {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -38,9 +42,10 @@ export const Tooltip = ({
   return (
     <button
       ref={triggerRef}
-      className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""}`}
+      className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""} ${className ?? ""}`}
       title={message}
       type="button"
+      onClick={onClick}
     >
       {children}
     </button>
