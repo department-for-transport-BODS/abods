@@ -57,14 +57,7 @@ export const ChartNoDataWrapper = ({
           </div>
         ) : null}
 
-        <div
-          className={
-            "chart-no-data-wrapper__chart" +
-            (!noData ? " chart-no-data-wrapper__chart--loaded" : "")
-          }
-        >
-          {children}
-        </div>
+        <div className="chart-no-data-wrapper__content">{children}</div>
       </div>
     </div>
   );

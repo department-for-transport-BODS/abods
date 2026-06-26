@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { FilterChips } from "@/components/on-time/FilterChips";
-import { JsonSection } from "@/components/on-time/JsonSection";
+import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
 import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
@@ -18,19 +18,16 @@ import {
 } from "@/src/generated/graphql";
 import {
   OperatorPerformance,
+  PunctualityOverview,
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
 import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { SearchInput } from "@/components/shared/SearchInput";
 
 const Select = dynamic(
   () =>
     import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Select),
-  { ssr: false },
-);
-
-const Table = dynamic(
-  () => import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Table),
   { ssr: false },
 );
 
@@ -157,24 +154,43 @@ const OnTimeIndexPage = () => {
   useRequireAuth();
   const { config } = useConfig();
   const [isLoading, setIsLoading] = useState(true);
+
   const [operatorPerformance, setOperatorPerformance] = useState<
     OperatorPerformance[]
   >([]);
+
+  const [summaryStats, setSummaryStats] = useState<PunctualityOverview | null>(
+    null,
+  );
+
   const [error, setError] = useState<string | null>(null);
+
   const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
   const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
   const [selectedStopType, setSelectedStopType] = useState("timing-points");
+  const [operatorSearch, setOperatorSearch] = useState("");
+
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
+
   const refineResultsInitialValues = useMemo(
     () => performanceFiltersToRefineResults(refineResultsFilters),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(refineResultsFilters)],
   );
   const [dateRange, setDateRange] = useState<{
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+
+  const filteredOperators = useMemo(() => {
+    if (!operatorSearch) return operatorPerformance;
+
+    const searchValue = operatorSearch.toLowerCase();
+    return operatorPerformance.filter(
+      (operator) =>
+        (operator.name ?? "").toLowerCase().includes(searchValue));
+  }, [operatorPerformance, operatorSearch]);
+
   const hasNoOperatorData =
     !isLoading && !error && operatorPerformance.length === 0;
   const dataExpected = selectedMatchType === "evidenced";
@@ -182,6 +198,25 @@ const OnTimeIndexPage = () => {
   const wrapperDataExpected = dataExpected;
   const wrapperTimingPointsNotSupported = false;
   const wrapperMinMaxDelayNotSupported = false;
+
+  const summaryTotal =
+    (summaryStats?.onTime ?? 0) +
+    (summaryStats?.late ?? 0) +
+    (summaryStats?.early ?? 0);
+
+  const formatPercentage = (value: number) => {
+    if (summaryTotal <= 0) return "-";
+    return `${((value / summaryTotal) * 100).toFixed(2)}%`;
+  };
+
+  const recordedStopDepartures =
+    (summaryStats?.completed ?? 0) > 0
+      ? summaryStats?.completed ?? 0
+      : summaryTotal;
+
+  const formattedRecordedStopDepartures = new Intl.NumberFormat("en-GB").format(
+    Math.max(0, Math.round(recordedStopDepartures)),
+  );
 
   const handleDatePresetChange = (selected: string) => {
     setSelectedDatePreset(selected);
@@ -216,10 +251,16 @@ const OnTimeIndexPage = () => {
           },
         };
 
-        const data = await onTimeService.fetchOperatorPerformanceList(params);
-        setOperatorPerformance(data);
+        const [operatorData, stats] = await Promise.all([
+          onTimeService.fetchOperatorPerformanceList(params),
+          onTimeService.fetchOnTimeStats(params),
+        ]);
+
+        setOperatorPerformance(operatorData);
+        setSummaryStats(stats);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
+        setSummaryStats(null);
       } finally {
         setIsLoading(false);
       }
@@ -237,11 +278,6 @@ const OnTimeIndexPage = () => {
     <BaseLayout title="All services - Analyse Bus Open Data">
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl">All services</h1>
-      {/* <p className="govuk-body">
-        Skeleton page for the on-time performance migration. Data shown is
-        fetched from the same GraphQL operations used by the existing Angular
-        app and displayed as JSON for verification.
-      </p> */}
       <div className="controls-container">
         <div className="controls-date-selects-container">
           <DateRangeSelect
@@ -260,33 +296,35 @@ const OnTimeIndexPage = () => {
             onChange={(event) => handleDatePresetChange(event.target.value)}
           />
         </div>
-        <div className="refine-results-button-container">
-          <RefineResultsButton
-            isLoading={isLoading}
-            initialValues={refineResultsInitialValues}
-            onApply={(values) => {
-              setRefineResultsFilters(
-                refineResultsToPerformanceFilters(values),
-              );
-            }}
-            onReset={() => setRefineResultsFilters({})}
-          />
-        </div>
-        <div className="on-time-toggle-container">
-          <SegmentedToggle
-            legend=""
-            name="match-type-toggle"
-            value={selectedMatchType}
-            onChange={setSelectedMatchType}
-            options={MATCH_TYPE_OPTIONS}
-          />
-          <SegmentedToggle
-            legend=""
-            name="stop-type-toggle"
-            value={selectedStopType}
-            onChange={setSelectedStopType}
-            options={STOP_TYPE_OPTIONS}
-          />
+        <div className="controls-filters-container">
+          <div className="refine-results-button-container">
+            <RefineResultsButton
+              isLoading={isLoading}
+              initialValues={refineResultsInitialValues}
+              onApply={(values) => {
+                setRefineResultsFilters(
+                  refineResultsToPerformanceFilters(values),
+                );
+              }}
+              onReset={() => setRefineResultsFilters({})}
+            />
+          </div>
+          <div className="on-time-toggle-container">
+            <SegmentedToggle
+              legend=""
+              name="match-type-toggle"
+              value={selectedMatchType}
+              onChange={setSelectedMatchType}
+              options={MATCH_TYPE_OPTIONS}
+            />
+            <SegmentedToggle
+              legend=""
+              name="stop-type-toggle"
+              value={selectedStopType}
+              onChange={setSelectedStopType}
+              options={STOP_TYPE_OPTIONS}
+            />
+          </div>
         </div>
       </div>
       <div className="filter-chips-container">
@@ -306,23 +344,33 @@ const OnTimeIndexPage = () => {
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
           >
-            <JsonSection
-              title="onTimeOperatorPerformanceList"
-              description="Operator-level on-time performance, last 7 days."
-              data={operatorPerformance}
-              error={error}
-            />
+            {/* TODO: Add admin area dropdown */}
+            <div className="summary-content-wrapper">
+              <div className="summary-stat-container">
+                <p className="govuk-body-l"><b>{formattedRecordedStopDepartures}</b> departures recorded</p>
+                <SummaryStatsGrid
+                  onTime={formatPercentage(summaryStats?.onTime ?? 0)}
+                  onTimeCount={summaryStats?.onTime ?? null}
+                  lateCount={summaryStats?.late ?? null}
+                  earlyCount={summaryStats?.early ?? null}
+                  incompleteCount={summaryStats?.noData ?? null}
+                  recordedStopDepartures={recordedStopDepartures > 0 ? recordedStopDepartures : null}
+                  late={formatPercentage(summaryStats?.late ?? 0)}
+                  early={formatPercentage(summaryStats?.early ?? 0)}
+                  incompleteData={formatPercentage(summaryStats?.noData ?? 0)}
+                  incompleteBreakdown={summaryStats?.incomplete ?? null}
+                  averageDelay={summaryStats?.averageDelay ?? null}
+                />
+              </div>
+              <div className="summary-map-container">
+              {/* TODO: Add map */}
+              </div>
+            </div>
           </ChartNoDataWrapper>
         )}
       </div>
       <div className="operator-container">
         <h2 className="govuk-heading-m">Operators</h2>
-        <p className="govuk-body">
-          Unformatted table used for validation purposes
-        </p>
-        <p className="govuk-body">
-          Total operators fetched: <strong>{operatorPerformance.length}</strong>
-        </p>
         {isLoading ? (
           <p className="govuk-body">Loading operator data...</p>
         ) : (
@@ -332,74 +380,15 @@ const OnTimeIndexPage = () => {
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
           >
-            <Table
-              head={[
-                { content: "NOC" },
-                { content: "Operator" },
-                {
-                  content: "Av. delay",
-                  classes: "govuk-table__header--numeric",
-                },
-                {
-                  content: "On-time %",
-                  classes: "govuk-table__header--numeric",
-                },
-                { content: "Late %", classes: "govuk-table__header--numeric" },
-                { content: "Early %", classes: "govuk-table__header--numeric" },
-              ]}
-              rows={operatorPerformance
-                .filter((op): op is OperatorPerformance & { nocCode: string } =>
-                  Boolean(op.nocCode),
-                )
-                .map((op) => {
-                  const delay = op.averageDelay;
-                  const formattedDelay =
-                    delay == null
-                      ? "-"
-                      : (Math.round(delay) >= 0 ? "+" : "-") +
-                        Duration.fromObject({
-                          seconds: Math.abs(Math.round(delay)),
-                        }).toFormat("mm:ss");
-                  return [
-                    { content: op.nocCode },
-                    {
-                      content: (
-                        <Link
-                          href={`/on-time/${encodeURIComponent(op.nocCode)}`}
-                          className="govuk-link"
-                        >
-                          {op.name}
-                        </Link>
-                      ),
-                    },
-                    {
-                      content: formattedDelay,
-                      classes: "govuk-table__cell--numeric",
-                    },
-                    {
-                      content:
-                        op.onTimeRatio != null
-                          ? `${(op.onTimeRatio * 100).toFixed(1)}%`
-                          : "-",
-                      classes: "govuk-table__cell--numeric",
-                    },
-                    {
-                      content:
-                        op.lateRatio != null
-                          ? `${(op.lateRatio * 100).toFixed(1)}%`
-                          : "-",
-                      classes: "govuk-table__cell--numeric",
-                    },
-                    {
-                      content:
-                        op.earlyRatio != null
-                          ? `${(op.earlyRatio * 100).toFixed(1)}%`
-                          : "-",
-                      classes: "govuk-table__cell--numeric",
-                    },
-                  ];
-                })}
+            <SearchInput
+              id="operator-search"
+              label="Search for an operator"
+              testId=""
+              value={operatorSearch}
+              onChange={setOperatorSearch}
             />
+            {/* TODO: Add sparkline to table */}
+            <OnTimeOperatorTable data={filteredOperators} />
           </ChartNoDataWrapper>
         )}
       </div>
