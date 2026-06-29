@@ -90,7 +90,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -122,7 +121,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -132,6 +130,11 @@ describe("StopAnalysisTable", () => {
 
     expect(screen.getByTestId("table-head")).toHaveTextContent("Scheduled");
     expect(screen.getByTestId("table-head")).toHaveTextContent("Recorded");
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Name");
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Direction");
+    expect(screen.getByTestId("table-head")).toHaveTextContent(
+      "Av. Scheduled Travel Time",
+    );
 
     await user.click(screen.getByRole("button", { name: "Display options" }));
 
@@ -140,33 +143,29 @@ describe("StopAnalysisTable", () => {
       within(dialog).getByRole("checkbox", { name: "NAPTAN" }),
     ).toBeDisabled();
 
-    await user.click(
-      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
-    );
+    await user.click(within(dialog).getByRole("checkbox", { name: "Name" }));
     await user.click(within(dialog).getByRole("button", { name: "Show all" }));
     expect(
-      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
+      within(dialog).getByRole("checkbox", { name: "Name" }),
     ).toBeChecked();
 
-    await user.click(
-      within(dialog).getByRole("checkbox", { name: "Scheduled" }),
-    );
+    await user.click(within(dialog).getByRole("checkbox", { name: "Name" }));
     await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
 
-    expect(screen.getByTestId("table-head")).toHaveTextContent("Scheduled");
+    expect(screen.getByTestId("table-head")).toHaveTextContent("Name");
 
     await user.click(screen.getByRole("button", { name: "Display options" }));
     const updatedDialog = screen.getByRole("dialog", {
       name: "Display options",
     });
     await user.click(
-      within(updatedDialog).getByRole("checkbox", { name: "Scheduled" }),
+      within(updatedDialog).getByRole("checkbox", { name: "Name" }),
     );
     await user.click(
       within(updatedDialog).getByRole("button", { name: "Update" }),
     );
 
-    expect(screen.getByTestId("table-head")).not.toHaveTextContent("Scheduled");
+    expect(screen.getByTestId("table-head")).not.toHaveTextContent("Name");
     expect(screen.getByTestId("table-head")).toHaveTextContent("Recorded");
   });
 
@@ -174,7 +173,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -199,7 +197,6 @@ describe("StopAnalysisTable", () => {
       return (
         <StopAnalysisTable
           data={[baseRow]}
-          loading={false}
           errored={false}
           directions={directions}
           onDirectionsChange={setDirections}
@@ -229,7 +226,6 @@ describe("StopAnalysisTable", () => {
       return (
         <StopAnalysisTable
           data={[baseRow]}
-          loading={false}
           errored={false}
           directions={directions}
           onDirectionsChange={setDirections}

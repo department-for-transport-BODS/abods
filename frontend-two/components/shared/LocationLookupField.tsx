@@ -1,8 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  buildLocationContext,
+  buildLocationSearchTypes,
+  type GeocodingFeature,
+} from "@/types/mapbox";
+
+const LOCATION_SEARCH_TYPES = buildLocationSearchTypes([
+  "poi",
+  "region",
+  "country",
+]);
 
 export interface LocationLookupSelection {
   id: string;
   label: string;
+  context?: string;
   center?: [number, number];
   bbox?: [number, number, number, number];
 }
@@ -33,6 +45,27 @@ export const LocationLookupField = ({
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<LocationLookupSelection[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedOption, setSelectedOption] =
+    useState<LocationLookupSelection | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const overlayRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!value) setSelectedOption(null);
+  }, [value]);
+
+  const clearSelection = (initialValue: string) => {
+    setSelectedOption(null);
+    onValueChange(initialValue);
+    setOpen(true);
+    window.setTimeout(() => {
+      const input = inputRef.current;
+      if (input) {
+        input.focus();
+        input.setSelectionRange(initialValue.length, initialValue.length);
+      }
+    }, 0);
+  };
 
   useEffect(() => {
     if (disabled || !mapboxToken || value.trim().length < 3) {
@@ -47,7 +80,7 @@ export const LocationLookupField = ({
         setLoading(true);
         const encodedQuery = encodeURIComponent(value.trim());
         const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?country=gb&autocomplete=true&limit=5&types=place,postcode,address&access_token=${mapboxToken}`,
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?country=gb&autocomplete=true&limit=5&types=${LOCATION_SEARCH_TYPES}&access_token=${mapboxToken}`,
           { signal: controller.signal },
         );
 
@@ -57,18 +90,14 @@ export const LocationLookupField = ({
         }
 
         const payload = (await response.json()) as {
-          features?: Array<{
-            id: string;
-            place_name: string;
-            center?: [number, number];
-            bbox?: [number, number, number, number];
-          }>;
+          features?: GeocodingFeature[];
         };
 
         setOptions(
           (payload.features ?? []).map((feature) => ({
             id: feature.id,
-            label: feature.place_name,
+            label: feature.text,
+            context: buildLocationContext(feature.context ?? []),
             center: feature.center,
             bbox: feature.bbox,
           })),
@@ -95,62 +124,118 @@ export const LocationLookupField = ({
       </label>
       <div className="stop-analysis-filters__location-search">
         <div className="stop-analysis-filters__location-input-wrap">
-          <input
-            id={id}
-            className="govuk-input stop-analysis-filters__location-input"
-            type="text"
-            value={value}
-            onChange={(event) => {
-              onValueChange(event.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => {
-              window.setTimeout(() => setOpen(false), 120);
-            }}
-            placeholder={placeholder}
-            aria-label={label}
-            disabled={disabled}
-          />
+          {selectedOption ? (
+            <div className="govuk-input stop-analysis-filters__location-input stop-analysis-filters__location-selected">
+              <span className="stop-analysis-filters__location-selected-text">
+                <span>{selectedOption.label}</span>
+                {selectedOption.context && (
+                  <span className="stop-analysis-filters__location-option-context">
+                    {selectedOption.context}
+                  </span>
+                )}
+              </span>
+              <input
+                ref={overlayRef}
+                id={id}
+                className="stop-analysis-filters__location-overlay-input"
+                type="text"
+                value=""
+                aria-label={selectedOption.label}
+                onChange={(e) => clearSelection(e.target.value)}
+                onFocus={() => setOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setOpen(false), 120);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setOpen(false);
+                  else if (e.key === "Backspace" || e.key === "Delete")
+                    clearSelection("");
+                }}
+              />
+            </div>
+          ) : (
+            <input
+              ref={inputRef}
+              id={id}
+              className="govuk-input stop-analysis-filters__location-input"
+              type="text"
+              value={value}
+              onChange={(event) => {
+                onValueChange(event.target.value);
+                setOpen(true);
+              }}
+              onFocus={() => setOpen(true)}
+              onBlur={() => {
+                window.setTimeout(() => setOpen(false), 120);
+              }}
+              placeholder={placeholder}
+              aria-label={label}
+              disabled={disabled}
+            />
+          )}
+          {(selectedOption || value) && (
+            <button
+              type="button"
+              className="stop-analysis-filters__location-clear"
+              aria-label="Clear location"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setSelectedOption(null);
+                onValueChange("");
+                setOpen(false);
+                window.setTimeout(() => inputRef.current?.focus(), 0);
+              }}
+            >
+              ×
+            </button>
+          )}
           <span
             className={`stop-analysis-filters__location-chevron${open ? " stop-analysis-filters__location-chevron--open" : ""}`}
             aria-hidden="true"
           />
         </div>
 
-        {open && !disabled && (value.trim().length === 0 || hasResults) && (
-          <div
-            className="stop-analysis-filters__location-results"
-            role="listbox"
-          >
-            {value.trim().length === 0 && (
-              <div className="stop-analysis-filters__location-hint">
-                Type to search
-              </div>
-            )}
-            {value.trim().length > 0 && loading && (
-              <div className="stop-analysis-filters__location-loading">
-                Searching...
-              </div>
-            )}
-            {value.trim().length > 0 &&
-              !loading &&
-              options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className="stop-analysis-filters__location-option"
-                  onClick={() => {
-                    onValueChange(option.label);
-                    setOpen(false);
-                    onSelect?.(option);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-          </div>
-        )}
+        {open &&
+          !disabled &&
+          (selectedOption || value.trim().length === 0 || hasResults) && (
+            <div
+              className="stop-analysis-filters__location-results"
+              role="listbox"
+            >
+              {value.trim().length === 0 && (
+                <div className="stop-analysis-filters__location-hint">
+                  Type to search
+                </div>
+              )}
+              {value.trim().length > 0 && loading && (
+                <div className="stop-analysis-filters__location-loading">
+                  Searching...
+                </div>
+              )}
+              {value.trim().length > 0 &&
+                !loading &&
+                options.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className="stop-analysis-filters__location-option"
+                    onClick={() => {
+                      setSelectedOption(option);
+                      onValueChange(option.label);
+                      setOpen(false);
+                      onSelect?.(option);
+                    }}
+                  >
+                    {option.label}
+                    {option.context && (
+                      <span className="stop-analysis-filters__location-option-context">
+                        {option.context}
+                      </span>
+                    )}
+                  </button>
+                ))}
+            </div>
+          )}
       </div>
     </div>
   );

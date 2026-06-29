@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
 import {
   DISPLAY_MODE_OPTIONS,
@@ -11,7 +11,12 @@ import {
 } from "@/hooks/useStopPerformanceTable";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
 import { Modal } from "@/components/shared/Modal";
-import { SortableTable, type SortOrder } from "../table/SortableTable";
+import { Tooltip } from "@/components/shared/Tooltip";
+import {
+  SortedPaginatedTable,
+  type SortedPaginatedTableColumn,
+} from "../table/SortedPaginatedTable";
+import { type SortOrder } from "../table/SortableTable";
 import { TimingIcon } from "./TimingIcon";
 
 type SortKey =
@@ -33,7 +38,6 @@ type SortableRow = {
   stopId: string;
   timingPoint: ReactNode;
   stopName: React.ReactNode;
-  source: StopPerformanceRow;
   direction: string;
   scheduledDepartures: number;
   actualDepartures: string;
@@ -62,6 +66,7 @@ type TableColumnKey =
 interface TableColumnDefinition {
   key: TableColumnKey;
   label: ReactNode;
+  modalLabel?: string;
   alwaysVisible?: boolean;
 }
 
@@ -70,22 +75,38 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   {
     key: "timingPoint",
     label: <TimingIcon className="stop-analysis-table__timing-icon" />,
+    modalLabel: "Timing Point",
   },
-  { key: "stopName", label: "Name", alwaysVisible: true },
+  { key: "stopName", label: "Name" },
   { key: "direction", label: "Direction" },
-  { key: "scheduledDepartures", label: "Scheduled" },
-  { key: "actualDepartures", label: "Recorded" },
-  { key: "averageScheduled", label: "Av. Sched." },
-  { key: "averageActual", label: "Av. Actual" },
-  { key: "averageDelay", label: "Av. Delay" },
+  {
+    key: "scheduledDepartures",
+    label: "Scheduled departures",
+    modalLabel: "Scheduled departures",
+  },
+  {
+    key: "actualDepartures",
+    label: "Recorded departures",
+    modalLabel: "Recorded departures",
+  },
+  {
+    key: "averageScheduled",
+    label: "Av. Scheduled Travel Time",
+    modalLabel: "Average scheduled",
+  },
+  {
+    key: "averageActual",
+    label: "Av. Actual Travel Time",
+    modalLabel: "Average actual",
+  },
+  { key: "averageDelay", label: "Av. Delay", modalLabel: "Average delay" },
   { key: "onTime", label: "On Time" },
-  { key: "early", label: "Early" },
   { key: "late", label: "Late" },
+  { key: "early", label: "Early" },
 ];
 
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
-  loading: boolean;
   errored: boolean;
   directions: Direction[];
   onDirectionsChange: (directions: Direction[]) => void;
@@ -97,17 +118,6 @@ const formatDirection = (direction: string | null): string => {
   if (!direction) return "-";
 
   return direction.charAt(0).toUpperCase() + direction.slice(1);
-};
-
-const compareValue = (a: string | number, b: string | number): number => {
-  if (typeof a === "number" && typeof b === "number") {
-    return a - b;
-  }
-
-  return String(a).localeCompare(String(b), undefined, {
-    numeric: true,
-    sensitivity: "base",
-  });
 };
 
 const SORT_ASC: SortOrder = "asc";
@@ -148,7 +158,6 @@ const getSortValue = (
 
 export const StopAnalysisTable = ({
   data,
-  loading,
   errored,
   directions,
   onDirectionsChange,
@@ -156,7 +165,6 @@ export const StopAnalysisTable = ({
   showTotals = false,
 }: StopAnalysisTableProps) => {
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<
     TableColumnKey[]
   >(TABLE_COLUMN_OPTIONS.map((column) => column.key));
@@ -195,53 +203,45 @@ export const StopAnalysisTable = ({
     showTotals,
   );
 
-  const sortedRows = useMemo(() => {
-    const rows = [...filteredData];
-    rows.sort((left, right) => {
-      const leftValue = getSortValue(left, sortState.key, displayMode);
-      const rightValue = getSortValue(right, sortState.key, displayMode);
-      const result = compareValue(leftValue, rightValue);
-      return sortState.order === SORT_ASC ? result : -result;
-    });
-    return rows;
-  }, [displayMode, filteredData, sortState]);
-
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [sortedRows]);
-
   const visibleColumnSet = useMemo(
     () => new Set(visibleColumns),
     [visibleColumns],
   );
 
-  const tableColumns = useMemo(
+  const tableColumns = useMemo<SortedPaginatedTableColumn[]>(
     () =>
       TABLE_COLUMN_OPTIONS.filter((column) =>
         visibleColumnSet.has(column.key),
       ).map((column) => ({
         key: column.key,
         label: column.label,
+        ariaLabel:
+          column.modalLabel ??
+          (typeof column.label === "string" ? column.label : column.key),
+        alignment:
+          column.key === "direction" ||
+          column.key === "stopId" ||
+          column.key === "timingPoint" ||
+          column.key === "stopName"
+            ? "left"
+            : "right",
         sortable:
           column.key !== "stopId" &&
           column.key !== "stopName" &&
           column.key !== "timingPoint",
-        sortOrder: sortState.key === column.key ? sortState.order : undefined,
       })),
-    [sortState, visibleColumnSet],
+    [visibleColumnSet],
   );
-
-  const tableHead = tableColumns;
 
   const totalsRow = useMemo<SortableRow | null>(
     () =>
       totals
         ? {
             key: "__totals__",
+            rowClassName: "stop-analysis-table__summary-row",
             stopId: "-",
             timingPoint: "",
             stopName: "-",
-            source: null as unknown as StopPerformanceRow,
             direction: "-",
             ...totals,
           }
@@ -249,55 +249,8 @@ export const StopAnalysisTable = ({
     [totals],
   );
 
-  const PAGE_SIZE = 10;
-
-  const tableRows = useMemo<SortableRow[]>(
-    () =>
-      sortedRows
-        .slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
-        .map((row) => ({
-          key: `${row.stopId}-${row.direction}`,
-          stopId: row.stopId,
-          timingPoint: row.timingPoint ? (
-            <TimingIcon className="stop-analysis-table__timing-icon" />
-          ) : (
-            ""
-          ),
-          stopName: (
-            <button
-              type="button"
-              className="govuk-link stop-analysis-table__stop-link"
-              onClick={() => onStopNameClick(row)}
-              title={`${row.localityName}, ${row.adminAreaName}`}
-            >
-              {row.stopName}
-            </button>
-          ),
-          source: row,
-          direction: formatDirection(row.direction),
-          scheduledDepartures: row.scheduledDepartures,
-          actualDepartures: `${row.actualDepartures} (${formatPercent(row.completedRatio)})`,
-          averageScheduled:
-            row.averageScheduled != null
-              ? formatSeconds(row.averageScheduled)
-              : "-",
-          averageActual:
-            row.averageActual != null ? formatSeconds(row.averageActual) : "-",
-          averageDelay:
-            row.averageDelay != null ? formatSeconds(row.averageDelay) : "-",
-          onTime: formatMetricValue(row, "onTime", displayMode),
-          early: formatMetricValue(row, "early", displayMode),
-          late: formatMetricValue(row, "late", displayMode),
-        })),
-    [displayMode, onStopNameClick, sortedRows, currentPage],
-  );
-
-  const allTableRows = useMemo(
-    () => (totalsRow ? [totalsRow, ...tableRows] : tableRows),
-    [totalsRow, tableRows],
-  );
-
-  const handleSort = (key: string, order: SortOrder) => {
+  const handleSortChange = (key: string | null, order: SortOrder) => {
+    if (!key) return;
     setSortState({ key: key as SortKey, order });
   };
 
@@ -310,17 +263,13 @@ export const StopAnalysisTable = ({
     key: TableColumnKey,
     visible: boolean,
   ) => {
-    if (key === "stopName") {
-      return;
-    }
-
     setDraftVisibleColumns((current) => {
       if (visible) {
         return current.includes(key) ? current : [...current, key];
       }
 
       const next = current.filter((columnKey) => columnKey !== key);
-      return next.includes("stopName") ? next : ["stopName", ...next];
+      return next;
     });
   };
 
@@ -422,7 +371,7 @@ export const StopAnalysisTable = ({
                       className="govuk-label govuk-checkboxes__label"
                       htmlFor={`stop-analysis-column-${column.key}`}
                     >
-                      {column.label}
+                      {column.modalLabel ?? column.label}
                     </label>
                   </div>
                 );
@@ -460,7 +409,7 @@ export const StopAnalysisTable = ({
                       className="govuk-label govuk-checkboxes__label"
                       htmlFor={`stop-analysis-column-${column.key}`}
                     >
-                      {column.label}
+                      {column.modalLabel ?? column.label}
                     </label>
                   </div>
                 );
@@ -511,33 +460,75 @@ export const StopAnalysisTable = ({
             showTotals ? "stop-analysis-table__table--with-totals" : undefined
           }
         >
-          <SortableTable
-            head={tableHead as any}
-            rows={allTableRows as any[]}
-            onSort={handleSort}
-            pagination={
-              !loading && sortedRows.length > PAGE_SIZE
-                ? {
-                    currentPage,
-                    totalPages: Math.ceil(sortedRows.length / PAGE_SIZE),
-                    pageSize: PAGE_SIZE,
-                    rowCount: sortedRows.length,
-                    noun: "stop",
-                    onPageChange: setCurrentPage,
-                  }
-                : undefined
+          <SortedPaginatedTable
+            key={`${displayMode}-${visibleColumns.join(",")}`}
+            columns={tableColumns}
+            data={filteredData}
+            getRowValue={(row, column) =>
+              getSortValue(row, column as SortKey, displayMode)
             }
+            renderRow={(row) => ({
+              key: `${row.stopId}-${row.direction}`,
+              stopId: row.stopId,
+              timingPoint: row.timingPoint ? (
+                <TimingIcon className="stop-analysis-table__timing-icon" />
+              ) : (
+                ""
+              ),
+              stopName: (
+                <Tooltip
+                  message={`${row.localityName}, ${row.adminAreaName}`}
+                  className="stop-analysis-table__stop-link"
+                  onClick={() => onStopNameClick(row)}
+                >
+                  {row.stopName}
+                </Tooltip>
+              ),
+              direction: formatDirection(row.direction),
+              scheduledDepartures: row.scheduledDepartures,
+              actualDepartures:
+                displayMode === "percentage"
+                  ? formatPercent(row.completedRatio)
+                  : String(row.actualDepartures),
+              averageScheduled:
+                row.averageScheduled != null
+                  ? formatSeconds(row.averageScheduled, true)
+                  : "-",
+              averageActual:
+                row.averageActual != null
+                  ? formatSeconds(row.averageActual, true)
+                  : "-",
+              averageDelay:
+                row.averageDelay != null
+                  ? formatSeconds(row.averageDelay)
+                  : "-",
+              onTime: formatMetricValue(row, "onTime", displayMode),
+              early: formatMetricValue(row, "early", displayMode),
+              late: formatMetricValue(row, "late", displayMode),
+            })}
+            pinnedRows={totalsRow ? [totalsRow] : undefined}
+            onSortChange={handleSortChange}
+            colWidths={{
+              stopId: "8rem",
+              timingPoint: "2rem",
+              stopName: "12rem",
+              direction: "5.5rem",
+              scheduledDepartures: "5rem",
+              actualDepartures: "6rem",
+              averageScheduled: "5rem",
+              averageActual: "5rem",
+              averageDelay: "5rem",
+              onTime: "4.5rem",
+              early: "4.5rem",
+              late: "4.5rem",
+            }}
+            initialSortKey={sortState.key}
+            initialSortOrder={sortState.order}
+            emptyMessage="No stop data found"
+            paginationNoun="stop"
+            paginationAlignment="left"
           />
         </div>
-        {loading ? (
-          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">
-            Loading...
-          </p>
-        ) : allTableRows.length === 0 ? (
-          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">
-            No stop data found
-          </p>
-        ) : null}
       </div>
     </div>
   );

@@ -157,6 +157,22 @@ describe("StopAnalysisPage", () => {
     expect(table).toHaveAttribute("data-directions", "Inbound,Outbound");
   });
 
+  it("replaces the table with loading dots while stop data is loading", () => {
+    mockRouterQuery = {
+      minLatitude: "51.0",
+      maxLatitude: "51.1",
+      minLongitude: "-1.2",
+      maxLongitude: "-1.1",
+    };
+    mockFetchStopAnalysis.mockReturnValue(new Promise(() => {}));
+
+    render(<StopAnalysisPage />);
+
+    expect(screen.queryByTestId("stop-analysis-table")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+
   it("renders base layout wrapper", () => {
     render(<StopAnalysisPage />);
     expect(screen.getByTestId("base-layout")).toBeInTheDocument();
