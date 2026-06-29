@@ -68,15 +68,21 @@ interface OnTimeOperatorTableProps {
 }
 
 export const OnTimeOperatorTable = ({ data }: OnTimeOperatorTableProps) => {
+  const sortedData = [...data]
+    .filter((op): op is OperatorPerformance & { nocCode: string } => Boolean(op.nocCode))
+    .sort((a, b) => {
+      const aName = (a.name ?? "").toLocaleLowerCase();
+      const bName = (b.name ?? "").toLocaleLowerCase();
+      return aName.localeCompare(bName);
+    });
+
   return (
     <SortedPaginatedTable
       columns={columns}
-      data={data.filter((op): op is OperatorPerformance & { nocCode: string } =>
-        Boolean(op.nocCode),
-      )}
+      data={sortedData}
       getRowValue={getRowValue}
       renderRow={renderRow}
-      initialSortKey="nocCode"
+      initialSortKey="name"
       initialSortOrder="asc"
       paginationNoun="operator"
     />

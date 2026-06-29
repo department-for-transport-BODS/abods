@@ -1,16 +1,15 @@
+// NOTE: I think an adapted version of this component can be used on the other on-time pages
+// TODO: Display unavailable when there is no data
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
 
 interface SummaryStatsGridProps {
-	onTime: string | null;
 	onTimeCount: number | null;
 	lateCount: number | null;
 	earlyCount: number | null;
 	incompleteCount: number | null;
 	recordedStopDepartures: number | null;
-	late: string | null;
-	early: string | null;
-	incompleteData: string | null;
+	totalStopDepartures: number | null;
 	incompleteBreakdown: string | null;
 	averageDelay: number | null;
 }
@@ -18,17 +17,28 @@ interface SummaryStatsGridProps {
 const formatDelay = (delay: number | null): string => {
 	if (delay == null) return "-";
 
-	const roundedDelay = Math.round(delay);
+	const wholeSeconds = delay >= 0 ? Math.floor(delay) : Math.ceil(delay);
 	return (
-		(roundedDelay >= 0 ? "+" : "-") +
-		Duration.fromObject({ seconds: Math.abs(roundedDelay) }).toFormat("mm:ss")
+		(wholeSeconds >= 0 ? "+" : "-") +
+		Duration.fromObject({ seconds: Math.abs(wholeSeconds) }).toFormat("mm:ss")
 	);
 };
 
-const formatPercentage = (value: string | null): string => {
-    if (value == null) return "-";
-    return value;
-}
+const formatPercentage = (value: number | null, total: number): string => {
+	if (value == null || total <= 0) return "-";
+	return `${((value / total) * 100).toFixed(2)}%`;
+};
+
+const formatIncompletePercentage = (
+	value: number | null,
+	totalStopDepartures: number | null,
+): string => {
+	if (value == null || totalStopDepartures == null || totalStopDepartures <= 0) {
+		return "-";
+	}
+
+	return `${((value / totalStopDepartures) * 100).toFixed(2)}%`;
+};
 
 const formatCount = (value: number | null): string => {
     if (value == null) return "-";
@@ -54,18 +64,19 @@ const incompleteReasonLabels: Record<string, string> = {
 };
 
 export const SummaryStatsGrid = ({
-	onTime,
 	onTimeCount,
 	lateCount,
 	earlyCount,
 	incompleteCount,
 	recordedStopDepartures,
-	late,
-	early,
-	incompleteData,
+	totalStopDepartures,
 	incompleteBreakdown,
 	averageDelay,
 }: SummaryStatsGridProps) => {
+	const summaryTotal =
+		(onTimeCount ?? 0) +
+		(lateCount ?? 0) +
+		(earlyCount ?? 0);
 
 	const onTimeTooltip = 
 		onTimeCount != null && recordedStopDepartures != null && recordedStopDepartures > 0
@@ -83,12 +94,12 @@ export const SummaryStatsGrid = ({
 			: undefined;
 
 	const incompleteTooltip = (() => {
-		if (incompleteCount == null || recordedStopDepartures == null || recordedStopDepartures <= 0) {
+		if (incompleteCount == null || totalStopDepartures == null || totalStopDepartures <= 0) {
 			return undefined;
 		}
 		
 		const breakdown = parseIncompleteBreakdown(incompleteBreakdown);
-		const baseText = `${formatCount(incompleteCount)} of ${formatCount(recordedStopDepartures)} stop departures have incomplete or missing real-time data so we are unable to calculate an accurate on-time performance figure.`;
+		const baseText = `${formatCount(incompleteCount)} of ${formatCount(totalStopDepartures)} stop departures have incomplete or missing real-time data so we are unable to calculate an accurate on-time performance figure.`;
 		
 		if (Object.keys(breakdown).length === 0) {
 			return baseText;
@@ -123,22 +134,26 @@ export const SummaryStatsGrid = ({
 			<div role="listitem" className="summary-stats-grid__item">
 				<SummaryStatWithTooltip
 					title="On-time"
-					value={formatPercentage(onTime)}
+					value={formatPercentage(onTimeCount, summaryTotal)}
 					tooltip={onTimeTooltip}
 				/>
 			</div>
 			<div role="listitem" className="summary-stats-grid__item">
 				<SummaryStatWithTooltip
 					title="Late"
-					value={formatPercentage(late)}
+					value={formatPercentage(lateCount, summaryTotal)}
 					tooltip={lateTooltip}
 				/>
 			</div>
 			<div role="listitem" className="summary-stats-grid__item">
-				<SummaryStatWithTooltip title="Early" value={formatPercentage(early)} tooltip={earlyTooltip} />
+				<SummaryStatWithTooltip title="Early" value={formatPercentage(earlyCount, summaryTotal)} tooltip={earlyTooltip} />
 			</div>
 			<div role="listitem" className="summary-stats-grid__item">
-				<SummaryStatWithTooltip title="Incomplete Data" value={formatPercentage(incompleteData)} tooltip={incompleteTooltip} />
+				<SummaryStatWithTooltip
+					title="Incomplete Data"
+					value={formatIncompletePercentage(incompleteCount, totalStopDepartures)}
+					tooltip={incompleteTooltip}
+				/>
 			</div>
 			<div role="listitem" className="summary-stats-grid__item">
 				<SummaryStatWithTooltip

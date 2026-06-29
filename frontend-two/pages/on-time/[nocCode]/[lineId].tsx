@@ -1,9 +1,17 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { JsonSection } from "@/components/on-time/JsonSection";
+import {
+  OnTimeStopsTable,
+  type StopDisplayMode,
+} from "@/components/on-time/OnTimeStopsTable";
+import { OnTimeFilterPanel } from "@/components/on-time/OnTimeFilterPanel";
+import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { RadioOptions } from "@/components/shared/RadioOptions";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { headwayService } from "@/services/on-time/headway.service";
@@ -26,13 +34,143 @@ import {
   FrequentServiceInfoType,
   Granularity,
   HeadwayTimeSeriesType,
+  MatchType,
+  PerformanceFiltersInputType,
   ServiceInfoType,
 } from "../../../src/generated/graphql";
+import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { Box } from "@/components/shared/Box";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+
+const DATE_PRESET_OPTIONS = [
+  "Last 7 days",
+  "Last 28 days",
+  "Last month",
+  "Month to date",
+];
+
+const MATCH_TYPE_OPTIONS = [
+  { value: "estimated", label: "Estimated" },
+  { value: "evidenced", label: "Evidenced" },
+];
+
+const STOP_TYPE_OPTIONS = [
+  { value: "all-stops", label: "All stops" },
+  { value: "timing-points", label: "Timing points" },
+];
 
 const ExcessWaitTimeChart = dynamic(
   () => import("@/components/on-time/ExcessWaitTimeChart"),
   { ssr: false },
 );
+
+const DISPLAY_MODE_OPTIONS = [
+  { value: "percentage", label: "Percentage" },
+  { value: "count", label: "Count" },
+  { value: "time", label: "Time" },
+] as const;
+
+const refineResultsToPerformanceFilters = (
+  values: RefineResultsFilterValues,
+): PerformanceFiltersInputType => {
+  const hasCustomDaySelection = Object.values(values.dayOfWeekFlags).some(
+    (enabled) => !enabled,
+  );
+
+  return {
+    ...(hasCustomDaySelection
+      ? {
+          dayOfWeekFlags: {
+            monday: values.dayOfWeekFlags.Mon,
+            tuesday: values.dayOfWeekFlags.Tue,
+            wednesday: values.dayOfWeekFlags.Wed,
+            thursday: values.dayOfWeekFlags.Thu,
+            friday: values.dayOfWeekFlags.Fri,
+            saturday: values.dayOfWeekFlags.Sat,
+            sunday: values.dayOfWeekFlags.Sun,
+          },
+        }
+      : {}),
+    ...(values.startTime !== "00:00" ? { startTime: values.startTime } : {}),
+    ...(values.endTime !== "23:59" ? { endTime: values.endTime } : {}),
+    ...(values.minDelayStr !== "none"
+      ? { minDelay: -1 * Number(values.minDelayStr) }
+      : {}),
+    ...(values.maxDelayStr !== "none"
+      ? { maxDelay: Number(values.maxDelayStr) }
+      : {}),
+  };
+};
+
+const performanceFiltersToRefineResults = (
+  filters: PerformanceFiltersInputType,
+): Partial<RefineResultsFilterValues> => {
+  return {
+    ...(filters.dayOfWeekFlags
+      ? {
+          dayOfWeekFlags: {
+            Mon: Boolean(filters.dayOfWeekFlags.monday),
+            Tue: Boolean(filters.dayOfWeekFlags.tuesday),
+            Wed: Boolean(filters.dayOfWeekFlags.wednesday),
+            Thu: Boolean(filters.dayOfWeekFlags.thursday),
+            Fri: Boolean(filters.dayOfWeekFlags.friday),
+            Sat: Boolean(filters.dayOfWeekFlags.saturday),
+            Sun: Boolean(filters.dayOfWeekFlags.sunday),
+          },
+        }
+      : {}),
+    ...(filters.startTime ? { startTime: filters.startTime } : {}),
+    ...(filters.endTime ? { endTime: filters.endTime } : {}),
+    ...(typeof filters.minDelay === "number"
+      ? {
+          minDelayStr: String(
+            Math.abs(filters.minDelay),
+          ) as RefineResultsFilterValues["minDelayStr"],
+        }
+      : {}),
+    ...(typeof filters.maxDelay === "number"
+      ? {
+          maxDelayStr: String(
+            filters.maxDelay,
+          ) as RefineResultsFilterValues["maxDelayStr"],
+        }
+      : {}),
+  };
+};
+
+const calculateDateRange = (
+  preset: string,
+): { from: string; to: string } | null => {
+  const today = DateTime.local().startOf("day");
+  switch (preset) {
+    case "Last 7 days":
+      return {
+        from: formatDateToISODateString(today.minus({ days: 7 })),
+        to: formatDateToISODateString(today),
+      };
+    case "Last 28 days":
+      return {
+        from: formatDateToISODateString(today.minus({ days: 28 })),
+        to: formatDateToISODateString(today),
+      };
+    case "Last month": {
+      const lastMonth = today.minus({ months: 1 });
+      return {
+        from: formatDateToISODateString(lastMonth.startOf("month")),
+        to: formatDateToISODateString(
+          lastMonth.endOf("month").plus({ days: 1 }),
+        ),
+      };
+    }
+    case "Month to date":
+      return {
+        from: formatDateToISODateString(today.startOf("month")),
+        to: formatDateToISODateString(today.plus({ days: 1 })),
+      };
+    default:
+      return null;
+  }
+};
 
 interface ServiceLevelData {
   fromTimestamp: string;
@@ -57,12 +195,126 @@ const OnTimeServicePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<Partial<ServiceLevelData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
+  const [selectedDisplayMode, setSelectedDisplayMode] =
+    useState<StopDisplayMode>("percentage");
+  const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
+  const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
+  const [selectedStopType, setSelectedStopType] = useState("timing-points");
+  const [refineResultsFilters, setRefineResultsFilters] =
+    useState<PerformanceFiltersInputType>({});
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(refineResultsFilters),
+    [JSON.stringify(refineResultsFilters)],
+  );
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(calculateDateRange("Last 7 days"));
+
+  const handleDatePresetChange = (selected: string) => {
+    setSelectedDatePreset(selected);
+    const range = calculateDateRange(selected);
+    setDateRange(range);
+  };
+
+  const filteredStopPerformance = useMemo(() => {
+    const stopPerformance = data.stopPerformance ?? [];
+    if (selectedDirections.length === 0) return stopPerformance;
+
+    return stopPerformance.filter((stop) => {
+      if (!stop.direction) return false;
+      const normalizedDirection = stop.direction.toLowerCase();
+
+      return selectedDirections.some(
+        (selectedDirection) =>
+          selectedDirection.toLowerCase() === normalizedDirection,
+      );
+    });
+  }, [data.stopPerformance, selectedDirections]);
+
+  const summaryStats = useMemo(() => {
+    if (filteredStopPerformance.length === 0) {
+      return {
+        onTimeCount: 0,
+        lateCount: 0,
+        earlyCount: 0,
+        incompleteCount: 0,
+        recordedStopDepartures: 0,
+        totalStopDepartures: 0,
+        averageDelay: null as number | null,
+      };
+    }
+
+    const totalStopDepartures = filteredStopPerformance.reduce(
+      (sum, row) => sum + (row.scheduledDepartures ?? 0),
+      0,
+    );
+    const recordedStopDepartures = filteredStopPerformance.reduce(
+      (sum, row) => sum + (row.actualDepartures ?? 0),
+      0,
+    );
+    const onTimeCount = filteredStopPerformance.reduce(
+      (sum, row) => sum + (row.onTime ?? 0),
+      0,
+    );
+    const lateCount = filteredStopPerformance.reduce(
+      (sum, row) => sum + (row.late ?? 0),
+      0,
+    );
+    const earlyCount = filteredStopPerformance.reduce(
+      (sum, row) => sum + (row.early ?? 0),
+      0,
+    );
+    const incompleteCount = Math.max(
+      0,
+      totalStopDepartures - recordedStopDepartures,
+    );
+
+    const weightedDelayTotal = filteredStopPerformance.reduce((sum, row) => {
+      if (row.averageDelay == null) return sum;
+      return sum + row.averageDelay * (row.actualDepartures ?? 0);
+    }, 0);
+
+    const averageDelay =
+      recordedStopDepartures > 0
+        ? weightedDelayTotal / recordedStopDepartures
+        : null;
+
+    return {
+      onTimeCount,
+      lateCount,
+      earlyCount,
+      incompleteCount,
+      recordedStopDepartures,
+      totalStopDepartures,
+      averageDelay,
+    };
+  }, [filteredStopPerformance]);
 
   useEffect(() => {
     if (!config?.apiUrl || !nocCode || !lineId) return;
     const load = async () => {
       setIsLoading(true);
-      const params = buildDefaultParams({ nocCode, lineId });
+      const defaultParams = buildDefaultParams({ nocCode, lineId });
+      const params = {
+        ...defaultParams,
+        ...(dateRange
+          ? {
+              fromTimestamp: dateRange.from,
+              toTimestamp: dateRange.to,
+            }
+          : {}),
+        filters: {
+          ...defaultParams.filters,
+          ...refineResultsFilters,
+          matchType:
+            selectedMatchType === "evidenced"
+              ? MatchType.Evidenced
+              : MatchType.Estimated,
+          timingPointsOnly: selectedStopType === "timing-points",
+        },
+      };
 
       const fromDate = DateTime.fromISO(params.fromTimestamp);
       const toDate = DateTime.fromISO(params.toTimestamp);
@@ -115,7 +367,15 @@ const OnTimeServicePage = () => {
       setIsLoading(false);
     };
     load();
-  }, [config, nocCode, lineId]);
+  }, [
+    config,
+    dateRange,
+    lineId,
+    nocCode,
+    refineResultsFilters,
+    selectedMatchType,
+    selectedStopType,
+  ]);
 
   if (!nocCode || !lineId) {
     return (
@@ -135,19 +395,91 @@ const OnTimeServicePage = () => {
           &larr; Back to {nocCode}
         </Link>
       </p>
-      <h1 className="govuk-heading-xl">
-        On-time performance: {nocCode} / {lineId}
-      </h1>
-      <p className="govuk-body">
-        Skeleton service view. Data is fetched via the migrated on-time,
-        headway, transit-model and stop-performance services and shown as JSON
-        for verification.
-      </p>
-
+      <span className="govuk-caption-xl">On-time performance</span>
+      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">{lineId}</h1>
+      <span className="govuk-caption-xl govuk-!-margin-bottom-0">{nocCode}</span>
       {isLoading ? (
-        <p className="govuk-body">Loading service data...</p>
+        <p className="govuk-body govuk-!-margin-top-6">Loading service data...</p>
       ) : (
         <>
+          <OnTimeFilterPanel
+            isLoading={isLoading}
+            refineResultsInitialValues={refineResultsInitialValues}
+            onApplyRefineResults={(values) => {
+              setRefineResultsFilters(refineResultsToPerformanceFilters(values));
+            }}
+            onResetRefineResults={() => setRefineResultsFilters({})}
+            dateRange={dateRange}
+            onDateRangeChange={(value) => setDateRange(value ?? null)}
+            datePresetOptions={DATE_PRESET_OPTIONS}
+            selectedDatePreset={selectedDatePreset}
+            onDatePresetChange={handleDatePresetChange}
+            selectedMatchType={selectedMatchType}
+            onMatchTypeChange={setSelectedMatchType}
+            matchTypeOptions={MATCH_TYPE_OPTIONS}
+            selectedStopType={selectedStopType}
+            onStopTypeChange={setSelectedStopType}
+            stopTypeOptions={STOP_TYPE_OPTIONS}
+            refineResultsFilters={refineResultsFilters}
+            onRefineResultsFilterChange={setRefineResultsFilters}
+          />
+          <div className="summary-map-container">
+            <Box minHeight="320px">
+              <p className="govuk-body">TODO: Add map</p>
+            </Box>
+          </div>
+          <div className="govuk-!-margin-top-6">
+            <SummaryStatsGrid
+              onTimeCount={summaryStats.onTimeCount}
+              lateCount={summaryStats.lateCount}
+              earlyCount={summaryStats.earlyCount}
+              incompleteCount={summaryStats.incompleteCount}
+              recordedStopDepartures={
+                summaryStats.recordedStopDepartures > 0
+                  ? summaryStats.recordedStopDepartures
+                  : null
+              }
+              totalStopDepartures={
+                summaryStats.totalStopDepartures > 0
+                  ? summaryStats.totalStopDepartures
+                  : null
+              }
+              incompleteBreakdown={null}
+              averageDelay={summaryStats.averageDelay}
+            />
+          </div>
+          <div className="on-time-service-filters govuk-!-margin-top-6">
+            <div className="on-time-service-filters__directions">
+              <MultiselectDropdown
+                label="Directions"
+                options={["Inbound", "Outbound"]}
+                selected={selectedDirections}
+                onChange={setSelectedDirections}
+                placeholderText="All directions"
+              />
+            </div>
+            <div className="on-time-service-filters__display-options">
+              <p className="on-time-service-display-options-button">
+                Display options
+              </p>
+              <div className="on-time-service-filters__radios">
+                <RadioOptions
+                  name="on-time-display-mode"
+                  legend="Show service performance values as"
+                  options={DISPLAY_MODE_OPTIONS}
+                  value={selectedDisplayMode}
+                  onChange={setSelectedDisplayMode}
+                />
+              </div>
+            </div>
+          </div>
+          {/* TODO: Only show data with directions if filtered */}
+          <div className="govuk-!-margin-top-6">
+            <OnTimeStopsTable
+              data={filteredStopPerformance}
+              displayMode={selectedDisplayMode}
+            />
+          </div>
           <JsonSection
             title="onTimeService.fetchServiceInfo"
             data={data.serviceInfo}
@@ -174,7 +506,7 @@ const OnTimeServicePage = () => {
             error={errors.frequentServiceInfo}
           />
           {errors.headwayTimeSeries ? (
-            <p className="govuk-error-message">
+            <p className="govuk-error-message govuk-!-margin-top-6">
               <span className="govuk-visually-hidden">Error:</span>{" "}
               {errors.headwayTimeSeries}
             </p>
@@ -194,7 +526,7 @@ const OnTimeServicePage = () => {
               </p>
             </>
           ) : (
-            <p className="govuk-body">
+            <p className="govuk-!-margin-top-6 govuk-body">
               Excess waiting time is unavailable for this service in the
               selected period because no frequent service hours were found.
             </p>

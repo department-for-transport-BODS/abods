@@ -1,11 +1,86 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// Display options styling
+.on-time-service-filters__display-options{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+.on-time-service-display-options-button{
+  display: flex;
+  background: transparent;
+  justify-content: flex-end;
+  cursor: pointer;
+  font-size: 19px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}
+
+// On Time Service / Stop styling
+.on-time-stops-table-container{
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.on-time-service-filters{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+
+.on-time-service-filters__radios{
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(1);
+  margin-left: auto;
+}
+
+.on-time-service-filters__inputs{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(2);
+  
+}
+
+.on-time-service-filters__search{
+  min-width: 200px;
+}
+
+.on-time-service-filters__directions{
+  min-width: 200px;
+}
+
+// Summary styling 
+.summary-header-container{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-admin-area-select-container{
+  min-width: 300px;
+  max-width: 350px;
+}
+
 // Controls styling
 .controls-container {
   display: flex;
   flex-direction: row;
-  gap: govuk-spacing(6);
+  column-gap: govuk-spacing(1);
+  row-gap: govuk-spacing(2);
   margin-bottom: govuk-spacing(2);
   align-items: baseline;
   justify-content: space-between;
@@ -15,9 +90,12 @@
 
 .controls-date-selects-container {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   gap: govuk-spacing(3);
-  margin-bottom: govuk-spacing(3);
+
+  .govuk-form-group {
+    margin-bottom: 0;
+  }
 
   > :first-child {
     flex: 1 1 24rem;
@@ -26,30 +104,20 @@
   }
 }
 
-.controls-filters-container {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: govuk-spacing(3);
-  margin-bottom: govuk-spacing(3);
-  flex-wrap: wrap;
-}
-
 .filter-chips-container {
   width: 100%;
 }
 
 .refine-results-button-container {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+    margin-bottom: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
 }
 
-.on-time-toggle-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.on-time-refine-results-button,
-.stop-analysis-filters__refine-button {
+.on-time-refine-results-button {
   display: inline-flex;
   align-items: center;
   gap: govuk-spacing(1);
@@ -73,7 +141,7 @@
 // FilterChips styling
 .filter-chips {
   padding: 0;
-  margin: 0 0 govuk-spacing(3);
+  margin: 0 0 govuk-spacing(2);
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;
