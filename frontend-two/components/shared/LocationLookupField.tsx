@@ -125,9 +125,7 @@ export const LocationLookupField = ({
       <div className="stop-analysis-filters__location-search">
         <div className="stop-analysis-filters__location-input-wrap">
           {selectedOption ? (
-            <div
-              className="govuk-input stop-analysis-filters__location-input stop-analysis-filters__location-selected"
-            >
+            <div className="govuk-input stop-analysis-filters__location-input stop-analysis-filters__location-selected">
               <span className="stop-analysis-filters__location-selected-text">
                 <span>{selectedOption.label}</span>
                 {selectedOption.context && (
@@ -150,7 +148,8 @@ export const LocationLookupField = ({
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") setOpen(false);
-                  else if (e.key === "Backspace" || e.key === "Delete") clearSelection("");
+                  else if (e.key === "Backspace" || e.key === "Delete")
+                    clearSelection("");
                 }}
               />
             </div>
@@ -196,45 +195,47 @@ export const LocationLookupField = ({
           />
         </div>
 
-        {open && !disabled && (selectedOption || value.trim().length === 0 || hasResults) && (
-          <div
-            className="stop-analysis-filters__location-results"
-            role="listbox"
-          >
-            {value.trim().length === 0 && (
-              <div className="stop-analysis-filters__location-hint">
-                Type to search
-              </div>
-            )}
-            {value.trim().length > 0 && loading && (
-              <div className="stop-analysis-filters__location-loading">
-                Searching...
-              </div>
-            )}
-            {value.trim().length > 0 &&
-              !loading &&
-              options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className="stop-analysis-filters__location-option"
-                  onClick={() => {
-                    setSelectedOption(option);
-                    onValueChange(option.label);
-                    setOpen(false);
-                    onSelect?.(option);
-                  }}
-                >
-                  {option.label}
-                  {option.context && (
-                    <span className="stop-analysis-filters__location-option-context">
-                      {option.context}
-                    </span>
-                  )}
-                </button>
-              ))}
-          </div>
-        )}
+        {open &&
+          !disabled &&
+          (selectedOption || value.trim().length === 0 || hasResults) && (
+            <div
+              className="stop-analysis-filters__location-results"
+              role="listbox"
+            >
+              {value.trim().length === 0 && (
+                <div className="stop-analysis-filters__location-hint">
+                  Type to search
+                </div>
+              )}
+              {value.trim().length > 0 && loading && (
+                <div className="stop-analysis-filters__location-loading">
+                  Searching...
+                </div>
+              )}
+              {value.trim().length > 0 &&
+                !loading &&
+                options.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className="stop-analysis-filters__location-option"
+                    onClick={() => {
+                      setSelectedOption(option);
+                      onValueChange(option.label);
+                      setOpen(false);
+                      onSelect?.(option);
+                    }}
+                  >
+                    {option.label}
+                    {option.context && (
+                      <span className="stop-analysis-filters__location-option-context">
+                        {option.context}
+                      </span>
+                    )}
+                  </button>
+                ))}
+            </div>
+          )}
       </div>
     </div>
   );
