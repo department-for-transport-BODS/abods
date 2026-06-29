@@ -75,7 +75,7 @@ export const PagingPanel = ({
         Showing {firstRow} - {lastRow} of {rowCount} {pluralNoun}
       </span>
       {totalPages > 1 && (
-        <nav className="flex items-baseline gap-1 govuk-body govuk-!-margin-bottom-0">
+        <nav className="flex items-baseline gap-[10px] govuk-body govuk-!-margin-bottom-0">
           {currentPage > 0 && (
             <a
               href="#"

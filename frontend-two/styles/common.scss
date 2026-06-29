@@ -4220,6 +4220,12 @@ body.modal-open {
     font-weight: $govuk-font-weight-bold;
   }
 
+  .govuk-table__cell,
+  .govuk-table__header {
+    @include govuk-font(16);
+    vertical-align: middle;
+  }
+
   &__stop-link {
     display: inline-block;
     max-width: 100%;

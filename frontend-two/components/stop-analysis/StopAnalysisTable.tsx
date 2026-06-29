@@ -92,14 +92,14 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   {
     key: "averageScheduled",
     label: "Av. Scheduled Travel Time",
-    modalLabel: "Average Scheduled",
+    modalLabel: "Average scheduled",
   },
   {
     key: "averageActual",
     label: "Av. Actual Travel Time",
-    modalLabel: "Average Actual",
+    modalLabel: "Average actual",
   },
-  { key: "averageDelay", label: "Av. Delay", modalLabel: "Average Delay" },
+  { key: "averageDelay", label: "Av. Delay", modalLabel: "Average delay" },
   { key: "onTime", label: "On Time" },
   { key: "late", label: "Late" },
   { key: "early", label: "Early" },
@@ -477,7 +477,7 @@ export const StopAnalysisTable = ({
               ),
               stopName: (
                 <Tooltip
-                  message={`${row.stopName}\n${row.localityName}, ${row.adminAreaName}`}
+                  message={`${row.localityName}, ${row.adminAreaName}`}
                   className="stop-analysis-table__stop-link"
                   onClick={() => onStopNameClick(row)}
                 >
