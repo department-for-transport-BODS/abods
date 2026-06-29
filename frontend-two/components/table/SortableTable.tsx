@@ -145,7 +145,11 @@ export const SortableTable = ({
                 <td
                   key={column.key}
                   className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""}`.trim()}
-                  data-label={typeof column.label === "string" ? column.label : (column.ariaLabel ?? column.key)}
+                  data-label={
+                    typeof column.label === "string"
+                      ? column.label
+                      : column.ariaLabel ?? column.key
+                  }
                 >
                   {row[column.key]}
                 </td>
