@@ -81,7 +81,7 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "direction", label: "Direction" },
   {
     key: "scheduledDepartures",
-    label: "Scheduled deparatures",
+    label: "Scheduled departures",
     modalLabel: "Scheduled departures",
   },
   {
@@ -107,7 +107,6 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
 
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
-  loading: boolean;
   errored: boolean;
   directions: Direction[];
   onDirectionsChange: (directions: Direction[]) => void;
@@ -157,19 +156,8 @@ const getSortValue = (
   }
 };
 
-const formatSignedSeconds = (value: number | null | undefined): string => {
-  const formatted = formatSeconds(value);
-
-  if (formatted === "-" || formatted.startsWith("-")) {
-    return formatted;
-  }
-
-  return `+${formatted}`;
-};
-
 export const StopAnalysisTable = ({
   data,
-  loading,
   errored,
   directions,
   onDirectionsChange,
@@ -473,7 +461,7 @@ export const StopAnalysisTable = ({
           }
         >
           <SortedPaginatedTable
-            key={`${sortState.key}-${sortState.order}-${displayMode}-${visibleColumns.join(",")}`}
+            key={`${displayMode}-${visibleColumns.join(",")}`}
             columns={tableColumns}
             data={filteredData}
             getRowValue={(row, column) =>
@@ -504,11 +492,11 @@ export const StopAnalysisTable = ({
                   : String(row.actualDepartures),
               averageScheduled:
                 row.averageScheduled != null
-                  ? formatSignedSeconds(row.averageScheduled)
+                  ? formatSeconds(row.averageScheduled, true)
                   : "-",
               averageActual:
                 row.averageActual != null
-                  ? formatSignedSeconds(row.averageActual)
+                  ? formatSeconds(row.averageActual, true)
                   : "-",
               averageDelay:
                 row.averageDelay != null
@@ -536,16 +524,11 @@ export const StopAnalysisTable = ({
             }}
             initialSortKey={sortState.key}
             initialSortOrder={sortState.order}
-            emptyMessage={!loading ? "No stop data found" : undefined}
+            emptyMessage="No stop data found"
             paginationNoun="stop"
             paginationAlignment="left"
           />
         </div>
-        {loading ? (
-          <p className="govuk-body govuk-!-margin-top-4 govuk-!-text-align-centre">
-            Loading...
-          </p>
-        ) : null}
       </div>
     </div>
   );

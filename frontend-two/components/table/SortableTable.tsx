@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode } from "react";
 import { PagingPanel } from "@/components/shared/PagingPanel";
 
 export type SortOrder = "asc" | "desc" | "none";
@@ -62,19 +62,6 @@ const unsortedIcon = (
 const getAlignmentClassName = (alignment?: "left" | "right" | "center") =>
   alignment ? `sortable-table__align--${alignment}` : "";
 
-function getNextOrder(
-  prevState: { key: string; order: SortOrder } | null,
-  key: string,
-): SortOrder {
-  if (!prevState || prevState.key !== key || prevState.order === "none") {
-    return "asc";
-  }
-  if (prevState.order === "asc") {
-    return "desc";
-  }
-  return "none";
-}
-
 export const SortableTable = ({
   head,
   rows,
@@ -84,49 +71,23 @@ export const SortableTable = ({
   paginationAlignment = "right",
   colWidths,
 }: SortableTableProps): React.JSX.Element => {
-  const [sortState, setSortState] = useState<{
-    key: string;
-    order: SortOrder;
-  } | null>(null);
-
-  useEffect(() => {
-    const initialSortColumn = head.find(
-      (column) =>
-        column.sortable && column.sortOrder && column.sortOrder !== "none",
-    );
-    const nextSortState = initialSortColumn
-      ? {
-          key: initialSortColumn.key,
-          order: initialSortColumn.sortOrder!,
-        }
-      : null;
-
-    setSortState((currentSortState) => {
-      if (
-        currentSortState?.key === nextSortState?.key &&
-        currentSortState?.order === nextSortState?.order
-      ) {
-        return currentSortState;
-      }
-
-      return nextSortState;
-    });
-  }, [head]);
-
   const handleSort = (key: string) => {
-    const newOrder = getNextOrder(sortState, key);
-    setSortState(newOrder === "none" ? null : { key, order: newOrder });
+    const current = head.find((c) => c.key === key)?.sortOrder ?? "none";
+    const newOrder: SortOrder =
+      current === "none" ? "asc" : current === "asc" ? "desc" : "none";
     onSort(key, newOrder);
   };
 
-  const getSortIcon = (key: string): React.ReactNode => {
-    if (!sortState || sortState.key !== key) return unsortedIcon;
-    return sortState.order === "asc" ? ascIcon : descIcon;
+  const getSortIcon = (cell: SortableTableHeadCell): React.ReactNode => {
+    if (!cell.sortOrder || cell.sortOrder === "none") return unsortedIcon;
+    return cell.sortOrder === "asc" ? ascIcon : descIcon;
   };
 
-  const getAriaSort = (key: string): "none" | "ascending" | "descending" => {
-    if (!sortState || sortState.key !== key) return "none";
-    return sortState.order === "asc" ? "ascending" : "descending";
+  const getAriaSort = (
+    cell: SortableTableHeadCell,
+  ): "none" | "ascending" | "descending" => {
+    if (!cell.sortOrder || cell.sortOrder === "none") return "none";
+    return cell.sortOrder === "asc" ? "ascending" : "descending";
   };
 
   return (
@@ -154,18 +115,18 @@ export const SortableTable = ({
               <th
                 key={item.key}
                 className={`govuk-table__header ${getAlignmentClassName(item.alignment)} ${item.headerClassName ?? ""}`.trim()}
-                {...(item?.sortable && { "aria-sort": getAriaSort(item.key) })}
+                {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
               >
                 {item.sortable ? (
                   <button
                     type="button"
                     className={`sortable-header ${getAlignmentClassName(item.alignment)} ${item.headerClassName ?? ""}`.trim()}
                     onClick={() => handleSort(item.key)}
-                    aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item.key)}`}
+                    aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
                     data-testid={`sortable-header-${item.key}`}
                   >
                     <span className="sortable-header__label">{item.label}</span>
-                    {getSortIcon(item.key)}
+                    {getSortIcon(item)}
                   </button>
                 ) : (
                   <span className="sortable-header__label">{item.label}</span>
@@ -184,7 +145,7 @@ export const SortableTable = ({
                 <td
                   key={column.key}
                   className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""}`.trim()}
-                  data-label={column.label}
+                  data-label={typeof column.label === "string" ? column.label : (column.ariaLabel ?? column.key)}
                 >
                   {row[column.key]}
                 </td>

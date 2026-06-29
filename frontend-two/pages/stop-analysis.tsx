@@ -832,7 +832,6 @@ const StopAnalysisPage = () => {
         ) : (
           <StopAnalysisTable
             data={tableRows}
-            loading={stopsLoading}
             errored={!!stopsError}
             directions={directions}
             showTotals
