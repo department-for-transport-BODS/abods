@@ -3480,10 +3480,6 @@ body.helpdesk-open {
     position: relative;
   }
 
-  &__location-input {
-    width: 100%;
-  }
-
   &__location-results {
     position: absolute;
     z-index: 100;
@@ -3502,7 +3498,8 @@ body.helpdesk-open {
   }
 
   &__location-input {
-    padding-right: govuk-spacing(6);
+    width: 100%;
+    padding-right: govuk-spacing(9);
   }
 
   &__location-chevron {
@@ -3552,6 +3549,64 @@ body.helpdesk-open {
     margin-left: govuk-spacing(1);
     @include govuk-font(14);
     color: $govuk-secondary-text-colour;
+  }
+
+  &__location-selected {
+    display: flex;
+    align-items: center;
+    cursor: text;
+    user-select: none;
+    overflow: hidden;
+    padding-right: govuk-spacing(9);
+    position: relative;
+
+    &:focus-within {
+      outline: 3px solid $govuk-focus-colour;
+      outline-offset: 0;
+    }
+
+    &:hover {
+      border-color: govuk-colour("black");
+    }
+  }
+
+  &__location-overlay-input {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: $govuk-text-colour;
+    outline: 0;
+    padding: inherit;
+    font-size: inherit;
+    cursor: text;
+  }
+
+  &__location-selected-text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__location-clear {
+    position: absolute;
+    top: 50%;
+    right: govuk-spacing(6);
+    transform: translateY(-50%);
+    padding: 0 govuk-spacing(1);
+    border: 0;
+    background: none;
+    cursor: pointer;
+    @include govuk-font(16);
+    font-weight: $govuk-font-weight-bold;
+    color: $govuk-secondary-text-colour;
+    line-height: 1;
+
+    &:hover {
+      color: $govuk-text-colour;
+    }
   }
 
   &__refine-button {
