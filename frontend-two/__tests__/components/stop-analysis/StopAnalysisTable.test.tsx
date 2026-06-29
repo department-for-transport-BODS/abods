@@ -90,7 +90,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -122,7 +121,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -175,7 +173,6 @@ describe("StopAnalysisTable", () => {
     render(
       <StopAnalysisTable
         data={[baseRow]}
-        loading={false}
         errored={false}
         directions={["Inbound", "Outbound"]}
         onDirectionsChange={vi.fn()}
@@ -200,7 +197,6 @@ describe("StopAnalysisTable", () => {
       return (
         <StopAnalysisTable
           data={[baseRow]}
-          loading={false}
           errored={false}
           directions={directions}
           onDirectionsChange={setDirections}
@@ -230,7 +226,6 @@ describe("StopAnalysisTable", () => {
       return (
         <StopAnalysisTable
           data={[baseRow]}
-          loading={false}
           errored={false}
           directions={directions}
           onDirectionsChange={setDirections}
