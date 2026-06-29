@@ -32,6 +32,7 @@ import {
 import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { operatorsService } from "@/services/operator.service";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
@@ -159,6 +160,12 @@ const OnTimeOperatorPage = () => {
     if (!router.isReady || !config?.apiUrl || !nocCode) return;
     const load = async () => {
       setIsLoading(true);
+      const operator = await operatorsService.fetchOperator(nocCode);
+      if (!operator) {
+        await router.replace("/on-time/operator-not-found");
+        return;
+      }
+
       const defaultParams = buildDefaultParams({ nocCode });
       const params = {
         ...defaultParams,

@@ -25,6 +25,16 @@ export const operatorsService = {
     }
   },
 
+  fetchOperator: async (nocCode: string): Promise<OperatorType | null> => {
+    try {
+      const operators = await operatorsService.fetchOperators();
+      return operators.find((operator) => operator.nocCode === nocCode) ?? null;
+    } catch (error) {
+      console.warn("Failed to fetch operator:", error);
+      return null;
+    }
+  },
+
   fetchAdminAreaIds: async (): Promise<string[]> => {
     try {
       const adminAreas = await operatorsService.fetchAdminAreas();

@@ -20,6 +20,12 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
+    fetchOperator: vi.fn(),
+  },
+}));
+
 vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchServiceInfo: vi.fn(),
@@ -60,6 +66,7 @@ let mockQuery: Record<string, string | string[] | undefined> = {
   nocCode: "ABCD",
   lineId: "LINE1",
 };
+const mockReplace = vi.fn();
 
 vi.mock("next/router", () => ({
   useRouter: () => ({
@@ -67,13 +74,14 @@ vi.mock("next/router", () => ({
     asPath: "/on-time/ABCD/LINE1",
     query: mockQuery,
     isReady: true,
-    replace: vi.fn(),
+    replace: mockReplace,
   }),
 }));
 
 import { useConfig } from "@/contexts/ConfigContext";
 import { headwayService } from "@/services/on-time/headway.service";
 import { onTimeService } from "@/services/on-time/on-time.service";
+import { operatorsService } from "@/services/operator.service";
 import { stopPerformanceService } from "@/services/on-time/stop-performance.service";
 import { transitModelService } from "@/services/on-time/transit-model.service";
 
@@ -90,16 +98,25 @@ const mockFetchFrequentServiceInfo = vi.mocked(
 );
 const mockFetchHeadwayTimeSeries = vi.mocked(headwayService.fetchTimeSeries);
 const mockMergeStops = vi.mocked(stopPerformanceService.mergeStops);
+const mockFetchOperator = vi.mocked(operatorsService.fetchOperator);
 
 describe("OnTimeServicePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQuery = { nocCode: "ABCD", lineId: "LINE1" };
+    mockReplace.mockReset();
     mockUseConfig.mockReturnValue({
       config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
+
+    mockFetchOperator.mockResolvedValue({
+      operatorId: "OP1",
+      nocCode: "ABCD",
+      name: "Demo Operator",
+      adminAreaIds: [],
+    });
 
     mockFetchServiceInfo.mockResolvedValue({
       serviceId: "S1",
@@ -178,5 +195,17 @@ describe("OnTimeServicePage", () => {
         screen.getByText(/Excess waiting time is unavailable for this service/),
       ).toBeInTheDocument();
     });
+  });
+
+  it("redirects to operator-not-found when nocCode is inaccessible", async () => {
+    mockFetchOperator.mockResolvedValue(null);
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("/on-time/operator-not-found");
+    });
+
+    expect(mockFetchServiceInfo).not.toHaveBeenCalled();
   });
 });

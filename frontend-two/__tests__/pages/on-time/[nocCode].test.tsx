@@ -25,6 +25,12 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
+    fetchOperator: vi.fn(),
+  },
+}));
+
 vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchOnTimeDelayFrequencyData: vi.fn(),
@@ -71,6 +77,7 @@ vi.mock("@/components/on-time/DayOfWeekChart", () => ({
 let mockQuery: Record<string, string | string[] | undefined> = {
   nocCode: "ABCD",
 };
+const mockReplace = vi.fn();
 
 vi.mock("next/router", () => ({
   useRouter: () => ({
@@ -86,6 +93,7 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { headwayService } from "@/services/on-time/headway.service";
 import { onTimeService } from "@/services/on-time/on-time.service";
 import { performanceService } from "@/services/on-time/performance.service";
+import { operatorsService } from "@/services/operator.service";
 
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchOverviewStats = vi.mocked(performanceService.fetchOverviewStats);
@@ -135,16 +143,25 @@ const makeService = (
   earlyInSeconds: -30,
   ...overrides,
 });
+const mockFetchOperator = vi.mocked(operatorsService.fetchOperator);
 
 describe("OnTimeOperatorPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQuery = { nocCode: "ABCD" };
+    mockReplace.mockReset();
     mockUseConfig.mockReturnValue({
       config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
+
+    mockFetchOperator.mockResolvedValue({
+      operatorId: "OP1",
+      nocCode: "ABCD",
+      name: "Demo Operator",
+      adminAreaIds: [],
+    });
 
     mockFetchOverviewStats.mockResolvedValue({});
     mockFetchDelayFrequency.mockResolvedValue([]);
@@ -703,5 +720,17 @@ describe("OnTimeOperatorPage", () => {
         screen.getByRole("columnheader", { name: "Average delay" }),
       ).toBeInTheDocument();
     });
+  });
+
+  it("redirects to operator-not-found when nocCode is inaccessible", async () => {
+    mockFetchOperator.mockResolvedValue(null);
+
+    render(<OnTimeOperatorPage />);
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("/on-time/operator-not-found");
+    });
+
+    expect(mockFetchOverviewStats).not.toHaveBeenCalled();
   });
 });

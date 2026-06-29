@@ -31,6 +31,7 @@ import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { operatorsService } from "@/services/operator.service";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   StopPerformance,
@@ -247,6 +248,12 @@ const OnTimeServicePage = () => {
     if (!router.isReady || !config?.apiUrl || !nocCode || !lineId) return;
     const load = async () => {
       setIsLoading(true);
+      const operator = await operatorsService.fetchOperator(nocCode);
+      if (!operator) {
+        await router.replace("/on-time/operator-not-found");
+        return;
+      }
+
       const defaultParams = buildDefaultParams({ nocCode, lineId });
       const params = {
         ...defaultParams,
