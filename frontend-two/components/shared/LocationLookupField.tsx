@@ -124,7 +124,6 @@ export const LocationLookupField = ({
       </label>
       <div className="stop-analysis-filters__location-search">
         <div className="stop-analysis-filters__location-input-wrap">
-            onBlur={() => {
           {selectedOption ? (
             <div
               className="govuk-input stop-analysis-filters__location-input stop-analysis-filters__location-selected"
