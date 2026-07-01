@@ -47,7 +47,7 @@ function renderRow(row: OperatorPerformance): SortableTableRow {
     key: row.nocCode ?? row.name ?? "",
     nocCode: row.nocCode ?? "-",
     name: row.nocCode ? (
-      <Link href={`/on-time/${encodeURIComponent(row.nocCode)}`} className="govuk-link">
+      <Link href={`/on-time/${encodeURIComponent(row.nocCode)}`} className="govuk-link govuk-!-font-weight-bold">
         {row.name}
       </Link>
     ) : (

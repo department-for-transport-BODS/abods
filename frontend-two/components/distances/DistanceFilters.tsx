@@ -1,5 +1,5 @@
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
-import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 
 interface DistanceFiltersProps {
   isLoading: boolean;

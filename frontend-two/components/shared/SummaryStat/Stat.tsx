@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Tooltip } from "@/components/shared/Tooltip";
+import { Tooltip } from "@/components/shared/SummaryStat/Tooltip";
 
 interface StatProps {
   label: string;

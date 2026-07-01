@@ -38,6 +38,7 @@ export interface SortableTableProps {
   pagination?: SortableTablePagination;
   paginationAlignment?: "left" | "right";
   colWidths?: Partial<Record<string, string>>;
+  footerAction?: ReactNode;
 }
 
 const ascIcon = (
@@ -70,6 +71,7 @@ export const SortableTable = ({
   pagination,
   paginationAlignment = "right",
   colWidths,
+  footerAction,
 }: SortableTableProps): React.JSX.Element => {
   const handleSort = (key: string) => {
     const current = head.find((c) => c.key === key)?.sortOrder ?? "none";
@@ -158,17 +160,22 @@ export const SortableTable = ({
           ))}
         </tbody>
       </table>
-      {pagination ? (
-        <div>
-          <PagingPanel
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            pageSize={pagination.pageSize}
-            rowCount={pagination.rowCount}
-            noun={pagination.noun ?? "row"}
-            alignment={pagination.alignment ?? paginationAlignment}
-            onPageChange={pagination.onPageChange}
-          />
+      {pagination || footerAction ? (
+        <div className="sortable-table__footer-row">
+          <div>{footerAction ?? null}</div>
+          <div>
+            {pagination ? (
+              <PagingPanel
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                rowCount={pagination.rowCount}
+                noun={pagination.noun ?? "row"}
+                alignment={pagination.alignment ?? paginationAlignment}
+                onPageChange={pagination.onPageChange}
+              />
+            ) : null}
+          </div>
         </div>
       ) : null}
     </>

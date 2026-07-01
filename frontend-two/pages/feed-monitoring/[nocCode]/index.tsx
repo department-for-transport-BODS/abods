@@ -8,7 +8,7 @@ import {
   OperatorLiveStatusQuery,
 } from "../../../src/generated/graphql";
 import { Box } from "@/components/shared/Box";
-import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
+import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import dynamic from "next/dynamic";

@@ -1,6 +1,6 @@
 import { Box } from "@/components/shared/Box";
 import { Status } from "@/components/shared/Status";
-import { Tooltip } from "@/components/shared/Tooltip";
+import { Tooltip } from "@/components/shared/SummaryStat/Tooltip";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
 import { DashboardOperatorListQuery } from "../../src/generated/graphql";
 

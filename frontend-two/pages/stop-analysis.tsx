@@ -1,3 +1,4 @@
+// TODO: Look to use some of the shared components being created for the on-time page
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -23,7 +24,10 @@ import {
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
 import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
-import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import {
+  RefineResultsFilterValues,
+  performanceFiltersToRefineResults,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import {
@@ -71,24 +75,6 @@ function getPresetWindow(preset: Period, today: DateTime) {
   }
 }
 
-const dayOfWeekToRefineValues = (
-  dayOfWeekFlags?: DayOfWeekFlags,
-): RefineResultsFilterValues["dayOfWeekFlags"] | undefined => {
-  if (!dayOfWeekFlags) {
-    return undefined;
-  }
-
-  return {
-    Mon: Boolean(dayOfWeekFlags.monday),
-    Tue: Boolean(dayOfWeekFlags.tuesday),
-    Wed: Boolean(dayOfWeekFlags.wednesday),
-    Thu: Boolean(dayOfWeekFlags.thursday),
-    Fri: Boolean(dayOfWeekFlags.friday),
-    Sat: Boolean(dayOfWeekFlags.saturday),
-    Sun: Boolean(dayOfWeekFlags.sunday),
-  };
-};
-
 const refineValuesToDayOfWeekQuery = (
   dayOfWeekFlags: RefineResultsFilterValues["dayOfWeekFlags"],
 ): string | undefined => {
@@ -98,18 +84,6 @@ const refineValuesToDayOfWeekQuery = (
 
   return selectedDays.length === 7 ? undefined : selectedDays.join(",");
 };
-
-const stopFiltersToRefineValues = (
-  dayOfWeekFlags: DayOfWeekFlags | undefined,
-  startTime: string | undefined,
-  endTime: string | undefined,
-): Partial<RefineResultsFilterValues> => ({
-  ...(dayOfWeekToRefineValues(dayOfWeekFlags)
-    ? { dayOfWeekFlags: dayOfWeekToRefineValues(dayOfWeekFlags) }
-    : {}),
-  ...(startTime ? { startTime } : {}),
-  ...(endTime ? { endTime } : {}),
-});
 
 const refineValuesToStopFiltersQuery = (
   values: RefineResultsFilterValues,
@@ -703,17 +677,17 @@ const StopAnalysisPage = () => {
     [],
   );
 
-  const refineResultsInitialValues = useMemo(
-    () => stopFiltersToRefineValues(dayOfWeekFlags, startTime, endTime),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
-  );
-
   const activeRefineFilters: PerformanceFiltersInputType = {
     ...(dayOfWeekFlags ? { dayOfWeekFlags } : {}),
     ...(startTime ? { startTime } : {}),
     ...(endTime ? { endTime } : {}),
   };
+
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(activeRefineFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
+  );
 
   useEffect(() => {
     return () => {

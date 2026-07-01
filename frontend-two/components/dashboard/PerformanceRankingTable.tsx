@@ -5,7 +5,7 @@ import {
   RankingOrder,
   ServicePunctualityType,
 } from "../../src/generated/graphql";
-import { Tooltip } from "@/components/shared/Tooltip";
+import { Tooltip } from "@/components/shared/SummaryStat/Tooltip";
 import { ServiceRankingItem, ServiceRankingResult } from "@/types/dashboard";
 
 interface PerformanceRankingTableProps {

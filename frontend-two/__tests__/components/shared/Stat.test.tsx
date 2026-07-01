@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Stat } from "@/components/shared/Stat";
+import { Stat } from "@/components/shared/SummaryStat/Stat";
 
 describe("Stat", () => {
   it("renders tooltip-backed values with the default dotted underline affordance", () => {

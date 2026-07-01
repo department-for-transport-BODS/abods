@@ -10,13 +10,8 @@ import {
   type DisplayMode,
 } from "@/hooks/useStopPerformanceTable";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
-import { Modal } from "@/components/shared/Modal";
-import { Tooltip } from "@/components/shared/Tooltip";
-import {
-  SortedPaginatedTable,
-  type SortedPaginatedTableColumn,
-} from "../table/SortedPaginatedTable";
-import { type SortOrder } from "../table/SortableTable";
+import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
+import { SortableTable, type SortOrder } from "../table/SortableTable";
 import { TimingIcon } from "./TimingIcon";
 
 type SortKey =
@@ -105,6 +100,22 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "early", label: "Early" },
 ];
 
+const COLUMN_LABELS: Record<string, ReactNode> = {
+  stopId: "NAPTAN",
+  timingPoint: "Timing Point",
+  stopName: "Name",
+  direction: "Direction",
+  scheduledDepartures: "Scheduled departures",
+  actualDepartures: "Recorded departures",
+  averageScheduled: "Average scheduled",
+  averageActual: "Average actual",
+  averageDelay: "Average delay",
+  onTime: "On time",
+  late: "Late",
+  early: "Early",
+};
+const ALWAYS_VISIBLE_KEYS = ["stopId"];
+
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
   errored: boolean;
@@ -165,9 +176,7 @@ export const StopAnalysisTable = ({
   showTotals = false,
 }: StopAnalysisTableProps) => {
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
-  const [draftVisibleColumns, setDraftVisibleColumns] = useState<
-    TableColumnKey[]
-  >(TABLE_COLUMN_OPTIONS.map((column) => column.key));
+  const [currentPage, setCurrentPage] = useState(0);
   const [visibleColumns, setVisibleColumns] = useState<TableColumnKey[]>(
     TABLE_COLUMN_OPTIONS.map((column) => column.key),
   );
@@ -255,36 +264,17 @@ export const StopAnalysisTable = ({
   };
 
   const openDisplayOptions = () => {
-    setDraftVisibleColumns(visibleColumns);
     setShowDisplayOptions(true);
   };
 
-  const toggleDraftColumnVisibility = (
-    key: TableColumnKey,
-    visible: boolean,
-  ) => {
-    setDraftVisibleColumns((current) => {
-      if (visible) {
-        return current.includes(key) ? current : [...current, key];
-      }
+  const handleDisplayOptionsApply = (newVisibleColumns: string[]) => {
+    setVisibleColumns(newVisibleColumns as TableColumnKey[]);
 
-      const next = current.filter((columnKey) => columnKey !== key);
-      return next;
-    });
-  };
-
-  const showAllColumns = () => {
-    setDraftVisibleColumns(TABLE_COLUMN_OPTIONS.map((column) => column.key));
-  };
-
-  const applyDisplayOptions = () => {
-    setVisibleColumns(draftVisibleColumns);
-
-    if (!draftVisibleColumns.includes(sortState.key as TableColumnKey)) {
+    if (
+      !newVisibleColumns.includes(sortState.key as string)
+    ) {
       setSortState({ key: "stopName", order: SORT_ASC });
     }
-
-    setShowDisplayOptions(false);
   };
 
   if (errored) {
@@ -339,102 +329,15 @@ export const StopAnalysisTable = ({
           </fieldset>
         </div>
       </div>
-      <Modal
+      <DisplayOptionsModal
         open={showDisplayOptions}
-        title="Display options"
-        closeLabel="Close display options"
-        showCloseButton={false}
+        columnKeys={TABLE_COLUMN_OPTIONS.map((c) => c.key)}
+        visibleColumns={visibleColumns}
+        alwaysVisibleKeys={ALWAYS_VISIBLE_KEYS}
+        columnLabels={COLUMN_LABELS}
         onClose={() => setShowDisplayOptions(false)}
-      >
-        <div className="stop-analysis-table__display-modal">
-          <div className="stop-analysis-table__display-columns">
-            <div className="stop-analysis-table__display-column govuk-checkboxes govuk-checkboxes--small">
-              {TABLE_COLUMN_OPTIONS.slice(0, 6).map((column) => {
-                const checked = draftVisibleColumns.includes(column.key);
-
-                return (
-                  <div key={column.key} className="govuk-checkboxes__item">
-                    <input
-                      className="govuk-checkboxes__input"
-                      id={`stop-analysis-column-${column.key}`}
-                      type="checkbox"
-                      checked={checked}
-                      disabled={column.alwaysVisible}
-                      onChange={(event) =>
-                        toggleDraftColumnVisibility(
-                          column.key,
-                          event.target.checked,
-                        )
-                      }
-                    />
-                    <label
-                      className="govuk-label govuk-checkboxes__label"
-                      htmlFor={`stop-analysis-column-${column.key}`}
-                    >
-                      {column.modalLabel ?? column.label}
-                    </label>
-                  </div>
-                );
-              })}
-
-              <button
-                type="button"
-                className="govuk-link stop-analysis-table__show-all-link"
-                onClick={showAllColumns}
-              >
-                Show all
-              </button>
-            </div>
-
-            <div className="stop-analysis-table__display-column govuk-checkboxes govuk-checkboxes--small">
-              {TABLE_COLUMN_OPTIONS.slice(6).map((column) => {
-                const checked = draftVisibleColumns.includes(column.key);
-
-                return (
-                  <div key={column.key} className="govuk-checkboxes__item">
-                    <input
-                      className="govuk-checkboxes__input"
-                      id={`stop-analysis-column-${column.key}`}
-                      type="checkbox"
-                      checked={checked}
-                      disabled={column.alwaysVisible}
-                      onChange={(event) =>
-                        toggleDraftColumnVisibility(
-                          column.key,
-                          event.target.checked,
-                        )
-                      }
-                    />
-                    <label
-                      className="govuk-label govuk-checkboxes__label"
-                      htmlFor={`stop-analysis-column-${column.key}`}
-                    >
-                      {column.modalLabel ?? column.label}
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="stop-analysis-table__display-footer">
-            <button
-              type="button"
-              className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
-              onClick={() => setShowDisplayOptions(false)}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="govuk-button govuk-!-margin-bottom-0"
-              onClick={applyDisplayOptions}
-            >
-              Update
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onApply={handleDisplayOptionsApply}
+      />
       <div className="stop-analysis-table__controls">
         <div className="stop-analysis-table__direction-filters">
           <MultiselectCheckbox

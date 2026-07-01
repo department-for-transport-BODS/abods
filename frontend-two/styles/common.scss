@@ -1,6 +1,18 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// DisplayOptionsModal styling
+.display-options-modal__footer{
+  display: flex;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+}
+
+.display-options-modal__show-all-link{
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}
+
 // Display options styling
 .on-time-service-filters__display-options{
   display: flex;

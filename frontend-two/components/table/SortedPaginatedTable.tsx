@@ -23,6 +23,8 @@ export interface SortedPaginatedTableProps<T> {
   data: T[];
   getRowValue: (row: T, column: string) => string | number;
   renderRow: (row: T) => SortableTableRow;
+  onDisplayedDataChange?: (rows: T[]) => void;
+  footerAction?: ReactNode;
   title?: ReactNode;
   pageSize?: number;
   pinnedRows?: SortableTableRow[];
@@ -41,6 +43,8 @@ export const SortedPaginatedTable = <T,>({
   data,
   getRowValue,
   renderRow,
+  onDisplayedDataChange,
+  footerAction,
   title,
   pageSize = DEFAULT_PAGE_SIZE,
   pinnedRows,
@@ -94,6 +98,10 @@ export const SortedPaginatedTable = <T,>({
     (currentPage + 1) * pageSize,
   );
 
+  useEffect(() => {
+    onDisplayedDataChange?.(sortedData);
+  }, [onDisplayedDataChange, sortedData]);
+
   const head = columns.map((col) => ({
     key: col.key,
     label: col.label,
@@ -133,6 +141,7 @@ export const SortedPaginatedTable = <T,>({
         pagination={pagination}
         paginationAlignment={paginationAlignment}
         colWidths={colWidths}
+        footerAction={footerAction}
       />
       {emptyMessage && data.length === 0 && (
         <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">

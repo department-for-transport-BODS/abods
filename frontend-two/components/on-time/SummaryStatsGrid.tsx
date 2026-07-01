@@ -1,7 +1,7 @@
 // NOTE: I think an adapted version of this component can be used on the other on-time pages
 // TODO: Display unavailable when there is no data
 import { Duration } from "luxon";
-import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
+import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 
 interface SummaryStatsGridProps {
 	onTimeCount: number | null;

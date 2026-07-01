@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
-import { OnTimeFilterPanel } from "@/components/on-time/OnTimeFilterPanel";
+import {
+  OnTimeFilterPanel,
+  DATE_PRESET_OPTIONS,
+  MATCH_TYPE_OPTIONS,
+  STOP_TYPE_OPTIONS,
+  calculateDateRange,
+} from "@/components/on-time/OnTimeFilterPanel";
 import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
-import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import {
+  RefineResultsFilterValues,
+  refineResultsToPerformanceFilters,
+  performanceFiltersToRefineResults,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import {
@@ -20,131 +29,11 @@ import {
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
-import { formatDateToISODateString } from "@/utils/dateFormatter";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { Box } from "@/components/shared/Box";
 import { distanceService } from "@/services/distances/distance.services";
 
-const DATE_PRESET_OPTIONS = [
-  "Last 7 days",
-  "Last 28 days",
-  "Last month",
-  "Month to date",
-];
-
-const MATCH_TYPE_OPTIONS = [
-  { value: "estimated", label: "Estimated" },
-  { value: "evidenced", label: "Evidenced" },
-];
-
-const STOP_TYPE_OPTIONS = [
-  { value: "all-stops", label: "All stops" },
-  { value: "timing-points", label: "Timing points" },
-];
-
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
-
-const refineResultsToPerformanceFilters = (
-  values: RefineResultsFilterValues,
-): PerformanceFiltersInputType => {
-  const hasCustomDaySelection = Object.values(values.dayOfWeekFlags).some(
-    (enabled) => !enabled,
-  );
-
-  return {
-    ...(hasCustomDaySelection
-      ? {
-          dayOfWeekFlags: {
-            monday: values.dayOfWeekFlags.Mon,
-            tuesday: values.dayOfWeekFlags.Tue,
-            wednesday: values.dayOfWeekFlags.Wed,
-            thursday: values.dayOfWeekFlags.Thu,
-            friday: values.dayOfWeekFlags.Fri,
-            saturday: values.dayOfWeekFlags.Sat,
-            sunday: values.dayOfWeekFlags.Sun,
-          },
-        }
-      : {}),
-    ...(values.startTime !== "00:00" ? { startTime: values.startTime } : {}),
-    ...(values.endTime !== "23:59" ? { endTime: values.endTime } : {}),
-    ...(values.minDelayStr !== "none"
-      ? { minDelay: -1 * Number(values.minDelayStr) }
-      : {}),
-    ...(values.maxDelayStr !== "none"
-      ? { maxDelay: Number(values.maxDelayStr) }
-      : {}),
-  };
-};
-
-const performanceFiltersToRefineResults = (
-  filters: PerformanceFiltersInputType,
-): Partial<RefineResultsFilterValues> => {
-  return {
-    ...(filters.dayOfWeekFlags
-      ? {
-          dayOfWeekFlags: {
-            Mon: Boolean(filters.dayOfWeekFlags.monday),
-            Tue: Boolean(filters.dayOfWeekFlags.tuesday),
-            Wed: Boolean(filters.dayOfWeekFlags.wednesday),
-            Thu: Boolean(filters.dayOfWeekFlags.thursday),
-            Fri: Boolean(filters.dayOfWeekFlags.friday),
-            Sat: Boolean(filters.dayOfWeekFlags.saturday),
-            Sun: Boolean(filters.dayOfWeekFlags.sunday),
-          },
-        }
-      : {}),
-    ...(filters.startTime ? { startTime: filters.startTime } : {}),
-    ...(filters.endTime ? { endTime: filters.endTime } : {}),
-    ...(typeof filters.minDelay === "number"
-      ? {
-          minDelayStr: String(
-            Math.abs(filters.minDelay),
-          ) as RefineResultsFilterValues["minDelayStr"],
-        }
-      : {}),
-    ...(typeof filters.maxDelay === "number"
-      ? {
-          maxDelayStr: String(
-            filters.maxDelay,
-          ) as RefineResultsFilterValues["maxDelayStr"],
-        }
-      : {}),
-  };
-};
-
-const calculateDateRange = (
-  preset: string,
-): { from: string; to: string } | null => {
-  const today = DateTime.local().startOf("day");
-  switch (preset) {
-    case "Last 7 days":
-      return {
-        from: formatDateToISODateString(today.minus({ days: 7 })),
-        to: formatDateToISODateString(today),
-      };
-    case "Last 28 days":
-      return {
-        from: formatDateToISODateString(today.minus({ days: 28 })),
-        to: formatDateToISODateString(today),
-      };
-    case "Last month": {
-      const lastMonth = today.minus({ months: 1 });
-      return {
-        from: formatDateToISODateString(lastMonth.startOf("month")),
-        to: formatDateToISODateString(
-          lastMonth.endOf("month").plus({ days: 1 }),
-        ),
-      };
-    }
-    case "Month to date":
-      return {
-        from: formatDateToISODateString(today.startOf("month")),
-        to: formatDateToISODateString(today.plus({ days: 1 })),
-      };
-    default:
-      return null;
-  }
-};
 
 const OnTimeIndexPage = () => {
   useRequireAuth();
