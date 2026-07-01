@@ -60,9 +60,6 @@ const DISPLAY_MODE_OPTIONS = [
 ] as const;
 
 // TODO: Check what to do about Admin area in refine results panel and add
-// TODO: Check whether the hyperlinks that sit around the summary stats grid need to be added
-// TODO: Export button
-
 
 const normaliseDirection = (direction: string | null | undefined): string => {
   const value = (direction ?? "").toLowerCase();
@@ -515,7 +512,6 @@ const OnTimeOperatorPage = () => {
                     averageDelay={summaryCards.averageDelay}
                   />
                 </div>
-                {/* TODO: Implement display options functionality */}
                 <div className="on-time-service-filters govuk-body govuk-!-margin-top-6">
                   <div className="on-time-service-filters__inputs">
                     <div className="on-time-service-filters__search">

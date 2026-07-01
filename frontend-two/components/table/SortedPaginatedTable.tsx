@@ -24,6 +24,7 @@ export interface SortedPaginatedTableProps<T> {
   getRowValue: (row: T, column: string) => string | number;
   renderRow: (row: T) => SortableTableRow;
   onDisplayedDataChange?: (rows: T[]) => void;
+  onPageDataChange?: (rows: T[]) => void;
   footerAction?: ReactNode;
   title?: ReactNode;
   pageSize?: number;
@@ -44,6 +45,7 @@ export const SortedPaginatedTable = <T,>({
   getRowValue,
   renderRow,
   onDisplayedDataChange,
+  onPageDataChange,
   footerAction,
   title,
   pageSize = DEFAULT_PAGE_SIZE,
@@ -93,14 +95,18 @@ export const SortedPaginatedTable = <T,>({
   };
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
-  const pageData = sortedData.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize,
+  const pageData = useMemo(
+    () => sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize),
+    [sortedData, currentPage, pageSize],
   );
 
   useEffect(() => {
     onDisplayedDataChange?.(sortedData);
   }, [onDisplayedDataChange, sortedData]);
+
+  useEffect(() => {
+    onPageDataChange?.(pageData);
+  }, [onPageDataChange, pageData]);
 
   const head = columns.map((col) => ({
     key: col.key,

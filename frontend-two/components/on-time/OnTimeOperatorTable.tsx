@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { Duration } from "luxon";
+import { DateTime } from "luxon";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
-import type { OperatorPerformance } from "@/services/on-time/on-time.service";
+import { Granularity } from "@/src/generated/graphql";
+import {
+  onTimeService,
+  type OperatorPerformance,
+  type PerformanceParams,
+  type TimeSeriesData,
+} from "@/services/on-time/on-time.service";
+import { OperatorSparkline } from "./OperatorSparkline";
 
 const columns = [
   { key: "nocCode", label: "NOC", sortable: false },
@@ -13,6 +22,16 @@ const columns = [
   { key: "earlyRatio", label: "Early %", sortable: true },
   { key: "sparkline", label: "", sortable: false },
 ];
+
+function getSparklineKey(row: OperatorPerformance): string | null {
+  return row.nocCode ?? row.operatorId ?? null;
+}
+
+function getSparklineFetchCandidates(row: OperatorPerformance): string[] {
+  return [row.nocCode, row.operatorId].filter(
+    (value): value is string => Boolean(value),
+  );
+}
 
 function formatDelay(delay: number | null | undefined): string {
   if (delay == null) return "-";
@@ -42,7 +61,15 @@ function getRowValue(row: OperatorPerformance, column: string): string | number 
   }
 }
 
-function renderRow(row: OperatorPerformance): SortableTableRow {
+function renderRow(
+  row: OperatorPerformance,
+  sparklineByOperatorId: Record<string, TimeSeriesData[]>,
+): SortableTableRow {
+  const sparklineKey = getSparklineKey(row);
+  const sparklineData = sparklineKey
+    ? sparklineByOperatorId[sparklineKey] ?? []
+    : [];
+
   return {
     key: row.nocCode ?? row.name ?? "",
     nocCode: row.nocCode ?? "-",
@@ -60,14 +87,138 @@ function renderRow(row: OperatorPerformance): SortableTableRow {
       row.lateRatio != null ? `${(row.lateRatio * 100).toFixed(1)}%` : "-",
     earlyRatio:
       row.earlyRatio != null ? `${(row.earlyRatio * 100).toFixed(1)}%` : "-",
+    sparkline:
+      sparklineKey && sparklineData.length > 0 ? (
+        <OperatorSparkline data={sparklineData} />
+      ) : (
+        "-"
+      ),
   };
 }
 
 interface OnTimeOperatorTableProps {
   data: OperatorPerformance[];
+  sparklineParams?: PerformanceParams | null;
 }
 
-export const OnTimeOperatorTable = ({ data }: OnTimeOperatorTableProps) => {
+export const OnTimeOperatorTable = ({
+  data,
+  sparklineParams,
+}: OnTimeOperatorTableProps) => {
+  const [pageRows, setPageRows] = useState<OperatorPerformance[]>([]);
+  const [sparklineByOperatorId, setSparklineByOperatorId] = useState<
+    Record<string, TimeSeriesData[]>
+  >({});
+  const inFlightOperatorIdsRef = useRef(new Set<string>());
+  const loadedOperatorIdsRef = useRef(new Set<string>());
+
+  const granularSparklineParams = useMemo<PerformanceParams | null>(() => {
+    if (!sparklineParams) {
+      return null;
+    }
+
+    const fromDate = DateTime.fromISO(sparklineParams.fromTimestamp);
+    const toDate = DateTime.fromISO(sparklineParams.toTimestamp);
+    const granularity =
+      Math.abs(toDate.diff(fromDate, "days").days) <= 5
+        ? Granularity.Hour
+        : Granularity.Day;
+
+    return {
+      ...sparklineParams,
+      filters: {
+        ...sparklineParams.filters,
+        granularity,
+      },
+    };
+  }, [sparklineParams]);
+
+  const sparklineParamsKey = useMemo(
+    () => JSON.stringify(granularSparklineParams),
+    [granularSparklineParams],
+  );
+
+  useEffect(() => {
+    setSparklineByOperatorId({});
+    inFlightOperatorIdsRef.current.clear();
+    loadedOperatorIdsRef.current.clear();
+  }, [sparklineParamsKey]);
+
+  useEffect(() => {
+    if (!granularSparklineParams) {
+      return;
+    }
+
+    const rowsToFetch = pageRows
+      .map((operator) => ({
+        displayKey: getSparklineKey(operator),
+        fetchCandidates: getSparklineFetchCandidates(operator),
+      }))
+      .filter(
+        (
+          item,
+        ): item is { displayKey: string; fetchCandidates: string[] } =>
+          Boolean(item.displayKey) && item.fetchCandidates.length > 0,
+      )
+      .filter(
+        (item) =>
+          !loadedOperatorIdsRef.current.has(item.displayKey) &&
+          !inFlightOperatorIdsRef.current.has(item.displayKey),
+      );
+
+    if (rowsToFetch.length === 0) {
+      return;
+    }
+
+    rowsToFetch.forEach((item) =>
+      inFlightOperatorIdsRef.current.add(item.displayKey),
+    );
+
+    void Promise.all(
+      rowsToFetch.map(async ({ displayKey, fetchCandidates }) => {
+        let data: TimeSeriesData[] = [];
+
+        for (const candidateId of fetchCandidates) {
+          try {
+            const candidateData = await onTimeService.fetchOnTimeTimeSeriesData({
+              ...granularSparklineParams,
+              filters: {
+                ...granularSparklineParams.filters,
+                operatorIds: [candidateId],
+              },
+            });
+
+            data = candidateData;
+            if (candidateData.length > 0) {
+              break;
+            }
+          } catch {
+            // Try the next candidate ID for this row.
+          }
+        }
+
+        return { displayKey, data };
+      }),
+    )
+      .then((results) => {
+        results.forEach(({ displayKey }) =>
+          loadedOperatorIdsRef.current.add(displayKey),
+        );
+        setSparklineByOperatorId((existing) => {
+          const next = { ...existing };
+          results.forEach(({ displayKey, data }) => {
+            next[displayKey] = data;
+          });
+          return next;
+        });
+      })
+      .finally(() => {
+        rowsToFetch.forEach((item) =>
+          inFlightOperatorIdsRef.current.delete(item.displayKey),
+        );
+      });
+  }, [pageRows, granularSparklineParams]);
+
   const sortedData = [...data]
     .filter((op): op is OperatorPerformance & { nocCode: string } => Boolean(op.nocCode))
     .sort((a, b) => {
@@ -76,15 +227,19 @@ export const OnTimeOperatorTable = ({ data }: OnTimeOperatorTableProps) => {
       return aName.localeCompare(bName);
     });
 
+  const renderOperatorRow = (row: OperatorPerformance) =>
+    renderRow(row, sparklineByOperatorId);
+
   return (
     <SortedPaginatedTable
       columns={columns}
       data={sortedData}
       getRowValue={getRowValue}
-      renderRow={renderRow}
+      renderRow={renderOperatorRow}
       initialSortKey="name"
       initialSortOrder="asc"
       paginationNoun="operator"
+      onPageDataChange={setPageRows}
     />
   );
 };

@@ -1,4 +1,3 @@
-// TODO: Look to use some of the shared components being created for the on-time page
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";

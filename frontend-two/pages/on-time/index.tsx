@@ -8,11 +8,12 @@ import {
   STOP_TYPE_OPTIONS,
   calculateDateRange,
 } from "@/components/on-time/OnTimeFilterPanel";
+import { operatorsService } from "@/services/operator.service";
+import { OnTimeBoundariesMap } from "@/components/on-time/OnTimeBoundariesMap";
 import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import {
-  RefineResultsFilterValues,
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
 } from "@/components/shared/RefineResults/RefineResultsFilters";
@@ -22,18 +23,20 @@ import {
   AdminOrgListQuery,
   MatchType,
   PerformanceFiltersInputType,
+  GetAdminAreasQuery,
 } from "@/src/generated/graphql";
 import {
+  PerformanceParams,
   OperatorPerformance,
   PunctualityOverview,
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
 import { SearchInput } from "@/components/shared/SearchInput";
-import { Box } from "@/components/shared/Box";
 import { distanceService } from "@/services/distances/distance.services";
 
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
+type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];
 
 const OnTimeIndexPage = () => {
   useRequireAuth();
@@ -48,6 +51,7 @@ const OnTimeIndexPage = () => {
     null,
   );
   const [adminOrgData, setAdminOrgData] = useState<AdminOrgMap[]>([]);
+  const [adminAreas, setAdminAreas] = useState<AdminArea[]>([]);
   const [isLoadingAdminAreas, setIsLoadingAdminAreas] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +132,12 @@ const OnTimeIndexPage = () => {
     const loadAdminAreas = async () => {
       setIsLoadingAdminAreas(true);
       try {
-        setAdminOrgData(await distanceService.fetchAdminOrg());
+        const [adminOrgMap, adminAreaShapes] = await Promise.all([
+          distanceService.fetchAdminOrg(),
+          operatorsService.fetchAdminAreas(),
+        ]);
+        setAdminOrgData(adminOrgMap);
+        setAdminAreas(adminAreaShapes);
       } finally {
         setIsLoadingAdminAreas(false);
       }
@@ -137,50 +146,63 @@ const OnTimeIndexPage = () => {
     loadAdminAreas();
   }, []);
 
+  const selectedAdminAreaIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          adminOrgData
+            .filter(
+              (adminArea) =>
+                adminArea.adminName !== null &&
+                selectedAdminAreas.includes(adminArea.adminName),
+            )
+            .map((adminArea) => adminArea.adminAreaId.toString()),
+        ),
+      ),
+    [adminOrgData, selectedAdminAreas],
+  );
+
+  const operatorTableParams = useMemo<PerformanceParams>(() => {
+    const defaultParams = buildDefaultParams();
+
+    return {
+      ...defaultParams,
+      ...(dateRange
+        ? {
+            fromTimestamp: dateRange.from,
+            toTimestamp: dateRange.to,
+          }
+        : {}),
+      filters: {
+        ...defaultParams.filters,
+        ...refineResultsFilters,
+        matchType:
+          selectedMatchType === "evidenced"
+            ? MatchType.Evidenced
+            : MatchType.Estimated,
+        timingPointsOnly: selectedStopType === "timing-points",
+        ...(selectedAdminAreaIds.length > 0
+          ? { adminAreaIds: selectedAdminAreaIds }
+          : {}),
+      },
+    };
+  }, [
+    dateRange,
+    refineResultsFilters,
+    selectedMatchType,
+    selectedStopType,
+    selectedAdminAreaIds,
+  ]);
+
   useEffect(() => {
     if (!config?.apiUrl) return;
     const load = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const defaultParams = buildDefaultParams();
-        const selectedAdminAreaIds = Array.from(
-          new Set(
-            adminOrgData
-              .filter(
-                (adminArea) =>
-                  adminArea.adminName !== null &&
-                  selectedAdminAreas.includes(adminArea.adminName),
-              )
-              .map((adminArea) => adminArea.adminAreaId.toString()),
-          ),
-        );
-
-        const params = {
-          ...defaultParams,
-          ...(dateRange
-            ? {
-                fromTimestamp: dateRange.from,
-                toTimestamp: dateRange.to,
-              }
-            : {}),
-          filters: {
-            ...defaultParams.filters,
-            ...refineResultsFilters,
-            matchType:
-              selectedMatchType === "evidenced"
-                ? MatchType.Evidenced
-                : MatchType.Estimated,
-            timingPointsOnly: selectedStopType === "timing-points",
-            ...(selectedAdminAreaIds.length > 0
-              ? { adminAreaIds: selectedAdminAreaIds }
-              : {}),
-          },
-        };
-
         const [operatorData, stats] = await Promise.all([
-          onTimeService.fetchOperatorPerformanceList(params),
-          onTimeService.fetchOnTimeStats(params),
+          onTimeService.fetchOperatorPerformanceList(operatorTableParams),
+          onTimeService.fetchOnTimeStats(operatorTableParams),
         ]);
 
         setOperatorPerformance(operatorData);
@@ -195,12 +217,7 @@ const OnTimeIndexPage = () => {
     load();
   }, [
     config,
-    adminOrgData,
-    refineResultsFilters,
-    dateRange,
-    selectedMatchType,
-    selectedStopType,
-    selectedAdminAreas,
+    operatorTableParams,
   ]);
 
   return (
@@ -267,9 +284,16 @@ const OnTimeIndexPage = () => {
                 />
               </div>
               <div className="summary-map-container">
-                <Box minHeight="320px">
-                  <p className="govuk-body">TODO: Add map</p>
-                </Box>
+                {config?.mapboxToken && config?.mapboxStyle ? (
+                  <OnTimeBoundariesMap
+                    mapboxToken={config.mapboxToken}
+                    mapboxStyle={config.mapboxStyle}
+                    adminAreas={adminAreas}
+                    selectedAdminAreaNames={selectedAdminAreas}
+                  />
+                ) : (
+                  <p className="govuk-body">Map is unavailable</p>
+                )}
               </div>
             </div>
           </ChartNoDataWrapper>
@@ -293,8 +317,10 @@ const OnTimeIndexPage = () => {
               value={operatorSearch}
               onChange={setOperatorSearch}
             />
-            {/* TODO: Add sparkline to table */}
-            <OnTimeOperatorTable data={filteredOperators} />
+            <OnTimeOperatorTable
+              data={filteredOperators}
+              sparklineParams={operatorTableParams}
+            />
           </ChartNoDataWrapper>
         )}
       </div>
