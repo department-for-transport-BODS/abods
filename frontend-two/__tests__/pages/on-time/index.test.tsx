@@ -123,7 +123,7 @@ describe("OnTimeIndexPage", () => {
       late: 0,
       completed: 0,
       scheduled: 0,
-      incomplete: null,
+      incomplete: "0",
       averageDelay: null,
       noData: 0,
     });
