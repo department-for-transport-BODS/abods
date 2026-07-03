@@ -1,50 +1,32 @@
 import { test, expect, loggedInTest } from "./fixtures";
 import { OnTimePage } from "./pages/OnTimePage";
 
-// Unauthenticated
-test("On-time performance - redirects unauthenticated users to login", async ({
+// On-Time Page
+test("On-Time Page - Redirects unauthenticated users to login", async ({
   page,
 }) => {
   await page.goto("/on-time", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/login/);
 });
 
-// Authenticated
-
-loggedInTest.describe("On-time performance - authenticated", () => {
+loggedInTest.describe("On-Time Page - Authenticated", () => {
   let onTime!: OnTimePage;
 
   loggedInTest.beforeEach(async ({ loggedInPage }) => {
     onTime = new OnTimePage(loggedInPage);
+
+    await onTime.goto();
   });
 
-  loggedInTest(
-    "is reachable from dashboard navigation",
-    async ({ loggedInPage }) => {
+  loggedInTest("is reachable from dashboard navigation", async ({ loggedInPage }) => {
       await onTime.openFromDashboardNav();
 
       await expect(loggedInPage).toHaveURL(/\/on-time\/?$/);
       await expect(onTime.heading()).toBeVisible();
-      await onTime.goto();
     },
   );
 
-  loggedInTest(
-    "shows the segmented toggles and defaults correctly",
-    async () => {
-      await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
-      await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
-      await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
-
-      await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
-      await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
-      await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
-    },
-  );
-
-  loggedInTest(
-    "shows distribution, time-of-day and day-of-week charts for an operator",
-    async ({ loggedInPage }) => {
+  loggedInTest( "shows distribution, time-of-day and day-of-week charts for an operator", async ({ loggedInPage }) => {
       const nocCode = process.env.TEST_NOC_CODE;
 
       if (nocCode) {
@@ -54,7 +36,7 @@ loggedInTest.describe("On-time performance - authenticated", () => {
         const operatorCount = await onTime.operatorLinks().count();
         loggedInTest.skip(
           operatorCount === 0,
-          "No operator links available on /on-time; set TEST_NOC_CODE to run this test deterministically.",
+          "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
         );
         await expect(onTime.operatorLinks().first()).toBeVisible();
         await onTime.operatorLinks().first().click();
@@ -81,9 +63,7 @@ loggedInTest.describe("On-time performance - authenticated", () => {
     },
   );
 
-  loggedInTest(
-    "drills into a service and shows excess wait time chart state",
-    async ({ loggedInPage }) => {
+  loggedInTest( "drills into a service and shows excess wait time chart state", async ({ loggedInPage }) => {
       const nocCode = process.env.TEST_NOC_CODE;
 
       if (nocCode) {
@@ -93,7 +73,7 @@ loggedInTest.describe("On-time performance - authenticated", () => {
         const operatorCount = await onTime.operatorLinks().count();
         loggedInTest.skip(
           operatorCount === 0,
-          "No operator links available on /on-time; set TEST_NOC_CODE to run this test deterministically.",
+          "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
         );
         await expect(onTime.operatorLinks().first()).toBeVisible();
         await onTime.operatorLinks().first().click();
@@ -122,9 +102,18 @@ loggedInTest.describe("On-time performance - authenticated", () => {
     },
   );
 
-  loggedInTest(
-    "shows date controls and checks correct options are present",
-    async () => {
+  loggedInTest( "shows the segmented toggles and defaults correctly", async () => {
+      await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
+      await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
+
+      await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
+      await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
+    },
+  );
+
+  loggedInTest( "shows date controls and checks correct options are present", async () => {
       await expect(onTime.dateRangeButton()).toBeVisible();
       await expect(onTime.datePresetSelect()).toBeVisible();
 
@@ -135,9 +124,7 @@ loggedInTest.describe("On-time performance - authenticated", () => {
     },
   );
 
-  loggedInTest(
-    "shows and closes the refine results panel and key filters",
-    async () => {
+  loggedInTest( "shows and closes the refine results panel and key filters", async () => {
       await expect(onTime.refineResultsButton()).toBeVisible();
 
       await onTime.refineResultsButton().click();
@@ -150,4 +137,227 @@ loggedInTest.describe("On-time performance - authenticated", () => {
       await expect(onTime.refineResultsHeading()).toHaveCount(0);
     },
   );
+
+  loggedInTest("renders summary stats", async () => {
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      await expect(onTime.summaryStats()).toBeVisible();
+      await expect(onTime.summaryStatItems()).toHaveCount(5);
+
+      for (const statName of [
+        "On-time",
+        "Late",
+        "Early",
+        "Incomplete Data",
+        "Average Delay",
+      ]) {
+        await expect(onTime.summaryStat(statName)).toBeVisible();
+        await expect(onTime.summaryStatItem(statName)).not.toHaveText(
+          new RegExp(`^\\s*${statName}\\s*$`),
+        );
+      }
+    });
+
+  loggedInTest("renders the operator table", async () => {
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 30000 });
+      await expect(onTime.operatorTable()).toBeVisible();
+      await expect(onTime.operatorTableHeader("NOC")).toBeVisible();
+      await expect(onTime.operatorTableHeader("Operator")).toBeVisible();
+    },
+  );
+
+  loggedInTest("renders nocCode page if nocCode clicked", async ({ loggedInPage }) => {
+      const nocCode = process.env.TEST_NOC_CODE;
+
+      if (nocCode) {
+        await onTime.gotoOperator(nocCode);
+      } else {
+        const operatorCount = await onTime.operatorLinks().count();
+        loggedInTest.skip(
+          operatorCount === 0,
+          "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
+        );
+
+        await expect(onTime.operatorLinks().first()).toBeVisible();
+        await onTime.operatorLinks().first().click();
+      }
+
+      await expect(loggedInPage).toHaveURL(
+        nocCode
+          ? new RegExp(`\\/on-time\\/${encodeURIComponent(nocCode)}\\/?$`)
+          : /\/on-time\/[^/]+\/?$/,
+      );
+  });
 });
+
+loggedInTest.describe("On-Time Operator Page - Authenticated", () => {
+  let onTime!: OnTimePage;
+
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    onTime = new OnTimePage(loggedInPage);
+
+    const nocCode = process.env.TEST_NOC_CODE;
+    if (nocCode) {
+      await onTime.gotoOperator(nocCode);
+    } else {
+      await onTime.gotoIndex();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const operatorCount = await onTime.operatorLinks().count();
+      loggedInTest.skip(
+        operatorCount === 0,
+        "No operator links available on /on-time; set TEST_NOC_CODE to skip.",
+      );
+      await onTime.operatorLinks().first().click();
+    }
+
+    await expect(onTime.datePresetSelect()).toBeVisible({ timeout: 60000 });
+  });
+
+  loggedInTest("renders the page header with correct heading and back link", async ({ loggedInPage }) => {
+    await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/?$/);
+    await expect(onTime.heading()).toBeVisible();
+    await expect(onTime.operatorPageCaption()).toContainText("On-time performance");
+    await expect(onTime.backToAllOperatorsLink()).toBeVisible();
+  });
+
+  loggedInTest("renders the filter controls with correct defaults", async () => {
+    await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
+    await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
+    await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
+
+    await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
+    await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
+    await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
+
+    await expect(onTime.datePresetSelect()).toBeVisible();
+    await expect(onTime.datePresetSelect()).toContainText("Last 7 days");
+
+    await expect(onTime.refineResultsButton()).toBeVisible();
+  });
+
+  loggedInTest("renders the services table with expected column headers", async () => {
+    await expect(onTime.serviceTable()).toBeVisible();
+
+    for (const header of [
+      "Service",
+      "Scheduled departures",
+      "Recorded departures",
+      "Average delay",
+      "On time",
+      "Late",
+      "Early",
+    ]) {
+      await expect(onTime.serviceTableHeader(header)).toBeVisible();
+    }
+  });
+
+  loggedInTest("renders service search input and directions filter", async () => {
+    await expect(onTime.serviceSearchInput()).toBeVisible();
+    await expect(onTime.directionsDropdown()).toBeVisible();
+  });
+
+  loggedInTest("renders display options button", async () => {
+    await expect(onTime.displayOptionsButton()).toBeVisible();
+  });
+});
+
+loggedInTest.describe("On-Time Service Page - Authenticated", () => {
+  let onTime!: OnTimePage;
+
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    onTime = new OnTimePage(loggedInPage);
+
+    const nocCode = process.env.TEST_NOC_CODE;
+    const lineId = process.env.TEST_LINE_ID;
+
+    if (nocCode && lineId) {
+      await onTime.gotoService(nocCode, lineId);
+    } else if (nocCode) {
+      await onTime.gotoOperator(nocCode);
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const drillInCount = await onTime.firstServiceDrillInLink().count();
+      loggedInTest.skip(
+        drillInCount === 0,
+        "No service drill-in link available; set TEST_LINE_ID to run this test.",
+      );
+      await onTime.firstServiceDrillInLink().click();
+    } else {
+      await onTime.gotoIndex();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const operatorCount = await onTime.operatorLinks().count();
+      loggedInTest.skip(
+        operatorCount === 0,
+        "No operator links available on /on-time; set TEST_NOC_CODE to run this test .",
+      );
+      await onTime.operatorLinks().first().click();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const drillInCount = await onTime.firstServiceDrillInLink().count();
+      loggedInTest.skip(
+        drillInCount === 0,
+        "No service drill-in link available for this operator in the current dataset.",
+      );
+      await onTime.firstServiceDrillInLink().click();
+    }
+
+    await expect(onTime.serviceLoadingText()).toHaveCount(0, { timeout: 60000 });
+  });
+
+  loggedInTest("renders the page header with correct heading and back link", async ({ loggedInPage }) => {
+    await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/[^/]+\/?$/);
+    await expect(onTime.servicePageHeading()).toBeVisible();
+    await expect(onTime.operatorPageCaption()).toContainText("On-time performance");
+    await expect(onTime.backToOperatorLink()).toBeVisible();
+  });
+
+  loggedInTest("renders the filter controls with correct defaults", async () => {
+    await expect(onTime.matchTypeEvidencedButton()).toBeVisible();
+    await expect(onTime.matchTypeEvidencedButton()).toBeChecked();
+    await expect(onTime.matchTypeEstimatedButton()).toBeVisible();
+
+    await expect(onTime.stopTypeTimingPointsButton()).toBeVisible();
+    await expect(onTime.stopTypeTimingPointsButton()).toBeChecked();
+    await expect(onTime.stopTypeAllStopsButton()).toBeVisible();
+
+    await expect(onTime.datePresetSelect()).toBeVisible();
+    await expect(onTime.datePresetSelect()).toContainText("Last 7 days");
+
+    await expect(onTime.refineResultsButton()).toBeVisible();
+  });
+
+  loggedInTest("renders the stops table with expected column headers", async () => {
+    await expect(onTime.stopsTable()).toBeVisible();
+
+    for (const header of [
+      "NAPTAN",
+      "Name",
+      "Scheduled departures",
+      "Recorded departures",
+      "Average delay",
+      "On time",
+      "Late",
+      "Early",
+    ]) {
+      await expect(onTime.stopsTableHeader(header)).toBeVisible();
+    }
+  });
+
+  loggedInTest("renders directions filter and display options button", async () => {
+    await expect(onTime.directionsDropdown()).toBeVisible();
+    await expect(onTime.displayOptionsButton()).toBeVisible();
+  });
+
+  loggedInTest("renders summary stats", async () => {
+    await expect(onTime.summaryStats()).toBeVisible();
+    await expect(onTime.summaryStatItems()).toHaveCount(5);
+
+    for (const statName of [
+      "On-time",
+      "Late",
+      "Early",
+      "Incomplete Data",
+      "Average Delay",
+    ]) {
+      await expect(onTime.summaryStat(statName)).toBeVisible();
+    }
+  });
+});
+

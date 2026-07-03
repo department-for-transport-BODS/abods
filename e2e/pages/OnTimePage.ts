@@ -6,6 +6,10 @@ import { Locator, Page } from "@playwright/test";
 export class OnTimePage {
   constructor(private readonly page: Page) {}
 
+  async goto(): Promise<void> {
+    await this.gotoIndex();
+  }
+
   async gotoIndex(): Promise<void> {
     await this.page.goto("/on-time", { waitUntil: "domcontentloaded" });
   }
@@ -14,6 +18,13 @@ export class OnTimePage {
     await this.page.goto(`/on-time/${encodeURIComponent(nocCode)}`, {
       waitUntil: "domcontentloaded",
     });
+  }
+
+  async gotoService(nocCode: string, lineId: string): Promise<void> {
+    await this.page.goto(
+      `/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(lineId)}`,
+      { waitUntil: "domcontentloaded" },
+    );
   }
 
   async openFromDashboardNav(): Promise<void> {
@@ -25,13 +36,17 @@ export class OnTimePage {
   }
 
   heading(): Locator {
-    return this.page.getByRole("heading", { name: /On-time performance/i });
+    return this.page.getByRole("heading", { name: /All services/i });
   }
 
   loadingText(): Locator {
     return this.page.getByText(/Loading on-time data\.\.\./i);
   }
 
+  serviceLoadingText(): Locator {
+    return this.page.getByText(/Loading service data\.\.\./i);
+  }
+  
   operatorLinks(): Locator {
     return this.page.locator('main ul.govuk-list a[href^="/on-time/"]');
   }
@@ -125,5 +140,99 @@ export class OnTimePage {
 
   stopTypeTimingPointsButton(): Locator {
     return this.page.getByLabel("Timing points");
+  }
+
+  csvExportButtons(): Locator {
+    return this.page.getByRole("button", { name: /Export data/i });
+  }
+
+  summaryStats(): Locator {
+    return this.page.getByRole("list", { name: "Summary stats" });
+  }
+
+  summaryStatItems(): Locator {
+    return this.summaryStats().getByRole("listitem");
+  }
+
+  summaryStatItem(name: string): Locator {
+    return this.summaryStatItems().filter({
+      has: this.page.getByText(name, { exact: true }),
+    });
+  }
+
+  summaryStat(name: string): Locator {
+    return this.summaryStatItem(name).getByText(name, { exact: true });
+  }
+
+  operatorTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  operatorTableHeader(name: string): Locator {
+    return this.operatorTable().getByRole("columnheader", { name });
+  }
+
+  serviceHeading(): Locator {
+    return this.page.getByRole("heading", { level: 1 });
+  }
+
+  operatorSparklines(): Locator {
+    return this.page.locator('svg[role="img"][aria-label*="On time stats"]');
+  }
+
+  boundariesMapContainer(): Locator {
+    return this.page.locator(".summary-map-container");
+  }
+
+  operatorSearchInput(): Locator {
+    return this.page.getByLabel("Search operators");
+  }
+
+  // Operator (nocCode) page locators
+
+  backToAllOperatorsLink(): Locator {
+    return this.page.getByRole("link", { name: /All operators/i });
+  }
+
+  operatorPageCaption(): Locator {
+    return this.page.locator(".govuk-caption-xl").first();
+  }
+
+  serviceTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  serviceTableHeader(name: string): Locator {
+    return this.serviceTable().getByRole("columnheader", { name });
+  }
+
+  serviceSearchInput(): Locator {
+    return this.page.getByLabel("Search for a service");
+  }
+
+  directionsDropdown(): Locator {
+    return this.page.locator(".multiselect-dropdown").filter({ hasText: "Directions" });
+  }
+
+  displayOptionsButton(): Locator {
+    return this.page.getByRole("button", { name: /Display options/i });
+  }
+
+  // Service (lineId) page locators
+
+  servicePageHeading(): Locator {
+    return this.page.getByRole("heading", { level: 1 });
+  }
+
+  backToOperatorLink(): Locator {
+    return this.page.getByRole("link", { name: /Back to/i });
+  }
+
+  stopsTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  stopsTableHeader(name: string): Locator {
+    return this.stopsTable().getByRole("columnheader", { name });
   }
 }
