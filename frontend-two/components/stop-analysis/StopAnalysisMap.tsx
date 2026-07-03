@@ -12,7 +12,7 @@ import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { Spinner } from "@/components/shared/Spinner";
-import { registerTimingPointIcons } from "@/components/stop-analysis/timingPointIcons";
+import { registerTimingPointIcons } from "@/components/icons/timingPointIcons";
 import { BoundingBoxInputType as BoundingBox } from "@/src/generated/graphql";
 
 import { StopStatistics } from "@/src/generated/graphql";

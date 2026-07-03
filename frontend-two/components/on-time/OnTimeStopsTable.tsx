@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import { Tooltip } from "@/components/shared/Tooltip";
-import { TimingIcon } from "@/components/stop-analysis/TimingIcon";
+import { TimingIcon } from "@/components/icons/TimingIcon";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import type { StopPerformance } from "@/services/on-time/on-time.service";
 

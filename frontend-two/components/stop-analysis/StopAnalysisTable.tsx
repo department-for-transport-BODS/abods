@@ -17,7 +17,7 @@ import {
   type SortedPaginatedTableColumn,
 } from "../table/SortedPaginatedTable";
 import { type SortOrder } from "../table/SortableTable";
-import { TimingIcon } from "./TimingIcon";
+import { TimingIcon } from "../icons/TimingIcon";
 
 type SortKey =
   | "stopId"

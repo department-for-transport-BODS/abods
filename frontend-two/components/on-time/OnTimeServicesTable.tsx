@@ -5,7 +5,7 @@ import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { FrequentServicePerformance } from "@/services/on-time/performance.service";
-import { FrequentIcon } from "./FrequentIcon";
+import { FrequentIcon } from "../icons/FrequentIcon";
 
 export type ServiceDisplayMode = "percentage" | "count" | "time";
 

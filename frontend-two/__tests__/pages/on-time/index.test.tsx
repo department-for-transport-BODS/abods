@@ -29,7 +29,6 @@ vi.mock("@/contexts/ConfigContext", () => ({
 vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchOperatorPerformanceList: vi.fn(),
-    fetchOnTimeStats: vi.fn(),
   },
 }));
 
@@ -107,7 +106,6 @@ const mockUseConfig = vi.mocked(useConfig);
 const mockFetchOperatorPerformanceList = vi.mocked(
   onTimeService.fetchOperatorPerformanceList,
 );
-const mockFetchOnTimeStats = vi.mocked(onTimeService.fetchOnTimeStats);
 
 describe("OnTimeIndexPage", () => {
   beforeEach(() => {
@@ -117,17 +115,6 @@ describe("OnTimeIndexPage", () => {
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
-
-    mockFetchOnTimeStats.mockResolvedValue({
-      onTime: 10,
-      late: 2,
-      early: 1,
-      completed: 13,
-      scheduled: 14,
-      incomplete: "7.1",
-      averageDelay: 90,
-      noData: 1,
-    });
   });
 
   afterEach(() => {
