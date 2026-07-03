@@ -38,6 +38,8 @@ import { distanceService } from "@/services/distances/distance.services";
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];
 
+const EMPTY_ADMIN_AREA_IDS: string[] = [];
+
 const OnTimeIndexPage = () => {
   useRequireAuth();
   const { config } = useConfig();
@@ -147,8 +149,12 @@ const OnTimeIndexPage = () => {
   }, []);
 
   const selectedAdminAreaIds = useMemo(
-    () =>
-      Array.from(
+    () => {
+      if (selectedAdminAreas.length === 0) {
+        return EMPTY_ADMIN_AREA_IDS;
+      }
+
+      return Array.from(
         new Set(
           adminOrgData
             .filter(
@@ -158,7 +164,8 @@ const OnTimeIndexPage = () => {
             )
             .map((adminArea) => adminArea.adminAreaId.toString()),
         ),
-      ),
+      );
+    },
     [adminOrgData, selectedAdminAreas],
   );
 
@@ -194,6 +201,11 @@ const OnTimeIndexPage = () => {
     selectedAdminAreaIds,
   ]);
 
+  const operatorTableParamsKey = useMemo(
+    () => JSON.stringify(operatorTableParams),
+    [operatorTableParams],
+  );
+
   useEffect(() => {
     if (!config?.apiUrl) return;
     const load = async () => {
@@ -216,8 +228,8 @@ const OnTimeIndexPage = () => {
     };
     load();
   }, [
-    config,
-    operatorTableParams,
+    config?.apiUrl,
+    operatorTableParamsKey,
   ]);
 
   return (

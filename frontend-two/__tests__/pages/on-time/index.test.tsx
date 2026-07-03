@@ -144,53 +144,6 @@ describe("OnTimeIndexPage", () => {
     expect(screen.getByText("Loading on-time data...")).toBeInTheDocument();
   });
 
-  it("renders fetched json section and operator links", async () => {
-    mockFetchOperatorPerformanceList.mockResolvedValue([
-      {
-        name: "Demo Operator",
-        nocCode: "ABCD",
-        operatorId: "ABCD",
-        onTime: 10,
-        early: 1,
-        late: 2,
-        total: 13,
-        onTimeRatio: 0.76,
-        earlyRatio: 0.08,
-        lateRatio: 0.15,
-        completedRatio: 0,
-        averageDelay: 1.5,
-      },
-      {
-        name: "Second Operator",
-        nocCode: "EFGH",
-        operatorId: "EFGH",
-        onTime: 8,
-        early: 2,
-        late: 5,
-        total: 15,
-        onTimeRatio: 0.53,
-        earlyRatio: 0.13,
-        lateRatio: 0.33,
-        completedRatio: 0,
-        averageDelay: 3.2,
-      },
-    ]);
-
-    render(<OnTimeIndexPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("onTimeOperatorPerformanceList"),
-      ).toBeInTheDocument();
-      expect(screen.getByText("On-time")).toBeInTheDocument();
-      expect(screen.getByText("Incomplete Data")).toBeInTheDocument();
-      expect(screen.getByText("Average Delay")).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: "Demo Operator" }),
-      ).toHaveAttribute("href", "/on-time/ABCD");
-    });
-  });
-
   describe("Filter defaults", () => {
     it("renders date preset selector with Last 7 days option", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue([]);

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { StopAnalysisFilters } from "@/components/stop-analysis/StopAnalysisFilters";
 import { MatchType } from "@/src/generated/graphql";
 
-vi.mock("@/components/shared/DateRangeSelect", () => ({
+vi.mock("@/components/shared/DateRangeSelect/DateRangeSelect", () => ({
   DateRangeSelect: ({
     value,
     onChange,
@@ -21,7 +21,7 @@ vi.mock("@/components/shared/DateRangeSelect", () => ({
   ),
 }));
 
-vi.mock("@/components/stop-analysis/MultiselectCheckbox", () => ({
+vi.mock("@/components/shared/MultiselectCheckbox", () => ({
   MultiselectCheckbox: ({ label }: { label: string }) => (
     <div
       data-testid={`multiselect-${label.toLowerCase().replace(/\s+/g, "-")}`}

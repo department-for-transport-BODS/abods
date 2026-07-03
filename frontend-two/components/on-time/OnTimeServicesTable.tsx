@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Duration } from "luxon";
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
@@ -330,9 +330,15 @@ export const OnTimeServicesTable = ({
     };
   }, [data, displayMode]);
 
-  const renderRow = createRenderRow(nocCode, displayMode);
-  const getValue = (row: FrequentServicePerformance, column: string) =>
-    getRowValue(row, column, displayMode);
+  const renderRow = useMemo(
+    () => createRenderRow(nocCode, displayMode),
+    [nocCode, displayMode],
+  );
+  const getValue = useCallback(
+    (row: FrequentServicePerformance, column: string) =>
+      getRowValue(row, column, displayMode),
+    [displayMode],
+  );
 
   const csvHeaders = filteredColumns.map(
     (column) => SERVICE_EXPORT_HEADER_LABELS[column.key] ?? column.key,

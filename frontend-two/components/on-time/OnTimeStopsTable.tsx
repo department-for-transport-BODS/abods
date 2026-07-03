@@ -1,8 +1,8 @@
 import { Duration } from "luxon";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
-import { Tooltip } from "@/components/shared/SummaryStat/Tooltip";
+import { Tooltip } from "@/components/shared/Tooltip";
 import { TimingIcon } from "@/components/stop-analysis/TimingIcon";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import type { StopPerformance } from "@/services/on-time/on-time.service";
@@ -367,9 +367,14 @@ export const OnTimeStopsTable = ({
     };
   }, [data, displayMode]);
 
-  const getValue = (row: StopPerformance, column: string) =>
-    getRowValue(row, column, displayMode);
-  const renderValue = (row: StopPerformance) => renderRow(row, displayMode);
+  const getValue = useCallback(
+    (row: StopPerformance, column: string) => getRowValue(row, column, displayMode),
+    [displayMode],
+  );
+  const renderValue = useCallback(
+    (row: StopPerformance) => renderRow(row, displayMode),
+    [displayMode],
+  );
 
   const csvHeaders = filteredColumns.map(
     (column) => STOPS_EXPORT_HEADER_LABELS[column.key] ?? column.key,

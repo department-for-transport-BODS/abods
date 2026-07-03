@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { PagingPanel } from "@/components/shared/PagingPanel";
+import { PagingPanel } from "@/components/table/PagingPanel";
 
 export type SortOrder = "asc" | "desc" | "none";
 

@@ -11,7 +11,12 @@ import {
 } from "@/hooks/useStopPerformanceTable";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
-import { SortableTable, type SortOrder } from "../table/SortableTable";
+import { Tooltip } from "@/components/shared/Tooltip";
+import {
+  SortedPaginatedTable,
+  type SortedPaginatedTableColumn,
+} from "../table/SortedPaginatedTable";
+import { type SortOrder } from "../table/SortableTable";
 import { TimingIcon } from "./TimingIcon";
 
 type SortKey =
