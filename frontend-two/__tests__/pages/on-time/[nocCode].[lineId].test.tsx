@@ -66,6 +66,7 @@ vi.mock("next/router", () => ({
     pathname: "/on-time/[nocCode]/[lineId]",
     asPath: "/on-time/ABCD/LINE1",
     query: mockQuery,
+    isReady: true,
     replace: vi.fn(),
   }),
 }));

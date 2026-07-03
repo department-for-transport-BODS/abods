@@ -240,7 +240,7 @@ const OnTimeOperatorPage = () => {
   };
 
   useEffect(() => {
-    if (!config?.apiUrl || !nocCode) return;
+    if (!router.isReady || !config?.apiUrl || !nocCode) return;
     const load = async () => {
       setIsLoading(true);
       const defaultParams = buildDefaultParams({ nocCode });
@@ -313,6 +313,7 @@ const OnTimeOperatorPage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
+    router.isReady,
   ]);
 
   const summaryStats = data.overview?.onTime;
@@ -433,7 +434,7 @@ const OnTimeOperatorPage = () => {
     });
   }, [directionFilteredServices, hasDirectionFilter, selectedDirections, serviceSearch]);
 
-  if (!nocCode) {
+  if (!router.isReady || !nocCode) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>

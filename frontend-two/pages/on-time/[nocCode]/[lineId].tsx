@@ -321,7 +321,7 @@ const OnTimeServicePage = () => {
   }, [filteredStopPerformance]);
 
   useEffect(() => {
-    if (!config?.apiUrl || !nocCode || !lineId) return;
+    if (!router.isReady || !config?.apiUrl || !nocCode || !lineId) return;
     const load = async () => {
       setIsLoading(true);
       const defaultParams = buildDefaultParams({ nocCode, lineId });
@@ -403,9 +403,10 @@ const OnTimeServicePage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
+    router.isReady,
   ]);
 
-  if (!nocCode || !lineId) {
+  if (!router.isReady || !nocCode || !lineId) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>

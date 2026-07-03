@@ -219,13 +219,17 @@ export const OnTimeOperatorTable = ({
       });
   }, [pageRows, granularSparklineParams]);
 
-  const sortedData = [...data]
-    .filter((op): op is OperatorPerformance & { nocCode: string } => Boolean(op.nocCode))
-    .sort((a, b) => {
-      const aName = (a.name ?? "").toLocaleLowerCase();
-      const bName = (b.name ?? "").toLocaleLowerCase();
-      return aName.localeCompare(bName);
-    });
+  const sortedData = useMemo(
+    () =>
+      [...data]
+        .filter((op): op is OperatorPerformance & { nocCode: string } => Boolean(op.nocCode))
+        .sort((a, b) => {
+          const aName = (a.name ?? "").toLocaleLowerCase();
+          const bName = (b.name ?? "").toLocaleLowerCase();
+          return aName.localeCompare(bName);
+        }),
+    [data],
+  );
 
   const renderOperatorRow = (row: OperatorPerformance) =>
     renderRow(row, sparklineByOperatorId);

@@ -1,4 +1,3 @@
-// NOTE: I think an adapted version of this component can be used on the other on-time pages
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 
