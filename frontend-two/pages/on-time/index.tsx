@@ -92,9 +92,9 @@ const OnTimeIndexPage = () => {
     if (!operatorSearch) return operatorPerformance;
 
     const searchValue = operatorSearch.toLowerCase();
-    return operatorPerformance.filter(
-      (operator) =>
-        (operator.name ?? "").toLowerCase().includes(searchValue));
+    return operatorPerformance.filter((operator) =>
+      (operator.name ?? "").toLowerCase().includes(searchValue),
+    );
   }, [operatorPerformance, operatorSearch]);
 
   const hasNoOperatorData =
@@ -148,26 +148,23 @@ const OnTimeIndexPage = () => {
     loadAdminAreas();
   }, []);
 
-  const selectedAdminAreaIds = useMemo(
-    () => {
-      if (selectedAdminAreas.length === 0) {
-        return EMPTY_ADMIN_AREA_IDS;
-      }
+  const selectedAdminAreaIds = useMemo(() => {
+    if (selectedAdminAreas.length === 0) {
+      return EMPTY_ADMIN_AREA_IDS;
+    }
 
-      return Array.from(
-        new Set(
-          adminOrgData
-            .filter(
-              (adminArea) =>
-                adminArea.adminName !== null &&
-                selectedAdminAreas.includes(adminArea.adminName),
-            )
-            .map((adminArea) => adminArea.adminAreaId.toString()),
-        ),
-      );
-    },
-    [adminOrgData, selectedAdminAreas],
-  );
+    return Array.from(
+      new Set(
+        adminOrgData
+          .filter(
+            (adminArea) =>
+              adminArea.adminName !== null &&
+              selectedAdminAreas.includes(adminArea.adminName),
+          )
+          .map((adminArea) => adminArea.adminAreaId.toString()),
+      ),
+    );
+  }, [adminOrgData, selectedAdminAreas]);
 
   const operatorTableParams = useMemo<PerformanceParams>(() => {
     const defaultParams = buildDefaultParams();
@@ -227,10 +224,7 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [
-    config?.apiUrl,
-    operatorTableParamsKey,
-  ]);
+  }, [config?.apiUrl, operatorTableParamsKey]);
 
   return (
     <BaseLayout title="All services - Analyse Bus Open Data">
@@ -266,9 +260,7 @@ const OnTimeIndexPage = () => {
               options={adminAreaOptions}
               selected={selectedAdminAreas}
               onChange={setSelectedAdminAreas}
-              placeholderText={
-                isLoadingAdminAreas ? "Loading..." : "All areas"
-              }
+              placeholderText={isLoadingAdminAreas ? "Loading..." : "All areas"}
             />
           </div>
         </div>
@@ -283,14 +275,20 @@ const OnTimeIndexPage = () => {
           >
             <div className="summary-content-wrapper">
               <div className="summary-stat-container">
-                <p className="govuk-body-l"><b>{formattedRecordedStopDepartures}</b> departures recorded</p>
+                <p className="govuk-body-l">
+                  <b>{formattedRecordedStopDepartures}</b> departures recorded
+                </p>
                 <SummaryStatsGrid
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
                   earlyCount={summaryStats?.early ?? null}
                   incompleteCount={summaryStats?.noData ?? null}
-                  recordedStopDepartures={recordedStopDepartures > 0 ? recordedStopDepartures : null}
-                  totalStopDepartures={totalStopDepartures > 0 ? totalStopDepartures : null}
+                  recordedStopDepartures={
+                    recordedStopDepartures > 0 ? recordedStopDepartures : null
+                  }
+                  totalStopDepartures={
+                    totalStopDepartures > 0 ? totalStopDepartures : null
+                  }
                   incompleteBreakdown={summaryStats?.incomplete ?? null}
                   averageDelay={summaryStats?.averageDelay ?? null}
                 />

@@ -38,7 +38,9 @@ const ADMIN_AREA_HIDDEN_ZOOM = 12;
 type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
 type ClipableFeature = Feature<ClipableGeometry>;
 
-const isClipableFeature = (candidate: Feature): candidate is ClipableFeature => {
+const isClipableFeature = (
+  candidate: Feature,
+): candidate is ClipableFeature => {
   const geometryType = candidate.geometry?.type;
 
   return (
@@ -239,12 +241,7 @@ export const OnTimeBoundariesMap = ({
             ["linear"],
             ["zoom"],
             9,
-            [
-              "case",
-              ["boolean", ["feature-state", "hover"], false],
-              0.5,
-              0.3,
-            ],
+            ["case", ["boolean", ["feature-state", "hover"], false], 0.5, 0.3],
             ADMIN_AREA_HIDDEN_ZOOM,
             0,
           ],

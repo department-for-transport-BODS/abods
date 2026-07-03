@@ -232,9 +232,9 @@ function getRowValue(
       return row.scheduledDepartures ?? 0;
     case "recordedDepartures":
       return displayMode === "percentage"
-        ? (row.completedRatio ??
-            ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0))
-        : (row.actualDepartures ?? 0);
+        ? row.completedRatio ??
+            ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0)
+        : row.actualDepartures ?? 0;
     case "averageDelay":
       return row.averageDelay ?? 0;
     case "onTime":
@@ -256,7 +256,7 @@ function createRenderRow(nocCode: string, displayMode: ServiceDisplayMode) {
 
     return {
       key: `${row.lineInfo?.serviceId}-${row.direction}`,
-  frequent: row.frequent ? <FrequentIcon /> : "",
+      frequent: row.frequent ? <FrequentIcon /> : "",
       service: (
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(row.lineId ?? "")}`}
@@ -292,8 +292,9 @@ export const OnTimeServicesTable = ({
   displayMode,
   visibleColumns,
 }: OnTimeServicesTableProps) => {
-  const [displayedRows, setDisplayedRows] =
-    useState<FrequentServicePerformance[]>([]);
+  const [displayedRows, setDisplayedRows] = useState<
+    FrequentServicePerformance[]
+  >([]);
 
   const filteredColumns = useMemo(
     () =>
@@ -315,7 +316,9 @@ export const OnTimeServicesTable = ({
       frequent: "",
       service: "",
       direction: "-",
-      scheduledDepartures: <strong>{(totals.scheduledDepartures ?? 0).toLocaleString()}</strong>,
+      scheduledDepartures: (
+        <strong>{(totals.scheduledDepartures ?? 0).toLocaleString()}</strong>
+      ),
       recordedDepartures: (
         <strong>
           {displayMode === "percentage"
@@ -324,7 +327,9 @@ export const OnTimeServicesTable = ({
         </strong>
       ),
       averageDelay: <strong>{formatDelay(totals.averageDelay)}</strong>,
-      onTime: <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>,
+      onTime: (
+        <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>
+      ),
       late: <strong>{formatMetricValue(totals, "late", displayMode)}</strong>,
       early: <strong>{formatMetricValue(totals, "early", displayMode)}</strong>,
     };
@@ -350,7 +355,8 @@ export const OnTimeServicesTable = ({
 
     const valuesByColumn: Record<string, string | number> = {
       frequent: row.frequent ? "Yes" : "No",
-      service: `${row.lineInfo?.serviceNumber ?? ""}: ${row.lineInfo?.serviceName ?? ""}`.trim(),
+      service:
+        `${row.lineInfo?.serviceNumber ?? ""}: ${row.lineInfo?.serviceName ?? ""}`.trim(),
       direction: formatDirection(row.direction),
       scheduledDepartures: row.scheduledDepartures ?? 0,
       recordedDepartures:

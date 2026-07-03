@@ -1,4 +1,10 @@
-import { render, screen, waitFor, cleanup, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
 import { Direction } from "../../../src/generated/graphql";
@@ -171,27 +177,29 @@ describe("OnTimeOperatorPage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("link", { name: /All operators/i })).toHaveAttribute(
-      "href",
-      "/on-time",
-    );
+    expect(
+      screen.getByRole("link", { name: /All operators/i }),
+    ).toHaveAttribute("href", "/on-time");
   });
 
   it("renders a service row with a link to its detail page", async () => {
     mockFetchServicePerformance.mockResolvedValue([
       makeService({
         lineId: "LINE1",
-        lineInfo: { serviceId: "S1", serviceName: "Demo Service", serviceNumber: "1" },
+        lineInfo: {
+          serviceId: "S1",
+          serviceName: "Demo Service",
+          serviceNumber: "1",
+        },
       }),
     ]);
 
     render(<OnTimeOperatorPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "1: Demo Service" })).toHaveAttribute(
-        "href",
-        "/on-time/ABCD/LINE1",
-      );
+      expect(
+        screen.getByRole("link", { name: "1: Demo Service" }),
+      ).toHaveAttribute("href", "/on-time/ABCD/LINE1");
     });
   });
 
@@ -251,11 +259,19 @@ describe("OnTimeOperatorPage", () => {
       mockFetchServicePerformance.mockResolvedValue([
         makeService({
           lineId: "L1",
-          lineInfo: { serviceId: "S1", serviceNumber: "101", serviceName: "City Express" },
+          lineInfo: {
+            serviceId: "S1",
+            serviceNumber: "101",
+            serviceName: "City Express",
+          },
         }),
         makeService({
           lineId: "L2",
-          lineInfo: { serviceId: "S2", serviceNumber: "202", serviceName: "Night Bus" },
+          lineInfo: {
+            serviceId: "S2",
+            serviceNumber: "202",
+            serviceName: "Night Bus",
+          },
         }),
       ]);
     });
@@ -264,9 +280,13 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
 
     it("filters services by service name", async () => {
@@ -274,7 +294,9 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.type(
@@ -282,8 +304,12 @@ describe("OnTimeOperatorPage", () => {
         "City",
       );
 
-      expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "202: Night Bus" })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "101: City Express" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "202: Night Bus" }),
+      ).not.toBeInTheDocument();
     });
 
     it("filters services by service number", async () => {
@@ -291,7 +317,9 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "202: Night Bus" }),
+        ).toBeInTheDocument();
       });
 
       await user.type(
@@ -299,8 +327,12 @@ describe("OnTimeOperatorPage", () => {
         "202",
       );
 
-      expect(screen.queryByRole("link", { name: "101: City Express" })).not.toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "101: City Express" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
 
     it("shows all services again when the search term is cleared", async () => {
@@ -308,16 +340,26 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
-      const searchInput = screen.getByRole("textbox", { name: "Search for a service" });
+      const searchInput = screen.getByRole("textbox", {
+        name: "Search for a service",
+      });
       await user.type(searchInput, "City");
-      expect(screen.queryByRole("link", { name: "202: Night Bus" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "202: Night Bus" }),
+      ).not.toBeInTheDocument();
 
       await user.clear(searchInput);
-      expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "101: City Express" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -326,12 +368,20 @@ describe("OnTimeOperatorPage", () => {
       mockFetchServicePerformance.mockResolvedValue([
         makeService({
           lineId: "L1",
-          lineInfo: { serviceId: "S1", serviceNumber: "101", serviceName: "City Express" },
+          lineInfo: {
+            serviceId: "S1",
+            serviceNumber: "101",
+            serviceName: "City Express",
+          },
           direction: Direction.Inbound,
         }),
         makeService({
           lineId: "L2",
-          lineInfo: { serviceId: "S2", serviceNumber: "202", serviceName: "Night Bus" },
+          lineInfo: {
+            serviceId: "S2",
+            serviceNumber: "202",
+            serviceName: "Night Bus",
+          },
           direction: Direction.Outbound,
         }),
       ]);
@@ -341,9 +391,13 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
 
     it("shows only inbound services when Inbound direction is selected", async () => {
@@ -351,14 +405,20 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: /All directions/i }));
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
 
-      expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "202: Night Bus" })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "101: City Express" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "202: Night Bus" }),
+      ).not.toBeInTheDocument();
     });
 
     it("shows only outbound services when Outbound direction is selected", async () => {
@@ -366,14 +426,20 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: /All directions/i }));
       await user.click(screen.getByRole("checkbox", { name: "Outbound" }));
 
-      expect(screen.queryByRole("link", { name: "101: City Express" })).not.toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "101: City Express" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
 
     it("shows all services again after clearing the direction filter", async () => {
@@ -381,19 +447,27 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: /All directions/i }));
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
-      expect(screen.queryByRole("link", { name: "202: Night Bus" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "202: Night Bus" }),
+      ).not.toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Clear all" }));
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
-      expect(screen.getByRole("link", { name: "202: Night Bus" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "202: Night Bus" }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -402,7 +476,11 @@ describe("OnTimeOperatorPage", () => {
       mockFetchServicePerformance.mockResolvedValue([
         makeService({
           lineId: "L1",
-          lineInfo: { serviceId: "S1", serviceNumber: "101", serviceName: "City Express" },
+          lineInfo: {
+            serviceId: "S1",
+            serviceNumber: "101",
+            serviceName: "City Express",
+          },
           actualDepartures: 90,
           onTime: 70,
           onTimeRatio: 0.778,
@@ -415,7 +493,9 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       expect(screen.getByRole("radio", { name: "Percentage" })).toBeChecked();
@@ -427,13 +507,19 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
-      const serviceLink = screen.getByRole("link", { name: "101: City Express" });
+      const serviceLink = screen.getByRole("link", {
+        name: "101: City Express",
+      });
       const row = serviceLink.closest("tr");
       expect(row).not.toBeNull();
-      expect(within(row as HTMLTableRowElement).getByText("77.7%")).toBeInTheDocument();
+      expect(
+        within(row as HTMLTableRowElement).getByText("77.7%"),
+      ).toBeInTheDocument();
     });
 
     it("shows on-time values as counts when Count mode is selected", async () => {
@@ -441,16 +527,24 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("radio", { name: "Count" }));
 
-      const serviceLink = screen.getByRole("link", { name: "101: City Express" });
+      const serviceLink = screen.getByRole("link", {
+        name: "101: City Express",
+      });
       const row = serviceLink.closest("tr");
       expect(row).not.toBeNull();
-      expect(within(row as HTMLTableRowElement).getByText("70")).toBeInTheDocument();
-      expect(within(row as HTMLTableRowElement).queryByText("77.7%")).not.toBeInTheDocument();
+      expect(
+        within(row as HTMLTableRowElement).getByText("70"),
+      ).toBeInTheDocument();
+      expect(
+        within(row as HTMLTableRowElement).queryByText("77.7%"),
+      ).not.toBeInTheDocument();
     });
 
     it("shows on-time values as time offsets when Time mode is selected", async () => {
@@ -458,16 +552,24 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("radio", { name: "Time" }));
 
-      const serviceLink = screen.getByRole("link", { name: "101: City Express" });
+      const serviceLink = screen.getByRole("link", {
+        name: "101: City Express",
+      });
       const row = serviceLink.closest("tr");
       expect(row).not.toBeNull();
-      expect(within(row as HTMLTableRowElement).getByText("+00:10")).toBeInTheDocument();
-      expect(within(row as HTMLTableRowElement).queryByText("77.7%")).not.toBeInTheDocument();
+      expect(
+        within(row as HTMLTableRowElement).getByText("+00:10"),
+      ).toBeInTheDocument();
+      expect(
+        within(row as HTMLTableRowElement).queryByText("77.7%"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -476,7 +578,11 @@ describe("OnTimeOperatorPage", () => {
       mockFetchServicePerformance.mockResolvedValue([
         makeService({
           lineId: "L1",
-          lineInfo: { serviceId: "S1", serviceNumber: "101", serviceName: "City Express" },
+          lineInfo: {
+            serviceId: "S1",
+            serviceNumber: "101",
+            serviceName: "City Express",
+          },
         }),
       ]);
     });
@@ -486,12 +592,16 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
-      expect(screen.getByRole("heading", { name: "Display options" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Display options" }),
+      ).toBeInTheDocument();
     });
 
     it("closes the modal when Cancel is clicked", async () => {
@@ -499,14 +609,20 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
-      expect(screen.getByRole("heading", { name: "Display options" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Display options" }),
+      ).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Cancel" }));
-      expect(screen.queryByRole("heading", { name: "Display options" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Display options" }),
+      ).not.toBeInTheDocument();
     });
 
     it("hides a column when it is unchecked in the modal and Update is clicked", async () => {
@@ -514,23 +630,33 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       // "Average delay" column header should be visible initially
-      expect(screen.getByRole("columnheader", { name: "Average delay" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: "Average delay" }),
+      ).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
-      const averageDelayCheckbox = screen.getByRole("checkbox", { name: "Average delay" });
+      const averageDelayCheckbox = screen.getByRole("checkbox", {
+        name: "Average delay",
+      });
       expect(averageDelayCheckbox).toBeChecked();
       await user.click(averageDelayCheckbox);
       expect(averageDelayCheckbox).not.toBeChecked();
 
       await user.click(screen.getByRole("button", { name: "Update" }));
 
-      expect(screen.queryByRole("heading", { name: "Display options" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("columnheader", { name: "Average delay" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Display options" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("columnheader", { name: "Average delay" }),
+      ).not.toBeInTheDocument();
     });
 
     it("restores all columns when Show all is clicked before applying", async () => {
@@ -538,18 +664,24 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
       // Uncheck "Average delay"
       await user.click(screen.getByRole("checkbox", { name: "Average delay" }));
-      expect(screen.getByRole("checkbox", { name: "Average delay" })).not.toBeChecked();
+      expect(
+        screen.getByRole("checkbox", { name: "Average delay" }),
+      ).not.toBeChecked();
 
       // Click "Show all" to restore
       await user.click(screen.getByRole("button", { name: "Show all" }));
-      expect(screen.getByRole("checkbox", { name: "Average delay" })).toBeChecked();
+      expect(
+        screen.getByRole("checkbox", { name: "Average delay" }),
+      ).toBeChecked();
     });
 
     it("does not apply changes when Cancel is clicked after unchecking a column", async () => {
@@ -557,7 +689,9 @@ describe("OnTimeOperatorPage", () => {
       render(<OnTimeOperatorPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: "101: City Express" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
@@ -565,7 +699,9 @@ describe("OnTimeOperatorPage", () => {
       await user.click(screen.getByRole("button", { name: "Cancel" }));
 
       // Column should still be visible after cancelling
-      expect(screen.getByRole("columnheader", { name: "Average delay" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: "Average delay" }),
+      ).toBeInTheDocument();
     });
   });
 });

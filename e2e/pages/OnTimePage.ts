@@ -46,7 +46,7 @@ export class OnTimePage {
   serviceLoadingText(): Locator {
     return this.page.getByText(/Loading service data\.\.\./i);
   }
-  
+
   operatorLinks(): Locator {
     return this.page.locator('main ul.govuk-list a[href^="/on-time/"]');
   }
@@ -211,7 +211,9 @@ export class OnTimePage {
   }
 
   directionsDropdown(): Locator {
-    return this.page.locator(".multiselect-dropdown").filter({ hasText: "Directions" });
+    return this.page
+      .locator(".multiselect-dropdown")
+      .filter({ hasText: "Directions" });
   }
 
   displayOptionsButton(): Locator {

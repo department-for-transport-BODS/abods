@@ -96,7 +96,8 @@ export const SortedPaginatedTable = <T,>({
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
   const pageData = useMemo(
-    () => sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize),
+    () =>
+      sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize),
     [sortedData, currentPage, pageSize],
   );
 

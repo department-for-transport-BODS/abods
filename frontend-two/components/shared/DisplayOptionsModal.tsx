@@ -71,7 +71,11 @@ export const DisplayOptionsModal = ({
       <div className="display-options-modal">
         <div
           className="display-options-modal__columns"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "24px",
+          }}
         >
           <div className="display-options-modal__column govuk-checkboxes govuk-checkboxes--small">
             {columnKeys.slice(0, midpoint).map((key) => {

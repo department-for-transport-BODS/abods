@@ -2,26 +2,26 @@
 @import "mapbox-gl/dist/mapbox-gl.css";
 
 // DisplayOptionsModal styling
-.display-options-modal__footer{
+.display-options-modal__footer {
   display: flex;
   justify-content: space-between;
   gap: govuk-spacing(2);
 }
 
-.display-options-modal__show-all-link{
+.display-options-modal__show-all-link {
   color: $govuk-link-colour;
   text-decoration: underline;
 }
 
 // Display options styling
-.on-time-service-filters__display-options{
+.on-time-service-filters__display-options {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: govuk-spacing(3);
   flex-wrap: wrap;
 }
-.on-time-service-display-options-button{
+.on-time-service-display-options-button {
   display: flex;
   background: transparent;
   justify-content: flex-end;
@@ -34,13 +34,13 @@
 }
 
 // On Time Service / Stop styling
-.on-time-stops-table-container{
+.on-time-stops-table-container {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.on-time-service-filters{
+.on-time-service-filters {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -49,7 +49,7 @@
   flex-wrap: wrap;
 }
 
-.on-time-service-filters__radios{
+.on-time-service-filters__radios {
   display: flex;
   justify-content: flex-end;
   flex-direction: row;
@@ -58,31 +58,30 @@
   margin-left: auto;
 }
 
-.on-time-service-filters__inputs{
+.on-time-service-filters__inputs {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: govuk-spacing(2);
-  
 }
 
-.on-time-service-filters__search{
+.on-time-service-filters__search {
   min-width: 200px;
 }
 
-.on-time-service-filters__directions{
+.on-time-service-filters__directions {
   min-width: 200px;
 }
 
-// Summary styling 
-.summary-header-container{
-  display:flex;
+// Summary styling
+.summary-header-container {
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 
-.summary-admin-area-select-container{
+.summary-admin-area-select-container {
   min-width: 300px;
   max-width: 350px;
 }
@@ -125,7 +124,7 @@
   align-items: center;
   justify-content: flex-end;
   margin-left: auto;
-    margin-bottom: govuk-spacing(1);
+  margin-bottom: govuk-spacing(1);
   margin-bottom: govuk-spacing(2);
 }
 

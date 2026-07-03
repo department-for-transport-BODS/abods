@@ -28,8 +28,8 @@ function getSparklineKey(row: OperatorPerformance): string | null {
 }
 
 function getSparklineFetchCandidates(row: OperatorPerformance): string[] {
-  return [row.nocCode, row.operatorId].filter(
-    (value): value is string => Boolean(value),
+  return [row.nocCode, row.operatorId].filter((value): value is string =>
+    Boolean(value),
   );
 }
 
@@ -42,7 +42,10 @@ function formatDelay(delay: number | null | undefined): string {
   );
 }
 
-function getRowValue(row: OperatorPerformance, column: string): string | number {
+function getRowValue(
+  row: OperatorPerformance,
+  column: string,
+): string | number {
   switch (column) {
     case "nocCode":
       return row.nocCode ?? "";
@@ -74,7 +77,10 @@ function renderRow(
     key: row.nocCode ?? row.name ?? "",
     nocCode: row.nocCode ?? "-",
     name: row.nocCode ? (
-      <Link href={`/on-time/${encodeURIComponent(row.nocCode)}`} className="govuk-link govuk-!-font-weight-bold">
+      <Link
+        href={`/on-time/${encodeURIComponent(row.nocCode)}`}
+        className="govuk-link govuk-!-font-weight-bold"
+      >
         {row.name}
       </Link>
     ) : (
@@ -155,9 +161,7 @@ export const OnTimeOperatorTable = ({
         fetchCandidates: getSparklineFetchCandidates(operator),
       }))
       .filter(
-        (
-          item,
-        ): item is { displayKey: string; fetchCandidates: string[] } =>
+        (item): item is { displayKey: string; fetchCandidates: string[] } =>
           Boolean(item.displayKey) && item.fetchCandidates.length > 0,
       )
       .filter(
@@ -180,13 +184,15 @@ export const OnTimeOperatorTable = ({
 
         for (const candidateId of fetchCandidates) {
           try {
-            const candidateData = await onTimeService.fetchOnTimeTimeSeriesData({
-              ...granularSparklineParams,
-              filters: {
-                ...granularSparklineParams.filters,
-                operatorIds: [candidateId],
+            const candidateData = await onTimeService.fetchOnTimeTimeSeriesData(
+              {
+                ...granularSparklineParams,
+                filters: {
+                  ...granularSparklineParams.filters,
+                  operatorIds: [candidateId],
+                },
               },
-            });
+            );
 
             data = candidateData;
             if (candidateData.length > 0) {
@@ -222,7 +228,9 @@ export const OnTimeOperatorTable = ({
   const sortedData = useMemo(
     () =>
       [...data]
-        .filter((op): op is OperatorPerformance & { nocCode: string } => Boolean(op.nocCode))
+        .filter((op): op is OperatorPerformance & { nocCode: string } =>
+          Boolean(op.nocCode),
+        )
         .sort((a, b) => {
           const aName = (a.name ?? "").toLocaleLowerCase();
           const bName = (b.name ?? "").toLocaleLowerCase();

@@ -220,7 +220,11 @@ const OnTimeOperatorPage = () => {
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
 
-  const chartErrors = [errors.delayFrequency, errors.timeOfDay, errors.dayOfWeek];
+  const chartErrors = [
+    errors.delayFrequency,
+    errors.timeOfDay,
+    errors.dayOfWeek,
+  ];
   const hasNoChartData =
     !isLoading &&
     chartErrors.every((error) => !error) &&
@@ -340,12 +344,12 @@ const OnTimeOperatorPage = () => {
 
       const totalStopDepartures =
         (summaryStats?.scheduled ?? 0) > 0
-          ? (summaryStats?.scheduled ?? 0)
+          ? summaryStats?.scheduled ?? 0
           : (summaryStats?.completed ?? 0) + (summaryStats?.noData ?? 0);
 
       const recordedStopDepartures =
         (summaryStats?.completed ?? 0) > 0
-          ? (summaryStats?.completed ?? 0)
+          ? summaryStats?.completed ?? 0
           : summaryTotal;
 
       return {
@@ -355,7 +359,8 @@ const OnTimeOperatorPage = () => {
         incompleteCount: summaryStats?.noData ?? null,
         recordedStopDepartures:
           recordedStopDepartures > 0 ? recordedStopDepartures : null,
-        totalStopDepartures: totalStopDepartures > 0 ? totalStopDepartures : null,
+        totalStopDepartures:
+          totalStopDepartures > 0 ? totalStopDepartures : null,
         incompleteBreakdown: summaryStats?.incomplete ?? null,
         averageDelay: summaryStats?.averageDelay ?? null,
       };
@@ -392,7 +397,10 @@ const OnTimeOperatorPage = () => {
       weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
     }
 
-    const incompleteCount = Math.max(0, scheduledDepartures - recordedStopDepartures);
+    const incompleteCount = Math.max(
+      0,
+      scheduledDepartures - recordedStopDepartures,
+    );
 
     return {
       onTimeCount,
@@ -432,7 +440,12 @@ const OnTimeOperatorPage = () => {
         (selectedDirection) => direction === selectedDirection.toLowerCase(),
       );
     });
-  }, [directionFilteredServices, hasDirectionFilter, selectedDirections, serviceSearch]);
+  }, [
+    directionFilteredServices,
+    hasDirectionFilter,
+    selectedDirections,
+    serviceSearch,
+  ]);
 
   if (!router.isReady || !nocCode) {
     return (
@@ -451,16 +464,22 @@ const OnTimeOperatorPage = () => {
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
-      <p className="govuk-caption-xl govuk-!-margin-bottom-0">TODO: Operator: {nocCode}</p>
+      <p className="govuk-caption-xl govuk-!-margin-bottom-0">
+        TODO: Operator: {nocCode}
+      </p>
       {isLoading ? (
-        <p className="govuk-body govuk-!-margin-top-6">Loading on-time data...</p>
+        <p className="govuk-body govuk-!-margin-top-6">
+          Loading on-time data...
+        </p>
       ) : (
         <>
-            <OnTimeFilterPanel
+          <OnTimeFilterPanel
             isLoading={isLoading}
             refineResultsInitialValues={refineResultsInitialValues}
             onApplyRefineResults={(values) => {
-              setRefineResultsFilters(refineResultsToPerformanceFilters(values));
+              setRefineResultsFilters(
+                refineResultsToPerformanceFilters(values),
+              );
             }}
             onResetRefineResults={() => setRefineResultsFilters({})}
             dateRange={dateRange}

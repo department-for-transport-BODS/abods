@@ -5,7 +5,11 @@ type FrequentIconProps = {
 };
 
 export const FrequentIcon = ({ className }: FrequentIconProps) => (
-  <span className={className} aria-hidden="true" style={{ display: "inline-flex", minWidth: "20px" }}>
+  <span
+    className={className}
+    aria-hidden="true"
+    style={{ display: "inline-flex", minWidth: "20px" }}
+  >
     <FrequentSvg focusable="false" aria-hidden="true" />
   </span>
 );

@@ -275,9 +275,7 @@ export const StopAnalysisTable = ({
   const handleDisplayOptionsApply = (newVisibleColumns: string[]) => {
     setVisibleColumns(newVisibleColumns as TableColumnKey[]);
 
-    if (
-      !newVisibleColumns.includes(sortState.key as string)
-    ) {
+    if (!newVisibleColumns.includes(sortState.key as string)) {
       setSortState({ key: "stopName", order: SORT_ASC });
     }
   };

@@ -72,7 +72,9 @@ const normaliseDirection = (direction: string | null | undefined): string => {
   return value;
 };
 
-const aggregateStopsByStopId = (stops: StopPerformance[]): StopPerformance[] => {
+const aggregateStopsByStopId = (
+  stops: StopPerformance[],
+): StopPerformance[] => {
   if (stops.length === 0) return [];
 
   const grouped = new Map<string, StopPerformance[]>();
@@ -170,20 +172,17 @@ const aggregateStopsByStopId = (stops: StopPerformance[]): StopPerformance[] => 
           ? weightedDelayTotal / countDelayed
           : null,
       countDelayed: hasDelayData ? countDelayed : null,
-      onTimeInSeconds:
-        hasOnTimeInSeconds
-          ? onTimeInSecondsTotal / rows.length
-          : null,
-      lateInSeconds:
-        hasLateInSeconds ? lateInSecondsTotal / rows.length : null,
-      earlyInSeconds:
-        hasEarlyInSeconds ? earlyInSecondsTotal / rows.length : null,
-      averageScheduled:
-        hasAverageScheduled
-          ? averageScheduledTotal / rows.length
-          : null,
-      averageActual:
-        hasAverageActual ? averageActualTotal / rows.length : null,
+      onTimeInSeconds: hasOnTimeInSeconds
+        ? onTimeInSecondsTotal / rows.length
+        : null,
+      lateInSeconds: hasLateInSeconds ? lateInSecondsTotal / rows.length : null,
+      earlyInSeconds: hasEarlyInSeconds
+        ? earlyInSecondsTotal / rows.length
+        : null,
+      averageScheduled: hasAverageScheduled
+        ? averageScheduledTotal / rows.length
+        : null,
+      averageActual: hasAverageActual ? averageActualTotal / rows.length : null,
     });
   }
 
@@ -251,7 +250,8 @@ const OnTimeServicePage = () => {
       const normalizedDirection = normaliseDirection(stop.direction);
 
       return selectedDirections.some(
-        (selectedDirection) => selectedDirection.toLowerCase() === normalizedDirection,
+        (selectedDirection) =>
+          selectedDirection.toLowerCase() === normalizedDirection,
       );
     });
   }, [data.stopPerformance, selectedDirections]);
@@ -426,16 +426,22 @@ const OnTimeServicePage = () => {
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">{lineId}</h1>
-      <span className="govuk-caption-xl govuk-!-margin-bottom-0">{nocCode}</span>
+      <span className="govuk-caption-xl govuk-!-margin-bottom-0">
+        {nocCode}
+      </span>
       {isLoading ? (
-        <p className="govuk-body govuk-!-margin-top-6">Loading service data...</p>
+        <p className="govuk-body govuk-!-margin-top-6">
+          Loading service data...
+        </p>
       ) : (
         <>
           <OnTimeFilterPanel
             isLoading={isLoading}
             refineResultsInitialValues={refineResultsInitialValues}
             onApplyRefineResults={(values) => {
-              setRefineResultsFilters(refineResultsToPerformanceFilters(values));
+              setRefineResultsFilters(
+                refineResultsToPerformanceFilters(values),
+              );
             }}
             onResetRefineResults={() => setRefineResultsFilters({})}
             dateRange={dateRange}

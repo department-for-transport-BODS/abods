@@ -52,15 +52,30 @@ export const OperatorSparkline = ({
       style={{ display: "block" }}
     >
       <defs>
-        <linearGradient id={`operator-sparkline-gradient-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient
+          id={`operator-sparkline-gradient-${gradientId}`}
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
           <stop offset="0%" stopColor="#6A3D9A" stopOpacity="0.3" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={areaPath} fill={`url(#operator-sparkline-gradient-${gradientId})`} />
+      <path
+        d={areaPath}
+        fill={`url(#operator-sparkline-gradient-${gradientId})`}
+      />
       <path d={path} fill="none" stroke="#6A3D9A" strokeWidth="1.5" />
       {points.map((point, index) => (
-        <circle key={`${point.x}-${point.y}-${index}`} cx={point.x} cy={point.y} r="1.7" fill="#6A3D9A" />
+        <circle
+          key={`${point.x}-${point.y}-${index}`}
+          cx={point.x}
+          cy={point.y}
+          r="1.7"
+          fill="#6A3D9A"
+        />
       ))}
     </svg>
   );

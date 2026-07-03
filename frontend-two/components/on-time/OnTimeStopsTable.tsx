@@ -16,7 +16,11 @@ const columns = [
   { key: "direction", label: "Direction", sortable: true },
   { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },
   { key: "actualDepartures", label: "Recorded departures", sortable: true },
-  { key: "averageScheduled", label: "Average scheduled travel time", sortable: true },
+  {
+    key: "averageScheduled",
+    label: "Average scheduled travel time",
+    sortable: true,
+  },
   { key: "averageActual", label: "Average actual travel time", sortable: true },
   { key: "averageDelay", label: "Average delay", sortable: true },
   { key: "onTimeRatio", label: "On time", sortable: true },
@@ -25,9 +29,8 @@ const columns = [
 ];
 
 export const STOPS_TABLE_COLUMN_KEYS = columns.map((c) => c.key);
-export const STOPS_TABLE_COLUMN_LABELS: Record<string, React.ReactNode> = Object.fromEntries(
-  columns.map((c) => [c.key, c.label]),
-);
+export const STOPS_TABLE_COLUMN_LABELS: Record<string, React.ReactNode> =
+  Object.fromEntries(columns.map((c) => [c.key, c.label]));
 export const STOPS_TABLE_ALWAYS_VISIBLE_KEYS = ["stopId"];
 
 const STOPS_EXPORT_HEADER_LABELS: Record<string, string> = {
@@ -83,9 +86,7 @@ function getRecordedDeparturesRatio(row: StopPerformance): number {
   );
 }
 
-function getStopLocationTooltip(
-  row: StopPerformance,
-): string | undefined {
+function getStopLocationTooltip(row: StopPerformance): string | undefined {
   const localityName = row.stopInfo?.stopLocality?.localityName;
   const localityAreaName = row.stopInfo?.stopLocality?.localityAreaName;
 
@@ -182,20 +183,17 @@ function calculateTotals(data: StopPerformance[]): StopPerformance | null {
         ? weightedDelayTotal / countDelayed
         : null,
     countDelayed: hasDelayData ? countDelayed : null,
-    onTimeInSeconds:
-      hasOnTimeInSeconds
-        ? onTimeInSecondsTotal / data.length
-        : null,
-    lateInSeconds:
-      hasLateInSeconds ? lateInSecondsTotal / data.length : null,
-    earlyInSeconds:
-      hasEarlyInSeconds ? earlyInSecondsTotal / data.length : null,
-    averageScheduled:
-      hasAverageScheduled
-        ? averageScheduledTotal / data.length
-        : null,
-    averageActual:
-      hasAverageActual ? averageActualTotal / data.length : null,
+    onTimeInSeconds: hasOnTimeInSeconds
+      ? onTimeInSecondsTotal / data.length
+      : null,
+    lateInSeconds: hasLateInSeconds ? lateInSecondsTotal / data.length : null,
+    earlyInSeconds: hasEarlyInSeconds
+      ? earlyInSecondsTotal / data.length
+      : null,
+    averageScheduled: hasAverageScheduled
+      ? averageScheduledTotal / data.length
+      : null,
+    averageActual: hasAverageActual ? averageActualTotal / data.length : null,
   };
 }
 
@@ -264,7 +262,7 @@ function getRowValue(
     case "actualDepartures":
       return displayMode === "percentage"
         ? getRecordedDeparturesRatio(row)
-        : (row.actualDepartures ?? 0);
+        : row.actualDepartures ?? 0;
     case "averageScheduled":
       return row.averageScheduled ?? Number.NEGATIVE_INFINITY;
     case "averageActual":
@@ -294,7 +292,9 @@ function renderRow(
         <TimingIcon />
         <span className="govuk-visually-hidden">Timing point</span>
       </div>
-    ) : "-",
+    ) : (
+      "-"
+    ),
     stopName: (() => {
       const stopName = row.stopInfo?.stopName ?? "-";
       const tooltipMessage = getStopLocationTooltip(row);
@@ -350,7 +350,9 @@ export const OnTimeStopsTable = ({
       timingPoint: "",
       stopName: "",
       direction: "-",
-      scheduledDepartures: <strong>{(totals.scheduledDepartures ?? 0).toLocaleString()}</strong>,
+      scheduledDepartures: (
+        <strong>{(totals.scheduledDepartures ?? 0).toLocaleString()}</strong>
+      ),
       actualDepartures: (
         <strong>
           {displayMode === "percentage"
@@ -361,14 +363,21 @@ export const OnTimeStopsTable = ({
       averageScheduled: <strong>{formatTime(totals.averageScheduled)}</strong>,
       averageActual: <strong>{formatTime(totals.averageActual)}</strong>,
       averageDelay: <strong>{formatTime(totals.averageDelay, true)}</strong>,
-      onTimeRatio: <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>,
-      lateRatio: <strong>{formatMetricValue(totals, "late", displayMode)}</strong>,
-      earlyRatio: <strong>{formatMetricValue(totals, "early", displayMode)}</strong>,
+      onTimeRatio: (
+        <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>
+      ),
+      lateRatio: (
+        <strong>{formatMetricValue(totals, "late", displayMode)}</strong>
+      ),
+      earlyRatio: (
+        <strong>{formatMetricValue(totals, "early", displayMode)}</strong>
+      ),
     };
   }, [data, displayMode]);
 
   const getValue = useCallback(
-    (row: StopPerformance, column: string) => getRowValue(row, column, displayMode),
+    (row: StopPerformance, column: string) =>
+      getRowValue(row, column, displayMode),
     [displayMode],
   );
   const renderValue = useCallback(
@@ -417,7 +426,7 @@ export const OnTimeStopsTable = ({
           onDisplayedDataChange={setDisplayedRows}
         />
       </div>
-      < div className="govuk-!-margin-top-4">
+      <div className="govuk-!-margin-top-4">
         <CsvExportButton
           filename="on-time-stops"
           headers={csvHeaders}
