@@ -141,11 +141,11 @@ describe("OnTimeServicePage", () => {
   });
 
   it("shows loading state initially", () => {
-    mockFetchServiceInfo.mockImplementation(() => new Promise(() => {}));
+    mockFetchOperator.mockImplementation(() => new Promise(() => {}));
 
     render(<OnTimeServicePage />);
 
-    expect(screen.getByText("Loading service data...")).toBeInTheDocument();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
   it("renders ExcessWaitTimeChart when frequent service hours are available", async () => {

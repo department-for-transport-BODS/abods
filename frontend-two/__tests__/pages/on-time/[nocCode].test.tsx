@@ -178,11 +178,11 @@ describe("OnTimeOperatorPage", () => {
   });
 
   it("shows loading state initially", () => {
-    mockFetchOverviewStats.mockImplementation(() => new Promise(() => {}));
+    mockFetchOperator.mockImplementation(() => new Promise(() => {}));
 
     render(<OnTimeOperatorPage />);
 
-    expect(screen.getByText("Loading on-time data...")).toBeInTheDocument();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
   it("renders the page heading and back link after data loads", async () => {

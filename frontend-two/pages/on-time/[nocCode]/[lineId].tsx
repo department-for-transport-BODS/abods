@@ -134,6 +134,7 @@ const OnTimeServicePage = () => {
     typeof router.query.lineId === "string" ? router.query.lineId : null;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [operatorChecked, setOperatorChecked] = useState(false);
   const [data, setData] = useState<Partial<ServiceLevelData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
@@ -250,9 +251,10 @@ const OnTimeServicePage = () => {
       setIsLoading(true);
       const operator = await operatorsService.fetchOperator(nocCode);
       if (!operator) {
-        await router.replace("/on-time/operator-not-found");
+        router.replace("/on-time/operator-not-found");
         return;
       }
+      setOperatorChecked(true);
 
       const defaultParams = buildDefaultParams({ nocCode, lineId });
       const params = {
@@ -336,7 +338,7 @@ const OnTimeServicePage = () => {
     router.isReady,
   ]);
 
-  if (!router.isReady || !nocCode || !lineId) {
+  if (!router.isReady || !nocCode || !lineId || !operatorChecked) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>
