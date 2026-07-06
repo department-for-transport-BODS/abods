@@ -8,6 +8,8 @@ import {
   OperatorType,
 } from "../src/generated/graphql";
 
+export type { OperatorType };
+
 const isNonGeographicalAdminAreaId = (adminAreaId: string) =>
   adminAreaId === "AA0" || /AA9\d{2}/.test(adminAreaId);
 

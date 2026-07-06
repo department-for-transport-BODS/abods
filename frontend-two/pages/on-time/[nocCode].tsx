@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
-import { JsonSection } from "@/components/on-time/JsonSection";
 import {
   OnTimeServicesTable,
   SERVICE_TABLE_COLUMN_KEYS,
@@ -33,6 +32,7 @@ import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
+import { type OperatorType } from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
@@ -50,6 +50,7 @@ import {
 } from "@/services/on-time/performance.service";
 import {
   DelayFrequencyType,
+  Granularity,
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
   MatchType,
@@ -98,6 +99,9 @@ interface OperatorOnTimeData {
   servicePerformance: FrequentServicePerformance[];
   servicePerformancePlain: ServicePerformance[];
   headwayTimeSeries: HeadwayTimeSeriesType[];
+  fromTimestamp: string;
+  toTimestamp: string;
+  granularity: Granularity;
 }
 
 const OnTimeOperatorPage = () => {
@@ -124,6 +128,7 @@ const OnTimeOperatorPage = () => {
   );
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
+  const [allOperators, setAllOperators] = useState<OperatorType[]>([]);
   const refineResultsInitialValues = useMemo(
     () => performanceFiltersToRefineResults(refineResultsFilters),
     [JSON.stringify(refineResultsFilters)],
@@ -158,6 +163,19 @@ const OnTimeOperatorPage = () => {
   };
 
   useEffect(() => {
+    if (!router.isReady || !config?.apiUrl) return;
+    const loadOperators = async () => {
+      try {
+        const ops = await operatorsService.fetchOperators();
+        setAllOperators(ops);
+      } catch (error) {
+        console.error("Failed to load operators", error);
+      }
+    };
+    loadOperators();
+  }, [router.isReady, config]);
+
+  useEffect(() => {
     if (!router.isReady || !config?.apiUrl || !nocCode) return;
     const load = async () => {
       setIsLoading(true);
@@ -185,6 +203,7 @@ const OnTimeOperatorPage = () => {
               ? MatchType.Evidenced
               : MatchType.Estimated,
           timingPointsOnly: selectedStopType === "timing-points",
+          granularity: Granularity.Day,
         },
       };
 
@@ -217,6 +236,9 @@ const OnTimeOperatorPage = () => {
         servicePerformancePlain: servicePerformancePlain.data ?? [],
         servicePerformance: servicePerformance.data ?? [],
         headwayTimeSeries: headwayTimeSeries.data ?? [],
+        fromTimestamp: params.fromTimestamp,
+        toTimestamp: params.toTimestamp,
+        granularity: Granularity.Day,
       });
       setErrors({
         overview: overview.error,
@@ -384,10 +406,27 @@ const OnTimeOperatorPage = () => {
         </Link>
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
-      <p className="govuk-caption-xl govuk-!-margin-bottom-0">
-        TODO: Operator: {nocCode}
-      </p>
+      <h1 className="govuk-heading-xl govuk-!-margin-bottom-4">All services</h1>
+      <div className="govuk-!-margin-bottom-6">
+        <label htmlFor="operator-select" className="govuk-label">
+          <strong>Operator</strong>
+        </label>
+        <select
+          id="operator-select"
+          className="govuk-select"
+          value={nocCode || ""}
+          onChange={(e) =>
+            router.push(`/on-time/${encodeURIComponent(e.target.value)}`)
+          }
+        >
+          <option value="">Select an operator</option>
+          {allOperators.map((op) => (
+            <option key={op.nocCode} value={op.nocCode}>
+              {op.name} ({op.nocCode})
+            </option>
+          ))}
+        </select>
+      </div>
       {isLoading ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading on-time data...
@@ -427,10 +466,15 @@ const OnTimeOperatorPage = () => {
               delayFrequency={data.delayFrequency ?? []}
               timeOfDay={data.timeOfDay ?? []}
               dayOfWeek={data.dayOfWeek ?? []}
+              timeSeries={data.timeSeries ?? []}
+              fromTimestamp={data.fromTimestamp ?? ""}
+              toTimestamp={data.toTimestamp ?? ""}
+              granularity={data.granularity ?? Granularity.Day}
               errors={{
                 delayFrequency: errors.delayFrequency,
                 timeOfDay: errors.timeOfDay,
                 dayOfWeek: errors.dayOfWeek,
+                timeSeries: errors.timeSeries,
               }}
             />
           </ChartNoDataWrapper>

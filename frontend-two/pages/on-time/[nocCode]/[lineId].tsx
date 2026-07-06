@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
+import { ChartsSection } from "@/components/on-time/ChartsSection";
 import {
   OnTimeStopsTable,
   STOPS_TABLE_COLUMN_KEYS,
@@ -15,6 +17,7 @@ import {
   normaliseDirection,
   aggregatePerformanceTotals,
 } from "@/utils/on-time-table-format";
+import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
@@ -32,9 +35,13 @@ import { RadioOptions } from "@/components/shared/RadioOptions";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
+import { type OperatorType } from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
+  DayOfWeekData,
   StopPerformance,
+  TimeOfDayData,
+  TimeSeriesData,
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { DateTime } from "luxon";
@@ -49,20 +56,15 @@ import {
 } from "@/services/on-time/transit-model.service";
 import { settle } from "@/utils/settle";
 import {
+  DelayFrequencyType,
   FrequentServiceInfoType,
   Granularity,
   HeadwayTimeSeriesType,
   MatchType,
   PerformanceFiltersInputType,
   ServiceInfoType,
-} from "../../../src/generated/graphql";
-import { Box } from "@/components/shared/Box";
+} from "@/src/generated/graphql";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
-
-const ExcessWaitTimeChart = dynamic(
-  () => import("@/components/on-time/ExcessWaitTimeChart"),
-  { ssr: false },
-);
 
 const aggregateStopsByStopId = (
   stops: StopPerformance[],
@@ -116,18 +118,23 @@ const aggregateStopsByStopId = (
 interface ServiceLevelData {
   fromTimestamp: string;
   toTimestamp: string;
+  granularity: Granularity;
   serviceInfo: ServiceInfoType | null;
   stopPerformance: StopPerformance[];
   servicePatterns: ServicePattern[];
   mergedStops: NormalizedStop[];
   frequentServiceInfo: FrequentServiceInfoType | null;
   headwayTimeSeries: HeadwayTimeSeriesType[];
+  delayFrequency: DelayFrequencyType[];
+  timeSeries: TimeSeriesData[];
+  timeOfDay: TimeOfDayData[];
+  dayOfWeek: DayOfWeekData[];
 }
 
 const OnTimeServicePage = () => {
   useRequireAuth();
   const router = useRouter();
-  const { config } = useConfig();
+  const { config } = useConfig() ?? { mapboxToken: "", mapboxStyle: "" };
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
   const lineId =
@@ -137,6 +144,7 @@ const OnTimeServicePage = () => {
   const [operatorChecked, setOperatorChecked] = useState(false);
   const [data, setData] = useState<Partial<ServiceLevelData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [operator, setOperator] = useState<OperatorType | null>(null);
   const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
   const [selectedDisplayMode, setSelectedDisplayMode] =
     useState<OnTimeDisplayMode>("percentage");
@@ -249,11 +257,12 @@ const OnTimeServicePage = () => {
     if (!router.isReady || !config?.apiUrl || !nocCode || !lineId) return;
     const load = async () => {
       setIsLoading(true);
-      const operator = await operatorsService.fetchOperator(nocCode);
-      if (!operator) {
+      const operatorData = await operatorsService.fetchOperator(nocCode);
+      if (!operatorData) {
         router.replace("/on-time/operator-not-found");
         return;
       }
+      setOperator(operatorData);
       setOperatorChecked(true);
 
       const defaultParams = buildDefaultParams({ nocCode, lineId });
@@ -282,18 +291,38 @@ const OnTimeServicePage = () => {
         Math.abs(toDate.diff(fromDate, "days").days) <= 5
           ? Granularity.Hour
           : Granularity.Day;
+      const performanceParams = {
+        ...params,
+        filters: { ...params.filters, granularity },
+      };
       const headwayParams = {
         ...params,
         filters: { ...params.filters, granularity },
       };
 
-      const [serviceInfo, stopPerformance, servicePatterns, headwayTimeSeries] =
-        await Promise.all([
-          settle(onTimeService.fetchServiceInfo(lineId)),
-          settle(onTimeService.fetchStopPerformanceList(params)),
-          settle(transitModelService.fetchServicePatternStops(nocCode, lineId)),
-          settle(headwayService.fetchTimeSeries(headwayParams)),
-        ]);
+      const [
+        serviceInfo,
+        stopPerformance,
+        servicePatterns,
+        headwayTimeSeries,
+        delayFrequency,
+        timeSeries,
+        timeOfDay,
+        dayOfWeek,
+      ] = await Promise.all([
+        settle(onTimeService.fetchServiceInfo(lineId)),
+        settle(onTimeService.fetchStopPerformanceList(performanceParams)),
+        settle(transitModelService.fetchServicePatternStops(nocCode, lineId)),
+        settle(headwayService.fetchTimeSeries(headwayParams)),
+        settle(onTimeService.fetchOnTimeDelayFrequencyData(performanceParams)),
+        settle(onTimeService.fetchOnTimeTimeSeriesData(performanceParams)),
+        settle(
+          onTimeService.fetchOnTimePunctualityTimeOfDayData(performanceParams),
+        ),
+        settle(
+          onTimeService.fetchOnTimePunctualityDayOfWeekData(performanceParams),
+        ),
+      ]);
 
       const frequentServiceInfo = await settle(
         headwayService.fetchFrequentServiceInfo(params),
@@ -310,12 +339,17 @@ const OnTimeServicePage = () => {
       setData({
         fromTimestamp: params.fromTimestamp,
         toTimestamp: params.toTimestamp,
+        granularity,
         serviceInfo: serviceInfo.data,
         stopPerformance: stopPerformance.data ?? [],
         servicePatterns: servicePatterns.data ?? [],
         mergedStops,
         frequentServiceInfo: frequentServiceInfo.data,
         headwayTimeSeries: headwayTimeSeries.data ?? [],
+        delayFrequency: delayFrequency.data ?? [],
+        timeSeries: timeSeries.data ?? [],
+        timeOfDay: timeOfDay.data ?? [],
+        dayOfWeek: dayOfWeek.data ?? [],
       });
       setErrors({
         serviceInfo: serviceInfo.error,
@@ -323,6 +357,10 @@ const OnTimeServicePage = () => {
         servicePatterns: servicePatterns.error,
         frequentServiceInfo: frequentServiceInfo.error,
         headwayTimeSeries: headwayTimeSeries.error,
+        delayFrequency: delayFrequency.error,
+        timeSeries: timeSeries.error,
+        timeOfDay: timeOfDay.error,
+        dayOfWeek: dayOfWeek.error,
       });
       setIsLoading(false);
     };
@@ -357,10 +395,16 @@ const OnTimeServicePage = () => {
         </Link>
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">{lineId}</h1>
-      <span className="govuk-caption-xl govuk-!-margin-bottom-0">
-        {nocCode}
-      </span>
+      <h1 className="govuk-heading-xl govuk-!-margin-bottom-2">
+        {data.serviceInfo
+          ? `${data.serviceInfo.serviceNumber} - ${data.serviceInfo.serviceName}`
+          : lineId}
+      </h1>
+      {operator && (
+        <p className="govuk-caption-l govuk-!-margin-bottom-6">
+          {operator.name} ({operator.nocCode})
+        </p>
+      )}
       {isLoading ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading service data...
@@ -390,10 +434,50 @@ const OnTimeServicePage = () => {
             refineResultsFilters={refineResultsFilters}
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
-          <div className="summary-map-container">
-            <Box minHeight="320px">
-              <p className="govuk-body">TODO: Add map</p>
-            </Box>
+          <div className="govuk-!-margin-top-6">
+            <h2 className="govuk-heading-m">Route</h2>
+            {config && (
+              <OnTimeServiceMap
+                mapboxToken={config.mapboxToken}
+                mapboxStyle={config.mapboxStyle}
+                loading={isLoading}
+                stops={data.mergedStops ?? []}
+                servicePatterns={data.servicePatterns ?? []}
+              />
+            )}
+          </div>
+          <div className="govuk-!-margin-top-6">
+            <ChartNoDataWrapper
+              noData={
+                !isLoading &&
+                (data.delayFrequency?.length ?? 0) === 0 &&
+                (data.timeSeries?.length ?? 0) === 0 &&
+                (data.timeOfDay?.length ?? 0) === 0 &&
+                (data.dayOfWeek?.length ?? 0) === 0
+              }
+              dataExpected={selectedMatchType === "evidenced"}
+              timingPointsNotSupported={false}
+              minMaxDelayNotSupported={false}
+            >
+              <ChartsSection
+                delayFrequency={data.delayFrequency ?? []}
+                timeOfDay={data.timeOfDay ?? []}
+                dayOfWeek={data.dayOfWeek ?? []}
+                timeSeries={data.timeSeries ?? []}
+                fromTimestamp={data.fromTimestamp ?? ""}
+                toTimestamp={data.toTimestamp ?? ""}
+                granularity={data.granularity}
+                headwayTimeSeries={data.headwayTimeSeries ?? []}
+                frequentServiceInfo={data.frequentServiceInfo}
+                errorHeadwayTimeSeries={errors.headwayTimeSeries}
+                errors={{
+                  delayFrequency: errors.delayFrequency,
+                  timeOfDay: errors.timeOfDay,
+                  dayOfWeek: errors.dayOfWeek,
+                  timeSeries: errors.timeSeries,
+                }}
+              />
+            </ChartNoDataWrapper>
           </div>
           <div className="govuk-!-margin-top-6">
             <SummaryStatsGrid
@@ -462,57 +546,6 @@ const OnTimeServicePage = () => {
               onApply={setVisibleStopColumns}
             />
           </div>
-          {/* <JsonSection
-            title="onTimeService.fetchServiceInfo"
-            data={data.serviceInfo}
-            error={errors.serviceInfo}
-          />
-          <JsonSection
-            title="onTimeService.fetchStopPerformanceList"
-            data={data.stopPerformance}
-            error={errors.stopPerformance}
-          />
-          <JsonSection
-            title="transitModelService.fetchServicePatternStops"
-            data={data.servicePatterns}
-            error={errors.servicePatterns}
-          />
-          <JsonSection
-            title="stopPerformanceService.mergeStops"
-            description="Merges transit model stops with normalized on-time stop performance."
-            data={data.mergedStops}
-          />
-          <JsonSection
-            title="headwayService.fetchFrequentServiceInfo"
-            data={data.frequentServiceInfo}
-            error={errors.frequentServiceInfo}
-          /> */}
-          {errors.headwayTimeSeries ? (
-            <p className="govuk-error-message govuk-!-margin-top-6">
-              <span className="govuk-visually-hidden">Error:</span>{" "}
-              {errors.headwayTimeSeries}
-            </p>
-          ) : (data.frequentServiceInfo?.numHours ?? 0) > 0 ? (
-            <>
-              <ExcessWaitTimeChart
-                data={data.headwayTimeSeries ?? []}
-                fromTimestamp={data.fromTimestamp ?? ""}
-                toTimestamp={data.toTimestamp ?? ""}
-              />
-              <p className="govuk-body govuk-!-margin-top-3">
-                {data.frequentServiceInfo?.numHours} hours out of a total{" "}
-                {data.frequentServiceInfo?.totalHours} service hours during the
-                selected period operated on a frequent service basis. Excess
-                Waiting Time is averaged over the period in which the service is
-                running on a frequent basis.
-              </p>
-            </>
-          ) : (
-            <p className="govuk-!-margin-top-6 govuk-body">
-              Excess waiting time is unavailable for this service in the
-              selected period because no frequent service hours were found.
-            </p>
-          )}
         </>
       )}
     </BaseLayout>

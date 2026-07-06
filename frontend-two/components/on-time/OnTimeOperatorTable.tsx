@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Duration } from "luxon";
 import { DateTime } from "luxon";
@@ -11,7 +12,11 @@ import {
   type PerformanceParams,
   type TimeSeriesData,
 } from "@/services/on-time/on-time.service";
-import { OperatorSparkline } from "./OperatorSparkline";
+
+const OperatorSparkline = dynamic(
+  () => import("./OperatorSparkline").then((mod) => mod.OperatorSparkline),
+  { ssr: false },
+);
 
 const columns = [
   { key: "nocCode", label: "NOC", sortable: false },
@@ -40,6 +45,12 @@ function formatDelay(delay: number | null | undefined): string {
     (roundedDelay >= 0 ? "+" : "-") +
     Duration.fromObject({ seconds: Math.abs(roundedDelay) }).toFormat("mm:ss")
   );
+}
+
+function formatPercentage(ratio: number | null | undefined): string {
+  if (ratio == null) return "-";
+  const percentage = Math.round(ratio * 1000) / 10;
+  return `${Number.isInteger(percentage) ? percentage.toFixed(0) : percentage.toFixed(1)}%`;
 }
 
 function getRowValue(
@@ -87,12 +98,9 @@ function renderRow(
       row.name ?? "-"
     ),
     averageDelay: formatDelay(row.averageDelay),
-    onTimeRatio:
-      row.onTimeRatio != null ? `${(row.onTimeRatio * 100).toFixed(1)}%` : "-",
-    lateRatio:
-      row.lateRatio != null ? `${(row.lateRatio * 100).toFixed(1)}%` : "-",
-    earlyRatio:
-      row.earlyRatio != null ? `${(row.earlyRatio * 100).toFixed(1)}%` : "-",
+    onTimeRatio: formatPercentage(row.onTimeRatio),
+    lateRatio: formatPercentage(row.lateRatio),
+    earlyRatio: formatPercentage(row.earlyRatio),
     sparkline:
       sparklineKey && sparklineData.length > 0 ? (
         <OperatorSparkline data={sparklineData} />
