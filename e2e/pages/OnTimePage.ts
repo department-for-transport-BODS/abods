@@ -191,7 +191,9 @@ export class OnTimePage {
   // Operator (nocCode) page locators
 
   backToAllOperatorsLink(): Locator {
-    return this.page.getByRole("link", { name: /All operators/i });
+    return this.page
+      .locator(".govuk-link")
+      .filter({ hasText: /All operators/i });
   }
 
   operatorPageCaption(): Locator {
@@ -236,5 +238,31 @@ export class OnTimePage {
 
   stopsTableHeader(name: string): Locator {
     return this.stopsTable().getByRole("columnheader", { name });
+  }
+
+  // Operator not found page locators
+
+  operatorNotFoundHeading(): Locator {
+    return this.page.getByRole("heading", {
+      name: /Not found/i,
+    });
+  }
+
+  operatorNotFoundMessage(): Locator {
+    return this.page.getByText(
+      /Operator not found, or you do not have permission to view/i,
+    );
+  }
+
+  operatorNotFoundBackLink(): Locator {
+    return this.page
+      .locator(".govuk-back-link")
+      .filter({ hasText: "On-time performance" });
+  }
+
+  gotoOperatorNotFound(): Promise<void> {
+    return this.page.goto("/on-time/operator-not-found", {
+      waitUntil: "domcontentloaded",
+    });
   }
 }
