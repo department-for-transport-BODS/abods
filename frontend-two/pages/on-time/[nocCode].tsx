@@ -1,9 +1,35 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
 import { JsonSection } from "@/components/on-time/JsonSection";
+import {
+  OnTimeServicesTable,
+  SERVICE_TABLE_COLUMN_KEYS,
+  SERVICE_TABLE_COLUMN_LABELS,
+  SERVICE_TABLE_ALWAYS_VISIBLE_KEYS,
+} from "@/components/on-time/OnTimeServicesTable";
+import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
+import {
+  OnTimeFilterPanel,
+  DATE_PRESET_OPTIONS,
+  MATCH_TYPE_OPTIONS,
+  STOP_TYPE_OPTIONS,
+  calculateDateRange,
+} from "@/components/on-time/OnTimeFilterPanel";
+import {
+  type OnTimeDisplayMode,
+  DISPLAY_MODE_OPTIONS,
+  normaliseDirection,
+  aggregatePerformanceTotals,
+} from "@/utils/on-time-table-format";
+import {
+  refineResultsToPerformanceFilters,
+  performanceFiltersToRefineResults,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
+import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { headwayService } from "@/services/on-time/headway.service";
@@ -25,7 +51,42 @@ import {
   DelayFrequencyType,
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
+  MatchType,
+  PerformanceFiltersInputType,
 } from "../../src/generated/graphql";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { RadioOptions } from "@/components/shared/RadioOptions";
+
+const aggregateServicesByLine = (
+  services: FrequentServicePerformance[],
+): FrequentServicePerformance[] => {
+  if (services.length === 0) return [];
+
+  const grouped = new Map<string, FrequentServicePerformance[]>();
+  for (const service of services) {
+    const key = service.lineInfo?.serviceId ?? service.lineId ?? "";
+    const existing = grouped.get(key) ?? [];
+    existing.push(service);
+    grouped.set(key, existing);
+  }
+
+  const aggregated: FrequentServicePerformance[] = [];
+
+  for (const rows of grouped.values()) {
+    const totals = aggregatePerformanceTotals(rows);
+    if (!totals) continue;
+
+    aggregated.push({
+      ...rows[0],
+      ...totals,
+      direction: null,
+      frequent: rows.some((r) => r.frequent),
+    });
+  }
+
+  return aggregated;
+};
 
 interface OperatorOnTimeData {
   overview: { onTime?: PunctualityOverview; headway?: HeadwayOverviewType };
@@ -48,12 +109,75 @@ const OnTimeOperatorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<Partial<OperatorOnTimeData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [serviceSearch, setServiceSearch] = useState("");
+  const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
+  const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
+  const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
+  const [selectedStopType, setSelectedStopType] = useState("timing-points");
+  const [selectedDisplayMode, setSelectedDisplayMode] =
+    useState<OnTimeDisplayMode>("percentage");
+  const [showDisplayOptions, setShowDisplayOptions] = useState(false);
+  const [visibleServiceColumns, setVisibleServiceColumns] = useState<string[]>(
+    SERVICE_TABLE_COLUMN_KEYS,
+  );
+  const [refineResultsFilters, setRefineResultsFilters] =
+    useState<PerformanceFiltersInputType>({});
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(refineResultsFilters),
+    [JSON.stringify(refineResultsFilters)],
+  );
+
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(calculateDateRange("Last 7 days"));
+
+  const chartErrors = [
+    errors.delayFrequency,
+    errors.timeOfDay,
+    errors.dayOfWeek,
+  ];
+  const hasNoChartData =
+    !isLoading &&
+    chartErrors.every((error) => !error) &&
+    (data.delayFrequency?.length ?? 0) === 0 &&
+    (data.timeOfDay?.length ?? 0) === 0 &&
+    (data.dayOfWeek?.length ?? 0) === 0;
+  const dataExpected = selectedMatchType === "evidenced";
+  const wrapperNoData = hasNoChartData;
+  const wrapperDataExpected = dataExpected;
+  const wrapperTimingPointsNotSupported = false;
+  const wrapperMinMaxDelayNotSupported = false;
+
+  const handleDatePresetChange = (selected: string) => {
+    setSelectedDatePreset(selected);
+    const range = calculateDateRange(selected);
+    setDateRange(range);
+  };
 
   useEffect(() => {
-    if (!config?.apiUrl || !nocCode) return;
+    if (!router.isReady || !config?.apiUrl || !nocCode) return;
     const load = async () => {
       setIsLoading(true);
-      const params = buildDefaultParams({ nocCode });
+      const defaultParams = buildDefaultParams({ nocCode });
+      const params = {
+        ...defaultParams,
+        ...(dateRange
+          ? {
+              fromTimestamp: dateRange.from,
+              toTimestamp: dateRange.to,
+            }
+          : {}),
+        filters: {
+          ...defaultParams.filters,
+          ...refineResultsFilters,
+          matchType:
+            selectedMatchType === "evidenced"
+              ? MatchType.Evidenced
+              : MatchType.Estimated,
+          timingPointsOnly: selectedStopType === "timing-points",
+        },
+      };
 
       const [
         overview,
@@ -98,17 +222,150 @@ const OnTimeOperatorPage = () => {
       setIsLoading(false);
     };
     load();
-  }, [config, nocCode]);
+  }, [
+    config,
+    dateRange,
+    nocCode,
+    refineResultsFilters,
+    selectedMatchType,
+    selectedStopType,
+    router.isReady,
+  ]);
 
-  if (!nocCode) {
+  const summaryStats = data.overview?.onTime;
+  const hasDirectionFilter = selectedDirections.length > 0;
+
+  const directionFilteredServices = useMemo(() => {
+    const services = data.servicePerformance ?? [];
+    if (!hasDirectionFilter) return services;
+
+    return services.filter((service) => {
+      const direction = normaliseDirection(service.direction);
+      return selectedDirections.some(
+        (selectedDirection) => direction === selectedDirection.toLowerCase(),
+      );
+    });
+  }, [data.servicePerformance, hasDirectionFilter, selectedDirections]);
+
+  const summaryCards = useMemo(() => {
+    if (!hasDirectionFilter) {
+      const summaryTotal =
+        (summaryStats?.onTime ?? 0) +
+        (summaryStats?.late ?? 0) +
+        (summaryStats?.early ?? 0);
+
+      const totalStopDepartures =
+        (summaryStats?.scheduled ?? 0) > 0
+          ? summaryStats?.scheduled ?? 0
+          : (summaryStats?.completed ?? 0) + (summaryStats?.noData ?? 0);
+
+      const recordedStopDepartures =
+        (summaryStats?.completed ?? 0) > 0
+          ? summaryStats?.completed ?? 0
+          : summaryTotal;
+
+      return {
+        onTimeCount: summaryStats?.onTime ?? null,
+        lateCount: summaryStats?.late ?? null,
+        earlyCount: summaryStats?.early ?? null,
+        incompleteCount: summaryStats?.noData ?? null,
+        recordedStopDepartures:
+          recordedStopDepartures > 0 ? recordedStopDepartures : null,
+        totalStopDepartures:
+          totalStopDepartures > 0 ? totalStopDepartures : null,
+        incompleteBreakdown: summaryStats?.incomplete ?? null,
+        averageDelay: summaryStats?.averageDelay ?? null,
+      };
+    }
+
+    if (directionFilteredServices.length === 0) {
+      return {
+        onTimeCount: null,
+        lateCount: null,
+        earlyCount: null,
+        incompleteCount: null,
+        recordedStopDepartures: null,
+        totalStopDepartures: null,
+        incompleteBreakdown: null,
+        averageDelay: null,
+      };
+    }
+
+    let onTimeCount = 0;
+    let lateCount = 0;
+    let earlyCount = 0;
+    let scheduledDepartures = 0;
+    let recordedStopDepartures = 0;
+    let countDelayed = 0;
+    let weightedDelayTotal = 0;
+
+    for (const row of directionFilteredServices) {
+      onTimeCount += row.onTime ?? 0;
+      lateCount += row.late ?? 0;
+      earlyCount += row.early ?? 0;
+      scheduledDepartures += row.scheduledDepartures ?? 0;
+      recordedStopDepartures += row.actualDepartures ?? 0;
+      countDelayed += row.countDelayed ?? 0;
+      weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
+    }
+
+    const incompleteCount = Math.max(
+      0,
+      scheduledDepartures - recordedStopDepartures,
+    );
+
+    return {
+      onTimeCount,
+      lateCount,
+      earlyCount,
+      incompleteCount,
+      recordedStopDepartures,
+      totalStopDepartures: scheduledDepartures,
+      incompleteBreakdown: null,
+      averageDelay: countDelayed > 0 ? weightedDelayTotal / countDelayed : null,
+    };
+  }, [directionFilteredServices, hasDirectionFilter, summaryStats]);
+
+  const filteredServices = useMemo(() => {
+    const services = directionFilteredServices;
+    const search = serviceSearch.trim().toLowerCase();
+
+    const searchFilteredServices = services.filter((service) => {
+      const searchFields = [
+        service.lineId,
+        service.lineInfo?.serviceName,
+        service.lineInfo?.serviceNumber,
+      ];
+
+      return searchFields.some((field) =>
+        (field ?? "").toLowerCase().includes(search),
+      );
+    });
+
+    if (!hasDirectionFilter) {
+      return aggregateServicesByLine(searchFilteredServices);
+    }
+
+    return searchFilteredServices.filter((service) => {
+      const direction = normaliseDirection(service.direction);
+      return selectedDirections.some(
+        (selectedDirection) => direction === selectedDirection.toLowerCase(),
+      );
+    });
+  }, [
+    directionFilteredServices,
+    hasDirectionFilter,
+    selectedDirections,
+    serviceSearch,
+  ]);
+
+  if (!router.isReady || !nocCode) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>
       </BaseLayout>
     );
   }
-
-  const firstLineId = data.servicePerformancePlain?.[0]?.lineId;
 
   return (
     <BaseLayout title={`On-time performance: ${nocCode}`}>
@@ -117,47 +374,141 @@ const OnTimeOperatorPage = () => {
           &larr; All operators
         </Link>
       </p>
-      <h1 className="govuk-heading-xl">On-time performance: {nocCode}</h1>
-      <p className="govuk-body">
-        Skeleton operator view. Data is fetched via the migrated on-time,
-        headway and performance services and shown as JSON for verification.
+      <span className="govuk-caption-xl">On-time performance</span>
+      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
+      <p className="govuk-caption-xl govuk-!-margin-bottom-0">
+        TODO: Operator: {nocCode}
       </p>
-      {firstLineId ? (
-        <p className="govuk-body">
-          Drill in to a service:{" "}
-          <Link
-            className="govuk-link"
-            href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(firstLineId)}`}
-          >
-            {firstLineId}
-          </Link>
-        </p>
-      ) : null}
-
       {isLoading ? (
-        <p className="govuk-body">Loading on-time data...</p>
+        <p className="govuk-body govuk-!-margin-top-6">
+          Loading on-time data...
+        </p>
       ) : (
         <>
-          <JsonSection
-            title="performanceService.fetchOverviewStats"
-            description="Combined on-time stats + headway overview (headway only when line filters present)."
-            data={data.overview}
-            error={errors.overview}
+          <OnTimeFilterPanel
+            isLoading={isLoading}
+            refineResultsInitialValues={refineResultsInitialValues}
+            onApplyRefineResults={(values) => {
+              setRefineResultsFilters(
+                refineResultsToPerformanceFilters(values),
+              );
+            }}
+            onResetRefineResults={() => setRefineResultsFilters({})}
+            dateRange={dateRange}
+            onDateRangeChange={(value) => setDateRange(value ?? null)}
+            datePresetOptions={DATE_PRESET_OPTIONS}
+            selectedDatePreset={selectedDatePreset}
+            onDatePresetChange={handleDatePresetChange}
+            selectedMatchType={selectedMatchType}
+            onMatchTypeChange={setSelectedMatchType}
+            matchTypeOptions={MATCH_TYPE_OPTIONS}
+            selectedStopType={selectedStopType}
+            onStopTypeChange={setSelectedStopType}
+            stopTypeOptions={STOP_TYPE_OPTIONS}
+            refineResultsFilters={refineResultsFilters}
+            onRefineResultsFilterChange={setRefineResultsFilters}
           />
-          <JsonSection
+          <ChartNoDataWrapper
+            noData={wrapperNoData}
+            dataExpected={wrapperDataExpected}
+            timingPointsNotSupported={wrapperTimingPointsNotSupported}
+            minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
+          >
+            <ChartsSection
+              delayFrequency={data.delayFrequency ?? []}
+              timeOfDay={data.timeOfDay ?? []}
+              dayOfWeek={data.dayOfWeek ?? []}
+              errors={{
+                delayFrequency: errors.delayFrequency,
+                timeOfDay: errors.timeOfDay,
+                dayOfWeek: errors.dayOfWeek,
+              }}
+            />
+          </ChartNoDataWrapper>
+          <div className="govuk-!-margin-top-6">
+            {errors.servicePerformance ? (
+              <p className="govuk-body" style={{ color: "#d4351c" }}>
+                Error loading service data: {errors.servicePerformance}
+              </p>
+            ) : (
+              <>
+                <div className="govuk-!-margin-bottom-6">
+                  <SummaryStatsGrid
+                    onTimeCount={summaryCards.onTimeCount}
+                    lateCount={summaryCards.lateCount}
+                    earlyCount={summaryCards.earlyCount}
+                    incompleteCount={summaryCards.incompleteCount}
+                    recordedStopDepartures={summaryCards.recordedStopDepartures}
+                    totalStopDepartures={summaryCards.totalStopDepartures}
+                    incompleteBreakdown={summaryCards.incompleteBreakdown}
+                    averageDelay={summaryCards.averageDelay}
+                  />
+                </div>
+                <div className="on-time-service-filters govuk-body govuk-!-margin-top-6">
+                  <div className="on-time-service-filters__inputs">
+                    <div className="on-time-service-filters__search">
+                      <SearchInput
+                        id="service-search"
+                        label="Search for a service"
+                        testId=""
+                        value={serviceSearch}
+                        onChange={setServiceSearch}
+                      />
+                    </div>
+                    <div className="on-time-service-filters__directions">
+                      <MultiselectDropdown
+                        label="Directions"
+                        options={["Inbound", "Outbound"]}
+                        selected={selectedDirections}
+                        onChange={setSelectedDirections}
+                        placeholderText="All directions"
+                      />
+                    </div>
+                  </div>
+                  <div className="on-time-service-filters__display-options">
+                    <p className="on-time-service-display-options-button">
+                      <button
+                        type="button"
+                        className="govuk-link"
+                        onClick={() => setShowDisplayOptions(true)}
+                      >
+                        Display options
+                      </button>
+                    </p>
+                    <div className="on-time-service-filters__radios">
+                      <RadioOptions
+                        name="on-time-display-mode"
+                        legend="Show service performance values as"
+                        options={DISPLAY_MODE_OPTIONS}
+                        value={selectedDisplayMode}
+                        onChange={setSelectedDisplayMode}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <OnTimeServicesTable
+                  data={filteredServices}
+                  nocCode={nocCode ?? ""}
+                  displayMode={selectedDisplayMode}
+                  visibleColumns={visibleServiceColumns}
+                />
+                <DisplayOptionsModal
+                  open={showDisplayOptions}
+                  columnKeys={SERVICE_TABLE_COLUMN_KEYS}
+                  visibleColumns={visibleServiceColumns}
+                  alwaysVisibleKeys={SERVICE_TABLE_ALWAYS_VISIBLE_KEYS}
+                  columnLabels={SERVICE_TABLE_COLUMN_LABELS}
+                  onClose={() => setShowDisplayOptions(false)}
+                  onApply={setVisibleServiceColumns}
+                />
+              </>
+            )}
+          </div>
+          {/* TODO: */}
+          {/* <JsonSection
             title="onTimeService.fetchOnTimeTimeSeriesData"
             data={data.timeSeries}
             error={errors.timeSeries}
-          />
-          <ChartsSection
-            delayFrequency={data.delayFrequency ?? []}
-            timeOfDay={data.timeOfDay ?? []}
-            dayOfWeek={data.dayOfWeek ?? []}
-            errors={{
-              delayFrequency: errors.delayFrequency,
-              timeOfDay: errors.timeOfDay,
-              dayOfWeek: errors.dayOfWeek,
-            }}
           />
           <JsonSection
             title="onTimeService.fetchOnTimePerformanceList"
@@ -165,16 +516,10 @@ const OnTimeOperatorPage = () => {
             error={errors.servicePerformancePlain}
           />
           <JsonSection
-            title="performanceService.fetchServicePerformance"
-            description="onTimePerformanceList merged with headway frequentServices to set `frequent` flag."
-            data={data.servicePerformance}
-            error={errors.servicePerformance}
-          />
-          <JsonSection
             title="headwayService.fetchTimeSeries"
             data={data.headwayTimeSeries}
             error={errors.headwayTimeSeries}
-          />
+          /> */}
         </>
       )}
     </BaseLayout>

@@ -23,7 +23,10 @@ import {
 import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
 import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
-import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import {
+  RefineResultsFilterValues,
+  performanceFiltersToRefineResults,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
 import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import {
@@ -34,8 +37,8 @@ import {
   StopStatistics,
 } from "../src/generated/graphql";
 import { FilterChips } from "@/components/on-time/FilterChips";
-import { Period } from "@/utils/dateRange";
-import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { Period } from "@/utils/date-range";
+import { formatDateToISODateString } from "@/utils/date-formatter";
 import { operatorsService } from "@/services/operator.service";
 
 const MAX_BOUND_SPAN = 0.5;
@@ -71,24 +74,6 @@ function getPresetWindow(preset: Period, today: DateTime) {
   }
 }
 
-const dayOfWeekToRefineValues = (
-  dayOfWeekFlags?: DayOfWeekFlags,
-): RefineResultsFilterValues["dayOfWeekFlags"] | undefined => {
-  if (!dayOfWeekFlags) {
-    return undefined;
-  }
-
-  return {
-    Mon: Boolean(dayOfWeekFlags.monday),
-    Tue: Boolean(dayOfWeekFlags.tuesday),
-    Wed: Boolean(dayOfWeekFlags.wednesday),
-    Thu: Boolean(dayOfWeekFlags.thursday),
-    Fri: Boolean(dayOfWeekFlags.friday),
-    Sat: Boolean(dayOfWeekFlags.saturday),
-    Sun: Boolean(dayOfWeekFlags.sunday),
-  };
-};
-
 const refineValuesToDayOfWeekQuery = (
   dayOfWeekFlags: RefineResultsFilterValues["dayOfWeekFlags"],
 ): string | undefined => {
@@ -98,18 +83,6 @@ const refineValuesToDayOfWeekQuery = (
 
   return selectedDays.length === 7 ? undefined : selectedDays.join(",");
 };
-
-const stopFiltersToRefineValues = (
-  dayOfWeekFlags: DayOfWeekFlags | undefined,
-  startTime: string | undefined,
-  endTime: string | undefined,
-): Partial<RefineResultsFilterValues> => ({
-  ...(dayOfWeekToRefineValues(dayOfWeekFlags)
-    ? { dayOfWeekFlags: dayOfWeekToRefineValues(dayOfWeekFlags) }
-    : {}),
-  ...(startTime ? { startTime } : {}),
-  ...(endTime ? { endTime } : {}),
-});
 
 const refineValuesToStopFiltersQuery = (
   values: RefineResultsFilterValues,
@@ -703,17 +676,17 @@ const StopAnalysisPage = () => {
     [],
   );
 
-  const refineResultsInitialValues = useMemo(
-    () => stopFiltersToRefineValues(dayOfWeekFlags, startTime, endTime),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
-  );
-
   const activeRefineFilters: PerformanceFiltersInputType = {
     ...(dayOfWeekFlags ? { dayOfWeekFlags } : {}),
     ...(startTime ? { startTime } : {}),
     ...(endTime ? { endTime } : {}),
   };
+
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(activeRefineFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
+  );
 
   useEffect(() => {
     return () => {

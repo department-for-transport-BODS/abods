@@ -11,7 +11,7 @@ import {
   OperatorHistoricStatsQuery,
 } from "../../../src/generated/graphql";
 import { Box } from "@/components/shared/Box";
-import { SummaryStatWithTooltip } from "@/components/shared/SummaryStatWithTooltip";
+import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
 import { useRequireAuth } from "@/hooks/useAuth";

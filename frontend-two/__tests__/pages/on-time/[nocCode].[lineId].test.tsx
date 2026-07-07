@@ -1,3 +1,7 @@
+// TODO: The OnTimeServicePage and OnTimeOperatorPage share same components.
+// A lot of the testing for the display options and filters have been captured
+// in the OnTimeOperatorPage tests, so we will not repeat those here.
+
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import OnTimeServicePage from "@/pages/on-time/[nocCode]/[lineId]";
 
@@ -62,6 +66,7 @@ vi.mock("next/router", () => ({
     pathname: "/on-time/[nocCode]/[lineId]",
     asPath: "/on-time/ABCD/LINE1",
     query: mockQuery,
+    isReady: true,
     replace: vi.fn(),
   }),
 }));
@@ -124,27 +129,6 @@ describe("OnTimeServicePage", () => {
     render(<OnTimeServicePage />);
 
     expect(screen.getByText("Loading service data...")).toBeInTheDocument();
-  });
-
-  it("renders skeleton json sections and calls mergeStops", async () => {
-    render(<OnTimeServicePage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("onTimeService.fetchServiceInfo"),
-      ).toBeInTheDocument();
-    });
-
-    expect(
-      screen.getByText("transitModelService.fetchServicePatternStops"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("stopPerformanceService.mergeStops"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("headwayService.fetchFrequentServiceInfo"),
-    ).toBeInTheDocument();
-    expect(mockMergeStops).toHaveBeenCalled();
   });
 
   it("renders ExcessWaitTimeChart when frequent service hours are available", async () => {

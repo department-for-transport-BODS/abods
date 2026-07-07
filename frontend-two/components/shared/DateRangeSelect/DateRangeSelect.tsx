@@ -6,7 +6,7 @@ import {
   formatDateToDisplayString,
   formatDateToISODateString,
   formatISODateStringToDate,
-} from "@/utils/dateFormatter";
+} from "@/utils/date-formatter";
 
 type CalendarDateRange = { start?: DateTime; end?: DateTime };
 

@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   registerTimingPointIcons: vi.fn(async () => undefined),
 }));
 
-vi.mock("@/components/stop-analysis/timingPointIcons", () => ({
+vi.mock("@/components/icons/timingPointIcons", () => ({
   registerTimingPointIcons: mocks.registerTimingPointIcons,
 }));
 
@@ -31,6 +31,7 @@ const mapboxMock = vi.hoisted(() => {
     getCanvas: vi.fn(() => ({ style: {} })),
     getSource: vi.fn(() => undefined),
     getZoom: vi.fn(() => 12),
+    hasImage: vi.fn(() => false),
     isStyleLoaded: vi.fn(() => true),
     on: vi.fn(),
     remove: vi.fn(),
@@ -49,6 +50,7 @@ const mapboxMock = vi.hoisted(() => {
     getCanvas = methods.getCanvas;
     getSource = methods.getSource;
     getZoom = methods.getZoom;
+    hasImage = methods.hasImage;
     isStyleLoaded = methods.isStyleLoaded;
     on = methods.on;
     remove = methods.remove;

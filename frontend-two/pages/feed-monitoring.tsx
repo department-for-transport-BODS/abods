@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { FeedTable } from "@/components/feed-monitoring/FeedTable";
+import { SearchInput } from "@/components/shared/SearchInput";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import {
   FeedMonitoringListQuery,
@@ -89,19 +90,13 @@ const FeedMonitoringPage = () => {
             </div>
           </div>
         )}
-        <div className="govuk-form-group">
-          <label className="govuk-label" htmlFor="operator-search">
-            Search for an operator
-          </label>
-          <input
-            className="govuk-input govuk-input--width-20"
-            id="operator-search"
-            data-testid="operator-search-input"
-            type="text"
-            value={operatorSearch}
-            onChange={(e) => setOperatorSearch(e.target.value)}
-          />
-        </div>
+        <SearchInput
+          id="operator-search"
+          label="Search for an operator"
+          testId="operator-search-input"
+          value={operatorSearch}
+          onChange={setOperatorSearch}
+        />
         {isLoading ? (
           <p className="govuk-body">Loading...</p>
         ) : (

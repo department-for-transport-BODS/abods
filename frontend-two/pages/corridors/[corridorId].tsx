@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { DateTime } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
-import { Stat } from "@/components/shared/Stat";
+import { Stat } from "@/components/shared/SummaryStat/Stat";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
@@ -16,7 +16,7 @@ import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnaly
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
-import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
+import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
 import { parseCorridorId, parseMatchType, queryValue } from "@/utils/query";

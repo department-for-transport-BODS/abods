@@ -1,33 +1,117 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// DisplayOptionsModal styling
+.display-options-modal__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+}
+
+.display-options-modal__show-all-link {
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}
+
+// Display options styling
+.on-time-service-filters__display-options {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+.on-time-service-display-options-button {
+  display: flex;
+  background: transparent;
+  justify-content: flex-end;
+  cursor: pointer;
+  font-size: 19px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}
+
+// On Time Service / Stop styling
+.on-time-stops-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.on-time-service-filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+
+.on-time-service-filters__radios {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(1);
+  margin-left: auto;
+}
+
+.on-time-service-filters__inputs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(2);
+}
+
+.on-time-service-filters__search {
+  min-width: 200px;
+}
+
+.on-time-service-filters__directions {
+  min-width: 200px;
+}
+
+// Summary styling
+.summary-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-admin-area-select-container {
+  min-width: 300px;
+  max-width: 350px;
+}
+
 // Controls styling
 .controls-container {
   display: flex;
   flex-direction: row;
-  gap: govuk-spacing(4);
+  column-gap: govuk-spacing(1);
+  row-gap: govuk-spacing(2);
   margin-bottom: govuk-spacing(2);
   align-items: baseline;
+  justify-content: space-between;
   flex-wrap: wrap;
   width: 100%;
 }
 
 .controls-date-selects-container {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   gap: govuk-spacing(3);
-  margin-bottom: govuk-spacing(3);
+
+  .govuk-form-group {
+    margin-bottom: 0;
+  }
 
   > :first-child {
     flex: 1 1 24rem;
     min-width: 20rem;
     max-width: 32rem;
-  }
-
-  > :nth-child(2) {
-    flex: 0 1 14rem;
-    min-width: 14rem;
-    max-width: 20rem;
   }
 }
 
@@ -36,16 +120,15 @@
 }
 
 .refine-results-button-container {
-  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  margin-bottom: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
 }
 
-.on-time-toggle-container {
-  margin-top: govuk-spacing(-5);
-  margin-bottom: govuk-spacing(6);
-}
-
-.on-time-refine-results-button,
-.stop-analysis-filters__refine-button {
+.on-time-refine-results-button {
   display: inline-flex;
   align-items: center;
   gap: govuk-spacing(1);
@@ -69,7 +152,7 @@
 // FilterChips styling
 .filter-chips {
   padding: 0;
-  margin: 0 0 govuk-spacing(3);
+  margin: 0 0 govuk-spacing(2);
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;
@@ -1237,6 +1320,30 @@ $day-width: 46px;
   color: #ffffff;
   font-size: 16px;
   padding: 8px 12px;
+  z-index: 1000;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+.summary-stat .tooltip p {
+  margin: 0 0 8px;
+}
+
+.summary-stat .tooltip p:last-of-type {
+  margin-bottom: 4px;
+}
+
+.summary-stat__tooltip-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.summary-stat__tooltip-list li {
+  margin-bottom: 4px;
+}
+
+.summary-stat__tooltip-list li:last-child {
+  margin-bottom: 0;
 }
 
 .summary-stat .tooltip .triangle {
@@ -2217,6 +2324,36 @@ $day-width: 46px;
     justify-content: flex-end;
     @include govuk-font(19);
     margin-top: govuk-spacing(4);
+  }
+}
+
+.summary-content-wrapper {
+  display: flex;
+  gap: govuk-spacing(4);
+  width: 100%;
+
+  .summary-stat-container,
+  .summary-map-container {
+    flex: 1 1 50%;
+    min-width: 0;
+  }
+}
+
+.summary-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: govuk-spacing(4);
+  width: 100%;
+  margin-bottom: govuk-spacing(4);
+
+  &__item {
+    min-width: 0;
+    overflow: visible;
+    position: relative;
+  }
+
+  .stat {
+    margin-bottom: 0;
   }
 }
 

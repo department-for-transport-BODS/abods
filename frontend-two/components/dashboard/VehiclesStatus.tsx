@@ -1,5 +1,5 @@
 import { Box } from "@/components/shared/Box";
-import { Stat } from "@/components/shared/Stat";
+import { Stat } from "@/components/shared/SummaryStat/Stat";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
 
 interface VehiclesStatusProps {

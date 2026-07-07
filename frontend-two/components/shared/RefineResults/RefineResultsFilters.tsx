@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { DayKey, DaySelect } from "@/components/shared/DaySelect";
 import { TimeRangeSlider } from "@/components/shared/TimeRangeSlider";
+import { PerformanceFiltersInputType } from "@/src/generated/graphql";
 
 const DELAY_OPTIONS = ["none", "10", "20", "30", "40", "50", "60"] as const;
 
@@ -187,4 +188,72 @@ export const RefineResultsFilters = ({
       </div>
     </form>
   );
+};
+
+export const refineResultsToPerformanceFilters = (
+  values: RefineResultsFilterValues,
+): PerformanceFiltersInputType => {
+  const hasCustomDaySelection = Object.values(values.dayOfWeekFlags).some(
+    (enabled) => !enabled,
+  );
+
+  return {
+    ...(hasCustomDaySelection
+      ? {
+          dayOfWeekFlags: {
+            monday: values.dayOfWeekFlags.Mon,
+            tuesday: values.dayOfWeekFlags.Tue,
+            wednesday: values.dayOfWeekFlags.Wed,
+            thursday: values.dayOfWeekFlags.Thu,
+            friday: values.dayOfWeekFlags.Fri,
+            saturday: values.dayOfWeekFlags.Sat,
+            sunday: values.dayOfWeekFlags.Sun,
+          },
+        }
+      : {}),
+    ...(values.startTime !== "00:00" ? { startTime: values.startTime } : {}),
+    ...(values.endTime !== "23:59" ? { endTime: values.endTime } : {}),
+    ...(values.minDelayStr !== "none"
+      ? { minDelay: -1 * Number(values.minDelayStr) }
+      : {}),
+    ...(values.maxDelayStr !== "none"
+      ? { maxDelay: Number(values.maxDelayStr) }
+      : {}),
+  };
+};
+
+export const performanceFiltersToRefineResults = (
+  filters: PerformanceFiltersInputType,
+): Partial<RefineResultsFilterValues> => {
+  return {
+    ...(filters.dayOfWeekFlags
+      ? {
+          dayOfWeekFlags: {
+            Mon: Boolean(filters.dayOfWeekFlags.monday),
+            Tue: Boolean(filters.dayOfWeekFlags.tuesday),
+            Wed: Boolean(filters.dayOfWeekFlags.wednesday),
+            Thu: Boolean(filters.dayOfWeekFlags.thursday),
+            Fri: Boolean(filters.dayOfWeekFlags.friday),
+            Sat: Boolean(filters.dayOfWeekFlags.saturday),
+            Sun: Boolean(filters.dayOfWeekFlags.sunday),
+          },
+        }
+      : {}),
+    ...(filters.startTime ? { startTime: filters.startTime } : {}),
+    ...(filters.endTime ? { endTime: filters.endTime } : {}),
+    ...(typeof filters.minDelay === "number"
+      ? {
+          minDelayStr: String(
+            Math.abs(filters.minDelay),
+          ) as RefineResultsFilterValues["minDelayStr"],
+        }
+      : {}),
+    ...(typeof filters.maxDelay === "number"
+      ? {
+          maxDelayStr: String(
+            filters.maxDelay,
+          ) as RefineResultsFilterValues["maxDelayStr"],
+        }
+      : {}),
+  };
 };
