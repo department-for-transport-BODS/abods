@@ -21,7 +21,9 @@ export const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
 export const ADMIN_AREA_HIDDEN_ZOOM = 12;
 export const ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD = 11;
 
-export const BRITISH_ISLES_BBOX: [number, number, number, number] = [-10.5, 49.5, 2.0, 61.0];
+export const BRITISH_ISLES_BBOX: [number, number, number, number] = [
+  -10.5, 49.5, 2.0, 61.0,
+];
 
 export const RED_THRESHOLD = 0.6;
 export const GREEN_THRESHOLD = 0.8;

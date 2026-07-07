@@ -105,9 +105,7 @@ const aggregateStopsByStopId = (
       averageScheduled: hasAverageScheduled
         ? averageScheduledTotal / rows.length
         : null,
-      averageActual: hasAverageActual
-        ? averageActualTotal / rows.length
-        : null,
+      averageActual: hasAverageActual ? averageActualTotal / rows.length : null,
     });
   }
 

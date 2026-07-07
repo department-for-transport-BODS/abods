@@ -229,9 +229,13 @@ export const OnTimeStopsTable = ({
             : (totals.actualDepartures ?? 0).toLocaleString()}
         </strong>
       ),
-      averageScheduled: <strong>{formatDuration(totals.averageScheduled)}</strong>,
+      averageScheduled: (
+        <strong>{formatDuration(totals.averageScheduled)}</strong>
+      ),
       averageActual: <strong>{formatDuration(totals.averageActual)}</strong>,
-      averageDelay: <strong>{formatDuration(totals.averageDelay, false)}</strong>,
+      averageDelay: (
+        <strong>{formatDuration(totals.averageDelay, false)}</strong>
+      ),
       onTimeRatio: (
         <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>
       ),
