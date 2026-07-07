@@ -18,7 +18,7 @@ import {
   POINT_COLOURS,
   RED_THRESHOLD,
   GREEN_THRESHOLD,
-} from "@/utils/mapConstants";
+} from "@/utils/map-constants";
 
 interface StopAnalysisMapProps {
   mapboxToken: string;

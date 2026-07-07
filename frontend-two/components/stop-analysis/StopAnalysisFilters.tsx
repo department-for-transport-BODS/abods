@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { DateTime } from "luxon";
-import { Period } from "@/utils/dateRange";
+import { Period } from "@/utils/date-range";
 import { StopTypeOption } from "@/types/stop-analysis";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";

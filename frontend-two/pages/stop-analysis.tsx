@@ -37,8 +37,8 @@ import {
   StopStatistics,
 } from "../src/generated/graphql";
 import { FilterChips } from "@/components/on-time/FilterChips";
-import { Period } from "@/utils/dateRange";
-import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { Period } from "@/utils/date-range";
+import { formatDateToISODateString } from "@/utils/date-formatter";
 import { operatorsService } from "@/services/operator.service";
 
 const MAX_BOUND_SPAN = 0.5;

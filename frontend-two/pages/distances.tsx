@@ -11,7 +11,7 @@ import {
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { formatDateToISODateString } from "@/utils/date-formatter";
 import { DateTime } from "luxon";
 
 const Button = dynamic(

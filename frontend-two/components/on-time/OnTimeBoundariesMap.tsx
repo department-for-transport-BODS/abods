@@ -14,7 +14,7 @@ import {
   ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD,
   ClipableFeature,
   isClipableFeature,
-} from "@/utils/mapConstants";
+} from "@/utils/map-constants";
 
 interface OnTimeBoundariesMapProps {
   mapboxToken: string;

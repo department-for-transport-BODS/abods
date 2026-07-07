@@ -6,7 +6,7 @@ import { RefineResultsButton } from "@/components/shared/RefineResults/RefineRes
 import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { PerformanceFiltersInputType } from "@/src/generated/graphql";
-import { formatDateToISODateString } from "@/utils/dateFormatter";
+import { formatDateToISODateString } from "@/utils/date-formatter";
 
 export const DATE_PRESET_OPTIONS = [
   "Last 7 days",
