@@ -123,7 +123,7 @@ interface ServiceLevelData {
 const OnTimeServicePage = () => {
   useRequireAuth();
   const router = useRouter();
-  const { config } = useConfig() ?? { mapboxToken: "", mapboxStyle: "" };
+  const { config } = useConfig();
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
   const lineId =

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { Granularity } from "@/src/generated/graphql";
+import { formatPercentage } from "@/utils/maths";
 import {
   onTimeService,
   type OperatorPerformance,
@@ -51,12 +52,6 @@ function formatDelay(delay: number | null | undefined): string {
     (roundedDelay >= 0 ? "+" : "-") +
     Duration.fromObject({ seconds: Math.abs(roundedDelay) }).toFormat("mm:ss")
   );
-}
-
-function formatPercentage(ratio: number | null | undefined): string {
-  if (ratio == null) return "-";
-  const percentage = Math.round(ratio * 1000) / 10;
-  return `${Number.isInteger(percentage) ? percentage.toFixed(0) : percentage.toFixed(1)}%`;
 }
 
 function getRowValue(
