@@ -1,74 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource } from "mapbox-gl";
-import type {
-  FeatureCollection,
-  Feature,
-  LineString,
-  MultiLineString,
-  MultiPolygon,
-  Polygon,
-} from "geojson";
+import type { FeatureCollection, Feature } from "geojson";
 import bboxClip from "@turf/bbox-clip";
 import pointOnFeature from "@turf/point-on-feature";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { Spinner } from "@/components/shared/Spinner";
 import { registerTimingPointIcons } from "@/components/icons/timingPointIcons";
 import { BoundingBoxInputType as BoundingBox } from "@/src/generated/graphql";
-
 import { StopStatistics } from "@/src/generated/graphql";
-
-// British Isles default bounds
-const BRITISH_ISLES_BBOX: LngLatBoundsLike = [-10.5, 49.5, 2.0, 61.0];
-
-const ADMIN_AREA_HIDDEN_ZOOM = 12;
-
-const RED_THRESHOLD = 0.6;
-const GREEN_THRESHOLD = 0.8;
-
-const POINT_COLOURS = [
-  "case",
-  ["==", ["get", "completedDepartures"], 0],
-  "#b1b4b6",
-  [
-    "step",
-    ["/", ["get", "onTime"], ["get", "completedDepartures"]],
-    "#d4351c",
-    RED_THRESHOLD,
-    "#ffdd00",
-    GREEN_THRESHOLD,
-    "#28a197",
-  ],
-] as NonNullable<mapboxgl.CirclePaint>["circle-color"];
-
-const CLUSTER_PROPERTIES = {
-  early: ["+", ["get", "early"]] as [string, mapboxgl.ExpressionSpecification],
-  onTime: ["+", ["get", "onTime"]] as [
-    string,
-    mapboxgl.ExpressionSpecification,
-  ],
-  late: ["+", ["get", "late"]] as [string, mapboxgl.ExpressionSpecification],
-  completedDepartures: ["+", ["get", "completedDepartures"]] as [
-    string,
-    mapboxgl.ExpressionSpecification,
-  ],
-  scheduledDepartures: ["+", ["get", "scheduledDepartures"]] as [
-    string,
-    mapboxgl.ExpressionSpecification,
-  ],
-};
-
-type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
-type ClipableFeature = Feature<ClipableGeometry>;
-
-const isClipableFeature = (feature: Feature): feature is ClipableFeature => {
-  const geometryType = feature.geometry?.type;
-  return (
-    geometryType === "LineString" ||
-    geometryType === "MultiLineString" ||
-    geometryType === "Polygon" ||
-    geometryType === "MultiPolygon"
-  );
-};
+import {
+  BRITISH_ISLES_BBOX,
+  ADMIN_AREA_HIDDEN_ZOOM,
+  ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD,
+  ClipableFeature,
+  isClipableFeature,
+  CLUSTER_PROPERTIES,
+  POINT_COLOURS,
+  RED_THRESHOLD,
+  GREEN_THRESHOLD,
+} from "@/utils/mapConstants";
 
 interface StopAnalysisMapProps {
   mapboxToken: string;
@@ -135,7 +85,7 @@ export const StopAnalysisMap = ({
       }
       const hoveredAdminArea = hoveredAdminAreaRef.current;
       if (!hoveredAdminArea) return;
-      if (map.getZoom() >= 11) {
+      if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) {
         clearPopup();
         return;
       }

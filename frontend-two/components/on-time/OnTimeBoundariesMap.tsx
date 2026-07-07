@@ -1,25 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import type {
-  Feature,
-  FeatureCollection,
-  LineString,
-  MultiLineString,
-  MultiPolygon,
-  Polygon,
-} from "geojson";
 import bbox from "@turf/bbox";
 import bboxClip from "@turf/bbox-clip";
 import flip from "@turf/flip";
 import pointOnFeature from "@turf/point-on-feature";
 import { feature } from "@turf/helpers";
 import { Spinner } from "@/components/shared/Spinner";
-
-type AdminAreaShape = {
-  id: string;
-  name: string;
-  shape: string;
-};
+import type { Feature, FeatureCollection } from "geojson";
+import {
+  AdminAreaShape,
+  BRITISH_ISLES_BOUNDS,
+  ADMIN_AREA_HIDDEN_ZOOM,
+  ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD,
+  ClipableFeature,
+  isClipableFeature,
+} from "@/utils/mapConstants";
 
 interface OnTimeBoundariesMapProps {
   mapboxToken: string;
@@ -27,30 +22,6 @@ interface OnTimeBoundariesMapProps {
   adminAreas: AdminAreaShape[];
   selectedAdminAreaNames?: string[];
 }
-
-const BRITISH_ISLES_BOUNDS: [[number, number], [number, number]] = [
-  [-10.5, 49.5],
-  [2.0, 61.0],
-];
-
-const ADMIN_AREA_HIDDEN_ZOOM = 12;
-
-type ClipableGeometry = LineString | MultiLineString | Polygon | MultiPolygon;
-type ClipableFeature = Feature<ClipableGeometry>;
-
-const isClipableFeature = (
-  candidate: Feature,
-): candidate is ClipableFeature => {
-  const geometryType = candidate.geometry?.type;
-
-  return (
-    geometryType === "LineString" ||
-    geometryType === "MultiLineString" ||
-    geometryType === "Polygon" ||
-    geometryType === "MultiPolygon"
-  );
-};
-
 export const OnTimeBoundariesMap = ({
   mapboxToken,
   mapboxStyle,
@@ -76,7 +47,7 @@ export const OnTimeBoundariesMap = ({
         return;
       }
 
-      if (map.getZoom() >= 11) {
+      if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) {
         clearPopup();
         return;
       }

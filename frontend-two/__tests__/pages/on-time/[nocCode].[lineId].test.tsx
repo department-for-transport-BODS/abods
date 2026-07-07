@@ -1,4 +1,4 @@
-// NOTE: The OnTimeServicePage and OnTimeOperatorPage share same components.
+// TODO: The OnTimeServicePage and OnTimeOperatorPage share same components.
 // A lot of the testing for the display options and filters have been captured
 // in the OnTimeOperatorPage tests, so we will not repeat those here.
 

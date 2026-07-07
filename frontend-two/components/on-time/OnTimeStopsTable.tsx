@@ -11,7 +11,16 @@ export type StopDisplayMode = "percentage" | "count" | "time";
 
 const columns = [
   { key: "stopId", label: "NAPTAN", sortable: false },
-  { key: "timingPoint", label: <TimingIcon />, sortable: false },
+  {
+    key: "timingPoint",
+    label: (
+      <>
+        <TimingIcon />
+        <span className="govuk-visually-hidden">Timing point</span>
+      </>
+    ),
+    sortable: false,
+  },
   { key: "stopName", label: "Name", sortable: false },
   { key: "direction", label: "Direction", sortable: true },
   { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },

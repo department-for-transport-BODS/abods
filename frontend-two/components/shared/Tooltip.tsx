@@ -42,7 +42,8 @@ export const Tooltip = ({
   return (
     <button
       ref={triggerRef}
-      className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""}`}
+      className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""} ${className ?? ""}`}
+      title={message}
       type="button"
       onClick={onClick}
     >

@@ -10,7 +10,16 @@ import { FrequentIcon } from "../icons/FrequentIcon";
 export type ServiceDisplayMode = "percentage" | "count" | "time";
 
 const ALL_COLUMNS = [
-  { key: "frequent", label: <FrequentIcon />, sortable: true },
+  {
+    key: "frequent",
+    label: (
+      <>
+        <FrequentIcon />
+        <span className="govuk-visually-hidden">Frequent service</span>
+      </>
+    ),
+    sortable: true,
+  },
   { key: "service", label: "Service", sortable: false },
   { key: "direction", label: "Direction", sortable: true },
   { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },
@@ -256,7 +265,14 @@ function createRenderRow(nocCode: string, displayMode: ServiceDisplayMode) {
 
     return {
       key: `${row.lineInfo?.serviceId}-${row.direction}`,
-      frequent: row.frequent ? <FrequentIcon /> : "",
+      frequent: row.frequent ? (
+        <>
+          <FrequentIcon />
+          <span className="govuk-visually-hidden">Frequent service</span>
+        </>
+      ) : (
+        ""
+      ),
       service: (
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(row.lineId ?? "")}`}
