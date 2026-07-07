@@ -18,9 +18,11 @@ import {
 } from "@/src/generated/graphql";
 import {
   OperatorPerformance,
+  PunctualityOverview,
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
+import { OnTimeOverviewStats } from "@/components/on-time/overview/OnTimeOverviewStats";
 import { formatDateToISODateString } from "@/utils/dateFormatter";
 
 const Select = dynamic(
@@ -160,6 +162,7 @@ const OnTimeIndexPage = () => {
   const [operatorPerformance, setOperatorPerformance] = useState<
     OperatorPerformance[]
   >([]);
+  const [overview, setOverview] = useState<PunctualityOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedDatePreset, setSelectedDatePreset] = useState("Last 7 days");
   const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
@@ -216,7 +219,11 @@ const OnTimeIndexPage = () => {
           },
         };
 
-        const data = await onTimeService.fetchOperatorPerformanceList(params);
+        const [overviewData, data] = await Promise.all([
+          onTimeService.fetchOnTimeStats(params),
+          onTimeService.fetchOperatorPerformanceList(params),
+        ]);
+        setOverview(overviewData);
         setOperatorPerformance(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -300,19 +307,22 @@ const OnTimeIndexPage = () => {
         {isLoading ? (
           <p className="govuk-body">Loading on-time data...</p>
         ) : (
-          <ChartNoDataWrapper
-            noData={wrapperNoData}
-            dataExpected={wrapperDataExpected}
-            timingPointsNotSupported={wrapperTimingPointsNotSupported}
-            minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
-          >
-            <JsonSection
-              title="onTimeOperatorPerformanceList"
-              description="Operator-level on-time performance, last 7 days."
-              data={operatorPerformance}
-              error={error}
-            />
-          </ChartNoDataWrapper>
+          <>
+            {overview && <OnTimeOverviewStats overview={overview} />}
+            <ChartNoDataWrapper
+              noData={wrapperNoData}
+              dataExpected={wrapperDataExpected}
+              timingPointsNotSupported={wrapperTimingPointsNotSupported}
+              minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
+            >
+              <JsonSection
+                title="onTimeOperatorPerformanceList"
+                description="Operator-level on-time performance, last 7 days."
+                data={operatorPerformance}
+                error={error}
+              />
+            </ChartNoDataWrapper>
+          </>
         )}
       </div>
       <div className="operator-container">
