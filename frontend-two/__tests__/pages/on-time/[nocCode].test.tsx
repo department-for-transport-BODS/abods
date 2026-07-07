@@ -27,6 +27,7 @@ vi.mock("@/contexts/ConfigContext", () => ({
 
 vi.mock("@/services/operator.service", () => ({
   operatorsService: {
+    fetchOperators: vi.fn(),
     fetchOperator: vi.fn(),
   },
 }));
@@ -114,6 +115,7 @@ const mockFetchServicePerformance = vi.mocked(
   performanceService.fetchServicePerformance,
 );
 const mockFetchHeadwayTimeSeries = vi.mocked(headwayService.fetchTimeSeries);
+const mockFetchOperators = vi.mocked(operatorsService.fetchOperators);
 
 const makeService = (
   overrides: Partial<FrequentServicePerformance> = {},
@@ -162,6 +164,14 @@ describe("OnTimeOperatorPage", () => {
       name: "Demo Operator",
       adminAreaIds: [],
     });
+    mockFetchOperators.mockResolvedValue([
+      {
+        operatorId: "OP1",
+        nocCode: "ABCD",
+        name: "Demo Operator",
+        adminAreaIds: [],
+      },
+    ]);
 
     mockFetchOverviewStats.mockResolvedValue({});
     mockFetchDelayFrequency.mockResolvedValue([]);
@@ -232,11 +242,28 @@ describe("OnTimeOperatorPage", () => {
       { dayOfWeek: "Monday", onTime: 60, early: 10, late: 30 },
     ] as any);
 
+    const user = userEvent.setup();
     render(<OnTimeOperatorPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("delay-frequency-chart")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Distribution" }),
+      ).toBeInTheDocument();
     });
+
+    expect(
+      screen.getByRole("button", { name: "Timeline" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Time of day" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Day of week" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Distribution" }));
+
+    expect(screen.getByTestId("delay-frequency-chart")).toBeInTheDocument();
 
     expect(screen.getByText("Delay Frequency: 2 items")).toBeInTheDocument();
   });
@@ -257,8 +284,14 @@ describe("OnTimeOperatorPage", () => {
     render(<OnTimeOperatorPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Delay Frequency: 1 items")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Distribution" }),
+      ).toBeInTheDocument();
     });
+
+    await user.click(screen.getByRole("button", { name: "Distribution" }));
+
+    expect(screen.getByText("Delay Frequency: 1 items")).toBeInTheDocument();
 
     const timeOfDayTab = screen.getByRole("button", { name: "Time of day" });
     await user.click(timeOfDayTab);
@@ -427,7 +460,11 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      await user.click(screen.getByRole("button", { name: /All directions/i }));
+      const directionsButton = document.querySelector(
+        ".on-time-service-filters__directions .multiselect-dropdown__button",
+      );
+      expect(directionsButton).toBeTruthy();
+      await user.click(directionsButton as HTMLButtonElement);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
 
       expect(
@@ -448,7 +485,11 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      await user.click(screen.getByRole("button", { name: /All directions/i }));
+      const directionsButton = document.querySelector(
+        ".on-time-service-filters__directions .multiselect-dropdown__button",
+      );
+      expect(directionsButton).toBeTruthy();
+      await user.click(directionsButton as HTMLButtonElement);
       await user.click(screen.getByRole("checkbox", { name: "Outbound" }));
 
       expect(
@@ -469,7 +510,11 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      await user.click(screen.getByRole("button", { name: /All directions/i }));
+      const directionsButton = document.querySelector(
+        ".on-time-service-filters__directions .multiselect-dropdown__button",
+      );
+      expect(directionsButton).toBeTruthy();
+      await user.click(directionsButton as HTMLButtonElement);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
       expect(
         screen.queryByRole("link", { name: "202: Night Bus" }),
@@ -652,15 +697,15 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      // "Average delay" column header should be visible initially
+      // "Av. delay" column header should be visible initially
       expect(
-        screen.getByRole("columnheader", { name: "Average delay" }),
+        screen.getByRole("columnheader", { name: "Av. delay" }),
       ).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
       const averageDelayCheckbox = screen.getByRole("checkbox", {
-        name: "Average delay",
+        name: "Av. delay",
       });
       expect(averageDelayCheckbox).toBeChecked();
       await user.click(averageDelayCheckbox);
@@ -672,7 +717,7 @@ describe("OnTimeOperatorPage", () => {
         screen.queryByRole("heading", { name: "Display options" }),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("columnheader", { name: "Average delay" }),
+        screen.queryByRole("columnheader", { name: "Av. delay" }),
       ).not.toBeInTheDocument();
     });
 
@@ -688,17 +733,15 @@ describe("OnTimeOperatorPage", () => {
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
-      // Uncheck "Average delay"
-      await user.click(screen.getByRole("checkbox", { name: "Average delay" }));
+      // Uncheck "Av. delay"
+      await user.click(screen.getByRole("checkbox", { name: "Av. delay" }));
       expect(
-        screen.getByRole("checkbox", { name: "Average delay" }),
+        screen.getByRole("checkbox", { name: "Av. delay" }),
       ).not.toBeChecked();
 
       // Click "Show all" to restore
       await user.click(screen.getByRole("button", { name: "Show all" }));
-      expect(
-        screen.getByRole("checkbox", { name: "Average delay" }),
-      ).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Av. delay" })).toBeChecked();
     });
 
     it("does not apply changes when Cancel is clicked after unchecking a column", async () => {
@@ -712,12 +755,12 @@ describe("OnTimeOperatorPage", () => {
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
-      await user.click(screen.getByRole("checkbox", { name: "Average delay" }));
+      await user.click(screen.getByRole("checkbox", { name: "Av. delay" }));
       await user.click(screen.getByRole("button", { name: "Cancel" }));
 
       // Column should still be visible after cancelling
       expect(
-        screen.getByRole("columnheader", { name: "Average delay" }),
+        screen.getByRole("columnheader", { name: "Av. delay" }),
       ).toBeInTheDocument();
     });
   });

@@ -498,6 +498,7 @@ const OnTimeOperatorPage = () => {
                         testId=""
                         value={serviceSearch}
                         onChange={setServiceSearch}
+                        widthClassName="on-time-service-filters__search-input"
                       />
                     </div>
                     <div className="on-time-service-filters__directions">
@@ -506,7 +507,7 @@ const OnTimeOperatorPage = () => {
                         options={["Inbound", "Outbound"]}
                         selected={selectedDirections}
                         onChange={setSelectedDirections}
-                        placeholderText=""
+                        placeholderText="All directions"
                       />
                     </div>
                   </div>

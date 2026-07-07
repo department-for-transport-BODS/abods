@@ -131,6 +131,7 @@ const OnTimeServicePage = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [operatorChecked, setOperatorChecked] = useState(false);
+  const [lineNotFound, setLineNotFound] = useState(false);
   const [data, setData] = useState<Partial<ServiceLevelData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [operator, setOperator] = useState<OperatorType | null>(null);
@@ -246,6 +247,7 @@ const OnTimeServicePage = () => {
     if (!router.isReady || !config?.apiUrl || !nocCode || !lineId) return;
     const load = async () => {
       setIsLoading(true);
+      setLineNotFound(false);
       const operatorData = await operatorsService.fetchOperator(nocCode);
       if (!operatorData) {
         router.replace("/on-time/operator-not-found");
@@ -315,6 +317,9 @@ const OnTimeServicePage = () => {
         headwayService.fetchFrequentServiceInfo(params),
       );
 
+      const serviceNotFound = !serviceInfo.data && !serviceInfo.error;
+      setLineNotFound(serviceNotFound);
+
       setData({
         fromTimestamp: params.fromTimestamp,
         toTimestamp: params.toTimestamp,
@@ -381,7 +386,21 @@ const OnTimeServicePage = () => {
           {operator.name} ({operator.nocCode})
         </p>
       )}
-      {isLoading ? (
+      {lineNotFound ? (
+        <>
+          <h2 className="govuk-heading-l">Not found</h2>
+          <p className="govuk-body">
+            Service not found, or you do not have permission to view. Go back to{" "}
+            <Link
+              className="govuk-link"
+              href={`/on-time/${encodeURIComponent(nocCode)}`}
+            >
+              operator
+            </Link>
+            ?
+          </p>
+        </>
+      ) : isLoading ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading service data...
         </p>
