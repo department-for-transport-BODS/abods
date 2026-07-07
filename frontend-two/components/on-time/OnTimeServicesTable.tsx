@@ -404,7 +404,7 @@ export const OnTimeServicesTable = ({
   });
 
   return (
-    <div>
+    <div className="on-time-services-table">
       <SortedPaginatedTable
         columns={filteredColumns}
         data={data}

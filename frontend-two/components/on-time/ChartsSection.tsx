@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { Box } from "@/components/shared/Box";
 import {
@@ -38,9 +38,10 @@ const ExcessWaitTimeChart = dynamic(
   { ssr: false },
 );
 
-type ChartTab = "timeline" | "distribution" | "timeOfDay" | "dayOfWeek";
+type ChartTab = "map" | "timeline" | "distribution" | "timeOfDay" | "dayOfWeek";
 
 interface ChartsSectionProps {
+  mapContent?: ReactNode;
   delayFrequency: DelayFrequencyType[];
   timeOfDay: TimeOfDayData[];
   dayOfWeek: DayOfWeekData[];
@@ -61,6 +62,7 @@ interface ChartsSectionProps {
 }
 
 export const ChartsSection = ({
+  mapContent,
   delayFrequency,
   timeOfDay,
   dayOfWeek,
@@ -73,7 +75,10 @@ export const ChartsSection = ({
   frequentServiceInfo,
   errorHeadwayTimeSeries,
 }: ChartsSectionProps) => {
-  const [activeTab, setActiveTab] = useState<ChartTab>("timeline");
+  const hasMapTab = mapContent !== undefined && mapContent !== null;
+  const [activeTab, setActiveTab] = useState<ChartTab>(
+    hasMapTab ? "map" : "timeline",
+  );
   const [overviewMode, setOverviewMode] = useState<
     "on-time-performance" | "excess-wait-time"
   >("on-time-performance");
@@ -81,6 +86,7 @@ export const ChartsSection = ({
   const hasEwt = (frequentServiceInfo?.numHours ?? 0) > 0;
 
   const TABS: Array<{ id: ChartTab; label: string }> = [
+    ...(hasMapTab ? [{ id: "map" as const, label: "Map" }] : []),
     { id: "timeline", label: "Timeline" },
     { id: "distribution", label: "Distribution" },
     { id: "timeOfDay", label: "Time of day" },
@@ -134,6 +140,8 @@ export const ChartsSection = ({
 
   const renderContent = () => {
     switch (activeTab) {
+      case "map":
+        return mapContent ?? null;
       case "timeline":
         return (
           <>

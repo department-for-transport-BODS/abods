@@ -63,7 +63,7 @@ export const MultiselectDropdown = ({
 
   const displayText =
     selected.length === 0
-      ? placeholderText
+      ? ""
       : selected.length === 1
         ? selected[0]
         : `${selected.length} selected`;
@@ -83,13 +83,13 @@ export const MultiselectDropdown = ({
       ) : (
         <button
           type="button"
-          className="multiselect-dropdown__button"
+          className={`multiselect-dropdown__button${open ? " multiselect-dropdown__button--open" : ""}`}
           onClick={() => setOpen(true)}
         >
           <span className="multiselect-dropdown__button-text">
             {displayText}
           </span>
-          <span>▼</span>
+          <span className="multiselect-dropdown__arrow"></span>
         </button>
       )}
       {open && (

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { Box } from "@/components/shared/Box";
-import { OperatorSelector } from "@/components/dashboard/OperatorSelector";
+import { OperatorSelector } from "@/components/shared/OperatorSelector";
 import { StopTypeToggle } from "@/components/dashboard/StopTypeToggle";
 import { PerformanceWidget } from "@/components/dashboard/PerformanceWidget";
 import { VehiclesStatus } from "@/components/dashboard/VehiclesStatus";

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -46,14 +45,6 @@ import {
 } from "@/services/on-time/on-time.service";
 import { DateTime } from "luxon";
 import { buildDefaultParams } from "@/services/on-time/params";
-import {
-  NormalizedStop,
-  stopPerformanceService,
-} from "@/services/on-time/stop-performance.service";
-import {
-  ServicePattern,
-  transitModelService,
-} from "@/services/on-time/transit-model.service";
 import { settle } from "@/utils/settle";
 import {
   DelayFrequencyType,
@@ -121,8 +112,6 @@ interface ServiceLevelData {
   granularity: Granularity;
   serviceInfo: ServiceInfoType | null;
   stopPerformance: StopPerformance[];
-  servicePatterns: ServicePattern[];
-  mergedStops: NormalizedStop[];
   frequentServiceInfo: FrequentServiceInfoType | null;
   headwayTimeSeries: HeadwayTimeSeriesType[];
   delayFrequency: DelayFrequencyType[];
@@ -303,7 +292,6 @@ const OnTimeServicePage = () => {
       const [
         serviceInfo,
         stopPerformance,
-        servicePatterns,
         headwayTimeSeries,
         delayFrequency,
         timeSeries,
@@ -312,7 +300,6 @@ const OnTimeServicePage = () => {
       ] = await Promise.all([
         settle(onTimeService.fetchServiceInfo(lineId)),
         settle(onTimeService.fetchStopPerformanceList(performanceParams)),
-        settle(transitModelService.fetchServicePatternStops(nocCode, lineId)),
         settle(headwayService.fetchTimeSeries(headwayParams)),
         settle(onTimeService.fetchOnTimeDelayFrequencyData(performanceParams)),
         settle(onTimeService.fetchOnTimeTimeSeriesData(performanceParams)),
@@ -328,22 +315,12 @@ const OnTimeServicePage = () => {
         headwayService.fetchFrequentServiceInfo(params),
       );
 
-      const mergedStops =
-        stopPerformance.data && servicePatterns.data
-          ? stopPerformanceService.mergeStops(
-              stopPerformance.data,
-              servicePatterns.data,
-            )
-          : [];
-
       setData({
         fromTimestamp: params.fromTimestamp,
         toTimestamp: params.toTimestamp,
         granularity,
         serviceInfo: serviceInfo.data,
         stopPerformance: stopPerformance.data ?? [],
-        servicePatterns: servicePatterns.data ?? [],
-        mergedStops,
         frequentServiceInfo: frequentServiceInfo.data,
         headwayTimeSeries: headwayTimeSeries.data ?? [],
         delayFrequency: delayFrequency.data ?? [],
@@ -354,7 +331,6 @@ const OnTimeServicePage = () => {
       setErrors({
         serviceInfo: serviceInfo.error,
         stopPerformance: stopPerformance.error,
-        servicePatterns: servicePatterns.error,
         frequentServiceInfo: frequentServiceInfo.error,
         headwayTimeSeries: headwayTimeSeries.error,
         delayFrequency: delayFrequency.error,
@@ -435,18 +411,6 @@ const OnTimeServicePage = () => {
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
           <div className="govuk-!-margin-top-6">
-            <h2 className="govuk-heading-m">Route</h2>
-            {config && (
-              <OnTimeServiceMap
-                mapboxToken={config.mapboxToken}
-                mapboxStyle={config.mapboxStyle}
-                loading={isLoading}
-                stops={data.mergedStops ?? []}
-                servicePatterns={data.servicePatterns ?? []}
-              />
-            )}
-          </div>
-          <div className="govuk-!-margin-top-6">
             <ChartNoDataWrapper
               noData={
                 !isLoading &&
@@ -460,6 +424,11 @@ const OnTimeServicePage = () => {
               minMaxDelayNotSupported={false}
             >
               <ChartsSection
+                mapContent={
+                  <p className="govuk-body govuk-!-margin-top-4">
+                    TODO: service-map
+                  </p>
+                }
                 delayFrequency={data.delayFrequency ?? []}
                 timeOfDay={data.timeOfDay ?? []}
                 dayOfWeek={data.dayOfWeek ?? []}
@@ -506,7 +475,7 @@ const OnTimeServicePage = () => {
                 options={["Inbound", "Outbound"]}
                 selected={selectedDirections}
                 onChange={setSelectedDirections}
-                placeholderText="All directions"
+                placeholderText="Directions"
               />
             </div>
             <div className="on-time-service-filters__display-options">

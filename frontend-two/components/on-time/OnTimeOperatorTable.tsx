@@ -20,11 +20,17 @@ const OperatorSparkline = dynamic(
 
 const columns = [
   { key: "nocCode", label: "NOC", sortable: false },
-  { key: "name", label: "Operator", sortable: false },
+  {
+    key: "name",
+    label: "Operator",
+    sortable: false,
+    cellClassName: "on-time-operator-table__name-cell",
+    headerClassName: "on-time-operator-table__name-header",
+  },
   { key: "averageDelay", label: "Av. delay", sortable: true },
-  { key: "onTimeRatio", label: "On-time %", sortable: true },
-  { key: "lateRatio", label: "Late %", sortable: true },
-  { key: "earlyRatio", label: "Early %", sortable: true },
+  { key: "onTimeRatio", label: "On-time", sortable: true },
+  { key: "lateRatio", label: "Late", sortable: true },
+  { key: "earlyRatio", label: "Early", sortable: true },
   { key: "sparkline", label: "", sortable: false },
 ];
 
@@ -256,6 +262,15 @@ export const OnTimeOperatorTable = ({
       data={sortedData}
       getRowValue={getRowValue}
       renderRow={renderOperatorRow}
+      colWidths={{
+        nocCode: "10%",
+        name: "30%",
+        averageDelay: "12%",
+        onTimeRatio: "12%",
+        lateRatio: "12%",
+        earlyRatio: "12%",
+        sparkline: "12%",
+      }}
       initialSortKey="name"
       initialSortOrder="asc"
       paginationNoun="operator"

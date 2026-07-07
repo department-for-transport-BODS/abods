@@ -59,6 +59,7 @@ import {
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
+import { OperatorSelector } from "@/components/shared/OperatorSelector";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -160,6 +161,11 @@ const OnTimeOperatorPage = () => {
     setSelectedDatePreset(selected);
     const range = calculateDateRange(selected);
     setDateRange(range);
+  };
+
+  const handleOperatorChange = (operatorId: string | null) => {
+    if (!operatorId) return;
+    router.push(`/on-time/${encodeURIComponent(operatorId)}`);
   };
 
   useEffect(() => {
@@ -407,26 +413,12 @@ const OnTimeOperatorPage = () => {
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl govuk-!-margin-bottom-4">All services</h1>
-      <div className="govuk-!-margin-bottom-6">
-        <label htmlFor="operator-select" className="govuk-label">
-          <strong>Operator</strong>
-        </label>
-        <select
-          id="operator-select"
-          className="govuk-select"
-          value={nocCode || ""}
-          onChange={(e) =>
-            router.push(`/on-time/${encodeURIComponent(e.target.value)}`)
-          }
-        >
-          <option value="">Select an operator</option>
-          {allOperators.map((op) => (
-            <option key={op.nocCode} value={op.nocCode}>
-              {op.name} ({op.nocCode})
-            </option>
-          ))}
-        </select>
-      </div>
+      <OperatorSelector
+        operators={allOperators}
+        selectedOperatorId={nocCode}
+        onChange={handleOperatorChange}
+        allowAll={false}
+      />
       {isLoading ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading on-time data...
@@ -514,7 +506,7 @@ const OnTimeOperatorPage = () => {
                         options={["Inbound", "Outbound"]}
                         selected={selectedDirections}
                         onChange={setSelectedDirections}
-                        placeholderText="All directions"
+                        placeholderText=""
                       />
                     </div>
                   </div>
