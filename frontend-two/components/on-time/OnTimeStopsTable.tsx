@@ -1,4 +1,3 @@
-import { Duration } from "luxon";
 import { useCallback, useMemo, useState } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
@@ -6,10 +5,17 @@ import { Tooltip } from "@/components/shared/Tooltip";
 import { TimingIcon } from "@/components/icons/TimingIcon";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import type { StopPerformance } from "@/services/on-time/on-time.service";
+import {
+  type OnTimeDisplayMode,
+  formatPercentage,
+  formatDuration,
+  formatDirection,
+  formatMetricValue,
+  getMetricSortValue,
+  aggregatePerformanceTotals,
+} from "@/utils/on-time-table-format";
 
-export type StopDisplayMode = "percentage" | "count" | "time";
-
-const columns = [
+const ALL_COLUMNS = [
   { key: "stopId", label: "NAPTAN", sortable: false },
   {
     key: "timingPoint",
@@ -37,9 +43,9 @@ const columns = [
   { key: "earlyRatio", label: "Early", sortable: true },
 ];
 
-export const STOPS_TABLE_COLUMN_KEYS = columns.map((c) => c.key);
+export const STOPS_TABLE_COLUMN_KEYS = ALL_COLUMNS.map((c) => c.key);
 export const STOPS_TABLE_COLUMN_LABELS: Record<string, React.ReactNode> =
-  Object.fromEntries(columns.map((c) => [c.key, c.label]));
+  Object.fromEntries(ALL_COLUMNS.map((c) => [c.key, c.label]));
 export const STOPS_TABLE_ALWAYS_VISIBLE_KEYS = ["stopId"];
 
 const STOPS_EXPORT_HEADER_LABELS: Record<string, string> = {
@@ -56,37 +62,6 @@ const STOPS_EXPORT_HEADER_LABELS: Record<string, string> = {
   lateRatio: "Late",
   earlyRatio: "Early",
 };
-
-const formatPercentage = (ratio: number | null | undefined): string => {
-  if (ratio == null) return "-";
-  return `${(ratio * 100).toFixed(1)}%`;
-};
-
-const formatTime = (
-  seconds: number | null | undefined,
-  withoutSign = false,
-): string => {
-  if (seconds == null) return "-";
-
-  const rounded = Math.round(seconds);
-  const prefix = withoutSign ? "" : rounded >= 0 ? "+" : "-";
-
-  return (
-    prefix +
-    Duration.fromObject({ seconds: Math.abs(rounded) }).toFormat("mm:ss")
-  );
-};
-
-function formatDirection(direction: string | null | undefined): string {
-  if (!direction) return "-";
-
-  const value = direction.toLowerCase();
-  if (value === "inbound") return "Inbound";
-  if (value === "outbound") return "Outbound";
-  if (value === "clockwise") return "Clockwise";
-  if (value === "anticlockwise") return "Anticlockwise";
-  return "-";
-}
 
 function getRecordedDeparturesRatio(row: StopPerformance): number {
   return (
@@ -107,60 +82,15 @@ function getStopLocationTooltip(row: StopPerformance): string | undefined {
 }
 
 function calculateTotals(data: StopPerformance[]): StopPerformance | null {
-  if (data.length === 0) return null;
+  const totals = aggregatePerformanceTotals(data);
+  if (!totals) return null;
 
-  let scheduledDepartures = 0;
-  let actualDepartures = 0;
-  let onTime = 0;
-  let late = 0;
-  let early = 0;
-  let total = 0;
-  let onTimeRatioSum = 0;
-  let lateRatioSum = 0;
-  let earlyRatioSum = 0;
-  let countDelayed = 0;
-  let weightedDelayTotal = 0;
-  let hasDelayData = false;
-  let onTimeInSecondsTotal = 0;
-  let hasOnTimeInSeconds = false;
-  let lateInSecondsTotal = 0;
-  let hasLateInSeconds = false;
-  let earlyInSecondsTotal = 0;
-  let hasEarlyInSeconds = false;
   let averageScheduledTotal = 0;
   let hasAverageScheduled = false;
   let averageActualTotal = 0;
   let hasAverageActual = false;
 
   for (const row of data) {
-    scheduledDepartures += row.scheduledDepartures ?? 0;
-    actualDepartures += row.actualDepartures ?? 0;
-    onTime += row.onTime ?? 0;
-    late += row.late ?? 0;
-    early += row.early ?? 0;
-    total += row.total ?? 0;
-    onTimeRatioSum += row.onTimeRatio ?? 0;
-    lateRatioSum += row.lateRatio ?? 0;
-    earlyRatioSum += row.earlyRatio ?? 0;
-
-    if (row.averageDelay != null || row.countDelayed != null) {
-      hasDelayData = true;
-      countDelayed += row.countDelayed ?? 0;
-      weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
-    }
-
-    if (row.onTimeInSeconds != null) {
-      onTimeInSecondsTotal += row.onTimeInSeconds;
-      hasOnTimeInSeconds = true;
-    }
-    if (row.lateInSeconds != null) {
-      lateInSecondsTotal += row.lateInSeconds;
-      hasLateInSeconds = true;
-    }
-    if (row.earlyInSeconds != null) {
-      earlyInSecondsTotal += row.earlyInSeconds;
-      hasEarlyInSeconds = true;
-    }
     if (row.averageScheduled != null) {
       averageScheduledTotal += row.averageScheduled;
       hasAverageScheduled = true;
@@ -171,34 +101,10 @@ function calculateTotals(data: StopPerformance[]): StopPerformance | null {
     }
   }
 
-  const totalRatio = onTimeRatioSum + lateRatioSum + earlyRatioSum;
-
   return {
     ...data[0],
+    ...totals,
     direction: null,
-    scheduledDepartures,
-    actualDepartures,
-    onTime,
-    late,
-    early,
-    total,
-    completedRatio:
-      scheduledDepartures > 0 ? actualDepartures / scheduledDepartures : 0,
-    onTimeRatio: totalRatio > 0 ? onTimeRatioSum / totalRatio : 0,
-    lateRatio: totalRatio > 0 ? lateRatioSum / totalRatio : 0,
-    earlyRatio: totalRatio > 0 ? earlyRatioSum / totalRatio : 0,
-    averageDelay:
-      hasDelayData && countDelayed > 0
-        ? weightedDelayTotal / countDelayed
-        : null,
-    countDelayed: hasDelayData ? countDelayed : null,
-    onTimeInSeconds: hasOnTimeInSeconds
-      ? onTimeInSecondsTotal / data.length
-      : null,
-    lateInSeconds: hasLateInSeconds ? lateInSecondsTotal / data.length : null,
-    earlyInSeconds: hasEarlyInSeconds
-      ? earlyInSecondsTotal / data.length
-      : null,
     averageScheduled: hasAverageScheduled
       ? averageScheduledTotal / data.length
       : null,
@@ -206,56 +112,10 @@ function calculateTotals(data: StopPerformance[]): StopPerformance | null {
   };
 }
 
-function formatMetricValue(
-  row: StopPerformance,
-  metric: "onTime" | "late" | "early",
-  displayMode: StopDisplayMode,
-): string {
-  const hasActualDepartures = (row.actualDepartures ?? 0) > 0;
-  if (!hasActualDepartures) return "-";
-
-  switch (displayMode) {
-    case "count":
-      return (row[metric] ?? 0).toLocaleString();
-    case "time": {
-      const secondsKey = `${metric}InSeconds` as const;
-      return formatTime(row[secondsKey]);
-    }
-    case "percentage":
-    default: {
-      const ratioKey = `${metric}Ratio` as const;
-      return formatPercentage(row[ratioKey]);
-    }
-  }
-}
-
-function getMetricSortValue(
-  row: StopPerformance,
-  metric: "onTime" | "late" | "early",
-  displayMode: StopDisplayMode,
-): number {
-  const hasActualDepartures = (row.actualDepartures ?? 0) > 0;
-  if (!hasActualDepartures) return Number.NEGATIVE_INFINITY;
-
-  switch (displayMode) {
-    case "count":
-      return row[metric] ?? Number.NEGATIVE_INFINITY;
-    case "time": {
-      const secondsKey = `${metric}InSeconds` as const;
-      return row[secondsKey] ?? Number.NEGATIVE_INFINITY;
-    }
-    case "percentage":
-    default: {
-      const ratioKey = `${metric}Ratio` as const;
-      return row[ratioKey] ?? Number.NEGATIVE_INFINITY;
-    }
-  }
-}
-
 function getRowValue(
   row: StopPerformance,
   column: string,
-  displayMode: StopDisplayMode,
+  displayMode: OnTimeDisplayMode,
 ): string | number {
   switch (column) {
     case "stopId":
@@ -291,7 +151,7 @@ function getRowValue(
 
 function renderRow(
   row: StopPerformance,
-  displayMode: StopDisplayMode,
+  displayMode: OnTimeDisplayMode,
 ): SortableTableRow {
   return {
     key: `${row.stopId ?? ""}-${row.direction ?? "all"}`,
@@ -320,9 +180,9 @@ function renderRow(
       displayMode === "percentage"
         ? formatPercentage(getRecordedDeparturesRatio(row))
         : (row.actualDepartures ?? 0).toLocaleString(),
-    averageScheduled: formatTime(row.averageScheduled),
-    averageActual: formatTime(row.averageActual),
-    averageDelay: formatTime(row.averageDelay, true),
+    averageScheduled: formatDuration(row.averageScheduled),
+    averageActual: formatDuration(row.averageActual),
+    averageDelay: formatDuration(row.averageDelay, false),
     onTimeRatio: formatMetricValue(row, "onTime", displayMode),
     lateRatio: formatMetricValue(row, "late", displayMode),
     earlyRatio: formatMetricValue(row, "early", displayMode),
@@ -331,7 +191,7 @@ function renderRow(
 
 interface OnTimeStopsTableProps {
   data: StopPerformance[];
-  displayMode?: StopDisplayMode;
+  displayMode?: OnTimeDisplayMode;
   visibleColumns?: string[];
 }
 
@@ -345,8 +205,8 @@ export const OnTimeStopsTable = ({
   const filteredColumns = useMemo(
     () =>
       visibleColumns
-        ? columns.filter((c) => visibleColumns.includes(c.key))
-        : columns,
+        ? ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key))
+        : ALL_COLUMNS,
     [visibleColumns],
   );
   const totalsRow = useMemo<SortableTableRow | null>(() => {
@@ -369,9 +229,9 @@ export const OnTimeStopsTable = ({
             : (totals.actualDepartures ?? 0).toLocaleString()}
         </strong>
       ),
-      averageScheduled: <strong>{formatTime(totals.averageScheduled)}</strong>,
-      averageActual: <strong>{formatTime(totals.averageActual)}</strong>,
-      averageDelay: <strong>{formatTime(totals.averageDelay, true)}</strong>,
+      averageScheduled: <strong>{formatDuration(totals.averageScheduled)}</strong>,
+      averageActual: <strong>{formatDuration(totals.averageActual)}</strong>,
+      averageDelay: <strong>{formatDuration(totals.averageDelay, false)}</strong>,
       onTimeRatio: (
         <strong>{formatMetricValue(totals, "onTime", displayMode)}</strong>
       ),
@@ -408,9 +268,9 @@ export const OnTimeStopsTable = ({
         displayMode === "percentage"
           ? formatPercentage(getRecordedDeparturesRatio(row))
           : row.actualDepartures ?? 0,
-      averageScheduled: formatTime(row.averageScheduled),
-      averageActual: formatTime(row.averageActual),
-      averageDelay: formatTime(row.averageDelay, true),
+      averageScheduled: formatDuration(row.averageScheduled),
+      averageActual: formatDuration(row.averageActual),
+      averageDelay: formatDuration(row.averageDelay, false),
       onTimeRatio: formatMetricValue(row, "onTime", displayMode),
       lateRatio: formatMetricValue(row, "late", displayMode),
       earlyRatio: formatMetricValue(row, "early", displayMode),

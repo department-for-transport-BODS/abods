@@ -19,7 +19,12 @@ import {
   STOP_TYPE_OPTIONS,
   calculateDateRange,
 } from "@/components/on-time/OnTimeFilterPanel";
-import type { ServiceDisplayMode } from "@/components/on-time/OnTimeServicesTable";
+import {
+  type OnTimeDisplayMode,
+  DISPLAY_MODE_OPTIONS,
+  normaliseDirection,
+  aggregatePerformanceTotals,
+} from "@/utils/on-time-table-format";
 import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
@@ -53,28 +58,12 @@ import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 
-const DISPLAY_MODE_OPTIONS = [
-  { value: "percentage", label: "Percentage" },
-  { value: "count", label: "Count" },
-  { value: "time", label: "Time" },
-] as const;
-
-// TODO: Check what to do about Admin area in refine results panel and add
-
-const normaliseDirection = (direction: string | null | undefined): string => {
-  const value = (direction ?? "").toLowerCase();
-  if (value === "clockwise") return "outbound";
-  if (value === "anticlockwise") return "inbound";
-  return value;
-};
-
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
 ): FrequentServicePerformance[] => {
   if (services.length === 0) return [];
 
   const grouped = new Map<string, FrequentServicePerformance[]>();
-
   for (const service of services) {
     const key = service.lineInfo?.serviceId ?? service.lineId ?? "";
     const existing = grouped.get(key) ?? [];
@@ -85,91 +74,14 @@ const aggregateServicesByLine = (
   const aggregated: FrequentServicePerformance[] = [];
 
   for (const rows of grouped.values()) {
-    const first = rows[0];
-    let scheduledDepartures = 0;
-    let actualDepartures = 0;
-    let onTime = 0;
-    let late = 0;
-    let early = 0;
-    let total = 0;
-    let onTimeRatioSum = 0;
-    let lateRatioSum = 0;
-    let earlyRatioSum = 0;
-    let countDelayed = 0;
-    let weightedDelayTotal = 0;
-    let hasDelayData = false;
-    let onTimeInSecondsTotal = 0;
-    let onTimeInSecondsCount = 0;
-    let lateInSecondsTotal = 0;
-    let lateInSecondsCount = 0;
-    let earlyInSecondsTotal = 0;
-    let earlyInSecondsCount = 0;
-    let frequent = false;
-
-    for (const row of rows) {
-      scheduledDepartures += row.scheduledDepartures ?? 0;
-      actualDepartures += row.actualDepartures ?? 0;
-      onTime += row.onTime ?? 0;
-      late += row.late ?? 0;
-      early += row.early ?? 0;
-      total += row.total ?? 0;
-      onTimeRatioSum += row.onTimeRatio ?? 0;
-      lateRatioSum += row.lateRatio ?? 0;
-      earlyRatioSum += row.earlyRatio ?? 0;
-      frequent = frequent || row.frequent;
-
-      if (row.averageDelay != null || row.countDelayed != null) {
-        hasDelayData = true;
-        countDelayed += row.countDelayed ?? 0;
-        weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
-      }
-
-      if (row.onTimeInSeconds != null) {
-        onTimeInSecondsTotal += row.onTimeInSeconds;
-        onTimeInSecondsCount += 1;
-      }
-      if (row.lateInSeconds != null) {
-        lateInSecondsTotal += row.lateInSeconds;
-        lateInSecondsCount += 1;
-      }
-      if (row.earlyInSeconds != null) {
-        earlyInSecondsTotal += row.earlyInSeconds;
-        earlyInSecondsCount += 1;
-      }
-    }
-
-    const totalRatio = onTimeRatioSum + lateRatioSum + earlyRatioSum;
+    const totals = aggregatePerformanceTotals(rows);
+    if (!totals) continue;
 
     aggregated.push({
-      ...first,
+      ...rows[0],
+      ...totals,
       direction: null,
-      frequent,
-      scheduledDepartures,
-      actualDepartures,
-      onTime,
-      late,
-      early,
-      total,
-      completedRatio:
-        scheduledDepartures > 0 ? actualDepartures / scheduledDepartures : 0,
-      onTimeRatio: totalRatio > 0 ? onTimeRatioSum / totalRatio : 0,
-      lateRatio: totalRatio > 0 ? lateRatioSum / totalRatio : 0,
-      earlyRatio: totalRatio > 0 ? earlyRatioSum / totalRatio : 0,
-      averageDelay:
-        hasDelayData && countDelayed > 0
-          ? weightedDelayTotal / countDelayed
-          : null,
-      countDelayed: hasDelayData ? countDelayed : null,
-      onTimeInSeconds:
-        onTimeInSecondsCount > 0
-          ? onTimeInSecondsTotal / onTimeInSecondsCount
-          : null,
-      lateInSeconds:
-        lateInSecondsCount > 0 ? lateInSecondsTotal / lateInSecondsCount : null,
-      earlyInSeconds:
-        earlyInSecondsCount > 0
-          ? earlyInSecondsTotal / earlyInSecondsCount
-          : null,
+      frequent: rows.some((r) => r.frequent),
     });
   }
 
@@ -203,7 +115,7 @@ const OnTimeOperatorPage = () => {
   const [selectedMatchType, setSelectedMatchType] = useState("evidenced");
   const [selectedStopType, setSelectedStopType] = useState("timing-points");
   const [selectedDisplayMode, setSelectedDisplayMode] =
-    useState<ServiceDisplayMode>("percentage");
+    useState<OnTimeDisplayMode>("percentage");
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const [visibleServiceColumns, setVisibleServiceColumns] = useState<string[]>(
     SERVICE_TABLE_COLUMN_KEYS,

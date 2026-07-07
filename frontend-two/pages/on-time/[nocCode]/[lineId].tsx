@@ -3,14 +3,18 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { JsonSection } from "@/components/on-time/JsonSection";
 import {
   OnTimeStopsTable,
   STOPS_TABLE_COLUMN_KEYS,
   STOPS_TABLE_COLUMN_LABELS,
   STOPS_TABLE_ALWAYS_VISIBLE_KEYS,
-  type StopDisplayMode,
 } from "@/components/on-time/OnTimeStopsTable";
+import {
+  type OnTimeDisplayMode,
+  DISPLAY_MODE_OPTIONS,
+  normaliseDirection,
+  aggregatePerformanceTotals,
+} from "@/utils/on-time-table-format";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
@@ -59,19 +63,6 @@ const ExcessWaitTimeChart = dynamic(
   { ssr: false },
 );
 
-const DISPLAY_MODE_OPTIONS = [
-  { value: "percentage", label: "Percentage" },
-  { value: "count", label: "Count" },
-  { value: "time", label: "Time" },
-] as const;
-
-const normaliseDirection = (direction: string | null | undefined): string => {
-  const value = (direction ?? "").toLowerCase();
-  if (value === "clockwise") return "outbound";
-  if (value === "anticlockwise") return "inbound";
-  return value;
-};
-
 const aggregateStopsByStopId = (
   stops: StopPerformance[],
 ): StopPerformance[] => {
@@ -88,59 +79,15 @@ const aggregateStopsByStopId = (
   const aggregated: StopPerformance[] = [];
 
   for (const rows of grouped.values()) {
-    const first = rows[0];
-    let scheduledDepartures = 0;
-    let actualDepartures = 0;
-    let onTime = 0;
-    let late = 0;
-    let early = 0;
-    let total = 0;
-    let onTimeRatioSum = 0;
-    let lateRatioSum = 0;
-    let earlyRatioSum = 0;
-    let countDelayed = 0;
-    let weightedDelayTotal = 0;
-    let hasDelayData = false;
-    let onTimeInSecondsTotal = 0;
-    let hasOnTimeInSeconds = false;
-    let lateInSecondsTotal = 0;
-    let hasLateInSeconds = false;
-    let earlyInSecondsTotal = 0;
-    let hasEarlyInSeconds = false;
+    const totals = aggregatePerformanceTotals(rows);
+    if (!totals) continue;
+
     let averageScheduledTotal = 0;
     let hasAverageScheduled = false;
     let averageActualTotal = 0;
     let hasAverageActual = false;
 
     for (const row of rows) {
-      scheduledDepartures += row.scheduledDepartures ?? 0;
-      actualDepartures += row.actualDepartures ?? 0;
-      onTime += row.onTime ?? 0;
-      late += row.late ?? 0;
-      early += row.early ?? 0;
-      total += row.total ?? 0;
-      onTimeRatioSum += row.onTimeRatio ?? 0;
-      lateRatioSum += row.lateRatio ?? 0;
-      earlyRatioSum += row.earlyRatio ?? 0;
-
-      if (row.averageDelay != null || row.countDelayed != null) {
-        hasDelayData = true;
-        countDelayed += row.countDelayed ?? 0;
-        weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
-      }
-
-      if (row.onTimeInSeconds != null) {
-        onTimeInSecondsTotal += row.onTimeInSeconds;
-        hasOnTimeInSeconds = true;
-      }
-      if (row.lateInSeconds != null) {
-        lateInSecondsTotal += row.lateInSeconds;
-        hasLateInSeconds = true;
-      }
-      if (row.earlyInSeconds != null) {
-        earlyInSecondsTotal += row.earlyInSeconds;
-        hasEarlyInSeconds = true;
-      }
       if (row.averageScheduled != null) {
         averageScheduledTotal += row.averageScheduled;
         hasAverageScheduled = true;
@@ -151,38 +98,16 @@ const aggregateStopsByStopId = (
       }
     }
 
-    const totalRatio = onTimeRatioSum + lateRatioSum + earlyRatioSum;
-
     aggregated.push({
-      ...first,
+      ...rows[0],
+      ...totals,
       direction: null,
-      scheduledDepartures,
-      actualDepartures,
-      onTime,
-      late,
-      early,
-      total,
-      completedRatio:
-        scheduledDepartures > 0 ? actualDepartures / scheduledDepartures : 0,
-      onTimeRatio: totalRatio > 0 ? onTimeRatioSum / totalRatio : 0,
-      lateRatio: totalRatio > 0 ? lateRatioSum / totalRatio : 0,
-      earlyRatio: totalRatio > 0 ? earlyRatioSum / totalRatio : 0,
-      averageDelay:
-        hasDelayData && countDelayed > 0
-          ? weightedDelayTotal / countDelayed
-          : null,
-      countDelayed: hasDelayData ? countDelayed : null,
-      onTimeInSeconds: hasOnTimeInSeconds
-        ? onTimeInSecondsTotal / rows.length
-        : null,
-      lateInSeconds: hasLateInSeconds ? lateInSecondsTotal / rows.length : null,
-      earlyInSeconds: hasEarlyInSeconds
-        ? earlyInSecondsTotal / rows.length
-        : null,
       averageScheduled: hasAverageScheduled
         ? averageScheduledTotal / rows.length
         : null,
-      averageActual: hasAverageActual ? averageActualTotal / rows.length : null,
+      averageActual: hasAverageActual
+        ? averageActualTotal / rows.length
+        : null,
     });
   }
 
@@ -214,7 +139,7 @@ const OnTimeServicePage = () => {
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
   const [selectedDisplayMode, setSelectedDisplayMode] =
-    useState<StopDisplayMode>("percentage");
+    useState<OnTimeDisplayMode>("percentage");
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
   const [visibleStopColumns, setVisibleStopColumns] = useState<string[]>(
     STOPS_TABLE_COLUMN_KEYS,

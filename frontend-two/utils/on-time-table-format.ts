@@ -1,0 +1,225 @@
+import { Duration } from "luxon";
+
+export type OnTimeDisplayMode = "percentage" | "count" | "time";
+
+export interface MetricRow {
+  onTime?: number | null;
+  late?: number | null;
+  early?: number | null;
+  onTimeRatio?: number | null;
+  lateRatio?: number | null;
+  earlyRatio?: number | null;
+  onTimeInSeconds?: number | null;
+  lateInSeconds?: number | null;
+  earlyInSeconds?: number | null;
+  actualDepartures?: number | null;
+}
+
+interface AggregableRow extends MetricRow {
+  scheduledDepartures?: number | null;
+  total?: number | null;
+  averageDelay?: number | null;
+  countDelayed?: number | null;
+}
+
+export interface AggregatedTotals {
+  scheduledDepartures: number;
+  actualDepartures: number;
+  onTime: number;
+  late: number;
+  early: number;
+  total: number;
+  completedRatio: number;
+  onTimeRatio: number;
+  lateRatio: number;
+  earlyRatio: number;
+  averageDelay: number | null;
+  countDelayed: number | null;
+  onTimeInSeconds: number | null;
+  lateInSeconds: number | null;
+  earlyInSeconds: number | null;
+}
+
+export function aggregatePerformanceTotals(
+  data: AggregableRow[],
+): AggregatedTotals | null {
+  if (data.length === 0) return null;
+
+  let scheduledDepartures = 0;
+  let actualDepartures = 0;
+  let onTime = 0;
+  let late = 0;
+  let early = 0;
+  let total = 0;
+  let onTimeRatioSum = 0;
+  let lateRatioSum = 0;
+  let earlyRatioSum = 0;
+  let countDelayed = 0;
+  let weightedDelayTotal = 0;
+  let hasDelayData = false;
+  let onTimeInSecondsTotal = 0;
+  let onTimeInSecondsCount = 0;
+  let lateInSecondsTotal = 0;
+  let lateInSecondsCount = 0;
+  let earlyInSecondsTotal = 0;
+  let earlyInSecondsCount = 0;
+
+  for (const row of data) {
+    scheduledDepartures += row.scheduledDepartures ?? 0;
+    actualDepartures += row.actualDepartures ?? 0;
+    onTime += row.onTime ?? 0;
+    late += row.late ?? 0;
+    early += row.early ?? 0;
+    total += row.total ?? 0;
+    onTimeRatioSum += row.onTimeRatio ?? 0;
+    lateRatioSum += row.lateRatio ?? 0;
+    earlyRatioSum += row.earlyRatio ?? 0;
+
+    if (row.averageDelay != null || row.countDelayed != null) {
+      hasDelayData = true;
+      countDelayed += row.countDelayed ?? 0;
+      weightedDelayTotal += (row.averageDelay ?? 0) * (row.countDelayed ?? 0);
+    }
+
+    if (row.onTimeInSeconds != null) {
+      onTimeInSecondsTotal += row.onTimeInSeconds;
+      onTimeInSecondsCount += 1;
+    }
+    if (row.lateInSeconds != null) {
+      lateInSecondsTotal += row.lateInSeconds;
+      lateInSecondsCount += 1;
+    }
+    if (row.earlyInSeconds != null) {
+      earlyInSecondsTotal += row.earlyInSeconds;
+      earlyInSecondsCount += 1;
+    }
+  }
+
+  const totalRatio = onTimeRatioSum + lateRatioSum + earlyRatioSum;
+
+  return {
+    scheduledDepartures,
+    actualDepartures,
+    onTime,
+    late,
+    early,
+    total,
+    completedRatio:
+      scheduledDepartures > 0 ? actualDepartures / scheduledDepartures : 0,
+    onTimeRatio: totalRatio > 0 ? onTimeRatioSum / totalRatio : 0,
+    lateRatio: totalRatio > 0 ? lateRatioSum / totalRatio : 0,
+    earlyRatio: totalRatio > 0 ? earlyRatioSum / totalRatio : 0,
+    averageDelay:
+      hasDelayData && countDelayed > 0
+        ? weightedDelayTotal / countDelayed
+        : null,
+    countDelayed: hasDelayData ? countDelayed : null,
+    onTimeInSeconds:
+      onTimeInSecondsCount > 0
+        ? onTimeInSecondsTotal / onTimeInSecondsCount
+        : null,
+    lateInSeconds:
+      lateInSecondsCount > 0 ? lateInSecondsTotal / lateInSecondsCount : null,
+    earlyInSeconds:
+      earlyInSecondsCount > 0
+        ? earlyInSecondsTotal / earlyInSecondsCount
+        : null,
+  };
+}
+
+export const DISPLAY_MODE_OPTIONS = [
+  { value: "percentage", label: "Percentage" },
+  { value: "count", label: "Count" },
+  { value: "time", label: "Time" },
+] as const;
+
+export function normaliseDirection(
+  direction: string | null | undefined,
+): string {
+  const value = (direction ?? "").toLowerCase();
+  if (value === "clockwise") return "outbound";
+  if (value === "anticlockwise") return "inbound";
+  return value;
+}
+
+export function formatPercentage(ratio: number | null | undefined): string {
+  if (ratio == null) return "-";
+  return `${(ratio * 100).toFixed(1)}%`;
+}
+
+/**
+ * Formats a duration in seconds as mm:ss.
+ * @param seconds - the value in seconds (may be negative)
+ * @param withSign - when true (default) prepends + or - to the result
+ */
+export function formatDuration(
+  seconds: number | null | undefined,
+  withSign = true,
+): string {
+  if (seconds == null) return "-";
+  const rounded = Math.round(seconds);
+  const prefix = withSign ? (rounded >= 0 ? "+" : "-") : "";
+  return (
+    prefix +
+    Duration.fromObject({ seconds: Math.abs(rounded) }).toFormat("mm:ss")
+  );
+}
+
+/**
+ * Formats a direction string. Handles inbound/outbound/clockwise/anticlockwise.
+ */
+export function formatDirection(direction: string | null | undefined): string {
+  if (!direction) return "-";
+  const value = direction.toLowerCase();
+  if (value === "inbound") return "Inbound";
+  if (value === "outbound") return "Outbound";
+  if (value === "clockwise") return "Clockwise";
+  if (value === "anticlockwise") return "Anticlockwise";
+  return "-";
+}
+
+export function formatMetricValue(
+  row: MetricRow,
+  metric: "onTime" | "late" | "early",
+  displayMode: OnTimeDisplayMode,
+): string {
+  const hasActualDepartures = (row.actualDepartures ?? 0) > 0;
+  if (!hasActualDepartures) return "-";
+
+  switch (displayMode) {
+    case "count":
+      return (row[metric] ?? 0).toLocaleString();
+    case "time": {
+      const secondsKey = `${metric}InSeconds` as const;
+      return formatDuration(row[secondsKey]);
+    }
+    case "percentage":
+    default: {
+      const ratioKey = `${metric}Ratio` as const;
+      return formatPercentage(row[ratioKey]);
+    }
+  }
+}
+
+export function getMetricSortValue(
+  row: MetricRow,
+  metric: "onTime" | "late" | "early",
+  displayMode: OnTimeDisplayMode,
+): string | number {
+  const hasActualDepartures = (row.actualDepartures ?? 0) > 0;
+  if (!hasActualDepartures) return Number.NEGATIVE_INFINITY;
+
+  switch (displayMode) {
+    case "count":
+      return row[metric] ?? Number.NEGATIVE_INFINITY;
+    case "time": {
+      const secondsKey = `${metric}InSeconds` as const;
+      return row[secondsKey] ?? Number.NEGATIVE_INFINITY;
+    }
+    case "percentage":
+    default: {
+      const ratioKey = `${metric}Ratio` as const;
+      return row[ratioKey] ?? Number.NEGATIVE_INFINITY;
+    }
+  }
+}
