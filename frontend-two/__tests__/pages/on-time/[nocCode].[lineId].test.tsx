@@ -20,16 +20,20 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
+    fetchOperator: vi.fn(),
+  },
+}));
+
 vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchServiceInfo: vi.fn(),
     fetchStopPerformanceList: vi.fn(),
-  },
-}));
-
-vi.mock("@/services/on-time/transit-model.service", () => ({
-  transitModelService: {
-    fetchServicePatternStops: vi.fn(),
+    fetchOnTimeDelayFrequencyData: vi.fn(),
+    fetchOnTimeTimeSeriesData: vi.fn(),
+    fetchOnTimePunctualityTimeOfDayData: vi.fn(),
+    fetchOnTimePunctualityDayOfWeekData: vi.fn(),
   },
 }));
 
@@ -37,12 +41,6 @@ vi.mock("@/services/on-time/headway.service", () => ({
   headwayService: {
     fetchFrequentServiceInfo: vi.fn(),
     fetchTimeSeries: vi.fn(),
-  },
-}));
-
-vi.mock("@/services/on-time/stop-performance.service", () => ({
-  stopPerformanceService: {
-    mergeStops: vi.fn(),
   },
 }));
 
@@ -60,6 +58,7 @@ let mockQuery: Record<string, string | string[] | undefined> = {
   nocCode: "ABCD",
   lineId: "LINE1",
 };
+const mockReplace = vi.fn();
 
 vi.mock("next/router", () => ({
   useRouter: () => ({
@@ -67,39 +66,53 @@ vi.mock("next/router", () => ({
     asPath: "/on-time/ABCD/LINE1",
     query: mockQuery,
     isReady: true,
-    replace: vi.fn(),
+    replace: mockReplace,
   }),
 }));
 
 import { useConfig } from "@/contexts/ConfigContext";
 import { headwayService } from "@/services/on-time/headway.service";
 import { onTimeService } from "@/services/on-time/on-time.service";
-import { stopPerformanceService } from "@/services/on-time/stop-performance.service";
-import { transitModelService } from "@/services/on-time/transit-model.service";
+import { operatorsService } from "@/services/operator.service";
 
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchServiceInfo = vi.mocked(onTimeService.fetchServiceInfo);
 const mockFetchStopPerformance = vi.mocked(
   onTimeService.fetchStopPerformanceList,
 );
-const mockFetchServicePatternStops = vi.mocked(
-  transitModelService.fetchServicePatternStops,
+const mockFetchDelayFrequency = vi.mocked(
+  onTimeService.fetchOnTimeDelayFrequencyData,
+);
+const mockFetchTimeSeries = vi.mocked(onTimeService.fetchOnTimeTimeSeriesData);
+const mockFetchTimeOfDay = vi.mocked(
+  onTimeService.fetchOnTimePunctualityTimeOfDayData,
+);
+const mockFetchDayOfWeek = vi.mocked(
+  onTimeService.fetchOnTimePunctualityDayOfWeekData,
 );
 const mockFetchFrequentServiceInfo = vi.mocked(
   headwayService.fetchFrequentServiceInfo,
 );
 const mockFetchHeadwayTimeSeries = vi.mocked(headwayService.fetchTimeSeries);
-const mockMergeStops = vi.mocked(stopPerformanceService.mergeStops);
+const mockFetchOperator = vi.mocked(operatorsService.fetchOperator);
 
 describe("OnTimeServicePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQuery = { nocCode: "ABCD", lineId: "LINE1" };
+    mockReplace.mockReset();
     mockUseConfig.mockReturnValue({
       config: { apiUrl: "http://test-api" },
       isLoading: false,
       error: null,
     } as ReturnType<typeof useConfig>);
+
+    mockFetchOperator.mockResolvedValue({
+      operatorId: "OP1",
+      nocCode: "ABCD",
+      name: "Demo Operator",
+      adminAreaIds: [],
+    });
 
     mockFetchServiceInfo.mockResolvedValue({
       serviceId: "S1",
@@ -107,7 +120,10 @@ describe("OnTimeServicePage", () => {
       serviceNumber: "1",
     } as any);
     mockFetchStopPerformance.mockResolvedValue([]);
-    mockFetchServicePatternStops.mockResolvedValue([] as any);
+    mockFetchDelayFrequency.mockResolvedValue([] as any);
+    mockFetchTimeSeries.mockResolvedValue([] as any);
+    mockFetchTimeOfDay.mockResolvedValue([] as any);
+    mockFetchDayOfWeek.mockResolvedValue([] as any);
     mockFetchFrequentServiceInfo.mockResolvedValue({
       averageHeadway: 10,
       averageExcessWaitTime: 2,
@@ -116,7 +132,6 @@ describe("OnTimeServicePage", () => {
       inVehicleTime: 25,
     } as any);
     mockFetchHeadwayTimeSeries.mockResolvedValue([] as any);
-    mockMergeStops.mockReturnValue([] as any);
   });
 
   afterEach(() => {
@@ -124,59 +139,59 @@ describe("OnTimeServicePage", () => {
   });
 
   it("shows loading state initially", () => {
-    mockFetchServiceInfo.mockImplementation(() => new Promise(() => {}));
+    mockFetchOperator.mockImplementation(() => new Promise(() => {}));
 
     render(<OnTimeServicePage />);
 
-    expect(screen.getByText("Loading service data...")).toBeInTheDocument();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
-  it("renders ExcessWaitTimeChart when frequent service hours are available", async () => {
-    mockFetchFrequentServiceInfo.mockResolvedValue({
-      averageHeadway: 10,
-      averageExcessWaitTime: 2,
-      totalJourneyTime: 30,
-      waitingTime: 5,
-      inVehicleTime: 25,
-      numHours: 10,
-      totalHours: 24,
-    } as any);
+  it("renders service heading and back link when service data is available", async () => {
+    render(<OnTimeServicePage />);
 
-    mockFetchHeadwayTimeSeries.mockResolvedValue([
-      { timestamp: "2024-01-01T00:00:00Z", value: 1.5 },
-    ] as any);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "1 - Demo Service" }),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("link", { name: /Back to ABCD/i })).toHaveAttribute(
+      "href",
+      "/on-time/ABCD",
+    );
+  });
+
+  it("redirects to operator-not-found when nocCode is inaccessible", async () => {
+    mockFetchOperator.mockResolvedValue(null);
 
     render(<OnTimeServicePage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("excess-wait-time-chart")).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/on-time/operator-not-found");
     });
 
-    expect(screen.getByText("Chart with 1 data points")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /10 hours out of a total 24 service hours during the selected period/,
-      ),
-    ).toBeInTheDocument();
+    expect(mockFetchServiceInfo).not.toHaveBeenCalled();
   });
 
-  it("shows unavailable message when no frequent service hours", async () => {
-    mockFetchFrequentServiceInfo.mockResolvedValue({
-      averageHeadway: 0,
-      averageExcessWaitTime: 0,
-      totalJourneyTime: 0,
-      waitingTime: 0,
-      inVehicleTime: 0,
-      numHours: 0,
-      totalHours: 24,
-    } as any);
+  it("shows line-not-found content when service info is unavailable", async () => {
+    mockFetchServiceInfo.mockResolvedValue(null);
 
     render(<OnTimeServicePage />);
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Excess waiting time is unavailable for this service/),
+        screen.getByRole("heading", { name: "Not found" }),
       ).toBeInTheDocument();
     });
+
+    expect(
+      screen.getByText(
+        /Service not found, or you do not have permission to view/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "operator" })).toHaveAttribute(
+      "href",
+      "/on-time/ABCD",
+    );
   });
 });

@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Duration } from "luxon";
 import { DateTime } from "luxon";
@@ -5,21 +6,32 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { Granularity } from "@/src/generated/graphql";
+import { formatPercentage } from "@/utils/maths";
 import {
   onTimeService,
   type OperatorPerformance,
   type PerformanceParams,
   type TimeSeriesData,
 } from "@/services/on-time/on-time.service";
-import { OperatorSparkline } from "./OperatorSparkline";
+
+const OperatorSparkline = dynamic(
+  () => import("./OperatorSparkline").then((mod) => mod.OperatorSparkline),
+  { ssr: false },
+);
 
 const columns = [
   { key: "nocCode", label: "NOC", sortable: false },
-  { key: "name", label: "Operator", sortable: false },
+  {
+    key: "name",
+    label: "Operator",
+    sortable: false,
+    cellClassName: "on-time-operator-table__name-cell",
+    headerClassName: "on-time-operator-table__name-header",
+  },
   { key: "averageDelay", label: "Av. delay", sortable: true },
-  { key: "onTimeRatio", label: "On-time %", sortable: true },
-  { key: "lateRatio", label: "Late %", sortable: true },
-  { key: "earlyRatio", label: "Early %", sortable: true },
+  { key: "onTimeRatio", label: "On-time", sortable: true },
+  { key: "lateRatio", label: "Late", sortable: true },
+  { key: "earlyRatio", label: "Early", sortable: true },
   { key: "sparkline", label: "", sortable: false },
 ];
 
@@ -87,12 +99,9 @@ function renderRow(
       row.name ?? "-"
     ),
     averageDelay: formatDelay(row.averageDelay),
-    onTimeRatio:
-      row.onTimeRatio != null ? `${(row.onTimeRatio * 100).toFixed(1)}%` : "-",
-    lateRatio:
-      row.lateRatio != null ? `${(row.lateRatio * 100).toFixed(1)}%` : "-",
-    earlyRatio:
-      row.earlyRatio != null ? `${(row.earlyRatio * 100).toFixed(1)}%` : "-",
+    onTimeRatio: formatPercentage(row.onTimeRatio),
+    lateRatio: formatPercentage(row.lateRatio),
+    earlyRatio: formatPercentage(row.earlyRatio),
     sparkline:
       sparklineKey && sparklineData.length > 0 ? (
         <OperatorSparkline data={sparklineData} />
@@ -248,6 +257,15 @@ export const OnTimeOperatorTable = ({
       data={sortedData}
       getRowValue={getRowValue}
       renderRow={renderOperatorRow}
+      colWidths={{
+        nocCode: "10%",
+        name: "30%",
+        averageDelay: "12%",
+        onTimeRatio: "12%",
+        lateRatio: "12%",
+        earlyRatio: "12%",
+        sparkline: "12%",
+      }}
       initialSortKey="name"
       initialSortOrder="asc"
       paginationNoun="operator"

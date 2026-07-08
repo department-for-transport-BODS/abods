@@ -1,5 +1,8 @@
-import { useId, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { TimeSeriesData } from "@/services/on-time/on-time.service";
+import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
+import am4themesMicrochart from "@amcharts/amcharts4/themes/microchart";
 
 interface OperatorSparklineProps {
   data: TimeSeriesData[];
@@ -8,8 +11,14 @@ interface OperatorSparklineProps {
   title?: string;
 }
 
-function clamp(value: number, min = 0, max = 1): number {
-  return Math.min(max, Math.max(min, value));
+function buildChartData(data: TimeSeriesData[]) {
+  return data
+    .filter((point) => point.ts && point.onTimeRatio != null)
+    .map((point) => ({
+      ts: point.ts,
+      onTimeRatio: Math.min(1, Math.max(0, point.onTimeRatio ?? 0)),
+    }))
+    .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 }
 
 export const OperatorSparkline = ({
@@ -18,65 +27,73 @@ export const OperatorSparkline = ({
   height = 44,
   title = "On time stats for the selected duration",
 }: OperatorSparklineProps) => {
-  const gradientId = useId().replace(/:/g, "");
-  const points = useMemo(() => {
-    if (data.length === 0) return [];
+  const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  const chartRef = useRef<am4charts.XYChart | null>(null);
+  const chartData = useMemo(() => buildChartData(data), [data]);
 
-    return data
-      .map((point) => clamp(point.onTimeRatio ?? 0))
-      .map((value, index, array) => {
-        const x =
-          array.length > 1 ? (index / (array.length - 1)) * width : width / 2;
-        const y = height - value * height;
-        return { x, y };
-      });
-  }, [data, width, height]);
+  useEffect(() => {
+    if (!chartContainerRef.current || chartData.length === 0) return;
 
-  if (points.length === 0) {
+    am4core.useTheme(am4themesMicrochart);
+
+    const chart = am4core.create(chartContainerRef.current, am4charts.XYChart);
+    chartRef.current = chart;
+    chart.width = am4core.percent(100);
+    chart.height = am4core.percent(100);
+    chart.padding(2, 2, 2, 2);
+    chart.margin(0, 0, 0, 0);
+    chart.maskBullets = false;
+    chart.dateFormatter.inputDateFormat = "yyyy-MM-ddTHH:mm:ss";
+
+    const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+    dateAxis.startLocation = 0.5;
+    dateAxis.endLocation = 0.5;
+
+    const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    valueAxis.min = 0;
+    valueAxis.max = 1;
+    valueAxis.renderer.baseGrid.disabled = false;
+
+    const series = chart.series.push(new am4charts.LineSeries());
+    series.dataFields.dateX = "ts";
+    series.dataFields.valueY = "onTimeRatio";
+    series.stroke = am4core.color("#6A3D9A");
+    series.strokeWidth = 1;
+    series.fillOpacity = 0.2;
+    series.mainContainer.mask = undefined;
+    series.connect = false;
+
+    const bullet = series.bullets.push(new am4charts.Bullet());
+    const circle = bullet.createChild(am4core.Circle);
+    circle.fill = am4core.color("#6A3D9A");
+    circle.width = 3;
+    circle.height = 3;
+    circle.strokeWidth = 0;
+
+    const gradient = new am4core.LinearGradient();
+    gradient.addColor(am4core.color("#6A3D9A"));
+    gradient.addColor(am4core.color("#ffffff"));
+    gradient.rotation = 90;
+    series.fill = gradient;
+
+    chart.data = chartData;
+
+    return () => {
+      chart.dispose();
+      chartRef.current = null;
+    };
+  }, [chartData]);
+
+  if (chartData.length === 0) {
     return <span className="govuk-body">-</span>;
   }
 
-  const path = points
-    .map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`)
-    .join(" ");
-
-  const areaPath = `${path} L${width},${height} L0,${height} Z`;
-
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
+    <div
+      ref={chartContainerRef}
       role="img"
       aria-label={title}
-      style={{ display: "block" }}
-    >
-      <defs>
-        <linearGradient
-          id={`operator-sparkline-gradient-${gradientId}`}
-          x1="0"
-          y1="0"
-          x2="0"
-          y2="1"
-        >
-          <stop offset="0%" stopColor="#6A3D9A" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path
-        d={areaPath}
-        fill={`url(#operator-sparkline-gradient-${gradientId})`}
-      />
-      <path d={path} fill="none" stroke="#6A3D9A" strokeWidth="1.5" />
-      {points.map((point, index) => (
-        <circle
-          key={`${point.x}-${point.y}-${index}`}
-          cx={point.x}
-          cy={point.y}
-          r="1.7"
-          fill="#6A3D9A"
-        />
-      ))}
-    </svg>
+      style={{ width, height }}
+    />
   );
 };

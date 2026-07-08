@@ -4,10 +4,10 @@ import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { FrequentServicePerformance } from "@/services/on-time/performance.service";
+import { formatPercentage } from "@/utils/maths";
 import { FrequentIcon } from "../icons/FrequentIcon";
 import {
   type OnTimeDisplayMode,
-  formatPercentage,
   formatDuration,
   formatDirection,
   formatMetricValue,
@@ -30,11 +30,23 @@ const ALL_COLUMNS = [
   { key: "direction", label: "Direction", sortable: true },
   { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },
   { key: "recordedDepartures", label: "Recorded departures", sortable: true },
-  { key: "averageDelay", label: "Average delay", sortable: true },
+  { key: "averageDelay", label: "Av. delay", sortable: true },
   { key: "onTime", label: "On time", sortable: true },
   { key: "late", label: "Late", sortable: true },
   { key: "early", label: "Early", sortable: true },
 ];
+
+const SERVICE_TABLE_COLUMN_WIDTHS = {
+  frequent: "6%",
+  service: "18%",
+  direction: "14%",
+  scheduledDepartures: "12%",
+  recordedDepartures: "12%",
+  averageDelay: "10%",
+  onTime: "10%",
+  late: "9%",
+  early: "9%",
+};
 
 export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map((c) => c.key);
 export const SERVICE_TABLE_COLUMN_LABELS: Record<string, ReactNode> = {
@@ -49,7 +61,7 @@ const SERVICE_EXPORT_HEADER_LABELS: Record<string, string> = {
   direction: "Direction",
   scheduledDepartures: "Scheduled departures",
   recordedDepartures: "Recorded departures",
-  averageDelay: "Average delay",
+  averageDelay: "Av. delay",
   onTime: "On time",
   late: "Late",
   early: "Early",
@@ -218,7 +230,7 @@ export const OnTimeServicesTable = ({
   });
 
   return (
-    <div>
+    <div className="on-time-services-table">
       <SortedPaginatedTable
         columns={filteredColumns}
         data={data}
@@ -230,6 +242,7 @@ export const OnTimeServicesTable = ({
         paginationNoun="service"
         emptyMessage="No service performance data available"
         onDisplayedDataChange={setDisplayedRows}
+        colWidths={SERVICE_TABLE_COLUMN_WIDTHS}
         footerAction={
           <CsvExportButton
             filename={`on-time-services-${nocCode}`}

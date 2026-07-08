@@ -29,26 +29,44 @@ loggedInTest.describe("On-Time Page - Authenticated", () => {
   );
 
   loggedInTest(
-    "shows distribution, time-of-day and day-of-week charts for an operator",
+    "shows distribution, time-of-day and day-of-week charts for a service",
     async ({ loggedInPage }) => {
       const nocCode = process.env.TEST_NOC_CODE;
+      const lineId = process.env.TEST_LINE_ID;
 
-      if (nocCode) {
+      if (nocCode && lineId) {
+        await onTime.gotoService(nocCode, lineId);
+      } else if (nocCode) {
         await onTime.gotoOperator(nocCode);
+        await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+        const serviceLinkCount = await onTime.firstServiceDrillInLink().count();
+        loggedInTest.skip(
+          serviceLinkCount === 0,
+          "No service drill-in link available; set TEST_LINE_ID to run this test.",
+        );
+        await onTime.firstServiceDrillInLink().click();
       } else {
         await onTime.gotoIndex();
+        await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
         const operatorCount = await onTime.operatorLinks().count();
         loggedInTest.skip(
           operatorCount === 0,
           "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
         );
-        await expect(onTime.operatorLinks().first()).toBeVisible();
         await onTime.operatorLinks().first().click();
+        await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+        const serviceLinkCount = await onTime.firstServiceDrillInLink().count();
+        loggedInTest.skip(
+          serviceLinkCount === 0,
+          "No service drill-in link available for this operator.",
+        );
+        await onTime.firstServiceDrillInLink().click();
       }
 
-      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/?$/);
-      await expect(onTime.heading()).toBeVisible();
-      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/[^/]+\/?$/);
+      await expect(onTime.serviceLoadingText()).toHaveCount(0, {
+        timeout: 60000,
+      });
 
       await expect(onTime.distributionTab()).toBeVisible();
       await expect(onTime.timeOfDayTab()).toBeVisible();
@@ -263,9 +281,10 @@ loggedInTest.describe("On-Time Operator Page - Authenticated", () => {
 
       for (const header of [
         "Service",
+        "Direction",
         "Scheduled departures",
         "Recorded departures",
-        "Average delay",
+        "Av. delay",
         "On time",
         "Late",
         "Early",
@@ -369,9 +388,10 @@ loggedInTest.describe("On-Time Service Page - Authenticated", () => {
       for (const header of [
         "NAPTAN",
         "Name",
+        "Direction",
         "Scheduled departures",
         "Recorded departures",
-        "Average delay",
+        "Av. delay",
         "On time",
         "Late",
         "Early",
@@ -403,4 +423,159 @@ loggedInTest.describe("On-Time Service Page - Authenticated", () => {
       await expect(onTime.summaryStat(statName)).toBeVisible();
     }
   });
+});
+
+loggedInTest.describe("On-Time Operator Not Found - Authenticated", () => {
+  let onTime!: OnTimePage;
+
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    onTime = new OnTimePage(loggedInPage);
+    await onTime.gotoOperatorNotFound();
+  });
+
+  loggedInTest(
+    "renders operator not found page with correct content",
+    async ({ loggedInPage }) => {
+      await expect(loggedInPage).toHaveURL(/\/on-time\/operator-not-found\/?$/);
+      await expect(onTime.operatorNotFoundHeading()).toBeVisible();
+      await expect(onTime.operatorNotFoundMessage()).toBeVisible();
+    },
+  );
+
+  loggedInTest("has a link back to all operators", async () => {
+    await expect(onTime.operatorNotFoundBackLink()).toBeVisible();
+  });
+});
+
+loggedInTest.describe("On-Time View Operator - Authenticated", () => {
+  let onTime!: OnTimePage;
+
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    onTime = new OnTimePage(loggedInPage);
+
+    const nocCode = process.env.TEST_NOC_CODE;
+    if (nocCode) {
+      await onTime.gotoOperator(nocCode);
+    } else {
+      await onTime.gotoIndex();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const operatorCount = await onTime.operatorLinks().count();
+      loggedInTest.skip(
+        operatorCount === 0,
+        "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
+      );
+      await onTime.operatorLinks().first().click();
+    }
+
+    await expect(onTime.datePresetSelect()).toBeVisible({ timeout: 60000 });
+  });
+
+  loggedInTest(
+    "displays operator page with correct page header",
+    async ({ loggedInPage }) => {
+      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/?$/);
+      await expect(onTime.heading()).toBeVisible();
+      await expect(onTime.operatorPageCaption()).toContainText(
+        "On-time performance",
+      );
+    },
+  );
+
+  loggedInTest(
+    "allows operator selection via dropdown",
+    async ({ loggedInPage }) => {
+      // Operator selector should be visible
+      await expect(loggedInPage.getByLabel("Operator")).toBeVisible();
+    },
+  );
+
+  loggedInTest(
+    "can navigate to a service from operator page",
+    async ({ loggedInPage }) => {
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const serviceLinkCount = await onTime.firstServiceDrillInLink().count();
+      loggedInTest.skip(
+        serviceLinkCount === 0,
+        "No service drill-in link available for this operator.",
+      );
+      await onTime.firstServiceDrillInLink().click();
+
+      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/[^/]+\/?$/);
+      await expect(onTime.servicePageHeading()).toBeVisible();
+    },
+  );
+});
+
+loggedInTest.describe("On-Time View Service - Authenticated", () => {
+  let onTime!: OnTimePage;
+
+  loggedInTest.beforeEach(async ({ loggedInPage }) => {
+    onTime = new OnTimePage(loggedInPage);
+
+    const nocCode = process.env.TEST_NOC_CODE;
+    const lineId = process.env.TEST_LINE_ID;
+
+    if (nocCode && lineId) {
+      await onTime.gotoService(nocCode, lineId);
+    } else if (nocCode) {
+      await onTime.gotoOperator(nocCode);
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const drillInCount = await onTime.firstServiceDrillInLink().count();
+      loggedInTest.skip(
+        drillInCount === 0,
+        "No service drill-in link available; set TEST_LINE_ID to run this test.",
+      );
+      await onTime.firstServiceDrillInLink().click();
+    } else {
+      await onTime.gotoIndex();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const operatorCount = await onTime.operatorLinks().count();
+      loggedInTest.skip(
+        operatorCount === 0,
+        "No operator links available on /on-time; set TEST_NOC_CODE to run this test.",
+      );
+      await onTime.operatorLinks().first().click();
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+      const drillInCount = await onTime.firstServiceDrillInLink().count();
+      loggedInTest.skip(
+        drillInCount === 0,
+        "No service drill-in link available for this operator.",
+      );
+      await onTime.firstServiceDrillInLink().click();
+    }
+
+    await expect(onTime.serviceLoadingText()).toHaveCount(0, {
+      timeout: 60000,
+    });
+  });
+
+  loggedInTest(
+    "displays service page with correct page header",
+    async ({ loggedInPage }) => {
+      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/[^/]+\/?$/);
+      await expect(onTime.servicePageHeading()).toBeVisible();
+      await expect(onTime.operatorPageCaption()).toContainText(
+        "On-time performance",
+      );
+    },
+  );
+
+  loggedInTest(
+    "has chart tabs for distribution, time-of-day and day-of-week",
+    async () => {
+      await expect(onTime.distributionTab()).toBeVisible();
+      await expect(onTime.timeOfDayTab()).toBeVisible();
+      await expect(onTime.dayOfWeekTab()).toBeVisible();
+    },
+  );
+
+  loggedInTest(
+    "can navigate back to operator page",
+    async ({ loggedInPage }) => {
+      await onTime.backToOperatorLink().click();
+
+      await expect(loggedInPage).toHaveURL(/\/on-time\/[^/]+\/?$/);
+      await expect(onTime.heading()).toBeVisible();
+    },
+  );
 });

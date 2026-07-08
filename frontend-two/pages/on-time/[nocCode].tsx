@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
-import { JsonSection } from "@/components/on-time/JsonSection";
 import {
   OnTimeServicesTable,
   SERVICE_TABLE_COLUMN_KEYS,
@@ -32,6 +31,8 @@ import {
 import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { operatorsService } from "@/services/operator.service";
+import { type OperatorType } from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
@@ -49,6 +50,7 @@ import {
 } from "@/services/on-time/performance.service";
 import {
   DelayFrequencyType,
+  Granularity,
   HeadwayOverviewType,
   HeadwayTimeSeriesType,
   MatchType,
@@ -57,6 +59,7 @@ import {
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
+import { OperatorSelector } from "@/components/shared/OperatorSelector";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -97,6 +100,9 @@ interface OperatorOnTimeData {
   servicePerformance: FrequentServicePerformance[];
   servicePerformancePlain: ServicePerformance[];
   headwayTimeSeries: HeadwayTimeSeriesType[];
+  fromTimestamp: string;
+  toTimestamp: string;
+  granularity: Granularity;
 }
 
 const OnTimeOperatorPage = () => {
@@ -107,6 +113,7 @@ const OnTimeOperatorPage = () => {
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [operatorChecked, setOperatorChecked] = useState(false);
   const [data, setData] = useState<Partial<OperatorOnTimeData>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [serviceSearch, setServiceSearch] = useState("");
@@ -122,6 +129,7 @@ const OnTimeOperatorPage = () => {
   );
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
+  const [allOperators, setAllOperators] = useState<OperatorType[]>([]);
   const refineResultsInitialValues = useMemo(
     () => performanceFiltersToRefineResults(refineResultsFilters),
     [JSON.stringify(refineResultsFilters)],
@@ -155,10 +163,35 @@ const OnTimeOperatorPage = () => {
     setDateRange(range);
   };
 
+  const handleOperatorChange = (operatorId: string | null) => {
+    if (!operatorId) return;
+    router.push(`/on-time/${encodeURIComponent(operatorId)}`);
+  };
+
+  useEffect(() => {
+    if (!router.isReady || !config?.apiUrl) return;
+    const loadOperators = async () => {
+      try {
+        const ops = await operatorsService.fetchOperators();
+        setAllOperators(ops);
+      } catch (error) {
+        console.error("Failed to load operators", error);
+      }
+    };
+    loadOperators();
+  }, [router.isReady, config]);
+
   useEffect(() => {
     if (!router.isReady || !config?.apiUrl || !nocCode) return;
     const load = async () => {
       setIsLoading(true);
+      const operator = await operatorsService.fetchOperator(nocCode);
+      if (!operator) {
+        router.replace("/on-time/operator-not-found");
+        return;
+      }
+      setOperatorChecked(true);
+
       const defaultParams = buildDefaultParams({ nocCode });
       const params = {
         ...defaultParams,
@@ -176,6 +209,7 @@ const OnTimeOperatorPage = () => {
               ? MatchType.Evidenced
               : MatchType.Estimated,
           timingPointsOnly: selectedStopType === "timing-points",
+          granularity: Granularity.Day,
         },
       };
 
@@ -208,6 +242,9 @@ const OnTimeOperatorPage = () => {
         servicePerformancePlain: servicePerformancePlain.data ?? [],
         servicePerformance: servicePerformance.data ?? [],
         headwayTimeSeries: headwayTimeSeries.data ?? [],
+        fromTimestamp: params.fromTimestamp,
+        toTimestamp: params.toTimestamp,
+        granularity: Granularity.Day,
       });
       setErrors({
         overview: overview.error,
@@ -359,7 +396,7 @@ const OnTimeOperatorPage = () => {
     serviceSearch,
   ]);
 
-  if (!router.isReady || !nocCode) {
+  if (!router.isReady || !nocCode || !operatorChecked) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>
@@ -375,10 +412,13 @@ const OnTimeOperatorPage = () => {
         </Link>
       </p>
       <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
-      <p className="govuk-caption-xl govuk-!-margin-bottom-0">
-        TODO: Operator: {nocCode}
-      </p>
+      <h1 className="govuk-heading-xl govuk-!-margin-bottom-4">All services</h1>
+      <OperatorSelector
+        operators={allOperators}
+        selectedOperatorId={nocCode}
+        onChange={handleOperatorChange}
+        allowAll={false}
+      />
       {isLoading ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading on-time data...
@@ -418,10 +458,15 @@ const OnTimeOperatorPage = () => {
               delayFrequency={data.delayFrequency ?? []}
               timeOfDay={data.timeOfDay ?? []}
               dayOfWeek={data.dayOfWeek ?? []}
+              timeSeries={data.timeSeries ?? []}
+              fromTimestamp={data.fromTimestamp ?? ""}
+              toTimestamp={data.toTimestamp ?? ""}
+              granularity={data.granularity ?? Granularity.Day}
               errors={{
                 delayFrequency: errors.delayFrequency,
                 timeOfDay: errors.timeOfDay,
                 dayOfWeek: errors.dayOfWeek,
+                timeSeries: errors.timeSeries,
               }}
             />
           </ChartNoDataWrapper>
@@ -453,6 +498,7 @@ const OnTimeOperatorPage = () => {
                         testId=""
                         value={serviceSearch}
                         onChange={setServiceSearch}
+                        widthClassName="on-time-service-filters__search-input"
                       />
                     </div>
                     <div className="on-time-service-filters__directions">
@@ -461,7 +507,7 @@ const OnTimeOperatorPage = () => {
                         options={["Inbound", "Outbound"]}
                         selected={selectedDirections}
                         onChange={setSelectedDirections}
-                        placeholderText="All directions"
+                        placeholderText=""
                       />
                     </div>
                   </div>

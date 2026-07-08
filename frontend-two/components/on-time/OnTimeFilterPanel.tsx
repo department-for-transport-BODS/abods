@@ -111,14 +111,6 @@ export const OnTimeFilterPanel = ({
 }: OnTimeFilterPanelProps) => {
   return (
     <>
-      <div className="refine-results-button-container">
-        <RefineResultsButton
-          isLoading={isLoading}
-          initialValues={refineResultsInitialValues}
-          onApply={onApplyRefineResults}
-          onReset={onResetRefineResults}
-        />
-      </div>
       <div className="controls-container">
         <div className="controls-date-selects-container">
           <DateRangeSelect
@@ -135,6 +127,14 @@ export const OnTimeFilterPanel = ({
               selected: selectedDatePreset === preset,
             }))}
             onChange={(event) => onDatePresetChange(event.target.value)}
+          />
+        </div>
+        <div className="refine-results-button-container">
+          <RefineResultsButton
+            isLoading={isLoading}
+            initialValues={refineResultsInitialValues}
+            onApply={onApplyRefineResults}
+            onReset={onResetRefineResults}
           />
         </div>
         <div className="on-time-toggle-container">
