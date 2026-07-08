@@ -182,9 +182,8 @@ it("Shows loading state within Generate button", async () => {
 
   render(<DistancesPage />);
 
-  const generateButton = await screen.findByRole("button", {
-    name: "Loading...",
-  });
+  const generateButton = await screen.findByTestId("generate-distances-button");
+  expect(generateButton).toHaveTextContent("Loading...");
   expect(generateButton).toBeDisabled();
 });
 

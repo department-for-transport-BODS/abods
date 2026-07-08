@@ -63,7 +63,7 @@ export const MultiselectDropdown = ({
 
   const displayText =
     selected.length === 0
-      ? ""
+      ? placeholderText ?? ""
       : selected.length === 1
         ? selected[0]
         : `${selected.length} selected`;

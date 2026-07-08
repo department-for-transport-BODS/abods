@@ -543,6 +543,7 @@ const DistancesPage = () => {
         <Button
           onClick={handleGenerateDataButton}
           disabled={isLoading || isGenerating}
+          data-testid="generate-distances-button"
         >
           {isLoading || isGenerating ? "Loading..." : "Generate"}
         </Button>

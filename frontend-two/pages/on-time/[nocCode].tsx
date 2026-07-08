@@ -507,7 +507,7 @@ const OnTimeOperatorPage = () => {
                         options={["Inbound", "Outbound"]}
                         selected={selectedDirections}
                         onChange={setSelectedDirections}
-                        placeholderText="All directions"
+                        placeholderText=""
                       />
                     </div>
                   </div>

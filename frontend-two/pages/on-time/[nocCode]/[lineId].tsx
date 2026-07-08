@@ -493,7 +493,7 @@ const OnTimeServicePage = () => {
                 options={["Inbound", "Outbound"]}
                 selected={selectedDirections}
                 onChange={setSelectedDirections}
-                placeholderText="Directions"
+                placeholderText=""
               />
             </div>
             <div className="on-time-service-filters__display-options">
