@@ -5,7 +5,6 @@ import { DateTime, Duration } from "luxon";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { FilterChips } from "@/components/on-time/FilterChips";
-import { JsonSection } from "@/components/on-time/JsonSection";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
 import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect";
@@ -307,22 +306,14 @@ const OnTimeIndexPage = () => {
         {isLoading ? (
           <p className="govuk-body">Loading on-time data...</p>
         ) : (
-          <>
+          <ChartNoDataWrapper
+            noData={wrapperNoData}
+            dataExpected={wrapperDataExpected}
+            timingPointsNotSupported={wrapperTimingPointsNotSupported}
+            minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
+          >
             {overview && <OnTimeOverviewStats overview={overview} />}
-            <ChartNoDataWrapper
-              noData={wrapperNoData}
-              dataExpected={wrapperDataExpected}
-              timingPointsNotSupported={wrapperTimingPointsNotSupported}
-              minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
-            >
-              <JsonSection
-                title="onTimeOperatorPerformanceList"
-                description="Operator-level on-time performance, last 7 days."
-                data={operatorPerformance}
-                error={error}
-              />
-            </ChartNoDataWrapper>
-          </>
+          </ChartNoDataWrapper>
         )}
       </div>
       <div className="operator-container">
