@@ -16,7 +16,6 @@ import {
   normaliseDirection,
   aggregatePerformanceTotals,
 } from "@/utils/on-time-table-format";
-import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
