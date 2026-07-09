@@ -32,6 +32,14 @@ export class OnTimePage {
     return this.page.getByText(/Loading on-time data\.\.\./i);
   }
 
+  /**
+   * Waits for the summary section to finish loading. Uses a generous timeout so
+   * it is resilient on slower engines (WebKit) and dev-server first compiles.
+   */
+  async waitForSummaryLoaded(): Promise<void> {
+    await this.onTimeStat().waitFor({ state: "visible", timeout: 60000 });
+  }
+
   operatorLinks(): Locator {
     return this.page.locator('main ul.govuk-list a[href^="/on-time/"]');
   }
@@ -125,5 +133,66 @@ export class OnTimePage {
 
   stopTypeTimingPointsButton(): Locator {
     return this.page.getByLabel("Timing points");
+  }
+
+  // --- Overview summary stats ---------------------------------------------
+
+  onTimeStat(): Locator {
+    return this.page.locator("#on-time-overview-stat-on-time");
+  }
+
+  lateStat(): Locator {
+    return this.page.locator("#on-time-overview-stat-late");
+  }
+
+  earlyStat(): Locator {
+    return this.page.locator("#on-time-overview-stat-early");
+  }
+
+  incompleteDataStat(): Locator {
+    return this.page.locator("#on-time-overview-stat-no-data");
+  }
+
+  averageDelayStat(): Locator {
+    return this.page.locator("#on-time-overview-stat-average-delay");
+  }
+
+  // --- Compare thresholds (OTP) modal -------------------------------------
+
+  compareThresholdsLink(): Locator {
+    return this.page.getByRole("button", { name: "Compare thresholds" });
+  }
+
+  thresholdModal(): Locator {
+    return this.page.getByRole("dialog");
+  }
+
+  thresholdModalHeading(): Locator {
+    return this.thresholdModal().getByRole("heading", {
+      name: /compare on-time performance thresholds/i,
+    });
+  }
+
+  thresholdEarlyInput(): Locator {
+    return this.thresholdModal().locator("#otp-threshold-early");
+  }
+
+  thresholdLateInput(): Locator {
+    return this.thresholdModal().locator("#otp-threshold-late");
+  }
+
+  thresholdCompareButton(): Locator {
+    return this.thresholdModal().getByRole("button", { name: "Compare" });
+  }
+
+  thresholdComparisonCell(rowName: string | RegExp): Locator {
+    return this.thresholdModal()
+      .getByRole("row", { name: rowName })
+      .locator("td")
+      .last();
+  }
+
+  thresholdValidationError(): Locator {
+    return this.thresholdModal().getByText(/between 1 and 20 minutes/i);
   }
 }
