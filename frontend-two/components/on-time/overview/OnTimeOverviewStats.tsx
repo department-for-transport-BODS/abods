@@ -1,6 +1,7 @@
 import { Duration } from "luxon";
 import { Stat } from "@/components/shared/Stat";
 import type { PunctualityOverview } from "@/services/on-time/on-time.service";
+import styles from "./OnTimeOverviewStats.module.scss";
 
 interface Props {
   overview: PunctualityOverview;
@@ -31,10 +32,10 @@ export const OnTimeOverviewStats = ({ overview }: Props) => {
   const noData = Math.max(0, scheduled - completed);
 
   return (
-    <div className="on-time-overview__stats">
+    <div className={styles.stats}>
       <Stat
         id="on-time-overview-stat-on-time"
-        className="on-time-overview__stat"
+        className={styles.stat}
         label="On-time"
         value={formatPercent(onTime, denominator)}
         tooltip={
@@ -45,7 +46,7 @@ export const OnTimeOverviewStats = ({ overview }: Props) => {
       />
       <Stat
         id="on-time-overview-stat-late"
-        className="on-time-overview__stat"
+        className={styles.stat}
         label="Late"
         value={formatPercent(late, denominator)}
         tooltip={
@@ -56,7 +57,7 @@ export const OnTimeOverviewStats = ({ overview }: Props) => {
       />
       <Stat
         id="on-time-overview-stat-early"
-        className="on-time-overview__stat"
+        className={styles.stat}
         label="Early"
         value={formatPercent(early, denominator)}
         tooltip={
@@ -67,7 +68,7 @@ export const OnTimeOverviewStats = ({ overview }: Props) => {
       />
       <Stat
         id="on-time-overview-stat-no-data"
-        className="on-time-overview__stat"
+        className={styles.stat}
         label="Incomplete data"
         value={scheduled ? formatPercent(noData, scheduled) : "Unavailable"}
         tooltip={
@@ -78,7 +79,7 @@ export const OnTimeOverviewStats = ({ overview }: Props) => {
       />
       <Stat
         id="on-time-overview-stat-average-delay"
-        className="on-time-overview__stat"
+        className={styles.stat}
         label="Average delay"
         value={formatDelay(averageDelay)}
         tooltip="Average delay with data displayed in minutes and second format MM:SS."
