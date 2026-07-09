@@ -17,11 +17,13 @@ import {
 } from "@/src/generated/graphql";
 import {
   OperatorPerformance,
+  PerformanceParams,
   PunctualityOverview,
   onTimeService,
 } from "@/services/on-time/on-time.service";
 import { buildDefaultParams } from "@/services/on-time/params";
 import { OnTimeOverviewStats } from "@/components/on-time/overview/OnTimeOverviewStats";
+import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
 import { formatDateToISODateString } from "@/utils/dateFormatter";
 
 const Select = dynamic(
@@ -191,33 +193,34 @@ const OnTimeIndexPage = () => {
     setDateRange(range);
   };
 
+  const params = useMemo<PerformanceParams>(() => {
+    const defaultParams = buildDefaultParams();
+    return {
+      ...defaultParams,
+      ...(dateRange
+        ? {
+            fromTimestamp: dateRange.from,
+            toTimestamp: dateRange.to,
+          }
+        : {}),
+      filters: {
+        ...defaultParams.filters,
+        ...refineResultsFilters,
+        matchType:
+          selectedMatchType === "evidenced"
+            ? MatchType.Evidenced
+            : MatchType.Estimated,
+        timingPointsOnly: selectedStopType === "timing-points",
+      },
+    };
+  }, [dateRange, refineResultsFilters, selectedMatchType, selectedStopType]);
+
   useEffect(() => {
     if (!config?.apiUrl) return;
     const load = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const defaultParams = buildDefaultParams();
-
-        const params = {
-          ...defaultParams,
-          ...(dateRange
-            ? {
-                fromTimestamp: dateRange.from,
-                toTimestamp: dateRange.to,
-              }
-            : {}),
-          filters: {
-            ...defaultParams.filters,
-            ...refineResultsFilters,
-            matchType:
-              selectedMatchType === "evidenced"
-                ? MatchType.Evidenced
-                : MatchType.Estimated,
-            timingPointsOnly: selectedStopType === "timing-points",
-          },
-        };
-
         const [overviewData, data] = await Promise.all([
           onTimeService.fetchOnTimeStats(params),
           onTimeService.fetchOperatorPerformanceList(params),
@@ -231,13 +234,7 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [
-    config,
-    refineResultsFilters,
-    dateRange,
-    selectedMatchType,
-    selectedStopType,
-  ]);
+  }, [config, params]);
 
   return (
     <BaseLayout title="All services - Analyse Bus Open Data">
@@ -302,7 +299,18 @@ const OnTimeIndexPage = () => {
         />
       </div>
       <div className="summary-container">
-        <h2 className="govuk-heading-l">Summary</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <h2 className="govuk-heading-l">Summary</h2>
+          <OtpThresholdModalLink params={params} overview={overview} />
+        </div>
         {isLoading ? (
           <p className="govuk-body">Loading on-time data...</p>
         ) : (
