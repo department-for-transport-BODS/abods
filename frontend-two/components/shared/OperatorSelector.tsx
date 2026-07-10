@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { DashboardOperatorListQuery } from "../../src/generated/graphql";
 
 const ALL_OPERATORS_OPTION = {
   value: "all",
@@ -19,15 +18,21 @@ const ALL_OPERATORS_OPTION = {
 };
 
 interface OperatorSelectorProps {
-  operators: DashboardOperatorListQuery["operatorsFeedMonitoring"];
+  operators: Array<{
+    nocCode?: string | null;
+    operatorId?: string | null;
+    name?: string | null;
+  }>;
   selectedOperatorId: string | null;
   onChange: (operatorId: string | null) => void;
+  allowAll?: boolean;
 }
 
 export const OperatorSelector = ({
   operators,
   selectedOperatorId,
   onChange,
+  allowAll = true,
 }: OperatorSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -39,26 +44,35 @@ export const OperatorSelector = ({
   const reactId = useId();
   const panelId = `operator_selector_panel_${reactId.replace(/[:]/g, "")}`;
 
-  const options = useMemo(
-    () => [
-      ALL_OPERATORS_OPTION,
-      ...operators.map((operator) => {
+  const options = useMemo(() => {
+    const operatorOptions = operators
+      .map((operator) => {
         const value = operator.nocCode ?? operator.operatorId;
-        const label = `${operator.name}${operator.nocCode ? ` (${operator.nocCode})` : ""}`;
+        if (!value) return null;
+        const label = `${operator.name ?? ""}${operator.nocCode ? ` (${operator.nocCode})` : ""}`;
         const aliases = [operator.nocCode, operator.operatorId].filter(
           (item): item is string => Boolean(item),
         );
         return { value, label, aliases };
-      }),
-    ],
-    [operators],
-  );
+      })
+      .filter(
+        (
+          option,
+        ): option is { value: string; label: string; aliases: string[] } =>
+          Boolean(option),
+      );
 
-  const selectedValueFromQuery = selectedOperatorId ?? "all";
+    return allowAll
+      ? [ALL_OPERATORS_OPTION, ...operatorOptions]
+      : operatorOptions;
+  }, [allowAll, operators]);
+
+  const selectedValueFromQuery = selectedOperatorId ?? (allowAll ? "all" : "");
   const selectedOption =
     options.find((option) => option.value === selectedValueFromQuery) ??
     options.find((option) => option.aliases.includes(selectedValueFromQuery)) ??
-    ALL_OPERATORS_OPTION;
+    options[0] ??
+    (allowAll ? ALL_OPERATORS_OPTION : { value: "", label: "", aliases: [] });
   const selectedValue = selectedOption.value;
   const hasSearchTerm = searchTerm.trim().length > 0;
 
@@ -82,9 +96,7 @@ export const OperatorSelector = ({
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
-        setIsFocused(false);
-        setSearchTerm("");
+        closeDropdown();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -124,6 +136,7 @@ export const OperatorSelector = ({
   };
 
   const closeDropdown = () => {
+    inputRef.current?.blur();
     setIsOpen(false);
     setIsFocused(false);
     setSearchTerm("");
@@ -285,6 +298,7 @@ export const OperatorSelector = ({
                   aria-autocomplete="list"
                   aria-expanded={isOpen}
                   aria-controls={panelId}
+                  aria-label="Operator"
                   aria-activedescendant={
                     isOpen && filteredOptions[activeIndex]
                       ? `${panelId}-${activeIndex}`

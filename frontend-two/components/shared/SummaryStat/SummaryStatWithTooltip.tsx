@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 interface SummaryStatWithTooltipProps {
   title: string;
   value: string | number;
-  tooltip?: string;
+  tooltip?: ReactNode;
 }
 
 export const SummaryStatWithTooltip = ({
@@ -22,8 +22,8 @@ export const SummaryStatWithTooltip = ({
         {title}
       </span>
       {tooltip ? (
-        <span className="font-bold" style={{ fontSize: "36px" }}>
-          <span
+        <div className="font-bold" style={{ fontSize: "36px" }}>
+          <div
             className="summary-stat"
             style={{ position: "relative", display: "inline-block" }}
             onMouseEnter={() => setVisible(true)}
@@ -35,17 +35,17 @@ export const SummaryStatWithTooltip = ({
               {value}
             </span>
             {visible && (
-              <span className="govuk-body tooltip">
+              <div className="govuk-body tooltip">
                 {tooltip}
                 <span className="triangle" />
-              </span>
+              </div>
             )}
-          </span>
-        </span>
+          </div>
+        </div>
       ) : (
-        <span className="font-bold" style={{ fontSize: "36px" }}>
+        <div className="font-bold" style={{ fontSize: "36px" }}>
           {value}
-        </span>
+        </div>
       )}
     </div>
   );

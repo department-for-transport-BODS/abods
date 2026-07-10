@@ -19,7 +19,7 @@ vi.mock("@/components/layout/BaseLayout", () => ({
   ),
 }));
 
-vi.mock("@/components/shared/DateRangeSelect", () => ({
+vi.mock("@/components/shared/DateRangeSelect/DateRangeSelect", () => ({
   DateRangeSelect: ({
     value,
     onChange,

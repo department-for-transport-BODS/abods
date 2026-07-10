@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { registerTimingPointIcons } from "@/components/stop-analysis/timingPointIcons";
+import { registerTimingPointIcons } from "@/components/icons/timingPointIcons";
 
 const timingSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M1 1h22v22H1z"/></svg>';

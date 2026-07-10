@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { useConfig } from "@/contexts/ConfigContext";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
 import { PunctualityOverview, ServiceRankingResult } from "@/types/dashboard";
-import { calculatePresetPeriod, Period } from "@/utils/dateRange";
+import { calculatePresetPeriod, Period } from "@/utils/date-range";
 import { PerformanceRankingTable } from "@/components/dashboard/PerformanceRankingTable";
 import {
   DashboardOperatorListQuery,

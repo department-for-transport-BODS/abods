@@ -20,3 +20,9 @@ export const stdDeviation = (
         .map((value) => Math.pow((value as number) - meanValue, 2)),
     ),
   );
+
+export const formatPercentage = (ratio: number | null | undefined): string => {
+  if (ratio == null) return "-";
+  const percentage = Math.round(ratio * 1000) / 10;
+  return `${Number.isInteger(percentage) ? percentage.toFixed(0) : percentage.toFixed(1)}%`;
+};

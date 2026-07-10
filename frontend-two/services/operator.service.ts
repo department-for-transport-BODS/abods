@@ -8,6 +8,8 @@ import {
   OperatorType,
 } from "../src/generated/graphql";
 
+export type { OperatorType };
+
 const isNonGeographicalAdminAreaId = (adminAreaId: string) =>
   adminAreaId === "AA0" || /AA9\d{2}/.test(adminAreaId);
 
@@ -22,6 +24,16 @@ export const operatorsService = {
     } catch (error) {
       console.warn("Failed to fetch operators:", error);
       return [];
+    }
+  },
+
+  fetchOperator: async (nocCode: string): Promise<OperatorType | null> => {
+    try {
+      const operators = await operatorsService.fetchOperators();
+      return operators.find((operator) => operator.nocCode === nocCode) ?? null;
+    } catch (error) {
+      console.warn("Failed to fetch operator:", error);
+      return null;
     }
   },
 

@@ -4,7 +4,7 @@ import {
   FeedMonitoringListQuery,
   VehicleStatFragment,
 } from "../../src/generated/graphql";
-import { formatISODateStringToRelativeTime } from "@/utils/dateFormatter";
+import { formatISODateStringToRelativeTime } from "@/utils/date-formatter";
 import { SortedPaginatedTable } from "../table/SortedPaginatedTable";
 import type { SortableTableRow } from "../table/SortableTable";
 import Image from "next/image";

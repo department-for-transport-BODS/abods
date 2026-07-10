@@ -6,6 +6,10 @@ import { Locator, Page } from "@playwright/test";
 export class OnTimePage {
   constructor(private readonly page: Page) {}
 
+  async goto(): Promise<void> {
+    await this.gotoIndex();
+  }
+
   async gotoIndex(): Promise<void> {
     await this.page.goto("/on-time", { waitUntil: "domcontentloaded" });
   }
@@ -14,6 +18,13 @@ export class OnTimePage {
     await this.page.goto(`/on-time/${encodeURIComponent(nocCode)}`, {
       waitUntil: "domcontentloaded",
     });
+  }
+
+  async gotoService(nocCode: string, lineId: string): Promise<void> {
+    await this.page.goto(
+      `/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(lineId)}`,
+      { waitUntil: "domcontentloaded" },
+    );
   }
 
   async openFromDashboardNav(): Promise<void> {
@@ -25,19 +36,15 @@ export class OnTimePage {
   }
 
   heading(): Locator {
-    return this.page.getByRole("heading", { name: /On-time performance/i });
+    return this.page.getByRole("heading", { name: /All services/i });
   }
 
   loadingText(): Locator {
     return this.page.getByText(/Loading on-time data\.\.\./i);
   }
 
-  /**
-   * Waits for the summary section to finish loading. Uses a generous timeout so
-   * it is resilient on slower engines (WebKit) and dev-server first compiles.
-   */
-  async waitForSummaryLoaded(): Promise<void> {
-    await this.onTimeStat().waitFor({ state: "visible", timeout: 60000 });
+  serviceLoadingText(): Locator {
+    return this.page.getByText(/Loading service data\.\.\./i);
   }
 
   operatorLinks(): Locator {
@@ -135,26 +142,128 @@ export class OnTimePage {
     return this.page.getByLabel("Timing points");
   }
 
-  // --- Overview summary stats ---------------------------------------------
-
-  onTimeStat(): Locator {
-    return this.page.locator("#on-time-overview-stat-on-time");
+  csvExportButtons(): Locator {
+    return this.page.getByRole("button", { name: /Export data/i });
   }
 
-  lateStat(): Locator {
-    return this.page.locator("#on-time-overview-stat-late");
+  summaryStats(): Locator {
+    return this.page.getByRole("list", { name: "Summary stats" });
   }
 
-  earlyStat(): Locator {
-    return this.page.locator("#on-time-overview-stat-early");
+  summaryStatItems(): Locator {
+    return this.summaryStats().getByRole("listitem");
   }
 
-  incompleteDataStat(): Locator {
-    return this.page.locator("#on-time-overview-stat-no-data");
+  summaryStatItem(name: string): Locator {
+    return this.summaryStatItems().filter({
+      has: this.page.getByText(name, { exact: true }),
+    });
   }
 
-  averageDelayStat(): Locator {
-    return this.page.locator("#on-time-overview-stat-average-delay");
+  summaryStat(name: string): Locator {
+    return this.summaryStatItem(name).getByText(name, { exact: true });
+  }
+
+  operatorTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  operatorTableHeader(name: string): Locator {
+    return this.operatorTable().getByRole("columnheader", { name });
+  }
+
+  serviceHeading(): Locator {
+    return this.page.getByRole("heading", { level: 1 });
+  }
+
+  operatorSparklines(): Locator {
+    return this.page.locator('svg[role="img"][aria-label*="On time stats"]');
+  }
+
+  boundariesMapContainer(): Locator {
+    return this.page.locator(".summary-map-container");
+  }
+
+  operatorSearchInput(): Locator {
+    return this.page.getByLabel("Search operators");
+  }
+
+  // Operator (nocCode) page locators
+
+  backToAllOperatorsLink(): Locator {
+    return this.page
+      .locator(".govuk-link")
+      .filter({ hasText: /All operators/i });
+  }
+
+  operatorPageCaption(): Locator {
+    return this.page.locator(".govuk-caption-xl").first();
+  }
+
+  serviceTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  serviceTableHeader(name: string): Locator {
+    return this.serviceTable().getByRole("columnheader", { name });
+  }
+
+  serviceSearchInput(): Locator {
+    return this.page.getByLabel("Search for a service");
+  }
+
+  directionsDropdown(): Locator {
+    return this.page
+      .locator(".multiselect-dropdown")
+      .filter({ hasText: "Directions" });
+  }
+
+  displayOptionsButton(): Locator {
+    return this.page.getByRole("button", { name: /Display options/i });
+  }
+
+  // Service (lineId) page locators
+
+  servicePageHeading(): Locator {
+    return this.page.getByRole("heading", { level: 1 });
+  }
+
+  backToOperatorLink(): Locator {
+    return this.page.getByRole("link", { name: /Back to/i });
+  }
+
+  stopsTable(): Locator {
+    return this.page.getByRole("table").first();
+  }
+
+  stopsTableHeader(name: string): Locator {
+    return this.stopsTable().getByRole("columnheader", { name });
+  }
+
+  // Operator not found page locators
+
+  operatorNotFoundHeading(): Locator {
+    return this.page.getByRole("heading", {
+      name: /Not found/i,
+    });
+  }
+
+  operatorNotFoundMessage(): Locator {
+    return this.page.getByText(
+      /Operator not found, or you do not have permission to view/i,
+    );
+  }
+
+  operatorNotFoundBackLink(): Locator {
+    return this.page
+      .locator(".govuk-back-link")
+      .filter({ hasText: "On-time performance" });
+  }
+
+  gotoOperatorNotFound(): Promise<void> {
+    return this.page.goto("/on-time/operator-not-found", {
+      waitUntil: "domcontentloaded",
+    });
   }
 
   // --- Compare thresholds (OTP) modal -------------------------------------

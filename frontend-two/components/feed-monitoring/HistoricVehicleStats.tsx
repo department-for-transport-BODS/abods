@@ -6,7 +6,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_frozen from "@amcharts/amcharts4/themes/frozen";
 
-import { COLOURS } from "@/utils/chartColours";
+import { COLOURS } from "@/utils/chart-colours";
 
 interface ChartDataPoint {
   dateTime: DateTime;

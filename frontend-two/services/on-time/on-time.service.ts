@@ -333,12 +333,12 @@ export const onTimeService = {
       .map((item) => calculateOnTimePcts(item));
   },
 
-  fetchServiceInfo: async (lineId: string): Promise<ServiceInfoType> => {
+  fetchServiceInfo: async (lineId: string): Promise<ServiceInfoType | null> => {
     const result = await apolloClient.query({
       query: ServiceInfoDocument,
       variables: { lineId },
       fetchPolicy: "no-cache",
     });
-    return assert(result.data?.serviceInfo);
+    return result.data?.serviceInfo ?? null;
   },
 };
