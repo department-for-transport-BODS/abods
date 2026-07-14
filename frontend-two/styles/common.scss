@@ -2453,6 +2453,10 @@ $day-width: 46px;
     flex: 1 1 50%;
     min-width: 0;
   }
+
+  .summary-stat-container .summary-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .summary-stats-grid {
