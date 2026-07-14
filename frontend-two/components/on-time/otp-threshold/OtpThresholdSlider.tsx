@@ -1,5 +1,4 @@
-import { ChangeEvent } from "react";
-import styles from "./OtpThresholdSlider.module.scss";
+import { RangeSlider } from "@/components/shared/RangeSlider";
 
 /** Thresholds are whole minutes between 1 and 20 on each side of the scheduled departure. */
 export const OTP_THRESHOLD_MIN = 1;
@@ -22,8 +21,8 @@ interface OtpThresholdSliderProps {
 
 /**
  * Two-thumb slider representing the "early" and "late" thresholds (in minutes)
- * around a scheduled departure. Mirrors the overlay technique used by the
- * shared TimeRangeSlider but on a symmetric minutes axis.
+ * around a scheduled departure. Uses the shared RangeSlider primitive and
+ * layers its own coloured track regions on top.
  */
 export const OtpThresholdSlider = ({
   early,
@@ -48,50 +47,56 @@ export const OtpThresholdSlider = ({
   const leftPct = (earlyPos / AXIS) * 100;
   const rightPct = 100 - (latePos / AXIS) * 100;
 
-  const handleEarly = (event: ChangeEvent<HTMLInputElement>) => {
-    const pos = Number.parseInt(event.target.value, 10);
-    onEarlyChange(clamp(CENTRE - pos, OTP_THRESHOLD_MIN, OTP_THRESHOLD_MAX));
-  };
-
-  const handleLate = (event: ChangeEvent<HTMLInputElement>) => {
-    const pos = Number.parseInt(event.target.value, 10);
-    onLateChange(clamp(pos - CENTRE, OTP_THRESHOLD_MIN, OTP_THRESHOLD_MAX));
-  };
-
   return (
-    <div className={styles.slider}>
-      <div className={styles.labels}>
+    <div className="otp-threshold-slider">
+      <div className="otp-threshold-slider__labels">
         <span>Early</span>
-        <span className={styles.scheduled}>Scheduled departure</span>
+        <span className="otp-threshold-slider__scheduled">
+          Scheduled departure
+        </span>
         <span>Late</span>
       </div>
-      <div className={styles.track}>
-        <div className={styles.early} style={{ width: `${leftPct}%` }} />
+      <RangeSlider
+        className="otp-threshold-slider__slider"
+        thumbs={[
+          {
+            min: 0,
+            max: CENTRE - 1,
+            value: earlyPos,
+            ariaLabel:
+              "Early threshold in minutes before the scheduled departure",
+            onChange: (pos) =>
+              onEarlyChange(
+                clamp(CENTRE - pos, OTP_THRESHOLD_MIN, OTP_THRESHOLD_MAX),
+              ),
+          },
+          {
+            min: CENTRE + 1,
+            max: AXIS,
+            value: latePos,
+            ariaLabel:
+              "Late threshold in minutes after the scheduled departure",
+            onChange: (pos) =>
+              onLateChange(
+                clamp(pos - CENTRE, OTP_THRESHOLD_MIN, OTP_THRESHOLD_MAX),
+              ),
+          },
+        ]}
+      >
         <div
-          className={styles.onTime}
+          className="otp-threshold-slider__early"
+          style={{ width: `${leftPct}%` }}
+        />
+        <div
+          className="otp-threshold-slider__on-time"
           style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
         />
-        <div className={styles.late} style={{ width: `${rightPct}%` }} />
-        <div className={styles.center} />
-      </div>
-      <input
-        className={styles.input}
-        type="range"
-        min={0}
-        max={CENTRE - 1}
-        value={earlyPos}
-        aria-label="Early threshold in minutes before the scheduled departure"
-        onChange={handleEarly}
-      />
-      <input
-        className={styles.input}
-        type="range"
-        min={CENTRE + 1}
-        max={AXIS}
-        value={latePos}
-        aria-label="Late threshold in minutes after the scheduled departure"
-        onChange={handleLate}
-      />
+        <div
+          className="otp-threshold-slider__late"
+          style={{ width: `${rightPct}%` }}
+        />
+        <div className="otp-threshold-slider__center" />
+      </RangeSlider>
     </div>
   );
 };
