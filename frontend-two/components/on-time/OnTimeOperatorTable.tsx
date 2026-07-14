@@ -265,12 +265,12 @@ export const OnTimeOperatorTable = ({
       renderRow={renderOperatorRow}
       colWidths={{
         nocCode: "10%",
-        name: "30%",
+        name: "20%",
         averageDelay: "12%",
         onTimeRatio: "12%",
         lateRatio: "12%",
         earlyRatio: "12%",
-        sparkline: "12%",
+        sparkline: "22%",
       }}
       initialSortKey="name"
       initialSortOrder="asc"

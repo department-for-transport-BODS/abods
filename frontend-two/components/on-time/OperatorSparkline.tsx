@@ -6,7 +6,7 @@ import am4themesMicrochart from "@amcharts/amcharts4/themes/microchart";
 
 interface OperatorSparklineProps {
   data: TimeSeriesData[];
-  width?: number;
+  width?: string | number;
   height?: number;
   title?: string;
 }
@@ -23,7 +23,7 @@ function buildChartData(data: TimeSeriesData[]) {
 
 export const OperatorSparkline = ({
   data,
-  width = 220,
+  width = "100%",
   height = 44,
   title = "On time stats for the selected duration",
 }: OperatorSparklineProps) => {
