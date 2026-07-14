@@ -267,8 +267,8 @@
   margin-bottom: govuk-spacing(5);
 }
 
-.vehicle-journeys-search__operator .govuk-select,
-.vehicle-journeys-search__service .govuk-select {
+.vehicle-journeys-search__operator .multiselect-dropdown,
+.vehicle-journeys-search__service .multiselect-dropdown {
   width: 100%;
 }
 
@@ -1594,20 +1594,38 @@ $day-width: 46px;
   align-items: center;
   width: 100%;
   height: 40px;
-  padding: 0.5em 0.75em;
+  box-sizing: border-box;
+  padding: govuk-spacing(1);
   background: $govuk-body-background-colour;
   border: 2px solid $govuk-input-border-colour;
   cursor: pointer;
   text-align: left;
 }
 
+.multiselect-dropdown__button:focus,
+.multiselect-dropdown__search-text:focus {
+  outline: 3px solid $govuk-focus-colour;
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 2px $govuk-input-border-colour;
+}
+
+.multiselect-dropdown__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .multiselect-dropdown__button-text {
   color: $govuk-secondary-text-colour;
   font-size: 19px;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+.multiselect-dropdown__button-text--selected {
+  color: $govuk-text-colour;
 }
 
 .multiselect-dropdown__arrow {
@@ -1629,6 +1647,7 @@ $day-width: 46px;
 .multiselect-dropdown__search-text {
   color: $govuk-secondary-text-colour;
   font-size: 19px;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1639,10 +1658,11 @@ $day-width: 46px;
   position: absolute;
   z-index: 100;
   background: $govuk-body-background-colour;
-  border: 1px solid $govuk-border-colour;
+  border: 1px solid govuk-colour("black");
   width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  max-height: 260px;
+  box-sizing: border-box;
+  padding: govuk-spacing(1);
+  max-height: 230px;
   overflow-y: auto;
 }
 
@@ -1695,19 +1715,27 @@ $day-width: 46px;
 }
 
 .multiselect-dropdown__single-item {
-  padding: 8px 12px;
+  padding: 5px;
   cursor: pointer;
   font-family: "GDS Transport", arial, sans-serif;
   font-size: 19px;
+  line-height: 1.25;
   color: $govuk-text-colour;
 }
 
 .multiselect-dropdown__single-item:hover {
-  background: #f3f2f1;
+  background: govuk-colour("blue");
+  color: govuk-colour("white");
 }
 
 .multiselect-dropdown__single-item--selected {
-  background: #d2e2f1;
+  background: transparent;
+  color: $govuk-text-colour;
+}
+
+.multiselect-dropdown__single-item--selected:hover {
+  background: govuk-colour("blue");
+  color: govuk-colour("white");
 }
 
 // OperatorDropdown styling

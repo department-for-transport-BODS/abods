@@ -2,20 +2,24 @@ import { useEffect, useRef, useState } from "react";
 
 interface MultiselectDropdownProps {
   multiSelect?: boolean;
+  hideLabel?: boolean;
   label: string;
   options: string[];
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholderText?: string;
+  disabled?: boolean;
 }
 
 export const MultiselectDropdown = ({
   multiSelect = true,
+  hideLabel = false,
   label,
   options,
   selected,
   onChange,
   placeholderText,
+  disabled = false,
 }: MultiselectDropdownProps) => {
   const [open, setOpen] = useState(false);
 
@@ -40,8 +44,10 @@ export const MultiselectDropdown = ({
   }, [open]);
 
   const toggleSelectedOption = (option: string) => {
+    if (disabled) return;
+
     if (!multiSelect) {
-      onChange([option]);
+      onChange(selected.includes(option) ? [] : [option]);
       setOpen(false);
       setSearch("");
       return;
@@ -70,13 +76,14 @@ export const MultiselectDropdown = ({
 
   return (
     <div className="govuk-form-group multiselect-dropdown" ref={ref}>
-      <label className="govuk-label">{label}</label>
+      <label className="govuk-label">{hideLabel ? "" : label}</label>
       {open ? (
         <input
           type="text"
           className="multiselect-dropdown__button multiselect-dropdown__search-text"
           placeholder="Search here"
           value={search}
+          disabled={disabled}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
         />
@@ -84,9 +91,12 @@ export const MultiselectDropdown = ({
         <button
           type="button"
           className={`multiselect-dropdown__button${open ? " multiselect-dropdown__button--open" : ""}`}
+          disabled={disabled}
           onClick={() => setOpen(true)}
         >
-          <span className="multiselect-dropdown__button-text">
+          <span
+            className={`multiselect-dropdown__button-text${hasSelected ? " multiselect-dropdown__button-text--selected" : ""}`}
+          >
             {displayText}
           </span>
           <span className="multiselect-dropdown__arrow"></span>
@@ -94,18 +104,20 @@ export const MultiselectDropdown = ({
       )}
       {open && (
         <div className="multiselect-dropdown__panel">
-          <div className="multiselect-dropdown__header">
-            <div className="govuk-body multiselect-dropdown__header-label font-bold">
-              {label}
+          {multiSelect ? (
+            <div className="multiselect-dropdown__header">
+              <div className="govuk-body multiselect-dropdown__header-label font-bold">
+                {label}
+              </div>
+              <button
+                type="button"
+                className="govuk-link"
+                onClick={toggleAllOptions}
+              >
+                {hasSelected ? "Clear all" : "Show all"}
+              </button>
             </div>
-            <button
-              type="button"
-              className="govuk-link"
-              onClick={toggleAllOptions}
-            >
-              {hasSelected ? "Clear all" : "Show all"}
-            </button>
-          </div>
+          ) : null}
           {multiSelect ? (
             <div className="govuk-checkboxes">
               {filteredOptions.map((option, idx) => (

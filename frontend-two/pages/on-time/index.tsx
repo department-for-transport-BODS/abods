@@ -263,7 +263,8 @@ const OnTimeIndexPage = () => {
           <h2 className="govuk-heading-l">Summary</h2>
           <div className="summary-admin-area-select-container">
             <MultiselectDropdown
-              label=""
+              label={"Area"}
+              hideLabel={true}
               options={adminAreaOptions}
               selected={selectedAdminAreas}
               onChange={setSelectedAdminAreas}
