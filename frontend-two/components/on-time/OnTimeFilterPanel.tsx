@@ -109,6 +109,11 @@ export const OnTimeFilterPanel = ({
   refineResultsFilters,
   onRefineResultsFilterChange,
 }: OnTimeFilterPanelProps) => {
+  const datePresetItems =
+    selectedDatePreset === "Custom" && !datePresetOptions.includes("Custom")
+      ? [...datePresetOptions, "Custom"]
+      : datePresetOptions;
+
   return (
     <>
       <div className="controls-container">
@@ -121,7 +126,7 @@ export const OnTimeFilterPanel = ({
           <Select
             name="date-preset"
             label=""
-            items={datePresetOptions.map((preset) => ({
+            items={datePresetItems.map((preset) => ({
               value: preset,
               text: preset,
               selected: selectedDatePreset === preset,
