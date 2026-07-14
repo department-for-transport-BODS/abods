@@ -32,7 +32,12 @@ const columns = [
   { key: "onTimeRatio", label: "On-time", sortable: true },
   { key: "lateRatio", label: "Late", sortable: true },
   { key: "earlyRatio", label: "Early", sortable: true },
-  { key: "sparkline", label: "", sortable: false },
+  {
+    key: "sparkline",
+    label: "",
+    sortable: false,
+    cellClassName: "on-time-operator-table__sparkline-cell",
+  },
 ];
 
 function getSparklineKey(row: OperatorPerformance): string | null {

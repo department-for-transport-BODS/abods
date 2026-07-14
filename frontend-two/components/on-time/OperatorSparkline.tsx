@@ -42,7 +42,7 @@ export const OperatorSparkline = ({
     chart.height = am4core.percent(100);
     chart.padding(2, 2, 2, 2);
     chart.margin(0, 0, 0, 0);
-    chart.maskBullets = false;
+    chart.maskBullets = true;
     chart.dateFormatter.inputDateFormat = "yyyy-MM-ddTHH:mm:ss";
 
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
@@ -60,7 +60,6 @@ export const OperatorSparkline = ({
     series.stroke = am4core.color("#6A3D9A");
     series.strokeWidth = 1;
     series.fillOpacity = 0.2;
-    series.mainContainer.mask = undefined;
     series.connect = false;
 
     const bullet = series.bullets.push(new am4charts.Bullet());
@@ -91,9 +90,10 @@ export const OperatorSparkline = ({
   return (
     <div
       ref={chartContainerRef}
+      className="on-time-operator-sparkline"
       role="img"
       aria-label={title}
-      style={{ width, height }}
+      style={{ width: "100%", maxWidth: width, height }}
     />
   );
 };
