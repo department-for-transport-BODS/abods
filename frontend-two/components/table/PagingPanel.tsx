@@ -80,6 +80,7 @@ export const PagingPanel = ({
             <a
               href="#"
               className="govuk-link govuk-!-margin-bottom-0"
+              style={{ textDecoration: "none" }}
               onClick={(e) => {
                 e.preventDefault();
                 onPageChange(currentPage - 1);
@@ -118,10 +119,12 @@ export const PagingPanel = ({
             <a
               href="#"
               className="govuk-link govuk-!-margin-bottom-0"
+              style={{ textDecoration: "none" }}
               onClick={(e) => {
                 e.preventDefault();
                 onPageChange(currentPage + 1);
               }}
+
             >
               Next »
             </a>
