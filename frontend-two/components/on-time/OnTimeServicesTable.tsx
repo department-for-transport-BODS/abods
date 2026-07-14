@@ -121,6 +121,7 @@ function createRenderRow(nocCode: string, displayMode: OnTimeDisplayMode) {
       service: (
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(row.lineId ?? "")}`}
+          style={{ textDecoration: "none" }}
           className="govuk-link"
         >
           {row.lineInfo?.serviceNumber}: {row.lineInfo?.serviceName}

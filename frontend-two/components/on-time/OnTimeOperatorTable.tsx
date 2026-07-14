@@ -96,6 +96,7 @@ function renderRow(
     name: row.nocCode ? (
       <Link
         href={`/on-time/${encodeURIComponent(row.nocCode)}`}
+        style={{ textDecoration: "none" }}
         className="govuk-link govuk-!-font-weight-bold"
       >
         {row.name}
