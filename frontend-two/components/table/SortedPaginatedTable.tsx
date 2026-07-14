@@ -132,7 +132,7 @@ export const SortedPaginatedTable = <T,>({
   ];
 
   const pagination =
-    enablePagination && totalPages > 1
+    enablePagination
       ? {
           currentPage,
           totalPages,
