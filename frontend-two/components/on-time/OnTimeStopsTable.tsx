@@ -297,6 +297,7 @@ export const OnTimeStopsTable = ({
           paginationNoun="stop"
           emptyMessage="No stop performance data available"
           onDisplayedDataChange={setDisplayedRows}
+          enablePagination={false}
         />
       </div>
       <div className="govuk-!-margin-top-4">
