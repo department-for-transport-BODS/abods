@@ -264,10 +264,6 @@ const OnTimeIndexPage = () => {
               placeholderText={isLoadingAdminAreas ? "Loading..." : "All areas"}
             />
           </div>
-          <OtpThresholdModalLink
-            params={operatorTableParams}
-            overview={summaryStats}
-          />
         </div>
         {isLoading ? (
           <p className="govuk-body">Loading on-time data...</p>
@@ -283,6 +279,10 @@ const OnTimeIndexPage = () => {
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
+                <OtpThresholdModalLink
+                  params={operatorTableParams}
+                  overview={summaryStats}
+                />
                 <SummaryStatsGrid
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
