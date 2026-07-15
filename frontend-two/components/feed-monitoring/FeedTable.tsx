@@ -97,6 +97,7 @@ export const FeedTable = ({
       name: (
         <Link
           className="govuk-link font-bold"
+          style={{ textDecoration: "none" }}
           href={`/feed-monitoring/${op.nocCode}`}
         >
           {op.name}

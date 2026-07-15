@@ -1541,6 +1541,18 @@ $day-width: 46px;
   overflow-wrap: anywhere;
 }
 
+.on-time-operator-table__sparkline-cell {
+  overflow: hidden;
+  padding-right: 0;
+}
+
+.on-time-operator-sparkline {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  margin-left: auto;
+}
+
 .sortable-table__align--right {
   justify-content: flex-end;
   width: 100%;
@@ -2505,6 +2517,10 @@ $day-width: 46px;
   .summary-map-container {
     flex: 1 1 50%;
     min-width: 0;
+  }
+
+  .summary-stat-container .summary-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

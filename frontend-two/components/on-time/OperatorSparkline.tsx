@@ -6,9 +6,11 @@ import am4themesMicrochart from "@amcharts/amcharts4/themes/microchart";
 
 interface OperatorSparklineProps {
   data: TimeSeriesData[];
-  width?: number;
+  width?: string | number;
   height?: number;
   title?: string;
+  fromTimestamp?: string;
+  toTimestamp?: string;
 }
 
 function buildChartData(data: TimeSeriesData[]) {
@@ -23,9 +25,11 @@ function buildChartData(data: TimeSeriesData[]) {
 
 export const OperatorSparkline = ({
   data,
-  width = 220,
-  height = 44,
+  width = "100%",
+  height = 60,
   title = "On time stats for the selected duration",
+  fromTimestamp,
+  toTimestamp,
 }: OperatorSparklineProps) => {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<am4charts.XYChart | null>(null);
@@ -34,6 +38,7 @@ export const OperatorSparkline = ({
   useEffect(() => {
     if (!chartContainerRef.current || chartData.length === 0) return;
 
+    am4core.unuseAllThemes();
     am4core.useTheme(am4themesMicrochart);
 
     const chart = am4core.create(chartContainerRef.current, am4charts.XYChart);
@@ -42,12 +47,20 @@ export const OperatorSparkline = ({
     chart.height = am4core.percent(100);
     chart.padding(2, 2, 2, 2);
     chart.margin(0, 0, 0, 0);
-    chart.maskBullets = false;
+    chart.maskBullets = true;
     chart.dateFormatter.inputDateFormat = "yyyy-MM-ddTHH:mm:ss";
 
     const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.startLocation = 0.5;
     dateAxis.endLocation = 0.5;
+
+    if (fromTimestamp) {
+      dateAxis.min = new Date(fromTimestamp).getTime();
+    }
+
+    if (toTimestamp) {
+      dateAxis.max = new Date(toTimestamp).getTime();
+    }
 
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.min = 0;
@@ -69,6 +82,7 @@ export const OperatorSparkline = ({
     circle.width = 3;
     circle.height = 3;
     circle.strokeWidth = 0;
+    chart.maskBullets = false;
 
     const gradient = new am4core.LinearGradient();
     gradient.addColor(am4core.color("#6A3D9A"));
@@ -91,9 +105,10 @@ export const OperatorSparkline = ({
   return (
     <div
       ref={chartContainerRef}
+      className="on-time-operator-sparkline"
       role="img"
       aria-label={title}
-      style={{ width, height }}
+      style={{ width: "100%", maxWidth: width, height }}
     />
   );
 };

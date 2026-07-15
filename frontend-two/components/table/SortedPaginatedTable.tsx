@@ -23,6 +23,7 @@ export interface SortedPaginatedTableProps<T> {
   data: T[];
   getRowValue: (row: T, column: string) => string | number;
   renderRow: (row: T) => SortableTableRow;
+  enablePagination?: boolean;
   onDisplayedDataChange?: (rows: T[]) => void;
   onPageDataChange?: (rows: T[]) => void;
   footerAction?: ReactNode;
@@ -44,6 +45,7 @@ export const SortedPaginatedTable = <T,>({
   data,
   getRowValue,
   renderRow,
+  enablePagination = true,
   onDisplayedDataChange,
   onPageDataChange,
   footerAction,
@@ -94,11 +96,15 @@ export const SortedPaginatedTable = <T,>({
     onSortChange?.(column, order);
   };
 
-  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const totalPages = enablePagination
+    ? Math.ceil(sortedData.length / pageSize)
+    : 1;
   const pageData = useMemo(
     () =>
-      sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize),
-    [sortedData, currentPage, pageSize],
+      enablePagination
+        ? sortedData.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+        : sortedData,
+    [sortedData, currentPage, pageSize, enablePagination],
   );
 
   useEffect(() => {
@@ -125,18 +131,17 @@ export const SortedPaginatedTable = <T,>({
     ...pageData.map(renderRow),
   ];
 
-  const pagination =
-    totalPages > 1
-      ? {
-          currentPage,
-          totalPages,
-          pageSize,
-          rowCount: sortedData.length,
-          onPageChange: setCurrentPage,
-          noun: paginationNoun ?? "row",
-          alignment: paginationAlignment,
-        }
-      : undefined;
+  const pagination = enablePagination
+    ? {
+        currentPage,
+        totalPages,
+        pageSize,
+        rowCount: sortedData.length,
+        onPageChange: setCurrentPage,
+        noun: paginationNoun ?? "row",
+        alignment: paginationAlignment,
+      }
+    : undefined;
 
   return (
     <>

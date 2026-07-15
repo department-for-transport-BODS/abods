@@ -239,7 +239,12 @@ const OnTimeIndexPage = () => {
         }}
         onResetRefineResults={() => setRefineResultsFilters({})}
         dateRange={dateRange}
-        onDateRangeChange={(value) => setDateRange(value ?? null)}
+        onDateRangeChange={(value) => {
+          setDateRange(value ?? null);
+          if (value) {
+            setSelectedDatePreset("Custom");
+          }
+        }}
         datePresetOptions={DATE_PRESET_OPTIONS}
         selectedDatePreset={selectedDatePreset}
         onDatePresetChange={handleDatePresetChange}

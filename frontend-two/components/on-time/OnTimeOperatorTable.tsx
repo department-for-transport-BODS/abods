@@ -32,7 +32,12 @@ const columns = [
   { key: "onTimeRatio", label: "On-time", sortable: true },
   { key: "lateRatio", label: "Late", sortable: true },
   { key: "earlyRatio", label: "Early", sortable: true },
-  { key: "sparkline", label: "", sortable: false },
+  {
+    key: "sparkline",
+    label: "",
+    sortable: false,
+    cellClassName: "on-time-operator-table__sparkline-cell",
+  },
 ];
 
 function getSparklineKey(row: OperatorPerformance): string | null {
@@ -79,6 +84,7 @@ function getRowValue(
 function renderRow(
   row: OperatorPerformance,
   sparklineByOperatorId: Record<string, TimeSeriesData[]>,
+  sparklineParams: PerformanceParams | null | undefined,
 ): SortableTableRow {
   const sparklineKey = getSparklineKey(row);
   const sparklineData = sparklineKey
@@ -91,6 +97,7 @@ function renderRow(
     name: row.nocCode ? (
       <Link
         href={`/on-time/${encodeURIComponent(row.nocCode)}`}
+        style={{ textDecoration: "none" }}
         className="govuk-link govuk-!-font-weight-bold"
       >
         {row.name}
@@ -104,7 +111,11 @@ function renderRow(
     earlyRatio: formatPercentage(row.earlyRatio),
     sparkline:
       sparklineKey && sparklineData.length > 0 ? (
-        <OperatorSparkline data={sparklineData} />
+        <OperatorSparkline
+          data={sparklineData}
+          fromTimestamp={sparklineParams?.fromTimestamp}
+          toTimestamp={sparklineParams?.toTimestamp}
+        />
       ) : (
         "-"
       ),
@@ -249,7 +260,7 @@ export const OnTimeOperatorTable = ({
   );
 
   const renderOperatorRow = (row: OperatorPerformance) =>
-    renderRow(row, sparklineByOperatorId);
+    renderRow(row, sparklineByOperatorId, granularSparklineParams);
 
   return (
     <SortedPaginatedTable
@@ -259,12 +270,12 @@ export const OnTimeOperatorTable = ({
       renderRow={renderOperatorRow}
       colWidths={{
         nocCode: "10%",
-        name: "30%",
+        name: "20%",
         averageDelay: "12%",
         onTimeRatio: "12%",
         lateRatio: "12%",
         earlyRatio: "12%",
-        sparkline: "12%",
+        sparkline: "22%",
       }}
       initialSortKey="name"
       initialSortOrder="asc"
