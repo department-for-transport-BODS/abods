@@ -131,18 +131,17 @@ export const SortedPaginatedTable = <T,>({
     ...pageData.map(renderRow),
   ];
 
-  const pagination =
-    enablePagination
-      ? {
-          currentPage,
-          totalPages,
-          pageSize,
-          rowCount: sortedData.length,
-          onPageChange: setCurrentPage,
-          noun: paginationNoun ?? "row",
-          alignment: paginationAlignment,
-        }
-      : undefined;
+  const pagination = enablePagination
+    ? {
+        currentPage,
+        totalPages,
+        pageSize,
+        rowCount: sortedData.length,
+        onPageChange: setCurrentPage,
+        noun: paginationNoun ?? "row",
+        alignment: paginationAlignment,
+      }
+    : undefined;
 
   return (
     <>

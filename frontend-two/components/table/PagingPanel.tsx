@@ -124,7 +124,6 @@ export const PagingPanel = ({
                 e.preventDefault();
                 onPageChange(currentPage + 1);
               }}
-
             >
               Next »
             </a>
