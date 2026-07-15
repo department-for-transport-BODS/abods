@@ -84,6 +84,7 @@ function getRowValue(
 function renderRow(
   row: OperatorPerformance,
   sparklineByOperatorId: Record<string, TimeSeriesData[]>,
+  sparklineParams: PerformanceParams | null | undefined,
 ): SortableTableRow {
   const sparklineKey = getSparklineKey(row);
   const sparklineData = sparklineKey
@@ -110,7 +111,11 @@ function renderRow(
     earlyRatio: formatPercentage(row.earlyRatio),
     sparkline:
       sparklineKey && sparklineData.length > 0 ? (
-        <OperatorSparkline data={sparklineData} />
+        <OperatorSparkline
+          data={sparklineData}
+          fromTimestamp={sparklineParams?.fromTimestamp}
+          toTimestamp={sparklineParams?.toTimestamp}
+        />
       ) : (
         "-"
       ),
@@ -255,7 +260,7 @@ export const OnTimeOperatorTable = ({
   );
 
   const renderOperatorRow = (row: OperatorPerformance) =>
-    renderRow(row, sparklineByOperatorId);
+    renderRow(row, sparklineByOperatorId, granularSparklineParams);
 
   return (
     <SortedPaginatedTable

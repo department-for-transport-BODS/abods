@@ -9,6 +9,8 @@ interface OperatorSparklineProps {
   width?: string | number;
   height?: number;
   title?: string;
+  fromTimestamp?: string;
+  toTimestamp?: string;
 }
 
 function buildChartData(data: TimeSeriesData[]) {
@@ -24,8 +26,10 @@ function buildChartData(data: TimeSeriesData[]) {
 export const OperatorSparkline = ({
   data,
   width = "100%",
-  height = 44,
+  height = 60,
   title = "On time stats for the selected duration",
+  fromTimestamp,
+  toTimestamp,
 }: OperatorSparklineProps) => {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<am4charts.XYChart | null>(null);
@@ -34,6 +38,7 @@ export const OperatorSparkline = ({
   useEffect(() => {
     if (!chartContainerRef.current || chartData.length === 0) return;
 
+    am4core.unuseAllThemes();
     am4core.useTheme(am4themesMicrochart);
 
     const chart = am4core.create(chartContainerRef.current, am4charts.XYChart);
@@ -49,6 +54,14 @@ export const OperatorSparkline = ({
     dateAxis.startLocation = 0.5;
     dateAxis.endLocation = 0.5;
 
+    if (fromTimestamp) {
+      dateAxis.min = new Date(fromTimestamp).getTime();
+    }
+
+    if (toTimestamp) {
+      dateAxis.max = new Date(toTimestamp).getTime();
+    }
+
     const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.min = 0;
     valueAxis.max = 1;
@@ -60,6 +73,7 @@ export const OperatorSparkline = ({
     series.stroke = am4core.color("#6A3D9A");
     series.strokeWidth = 1;
     series.fillOpacity = 0.2;
+    series.mainContainer.mask = undefined;
     series.connect = false;
 
     const bullet = series.bullets.push(new am4charts.Bullet());
@@ -68,6 +82,7 @@ export const OperatorSparkline = ({
     circle.width = 3;
     circle.height = 3;
     circle.strokeWidth = 0;
+    chart.maskBullets = false;
 
     const gradient = new am4core.LinearGradient();
     gradient.addColor(am4core.color("#6A3D9A"));
