@@ -34,6 +34,7 @@ import {
 import { buildDefaultParams } from "@/services/on-time/params";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { distanceService } from "@/services/distances/distance.services";
+import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
 
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];
@@ -278,6 +279,10 @@ const OnTimeIndexPage = () => {
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
+                <OtpThresholdModalLink
+                  params={operatorTableParams}
+                  overview={summaryStats}
+                />
                 <SummaryStatsGrid
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}

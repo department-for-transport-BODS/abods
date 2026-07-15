@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { RangeSlider } from "@/components/shared/RangeSlider";
 
 const MIN_HOUR = 0;
 const MAX_START_HOUR = 23;
@@ -81,18 +82,18 @@ export const TimeRangeSlider = ({
     };
   }, [endHour, startHour]);
 
-  const handleSliderStartChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSliderStartChange = (value: number) => {
     const nextStart = clamp(
-      Number.parseInt(event.target.value, 10),
+      value,
       MIN_HOUR,
       Math.min(MAX_START_HOUR, endHour - 1),
     );
     onStartTimeChange(formatStartTime(nextStart));
   };
 
-  const handleSliderEndChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSliderEndChange = (value: number) => {
     const nextEnd = clamp(
-      Number.parseInt(event.target.value, 10),
+      value,
       Math.max(MIN_END_HOUR, startHour + 1),
       MAX_END_HOUR,
     );
@@ -195,36 +196,31 @@ export const TimeRangeSlider = ({
           </p>
         ) : null}
 
-        <div className="time-range-slider" id="time-range-slider">
-          <div className="time-range-slider__track">
-            <div
-              className="time-range-slider__selected"
-              style={sliderSelectedStyle}
-            />
-          </div>
-          <input
-            className="time-range-slider__input"
-            type="range"
-            min={MIN_HOUR}
-            max={MAX_START_HOUR}
-            value={startHour}
-            aria-label={labelMin}
-            aria-invalid={Boolean(error)}
-            aria-describedby={errorId}
-            onChange={handleSliderStartChange}
-          />
-          <input
-            className="time-range-slider__input"
-            type="range"
-            min={MIN_END_HOUR}
-            max={MAX_END_HOUR}
-            value={endHour}
-            aria-label={labelMax}
-            aria-invalid={Boolean(error)}
-            aria-describedby={errorId}
-            onChange={handleSliderEndChange}
-          />
-        </div>
+        <RangeSlider
+          id="time-range-slider"
+          thumbs={[
+            {
+              min: MIN_HOUR,
+              max: MAX_START_HOUR,
+              value: startHour,
+              ariaLabel: labelMin,
+              ariaInvalid: Boolean(error),
+              ariaDescribedBy: errorId,
+              onChange: handleSliderStartChange,
+            },
+            {
+              min: MIN_END_HOUR,
+              max: MAX_END_HOUR,
+              value: endHour,
+              ariaLabel: labelMax,
+              ariaInvalid: Boolean(error),
+              ariaDescribedBy: errorId,
+              onChange: handleSliderEndChange,
+            },
+          ]}
+        >
+          <div className="range-slider__selected" style={sliderSelectedStyle} />
+        </RangeSlider>
 
         <div className="time-range-slider__textboxes">
           <div className="govuk-form-group">

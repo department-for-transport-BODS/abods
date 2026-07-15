@@ -219,6 +219,59 @@ loggedInTest.describe("On-Time Page - Authenticated", () => {
       );
     },
   );
+
+  loggedInTest(
+    "opens the compare thresholds modal and shows the default values",
+    async () => {
+      await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+
+      await onTime.compareThresholdsLink().click();
+
+      await expect(onTime.thresholdModalHeading()).toBeVisible();
+      await expect(
+        onTime.thresholdModal().getByRole("row", { name: /on time/i }),
+      ).toBeVisible();
+    },
+  );
+
+  loggedInTest("compares punctuality against custom thresholds", async () => {
+    await expect(onTime.loadingText()).toHaveCount(0, { timeout: 60000 });
+
+    await onTime.compareThresholdsLink().click();
+    await expect(onTime.thresholdModalHeading()).toBeVisible();
+
+    await onTime.thresholdEarlyInput().fill("2");
+    await onTime.thresholdLateInput().fill("10");
+    await onTime.thresholdCompareButton().click();
+
+    // The "On time" row's Comparison cell should populate with a percentage.
+    await expect(onTime.thresholdComparisonCell(/on time/i)).toContainText(
+      "%",
+      { timeout: 30000 },
+    );
+  });
+
+  loggedInTest(
+    "shows a validation error for out-of-range thresholds",
+    async () => {
+      await onTime.compareThresholdsLink().click();
+      await onTime.thresholdEarlyInput().fill("50");
+      await onTime.thresholdCompareButton().click();
+
+      await expect(onTime.thresholdValidationError()).toBeVisible();
+    },
+  );
+
+  loggedInTest(
+    "closes the threshold modal with the Escape key",
+    async ({ loggedInPage }) => {
+      await onTime.compareThresholdsLink().click();
+      await expect(onTime.thresholdModal()).toBeVisible();
+
+      await loggedInPage.keyboard.press("Escape");
+      await expect(onTime.thresholdModal()).toHaveCount(0);
+    },
+  );
 });
 
 loggedInTest.describe("On-Time Operator Page - Authenticated", () => {

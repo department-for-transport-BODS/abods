@@ -412,14 +412,14 @@ $_slider-track-height: govuk-spacing(
 $_slider-thumb-width: 15px;
 $_slider-thumb-height: 40px;
 
-.time-range-slider {
+.range-slider {
   position: relative;
   height: $_slider-thumb-height;
   margin-bottom: govuk-spacing(4);
   margin-top: govuk-spacing(2);
 }
 
-.time-range-slider__track {
+.range-slider__track {
   position: absolute;
   top: 50%;
   left: 0;
@@ -432,7 +432,7 @@ $_slider-thumb-height: 40px;
   box-sizing: border-box;
 }
 
-.time-range-slider__selected {
+.range-slider__selected {
   position: absolute;
   top: 0;
   height: 100%;
@@ -442,7 +442,7 @@ $_slider-thumb-height: 40px;
   outline-offset: -4px;
 }
 
-.time-range-slider__input {
+.range-slider__input {
   -webkit-appearance: none;
   appearance: none;
   position: absolute;
@@ -456,14 +456,14 @@ $_slider-thumb-height: 40px;
   pointer-events: none;
 }
 
-.time-range-slider__input::-webkit-slider-runnable-track {
+.range-slider__input::-webkit-slider-runnable-track {
   -webkit-appearance: none;
   appearance: none;
   height: $_slider-track-height;
   background: transparent;
 }
 
-.time-range-slider__input::-webkit-slider-thumb {
+.range-slider__input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: $_slider-thumb-width;
@@ -478,12 +478,12 @@ $_slider-thumb-height: 40px;
   box-shadow: none;
 }
 
-.time-range-slider__input::-moz-range-track {
+.range-slider__input::-moz-range-track {
   height: $_slider-track-height;
   background: transparent;
 }
 
-.time-range-slider__input::-moz-range-thumb {
+.range-slider__input::-moz-range-thumb {
   width: $_slider-thumb-width;
   height: $_slider-thumb-height;
   border-radius: 0;
@@ -493,8 +493,61 @@ $_slider-thumb-height: 40px;
   pointer-events: auto;
 }
 
-.time-range-slider__input:focus-visible {
+.range-slider__input:focus-visible {
   outline: none;
+}
+
+// OtpThresholdSlider — bespoke coloured track decorations layered on the shared primitive
+.otp-threshold-slider__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: govuk-spacing(1);
+  font-size: 0.875rem;
+  color: $govuk-secondary-text-colour;
+}
+
+.otp-threshold-slider__scheduled {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.otp-threshold-slider__slider {
+  // Tighter spacing than the default so it sits neatly within the modal form
+  margin-top: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
+}
+
+.otp-threshold-slider__early,
+.otp-threshold-slider__on-time,
+.otp-threshold-slider__late {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.otp-threshold-slider__early {
+  left: 0;
+  background-color: govuk-colour("pink");
+}
+
+.otp-threshold-slider__late {
+  right: 0;
+  background-color: govuk-colour("yellow");
+}
+
+.otp-threshold-slider__on-time {
+  background-color: govuk-colour("blue");
+}
+
+.otp-threshold-slider__center {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background-color: govuk-colour("black");
 }
 
 .time-range-slider__textboxes {

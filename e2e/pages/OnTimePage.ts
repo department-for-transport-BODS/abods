@@ -265,4 +265,43 @@ export class OnTimePage {
       waitUntil: "domcontentloaded",
     });
   }
+
+  // --- Compare thresholds (OTP) modal -------------------------------------
+
+  compareThresholdsLink(): Locator {
+    return this.page.getByRole("button", { name: "Compare thresholds" });
+  }
+
+  thresholdModal(): Locator {
+    return this.page.getByRole("dialog");
+  }
+
+  thresholdModalHeading(): Locator {
+    return this.thresholdModal().getByRole("heading", {
+      name: /compare on-time performance thresholds/i,
+    });
+  }
+
+  thresholdEarlyInput(): Locator {
+    return this.thresholdModal().locator("#otp-threshold-early");
+  }
+
+  thresholdLateInput(): Locator {
+    return this.thresholdModal().locator("#otp-threshold-late");
+  }
+
+  thresholdCompareButton(): Locator {
+    return this.thresholdModal().getByRole("button", { name: "Compare" });
+  }
+
+  thresholdComparisonCell(rowName: string | RegExp): Locator {
+    return this.thresholdModal()
+      .getByRole("row", { name: rowName })
+      .locator("td")
+      .last();
+  }
+
+  thresholdValidationError(): Locator {
+    return this.thresholdModal().getByText(/between 1 and 20 minutes/i);
+  }
 }
