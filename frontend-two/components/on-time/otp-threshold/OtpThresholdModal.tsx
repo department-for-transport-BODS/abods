@@ -164,6 +164,16 @@ export const OtpThresholdModal = ({
           ))}
         </tbody>
       </table>
+
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
+          onClick={onClose}
+        >
+          Close
+        </button>
+      </div>
     </Modal>
   );
 };
