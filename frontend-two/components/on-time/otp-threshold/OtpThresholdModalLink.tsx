@@ -27,6 +27,7 @@ export const OtpThresholdModalLink = ({
       <button
         type="button"
         className="govuk-body govuk-link button-link"
+        style={{ textDecoration: "underline" }}
         onClick={() => setOpen(true)}
       >
         Compare thresholds

@@ -363,6 +363,135 @@
   cursor: pointer;
 }
 
+.helpdesk-container{
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.helpdesk-link{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.on-time-helpdesk-panel-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+}
+
+.on-time-helpdesk-panel-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(11, 12, 12, 0.35);
+  cursor: pointer;
+}
+
+.on-time-helpdesk-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(100vw / 4);
+  padding: govuk-spacing(4);
+  border-left: 1px solid $govuk-border-colour;
+  background-color: govuk-colour("white");
+  box-sizing: border-box;
+  overflow-y: auto;
+  box-shadow: -4px 0 12px rgba(11, 12, 12, 0.2);
+  animation: refine-results-slide-in 180ms ease-out;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: govuk-spacing(2);
+    gap: govuk-spacing(2);
+  }
+
+  &__close {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  &__toggle-all {
+    margin-bottom: govuk-spacing(3);
+    @include govuk-font(19);
+    display: inline-flex;
+    align-items: center;
+    gap: govuk-spacing(1);
+
+    &::before {
+      content: "˅";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 1;
+      transform: rotate(0deg);
+      transition: transform 120ms ease-in-out;
+    }
+
+    &--expanded::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__sections {
+    border-top: 1px solid $govuk-border-colour;
+  }
+
+  &__section {
+    border-bottom: 1px solid $govuk-border-colour;
+    padding: govuk-spacing(3) 0;
+  }
+
+  &__section-toggle {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    @include govuk-font(19);
+    display: inline-flex;
+    align-items: center;
+    gap: govuk-spacing(1);
+    margin-top: 0;
+
+    &::before {
+      content: "˅";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 1;
+      transform: rotate(0deg);
+      transition: transform 120ms ease-in-out;
+    }
+
+    &--expanded::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__section-content {
+    margin-top: govuk-spacing(2);
+    margin-bottom: 0;
+  }
+}
+
 .refine-results-filters {
   display: flex;
   flex: 1 1 auto;
