@@ -2136,6 +2136,10 @@ $day-width: 46px;
     padding-left: 0;
     padding-right: 0;
   }
+
+  &__content--page {
+    padding: 0;
+  }
 }
 
 @include bp($tablet) {
@@ -2159,6 +2163,10 @@ $day-width: 46px;
     &__content:has(> .app-page) {
       padding-left: 0;
       padding-right: 0;
+    }
+
+    &__content--page {
+      padding: 0;
     }
   }
 }
@@ -2211,6 +2219,21 @@ $day-width: 46px;
     width: 100%;
     margin-right: auto;
     margin-left: auto;
+  }
+}
+
+.page {
+  &__back-link,
+  &__main-wrapper {
+    @include bp($desktop) {
+      padding-left: govuk-spacing(4);
+    }
+  }
+}
+
+.page-header {
+  &__title {
+    margin-bottom: 0;
   }
 }
 
