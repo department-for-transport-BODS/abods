@@ -24,9 +24,9 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
         <p className="govuk-body">
           AVL data is received from the vehicles and is automatically matched to
           journeys in the schedules supplied to BODS. Using various fields in
-          the SIRI-VM data including &quot;OperatorRef&quot;, &quot;LineRef&quot; and
-          &quot;DatedVehicleJourneyRef&quot; the system will scan the schedules to find a
-          match.
+          the SIRI-VM data including &quot;OperatorRef&quot;,
+          &quot;LineRef&quot; and &quot;DatedVehicleJourneyRef&quot; the system
+          will scan the schedules to find a match.
         </p>
       </>
     ),
@@ -39,19 +39,19 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
         <p className="govuk-body">
           As a vehicle travels along its journey, the system continually
           monitors its location against the stops in the schedules. If a vehicle
-          is within a 70 meter radius of the stop, it's considered to be at the
-          stop. The system will then continue to monitor the GPS point until
+          is within a 70 meter radius of the stop, it&apos;s considered to be at
+          the stop. The system will then continue to monitor the GPS point until
           there are two GPS points progressively moving away from the 70 meter
           radius of the stop. At this point it will then record the departure
           time as the last GPS point within the 70m zone (using the GPS
           timestamp provided in the SIRI-VM data).
         </p>
         <p className="govuk-body">
-          If two GPS pings happen to &quot;straddle&quot; a stop but both are further than
-          70 meters from the stop location, the system will calculate the
-          departure time using the geometry of the two GPS points against the
-          stop position. It will then look at the timestamps of the GPS points
-          to calculate when the vehicle was leaving the 70m zone.
+          If two GPS pings happen to &quot;straddle&quot; a stop but both are
+          further than 70 meters from the stop location, the system will
+          calculate the departure time using the geometry of the two GPS points
+          against the stop position. It will then look at the timestamps of the
+          GPS points to calculate when the vehicle was leaving the 70m zone.
         </p>
         <p>
           Finally, the system relies on regular GPS updates to calculate
@@ -72,7 +72,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
           <li>
             We calculate your punctuality figures by matching your static
             timetable data with your AVL feeds. Please see &quot;How do we match
-            Automatic Vehicle Location (AVL) data to schedules?" for more
+            Automatic Vehicle Location (AVL) data to schedules?&quot; for more
             information.
           </li>
           <li>We ONLY include where a departure is recorded.</li>
@@ -90,10 +90,10 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Late",
     content: (
       <p className="govuk-body">
-        We calculate late buses as per the Traffic Commissioner&apos;s guidelines,
-        which means anything over 5 minutes 59 seconds counts as late. If the
-        bus was exactly 5m 59s late, it would count as on time, 6 minutes would
-        count as late.
+        We calculate late buses as per the Traffic Commissioner&apos;s
+        guidelines, which means anything over 5 minutes 59 seconds counts as
+        late. If the bus was exactly 5m 59s late, it would count as on time, 6
+        minutes would count as late.
       </p>
     ),
   },
@@ -102,10 +102,10 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Early",
     content: (
       <p className="govuk-body">
-        We calculate early buses as per the Traffic Commissioner&apos;s guidelines as
-        anything that departs more than 1 minute before the scheduled departure.
-        1 minute early is on-time, 1 minute and 1 second early is classified as
-        early.
+        We calculate early buses as per the Traffic Commissioner&apos;s
+        guidelines as anything that departs more than 1 minute before the
+        scheduled departure. 1 minute early is on-time, 1 minute and 1 second
+        early is classified as early.
       </p>
     ),
   },
@@ -123,19 +123,19 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
         </p>
         <ol className="govuk-list govuk-list--number">
           <li>
-            The static data was not correct in BODS, so ABODS wasn&apos;t able to
-            match AVL to the static data.
+            The static data was not correct in BODS, so ABODS wasn&apos;t able
+            to match AVL to the static data.
           </li>
           <li>
             We didn&apos;t receive AVL data. This could be for many reasons: the
-            ticket machine wasn&apos;t turned on, or the ticket machine didn&apos;t have
-            signal and was not able to upload the data once reconnected. If this
-            continues to be a problem we suggest you speak to your AVL supplier
-            directly. We are working hard to ensure greater completeness of AVL
-            data on ABODS!
+            ticket machine wasn&apos;t turned on, or the ticket machine
+            didn&apos;t have signal and was not able to upload the data once
+            reconnected. If this continues to be a problem we suggest you speak
+            to your AVL supplier directly. We are working hard to ensure greater
+            completeness of AVL data on ABODS!
           </li>
           <li>
-            The line name in the static data and the AVL file don't match.
+            The line name in the static data and the AVL file don&apos;t match.
           </li>
           <li>We didn&apos;t receive enough AVL data around a stop.</li>
         </ol>
