@@ -58,6 +58,7 @@ import {
 } from "@/src/generated/graphql";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 
 const aggregateStopsByStopId = (
   stops: StopPerformance[],
@@ -511,10 +512,13 @@ const OnTimeServicePage = () => {
               />
             </ChartNoDataWrapper>
           </div>
-          <OtpThresholdModalLink
-            params={stopPerformanceParams}
-            overview={summaryOverview}
-          />
+          <div className="helpdesk-container">
+            <OnTimeHelpdeskButton />
+            <OtpThresholdModalLink
+              params={stopPerformanceParams}
+              overview={summaryOverview}
+            />
+          </div>
           <div className="govuk-!-margin-top-6">
             <SummaryStatsGrid
               onTimeCount={summaryStats.onTimeCount}

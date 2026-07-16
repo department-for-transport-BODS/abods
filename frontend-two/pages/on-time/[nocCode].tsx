@@ -62,6 +62,7 @@ import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 import { OperatorSelector } from "@/components/shared/OperatorSelector";
 import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -502,10 +503,13 @@ const OnTimeOperatorPage = () => {
               </p>
             ) : (
               <>
-                <OtpThresholdModalLink
-                  params={servicePerformanceParams}
-                  overview={summaryStats}
-                />
+                <div className="helpdesk-container">
+                  <OnTimeHelpdeskButton />
+                  <OtpThresholdModalLink
+                    params={servicePerformanceParams}
+                    overview={summaryStats}
+                  />
+                </div>
                 <div className="govuk-!-margin-bottom-6">
                   <SummaryStatsGrid
                     onTimeCount={summaryCards.onTimeCount}
