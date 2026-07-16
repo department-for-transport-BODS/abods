@@ -37,6 +37,8 @@ import { type OperatorType } from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
+  PerformanceParams,
+  PunctualityOverview,
   StopPerformance,
   TimeOfDayData,
   TimeSeriesData,
@@ -55,6 +57,7 @@ import {
   ServiceInfoType,
 } from "@/src/generated/graphql";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
 
 const aggregateStopsByStopId = (
   stops: StopPerformance[],
@@ -155,6 +158,38 @@ const OnTimeServicePage = () => {
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
 
+  const stopPerformanceParams = useMemo<PerformanceParams | null>(() => {
+    if (!nocCode || !lineId) return null;
+
+    const defaultParams = buildDefaultParams({ nocCode, lineId });
+
+    return {
+      ...defaultParams,
+      ...(dateRange
+        ? {
+            fromTimestamp: dateRange.from,
+            toTimestamp: dateRange.to,
+          }
+        : {}),
+      filters: {
+        ...defaultParams.filters,
+        ...refineResultsFilters,
+        matchType:
+          selectedMatchType === "evidenced"
+            ? MatchType.Evidenced
+            : MatchType.Estimated,
+        timingPointsOnly: selectedStopType === "timing-points",
+      },
+    };
+  }, [
+    dateRange,
+    lineId,
+    nocCode,
+    refineResultsFilters,
+    selectedMatchType,
+    selectedStopType,
+  ]);
+
   const handleDatePresetChange = (selected: string) => {
     setSelectedDatePreset(selected);
     const range = calculateDateRange(selected);
@@ -242,8 +277,32 @@ const OnTimeServicePage = () => {
     };
   }, [filteredStopPerformance]);
 
+  const summaryOverview = useMemo<PunctualityOverview>(
+    () => ({
+      onTime: summaryStats.onTimeCount,
+      late: summaryStats.lateCount,
+      early: summaryStats.earlyCount,
+      completed: summaryStats.recordedStopDepartures,
+      scheduled: summaryStats.totalStopDepartures,
+      incomplete: String(summaryStats.incompleteCount),
+      averageDelay: summaryStats.averageDelay,
+      noData: Math.max(
+        0,
+        summaryStats.totalStopDepartures - summaryStats.recordedStopDepartures,
+      ),
+    }),
+    [summaryStats],
+  );
+
   useEffect(() => {
-    if (!router.isReady || !config?.apiUrl || !nocCode || !lineId) return;
+    if (
+      !router.isReady ||
+      !config?.apiUrl ||
+      !nocCode ||
+      !lineId ||
+      !stopPerformanceParams
+    )
+      return;
     const load = async () => {
       setIsLoading(true);
       setLineNotFound(false);
@@ -255,39 +314,19 @@ const OnTimeServicePage = () => {
       setOperator(operatorData);
       setOperatorChecked(true);
 
-      const defaultParams = buildDefaultParams({ nocCode, lineId });
-      const params = {
-        ...defaultParams,
-        ...(dateRange
-          ? {
-              fromTimestamp: dateRange.from,
-              toTimestamp: dateRange.to,
-            }
-          : {}),
-        filters: {
-          ...defaultParams.filters,
-          ...refineResultsFilters,
-          matchType:
-            selectedMatchType === "evidenced"
-              ? MatchType.Evidenced
-              : MatchType.Estimated,
-          timingPointsOnly: selectedStopType === "timing-points",
-        },
-      };
-
-      const fromDate = DateTime.fromISO(params.fromTimestamp);
-      const toDate = DateTime.fromISO(params.toTimestamp);
+      const fromDate = DateTime.fromISO(stopPerformanceParams.fromTimestamp);
+      const toDate = DateTime.fromISO(stopPerformanceParams.toTimestamp);
       const granularity =
         Math.abs(toDate.diff(fromDate, "days").days) <= 5
           ? Granularity.Hour
           : Granularity.Day;
       const performanceParams = {
-        ...params,
-        filters: { ...params.filters, granularity },
+        ...stopPerformanceParams,
+        filters: { ...stopPerformanceParams.filters, granularity },
       };
       const headwayParams = {
-        ...params,
-        filters: { ...params.filters, granularity },
+        ...stopPerformanceParams,
+        filters: { ...stopPerformanceParams.filters, granularity },
       };
 
       const [
@@ -313,15 +352,15 @@ const OnTimeServicePage = () => {
       ]);
 
       const frequentServiceInfo = await settle(
-        headwayService.fetchFrequentServiceInfo(params),
+        headwayService.fetchFrequentServiceInfo(stopPerformanceParams),
       );
 
       const serviceNotFound = !serviceInfo.data && !serviceInfo.error;
       setLineNotFound(serviceNotFound);
 
       setData({
-        fromTimestamp: params.fromTimestamp,
-        toTimestamp: params.toTimestamp,
+        fromTimestamp: stopPerformanceParams.fromTimestamp,
+        toTimestamp: stopPerformanceParams.toTimestamp,
         granularity,
         serviceInfo: serviceInfo.data,
         stopPerformance: stopPerformance.data ?? [],
@@ -350,6 +389,7 @@ const OnTimeServicePage = () => {
     dateRange,
     lineId,
     nocCode,
+    stopPerformanceParams,
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
@@ -471,6 +511,10 @@ const OnTimeServicePage = () => {
               />
             </ChartNoDataWrapper>
           </div>
+          <OtpThresholdModalLink
+            params={stopPerformanceParams}
+            overview={summaryOverview}
+          />
           <div className="govuk-!-margin-top-6">
             <SummaryStatsGrid
               onTimeCount={summaryStats.onTimeCount}
