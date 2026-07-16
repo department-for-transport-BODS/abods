@@ -16,6 +16,7 @@ interface BaseLayoutProps {
   description?: string;
   children: ReactNode;
   errors?: ErrorInfo[];
+  mainClassName?: string;
 }
 const PUBLIC_ROUTES = [
   "/login",
@@ -29,6 +30,7 @@ export const BaseLayout = ({
   description,
   children,
   errors,
+  mainClassName,
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -55,8 +57,10 @@ export const BaseLayout = ({
             id="content"
             className={
               showAuthenticatedLayout
-                ? "app__content"
-                : "app__content app__content--narrow"
+                ? ["app__content", mainClassName].filter(Boolean).join(" ")
+                : ["app__content", "app__content--narrow", mainClassName]
+                    .filter(Boolean)
+                    .join(" ")
             }
           >
             {children}
