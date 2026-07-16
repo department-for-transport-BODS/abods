@@ -218,7 +218,12 @@ const OnTimeOperatorPage = () => {
   }, [router.isReady, config]);
 
   useEffect(() => {
-    if (!router.isReady || !config?.apiUrl || !nocCode || !servicePerformanceParams)
+    if (
+      !router.isReady ||
+      !config?.apiUrl ||
+      !nocCode ||
+      !servicePerformanceParams
+    )
       return;
     const load = async () => {
       setIsLoading(true);
@@ -240,16 +245,28 @@ const OnTimeOperatorPage = () => {
         headwayTimeSeries,
       ] = await Promise.all([
         settle(performanceService.fetchOverviewStats(servicePerformanceParams)),
-        settle(onTimeService.fetchOnTimeDelayFrequencyData(servicePerformanceParams)),
-        settle(onTimeService.fetchOnTimeTimeSeriesData(servicePerformanceParams)),
         settle(
-          onTimeService.fetchOnTimePunctualityTimeOfDayData(servicePerformanceParams),
+          onTimeService.fetchOnTimeDelayFrequencyData(servicePerformanceParams),
         ),
         settle(
-          onTimeService.fetchOnTimePunctualityDayOfWeekData(servicePerformanceParams),
+          onTimeService.fetchOnTimeTimeSeriesData(servicePerformanceParams),
         ),
-        settle(onTimeService.fetchOnTimePerformanceList(servicePerformanceParams)),
-        settle(performanceService.fetchServicePerformance(servicePerformanceParams)),
+        settle(
+          onTimeService.fetchOnTimePunctualityTimeOfDayData(
+            servicePerformanceParams,
+          ),
+        ),
+        settle(
+          onTimeService.fetchOnTimePunctualityDayOfWeekData(
+            servicePerformanceParams,
+          ),
+        ),
+        settle(
+          onTimeService.fetchOnTimePerformanceList(servicePerformanceParams),
+        ),
+        settle(
+          performanceService.fetchServicePerformance(servicePerformanceParams),
+        ),
         settle(headwayService.fetchTimeSeries(servicePerformanceParams)),
       ]);
 

@@ -9,7 +9,7 @@ export const OnTimeHelpdeskButton = () => {
     <>
       <button
         className="helpdesk-link govuk-body govuk-link button-link"
-        style = {{ textDecoration: "underline" }}
+        style={{ textDecoration: "underline" }}
         onClick={() => setIsHelpdeskOpen(true)}
         type="button"
       >

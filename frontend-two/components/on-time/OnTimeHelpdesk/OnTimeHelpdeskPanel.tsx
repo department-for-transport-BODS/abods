@@ -17,11 +17,16 @@ interface OnTimeHelpdeskPanelProps {
 const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
   {
     id: "avl-to-schedules",
-    title: "How do we match Automatic Vehicle Location (AVL) data to schedules?",
+    title:
+      "How do we match Automatic Vehicle Location (AVL) data to schedules?",
     content: (
       <>
         <p className="govuk-body">
-          AVL data is received from the vehicles and is automatically matched to journeys in the schedules supplied to BODS. Using various fields in the SIRI-VM data including "OperatorRef", "LineRef" and "DatedVehicleJourneyRef" the system will scan the schedules to find a match.
+          AVL data is received from the vehicles and is automatically matched to
+          journeys in the schedules supplied to BODS. Using various fields in
+          the SIRI-VM data including "OperatorRef", "LineRef" and
+          "DatedVehicleJourneyRef" the system will scan the schedules to find a
+          match.
         </p>
       </>
     ),
@@ -32,13 +37,28 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     content: (
       <>
         <p className="govuk-body">
-          As a vehicle travels along its journey, the system continually monitors its location against the stops in the schedules. If a vehicle is within a 70 meter radius of the stop, it's considered to be at the stop. The system will then continue to monitor the GPS point until there are two GPS points progressively moving away from the 70 meter radius of the stop. At this point it will then record the departure time as the last GPS point within the 70m zone (using the GPS timestamp provided in the SIRI-VM data).
+          As a vehicle travels along its journey, the system continually
+          monitors its location against the stops in the schedules. If a vehicle
+          is within a 70 meter radius of the stop, it's considered to be at the
+          stop. The system will then continue to monitor the GPS point until
+          there are two GPS points progressively moving away from the 70 meter
+          radius of the stop. At this point it will then record the departure
+          time as the last GPS point within the 70m zone (using the GPS
+          timestamp provided in the SIRI-VM data).
         </p>
         <p className="govuk-body">
-          If two GPS pings happen to "straddle" a stop but both are further than 70 meters from the stop location, the system will calculate the departure time using the geometry of the two GPS points against the stop position. It will then look at the timestamps of the GPS points to calculate when the vehicle was leaving the 70m zone.
+          If two GPS pings happen to "straddle" a stop but both are further than
+          70 meters from the stop location, the system will calculate the
+          departure time using the geometry of the two GPS points against the
+          stop position. It will then look at the timestamps of the GPS points
+          to calculate when the vehicle was leaving the 70m zone.
         </p>
         <p>
-          Finally, the system relies on regular GPS updates to calculate arrivals and departures. If there are infrequent pings and the system does not receive GPS data close to a stop, it will not calculate departure times for those stops. This is to avoid calculating an inaccurate time because of insufficient data.
+          Finally, the system relies on regular GPS updates to calculate
+          arrivals and departures. If there are infrequent pings and the system
+          does not receive GPS data close to a stop, it will not calculate
+          departure times for those stops. This is to avoid calculating an
+          inaccurate time because of insufficient data.
         </p>
       </>
     ),
@@ -70,7 +90,10 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Late",
     content: (
       <p className="govuk-body">
-        We calculate late buses as per the Traffic Commissioner's guidelines, which means anything over 5 minutes 59 seconds counts as late. If the bus was exactly 5m 59s late, it would count as on time, 6 minutes would count as late.
+        We calculate late buses as per the Traffic Commissioner's guidelines,
+        which means anything over 5 minutes 59 seconds counts as late. If the
+        bus was exactly 5m 59s late, it would count as on time, 6 minutes would
+        count as late.
       </p>
     ),
   },
@@ -79,7 +102,10 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Early",
     content: (
       <p className="govuk-body">
-        We calculate early buses as per the Traffic Commissioner's guidelines as anything that departs more than 1 minute before the scheduled departure. 1 minute early is on-time, 1 minute and 1 second early is classified as early.
+        We calculate early buses as per the Traffic Commissioner's guidelines as
+        anything that departs more than 1 minute before the scheduled departure.
+        1 minute early is on-time, 1 minute and 1 second early is classified as
+        early.
       </p>
     ),
   },
@@ -103,10 +129,10 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
           <li>
             We didn't receive AVL data. This could be for many reasons: the
             ticket machine wasn't turned on, or the ticket machine didn't have
-            signal and was not able to upload the data once reconnected. If
-            this continues to be a problem we suggest you speak to your AVL
-            supplier directly. We are working hard to ensure greater
-            completeness of AVL data on ABODS!
+            signal and was not able to upload the data once reconnected. If this
+            continues to be a problem we suggest you speak to your AVL supplier
+            directly. We are working hard to ensure greater completeness of AVL
+            data on ABODS!
           </li>
           <li>
             The line name in the static data and the AVL file don't match.
@@ -122,19 +148,23 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     content: (
       <>
         <p className="govuk-body">
-          For the given set of filter data (i.e. date range, granularity (hour, day, or month), operator and line), the query will return:
+          For the given set of filter data (i.e. date range, granularity (hour,
+          day, or month), operator and line), the query will return:
         </p>
         <p className="govuk-body">
           <b>scheduled_departures:</b> total number of scheduled stop departures
         </p>
         <p className="govuk-body">
-          <b>total_departures:</b> total number of actual stop departures observed
+          <b>total_departures:</b> total number of actual stop departures
+          observed
         </p>
         <p className="govuk-body">
-          <b>total_delay:</b> sum of differences between actual and scheduled departure times (in seconds).
+          <b>total_delay:</b> sum of differences between actual and scheduled
+          departure times (in seconds).
         </p>
         <p className="govuk-body">
-          We can then formulate the average delay = <b>total_delay / total_departures</b>
+          We can then formulate the average delay ={" "}
+          <b>total_delay / total_departures</b>
         </p>
       </>
     ),
@@ -144,15 +174,17 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Last Stops",
     content: (
       <p className="govuk-body">
-        On-time performance is currently calculated using departure times for all stops except for the last stop, where arrival time is used. The last stop in a journey will be reported as either on time or late based on its arrival time, never early.
+        On-time performance is currently calculated using departure times for
+        all stops except for the last stop, where arrival time is used. The last
+        stop in a journey will be reported as either on time or late based on
+        its arrival time, never early.
       </p>
     ),
   },
 ];
 
-const sectionHasRenderableContent = (
-  section: OnTimeHelpdeskSection,
-): boolean => section.content !== undefined && section.content !== null;
+const sectionHasRenderableContent = (section: OnTimeHelpdeskSection): boolean =>
+  section.content !== undefined && section.content !== null;
 
 export const OnTimeHelpdeskPanel = ({
   isOpen,
@@ -165,9 +197,8 @@ export const OnTimeHelpdeskPanel = ({
     () => new Set(initiallyExpandedSectionIds ?? []),
     [initiallyExpandedSectionIds],
   );
-  const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(
-    initialExpandedIds,
-  );
+  const [expandedSectionIds, setExpandedSectionIds] =
+    useState<Set<string>>(initialExpandedIds);
 
   if (!isOpen) {
     return null;
@@ -231,7 +262,9 @@ export const OnTimeHelpdeskPanel = ({
         <button
           type="button"
           className={`on-time-helpdesk-panel__toggle-all button-link govuk-link${
-            allSectionsExpanded ? " on-time-helpdesk-panel__toggle-all--expanded" : ""
+            allSectionsExpanded
+              ? " on-time-helpdesk-panel__toggle-all--expanded"
+              : ""
           }`}
           onClick={toggleAllSections}
           disabled={allExpandableSectionIds.length === 0}
@@ -255,7 +288,9 @@ export const OnTimeHelpdeskPanel = ({
                 <button
                   type="button"
                   className={`on-time-helpdesk-panel__section-toggle button-link govuk-link${
-                    isExpanded ? " on-time-helpdesk-panel__section-toggle--expanded" : ""
+                    isExpanded
+                      ? " on-time-helpdesk-panel__section-toggle--expanded"
+                      : ""
                   }`}
                   onClick={() => toggleSection(section.id)}
                   disabled={!isExpandable}
