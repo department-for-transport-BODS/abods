@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
+import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
 import {
   OnTimeStopsTable,
   STOPS_TABLE_COLUMN_KEYS,
@@ -489,9 +490,18 @@ const OnTimeServicePage = () => {
             >
               <ChartsSection
                 mapContent={
-                  <p className="govuk-body govuk-!-margin-top-4">
-                    TODO: service-map
-                  </p>
+                  config?.mapboxToken && config?.mapboxStyle ? (
+                    <OnTimeServiceMap
+                      mapboxToken={config.mapboxToken}
+                      mapboxStyle={config.mapboxStyle}
+                      params={serviceLevelParams}
+                      timingPointsOnly={selectedStopType === "timing-points"}
+                    />
+                  ) : (
+                    <p className="govuk-body govuk-!-margin-top-4">
+                      Map is unavailable
+                    </p>
+                  )
                 }
                 delayFrequency={data.delayFrequency ?? []}
                 timeOfDay={data.timeOfDay ?? []}
