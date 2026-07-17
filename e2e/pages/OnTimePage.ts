@@ -260,8 +260,8 @@ export class OnTimePage {
       .filter({ hasText: "On-time performance" });
   }
 
-  gotoOperatorNotFound(): Promise<void> {
-    return this.page.goto("/on-time/operator-not-found", {
+  async gotoOperatorNotFound(): Promise<void> {
+    await this.page.goto("/on-time/operator-not-found", {
       waitUntil: "domcontentloaded",
     });
   }

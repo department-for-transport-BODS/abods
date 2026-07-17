@@ -727,7 +727,16 @@ it.each(filteredTableDataTestCases)(
   },
 );
 
-const clearAllDropdownTestCases = [
+type ClearAllDropdownTestCase = {
+  name: string;
+  filterButtonName: RegExp;
+  optionsToSelect: readonly string[];
+  defaultText: RegExp;
+  displayText: RegExp;
+  clearSelectionText?: string;
+};
+
+const clearAllDropdownTestCases: readonly ClearAllDropdownTestCase[] = [
   {
     name: "Admin Area dropdown clears selection",
     filterButtonName: /All areas/i,
@@ -741,6 +750,7 @@ const clearAllDropdownTestCases = [
     optionsToSelect: ["Arriva UK Bus"],
     defaultText: /All organisations/i,
     displayText: /Arriva UK Bus/i,
+    clearSelectionText: "Arriva UK Bus",
   },
   {
     name: "Operators dropdown clears selection",
@@ -763,11 +773,17 @@ const clearAllDropdownTestCases = [
     defaultText: /All services/i,
     displayText: /2 selected/i,
   },
-] as const;
+];
 
 it.each(clearAllDropdownTestCases)(
   "$name",
-  async ({ filterButtonName, optionsToSelect, defaultText, displayText }) => {
+  async ({
+    filterButtonName,
+    optionsToSelect,
+    defaultText,
+    displayText,
+    clearSelectionText,
+  }) => {
     mockFetchDistances.mockResolvedValue(mockDistanceData);
     mockFetchDropdownInputs.mockResolvedValue(mockDropdownInputData);
     mockFetchAdminOrg.mockResolvedValue(mockAdminAreaData);
@@ -799,7 +815,11 @@ it.each(clearAllDropdownTestCases)(
     });
     fireEvent.click(newDropdownButton);
 
-    fireEvent.click(screen.getByRole("button", { name: /Clear all/i }));
+    fireEvent.click(
+      clearSelectionText
+        ? screen.getByText(clearSelectionText)
+        : screen.getByRole("button", { name: /Clear all/i }),
+    );
 
     // Dropdown button should reset to default text
     fireEvent.mouseDown(document.body);
