@@ -494,7 +494,7 @@ const OnTimeServicePage = () => {
                     <OnTimeServiceMap
                       mapboxToken={config.mapboxToken}
                       mapboxStyle={config.mapboxStyle}
-                      params={serviceLevelParams}
+                      params={stopPerformanceParams}
                       timingPointsOnly={selectedStopType === "timing-points"}
                     />
                   ) : (
