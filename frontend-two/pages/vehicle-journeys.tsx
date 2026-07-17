@@ -31,24 +31,29 @@ const VehicleJourneysPage = () => {
 
   const journeyId = getQueryString(router.query.journeyId) ?? null;
   const queryDate = getQueryString(router.query.date);
-  const selectedDate =
-    queryDate &&
-    isDateInRange(
-      queryDate,
-      config?.vehicleJourneys.validDateRange.offsetISO,
-      config?.vehicleJourneys.validDateRange.durationISO,
-    )
-      ? queryDate
-      : getDefaultJourneyDate(config?.vehicleJourneys.validDateRange.offsetISO);
-  const selectedOperatorId = getQueryString(router.query.operator) ?? null;
-  const selectedServiceId = getQueryString(router.query.service) ?? null;
-  const selectedDirectionRef = getQueryString(router.query.direction) ?? null;
+  const defaultDate = getDefaultJourneyDate(
+    config?.vehicleJourneys.validDateRange.offsetISO,
+  );
   const validDateRange = getValidDateRange(
     config?.vehicleJourneys.validDateRange.offsetISO,
     config?.vehicleJourneys.validDateRange.durationISO,
   );
-  const previousDateValue = DateTime.fromISO(selectedDate).minus({ days: 1 });
-  const nextDateValue = DateTime.fromISO(selectedDate).plus({ days: 1 });
+  const dateInRange = queryDate
+    ? isDateInRange(
+        queryDate,
+        config?.vehicleJourneys.validDateRange.offsetISO,
+        config?.vehicleJourneys.validDateRange.durationISO,
+      )
+    : true;
+  const dateError =
+    queryDate && !dateInRange ? "Must be within the last 6 months" : undefined;
+  const selectedDate = queryDate ?? defaultDate ?? "";
+  const fetchDate = dateInRange ? selectedDate : (defaultDate ?? selectedDate);
+  const selectedOperatorId = getQueryString(router.query.operator) ?? null;
+  const selectedServiceId = getQueryString(router.query.service) ?? null;
+  const selectedDirectionRef = getQueryString(router.query.direction) ?? null;
+  const previousDateValue = DateTime.fromISO(fetchDate).minus({ days: 1 });
+  const nextDateValue = DateTime.fromISO(fetchDate).plus({ days: 1 });
   const previousDate = validDateRange.contains(previousDateValue)
     ? previousDateValue.toISODate()
     : null;
@@ -61,15 +66,15 @@ const VehicleJourneysPage = () => {
     () => vehicleJourneysService.fetchOperators(),
   );
   const { data: services = [], isLoading: servicesLoading } = useSWR(
-    config?.apiUrl && selectedOperatorId
-      ? ["vehicle-journeys-services", selectedOperatorId, selectedDate]
+    config?.apiUrl && selectedOperatorId && !dateError
+      ? ["vehicle-journeys-services", selectedOperatorId, fetchDate]
       : null,
     ([, operatorId, date]) =>
       vehicleJourneysService.fetchLines(operatorId, date),
   );
   const { data: journeys, isLoading: journeysLoading } = useSWR(
-    config?.apiUrl && selectedServiceId
-      ? ["vehicle-journeys-day", selectedDate, selectedServiceId]
+    config?.apiUrl && selectedServiceId && !dateError
+      ? ["vehicle-journeys-day", fetchDate, selectedServiceId]
       : null,
     ([, date, serviceId]) =>
       vehicleJourneysService.fetchDayJourneys(date, serviceId),
@@ -146,7 +151,7 @@ const VehicleJourneysPage = () => {
         <VehicleJourneyDetail
           router={router}
           journeyId={journeyId}
-          dateOfJourney={selectedDate}
+          dateOfJourney={fetchDate}
           operatorId={selectedOperatorId}
           serviceId={selectedServiceId}
           directionRef={selectedDirectionRef}
@@ -177,6 +182,8 @@ const VehicleJourneysPage = () => {
           journeysLoading={journeysLoading}
           previousDate={previousDate}
           nextDate={nextDate}
+          validDateRange={validDateRange}
+          dateError={dateError}
         />
       )}
     </BaseLayout>
