@@ -1,14 +1,23 @@
 import { ReactNode, useEffect, useRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import tippy from "tippy.js";
 
 interface TooltipProps {
-  message?: string;
+  message?: ReactNode;
   underline?: boolean;
   selectable?: boolean;
   onClick?: () => void;
   className?: string;
   children: ReactNode;
 }
+
+const getTooltipContent = (message: ReactNode) => {
+  if (typeof message === "string") {
+    return message;
+  }
+
+  return renderToStaticMarkup(<>{message}</>);
+};
 
 export const Tooltip = ({
   message,
@@ -26,7 +35,7 @@ export const Tooltip = ({
     }
 
     const instance = tippy(triggerRef.current, {
-      content: message,
+      content: getTooltipContent(message),
       allowHTML: true,
       theme: "gds-tooltip",
       zIndex: 100,
@@ -43,7 +52,6 @@ export const Tooltip = ({
     <button
       ref={triggerRef}
       className={`unbuttoned tooltip ${underline ? "tooltip--underline" : ""} ${selectable ? "tooltip--selectable" : ""} ${className ?? ""}`}
-      title={message}
       type="button"
       onClick={onClick}
     >
