@@ -72,6 +72,16 @@ export const getDistinct = <T, U>(items: T[], accessor: (item: T) => U): U[] =>
     .map(accessor)
     .filter((value, index, array) => array.indexOf(value) === index);
 
+export const normaliseJourneyDirection = (
+  direction: string | null | undefined,
+): string | null => {
+  const value = (direction ?? "").trim().toLowerCase();
+  if (!value) return null;
+  if (value === "clockwise") return "outbound";
+  if (value === "anticlockwise") return "inbound";
+  return value;
+};
+
 export const getInitialVehicleRef = (
   stops: VehicleJourneyStop[],
   avls: VehicleJourneyAvl[],
@@ -136,6 +146,15 @@ export const getDefaultJourneyDate = (offsetISO?: string) =>
     .startOf("day")
     .minus(Duration.fromISO(offsetISO || "P1D"))
     .toISODate() ?? DateTime.local().toISODate();
+
+export const getJourneyDateFromStartTime = (
+  startTime: string | null | undefined,
+) => {
+  if (!startTime) return null;
+
+  const dateTime = DateTime.fromISO(startTime, { setZone: true }).setZone("Europe/London");
+  return dateTime.isValid ? dateTime.toISODate() : null;
+};
 
 export const getValidDateRange = (offsetISO?: string, durationISO?: string) =>
   Interval.before(

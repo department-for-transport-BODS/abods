@@ -7,6 +7,7 @@ const { mockRouter } = vi.hoisted(() => ({
   mockRouter: {
     pathname: "/vehicle-journeys",
     asPath: "/vehicle-journeys",
+    isReady: true,
     query: {} as Record<string, string>,
     replace: vi.fn(),
   },
@@ -124,6 +125,7 @@ describe("VehicleJourneysPage", () => {
     vi.clearAllMocks();
     mockRouter.pathname = "/vehicle-journeys";
     mockRouter.asPath = "/vehicle-journeys";
+    mockRouter.isReady = true;
     mockRouter.query = {};
     mockUseConfig.mockReturnValue({
       config: {
@@ -174,7 +176,7 @@ describe("VehicleJourneysPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Loading...")).toBeInTheDocument();
+      expect(screen.getByText("Loading journeys")).toBeInTheDocument();
     });
   });
 
@@ -232,5 +234,101 @@ describe("VehicleJourneysPage", () => {
     expect(screen.getByText("Best Buses (BBUS)")).toBeInTheDocument();
     expect(screen.getByText("High Street")).toBeInTheDocument();
     expect(screen.getByTestId("vehicle-journey-map")).toBeInTheDocument();
+  });
+
+  it("normalises blank direction queries for journeys without a direction", async () => {
+    mockRouter.pathname = "/vehicle-journeys/[journeyId]";
+    mockRouter.asPath = "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=";
+    mockRouter.query = {
+      journeyId: "G1",
+      date: "2026-07-13",
+      operator: "OP1",
+      service: "L1",
+      direction: "",
+    };
+    mockFetchDayJourneys.mockResolvedValue([
+      {
+        ...journey,
+        directionRef: "",
+      },
+    ]);
+    mockFetchJourney.mockResolvedValue({
+      stops: [
+        {
+          ...journeyInfo.stops[0],
+          directionRef: "",
+        },
+      ],
+      avls: [
+        {
+          ...journeyInfo.avls[0],
+          directionRef: "",
+        },
+      ],
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "12: Town Centre" })).toBeInTheDocument();
+    });
+    expect(mockFetchServicePatternDistanceGeom).toHaveBeenCalledWith("101");
+  });
+
+  it("falls back to the start time date for legacy detail links", async () => {
+    mockRouter.pathname = "/vehicle-journeys/[journeyId]";
+    mockRouter.asPath = "/vehicle-journeys/G1?operator=OP1&service=L1&startTime=2026-07-13T10:30:00%2B01:00&direction=outbound";
+    mockRouter.query = {
+      journeyId: "G1",
+      operator: "OP1",
+      service: "L1",
+      startTime: "2026-07-13T10:30:00+01:00",
+      direction: "outbound",
+    };
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(mockFetchDayJourneys).toHaveBeenCalledWith("2026-07-13", "L1");
+    });
+  });
+
+  it("shows a loading heading until the detail route is ready", () => {
+    mockRouter.pathname = "/vehicle-journeys/[journeyId]";
+    mockRouter.isReady = false;
+    mockRouter.query = {
+      journeyId: "G1",
+      date: "2026-07-13",
+      operator: "OP1",
+      service: "L1",
+      direction: "outbound",
+    };
+
+    renderPage();
+
+    expect(screen.getByRole("heading", { name: "Loading journey details" })).toBeInTheDocument();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByText("Journey not found")).not.toBeInTheDocument();
+  });
+
+  it("keeps the detail page in a loading state while journeys are still loading", async () => {
+    mockRouter.pathname = "/vehicle-journeys/[journeyId]";
+    mockRouter.asPath = "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=outbound";
+    mockRouter.query = {
+      journeyId: "G1",
+      date: "2026-07-13",
+      operator: "OP1",
+      service: "L1",
+      direction: "outbound",
+    };
+    mockFetchDayJourneys.mockImplementation(() => new Promise(() => {}));
+    mockFetchJourney.mockImplementation(() => new Promise(() => {}));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Loading journey details" })).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Vehicle journey not found/)).not.toBeInTheDocument();
   });
 });

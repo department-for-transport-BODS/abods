@@ -220,7 +220,7 @@ export const VehicleJourneysSearch = ({
                         date: selectedDate,
                         operator: selectedOperatorId ?? "",
                         service: selectedServiceId ?? "",
-                        direction: journey.directionRef ?? "",
+                        ...(journey.directionRef ? { direction: journey.directionRef } : {}),
                       },
                     }}
                   >

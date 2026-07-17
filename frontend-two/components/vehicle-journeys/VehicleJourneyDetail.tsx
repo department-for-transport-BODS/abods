@@ -50,6 +50,7 @@ interface VehicleJourneyDetailProps {
   avls: VehicleJourneyAvl[];
   rawAvls: VehicleJourneyAvl[];
   routeGeometry: ServicePatternDistanceGeom | null | undefined;
+  viewportKey: string;
 }
 
 const replaceQuery = (
@@ -488,6 +489,7 @@ export const VehicleJourneyDetail = ({
   avls,
   rawAvls,
   routeGeometry,
+  viewportKey,
 }: VehicleJourneyDetailProps) => {
   const [selectedStop, setSelectedStop] = useState<VehicleJourneyStop | null>(null);
   const [hoveredStop, setHoveredStop] = useState<VehicleJourneyStop | null>(null);
@@ -496,10 +498,13 @@ export const VehicleJourneyDetail = ({
   const stopType =
     router.query.allStops === "true" ? StopTypeOption.AllStops : StopTypeOption.TimingPoints;
   const timingPointsOnly = stopType === StopTypeOption.TimingPoints;
-  const heading = currentJourney
-    ? `${currentJourney.serviceNumber}: ${currentJourney.serviceName}`
-    : "Journey not found";
-  const showNotFound = !journeyInfoLoading && journeyInfo === null;
+  const showLoadingState = (journeysLoading || journeyInfoLoading) && !currentJourney;
+  const heading = showLoadingState
+    ? "Loading journey details"
+    : currentJourney
+      ? `${currentJourney.serviceNumber}: ${currentJourney.serviceName}`
+      : "Journey not found";
+  const showNotFound = !journeysLoading && !journeyInfoLoading && journeyInfo === null;
 
   return (
     <>
@@ -511,6 +516,13 @@ export const VehicleJourneyDetail = ({
       </Link>
       <span className="govuk-caption-xl">Vehicle journeys</span>
       <h1 className="govuk-heading-xl">{heading}</h1>
+
+      {showLoadingState ? (
+        <div className="govuk-body" aria-live="polite">
+          <Spinner size="small" />
+          <span className="govuk-visually-hidden">Loading journey details</span>
+        </div>
+      ) : null}
 
       {showNotFound ? (
         <p className="govuk-body">
@@ -639,6 +651,7 @@ export const VehicleJourneyDetail = ({
                 scheduledRoute={routeGeometry?.geom ?? null}
                 directionRef={directionRef}
                 matchType={matchType}
+                viewportKey={viewportKey}
                 loading={journeyInfoLoading}
                 selectedStop={selectedStop}
                 hoveredStop={hoveredStop}

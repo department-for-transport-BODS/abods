@@ -20,6 +20,7 @@ interface VehicleJourneyMapProps {
   scheduledRoute: [number, number][] | null;
   directionRef: string | null;
   matchType: MatchType;
+  viewportKey: string;
   loading?: boolean;
   selectedStop?: VehicleJourneyStop | null;
   hoveredStop?: VehicleJourneyStop | null;
@@ -533,6 +534,7 @@ export const VehicleJourneyMap = ({
   scheduledRoute,
   directionRef,
   matchType,
+  viewportKey,
   loading = false,
   selectedStop = null,
   hoveredStop = null,
@@ -543,6 +545,7 @@ export const VehicleJourneyMap = ({
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const activeStopHoverRef = useRef<{ sourceId: string; id: string } | null>(null);
   const journeyBoundsRef = useRef<mapboxgl.LngLatBounds | null>(null);
+  const fittedViewportKeyRef = useRef<string | null>(null);
   const [activeStyle, setActiveStyle] = useState<MapStyle>("default");
   const [showScheduledRoute, setShowScheduledRoute] = useState(true);
   const [moveCounter, setMoveCounter] = useState(0);
@@ -602,6 +605,7 @@ export const VehicleJourneyMap = ({
       journeyBoundsRef.current = bounds;
       if (bounds) {
         map.fitBounds(bounds, { padding: 50, maxZoom: 16, duration: 0 });
+        fittedViewportKeyRef.current = viewportKey;
       }
       setMoveCounter(0);
     };
@@ -639,17 +643,18 @@ export const VehicleJourneyMap = ({
       addJourneyLayers(map, geojson, showScheduledRoute);
       const bounds = buildBounds(stops, avls, scheduledRoute);
       journeyBoundsRef.current = bounds;
-      if (bounds) {
+      if (bounds && fittedViewportKeyRef.current !== viewportKey) {
         map.fitBounds(bounds, { padding: 50, maxZoom: 16, duration: 0 });
+        fittedViewportKeyRef.current = viewportKey;
+        setMoveCounter(0);
       }
-      setMoveCounter(0);
     };
 
     void update();
     return () => {
       cancelled = true;
     };
-  }, [stops, avls, scheduledRoute, matchType, showScheduledRoute]);
+  }, [stops, avls, scheduledRoute, matchType, showScheduledRoute, viewportKey]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -793,7 +798,7 @@ export const VehicleJourneyMap = ({
         aria-label="Journey map"
       />
       {recentrePortal &&
-        moveCounter > 1 &&
+        moveCounter > 0 &&
         createPortal(
           <button
             type="button"
