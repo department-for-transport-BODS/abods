@@ -36,6 +36,7 @@ import { type OperatorType } from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
+  PerformanceParams,
   PunctualityOverview,
   ServicePerformance,
   TimeOfDayData,
@@ -60,6 +61,8 @@ import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
 import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 import { OperatorSelector } from "@/components/shared/OperatorSelector";
+import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -130,6 +133,7 @@ const OnTimeOperatorPage = () => {
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
   const [allOperators, setAllOperators] = useState<OperatorType[]>([]);
+
   const refineResultsInitialValues = useMemo(
     () => performanceFiltersToRefineResults(refineResultsFilters),
     [JSON.stringify(refineResultsFilters)],
@@ -139,6 +143,38 @@ const OnTimeOperatorPage = () => {
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+
+  const servicePerformanceParams = useMemo<PerformanceParams | null>(() => {
+    if (!nocCode) return null;
+
+    const defaultParams = buildDefaultParams({ nocCode });
+
+    return {
+      ...defaultParams,
+      ...(dateRange
+        ? {
+            fromTimestamp: dateRange.from,
+            toTimestamp: dateRange.to,
+          }
+        : {}),
+      filters: {
+        ...defaultParams.filters,
+        ...refineResultsFilters,
+        matchType:
+          selectedMatchType === "evidenced"
+            ? MatchType.Evidenced
+            : MatchType.Estimated,
+        timingPointsOnly: selectedStopType === "timing-points",
+        granularity: Granularity.Day,
+      },
+    };
+  }, [
+    dateRange,
+    nocCode,
+    refineResultsFilters,
+    selectedMatchType,
+    selectedStopType,
+  ]);
 
   const chartErrors = [
     errors.delayFrequency,
@@ -182,7 +218,13 @@ const OnTimeOperatorPage = () => {
   }, [router.isReady, config]);
 
   useEffect(() => {
-    if (!router.isReady || !config?.apiUrl || !nocCode) return;
+    if (
+      !router.isReady ||
+      !config?.apiUrl ||
+      !nocCode ||
+      !servicePerformanceParams
+    )
+      return;
     const load = async () => {
       setIsLoading(true);
       const operator = await operatorsService.fetchOperator(nocCode);
@@ -191,27 +233,6 @@ const OnTimeOperatorPage = () => {
         return;
       }
       setOperatorChecked(true);
-
-      const defaultParams = buildDefaultParams({ nocCode });
-      const params = {
-        ...defaultParams,
-        ...(dateRange
-          ? {
-              fromTimestamp: dateRange.from,
-              toTimestamp: dateRange.to,
-            }
-          : {}),
-        filters: {
-          ...defaultParams.filters,
-          ...refineResultsFilters,
-          matchType:
-            selectedMatchType === "evidenced"
-              ? MatchType.Evidenced
-              : MatchType.Estimated,
-          timingPointsOnly: selectedStopType === "timing-points",
-          granularity: Granularity.Day,
-        },
-      };
 
       const [
         overview,
@@ -223,14 +244,30 @@ const OnTimeOperatorPage = () => {
         servicePerformance,
         headwayTimeSeries,
       ] = await Promise.all([
-        settle(performanceService.fetchOverviewStats(params)),
-        settle(onTimeService.fetchOnTimeDelayFrequencyData(params)),
-        settle(onTimeService.fetchOnTimeTimeSeriesData(params)),
-        settle(onTimeService.fetchOnTimePunctualityTimeOfDayData(params)),
-        settle(onTimeService.fetchOnTimePunctualityDayOfWeekData(params)),
-        settle(onTimeService.fetchOnTimePerformanceList(params)),
-        settle(performanceService.fetchServicePerformance(params)),
-        settle(headwayService.fetchTimeSeries(params)),
+        settle(performanceService.fetchOverviewStats(servicePerformanceParams)),
+        settle(
+          onTimeService.fetchOnTimeDelayFrequencyData(servicePerformanceParams),
+        ),
+        settle(
+          onTimeService.fetchOnTimeTimeSeriesData(servicePerformanceParams),
+        ),
+        settle(
+          onTimeService.fetchOnTimePunctualityTimeOfDayData(
+            servicePerformanceParams,
+          ),
+        ),
+        settle(
+          onTimeService.fetchOnTimePunctualityDayOfWeekData(
+            servicePerformanceParams,
+          ),
+        ),
+        settle(
+          onTimeService.fetchOnTimePerformanceList(servicePerformanceParams),
+        ),
+        settle(
+          performanceService.fetchServicePerformance(servicePerformanceParams),
+        ),
+        settle(headwayService.fetchTimeSeries(servicePerformanceParams)),
       ]);
 
       setData({
@@ -242,8 +279,8 @@ const OnTimeOperatorPage = () => {
         servicePerformancePlain: servicePerformancePlain.data ?? [],
         servicePerformance: servicePerformance.data ?? [],
         headwayTimeSeries: headwayTimeSeries.data ?? [],
-        fromTimestamp: params.fromTimestamp,
-        toTimestamp: params.toTimestamp,
+        fromTimestamp: servicePerformanceParams.fromTimestamp,
+        toTimestamp: servicePerformanceParams.toTimestamp,
         granularity: Granularity.Day,
       });
       setErrors({
@@ -263,6 +300,7 @@ const OnTimeOperatorPage = () => {
     config,
     dateRange,
     nocCode,
+    servicePerformanceParams,
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
@@ -482,6 +520,13 @@ const OnTimeOperatorPage = () => {
               </p>
             ) : (
               <>
+                <div className="helpdesk-container">
+                  <OnTimeHelpdeskButton />
+                  <OtpThresholdModalLink
+                    params={servicePerformanceParams}
+                    overview={summaryStats}
+                  />
+                </div>
                 <div className="govuk-!-margin-bottom-6">
                   <SummaryStatsGrid
                     onTimeCount={summaryCards.onTimeCount}

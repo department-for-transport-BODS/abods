@@ -17,6 +17,7 @@ import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
 } from "@/components/shared/RefineResults/RefineResultsFilters";
+import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import {
@@ -284,10 +285,13 @@ const OnTimeIndexPage = () => {
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
-                <OtpThresholdModalLink
-                  params={operatorTableParams}
-                  overview={summaryStats}
-                />
+                <div className="helpdesk-container">
+                  <OnTimeHelpdeskButton />
+                  <OtpThresholdModalLink
+                    params={operatorTableParams}
+                    overview={summaryStats}
+                  />
+                </div>
                 <SummaryStatsGrid
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
