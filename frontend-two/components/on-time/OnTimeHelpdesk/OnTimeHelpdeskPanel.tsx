@@ -21,9 +21,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
       "How do we match Automatic Vehicle Location (AVL) data to schedules?",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -32,9 +30,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "How do we calculate Arrival and Departure times?",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -43,9 +39,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "How do we calculate On Time Performance?",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -55,9 +49,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Late",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -66,9 +58,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Early",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -77,9 +67,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Missing Data",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -88,9 +76,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Average delay",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
@@ -99,9 +85,7 @@ const DEFAULT_SECTIONS: OnTimeHelpdeskSection[] = [
     title: "Last Stops",
     content: (
       <>
-        <p className="govuk-body">
-          TODO: Put content here
-        </p>
+        <p className="govuk-body">TODO: Put content here</p>
       </>
     ),
   },
