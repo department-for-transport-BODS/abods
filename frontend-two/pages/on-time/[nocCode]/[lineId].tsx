@@ -16,7 +16,7 @@ import {
   DISPLAY_MODE_OPTIONS,
   normaliseDirection,
   aggregatePerformanceTotals,
-} from "@/utils/on-time-table-format";
+} from "@/utils/on-time/on-time-table-format";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
