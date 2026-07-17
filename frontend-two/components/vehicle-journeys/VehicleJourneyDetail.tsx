@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { NextRouter } from "next/router";
 import tippy from "tippy.js";
+import { CaretLeftIcon } from "@/components/icons/CaretLeftIcon";
+import { CaretRightIcon } from "@/components/icons/CaretRightIcon";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { Spinner } from "@/components/shared/Spinner";
 import { Stat } from "@/components/shared/SummaryStat/Stat";
@@ -199,34 +201,14 @@ const JourneyNav = ({
       ? journeys[currentJourneyIndex + 1]
       : null;
   const previousIcon = (
-    <svg
+    <CaretLeftIcon
       className="journey-nav__icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M7.69525 11.6015L14.5765 4.66401C14.7968 4.4437 15.1531 4.4437 15.3734 4.66401L16.3015 5.59214C16.5218 5.81245 16.5218 6.1687 16.3015 6.38901L10.7468 12L16.3015 17.6109C16.5218 17.8312 16.5218 18.1875 16.3015 18.4078L15.3734 19.3359C15.1531 19.5562 14.7968 19.5562 14.5765 19.3359L7.69525 12.3984C7.47494 12.1781 7.47494 11.8218 7.69525 11.6015Z"
-        fill="currentColor"
-      />
-    </svg>
+    />
   );
   const nextIcon = (
-    <svg
+    <CaretRightIcon
       className="journey-nav__icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M16.3015 11.6015L9.42026 4.66401C9.19995 4.4437 8.8437 4.4437 8.62339 4.66401L7.69526 5.59214C7.47495 5.81245 7.47495 6.1687 7.69526 6.38901L13.25 12L7.69526 17.6109C7.47495 17.8312 7.47495 18.1875 7.69526 18.4078L8.62339 19.3359C8.8437 19.5562 9.19995 19.5562 9.42026 19.3359L16.3015 12.3984C16.5218 12.1781 16.5218 11.8218 16.3015 11.6015Z"
-        fill="currentColor"
-      />
-    </svg>
+    />
   );
 
   return (
