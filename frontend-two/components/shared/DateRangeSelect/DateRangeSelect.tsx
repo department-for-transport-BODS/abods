@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
-import Image from "next/image";
-import { DateRangeCalendar } from "./DateRangeCalendar";
+import { CalendarIcon } from "@/components/icons/CalendarIcon";
+import { DateCalendarMonth } from "@/components/shared/DateCalendarMonth";
 import {
   formatDateToDisplayString,
   formatDateToISODateString,
@@ -148,6 +148,26 @@ export const DateRangeSelect = ({
   const nextMonthDisabled =
     monthRight.startOf("month") >= today.startOf("month");
 
+  const inRange = (date: DateTime) =>
+    Boolean(
+      draftDateRange.start?.isValid &&
+        draftDateRange.end?.isValid &&
+        date >= draftDateRange.start &&
+        date <= draftDateRange.end,
+    );
+
+  const isStart = (date: DateTime) =>
+    Boolean(
+      draftDateRange.start?.isValid && draftDateRange.start.hasSame(date, "day"),
+    );
+
+  const isEnd = (date: DateTime) =>
+    Boolean(
+      draftDateRange.end?.isValid && draftDateRange.end.hasSame(date, "day"),
+    );
+
+  const calendarMaxDate = today.minus({ days: 1 });
+
   const triggerLabel =
     selectedDateRange.start?.isValid && selectedDateRange.end?.isValid
       ? `${formatDateToDisplayString(selectedDateRange.start)} - ${formatDateToDisplayString(selectedDateRange.end)}`
@@ -173,13 +193,7 @@ export const DateRangeSelect = ({
         }}
       >
         <span className="date-range-select__button-text">{triggerLabel}</span>
-        <Image
-          src="/assets/icons/calendar.svg"
-          alt=""
-          width={20}
-          height={20}
-          className="date-range-select__icon"
-        />
+        <CalendarIcon className="date-range-select__icon" />
       </button>
 
       {openDropdown && (
@@ -235,9 +249,13 @@ export const DateRangeSelect = ({
                   {monthLeft.toFormat("MMM yyyy")}
                 </span>
               </div>
-              <DateRangeCalendar
+              <DateCalendarMonth
                 month={monthLeft}
-                selected={draftDateRange}
+                today={today}
+                isSelectable={(date) => date <= calendarMaxDate}
+                isIncluded={inRange}
+                isStart={isStart}
+                isEnd={isEnd}
                 onDateChange={handleDaySelect}
               />
             </div>
@@ -259,9 +277,13 @@ export const DateRangeSelect = ({
                   ›
                 </button>
               </div>
-              <DateRangeCalendar
+              <DateCalendarMonth
                 month={monthRight}
-                selected={draftDateRange}
+                today={today}
+                isSelectable={(date) => date <= calendarMaxDate}
+                isIncluded={inRange}
+                isStart={isStart}
+                isEnd={isEnd}
                 onDateChange={handleDaySelect}
               />
             </div>
