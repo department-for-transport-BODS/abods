@@ -9,6 +9,7 @@ interface MultiselectDropdownProps {
   onChange: (selected: string[]) => void;
   placeholderText?: string;
   disabled?: boolean;
+  clearable?: boolean;
 }
 
 export const MultiselectDropdown = ({
@@ -20,6 +21,7 @@ export const MultiselectDropdown = ({
   onChange,
   placeholderText,
   disabled = false,
+  clearable = false,
 }: MultiselectDropdownProps) => {
   const [open, setOpen] = useState(false);
 
@@ -67,12 +69,19 @@ export const MultiselectDropdown = ({
     }
   };
 
+  const clearSelection = () => {
+    onChange([]);
+    setOpen(false);
+    setSearch("");
+  };
+
   const displayText =
     selected.length === 0
       ? placeholderText ?? ""
       : selected.length === 1
         ? selected[0]
         : `${selected.length} selected`;
+  const showClearButton = clearable && hasSelected && !disabled;
 
   return (
     <div className="govuk-form-group multiselect-dropdown" ref={ref}>
@@ -81,26 +90,37 @@ export const MultiselectDropdown = ({
         <input
           type="text"
           className="multiselect-dropdown__button multiselect-dropdown__search-text"
-          placeholder="Search here"
           value={search}
           disabled={disabled}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
         />
       ) : (
-        <button
-          type="button"
-          className={`multiselect-dropdown__button${open ? " multiselect-dropdown__button--open" : ""}`}
-          disabled={disabled}
-          onClick={() => setOpen(true)}
-        >
-          <span
-            className={`multiselect-dropdown__button-text${hasSelected ? " multiselect-dropdown__button-text--selected" : ""}`}
+        <div className="multiselect-dropdown__control">
+          <button
+            type="button"
+            className={`multiselect-dropdown__button${open ? " multiselect-dropdown__button--open" : ""}${showClearButton ? " multiselect-dropdown__button--clearable" : ""}`}
+            disabled={disabled}
+            onClick={() => setOpen(true)}
           >
-            {displayText}
-          </span>
-          <span className="multiselect-dropdown__arrow"></span>
-        </button>
+            <span
+              className={`multiselect-dropdown__button-text${hasSelected ? " multiselect-dropdown__button-text--selected" : ""}`}
+            >
+              {displayText}
+            </span>
+            <span className="multiselect-dropdown__arrow"></span>
+          </button>
+          {showClearButton ? (
+            <button
+              type="button"
+              className="multiselect-dropdown__clear"
+              aria-label={`Clear ${label}`}
+              onClick={clearSelection}
+            >
+              ×
+            </button>
+          ) : null}
+        </div>
       )}
       {open && (
         <div className="multiselect-dropdown__panel">
