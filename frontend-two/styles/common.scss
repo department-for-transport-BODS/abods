@@ -352,7 +352,10 @@
 
 .vehicle-journeys-search__controls {
   display: grid;
-  grid-template-columns: minmax(10rem, auto) minmax(18rem, 1fr) minmax(18rem, 1fr);
+  grid-template-columns: minmax(10rem, auto) minmax(18rem, 1fr) minmax(
+      18rem,
+      1fr
+    );
   gap: govuk-spacing(4);
   align-items: end;
   margin-bottom: govuk-spacing(5);

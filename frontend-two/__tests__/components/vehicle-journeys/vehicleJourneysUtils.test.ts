@@ -10,7 +10,10 @@ import {
   normaliseJourneyDirection,
 } from "@/components/vehicle-journeys/vehicleJourneysUtils";
 import { MatchType, OtpEnum } from "@/src/generated/graphql";
-import { VehicleJourneyAvl, VehicleJourneyStop } from "@/types/vehicle-journeys";
+import {
+  VehicleJourneyAvl,
+  VehicleJourneyStop,
+} from "@/types/vehicle-journeys";
 
 const buildStop = (
   overrides: Partial<VehicleJourneyStop> = {},
@@ -95,8 +98,14 @@ describe("vehicleJourneysUtils", () => {
         }),
       ];
       const avls = [
-        buildAvl({ vehicleRef: "BUS-2", recordedAtTimeUtc: "2026-07-13T09:33:00Z" }),
-        buildAvl({ vehicleRef: "BUS-1", recordedAtTimeUtc: "2026-07-13T09:31:00Z" }),
+        buildAvl({
+          vehicleRef: "BUS-2",
+          recordedAtTimeUtc: "2026-07-13T09:33:00Z",
+        }),
+        buildAvl({
+          vehicleRef: "BUS-1",
+          recordedAtTimeUtc: "2026-07-13T09:31:00Z",
+        }),
       ];
 
       expect(getInitialVehicleRef(stops, avls)).toBe("BUS-1");
@@ -106,7 +115,10 @@ describe("vehicleJourneysUtils", () => {
       {
         name: "falls back to the first AVL when there is no evidenced stop match",
         stops: [buildStop({ actualDepartureUtc: null })],
-        avls: [buildAvl({ vehicleRef: "BUS-9" }), buildAvl({ vehicleRef: "BUS-8" })],
+        avls: [
+          buildAvl({ vehicleRef: "BUS-9" }),
+          buildAvl({ vehicleRef: "BUS-8" }),
+        ],
         expected: "BUS-9",
       },
       {
@@ -132,7 +144,12 @@ describe("vehicleJourneysUtils", () => {
         estimatedDepartureUtc: "2026-07-13T09:34:00Z",
         incompleteReason: 4,
       }),
-      buildStop({ stopId: 5, stopIndex: 5, otp: OtpEnum.OnTime, isTimingPoint: false }),
+      buildStop({
+        stopId: 5,
+        stopIndex: 5,
+        otp: OtpEnum.OnTime,
+        isTimingPoint: false,
+      }),
       buildStop({
         stopId: 6,
         stopIndex: 6,
@@ -151,7 +168,10 @@ describe("vehicleJourneysUtils", () => {
         noData: 1,
         completed: 3,
         incomplete: [
-          { reason: "missing real-time data within the zone of a stop", count: 1 },
+          {
+            reason: "missing real-time data within the zone of a stop",
+            count: 1,
+          },
         ],
       });
     });
@@ -198,7 +218,9 @@ describe("vehicleJourneysUtils", () => {
     it("builds a range that includes the expected latest date", () => {
       const latestExpectedDate = DateTime.fromISO("2026-07-16").startOf("day");
 
-      expect(isDateInRange(latestExpectedDate.toISODate() ?? "", "P1D", "P6M")).toBe(true);
+      expect(
+        isDateInRange(latestExpectedDate.toISODate() ?? "", "P1D", "P6M"),
+      ).toBe(true);
     });
   });
 });

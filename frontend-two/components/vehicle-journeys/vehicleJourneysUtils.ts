@@ -20,7 +20,9 @@ export const incompleteIdToString = (incompleteId: number) =>
   incompleteReasonText[0];
 
 export const formatJourneyStartTime = (journey: VehicleJourneySummary) =>
-  DateTime.fromISO(journey.startTime).setZone("Europe/London").toFormat("HH:mm");
+  DateTime.fromISO(journey.startTime)
+    .setZone("Europe/London")
+    .toFormat("HH:mm");
 
 export const formatDate = (date: string) =>
   DateTime.fromISO(date).setZone("Europe/London").toFormat("dd/MM/yyyy");
@@ -30,18 +32,25 @@ export const formatLongDateTime = (dateTime: string) =>
     .setZone("Europe/London")
     .toFormat("d MMM yyyy, HH:mm");
 
-export const formatStopTime = (dateTime?: string | null, includeSeconds = false) => {
+export const formatStopTime = (
+  dateTime?: string | null,
+  includeSeconds = false,
+) => {
   if (!dateTime) return "-";
   return DateTime.fromISO(dateTime)
     .setZone("Europe/London")
     .toFormat(includeSeconds ? "HH:mm:ss" : "HH:mm");
 };
 
-export const formatDelay = (scheduled?: string | null, actual?: string | null) => {
+export const formatDelay = (
+  scheduled?: string | null,
+  actual?: string | null,
+) => {
   if (!scheduled || !actual) return "Unavailable";
 
   const diffSeconds = Math.round(
-    DateTime.fromISO(actual).diff(DateTime.fromISO(scheduled), "seconds").seconds,
+    DateTime.fromISO(actual).diff(DateTime.fromISO(scheduled), "seconds")
+      .seconds,
   );
   const sign = diffSeconds >= 0 ? "+" : "-";
   const absoluteSeconds = Math.abs(diffSeconds);
@@ -63,7 +72,8 @@ export const getActualDeparture = (
 };
 
 export const getStopOtp = (stop: VehicleJourneyStop, matchType: MatchType) => {
-  if (matchType === MatchType.Evidenced && stop.estimatedDepartureUtc) return null;
+  if (matchType === MatchType.Evidenced && stop.estimatedDepartureUtc)
+    return null;
   return stop.otp;
 };
 
@@ -110,7 +120,9 @@ export const calculateOtpStats = (
 
   const total = stopDetails.length;
   const early = stopDetails.filter((stop) => stop.otp === OtpEnum.Early).length;
-  const onTime = stopDetails.filter((stop) => stop.otp === OtpEnum.OnTime).length;
+  const onTime = stopDetails.filter(
+    (stop) => stop.otp === OtpEnum.OnTime,
+  ).length;
   const late = stopDetails.filter((stop) => stop.otp === OtpEnum.Late).length;
   const noMatchStops = stopDetails.filter((stop) => stop.otp === null);
   const completed = total - noMatchStops.length;
@@ -129,7 +141,15 @@ export const calculateOtpStats = (
     })
     .filter((item) => item.count > 0);
 
-  return { total, early, onTime, late, noData: noMatchStops.length, completed, incomplete };
+  return {
+    total,
+    early,
+    onTime,
+    late,
+    noData: noMatchStops.length,
+    completed,
+    incomplete,
+  };
 };
 
 export const formatPercent = (numerator: number, denominator: number) => {
@@ -152,13 +172,17 @@ export const getJourneyDateFromStartTime = (
 ) => {
   if (!startTime) return null;
 
-  const dateTime = DateTime.fromISO(startTime, { setZone: true }).setZone("Europe/London");
+  const dateTime = DateTime.fromISO(startTime, { setZone: true }).setZone(
+    "Europe/London",
+  );
   return dateTime.isValid ? dateTime.toISODate() : null;
 };
 
 export const getValidDateRange = (offsetISO?: string, durationISO?: string) =>
   Interval.before(
-    DateTime.local().endOf("day").minus(Duration.fromISO(offsetISO || "P1D")),
+    DateTime.local()
+      .endOf("day")
+      .minus(Duration.fromISO(offsetISO || "P1D")),
     Duration.fromISO(durationISO || "P6M"),
   );
 
@@ -168,5 +192,8 @@ export const isDateInRange = (
   durationISO?: string,
 ) => {
   const parsedDate = DateTime.fromISO(date).startOf("day");
-  return parsedDate.isValid && getValidDateRange(offsetISO, durationISO).contains(parsedDate);
+  return (
+    parsedDate.isValid &&
+    getValidDateRange(offsetISO, durationISO).contains(parsedDate)
+  );
 };

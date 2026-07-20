@@ -5,9 +5,5 @@ type ArrowRightIconProps = {
 };
 
 export const ArrowRightIcon = ({ className }: ArrowRightIconProps) => (
-  <ArrowRightSvg
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  />
+  <ArrowRightSvg className={className} aria-hidden="true" focusable="false" />
 );

@@ -32,15 +32,15 @@ export class VehicleJourneysPage {
   }
 
   operatorSelect(): Locator {
-      return this.page
-        .locator(".vehicle-journeys-search__operator")
-        .getByRole("button", { name: /select|loading/i });
+    return this.page
+      .locator(".vehicle-journeys-search__operator")
+      .getByRole("button", { name: /select|loading/i });
   }
 
   serviceSelect(): Locator {
-      return this.page
-        .locator(".vehicle-journeys-search__service")
-        .getByRole("button", { name: /select|loading/i });
+    return this.page
+      .locator(".vehicle-journeys-search__service")
+      .getByRole("button", { name: /select|loading/i });
   }
 
   operatorSelectLabel(): Locator {

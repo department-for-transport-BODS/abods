@@ -158,7 +158,8 @@ export const DateRangeSelect = ({
 
   const isStart = (date: DateTime) =>
     Boolean(
-      draftDateRange.start?.isValid && draftDateRange.start.hasSame(date, "day"),
+      draftDateRange.start?.isValid &&
+        draftDateRange.start.hasSame(date, "day"),
     );
 
   const isEnd = (date: DateTime) =>

@@ -5,9 +5,5 @@ type ReCentreIconProps = {
 };
 
 export const ReCentreIcon = ({ className }: ReCentreIconProps) => (
-  <ReCentreSvg
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  />
+  <ReCentreSvg className={className} aria-hidden="true" focusable="false" />
 );

@@ -68,7 +68,7 @@ const replaceQuery = (
   router.replace({ pathname: router.pathname, query: nextQuery }, undefined, {
     shallow: true,
   });
-}; 
+};
 
 const getReturnHref = (
   dateOfJourney: string | null,
@@ -117,12 +117,16 @@ const JourneySummaryList = ({
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Operator:</dt>
       <dd className="govuk-summary-list__value">
-        {journey ? `${journey.operatorName} (${journey.operatorNoc})` : "Unknown"}
+        {journey
+          ? `${journey.operatorName} (${journey.operatorNoc})`
+          : "Unknown"}
       </dd>
     </div>
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Service pattern:</dt>
-      <dd className="govuk-summary-list__value">{journey?.serviceName ?? "Unknown"}</dd>
+      <dd className="govuk-summary-list__value">
+        {journey?.serviceName ?? "Unknown"}
+      </dd>
     </div>
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Scheduled start time:</dt>
@@ -137,7 +141,9 @@ const JourneySummaryList = ({
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Scheduled distance (km):</dt>
       <dd className="govuk-summary-list__value">
-        {typeof distance === "number" ? (distance / 1000).toString() : "Unknown"}
+        {typeof distance === "number"
+          ? (distance / 1000).toString()
+          : "Unknown"}
       </dd>
     </div>
   </dl>
@@ -196,46 +202,57 @@ const JourneyNav = ({
   matchType: MatchType;
   stopType: StopTypeOption;
 }) => {
-  const previous = currentJourneyIndex > 0 ? journeys[currentJourneyIndex - 1] : null;
+  const previous =
+    currentJourneyIndex > 0 ? journeys[currentJourneyIndex - 1] : null;
   const next =
     currentJourneyIndex >= 0 && currentJourneyIndex < journeys.length - 1
       ? journeys[currentJourneyIndex + 1]
       : null;
-  const previousIcon = (
-    <CaretLeftIcon
-      className="journey-nav__icon"
-    />
-  );
-  const nextIcon = (
-    <CaretRightIcon
-      className="journey-nav__icon"
-    />
-  );
+  const previousIcon = <CaretLeftIcon className="journey-nav__icon" />;
+  const nextIcon = <CaretRightIcon className="journey-nav__icon" />;
 
   return (
     <div className="journey-nav">
       <span>Journey</span>
       {previous ? (
         <JourneyNavLink
-          href={getJourneyHref(previous, dateOfJourney, operatorId, serviceId, matchType, stopType)}
+          href={getJourneyHref(
+            previous,
+            dateOfJourney,
+            operatorId,
+            serviceId,
+            matchType,
+            stopType,
+          )}
           tooltip={`${previous.serviceNumber}: ${previous.serviceName}`}
         >
           {previousIcon}
           <span>{formatJourneyStartTime(previous)}</span>
         </JourneyNavLink>
       ) : (
-        <span className="journey-nav__link journey-nav__link--disabled">{previousIcon}</span>
+        <span className="journey-nav__link journey-nav__link--disabled">
+          {previousIcon}
+        </span>
       )}
       {next ? (
         <JourneyNavLink
-          href={getJourneyHref(next, dateOfJourney, operatorId, serviceId, matchType, stopType)}
+          href={getJourneyHref(
+            next,
+            dateOfJourney,
+            operatorId,
+            serviceId,
+            matchType,
+            stopType,
+          )}
           tooltip={`${next.serviceNumber}: ${next.serviceName}`}
         >
           <span>{formatJourneyStartTime(next)}</span>
           {nextIcon}
         </JourneyNavLink>
       ) : (
-        <span className="journey-nav__link journey-nav__link--disabled">{nextIcon}</span>
+        <span className="journey-nav__link journey-nav__link--disabled">
+          {nextIcon}
+        </span>
       )}
     </div>
   );
@@ -256,9 +273,10 @@ const OtpStats = ({
   const incompleteTooltip = (
     <>
       <p>
-        {stats.noData.toLocaleString("en-GB")} of {stats.total.toLocaleString("en-GB")} stop
-        departures have limited or missing real-time data so we are unable to
-        calculate an accurate on-time performance figure.
+        {stats.noData.toLocaleString("en-GB")} of{" "}
+        {stats.total.toLocaleString("en-GB")} stop departures have limited or
+        missing real-time data so we are unable to calculate an accurate on-time
+        performance figure.
       </p>
       {stats.incomplete.length > 0 ? (
         <>
@@ -326,10 +344,7 @@ const StopTime = ({
     return <span className="stop-list-item__scheduled">{formatted}</span>;
   }
 
-  const [hoursMinutes, seconds] = [
-    formatted.slice(0, 5),
-    formatted.slice(5),
-  ];
+  const [hoursMinutes, seconds] = [formatted.slice(0, 5), formatted.slice(5)];
 
   return (
     <span className="stop-list-item__time-container">
@@ -358,7 +373,10 @@ const StopList = ({
   const includeSeconds = !timingPointsOnly;
 
   return (
-    <div className="vehicle-journeys__stop-list" aria-label="Scheduled and actual stops">
+    <div
+      className="vehicle-journeys__stop-list"
+      aria-label="Scheduled and actual stops"
+    >
       <div className="stop-list-item stop-list-header">
         <div></div>
         <div></div>
@@ -370,7 +388,11 @@ const StopList = ({
           <Spinner size="x-small" />
           <span className="govuk-visually-hidden">Loading stops</span>
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="stop-list-item stop-list-item--skeleton" aria-hidden="true">
+            <div
+              key={index}
+              className="stop-list-item stop-list-item--skeleton"
+              aria-hidden="true"
+            >
               <div className="stop-list-item__skeleton-block" />
               <div className="stop-list-item__skeleton-block stop-list-item__skeleton-block--wide" />
               <div className="stop-list-item__skeleton-block" />
@@ -386,7 +408,8 @@ const StopList = ({
         ? visibleStops.map((stop, index) => {
             const actualDeparture = getActualDeparture(stop, matchType);
             const otp = getStopOtp(stop, matchType);
-            const displayTimingDetails = !timingPointsOnly || stop.isTimingPoint;
+            const displayTimingDetails =
+              !timingPointsOnly || stop.isTimingPoint;
             const incompleteReason = stop.setDown
               ? "unmatched set down stop - not included in OTP calculations"
               : incompleteIdToString(stop.incompleteReason);
@@ -414,7 +437,9 @@ const StopList = ({
               <div
                 key={`${stop.stopId}-${stop.stopIndex}`}
                 className={`stop-list-item${stop.isTimingPoint ? " stop-list-item--timing-point" : ""}${
-                  stop.isTimingPoint && index === 0 ? " stop-list-item--timing-point--first" : ""
+                  stop.isTimingPoint && index === 0
+                    ? " stop-list-item--timing-point--first"
+                    : ""
                 }`}
               >
                 <div className="stop-list-item__value-container">
@@ -452,11 +477,16 @@ const StopList = ({
                         message={`Calculated delay ${formatDelay(stop.scheduledDepartureUtc, actualDeparture)}`}
                       >
                         <span className="stop-list-item__actual">
-                          <StopTime dateTime={actualDeparture} includeSeconds={includeSeconds} />
+                          <StopTime
+                            dateTime={actualDeparture}
+                            includeSeconds={includeSeconds}
+                          />
                         </span>
                       </Tooltip>
                     ) : (
-                      <Tooltip message={`Incomplete Reason: ${incompleteReason}`}>
+                      <Tooltip
+                        message={`Incomplete Reason: ${incompleteReason}`}
+                      >
                         <span>—</span>
                       </Tooltip>
                     )
@@ -491,20 +521,30 @@ export const VehicleJourneyDetail = ({
   routeGeometry,
   viewportKey,
 }: VehicleJourneyDetailProps) => {
-  const [selectedStop, setSelectedStop] = useState<VehicleJourneyStop | null>(null);
-  const [hoveredStop, setHoveredStop] = useState<VehicleJourneyStop | null>(null);
+  const [selectedStop, setSelectedStop] = useState<VehicleJourneyStop | null>(
+    null,
+  );
+  const [hoveredStop, setHoveredStop] = useState<VehicleJourneyStop | null>(
+    null,
+  );
   const matchType =
-    router.query.match_type === MatchType.Estimated ? MatchType.Estimated : MatchType.Evidenced;
+    router.query.match_type === MatchType.Estimated
+      ? MatchType.Estimated
+      : MatchType.Evidenced;
   const stopType =
-    router.query.allStops === "true" ? StopTypeOption.AllStops : StopTypeOption.TimingPoints;
+    router.query.allStops === "true"
+      ? StopTypeOption.AllStops
+      : StopTypeOption.TimingPoints;
   const timingPointsOnly = stopType === StopTypeOption.TimingPoints;
-  const showLoadingState = (journeysLoading || journeyInfoLoading) && !currentJourney;
+  const showLoadingState =
+    (journeysLoading || journeyInfoLoading) && !currentJourney;
   const heading = showLoadingState
     ? "Loading journey details"
     : currentJourney
       ? `${currentJourney.serviceNumber}: ${currentJourney.serviceName}`
       : "Journey not found";
-  const showNotFound = !journeysLoading && !journeyInfoLoading && journeyInfo === null;
+  const showNotFound =
+    !journeysLoading && !journeyInfoLoading && journeyInfo === null;
 
   return (
     <>
@@ -526,8 +566,12 @@ export const VehicleJourneyDetail = ({
 
       {showNotFound ? (
         <p className="govuk-body">
-          Vehicle journey not found, or you do not have permission to view. Go back to{" "}
-          <Link className="govuk-link" href={getReturnHref(dateOfJourney, operatorId, serviceId)}>
+          Vehicle journey not found, or you do not have permission to view. Go
+          back to{" "}
+          <Link
+            className="govuk-link"
+            href={getReturnHref(dateOfJourney, operatorId, serviceId)}
+          >
             Vehicle journeys
           </Link>
           ?
@@ -538,14 +582,17 @@ export const VehicleJourneyDetail = ({
         <div className="govuk-error-summary" data-module="govuk-error-summary">
           <div role="alert">
             <h2 className="govuk-error-summary__title">
-              Data from multiple vehicles found for the selected start time (journey code)
+              Data from multiple vehicles found for the selected start time
+              (journey code)
             </h2>
             <div className="govuk-error-summary__body">
               <p>
-                This data quality issue is likely to have resulted in poor quality performance data for the journey
+                This data quality issue is likely to have resulted in poor
+                quality performance data for the journey
               </p>
               <p>
-                Location data for the different vehicles can be viewed on the map. This will not change performance data.
+                Location data for the different vehicles can be viewed on the
+                map. This will not change performance data.
               </p>
               {vehicleRef ? (
                 <SegmentedToggle
@@ -553,7 +600,10 @@ export const VehicleJourneyDetail = ({
                   name="vehicle-ref"
                   value={vehicleRef}
                   onChange={onVehicleRefChange}
-                  options={vehicles.map((vehicle) => ({ value: vehicle, label: vehicle }))}
+                  options={vehicles.map((vehicle) => ({
+                    value: vehicle,
+                    label: vehicle,
+                  }))}
                 />
               ) : null}
             </div>
@@ -567,7 +617,8 @@ export const VehicleJourneyDetail = ({
             <h2 className="govuk-error-summary__title">Journey Cancelled</h2>
             <div className="govuk-error-summary__body">
               <p>
-                This journey has been cancelled (per SIRI-SX data) and will therefore not be included in on-time performance statistics.
+                This journey has been cancelled (per SIRI-SX data) and will
+                therefore not be included in on-time performance statistics.
               </p>
             </div>
           </div>
@@ -588,7 +639,9 @@ export const VehicleJourneyDetail = ({
                 hideLegend
                 name="match-type"
                 value={matchType}
-                onChange={(value) => replaceQuery(router, { match_type: value })}
+                onChange={(value) =>
+                  replaceQuery(router, { match_type: value })
+                }
                 options={[
                   { value: MatchType.Estimated, label: "Estimated" },
                   { value: MatchType.Evidenced, label: "Evidenced" },
@@ -606,7 +659,10 @@ export const VehicleJourneyDetail = ({
                 }
                 options={[
                   { value: StopTypeOption.AllStops, label: "All stops" },
-                  { value: StopTypeOption.TimingPoints, label: "Timing points" },
+                  {
+                    value: StopTypeOption.TimingPoints,
+                    label: "Timing points",
+                  },
                 ]}
               />
               {Array.isArray(journeys) ? (
@@ -622,7 +678,9 @@ export const VehicleJourneyDetail = ({
               ) : journeysLoading ? (
                 <div className="vehicle-journeys__nav-loading">
                   <Spinner size="x-small" />
-                  <span className="govuk-visually-hidden">Loading journeys</span>
+                  <span className="govuk-visually-hidden">
+                    Loading journeys
+                  </span>
                 </div>
               ) : null}
             </div>

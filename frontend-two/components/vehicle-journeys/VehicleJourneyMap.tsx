@@ -77,7 +77,11 @@ const ensureImage = async (map: mapboxgl.Map, id: string, url: string) => {
 
 const registerJourneyMapImages = async (map: mapboxgl.Map) => {
   await Promise.all([
-    ensureImage(map, "map-chevron-early", "/assets/icons/map-chevron-early.svg"),
+    ensureImage(
+      map,
+      "map-chevron-early",
+      "/assets/icons/map-chevron-early.svg",
+    ),
     ensureImage(
       map,
       "map-chevron-on-time",
@@ -168,7 +172,8 @@ const createStopPopupContent = (stopName: string) =>
   createPopupContent([
     {
       text: stopName,
-      className: "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1",
+      className:
+        "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1",
     },
   ]);
 
@@ -176,7 +181,8 @@ const createPingPopupContent = (receivedAt: string) =>
   createPopupContent([
     {
       text: `Received at: ${receivedAt}`,
-      className: "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1",
+      className:
+        "govuk-body-small govuk-!-font-weight-bold govuk-!-margin-bottom-1",
     },
   ]);
 
@@ -187,7 +193,9 @@ const buildJourneyGeoJson = (
   matchType: MatchType,
 ) => {
   const estimated = matchType === MatchType.Estimated;
-  const stopModels = stops.filter(hasPoint).map((stop) => createStopModel(stop, matchType));
+  const stopModels = stops
+    .filter(hasPoint)
+    .map((stop) => createStopModel(stop, matchType));
   const stopFeatures = stopModels
     .filter((stop) => !stop.isTimingPoint)
     .map((stop) => ({
@@ -349,7 +357,10 @@ const addJourneyLayers = (
     data: geojson.scheduledRoute,
   });
 
-  if (showScheduledRoute && geojson.scheduledRoute.geometry.coordinates.length >= 2) {
+  if (
+    showScheduledRoute &&
+    geojson.scheduledRoute.geometry.coordinates.length >= 2
+  ) {
     map.addLayer({
       id: "scheduled-route-line",
       type: "line",
@@ -543,7 +554,9 @@ export const VehicleJourneyMap = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
-  const activeStopHoverRef = useRef<{ sourceId: string; id: string } | null>(null);
+  const activeStopHoverRef = useRef<{ sourceId: string; id: string } | null>(
+    null,
+  );
   const journeyBoundsRef = useRef<mapboxgl.LngLatBounds | null>(null);
   const fittedViewportKeyRef = useRef<string | null>(null);
   const [activeStyle, setActiveStyle] = useState<MapStyle>("default");
@@ -599,7 +612,12 @@ export const VehicleJourneyMap = ({
       await registerJourneyMapImages(map);
       if (cancelled) return;
 
-      const geojson = buildJourneyGeoJson(stops, avls, scheduledRoute, matchType);
+      const geojson = buildJourneyGeoJson(
+        stops,
+        avls,
+        scheduledRoute,
+        matchType,
+      );
       addJourneyLayers(map, geojson, showScheduledRoute);
       const bounds = buildBounds(stops, avls, scheduledRoute);
       journeyBoundsRef.current = bounds;
@@ -639,7 +657,12 @@ export const VehicleJourneyMap = ({
     const update = async () => {
       await registerJourneyMapImages(map);
       if (cancelled) return;
-      const geojson = buildJourneyGeoJson(stops, avls, scheduledRoute, matchType);
+      const geojson = buildJourneyGeoJson(
+        stops,
+        avls,
+        scheduledRoute,
+        matchType,
+      );
       addJourneyLayers(map, geojson, showScheduledRoute);
       const bounds = buildBounds(stops, avls, scheduledRoute);
       journeyBoundsRef.current = bounds;
@@ -712,9 +735,7 @@ export const VehicleJourneyMap = ({
     const popup = popupRef.current;
     if (!map || !popup) return;
 
-    const onStopEnter = (
-      event: mapboxgl.MapLayerMouseEvent,
-    ) => {
+    const onStopEnter = (event: mapboxgl.MapLayerMouseEvent) => {
       map.getCanvas().style.cursor = "pointer";
       const feature = event.features?.[0];
       if (!feature?.properties) return;

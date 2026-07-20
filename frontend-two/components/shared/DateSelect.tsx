@@ -32,7 +32,9 @@ export const DateSelect = ({
   const selectedDate = value ? formatISODateStringToDate(value) : null;
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(
-    selectedDate?.isValid ? selectedDate.startOf("month") : today.startOf("month"),
+    selectedDate?.isValid
+      ? selectedDate.startOf("month")
+      : today.startOf("month"),
   );
   const [draftValue, setDraftValue] = useState(
     selectedDate?.isValid ? formatDateToShortDisplayString(selectedDate) : "",
@@ -73,9 +75,9 @@ export const DateSelect = ({
 
   const rangeStart = validRange.start?.startOf("day");
   const rangeEnd = validRange.end?.startOf("day");
-  const canGoPrev = !rangeStart || month.startOf("month") > rangeStart.startOf("month");
-  const canGoNext =
-    !rangeEnd || month.endOf("month") < rangeEnd.endOf("month");
+  const canGoPrev =
+    !rangeStart || month.startOf("month") > rangeStart.startOf("month");
+  const canGoNext = !rangeEnd || month.endOf("month") < rangeEnd.endOf("month");
   const hasError = Boolean(error);
   const formGroupClass = hasError
     ? "govuk-form-group govuk-form-group--error date-select"
@@ -127,9 +129,7 @@ export const DateSelect = ({
           aria-expanded={open}
           onClick={() => setOpen((current) => !current)}
         >
-          <CalendarIcon
-            className="date-select__calendar-icon"
-          />
+          <CalendarIcon className="date-select__calendar-icon" />
         </button>
       </div>
       {open ? (
@@ -170,10 +170,14 @@ export const DateSelect = ({
             today={today}
             isSelectable={(date) => validRange.contains(date)}
             isStart={(date) =>
-              Boolean(selectedDate?.isValid && selectedDate.hasSame(date, "day"))
+              Boolean(
+                selectedDate?.isValid && selectedDate.hasSame(date, "day"),
+              )
             }
             isEnd={(date) =>
-              Boolean(selectedDate?.isValid && selectedDate.hasSame(date, "day"))
+              Boolean(
+                selectedDate?.isValid && selectedDate.hasSame(date, "day"),
+              )
             }
             onDateChange={commitDate}
           />

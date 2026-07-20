@@ -188,7 +188,9 @@ describe("VehicleJourneysPage", () => {
     await waitFor(() => {
       expect(screen.getByRole("link", { name: "10:30" })).toBeInTheDocument();
     });
-    expect(screen.getByRole("heading", { name: "12: Town Centre" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "12: Town Centre" }),
+    ).toBeInTheDocument();
   });
 
   it("shows no journeys message when the service returns an empty list", async () => {
@@ -210,14 +212,17 @@ describe("VehicleJourneysPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Sorry, there is a problem finding vehicle journeys. Please try again."),
+        screen.getByText(
+          "Sorry, there is a problem finding vehicle journeys. Please try again.",
+        ),
       ).toBeInTheDocument();
     });
   });
 
   it("renders the individual journey summary and stop list", async () => {
     mockRouter.pathname = "/vehicle-journeys/[journeyId]";
-    mockRouter.asPath = "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=outbound";
+    mockRouter.asPath =
+      "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=outbound";
     mockRouter.query = {
       journeyId: "G1",
       date: "2026-07-13",
@@ -229,7 +234,9 @@ describe("VehicleJourneysPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "12: Town Centre" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "12: Town Centre" }),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText("Best Buses (BBUS)")).toBeInTheDocument();
     expect(screen.getByText("High Street")).toBeInTheDocument();
@@ -238,7 +245,8 @@ describe("VehicleJourneysPage", () => {
 
   it("normalises blank direction queries for journeys without a direction", async () => {
     mockRouter.pathname = "/vehicle-journeys/[journeyId]";
-    mockRouter.asPath = "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=";
+    mockRouter.asPath =
+      "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=";
     mockRouter.query = {
       journeyId: "G1",
       date: "2026-07-13",
@@ -270,14 +278,17 @@ describe("VehicleJourneysPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "12: Town Centre" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "12: Town Centre" }),
+      ).toBeInTheDocument();
     });
     expect(mockFetchServicePatternDistanceGeom).toHaveBeenCalledWith("101");
   });
 
   it("falls back to the start time date for legacy detail links", async () => {
     mockRouter.pathname = "/vehicle-journeys/[journeyId]";
-    mockRouter.asPath = "/vehicle-journeys/G1?operator=OP1&service=L1&startTime=2026-07-13T10:30:00%2B01:00&direction=outbound";
+    mockRouter.asPath =
+      "/vehicle-journeys/G1?operator=OP1&service=L1&startTime=2026-07-13T10:30:00%2B01:00&direction=outbound";
     mockRouter.query = {
       journeyId: "G1",
       operator: "OP1",
@@ -306,14 +317,17 @@ describe("VehicleJourneysPage", () => {
 
     renderPage();
 
-    expect(screen.getByRole("heading", { name: "Loading journey details" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Loading journey details" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Loading...")).toBeInTheDocument();
     expect(screen.queryByText("Journey not found")).not.toBeInTheDocument();
   });
 
   it("keeps the detail page in a loading state while journeys are still loading", async () => {
     mockRouter.pathname = "/vehicle-journeys/[journeyId]";
-    mockRouter.asPath = "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=outbound";
+    mockRouter.asPath =
+      "/vehicle-journeys/G1?date=2026-07-13&operator=OP1&service=L1&direction=outbound";
     mockRouter.query = {
       journeyId: "G1",
       date: "2026-07-13",
@@ -327,8 +341,12 @@ describe("VehicleJourneysPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Loading journey details" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Loading journey details" }),
+      ).toBeInTheDocument();
     });
-    expect(screen.queryByText(/Vehicle journey not found/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Vehicle journey not found/),
+    ).not.toBeInTheDocument();
   });
 });

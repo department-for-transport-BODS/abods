@@ -12,7 +12,10 @@ import {
   VehicleJourneyOperator,
   VehicleJourneySummary,
 } from "@/types/vehicle-journeys";
-import { formatDate, formatJourneyStartTime } from "@/components/vehicle-journeys/vehicleJourneysUtils";
+import {
+  formatDate,
+  formatJourneyStartTime,
+} from "@/components/vehicle-journeys/vehicleJourneysUtils";
 
 interface VehicleJourneysSearchProps {
   router: NextRouter;
@@ -45,16 +48,23 @@ const updateQuery = (
     nextQuery[key] = value;
   });
 
-  router.replace({ pathname: "/vehicle-journeys", query: nextQuery }, undefined, {
-    shallow: true,
-  });
+  router.replace(
+    { pathname: "/vehicle-journeys", query: nextQuery },
+    undefined,
+    {
+      shallow: true,
+    },
+  );
 };
 
 const groupedJourneys = (journeys: VehicleJourneySummary[]) =>
-  journeys.reduce<Record<string, VehicleJourneySummary[]>>((groups, journey) => {
-    const key = journey.serviceName;
-    return { ...groups, [key]: [...(groups[key] ?? []), journey] };
-  }, {});
+  journeys.reduce<Record<string, VehicleJourneySummary[]>>(
+    (groups, journey) => {
+      const key = journey.serviceName;
+      return { ...groups, [key]: [...(groups[key] ?? []), journey] };
+    },
+    {},
+  );
 
 export const VehicleJourneysSearch = ({
   router,
@@ -174,7 +184,9 @@ export const VehicleJourneysSearch = ({
               </button>
             ) : null}
           </div>
-          <span className="journey-search-nav__date">{formatDate(selectedDate)}</span>
+          <span className="journey-search-nav__date">
+            {formatDate(selectedDate)}
+          </span>
           <div className="govuk-pagination__next">
             {nextDate ? (
               <button
@@ -194,7 +206,10 @@ export const VehicleJourneysSearch = ({
         <div className="vehicle-journeys-search__loading" aria-live="polite">
           <Spinner size="small" />
           <span className="govuk-visually-hidden">Loading journeys</span>
-          <div className="journey-search-grid journey-search-grid--skeleton" aria-hidden="true">
+          <div
+            className="journey-search-grid journey-search-grid--skeleton"
+            aria-hidden="true"
+          >
             {Array.from({ length: 12 }).map((_, index) => (
               <div key={index} className="journey-search-grid__skeleton-item" />
             ))}
@@ -202,37 +217,41 @@ export const VehicleJourneysSearch = ({
         </div>
       ) : null}
 
-      {!dateError && patterns.length > 0 ? (
-        patterns.map((pattern, index) => (
-          <div key={pattern[0].serviceName}>
-            <h2 className="govuk-heading-m govuk-!-margin-top-6">
-              {pattern[0].serviceNumber}: {pattern[0].serviceName}
-            </h2>
-            <div className="journey-search-grid">
-              {pattern.map((journey) => (
-                <div key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}>
-                  <Link
-                    className="govuk-link govuk-body journey-search-grid__time"
-                    href={{
-                      pathname: "/vehicle-journeys/[journeyId]",
-                      query: {
-                        journeyId: journey.groupId,
-                        date: selectedDate,
-                        operator: selectedOperatorId ?? "",
-                        service: selectedServiceId ?? "",
-                        ...(journey.directionRef ? { direction: journey.directionRef } : {}),
-                      },
-                    }}
+      {!dateError && patterns.length > 0
+        ? patterns.map((pattern, index) => (
+            <div key={pattern[0].serviceName}>
+              <h2 className="govuk-heading-m govuk-!-margin-top-6">
+                {pattern[0].serviceNumber}: {pattern[0].serviceName}
+              </h2>
+              <div className="journey-search-grid">
+                {pattern.map((journey) => (
+                  <div
+                    key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}
                   >
-                    {formatJourneyStartTime(journey)}
-                  </Link>
-                </div>
-              ))}
+                    <Link
+                      className="govuk-link govuk-body journey-search-grid__time"
+                      href={{
+                        pathname: "/vehicle-journeys/[journeyId]",
+                        query: {
+                          journeyId: journey.groupId,
+                          date: selectedDate,
+                          operator: selectedOperatorId ?? "",
+                          service: selectedServiceId ?? "",
+                          ...(journey.directionRef
+                            ? { direction: journey.directionRef }
+                            : {}),
+                        },
+                      }}
+                    >
+                      {formatJourneyStartTime(journey)}
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              {index < patterns.length - 1 ? <hr /> : null}
             </div>
-            {index < patterns.length - 1 ? <hr /> : null}
-          </div>
-        ))
-      ) : null}
+          ))
+        : null}
 
       {noJourneysFound ? (
         <div className="govuk-body govuk-!-margin-top-8" role="alert">
@@ -251,7 +270,8 @@ export const VehicleJourneysSearch = ({
             focusable="false"
           />
           <span>
-            Sorry, there is a problem finding vehicle journeys. Please try again.
+            Sorry, there is a problem finding vehicle journeys. Please try
+            again.
           </span>
         </div>
       ) : null}

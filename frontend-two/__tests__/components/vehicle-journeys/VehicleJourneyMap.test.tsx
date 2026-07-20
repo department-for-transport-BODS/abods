@@ -35,8 +35,9 @@ const mapboxMock = vi.hoisted(() => {
     getSource: vi.fn(() => undefined),
     hasImage: vi.fn(() => true),
     isStyleLoaded: vi.fn(() => true),
-    loadImage: vi.fn((_url: string, callback: (error: Error | null, image?: {}) => void) =>
-      callback(null, {}),
+    loadImage: vi.fn(
+      (_url: string, callback: (error: Error | null, image?: {}) => void) =>
+        callback(null, {}),
     ),
     off: vi.fn(
       (event: string, layerOrHandler: unknown, maybeHandler?: unknown) => {
@@ -217,7 +218,9 @@ describe("VehicleJourneyMap", () => {
       mapboxMock.eventHandlers.movestart?.forEach((handler) => handler());
     });
 
-    expect(screen.getByRole("button", { name: "Re-centre" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Re-centre" }),
+    ).toBeInTheDocument();
   });
 
   it("only auto-fits on initial load and journey changes", async () => {

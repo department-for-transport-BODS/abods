@@ -5,9 +5,5 @@ type CaretRightIconProps = {
 };
 
 export const CaretRightIcon = ({ className }: CaretRightIconProps) => (
-  <CaretRightSvg
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  />
+  <CaretRightSvg className={className} aria-hidden="true" focusable="false" />
 );

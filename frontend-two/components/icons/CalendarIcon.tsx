@@ -5,9 +5,5 @@ type CalendarIconProps = {
 };
 
 export const CalendarIcon = ({ className }: CalendarIconProps) => (
-  <CalendarSvg
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  />
+  <CalendarSvg className={className} aria-hidden="true" focusable="false" />
 );

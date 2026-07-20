@@ -53,12 +53,16 @@ const VehicleJourneysPage = () => {
       )
     : true;
   const dateError =
-    requestedDate && !dateInRange ? "Must be within the last 6 months" : undefined;
+    requestedDate && !dateInRange
+      ? "Must be within the last 6 months"
+      : undefined;
   const selectedDate = requestedDate ?? defaultDate ?? "";
-  const fetchDate = dateInRange ? selectedDate : (defaultDate ?? selectedDate);
+  const fetchDate = dateInRange ? selectedDate : defaultDate ?? selectedDate;
   const selectedOperatorId = getQueryString(router.query.operator) ?? null;
   const selectedServiceId = getQueryString(router.query.service) ?? null;
-  const selectedDirectionRef = normaliseJourneyDirection(getQueryString(router.query.direction));
+  const selectedDirectionRef = normaliseJourneyDirection(
+    getQueryString(router.query.direction),
+  );
   const previousDateValue = DateTime.fromISO(fetchDate).minus({ days: 1 });
   const nextDateValue = DateTime.fromISO(fetchDate).plus({ days: 1 });
   const previousDate = validDateRange.contains(previousDateValue)
@@ -69,7 +73,9 @@ const VehicleJourneysPage = () => {
     : null;
 
   const { data: operators = [], isLoading: operatorsLoading } = useSWR(
-    config?.apiUrl && !isDetailRoutePending ? ["vehicle-journeys-operators"] : null,
+    config?.apiUrl && !isDetailRoutePending
+      ? ["vehicle-journeys-operators"]
+      : null,
     () => vehicleJourneysService.fetchOperators(),
   );
   const { data: services = [], isLoading: servicesLoading } = useSWR(
@@ -120,7 +126,8 @@ const VehicleJourneysPage = () => {
     ? journeys.findIndex(
         (journey) =>
           journey.groupId === journeyId &&
-          normaliseJourneyDirection(journey.directionRef) === selectedDirectionRef,
+          normaliseJourneyDirection(journey.directionRef) ===
+            selectedDirectionRef,
       )
     : -1;
   const currentJourney =
@@ -133,7 +140,13 @@ const VehicleJourneysPage = () => {
       return;
     }
     setSelectedVehicleRef(null);
-  }, [router.isReady, journeyId, fetchDate, selectedServiceId, selectedDirectionRef]);
+  }, [
+    router.isReady,
+    journeyId,
+    fetchDate,
+    selectedServiceId,
+    selectedDirectionRef,
+  ]);
 
   const { data: routeGeometry } = useSWR(
     config?.apiUrl && !isDetailRoutePending && currentJourney?.vehicleJourneyId

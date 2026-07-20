@@ -107,7 +107,9 @@ export const DateCalendarMonth = ({
                     key={cellIndex}
                     className={[
                       "date-range-controls__table-cell",
-                      included ? "date-range-controls__table-cell--included" : "",
+                      included
+                        ? "date-range-controls__table-cell--included"
+                        : "",
                       start ? "date-range-controls__table-cell--start" : "",
                       end ? "date-range-controls__table-cell--end" : "",
                     ]
