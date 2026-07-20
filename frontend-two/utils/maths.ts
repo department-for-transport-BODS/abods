@@ -9,6 +9,11 @@ const mean = (values: number[]): number =>
 export const sumBy = <T>(items: T[], key: keyof T): number =>
   items.reduce((acc, item) => acc + (Number(item[key]) || 0), 0);
 
+export const getRatio = (
+  numerator: number | null | undefined,
+  denominator: number | null | undefined,
+): number => (denominator ? (numerator ?? 0) / denominator : 0);
+
 export const stdDeviation = (
   arr: Maybe<number | null | undefined>[],
   meanValue: number,

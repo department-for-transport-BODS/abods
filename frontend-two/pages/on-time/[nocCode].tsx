@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
 import {
   OnTimeServicesTable,
@@ -20,10 +19,10 @@ import {
 } from "@/components/on-time/OnTimeFilterPanel";
 import {
   type OnTimeDisplayMode,
-  DISPLAY_MODE_OPTIONS,
   normaliseDirection,
   aggregatePerformanceTotals,
 } from "@/utils/on-time/on-time-table-format";
+import { formatServicePerformanceCsvFilename } from "@/utils/on-time-csv-filename";
 import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
@@ -32,7 +31,10 @@ import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
-import { type OperatorType } from "@/src/generated/graphql";
+import {
+  type GetAdminAreasQuery,
+  type OperatorType,
+} from "@/src/generated/graphql";
 import { headwayService } from "@/services/on-time/headway.service";
 import {
   DayOfWeekData,
@@ -58,11 +60,10 @@ import {
   PerformanceFiltersInputType,
 } from "../../src/generated/graphql";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
-import { RadioOptions } from "@/components/shared/RadioOptions";
 import { OperatorSelector } from "@/components/shared/OperatorSelector";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
-import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
+import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
+import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
+import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -115,6 +116,8 @@ const OnTimeOperatorPage = () => {
   const { config } = useConfig();
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
+  const routerIsReady = router.isReady;
+  const routerReplace = router.replace;
 
   const [isLoading, setIsLoading] = useState(true);
   const [operatorChecked, setOperatorChecked] = useState(false);
@@ -134,6 +137,9 @@ const OnTimeOperatorPage = () => {
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
   const [allOperators, setAllOperators] = useState<OperatorType[]>([]);
+  const [adminAreas, setAdminAreas] = useState<
+    NonNullable<GetAdminAreasQuery["adminAreas"]>
+  >([]);
 
   const refineResultsInitialValues =
     performanceFiltersToRefineResults(refineResultsFilters);
@@ -207,8 +213,12 @@ const OnTimeOperatorPage = () => {
     if (!isReady || !config?.apiUrl) return;
     const loadOperators = async () => {
       try {
-        const ops = await operatorsService.fetchOperators();
+        const [ops, areas] = await Promise.all([
+          operatorsService.fetchOperators(),
+          operatorsService.fetchAdminAreas(),
+        ]);
         setAllOperators(ops);
+        setAdminAreas(areas);
       } catch (error) {
         console.error("Failed to load operators", error);
       }
@@ -304,6 +314,16 @@ const OnTimeOperatorPage = () => {
 
   const summaryStats = data.overview?.onTime;
   const hasDirectionFilter = selectedDirections.length > 0;
+  const hasLoadedData = Boolean(data.fromTimestamp);
+
+  const adminAreaOptions = useMemo(
+    () =>
+      adminAreas.map((adminArea) => ({
+        label: adminArea.name,
+        value: adminArea.id,
+      })),
+    [adminAreas],
+  );
 
   const directionFilteredServices = useMemo(() => {
     const services = data.servicePerformance ?? [];
@@ -429,7 +449,7 @@ const OnTimeOperatorPage = () => {
     serviceSearch,
   ]);
 
-  if (!router.isReady || !nocCode || !operatorChecked) {
+  if (!routerIsReady || !nocCode || !operatorChecked) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>
@@ -438,21 +458,19 @@ const OnTimeOperatorPage = () => {
   }
 
   return (
-    <BaseLayout title={`On-time performance: ${nocCode}`}>
-      <p className="govuk-body">
-        <Link href="/on-time" className="govuk-link">
-          &larr; All operators
-        </Link>
-      </p>
-      <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-4">All services</h1>
-      <OperatorSelector
-        operators={allOperators}
-        selectedOperatorId={nocCode}
-        onChange={handleOperatorChange}
-        allowAll={false}
-      />
-      {isLoading ? (
+    <BaseLayout title={`All services: Analyse Bus Open Data`}>
+      <Link href="/on-time" className="govuk-back-link">
+        All operators
+      </Link>
+      <OnTimePageHeader title="All services">
+        <OperatorSelector
+          operators={allOperators}
+          selectedOperatorId={nocCode}
+          onChange={handleOperatorChange}
+          allowAll={false}
+        />
+      </OnTimePageHeader>
+      {isLoading && !hasLoadedData ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading on-time data...
         </p>
@@ -460,6 +478,8 @@ const OnTimeOperatorPage = () => {
         <>
           <OnTimeFilterPanel
             isLoading={isLoading}
+            showAdminAreaFilter={true}
+            adminAreaOptions={adminAreaOptions}
             refineResultsInitialValues={refineResultsInitialValues}
             onApplyRefineResults={(values) => {
               setRefineResultsFilters(
@@ -486,28 +506,25 @@ const OnTimeOperatorPage = () => {
             refineResultsFilters={refineResultsFilters}
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
-          <ChartNoDataWrapper
+          <ChartsSection
             noData={wrapperNoData}
             dataExpected={wrapperDataExpected}
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
-          >
-            <ChartsSection
-              delayFrequency={data.delayFrequency ?? []}
-              timeOfDay={data.timeOfDay ?? []}
-              dayOfWeek={data.dayOfWeek ?? []}
-              timeSeries={data.timeSeries ?? []}
-              fromTimestamp={data.fromTimestamp ?? ""}
-              toTimestamp={data.toTimestamp ?? ""}
-              granularity={data.granularity ?? Granularity.Day}
-              errors={{
-                delayFrequency: errors.delayFrequency,
-                timeOfDay: errors.timeOfDay,
-                dayOfWeek: errors.dayOfWeek,
-                timeSeries: errors.timeSeries,
-              }}
-            />
-          </ChartNoDataWrapper>
+            delayFrequency={data.delayFrequency ?? []}
+            timeOfDay={data.timeOfDay ?? []}
+            dayOfWeek={data.dayOfWeek ?? []}
+            timeSeries={data.timeSeries ?? []}
+            fromTimestamp={data.fromTimestamp ?? ""}
+            toTimestamp={data.toTimestamp ?? ""}
+            granularity={data.granularity ?? Granularity.Day}
+            errors={{
+              delayFrequency: errors.delayFrequency,
+              timeOfDay: errors.timeOfDay,
+              dayOfWeek: errors.dayOfWeek,
+              timeSeries: errors.timeSeries,
+            }}
+          />
           <div className="govuk-!-margin-top-6">
             {errors.servicePerformance ? (
               <p className="govuk-body" style={{ color: "#d4351c" }}>
@@ -515,13 +532,10 @@ const OnTimeOperatorPage = () => {
               </p>
             ) : (
               <>
-                <div className="helpdesk-container">
-                  <OnTimeHelpdeskButton />
-                  <OtpThresholdModalLink
-                    params={servicePerformanceParams}
-                    overview={summaryStats}
-                  />
-                </div>
+                <OnTimeHelpdeskRow
+                  params={servicePerformanceParams}
+                  overview={summaryStats}
+                />
                 <div className="govuk-!-margin-bottom-6">
                   <SummaryStatsGrid
                     onTimeCount={summaryCards.onTimeCount}
@@ -534,8 +548,10 @@ const OnTimeOperatorPage = () => {
                     averageDelay={summaryCards.averageDelay}
                   />
                 </div>
-                <div className="on-time-service-filters govuk-body govuk-!-margin-top-6">
-                  <div className="on-time-service-filters__inputs">
+                <OnTimeDisplayControls
+                  className="on-time-service-filters govuk-body govuk-!-margin-top-6"
+                  groupInputs
+                  beforeDirections={
                     <div className="on-time-service-filters__search">
                       <SearchInput
                         id="service-search"
@@ -546,41 +562,22 @@ const OnTimeOperatorPage = () => {
                         widthClassName="on-time-service-filters__search-input"
                       />
                     </div>
-                    <div className="on-time-service-filters__directions">
-                      <MultiselectDropdown
-                        label="Directions"
-                        options={["Inbound", "Outbound"]}
-                        selected={selectedDirections}
-                        onChange={setSelectedDirections}
-                        placeholderText=""
-                      />
-                    </div>
-                  </div>
-                  <div className="on-time-service-filters__display-options">
-                    <p className="on-time-service-display-options-button">
-                      <button
-                        type="button"
-                        className="govuk-link"
-                        onClick={() => setShowDisplayOptions(true)}
-                      >
-                        Display options
-                      </button>
-                    </p>
-                    <div className="on-time-service-filters__radios">
-                      <RadioOptions
-                        name="on-time-display-mode"
-                        legend="Show service performance values as"
-                        options={DISPLAY_MODE_OPTIONS}
-                        value={selectedDisplayMode}
-                        onChange={setSelectedDisplayMode}
-                      />
-                    </div>
-                  </div>
-                </div>
+                  }
+                  selectedDirections={selectedDirections}
+                  onDirectionsChange={setSelectedDirections}
+                  selectedDisplayMode={selectedDisplayMode}
+                  onDisplayModeChange={setSelectedDisplayMode}
+                  onOpenDisplayOptions={() => setShowDisplayOptions(true)}
+                />
                 <OnTimeServicesTable
                   data={filteredServices}
                   nocCode={nocCode ?? ""}
                   displayMode={selectedDisplayMode}
+                  csvFilename={formatServicePerformanceCsvFilename({
+                    nocCode: nocCode ?? "",
+                    fromTimestamp: data.fromTimestamp ?? "",
+                    toTimestamp: data.toTimestamp ?? "",
+                  })}
                   visibleColumns={visibleServiceColumns}
                 />
                 <DisplayOptionsModal
@@ -595,22 +592,6 @@ const OnTimeOperatorPage = () => {
               </>
             )}
           </div>
-          {/* TODO: */}
-          {/* <JsonSection
-            title="onTimeService.fetchOnTimeTimeSeriesData"
-            data={data.timeSeries}
-            error={errors.timeSeries}
-          />
-          <JsonSection
-            title="onTimeService.fetchOnTimePerformanceList"
-            data={data.servicePerformancePlain}
-            error={errors.servicePerformancePlain}
-          />
-          <JsonSection
-            title="headwayService.fetchTimeSeries"
-            data={data.headwayTimeSeries}
-            error={errors.headwayTimeSeries}
-          /> */}
         </>
       )}
     </BaseLayout>

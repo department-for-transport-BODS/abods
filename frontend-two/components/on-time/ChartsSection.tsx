@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { Box } from "@/components/shared/Box";
+import { ChartNoDataMessage } from "@/components/on-time/ChartNoDataWrapper";
 import {
   DayOfWeekData,
   TimeOfDayData,
@@ -55,10 +56,13 @@ interface ChartsSectionProps {
     dayOfWeek?: string | null;
     timeSeries?: string | null;
   };
-  // Optional EWT props — only passed from the service page
   headwayTimeSeries?: HeadwayTimeSeriesType[];
   frequentServiceInfo?: FrequentServiceInfoType | null;
   errorHeadwayTimeSeries?: string | null;
+  noData?: boolean;
+  dataExpected?: boolean;
+  timingPointsNotSupported?: boolean;
+  minMaxDelayNotSupported?: boolean;
 }
 
 export const ChartsSection = ({
@@ -74,6 +78,10 @@ export const ChartsSection = ({
   headwayTimeSeries,
   frequentServiceInfo,
   errorHeadwayTimeSeries,
+  noData = false,
+  dataExpected = false,
+  timingPointsNotSupported = false,
+  minMaxDelayNotSupported = false,
 }: ChartsSectionProps) => {
   const hasMapTab = mapContent !== undefined && mapContent !== null;
   const [activeTab, setActiveTab] = useState<ChartTab>(
@@ -146,7 +154,6 @@ export const ChartsSection = ({
         return (
           <>
             {renderTimelineContent()}
-            {/* Mode selector shown inside Timeline only when EWT data is available */}
             {headwayTimeSeries !== undefined && hasEwt && (
               <div className="on-time__chart-footer govuk-!-margin-top-4">
                 {overviewMode === "excess-wait-time" && (
@@ -217,24 +224,40 @@ export const ChartsSection = ({
         ) : (
           <DayOfWeekChart data={dayOfWeek} />
         );
+      default: {
+        const _exhaustive: never = activeTab;
+        return _exhaustive;
+      }
     }
   };
 
   return (
     <div className="govuk-!-margin-bottom-8">
-      <div className="analysis-tabs">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`analysis-tabs__tab${activeTab === tab.id ? " analysis-tabs__tab--active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <Box minHeight="440px">{renderContent()}</Box>
+      <Box minHeight="440px">
+        <div className="analysis-tabs analysis-tabs--panel govuk-!-margin-bottom-4">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`analysis-tabs__tab${activeTab === tab.id ? " analysis-tabs__tab--active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {noData ? (
+          <div className="charts-section__no-data">
+            <ChartNoDataMessage
+              dataExpected={dataExpected}
+              timingPointsNotSupported={timingPointsNotSupported}
+              minMaxDelayNotSupported={minMaxDelayNotSupported}
+            />
+          </div>
+        ) : (
+          renderContent()
+        )}
+      </Box>
     </div>
   );
 };

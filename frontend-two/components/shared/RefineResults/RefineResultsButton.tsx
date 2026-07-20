@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { RefineResultsPanel } from "@/components/shared/RefineResults/RefineResultsPanel";
-import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import {
+  RefineResultsAdminAreaOption,
+  RefineResultsFilterValues,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
 import RefineIcon from "@/assets/icons/refine.svg";
 
 interface RefineResultsButtonProps {
   isLoading: boolean;
   showPerformanceFilters?: boolean;
+  showAdminAreaFilter?: boolean;
+  adminAreaOptions?: RefineResultsAdminAreaOption[];
   initialValues: Partial<RefineResultsFilterValues>;
   onApply: (values: RefineResultsFilterValues) => void;
   onReset: () => void;
@@ -15,21 +20,27 @@ interface RefineResultsButtonProps {
 export const RefineResultsButton = ({
   isLoading,
   showPerformanceFilters = true,
+  showAdminAreaFilter = false,
+  adminAreaOptions,
   initialValues,
   onApply,
   onReset,
   buttonClassName,
 }: RefineResultsButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const closePanel = useCallback(() => setIsOpen(false), []);
 
   return (
     <>
       <button
         type="button"
-        className={
-          buttonClassName ?? "on-time-refine-results-button govuk-link"
-        }
-        onClick={() => setIsOpen(true)}
+        className={[
+          "on-time-refine-results-button",
+          buttonClassName ?? "button-link govuk-link",
+        ].join(" ")}
+        onClick={() => setIsOpen((open) => !open)}
+        aria-expanded={isOpen}
+        aria-controls="refine-results-panel"
       >
         <RefineIcon
           className="on-time-refine-results-button__icon"
@@ -43,13 +54,12 @@ export const RefineResultsButton = ({
         isOpen={isOpen}
         isLoading={isLoading}
         showPerformanceFilters={showPerformanceFilters}
+        showAdminAreaFilter={showAdminAreaFilter}
+        adminAreaOptions={adminAreaOptions}
         initialValues={initialValues}
-        onApply={(values) => {
-          onApply(values);
-          setIsOpen(false);
-        }}
+        onApply={onApply}
         onReset={onReset}
-        onCancel={() => setIsOpen(false)}
+        onCancel={closePanel}
       />
     </>
   );

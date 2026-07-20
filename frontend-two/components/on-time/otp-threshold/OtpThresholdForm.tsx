@@ -60,8 +60,8 @@ export const OtpThresholdForm = ({ onCompare }: OtpThresholdFormProps) => {
             </p>
           ) : null}
 
-          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-            <div className="govuk-form-group">
+          <div className="otp-threshold-form__inputs">
+            <div className="govuk-form-group otp-threshold-form__control">
               <label className="govuk-label" htmlFor="otp-threshold-early">
                 Early
               </label>
@@ -87,7 +87,7 @@ export const OtpThresholdForm = ({ onCompare }: OtpThresholdFormProps) => {
               </div>
             </div>
 
-            <div className="govuk-form-group">
+            <div className="govuk-form-group otp-threshold-form__control">
               <label className="govuk-label" htmlFor="otp-threshold-late">
                 Late
               </label>

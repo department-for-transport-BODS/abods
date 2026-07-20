@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
 import { Direction } from "../../../src/generated/graphql";
 import type { FrequentServicePerformance } from "@/services/on-time/performance.service";
+import { Settings } from "luxon";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock("@/services/operator.service", () => ({
   operatorsService: {
     fetchOperators: vi.fn(),
     fetchOperator: vi.fn(),
+    fetchAdminAreas: vi.fn(),
   },
 }));
 
@@ -116,6 +118,7 @@ const mockFetchServicePerformance = vi.mocked(
 );
 const mockFetchHeadwayTimeSeries = vi.mocked(headwayService.fetchTimeSeries);
 const mockFetchOperators = vi.mocked(operatorsService.fetchOperators);
+const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
 
 const makeService = (
   overrides: Partial<FrequentServicePerformance> = {},
@@ -150,6 +153,7 @@ const mockFetchOperator = vi.mocked(operatorsService.fetchOperator);
 describe("OnTimeOperatorPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Settings.now = () => new Date("2026-06-28T12:00:00Z").valueOf();
     mockQuery = { nocCode: "ABCD" };
     mockReplace.mockReset();
     mockUseConfig.mockReturnValue({
@@ -172,6 +176,7 @@ describe("OnTimeOperatorPage", () => {
         adminAreaIds: [],
       },
     ]);
+    mockFetchAdminAreas.mockResolvedValue([]);
 
     mockFetchOverviewStats.mockResolvedValue({});
     mockFetchDelayFrequency.mockResolvedValue([]);
@@ -184,6 +189,7 @@ describe("OnTimeOperatorPage", () => {
   });
 
   afterEach(() => {
+    Settings.now = () => Date.now();
     cleanup();
   });
 
@@ -266,6 +272,90 @@ describe("OnTimeOperatorPage", () => {
     expect(screen.getByTestId("delay-frequency-chart")).toBeInTheDocument();
 
     expect(screen.getByText("Delay Frequency: 2 items")).toBeInTheDocument();
+  });
+
+  it("shows the vehicle location no-data message inside the chart box", async () => {
+    render(<OnTimeOperatorPage />);
+
+    const message = await screen.findByText(
+      "We have not received any vehicle location data for the time period and filters selected.",
+    );
+
+    expect(message.closest(".app-box")).not.toBeNull();
+    expect(message.closest(".charts-section__no-data")).not.toBeNull();
+  });
+
+  it("shows the service export button below the empty table message", async () => {
+    render(<OnTimeOperatorPage />);
+
+    const emptyMessage = await screen.findByText("No service data found");
+    const exportButton = screen.getByRole("button", { name: "Export data" });
+
+    expect(
+      emptyMessage.compareDocumentPosition(exportButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("exports service data with hidden metric columns", async () => {
+    mockFetchServicePerformance.mockResolvedValue([
+      makeService({
+        lineId: "LINE1",
+        lineInfo: {
+          serviceId: "S1",
+          serviceName: "Demo Service",
+          serviceNumber: "1",
+        },
+      }),
+    ]);
+    const createObjectUrl = vi.fn().mockReturnValue("blob:test-csv");
+    const revokeObjectUrl = vi.fn();
+    let downloadedFilename = "";
+    const anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        downloadedFilename = this.download;
+      });
+
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectUrl,
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectUrl,
+    });
+    const user = userEvent.setup();
+
+    render(<OnTimeOperatorPage />);
+
+    await screen.findByRole("link", { name: "1: Demo Service" });
+
+    await user.click(screen.getByRole("button", { name: "Export data" }));
+
+    const blob = createObjectUrl.mock.calls[0][0] as Blob;
+    const csv = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.readAsText(blob);
+    });
+
+    expect(csv.split("\r\n")[0]).toBe(
+      "Frequent service,Service,Direction,Scheduled departures,Recorded departures,Recorded departures (percentage),Av. delay (seconds),On time,On time (percentage),On time (seconds),Late,Late (percentage),Late (seconds),Early,Early (percentage),Early (seconds)",
+    );
+    expect(csv.split("\r\n")[1]).toBe(
+      ",Total:,-,100,90,90%,45,70,77.7%,10,15,16.7%,120,5,5.6%,-30",
+    );
+    expect(csv.split("\r\n")[2]).toBe(
+      ",1: Demo Service,-,100,90,90%,45,70,77.7%,10,15,16.7%,120,5,5.6%,-30",
+    );
+
+    expect(anchorClick).toHaveBeenCalled();
+    expect(downloadedFilename).toBe(
+      "Service_Performance_ABCD_26-06-21_-_26-06-27.csv",
+    );
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:test-csv");
+    anchorClick.mockRestore();
   });
 
   it("switches between chart tabs", async () => {
@@ -704,8 +794,12 @@ describe("OnTimeOperatorPage", () => {
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
+      expect(
+        screen.getByRole("checkbox", { name: "Frequent service" }),
+      ).toBeInTheDocument();
+
       const averageDelayCheckbox = screen.getByRole("checkbox", {
-        name: "Av. delay",
+        name: "Average delay",
       });
       expect(averageDelayCheckbox).toBeChecked();
       await user.click(averageDelayCheckbox);
@@ -734,14 +828,16 @@ describe("OnTimeOperatorPage", () => {
       await user.click(screen.getByRole("button", { name: "Display options" }));
 
       // Uncheck "Av. delay"
-      await user.click(screen.getByRole("checkbox", { name: "Av. delay" }));
+      await user.click(screen.getByRole("checkbox", { name: "Average delay" }));
       expect(
-        screen.getByRole("checkbox", { name: "Av. delay" }),
+        screen.getByRole("checkbox", { name: "Average delay" }),
       ).not.toBeChecked();
 
       // Click "Show all" to restore
       await user.click(screen.getByRole("button", { name: "Show all" }));
-      expect(screen.getByRole("checkbox", { name: "Av. delay" })).toBeChecked();
+      expect(
+        screen.getByRole("checkbox", { name: "Average delay" }),
+      ).toBeChecked();
     });
 
     it("does not apply changes when Cancel is clicked after unchecking a column", async () => {
@@ -755,13 +851,106 @@ describe("OnTimeOperatorPage", () => {
       });
 
       await user.click(screen.getByRole("button", { name: "Display options" }));
-      await user.click(screen.getByRole("checkbox", { name: "Av. delay" }));
+      await user.click(screen.getByRole("checkbox", { name: "Average delay" }));
       await user.click(screen.getByRole("button", { name: "Cancel" }));
 
       // Column should still be visible after cancelling
       expect(
         screen.getByRole("columnheader", { name: "Av. delay" }),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("refine results panel", () => {
+    it("keeps the panel open while applying an area filter", async () => {
+      const user = userEvent.setup();
+      mockFetchOperator.mockResolvedValue({
+        operatorId: "OP1",
+        nocCode: "ABCD",
+        name: "Demo Operator",
+        adminAreaIds: ["AA100"],
+      });
+      mockFetchOperators.mockResolvedValue([
+        {
+          operatorId: "OP1",
+          nocCode: "ABCD",
+          name: "Demo Operator",
+          adminAreaIds: ["AA100"],
+        },
+      ]);
+      mockFetchAdminAreas.mockResolvedValue([
+        { id: "AA100", name: "Derbyshire", shape: "{}" },
+        { id: "AA200", name: "Nottinghamshire", shape: "{}" },
+      ]);
+      mockFetchServicePerformance.mockResolvedValueOnce([
+        makeService({
+          lineInfo: {
+            serviceId: "S1",
+            serviceNumber: "101",
+            serviceName: "City Express",
+          },
+        }),
+      ]);
+      let resolveRefetch!: (value: FrequentServicePerformance[]) => void;
+      mockFetchServicePerformance.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveRefetch = resolve;
+          }),
+      );
+
+      render(<OnTimeOperatorPage />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("link", { name: "101: City Express" }),
+        ).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText("Refine results"));
+      const panel = screen
+        .getByRole("heading", { name: "Refine results" })
+        .closest("div.refine-results-panel") as HTMLElement;
+      const areasInput = within(panel).getByRole("textbox", { name: "Area" });
+
+      await waitFor(() => {
+        expect(areasInput).not.toBeDisabled();
+      });
+
+      await user.click(areasInput);
+      await user.click(
+        await within(panel).findByRole("checkbox", { name: "Nottinghamshire" }),
+      );
+      await user.click(screen.getByRole("button", { name: "Apply" }));
+
+      await waitFor(() => {
+        const lastCall =
+          mockFetchServicePerformance.mock.calls[
+            mockFetchServicePerformance.mock.calls.length - 1
+          ][0];
+        expect(lastCall.filters.adminAreaIds).toEqual(["AA200"]);
+      });
+
+      expect(
+        screen.getByRole("heading", { name: "Refine results" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("Loading on-time data..."),
+      ).not.toBeInTheDocument();
+      const filterChips = document.querySelector(
+        ".filter-chips-container",
+      ) as HTMLElement;
+      expect(within(filterChips).getByText("Area:")).toBeInTheDocument();
+      expect(
+        within(filterChips).getByText("Nottinghamshire"),
+      ).toBeInTheDocument();
+
+      resolveRefetch([]);
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "Apply" }),
+        ).not.toBeDisabled();
+      });
     });
   });
 

@@ -8,6 +8,7 @@ interface MultiselectOption {
 interface MultiselectCheckboxProps {
   id: string;
   label: string;
+  labelClassName?: string;
   options: MultiselectOption[];
   selectedValues: string[];
   onChange: (values: string[]) => void;
@@ -21,6 +22,7 @@ interface MultiselectCheckboxProps {
 export const MultiselectCheckbox = ({
   id,
   label,
+  labelClassName,
   options,
   selectedValues,
   onChange,
@@ -95,7 +97,10 @@ export const MultiselectCheckbox = ({
         }
       }}
     >
-      <label className="govuk-label" htmlFor={id}>
+      <label
+        className={`govuk-label${labelClassName ? ` ${labelClassName}` : ""}`}
+        htmlFor={id}
+      >
         {label}
       </label>
       <div className="multiselect-checkbox__trigger-wrap">

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
 import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
 import {
@@ -13,10 +12,11 @@ import {
 } from "@/components/on-time/OnTimeStopsTable";
 import {
   type OnTimeDisplayMode,
-  DISPLAY_MODE_OPTIONS,
   normaliseDirection,
   aggregatePerformanceTotals,
+  aggregateAverageTravelTimes,
 } from "@/utils/on-time/on-time-table-format";
+import { formatStopPerformanceCsvFilename } from "@/utils/on-time-csv-filename";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
@@ -29,8 +29,6 @@ import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
 } from "@/components/shared/RefineResults/RefineResultsFilters";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
-import { RadioOptions } from "@/components/shared/RadioOptions";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
@@ -58,8 +56,9 @@ import {
   ServiceInfoType,
 } from "@/src/generated/graphql";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
-import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
+import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
+import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
+import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
 
 const aggregateStopsByStopId = (
   stops: StopPerformance[],
@@ -80,30 +79,14 @@ const aggregateStopsByStopId = (
     const totals = aggregatePerformanceTotals(rows);
     if (!totals) continue;
 
-    let averageScheduledTotal = 0;
-    let hasAverageScheduled = false;
-    let averageActualTotal = 0;
-    let hasAverageActual = false;
-
-    for (const row of rows) {
-      if (row.averageScheduled != null) {
-        averageScheduledTotal += row.averageScheduled;
-        hasAverageScheduled = true;
-      }
-      if (row.averageActual != null) {
-        averageActualTotal += row.averageActual;
-        hasAverageActual = true;
-      }
-    }
+    const travelTimes = aggregateAverageTravelTimes(rows);
 
     aggregated.push({
       ...rows[0],
       ...totals,
       direction: null,
-      averageScheduled: hasAverageScheduled
-        ? averageScheduledTotal / rows.length
-        : null,
-      averageActual: hasAverageActual ? averageActualTotal / rows.length : null,
+      averageScheduled: travelTimes.averageScheduled,
+      averageActual: travelTimes.averageActual,
     });
   }
 
@@ -133,6 +116,8 @@ const OnTimeServicePage = () => {
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
   const lineId =
     typeof router.query.lineId === "string" ? router.query.lineId : null;
+  const routerIsReady = router.isReady;
+  const routerReplace = router.replace;
 
   const [isLoading, setIsLoading] = useState(true);
   const [operatorChecked, setOperatorChecked] = useState(false);
@@ -406,27 +391,31 @@ const OnTimeServicePage = () => {
     );
   }
 
+  const serviceTitle = data.serviceInfo
+    ? `${data.serviceInfo.serviceNumber} - ${data.serviceInfo.serviceName}`
+    : lineId;
+
   return (
-    <BaseLayout title={`On-time performance: ${nocCode} / ${lineId}`}>
+    <BaseLayout title={serviceTitle}>
       <p className="govuk-body">
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}`}
-          className="govuk-link"
+          className="govuk-back-link"
         >
-          &larr; Back to {nocCode}
+          All Services
         </Link>
       </p>
-      <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-2">
-        {data.serviceInfo
-          ? `${data.serviceInfo.serviceNumber} - ${data.serviceInfo.serviceName}`
-          : lineId}
-      </h1>
-      {operator && (
-        <p className="govuk-caption-l govuk-!-margin-bottom-6">
-          {operator.name} ({operator.nocCode})
-        </p>
-      )}
+      <OnTimePageHeader
+        title={serviceTitle}
+        headingClassName="govuk-heading-xl govuk-!-margin-bottom-2"
+        subtitle={
+          operator ? (
+            <p className="govuk-caption-l govuk-!-margin-bottom-6">
+              {operator.name} ({operator.nocCode})
+            </p>
+          ) : undefined
+        }
+      />
       {lineNotFound ? (
         <>
           <h2 className="govuk-heading-l">Not found</h2>
@@ -476,7 +465,7 @@ const OnTimeServicePage = () => {
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
           <div className="govuk-!-margin-top-6">
-            <ChartNoDataWrapper
+            <ChartsSection
               noData={
                 !isLoading &&
                 (data.delayFrequency?.length ?? 0) === 0 &&
@@ -487,48 +476,42 @@ const OnTimeServicePage = () => {
               dataExpected={selectedMatchType === "evidenced"}
               timingPointsNotSupported={false}
               minMaxDelayNotSupported={false}
-            >
-              <ChartsSection
-                mapContent={
-                  config?.mapboxToken && config?.mapboxStyle ? (
-                    <OnTimeServiceMap
-                      mapboxToken={config.mapboxToken}
-                      mapboxStyle={config.mapboxStyle}
-                      params={stopPerformanceParams}
-                      timingPointsOnly={selectedStopType === "timing-points"}
-                    />
-                  ) : (
-                    <p className="govuk-body govuk-!-margin-top-4">
-                      Map is unavailable
-                    </p>
-                  )
-                }
-                delayFrequency={data.delayFrequency ?? []}
-                timeOfDay={data.timeOfDay ?? []}
-                dayOfWeek={data.dayOfWeek ?? []}
-                timeSeries={data.timeSeries ?? []}
-                fromTimestamp={data.fromTimestamp ?? ""}
-                toTimestamp={data.toTimestamp ?? ""}
-                granularity={data.granularity}
-                headwayTimeSeries={data.headwayTimeSeries ?? []}
-                frequentServiceInfo={data.frequentServiceInfo}
-                errorHeadwayTimeSeries={errors.headwayTimeSeries}
-                errors={{
-                  delayFrequency: errors.delayFrequency,
-                  timeOfDay: errors.timeOfDay,
-                  dayOfWeek: errors.dayOfWeek,
-                  timeSeries: errors.timeSeries,
-                }}
-              />
-            </ChartNoDataWrapper>
-          </div>
-          <div className="helpdesk-container">
-            <OnTimeHelpdeskButton />
-            <OtpThresholdModalLink
-              params={stopPerformanceParams}
-              overview={summaryOverview}
+              mapContent={
+                config?.mapboxToken && config?.mapboxStyle ? (
+                  <OnTimeServiceMap
+                    mapboxToken={config.mapboxToken}
+                    mapboxStyle={config.mapboxStyle}
+                    params={stopPerformanceParams}
+                    timingPointsOnly={selectedStopType === "timing-points"}
+                  />
+                ) : (
+                  <p className="govuk-body govuk-!-margin-top-4">
+                    Map is unavailable
+                  </p>
+                )
+              }
+              delayFrequency={data.delayFrequency ?? []}
+              timeOfDay={data.timeOfDay ?? []}
+              dayOfWeek={data.dayOfWeek ?? []}
+              timeSeries={data.timeSeries ?? []}
+              fromTimestamp={data.fromTimestamp ?? ""}
+              toTimestamp={data.toTimestamp ?? ""}
+              granularity={data.granularity}
+              headwayTimeSeries={data.headwayTimeSeries ?? []}
+              frequentServiceInfo={data.frequentServiceInfo}
+              errorHeadwayTimeSeries={errors.headwayTimeSeries}
+              errors={{
+                delayFrequency: errors.delayFrequency,
+                timeOfDay: errors.timeOfDay,
+                dayOfWeek: errors.dayOfWeek,
+                timeSeries: errors.timeSeries,
+              }}
             />
           </div>
+          <OnTimeHelpdeskRow
+            params={stopPerformanceParams}
+            overview={summaryOverview}
+          />
           <div className="govuk-!-margin-top-6">
             <SummaryStatsGrid
               onTimeCount={summaryStats.onTimeCount}
@@ -549,41 +532,22 @@ const OnTimeServicePage = () => {
               averageDelay={summaryStats.averageDelay}
             />
           </div>
-          <div className="on-time-service-filters govuk-!-margin-top-6">
-            <div className="on-time-service-filters__directions">
-              <MultiselectDropdown
-                label="Directions"
-                options={["Inbound", "Outbound"]}
-                selected={selectedDirections}
-                onChange={setSelectedDirections}
-                placeholderText=""
-              />
-            </div>
-            <div className="on-time-service-filters__display-options">
-              <p className="on-time-service-display-options-button">
-                <button
-                  type="button"
-                  className="govuk-link"
-                  onClick={() => setShowDisplayOptions(true)}
-                >
-                  Display options
-                </button>
-              </p>
-              <div className="on-time-service-filters__radios">
-                <RadioOptions
-                  name="on-time-display-mode"
-                  legend="Show service performance values as"
-                  options={DISPLAY_MODE_OPTIONS}
-                  value={selectedDisplayMode}
-                  onChange={setSelectedDisplayMode}
-                />
-              </div>
-            </div>
-          </div>
+          <OnTimeDisplayControls
+            selectedDirections={selectedDirections}
+            onDirectionsChange={setSelectedDirections}
+            selectedDisplayMode={selectedDisplayMode}
+            onDisplayModeChange={setSelectedDisplayMode}
+            onOpenDisplayOptions={() => setShowDisplayOptions(true)}
+          />
           <div className="govuk-!-margin-top-6">
             <OnTimeStopsTable
               data={filteredStopPerformance}
               displayMode={selectedDisplayMode}
+              csvFilename={formatStopPerformanceCsvFilename({
+                lineId: lineId ?? "",
+                fromTimestamp: data.fromTimestamp ?? "",
+                toTimestamp: data.toTimestamp ?? "",
+              })}
               visibleColumns={visibleStopColumns}
             />
             <DisplayOptionsModal

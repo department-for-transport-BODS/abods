@@ -50,18 +50,19 @@ export const OtpThresholdSlider = ({
   return (
     <div className="otp-threshold-slider">
       <div className="otp-threshold-slider__labels">
-        <span>Early</span>
+        <span className="otp-threshold-slider__label">Early</span>
         <span className="otp-threshold-slider__scheduled">
-          Scheduled departure
+          <span>Scheduled departure</span>
+          <span className="otp-threshold-slider__scheduled-value">0:00</span>
         </span>
-        <span>Late</span>
+        <span className="otp-threshold-slider__label">Late</span>
       </div>
       <RangeSlider
         className="otp-threshold-slider__slider"
         thumbs={[
           {
             min: 0,
-            max: CENTRE - 1,
+            max: AXIS,
             value: earlyPos,
             ariaLabel:
               "Early threshold in minutes before the scheduled departure",
@@ -71,7 +72,7 @@ export const OtpThresholdSlider = ({
               ),
           },
           {
-            min: CENTRE + 1,
+            min: 0,
             max: AXIS,
             value: latePos,
             ariaLabel:
@@ -83,18 +84,20 @@ export const OtpThresholdSlider = ({
           },
         ]}
       >
-        <div
-          className="otp-threshold-slider__early"
-          style={{ width: `${leftPct}%` }}
-        />
-        <div
-          className="otp-threshold-slider__on-time"
-          style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
-        />
-        <div
-          className="otp-threshold-slider__late"
-          style={{ width: `${rightPct}%` }}
-        />
+        <div className="otp-threshold-slider__fill">
+          <div
+            className="otp-threshold-slider__early"
+            style={{ width: `${leftPct}%` }}
+          />
+          <div
+            className="otp-threshold-slider__on-time"
+            style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
+          />
+          <div
+            className="otp-threshold-slider__late"
+            style={{ width: `${rightPct}%` }}
+          />
+        </div>
         <div className="otp-threshold-slider__center" />
       </RangeSlider>
     </div>

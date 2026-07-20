@@ -12,6 +12,7 @@ export const SummaryStatWithTooltip = ({
   tooltip,
 }: SummaryStatWithTooltipProps) => {
   const [visible, setVisible] = useState(false);
+  const displayValue = value === "-" ? "Unavailable" : value;
 
   return (
     <div
@@ -32,7 +33,7 @@ export const SummaryStatWithTooltip = ({
             <span
               style={{ borderBottom: "4px dotted #000000", cursor: "help" }}
             >
-              {value}
+              {displayValue}
             </span>
             {visible && (
               <div className="govuk-body tooltip">
@@ -44,7 +45,7 @@ export const SummaryStatWithTooltip = ({
         </div>
       ) : (
         <div className="font-bold" style={{ fontSize: "36px" }}>
-          {value}
+          {displayValue}
         </div>
       )}
     </div>

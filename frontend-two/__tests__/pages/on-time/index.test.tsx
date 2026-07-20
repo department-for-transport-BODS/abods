@@ -8,6 +8,8 @@ import {
 } from "@testing-library/react";
 import { useConfig } from "@/contexts/ConfigContext";
 import { onTimeService } from "@/services/on-time/on-time.service";
+import { operatorsService } from "@/services/operator.service";
+import { distanceService } from "@/services/distances/distance.services";
 import OnTimeIndexPage from "@/pages/on-time";
 import { DateTime } from "luxon";
 
@@ -30,6 +32,18 @@ vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchOperatorPerformanceList: vi.fn(),
     fetchOnTimeStats: vi.fn(),
+  },
+}));
+
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
+    fetchAdminAreas: vi.fn(),
+  },
+}));
+
+vi.mock("@/services/distances/distance.services", () => ({
+  distanceService: {
+    fetchAdminOrg: vi.fn(),
   },
 }));
 
@@ -108,6 +122,8 @@ const mockFetchOperatorPerformanceList = vi.mocked(
   onTimeService.fetchOperatorPerformanceList,
 );
 const mockFetchOnTimeStats = vi.mocked(onTimeService.fetchOnTimeStats);
+const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
+const mockFetchAdminOrg = vi.mocked(distanceService.fetchAdminOrg);
 
 describe("OnTimeIndexPage", () => {
   beforeEach(() => {
@@ -127,6 +143,14 @@ describe("OnTimeIndexPage", () => {
       averageDelay: null,
       noData: 0,
     });
+    mockFetchAdminAreas.mockResolvedValue([
+      { id: "AA100", name: "Derbyshire", shape: "{}" },
+      { id: "AA200", name: "Nottinghamshire", shape: "{}" },
+    ]);
+    mockFetchAdminOrg.mockResolvedValue([
+      { adminAreaId: 100, adminName: "Derbyshire" },
+      { adminAreaId: 200, adminName: "Nottinghamshire" },
+    ] as Awaited<ReturnType<typeof distanceService.fetchAdminOrg>>);
   });
 
   afterEach(() => {
@@ -379,9 +403,29 @@ describe("OnTimeIndexPage", () => {
       fireEvent.click(screen.getByText("Refine results"));
     };
 
+    const filterChips = () =>
+      document.querySelector(".filter-chips-container") as HTMLElement;
+
     const applyFilters = () => {
       fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     };
+
+    it("does not show the area filter", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      render(<OnTimeIndexPage />);
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
+
+      openRefinePanel();
+      const panel = screen
+        .getByRole("heading", { name: "Refine results" })
+        .closest("div.refine-results-panel") as HTMLElement;
+
+      expect(
+        within(panel).queryByRole("textbox", { name: "Area" }),
+      ).not.toBeInTheDocument();
+    });
 
     it("day of week filter: unchecking Saturday shows a filter chip", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
@@ -395,8 +439,13 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Day of the week:")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Day of the week:"),
+        ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
+        expect(
+          screen.getByRole("heading", { name: "Refine results" }),
+        ).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
             mockFetchOperatorPerformanceList.mock.calls.length - 1
@@ -420,8 +469,10 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Day of the week:")).toBeInTheDocument();
-        expect(screen.getByText("Weekdays")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Day of the week:"),
+        ).toBeInTheDocument();
+        expect(within(filterChips()).getByText("Weekdays")).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
@@ -454,8 +505,12 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Time range:")).toBeInTheDocument();
-        expect(screen.getByText("08:00 - 23:59")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Time range:"),
+        ).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("08:00 - 23:59"),
+        ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
@@ -486,8 +541,12 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Time range:")).toBeInTheDocument();
-        expect(screen.getByText("00:00 - 18:59")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Time range:"),
+        ).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("00:00 - 18:59"),
+        ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
@@ -511,8 +570,12 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Maximum early:")).toBeInTheDocument();
-        expect(screen.getByText("10 minutes")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Maximum early:"),
+        ).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("10 minutes"),
+        ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
@@ -536,8 +599,12 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Maximum late:")).toBeInTheDocument();
-        expect(screen.getByText("20 minutes")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Maximum late:"),
+        ).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("20 minutes"),
+        ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
@@ -560,16 +627,21 @@ describe("OnTimeIndexPage", () => {
       applyFilters();
 
       await waitFor(() => {
-        expect(screen.getByText("Day of the week:")).toBeInTheDocument();
+        expect(
+          within(filterChips()).getByText("Day of the week:"),
+        ).toBeInTheDocument();
       });
 
-      // Open panel again and reset
-      openRefinePanel();
       fireEvent.click(screen.getByText("Reset to defaults"));
 
       await waitFor(() => {
-        expect(screen.queryByText("Day of the week:")).not.toBeInTheDocument();
+        expect(
+          within(filterChips()).queryByText("Day of the week:"),
+        ).not.toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
+        expect(
+          screen.getByRole("heading", { name: "Refine results" }),
+        ).toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
             mockFetchOperatorPerformanceList.mock.calls.length - 1

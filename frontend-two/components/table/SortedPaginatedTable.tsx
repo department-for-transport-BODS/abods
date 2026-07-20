@@ -130,6 +130,7 @@ export const SortedPaginatedTable = <T,>({
     ...(pinnedRows ?? []),
     ...pageData.map(renderRow),
   ];
+  const showEmptyMessage = Boolean(emptyMessage && data.length === 0);
 
   const pagination = enablePagination
     ? {
@@ -150,16 +151,21 @@ export const SortedPaginatedTable = <T,>({
         rows={rows}
         onSort={handleSort}
         title={title}
-        pagination={pagination}
+        pagination={!showEmptyMessage ? pagination : undefined}
         paginationAlignment={paginationAlignment}
         colWidths={colWidths}
-        footerAction={footerAction}
+        footerAction={showEmptyMessage ? undefined : footerAction}
       />
-      {emptyMessage && data.length === 0 && (
+      {showEmptyMessage && (
         <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">
           {emptyMessage}
         </div>
       )}
+      {showEmptyMessage && footerAction ? (
+        <div className="sortable-table__footer-row sortable-table__footer-row--empty">
+          <div>{footerAction}</div>
+        </div>
+      ) : null}
     </>
   );
 };
