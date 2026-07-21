@@ -16,6 +16,10 @@ vi.mock("@/components/layout/BaseLayout", () => ({
   ),
 }));
 
+vi.mock("@/components/on-time/OnTimeServiceMap", () => ({
+  OnTimeServiceMap: () => <div data-testid="on-time-service-map" />,
+}));
+
 vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
@@ -193,5 +197,23 @@ describe("OnTimeServicePage", () => {
       "href",
       "/on-time/ABCD",
     );
+  });
+
+  it("renders OnTimeServiceMap component", async () => {
+    mockUseConfig.mockReturnValue({
+      config: {
+        apiUrl: "http://test-api",
+        mapboxToken: "test-mapbox-token",
+        mapboxStyle: "mapbox://styles/test/street",
+      },
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useConfig>);
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("on-time-service-map")).toBeInTheDocument();
+    });
   });
 });
