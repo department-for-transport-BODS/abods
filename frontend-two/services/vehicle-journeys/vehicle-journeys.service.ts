@@ -3,14 +3,12 @@ import { apolloClient } from "@/services/apolloClient";
 import {
   JourneyDocument,
   JourneysDocument,
-  OperatorLinesDocument,
   OperatorListDocument,
   ServicePatternDistanceGeomDocument,
-} from "@/services/vehicle-journeys/vehicle-journeys.operations";
+} from "@/src/generated/graphql";
 import {
   ServicePatternDistanceGeom,
   VehicleJourneyInfo,
-  VehicleJourneyLine,
   VehicleJourneyOperator,
   VehicleJourneySummary,
 } from "@/types/vehicle-journeys";
@@ -38,22 +36,6 @@ export const vehicleJourneysService = {
       return result.data?.operators ?? [];
     } catch (error) {
       console.warn("Failed to fetch vehicle journey operators:", error);
-      return [];
-    }
-  },
-
-  fetchLines: async (
-    operatorId: string,
-    inputDate: string,
-  ): Promise<VehicleJourneyLine[]> => {
-    try {
-      const result = await apolloClient.query({
-        query: OperatorLinesDocument,
-        variables: { operatorIds: [operatorId], inputDate },
-      });
-      return result.data?.lines ?? [];
-    } catch (error) {
-      console.warn("Failed to fetch vehicle journey services:", error);
       return [];
     }
   },

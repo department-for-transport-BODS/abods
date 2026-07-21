@@ -56,4 +56,18 @@ describe("registerTimingPointIcons", () => {
       expect.objectContaining({ width: 24, height: 24 }),
     );
   });
+
+  it("registers each icon once when requests overlap", async () => {
+    const map = {
+      addImage: vi.fn(),
+      hasImage: vi.fn(() => false),
+    };
+
+    await Promise.all([
+      registerTimingPointIcons(map as never),
+      registerTimingPointIcons(map as never),
+    ]);
+
+    expect(map.addImage).toHaveBeenCalledTimes(4);
+  });
 });

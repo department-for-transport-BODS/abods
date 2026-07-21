@@ -6,7 +6,12 @@
   "mapboxToken": "",
   "mapboxStyle": "mapbox://styles/mapbox/streets-v11",
   "mapboxSatelliteStyle": "mapbox://styles/mapbox/satellite-v9",
-  "vehicleJourneys": true,
+  "vehicleJourneys": {
+    "validDateRange": {
+      "offsetISO": "PT0H",
+      "durationISO": "P6M"
+    }
+  },
   "otp": false,
   "defaultCookiePolicy": false,
   "freshdesk": false

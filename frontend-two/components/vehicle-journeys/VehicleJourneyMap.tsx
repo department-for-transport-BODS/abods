@@ -2,6 +2,14 @@ import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import mapboxgl from "mapbox-gl";
+import MapChevronEarlySvg from "@/assets/icons/map-chevron-early.svg";
+import MapChevronOnTimeSvg from "@/assets/icons/map-chevron-on-time.svg";
+import MapChevronLateSvg from "@/assets/icons/map-chevron-late.svg";
+import MapChevronNoDataSvg from "@/assets/icons/map-chevron-no-data.svg";
+import TimingEarlyMapSvg from "@/assets/icons/timing-early-map-solid.svg";
+import TimingOnTimeMapSvg from "@/assets/icons/timing-on-time-map-solid.svg";
+import TimingLateMapSvg from "@/assets/icons/timing-late-map-solid.svg";
+import TimingNoDataMapSvg from "@/assets/icons/timing-no-data-map-solid.svg";
 import { ReCentreIcon } from "@/components/icons/ReCentreIcon";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { Spinner } from "@/components/shared/Spinner";
@@ -12,6 +20,10 @@ import {
   VehicleJourneyStop,
 } from "@/types/vehicle-journeys";
 import { getStopOtp } from "@/components/vehicle-journeys/vehicleJourneysUtils";
+import {
+  ensureMapImage,
+  type SvgModule,
+} from "@/utils/mapImage";
 
 interface VehicleJourneyMapProps {
   stops: VehicleJourneyStop[];
@@ -59,57 +71,23 @@ const pairwise = <T,>(items: T[]): [T, T][] => {
   return pairs;
 };
 
-const loadMapImage = (map: mapboxgl.Map, url: string) =>
-  new Promise<HTMLImageElement | ImageBitmap | ImageData>((resolve, reject) => {
-    map.loadImage(url, (error, image) => {
-      if (error || !image) {
-        reject(error ?? new Error(`Unable to load map image: ${url}`));
-        return;
-      }
-      resolve(image);
-    });
-  });
-
-const ensureImage = async (map: mapboxgl.Map, id: string, url: string) => {
-  if (map.hasImage(id)) return;
-  map.addImage(id, await loadMapImage(map, url));
+const JOURNEY_MAP_ICONS: Record<string, SvgModule> = {
+  "map-chevron-early": MapChevronEarlySvg,
+  "map-chevron-on-time": MapChevronOnTimeSvg,
+  "map-chevron-late": MapChevronLateSvg,
+  "map-chevron-no-data": MapChevronNoDataSvg,
+  "timing-early": TimingEarlyMapSvg,
+  "timing-on-time": TimingOnTimeMapSvg,
+  "timing-late": TimingLateMapSvg,
+  "timing-no-data": TimingNoDataMapSvg,
 };
 
 const registerJourneyMapImages = async (map: mapboxgl.Map) => {
-  await Promise.all([
-    ensureImage(
-      map,
-      "map-chevron-early",
-      "/assets/icons/map-chevron-early.svg",
+  await Promise.all(
+    Object.entries(JOURNEY_MAP_ICONS).map(([id, svg]) =>
+      ensureMapImage(map, id, svg),
     ),
-    ensureImage(
-      map,
-      "map-chevron-on-time",
-      "/assets/icons/map-chevron-on-time.svg",
-    ),
-    ensureImage(map, "map-chevron-late", "/assets/icons/map-chevron-late.svg"),
-    ensureImage(
-      map,
-      "map-chevron-no-data",
-      "/assets/icons/map-chevron-no-data.svg",
-    ),
-    ensureImage(
-      map,
-      "timing-early",
-      "/assets/icons/timing-early-map-solid.svg",
-    ),
-    ensureImage(
-      map,
-      "timing-on-time",
-      "/assets/icons/timing-on-time-map-solid.svg",
-    ),
-    ensureImage(map, "timing-late", "/assets/icons/timing-late-map-solid.svg"),
-    ensureImage(
-      map,
-      "timing-no-data",
-      "/assets/icons/timing-no-data-map-solid.svg",
-    ),
-  ]);
+  );
 };
 
 type VehiclePing = {

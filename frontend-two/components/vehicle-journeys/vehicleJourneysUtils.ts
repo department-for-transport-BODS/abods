@@ -164,7 +164,7 @@ export const formatPercent = (numerator: number, denominator: number) => {
 export const getDefaultJourneyDate = (offsetISO?: string) =>
   DateTime.local()
     .startOf("day")
-    .minus(Duration.fromISO(offsetISO || "P1D"))
+    .minus(Duration.fromISO(offsetISO || "PT0H"))
     .toISODate() ?? DateTime.local().toISODate();
 
 export const getJourneyDateFromStartTime = (
@@ -182,7 +182,7 @@ export const getValidDateRange = (offsetISO?: string, durationISO?: string) =>
   Interval.before(
     DateTime.local()
       .endOf("day")
-      .minus(Duration.fromISO(offsetISO || "P1D")),
+      .minus(Duration.fromISO(offsetISO || "P6M")),
     Duration.fromISO(durationISO || "P6M"),
   );
 

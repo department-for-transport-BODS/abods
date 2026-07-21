@@ -17,6 +17,7 @@ import {
 } from "@/components/vehicle-journeys/vehicleJourneysUtils";
 import { useConfig } from "@/contexts/ConfigContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { operatorsService } from "@/services/operator.service";
 import { vehicleJourneysService } from "@/services/vehicle-journeys/vehicle-journeys.service";
 import { ErrorInfo } from "@/types";
 
@@ -33,24 +34,16 @@ const VehicleJourneysPage = () => {
   const isDetailRoutePending =
     router.pathname === "/vehicle-journeys/[journeyId]" && !router.isReady;
 
+  const { offsetISO, durationISO } = config?.vehicleJourneys.validDateRange ?? {};
   const journeyId = getQueryString(router.query.journeyId) ?? null;
   const queryDate = getQueryString(router.query.date);
   const queryStartTime = getQueryString(router.query.startTime);
   const fallbackDate = getJourneyDateFromStartTime(queryStartTime);
-  const defaultDate = getDefaultJourneyDate(
-    config?.vehicleJourneys.validDateRange.offsetISO,
-  );
+  const defaultDate = getDefaultJourneyDate(offsetISO);
   const requestedDate = queryDate ?? fallbackDate;
-  const validDateRange = getValidDateRange(
-    config?.vehicleJourneys.validDateRange.offsetISO,
-    config?.vehicleJourneys.validDateRange.durationISO,
-  );
+  const validDateRange = getValidDateRange(offsetISO, durationISO);
   const dateInRange = requestedDate
-    ? isDateInRange(
-        requestedDate,
-        config?.vehicleJourneys.validDateRange.offsetISO,
-        config?.vehicleJourneys.validDateRange.durationISO,
-      )
+    ? isDateInRange(requestedDate, offsetISO, durationISO)
     : true;
   const dateError =
     requestedDate && !dateInRange
@@ -83,7 +76,7 @@ const VehicleJourneysPage = () => {
       ? ["vehicle-journeys-services", selectedOperatorId, fetchDate]
       : null,
     ([, operatorId, date]) =>
-      vehicleJourneysService.fetchLines(operatorId, date),
+      operatorsService.fetchLines([operatorId], date),
   );
   const { data: journeys, isLoading: journeysLoading } = useSWR(
     config?.apiUrl && !isDetailRoutePending && selectedServiceId && !dateError

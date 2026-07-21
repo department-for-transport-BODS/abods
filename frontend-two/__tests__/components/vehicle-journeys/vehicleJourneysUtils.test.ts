@@ -200,7 +200,7 @@ describe("vehicleJourneysUtils", () => {
     });
 
     it.each([
-      [undefined, "2026-07-16"],
+      [undefined, "2026-07-17"],
       ["P7D", "2026-07-10"],
     ])("defaults %p to %p", (offsetISO, expected) => {
       expect(getDefaultJourneyDate(offsetISO)).toBe(expected);
@@ -212,7 +212,7 @@ describe("vehicleJourneysUtils", () => {
       ["2025-12-31", false],
       ["not-a-date", false],
     ])("reports %p as in range: %p", (date, expected) => {
-      expect(isDateInRange(date, "P1D", "P6M")).toBe(expected);
+      expect(isDateInRange(date, "PT0H", "P6M")).toBe(expected);
     });
 
     it("builds a range that includes the expected latest date", () => {

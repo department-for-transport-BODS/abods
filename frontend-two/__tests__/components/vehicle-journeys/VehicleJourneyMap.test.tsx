@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { VehicleJourneyMap } from "@/components/vehicle-journeys/VehicleJourneyMap";
 import { MatchType, OtpEnum } from "@/src/generated/graphql";
 
@@ -18,6 +18,7 @@ vi.mock("@/contexts/ConfigContext", () => ({
 
 const mapboxMock = vi.hoisted(() => {
   const eventHandlers: Record<string, Array<(...args: unknown[]) => void>> = {};
+  const registeredImages = new Set<string>();
 
   const methods = {
     addControl: vi.fn((control?: { onAdd?: () => HTMLElement }) => {
@@ -26,14 +27,14 @@ const mapboxMock = vi.hoisted(() => {
         document.body.appendChild(controlElement);
       }
     }),
-    addImage: vi.fn(),
+    addImage: vi.fn((id: string) => registeredImages.add(id)),
     addLayer: vi.fn(),
     addSource: vi.fn(),
     fitBounds: vi.fn(),
     getCanvas: vi.fn(() => ({ style: {} })),
     getLayer: vi.fn(() => undefined),
     getSource: vi.fn(() => undefined),
-    hasImage: vi.fn(() => true),
+    hasImage: vi.fn((id: string) => registeredImages.has(id)),
     isStyleLoaded: vi.fn(() => true),
     loadImage: vi.fn(
       (_url: string, callback: (error: Error | null, image?: {}) => void) =>
@@ -130,8 +131,11 @@ const mapboxMock = vi.hoisted(() => {
     });
   };
 
+  const clearRegisteredImages = () => registeredImages.clear();
+
   return {
     clearEventHandlers,
+    clearRegisteredImages,
     eventHandlers,
     methods,
     MockLngLatBounds,
@@ -204,7 +208,24 @@ describe("VehicleJourneyMap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mapboxMock.clearEventHandlers();
+    mapboxMock.clearRegisteredImages();
     document.body.innerHTML = "";
+    vi.stubGlobal(
+      "Image",
+      class {
+        onload: (() => void) | null = null;
+
+        onerror: (() => void) | null = null;
+
+        set src(_value: string) {
+          queueMicrotask(() => this.onload?.());
+        }
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("shows the re-centre control after the first map movement", async () => {
@@ -221,6 +242,14 @@ describe("VehicleJourneyMap", () => {
     expect(
       screen.getByRole("button", { name: "Re-centre" }),
     ).toBeInTheDocument();
+  });
+
+  it("registers each icon once when initialization effects overlap", async () => {
+    renderMap();
+
+    await waitFor(() => {
+      expect(mapboxMock.methods.addImage).toHaveBeenCalledTimes(8);
+    });
   });
 
   it("only auto-fits on initial load and journey changes", async () => {

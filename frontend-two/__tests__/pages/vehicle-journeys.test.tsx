@@ -35,10 +35,15 @@ vi.mock("@/components/vehicle-journeys/VehicleJourneyMap", () => ({
 vi.mock("@/services/vehicle-journeys/vehicle-journeys.service", () => ({
   vehicleJourneysService: {
     fetchOperators: vi.fn(),
-    fetchLines: vi.fn(),
     fetchDayJourneys: vi.fn(),
     fetchJourney: vi.fn(),
     fetchServicePatternDistanceGeom: vi.fn(),
+  },
+}));
+
+vi.mock("@/services/operator.service", () => ({
+  operatorsService: {
+    fetchLines: vi.fn(),
   },
 }));
 
@@ -48,10 +53,11 @@ vi.mock("next/router", () => ({
 
 import { useConfig } from "@/contexts/ConfigContext";
 import { vehicleJourneysService } from "@/services/vehicle-journeys/vehicle-journeys.service";
+import { operatorsService } from "@/services/operator.service";
 
 const mockUseConfig = vi.mocked(useConfig);
 const mockFetchOperators = vi.mocked(vehicleJourneysService.fetchOperators);
-const mockFetchLines = vi.mocked(vehicleJourneysService.fetchLines);
+const mockFetchLines = vi.mocked(operatorsService.fetchLines);
 const mockFetchDayJourneys = vi.mocked(vehicleJourneysService.fetchDayJourneys);
 const mockFetchJourney = vi.mocked(vehicleJourneysService.fetchJourney);
 const mockFetchServicePatternDistanceGeom = vi.mocked(
