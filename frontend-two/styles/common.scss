@@ -373,8 +373,21 @@
 .helpdesk-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  white-space: nowrap;
+  text-align: left;
+  appearance: auto;
+  @include govuk-font(19);
+  svg {
+    display: inline-flex;
+    color: govuk-colour("blue");
+    width: 20px;
+    height: 20px;
+    margin-right: govuk-spacing(1);
+  }
+  &:focus {
+    svg {
+      color: govuk-colour("black");
+    }
+  }
 }
 
 .on-time-helpdesk-panel-drawer {
@@ -2697,6 +2710,10 @@ $day-width: 46px;
   .stat {
     margin-bottom: 0;
   }
+}
+
+.summary-stats-grid-map-container {
+  display: flex;
 }
 
 .feed-status-summary {

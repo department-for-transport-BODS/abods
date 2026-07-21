@@ -292,32 +292,34 @@ const OnTimeIndexPage = () => {
                     overview={summaryStats}
                   />
                 </div>
-                <SummaryStatsGrid
-                  onTimeCount={summaryStats?.onTime ?? null}
-                  lateCount={summaryStats?.late ?? null}
-                  earlyCount={summaryStats?.early ?? null}
-                  incompleteCount={summaryStats?.noData ?? null}
-                  recordedStopDepartures={
-                    recordedStopDepartures > 0 ? recordedStopDepartures : null
-                  }
-                  totalStopDepartures={
-                    totalStopDepartures > 0 ? totalStopDepartures : null
-                  }
-                  incompleteBreakdown={summaryStats?.incomplete ?? null}
-                  averageDelay={summaryStats?.averageDelay ?? null}
-                />
-              </div>
-              <div className="summary-map-container">
-                {config?.mapboxToken && config?.mapboxStyle ? (
-                  <OnTimeBoundariesMap
-                    mapboxToken={config.mapboxToken}
-                    mapboxStyle={config.mapboxStyle}
-                    adminAreas={adminAreas}
-                    selectedAdminAreaNames={selectedAdminAreas}
+                <div className="summary-stats-grid-map-container">
+                  <SummaryStatsGrid
+                    onTimeCount={summaryStats?.onTime ?? null}
+                    lateCount={summaryStats?.late ?? null}
+                    earlyCount={summaryStats?.early ?? null}
+                    incompleteCount={summaryStats?.noData ?? null}
+                    recordedStopDepartures={
+                      recordedStopDepartures > 0 ? recordedStopDepartures : null
+                    }
+                    totalStopDepartures={
+                      totalStopDepartures > 0 ? totalStopDepartures : null
+                    }
+                    incompleteBreakdown={summaryStats?.incomplete ?? null}
+                    averageDelay={summaryStats?.averageDelay ?? null}
                   />
-                ) : (
-                  <p className="govuk-body">Map is unavailable</p>
-                )}
+                </div>
+                <div className="summary-map-container">
+                  {config?.mapboxToken && config?.mapboxStyle ? (
+                    <OnTimeBoundariesMap
+                      mapboxToken={config.mapboxToken}
+                      mapboxStyle={config.mapboxStyle}
+                      adminAreas={adminAreas}
+                      selectedAdminAreaNames={selectedAdminAreas}
+                    />
+                  ) : (
+                    <p className="govuk-body">Map is unavailable</p>
+                  )}
+                </div>
               </div>
             </div>
           </ChartNoDataWrapper>
