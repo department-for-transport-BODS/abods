@@ -9,11 +9,11 @@ export const OnTimeHelpdeskButton = () => {
     <>
       <button
         className="helpdesk-link govuk-body govuk-link button-link"
-        style={{ textDecoration: "underline" }}
+        style={{ textDecoration: "underline", textDecorationThickness: "1px" }}
         onClick={() => setIsHelpdeskOpen(true)}
         type="button"
       >
-        <QuestionInCircleIcon aria-hidden width="20" height="20" />
+        <QuestionInCircleIcon aria-hidden style={{ minWidth: "20px" }}/>
         How are these numbers calculated?
       </button>
       <OnTimeHelpdeskPanel

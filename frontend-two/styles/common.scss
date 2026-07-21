@@ -373,8 +373,11 @@
 .helpdesk-link {
   display: inline-flex;
   align-items: center;
+  text-align: left;
   gap: 4px;
   white-space: nowrap;
+  line-height: 25px;
+  appearance: auto;
 }
 
 .on-time-helpdesk-panel-drawer {
@@ -2697,6 +2700,10 @@ $day-width: 46px;
   .stat {
     margin-bottom: 0;
   }
+}
+
+.summary-stats-grid-map-container {
+  display: flex;
 }
 
 .feed-status-summary {
