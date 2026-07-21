@@ -374,10 +374,20 @@
   display: inline-flex;
   align-items: center;
   text-align: left;
-  gap: 4px;
-  white-space: nowrap;
-  line-height: 25px;
   appearance: auto;
+  @include govuk-font(19);
+  svg {
+    display: inline-flex;
+    color: govuk-colour("blue");
+    width: 20px;
+    height: 20px;
+    margin-right: govuk-spacing(1);
+  }
+  &:focus {
+    svg {
+      color: govuk-colour("black");
+    }
+  }
 }
 
 .on-time-helpdesk-panel-drawer {

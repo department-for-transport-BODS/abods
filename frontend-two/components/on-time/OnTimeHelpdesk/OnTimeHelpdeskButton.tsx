@@ -13,7 +13,7 @@ export const OnTimeHelpdeskButton = () => {
         onClick={() => setIsHelpdeskOpen(true)}
         type="button"
       >
-        <QuestionInCircleIcon aria-hidden style={{ minWidth: "20px" }} />
+        <QuestionInCircleIcon />
         How are these numbers calculated?
       </button>
       <OnTimeHelpdeskPanel
