@@ -81,12 +81,23 @@ vi.mock("mapbox-gl", () => ({
 }));
 
 const stops: StopType[] = [
-  { stopId: "ST0000001", stopName: "Mansfield", lat: 53.1472, lon: 1.1987 },
+  {
+    stopId: "ST0000001",
+    stopName: "Mansfield",
+    lat: 53.1472,
+    lon: 1.1987,
+    adminAreaId: null,
+    localityName: null,
+    sourceId: null,
+  },
   {
     stopId: "ST0000002",
     stopName: "Sheffield",
     lat: 53.383331,
     lon: -1.466667,
+    adminAreaId: null,
+    localityName: null,
+    sourceId: null,
   },
 ];
 
