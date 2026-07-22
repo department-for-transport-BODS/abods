@@ -1158,7 +1158,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(100vw, 380px);
+  width: calc(100vw / 2);
   padding: govuk-spacing(4);
   border-left: 1px solid $govuk-border-colour;
   background-color: govuk-colour("white");
