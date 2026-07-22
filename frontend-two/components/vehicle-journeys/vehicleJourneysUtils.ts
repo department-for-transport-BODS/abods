@@ -182,7 +182,7 @@ export const getValidDateRange = (offsetISO?: string, durationISO?: string) =>
   Interval.before(
     DateTime.local()
       .endOf("day")
-      .minus(Duration.fromISO(offsetISO || "P6M")),
+      .minus(Duration.fromISO(offsetISO || "PT0H")),
     Duration.fromISO(durationISO || "P6M"),
   );
 
