@@ -66,7 +66,12 @@ describe("vehicleJourneysService", () => {
   describe("fetchOperators", () => {
     it("should fetch operators", async () => {
       const operators = [
-        { name: "Best Buses", nocCode: "BBUS", operatorId: "OP1", adminAreaIds: [] },
+        {
+          name: "Best Buses",
+          nocCode: "BBUS",
+          operatorId: "OP1",
+          adminAreaIds: [],
+        },
       ];
       mockQuery.mockResolvedValue({ data: { operators } });
 

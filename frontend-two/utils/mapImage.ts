@@ -1,10 +1,8 @@
-import { createElement, type ComponentType } from "react";
+import { createElement, type ComponentType, type SVGProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Map as MapboxMap } from "mapbox-gl";
 
-export type SvgModule =
-  | string
-  | ComponentType<{ focusable?: string; "aria-hidden"?: string | boolean }>;
+export type SvgModule = string | ComponentType<SVGProps<SVGSVGElement>>;
 
 export const resolveSvgMarkup = (svg: SvgModule) =>
   typeof svg === "string"
@@ -24,10 +22,7 @@ export const loadImageFromSvg = async (svg: string) => {
   return await loadPromise;
 };
 
-const imageRegistrations = new WeakMap<
-  MapboxMap,
-  Map<string, Promise<void>>
->();
+const imageRegistrations = new WeakMap<MapboxMap, Map<string, Promise<void>>>();
 
 export const ensureMapImage = async (
   map: MapboxMap,

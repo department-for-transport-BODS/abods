@@ -20,10 +20,7 @@ import {
   VehicleJourneyStop,
 } from "@/types/vehicle-journeys";
 import { getStopOtp } from "@/components/vehicle-journeys/vehicleJourneysUtils";
-import {
-  ensureMapImage,
-  type SvgModule,
-} from "@/utils/mapImage";
+import { ensureMapImage, type SvgModule } from "@/utils/mapImage";
 
 interface VehicleJourneyMapProps {
   stops: VehicleJourneyStop[];

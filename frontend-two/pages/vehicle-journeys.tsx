@@ -34,7 +34,8 @@ const VehicleJourneysPage = () => {
   const isDetailRoutePending =
     router.pathname === "/vehicle-journeys/[journeyId]" && !router.isReady;
 
-  const { offsetISO, durationISO } = config?.vehicleJourneys.validDateRange ?? {};
+  const { offsetISO, durationISO } =
+    config?.vehicleJourneys.validDateRange ?? {};
   const journeyId = getQueryString(router.query.journeyId) ?? null;
   const queryDate = getQueryString(router.query.date);
   const queryStartTime = getQueryString(router.query.startTime);
@@ -75,8 +76,7 @@ const VehicleJourneysPage = () => {
     config?.apiUrl && !isDetailRoutePending && selectedOperatorId && !dateError
       ? ["vehicle-journeys-services", selectedOperatorId, fetchDate]
       : null,
-    ([, operatorId, date]) =>
-      operatorsService.fetchLines([operatorId], date),
+    ([, operatorId, date]) => operatorsService.fetchLines([operatorId], date),
   );
   const { data: journeys, isLoading: journeysLoading } = useSWR(
     config?.apiUrl && !isDetailRoutePending && selectedServiceId && !dateError
