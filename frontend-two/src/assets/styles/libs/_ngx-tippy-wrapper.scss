@@ -29,6 +29,29 @@ $tooltip-arrow-offset: $tooltip-arrow-size;
   .tippy-content {
     max-width: rem(260);
     padding: govuk-spacing(2);
+
+    p {
+      margin: 0 0 govuk-spacing(2);
+    }
+
+    p:last-of-type {
+      margin-bottom: govuk-spacing(1);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      list-style: disc;
+    }
+
+    li {
+      margin-bottom: govuk-spacing(1);
+      list-style: disc;
+    }
+
+    li:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 .tippy-box[data-theme~="gds-tooltip"][data-placement^="top"]

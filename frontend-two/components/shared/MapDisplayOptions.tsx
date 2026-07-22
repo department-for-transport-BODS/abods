@@ -7,12 +7,16 @@ interface MapDisplayOptionsProps {
   activeStyle: MapStyle;
   mapboxSatelliteStyle?: string;
   onStyleChange: (style: MapStyle) => void;
+  showScheduledRoute?: boolean;
+  onScheduledRouteChange?: (visible: boolean) => void;
 }
 
 export const MapDisplayOptions = ({
   activeStyle,
   mapboxSatelliteStyle,
   onStyleChange,
+  showScheduledRoute,
+  onScheduledRouteChange,
 }: MapDisplayOptionsProps) => {
   const optionsRef = useRef<HTMLDivElement>(null);
   const [showDisplayOptions, setShowDisplayOptions] = useState(false);
@@ -20,6 +24,10 @@ export const MapDisplayOptions = ({
   const suffix = reactId.replace(/:/g, "");
   const panelId = `map-display-options-panel-${suffix}`;
   const toggleName = `map-display-options-${suffix}`;
+  const scheduledRouteToggleName = `map-scheduled-route-${suffix}`;
+  const showScheduledRouteControls =
+    typeof showScheduledRoute === "boolean" &&
+    typeof onScheduledRouteChange === "function";
 
   useEffect(() => {
     if (!showDisplayOptions) return;
@@ -47,7 +55,7 @@ export const MapDisplayOptions = ({
     };
   }, [showDisplayOptions]);
 
-  if (!mapboxSatelliteStyle) {
+  if (!mapboxSatelliteStyle && !showScheduledRouteControls) {
     return null;
   }
 
@@ -70,20 +78,44 @@ export const MapDisplayOptions = ({
         aria-label="Map view"
         aria-hidden={!showDisplayOptions}
       >
-        <p className="govuk-body govuk-!-margin-bottom-1">
-          <strong>Map view</strong>
-        </p>
-        <SegmentedToggle
-          legend="Map view"
-          hideLegend
-          name={toggleName}
-          value={activeStyle}
-          onChange={(value) => onStyleChange(value as MapStyle)}
-          options={[
-            { value: "default", label: "Default" },
-            { value: "satellite", label: "Satellite" },
-          ]}
-        />
+        {mapboxSatelliteStyle ? (
+          <>
+            <p className="govuk-body govuk-!-margin-bottom-1">
+              <strong>Map view</strong>
+            </p>
+            <SegmentedToggle
+              legend="Map view"
+              hideLegend
+              name={toggleName}
+              value={activeStyle}
+              onChange={(value) => onStyleChange(value as MapStyle)}
+              options={[
+                { value: "default", label: "Default" },
+                { value: "satellite", label: "Satellite" },
+              ]}
+            />
+          </>
+        ) : null}
+        {showScheduledRouteControls ? (
+          <>
+            <p
+              className={`govuk-body govuk-!-margin-bottom-1${mapboxSatelliteStyle ? " govuk-!-margin-top-2" : ""}`}
+            >
+              <strong>Scheduled route view</strong>
+            </p>
+            <SegmentedToggle
+              legend="Scheduled route view"
+              hideLegend
+              name={scheduledRouteToggleName}
+              value={showScheduledRoute ? "show" : "hide"}
+              onChange={(value) => onScheduledRouteChange(value === "show")}
+              options={[
+                { value: "show", label: "Show" },
+                { value: "hide", label: "Hide" },
+              ]}
+            />
+          </>
+        ) : null}
       </div>
     </div>
   );

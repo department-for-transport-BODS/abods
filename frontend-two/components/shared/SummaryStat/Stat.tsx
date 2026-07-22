@@ -4,7 +4,7 @@ import { Tooltip } from "@/components/shared/Tooltip";
 interface StatProps {
   label: string;
   value: ReactNode;
-  tooltip?: string;
+  tooltip?: ReactNode;
   id: string;
   className?: string;
   loading?: boolean;

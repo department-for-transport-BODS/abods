@@ -259,6 +259,564 @@
   @include govuk-font(16);
 }
 
+.date-select {
+  position: relative;
+}
+
+.date-select__input-row {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  .govuk-input {
+    padding-right: 3rem;
+  }
+}
+
+.date-select__calendar-toggle {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: auto;
+  color: govuk-colour("black");
+  cursor: pointer;
+}
+
+.date-select__calendar-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.date-select__controls {
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  top: 100%;
+  margin-top: -2px;
+  width: calc(46px * 7 + #{govuk-spacing(6)});
+  box-sizing: border-box;
+  padding: govuk-spacing(4);
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+}
+
+.date-select__calendar-header {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: govuk-spacing(1);
+}
+
+.date-select__month-name {
+  @include govuk-font(19);
+
+  &--this-month {
+    font-weight: 700;
+  }
+}
+
+.date-select__month-step {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: $govuk-brand-colour;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &--prev {
+    left: 0;
+  }
+
+  &--next {
+    right: 0;
+  }
+
+  &--disabled {
+    pointer-events: none;
+    color: govuk-colour("mid-grey");
+  }
+}
+
+.vehicle-journeys-search__controls {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) minmax(18rem, 1fr) minmax(
+      18rem,
+      1fr
+    );
+  gap: govuk-spacing(4);
+  align-items: end;
+  margin-bottom: govuk-spacing(5);
+}
+
+.vehicle-journeys-search__operator .multiselect-dropdown,
+.vehicle-journeys-search__service .multiselect-dropdown {
+  width: 100%;
+}
+
+.vehicle-journeys-search__loading {
+  margin-top: govuk-spacing(4);
+}
+
+.vehicle-journeys-search__error {
+  display: flex;
+  align-items: flex-start;
+  gap: govuk-spacing(2);
+}
+
+.vehicle-journeys-search__error-icon {
+  flex-shrink: 0;
+  color: $govuk-error-colour;
+}
+
+.journey-search-nav {
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(3);
+  justify-content: flex-end;
+  margin-left: auto;
+  margin-bottom: govuk-spacing(5);
+  width: fit-content;
+}
+
+.journey-search-nav .govuk-pagination__prev,
+.journey-search-nav .govuk-pagination__next {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.journey-search-nav__date {
+  padding-left: govuk-spacing(1);
+  padding-right: govuk-spacing(1);
+  @include govuk-font(19);
+}
+
+.journey-search-nav .govuk-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+  color: $govuk-link-colour;
+  font-weight: normal;
+  text-decoration: underline;
+}
+
+.journey-search-nav .govuk-pagination__link-title {
+  font-weight: 700;
+}
+
+.journey-search-nav .govuk-pagination__link:hover {
+  color: $govuk-link-hover-colour;
+}
+
+.journey-search-nav .govuk-pagination__link:focus {
+  color: $govuk-text-colour;
+}
+
+.journey-search-nav .govuk-pagination__icon {
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+.journey-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: govuk-spacing(2);
+  margin-bottom: govuk-spacing(5);
+}
+
+.journey-search-grid__time {
+  display: inline-block;
+  padding: govuk-spacing(1) 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-search-grid--skeleton {
+  margin-top: govuk-spacing(3);
+}
+
+.journey-search-grid__skeleton-item {
+  height: 1.5rem;
+  background: govuk-colour("light-grey");
+}
+
+.vehicle-journeys__header-container {
+  display: grid;
+  grid-template-columns: minmax(20rem, 1fr) minmax(18rem, auto);
+  gap: govuk-spacing(5);
+  align-items: start;
+  margin-bottom: govuk-spacing(5);
+}
+
+.vehicle-journeys__summary-list {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  row-gap: govuk-spacing(2);
+  column-gap: govuk-spacing(2);
+  margin-bottom: 0;
+  @include govuk-font(19);
+}
+
+.vehicle-journeys__summary-list .govuk-summary-list__row {
+  display: contents;
+  border-bottom: 0;
+}
+
+.vehicle-journeys__summary-list .govuk-summary-list__key {
+  display: block;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  font-weight: $govuk-font-weight-regular;
+}
+
+.vehicle-journeys__summary-list .govuk-summary-list__value {
+  display: block;
+  padding: 0;
+  margin: 0;
+  font-weight: $govuk-font-weight-bold;
+}
+
+.vehicle-journeys__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: govuk-spacing(3);
+}
+
+.vehicle-journeys__nav-loading {
+  display: inline-flex;
+  align-items: center;
+}
+
+.journey-nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: govuk-spacing(3);
+  margin-bottom: govuk-spacing(3);
+  @include govuk-font(19);
+}
+
+.journey-nav__link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: govuk-spacing(2);
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}
+
+.journey-nav__link:hover {
+  color: $govuk-link-hover-colour;
+}
+
+.journey-nav__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 15px;
+  height: 13px;
+}
+
+.journey-nav__link--disabled {
+  color: $govuk-link-colour;
+  opacity: 0.6;
+  pointer-events: none;
+  text-decoration: none;
+}
+
+.vehicle-journeys__stop-map-grid {
+  display: grid;
+  grid-template-columns: minmax(22rem, 0.9fr) minmax(24rem, 1.1fr);
+  gap: govuk-spacing(5);
+  align-items: start;
+}
+
+.vehicle-journeys__sticky-container {
+  position: sticky;
+  top: govuk-spacing(4);
+}
+
+.vehicle-journeys__otp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: govuk-spacing(2);
+  margin-top: govuk-spacing(8);
+  margin-bottom: govuk-spacing(4);
+}
+
+.vehicle-journeys__otp-stat {
+  min-width: 0;
+  border-top: 1px solid $govuk-border-colour;
+  padding-top: govuk-spacing(3);
+}
+
+.vehicle-journeys__stop-list {
+  border-top: 0;
+}
+
+.vehicle-journeys__stop-list-loading {
+  padding-top: govuk-spacing(2);
+}
+
+.stop-list-item {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 5.5rem 5.5rem;
+  gap: govuk-spacing(2);
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.stop-list-item--timing-point {
+  @include govuk-font(19, $weight: bold);
+  border-top: 1px solid govuk-colour("mid-grey");
+  border-bottom: 1px solid govuk-colour("mid-grey");
+  padding-top: govuk-spacing(2);
+  padding-bottom: govuk-spacing(2);
+}
+
+.stop-list-item--timing-point--first {
+  border-top: none;
+}
+
+.stop-list-item--skeleton {
+  border-bottom: none;
+  min-height: 2.25rem;
+}
+
+.stop-list-item__skeleton-block {
+  height: 1rem;
+  background: govuk-colour("light-grey");
+
+  &--wide {
+    width: 80%;
+  }
+}
+
+.stop-list-header {
+  @include govuk-font(16, $weight: bold);
+  border-bottom: 1px solid $govuk-border-colour;
+  min-height: govuk-spacing(8);
+}
+
+.stop-list-item__value-container {
+  display: flex;
+  align-items: center;
+}
+
+.stop-list-item__heading,
+.stop-list-item__value-container__align-right {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.stop-list-item__name {
+  @include govuk-font(16);
+  font-weight: $font-weight-normal;
+  color: govuk-colour("black");
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.stop-list-item--timing-point .stop-list-item__name {
+  font-size: $font-size-body;
+  line-height: $line-height-body;
+  font-weight: $font-weight-normal;
+}
+
+.stop-list-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.stop-list-item__icon svg {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.stop-list-item__icon--on-time {
+  color: govuk-colour("purple");
+}
+
+.stop-list-item__icon--early {
+  color: govuk-colour("pink");
+}
+
+.stop-list-item__icon--late {
+  color: #e5c700;
+}
+
+.stop-list-item__icon--no-data {
+  color: govuk-colour("mid-grey");
+}
+
+.stop-list-item__icon--stop {
+  width: 1.25rem;
+  margin-left: 3px;
+
+  svg {
+    stroke-width: 2px;
+  }
+}
+
+.stop-list-item__scheduled,
+.stop-list-item__actual {
+  font-variant-numeric: tabular-nums;
+}
+
+.stop-list-item__time-container {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.stop-list-item__time-container--seconds {
+  font-size: calc(100% - 4px);
+}
+
+.vehicle-journeys__map-wrapper {
+  position: relative;
+}
+
+.vehicle-journeys__map-controls {
+  position: absolute;
+  z-index: 2;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+}
+
+.vehicle-journeys__map {
+  width: 100%;
+  min-height: 80vh;
+  border: 1px solid $govuk-border-colour;
+}
+
+.vehicle-journeys__map-loading {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.vehicle-journeys__map-recentre {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin: 0 0 govuk-spacing(1) govuk-spacing(2);
+  border: 0;
+  background: govuk-colour("white");
+  color: govuk-colour("blue");
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  cursor: pointer;
+
+  &:hover {
+    background: govuk-colour("light-grey");
+  }
+}
+
+.vehicle-journeys__map-recentre-icon {
+  display: inline-flex;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.vehicle-journeys__map-empty {
+  position: absolute;
+  right: govuk-spacing(3);
+  bottom: govuk-spacing(2);
+  padding: govuk-spacing(2);
+  background: govuk-colour("white");
+}
+
+.otp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(2) govuk-spacing(4);
+}
+
+.otp-legend__item {
+  display: flex;
+  align-items: center;
+}
+
+.otp-legend__icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: govuk-spacing(1);
+
+  &--on-time {
+    background-color: govuk-colour("purple");
+  }
+
+  &--early {
+    background-color: govuk-colour("pink");
+  }
+
+  &--late {
+    background-color: #e5c700;
+  }
+
+  &--scheduled-route {
+    width: 24px;
+    height: 0;
+    border-top: 2px dotted #999999;
+  }
+}
+
+.otp-legend__value {
+  margin-top: 2px;
+
+  &--muted {
+    margin-left: govuk-spacing(1);
+    color: $govuk-secondary-text-colour;
+  }
+}
+
+@media (max-width: 900px) {
+  .vehicle-journeys-search__controls,
+  .vehicle-journeys__header-container,
+  .vehicle-journeys__stop-map-grid,
+  .vehicle-journeys__otp-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-journeys__sticky-container {
+    position: static;
+  }
+
+  .vehicle-journeys__map {
+    min-height: 34rem;
+  }
+}
+
 .filter-chip__remove {
   border: 0;
   padding: 0;
@@ -1302,6 +1860,7 @@ $day-width: 46px;
 .date-range-controls__calendar-day-names {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .date-range-controls__day-name,
@@ -1309,6 +1868,8 @@ $day-width: 46px;
   width: $day-width;
   height: $day-width;
   display: inline-flex;
+  flex: 0 0 $day-width;
+  position: relative;
   align-items: center;
   justify-content: center;
   font-size: 19px;
@@ -1319,15 +1880,32 @@ $day-width: 46px;
 }
 
 .date-range-controls__table {
+  width: 100%;
+  table-layout: fixed;
   border-spacing: 0;
   border-collapse: collapse;
 }
 
 .date-range-controls__table-cell {
+  width: $day-width;
+  height: $day-width;
   padding: 0;
+  position: relative;
 
   &--included {
     background-color: #f3f2f1;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -$day-width;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #f3f2f1;
+      z-index: 0;
+      pointer-events: none;
+    }
   }
   &--start {
     background-color: #f3f2f1;
@@ -1345,7 +1923,7 @@ $day-width: 46px;
   background: none;
   border: none;
   cursor: pointer;
-  position: relative;
+  z-index: 1;
   color: $govuk-text-colour;
 
   &:hover::after {
@@ -1411,47 +1989,100 @@ $day-width: 46px;
   position: relative;
 }
 
+.multiselect-dropdown__control {
+  position: relative;
+}
+
 .multiselect-dropdown__button {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   height: 40px;
-  padding: 0.5em 0.75em;
+  box-sizing: border-box;
+  padding: govuk-spacing(1);
   background: $govuk-body-background-colour;
   border: 2px solid $govuk-input-border-colour;
   cursor: pointer;
   text-align: left;
 }
 
+.multiselect-dropdown__button:focus,
+.multiselect-dropdown__search-text:focus {
+  outline: 3px solid $govuk-focus-colour;
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 2px $govuk-input-border-colour;
+}
+
+.multiselect-dropdown__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.multiselect-dropdown__button--clearable {
+  padding-right: 50px;
+}
+
 .multiselect-dropdown__button-text {
+  flex: 1 1 auto;
+  min-width: 0;
   color: $govuk-secondary-text-colour;
   font-size: 19px;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
 
+.multiselect-dropdown__button-text--selected {
+  color: $govuk-text-colour;
+}
+
 .multiselect-dropdown__arrow {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(2);
   display: inline-block;
   border: solid $govuk-text-colour;
   border-width: 0 2px 2px 0;
   padding: 3px;
-  transform: rotate(45deg);
-  margin-bottom: 3px;
+  transform: translateY(-50%) rotate(45deg);
   flex-shrink: 0;
   transition: transform 0.15s ease;
+  pointer-events: none;
+}
+
+.multiselect-dropdown__clear {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(6);
+  transform: translateY(-50%);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: govuk-colour("black");
+  cursor: pointer;
+  @include govuk-font(19, $weight: bold);
+  line-height: 1;
+}
+
+.multiselect-dropdown__clear:focus {
+  outline: 3px solid $govuk-focus-colour;
+  outline-offset: 0;
+  background-color: $govuk-focus-colour;
+  color: $govuk-focus-text-colour;
 }
 
 .multiselect-dropdown__button--open .multiselect-dropdown__arrow {
-  transform: rotate(-135deg);
-  margin-bottom: -3px;
+  transform: translateY(-50%) rotate(-135deg);
 }
 
 .multiselect-dropdown__search-text {
   color: $govuk-secondary-text-colour;
   font-size: 19px;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1462,10 +2093,11 @@ $day-width: 46px;
   position: absolute;
   z-index: 100;
   background: $govuk-body-background-colour;
-  border: 1px solid $govuk-border-colour;
+  border: 1px solid govuk-colour("black");
   width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  max-height: 260px;
+  box-sizing: border-box;
+  padding: govuk-spacing(1);
+  max-height: 230px;
   overflow-y: auto;
 }
 
@@ -1518,19 +2150,27 @@ $day-width: 46px;
 }
 
 .multiselect-dropdown__single-item {
-  padding: 8px 12px;
+  padding: 5px;
   cursor: pointer;
   font-family: "GDS Transport", arial, sans-serif;
   font-size: 19px;
+  line-height: 1.25;
   color: $govuk-text-colour;
 }
 
 .multiselect-dropdown__single-item:hover {
-  background: #f3f2f1;
+  background: govuk-colour("blue");
+  color: govuk-colour("white");
 }
 
 .multiselect-dropdown__single-item--selected {
-  background: #d2e2f1;
+  background: transparent;
+  color: $govuk-text-colour;
+}
+
+.multiselect-dropdown__single-item--selected:hover {
+  background: govuk-colour("blue");
+  color: govuk-colour("white");
 }
 
 // OperatorDropdown styling

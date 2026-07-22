@@ -1,5 +1,4 @@
 import { Locator, Page } from "@playwright/test";
-import { DateTime } from "luxon";
 
 /**
  * Page object for the Feed History page (/feed-monitoring/[nocCode]/feed-history).
@@ -7,9 +6,9 @@ import { DateTime } from "luxon";
 export class FeedHistoryPage {
   constructor(readonly page: Page) {}
 
-  async goTo(nocCode: string, date?: DateTime): Promise<void> {
+  async goTo(nocCode: string, date?: string): Promise<void> {
     const d = date
-      ? date.toISODate()
+      ? date
       : new Date(Date.now() - 86400000).toISOString().split("T")[0];
     await this.page.goto(`/feed-monitoring/${nocCode}/feed-history?date=${d}`, {
       waitUntil: "domcontentloaded",

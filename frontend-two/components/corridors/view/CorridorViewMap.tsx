@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapDisplayOptions } from "@/components/shared/MapDisplayOptions";
 import { displayCorridorChevrons } from "@/components/corridors/shared/corridorChevrons";
-import ReCentreIcon from "@/assets/icons/re-centre.svg";
+import { ReCentreIcon } from "@/components/icons/ReCentreIcon";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
 import { isInvalidRouteLink } from "@/services/corridors/corridors-speed-utils";
@@ -354,11 +354,7 @@ export const CorridorViewMap = ({
             className="corridor__map-recentre"
             onClick={recentre}
           >
-            <ReCentreIcon
-              className="corridor__map-recentre-icon"
-              aria-hidden="true"
-              focusable="false"
-            />
+            <ReCentreIcon className="corridor__map-recentre-icon" />
             Re-centre
           </button>,
           recentrePortal,

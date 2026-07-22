@@ -17,7 +17,17 @@ export function formatDateToDisplayString(date: DateTime): string {
   return date.toFormat("dd MMM yyyy");
 }
 
+// DateTime object to short display string (e.g. "06/05/2026")
+export function formatDateToShortDisplayString(date: DateTime): string {
+  return date.toFormat("dd/MM/yyyy");
+}
+
 // ISO date string (YYYY-MM-DD) to DateTime object (local time)
 export function formatISODateStringToDate(str: string): DateTime {
   return DateTime.fromISO(str).startOf("day");
+}
+
+// Short display string (DD/MM/YYYY) to DateTime object (local time)
+export function formatShortDisplayStringToDate(str: string): DateTime {
+  return DateTime.fromFormat(str, "dd/MM/yyyy").startOf("day");
 }
