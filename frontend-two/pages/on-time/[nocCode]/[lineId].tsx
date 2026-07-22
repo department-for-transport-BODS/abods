@@ -126,6 +126,7 @@ interface ServiceLevelData {
 const OnTimeServicePage = () => {
   useRequireAuth();
   const router = useRouter();
+  const { isReady, replace } = router;
   const { config } = useConfig();
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
@@ -295,7 +296,7 @@ const OnTimeServicePage = () => {
 
   useEffect(() => {
     if (
-      !router.isReady ||
+      !isReady ||
       !config?.apiUrl ||
       !nocCode ||
       !lineId ||
@@ -307,7 +308,7 @@ const OnTimeServicePage = () => {
       setLineNotFound(false);
       const operatorData = await operatorsService.fetchOperator(nocCode);
       if (!operatorData) {
-        router.replace("/on-time/operator-not-found");
+        replace("/on-time/operator-not-found");
         return;
       }
       setOperator(operatorData);
@@ -392,11 +393,11 @@ const OnTimeServicePage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
-    router,
-    router.isReady,
+    isReady,
+    replace,
   ]);
 
-  if (!router.isReady || !nocCode || !lineId || !operatorChecked) {
+  if (!isReady || !nocCode || !lineId || !operatorChecked) {
     return (
       <BaseLayout title="On-time performance - Analyse Bus Open Data">
         <p className="govuk-body">Loading...</p>

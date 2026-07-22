@@ -111,6 +111,7 @@ interface OperatorOnTimeData {
 const OnTimeOperatorPage = () => {
   useRequireAuth();
   const router = useRouter();
+  const { isReady, replace } = router;
   const { config } = useConfig();
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
@@ -203,7 +204,7 @@ const OnTimeOperatorPage = () => {
   };
 
   useEffect(() => {
-    if (!router.isReady || !config?.apiUrl) return;
+    if (!isReady || !config?.apiUrl) return;
     const loadOperators = async () => {
       try {
         const ops = await operatorsService.fetchOperators();
@@ -213,11 +214,11 @@ const OnTimeOperatorPage = () => {
       }
     };
     loadOperators();
-  }, [router.isReady, config]);
+  }, [config, isReady]);
 
   useEffect(() => {
     if (
-      !router.isReady ||
+      !isReady ||
       !config?.apiUrl ||
       !nocCode ||
       !servicePerformanceParams
@@ -227,7 +228,7 @@ const OnTimeOperatorPage = () => {
       setIsLoading(true);
       const operator = await operatorsService.fetchOperator(nocCode);
       if (!operator) {
-        router.replace("/on-time/operator-not-found");
+        replace("/on-time/operator-not-found");
         return;
       }
       setOperatorChecked(true);
@@ -302,8 +303,8 @@ const OnTimeOperatorPage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
-    router,
-    router.isReady,
+    isReady,
+    replace,
   ]);
 
   const summaryStats = data.overview?.onTime;
