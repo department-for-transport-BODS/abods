@@ -69,10 +69,8 @@ const OnTimeIndexPage = () => {
   const [refineResultsFilters, setRefineResultsFilters] =
     useState<PerformanceFiltersInputType>({});
 
-  const refineResultsInitialValues = useMemo(
-    () => performanceFiltersToRefineResults(refineResultsFilters),
-    [JSON.stringify(refineResultsFilters)],
-  );
+  const refineResultsInitialValues =
+    performanceFiltersToRefineResults(refineResultsFilters);
   const [dateRange, setDateRange] = useState<{
     from: string;
     to: string;
@@ -226,7 +224,7 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [config?.apiUrl, operatorTableParamsKey]);
+  }, [config?.apiUrl, operatorTableParams, operatorTableParamsKey]);
 
   return (
     <BaseLayout title="All services - Analyse Bus Open Data">

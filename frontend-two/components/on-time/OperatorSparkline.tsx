@@ -96,7 +96,7 @@ export const OperatorSparkline = ({
       chart.dispose();
       chartRef.current = null;
     };
-  }, [chartData]);
+  }, [chartData, fromTimestamp, toTimestamp]);
 
   if (chartData.length === 0) {
     return <span className="govuk-body">-</span>;

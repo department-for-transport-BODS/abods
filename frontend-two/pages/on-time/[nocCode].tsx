@@ -134,10 +134,8 @@ const OnTimeOperatorPage = () => {
     useState<PerformanceFiltersInputType>({});
   const [allOperators, setAllOperators] = useState<OperatorType[]>([]);
 
-  const refineResultsInitialValues = useMemo(
-    () => performanceFiltersToRefineResults(refineResultsFilters),
-    [JSON.stringify(refineResultsFilters)],
-  );
+  const refineResultsInitialValues =
+    performanceFiltersToRefineResults(refineResultsFilters);
 
   const [dateRange, setDateRange] = useState<{
     from: string;
@@ -304,6 +302,7 @@ const OnTimeOperatorPage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
+    router,
     router.isReady,
   ]);
 
