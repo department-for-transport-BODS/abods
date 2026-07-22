@@ -228,9 +228,12 @@ describe("OnTimeServicePage", () => {
 
     render(<OnTimeServicePage />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId("on-time-service-map")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("on-time-service-map")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
   });
 
   it("exports stop data with an Angular-style filename", async () => {

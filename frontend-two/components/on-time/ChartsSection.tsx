@@ -246,7 +246,7 @@ export const ChartsSection = ({
             </button>
           ))}
         </div>
-        {noData ? (
+        {noData && activeTab !== "map" ? (
           <div className="charts-section__no-data">
             <ChartNoDataMessage
               dataExpected={dataExpected}
