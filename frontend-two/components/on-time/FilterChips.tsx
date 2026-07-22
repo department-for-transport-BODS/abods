@@ -1,8 +1,11 @@
 import { entries as getEntries } from "lodash-es";
+import { CrossIcon } from "@/components/icons/CrossIcon";
+import { RefineResultsAdminAreaOption } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { PerformanceFiltersInputType } from "@/src/generated/graphql";
 
 interface FilterChipsProps {
   filters: PerformanceFiltersInputType;
+  adminAreaOptions?: RefineResultsAdminAreaOption[];
   onFilterChange: (filters: PerformanceFiltersInputType) => void;
 }
 
@@ -49,29 +52,44 @@ const FilterChip = ({
 }) => {
   return (
     <div className="filter-chip">
-      <span className="filter-chip__label">{label}:</span>
-      <span className="filter-chip__value">{value}</span>
       <button
         type="button"
         className="filter-chip__remove"
         aria-label={`Remove ${label} filter`}
         onClick={onClear}
       >
-        ×
+        <CrossIcon className="filter-chip__remove-icon" />
       </button>
+      <span className="filter-chip__label">{label}:</span>
+      <span className="filter-chip__value">{value}</span>
     </div>
   );
 };
 
-export const FilterChips = ({ filters, onFilterChange }: FilterChipsProps) => {
+export const FilterChips = ({
+  filters,
+  adminAreaOptions = [],
+  onFilterChange,
+}: FilterChipsProps) => {
+  const isAdminAreas = Boolean(filters.adminAreaIds?.length);
   const isDayOfWeek = Boolean(filters.dayOfWeekFlags);
   const isTimeRange = Boolean(filters.startTime) || Boolean(filters.endTime);
   const isMinDelay = Boolean(filters.minDelay);
   const isMaxDelay = Boolean(filters.maxDelay);
 
-  if (!isDayOfWeek && !isTimeRange && !isMinDelay && !isMaxDelay) {
+  if (
+    !isAdminAreas &&
+    !isDayOfWeek &&
+    !isTimeRange &&
+    !isMinDelay &&
+    !isMaxDelay
+  ) {
     return null;
   }
+
+  const adminAreaNameById = new Map(
+    adminAreaOptions.map((option) => [option.value, option.label]),
+  );
 
   const updateFilters = (nextFilters: PerformanceFiltersInputType) => {
     onFilterChange(nextFilters);
@@ -80,6 +98,13 @@ export const FilterChips = ({ filters, onFilterChange }: FilterChipsProps) => {
   const clearDayOfWeekFilter = () => {
     const { dayOfWeekFlags: _, ...rest } = filters;
     updateFilters(rest);
+  };
+
+  const clearAdminAreaFilter = (adminAreaId: string) => {
+    updateFilters({
+      ...filters,
+      adminAreaIds: filters.adminAreaIds?.filter((id) => id !== adminAreaId),
+    });
   };
 
   const clearTimeRangeFilter = () => {
@@ -103,6 +128,16 @@ export const FilterChips = ({ filters, onFilterChange }: FilterChipsProps) => {
 
   return (
     <ul className="filter-chips" aria-label="Active filters">
+      {filters.adminAreaIds?.map((adminAreaId) => (
+        <li className="filter-chips__item" key={adminAreaId}>
+          <FilterChip
+            label="Area"
+            value={adminAreaNameById.get(adminAreaId) ?? adminAreaId}
+            onClear={() => clearAdminAreaFilter(adminAreaId)}
+          />
+        </li>
+      ))}
+
       {isDayOfWeek && (
         <li className="filter-chips__item">
           <FilterChip

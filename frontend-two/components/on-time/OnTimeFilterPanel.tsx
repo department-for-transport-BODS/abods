@@ -3,7 +3,10 @@ import { DateTime } from "luxon";
 import { FilterChips } from "@/components/on-time/FilterChips";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
-import { RefineResultsFilterValues } from "@/components/shared/RefineResults/RefineResultsFilters";
+import {
+  RefineResultsAdminAreaOption,
+  RefineResultsFilterValues,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { PerformanceFiltersInputType } from "@/src/generated/graphql";
 import { formatDateToISODateString } from "@/utils/date-formatter";
@@ -72,6 +75,8 @@ interface ToggleOption {
 
 interface OnTimeFilterPanelProps {
   isLoading: boolean;
+  showAdminAreaFilter?: boolean;
+  adminAreaOptions?: RefineResultsAdminAreaOption[];
   refineResultsInitialValues: Partial<RefineResultsFilterValues>;
   onApplyRefineResults: (values: RefineResultsFilterValues) => void;
   onResetRefineResults: () => void;
@@ -92,6 +97,8 @@ interface OnTimeFilterPanelProps {
 
 export const OnTimeFilterPanel = ({
   isLoading,
+  showAdminAreaFilter = false,
+  adminAreaOptions = [],
   refineResultsInitialValues,
   onApplyRefineResults,
   onResetRefineResults,
@@ -134,34 +141,39 @@ export const OnTimeFilterPanel = ({
             onChange={(event) => onDatePresetChange(event.target.value)}
           />
         </div>
-        <div className="refine-results-button-container">
-          <RefineResultsButton
-            isLoading={isLoading}
-            initialValues={refineResultsInitialValues}
-            onApply={onApplyRefineResults}
-            onReset={onResetRefineResults}
-          />
-        </div>
-        <div className="on-time-toggle-container">
-          <SegmentedToggle
-            legend=""
-            name="match-type-toggle"
-            value={selectedMatchType}
-            onChange={onMatchTypeChange}
-            options={matchTypeOptions}
-          />
-          <SegmentedToggle
-            legend=""
-            name="stop-type-toggle"
-            value={selectedStopType}
-            onChange={onStopTypeChange}
-            options={stopTypeOptions}
-          />
+        <div className="controls-secondary-row">
+          <div className="refine-results-button-container">
+            <RefineResultsButton
+              isLoading={isLoading}
+              showAdminAreaFilter={showAdminAreaFilter}
+              adminAreaOptions={adminAreaOptions}
+              initialValues={refineResultsInitialValues}
+              onApply={onApplyRefineResults}
+              onReset={onResetRefineResults}
+            />
+          </div>
+          <div className="on-time-toggle-container">
+            <SegmentedToggle
+              legend=""
+              name="match-type-toggle"
+              value={selectedMatchType}
+              onChange={onMatchTypeChange}
+              options={matchTypeOptions}
+            />
+            <SegmentedToggle
+              legend=""
+              name="stop-type-toggle"
+              value={selectedStopType}
+              onChange={onStopTypeChange}
+              options={stopTypeOptions}
+            />
+          </div>
         </div>
       </div>
       <div className="filter-chips-container">
         <FilterChips
           filters={refineResultsFilters}
+          adminAreaOptions={adminAreaOptions}
           onFilterChange={onRefineResultsFilterChange}
         />
       </div>

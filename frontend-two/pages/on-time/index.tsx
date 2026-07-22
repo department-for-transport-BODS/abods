@@ -198,11 +198,6 @@ const OnTimeIndexPage = () => {
     selectedAdminAreaIds,
   ]);
 
-  const operatorTableParamsKey = useMemo(
-    () => JSON.stringify(operatorTableParams),
-    [operatorTableParams],
-  );
-
   useEffect(() => {
     if (!config?.apiUrl) return;
     const load = async () => {
@@ -224,10 +219,10 @@ const OnTimeIndexPage = () => {
       }
     };
     load();
-  }, [config?.apiUrl, operatorTableParams, operatorTableParamsKey]);
+  }, [config?.apiUrl, operatorTableParams]);
 
   return (
-    <BaseLayout title="All services - Analyse Bus Open Data">
+    <BaseLayout title="All services: Analyse Bus Open Data">
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
       <OnTimeFilterPanel

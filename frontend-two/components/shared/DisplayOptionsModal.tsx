@@ -65,7 +65,6 @@ export const DisplayOptionsModal = ({
       open={open}
       title="Display options"
       closeLabel="Close display options"
-      showCloseButton={false}
       onClose={onClose}
     >
       <div className="display-options-modal">

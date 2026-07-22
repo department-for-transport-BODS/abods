@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { OtpThresholdModal } from "@/components/on-time/otp-threshold/OtpThresholdModal";
+import { Tooltip } from "@/components/shared/Tooltip";
 import {
   PerformanceParams,
   PunctualityOverview,
@@ -24,14 +25,13 @@ export const OtpThresholdModalLink = ({
 
   return (
     <>
-      <button
-        type="button"
-        className="govuk-body govuk-link button-link"
-        style={{ textDecoration: "underline" }}
+      <Tooltip
+        message="Compare on-time performance thresholds"
+        className="govuk-body govuk-link button-link otp-threshold-modal-button"
         onClick={() => setOpen(true)}
       >
         Compare thresholds
-      </button>
+      </Tooltip>
       <OtpThresholdModal
         open={open}
         onClose={() => setOpen(false)}

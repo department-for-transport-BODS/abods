@@ -9,7 +9,7 @@ interface ChartNoDataWrapperProps {
   children: ReactNode;
 }
 
-const getErrorMessage = ({
+export const getChartNoDataMessage = ({
   dataExpected,
   timingPointsNotSupported,
   minMaxDelayNotSupported,
@@ -29,6 +29,30 @@ const getErrorMessage = ({
   return "We have not found any timetable data for the time period and filters selected.";
 };
 
+export const ChartNoDataMessage = ({
+  dataExpected = false,
+  timingPointsNotSupported = false,
+  minMaxDelayNotSupported = false,
+}: Omit<ChartNoDataWrapperProps, "children" | "noData">) => {
+  const errorMessage = getChartNoDataMessage({
+    dataExpected,
+    timingPointsNotSupported,
+    minMaxDelayNotSupported,
+  });
+
+  return (
+    <div className="chart-no-data-wrapper__error">
+      <ExclamationInCircleIcon
+        aria-hidden="true"
+        className="chart-no-data-wrapper__error-icon"
+      />
+      <span className="chart-no-data-wrapper__error-message">
+        {errorMessage}
+      </span>
+    </div>
+  );
+};
+
 export const ChartNoDataWrapper = ({
   noData = false,
   dataExpected = false,
@@ -36,25 +60,15 @@ export const ChartNoDataWrapper = ({
   minMaxDelayNotSupported = false,
   children,
 }: ChartNoDataWrapperProps) => {
-  const errorMessage = getErrorMessage({
-    dataExpected,
-    timingPointsNotSupported,
-    minMaxDelayNotSupported,
-  });
-
   return (
     <div className="chart-no-data-wrapper">
       <div>
         {noData ? (
-          <div className="chart-no-data-wrapper__error">
-            <ExclamationInCircleIcon
-              aria-hidden="true"
-              className="chart-no-data-wrapper__error-icon"
-            />
-            <span className="chart-no-data-wrapper__error-message">
-              {errorMessage}
-            </span>
-          </div>
+          <ChartNoDataMessage
+            dataExpected={dataExpected}
+            timingPointsNotSupported={timingPointsNotSupported}
+            minMaxDelayNotSupported={minMaxDelayNotSupported}
+          />
         ) : null}
 
         <div className="chart-no-data-wrapper__content">{children}</div>

@@ -1,6 +1,15 @@
-export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+export const DAYS = [
+  { key: "Mon", displayValue: "Mon" },
+  { key: "Tue", displayValue: "Tue" },
+  { key: "Wed", displayValue: "Wed" },
+  { key: "Thu", displayValue: "Thur" },
+  { key: "Fri", displayValue: "Fri" },
+  { key: "Sat", displayValue: "Sat" },
+  { key: "Sun", displayValue: "Sun" },
+] as const;
+// That exists purely because of Thursday
 
-export type DayKey = (typeof DAYS)[number];
+export type DayKey = (typeof DAYS)[number]["key"];
 
 interface DaySelectProps {
   selectedDays: Record<DayKey, boolean>;
@@ -21,19 +30,19 @@ export const DaySelect = ({
         {legend}
       </legend>
       <div className="day-select__checkboxes">
-        {DAYS.map((day) => {
-          const inputId = `${idPrefix}-${day}`;
+        {DAYS.map(({ key, displayValue }) => {
+          const inputId = `${idPrefix}-${key}`;
 
           return (
-            <label className="day-select__item" htmlFor={inputId} key={day}>
+            <label className="day-select__item" htmlFor={inputId} key={key}>
               <input
                 className="day-select__input"
                 id={inputId}
                 type="checkbox"
-                checked={selectedDays[day]}
-                onChange={(event) => onDayChange(day, event.target.checked)}
+                checked={selectedDays[key]}
+                onChange={(event) => onDayChange(key, event.target.checked)}
               />
-              <span className="day-select__label">{day}</span>
+              <span className="day-select__label">{displayValue}</span>
             </label>
           );
         })}

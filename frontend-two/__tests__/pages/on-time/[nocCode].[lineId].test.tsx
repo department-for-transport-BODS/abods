@@ -3,7 +3,9 @@
 // in the OnTimeOperatorPage tests, so we will not repeat those here.
 
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import OnTimeServicePage from "@/pages/on-time/[nocCode]/[lineId]";
+import { Settings } from "luxon";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -11,8 +13,16 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/layout/BaseLayout", () => ({
-  BaseLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-layout">{children}</div>
+  BaseLayout: ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
+    <div data-testid="base-layout" data-title={title}>
+      {children}
+    </div>
   ),
 }));
 
@@ -103,6 +113,7 @@ const mockFetchOperator = vi.mocked(operatorsService.fetchOperator);
 describe("OnTimeServicePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Settings.now = () => new Date("2026-06-28T12:00:00Z").valueOf();
     mockQuery = { nocCode: "ABCD", lineId: "LINE1" };
     mockReplace.mockReset();
     mockUseConfig.mockReturnValue({
@@ -139,6 +150,7 @@ describe("OnTimeServicePage", () => {
   });
 
   afterEach(() => {
+    Settings.now = () => Date.now();
     cleanup();
   });
 
@@ -159,7 +171,11 @@ describe("OnTimeServicePage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("link", { name: /Back to ABCD/i })).toHaveAttribute(
+    expect(screen.getByTestId("base-layout")).toHaveAttribute(
+      "data-title",
+      "1 - Demo Service",
+    );
+    expect(screen.getByRole("link", { name: /All Services/i })).toHaveAttribute(
       "href",
       "/on-time/ABCD",
     );
@@ -212,8 +228,85 @@ describe("OnTimeServicePage", () => {
 
     render(<OnTimeServicePage />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId("on-time-service-map")).toBeInTheDocument();
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("on-time-service-map")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  it("exports stop data with an Angular-style filename", async () => {
+    mockQuery = { nocCode: "FBSM", lineId: "4-PK1147727_10" };
+    mockFetchStopPerformance.mockResolvedValue([
+      {
+        stopId: "STOP1",
+        timingPoint: true,
+        stopInfo: { stopName: "Example Stop" },
+        direction: null,
+        scheduledDepartures: 10,
+        actualDepartures: 8,
+        completedRatio: 0.8,
+        averageScheduled: 120,
+        averageActual: 130,
+        averageDelay: 10,
+        countDelayed: 8,
+        onTime: 6,
+        onTimeRatio: 0.75,
+        onTimeInSeconds: 180,
+        late: 1,
+        lateRatio: 0.125,
+        lateInSeconds: 60,
+        early: 1,
+        earlyRatio: 0.125,
+        earlyInSeconds: 30,
+      } as any,
+    ]);
+    const createObjectUrl = vi.fn().mockReturnValue("blob:test-csv");
+    const revokeObjectUrl = vi.fn();
+    let downloadedFilename = "";
+    const anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        downloadedFilename = this.download;
+      });
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectUrl,
     });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectUrl,
+    });
+    const user = userEvent.setup();
+
+    render(<OnTimeServicePage />);
+
+    await screen.findByText("Example Stop");
+    await user.click(screen.getByRole("button", { name: "Export data" }));
+
+    const blob = createObjectUrl.mock.calls[0][0] as Blob;
+    const csv = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.readAsText(blob);
+    });
+
+    expect(csv.split("\r\n")[0]).toBe(
+      "NAPTAN,Timing point,Name,Direction,Scheduled departures,Recorded departures,Recorded departures (percentage),Av. Scheduled Travel Time (seconds),Av. Actual Travel Time (seconds),Av. delay (seconds),On time,On time (percentage),On time (seconds),Late,Late (percentage),Late (seconds),Early,Early (percentage),Early (seconds)",
+    );
+    expect(csv.split("\r\n")[1]).toBe(
+      ",,Total:,-,10,8,80%,120,130,10,6,75%,180,1,12.5%,60,1,12.5%,30",
+    );
+    expect(csv.split("\r\n")[2]).toBe(
+      "STOP1,true,Example Stop,-,10,8,80%,120,130,10,6,75%,180,1,12.5%,60,1,12.5%,30",
+    );
+
+    expect(anchorClick).toHaveBeenCalled();
+    expect(downloadedFilename).toBe(
+      "Stop_Performance_4-PK1147727_10_26-06-21_-_26-06-27.csv",
+    );
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:test-csv");
+    anchorClick.mockRestore();
   });
 });

@@ -1,4 +1,8 @@
 import { Duration } from "luxon";
+import {
+  formatPercentage as formatAngularStylePercentage,
+  getRatio,
+} from "../maths";
 
 export type OnTimeDisplayMode = "percentage" | "count" | "time";
 
@@ -127,6 +131,39 @@ export function aggregatePerformanceTotals(
   };
 }
 
+interface AverageTravelTimeRow {
+  averageScheduled?: number | null;
+  averageActual?: number | null;
+}
+
+export function aggregateAverageTravelTimes(rows: AverageTravelTimeRow[]): {
+  averageScheduled: number | null;
+  averageActual: number | null;
+} {
+  let averageScheduledTotal = 0;
+  let hasAverageScheduled = false;
+  let averageActualTotal = 0;
+  let hasAverageActual = false;
+
+  for (const row of rows) {
+    if (row.averageScheduled != null) {
+      averageScheduledTotal += row.averageScheduled;
+      hasAverageScheduled = true;
+    }
+    if (row.averageActual != null) {
+      averageActualTotal += row.averageActual;
+      hasAverageActual = true;
+    }
+  }
+
+  return {
+    averageScheduled: hasAverageScheduled
+      ? averageScheduledTotal / rows.length
+      : null,
+    averageActual: hasAverageActual ? averageActualTotal / rows.length : null,
+  };
+}
+
 export const DISPLAY_MODE_OPTIONS = [
   { value: "percentage", label: "Percentage" },
   { value: "count", label: "Count" },
@@ -193,10 +230,13 @@ export function formatMetricValue(
       const secondsKey = `${metric}InSeconds` as const;
       return formatDuration(row[secondsKey]);
     }
-    case "percentage":
-    default: {
+    case "percentage": {
       const ratioKey = `${metric}Ratio` as const;
       return formatPercentage(row[ratioKey]);
+    }
+    default: {
+      const _exhaustive: never = displayMode;
+      return _exhaustive;
     }
   }
 }
@@ -216,10 +256,34 @@ export function getMetricSortValue(
       const secondsKey = `${metric}InSeconds` as const;
       return row[secondsKey] ?? Number.NEGATIVE_INFINITY;
     }
-    case "percentage":
-    default: {
+    case "percentage": {
       const ratioKey = `${metric}Ratio` as const;
       return row[ratioKey] ?? Number.NEGATIVE_INFINITY;
     }
+    default: {
+      const _exhaustive: never = displayMode;
+      return _exhaustive;
+    }
   }
+}
+
+export function formatExportPercentage(
+  ratio: number | null | undefined,
+): string {
+  if (ratio === undefined || ratio === null) return "-";
+  return formatAngularStylePercentage(ratio);
+}
+
+export function formatAverageSecondsForExport(
+  value: number | null | undefined,
+): string {
+  if (value == null) return "";
+  return value.toFixed(0);
+}
+
+export function getRecordedDeparturesExportRatio(row: {
+  actualDepartures?: number | null;
+  scheduledDepartures?: number | null;
+}): number {
+  return getRatio(row.actualDepartures, row.scheduledDepartures);
 }

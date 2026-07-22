@@ -3,9 +3,14 @@ import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
+import { Tooltip } from "@/components/shared/Tooltip";
 import { FrequentServicePerformance } from "@/services/on-time/performance.service";
-import { formatPercentage } from "@/utils/maths";
 import { FrequentIcon } from "../icons/FrequentIcon";
+import {
+  buildCsvRows,
+  buildMetricCsvColumns,
+  type CsvExportColumn,
+} from "@/utils/on-time-csv-export";
 import {
   type OnTimeDisplayMode,
   formatDuration,
@@ -13,27 +18,153 @@ import {
   formatMetricValue,
   getMetricSortValue,
   aggregatePerformanceTotals,
+  formatExportPercentage,
+  formatAverageSecondsForExport,
+  getRecordedDeparturesExportRatio,
 } from "@/utils/on-time/on-time-table-format";
+import { formatPercentage, getRatio } from "@/utils/maths";
 
-const ALL_COLUMNS = [
+type ServiceTableColumnKey =
+  | "frequent"
+  | "service"
+  | "direction"
+  | "scheduledDepartures"
+  | "recordedDepartures"
+  | "averageDelay"
+  | "onTime"
+  | "late"
+  | "early";
+
+interface ServiceTableColumnDefinition {
+  key: ServiceTableColumnKey;
+  label: ReactNode;
+  modalLabel?: string;
+  alwaysVisible?: boolean;
+  sortable?: boolean;
+  csvColumns: CsvExportColumn<FrequentServicePerformance>[];
+}
+
+const ALL_COLUMNS: ServiceTableColumnDefinition[] = [
   {
     key: "frequent",
     label: (
-      <>
+      <Tooltip as="span" message="Service has periods of frequent running.">
         <FrequentIcon />
         <span className="govuk-visually-hidden">Frequent service</span>
-      </>
+      </Tooltip>
     ),
+    modalLabel: "Frequent service",
     sortable: true,
+    csvColumns: [
+      {
+        header: "Frequent service",
+        value: (row) => (row.frequent ? "TRUE" : ""),
+      },
+    ],
   },
-  { key: "service", label: "Service", sortable: false },
-  { key: "direction", label: "Direction", sortable: true },
-  { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },
-  { key: "recordedDepartures", label: "Recorded departures", sortable: true },
-  { key: "averageDelay", label: "Av. delay", sortable: true },
-  { key: "onTime", label: "On time", sortable: true },
-  { key: "late", label: "Late", sortable: true },
-  { key: "early", label: "Early", sortable: true },
+  {
+    key: "service",
+    label: "Service",
+    modalLabel: "Service",
+    alwaysVisible: true,
+    sortable: false,
+    csvColumns: [
+      {
+        header: "Service",
+        value: (row) =>
+          `${row.lineInfo?.serviceNumber ?? ""}: ${row.lineInfo?.serviceName ?? ""}`.trim(),
+      },
+    ],
+  },
+  {
+    key: "direction",
+    label: "Direction",
+    modalLabel: "Direction",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Direction",
+        value: (row) => formatDirection(row.direction),
+      },
+    ],
+  },
+  {
+    key: "scheduledDepartures",
+    label: "Scheduled departures",
+    modalLabel: "Scheduled departures",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Scheduled departures",
+        value: (row) => row.scheduledDepartures ?? 0,
+      },
+    ],
+  },
+  {
+    key: "recordedDepartures",
+    label: "Recorded departures",
+    modalLabel: "Recorded departures",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Recorded departures",
+        value: (row) => row.actualDepartures ?? 0,
+      },
+      {
+        header: "Recorded departures (percentage)",
+        value: (row) =>
+          formatExportPercentage(getRecordedDeparturesExportRatio(row)),
+      },
+    ],
+  },
+  {
+    key: "averageDelay",
+    label: "Av. delay",
+    modalLabel: "Average delay",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Av. delay (seconds)",
+        value: (row) => formatAverageSecondsForExport(row.averageDelay),
+      },
+    ],
+  },
+  {
+    key: "onTime",
+    label: "On time",
+    modalLabel: "On time",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "On time",
+      "onTime",
+      "onTimeRatio",
+      "onTimeInSeconds",
+    ),
+  },
+  {
+    key: "late",
+    label: "Late",
+    modalLabel: "Late",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "Late",
+      "late",
+      "lateRatio",
+      "lateInSeconds",
+    ),
+  },
+  {
+    key: "early",
+    label: "Early",
+    modalLabel: "Early",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "Early",
+      "early",
+      "earlyRatio",
+      "earlyInSeconds",
+    ),
+  },
 ];
 
 const SERVICE_TABLE_COLUMN_WIDTHS = {
@@ -48,28 +179,47 @@ const SERVICE_TABLE_COLUMN_WIDTHS = {
   early: "9%",
 };
 
-export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map((c) => c.key);
-export const SERVICE_TABLE_COLUMN_LABELS: Record<string, ReactNode> = {
-  ...Object.fromEntries(ALL_COLUMNS.map((c) => [c.key, c.label])),
-  frequent: <FrequentIcon />,
-};
-export const SERVICE_TABLE_ALWAYS_VISIBLE_KEYS = ["service"];
+export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map(
+  (column) => column.key,
+);
+export const SERVICE_TABLE_COLUMN_LABELS: Record<string, ReactNode> =
+  Object.fromEntries(
+    ALL_COLUMNS.map((column) => [
+      column.key,
+      column.modalLabel ??
+        (typeof column.label === "string" ? column.label : column.key),
+    ]),
+  );
+export const SERVICE_TABLE_ALWAYS_VISIBLE_KEYS = ALL_COLUMNS.filter(
+  (column) => column.alwaysVisible,
+).map((column) => column.key);
 
-const SERVICE_EXPORT_HEADER_LABELS: Record<string, string> = {
-  frequent: "Frequent",
-  service: "Service",
-  direction: "Direction",
-  scheduledDepartures: "Scheduled departures",
-  recordedDepartures: "Recorded departures",
-  averageDelay: "Av. delay",
-  onTime: "On time",
-  late: "Late",
-  early: "Early",
-};
+const SERVICE_EXPORT_COLUMNS = ALL_COLUMNS.flatMap(
+  (column) => column.csvColumns,
+);
+
+function buildCsvExportTotalsRow(
+  data: FrequentServicePerformance[],
+): FrequentServicePerformance | null {
+  const totals = aggregatePerformanceTotals(data);
+  if (!totals || data.length === 0) return null;
+
+  return {
+    ...data[0],
+    ...totals,
+    frequent: false,
+    lineInfo: {
+      ...data[0].lineInfo,
+      serviceNumber: "Total",
+      serviceName: "",
+    },
+    direction: null,
+  };
+}
 
 function getRowValue(
   row: FrequentServicePerformance,
-  column: string,
+  column: ServiceTableColumnKey,
   displayMode: OnTimeDisplayMode,
 ): string | number {
   switch (column) {
@@ -87,7 +237,7 @@ function getRowValue(
     case "recordedDepartures":
       return displayMode === "percentage"
         ? row.completedRatio ??
-            ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0)
+            getRatio(row.actualDepartures, row.scheduledDepartures)
         : row.actualDepartures ?? 0;
     case "averageDelay":
       return row.averageDelay ?? 0;
@@ -97,8 +247,10 @@ function getRowValue(
       return getMetricSortValue(row, "late", displayMode);
     case "early":
       return getMetricSortValue(row, "early", displayMode);
-    default:
-      return "";
+    default: {
+      const _exhaustive: never = column;
+      return _exhaustive;
+    }
   }
 }
 
@@ -106,7 +258,7 @@ function createRenderRow(nocCode: string, displayMode: OnTimeDisplayMode) {
   return (row: FrequentServicePerformance): SortableTableRow => {
     const completedRatio =
       row.completedRatio ??
-      ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0);
+      getRatio(row.actualDepartures, row.scheduledDepartures);
 
     return {
       key: `${row.lineInfo?.serviceId}-${row.direction}`,
@@ -145,6 +297,7 @@ interface OnTimeServicesTableProps {
   data: FrequentServicePerformance[];
   nocCode: string;
   displayMode: OnTimeDisplayMode;
+  csvFilename: string;
   visibleColumns?: string[];
 }
 
@@ -152,6 +305,7 @@ export const OnTimeServicesTable = ({
   data,
   nocCode,
   displayMode,
+  csvFilename,
   visibleColumns,
 }: OnTimeServicesTableProps) => {
   const [displayedRows, setDisplayedRows] = useState<
@@ -160,9 +314,16 @@ export const OnTimeServicesTable = ({
 
   const filteredColumns = useMemo(
     () =>
-      visibleColumns
-        ? ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key))
-        : ALL_COLUMNS,
+      ALL_COLUMNS.filter((column) =>
+        visibleColumns ? visibleColumns.includes(column.key) : true,
+      ).map((column) => ({
+        key: column.key,
+        label: column.label,
+        sortable: column.sortable ?? false,
+        ariaLabel:
+          column.modalLabel ??
+          (typeof column.label === "string" ? column.label : column.key),
+      })),
     [visibleColumns],
   );
   const totalsRow = useMemo<SortableTableRow | null>(() => {
@@ -199,36 +360,20 @@ export const OnTimeServicesTable = ({
   );
   const getValue = useCallback(
     (row: FrequentServicePerformance, column: string) =>
-      getRowValue(row, column, displayMode),
+      getRowValue(row, column as ServiceTableColumnKey, displayMode),
     [displayMode],
   );
 
-  const csvHeaders = filteredColumns.map(
-    (column) => SERVICE_EXPORT_HEADER_LABELS[column.key] ?? column.key,
+  const csvHeaders = SERVICE_EXPORT_COLUMNS.map((column) => column.header);
+  const csvExportTotalsRow = useMemo(
+    () => buildCsvExportTotalsRow(data),
+    [data],
   );
-  const csvRows = displayedRows.map((row) => {
-    const completedRatio =
-      row.completedRatio ??
-      ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0);
-
-    const valuesByColumn: Record<string, string | number> = {
-      frequent: row.frequent ? "Yes" : "No",
-      service:
-        `${row.lineInfo?.serviceNumber ?? ""}: ${row.lineInfo?.serviceName ?? ""}`.trim(),
-      direction: formatDirection(row.direction),
-      scheduledDepartures: row.scheduledDepartures ?? 0,
-      recordedDepartures:
-        displayMode === "percentage"
-          ? formatPercentage(completedRatio)
-          : row.actualDepartures ?? 0,
-      averageDelay: formatDuration(row.averageDelay),
-      onTime: formatMetricValue(row, "onTime", displayMode),
-      late: formatMetricValue(row, "late", displayMode),
-      early: formatMetricValue(row, "early", displayMode),
-    };
-
-    return filteredColumns.map((column) => valuesByColumn[column.key] ?? "");
-  });
+  const csvRows = useMemo(
+    () =>
+      buildCsvRows(SERVICE_EXPORT_COLUMNS, displayedRows, csvExportTotalsRow),
+    [csvExportTotalsRow, displayedRows],
+  );
 
   return (
     <div className="on-time-services-table">
@@ -241,12 +386,12 @@ export const OnTimeServicesTable = ({
         initialSortKey="service"
         initialSortOrder="asc"
         paginationNoun="service"
-        emptyMessage="No service performance data available"
+        emptyMessage="No service data found"
         onDisplayedDataChange={setDisplayedRows}
         colWidths={SERVICE_TABLE_COLUMN_WIDTHS}
         footerAction={
           <CsvExportButton
-            filename={`on-time-services-${nocCode}`}
+            filename={csvFilename}
             headers={csvHeaders}
             rows={csvRows}
             buttonText="Export data"

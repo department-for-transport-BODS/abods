@@ -168,7 +168,7 @@ export const OtpThresholdModal = ({
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
           type="button"
-          className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"
+          className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 otp-threshold-modal__close-button"
           onClick={onClose}
         >
           Close

@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import { Tooltip } from "@/components/shared/Tooltip";
 import { TimingIcon } from "@/components/icons/TimingIcon";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import type { StopPerformance } from "@/services/on-time/on-time.service";
+import {
+  buildCsvRows,
+  buildMetricCsvColumns,
+  type CsvExportColumn,
+} from "@/utils/on-time-csv-export";
 import {
   type OnTimeDisplayMode,
   formatPercentage,
@@ -13,10 +18,50 @@ import {
   formatMetricValue,
   getMetricSortValue,
   aggregatePerformanceTotals,
+  aggregateAverageTravelTimes,
+  formatExportPercentage,
+  formatAverageSecondsForExport,
+  getRecordedDeparturesExportRatio,
 } from "@/utils/on-time/on-time-table-format";
+import { getRatio } from "@/utils/maths";
 
-const ALL_COLUMNS = [
-  { key: "stopId", label: "NAPTAN", sortable: false },
+type StopsTableColumnKey =
+  | "stopId"
+  | "timingPoint"
+  | "stopName"
+  | "direction"
+  | "scheduledDepartures"
+  | "actualDepartures"
+  | "averageScheduled"
+  | "averageActual"
+  | "averageDelay"
+  | "onTimeRatio"
+  | "lateRatio"
+  | "earlyRatio";
+
+interface StopsTableColumnDefinition {
+  key: StopsTableColumnKey;
+  label: ReactNode;
+  modalLabel?: string;
+  alwaysVisible?: boolean;
+  sortable?: boolean;
+  csvColumns: CsvExportColumn<StopPerformance>[];
+}
+
+const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
+  {
+    key: "stopId",
+    label: "NAPTAN",
+    modalLabel: "NAPTAN",
+    alwaysVisible: true,
+    sortable: false,
+    csvColumns: [
+      {
+        header: "NAPTAN",
+        value: (row) => row.stopId ?? "",
+      },
+    ],
+  },
   {
     key: "timingPoint",
     label: (
@@ -25,48 +70,166 @@ const ALL_COLUMNS = [
         <span className="govuk-visually-hidden">Timing point</span>
       </>
     ),
+    modalLabel: "Timing point",
     sortable: false,
+    csvColumns: [
+      {
+        header: "Timing point",
+        value: (row) => (row.stopId ? String(row.timingPoint) : ""),
+      },
+    ],
   },
-  { key: "stopName", label: "Name", sortable: false },
-  { key: "direction", label: "Direction", sortable: true },
-  { key: "scheduledDepartures", label: "Scheduled departures", sortable: true },
-  { key: "actualDepartures", label: "Recorded departures", sortable: true },
+  {
+    key: "stopName",
+    label: "Name",
+    modalLabel: "Name",
+    sortable: false,
+    csvColumns: [
+      {
+        header: "Name",
+        value: (row) => row.stopInfo?.stopName ?? "",
+      },
+    ],
+  },
+  {
+    key: "direction",
+    label: "Direction",
+    modalLabel: "Direction",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Direction",
+        value: (row) => formatDirection(row.direction),
+      },
+    ],
+  },
+  {
+    key: "scheduledDepartures",
+    label: "Scheduled departures",
+    modalLabel: "Scheduled departures",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Scheduled departures",
+        value: (row) => row.scheduledDepartures ?? 0,
+      },
+    ],
+  },
+  {
+    key: "actualDepartures",
+    label: "Recorded departures",
+    modalLabel: "Recorded departures",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Recorded departures",
+        value: (row) => row.actualDepartures ?? 0,
+      },
+      {
+        header: "Recorded departures (percentage)",
+        value: (row) =>
+          formatExportPercentage(getRecordedDeparturesExportRatio(row)),
+      },
+    ],
+  },
   {
     key: "averageScheduled",
     label: "Av. Scheduled Travel Time",
+    modalLabel: "Average scheduled",
     sortable: true,
+    csvColumns: [
+      {
+        header: "Av. Scheduled Travel Time (seconds)",
+        value: (row) => formatAverageSecondsForExport(row.averageScheduled),
+      },
+    ],
   },
-  { key: "averageActual", label: "Av. Actual Travel Time", sortable: true },
-  { key: "averageDelay", label: "Av. delay", sortable: true },
-  { key: "onTimeRatio", label: "On time", sortable: true },
-  { key: "lateRatio", label: "Late", sortable: true },
-  { key: "earlyRatio", label: "Early", sortable: true },
+  {
+    key: "averageActual",
+    label: "Av. Actual Travel Time",
+    modalLabel: "Average actual",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Av. Actual Travel Time (seconds)",
+        value: (row) => formatAverageSecondsForExport(row.averageActual),
+      },
+    ],
+  },
+  {
+    key: "averageDelay",
+    label: "Av. delay",
+    modalLabel: "Average delay",
+    sortable: true,
+    csvColumns: [
+      {
+        header: "Av. delay (seconds)",
+        value: (row) => formatAverageSecondsForExport(row.averageDelay),
+      },
+    ],
+  },
+  {
+    key: "onTimeRatio",
+    label: "On time",
+    modalLabel: "On time",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "On time",
+      "onTime",
+      "onTimeRatio",
+      "onTimeInSeconds",
+    ),
+  },
+  {
+    key: "lateRatio",
+    label: "Late",
+    modalLabel: "Late",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "Late",
+      "late",
+      "lateRatio",
+      "lateInSeconds",
+    ),
+  },
+  {
+    key: "earlyRatio",
+    label: "Early",
+    modalLabel: "Early",
+    sortable: true,
+    csvColumns: buildMetricCsvColumns(
+      "Early",
+      "early",
+      "earlyRatio",
+      "earlyInSeconds",
+    ),
+  },
 ];
 
-export const STOPS_TABLE_COLUMN_KEYS = ALL_COLUMNS.map((c) => c.key);
-export const STOPS_TABLE_COLUMN_LABELS: Record<string, React.ReactNode> =
-  Object.fromEntries(ALL_COLUMNS.map((c) => [c.key, c.label]));
-export const STOPS_TABLE_ALWAYS_VISIBLE_KEYS = ["stopId"];
+export const STOPS_TABLE_COLUMN_KEYS = STOPS_TABLE_COLUMN_OPTIONS.map(
+  (column) => column.key,
+);
+export const STOPS_TABLE_COLUMN_LABELS: Record<string, ReactNode> =
+  Object.fromEntries(
+    STOPS_TABLE_COLUMN_OPTIONS.map((column) => [
+      column.key,
+      column.modalLabel ??
+        (typeof column.label === "string" ? column.label : column.key),
+    ]),
+  );
+export const STOPS_TABLE_ALWAYS_VISIBLE_KEYS =
+  STOPS_TABLE_COLUMN_OPTIONS.filter((column) => column.alwaysVisible).map(
+    (column) => column.key,
+  );
 
-const STOPS_EXPORT_HEADER_LABELS: Record<string, string> = {
-  stopId: "NAPTAN",
-  timingPoint: "Timing point",
-  stopName: "Name",
-  direction: "Direction",
-  scheduledDepartures: "Scheduled departures",
-  actualDepartures: "Recorded departures",
-  averageScheduled: "Average scheduled travel time",
-  averageActual: "Average actual travel time",
-  averageDelay: "Average delay",
-  onTimeRatio: "On time",
-  lateRatio: "Late",
-  earlyRatio: "Early",
-};
+const STOPS_EXPORT_COLUMNS = STOPS_TABLE_COLUMN_OPTIONS.flatMap(
+  (column) => column.csvColumns,
+);
 
 function getRecordedDeparturesRatio(row: StopPerformance): number {
   return (
     row.completedRatio ??
-    ((row.actualDepartures ?? 0) / (row.scheduledDepartures ?? 0) || 0)
+    getRatio(row.actualDepartures, row.scheduledDepartures)
   );
 }
 
@@ -85,36 +248,38 @@ function calculateTotals(data: StopPerformance[]): StopPerformance | null {
   const totals = aggregatePerformanceTotals(data);
   if (!totals) return null;
 
-  let averageScheduledTotal = 0;
-  let hasAverageScheduled = false;
-  let averageActualTotal = 0;
-  let hasAverageActual = false;
-
-  for (const row of data) {
-    if (row.averageScheduled != null) {
-      averageScheduledTotal += row.averageScheduled;
-      hasAverageScheduled = true;
-    }
-    if (row.averageActual != null) {
-      averageActualTotal += row.averageActual;
-      hasAverageActual = true;
-    }
-  }
+  const travelTimes = aggregateAverageTravelTimes(data);
 
   return {
     ...data[0],
     ...totals,
     direction: null,
-    averageScheduled: hasAverageScheduled
-      ? averageScheduledTotal / data.length
-      : null,
-    averageActual: hasAverageActual ? averageActualTotal / data.length : null,
+    averageScheduled: travelTimes.averageScheduled,
+    averageActual: travelTimes.averageActual,
+  };
+}
+
+function buildCsvExportTotalsRow(
+  data: StopPerformance[],
+): StopPerformance | null {
+  const totals = calculateTotals(data);
+  if (!totals) return null;
+
+  return {
+    ...totals,
+    stopId: "",
+    stopInfo: totals.stopInfo
+      ? { ...totals.stopInfo, stopName: "Total:" }
+      : ({
+          stopId: "",
+          stopName: "Total:",
+        } as StopPerformance["stopInfo"]),
   };
 }
 
 function getRowValue(
   row: StopPerformance,
-  column: string,
+  column: StopsTableColumnKey,
   displayMode: OnTimeDisplayMode,
 ): string | number {
   switch (column) {
@@ -144,8 +309,10 @@ function getRowValue(
       return getMetricSortValue(row, "late", displayMode);
     case "earlyRatio":
       return getMetricSortValue(row, "early", displayMode);
-    default:
-      return "";
+    default: {
+      const _exhaustive: never = column;
+      return _exhaustive;
+    }
   }
 }
 
@@ -192,21 +359,30 @@ function renderRow(
 interface OnTimeStopsTableProps {
   data: StopPerformance[];
   displayMode?: OnTimeDisplayMode;
+  csvFilename: string;
   visibleColumns?: string[];
 }
 
 export const OnTimeStopsTable = ({
   data,
   displayMode = "percentage",
+  csvFilename,
   visibleColumns,
 }: OnTimeStopsTableProps) => {
   const [displayedRows, setDisplayedRows] = useState<StopPerformance[]>([]);
 
   const filteredColumns = useMemo(
     () =>
-      visibleColumns
-        ? ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key))
-        : ALL_COLUMNS,
+      STOPS_TABLE_COLUMN_OPTIONS.filter((column) =>
+        visibleColumns ? visibleColumns.includes(column.key) : true,
+      ).map((column) => ({
+        key: column.key,
+        label: column.label,
+        sortable: column.sortable ?? false,
+        ariaLabel:
+          column.modalLabel ??
+          (typeof column.label === "string" ? column.label : column.key),
+      })),
     [visibleColumns],
   );
   const totalsRow = useMemo<SortableTableRow | null>(() => {
@@ -250,7 +426,7 @@ export const OnTimeStopsTable = ({
 
   const getValue = useCallback(
     (row: StopPerformance, column: string) =>
-      getRowValue(row, column, displayMode),
+      getRowValue(row, column as StopsTableColumnKey, displayMode),
     [displayMode],
   );
   const renderValue = useCallback(
@@ -258,56 +434,39 @@ export const OnTimeStopsTable = ({
     [displayMode],
   );
 
-  const csvHeaders = filteredColumns.map(
-    (column) => STOPS_EXPORT_HEADER_LABELS[column.key] ?? column.key,
+  const csvHeaders = STOPS_EXPORT_COLUMNS.map((column) => column.header);
+  const csvExportTotalsRow = useMemo(
+    () => buildCsvExportTotalsRow(data),
+    [data],
   );
-  const csvRows = displayedRows.map((row) => {
-    const valuesByColumn: Record<string, string | number> = {
-      stopId: row.stopId ?? "-",
-      timingPoint: row.timingPoint ? "Yes" : "No",
-      stopName: row.stopInfo?.stopName ?? "-",
-      direction: formatDirection(row.direction),
-      scheduledDepartures: row.scheduledDepartures ?? 0,
-      actualDepartures:
-        displayMode === "percentage"
-          ? formatPercentage(getRecordedDeparturesRatio(row))
-          : row.actualDepartures ?? 0,
-      averageScheduled: formatDuration(row.averageScheduled),
-      averageActual: formatDuration(row.averageActual),
-      averageDelay: formatDuration(row.averageDelay, false),
-      onTimeRatio: formatMetricValue(row, "onTime", displayMode),
-      lateRatio: formatMetricValue(row, "late", displayMode),
-      earlyRatio: formatMetricValue(row, "early", displayMode),
-    };
-
-    return filteredColumns.map((column) => valuesByColumn[column.key] ?? "");
-  });
+  const csvRows = useMemo(
+    () => buildCsvRows(STOPS_EXPORT_COLUMNS, displayedRows, csvExportTotalsRow),
+    [csvExportTotalsRow, displayedRows],
+  );
 
   return (
-    <>
-      <div className="on-time-stops-table-container">
-        <SortedPaginatedTable
-          columns={filteredColumns}
-          data={data}
-          getRowValue={getValue}
-          renderRow={renderValue}
-          pinnedRows={totalsRow ? [totalsRow] : undefined}
-          initialSortKey="stopId"
-          initialSortOrder="asc"
-          paginationNoun="stop"
-          emptyMessage="No stop performance data available"
-          onDisplayedDataChange={setDisplayedRows}
-          enablePagination={false}
-        />
-      </div>
-      <div className="govuk-!-margin-top-4">
-        <CsvExportButton
-          filename="on-time-stops"
-          headers={csvHeaders}
-          rows={csvRows}
-          buttonText="Export data"
-        />
-      </div>
-    </>
+    <div className="on-time-stops-table-container">
+      <SortedPaginatedTable
+        columns={filteredColumns}
+        data={data}
+        getRowValue={getValue}
+        renderRow={renderValue}
+        pinnedRows={totalsRow ? [totalsRow] : undefined}
+        initialSortKey="stopId"
+        initialSortOrder="asc"
+        paginationNoun="stop"
+        emptyMessage="No stop performance data available"
+        onDisplayedDataChange={setDisplayedRows}
+        enablePagination={false}
+        footerAction={
+          <CsvExportButton
+            filename={csvFilename}
+            headers={csvHeaders}
+            rows={csvRows}
+            buttonText="Export data"
+          />
+        }
+      />
+    </div>
   );
 };
