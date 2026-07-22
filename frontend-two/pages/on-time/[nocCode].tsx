@@ -217,12 +217,7 @@ const OnTimeOperatorPage = () => {
   }, [config, isReady]);
 
   useEffect(() => {
-    if (
-      !isReady ||
-      !config?.apiUrl ||
-      !nocCode ||
-      !servicePerformanceParams
-    )
+    if (!isReady || !config?.apiUrl || !nocCode || !servicePerformanceParams)
       return;
     const load = async () => {
       setIsLoading(true);
