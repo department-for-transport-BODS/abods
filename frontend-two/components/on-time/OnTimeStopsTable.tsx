@@ -13,7 +13,7 @@ import {
   formatMetricValue,
   getMetricSortValue,
   aggregatePerformanceTotals,
-} from "@/utils/on-time-table-format";
+} from "@/utils/on-time/on-time-table-format";
 
 const ALL_COLUMNS = [
   { key: "stopId", label: "NAPTAN", sortable: false },
