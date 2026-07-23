@@ -295,7 +295,7 @@ export const OnTimeBoundariesMap = ({
   }, [boundariesGeoJson, mapLoaded, clearPopup, updateAdminAreaPopup]);
 
   return (
-    <div style={{ position: "relative", height: "320px" }}>
+    <div style={{ position: "relative", height: "380px" }}>
       <div
         ref={mapContainerRef}
         style={{ width: "100%", height: "100%" }}
