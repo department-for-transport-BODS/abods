@@ -23,7 +23,7 @@ export const SummaryStatWithTooltip = ({
         {title}
       </span>
       {tooltip ? (
-        <div className="font-bold" style={{ fontSize: "36px" }}>
+        <div className="font-bold" style={{ fontSize: "32px" }}>
           <div
             className="summary-stat"
             style={{ position: "relative", display: "inline-block" }}
@@ -44,7 +44,7 @@ export const SummaryStatWithTooltip = ({
           </div>
         </div>
       ) : (
-        <div className="font-bold" style={{ fontSize: "36px" }}>
+        <div className="font-bold" style={{ fontSize: "32px" }}>
           {displayValue}
         </div>
       )}
