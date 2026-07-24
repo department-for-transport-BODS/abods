@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
 import {
@@ -44,16 +45,19 @@ const EMPTY_ADMIN_AREA_IDS: string[] = [];
 
 const OnTimeIndexPage = () => {
   useRequireAuth();
+
+  const router = useRouter();
   const { config } = useConfig();
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [operatorPerformance, setOperatorPerformance] = useState<
     OperatorPerformance[]
   >([]);
 
-  const [summaryStats, setSummaryStats] = useState<PunctualityOverview | null>(
-    null,
-  );
+  const [summaryStats, setSummaryStats] =
+    useState<PunctualityOverview | null>(null);
+
   const [adminOrgData, setAdminOrgData] = useState<AdminOrgMap[]>([]);
   const [adminAreas, setAdminAreas] = useState<AdminArea[]>([]);
   const [isLoadingAdminAreas, setIsLoadingAdminAreas] = useState(true);
@@ -71,6 +75,7 @@ const OnTimeIndexPage = () => {
 
   const refineResultsInitialValues =
     performanceFiltersToRefineResults(refineResultsFilters);
+
   const [dateRange, setDateRange] = useState<{
     from: string;
     to: string;
@@ -92,6 +97,7 @@ const OnTimeIndexPage = () => {
     if (!operatorSearch) return operatorPerformance;
 
     const searchValue = operatorSearch.toLowerCase();
+
     return operatorPerformance.filter((operator) =>
       (operator.name ?? "").toLowerCase().includes(searchValue),
     );
@@ -99,6 +105,7 @@ const OnTimeIndexPage = () => {
 
   const hasNoOperatorData =
     !isLoading && !error && operatorPerformance.length === 0;
+
   const dataExpected = selectedMatchType === "evidenced";
   const wrapperNoData = hasNoOperatorData;
   const wrapperDataExpected = dataExpected;
@@ -133,11 +140,13 @@ const OnTimeIndexPage = () => {
   useEffect(() => {
     const loadAdminAreas = async () => {
       setIsLoadingAdminAreas(true);
+
       try {
         const [adminOrgMap, adminAreaShapes] = await Promise.all([
           distanceService.fetchAdminOrg(),
           operatorsService.fetchAdminAreas(),
         ]);
+
         setAdminOrgData(adminOrgMap);
         setAdminAreas(adminAreaShapes);
       } finally {
@@ -165,6 +174,44 @@ const OnTimeIndexPage = () => {
       ),
     );
   }, [adminOrgData, selectedAdminAreas]);
+
+  const updateAdminAreaQueryParams = (adminAreaIds: string[]) => {
+    const query = { ...router.query };
+
+    delete query.adminAreaId;
+
+    void router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          ...(adminAreaIds.length > 0
+            ? { adminAreaId: adminAreaIds }
+            : {}),
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
+  };
+
+  const handleAdminAreaChange = (adminAreaNames: string[]) => {
+    setSelectedAdminAreas(adminAreaNames);
+
+    const adminAreaIds = Array.from(
+      new Set(
+        adminOrgData
+          .filter(
+            (adminArea) =>
+              adminArea.adminName !== null &&
+              adminAreaNames.includes(adminArea.adminName),
+          )
+          .map((adminArea) => adminArea.adminAreaId.toString()),
+      ),
+    );
+
+    updateAdminAreaQueryParams(adminAreaIds);
+  };
 
   const operatorTableParams = useMemo<PerformanceParams>(() => {
     const defaultParams = buildDefaultParams();
@@ -200,9 +247,11 @@ const OnTimeIndexPage = () => {
 
   useEffect(() => {
     if (!config?.apiUrl) return;
+
     const load = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
         const [operatorData, stats] = await Promise.all([
           onTimeService.fetchOperatorPerformanceList(operatorTableParams),
@@ -218,6 +267,7 @@ const OnTimeIndexPage = () => {
         setIsLoading(false);
       }
     };
+
     load();
   }, [config?.apiUrl, operatorTableParams]);
 
@@ -225,6 +275,7 @@ const OnTimeIndexPage = () => {
     <BaseLayout title="All services: Analyse Bus Open Data">
       <span className="govuk-caption-xl">On-time performance</span>
       <h1 className="govuk-heading-xl">All services</h1>
+
       <OnTimeFilterPanel
         isLoading={isLoading}
         refineResultsInitialValues={refineResultsInitialValues}
@@ -251,20 +302,23 @@ const OnTimeIndexPage = () => {
         refineResultsFilters={refineResultsFilters}
         onRefineResultsFilterChange={setRefineResultsFilters}
       />
+
       <div className="summary-container">
         <div className="summary-header-container">
           <h2 className="govuk-heading-l">Summary</h2>
+
           <div className="summary-admin-area-select-container">
             <MultiselectDropdown
               label={"Area"}
               hideLabel={true}
               options={adminAreaOptions}
               selected={selectedAdminAreas}
-              onChange={setSelectedAdminAreas}
+              onChange={handleAdminAreaChange}
               placeholderText={isLoadingAdminAreas ? "Loading..." : "All areas"}
             />
           </div>
         </div>
+
         {isLoading ? (
           <p className="govuk-body">Loading on-time data...</p>
         ) : (
@@ -279,6 +333,7 @@ const OnTimeIndexPage = () => {
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
+
                 <div className="helpdesk-container">
                   <OnTimeHelpdeskButton />
                   <OtpThresholdModalLink
@@ -286,6 +341,7 @@ const OnTimeIndexPage = () => {
                     overview={summaryStats}
                   />
                 </div>
+
                 <SummaryStatsGrid
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
@@ -301,6 +357,7 @@ const OnTimeIndexPage = () => {
                   averageDelay={summaryStats?.averageDelay ?? null}
                 />
               </div>
+
               <div className="summary-map-container">
                 {config?.mapboxToken && config?.mapboxStyle ? (
                   <OnTimeBoundariesMap
@@ -317,8 +374,10 @@ const OnTimeIndexPage = () => {
           </ChartNoDataWrapper>
         )}
       </div>
+
       <div className="operator-container">
         <h2 className="govuk-heading-m">Operators</h2>
+
         {isLoading ? (
           <p className="govuk-body">Loading operator data...</p>
         ) : (
@@ -335,9 +394,11 @@ const OnTimeIndexPage = () => {
               value={operatorSearch}
               onChange={setOperatorSearch}
             />
+
             <OnTimeOperatorTable
               data={filteredOperators}
               sparklineParams={operatorTableParams}
+              selectedAdminAreaIds={selectedAdminAreaIds}
             />
           </ChartNoDataWrapper>
         )}
