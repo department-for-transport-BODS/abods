@@ -168,15 +168,15 @@ const ALL_COLUMNS: ServiceTableColumnDefinition[] = [
 ];
 
 const SERVICE_TABLE_COLUMN_WIDTHS = {
-  frequent: "6%",
-  service: "18%",
-  direction: "14%",
+  frequent: "4%",
+  service: "40%",
+  direction: "9%",
   scheduledDepartures: "12%",
-  recordedDepartures: "12%",
-  averageDelay: "10%",
-  onTime: "10%",
-  late: "9%",
-  early: "9%",
+  recordedDepartures: "10%",
+  averageDelay: "7%",
+  onTime: "6%",
+  late: "6%",
+  early: "6%",
 };
 
 export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map(
@@ -397,6 +397,7 @@ export const OnTimeServicesTable = ({
             buttonText="Export data"
           />
         }
+        fontSize="16px"
       />
     </div>
   );

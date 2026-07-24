@@ -77,11 +77,12 @@
 }
 
 .on-time-service-filters {
-  display: grid;
+  display: flex;
   grid-template-columns: minmax(0, 60%) auto;
   justify-content: space-between;
   align-items: end;
   gap: govuk-spacing(3);
+  flex-wrap: wrap;
 }
 
 .on-time-service-filters__radios {

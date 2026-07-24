@@ -224,7 +224,7 @@ const OnTimeIndexPage = () => {
   return (
     <BaseLayout title="All services: Analyse Bus Open Data">
       <span className="govuk-caption-xl">On-time performance</span>
-      <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">All services</h1>
+      <h1 className="govuk-heading-xl">All services</h1>
       <OnTimeFilterPanel
         isLoading={isLoading}
         refineResultsInitialValues={refineResultsInitialValues}

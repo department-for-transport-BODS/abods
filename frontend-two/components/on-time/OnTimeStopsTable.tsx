@@ -66,8 +66,10 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     key: "timingPoint",
     label: (
       <>
-        <TimingIcon />
-        <span className="govuk-visually-hidden">Timing point</span>
+        <div style={{ minWidth: "20px", display: "inline-flex" }}>
+          <TimingIcon />
+          <span className="govuk-visually-hidden">Timing point</span>
+      </div>
       </>
     ),
     modalLabel: "Timing point",
@@ -205,6 +207,21 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     ),
   },
 ];
+
+const STOP_TABLE_COLUMN_WIDTHS = {
+  stopId: "11%",
+  timingPoint: "3%",
+  stopName: "23%",
+  direction: "9%",
+  scheduledDepartures: "9%",
+  actualDepartures: "9%",
+  averageScheduled: "9%",
+  averageActual: "9%",
+  averageDelay: "4.5%",
+  onTimeRatio: "4.5%",
+  lateRatio: "4.5%",
+  earlyRatio: "4.5%",
+};
 
 export const STOPS_TABLE_COLUMN_KEYS = STOPS_TABLE_COLUMN_OPTIONS.map(
   (column) => column.key,
@@ -452,12 +469,11 @@ export const OnTimeStopsTable = ({
         getRowValue={getValue}
         renderRow={renderValue}
         pinnedRows={totalsRow ? [totalsRow] : undefined}
-        initialSortKey="stopId"
-        initialSortOrder="asc"
         paginationNoun="stop"
         emptyMessage="No stop performance data available"
         onDisplayedDataChange={setDisplayedRows}
         enablePagination={false}
+        colWidths={STOP_TABLE_COLUMN_WIDTHS}
         footerAction={
           <CsvExportButton
             filename={csvFilename}
@@ -466,6 +482,7 @@ export const OnTimeStopsTable = ({
             buttonText="Export data"
           />
         }
+        fontSize="16px"
       />
     </div>
   );
