@@ -73,7 +73,7 @@ export const SortableTable = ({
   paginationAlignment = "right",
   colWidths,
   footerAction,
-  fontSize
+  fontSize,
 }: SortableTableProps): React.JSX.Element => {
   const handleSort = (key: string) => {
     const current = head.find((c) => c.key === key)?.sortOrder ?? "none";
@@ -145,19 +145,19 @@ export const SortableTable = ({
               key={row.key}
               className={`govuk-table__row ${row.rowClassName ?? ""}`.trim()}
             >
-              {head.map((column) => (       
-              <td
-                key={column.key}
-                className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""}`.trim()}
-                data-label={
-                  typeof column.label === "string"
-                    ? column.label
-                    : column.ariaLabel ?? column.key
-                }
-                style={fontSize ? { fontSize } : undefined}
-              >
-                {row[column.key]}
-              </td>
+              {head.map((column) => (
+                <td
+                  key={column.key}
+                  className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""}`.trim()}
+                  data-label={
+                    typeof column.label === "string"
+                      ? column.label
+                      : column.ariaLabel ?? column.key
+                  }
+                  style={fontSize ? { fontSize } : undefined}
+                >
+                  {row[column.key]}
+                </td>
               ))}
             </tr>
           ))}

@@ -273,12 +273,12 @@ export const OnTimeOperatorTable = ({
   );
 
   const renderOperatorRow = (row: OperatorPerformance) =>
-  renderRow(
-    row,
-    sparklineByOperatorId,
-    granularSparklineParams,
-    selectedAdminAreaIds,
-  );
+    renderRow(
+      row,
+      sparklineByOperatorId,
+      granularSparklineParams,
+      selectedAdminAreaIds,
+    );
 
   return (
     <SortedPaginatedTable

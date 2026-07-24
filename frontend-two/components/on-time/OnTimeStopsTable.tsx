@@ -69,7 +69,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
         <div style={{ minWidth: "20px", display: "inline-flex" }}>
           <TimingIcon />
           <span className="govuk-visually-hidden">Timing point</span>
-      </div>
+        </div>
       </>
     ),
     modalLabel: "Timing point",

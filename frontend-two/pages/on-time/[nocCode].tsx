@@ -158,9 +158,7 @@ const OnTimeOperatorPage = () => {
     }
 
     return adminAreas
-      .filter((area) =>
-        selectedAdminAreaIds.includes(area.id.toString()),
-      )
+      .filter((area) => selectedAdminAreaIds.includes(area.id.toString()))
       .map((area) => area.name);
   }, [adminAreas, selectedAdminAreaIds]);
 
@@ -180,9 +178,7 @@ const OnTimeOperatorPage = () => {
     [adminAreas],
   );
 
-  const handleAdminAreaChipChange = (
-    filters: PerformanceFiltersInputType,
-  ) => {
+  const handleAdminAreaChipChange = (filters: PerformanceFiltersInputType) => {
     const remainingIds = filters.adminAreaIds ?? [];
 
     const query = { ...router.query };
@@ -194,9 +190,7 @@ const OnTimeOperatorPage = () => {
         pathname: router.pathname,
         query: {
           ...query,
-          ...(remainingIds.length > 0
-            ? { adminAreaId: remainingIds }
-            : {}),
+          ...(remainingIds.length > 0 ? { adminAreaId: remainingIds } : {}),
         },
       },
       undefined,
@@ -235,8 +229,8 @@ const OnTimeOperatorPage = () => {
         timingPointsOnly: selectedStopType === "timing-points",
         granularity: Granularity.Day,
         ...(selectedAdminAreaIds.length > 0
-        ? { adminAreaIds: selectedAdminAreaIds }
-        : {}),
+          ? { adminAreaIds: selectedAdminAreaIds }
+          : {}),
       },
     };
   }, [
@@ -576,15 +570,13 @@ const OnTimeOperatorPage = () => {
             refineResultsFilters={refineResultsFilters}
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
-          {
-            selectedAdminAreaNames.length > 0 && (
-              <FilterChips
-                filters={adminAreaChipFilters}
-                adminAreaOptions={adminAreaFilterChipOptions}
-                onFilterChange={handleAdminAreaChipChange}
-              />
-            )
-          }
+          {selectedAdminAreaNames.length > 0 && (
+            <FilterChips
+              filters={adminAreaChipFilters}
+              adminAreaOptions={adminAreaFilterChipOptions}
+              onFilterChange={handleAdminAreaChipChange}
+            />
+          )}
           <ChartsSection
             noData={wrapperNoData}
             dataExpected={wrapperDataExpected}

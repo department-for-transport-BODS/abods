@@ -55,8 +55,9 @@ const OnTimeIndexPage = () => {
     OperatorPerformance[]
   >([]);
 
-  const [summaryStats, setSummaryStats] =
-    useState<PunctualityOverview | null>(null);
+  const [summaryStats, setSummaryStats] = useState<PunctualityOverview | null>(
+    null,
+  );
 
   const [adminOrgData, setAdminOrgData] = useState<AdminOrgMap[]>([]);
   const [adminAreas, setAdminAreas] = useState<AdminArea[]>([]);
@@ -185,9 +186,7 @@ const OnTimeIndexPage = () => {
         pathname: router.pathname,
         query: {
           ...query,
-          ...(adminAreaIds.length > 0
-            ? { adminAreaId: adminAreaIds }
-            : {}),
+          ...(adminAreaIds.length > 0 ? { adminAreaId: adminAreaIds } : {}),
         },
       },
       undefined,

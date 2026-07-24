@@ -61,7 +61,7 @@ export const SortedPaginatedTable = <T,>({
   paginationAlignment = "right",
   onSortChange,
   colWidths,
-  fontSize
+  fontSize,
 }: SortedPaginatedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(initialSortKey);
