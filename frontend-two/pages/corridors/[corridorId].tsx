@@ -206,11 +206,14 @@ const CorridorsViewPage = () => {
   };
 
   return (
-    <BaseLayout title={pageTitle}>
-      <Link href="/corridors" className="govuk-back-link">
-        All corridors
-      </Link>
-
+    <BaseLayout
+      title={pageTitle}
+      backLink={
+        <Link href="/corridors" className="govuk-back-link">
+          All corridors
+        </Link>
+      }
+    >
       {showNotFound ? (
         <>
           <span className="govuk-caption-xl">Corridors</span>

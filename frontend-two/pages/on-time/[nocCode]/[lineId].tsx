@@ -120,6 +120,7 @@ const OnTimeServicePage = () => {
   const routerReplace = router.replace;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
   const [operatorChecked, setOperatorChecked] = useState(false);
   const [lineNotFound, setLineNotFound] = useState(false);
   const [data, setData] = useState<Partial<ServiceLevelData>>({});
@@ -367,6 +368,7 @@ const OnTimeServicePage = () => {
         timeOfDay: timeOfDay.error,
         dayOfWeek: dayOfWeek.error,
       });
+      setHasLoadedData(true);
       setIsLoading(false);
     };
     load();
@@ -396,7 +398,7 @@ const OnTimeServicePage = () => {
     : lineId;
 
   return (
-    <BaseLayout title={serviceTitle}>
+    <BaseLayout title={`${serviceTitle} : Analyse Bus Open Data`}>
       <p className="govuk-body">
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}`}
@@ -430,7 +432,7 @@ const OnTimeServicePage = () => {
             ?
           </p>
         </>
-      ) : isLoading ? (
+      ) : isLoading && !hasLoadedData ? (
         <p className="govuk-body govuk-!-margin-top-6">
           Loading service data...
         </p>

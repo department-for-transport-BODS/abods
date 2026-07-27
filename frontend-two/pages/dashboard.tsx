@@ -130,8 +130,10 @@ const DashboardPage = () => {
 
   return (
     <BaseLayout title="Dashboard - Analyse Bus Open Data">
-      <div className="app-page dashboard-page">
-        <h1 className="govuk-heading-xl app-page-header">Dashboard</h1>
+      <div className="dashboard-page">
+        <div className="govuk-!-margin-bottom-2 govuk-!-margin-top-2">
+          <h1 className="govuk-heading-xl app-page-header">Dashboard</h1>
+        </div>
         <div className="dashboard__controls">
           <OperatorSelector
             operators={operators}

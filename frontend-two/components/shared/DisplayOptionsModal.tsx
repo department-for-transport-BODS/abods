@@ -147,7 +147,7 @@ export const DisplayOptionsModal = ({
 
         <button
           type="button"
-          className="govuk-link govuk-body govuk-body display-options-modal__show-all-link govuk-!-margin-top-4"
+          className="govuk-link govuk-body govuk-body display-options-modal__show-all-link govuk-!-margin-top-1"
           onClick={showAllColumns}
         >
           Show all

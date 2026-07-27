@@ -178,6 +178,19 @@ export const getJourneyDateFromStartTime = (
   return dateTime.isValid ? dateTime.toISODate() : null;
 };
 
+export const getVehicleJourneyReturnHref = (
+  dateOfJourney: string | null,
+  operatorId: string | null,
+  serviceId: string | null,
+) => ({
+  pathname: "/vehicle-journeys",
+  query: {
+    ...(dateOfJourney ? { date: dateOfJourney } : {}),
+    ...(operatorId ? { operator: operatorId } : {}),
+    ...(serviceId ? { service: serviceId } : {}),
+  },
+});
+
 export const getValidDateRange = (offsetISO?: string, durationISO?: string) =>
   Interval.before(
     DateTime.local()

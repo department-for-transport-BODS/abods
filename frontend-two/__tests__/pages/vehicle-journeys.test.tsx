@@ -19,8 +19,20 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/layout/BaseLayout", () => ({
-  BaseLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-layout">{children}</div>
+  BaseLayout: ({
+    backLink,
+    children,
+    title,
+  }: {
+    backLink?: React.ReactNode;
+    children: React.ReactNode;
+    title: string;
+  }) => (
+    <div data-testid="base-layout">
+      <span data-testid="page-title">{title}</span>
+      {backLink ? <div className="page__back-link">{backLink}</div> : null}
+      <main className="page__main-wrapper">{children}</main>
+    </div>
   ),
 }));
 
@@ -244,6 +256,15 @@ describe("VehicleJourneysPage", () => {
         screen.getByRole("heading", { name: "12: Town Centre" }),
       ).toBeInTheDocument();
     });
+    expect(screen.getByTestId("page-title")).toHaveTextContent(
+      "12: Town Centre: Analyse Bus Open Data",
+    );
+    const backLink = screen.getByRole("link", { name: "Search" });
+    expect(backLink).toHaveAttribute(
+      "href",
+      "/vehicle-journeys?date=2026-07-13&operator=OP1&service=L1",
+    );
+    expect(backLink.parentElement).toHaveClass("page__back-link");
     expect(screen.getByText("Best Buses (BBUS)")).toBeInTheDocument();
     expect(screen.getByText("High Street")).toBeInTheDocument();
     expect(screen.getByTestId("vehicle-journey-map")).toBeInTheDocument();

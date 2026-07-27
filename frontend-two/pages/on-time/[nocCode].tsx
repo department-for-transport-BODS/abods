@@ -458,10 +458,14 @@ const OnTimeOperatorPage = () => {
   }
 
   return (
-    <BaseLayout title={`All services: Analyse Bus Open Data`}>
-      <Link href="/on-time" className="govuk-back-link">
-        All operators
-      </Link>
+    <BaseLayout
+      title="All services: Analyse Bus Open Data"
+      backLink={
+        <Link href="/on-time" className="govuk-back-link">
+          All operators
+        </Link>
+      }
+    >
       <OnTimePageHeader title="All services">
         <OperatorSelector
           operators={allOperators}

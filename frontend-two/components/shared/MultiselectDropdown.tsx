@@ -163,19 +163,25 @@ export const MultiselectDropdown = ({
             </div>
           ) : (
             <ul className="multiselect-dropdown__single-list">
-              {filteredOptions.map((option, idx) => (
-                <li
-                  key={`${option}-${idx}`}
-                  className={`multiselect-dropdown__single-item${
-                    selected.includes(option)
-                      ? " multiselect-dropdown__single-item--selected"
-                      : ""
-                  }`}
-                  onClick={() => toggleSelectedOption(option)}
-                >
-                  {option}
+              {filteredOptions.length === 0 ? (
+                <li className="multiselect-dropdown__single-item">
+                  No items found
                 </li>
-              ))}
+              ) : (
+                filteredOptions.map((option, idx) => (
+                  <li
+                    key={`${option}-${idx}`}
+                    className={`multiselect-dropdown__single-item${
+                      selected.includes(option)
+                        ? " multiselect-dropdown__single-item--selected"
+                        : ""
+                    }`}
+                    onClick={() => toggleSelectedOption(option)}
+                  >
+                    {option}
+                  </li>
+                ))
+              )}
             </ul>
           )}
         </div>

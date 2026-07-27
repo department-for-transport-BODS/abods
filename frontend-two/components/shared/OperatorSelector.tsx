@@ -248,7 +248,7 @@ export const OperatorSelector = ({
   }
 
   return (
-    <div className="operator-selector app-operator-selector govuk-!-margin-bottom-6">
+    <div className="operator-selector app-operator-selector govuk-!-margin-bottom-4">
       <div className="operator-selector__label">
         <label
           className="govuk-caption-l govuk-!-margin-bottom-0"

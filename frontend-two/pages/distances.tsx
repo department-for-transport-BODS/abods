@@ -479,7 +479,7 @@ const DistancesPage = () => {
 
   return (
     <BaseLayout title="Distances - Analyse Bus Open Data">
-      <div className="app-page feed-monitoring-page">
+      <div className="feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">Distances</h1>
         {error && (
           <div

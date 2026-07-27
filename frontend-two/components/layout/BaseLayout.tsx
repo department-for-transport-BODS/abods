@@ -5,6 +5,7 @@ import { CookieBanner } from "@/components/layout/CookieBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { Nav } from "@/components/layout/Nav";
+import { Page } from "@/components/layout/Page";
 import { Panel } from "@/components/layout/Panel";
 import { SkipLinks } from "@/components/layout/SkipLinks";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +18,7 @@ interface BaseLayoutProps {
   children: ReactNode;
   errors?: ErrorInfo[];
   mainClassName?: string;
+  backLink?: ReactNode;
 }
 const PUBLIC_ROUTES = [
   "/login",
@@ -31,6 +33,7 @@ export const BaseLayout = ({
   children,
   errors,
   mainClassName,
+  backLink,
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -53,8 +56,7 @@ export const BaseLayout = ({
         <Header serviceName="Analyse Bus Open Data" />
         <div className="app__body">
           {showAuthenticatedLayout ? <Nav /> : null}
-          <main
-            id="content"
+          <div
             className={
               showAuthenticatedLayout
                 ? ["app__content", mainClassName].filter(Boolean).join(" ")
@@ -63,8 +65,8 @@ export const BaseLayout = ({
                     .join(" ")
             }
           >
-            {children}
-          </main>
+            <Page backLink={backLink}>{children}</Page>
+          </div>
           {showAuthenticatedLayout ? <Panel /> : null}
         </div>
         <Footer />

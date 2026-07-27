@@ -17,8 +17,17 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/layout/BaseLayout", () => ({
-  BaseLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-layout">{children}</div>
+  BaseLayout: ({
+    backLink,
+    children,
+  }: {
+    backLink?: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
+    <div data-testid="base-layout">
+      {backLink ? <div className="page__back-link">{backLink}</div> : null}
+      <main className="page__main-wrapper">{children}</main>
+    </div>
   ),
 }));
 
@@ -210,9 +219,10 @@ describe("OnTimeOperatorPage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByRole("link", { name: /All operators/i }),
-    ).toHaveAttribute("href", "/on-time");
+    const backLink = screen.getByRole("link", { name: /All operators/i });
+
+    expect(backLink).toHaveAttribute("href", "/on-time");
+    expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 
   it("renders a service row with a link to its detail page", async () => {

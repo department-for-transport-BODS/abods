@@ -26,6 +26,7 @@ import {
   formatPercent,
   formatStopTime,
   getActualDeparture,
+  getVehicleJourneyReturnHref,
   getStopOtp,
   incompleteIdToString,
 } from "@/components/vehicle-journeys/vehicleJourneysUtils";
@@ -69,19 +70,6 @@ const replaceQuery = (
     shallow: true,
   });
 };
-
-const getReturnHref = (
-  dateOfJourney: string | null,
-  operatorId: string | null,
-  serviceId: string | null,
-) => ({
-  pathname: "/vehicle-journeys",
-  query: {
-    ...(dateOfJourney ? { date: dateOfJourney } : {}),
-    ...(operatorId ? { operator: operatorId } : {}),
-    ...(serviceId ? { service: serviceId } : {}),
-  },
-});
 
 const getJourneyHref = (
   journey: VehicleJourneySummary,
@@ -548,12 +536,6 @@ export const VehicleJourneyDetail = ({
 
   return (
     <>
-      <Link
-        className="govuk-back-link"
-        href={getReturnHref(dateOfJourney, operatorId, serviceId)}
-      >
-        Search
-      </Link>
       <span className="govuk-caption-xl">Vehicle journeys</span>
       <h1 className="govuk-heading-xl">{heading}</h1>
 
@@ -570,7 +552,11 @@ export const VehicleJourneyDetail = ({
           back to{" "}
           <Link
             className="govuk-link"
-            href={getReturnHref(dateOfJourney, operatorId, serviceId)}
+            href={getVehicleJourneyReturnHref(
+              dateOfJourney,
+              operatorId,
+              serviceId,
+            )}
           >
             Vehicle journeys
           </Link>

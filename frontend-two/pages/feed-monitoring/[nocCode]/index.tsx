@@ -59,21 +59,28 @@ const LiveStatusPage = () => {
 
   if (isLoading) {
     return (
-      <BaseLayout title="Live status - Analyse Bus Open Data">
-        <div className="app-page feed-monitoring-page">
-          <p className="govuk-body">Loading...</p>
-        </div>
+      <BaseLayout
+        title="Live status - Analyse Bus Open Data"
+        mainClassName="app__content--page"
+      >
+        <p className="govuk-body">Loading...</p>
       </BaseLayout>
     );
   }
 
   return (
-    <BaseLayout title="Live status - Analyse Bus Open Data">
-      <div className="app-page feed-monitoring-page">
-        <div>
-          <Link href="/feed-monitoring" className="govuk-back-link">
-            All operators
-          </Link>
+    <BaseLayout
+      title="Live status - Analyse Bus Open Data"
+      mainClassName="app__content--page"
+      backLink={
+        <Link
+          href="/feed-monitoring"
+          className="govuk-back-link back-link govuk-!-margin-bottom-0"
+        >
+          All operators
+        </Link>
+      }
+    >
           {error && (
             <div
               className="govuk-error-summary"
@@ -112,7 +119,6 @@ const LiveStatusPage = () => {
               pageLink="/feed-monitoring/[nocCode]"
             />
           </div>
-        </div>
         <div className="flex items-center justify-between mt-8">
           <span style={{ fontSize: "24px" }}>
             {new Date().toLocaleDateString("en-GB", {
@@ -217,7 +223,6 @@ const LiveStatusPage = () => {
             </div>
           </Box>
         </div>
-      </div>
     </BaseLayout>
   );
 };

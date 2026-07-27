@@ -15,13 +15,16 @@ vi.mock("@/hooks/useAuth", () => ({
 vi.mock("@/components/layout/BaseLayout", () => ({
   BaseLayout: ({
     title,
+    backLink,
     children,
   }: {
     title: string;
+    backLink?: React.ReactNode;
     children: React.ReactNode;
   }) => (
     <div data-testid="base-layout" data-title={title}>
-      {children}
+      {backLink ? <div className="page__back-link">{backLink}</div> : null}
+      <main className="page__main-wrapper">{children}</main>
     </div>
   ),
 }));
@@ -175,10 +178,10 @@ describe("OnTimeServicePage", () => {
       "data-title",
       "1 - Demo Service",
     );
-    expect(screen.getByRole("link", { name: /All Services/i })).toHaveAttribute(
-      "href",
-      "/on-time/ABCD",
-    );
+    const backLink = screen.getByRole("link", { name: /All Services/i });
+
+    expect(backLink).toHaveAttribute("href", "/on-time/ABCD");
+    expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 
   it("redirects to operator-not-found when nocCode is inaccessible", async () => {

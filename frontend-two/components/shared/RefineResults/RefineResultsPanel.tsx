@@ -84,38 +84,36 @@ export const RefineResultsPanel = ({
   }
 
   return (
-    <div className="refine-results-panel-drawer">
-      <div
-        ref={panelRef}
-        id="refine-results-panel"
-        className="refine-results-panel"
-        role="dialog"
-        aria-labelledby={titleId}
-      >
-        <div className="refine-results-panel__header">
-          <h2 id={titleId} className="govuk-heading-l">
-            Refine results
-          </h2>
-          <button
-            type="button"
-            className="refine-results-panel__close button-link govuk-link"
-            onClick={onCancel}
-          >
-            Close
-          </button>
-        </div>
-
-        <RefineResultsFilters
-          isLoading={isLoading}
-          showPerformanceFilters={showPerformanceFilters}
-          showAdminAreaFilter={showAdminAreaFilter}
-          adminAreaOptions={adminAreaOptions}
-          initialValues={initialValues}
-          onApply={onApply}
-          onCancel={onCancel}
-          onReset={onReset}
-        />
+    <div
+      ref={panelRef}
+      id="refine-results-panel"
+      className="refine-results-panel"
+      role="dialog"
+      aria-labelledby={titleId}
+    >
+      <div className="refine-results-panel__header">
+        <h2 id={titleId} className="govuk-heading-l">
+          Refine results
+        </h2>
+        <button
+          type="button"
+          className="refine-results-panel__close button-link govuk-link"
+          onClick={onCancel}
+        >
+          Close
+        </button>
       </div>
+
+      <RefineResultsFilters
+        isLoading={isLoading}
+        showPerformanceFilters={showPerformanceFilters}
+        showAdminAreaFilter={showAdminAreaFilter}
+        adminAreaOptions={adminAreaOptions}
+        initialValues={initialValues}
+        onApply={onApply}
+        onCancel={onCancel}
+        onReset={onReset}
+      />
     </div>
   );
 };
