@@ -398,15 +398,17 @@ const OnTimeServicePage = () => {
     : lineId;
 
   return (
-    <BaseLayout title={`${serviceTitle} : Analyse Bus Open Data`}>
-      <p className="govuk-body">
+    <BaseLayout
+      title={`${serviceTitle}: Analyse Bus Open Data`}
+      backLink={
         <Link
           href={`/on-time/${encodeURIComponent(nocCode)}`}
           className="govuk-back-link"
         >
           All Services
         </Link>
-      </p>
+      }
+    >
       <OnTimePageHeader
         title={serviceTitle}
         headingClassName="govuk-heading-xl govuk-!-margin-bottom-2"

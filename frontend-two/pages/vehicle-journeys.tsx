@@ -165,10 +165,22 @@ const VehicleJourneysPage = () => {
   const pageTitle = currentJourney
     ? `${currentJourney.serviceNumber}: ${currentJourney.serviceName}: Analyse Bus Open Data`
     : "Vehicle journeys: Analyse Bus Open Data";
+  const searchBackLink = journeyId ? (
+    <Link
+      className="govuk-back-link"
+      href={getVehicleJourneyReturnHref(
+        fetchDate,
+        selectedOperatorId,
+        selectedServiceId,
+      )}
+    >
+      Search
+    </Link>
+  ) : undefined;
 
   if (isDetailRoutePending) {
     return (
-      <BaseLayout title={pageTitle}>
+      <BaseLayout title={pageTitle} backLink={searchBackLink}>
         <span className="govuk-caption-xl">Vehicle journeys</span>
         <h1 className="govuk-heading-xl">Loading journey details</h1>
         <p className="govuk-body">Loading...</p>
@@ -177,23 +189,7 @@ const VehicleJourneysPage = () => {
   }
 
   return (
-    <BaseLayout
-      title={pageTitle}
-      backLink={
-        journeyId ? (
-          <Link
-            className="govuk-back-link"
-            href={getVehicleJourneyReturnHref(
-              fetchDate,
-              selectedOperatorId,
-              selectedServiceId,
-            )}
-          >
-            Search
-          </Link>
-        ) : undefined
-      }
-    >
+    <BaseLayout title={pageTitle} backLink={searchBackLink}>
       <div className="govuk-grid-row">
         <div className="govuk-grid-column-two-thirds-from-desktop">
           <ErrorSummary errors={errors} />

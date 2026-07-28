@@ -183,23 +183,27 @@ export const MultiselectCheckbox = ({
             </div>
           ) : null}
           <div className="govuk-checkboxes govuk-checkboxes--small multiselect-checkbox__options">
-            {filteredOptions.map((option) => (
-              <div key={option.value} className="govuk-checkboxes__item">
-                <input
-                  id={getOptionId(option.value)}
-                  className="govuk-checkboxes__input"
-                  type="checkbox"
-                  checked={selectedValues.includes(option.value)}
-                  onChange={() => handleToggle(option.value)}
-                />
-                <label
-                  className="govuk-label govuk-checkboxes__label"
-                  htmlFor={getOptionId(option.value)}
-                >
-                  {option.label}
-                </label>
-              </div>
-            ))}
+            {filteredOptions.length === 0 ? (
+              <p className="govuk-body govuk-!-margin-bottom-0">No items found</p>
+            ) : (
+              filteredOptions.map((option) => (
+                <div key={option.value} className="govuk-checkboxes__item">
+                  <input
+                    id={getOptionId(option.value)}
+                    className="govuk-checkboxes__input"
+                    type="checkbox"
+                    checked={selectedValues.includes(option.value)}
+                    onChange={() => handleToggle(option.value)}
+                  />
+                  <label
+                    className="govuk-label govuk-checkboxes__label"
+                    htmlFor={getOptionId(option.value)}
+                  >
+                    {option.label}
+                  </label>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}

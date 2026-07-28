@@ -657,7 +657,7 @@
 
 .vehicle-journeys__otp-stat .stat__value {
   font-size: 32px;
-  line-height: 35 / 32;
+  line-height: math.div(35, 32);
   white-space: nowrap;
 }
 
@@ -806,7 +806,7 @@
 
 .vehicle-journeys__map {
   width: 100%;
-  height: 80vh;
+  min-height: 80vh;
   border: 1px solid $govuk-border-colour;
 }
 
@@ -855,18 +855,14 @@
 
 .otp-legend {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  gap: govuk-spacing(2) govuk-spacing(4);
 }
 
 .otp-legend__item {
   display: flex;
   align-items: center;
-  margin-right: govuk-spacing(4);
   white-space: nowrap;
-}
-
-.otp-legend__item:last-child {
-  margin-right: 0;
 }
 
 .otp-legend__icon {
@@ -1032,12 +1028,15 @@
   position: fixed;
   top: 0;
   right: 0;
-  height: 100%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
   width: 380px;
   padding: govuk-spacing(4);
   border-left: 1px solid $govuk-border-colour;
   background-color: govuk-colour("white");
   box-sizing: border-box;
+  overflow: hidden;
   z-index: $z-modal;
   animation: refine-results-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1046,9 +1045,11 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex: 0 0 auto;
 }
 
 .refine-results-panel__close {
+  flex: 0 0 auto;
   height: govuk-spacing(7);
 }
 
@@ -1215,7 +1216,10 @@
 }
 
 .refine-results-filters {
-  display: block;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .refine-results-filters__scrollbox {
@@ -1257,6 +1261,7 @@
 
 .refine-results-filters__actions {
   display: flex;
+  flex: 0 0 auto;
   justify-content: flex-end;
   margin-top: govuk-spacing(2);
 
@@ -3437,7 +3442,7 @@ $day-width: 46px;
     }
     .status--large & {
       font-size: rem(32);
-      line-height: 35 / 32;
+      line-height: math.div(35, 32);
       margin-left: govuk-spacing(2);
     }
   }
