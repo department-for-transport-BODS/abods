@@ -39,9 +39,7 @@ export const loadImageFromSvg = async (
   svg: string,
   options: LoadSvgOptions = {},
 ) => {
-  const markup = options.normaliseDimensions
-    ? ensureSvgDimensions(svg)
-    : svg;
+  const markup = options.normaliseDimensions ? ensureSvgDimensions(svg) : svg;
 
   const image = new Image();
 
