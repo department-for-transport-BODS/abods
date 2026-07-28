@@ -126,7 +126,7 @@ export const OnTimeServiceMap = ({
       fitBoundsOptions: { padding: 50, duration: 0 },
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), "top-left");
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     map.on("load", () => {
       void (async () => {
