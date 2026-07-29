@@ -677,7 +677,10 @@
 
 .stop-list-item {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 2fr) minmax(4.5rem, 1fr) minmax(4.5rem, 1fr);
+  grid-template-columns: 2rem minmax(0, 2fr) minmax(4.5rem, 1fr) minmax(
+      4.5rem,
+      1fr
+    );
   gap: govuk-spacing(2);
   align-items: center;
   min-height: 2.75rem;
