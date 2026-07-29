@@ -162,7 +162,7 @@ describe("MultiselectCheckbox", () => {
     await user.click(trigger);
     await user.type(trigger, "zzz");
 
-    expect(screen.queryByText("No items found")).not.toBeInTheDocument();
+    expect(screen.getByText("No items found")).toBeInTheDocument();
     const dropdown = screen.getByRole("listbox");
     expect(within(dropdown).queryAllByRole("checkbox")).toHaveLength(0);
   });

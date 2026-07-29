@@ -7,8 +7,17 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/layout/BaseLayout", () => ({
-  BaseLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-layout">{children}</div>
+  BaseLayout: ({
+    backLink,
+    children,
+  }: {
+    backLink?: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
+    <div data-testid="base-layout">
+      {backLink}
+      {children}
+    </div>
   ),
 }));
 

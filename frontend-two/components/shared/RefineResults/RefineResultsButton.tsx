@@ -57,7 +57,10 @@ export const RefineResultsButton = ({
         showAdminAreaFilter={showAdminAreaFilter}
         adminAreaOptions={adminAreaOptions}
         initialValues={initialValues}
-        onApply={onApply}
+        onApply={(values) => {
+          onApply(values);
+          closePanel();
+        }}
         onReset={onReset}
         onCancel={closePanel}
       />

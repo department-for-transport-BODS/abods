@@ -17,8 +17,19 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/layout/BaseLayout", () => ({
-  BaseLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-layout">{children}</div>
+  BaseLayout: ({
+    backLink,
+    children,
+  }: {
+    backLink?: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
+    <div data-testid="base-layout">
+      {backLink ? <div className="page__back-link">{backLink}</div> : null}
+      <main id="content" className="govuk-main-wrapper page__main-wrapper">
+        {children}
+      </main>
+    </div>
   ),
 }));
 
@@ -185,6 +196,29 @@ it("Shows loading state whilst waiting for data", async () => {
   render(<LiveStatusPage />);
 
   expect(screen.getByText("Loading...")).toBeInTheDocument();
+  expect(document.querySelector(".page__main-wrapper")).toHaveClass(
+    "govuk-main-wrapper",
+    "page__main-wrapper",
+  );
+});
+
+it("separates the back link from the padded main content", async () => {
+  mockFetchFeedMonitoringList.mockResolvedValue(feedMonitoringListMockData);
+  mockFetchOperatorLiveStatus.mockResolvedValue(
+    operatorLiveStatusMockData_Alpha,
+  );
+
+  render(<LiveStatusPage />);
+
+  const backLink = await screen.findByRole("link", {
+    name: "All operators",
+  });
+  const pageContent = document.querySelector(".page__main-wrapper");
+
+  expect(backLink.parentElement).toHaveClass("page__back-link");
+  expect(pageContent).toContainElement(
+    screen.getByRole("heading", { name: "Live status" }),
+  );
 });
 
 it("Shows an error message when data fails to load", async () => {

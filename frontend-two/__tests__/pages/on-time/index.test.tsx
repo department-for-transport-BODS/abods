@@ -444,8 +444,8 @@ describe("OnTimeIndexPage", () => {
         ).toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         expect(
-          screen.getByRole("heading", { name: "Refine results" }),
-        ).toBeInTheDocument();
+          screen.queryByRole("dialog", { name: "Refine results" }),
+        ).not.toBeInTheDocument();
         const lastCall =
           mockFetchOperatorPerformanceList.mock.calls[
             mockFetchOperatorPerformanceList.mock.calls.length - 1
@@ -632,6 +632,7 @@ describe("OnTimeIndexPage", () => {
         ).toBeInTheDocument();
       });
 
+      openRefinePanel();
       fireEvent.click(screen.getByText("Reset to defaults"));
 
       await waitFor(() => {

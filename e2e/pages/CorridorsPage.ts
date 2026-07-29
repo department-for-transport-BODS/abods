@@ -8,6 +8,9 @@ export class CorridorsPage {
 
   async gotoList(): Promise<void> {
     await this.page.goto("/corridors", { waitUntil: "domcontentloaded" });
+    await this.page
+      .getByText("Loading...", { exact: true })
+      .waitFor({ state: "hidden" });
   }
 
   async gotoCreate(): Promise<void> {

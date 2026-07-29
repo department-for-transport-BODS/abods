@@ -98,7 +98,10 @@ export const PagingPanel = ({
                 ...
               </span>
             ) : page === currentPage + 1 ? (
-              <strong key={page} className="govuk-body govuk-!-margin-bottom-0">
+              <strong
+                key={page}
+                className="govuk-!-font-weight-bold govuk-body govuk-!-margin-bottom-0"
+              >
                 {page}
               </strong>
             ) : (

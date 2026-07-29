@@ -69,7 +69,7 @@ const FeedMonitoringPage = () => {
 
   return (
     <BaseLayout title="NOC feed monitoring - Analyse Bus Open Data">
-      <div className="app-page feed-monitoring-page">
+      <div className="feed-monitoring-page">
         <h1 className="govuk-heading-xl app-page-header">
           NOC feed monitoring
         </h1>

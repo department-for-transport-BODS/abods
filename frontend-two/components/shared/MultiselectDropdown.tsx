@@ -139,28 +139,36 @@ export const MultiselectDropdown = ({
             </div>
           ) : null}
           {multiSelect ? (
-            <div className="govuk-checkboxes">
-              {filteredOptions.map((option, idx) => (
-                <div
-                  className="govuk-checkboxes__item"
-                  key={`${option}-${idx}`}
-                >
-                  <input
-                    className="govuk-checkboxes__input"
-                    type="checkbox"
-                    checked={selected.includes(option)}
-                    onChange={() => toggleSelectedOption(option)}
-                    id={`checkbox-${option}`}
-                  />
-                  <label
-                    className="govuk-label govuk-checkboxes__label"
-                    htmlFor={`checkbox-${option}`}
+            filteredOptions.length === 0 ? (
+              <p className="govuk-body govuk-!-margin-bottom-0">
+                No items found
+              </p>
+            ) : (
+              <div className="govuk-checkboxes">
+                {filteredOptions.map((option, idx) => (
+                  <div
+                    className="govuk-checkboxes__item"
+                    key={`${option}-${idx}`}
                   >
-                    {option}
-                  </label>
-                </div>
-              ))}
-            </div>
+                    <input
+                      className="govuk-checkboxes__input"
+                      type="checkbox"
+                      checked={selected.includes(option)}
+                      onChange={() => toggleSelectedOption(option)}
+                      id={`checkbox-${option}`}
+                    />
+                    <label
+                      className="govuk-label govuk-checkboxes__label"
+                      htmlFor={`checkbox-${option}`}
+                    >
+                      {option}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : filteredOptions.length === 0 ? (
+            <p className="govuk-body govuk-!-margin-bottom-0">No items found</p>
           ) : (
             <ul className="multiselect-dropdown__single-list">
               {filteredOptions.map((option, idx) => (

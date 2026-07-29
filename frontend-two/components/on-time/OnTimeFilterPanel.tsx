@@ -124,50 +124,50 @@ export const OnTimeFilterPanel = ({
   return (
     <>
       <div className="controls-container">
-        <div className="controls-date-selects-container">
-          <DateRangeSelect
-            hideLabel={true}
-            value={dateRange || undefined}
-            onChange={onDateRangeChange}
-          />
-          <Select
-            name="date-preset"
-            label=""
-            items={datePresetItems.map((preset) => ({
-              value: preset,
-              text: preset,
-              selected: selectedDatePreset === preset,
-            }))}
-            onChange={(event) => onDatePresetChange(event.target.value)}
+        <div className="on-time-date-picker">
+          <div className="date-range">
+            <DateRangeSelect
+              hideLabel={true}
+              value={dateRange || undefined}
+              onChange={onDateRangeChange}
+            />
+            <Select
+              name="date-preset"
+              label=""
+              items={datePresetItems.map((preset) => ({
+                value: preset,
+                text: preset,
+                selected: selectedDatePreset === preset,
+              }))}
+              onChange={(event) => onDatePresetChange(event.target.value)}
+            />
+          </div>
+        </div>
+        <div className="on-time-filters">
+          <RefineResultsButton
+            isLoading={isLoading}
+            showAdminAreaFilter={showAdminAreaFilter}
+            adminAreaOptions={adminAreaOptions}
+            initialValues={refineResultsInitialValues}
+            onApply={onApplyRefineResults}
+            onReset={onResetRefineResults}
           />
         </div>
-        <div className="controls-secondary-row">
-          <div className="refine-results-button-container">
-            <RefineResultsButton
-              isLoading={isLoading}
-              showAdminAreaFilter={showAdminAreaFilter}
-              adminAreaOptions={adminAreaOptions}
-              initialValues={refineResultsInitialValues}
-              onApply={onApplyRefineResults}
-              onReset={onResetRefineResults}
-            />
-          </div>
-          <div className="on-time-toggle-container">
-            <SegmentedToggle
-              legend=""
-              name="match-type-toggle"
-              value={selectedMatchType}
-              onChange={onMatchTypeChange}
-              options={matchTypeOptions}
-            />
-            <SegmentedToggle
-              legend=""
-              name="stop-type-toggle"
-              value={selectedStopType}
-              onChange={onStopTypeChange}
-              options={stopTypeOptions}
-            />
-          </div>
+        <div className="on-time-toggle-container">
+          <SegmentedToggle
+            legend=""
+            name="match-type-toggle"
+            value={selectedMatchType}
+            onChange={onMatchTypeChange}
+            options={matchTypeOptions}
+          />
+          <SegmentedToggle
+            legend=""
+            name="stop-type-toggle"
+            value={selectedStopType}
+            onChange={onStopTypeChange}
+            options={stopTypeOptions}
+          />
         </div>
       </div>
       <div className="filter-chips-container">

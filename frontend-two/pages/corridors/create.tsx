@@ -16,10 +16,14 @@ const CorridorsCreatePage = () => {
   }, [loadData]);
 
   return (
-    <BaseLayout title="Create new corridor - Analyse Bus Open Data">
-      <Link href="/corridors" className="govuk-back-link">
-        All corridors
-      </Link>
+    <BaseLayout
+      title="Create new corridor - Analyse Bus Open Data"
+      backLink={
+        <Link href="/corridors" className="govuk-back-link">
+          All corridors
+        </Link>
+      }
+    >
       <span className="govuk-caption-xl">Corridors</span>
       <h1 className="govuk-heading-xl">Create new corridor</h1>
       <CreateCorridorForm

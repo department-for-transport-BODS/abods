@@ -34,10 +34,14 @@ const CorridorsEditPage = () => {
   const showNotFound = !isLoading && corridor === null;
 
   return (
-    <BaseLayout title="Edit corridor - Analyse Bus Open Data">
-      <Link href="/corridors" className="govuk-back-link">
-        All corridors
-      </Link>
+    <BaseLayout
+      title="Edit corridor - Analyse Bus Open Data"
+      backLink={
+        <Link href="/corridors" className="govuk-back-link">
+          All corridors
+        </Link>
+      }
+    >
       {showNotFound || corridorId === null ? (
         <>
           <span className="govuk-caption-xl">Corridors</span>
