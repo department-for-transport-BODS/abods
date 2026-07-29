@@ -148,13 +148,12 @@ export const SortableTable = ({
               {head.map((column) => (
                 <td
                   key={column.key}
-                  className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""}`.trim()}
+                  className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""} ${fontSize ? fontSize : undefined}`.trim()}
                   data-label={
                     typeof column.label === "string"
                       ? column.label
                       : column.ariaLabel ?? column.key
                   }
-                  style={fontSize ? { fontSize } : undefined}
                 >
                   {row[column.key]}
                 </td>

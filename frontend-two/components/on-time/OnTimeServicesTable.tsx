@@ -397,7 +397,7 @@ export const OnTimeServicesTable = ({
             buttonText="Export data"
           />
         }
-        fontSize="16px"
+        fontSize="govuk-!-font-size-16"
       />
     </div>
   );

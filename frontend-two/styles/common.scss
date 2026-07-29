@@ -2,6 +2,13 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// Timing icon
+.timing-icon {
+  display: inline-flex;
+  min-width: 20px;
+  color: $govuk-text-colour;
+}
+
 // DisplayOptionsModal styling
 .display-options-modal__footer {
   display: flex;

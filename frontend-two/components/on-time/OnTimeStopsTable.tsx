@@ -66,10 +66,10 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     key: "timingPoint",
     label: (
       <>
-        <div style={{ minWidth: "20px", display: "inline-flex" }}>
+        <span className="timing-icon">
           <TimingIcon />
           <span className="govuk-visually-hidden">Timing point</span>
-        </div>
+        </span>
       </>
     ),
     modalLabel: "Timing point",
@@ -341,10 +341,10 @@ function renderRow(
     key: `${row.stopId ?? ""}-${row.direction ?? "all"}`,
     stopId: row.stopId ?? "-",
     timingPoint: row.timingPoint ? (
-      <div style={{ minWidth: "20px", display: "inline-flex" }}>
+      <span className="timing-icon">
         <TimingIcon />
         <span className="govuk-visually-hidden">Timing point</span>
-      </div>
+      </span>
     ) : (
       "-"
     ),
@@ -482,7 +482,7 @@ export const OnTimeStopsTable = ({
             buttonText="Export data"
           />
         }
-        fontSize="16px"
+        fontSize="govuk-!-font-size-16"
       />
     </div>
   );
