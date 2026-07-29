@@ -28,6 +28,7 @@ export class DashboardPage {
     await this.page.goto(`/dashboard${search}`, {
       waitUntil: "domcontentloaded",
     });
+    await this.onTimeHeading().waitFor({ state: "visible" });
   }
 
   // ── Page-level ─────────────────────────────────────────────────────────────
@@ -52,11 +53,15 @@ export class DashboardPage {
   }
 
   topThreeTab(): Locator {
-    return this.page.locator("li.tabs__list-item", { hasText: "Top 3" });
+    return this.page
+      .locator(".app-performance-ranking")
+      .getByText("Top 3", { exact: true });
   }
 
   bottomThreeTab(): Locator {
-    return this.page.locator("li.tabs__list-item", { hasText: "Bottom 3" });
+    return this.page
+      .locator(".app-performance-ranking")
+      .getByText("Bottom 3", { exact: true });
   }
 
   rankingRows(): Locator {

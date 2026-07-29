@@ -74,11 +74,8 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
 
       await test.step("verify chips are rendered from the URL", async () => {
         await expect(stopAnalysis.heading()).toBeVisible();
-        await expect(stopAnalysis.chip("From 08:00")).toBeVisible();
-        await expect(stopAnalysis.chip("Until 17:59")).toBeVisible();
-        await expect(
-          stopAnalysis.chip("Monday, Wednesday, Friday"),
-        ).toBeVisible();
+        await expect(stopAnalysis.chip("08:00 - 17:59")).toBeVisible();
+        await expect(stopAnalysis.chip("Mon, Wed, Fri")).toBeVisible();
       });
 
       await test.step("reset the refine panel values back to defaults", async () => {
@@ -88,11 +85,8 @@ loggedInTest.describe("Stop analysis - authenticated", () => {
         await stopAnalysis.applyButton().click();
         await expect(stopAnalysis.refinePanel()).toBeHidden();
         await expect(loggedInPage).toHaveURL(/\/stop-analysis\/?(?:\?.*)?$/);
-        await expect(stopAnalysis.chip("From 00:00")).toHaveCount(0);
-        await expect(stopAnalysis.chip("Until 23:59")).toHaveCount(0);
-        await expect(
-          stopAnalysis.chip("Monday, Wednesday, Friday"),
-        ).toBeVisible();
+        await expect(stopAnalysis.chip("08:00 - 17:59")).toHaveCount(0);
+        await expect(stopAnalysis.chip("Mon, Wed, Fri")).toHaveCount(0);
       });
     },
   );

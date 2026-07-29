@@ -30,7 +30,7 @@ export class StopAnalysisPage {
   }
 
   refinePanel(): Locator {
-    return this.page.locator("#panel");
+    return this.page.getByRole("dialog", { name: "Refine results" });
   }
 
   closeRefineButton(): Locator {
@@ -99,6 +99,8 @@ export class StopAnalysisPage {
   }
 
   chip(text: string): Locator {
-    return this.page.getByText(text, { exact: true });
+    return this.page
+      .getByRole("list", { name: "Active filters" })
+      .getByText(text, { exact: true });
   }
 }
