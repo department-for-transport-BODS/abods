@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react";
+import Link from "next/link";
 import { Page } from "@/components/layout/Page";
 
 describe("Page", () => {
   it("renders the back link before the padded page content", () => {
     render(
-      <Page backLink={<a href="/operators">All operators</a>}>
+      <Page backLink={<Link href="/operators">All operators</Link>}>
         <h1>Live status</h1>
       </Page>,
     );

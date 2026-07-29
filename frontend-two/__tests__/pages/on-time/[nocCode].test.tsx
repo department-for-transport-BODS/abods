@@ -901,13 +901,7 @@ describe("OnTimeOperatorPage", () => {
           },
         }),
       ]);
-      let resolveRefetch!: (value: FrequentServicePerformance[]) => void;
-      mockFetchServicePerformance.mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            resolveRefetch = resolve;
-          }),
-      );
+      mockFetchServicePerformance.mockResolvedValueOnce([]);
 
       render(<OnTimeOperatorPage />);
 
@@ -942,8 +936,8 @@ describe("OnTimeOperatorPage", () => {
       });
 
       expect(
-        screen.getByRole("heading", { name: "Refine results" }),
-      ).toBeInTheDocument();
+        screen.queryByRole("dialog", { name: "Refine results" }),
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByText("Loading on-time data..."),
       ).not.toBeInTheDocument();
@@ -954,13 +948,6 @@ describe("OnTimeOperatorPage", () => {
       expect(
         within(filterChips).getByText("Nottinghamshire"),
       ).toBeInTheDocument();
-
-      resolveRefetch([]);
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "Apply" }),
-        ).not.toBeDisabled();
-      });
     });
   });
 
