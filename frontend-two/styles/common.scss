@@ -630,7 +630,7 @@
 
 .vehicle-journeys__stop-map-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 2fr 3fr;
   column-gap: govuk-spacing(8);
   row-gap: govuk-spacing(6);
   align-items: start;
@@ -643,7 +643,7 @@
 
 .vehicle-journeys__otp-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: govuk-spacing(2);
   margin-top: govuk-spacing(8);
   margin-bottom: govuk-spacing(4);
@@ -661,6 +661,12 @@
   white-space: nowrap;
 }
 
+@media (min-width: 64em) {
+  .vehicle-journeys__otp-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .vehicle-journeys__stop-list {
   border-top: 0;
 }
@@ -671,7 +677,7 @@
 
 .stop-list-item {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr) 5.5rem 5.5rem;
+  grid-template-columns: 2rem minmax(0, 2fr) minmax(4.5rem, 1fr) minmax(4.5rem, 1fr);
   gap: govuk-spacing(2);
   align-items: center;
   min-height: 2.75rem;
@@ -712,6 +718,7 @@
 .stop-list-item__value-container {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .stop-list-item__heading,
@@ -722,6 +729,7 @@
 
 .stop-list-item__name {
   @include govuk-font(16);
+  max-width: 100%;
   font-weight: $font-weight-normal;
   color: govuk-colour("black");
   text-align: left;
@@ -900,7 +908,12 @@
 }
 
 @media (max-width: 900px) {
-  .vehicle-journeys-search__controls,
+  .vehicle-journeys-search__controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 58.75em) {
   .vehicle-journeys__header-container,
   .vehicle-journeys__stop-map-grid {
     grid-template-columns: 1fr;
@@ -912,6 +925,16 @@
 
   .vehicle-journeys__map {
     min-height: 34rem;
+  }
+}
+
+@media (min-width: 64em) {
+  .vehicle-journeys__detail {
+    min-width: 75rem;
+  }
+
+  .vehicle-journeys__detail .vehicle-journeys__otp-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -1029,8 +1052,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
+  display: block;
   width: 380px;
   padding: govuk-spacing(4);
   border-left: 1px solid $govuk-border-colour;
