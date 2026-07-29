@@ -535,7 +535,7 @@ export const VehicleJourneyDetail = ({
     !journeysLoading && !journeyInfoLoading && journeyInfo === null;
 
   return (
-    <>
+    <div className="vehicle-journeys__detail">
       <span className="govuk-caption-xl">Vehicle journeys</span>
       <h1 className="govuk-heading-xl">{heading}</h1>
 
@@ -706,6 +706,6 @@ export const VehicleJourneyDetail = ({
       ) : null}
 
       <span className="govuk-visually-hidden">Journey id {journeyId}</span>
-    </>
+    </div>
   );
 };
