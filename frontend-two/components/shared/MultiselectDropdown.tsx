@@ -140,7 +140,9 @@ export const MultiselectDropdown = ({
           ) : null}
           {multiSelect ? (
             filteredOptions.length === 0 ? (
-              <p className="govuk-body govuk-!-margin-bottom-0">No items found</p>
+              <p className="govuk-body govuk-!-margin-bottom-0">
+                No items found
+              </p>
             ) : (
               <div className="govuk-checkboxes">
                 {filteredOptions.map((option, idx) => (

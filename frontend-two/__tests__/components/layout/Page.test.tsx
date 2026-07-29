@@ -14,14 +14,11 @@ describe("Page", () => {
 
     expect(pageContent.parentElement).toHaveClass("page");
     expect(backLink.parentElement).toHaveClass("page__back-link");
-    expect(pageContent).toHaveClass(
-      "govuk-main-wrapper",
-      "page__main-wrapper",
-    );
+    expect(pageContent).toHaveClass("govuk-main-wrapper", "page__main-wrapper");
     expect(pageContent).toHaveAttribute("id", "content");
-    expect(
-      backLink.parentElement?.compareDocumentPosition(pageContent),
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(backLink.parentElement?.compareDocumentPosition(pageContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(document.querySelectorAll("main")).toHaveLength(1);
     expect(backLink.closest("main")).toBeNull();
   });
@@ -37,10 +34,7 @@ describe("Page", () => {
     const pageContent = screen.getByRole("main");
 
     expect(pageContent.parentElement).toHaveClass("page");
-    expect(pageContent).toHaveClass(
-      "govuk-main-wrapper",
-      "page__main-wrapper",
-    );
+    expect(pageContent).toHaveClass("govuk-main-wrapper", "page__main-wrapper");
     expect(pageContent).toHaveAttribute("id", "content");
   });
 });

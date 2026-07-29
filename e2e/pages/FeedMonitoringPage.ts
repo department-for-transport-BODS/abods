@@ -42,8 +42,6 @@ export class FeedMonitoringPage {
   }
 
   async clickOperatorLink(nocCode: string): Promise<void> {
-    await this.page
-      .locator(`a[href="/feed-monitoring/${nocCode}/"]`)
-      .click();
+    await this.page.locator(`a[href="/feed-monitoring/${nocCode}/"]`).click();
   }
 }

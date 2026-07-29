@@ -184,7 +184,9 @@ export const MultiselectCheckbox = ({
           ) : null}
           <div className="govuk-checkboxes govuk-checkboxes--small multiselect-checkbox__options">
             {filteredOptions.length === 0 ? (
-              <p className="govuk-body govuk-!-margin-bottom-0">No items found</p>
+              <p className="govuk-body govuk-!-margin-bottom-0">
+                No items found
+              </p>
             ) : (
               filteredOptions.map((option) => (
                 <div key={option.value} className="govuk-checkboxes__item">
