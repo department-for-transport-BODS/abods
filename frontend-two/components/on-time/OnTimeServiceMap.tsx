@@ -4,6 +4,7 @@ import bbox from "@turf/bbox";
 import { featureCollection, lineString, point } from "@turf/helpers";
 import type { FeatureCollection, LineString, Point } from "geojson";
 import { registerTimingPointIcons } from "@/components/icons/timingPointIcons";
+import { registerMapChevronIcon } from "@/components/icons/MapChevronIcon";
 import { Spinner } from "@/components/shared/Spinner";
 import {
   clearStopPopup,
@@ -126,12 +127,15 @@ export const OnTimeServiceMap = ({
       fitBoundsOptions: { padding: 50, duration: 0 },
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), "top-left");
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     map.on("load", () => {
       void (async () => {
         try {
-          await registerTimingPointIcons(map);
+          await Promise.all([
+            registerTimingPointIcons(map),
+            registerMapChevronIcon(map),
+          ]);
         } finally {
           setMapLoaded(true);
         }
@@ -141,7 +145,10 @@ export const OnTimeServiceMap = ({
     map.on("style.load", () => {
       void (async () => {
         try {
-          await registerTimingPointIcons(map);
+          await Promise.all([
+            registerTimingPointIcons(map),
+            registerMapChevronIcon(map),
+          ]);
         } finally {
           setStyleRevision((previous) => previous + 1);
         }

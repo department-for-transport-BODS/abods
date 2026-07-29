@@ -116,7 +116,7 @@
 }
 
 .on-time-service-filters__directions {
-  min-width: 200px;
+  max-width: 80%;
 }
 
 @media (max-width: 900px) {
@@ -3674,7 +3674,7 @@ $day-width: 46px;
   &__legend {
     @include govuk-font(16);
     position: absolute;
-    bottom: govuk-spacing(4);
+    top: govuk-spacing(4);
     left: govuk-spacing(4);
     background-color: govuk-colour("white");
     padding: govuk-spacing(1) govuk-spacing(2);
@@ -3685,7 +3685,6 @@ $day-width: 46px;
     grid-template-rows: auto;
     column-gap: govuk-spacing(2);
     row-gap: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     z-index: 1;
   }
 

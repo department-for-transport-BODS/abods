@@ -10,10 +10,15 @@ import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
 
 const mocks = vi.hoisted(() => ({
   registerTimingPointIcons: vi.fn(async () => undefined),
+  registerMapChevronIcon: vi.fn(async () => undefined),
 }));
 
 vi.mock("@/components/icons/timingPointIcons", () => ({
   registerTimingPointIcons: mocks.registerTimingPointIcons,
+}));
+
+vi.mock("@/components/icons/MapChevronIcon", () => ({
+  registerMapChevronIcon: mocks.registerMapChevronIcon,
 }));
 
 const mapboxMock = vi.hoisted(() => {
