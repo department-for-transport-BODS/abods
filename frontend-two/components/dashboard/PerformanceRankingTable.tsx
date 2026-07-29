@@ -108,7 +108,7 @@ export const PerformanceRankingTable = ({
           <li
             className={`tabs__list-item ${order === "ascending" ? "tabs__list-item--selected" : ""}`}
             tabIndex={0}
-            onClick={() => onChangeOrder(RankingOrder.Descending)}
+            onClick={() => onChangeOrder(RankingOrder.Ascending)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();

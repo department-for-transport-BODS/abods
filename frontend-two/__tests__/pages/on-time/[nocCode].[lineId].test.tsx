@@ -176,7 +176,7 @@ describe("OnTimeServicePage", () => {
 
     expect(screen.getByTestId("base-layout")).toHaveAttribute(
       "data-title",
-      "1 - Demo Service",
+      "1 - Demo Service: Analyse Bus Open Data",
     );
     const backLink = screen.getByRole("link", { name: /All Services/i });
 
