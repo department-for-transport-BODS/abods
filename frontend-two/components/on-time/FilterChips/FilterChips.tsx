@@ -1,3 +1,5 @@
+import styles from "./filter-chips.module.scss";
+
 import { entries as getEntries } from "lodash-es";
 import { CrossIcon } from "@/components/icons/CrossIcon";
 import { RefineResultsAdminAreaOption } from "@/components/shared/RefineResults/RefineResultsFilters";
@@ -24,10 +26,14 @@ const weekdays = "Mon, Tue, Wed, Thur, Fri";
 const DEFAULT_START_TIME = "00:00";
 const DEFAULT_END_TIME = "23:59";
 
-const getDayOfWeekValues = (filters: PerformanceFiltersInputType): string => {
+const getDayOfWeekValues = (
+  filters: PerformanceFiltersInputType,
+): string => {
   const value = getEntries(filters.dayOfWeekFlags ?? {})
     .filter(([, enabled]) => enabled)
-    .map(([day]) => dayOfWeekValueMap[day as keyof typeof dayOfWeekValueMap])
+    .map(
+      ([day]) => dayOfWeekValueMap[day as keyof typeof dayOfWeekValueMap],
+    )
     .join(", ");
 
   if (value === weekdays) {
@@ -51,17 +57,19 @@ const FilterChip = ({
   onClear: () => void;
 }) => {
   return (
-    <div className="filter-chip">
+    <div className={styles.chip}>
       <button
         type="button"
-        className="filter-chip__remove"
+        className={styles.remove}
         aria-label={`Remove ${label} filter`}
         onClick={onClear}
       >
-        <CrossIcon className="filter-chip__remove-icon" />
+        <CrossIcon className={styles.removeIcon} />
       </button>
-      <span className="filter-chip__label">{label}:</span>
-      <span className="filter-chip__value">{value}</span>
+
+      <span className={styles.label}>{label}:</span>
+
+      <span className={styles.value}>{value}</span>
     </div>
   );
 };
@@ -103,7 +111,9 @@ export const FilterChips = ({
   const clearAdminAreaFilter = (adminAreaId: string) => {
     updateFilters({
       ...filters,
-      adminAreaIds: filters.adminAreaIds?.filter((id) => id !== adminAreaId),
+      adminAreaIds: filters.adminAreaIds?.filter(
+        (id) => id !== adminAreaId,
+      ),
     });
   };
 
@@ -123,13 +133,22 @@ export const FilterChips = ({
   };
 
   const timeRange = `${filters.startTime ?? DEFAULT_START_TIME} - ${filters.endTime ?? DEFAULT_END_TIME}`;
-  const minDelay = filters.minDelay ? `${filters.minDelay * -1} minutes` : "";
-  const maxDelay = filters.maxDelay ? `${filters.maxDelay} minutes` : "";
+
+  const minDelay = filters.minDelay
+    ? `${filters.minDelay * -1} minutes`
+    : "";
+
+  const maxDelay = filters.maxDelay
+    ? `${filters.maxDelay} minutes`
+    : "";
 
   return (
-    <ul className="filter-chips" aria-label="Active filters">
+    <ul className={styles.list} aria-label="Active filters">
       {filters.adminAreaIds?.map((adminAreaId) => (
-        <li className="filter-chips__item" key={adminAreaId}>
+        <li
+          className={styles.listItem}
+          key={adminAreaId}
+        >
           <FilterChip
             label="Area"
             value={adminAreaNameById.get(adminAreaId) ?? adminAreaId}
@@ -139,7 +158,7 @@ export const FilterChips = ({
       ))}
 
       {isDayOfWeek && (
-        <li className="filter-chips__item">
+        <li className={styles.listItem}>
           <FilterChip
             label="Day of the week"
             value={getDayOfWeekValues(filters)}
@@ -149,7 +168,7 @@ export const FilterChips = ({
       )}
 
       {isTimeRange && (
-        <li className="filter-chips__item">
+        <li className={styles.listItem}>
           <FilterChip
             label="Time range"
             value={timeRange}
@@ -159,7 +178,7 @@ export const FilterChips = ({
       )}
 
       {isMinDelay && (
-        <li className="filter-chips__item">
+        <li className={styles.listItem}>
           <FilterChip
             label="Maximum early"
             value={minDelay}
@@ -169,7 +188,7 @@ export const FilterChips = ({
       )}
 
       {isMaxDelay && (
-        <li className="filter-chips__item">
+        <li className={styles.listItem}>
           <FilterChip
             label="Maximum late"
             value={maxDelay}
