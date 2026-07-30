@@ -1,3 +1,5 @@
+import styles from "./multiselect-checkbox.module.scss";
+
 import { useCallback, useMemo, useRef, useState } from "react";
 
 interface MultiselectOption {
@@ -34,6 +36,7 @@ export const MultiselectCheckbox = ({
 }: MultiselectCheckboxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+
   const containerRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,8 +46,10 @@ export const MultiselectCheckbox = ({
 
   const filteredOptions = useMemo(
     () =>
-      options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchText.toLowerCase()),
+      options.filter((option) =>
+        option.label
+          .toLowerCase()
+          .includes(searchText.toLowerCase()),
       ),
     [options, searchText],
   );
@@ -55,8 +60,11 @@ export const MultiselectCheckbox = ({
   const handleToggle = useCallback(
     (value: string) => {
       const newValues = selectedValues.includes(value)
-        ? selectedValues.filter((v) => v !== value)
+        ? selectedValues.filter(
+            (selectedValue) => selectedValue !== value,
+          )
         : [...selectedValues, value];
+
       onChange(newValues);
     },
     [selectedValues, onChange],
@@ -67,31 +75,34 @@ export const MultiselectCheckbox = ({
       onShowAll();
       return;
     }
+
     onChange([]);
   }, [onChange, onShowAll]);
 
   const displayText = allSelected
     ? placeholder ?? label
     : selectedValues.length === 1
-      ? options.find((o) => o.value === selectedValues[0])?.label ??
-        `${selectedValues.length} selected`
+      ? options.find(
+          (option) => option.value === selectedValues[0],
+        )?.label ?? `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
 
   const selectionSummary =
     selectedValues.length === 1
-      ? options.find((o) => o.value === selectedValues[0])?.label ??
-        `${selectedValues.length} selected`
+      ? options.find(
+          (option) => option.value === selectedValues[0],
+        )?.label ?? `${selectedValues.length} selected`
       : `${selectedValues.length} selected`;
-  const showSelectionSummary = isOpen && hasSelection;
 
+  const showSelectionSummary = isOpen && hasSelection;
   const inputValue = isOpen ? searchText : displayText;
 
   return (
     <div
       ref={containerRef}
-      className="multiselect-checkbox"
-      onBlur={(e) => {
-        if (!containerRef.current?.contains(e.relatedTarget)) {
+      className={`${styles.container}${disabled ? ` ${styles.disabled}` : ""}`}
+      onBlur={(event) => {
+        if (!containerRef.current?.contains(event.relatedTarget)) {
           setIsOpen(false);
           setSearchText("");
         }
@@ -103,24 +114,33 @@ export const MultiselectCheckbox = ({
       >
         {label}
       </label>
-      <div className="multiselect-checkbox__trigger-wrap">
+
+      <div className={styles.triggerWrap}>
         {hasSelection ? (
           <span
             ref={summaryRef}
-            className="multiselect-checkbox__selection-summary"
-            style={{ visibility: showSelectionSummary ? "visible" : "hidden" }}
+            className={styles.selectionSummary}
+            style={{
+              visibility: showSelectionSummary
+                ? "visible"
+                : "hidden",
+            }}
           >
             {selectionSummary}
           </span>
         ) : null}
+
         <input
           ref={inputRef}
           id={id}
           type="text"
-          className="multiselect-checkbox__trigger govuk-input"
+          className={`govuk-input ${styles.trigger}`}
           style={
             showSelectionSummary && summaryRef.current
-              ? { paddingLeft: summaryRef.current.offsetWidth + 16 }
+              ? {
+                  paddingLeft:
+                    summaryRef.current.offsetWidth + 16,
+                }
               : undefined
           }
           value={inputValue}
@@ -128,8 +148,10 @@ export const MultiselectCheckbox = ({
             if (disabled || isOpen) {
               return;
             }
+
             event.preventDefault();
             setIsOpen(true);
+
             requestAnimationFrame(() => {
               inputRef.current?.focus();
             });
@@ -154,26 +176,33 @@ export const MultiselectCheckbox = ({
           aria-haspopup="listbox"
           aria-label={label}
         />
+
         <span
-          className={`multiselect-checkbox__chevron${isOpen ? " multiselect-checkbox__chevron--open" : ""}`}
+          className={`${styles.chevron}${
+            isOpen ? ` ${styles.chevronOpen}` : ""
+          }`}
           aria-hidden="true"
         />
       </div>
+
       {isOpen && (
         <div
-          className="multiselect-checkbox__dropdown"
+          className={styles.dropdown}
           role="listbox"
-          onMouseDown={(e) => e.preventDefault()}
+          onMouseDown={(event) => event.preventDefault()}
         >
           {showAll ? (
-            <div className="multiselect-checkbox__header">
-              <strong className="multiselect-checkbox__header-label">
+            <div className={styles.header}>
+              <strong className={styles.headerLabel}>
                 {showAllLabel}
               </strong>
+
               <button
                 type="button"
-                className={`button-link govuk-link multiselect-checkbox__header-action${
-                  hasSelection || onShowAll ? "" : " button-link--disabled"
+                className={`button-link govuk-link ${styles.headerAction}${
+                  hasSelection || onShowAll
+                    ? ""
+                    : " button-link--disabled"
                 }`}
                 onClick={handleSelectAll}
                 disabled={!hasSelection && !onShowAll}
@@ -182,14 +211,20 @@ export const MultiselectCheckbox = ({
               </button>
             </div>
           ) : null}
-          <div className="govuk-checkboxes govuk-checkboxes--small multiselect-checkbox__options">
+
+          <div
+            className={`govuk-checkboxes govuk-checkboxes--small ${styles.options}`}
+          >
             {filteredOptions.length === 0 ? (
               <p className="govuk-body govuk-!-margin-bottom-0">
                 No items found
               </p>
             ) : (
               filteredOptions.map((option) => (
-                <div key={option.value} className="govuk-checkboxes__item">
+                <div
+                  key={option.value}
+                  className={`govuk-checkboxes__item ${styles.option}`}
+                >
                   <input
                     id={getOptionId(option.value)}
                     className="govuk-checkboxes__input"
@@ -197,6 +232,7 @@ export const MultiselectCheckbox = ({
                     checked={selectedValues.includes(option.value)}
                     onChange={() => handleToggle(option.value)}
                   />
+
                   <label
                     className="govuk-label govuk-checkboxes__label"
                     htmlFor={getOptionId(option.value)}

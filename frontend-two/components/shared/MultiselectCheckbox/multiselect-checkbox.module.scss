@@ -1,0 +1,111 @@
+@import "../../../styles/govuk-module";
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.triggerWrap {
+  position: relative;
+}
+
+.selectionSummary {
+  position: absolute;
+  top: 50%;
+  left: govuk-spacing(2);
+  transform: translateY(-50%);
+  @include govuk-font($size: 19, $line-height: 1.25);
+  color: govuk-colour("black");
+  pointer-events: none;
+  z-index: 1;
+  max-width: 50%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.trigger {
+  text-align: left;
+  width: 100%;
+  padding-right: govuk-spacing(6);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(2);
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 3px solid govuk-colour("mid-grey");
+  border-bottom: 3px solid govuk-colour("mid-grey");
+  transform: translateY(-60%) rotate(45deg);
+  pointer-events: none;
+}
+
+.chevronOpen {
+  transform: translateY(-35%) rotate(-135deg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+  background: govuk-colour("light-grey");
+  padding: govuk-spacing(2);
+  margin: govuk-spacing(1);
+  @include govuk-font($size: 19, $line-height: 1.25);
+}
+
+.headerLabel {
+  margin: 0;
+  @include govuk-font($size: 19, $weight: bold);
+}
+
+.headerAction {
+  margin-left: auto;
+}
+
+.dropdown {
+  position: absolute;
+  z-index: 100;
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: -2px;
+}
+
+.options {
+  padding: 0 govuk-spacing(2) govuk-spacing(2);
+
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:before) {
+    top: 10px;
+  }
+
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:after) {
+    top: 17px;
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+  padding: govuk-spacing(1) 0;
+  cursor: pointer;
+
+  &:hover {
+    background-color: govuk-colour("light-grey");
+  }
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+}
