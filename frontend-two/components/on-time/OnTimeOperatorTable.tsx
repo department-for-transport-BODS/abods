@@ -85,18 +85,29 @@ function renderRow(
   row: OperatorPerformance,
   sparklineByOperatorId: Record<string, TimeSeriesData[]>,
   sparklineParams: PerformanceParams | null | undefined,
+  selectedAdminAreaIds: string[],
 ): SortableTableRow {
   const sparklineKey = getSparklineKey(row);
   const sparklineData = sparklineKey
     ? sparklineByOperatorId[sparklineKey] ?? []
     : [];
 
+  const queryString = new URLSearchParams();
+
+  selectedAdminAreaIds.forEach((id) => {
+    queryString.append("adminAreaId", id);
+  });
+
+  const href =
+    `/on-time/${encodeURIComponent(row.nocCode ?? "")}` +
+    (queryString.toString() ? `?${queryString.toString()}` : "");
+
   return {
     key: row.nocCode ?? row.name ?? "",
     nocCode: row.nocCode ?? "-",
     name: row.nocCode ? (
       <Link
-        href={`/on-time/${encodeURIComponent(row.nocCode)}`}
+        href={href}
         style={{ textDecoration: "none" }}
         className="govuk-link govuk-!-font-weight-bold"
       >
@@ -124,12 +135,14 @@ function renderRow(
 
 interface OnTimeOperatorTableProps {
   data: OperatorPerformance[];
-  sparklineParams?: PerformanceParams | null;
+  sparklineParams: PerformanceParams;
+  selectedAdminAreaIds?: string[];
 }
 
 export const OnTimeOperatorTable = ({
   data,
   sparklineParams,
+  selectedAdminAreaIds = [],
 }: OnTimeOperatorTableProps) => {
   const [pageRows, setPageRows] = useState<OperatorPerformance[]>([]);
   const [sparklineByOperatorId, setSparklineByOperatorId] = useState<
@@ -260,7 +273,12 @@ export const OnTimeOperatorTable = ({
   );
 
   const renderOperatorRow = (row: OperatorPerformance) =>
-    renderRow(row, sparklineByOperatorId, granularSparklineParams);
+    renderRow(
+      row,
+      sparklineByOperatorId,
+      granularSparklineParams,
+      selectedAdminAreaIds,
+    );
 
   return (
     <SortedPaginatedTable

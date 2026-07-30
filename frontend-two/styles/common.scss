@@ -2,6 +2,13 @@
 @import "src/assets/styles/helpers/helpers";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+// Timing icon
+.timing-icon {
+  display: inline-flex;
+  min-width: 20px;
+  color: $govuk-text-colour;
+}
+
 // DisplayOptionsModal styling
 .display-options-modal__footer {
   display: flex;
@@ -77,11 +84,12 @@
 }
 
 .on-time-service-filters {
-  display: grid;
+  display: flex;
   grid-template-columns: minmax(0, 60%) auto;
   justify-content: space-between;
   align-items: end;
   gap: govuk-spacing(3);
+  flex-wrap: wrap;
 }
 
 .on-time-service-filters__radios {
@@ -165,6 +173,7 @@
   align-items: center;
   flex-wrap: nowrap;
   gap: govuk-spacing(3);
+  margin-top: 30px;
 
   > .govuk-heading-l {
     flex: 0 1 auto;
@@ -193,46 +202,29 @@
   width: 100%;
 }
 
-.controls-container > * {
-  min-width: 0;
-}
-
-.on-time-date-picker {
-  flex: 1 1 29rem;
-  max-width: 46rem;
-  margin-right: govuk-spacing(2);
-  margin-bottom: govuk-spacing(4);
-}
-
-.date-range {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-gap: govuk-spacing(1);
-  width: 100%;
-
-  .govuk-form-group {
-    margin-bottom: 0;
+.on-time {
+  &__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
   }
-
-  .govuk-label:empty {
-    display: none;
+  &__date-picker {
+    display: flex;
+    align-items: baseline;
+    gap: govuk-spacing(2);
+    margin-right: govuk-spacing(2);
+    margin-bottom: govuk-spacing(2) * -1;
   }
-
-  .date-range-select {
-    width: 100%;
+  &__refine-results-button-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    grid-column: 1;
+    grid-row: 2;
+    margin-bottom: govuk-spacing(4);
+    min-width: 0;
   }
-
-  > :nth-child(2) {
-    .govuk-select {
-      width: 100%;
-    }
-  }
-}
-
-.on-time-filters {
-  display: grid;
-  grid-template-columns: repeat(2, min-content);
-  grid-column-gap: govuk-spacing(6);
 }
 
 .filter-chips-container {
@@ -243,7 +235,13 @@
   display: flex;
   flex-direction: column;
   gap: govuk-spacing(1);
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  width: 100%;
+  max-width: 100%;
   margin-bottom: govuk-spacing(4);
+  min-width: 0;
 }
 
 .on-time-refine-results-button {
@@ -1969,7 +1967,7 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 430px;
   height: 40px;
   padding: 0.5em 0.75em;
   background: $govuk-body-background-colour;
@@ -3610,16 +3608,9 @@ $day-width: 46px;
   }
 }
 
-@media (max-width: 29.99em) {
-  .summary-content-wrapper .summary-stat-container .summary-stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .summary-stats-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: govuk-spacing(6);
+  gap: govuk-spacing(4);
   width: 100%;
   margin-bottom: govuk-spacing(4);
 

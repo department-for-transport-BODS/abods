@@ -123,27 +123,25 @@ export const OnTimeFilterPanel = ({
 
   return (
     <>
-      <div className="controls-container">
-        <div className="on-time-date-picker">
-          <div className="date-range">
-            <DateRangeSelect
-              hideLabel={true}
-              value={dateRange || undefined}
-              onChange={onDateRangeChange}
-            />
-            <Select
-              name="date-preset"
-              label=""
-              items={datePresetItems.map((preset) => ({
-                value: preset,
-                text: preset,
-                selected: selectedDatePreset === preset,
-              }))}
-              onChange={(event) => onDatePresetChange(event.target.value)}
-            />
-          </div>
+      <div className="on-time__filter-row">
+        <div className="on-time__date-picker">
+          <DateRangeSelect
+            hideLabel={true}
+            value={dateRange || undefined}
+            onChange={onDateRangeChange}
+          />
+          <Select
+            name="date-preset"
+            label=""
+            items={datePresetItems.map((preset) => ({
+              value: preset,
+              text: preset,
+              selected: selectedDatePreset === preset,
+            }))}
+            onChange={(event) => onDatePresetChange(event.target.value)}
+          />
         </div>
-        <div className="on-time-filters">
+        <div className="on-time__refine-results-button-container">
           <RefineResultsButton
             isLoading={isLoading}
             showAdminAreaFilter={showAdminAreaFilter}

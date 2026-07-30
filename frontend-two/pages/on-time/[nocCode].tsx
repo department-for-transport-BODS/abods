@@ -64,6 +64,7 @@ import { OperatorSelector } from "@/components/shared/OperatorSelector";
 import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
 import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
 import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
+import { FilterChips } from "@/components/on-time/FilterChips";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -141,6 +142,62 @@ const OnTimeOperatorPage = () => {
     NonNullable<GetAdminAreasQuery["adminAreas"]>
   >([]);
 
+  const selectedAdminAreaIds = useMemo(() => {
+    const value = router.query.adminAreaId;
+
+    if (!value) {
+      return [];
+    }
+
+    return Array.isArray(value) ? value : [value];
+  }, [router.query.adminAreaId]);
+
+  const selectedAdminAreaNames = useMemo(() => {
+    if (selectedAdminAreaIds.length === 0) {
+      return [];
+    }
+
+    return adminAreas
+      .filter((area) => selectedAdminAreaIds.includes(area.id.toString()))
+      .map((area) => area.name);
+  }, [adminAreas, selectedAdminAreaIds]);
+
+  const adminAreaChipFilters = useMemo<PerformanceFiltersInputType>(
+    () => ({
+      adminAreaIds: selectedAdminAreaIds,
+    }),
+    [selectedAdminAreaIds],
+  );
+
+  const adminAreaFilterChipOptions = useMemo(
+    () =>
+      adminAreas.map((adminArea) => ({
+        label: adminArea.name,
+        value: adminArea.id.toString(),
+      })),
+    [adminAreas],
+  );
+
+  const handleAdminAreaChipChange = (filters: PerformanceFiltersInputType) => {
+    const remainingIds = filters.adminAreaIds ?? [];
+
+    const query = { ...router.query };
+
+    delete query.adminAreaId;
+
+    void router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          ...(remainingIds.length > 0 ? { adminAreaId: remainingIds } : {}),
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
+  };
+
   const refineResultsInitialValues =
     performanceFiltersToRefineResults(refineResultsFilters);
 
@@ -171,6 +228,9 @@ const OnTimeOperatorPage = () => {
             : MatchType.Estimated,
         timingPointsOnly: selectedStopType === "timing-points",
         granularity: Granularity.Day,
+        ...(selectedAdminAreaIds.length > 0
+          ? { adminAreaIds: selectedAdminAreaIds }
+          : {}),
       },
     };
   }, [
@@ -510,6 +570,13 @@ const OnTimeOperatorPage = () => {
             refineResultsFilters={refineResultsFilters}
             onRefineResultsFilterChange={setRefineResultsFilters}
           />
+          {selectedAdminAreaNames.length > 0 && (
+            <FilterChips
+              filters={adminAreaChipFilters}
+              adminAreaOptions={adminAreaFilterChipOptions}
+              onFilterChange={handleAdminAreaChipChange}
+            />
+          )}
           <ChartsSection
             noData={wrapperNoData}
             dataExpected={wrapperDataExpected}
