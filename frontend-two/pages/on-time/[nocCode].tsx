@@ -65,7 +65,7 @@ import { OperatorSelector } from "@/components/shared/OperatorSelector";
 import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
 import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
 import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
-import { FilterChips } from "@/components/on-time/FilterChips";
+import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],

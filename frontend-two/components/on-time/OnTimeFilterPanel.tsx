@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
-import { FilterChips } from "@/components/on-time/FilterChips";
+import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
 import {

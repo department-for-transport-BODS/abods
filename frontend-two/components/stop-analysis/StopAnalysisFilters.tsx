@@ -5,7 +5,7 @@ import { StopTypeOption } from "@/types/stop-analysis";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import {
   AdminAreasType,
   LineType,

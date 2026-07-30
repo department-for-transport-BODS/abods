@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { DayKey, DaySelect } from "@/components/shared/DaySelect";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { TimeRangeSlider } from "@/components/shared/TimeRangeSlider";
 import { PerformanceFiltersInputType } from "@/src/generated/graphql";
 

@@ -37,7 +37,7 @@ import {
   StopAnalysisQueryVariables,
   StopStatistics,
 } from "../src/generated/graphql";
-import { FilterChips } from "@/components/on-time/FilterChips";
+import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 import { Period } from "@/utils/date-range";
 import { formatDateToISODateString } from "@/utils/date-formatter";
 import { operatorsService } from "@/services/operator.service";

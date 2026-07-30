@@ -9,7 +9,7 @@ import {
   useStopPerformanceTable,
   type DisplayMode,
 } from "@/hooks/useStopPerformanceTable";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
 import { Tooltip } from "@/components/shared/Tooltip";
 import {
