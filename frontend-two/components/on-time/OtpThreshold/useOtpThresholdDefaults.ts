@@ -6,7 +6,7 @@ import {
   getOtpThresholdDefault,
   resetOtpThresholdDefaults,
   setOtpThresholdDefault,
-} from "@/components/on-time/otp-threshold/otpThresholdDefaults";
+} from "@/components/on-time/OtpThreshold/otpThresholdDefaults";
 
 interface OtpThresholdDefaults {
   /** Current default "early" threshold in minutes. */

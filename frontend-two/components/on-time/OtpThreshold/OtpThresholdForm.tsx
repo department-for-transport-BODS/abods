@@ -1,10 +1,10 @@
 import { FormEvent, useState } from "react";
-import { useOtpThresholdDefaults } from "@/components/on-time/otp-threshold/useOtpThresholdDefaults";
+import { useOtpThresholdDefaults } from "@/components/on-time/OtpThreshold/useOtpThresholdDefaults";
 import {
   OTP_THRESHOLD_MAX,
   OTP_THRESHOLD_MIN,
   OtpThresholdSlider,
-} from "@/components/on-time/otp-threshold/OtpThresholdSlider";
+} from "@/components/on-time/OtpThreshold/OtpThresholdSlider";
 
 export interface OtpThresholds {
   early: number;

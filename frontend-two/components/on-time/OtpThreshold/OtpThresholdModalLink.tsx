@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OtpThresholdModal } from "@/components/on-time/otp-threshold/OtpThresholdModal";
+import { OtpThresholdModal } from "@/components/on-time/OtpThreshold/OtpThresholdModal";
 import { Tooltip } from "@/components/shared/Tooltip";
 import {
   PerformanceParams,

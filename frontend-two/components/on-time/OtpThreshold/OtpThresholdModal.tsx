@@ -3,7 +3,7 @@ import { Modal } from "@/components/shared/Modal";
 import {
   OtpThresholdForm,
   OtpThresholds,
-} from "@/components/on-time/otp-threshold/OtpThresholdForm";
+} from "@/components/on-time/OtpThreshold/OtpThresholdForm";
 import {
   PerformanceParams,
   PunctualityOverview,

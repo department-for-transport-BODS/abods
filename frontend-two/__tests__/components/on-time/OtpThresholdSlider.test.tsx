@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { OtpThresholdSlider } from "@/components/on-time/otp-threshold/OtpThresholdSlider";
+import { OtpThresholdSlider } from "@/components/on-time/OtpThreshold/OtpThresholdSlider";
 
 describe("OtpThresholdSlider", () => {
   it("renders the scheduled departure centre label", () => {

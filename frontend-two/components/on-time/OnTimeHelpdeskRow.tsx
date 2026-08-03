@@ -1,5 +1,5 @@
 import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OtpThresholdModalLink } from "@/components/on-time/OtpThreshold/OtpThresholdModalLink";
 import type {
   PerformanceParams,
   PunctualityOverview,
