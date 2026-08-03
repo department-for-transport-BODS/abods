@@ -344,17 +344,11 @@ export const StopAnalysisTable = ({
       <div className="stop-analysis-table__controls">
         <div className="stop-analysis-table__direction-filters">
           <MultiselectCheckbox
-            id="sa-directions"
+            id="stop-analysis-directions"
             label="Directions"
             options={directionOptions}
             selectedValues={directions}
             onChange={(values) => onDirectionsChange(values as Direction[])}
-            onShowAll={() =>
-              onDirectionsChange(
-                directionOptions.map((o) => o.value) as Direction[],
-              )
-            }
-            showAllLabel="All Directions"
             placeholder="Directions"
           />
         </div>

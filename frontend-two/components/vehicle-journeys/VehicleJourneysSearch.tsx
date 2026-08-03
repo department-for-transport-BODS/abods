@@ -5,7 +5,7 @@ import ExclamationInCircleIcon from "@/assets/icons/exclamation-in-circle.svg";
 import { ArrowLeftIcon } from "../icons/ArrowLeftIcon";
 import { ArrowRightIcon } from "../icons/ArrowRightIcon";
 import { DateSelect } from "@/components/shared/DateSelect";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { Spinner } from "@/components/shared/Spinner";
 import {
   VehicleJourneyLine,
@@ -82,24 +82,14 @@ export const VehicleJourneysSearch = ({
   validDateRange,
   dateError,
 }: VehicleJourneysSearchProps) => {
-  const operatorOptions = operators.map(
-    (operator) => `${operator.name} (${operator.operatorId})`,
-  );
-  const selectedOperator = selectedOperatorId
-    ? operators.find((operator) => operator.operatorId === selectedOperatorId)
-    : null;
-  const selectedOperatorOption = selectedOperator
-    ? `${selectedOperator.name} (${selectedOperator.operatorId})`
-    : null;
-  const serviceOptions = services.map(
-    (service) => `${service.number}: ${service.name}`,
-  );
-  const selectedService = selectedServiceId
-    ? services.find((service) => service.id === selectedServiceId)
-    : null;
-  const selectedServiceOption = selectedService
-    ? `${selectedService.number}: ${selectedService.name}`
-    : null;
+  const operatorOptions = operators.map((operator) => ({
+    label: `${operator.name} (${operator.operatorId})`,
+    value: operator.operatorId,
+  }));
+  const serviceOptions = services.map((service) => ({
+    label: `${service.number}: ${service.name}`,
+    value: service.id,
+  }));
   const patterns = Object.values(groupedJourneys(journeys ?? []));
   const noJourneysFound =
     !journeysLoading &&
@@ -129,39 +119,33 @@ export const VehicleJourneysSearch = ({
         />
 
         <div className="vehicle-journeys-search__operator">
-          <MultiselectDropdown
-            multiSelect={false}
+          <MultiselectCheckbox
+            id="vehicle-journeys-operator"
             label="Operator"
             options={operatorOptions}
-            selected={selectedOperatorOption ? [selectedOperatorOption] : []}
+            selectedValues={selectedOperatorId ? [selectedOperatorId] : []}
             onChange={([selected]) => {
-              const operator = operators.find(
-                (item) => `${item.name} (${item.operatorId})` === selected,
-              );
               updateQuery(router, {
-                operator: operator?.operatorId ?? null,
+                operator: selected ?? null,
                 service: null,
               });
             }}
-            placeholderText={operatorsLoading ? "Loading..." : "Select"}
+            placeholder={operatorsLoading ? "Loading..." : "Select"}
+            showAll={false}
           />
         </div>
 
         <div className="vehicle-journeys-search__service">
-          <MultiselectDropdown
-            multiSelect={false}
+          <MultiselectCheckbox
+            id="vehicle-journeys-service"
             label="Service name"
             options={serviceOptions}
-            selected={selectedServiceOption ? [selectedServiceOption] : []}
+            selectedValues={selectedServiceId ? [selectedServiceId] : []}
             disabled={!selectedOperatorId || servicesLoading}
-            clearable
             onChange={([selected]) => {
-              const service = services.find(
-                (item) => `${item.number}: ${item.name}` === selected,
-              );
-              updateQuery(router, { service: service?.id ?? null });
+              updateQuery(router, { service: selected ?? null });
             }}
-            placeholderText={servicesLoading ? "Loading..." : "Select"}
+            placeholder={servicesLoading ? "Loading..." : "Select"}
           />
         </div>
       </div>

@@ -193,12 +193,11 @@ export const StopAnalysisFilters = ({
 
         <div className="stop-analysis-filters__item stop-analysis-filters__item--admin">
           <MultiselectCheckbox
-            id="sa-admin-areas"
+            id="stop-analysis-admin-areas"
             label="Admin Areas"
             options={adminAreaOptions}
             selectedValues={adminAreaIds}
             onChange={onAdminAreasChange}
-            showAllLabel="All Areas"
             placeholder="Admin Areas"
           />
         </div>
@@ -227,24 +226,22 @@ export const StopAnalysisFilters = ({
 
         <div className="stop-analysis-filters__item stop-analysis-filters__item--operators">
           <MultiselectCheckbox
-            id="sa-operators"
+            id="stop-analysis-operators"
             label="Operators"
             options={operatorOptions}
             selectedValues={operatorIds}
             onChange={onOperatorsChange}
-            showAllLabel="All Operators"
             placeholder="Operators"
           />
         </div>
 
         <div className="stop-analysis-filters__item stop-analysis-filters__item--services">
           <MultiselectCheckbox
-            id="sa-services"
+            id="stop-analysis-services"
             label="Services"
             options={lineOptions}
             selectedValues={lineIds}
             onChange={onLinesChange}
-            showAllLabel="All Services"
             placeholder="Services"
             disabled={operatorIds.length === 0}
           />

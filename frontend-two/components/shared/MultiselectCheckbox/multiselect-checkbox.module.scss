@@ -3,6 +3,7 @@
 .container {
   position: relative;
   width: 100%;
+  padding: govuk-spacing(2);
 }
 
 .disabled {
@@ -57,7 +58,7 @@
   gap: govuk-spacing(2);
   background: govuk-colour("light-grey");
   padding: govuk-spacing(2);
-  margin: govuk-spacing(1);
+  margin-bottom: govuk-spacing(1);
   @include govuk-font($size: 19, $line-height: 1.25);
 }
 
@@ -72,13 +73,15 @@
 
 .dropdown {
   position: absolute;
-  z-index: 100;
+  top: 100%;
+  left: 0;
+  z-index: 200;
   background: govuk-colour("white");
   border: 2px solid govuk-colour("black");
+  border-top: 0;
   width: 100%;
   max-height: 300px;
   overflow-y: auto;
-  margin-top: -2px;
 }
 
 .options {
@@ -94,18 +97,12 @@
 }
 
 .option {
-  display: flex;
-  align-items: center;
-  gap: govuk-spacing(2);
-  padding: govuk-spacing(1) 0;
   cursor: pointer;
 
-  &:hover {
-    background-color: govuk-colour("light-grey");
-  }
-
-  input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+  &:hover,
+  &:focus-within {
+    :global(.govuk-checkboxes__input:not(:disabled) + .govuk-checkboxes__label:before) {
+      box-shadow: 0 0 0 10px govuk-colour("mid-grey");
+    }
   }
 }

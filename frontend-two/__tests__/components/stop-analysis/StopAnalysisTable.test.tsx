@@ -4,15 +4,15 @@ import userEvent from "@testing-library/user-event";
 import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
 import { type Direction, type StopPerformanceRow } from "@/types/stop-analysis";
 
-vi.mock("@/components/shared/MultiselectCheckbox", () => ({
+vi.mock("@/components/shared/MultiselectCheckbox/MultiselectCheckbox", () => ({
   MultiselectCheckbox: ({
     selectedValues = [],
     onChange,
-    onShowAll,
+    options = [],
   }: {
     selectedValues?: string[];
     onChange: (values: string[]) => void;
-    onShowAll?: () => void;
+    options?: Array<{ label: string; value: string }>;
   }) => (
     <div data-testid="direction-filters">
       <span data-testid="selected-values">{selectedValues.join(",")}</span>
@@ -22,7 +22,10 @@ vi.mock("@/components/shared/MultiselectCheckbox", () => ({
       <button type="button" onClick={() => onChange([])}>
         Clear all
       </button>
-      <button type="button" onClick={() => onShowAll?.()}>
+      <button
+        type="button"
+        onClick={() => onChange(options.map((option) => option.value))}
+      >
         Show all
       </button>
     </div>

@@ -13,7 +13,7 @@ import { operatorsService } from "@/services/operator.service";
 import { OnTimeBoundariesMap } from "@/components/on-time/OnTimeBoundariesMap";
 import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
 import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
@@ -313,13 +313,17 @@ const OnTimeIndexPage = () => {
           <h2 className="govuk-heading-l">Summary</h2>
 
           <div className="summary-admin-area-select-container">
-            <MultiselectDropdown
+            <MultiselectCheckbox
+              id="on-time-summary-area"
               label={"Area"}
-              hideLabel={true}
-              options={adminAreaOptions}
-              selected={selectedAdminAreas}
+              labelClassName="govuk-visually-hidden"
+              options={adminAreaOptions.map((area) => ({
+                label: area,
+                value: area,
+              }))}
+              selectedValues={selectedAdminAreas}
               onChange={handleAdminAreaChange}
-              placeholderText={isLoadingAdminAreas ? "Loading..." : "All areas"}
+              placeholder={isLoadingAdminAreas ? "Loading..." : "All areas"}
             />
           </div>
         </div>

@@ -182,15 +182,13 @@ export const RefineResultsFilters = ({
               <fieldset className="govuk-fieldset">
                 <div className="govuk-form-group">
                   <MultiselectCheckbox
-                    id="refine-results-admin-areas"
+                    id="refine-results-area"
                     label="Area"
-                    labelClassName="govuk-label--s"
                     options={adminAreaOptions}
                     selectedValues={values.adminAreaIds}
                     onChange={(adminAreaIds) =>
                       setValues((prev) => ({ ...prev, adminAreaIds }))
                     }
-                    showAllLabel="Area"
                     placeholder="All areas"
                     disabled={adminAreaOptions.length === 0}
                   />

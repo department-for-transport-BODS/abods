@@ -570,11 +570,8 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
 
       expect(
@@ -595,11 +592,8 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Outbound" }));
 
       expect(
@@ -620,11 +614,8 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
       expect(
         screen.queryByRole("link", { name: "202: Night Bus" }),

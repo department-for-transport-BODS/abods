@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 import {
   type OnTimeDisplayMode,
@@ -34,12 +34,16 @@ export const OnTimeDisplayControls = ({
 }: OnTimeDisplayControlsProps) => {
   const directionsControl = (
     <div className="on-time-service-filters__directions">
-      <MultiselectDropdown
+      <MultiselectCheckbox
+        id="on-time-directions"
         label="Directions"
-        options={["Inbound", "Outbound"]}
-        selected={selectedDirections}
+        options={[
+          { label: "Inbound", value: "Inbound" },
+          { label: "Outbound", value: "Outbound" },
+        ]}
+        selectedValues={selectedDirections}
         onChange={onDirectionsChange}
-        placeholderText=""
+        placeholder=""
       />
     </div>
   );
