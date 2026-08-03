@@ -1,3 +1,5 @@
+import styles from "./display-options-modal.module.scss";
+
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Modal } from "@/components/shared/Modal";
 
@@ -76,7 +78,7 @@ export const DisplayOptionsModal = ({
             gap: "24px",
           }}
         >
-          <div className="display-options-modal__column govuk-checkboxes govuk-checkboxes--small">
+          <div className="govuk-checkboxes govuk-checkboxes--small">
             {columnKeys.slice(0, midpoint).map((key) => {
               const checked = draftVisibleColumns.includes(key);
               const label = columnLabels[key] ?? key;
@@ -110,7 +112,7 @@ export const DisplayOptionsModal = ({
           </div>
 
           {columnKeys.length > midpoint && (
-            <div className="display-options-modal__column govuk-checkboxes govuk-checkboxes--small">
+            <div className="govuk-checkboxes govuk-checkboxes--small">
               {columnKeys.slice(midpoint).map((key) => {
                 const checked = draftVisibleColumns.includes(key);
                 const label = columnLabels[key] ?? key;
@@ -147,13 +149,13 @@ export const DisplayOptionsModal = ({
 
         <button
           type="button"
-          className="govuk-link govuk-body govuk-body display-options-modal__show-all-link govuk-!-margin-top-1"
+          className={`govuk-link govuk-body govuk-body ${styles.showAllLink} govuk-!-margin-top-1`}
           onClick={showAllColumns}
         >
           Show all
         </button>
 
-        <div className="display-options-modal__footer">
+        <div className={styles.footer}>
           <button
             type="button"
             className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"

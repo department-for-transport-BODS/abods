@@ -1,3 +1,5 @@
+import styles from "./date-select.module.scss";
+
 import { useEffect, useId, useRef, useState } from "react";
 import { DateTime, Interval } from "luxon";
 import { CalendarIcon } from "@/components/icons/CalendarIcon";
@@ -80,8 +82,8 @@ export const DateSelect = ({
   const canGoNext = !rangeEnd || month.endOf("month") < rangeEnd.endOf("month");
   const hasError = Boolean(error);
   const formGroupClass = hasError
-    ? "govuk-form-group govuk-form-group--error date-select"
-    : "govuk-form-group date-select";
+    ? "govuk-form-group govuk-form-group--error container"
+    : "govuk-form-group container";
 
   const commitDate = (next: DateTime) => {
     const iso = formatDateToISODateString(next);
@@ -109,7 +111,7 @@ export const DateSelect = ({
           <span className="govuk-visually-hidden">Error:</span> {error}
         </p>
       ) : null}
-      <div className="date-select__input-row">
+      <div className={styles.inputRow}>
         <input
           className={`govuk-input govuk-input--width-10${hasError ? " govuk-input--error" : ""}`}
           id={resolvedInputId}
@@ -124,20 +126,20 @@ export const DateSelect = ({
         />
         <button
           type="button"
-          className="date-select__calendar-toggle unbuttoned"
+          className={`${styles.calendarToggle} unbuttoned`}
           aria-label="Toggle calendar"
           aria-expanded={open}
           onClick={() => setOpen((current) => !current)}
         >
-          <CalendarIcon className="date-select__calendar-icon" />
+          <CalendarIcon className={styles.calendarIcon} />
         </button>
       </div>
       {open ? (
-        <div className="date-select__controls">
-          <div className="date-select__calendar-header">
+        <div className={styles.container}>
+          <div className={styles.calendarHeader}>
             <button
               type="button"
-              className={`date-select__month-step date-select__month-step--prev unbuttoned${!canGoPrev ? " date-select__month-step--disabled" : ""}`}
+              className={`${styles.monthStep} ${styles.monthStepPrev} unbuttoned${!canGoPrev ? " " + styles.monthStepDisabled : ""}`}
               aria-label="Previous month"
               disabled={!canGoPrev}
               onClick={(event) => {
@@ -148,13 +150,13 @@ export const DateSelect = ({
               ‹
             </button>
             <span
-              className={`date-select__month-name${month.hasSame(today, "month") ? " date-select__month-name--this-month" : ""}`}
+              className={`${styles.monthName}${month.hasSame(today, "month") ? " " + styles.monthNameCurrent : ""}`}
             >
               {month.toFormat("MMMM yyyy")}
             </span>
             <button
               type="button"
-              className={`date-select__month-step date-select__month-step--next unbuttoned${!canGoNext ? " date-select__month-step--disabled" : ""}`}
+              className={`${styles.monthStep} ${styles.monthStepNext} unbuttoned${!canGoNext ? " " + styles.monthStepDisabled : ""}`}
               aria-label="Next month"
               disabled={!canGoNext}
               onClick={(event) => {

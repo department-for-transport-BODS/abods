@@ -1,3 +1,5 @@
+import styles from "./on-time-display-controls.module.scss";
+
 import type { ReactNode } from "react";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { RadioOptions } from "@/components/shared/RadioOptions";
@@ -30,10 +32,10 @@ export const OnTimeDisplayControls = ({
   onOpenDisplayOptions,
   beforeDirections,
   groupInputs = false,
-  className = "on-time-service-filters govuk-!-margin-top-6",
+  className = `${styles.container} govuk-!-margin-top-6`,
 }: OnTimeDisplayControlsProps) => {
   const directionsControl = (
-    <div className="on-time-service-filters__directions">
+    <div className={styles.directionsContainer}>
       <MultiselectCheckbox
         id="on-time-directions"
         label="Directions"
@@ -51,7 +53,7 @@ export const OnTimeDisplayControls = ({
   return (
     <div className={className}>
       {groupInputs ? (
-        <div className="on-time-service-filters__inputs">
+        <div className={styles.inputsContainer}>
           {beforeDirections}
           {directionsControl}
         </div>
@@ -61,8 +63,8 @@ export const OnTimeDisplayControls = ({
           {directionsControl}
         </>
       )}
-      <div className="on-time-service-filters__display-options">
-        <p className="on-time-service-display-options-button">
+      <div className={styles.displayOptionsContainer}>
+        <p className={styles.displayOptionsButton}>
           <button
             type="button"
             className="govuk-link"
@@ -71,7 +73,7 @@ export const OnTimeDisplayControls = ({
             Display options
           </button>
         </p>
-        <div className="on-time-service-filters__radios">
+        <div className={styles.radiosContainer}>
           <RadioOptions
             name="on-time-display-mode"
             legend="Show service performance values as"

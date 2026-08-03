@@ -4,7 +4,7 @@ import { Interval } from "luxon";
 import ExclamationInCircleIcon from "@/assets/icons/exclamation-in-circle.svg";
 import { ArrowLeftIcon } from "../icons/ArrowLeftIcon";
 import { ArrowRightIcon } from "../icons/ArrowRightIcon";
-import { DateSelect } from "@/components/shared/DateSelect";
+import { DateSelect } from "@/components/shared/DateSelect/DateSelect";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { Spinner } from "@/components/shared/Spinner";
 import {

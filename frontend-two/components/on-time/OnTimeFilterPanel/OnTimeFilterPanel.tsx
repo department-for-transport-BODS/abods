@@ -1,3 +1,5 @@
+import styles from "./on-time-filter-panel.module.scss";
+
 import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
 import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
@@ -123,8 +125,8 @@ export const OnTimeFilterPanel = ({
 
   return (
     <>
-      <div className="on-time__filter-row">
-        <div className="on-time__date-picker">
+      <div className={styles.filterRow}>
+        <div className={styles.datePicker}>
           <DateRangeSelect
             hideLabel={true}
             value={dateRange || undefined}
@@ -141,7 +143,7 @@ export const OnTimeFilterPanel = ({
             onChange={(event) => onDatePresetChange(event.target.value)}
           />
         </div>
-        <div className="on-time__refine-results-button-container">
+        <div className={styles.refineResultsButtonContainer}>
           <RefineResultsButton
             isLoading={isLoading}
             showAdminAreaFilter={showAdminAreaFilter}
@@ -151,7 +153,7 @@ export const OnTimeFilterPanel = ({
             onReset={onResetRefineResults}
           />
         </div>
-        <div className="on-time-toggle-container">
+        <div className={styles.toggleContainer}>
           <SegmentedToggle
             legend=""
             name="match-type-toggle"
@@ -168,7 +170,7 @@ export const OnTimeFilterPanel = ({
           />
         </div>
       </div>
-      <div className="filter-chips-container">
+      <div className={styles.filterChipsContainer}>
         <FilterChips
           filters={refineResultsFilters}
           adminAreaOptions={adminAreaOptions}

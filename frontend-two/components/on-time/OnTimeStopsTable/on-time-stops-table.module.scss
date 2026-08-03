@@ -1,0 +1,36 @@
+@import "../../../styles/govuk-module";
+
+.timingIcon {
+  display: inline-flex;
+  min-width: 20px;
+  color: $govuk-text-colour;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.container {
+  .sortable-table .sortable-header {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .sortable-table .sortable-header__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
+  }
+}
+
+.container .sortable-table {
+  min-width: 1100px;
+}

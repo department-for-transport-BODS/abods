@@ -1,3 +1,5 @@
+import styles from "./day-select.module.scss";
+
 export const DAYS = [
   { key: "Mon", displayValue: "Mon" },
   { key: "Tue", displayValue: "Tue" },
@@ -29,20 +31,20 @@ export const DaySelect = ({
       <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
         {legend}
       </legend>
-      <div className="day-select__checkboxes">
+      <div className={styles.checkboxes}>
         {DAYS.map(({ key, displayValue }) => {
           const inputId = `${idPrefix}-${key}`;
 
           return (
-            <label className="day-select__item" htmlFor={inputId} key={key}>
+            <label className={styles.item} htmlFor={inputId} key={key}>
               <input
-                className="day-select__input"
+                className={styles.input}
                 id={inputId}
                 type="checkbox"
                 checked={selectedDays[key]}
                 onChange={(event) => onDayChange(key, event.target.checked)}
               />
-              <span className="day-select__label">{displayValue}</span>
+              <span className={styles.label}>{displayValue}</span>
             </label>
           );
         })}

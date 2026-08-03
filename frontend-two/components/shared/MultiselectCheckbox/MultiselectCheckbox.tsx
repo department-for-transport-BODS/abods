@@ -183,14 +183,14 @@ export const MultiselectCheckbox = ({
           }`}
           aria-hidden="true"
         />
-      </div>
 
-      {isOpen && (
+        {isOpen && (
         <div
           className={styles.dropdown}
           role="listbox"
           onMouseDown={(event) => event.preventDefault()}
         >
+
           {showAll ? (
             <div className={styles.header}>
               <strong className={styles.headerLabel}>
@@ -244,7 +244,8 @@ export const MultiselectCheckbox = ({
             )}
           </div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

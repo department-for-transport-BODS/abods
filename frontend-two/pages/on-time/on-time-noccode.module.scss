@@ -1,0 +1,20 @@
+@import "../../styles/govuk-module";
+
+.onTimeDisplayControlsContainer {
+  display: flex;
+  grid-template-columns: minmax(0, 60%) auto;
+  justify-content: space-between;
+  align-items: end;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+
+.searchContainer {
+  width: 100%;
+  min-width: 200px;
+}
+
+.searchContainerInput {
+  width: 100%;
+  max-width: none;
+}

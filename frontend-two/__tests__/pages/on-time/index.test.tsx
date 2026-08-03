@@ -414,7 +414,7 @@ describe("OnTimeIndexPage", () => {
     };
 
     const filterChips = () =>
-      document.querySelector(".filter-chips-container") as HTMLElement;
+      document.querySelector(".filterChipsContainer") as HTMLElement;
 
     const applyFilters = () => {
       fireEvent.click(screen.getByRole("button", { name: "Apply" }));

@@ -1,3 +1,5 @@
+import styles from "./on-time-operator-table.module.scss";
+
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Duration } from "luxon";

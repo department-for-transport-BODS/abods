@@ -1,3 +1,5 @@
+import styles from "./refine-results-panel.module.scss";
+
 import { useEffect, useId, useRef } from "react";
 import {
   RefineResultsAdminAreaOption,
@@ -87,17 +89,17 @@ export const RefineResultsPanel = ({
     <div
       ref={panelRef}
       id="refine-results-panel"
-      className="refine-results-panel"
+      className={styles.container}
       role="dialog"
       aria-labelledby={titleId}
     >
-      <div className="refine-results-panel__header">
+      <div className={styles.header}>
         <h2 id={titleId} className="govuk-heading-l">
           Refine results
         </h2>
         <button
           type="button"
-          className="refine-results-panel__close button-link govuk-link"
+          className={`${styles.close} button-link govuk-link`}
           onClick={onCancel}
         >
           Close

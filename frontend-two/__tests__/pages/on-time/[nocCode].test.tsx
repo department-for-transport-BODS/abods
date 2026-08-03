@@ -943,7 +943,7 @@ describe("OnTimeOperatorPage", () => {
         screen.queryByText("Loading on-time data..."),
       ).not.toBeInTheDocument();
       const filterChips = document.querySelector(
-        ".filter-chips-container",
+        ".filterChipsContainer",
       ) as HTMLElement;
       expect(within(filterChips).getByText("Area:")).toBeInTheDocument();
       expect(

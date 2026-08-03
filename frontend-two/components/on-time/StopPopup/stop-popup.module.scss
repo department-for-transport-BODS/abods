@@ -1,0 +1,21 @@
+@import "../../../styles/govuk-module";
+
+.popupTitle {
+  font-weight: $govuk-font-weight-bold;
+  text-align: left;
+  color: govuk-colour("white");
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.popupContent {
+  color: govuk-colour("white");
+  max-width: 320px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+
+  .govuk-body-small {
+    color: govuk-colour("white");
+    margin-bottom: 0;
+  }
+}

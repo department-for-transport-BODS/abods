@@ -1,0 +1,31 @@
+@import "../../../styles/govuk-module";
+
+// TODO: check where used
+.nameCell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  .govuk-link {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+.nameHeader .sortable-header__label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sparklineCell {
+  overflow: hidden;
+  padding-right: 0;
+}
+
+.sparkline {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  margin-left: auto;
+}

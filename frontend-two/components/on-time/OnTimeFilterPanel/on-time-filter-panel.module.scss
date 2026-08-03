@@ -1,0 +1,84 @@
+@import "../../../styles/govuk-module";
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.datePicker {
+  display: flex;
+  align-items: baseline;
+  gap: govuk-spacing(2);
+  margin-right: govuk-spacing(2);
+  margin-bottom: govuk-spacing(2) * -1;
+}
+
+.refineResultsButtonContainer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  grid-column: 1;
+  grid-row: 2;
+  margin-bottom: govuk-spacing(4);
+  min-width: 0;
+}
+
+.toggleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(1);
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: govuk-spacing(4);
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 47.99em) {
+  .datePicker {
+    width: 100%;
+  }
+
+  .filterRow {
+    width: 100%;
+  }
+
+  .toggleContainer {
+    overflow: hidden;
+  }
+
+  .toggleContainer .segmented-toggle,
+  .toggleContainer .segmented-toggle__controls {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .toggleContainer .segmented-toggle__controls {
+    display: flex;
+  }
+
+  .toggleContainer .segmented-toggle-item {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .toggleContainer .segmented-toggle-item__label {
+    display: block;
+    @include govuk-font(16);
+    padding-left: govuk-spacing(1);
+    padding-right: govuk-spacing(1);
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+
+.filterChipsContainer {
+  width: 100%;
+}

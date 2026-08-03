@@ -1,3 +1,5 @@
+import styles from "./stop-popup.module.scss";
+
 import mapboxgl from "mapbox-gl";
 import { type MutableRefObject } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -81,11 +83,11 @@ export const StopPopup = ({ stop }: StopPopupProps) => {
     .join("<br />");
 
   return (
-    <div className="on-time-service-map__popup-content">
+    <div className={styles.popupContent}>
       <div className="govuk-!-margin-bottom-1">
         <Tooltip
           message={tooltipMessage || undefined}
-          className="on-time-service-map__popup-title"
+          className={styles.popupTitle}
           selectable
         >
           <strong>{stop.stopName ?? ""}</strong>

@@ -1,0 +1,72 @@
+@import "../../../styles/govuk-module";
+
+.container {
+  display: flex;
+  grid-template-columns: minmax(0, 60%) auto;
+  justify-content: space-between;
+  align-items: end;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+}
+
+.displayOptionsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(3);
+  flex-wrap: wrap;
+  align-self: start;
+  margin-top: 31px;
+}
+
+.displayOptionsButton {
+  display: flex;
+  background: transparent;
+  justify-content: flex-end;
+  cursor: pointer;
+  font-size: 19px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: $govuk-link-colour;
+  margin: 0;
+}
+
+.directionsContainer {
+  max-width: 80%;
+}
+
+.radiosContainer {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  align-items: center;
+  gap: govuk-spacing(1);
+  margin-left: auto;
+}
+
+.inputsContainer {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(200px, 2fr);
+  align-items: baseline;
+  gap: govuk-spacing(2);
+  min-width: 0;
+}
+
+.govuk-form-group,
+.directionsContainer{
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .inputsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .displayOptionsContainer {
+    margin-top: 0;
+  }
+}

@@ -3,13 +3,13 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
-import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
+import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap/OnTimeServiceMap";
 import {
   OnTimeStopsTable,
   STOPS_TABLE_COLUMN_KEYS,
   STOPS_TABLE_COLUMN_LABELS,
   STOPS_TABLE_ALWAYS_VISIBLE_KEYS,
-} from "@/components/on-time/OnTimeStopsTable";
+} from "@/components/on-time/OnTimeStopsTable/OnTimeStopsTable";
 import {
   type OnTimeDisplayMode,
   normaliseDirection,
@@ -17,14 +17,14 @@ import {
   aggregateAverageTravelTimes,
 } from "@/utils/on-time/on-time-table-format";
 import { formatStopPerformanceCsvFilename } from "@/utils/on-time-csv-filename";
-import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
+import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
   DATE_PRESET_OPTIONS,
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
-} from "@/components/on-time/OnTimeFilterPanel";
+} from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
@@ -56,10 +56,10 @@ import {
   PerformanceFiltersInputType,
   ServiceInfoType,
 } from "@/src/generated/graphql";
-import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid/SummaryStatsGrid";
 import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
 import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
-import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
+import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls/OnTimeDisplayControls";
 
 const aggregateStopsByStopId = (
   stops: StopPerformance[],

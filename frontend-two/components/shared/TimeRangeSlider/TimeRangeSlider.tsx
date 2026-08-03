@@ -1,3 +1,6 @@
+import styles from "./time-range-slider.module.scss";
+import sliderStyles from "../RangeSlider/range-slider.module.scss";
+
 import {
   ChangeEvent,
   KeyboardEvent,
@@ -5,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { RangeSlider } from "@/components/shared/RangeSlider";
+import { RangeSlider } from "@/components/shared/RangeSlider/RangeSlider";
 
 const MIN_HOUR = 0;
 const MAX_START_HOUR = 23;
@@ -219,10 +222,10 @@ export const TimeRangeSlider = ({
             },
           ]}
         >
-          <div className="range-slider__selected" style={sliderSelectedStyle} />
+          <div className={sliderStyles.selected} style={sliderSelectedStyle} />
         </RangeSlider>
 
-        <div className="time-range-slider__textboxes">
+        <div className={styles.textboxes}>
           <div className="govuk-form-group">
             <label className="govuk-label" htmlFor="range-slider-min">
               {labelMin}

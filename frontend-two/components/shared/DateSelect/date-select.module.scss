@@ -1,0 +1,92 @@
+@import "../../../styles/govuk-module";
+
+.container {
+  position: relative;
+}
+
+.inputRow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  :global(.govuk-input) {
+    padding-right: 3rem;
+  }
+}
+
+.calendarToggle {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: auto;
+  color: govuk-colour("black");
+  cursor: pointer;
+}
+
+.calendarIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.controls {
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  top: 100%;
+  margin-top: -2px;
+  width: calc(46px * 7 + #{govuk-spacing(6)});
+  box-sizing: border-box;
+  padding: govuk-spacing(4);
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+}
+
+.calendarHeader {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: govuk-spacing(1);
+}
+
+.monthName {
+  @include govuk-font(19);
+}
+
+.monthNameCurrent {
+  font-weight: 700;
+}
+
+.monthStep {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: $govuk-brand-colour;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.monthStepPrev {
+  left: 0;
+}
+
+.monthStepNext {
+  right: 0;
+}
+
+.monthStepDisabled {
+  pointer-events: none;
+  color: govuk-colour("mid-grey");
+}

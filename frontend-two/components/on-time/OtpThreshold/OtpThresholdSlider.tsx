@@ -1,4 +1,4 @@
-import { RangeSlider } from "@/components/shared/RangeSlider";
+import { RangeSlider } from "@/components/shared/RangeSlider/RangeSlider";
 
 /** Thresholds are whole minutes between 1 and 20 on each side of the scheduled departure. */
 export const OTP_THRESHOLD_MIN = 1;

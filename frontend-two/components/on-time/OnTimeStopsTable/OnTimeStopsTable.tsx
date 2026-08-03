@@ -1,3 +1,5 @@
+import styles from "./on-time-stops-table.module.scss";
+
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
@@ -66,7 +68,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     key: "timingPoint",
     label: (
       <>
-        <span className="timing-icon">
+        <span className={styles.timingIcon}>
           <TimingIcon />
           <span className="govuk-visually-hidden">Timing point</span>
         </span>
@@ -341,7 +343,7 @@ function renderRow(
     key: `${row.stopId ?? ""}-${row.direction ?? "all"}`,
     stopId: row.stopId ?? "-",
     timingPoint: row.timingPoint ? (
-      <span className="timing-icon">
+      <span className={styles.timingIcon}>
         <TimingIcon />
         <span className="govuk-visually-hidden">Timing point</span>
       </span>
@@ -462,7 +464,7 @@ export const OnTimeStopsTable = ({
   );
 
   return (
-    <div className="on-time-stops-table-container">
+    <div className={styles.container}>
       <SortedPaginatedTable
         columns={filteredColumns}
         data={data}

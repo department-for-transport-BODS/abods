@@ -1,0 +1,12 @@
+@import "../../../styles/govuk-module";
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+}
+
+.showAllLink {
+  color: $govuk-link-colour;
+  text-decoration: underline;
+}

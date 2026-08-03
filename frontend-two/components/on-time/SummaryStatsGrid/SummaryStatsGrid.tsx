@@ -1,3 +1,5 @@
+import styles from "./summary-stats-grid.module.scss";
+
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 
@@ -147,29 +149,29 @@ export const SummaryStatsGrid = ({
   })();
 
   return (
-    <div className="summary-stats-grid" role="list" aria-label="Summary stats">
-      <div role="listitem" className="summary-stats-grid__item">
+    <div className={styles.grid} role="list" aria-label="Summary stats">
+      <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="On-time"
           value={formatPercentage(onTimeCount, summaryTotal)}
           tooltip={onTimeTooltip}
         />
       </div>
-      <div role="listitem" className="summary-stats-grid__item">
+      <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="Late"
           value={formatPercentage(lateCount, summaryTotal)}
           tooltip={lateTooltip}
         />
       </div>
-      <div role="listitem" className="summary-stats-grid__item">
+      <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="Early"
           value={formatPercentage(earlyCount, summaryTotal)}
           tooltip={earlyTooltip}
         />
       </div>
-      <div role="listitem" className="summary-stats-grid__item">
+      <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="Incomplete Data"
           value={formatIncompletePercentage(
@@ -179,7 +181,7 @@ export const SummaryStatsGrid = ({
           tooltip={incompleteTooltip}
         />
       </div>
-      <div role="listitem" className="summary-stats-grid__item">
+      <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="Average Delay"
           value={formatDelay(averageDelay)}

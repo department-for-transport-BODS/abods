@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { Box } from "@/components/shared/Box";
-import { ChartNoDataMessage } from "@/components/on-time/ChartNoDataWrapper";
+import { ChartNoDataMessage } from "@/components/on-time/ChartNoDataWrapper/ChartNoDataWrapper";
 import {
   DayOfWeekData,
   TimeOfDayData,

@@ -1,18 +1,20 @@
+import styles from "./on-time.module.scss";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
+import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper/ChartNoDataWrapper";
 import {
   OnTimeFilterPanel,
   DATE_PRESET_OPTIONS,
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
-} from "@/components/on-time/OnTimeFilterPanel";
+} from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import { operatorsService } from "@/services/operator.service";
 import { OnTimeBoundariesMap } from "@/components/on-time/OnTimeBoundariesMap";
-import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
-import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable/OnTimeOperatorTable";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid/SummaryStatsGrid";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import {
   refineResultsToPerformanceFilters,
@@ -37,7 +39,7 @@ import {
 import { buildDefaultParams } from "@/services/on-time/params";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { distanceService } from "@/services/distances/distance.services";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OtpThresholdModalLink } from "@/components/on-time/OtpThreshold/OtpThresholdModalLink";
 
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];

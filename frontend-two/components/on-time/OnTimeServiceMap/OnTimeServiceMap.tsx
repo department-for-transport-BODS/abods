@@ -1,3 +1,5 @@
+import styles from "./on-time-service-map.module.scss";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { GeoJSONSource, Map } from "mapbox-gl";
 import bbox from "@turf/bbox";
@@ -11,7 +13,7 @@ import {
   StopPopupContent,
   StopPopupRoot,
   showStopPopup,
-} from "@/components/on-time/StopPopup";
+} from "../StopPopup/StopPopup";
 import {
   PerformanceParams,
   onTimeService,
@@ -42,7 +44,7 @@ import {
   removeAdminAreaIds,
   buildPatternFeatures,
   buildStopFeatures,
-} from "../../utils/on-time/on-time-service-map";
+} from "../../../utils/on-time/on-time-service-map";
 
 interface OnTimeServiceMapProps {
   mapboxToken: string;
@@ -425,16 +427,16 @@ export const OnTimeServiceMap = ({
   ]);
 
   return (
-    <div className="on-time-service-map">
+    <div className={styles.container}>
       <div
         ref={mapContainerRef}
-        className="on-time-service-map__container"
+        className={styles.mapElement}
         aria-label="On-time service map"
       />
 
       {isLoading && (
         <div
-          className="on-time-service-map__loading-overlay"
+          className={styles.loadingOverlay}
           role="status"
           aria-live="polite"
           aria-label="Loading service map"
@@ -444,21 +446,21 @@ export const OnTimeServiceMap = ({
       )}
 
       {errored && (
-        <div className="on-time-service-map__error">
+        <div className={styles.error}>
           <p className="govuk-body govuk-!-margin-bottom-0">
             Unable to load map data.
           </p>
         </div>
       )}
 
-      <div className="on-time-service-map__legend">
-        <span className="on-time-service-map__dot on-time-service-map__dot--high" />
+      <div className={styles.legend}>
+        <span className={`${styles.dot} ${styles.dotHigh}`} />
         <span>&gt; 80% on-time</span>
-        <span className="on-time-service-map__dot on-time-service-map__dot--med" />
+        <span className={`${styles.dot} ${styles.dotMed}`} />
         <span>60 - 80% on-time</span>
-        <span className="on-time-service-map__dot on-time-service-map__dot--low" />
+        <span className={`${styles.dot} ${styles.dotLow}`} />
         <span>&lt; 60% on-time</span>
-        <span className="on-time-service-map__dot on-time-service-map__dot--no-data" />
+        <span className={`${styles.dot} ${styles.dotNoData}`} />
         <span>No data</span>
       </div>
     </div>

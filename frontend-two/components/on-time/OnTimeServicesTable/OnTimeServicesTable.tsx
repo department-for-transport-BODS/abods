@@ -1,3 +1,5 @@
+import styles from "./on-time-services-table.module.scss";
+
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
@@ -5,7 +7,7 @@ import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
 import type { SortableTableRow } from "@/components/table/SortableTable";
 import { Tooltip } from "@/components/shared/Tooltip";
 import { FrequentServicePerformance } from "@/services/on-time/performance.service";
-import { FrequentIcon } from "../icons/FrequentIcon";
+import { FrequentIcon } from "../../icons/FrequentIcon/FrequentIcon";
 import {
   buildCsvRows,
   buildMetricCsvColumns,
@@ -376,7 +378,7 @@ export const OnTimeServicesTable = ({
   );
 
   return (
-    <div className="on-time-services-table">
+    <div className={styles.container}>
       <SortedPaginatedTable
         columns={filteredColumns}
         data={data}

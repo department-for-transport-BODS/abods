@@ -1,0 +1,29 @@
+@import "../../../styles/govuk-module";
+
+.container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 380px;
+  padding: govuk-spacing(4);
+  border-left: 1px solid $govuk-border-colour;
+  background-color: govuk-colour("white");
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 1000;
+  animation: refine-results-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 0 0 auto;
+}
+
+.close {
+  flex: 0 0 auto;
+  height: govuk-spacing(7);
+}

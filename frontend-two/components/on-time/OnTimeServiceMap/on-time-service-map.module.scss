@@ -1,0 +1,79 @@
+@import "../../../styles/govuk-module";
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 440px;
+}
+
+.mapElement {
+  width: 100%;
+  height: 100%;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  z-index: 2;
+}
+
+.error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: govuk-colour("white");
+  padding: govuk-spacing(2) govuk-spacing(3);
+  border: 1px solid $govuk-border-colour;
+  border-radius: 4px;
+  z-index: 3;
+}
+
+.legend {
+  @include govuk-font(16);
+  position: absolute;
+  top: govuk-spacing(4);
+  left: govuk-spacing(4);
+  background-color: govuk-colour("white");
+  padding: govuk-spacing(1) govuk-spacing(2);
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  grid-template-columns: repeat(8, auto);
+  grid-template-rows: auto;
+  column-gap: govuk-spacing(2);
+  row-gap: 0;
+  z-index: 1;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 100%;
+  margin: govuk-spacing(1);
+
+  &High {
+    background-color: #28a197;
+  }
+
+  &Med {
+    background-color: #ffdd00;
+  }
+
+  &Low {
+    background-color: #d4351c;
+  }
+
+  &NoData {
+    background-color: #b1b4b6;
+  }
+}

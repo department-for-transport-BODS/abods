@@ -1,0 +1,29 @@
+@import "../../../styles/govuk-module";
+
+.button{
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  @include govuk-font(19);
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: $govuk-link-colour;
+  margin-bottom: govuk-spacing(4);
+
+  // Win over later .button-link { text-decoration: none }
+  &.button-link,
+  &.button-link:hover,
+  &.button-link:hover:not(:focus) {
+    text-decoration: underline;
+  }
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  color: $govuk-link-colour;
+}

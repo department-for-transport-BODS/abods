@@ -1,3 +1,5 @@
+import styles from "./chart-no-data-wrapper.module.scss";
+
 import { ReactNode } from "react";
 import ExclamationInCircleIcon from "@/assets/icons/exclamation-in-circle.svg";
 
@@ -41,10 +43,10 @@ export const ChartNoDataMessage = ({
   });
 
   return (
-    <div className="chart-no-data-wrapper__error">
+    <div className={styles.error}>
       <ExclamationInCircleIcon
         aria-hidden="true"
-        className="chart-no-data-wrapper__error-icon"
+        className={styles.errorIcon}
       />
       <span className="chart-no-data-wrapper__error-message">
         {errorMessage}
@@ -61,7 +63,7 @@ export const ChartNoDataWrapper = ({
   children,
 }: ChartNoDataWrapperProps) => {
   return (
-    <div className="chart-no-data-wrapper">
+    <div className={styles.container}>
       <div>
         {noData ? (
           <ChartNoDataMessage
@@ -71,8 +73,8 @@ export const ChartNoDataWrapper = ({
           />
         ) : null}
 
-        <div className="chart-no-data-wrapper__content">{children}</div>
+        <div className={styles.content}>{children}</div>
       </div>
     </div>
   );
-};
+}; 

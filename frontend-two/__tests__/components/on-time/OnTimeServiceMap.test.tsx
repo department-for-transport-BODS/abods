@@ -6,7 +6,7 @@ import { onTimeService } from "@/services/on-time/on-time.service";
 import { transitModelService } from "@/services/on-time/transit-model.service";
 import { ON_TIME_SERVICE_MAP_IDS } from "@/utils/map-constants";
 import { setCoordinates } from "@/utils/on-time/on-time-service-map";
-import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap";
+import { OnTimeServiceMap } from "@/components/on-time/OnTimeServiceMap/OnTimeServiceMap";
 
 const mocks = vi.hoisted(() => ({
   registerTimingPointIcons: vi.fn(async () => undefined),

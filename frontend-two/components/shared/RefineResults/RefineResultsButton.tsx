@@ -1,3 +1,5 @@
+import styles from "./refine-results-button.module.scss";
+
 import { useCallback, useState } from "react";
 import { RefineResultsPanel } from "@/components/shared/RefineResults/RefineResultsPanel";
 import {
@@ -35,7 +37,7 @@ export const RefineResultsButton = ({
       <button
         type="button"
         className={[
-          "on-time-refine-results-button",
+          styles.button,
           buttonClassName ?? "button-link govuk-link",
         ].join(" ")}
         onClick={() => setIsOpen((open) => !open)}
@@ -43,7 +45,7 @@ export const RefineResultsButton = ({
         aria-controls="refine-results-panel"
       >
         <RefineIcon
-          className="on-time-refine-results-button__icon"
+          className={styles.icon}
           aria-hidden="true"
           focusable="false"
           style={{ flexShrink: 0 }}
