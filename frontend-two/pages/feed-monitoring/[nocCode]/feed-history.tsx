@@ -13,7 +13,7 @@ import {
 import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
-import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
+import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks/DateNavigationDayBlocks";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 

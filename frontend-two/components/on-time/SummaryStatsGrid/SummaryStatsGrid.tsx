@@ -12,6 +12,7 @@ interface SummaryStatsGridProps {
   totalStopDepartures: number | null;
   incompleteBreakdown: string | null;
   averageDelay: number | null;
+  className?: string;
 }
 
 const formatDelay = (delay: number | null): string => {
@@ -78,6 +79,7 @@ export const SummaryStatsGrid = ({
   totalStopDepartures,
   incompleteBreakdown,
   averageDelay,
+  className,
 }: SummaryStatsGridProps) => {
   const summaryTotal =
     (onTimeCount ?? 0) + (lateCount ?? 0) + (earlyCount ?? 0);
@@ -149,7 +151,13 @@ export const SummaryStatsGrid = ({
   })();
 
   return (
-    <div className={styles.grid} role="list" aria-label="Summary stats">
+    <div
+      className={["summary-stats-grid", styles.grid, className]
+        .filter(Boolean)
+        .join(" ")}
+      role="list"
+      aria-label="Summary stats"
+    >
       <div role="listitem" className={styles.item}>
         <SummaryStatWithTooltip
           title="On-time"

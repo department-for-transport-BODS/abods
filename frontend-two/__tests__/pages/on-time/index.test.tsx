@@ -413,8 +413,11 @@ describe("OnTimeIndexPage", () => {
       fireEvent.click(screen.getByText("Refine results"));
     };
 
+    const refinePanel = () =>
+      screen.getByRole("dialog", { name: "Refine results" });
+
     const filterChips = () =>
-      document.querySelector(".filterChipsContainer") as HTMLElement;
+      screen.getByRole("list", { name: "Active filters" });
 
     const applyFilters = () => {
       fireEvent.click(screen.getByRole("button", { name: "Apply" }));
@@ -428,9 +431,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
 
       expect(
         within(panel).queryByRole("textbox", { name: "Area" }),
@@ -502,9 +503,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
       fireEvent.change(
         within(panel).getByRole("spinbutton", { name: "Start time" }),
         { target: { value: "8" } },
@@ -538,9 +537,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
       fireEvent.change(
         within(panel).getByRole("spinbutton", { name: "End time" }),
         { target: { value: "18" } },
@@ -647,7 +644,7 @@ describe("OnTimeIndexPage", () => {
 
       await waitFor(() => {
         expect(
-          within(filterChips()).queryByText("Day of the week:"),
+          screen.queryByRole("list", { name: "Active filters" }),
         ).not.toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         expect(

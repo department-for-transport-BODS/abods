@@ -19,6 +19,7 @@ interface MultiselectCheckboxProps {
   showAllLabel?: string;
   placeholder?: string;
   disabled?: boolean;
+  allowMultiselect?: boolean;
 }
 
 export const MultiselectCheckbox = ({
@@ -33,6 +34,7 @@ export const MultiselectCheckbox = ({
   showAllLabel = "All",
   placeholder,
   disabled = false,
+  allowMultiselect = true,
 }: MultiselectCheckboxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -54,45 +56,83 @@ export const MultiselectCheckbox = ({
     [options, searchText],
   );
 
-  const allSelected = selectedValues.length === 0;
-  const hasSelection = selectedValues.length > 0;
+  const normalizedSelectedValues = useMemo(
+    () =>
+      allowMultiselect
+        ? selectedValues
+        : selectedValues.slice(-1),
+    [allowMultiselect, selectedValues],
+  );
+
+  const allSelected = normalizedSelectedValues.length === 0;
+  const hasSelection = normalizedSelectedValues.length > 0;
 
   const handleToggle = useCallback(
     (value: string) => {
-      const newValues = selectedValues.includes(value)
-        ? selectedValues.filter(
+      if (disabled) {
+        return;
+      }
+
+      if (!allowMultiselect) {
+        if (normalizedSelectedValues.includes(value)) {
+          onChange([]);
+          setIsOpen(false);
+          setSearchText("");
+          return;
+        }
+
+        onChange([value]);
+        setIsOpen(false);
+        setSearchText("");
+        return;
+      }
+
+      const newValues = normalizedSelectedValues.includes(value)
+        ? normalizedSelectedValues.filter(
             (selectedValue) => selectedValue !== value,
           )
-        : [...selectedValues, value];
+        : [...normalizedSelectedValues, value];
 
       onChange(newValues);
     },
-    [selectedValues, onChange],
+    [allowMultiselect, disabled, normalizedSelectedValues, onChange],
   );
 
   const handleSelectAll = useCallback(() => {
+    if (disabled) {
+      return;
+    }
+
     if (onShowAll) {
       onShowAll();
+      if (!allowMultiselect) {
+        setIsOpen(false);
+        setSearchText("");
+      }
       return;
     }
 
     onChange([]);
-  }, [onChange, onShowAll]);
+    if (!allowMultiselect) {
+      setIsOpen(false);
+      setSearchText("");
+    }
+  }, [allowMultiselect, disabled, onChange, onShowAll]);
 
   const displayText = allSelected
     ? placeholder ?? label
-    : selectedValues.length === 1
+    : normalizedSelectedValues.length === 1
       ? options.find(
-          (option) => option.value === selectedValues[0],
-        )?.label ?? `${selectedValues.length} selected`
-      : `${selectedValues.length} selected`;
+          (option) => option.value === normalizedSelectedValues[0],
+        )?.label ?? `${normalizedSelectedValues.length} selected`
+      : `${normalizedSelectedValues.length} selected`;
 
   const selectionSummary =
-    selectedValues.length === 1
+    normalizedSelectedValues.length === 1
       ? options.find(
-          (option) => option.value === selectedValues[0],
-        )?.label ?? `${selectedValues.length} selected`
-      : `${selectedValues.length} selected`;
+          (option) => option.value === normalizedSelectedValues[0],
+        )?.label ?? `${normalizedSelectedValues.length} selected`
+      : `${normalizedSelectedValues.length} selected`;
 
   const showSelectionSummary = isOpen && hasSelection;
   const inputValue = isOpen ? searchText : displayText;
@@ -205,7 +245,7 @@ export const MultiselectCheckbox = ({
                     : " button-link--disabled"
                 }`}
                 onClick={handleSelectAll}
-                disabled={!hasSelection && !onShowAll}
+                disabled={disabled || (!hasSelection && !onShowAll)}
               >
                 Show all
               </button>
@@ -213,7 +253,9 @@ export const MultiselectCheckbox = ({
           ) : null}
 
           <div
-            className={`govuk-checkboxes govuk-checkboxes--small ${styles.options}`}
+            className={allowMultiselect
+              ? `govuk-checkboxes govuk-checkboxes--small ${styles.options}`
+              : styles.optionsSingle}
           >
             {filteredOptions.length === 0 ? (
               <p className="govuk-body govuk-!-margin-bottom-0">
@@ -221,25 +263,40 @@ export const MultiselectCheckbox = ({
               </p>
             ) : (
               filteredOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`govuk-checkboxes__item ${styles.option}`}
-                >
-                  <input
-                    id={getOptionId(option.value)}
-                    className="govuk-checkboxes__input"
-                    type="checkbox"
-                    checked={selectedValues.includes(option.value)}
-                    onChange={() => handleToggle(option.value)}
-                  />
+                allowMultiselect ? (
+                  <div
+                    key={option.value}
+                    className={`govuk-checkboxes__item ${styles.option}`}
+                  >
+                    <input
+                      id={getOptionId(option.value)}
+                      className="govuk-checkboxes__input"
+                      type="checkbox"
+                      checked={normalizedSelectedValues.includes(option.value)}
+                      onChange={() => handleToggle(option.value)}
+                      disabled={disabled}
+                    />
 
-                  <label
-                    className="govuk-label govuk-checkboxes__label"
-                    htmlFor={getOptionId(option.value)}
+                    <label
+                      className="govuk-label govuk-checkboxes__label"
+                      htmlFor={getOptionId(option.value)}
+                    >
+                      {option.label}
+                    </label>
+                  </div>
+                ) : (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={styles.optionButton}
+                    onClick={() => handleToggle(option.value)}
+                    disabled={disabled}
+                    role="option"
+                    aria-selected={normalizedSelectedValues.includes(option.value)}
                   >
                     {option.label}
-                  </label>
-                </div>
+                  </button>
+                )
               ))
             )}
           </div>

@@ -1,6 +1,7 @@
 import {
   render,
   screen,
+  within,
   waitFor,
   cleanup,
   fireEvent,
@@ -171,6 +172,9 @@ const mockFetchDistances = vi.mocked(distanceService.fetchDistances);
 const mockFetchDropdownInputs = vi.mocked(distanceService.fetchDropdownInputs);
 const mockFetchAdminOrg = vi.mocked(distanceService.fetchAdminOrg);
 
+const getDropdownOption = (option: string) =>
+  screen.queryByLabelText(option) ?? screen.getByRole("option", { name: option });
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseConfig.mockReturnValue({
@@ -305,19 +309,19 @@ it("Defaults to no selection for all the filters", async () => {
   });
 
   expect(
-    screen.getByRole("button", { name: /All areas/i }),
+    screen.getByDisplayValue(/All areas/i),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /All organisations/i }),
+    screen.getByDisplayValue(/All organisations/i),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /All operators/i }),
+    screen.getByDisplayValue(/All operators/i),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /All licenses/i }),
+    screen.getByDisplayValue(/All licenses/i),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /All services/i }),
+    screen.getByDisplayValue(/All services/i),
   ).toBeInTheDocument();
 });
 
@@ -393,13 +397,11 @@ it.each(allFilterOptionsTestCases)(
     render(<DistancesPage />);
 
     // Wait for the dropdown trigger button to render first
-    const dropdownButton = await screen.findByRole("button", {
-      name: filterButtonName,
-    });
+    const dropdownButton = await screen.findByDisplayValue(filterButtonName);
 
-    fireEvent.click(dropdownButton);
+    fireEvent.mouseDown(dropdownButton);
     expectedOptions.forEach((option) => {
-      expect(screen.getByText(option)).toBeInTheDocument();
+      expect(getDropdownOption(option)).toBeInTheDocument();
     });
   },
 );
@@ -528,18 +530,18 @@ it.each(crossFilterTestCases)(
 
     render(<DistancesPage />);
 
-    const selectedDropdownButton = await screen.findByRole("button", {
-      name: selectedDropdownButtonName,
-    });
-    fireEvent.click(selectedDropdownButton);
-    fireEvent.click(screen.getByText(selectedOption));
+    const selectedDropdownButton = await screen.findByDisplayValue(
+      selectedDropdownButtonName,
+    );
+    fireEvent.mouseDown(selectedDropdownButton);
+    fireEvent.click(getDropdownOption(selectedOption));
 
     expectedByDropdown.forEach(({ buttonName, present, absent }) => {
       // Close any currently open dropdown, before checking the next dropdown
       fireEvent.mouseDown(document.body);
 
-      const dropdownButton = screen.getByRole("button", { name: buttonName });
-      fireEvent.click(dropdownButton);
+      const dropdownButton = screen.getByDisplayValue(buttonName);
+      fireEvent.mouseDown(dropdownButton);
 
       present.forEach((text) => {
         expect(screen.getByText(text)).toBeInTheDocument();
@@ -709,14 +711,14 @@ it.each(filteredTableDataTestCases)(
       expect(screen.getAllByRole("row").length).toBe(6);
     });
 
-    fireEvent.click(screen.getByRole("button", { name: filterButtonName }));
+    fireEvent.mouseDown(screen.getByDisplayValue(filterButtonName));
 
     const optionCheckbox = screen.queryByLabelText(selectedOption);
 
     if (optionCheckbox) {
       fireEvent.click(optionCheckbox);
     } else {
-      fireEvent.click(screen.getByText(selectedOption));
+        fireEvent.click(screen.getByRole("option", { name: selectedOption }));
     }
 
     fireEvent.mouseDown(document.body);
@@ -727,12 +729,13 @@ it.each(filteredTableDataTestCases)(
       expect(screen.getAllByRole("row").length).toBe(expectedRowCount);
     });
 
+    const table = within(screen.getByRole("table"));
     shouldSee.forEach((value) => {
-      expect(screen.getAllByText(value).length).toBeGreaterThan(0);
+      expect(table.getAllByText(value).length).toBeGreaterThan(0);
     });
 
     shouldNotSee.forEach((value) => {
-      expect(screen.queryAllByText(value).length).toBe(0);
+      expect(table.queryAllByText(value).length, value).toBe(0);
     });
   },
 );
@@ -800,41 +803,37 @@ it.each(clearAllDropdownTestCases)(
 
     render(<DistancesPage />);
 
-    const dropdownButton = await screen.findByRole("button", {
-      name: filterButtonName,
-    });
-    fireEvent.click(dropdownButton);
+    const dropdownButton = await screen.findByDisplayValue(filterButtonName);
+    fireEvent.mouseDown(dropdownButton);
 
     for (const option of optionsToSelect) {
       const checkbox = screen.queryByLabelText(option);
       if (checkbox) {
         fireEvent.click(checkbox);
       } else {
-        fireEvent.click(screen.getByText(option));
+        fireEvent.click(screen.getByRole("option", { name: option }));
       }
     }
 
     // Check options have been selected (Button text should show number of selected options)
-    fireEvent.mouseDown(document.body);
+    fireEvent.blur(dropdownButton, { relatedTarget: null });
     expect(
-      screen.getByRole("button", { name: displayText }),
+      screen.getByDisplayValue(displayText),
     ).toBeInTheDocument();
 
-    const newDropdownButton = await screen.findByRole("button", {
-      name: displayText,
-    });
-    fireEvent.click(newDropdownButton);
+    const newDropdownButton = await screen.findByDisplayValue(displayText);
+    fireEvent.mouseDown(newDropdownButton);
 
     fireEvent.click(
       clearSelectionText
-        ? screen.getByText(clearSelectionText)
-        : screen.getByRole("button", { name: /Clear all/i }),
+        ? getDropdownOption(clearSelectionText)
+        : screen.getByRole("button", { name: /Show all/i }),
     );
 
     // Dropdown button should reset to default text
-    fireEvent.mouseDown(document.body);
+    fireEvent.blur(newDropdownButton, { relatedTarget: null });
     expect(
-      screen.getByRole("button", { name: defaultText }),
+      screen.getByDisplayValue(defaultText),
     ).toBeInTheDocument();
   },
 );

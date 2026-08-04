@@ -302,7 +302,7 @@ describe("OnTimeOperatorPage", () => {
     );
 
     expect(message.closest(".app-box")).not.toBeNull();
-    expect(message.closest(".charts-section__no-data")).not.toBeNull();
+    expect(message.closest('[class*="noData"]')).not.toBeNull();
   });
 
   it("shows the service export button below the empty table message", async () => {
@@ -621,7 +621,7 @@ describe("OnTimeOperatorPage", () => {
         screen.queryByRole("link", { name: "202: Night Bus" }),
       ).not.toBeInTheDocument();
 
-      await user.click(screen.getByRole("button", { name: "Clear all" }));
+      await user.click(screen.getByRole("button", { name: "Show all" }));
 
       await waitFor(() => {
         expect(
@@ -912,10 +912,10 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText("Refine results"));
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      await user.click(screen.getByRole("button", { name: "Refine results" }));
+      const panel = screen.getByRole("dialog", {
+        name: "Refine results",
+      });
       const areasInput = within(panel).getByRole("textbox", { name: "Area" });
 
       await waitFor(() => {
@@ -942,13 +942,8 @@ describe("OnTimeOperatorPage", () => {
       expect(
         screen.queryByText("Loading on-time data..."),
       ).not.toBeInTheDocument();
-      const filterChips = document.querySelector(
-        ".filterChipsContainer",
-      ) as HTMLElement;
-      expect(within(filterChips).getByText("Area:")).toBeInTheDocument();
-      expect(
-        within(filterChips).getByText("Nottinghamshire"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Area:")).toBeInTheDocument();
+      expect(screen.getByText("Nottinghamshire")).toBeInTheDocument();
     });
   });
 

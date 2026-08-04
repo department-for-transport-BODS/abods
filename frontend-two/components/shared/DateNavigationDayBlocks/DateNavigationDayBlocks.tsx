@@ -1,3 +1,5 @@
+import styles from "./date-navigation-day-blocks.module.scss";
+
 import { DateTime } from "luxon";
 
 interface DateNavigationDayBlocksProps {
@@ -12,7 +14,7 @@ export const DateNavigationDayBlocks = ({
   onDateSelected,
 }: DateNavigationDayBlocksProps) => {
   return (
-    <div className="datenav__day-blocks datenav__day-blocks--with-labels">
+    <div className={`${styles.container} datenav__day-blocks--with-labels`}>
       {dateArray.map((item) => {
         const isActive = selectedDate.hasSame(item.date, "day");
         const isFirstOfMonth = item.date.day === 1;

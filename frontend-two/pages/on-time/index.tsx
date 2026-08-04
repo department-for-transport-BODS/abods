@@ -1,4 +1,5 @@
 import styles from "./on-time.module.scss";
+import helpdeskStyles from "../../components/on-time/OnTimeHelpdesk/on-time-helpdesk-panel.module.scss";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -310,11 +311,11 @@ const OnTimeIndexPage = () => {
         onRefineResultsFilterChange={setRefineResultsFilters}
       />
 
-      <div className="summary-container">
-        <div className="summary-header-container">
+      <div className={styles.container}>
+        <div className={styles.header}>
           <h2 className="govuk-heading-l">Summary</h2>
 
-          <div className="summary-admin-area-select-container">
+          <div className={styles.adminAreaSelect}>
             <MultiselectCheckbox
               id="on-time-summary-area"
               label={"Area"}
@@ -339,13 +340,13 @@ const OnTimeIndexPage = () => {
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
           >
-            <div className="summary-content-wrapper">
+            <div className={styles.content}>
               <div className="summary-stat-container">
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
 
-                <div className="helpdesk-container">
+                <div className={helpdeskStyles.container}>
                   <OnTimeHelpdeskButton />
                   <OtpThresholdModalLink
                     params={operatorTableParams}
@@ -366,6 +367,7 @@ const OnTimeIndexPage = () => {
                   }
                   incompleteBreakdown={summaryStats?.incomplete ?? null}
                   averageDelay={summaryStats?.averageDelay ?? null}
+                  className={styles.summaryGrid}
                 />
               </div>
 

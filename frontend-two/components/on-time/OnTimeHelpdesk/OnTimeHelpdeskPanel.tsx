@@ -1,3 +1,5 @@
+import styles from "./on-time-helpdesk-panel.module.scss";
+
 import { ReactNode, useMemo, useState } from "react";
 
 export interface OnTimeHelpdeskSection {
@@ -142,25 +144,28 @@ export const OnTimeHelpdeskPanel = ({
   };
 
   return (
-    <div className="on-time-helpdesk-panel-drawer" role="presentation">
+    <div className={styles.drawer} role="presentation">
       <button
         type="button"
-        className="on-time-helpdesk-panel-drawer__backdrop"
+        className={styles.backdrop}
         aria-label="Close on-time performance helpdesk panel"
         onClick={onClose}
       />
 
       <div
-        className="on-time-helpdesk-panel"
+        className={styles.panel}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="on-time-helpdesk-panel__header">
-          <h2 className="govuk-heading-l govuk-!-margin-bottom-0">{title}</h2>
+        <div className={styles.header}>
+          <h2 className="govuk-heading-l govuk-!-margin-bottom-0">
+            {title}
+          </h2>
+
           <button
             type="button"
-            className="on-time-helpdesk-panel__close button-link govuk-link"
+            className={`${styles.close} button-link govuk-link`}
             onClick={onClose}
           >
             Close
@@ -169,35 +174,41 @@ export const OnTimeHelpdeskPanel = ({
 
         <button
           type="button"
-          className={`on-time-helpdesk-panel__toggle-all button-link govuk-link${
+          className={`${styles.toggleAll} button-link govuk-link${
             allSectionsExpanded
-              ? " on-time-helpdesk-panel__toggle-all--expanded"
+              ? ` ${styles.toggleAllExpanded}`
               : ""
           }`}
           onClick={toggleAllSections}
           disabled={allExpandableSectionIds.length === 0}
         >
-          {allSectionsExpanded ? "Hide all sections" : "Show all sections"}
+          {allSectionsExpanded
+            ? "Hide all sections"
+            : "Show all sections"}
         </button>
 
-        <div className="on-time-helpdesk-panel__sections">
+        <div className={styles.sections}>
           {sections.map((section) => {
-            const isExpandable = sectionHasRenderableContent(section);
-            const isExpanded = expandedSectionIds.has(section.id);
+            const isExpandable =
+              sectionHasRenderableContent(section);
+
+            const isExpanded =
+              expandedSectionIds.has(section.id);
 
             return (
               <section
                 key={section.id}
-                className="on-time-helpdesk-panel__section"
+                className={styles.section}
               >
                 <h3 className="govuk-heading-m govuk-!-margin-bottom-2">
                   {section.title}
                 </h3>
+
                 <button
                   type="button"
-                  className={`on-time-helpdesk-panel__section-toggle button-link govuk-link${
+                  className={`${styles.sectionToggle} button-link govuk-link${
                     isExpanded
-                      ? " on-time-helpdesk-panel__section-toggle--expanded"
+                      ? ` ${styles.sectionToggleExpanded}`
                       : ""
                   }`}
                   onClick={() => toggleSection(section.id)}
@@ -211,7 +222,7 @@ export const OnTimeHelpdeskPanel = ({
                 {isExpanded && isExpandable ? (
                   <div
                     id={`on-time-helpdesk-panel-content-${section.id}`}
-                    className="on-time-helpdesk-panel__section-content govuk-body"
+                    className={`${styles.sectionContent} govuk-body`}
                   >
                     {section.content}
                   </div>

@@ -95,6 +95,13 @@
   }
 }
 
+.optionsSingle {
+  padding: govuk-spacing(2) govuk-spacing(2);
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(1);
+}
+
 .option {
   cursor: pointer;
 
@@ -105,3 +112,25 @@
     }
   }
 }
+
+.optionButton {
+  @include govuk-font($size: 19, $line-height: 1.25);
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: govuk-spacing(2);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: $govuk-brand-colour;
+    color: govuk-colour("white");
+    outline: 0;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+

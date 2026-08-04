@@ -1,3 +1,5 @@
+import styles from "./charts-section.module.scss";
+
 import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { Box } from "@/components/shared/Box";
@@ -12,7 +14,7 @@ import {
   FrequentServiceInfoType,
   Granularity,
   HeadwayTimeSeriesType,
-} from "../../src/generated/graphql";
+} from "@/src/generated/graphql";
 
 const DelayFrequencyChart = dynamic(
   () => import("@/components/on-time/DelayFrequencyChart"),
@@ -155,7 +157,7 @@ export const ChartsSection = ({
           <>
             {renderTimelineContent()}
             {headwayTimeSeries !== undefined && hasEwt && (
-              <div className="on-time__chart-footer govuk-!-margin-top-4">
+              <div className={`${styles.footer} govuk-!-margin-top-4`}>
                 {overviewMode === "excess-wait-time" && (
                   <p className="govuk-body-s">
                     {frequentServiceInfo?.numHours} hours out of a total{" "}
@@ -165,9 +167,9 @@ export const ChartsSection = ({
                     service is running on a frequent basis.
                   </p>
                 )}
-                <div className="on-time__mode-select">
+                <div className={styles.modeSelect}>
                   <label
-                    className="govuk-label on-time__mode-label"
+                    className={`govuk-label ${styles.modeLabel}`}
                     htmlFor="overviewMode"
                   >
                     Show:
@@ -247,7 +249,7 @@ export const ChartsSection = ({
           ))}
         </div>
         {noData && activeTab !== "map" ? (
-          <div className="charts-section__no-data">
+          <div className={styles.noData}>
             <ChartNoDataMessage
               dataExpected={dataExpected}
               timingPointsNotSupported={timingPointsNotSupported}

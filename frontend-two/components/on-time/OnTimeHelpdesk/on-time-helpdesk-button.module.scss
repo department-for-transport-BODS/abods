@@ -1,0 +1,27 @@
+@import "../../../styles/govuk-module";
+
+.helpdeskLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+  appearance: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  @include govuk-font(19);
+
+  svg {
+    display: inline-flex;
+    color: govuk-colour("blue");
+    width: 20px;
+    height: 20px;
+    margin-right: govuk-spacing(1);
+  }
+
+  &:focus {
+    svg {
+      color: govuk-colour("black");
+    }
+  }
+}

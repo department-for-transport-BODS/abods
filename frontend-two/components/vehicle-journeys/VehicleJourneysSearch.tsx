@@ -124,6 +124,7 @@ export const VehicleJourneysSearch = ({
             label="Operator"
             options={operatorOptions}
             selectedValues={selectedOperatorId ? [selectedOperatorId] : []}
+            allowMultiselect={false}
             onChange={([selected]) => {
               updateQuery(router, {
                 operator: selected ?? null,
@@ -141,6 +142,7 @@ export const VehicleJourneysSearch = ({
             label="Service name"
             options={serviceOptions}
             selectedValues={selectedServiceId ? [selectedServiceId] : []}
+            allowMultiselect={false}
             disabled={!selectedOperatorId || servicesLoading}
             onChange={([selected]) => {
               updateQuery(router, { service: selected ?? null });

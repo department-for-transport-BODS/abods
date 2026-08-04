@@ -87,6 +87,7 @@ export const DistanceFilters = ({
             }}
             showAll={false}
             placeholder={isLoading ? "Loading..." : "All organisations"}
+            allowMultiselect={false}
           />
         </div>
       </div>
