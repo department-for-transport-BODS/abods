@@ -14,6 +14,16 @@ vi.mock("@/components/layout/BaseLayout", () => ({
   ),
 }));
 
+vi.mock("@/contexts/HelpdeskContext", () => ({
+  useHelpdesk: vi.fn().mockReturnValue({
+    isOpen: false,
+    data: null,
+    open: vi.fn(),
+    close: vi.fn(),
+    loadData: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 describe("ServiceMonitoringPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
