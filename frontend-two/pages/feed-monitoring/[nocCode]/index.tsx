@@ -12,6 +12,7 @@ import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryS
 import { FeedStatusSummaryStat } from "@/components/feed-monitoring/FeedStatusSummaryStat";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import dynamic from "next/dynamic";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 
 const LiveVehicleStats = dynamic(
@@ -27,6 +28,11 @@ const LiveStatusPage = () => {
   useRequireAuth();
   const router = useRouter();
   const { nocCode } = router.query as { nocCode: string };
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("feedMonitoring", "NOC feed monitoring");
+  }, [loadData]);
 
   const [operator, setOperator] = useState<OperatorLiveStatus | null>(null);
   const [operators, setOperators] = useState<FeedMonitoringOperatorData[]>([]);

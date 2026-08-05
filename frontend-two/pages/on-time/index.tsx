@@ -20,6 +20,7 @@ import {
 } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import {
   AdminOrgListQuery,
@@ -48,6 +49,11 @@ const OnTimeIndexPage = () => {
 
   const router = useRouter();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("otp", "On-time performance");
+  }, [loadData]);
 
   const [isLoading, setIsLoading] = useState(true);
 

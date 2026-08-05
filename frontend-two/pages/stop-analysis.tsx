@@ -10,6 +10,7 @@ import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
 import {
   Direction,
@@ -382,7 +383,12 @@ export const pruneStopAnalysisSelections = (
 const StopAnalysisPage = () => {
   useRequireAuth();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
   const router = useRouter();
+
+  useEffect(() => {
+    loadData("stopAnalysis", "Stop analysis");
+  }, [loadData]);
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFetchedBoundsRef = useRef<BoundingBox>();
   const lastFetchedFilterSignatureRef = useRef<string>("");

@@ -1,9 +1,16 @@
 import Link from "next/link";
+import { useEffect } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 
 const OnTimeOperatorNotFoundPage = () => {
   useRequireAuth();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("otp", "On-time performance");
+  }, [loadData]);
 
   return (
     <BaseLayout

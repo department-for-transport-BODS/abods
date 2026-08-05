@@ -30,6 +30,7 @@ import {
   performanceFiltersToRefineResults,
 } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
 import { type OperatorType } from "@/src/generated/graphql";
@@ -112,6 +113,11 @@ const OnTimeServicePage = () => {
   const router = useRouter();
   const { isReady, replace } = router;
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("otp", "On-time performance");
+  }, [loadData]);
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
   const lineId =

@@ -14,5 +14,19 @@
   },
   "otp": false,
   "defaultCookiePolicy": false,
-  "freshdesk": false
+  "freshdesk": {
+    "apiUrl": "/freshdesk",
+    "folders": {
+      "dashboard": "43000590095",
+      "feedMonitoring": "43000590096",
+      "otp": "43000590097",
+      "vehicleJourneys": "43000590098",
+      "corridors": "43000590099",
+      "organisation": "43000590100",
+      "dataMonitoring": "43000590101",
+      "serviceMonitoring": "43000590102",
+      "stopAnalysis": "43000590103",
+      "distances": "43000590104"
+    }
+  }
 }

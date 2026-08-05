@@ -9,4 +9,8 @@ declare module "govuk-frontend" {
     scope?: HTMLElement | Document;
     onError?: (error: Error) => void;
   }): void;
+
+  export class Accordion {
+    constructor($root: Element | null, config?: Record<string, unknown>);
+  }
 }

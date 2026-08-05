@@ -18,5 +18,6 @@ Makefile
 *.png
 *.toml
 frontend/src/freshdesk/*
+frontend-two/public/freshdesk/*
 *.svg
 *.ico

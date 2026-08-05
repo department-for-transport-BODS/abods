@@ -1,11 +1,18 @@
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { useAuth, useRequireAuth } from "@/hooks/useAuth";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
+import { useEffect } from "react";
 
 const ServiceMonitoringPage = () => {
   useRequireAuth();
   const { user, isLoading } = useAuth();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("serviceMonitoring", "Service monitoring");
+  }, [loadData]);
 
   const errors: ErrorInfo[] =
     isLoading ||
