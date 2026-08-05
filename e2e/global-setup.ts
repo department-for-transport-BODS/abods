@@ -10,6 +10,7 @@ export default async function globalSetup(config: FullConfig) {
   if (!username || !password) {
     // No credentials provided — authenticated tests will fail with a clear
     // message from the fixture rather than a confusing redirect.
+    console.log("i am getting here?");
     return;
   }
 
