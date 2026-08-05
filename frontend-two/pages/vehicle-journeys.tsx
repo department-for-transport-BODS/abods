@@ -18,6 +18,7 @@ import {
   normaliseJourneyDirection,
 } from "@/components/vehicle-journeys/vehicleJourneysUtils";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
 import { vehicleJourneysService } from "@/services/vehicle-journeys/vehicle-journeys.service";
@@ -29,10 +30,15 @@ const getQueryString = (value: string | string[] | undefined) =>
 const VehicleJourneysPage = () => {
   useRequireAuth();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
   const router = useRouter();
   const [selectedVehicleRef, setSelectedVehicleRef] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    loadData("vehicleJourneys", "Vehicle journeys");
+  }, [loadData]);
   const isDetailRoutePending =
     router.pathname === "/vehicle-journeys/[journeyId]" && !router.isReady;
 

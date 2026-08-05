@@ -14,6 +14,7 @@ import { Box } from "@/components/shared/Box";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
 import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 
 const HistoricVehicleStats = dynamic(
@@ -45,6 +46,11 @@ function formatUpdateFrequency(f?: number | null): string {
 
 const FeedHistoryPage = () => {
   useRequireAuth();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("feedMonitoring", "NOC feed monitoring");
+  }, [loadData]);
 
   const router = useRouter();
 

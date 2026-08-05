@@ -29,6 +29,7 @@ import {
 } from "@/components/shared/RefineResults/RefineResultsFilters";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { operatorsService } from "@/services/operator.service";
 import {
@@ -115,6 +116,11 @@ const OnTimeOperatorPage = () => {
   const router = useRouter();
   const { isReady, replace } = router;
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("otp", "On-time performance");
+  }, [loadData]);
   const nocCode =
     typeof router.query.nocCode === "string" ? router.query.nocCode : null;
   const routerIsReady = router.isReady;
@@ -239,6 +245,7 @@ const OnTimeOperatorPage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
+    selectedAdminAreaIds,
   ]);
 
   const chartErrors = [

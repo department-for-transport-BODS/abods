@@ -1,4 +1,5 @@
 import { useAuth, useRequireAuth } from "@/hooks/useAuth";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { BaseLayout } from "../components/layout/BaseLayout";
 import { DistanceFilters } from "../components/distances/DistanceFilters";
 import { DistanceTable } from "@/components/distances/DistanceTable";
@@ -28,6 +29,11 @@ const DistancesPage = () => {
   useRequireAuth();
   const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("distances", "Distances");
+  }, [loadData]);
 
   useEffect(() => {
     if (!isAuthLoading && user && !user.canViewDistances) {

@@ -40,6 +40,16 @@ vi.mock("@/contexts/ConfigContext", () => ({
   useConfig: vi.fn(),
 }));
 
+vi.mock("@/contexts/HelpdeskContext", () => ({
+  useHelpdesk: vi.fn().mockReturnValue({
+    isOpen: false,
+    data: null,
+    open: vi.fn(),
+    close: vi.fn(),
+    loadData: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 vi.mock("@/components/vehicle-journeys/VehicleJourneyMap", () => ({
   VehicleJourneyMap: () => <div data-testid="vehicle-journey-map" />,
 }));

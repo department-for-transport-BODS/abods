@@ -9,6 +9,7 @@ import { VehiclesStatus } from "@/components/dashboard/VehiclesStatus";
 import { FeedStatusSummary } from "@/components/dashboard/FeedStatusSummary";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { StopTypeOption } from "@/types/dashboard";
 import {
@@ -21,6 +22,11 @@ const DashboardPage = () => {
   useRequireAuth();
   const router = useRouter();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+
+  useEffect(() => {
+    loadData("dashboard", "Dashboard");
+  }, [loadData]);
   const [operators, setOperators] = useState<
     DashboardOperatorListQuery["operatorsFeedMonitoring"]
   >([]);

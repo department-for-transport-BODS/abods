@@ -5,14 +5,20 @@ import { QuickSightEmbed } from "@/components/data-monitoring/QuickSightEmbed";
 import { dataMonitoringService } from "@/services/data-monitoring/data-monitoring.service";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { ErrorInfo } from "@/types";
 
 const DataMonitoringPage = () => {
   useRequireAuth();
   const { config } = useConfig();
+  const { loadData } = useHelpdesk();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<ErrorInfo[]>([]);
   const [embedUrl, setEmbedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadData("dataMonitoring", "Data monitoring");
+  }, [loadData]);
 
   useEffect(() => {
     if (!config?.apiUrl) return;

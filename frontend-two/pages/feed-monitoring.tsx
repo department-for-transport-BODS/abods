@@ -8,6 +8,7 @@ import {
   VehicleStatFragment,
 } from "../src/generated/graphql";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
 
 type FeedMonitoringOperatorData =
   FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
@@ -18,6 +19,7 @@ type VehicleCountData = {
 
 const FeedMonitoringPage = () => {
   useRequireAuth();
+  const { loadData } = useHelpdesk();
   const [operatorData, setOperatorData] = useState<
     FeedMonitoringOperatorData[]
   >([]);
@@ -27,6 +29,10 @@ const FeedMonitoringPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [operatorSearch, setOperatorSearch] = useState("");
+
+  useEffect(() => {
+    loadData("feedMonitoring", "NOC feed monitoring");
+  }, [loadData]);
 
   useEffect(() => {
     const load = async () => {
