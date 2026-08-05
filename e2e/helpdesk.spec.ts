@@ -62,7 +62,6 @@ loggedInTest.describe("Helpdesk panel - authenticated", () => {
         await expect(firstSection).toHaveAttribute("aria-expanded", "true");
       } else {
         await expect(helpdesk.noArticlesHeading()).toBeVisible();
-        await expect(helpdesk.supportEmailLink()).toBeVisible();
       }
     },
   );

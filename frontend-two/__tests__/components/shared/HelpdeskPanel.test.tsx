@@ -121,7 +121,7 @@ describe("HelpdeskPanel", () => {
     expect(link).toHaveAttribute("href", "mailto:support@example.com");
   });
 
-  it("falls back to a support prompt when no support email is configured", () => {
+  it("does not render an email link when no support email is configured", () => {
     mockUseConfig.mockReturnValue({
       config: {} as never,
       isLoading: false,
@@ -134,8 +134,9 @@ describe("HelpdeskPanel", () => {
     render(<HelpdeskPanel />);
 
     expect(
-      screen.getByRole("link", { name: "Please Contact Support" }),
-    ).toHaveAttribute("href", "mailto:Please Contact Support");
+      screen.getByText("Sorry, there are no help articles for this section"),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("renders an accordion section per article with formatted description html", async () => {

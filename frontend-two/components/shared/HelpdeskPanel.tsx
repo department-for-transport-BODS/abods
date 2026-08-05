@@ -101,19 +101,20 @@ const HelpdeskPanel: React.FC = () => {
             <div>
               <h3>Sorry, there are no help articles for this section</h3>
               <div className="govuk-body">
-                <p>We are working on adding more.</p>
-                <p>
-                  If you have any questions or would like to leave feedback
-                  please email{" "}
-                  <a
-                    className="govuk-link"
-                    href={`mailto:${config?.supportEmail || "Please Contact Support"}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {config?.supportEmail || " Please Contact Support"}
-                  </a>
-                </p>
+                {config?.supportEmail && (
+                  <p>
+                    If you have any questions or would like to leave feedback
+                    please email{" "}
+                    <a
+                      className="govuk-link"
+                      href={`mailto:${config.supportEmail}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {config.supportEmail}
+                    </a>
+                  </p>
+                )}
               </div>
             </div>
           )}
