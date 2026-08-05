@@ -245,6 +245,7 @@ const OnTimeOperatorPage = () => {
     refineResultsFilters,
     selectedMatchType,
     selectedStopType,
+    selectedAdminAreaIds,
   ]);
 
   const chartErrors = [
