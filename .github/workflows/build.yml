@@ -194,7 +194,6 @@ jobs:
             | jq -r '.Parameter.Value')
           bods_base_url="https://${domain_name}"
           graphql_api_url="/api/graphql"
-          freshdesk_api_url="${bods_base_url}/freshdesk/"
           mapbox_token="${{ secrets.MAPBOX_TOKEN }}"
           mapbox_style="mapbox://styles/${{ vars.MAPBOX_STYLE }}"
           mapbox_satellite_style="mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}"
@@ -210,7 +209,6 @@ jobs:
             --arg mapbox_style "$mapbox_style" \
             --arg mapbox_satellite_style "$mapbox_satellite_style" \
             --arg support_email "$support_email" \
-            --arg freshdesk_api_url "$freshdesk_api_url" \
             '{
               apiUrl: $api_url,
               bodsBaseUrl: $bods_base_url,
@@ -224,7 +222,7 @@ jobs:
               otp: { early: 1, late: 6 },
               defaultCookiePolicy: { analyticsEnabled: false, version: 1, userSubmitted: false },
               freshdesk: {
-                apiUrl: $freshdesk_api_url,
+                apiUrl: "/freshdesk",
                 folders: {
                   dashboard: "43000590095",
                   feedMonitoring: "43000590096",
