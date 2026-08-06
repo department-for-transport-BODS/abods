@@ -3,7 +3,7 @@ awscli = "latest"
 usage = "latest"
 jq = "latest"
 serverless = "3.39.0"
-node = "20.19.0"
+node = "24.19.0"
 
 [env]
 REGION = "eu-west-2"
