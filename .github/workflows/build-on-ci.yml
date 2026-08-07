@@ -1,9 +1,11 @@
-name: pr-checks
+name: Build on CI
 on:
-  pull_request:
-    branches:
-      - sandbox
-      - abods-two-next-js
+  push:
+    branches-ignore:
+        - main
+        - sandbox
+        - dev
+        - test
 
 permissions: read-all
 
@@ -85,22 +87,19 @@ jobs:
           npm install
           npm run build:production
 
-  build-next-js-frontend:
+  checkov:
+    name: checkov-action
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend-two
-
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: setup node
-        uses: actions/setup-node@v4
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@dfb51aed1b783289b0d3f255028e7a88d5e8caa1 # master
         with:
-          node-version-file: frontend-two/.nvmrc
-
-      - name: build next js frontend code
-        run: |
-          npm install
-          npm run build
+          directory: ${{ github.workspace }}
+          framework: all
+          skip_check: ""
+          output_format: cli,sarif
+          quiet: true # display only failed checks
