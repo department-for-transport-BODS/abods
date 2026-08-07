@@ -4667,11 +4667,13 @@ $day-width: 46px;
   }
 
   &:focus {
-    outline: 3px solid $govuk-focus-colour;
-    outline-offset: 0;
+    outline: $govuk-focus-width solid transparent;
     color: $govuk-focus-text-colour;
     background-color: $govuk-focus-colour;
-    box-shadow: 0 4px $govuk-focus-text-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
+    text-decoration: none;
   }
 }
 
@@ -4872,6 +4874,55 @@ $day-width: 46px;
 
 body.helpdesk-open {
   overflow: hidden;
+}
+
+.govuk-accordion__section-content {
+  p {
+    margin-top: 0;
+    margin-bottom: govuk-spacing(4);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: govuk-spacing(4);
+    margin-left: govuk-spacing(4);
+    padding-left: govuk-spacing(4);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-bottom: govuk-spacing(1);
+
+    > ul,
+    > ol {
+      margin-top: govuk-spacing(1);
+    }
+  }
+
+  img {
+    margin-bottom: govuk-spacing(2);
+  }
+
+  a {
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+  }
 }
 
 .service-monitoring {

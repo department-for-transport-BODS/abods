@@ -21,7 +21,7 @@ const HelpdeskPanel: React.FC = () => {
     import("govuk-frontend")
       .then(({ Accordion }) => {
         if (!cancelled) {
-          new Accordion(container);
+          new Accordion(container, { rememberExpanded: false });
         }
       })
       .catch((error) => {
@@ -86,7 +86,7 @@ const HelpdeskPanel: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <div className="govuk-accordion__section-content">
+                  <div className="govuk-accordion__section-content" hidden>
                     <div
                       className="govuk-body"
                       dangerouslySetInnerHTML={{
