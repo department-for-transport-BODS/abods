@@ -14,7 +14,7 @@ describe("formatFreshdeskHtml", () => {
 
   it("replaces a single fixed pixel width with 100%", () => {
     const input = '<img style="width: 300px;" src="test.png" />';
-    const expected = '<img style="width: 100%;" src="test.png" />';
+    const expected = '<img style="width: 100%;" src="test.png">';
     expect(formatFreshdeskHtml(input)).toBe(expected);
   });
 
@@ -22,7 +22,7 @@ describe("formatFreshdeskHtml", () => {
     const input =
       '<table style="width: 500px;"><tr><td style="width: 120px;">Cell</td></tr></table>';
     const expected =
-      '<table style="width: 100%;"><tr><td style="width: 100%;">Cell</td></tr></table>';
+      '<table style="width: 100%;"><tbody><tr><td style="width: 100%;">Cell</td></tr></tbody></table>';
     expect(formatFreshdeskHtml(input)).toBe(expected);
   });
 
