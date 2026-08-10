@@ -2,7 +2,7 @@ useDotenv: true
 service: apollo-lambda
 provider:
   name: aws
-  runtime: nodejs24.x
+  runtime: nodejs20.x
   timeout: 899
   httpApi:
     cors:
