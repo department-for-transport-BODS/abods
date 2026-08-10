@@ -71,7 +71,7 @@
     "prisma": "^5.22.0",
     "prisma-kysely": "^1.8.0",
     "serverless-dotenv-plugin": "^6.0.0",
-    "serverless-offline": "^13.9.0",
+    "serverless-offline": "^13.10.0",
     "serverless-plugin-typescript": "^2.1.5",
     "testcontainers": "^11.7.1",
     "ts-jest": "^29.4.4",

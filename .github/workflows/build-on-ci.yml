@@ -21,8 +21,14 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Install
-        run: npm i
+      - name: Install root dependencies
+        run: npm install --ignore-scripts
+
+      - name: Install API dependencies
+        run: npm install --prefix abods-api
+
+      - name: Generate code
+        run: npm run codegen
 
       - name: Check for changes
         env:
@@ -36,7 +42,7 @@ jobs:
 
       - name: Check types
         if: success() || failure()
-        run: npm run type-check
+        run: npm --prefix abods-api run type-check
 
       - name: Check formatting
         if: success() || failure()
@@ -44,11 +50,11 @@ jobs:
 
       - name: Run linters
         if: success() || failure()
-        run: npm run lint:check
+        run: npm --prefix abods-api run lint:check
 
       - name: Run tests
         if: success() || failure()
-        run: npm run test:ci
+        run: npm --prefix abods-api run test:ci
 
   build-backend:
     runs-on: ubuntu-latest
@@ -89,10 +95,27 @@ jobs:
         with:
           node-version-file: frontend/.nvmrc
 
-      - name: build frontend code
-        run: |
-          npm install
-          npm run build:production
+      - name: Install
+        run: npm install
+
+      - name: Check for changes
+        run: git diff --name-only --exit-code HEAD || (echo "It looks like the frontend lockfile hasn't been updated. Run 'npm install' in the frontend directory using the version in frontend/.nvmrc"; false)
+
+      - name: Check types
+        if: success() || failure()
+        run: npm run type-check
+
+      - name: Run linters
+        if: success() || failure()
+        run: npm run lint:check
+
+      - name: Run tests
+        if: success() || failure()
+        run: npm run test:ci
+
+      - name: Build frontend code
+        if: success() || failure()
+        run: npm run build:production
 
   checkov:
     name: checkov-action
