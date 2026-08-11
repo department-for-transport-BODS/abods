@@ -22,7 +22,7 @@ import { featureCollection, lineString } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
-import { BRITISH_ISLES_BBOX, position } from "../../shared/geo";
+import { EnglandAndWalesBoundingBox, position } from "../../shared/geo";
 import { combineLatest, EMPTY, ReplaySubject, Subject } from "rxjs";
 import { FitBoundsOptions, LngLat, LngLatBounds } from "mapbox-gl";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -158,7 +158,7 @@ export class CreateCorridorComponent implements OnInit, OnDestroy {
       this.stopQuery.reset();
       this.matchingStops = undefined;
       this.hasSelectedLocation = false;
-      this.setMapBounds(BRITISH_ISLES_BBOX, { maxDuration: 1 });
+      this.setMapBounds(EnglandAndWalesBoundingBox, { maxDuration: 1 });
       this.corridorMap.nonOrgStops = undefined;
       this.corridorMap.otherStops = undefined;
       this.noData = false;

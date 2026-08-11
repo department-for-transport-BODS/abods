@@ -19,7 +19,7 @@ import {
 import { combineLatest, of, Subject } from "rxjs";
 import { CorridorsService } from "../corridors.service";
 import { AgGridEvent, ColDef, GridOptions } from "ag-grid-community";
-import { BRITISH_ISLES_BBOX, position } from "../../shared/geo";
+import { EnglandAndWalesBoundingBox, position } from "../../shared/geo";
 import { featureCollection, lineString, point } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import { FeatureCollection, LineString, Point, Position } from "geojson";
@@ -76,7 +76,7 @@ export class ViewCorridorComponent implements OnInit, OnDestroy {
     return this.mode === "time";
   }
 
-  bounds = BRITISH_ISLES_BBOX;
+  bounds = EnglandAndWalesBoundingBox;
   corridorLine?: FeatureCollection<LineString, { segmentId: string }>;
   corridorStops?: FeatureCollection<Point, CorridorStop>;
   popupStop?: CorridorStop;

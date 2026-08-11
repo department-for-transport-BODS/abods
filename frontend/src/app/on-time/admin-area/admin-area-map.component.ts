@@ -7,7 +7,11 @@ import {
   ViewChild,
 } from "@angular/core";
 import { AdminArea, AdminAreaService } from "./admin-area.service";
-import { asBbox, BRITISH_ISLES_BBOX, combineBounds } from "../../shared/geo";
+import {
+  asBbox,
+  EnglandAndWalesBoundingBox,
+  combineBounds,
+} from "../../shared/geo";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { EventData, MapboxGeoJSONFeature, MapMouseEvent } from "mapbox-gl";
 import { MapComponent } from "ngx-mapbox-gl";
@@ -97,7 +101,7 @@ export class AdminAreaMapComponent implements OnInit {
   @Output() boundaryClick = new EventEmitter<AdminArea>();
 
   adminAreas: FeatureCollection<Polygon, AdminArea> = featureCollection([]);
-  bounds: BBox2d = BRITISH_ISLES_BBOX;
+  bounds: BBox2d = EnglandAndWalesBoundingBox;
   hoveredAdminArea?: Feature<Polygon, AdminArea>;
   labelPosition?: Feature<Point>;
 
@@ -130,7 +134,8 @@ export class AdminAreaMapComponent implements OnInit {
 
   recalculateBounds() {
     if (!this._adminAreaIds?.length || !this.adminAreas.features.length) {
-      this.bounds = (this.adminAreas.bbox as BBox2d) ?? BRITISH_ISLES_BBOX;
+      this.bounds =
+        (this.adminAreas.bbox as BBox2d) ?? EnglandAndWalesBoundingBox;
       return;
     }
     const selected = this.adminAreas.features.filter((feature) =>
