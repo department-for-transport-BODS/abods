@@ -16,7 +16,7 @@
     "test:ci": "(cd abods-api && npm run test) && (cd frontend && npm run test:ci)"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-codegen/cli": "^6.0.1",
     "@graphql-codegen/introspection": "^4.0.3",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
